@@ -49,6 +49,8 @@
 #include <media/MediaMetadataRetrieverInterface.h>
 #include <media/AudioTrack.h>
 
+#include <utils/SortedVector.h>
+
 #include "MediaRecorderClient.h"
 #include "MediaPlayerService.h"
 #include "MetadataRetrieverClient.h"
@@ -74,8 +76,9 @@ using android::status_t;
 using android::OK;
 using android::BAD_VALUE;
 using android::NOT_ENOUGH_DATA;
+using android::MetadataType;
 using android::Parcel;
-using android::Vector;
+using android::SortedVector;
 
 // Max number of entries in the filter.
 const int kMaxFilterSize = 64;  // I pulled that out of thin air.
@@ -83,11 +86,6 @@ const int kMaxFilterSize = 64;  // I pulled that out of thin air.
 // Keep in sync with ANY in Metadata.java
 const int32_t kAny = 0;
 
-// To order the metadata types in the vector-filter.
-int lessThan(const int32_t *lhs, const int32_t *rhs)
-{
-    return *lhs < *rhs ? 0 : 1;
-}
 
 // Unmarshall a filter from a Parcel.
 // Filter format in a parcel:
@@ -111,41 +109,42 @@ int lessThan(const int32_t *lhs, const int32_t *rhs)
 // @param[out] status On exit contains the status code to be returned.
 // @return true if the parcel starts with a valid filter.
 bool unmarshallFilter(const Parcel& p,
-                      Vector<int32_t> *filter,
+                      SortedVector<MetadataType> *filter,
                       status_t *status)
 {
-    int32_t s;
-    if (p.readInt32(&s) != OK)
+    int32_t val;
+    if (p.readInt32(&val) != OK)
     {
         LOGE("Failed to read filter's length");
         *status = NOT_ENOUGH_DATA;
         return false;
     }
 
-    if( s > kMaxFilterSize || s < 0)
+    if( val > kMaxFilterSize || val < 0)
     {
-        LOGE("Invalid filter len %d", s);
+        LOGE("Invalid filter len %d", val);
         *status = BAD_VALUE;
         return false;
     }
 
-    size_t size = s;
+    const size_t num = val;
 
     filter->clear();
-    filter->setCapacity(size);
+    filter->setCapacity(num);
 
-    s *= sizeof(int32_t);
+    size_t size = num * sizeof(MetadataType);
 
-    if (p.dataAvail() < static_cast<size_t>(s))
+
+    if (p.dataAvail() < size)
     {
-        LOGE("Filter too short expected %d but got %d", s, p.dataAvail());
+        LOGE("Filter too short expected %d but got %d", size, p.dataAvail());
         *status = NOT_ENOUGH_DATA;
         return false;
     }
 
-    const int32_t *data = static_cast<const int32_t*>(p.readInplace(s));
+    const MetadataType *data = static_cast<const MetadataType*>(p.readInplace(size));
 
-    if (NULL == data )
+    if (NULL == data)
     {
         LOGE("Filter had no data");
         *status = BAD_VALUE;
@@ -155,59 +154,25 @@ bool unmarshallFilter(const Parcel& p,
     // TODO: The stl impl of vector would be more efficient here
     // because it degenerates into a memcpy on pod types. Try to
     // replace later or use stl::set.
-    for (size_t i = 0; i < size; ++i)
+    for (size_t i = 0; i < num; ++i)
     {
-        filter->push(*data);
+        filter->add(*data);
         ++data;
     }
     *status = OK;
     return true;
 }
 
-bool unmarshallBothFilters(const Parcel& p,
-                           Vector<int32_t> *allow,
-                           Vector<int32_t> *block,
-                           status_t *status)
-{
-    if (!(unmarshallFilter(p, allow, status) && unmarshallFilter(p, block, status)))
-    {
-        return false;
-    }
-    allow->sort(lessThan);
-    block->sort(lessThan);
-    return true;
-}
-
-// @param filter Should be sorted in ascending order.
+// @param filter Of metadata type.
 // @param val To be searched.
 // @return true if a match was found.
-bool findMetadata(const Vector<int32_t> filter, const int32_t val)
+bool findMetadata(const SortedVector<MetadataType>& filter, const int32_t val)
 {
     // Deal with empty and ANY right away
     if (filter.isEmpty()) return false;
     if (filter[0] == kAny) return true;
 
-    ssize_t min = 0;
-    ssize_t max = filter.size() - 1;
-    ssize_t mid;
-    do
-    {
-        mid = (min + max) / 2;
-        if (val > filter[mid])
-        {
-            min = mid + 1;
-        }
-        else
-        {
-            max = mid - 1;
-        }
-        if (filter[mid] == val)
-        {
-            return true;
-        }
-    }
-    while(min <= max);
-    return false;
+    return filter.indexOf(val) >= 0;
 }
 
 }  // anonymous namespace
@@ -834,11 +799,11 @@ status_t MediaPlayerService::Client::invoke(const Parcel& request,
 status_t MediaPlayerService::Client::setMetadataFilter(const Parcel& filter)
 {
     status_t status;
-    Vector<int32_t> allow, drop;
+    SortedVector<MetadataType> allow, drop;
 
-    if (unmarshallBothFilters(filter, &allow, &drop, &status))
-    {
-        Mutex::Autolock l(mLock);
+    if (unmarshallFilter(filter, &allow, &status) &&
+        unmarshallFilter(filter, &drop, &status)) {
+        Mutex::Autolock lock(mLock);
 
         mMetadataAllow = allow;
         mMetadataDrop = drop;
@@ -846,13 +811,28 @@ status_t MediaPlayerService::Client::setMetadataFilter(const Parcel& filter)
     return status;
 }
 
-status_t MediaPlayerService::Client::getMetadata(bool update_only, bool apply_filter, Parcel *metadata)
+status_t MediaPlayerService::Client::getMetadata(
+        bool update_only, bool apply_filter, Parcel *reply)
 {
     status_t status;
-    metadata->writeInt32(-1);  // Placeholder for the return code
+    reply->writeInt32(-1);  // Placeholder for the return code
+
+    SortedVector<MetadataType> updates;
+
+    // We don't block notifications while we fetch the data. We clear
+    // mMetadataUpdated first so we don't lose notifications happening
+    // during the rest of this call.
+    {
+        Mutex::Autolock lock(mLock);
+        if (update_only) {
+            updates = mMetadataUpdated;
+        }
+        mMetadataUpdated.clear();
+    }
 
     // FIXME: Implement, query the native player and do the optional filtering, etc...
     status = OK;
+
     return status;
 }
 
@@ -975,35 +955,48 @@ status_t MediaPlayerService::Client::setVolume(float leftVolume, float rightVolu
     return NO_ERROR;
 }
 
+
 void MediaPlayerService::Client::notify(void* cookie, int msg, int ext1, int ext2)
 {
     Client* client = static_cast<Client*>(cookie);
 
     if (MEDIA_INFO == msg &&
-        MEDIA_INFO_METADATA_UPDATE == ext1 &&
-        client->shouldDropMetadata(ext2 /* metadata type */)) {
-        return;
+        MEDIA_INFO_METADATA_UPDATE == ext1) {
+        const MetadataType metadata_type = ext2;
+
+        if(client->shouldDropMetadata(metadata_type)) {
+            return;
+        }
+
+        // Update the list of metadata that have changed. getMetadata
+        // also access mMetadataUpdated and clears it.
+        client->addNewMetadataUpdate(metadata_type);
     }
     LOGV("[%d] notify (%p, %d, %d, %d)", client->mConnId, cookie, msg, ext1, ext2);
     client->mClient->notify(msg, ext1, ext2);
 }
 
-bool MediaPlayerService::Client::shouldDropMetadata(int code) const
+
+bool MediaPlayerService::Client::shouldDropMetadata(MetadataType code) const
 {
-    Mutex::Autolock l(mLock);
+    Mutex::Autolock lock(mLock);
 
-    if (findMetadata(mMetadataDrop, code))
-    {
+    if (findMetadata(mMetadataDrop, code)) {
         return true;
     }
 
-    if (mMetadataAllow.isEmpty() || findMetadata(mMetadataAllow, code))
-    {
+    if (mMetadataAllow.isEmpty() || findMetadata(mMetadataAllow, code)) {
         return false;
-    }
-    else
-    {
+    } else {
         return true;
+    }
+}
+
+
+void MediaPlayerService::Client::addNewMetadataUpdate(MetadataType metadata_type) {
+    Mutex::Autolock lock(mLock);
+    if (mMetadataUpdated.indexOf(metadata_type) < 0) {
+        mMetadataUpdated.add(metadata_type);
     }
 }
 

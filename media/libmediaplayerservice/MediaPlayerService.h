@@ -23,6 +23,7 @@
 #include <utils/List.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
+#include <utils/SortedVector.h>
 #include <utils/Vector.h>
 #include <ui/SurfaceComposerClient.h>
 
@@ -30,6 +31,7 @@
 #include <media/MediaPlayerInterface.h>
 
 namespace android {
+typedef int32_t MetadataType;
 
 class IMediaRecorder;
 class IMediaMetadataRetriever;
@@ -191,7 +193,9 @@ private:
         virtual status_t        setVolume(float leftVolume, float rightVolume);
         virtual status_t        invoke(const Parcel& request, Parcel *reply);
         virtual status_t        setMetadataFilter(const Parcel& filter);
-        virtual status_t        getMetadata(bool update_only, bool apply_filter, Parcel *metadata);
+        virtual status_t        getMetadata(bool update_only,
+                                            bool apply_filter,
+                                            Parcel *reply);
 
         sp<MediaPlayerBase>     createPlayer(player_type playerType);
                 status_t        setDataSource(const char *url);
@@ -215,10 +219,16 @@ private:
         sp<MediaPlayerBase>     getPlayer() const { Mutex::Autolock lock(mLock); return mPlayer; }
 
 
-        /**
-         * @return true if the metadata should be dropped.
-         */
-        bool shouldDropMetadata(int code) const;
+
+        // @param type Of the metadata to be tested.
+        // @return true if the metadata should be dropped according to
+        //              the filters.
+        bool shouldDropMetadata(MetadataType type) const;
+
+        // Add a new element to the set of metadata updated. Noop if
+        // the element exists already.
+        // @param type Of the metadata to be recorded.
+        void addNewMetadataUpdate(MetadataType type);
 
         mutable     Mutex                       mLock;
                     sp<MediaPlayerBase>         mPlayer;
@@ -229,10 +239,17 @@ private:
                     status_t                    mStatus;
                     bool                        mLoop;
                     int32_t                     mConnId;
-        // FIXME: Replace Vector<> with std::set<> when available. std::set support find.
+
         // Metadata filters.
-                    Vector<int32_t>             mMetadataAllow;  // protected by mLock
-                    Vector<int32_t>             mMetadataDrop;  // protected by mLock
+        SortedVector<int32_t>       mMetadataAllow;  // protected by mLock
+        SortedVector<int32_t>       mMetadataDrop;  // protected by mLock
+
+        // Metadata updated. For each MEDIA_INFO_METADATA_UPDATE
+        // notification we try to update mMetadataUpdated which is a
+        // set: no duplicate.
+        // getMetadata clears this set.
+        SortedVector<int32_t>       mMetadataUpdated;  // protected by mLock
+
 #if CALLBACK_ANTAGONIZER
                     Antagonizer*                mAntagonizer;
 #endif
