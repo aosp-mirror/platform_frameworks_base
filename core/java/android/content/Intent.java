@@ -75,10 +75,10 @@ import java.util.Set;
  * <p>Some examples of action/data pairs are:</p>
  *
  * <ul>
- *   <li> <p><b>{@link #ACTION_VIEW} <i>content://contacts/1</i></b> -- Display
+ *   <li> <p><b>{@link #ACTION_VIEW} <i>content://contacts/people/1</i></b> -- Display
  *     information about the person whose identifier is "1".</p>
  *   </li>
- *   <li> <p><b>{@link #ACTION_DIAL} <i>content://contacts/1</i></b> -- Display
+ *   <li> <p><b>{@link #ACTION_DIAL} <i>content://contacts/people/1</i></b> -- Display
  *     the phone dialer with the person filled in.</p>
  *   </li>
  *   <li> <p><b>{@link #ACTION_VIEW} <i>tel:123</i></b> -- Display
@@ -89,10 +89,10 @@ import java.util.Set;
  *   <li> <p><b>{@link #ACTION_DIAL} <i>tel:123</i></b> -- Display
  *     the phone dialer with the given number filled in.</p>
  *   </li>
- *   <li> <p><b>{@link #ACTION_EDIT} <i>content://contacts/1</i></b> -- Edit
+ *   <li> <p><b>{@link #ACTION_EDIT} <i>content://contacts/people/1</i></b> -- Edit
  *     information about the person whose identifier is "1".</p>
  *   </li>
- *   <li> <p><b>{@link #ACTION_VIEW} <i>content://contacts/</i></b> -- Display
+ *   <li> <p><b>{@link #ACTION_VIEW} <i>content://contacts/people/</i></b> -- Display
  *     a list of people, which the user can browse through.  This example is a
  *     typical top-level entry into the Contacts application, showing you the
  *     list of people. Selecting a particular person to view would result in a
@@ -156,7 +156,7 @@ import java.util.Set;
  * defined in the Intent class, but applications can also define their own.
  * These strings use java style scoping, to ensure they are unique -- for
  * example, the standard {@link #ACTION_VIEW} is called
- * "android.app.action.VIEW".</p>
+ * "android.intent.action.VIEW".</p>
  *
  * <p>Put together, the set of actions, data types, categories, and extra data
  * defines a language for the system allowing for the expression of phrases
@@ -347,7 +347,7 @@ import java.util.Set;
  *     <li> <p><b>{ action=android.app.action.MAIN,
  *         category=android.app.category.LAUNCHER }</b> is the actual intent
  *         used by the Launcher to populate its top-level list.</p>
- *     <li> <p><b>{ action=android.app.action.VIEW
+ *     <li> <p><b>{ action=android.intent.action.VIEW
  *          data=content://com.google.provider.NotePad/notes }</b>
  *         displays a list of all the notes under
  *         "content://com.google.provider.NotePad/notes", which
@@ -399,7 +399,7 @@ import java.util.Set;
  * NoteEditor activity:</p>
  *
  * <ul>
- *     <li> <p><b>{ action=android.app.action.VIEW
+ *     <li> <p><b>{ action=android.intent.action.VIEW
  *          data=content://com.google.provider.NotePad/notes/<var>{ID}</var> }</b>
  *         shows the user the content of note <var>{ID}</var>.</p>
  *     <li> <p><b>{ action=android.app.action.EDIT
