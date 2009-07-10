@@ -887,11 +887,12 @@
         <attr name="largeScreens" format="boolean" />
     </declare-styleable>
 
-    <!-- The <code>expandable</code> specifies if this package supports screen metrics
-         other than 320x480 dip.
-         <p>This appears as a child tag of the
+    <!-- Private tag to declare system protected broadcast actions.
+
+         <p>This appears as a child tag of the root
          {@link #AndroidManifest manifest} tag. -->
-    <declare-styleable name="AndroidManifestExpandable" parent="AndroidManifest">
+    <declare-styleable name="AndroidManifestProtectedBroadcast" parent="AndroidManifest">
+        <attr name="name" />
     </declare-styleable>
 
     <!-- The <code>provider</code> tag declares a

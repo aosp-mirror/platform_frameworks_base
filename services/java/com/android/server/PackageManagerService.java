@@ -56,8 +56,6 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
-import android.content.res.CompatibilityInfo;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -251,6 +249,9 @@ class PackageManagerService extends IPackageManager.Stub {
     final HashMap<String, PackageParser.PermissionGroup> mPermissionGroups =
             new HashMap<String, PackageParser.PermissionGroup>();
 
+    // Broadcast actions that are only available to the system.
+    final HashSet<String> mProtectedBroadcasts = new HashSet<String>();
+    
     boolean mSystemReady;
     boolean mSafeMode;
     boolean mHasSystemUidErrors;
@@ -1128,6 +1129,12 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    public boolean isProtectedBroadcast(String actionName) {
+        synchronized (mPackages) {
+            return mProtectedBroadcasts.contains(actionName);
+        }
+    }
+    
     public int checkSignatures(String pkg1, String pkg2) {
         synchronized (mPackages) {
             PackageParser.Package p1 = mPackages.get(pkg1);
@@ -2503,6 +2510,13 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (Config.LOGD) Log.d(TAG, "  Instrumentation: " + r);
             }
     
+            if (pkg.protectedBroadcasts != null) {
+                N = pkg.protectedBroadcasts.size();
+                for (i=0; i<N; i++) {
+                    mProtectedBroadcasts.add(pkg.protectedBroadcasts.get(i));
+                }
+            }
+            
             pkgSetting.setTimeStamp(scanFileTime);
         }
         

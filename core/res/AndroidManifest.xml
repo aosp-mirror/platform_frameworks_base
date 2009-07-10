@@ -21,6 +21,39 @@
     package="android" android:sharedUserId="android.uid.system"
     android:sharedUserLabel="@string/android_system_label">
 
+    <!-- ================================================ -->
+    <!-- Special broadcasts that only the system can send -->
+    <!-- ================================================ -->
+    <eat-comment />
+    
+    <protected-broadcast android:name="android.intent.action.SCREEN_OFF" />
+    <protected-broadcast android:name="android.intent.action.SCREEN_ON" />
+    <protected-broadcast android:name="android.intent.action.USER_PRESENT" />
+    <protected-broadcast android:name="android.intent.action.TIME_TICK" />
+    <protected-broadcast android:name="android.intent.action.TIMEZONE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.BOOT_COMPLETED" />
+    <protected-broadcast android:name="android.intent.action.CLOSE_SYSTEM_DIALOGS" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_INSTALL" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_ADDED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_REPLACED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_REMOVED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_RESTARTED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
+    <protected-broadcast android:name="android.intent.action.UID_REMOVED" />
+    <protected-broadcast android:name="android.intent.action.CONFIGURATION_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.BATTERY_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.BATTERY_LOW" />
+    <protected-broadcast android:name="android.intent.action.BATTERY_OKAY" />
+    <protected-broadcast android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+    <protected-broadcast android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+    <protected-broadcast android:name="android.intent.action.ACTION_SHUTDOWN" />
+    <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_LOW" />
+    <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_OK" />
+    <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />
+    <protected-broadcast android:name="android.intent.action.NEW_OUTGOING_CALL" />
+    <protected-broadcast android:name="android.intent.action.REBOOT" />
+    
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
