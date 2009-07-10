@@ -10832,6 +10832,29 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mHandler.sendEmptyMessage(UPDATE_TIME_ZONE);
         }
 
+        /*
+         * Prevent non-system code (defined here to be non-persistent
+         * processes) from sending protected broadcasts.
+         */
+        if (callingUid == Process.SYSTEM_UID || callingUid == Process.PHONE_UID
+                || callingUid == Process.SHELL_UID || callingUid == 0) {
+            // Always okay.
+        } else if (callerApp == null || !callerApp.persistent) {
+            try {
+                if (ActivityThread.getPackageManager().isProtectedBroadcast(
+                        intent.getAction())) {
+                    String msg = "Permission Denial: not allowed to send broadcast "
+                            + intent.getAction() + " from pid="
+                            + callingPid + ", uid=" + callingUid;
+                    Log.w(TAG, msg);
+                    throw new SecurityException(msg);
+                }
+            } catch (RemoteException e) {
+                Log.w(TAG, "Remote exception", e);
+                return BROADCAST_SUCCESS;
+            }
+        }
+        
         // Add to the sticky list if requested.
         if (sticky) {
             if (checkPermission(android.Manifest.permission.BROADCAST_STICKY,

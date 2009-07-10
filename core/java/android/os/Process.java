@@ -68,6 +68,12 @@ public class Process {
     public static final int PHONE_UID = 1001;
 
     /**
+     * Defines the UID/GID for the user shell.
+     * @hide
+     */
+    public static final int SHELL_UID = 2000;
+
+    /**
      * Defines the UID/GID for the WIFI supplicant process.
      * @hide
      */
