@@ -211,12 +211,21 @@ status_t MediaPlayer::invoke(const Parcel& request, Parcel *reply)
 status_t MediaPlayer::setMetadataFilter(const Parcel& filter)
 {
     LOGD("setMetadataFilter");
-    Mutex::Autolock _l(mLock);
-    if (mPlayer == NULL)
-    {
+    Mutex::Autolock lock(mLock);
+    if (mPlayer == NULL) {
         return NO_INIT;
     }
     return mPlayer->setMetadataFilter(filter);
+}
+
+status_t MediaPlayer::getMetadata(bool update_only, bool apply_filter, Parcel *metadata)
+{
+    LOGD("getMetadata");
+    Mutex::Autolock lock(mLock);
+    if (mPlayer == NULL) {
+        return NO_INIT;
+    }
+    return mPlayer->getMetadata(update_only, apply_filter, metadata);
 }
 
 status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)

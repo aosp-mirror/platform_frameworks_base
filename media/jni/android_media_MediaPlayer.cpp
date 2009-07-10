@@ -479,7 +479,37 @@ android_media_MediaPlayer_setMetadataFilter(JNIEnv *env, jobject thiz, jobject r
 
     Parcel *filter = parcelForJavaObject(env, request);
 
+    if (filter == NULL ) {
+        jniThrowException(env, "java/lang/RuntimeException", "Filter is null");
+        return UNKNOWN_ERROR;
+    }
+
     return media_player->setMetadataFilter(*filter);
+}
+
+static jboolean
+android_media_MediaPlayer_getMetadata(JNIEnv *env, jobject thiz, jboolean update_only,
+                                      jboolean apply_filter, jobject reply)
+{
+    sp<MediaPlayer> media_player = getMediaPlayer(env, thiz);
+    if (media_player == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return false;
+    }
+
+    Parcel *metadata = parcelForJavaObject(env, reply);
+
+    if (metadata == NULL ) {
+        jniThrowException(env, "java/lang/RuntimeException", "Reply parcel is null");
+        return false;
+    }
+
+    metadata->freeData();
+    // On return metadata is positioned at the beginning of the
+    // metadata. Note however that the parcel actually starts with the
+    // return code so you should not rewind the parcel using
+    // setDataPosition(0).
+    return media_player->getMetadata(update_only, apply_filter, metadata) == OK;
 }
 
 
@@ -546,6 +576,7 @@ static JNINativeMethod gMethods[] = {
     {"getFrameAt",          "(I)Landroid/graphics/Bitmap;",     (void *)android_media_MediaPlayer_getFrameAt},
     {"native_invoke",       "(Landroid/os/Parcel;Landroid/os/Parcel;)I",(void *)android_media_MediaPlayer_invoke},
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
+    {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
 };

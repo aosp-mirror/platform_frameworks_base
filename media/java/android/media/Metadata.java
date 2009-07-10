@@ -17,12 +17,14 @@
 package android.media;
 
 import android.graphics.Bitmap;
+import android.os.Parcel;
 import android.util.Log;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
+
 
 /**
    Class to hold the media's metadata.  Metadata are used
@@ -100,6 +102,12 @@ public class Metadata
     public static final Set<Integer> MATCH_NONE = Collections.EMPTY_SET;
     public static final Set<Integer> MATCH_ALL = Collections.singleton(ANY);
 
+    private static final int STRING_VAL = 1;
+    private static final int INTEGER_VAL = 2;
+    private static final int LONG_VAL = 3;
+    private static final int DOUBLE_VAL = 4;
+    private static final int TIMED_TEXT_VAL = 2;
+
     /**
      * Helper class to hold a pair (time, text). Can be used to implement caption.
      */
@@ -118,6 +126,11 @@ public class Metadata
     }
 
     /* package */ Metadata() {}
+
+    /* package */ boolean parse(Parcel data) {
+        // FIXME: Implement.
+        return true;
+    }
 
     /**
      * @return the number of element in this metadata set.
