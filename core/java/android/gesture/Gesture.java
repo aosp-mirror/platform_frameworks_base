@@ -31,6 +31,7 @@ import java.io.DataInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A gesture can have a single or multiple strokes
@@ -44,7 +45,7 @@ public class Gesture implements Parcelable {
     private static final boolean BITMAP_RENDERING_ANTIALIAS = true;
     private static final boolean BITMAP_RENDERING_DITHER = true;
 
-    private static int sGestureCount = 0;
+    private static final AtomicInteger sGestureCount = new AtomicInteger(0);
 
     private final RectF mBoundingBox = new RectF();
 
@@ -54,7 +55,7 @@ public class Gesture implements Parcelable {
     private final ArrayList<GestureStroke> mStrokes = new ArrayList<GestureStroke>();
 
     public Gesture() {
-        mGestureID = GESTURE_ID_BASE + sGestureCount++;
+        mGestureID = GESTURE_ID_BASE + sGestureCount.incrementAndGet();
     }
 
     /**
