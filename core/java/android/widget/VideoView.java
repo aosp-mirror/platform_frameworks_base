@@ -193,7 +193,9 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         i.putExtra("command", "pause");
         mContext.sendBroadcast(i);
 
-        release();
+        // we shouldn't clear the target state, because somebody might have
+        // called start() previously
+        release(false);
         try {
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
@@ -208,8 +210,9 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mMediaPlayer.setScreenOnWhilePlaying(true);
             mMediaPlayer.prepareAsync();
+            // we don't set the target state here either, but preserve the
+            // target state that was there before.
             mCurrentState = STATE_PREPARING;
-            mTargetState  = STATE_PREPARED;
             attachMediaController();
         } catch (IOException ex) {
             Log.w(TAG, "Unable to open content: " + mUri, ex);
@@ -438,20 +441,22 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             // after we return from this we can't use the surface any more
             mSurfaceHolder = null;
             if (mMediaController != null) mMediaController.hide();
-            release();
+            release(true);
         }
     };
 
     /*
      * release the media player in any state
      */
-    private void release() {
+    private void release(boolean cleartargetstate) {
         if (mMediaPlayer != null) {
             mMediaPlayer.reset();
             mMediaPlayer.release();
             mMediaPlayer = null;
             mCurrentState = STATE_IDLE;
-            mTargetState  = STATE_IDLE;
+            if (cleartargetstate) {
+                mTargetState  = STATE_IDLE;
+            }
         }
     }
 
