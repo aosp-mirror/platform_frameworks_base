@@ -51,6 +51,7 @@ void MessageList::remove(MessageList::LIST::iterator pos)
 // ---------------------------------------------------------------------------
 
 MessageQueue::MessageQueue()
+    : mInvalidate(false)
 {
     mInvalidateMessage = new MessageBase(INVALIDATE);
 }
