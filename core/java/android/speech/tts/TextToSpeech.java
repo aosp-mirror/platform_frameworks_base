@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.AudioManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -109,6 +110,9 @@ public class TextToSpeech {
         public static final int FALLBACK_TTS_USE_DEFAULTS = 0; // false
         public static final String FALLBACK_TTS_DEFAULT_SYNTH = "com.svox.pico";
 
+        // default values for rendering
+        public static final int TTS_DEFAULT_STREAM = AudioManager.STREAM_MUSIC;
+
         // return codes for a TTS engine's check data activity
         public static final int CHECK_VOICE_DATA_PASS = 1;
         public static final int CHECK_VOICE_DATA_FAIL = 0;
@@ -126,10 +130,15 @@ public class TextToSpeech {
         public static final String TTS_KEY_PARAM_LANGUAGE = "language";
         public static final String TTS_KEY_PARAM_COUNTRY = "country";
         public static final String TTS_KEY_PARAM_VARIANT = "variant";
-        public static final int TTS_PARAM_POSITION_RATE = 0;
-        public static final int TTS_PARAM_POSITION_LANGUAGE = 2;
-        public static final int TTS_PARAM_POSITION_COUNTRY = 4;
-        public static final int TTS_PARAM_POSITION_VARIANT = 6;
+        public static final String TTS_KEY_PARAM_STREAM = "streamType";
+        public static final String TTS_KEY_PARAM_UTTERANCE_ID = "utteranceId";
+        protected static final int TTS_PARAM_POSITION_RATE = 0;
+        protected static final int TTS_PARAM_POSITION_LANGUAGE = 2;
+        protected static final int TTS_PARAM_POSITION_COUNTRY = 4;
+        protected static final int TTS_PARAM_POSITION_VARIANT = 6;
+        protected static final int TTS_PARAM_POSITION_STREAM = 8;
+        protected static final int TTS_PARAM_POSITION_UTTERANCE_ID = 10;
+        protected static final int TTS_NB_CACHED_PARAMS = 6;
     }
 
     /**
@@ -163,11 +172,12 @@ public class TextToSpeech {
         mPackageName = mContext.getPackageName();
         mInitListener = listener;
 
-        mCachedParams = new String[2*4]; // 4 parameters, store key and value
+        mCachedParams = new String[2*Engine.TTS_NB_CACHED_PARAMS]; // store key and value
         mCachedParams[Engine.TTS_PARAM_POSITION_RATE] = Engine.TTS_KEY_PARAM_RATE;
         mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE] = Engine.TTS_KEY_PARAM_LANGUAGE;
         mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY] = Engine.TTS_KEY_PARAM_COUNTRY;
         mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT] = Engine.TTS_KEY_PARAM_VARIANT;
+        mCachedParams[Engine.TTS_PARAM_POSITION_STREAM] = Engine.TTS_KEY_PARAM_STREAM;
 
         mCachedParams[Engine.TTS_PARAM_POSITION_RATE + 1] =
                 String.valueOf(Engine.FALLBACK_TTS_DEFAULT_RATE);
@@ -176,6 +186,10 @@ public class TextToSpeech {
         mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1] = defaultLoc.getISO3Language();
         mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY + 1] = defaultLoc.getISO3Country();
         mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT + 1] = defaultLoc.getVariant();
+
+        mCachedParams[Engine.TTS_PARAM_POSITION_STREAM + 1] =
+                String.valueOf(Engine.TTS_DEFAULT_STREAM);
+        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID+ 1] = "";
 
         initTts();
     }
@@ -347,7 +361,14 @@ public class TextToSpeech {
                 return result;
             }
             try {
-                // TODO support extra parameters, passing cache of current parameters for the moment
+                String extra = params.get(Engine.TTS_KEY_PARAM_STREAM);
+                if (extra != null) {
+                    mCachedParams[Engine.TTS_PARAM_POSITION_STREAM + 1] = extra;
+                }
+                extra = params.get(Engine.TTS_KEY_PARAM_UTTERANCE_ID);
+                if (extra != null) {
+                    mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID] = extra;
+                }
                 result = mITts.speak(mPackageName, text, queueMode, mCachedParams);
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -362,7 +383,8 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             } finally {
-              return result;
+                resetCachedParams();
+                return result;
             }
         }
     }
@@ -388,7 +410,16 @@ public class TextToSpeech {
                 return result;
             }
             try {
-                // TODO support extra parameters, passing null for the moment
+                if ((params != null) && (!params.isEmpty())) {
+                    String extra = params.get(Engine.TTS_KEY_PARAM_STREAM);
+                    if (extra != null) {
+                        mCachedParams[Engine.TTS_PARAM_POSITION_STREAM + 1] = extra;
+                    }
+                    extra = params.get(Engine.TTS_KEY_PARAM_UTTERANCE_ID);
+                    if (extra != null) {
+                        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID] = extra;
+                    }
+                }
                 result = mITts.playEarcon(mPackageName, earcon, queueMode, null);
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -403,7 +434,8 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             } finally {
-              return result;
+                resetCachedParams();
+                return result;
             }
         }
     }
@@ -426,7 +458,6 @@ public class TextToSpeech {
                 return result;
             }
             try {
-                // TODO support extra parameters, passing cache of current parameters for the moment
                 result = mITts.playSilence(mPackageName, durationInMs, queueMode, mCachedParams);
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -696,8 +727,12 @@ public class TextToSpeech {
                 return result;
             }
             try {
-                // TODO support extra parameters, passing null for the moment
-                if (mITts.synthesizeToFile(mPackageName, text, null, filename)){
+                // no need to read the stream type here
+                String extra = params.get(Engine.TTS_KEY_PARAM_UTTERANCE_ID);
+                if (extra != null) {
+                    mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID] = extra;
+                }
+                if (mITts.synthesizeToFile(mPackageName, text, mCachedParams, filename)){
                     result = TTS_SUCCESS;
                 }
             } catch (RemoteException e) {
@@ -713,9 +748,21 @@ public class TextToSpeech {
                 mStarted = false;
                 initTts();
             } finally {
-              return result;
+                resetCachedParams();
+                return result;
             }
         }
+    }
+
+
+    /**
+     * Convenience method to reset the cached parameters to the current default values
+     * if they are not persistent between calls to the service.
+     */
+    private void resetCachedParams() {
+        mCachedParams[Engine.TTS_PARAM_POSITION_STREAM + 1] =
+                String.valueOf(Engine.TTS_DEFAULT_STREAM);
+        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID+ 1] = "";
     }
 
 }
