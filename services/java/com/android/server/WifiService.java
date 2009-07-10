@@ -142,28 +142,6 @@ public class WifiService extends IWifiManager.Stub {
     private final  WifiHandler mWifiHandler;
 
     /*
-     * Map used to keep track of hidden networks presence, which
-     * is needed to switch between active and passive scan modes.
-     * If there is at least one hidden network that is currently
-     * present (enabled), we want to do active scans instead of
-     * passive.
-     */
-    private final Map<Integer, Boolean> mIsHiddenNetworkPresent;
-    /*
-     * The number of currently present hidden networks. When this
-     * counter goes from 0 to 1 or from 1 to 0, we change the
-     * scan mode to active or passive respectively. Initially, we
-     * set the counter to 0 and we increment it every time we add
-     * a new present (enabled) hidden network.
-     */
-    private int mNumHiddenNetworkPresent;
-    /*
-     * Whether we change the scan mode is due to a hidden network
-     * (in this class, this is always the case)
-     */
-    private final static boolean SET_DUE_TO_A_HIDDEN_NETWORK = true;
-
-    /*
      * Cache of scan results objects (size is somewhat arbitrary)
      */
     private static final int SCAN_RESULT_CACHE_SIZE = 80;
@@ -194,12 +172,6 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateTracker = tracker;
         mBatteryStats = BatteryStatsService.getService();
         
-        /*
-         * Initialize the hidden-networks state
-         */
-        mIsHiddenNetworkPresent = new HashMap<Integer, Boolean>();
-        mNumHiddenNetworkPresent = 0;
-
         mScanResultCache = new LinkedHashMap<String, ScanResult>(
             SCAN_RESULT_CACHE_SIZE, 0.75f, true) {
                 /*
@@ -251,155 +223,6 @@ public class WifiService extends IWifiManager.Stub {
                 new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
 
         setWifiEnabledBlocking(wifiEnabled, false, Process.myUid());
-    }
-
-    /**
-     * Initializes the hidden networks state. Must be called when we
-     * enable Wi-Fi.
-     */
-    private synchronized void initializeHiddenNetworksState() {
-        // First, reset the state
-        resetHiddenNetworksState();
-
-        // ... then add networks that are marked as hidden
-        List<WifiConfiguration> networks = getConfiguredNetworks();
-        if (!networks.isEmpty()) {
-            for (WifiConfiguration config : networks) {
-                if (config != null && config.hiddenSSID) {
-                    addOrUpdateHiddenNetwork(
-                        config.networkId,
-                        config.status != WifiConfiguration.Status.DISABLED);
-                }
-            }
-
-        }
-    }
-
-    /**
-     * Resets the hidden networks state.
-     */
-    private synchronized void resetHiddenNetworksState() {
-        mNumHiddenNetworkPresent = 0;
-        mIsHiddenNetworkPresent.clear();
-    }
-
-    /**
-     * Marks all but netId network as not present.
-     */
-    private synchronized void markAllHiddenNetworksButOneAsNotPresent(int netId) {
-        for (Map.Entry<Integer, Boolean> entry : mIsHiddenNetworkPresent.entrySet()) {
-            if (entry != null) {
-                Integer networkId = entry.getKey();
-                if (networkId != netId) {
-                    updateNetworkIfHidden(
-                        networkId, false);
-                }
-            }
-        }
-    }
-
-    /**
-     * Updates the netId network presence status if netId is an existing
-     * hidden network.
-     */
-    private synchronized void updateNetworkIfHidden(int netId, boolean present) {
-        if (isHiddenNetwork(netId)) {
-            addOrUpdateHiddenNetwork(netId, present);
-        }
-    }
-
-    /**
-     * Updates the netId network presence status if netId is an existing
-     * hidden network. If the network does not exist, adds the network.
-     */
-    private synchronized void addOrUpdateHiddenNetwork(int netId, boolean present) {
-        if (0 <= netId) {
-
-            // If we are adding a new entry or modifying an existing one
-            Boolean isPresent = mIsHiddenNetworkPresent.get(netId);
-            if (isPresent == null || isPresent != present) {
-                if (present) {
-                    incrementHiddentNetworkPresentCounter();
-                } else {
-                    // If we add a new hidden network, no need to change
-                    // the counter (it must be 0)
-                    if (isPresent != null) {
-                        decrementHiddentNetworkPresentCounter();
-                    }
-                }
-                mIsHiddenNetworkPresent.put(netId, present);
-            }
-        } else {
-            Log.e(TAG, "addOrUpdateHiddenNetwork(): Invalid (negative) network id!");
-        }
-    }
-
-    /**
-     * Removes the netId network if it is hidden (being kept track of).
-     */
-    private synchronized void removeNetworkIfHidden(int netId) {
-        if (isHiddenNetwork(netId)) {
-            removeHiddenNetwork(netId);
-        }
-    }
-
-    /**
-     * Removes the netId network. For the call to be successful, the network
-     * must be hidden.
-     */
-    private synchronized void removeHiddenNetwork(int netId) {
-        if (0 <= netId) {
-            Boolean isPresent =
-                mIsHiddenNetworkPresent.remove(netId);
-            if (isPresent != null) {
-                // If we remove an existing hidden network that is not
-                // present, no need to change the counter
-                if (isPresent) {
-                    decrementHiddentNetworkPresentCounter();
-                }
-            } else {
-                if (DBG) {
-                    Log.d(TAG, "removeHiddenNetwork(): Removing a non-existent network!");
-                }
-            }
-        } else {
-            Log.e(TAG, "removeHiddenNetwork(): Invalid (negative) network id!");
-        }
-    }
-
-    /**
-     * Returns true if netId is an existing hidden network.
-     */
-    private synchronized boolean isHiddenNetwork(int netId) {
-        return mIsHiddenNetworkPresent.containsKey(netId);
-    }
-
-    /**
-     * Increments the present (enabled) hidden networks counter. If the
-     * counter value goes from 0 to 1, changes the scan mode to active.
-     */
-    private void incrementHiddentNetworkPresentCounter() {
-        ++mNumHiddenNetworkPresent;
-        if (1 == mNumHiddenNetworkPresent) {
-            // Switch the scan mode to "active"
-            mWifiStateTracker.setScanMode(true, SET_DUE_TO_A_HIDDEN_NETWORK);
-        }
-    }
-
-    /**
-     * Decrements the present (enabled) hidden networks counter. If the
-     * counter goes from 1 to 0, changes the scan mode back to passive.
-     */
-    private void decrementHiddentNetworkPresentCounter() {
-        if (0 < mNumHiddenNetworkPresent) {
-            --mNumHiddenNetworkPresent;
-            if (0 == mNumHiddenNetworkPresent) {
-                // Switch the scan mode to "passive"
-                mWifiStateTracker.setScanMode(false, SET_DUE_TO_A_HIDDEN_NETWORK);
-            }
-        } else {
-            Log.e(TAG, "Hidden-network counter invariant violation!");
-        }
     }
 
     private boolean getPersistedWifiEnabled() {
@@ -543,12 +366,10 @@ public class WifiService extends IWifiManager.Stub {
         setWifiEnabledState(eventualWifiState, uid);
 
         /*
-         * Initialize the hidden networks state and the number of allowed
-         * radio channels if Wi-Fi is being turned on.
+         * Initialize the number of allowed radio channels if Wi-Fi is being turned on.
          */
         if (enable) {
             mWifiStateTracker.setNumAllowedChannels();
-            initializeHiddenNetworksState();
         }
 
         return true;
@@ -883,15 +704,6 @@ public class WifiService extends IWifiManager.Stub {
         }
         mNeedReconfig = mNeedReconfig || doReconfig;
 
-        /*
-         * If we have hidden networks, we may have to change the scan mode
-         */
-        if (config.hiddenSSID) {
-            // Mark the network as present unless it is disabled
-            addOrUpdateHiddenNetwork(
-                netId, config.status != WifiConfiguration.Status.DISABLED);
-        }
-
         setVariables: {
             /*
              * Note that if a networkId for a non-existent network
@@ -1219,11 +1031,6 @@ public class WifiService extends IWifiManager.Stub {
     public boolean removeNetwork(int netId) {
         enforceChangePermission();
 
-        /*
-         * If we have hidden networks, we may have to change the scan mode
-         */
-        removeNetworkIfHidden(netId);
-
         return mWifiStateTracker.removeNetwork(netId);
     }
 
@@ -1236,16 +1043,6 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean enableNetwork(int netId, boolean disableOthers) {
         enforceChangePermission();
-
-        /*
-         * If we have hidden networks, we may have to change the scan mode
-         */
-         synchronized(this) {
-             if (disableOthers) {
-                 markAllHiddenNetworksButOneAsNotPresent(netId);
-             }
-             updateNetworkIfHidden(netId, true);
-         }
 
         synchronized (mWifiStateTracker) {
             return WifiNative.enableNetworkCommand(netId, disableOthers);
@@ -1260,11 +1057,6 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean disableNetwork(int netId) {
         enforceChangePermission();
-
-        /*
-         * If we have hidden networks, we may have to change the scan mode
-         */
-        updateNetworkIfHidden(netId, false);
 
         synchronized (mWifiStateTracker) {
             return WifiNative.disableNetworkCommand(netId);
