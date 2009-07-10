@@ -20,7 +20,7 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libbinder \
     libmedia \
-    libsgl \
+    libskia \
     libui
 
 LOCAL_STATIC_LIBRARIES :=

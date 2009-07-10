@@ -10,7 +10,7 @@ LOCAL_SHARED_LIBRARIES := \
         libnativehelper \
         libRS \
         libcutils \
-        libsgl \
+        libskia \
         libutils \
         libui
 
