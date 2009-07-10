@@ -118,6 +118,12 @@ cat include/telephony/ril.h | \
      */
     int RIL_RESTRICTED_STATE_PS_ALL = 0x10;
 
+    /** Data profile for RIL_REQUEST_SETUP_DATA_CALL */
+    static final int DATA_PROFILE_DEFAULT   = 0;
+    static final int DATA_PROFILE_TETHERED  = 1;
+    static final int DATA_PROFILE_OEM_BASE  = 1000;
+
+
     int RIL_REQUEST_GET_SIM_STATUS = 1;
     int RIL_REQUEST_ENTER_SIM_PIN = 2;
     int RIL_REQUEST_ENTER_SIM_PUK = 3;

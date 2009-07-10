@@ -685,7 +685,7 @@ public abstract class PhoneBase implements Phone {
         return null;
     }
 
-    public void sendBurstDtmf(String dtmfString, Message onComplete) {
+    public void sendBurstDtmf(String dtmfString, int on, int off, Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
     }
