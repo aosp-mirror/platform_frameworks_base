@@ -1103,7 +1103,7 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
         // default value
         if (binarySearch<config_pair_t>(
                 (config_pair_t const*)attrib_list,
-                0, numAttributes,
+                0, numAttributes-1,
                 config_defaults[j].key) < 0)
         {
             for (int i=0 ; i<numConfigs ; i++) {
