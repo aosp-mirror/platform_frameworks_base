@@ -16,13 +16,14 @@
 
 package android.provider;
 
-import java.util.Arrays;
-import java.util.List;
-
 import android.content.Intent;
+import android.content.ContentProviderClient;
+import android.content.ContentProviderOperation;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
+import android.accounts.Account;
+import android.os.RemoteException;
 
 /**
  * The contract between the contacts provider and applications. Contains definitions
@@ -35,6 +36,48 @@ public final class ContactsContract {
     public static final String AUTHORITY = "com.android.contacts";
     /** A content:// style uri to the authority for the contacts provider */
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
+
+    public interface SyncStateColumns extends SyncStateContract.Columns {
+    }
+
+    public static final class SyncState {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private SyncState() {}
+
+        public static final String CONTENT_DIRECTORY =
+                SyncStateContract.Constants.CONTENT_DIRECTORY;
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, CONTENT_DIRECTORY);
+
+        /**
+         * @see android.provider.SyncStateContract.Helpers#get
+         */
+        public static byte[] get(ContentProviderClient provider, Account account)
+                throws RemoteException {
+            return SyncStateContract.Helpers.get(provider, CONTENT_URI, account);
+        }
+
+        /**
+         * @see android.provider.SyncStateContract.Helpers#set
+         */
+        public static void set(ContentProviderClient provider, Account account, byte[] data)
+                throws RemoteException {
+            SyncStateContract.Helpers.set(provider, CONTENT_URI, account, data);
+        }
+
+        /**
+         * @see android.provider.SyncStateContract.Helpers#newSetOperation
+         */
+        public static ContentProviderOperation newSetOperation(Account account, byte[] data) {
+            return SyncStateContract.Helpers.newSetOperation(CONTENT_URI, account, data);
+        }
+    }
 
     public interface AggregatesColumns {
         /**

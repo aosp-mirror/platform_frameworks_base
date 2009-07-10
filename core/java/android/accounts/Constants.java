@@ -29,7 +29,6 @@ public class Constants {
 
     public static final String ACCOUNTS_KEY = "accounts";
     public static final String AUTHENTICATOR_TYPES_KEY = "authenticator_types";
-    public static final String PASSWORD_KEY = "password";
     public static final String USERDATA_KEY = "userdata";
     public static final String AUTHTOKEN_KEY = "authtoken";
     public static final String ACCOUNT_NAME_KEY = "authAccount";
