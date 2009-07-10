@@ -378,6 +378,14 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     /**
+     * Return the name of our WLAN network interface.
+     * @return the name of our interface.
+     */
+    public String getInterfaceName() {
+        return mInterfaceName;
+    }
+
+    /**
      * Return the system properties name associated with the tcp buffer sizes
      * for this network.
      */
@@ -784,7 +792,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                     WifiNative.closeSupplicantConnection();
                 }
                 if (died) {
-                    resetInterface();
+                    resetInterface(false);
                 }
                 // When supplicant dies, kill the DHCP thread
                 if (mDhcpTarget != null) {
@@ -1195,7 +1203,7 @@ public class WifiStateTracker extends NetworkStateTracker {
             cancelDisconnect();
         }
         mDisconnectExpected = false;
-        resetInterface();
+        resetInterface(true);
         setDetailedState(newState);
         sendNetworkStateChangeBroadcast(mLastBssid);
         mWifiInfo.setBSSID(null);
@@ -1208,7 +1216,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      * Resets the Wi-Fi interface by clearing any state, resetting any sockets
      * using the interface, stopping DHCP, and disabling the interface.
      */
-    public void resetInterface() {
+    public void resetInterface(boolean reenable) {
         mHaveIpAddress = false;
         mObtainingIpAddress = false;
         mWifiInfo.setIpAddress(0);
@@ -1229,6 +1237,9 @@ public class WifiStateTracker extends NetworkStateTracker {
         }
         
         NetworkUtils.disableInterface(mInterfaceName);
+        if (reenable) {
+            NetworkUtils.enableInterface(mInterfaceName);
+        }
     }
 
     /**
@@ -1872,7 +1883,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                         oDns2 != mDhcpInfo.dns2));
 
             if (changed) {
-                resetInterface();
+                resetInterface(true);
                 configureInterface();
                 if (mUseStaticIp) {
                     mTarget.sendEmptyMessage(EVENT_CONFIGURATION_CHANGED);
