@@ -720,7 +720,7 @@ public class PackageParser {
                 sa.recycle();
 
                 if (name != null && !pkg.requestedPermissions.contains(name)) {
-                    pkg.requestedPermissions.add(name);
+                    pkg.requestedPermissions.add(name.intern());
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -851,21 +851,6 @@ public class PackageParser {
 
                 XmlUtils.skipCurrentTag(parser);
 
-            } else if (tagName.equals("instrumentation")) {
-                if (parseInstrumentation(pkg, res, parser, attrs, outError) == null) {
-                    return null;
-                }
-            } else if (tagName.equals("eat-comment")) {
-                // Just skip this tag
-                XmlUtils.skipCurrentTag(parser);
-                continue;
-            } else if (RIGID_PARSER) {
-                outError[0] = "Bad element under <manifest>: "
-                    + parser.getName();
-                mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-                return null;
-
-
             } else if (tagName.equals("supports-density")) {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestSupportsDensity);
@@ -900,6 +885,43 @@ public class PackageParser {
                 sa.recycle();
                 
                 XmlUtils.skipCurrentTag(parser);
+                
+            } else if (tagName.equals("protected-broadcast")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestProtectedBroadcast);
+
+                String name = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestProtectedBroadcast_name);
+
+                sa.recycle();
+
+                if (name != null && (flags&PARSE_IS_SYSTEM) != 0) {
+                    if (pkg.protectedBroadcasts == null) {
+                        pkg.protectedBroadcasts = new ArrayList<String>();
+                    }
+                    if (!pkg.protectedBroadcasts.contains(name)) {
+                        pkg.protectedBroadcasts.add(name.intern());
+                    }
+                }
+
+                XmlUtils.skipCurrentTag(parser);
+                
+            } else if (tagName.equals("instrumentation")) {
+                if (parseInstrumentation(pkg, res, parser, attrs, outError) == null) {
+                    return null;
+                }
+                
+            } else if (tagName.equals("eat-comment")) {
+                // Just skip this tag
+                XmlUtils.skipCurrentTag(parser);
+                continue;
+                
+            } else if (RIGID_PARSER) {
+                outError[0] = "Bad element under <manifest>: "
+                    + parser.getName();
+                mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                return null;
+
             } else {
                 Log.w(TAG, "Bad element under <manifest>: "
                       + parser.getName());
@@ -1429,7 +1451,7 @@ public class PackageParser {
                 sa.recycle();
 
                 if (lname != null && !owner.usesLibraries.contains(lname)) {
-                    owner.usesLibraries.add(lname);
+                    owner.usesLibraries.add(lname.intern());
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -2210,8 +2232,8 @@ public class PackageParser {
             return null;
         }
 
-        boolean success = true;
-
+        name = name.intern();
+        
         TypedValue v = sa.peekValue(
                 com.android.internal.R.styleable.AndroidManifestMetaData_resource);
         if (v != null && v.resourceId != 0) {
@@ -2224,7 +2246,7 @@ public class PackageParser {
             if (v != null) {
                 if (v.type == TypedValue.TYPE_STRING) {
                     CharSequence cs = v.coerceToString();
-                    data.putString(name, cs != null ? cs.toString() : null);
+                    data.putString(name, cs != null ? cs.toString().intern() : null);
                 } else if (v.type == TypedValue.TYPE_INT_BOOLEAN) {
                     data.putBoolean(name, v.data != 0);
                 } else if (v.type >= TypedValue.TYPE_FIRST_INT
@@ -2405,6 +2427,8 @@ public class PackageParser {
 
         public final ArrayList<String> requestedPermissions = new ArrayList<String>();
 
+        public ArrayList<String> protectedBroadcasts;
+        
         public final ArrayList<String> usesLibraries = new ArrayList<String>();
         public String[] usesLibraryFiles = null;
 

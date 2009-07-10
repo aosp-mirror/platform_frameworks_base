@@ -1620,6 +1620,9 @@ public final class Telephony {
          *
          * It is recommended to display <em>plmn</em> before / above <em>spn</em> if
          * both are displayed.
+         * 
+         * <p>Note this is a protected intent that can only be sent
+         * by the system.
          */
         public static final String SPN_STRINGS_UPDATED_ACTION =
                 "android.provider.Telephony.SPN_STRINGS_UPDATED";
