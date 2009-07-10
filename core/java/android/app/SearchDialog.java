@@ -962,19 +962,18 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                         && event.getAction() == KeyEvent.ACTION_UP) {
                     v.cancelLongPress();
 
-                    if (mSearchable.autoUrlDetect()) {
-                        // If this is a url entered by the user & we displayed the 'Go' button which
-                        // the user clicked, launch the url instead of using it as a search query.
-                        if ((mSearchAutoCompleteImeOptions & EditorInfo.IME_MASK_ACTION)
+                    // If this is a url entered by the user & we displayed the 'Go' button which
+                    // the user clicked, launch the url instead of using it as a search query.
+                    if (mSearchable.autoUrlDetect() &&
+                        (mSearchAutoCompleteImeOptions & EditorInfo.IME_MASK_ACTION)
                                 == EditorInfo.IME_ACTION_GO) {
-                            Uri uri = Uri.parse(fixUrl(mSearchAutoComplete.getText().toString()));
-                            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            launchIntent(intent);
-                        } else {
-                            // Launch as a regular search.
-                            launchQuerySearch();
-                        }
+                        Uri uri = Uri.parse(fixUrl(mSearchAutoComplete.getText().toString()));
+                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        launchIntent(intent);
+                    } else {
+                        // Launch as a regular search.
+                        launchQuerySearch();
                     }
                     return true;
                 }
