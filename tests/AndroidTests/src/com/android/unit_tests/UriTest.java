@@ -499,4 +499,8 @@ public class UriTest extends TestCase {
 
         assertEquals(uriString, uri.toString());
     }
+
+    public void testEmptyToStringNotNull() {
+        assertNotNull(Uri.EMPTY.toString());
+    }
 }

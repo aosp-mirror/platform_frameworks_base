@@ -105,6 +105,18 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     private static final String LOG = Uri.class.getSimpleName();
 
     /**
+     * NOTE: EMPTY accesses this field during its own initialization, so this
+     * field *must* be initialized first, or else EMPTY will see a null value!
+     *
+     * Placeholder for strings which haven't been cached. This enables us
+     * to cache null. We intentionally create a new String instance so we can
+     * compare its identity and there is no chance we will confuse it with
+     * user data.
+     */
+    @SuppressWarnings("RedundantStringConstructorCall")
+    private static final String NOT_CACHED = new String("NOT CACHED");
+
+    /**
      * The empty URI, equivalent to "".
      */
     public static final Uri EMPTY = new HierarchicalUri(null, Part.NULL,
@@ -348,15 +360,6 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
     /** Placeholder value for an index which hasn't been calculated yet. */
     private final static int NOT_CALCULATED = -2;
-
-    /**
-     * Placeholder for strings which haven't been cached. This enables us
-     * to cache null. We intentionally create a new String instance so we can
-     * compare its identity and there is no chance we will confuse it with
-     * user data.
-     */
-    @SuppressWarnings("RedundantStringConstructorCall")
-    private static final String NOT_CACHED = new String("NOT CACHED");
 
     /**
      * Error message presented when a user tries to treat an opaque URI as
