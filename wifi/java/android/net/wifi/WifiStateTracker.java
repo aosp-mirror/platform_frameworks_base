@@ -242,7 +242,6 @@ public class WifiStateTracker extends NetworkStateTracker {
     private SettingsObserver mSettingsObserver;
     
     private boolean mIsScanModeActive;
-    private boolean mIsScanModeSetDueToAHiddenNetwork;
 
     // Wi-Fi run states:
     private static final int RUN_STATE_STARTING = 1;
@@ -314,7 +313,6 @@ public class WifiStateTracker extends NetworkStateTracker {
         mScanResults = new ArrayList<ScanResult>();
         // Allocate DHCP info object once, and fill it in on each request
         mDhcpInfo = new DhcpInfo();
-        mIsScanModeSetDueToAHiddenNetwork = false;
         mRunState = RUN_STATE_STARTING;
 
         // Setting is in seconds
@@ -1019,12 +1017,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                  * On receiving the first scan results after connecting to
                  * the supplicant, switch scan mode over to passive.
                  */
-                if (!mIsScanModeSetDueToAHiddenNetwork) {
-                    // This is the only place at the moment where we set
-                    // the scan mode NOT due to a hidden network. This is
-                    // what the second parameter value (false) stands for.
-                    setScanMode(false, false);
-                }
+                setScanMode(false);
                 break;
 
             case EVENT_POLL_INTERVAL:
@@ -1162,9 +1155,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         return disabledNetwork;
     }
 
-    public synchronized void setScanMode(
-        boolean isScanModeActive, boolean setDueToAHiddenNetwork) {
-        mIsScanModeSetDueToAHiddenNetwork = setDueToAHiddenNetwork;
+    public synchronized void setScanMode(boolean isScanModeActive) {
         if (mIsScanModeActive != isScanModeActive) {
             WifiNative.setScanModeCommand(mIsScanModeActive = isScanModeActive);
         }
