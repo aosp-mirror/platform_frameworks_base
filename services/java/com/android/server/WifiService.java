@@ -41,6 +41,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.SupplicantState;
 import android.net.NetworkStateTracker;
 import android.net.DhcpInfo;
+import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -344,7 +345,7 @@ public class WifiService extends IWifiManager.Stub {
             }
 
             // We must reset the interface before we unload the driver
-            mWifiStateTracker.resetInterface();
+            mWifiStateTracker.resetInterface(false);
 
             if (!WifiNative.unloadDriver()) {
                 Log.e(TAG, "Failed to unload Wi-Fi driver.");
@@ -1045,7 +1046,13 @@ public class WifiService extends IWifiManager.Stub {
         enforceChangePermission();
 
         synchronized (mWifiStateTracker) {
-            return WifiNative.enableNetworkCommand(netId, disableOthers);
+            String ifname = mWifiStateTracker.getInterfaceName();
+            NetworkUtils.enableInterface(ifname);
+            boolean result = WifiNative.enableNetworkCommand(netId, disableOthers);
+            if (!result) {
+                NetworkUtils.disableInterface(ifname);
+            }
+            return result;
         }
     }
 
