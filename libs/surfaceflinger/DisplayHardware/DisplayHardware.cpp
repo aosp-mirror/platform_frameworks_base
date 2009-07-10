@@ -219,7 +219,7 @@ void DisplayHardware::init(uint32_t dpy)
     
 
     mDpiX = mNativeWindow->xdpi;
-    mDpiX = mNativeWindow->ydpi;
+    mDpiY = mNativeWindow->ydpi;
     mRefreshRate = fbDev->fps; 
     
     char property[PROPERTY_VALUE_MAX];
