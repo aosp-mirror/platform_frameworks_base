@@ -139,6 +139,7 @@ public class TextToSpeech {
 
     private ITts mITts = null;
     private Context mContext = null;
+    private String mPackageName = "";
     private OnInitListener mInitListener = null;
     private boolean mStarted = false;
     private final Object mStartLock = new Object();
@@ -159,6 +160,7 @@ public class TextToSpeech {
      */
     public TextToSpeech(Context context, OnInitListener listener) {
         mContext = context;
+        mPackageName = mContext.getPackageName();
         mInitListener = listener;
 
         mCachedParams = new String[2*4]; // 4 parameters, store key and value
@@ -261,7 +263,7 @@ public class TextToSpeech {
                 return TTS_ERROR;
             }
             try {
-                mITts.addSpeech(text, packagename, resourceId);
+                mITts.addSpeech(mPackageName, text, packagename, resourceId);
                 return TTS_SUCCESS;
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -299,7 +301,7 @@ public class TextToSpeech {
                 return TTS_ERROR;
             }
             try {
-                mITts.addSpeechFile(text, filename);
+                mITts.addSpeechFile(mPackageName, text, filename);
                 return TTS_SUCCESS;
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -346,7 +348,7 @@ public class TextToSpeech {
             }
             try {
                 // TODO support extra parameters, passing cache of current parameters for the moment
-                result = mITts.speak(text, queueMode, mCachedParams);
+                result = mITts.speak(mPackageName, text, queueMode, mCachedParams);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -387,7 +389,7 @@ public class TextToSpeech {
             }
             try {
                 // TODO support extra parameters, passing null for the moment
-                result = mITts.playEarcon(earcon, queueMode, null);
+                result = mITts.playEarcon(mPackageName, earcon, queueMode, null);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -425,7 +427,7 @@ public class TextToSpeech {
             }
             try {
                 // TODO support extra parameters, passing cache of current parameters for the moment
-                result = mITts.playSilence(durationInMs, queueMode, mCachedParams);
+                result = mITts.playSilence(mPackageName, durationInMs, queueMode, mCachedParams);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -487,7 +489,7 @@ public class TextToSpeech {
                 return result;
             }
             try {
-                result = mITts.stop();
+                result = mITts.stop(mPackageName);
             } catch (RemoteException e) {
                 // TTS died; restart it.
                 mStarted = false;
@@ -532,7 +534,7 @@ public class TextToSpeech {
                 if (speechRate > 0) {
                     int rate = (int)(speechRate*100);
                     mCachedParams[Engine.TTS_PARAM_POSITION_RATE + 1] = String.valueOf(rate);
-                    result = mITts.setSpeechRate(rate);
+                    result = mITts.setSpeechRate(mPackageName, rate);
                 }
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -568,7 +570,7 @@ public class TextToSpeech {
             }
             try {
                 if (pitch > 0) {
-                    result = mITts.setPitch((int)(pitch*100));
+                    result = mITts.setPitch(mPackageName, (int)(pitch*100));
                 }
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -603,7 +605,8 @@ public class TextToSpeech {
                 mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1] = loc.getISO3Language();
                 mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY + 1] = loc.getISO3Country();
                 mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT + 1] = loc.getVariant();
-                result = mITts.setLanguage(mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1],
+                result = mITts.setLanguage(mPackageName,
+                        mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1],
                         mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY + 1],
                         mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT + 1] );
             } catch (RemoteException e) {
@@ -694,7 +697,7 @@ public class TextToSpeech {
             }
             try {
                 // TODO support extra parameters, passing null for the moment
-                if (mITts.synthesizeToFile(text, null, filename)){
+                if (mITts.synthesizeToFile(mPackageName, text, null, filename)){
                     result = TTS_SUCCESS;
                 }
             } catch (RemoteException e) {
