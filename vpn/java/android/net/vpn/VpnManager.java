@@ -42,6 +42,15 @@ public class VpnManager {
     public static final String BROADCAST_PROFILE_NAME = "profile_name";
     /** Key to the connectivity state of a connectivity broadcast event. */
     public static final String BROADCAST_CONNECTION_STATE = "connection_state";
+    /** Key to the error code of a connectivity broadcast event. */
+    public static final String BROADCAST_ERROR_CODE = "err";
+    /** Error code to indicate an error from authentication. */
+    public static final int VPN_ERROR_AUTH = 1;
+    /** Error code to indicate the connection attempt failed. */
+    public static final int VPN_ERROR_CONNECTION_FAILED = 2;
+    /** Error code to indicate the server is not known. */
+    public static final int VPN_ERROR_UNKNOWN_SERVER = 3;
+    private static final int VPN_ERROR_NO_ERROR = 0;
 
     public static final String PROFILES_PATH = "/data/misc/vpn/profiles";
 
@@ -52,7 +61,8 @@ public class VpnManager {
     private static final String ACTION_VPN_SERVICE = PACKAGE_PREFIX + "SERVICE";
 
     // Action to start VPN settings
-    private static final String ACTION_VPN_SETTINGS = PACKAGE_PREFIX + "SETTINGS";
+    private static final String ACTION_VPN_SETTINGS =
+            PACKAGE_PREFIX + "SETTINGS";
 
     private static final String TAG = VpnManager.class.getSimpleName();
 
@@ -130,9 +140,18 @@ public class VpnManager {
 
     /** Broadcasts the connectivity state of the specified profile. */
     public void broadcastConnectivity(String profileName, VpnState s) {
+        broadcastConnectivity(profileName, s, VPN_ERROR_NO_ERROR);
+    }
+
+    /** Broadcasts the connectivity state with an error code. */
+    public void broadcastConnectivity(String profileName, VpnState s,
+            int error) {
         Intent intent = new Intent(ACTION_VPN_CONNECTIVITY);
         intent.putExtra(BROADCAST_PROFILE_NAME, profileName);
         intent.putExtra(BROADCAST_CONNECTION_STATE, s);
+        if (error != VPN_ERROR_NO_ERROR) {
+            intent.putExtra(BROADCAST_ERROR_CODE, error);
+        }
         mContext.sendBroadcast(intent);
     }
 
