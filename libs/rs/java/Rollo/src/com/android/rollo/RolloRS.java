@@ -190,8 +190,9 @@ public class RolloRS {
 
     private void initRS() {
         mRS.scriptCBegin();
-        mRS.scriptCSetClearColor(0.0f, 0.0f, 0.1f, 1.0f);
-        mRS.scriptCSetScript(mRes, R.raw.rollo);
+        mRS.scriptCSetClearColor(0.0f, 0.0f, 0.1f, 0.5f);
+        //mRS.scriptCSetScript(mRes, R.raw.rollo);
+        mRS.scriptCSetScript(mRes, R.raw.rollo2);
         mRS.scriptCSetRoot(true);
         mScript = mRS.scriptCCreate();
 
@@ -201,6 +202,8 @@ public class RolloRS {
         mScript.bindAllocation(mAllocState, 0);
         mScript.bindAllocation(mAllocIconID, 1);
         setPosition(0, 0);
+
+        //RenderScript.File f = mRS.fileOpen("/sdcard/test.a3d");
 
         mRS.contextBindRootScript(mScript);
     }

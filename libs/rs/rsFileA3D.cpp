@@ -261,8 +261,11 @@ void FileA3D::processChunk_Primitive(Context *rsc, IO *io, A3DIndexEntry *ie)
 
     p->mIndexCount = io->loadU32();
     uint32_t vertIdx = io->loadU32();
+    p->mRestartCounts = io->loadU16();
     uint32_t bits = io->loadU8();
     p->mType = (RsPrimitive)io->loadU8();
+
+    LOGE("processChunk_Primitive count %i, bits %i", p->mIndexCount, bits);
 
     p->mVerticies = (Mesh::Verticies_t *)mIndex[vertIdx].mRsObj;
 
@@ -279,6 +282,27 @@ void FileA3D::processChunk_Primitive(Context *rsc, IO *io, A3DIndexEntry *ie)
             p->mIndicies[ct] = io->loadU32();
             break;
         }
+        LOGE("  idx %i", p->mIndicies[ct]);
+    }
+
+    if (p->mRestartCounts) {
+        p->mRestarts = new uint16_t[p->mRestartCounts];
+        for (uint32_t ct = 0; ct < p->mRestartCounts; ct++) {
+            switch(bits) {
+            case 8:
+                p->mRestarts[ct] = io->loadU8();
+                break;
+            case 16:
+                p->mRestarts[ct] = io->loadU16();
+                break;
+            case 32:
+                p->mRestarts[ct] = io->loadU32();
+                break;
+            }
+            LOGE("  idx %i", p->mRestarts[ct]);
+        }
+    } else {
+        p->mRestarts = NULL;
     }
 
     ie->mRsObj = p;
@@ -289,16 +313,17 @@ void FileA3D::processChunk_Verticies(Context *rsc, IO *io, A3DIndexEntry *ie)
     Mesh::Verticies_t *cv = new Mesh::Verticies_t;
     cv->mAllocationCount = io->loadU32();
     cv->mAllocations = new Allocation *[cv->mAllocationCount];
+    LOGE("processChunk_Verticies count %i", cv->mAllocationCount);
     for (uint32_t ct = 0; ct < cv->mAllocationCount; ct++) {
         uint32_t i = io->loadU32();
         cv->mAllocations[ct] = (Allocation *)mIndex[i].mRsObj;
+        LOGE("  idx %i", i);
     }
     ie->mRsObj = cv;
 }
 
 void FileA3D::processChunk_Element(Context *rsc, IO *io, A3DIndexEntry *ie)
 {
-    LOGE("processChunk_Element ie %p", ie);
     rsi_ElementBegin(rsc);
 
     uint32_t count = io->loadU32();
@@ -320,6 +345,8 @@ void FileA3D::processChunk_ElementSource(Context *rsc, IO *io, A3DIndexEntry *ie
     uint32_t index = io->loadU32();
     uint32_t count = io->loadU32();
 
+    LOGE("processChunk_ElementSource count %i, index %i", count, index);
+
     RsElement e = (RsElement)mIndex[index].mRsObj;
 
     RsAllocation a = rsi_AllocationCreateSized(rsc, e, count);
@@ -328,6 +355,7 @@ void FileA3D::processChunk_ElementSource(Context *rsc, IO *io, A3DIndexEntry *ie
     float * data = (float *)alloc->getPtr();
     while(count--) {
         *data = io->loadF();
+        LOGE("  %f", *data);
         data++;
     }
     ie->mRsObj = alloc;

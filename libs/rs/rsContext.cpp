@@ -35,9 +35,16 @@ void Context::initEGL()
 
     EGLint s_configAttribs[] = {
          EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+#if 1
+         EGL_RED_SIZE,       8,
+         EGL_GREEN_SIZE,     8,
+         EGL_BLUE_SIZE,      8,
+         EGL_ALPHA_SIZE,     8,
+#else
          EGL_RED_SIZE,       5,
          EGL_GREEN_SIZE,     6,
          EGL_BLUE_SIZE,      5,
+#endif
          EGL_DEPTH_SIZE,     16,
          EGL_NONE
      };
