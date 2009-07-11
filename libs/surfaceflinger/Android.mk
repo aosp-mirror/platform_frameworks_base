@@ -15,7 +15,6 @@ LOCAL_SRC_FILES:= \
     LayerBitmap.cpp \
     LayerDim.cpp \
     LayerOrientationAnim.cpp \
-    LayerOrientationAnimRotate.cpp \
     OrientationAnimation.cpp \
     SurfaceFlinger.cpp \
     Tokenizer.cpp \
