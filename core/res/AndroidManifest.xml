@@ -32,7 +32,6 @@
     <protected-broadcast android:name="android.intent.action.TIME_TICK" />
     <protected-broadcast android:name="android.intent.action.TIMEZONE_CHANGED" />
     <protected-broadcast android:name="android.intent.action.BOOT_COMPLETED" />
-    <protected-broadcast android:name="android.intent.action.CLOSE_SYSTEM_DIALOGS" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_INSTALL" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_ADDED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_REPLACED" />
