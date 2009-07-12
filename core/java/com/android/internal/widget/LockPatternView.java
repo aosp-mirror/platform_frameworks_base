@@ -20,23 +20,22 @@ package com.android.internal.widget;
 import com.android.internal.R;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.os.Debug;
 import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -393,17 +392,9 @@ public class LockPatternView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final WindowManager wm = (WindowManager) getContext()
-                .getSystemService(Context.WINDOW_SERVICE);
-        final int width = wm.getDefaultDisplay().getWidth();
-        final int height = wm.getDefaultDisplay().getHeight();
-        int squareSide = Math.min(width, height);
-
-        // if in landscape...
-        if (width > height) {
-            squareSide -= STATUS_BAR_HEIGHT;
-        }
-
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int height = MeasureSpec.getSize(heightMeasureSpec);
+        final int squareSide = Math.min(width, height);
         setMeasuredDimension(squareSide, squareSide);
     }
 
