@@ -143,9 +143,9 @@ void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int 
                 LOGE("Couldn't allocate byte array for JPEG data");
                 env->ExceptionClear();
             } else {
-                jbyte *bytes = env->GetByteArrayElements(obj, NULL);
+                jbyte *bytes = static_cast<jbyte*>(env->GetPrimitiveArrayCritical(obj, NULL));
                 memcpy(bytes, data, size);
-                env->ReleaseByteArrayElements(obj, bytes, 0);
+                env->ReleasePrimitiveArrayCritical(obj, bytes, 0);
 
             }
         } else {
