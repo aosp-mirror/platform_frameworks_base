@@ -25,12 +25,14 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncResult;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.preference.PreferenceManager;
 import android.util.Config;
 import android.util.Log;
 
+import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
@@ -72,6 +74,11 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
         // If sms is null, means there was a parsing error.
         if (smsb == null) {
+            return Intents.RESULT_SMS_GENERIC_ERROR;
+        }
+
+        String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
+        if (inEcm.equals("true")) {
             return Intents.RESULT_SMS_GENERIC_ERROR;
         }
 
@@ -343,6 +350,12 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
     /** {@inheritDoc} */
     protected void acknowledgeLastIncomingSms(boolean success, int result, Message response){
         // FIXME unit test leaves cm == null. this should change
+
+        String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
+        if (inEcm.equals("true")) {
+            return;
+        }
+
         if (mCm != null) {
             mCm.acknowledgeLastIncomingCdmaSms(success, resultToCause(result), response);
         }
