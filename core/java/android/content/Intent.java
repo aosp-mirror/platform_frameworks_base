@@ -1202,9 +1202,6 @@ public class Intent implements Parcelable {
      * Broadcast Action: This is broadcast when a user action should request a
      * temporary system dialog to dismiss.  Some examples of temporary system
      * dialogs are the notification window-shade and the recent tasks dialog.
-     * 
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
      */
     public static final String ACTION_CLOSE_SYSTEM_DIALOGS = "android.intent.action.CLOSE_SYSTEM_DIALOGS";
     /**
