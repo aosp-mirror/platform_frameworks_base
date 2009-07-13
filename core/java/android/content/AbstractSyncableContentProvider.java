@@ -165,6 +165,20 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
                         // Some providers override onAccountsChanged(); give them a database to
                         // work with.
                         mDb = mOpenHelper.getWritableDatabase();
+                        // Only call onAccountsChanged on GAIA accounts; otherwise, the contacts and
+                        // calendar providers will choke as they try to sync unknown accounts with
+                        // AbstractGDataSyncAdapter, which will put acore into a crash loop
+                        ArrayList<Account> gaiaAccounts = new ArrayList<Account>();
+                        for (Account acct: accounts) {
+                            if (acct.mType.equals("com.google.GAIA")) {
+                                gaiaAccounts.add(acct);
+                            }
+                        }
+                        accounts = new Account[gaiaAccounts.size()];
+                        int i = 0;
+                        for (Account acct: gaiaAccounts) {
+                            accounts[i++] = acct;
+                        }
                         onAccountsChanged(accounts);
                         TempProviderSyncAdapter syncAdapter = getTempProviderSyncAdapter();
                         if (syncAdapter != null) {
@@ -175,7 +189,6 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
 
         return true;
     }
-
     /**
      * Get a non-persistent instance of this content provider.
      * You must call {@link #close} on the returned
