@@ -60,6 +60,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.HandlerThread;
 import android.os.Parcel;
 import android.os.RemoteException;
@@ -2049,8 +2050,9 @@ class PackageManagerService extends IPackageManager.Stub {
                             + suid.userId + "): packages=" + suid.packages);
                 }
             }
-    
-            // Just create the setting, don't add it yet
+
+            // Just create the setting, don't add it yet. For already existing packages
+            // the PkgSetting exists already and doesn't have to be created.
             pkgSetting = mSettings.getPackageLP(pkg, suid, destCodeFile,
                             destResourceFile, pkg.applicationInfo.flags, true, false);
             if (pkgSetting == null) {
@@ -2275,7 +2277,7 @@ class PackageManagerService extends IPackageManager.Stub {
             // Add the new setting to mSettings
             mSettings.insertPackageSettingLP(pkgSetting, pkg.packageName, suid);
             // Add the new setting to mPackages
-            mPackages.put(pkg.applicationInfo.packageName, pkg);          
+            mPackages.put(pkg.applicationInfo.packageName, pkg);
             int N = pkg.providers.size();
             StringBuilder r = null;
             int i;
@@ -5425,10 +5427,10 @@ class PackageManagerService extends IPackageManager.Stub {
      */
     static class PackageSettingBase extends GrantedPermissions {
         final String name;
-        final File codePath;
-        final String codePathString;
-        final File resourcePath;
-        final String resourcePathString;
+        File codePath;
+        String codePathString;
+        File resourcePath;
+        String resourcePathString;
         private long timeStamp;
         private String timeStampString = "0";
         final int versionCode;
@@ -5826,11 +5828,16 @@ class PackageManagerService extends IPackageManager.Stub {
                         // and data partition. Just let the most recent version
                         // take precedence.
                         return p;
-                    } else if ((p.pkg != null) && (p.pkg.applicationInfo != null)) {
+                    } else {
                         // Let the app continue with previous uid if code path changes.
                         reportSettingsProblem(Log.WARN,
                                 "Package " + name + " codePath changed from " + p.codePath
-                                + " to " + codePath + "; Retaining data and using new code");
+                                + " to " + codePath + "; Retaining data and using new code from " +
+                                codePath);
+                        p.codePath = codePath;
+                        p.resourcePath = resourcePath;
+                        p.codePathString = codePath.toString();
+                        p.resourcePathString = resourcePath.toString();
                     }
                 } else if (p.sharedUser != sharedUser) {
                     reportSettingsProblem(Log.WARN,
@@ -5854,6 +5861,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (sharedUser != null) {
                     p.userId = sharedUser.userId;
                 } else if (MULTIPLE_APPLICATION_UIDS) {
+                    // Assign new user id
                     p.userId = newUserIdLP(p);
                 } else {
                     p.userId = FIRST_APPLICATION_UID;
