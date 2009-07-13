@@ -1490,7 +1490,9 @@ class BackupManagerService extends IBackupManager.Stub {
 
             try {
             synchronized(this) {
-                if (mRestoreSets == null) {
+                if (mRestoreTransport == null) {
+                    Log.w(TAG, "Null transport getting restore sets");
+                } else if (mRestoreSets == null) { // valid transport; do the one-time fetch
                     mRestoreSets = mRestoreTransport.getAvailableRestoreSets();
                 }
                 return mRestoreSets;
