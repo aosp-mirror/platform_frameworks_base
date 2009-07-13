@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
@@ -109,6 +110,8 @@ public class TtsService extends Service implements OnCompletionListener {
 
     private static final int MAX_SPEECH_ITEM_CHAR_LENGTH = 4000;
     private static final int MAX_FILENAME_LENGTH = 250;
+    // TODO use the TTS stream type when available
+    private static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_MUSIC;
 
     private static final String ACTION = "android.intent.action.START_TTS_SERVICE";
     private static final String CATEGORY = "android.intent.category.TTS";
@@ -450,14 +453,15 @@ public class TtsService extends Service implements OnCompletionListener {
                         synth.start();
                         return;
                     }
+                    int streamType = DEFAULT_STREAM_TYPE;
                     if (params != null){
                         String language = "";
                         String country = "";
                         String variant = "";
                         for (int i = 0; i < params.size() - 1; i = i + 2){
                             String param = params.get(i);
-                            if (param != null){
-                                if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)){
+                            if (param != null) {
+                                if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)) {
                                     setSpeechRate("", Integer.parseInt(params.get(i+1)));
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
                                     language = params.get(i+1);
@@ -465,6 +469,12 @@ public class TtsService extends Service implements OnCompletionListener {
                                     country = params.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_VARIANT)){
                                     variant = params.get(i+1);
+                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_STREAM)) {
+                                    try {
+                                        streamType = Integer.parseInt(params.get(i + 1));
+                                    } catch (NumberFormatException e) {
+                                        streamType = DEFAULT_STREAM_TYPE;
+                                    }
                                 }
                             }
                         }
@@ -472,7 +482,7 @@ public class TtsService extends Service implements OnCompletionListener {
                             setLanguage("", language, country, variant);
                         }
                     }
-                    nativeSynth.speak(text);
+                    nativeSynth.speak(text, streamType);
                 } catch (InterruptedException e) {
                     Log.e("TTS speakInternalOnly", "tryLock interrupted");
                     e.printStackTrace();
@@ -651,8 +661,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     // Utterance is part of the app calling the library
                     Context ctx;
                     try {
-                        ctx = this.createPackageContext(sr.mSourcePackageName,
-                                0);
+                        ctx = this.createPackageContext(sr.mSourcePackageName, 0);
                     } catch (NameNotFoundException e) {
                         e.printStackTrace();
                         mSpeechQueue.remove(0); // Remove it from the queue and
@@ -675,6 +684,7 @@ public class TtsService extends Service implements OnCompletionListener {
                 }
                 mPlayer.setOnCompletionListener(this);
                 try {
+                    mPlayer.setAudioStreamType(getStreamTypeFromParams(currentSpeechItem.mParams));
                     mPlayer.start();
                 } catch (IllegalStateException e) {
                     mSpeechQueue.clear();
@@ -693,6 +703,24 @@ public class TtsService extends Service implements OnCompletionListener {
                 speechQueueLock.unlock();
             }
         }
+    }
+
+    private int getStreamTypeFromParams(ArrayList<String> paramList) {
+        int streamType = DEFAULT_STREAM_TYPE;
+        if (paramList == null) {
+            return streamType;
+        }
+        for (int i = 0; i < paramList.size() - 1; i = i + 2) {
+            String param = paramList.get(i);
+            if ((param != null) && (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_STREAM))) {
+                try {
+                    streamType = Integer.parseInt(paramList.get(i + 1));
+                } catch (NumberFormatException e) {
+                    streamType = DEFAULT_STREAM_TYPE;
+                }
+            }
+        }
+        return streamType;
     }
 
     private void cleanUpPlayer() {
