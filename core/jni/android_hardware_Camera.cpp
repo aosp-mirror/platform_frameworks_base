@@ -137,7 +137,7 @@ void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int 
         uint8_t *heapBase = (uint8_t*)heap->base();
 
         if (heapBase != NULL) {
-            uint8_t *data = heapBase + offset;
+            const jbyte* data = reinterpret_cast<const jbyte*>(heapBase + offset);
             obj = env->NewByteArray(size);
             if (obj == NULL) {
                 LOGE("Couldn't allocate byte array for JPEG data");
