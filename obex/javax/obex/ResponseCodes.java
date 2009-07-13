@@ -33,8 +33,8 @@
 package javax.obex;
 
 /**
- * The <code>ResponseCodes</code> class contains the list of valid
- * response codes a server may send to a client.
+ * The <code>ResponseCodes</code> class contains the list of valid response
+ * codes a server may send to a client.
  * <P>
  * <STRONG>IMPORTANT NOTE</STRONG>
  * <P>
@@ -42,13 +42,12 @@ package javax.obex;
  * specification, which is different with the HTTP specification.
  * <P>
  * <code>OBEX_DATABASE_FULL</code> and <code>OBEX_DATABASE_LOCKED</code> require
- * further description since they are not defined in HTTP.  The server will send
+ * further description since they are not defined in HTTP. The server will send
  * an <code>OBEX_DATABASE_FULL</code> message when the client requests that
  * something be placed into a database but the database is full (cannot take
- * more data).   <code>OBEX_DATABASE_LOCKED</code> will be returned when the
+ * more data). <code>OBEX_DATABASE_LOCKED</code> will be returned when the
  * client wishes to access a database, database table, or database record that
  * has been locked.
- *
  * @hide
  */
 public final class ResponseCodes {

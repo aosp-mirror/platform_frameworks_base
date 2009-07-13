@@ -37,46 +37,39 @@ import java.io.IOException;
 /**
  * This interface defines the methods needed by a parent that uses the
  * PrivateInputStream and PrivateOutputStream objects defined in this package.
- *
  * @hide
  */
 public interface BaseStream {
 
     /**
      * Verifies that this object is still open.
-     *
      * @throws IOException if the object is closed
      */
     void ensureOpen() throws IOException;
 
     /**
-     * Verifies that additional information may be sent.  In other words, the
+     * Verifies that additional information may be sent. In other words, the
      * operation is not done.
-     *
      * @throws IOException if the operation is completed
      */
     void ensureNotDone() throws IOException;
 
     /**
      * Continues the operation since there is no data to read.
-     *
-     * @param sendEmpty <code>true</code> if the operation should send an
-     * empty packet or not send anything if there is no data to send
-     * @param inStream  <code>true</code> if the stream is input stream or
-     * is output stream
+     * @param sendEmpty <code>true</code> if the operation should send an empty
+     *        packet or not send anything if there is no data to send
+     * @param inStream <code>true</code> if the stream is input stream or is
+     *        output stream
      * @return <code>true</code> if the operation was completed;
-     * <code>false</code> if no operation took place
-     *
+     *         <code>false</code> if no operation took place
      * @throws IOException if an IO error occurs
      */
     boolean continueOperation(boolean sendEmpty, boolean inStream) throws IOException;
 
     /**
      * Called when the output or input stream is closed.
-     *
      * @param inStream <code>true</code> if the input stream is closed;
-     * <code>false</code> if the output stream is closed
-     *
+     *        <code>false</code> if the output stream is closed
      * @throws IOException if an IO error occurs
      */
     void streamClosed(boolean inStream) throws IOException;

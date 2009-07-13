@@ -51,7 +51,6 @@ import java.io.OutputStream;
  * Different kind of medium may have different construction - for example, the
  * RFCOMM device file medium may be constructed from a file descriptor or simply
  * a string while the TCP medium usually from a socket.
- * 
  * @hide
  */
 public interface ObexTransport {

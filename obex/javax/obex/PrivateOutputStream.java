@@ -39,7 +39,6 @@ import java.io.ByteArrayOutputStream;
 /**
  * This object provides an output stream to the Operation objects used in this
  * package.
- *
  * @hide
  */
 public final class PrivateOutputStream extends OutputStream {
@@ -54,18 +53,17 @@ public final class PrivateOutputStream extends OutputStream {
 
     /**
      * Creates an empty <code>PrivateOutputStream</code> to write to.
-     *
      * @param p the connection that this stream runs over
      */
     public PrivateOutputStream(BaseStream p, int maxSize) {
         mParent = p;
         mArray = new ByteArrayOutputStream();
         mMaxPacketSize = maxSize;
+        mOpen = true;
     }
 
     /**
      * Determines how many bytes have been written to the output stream.
-     *
      * @return the number of bytes written to the output stream
      */
     public int size() {
@@ -73,13 +71,11 @@ public final class PrivateOutputStream extends OutputStream {
     }
 
     /**
-     * Writes the specified byte to this output stream. The general contract
-     * for write is that one byte is written to the output stream. The byte to
-     * be written is the eight low-order bits of the argument b. The 24
-     * high-order bits of b are ignored.
-     *
+     * Writes the specified byte to this output stream. The general contract for
+     * write is that one byte is written to the output stream. The byte to be
+     * written is the eight low-order bits of the argument b. The 24 high-order
+     * bits of b are ignored.
      * @param b the byte to write
-     *
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -128,9 +124,7 @@ public final class PrivateOutputStream extends OutputStream {
 
     /**
      * Reads the bytes that have been written to this stream.
-     *
      * @param size the size of the array to return
-     *
      * @return the byte array that is written
      */
     public synchronized byte[] readBytes(int size) {
@@ -150,7 +144,6 @@ public final class PrivateOutputStream extends OutputStream {
 
     /**
      * Verifies that this stream is open
-     *
      * @throws IOException if the stream is not open
      */
     private void ensureOpen() throws IOException {
@@ -161,9 +154,8 @@ public final class PrivateOutputStream extends OutputStream {
     }
 
     /**
-     * Closes the output stream.  If the input stream is already closed, do
+     * Closes the output stream. If the input stream is already closed, do
      * nothing.
-     *
      * @throws IOException this will never happen
      */
     @Override
@@ -174,9 +166,8 @@ public final class PrivateOutputStream extends OutputStream {
 
     /**
      * Determines if the connection is closed
-     *
-     * @return <code>true</code> if the connection is closed;
-     * <code>false</code> if the connection is open
+     * @return <code>true</code> if the connection is closed; <code>false</code>
+     *         if the connection is open
      */
     public boolean isClosed() {
         return !mOpen;
