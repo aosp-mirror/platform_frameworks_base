@@ -38,10 +38,6 @@
 # define HAVE_CREATETHREAD  // Cygwin, vs. HAVE__BEGINTHREADEX for MinGW
 #endif
 
-#if defined(HAVE_FUTEX)
-#include <private/utils/futex_synchro.h>
-#endif
-
 #if defined(HAVE_PRCTL)
 #include <sys/prctl.h>
 #endif
@@ -56,10 +52,6 @@ using namespace android;
 
 // ----------------------------------------------------------------------------
 #if defined(HAVE_PTHREADS)
-#if 0
-#pragma mark -
-#pragma mark PTHREAD
-#endif
 // ----------------------------------------------------------------------------
 
 /*
@@ -163,10 +155,6 @@ android_thread_id_t androidGetThreadId()
 
 // ----------------------------------------------------------------------------
 #elif defined(HAVE_WIN32_THREADS)
-#if 0
-#pragma mark -
-#pragma mark WIN32_THREADS
-#endif
 // ----------------------------------------------------------------------------
 
 /*
@@ -252,11 +240,6 @@ android_thread_id_t androidGetThreadId()
 
 // ----------------------------------------------------------------------------
 
-#if 0
-#pragma mark -
-#pragma mark Common Thread functions
-#endif
-
 int androidCreateThread(android_thread_func_t fn, void* arg)
 {
     return createThreadEtc(fn, arg);
@@ -294,109 +277,9 @@ namespace android {
  * ===========================================================================
  */
 
-#if 0
-#pragma mark -
-#pragma mark Mutex
-#endif
-
-#if defined(HAVE_PTHREADS) && !defined(HAVE_FUTEX)
-/*
- * Simple pthread wrapper.
- */
-
-Mutex::Mutex()
-{
-    _init();
-}
-
-Mutex::Mutex(const char* name)
-{
-    // XXX: name not used for now
-    _init();
-}
-
-void Mutex::_init()
-{
-    pthread_mutex_t* pMutex = new pthread_mutex_t;
-    pthread_mutex_init(pMutex, NULL);
-    mState = pMutex;
-}
-
-Mutex::~Mutex()
-{
-    delete (pthread_mutex_t*) mState;
-}
-
-status_t Mutex::lock()
-{
-    int res;
-    while ((res=pthread_mutex_lock((pthread_mutex_t*) mState)) == EINTR) ;
-    return -res;
-}
-
-void Mutex::unlock()
-{
-    pthread_mutex_unlock((pthread_mutex_t*) mState);
-}
-
-status_t Mutex::tryLock()
-{
-    int res;
-    while ((res=pthread_mutex_trylock((pthread_mutex_t*) mState)) == EINTR) ;
-    return -res;
-}
-
-#elif defined(HAVE_FUTEX)
-#if 0
-#pragma mark -
-#endif
-
-#define STATE ((futex_mutex_t*) (&mState))
-
-Mutex::Mutex()
-{
-    _init();
-}
-
-Mutex::Mutex(const char* name)
-{
-    _init();
-}
-
-void
-Mutex::_init()
-{
-    futex_mutex_init(STATE);
-}
-
-Mutex::~Mutex()
-{
-}
-
-status_t Mutex::lock()
-{
-    int res;
-    while ((res=futex_mutex_lock(STATE, FUTEX_WAIT_INFINITE)) == EINTR) ;
-    return -res;
-}
-
-void Mutex::unlock()
-{
-    futex_mutex_unlock(STATE);
-}
-
-status_t Mutex::tryLock()
-{
-    int res;
-    while ((res=futex_mutex_trylock(STATE)) == EINTR) ;
-    return -res;
-}
-#undef STATE
-
+#if defined(HAVE_PTHREADS)
+// implemented as inlines in threads.h
 #elif defined(HAVE_WIN32_THREADS)
-#if 0
-#pragma mark -
-#endif
 
 Mutex::Mutex()
 {
@@ -456,161 +339,9 @@ status_t Mutex::tryLock()
  * ===========================================================================
  */
 
-#if 0
-#pragma mark -
-#pragma mark Condition
-#endif
-
-#if defined(HAVE_PTHREADS) && !defined(HAVE_FUTEX)
-
-/*
- * Constructor.  This is a simple pthread wrapper.
- */
-Condition::Condition()
-{
-    pthread_cond_t* pCond = new pthread_cond_t;
-
-    pthread_cond_init(pCond, NULL);
-    mState = pCond;
-}
-
-/*
- * Destructor.
- */
-Condition::~Condition()
-{
-    pthread_cond_destroy((pthread_cond_t*) mState);
-    delete (pthread_cond_t*) mState;
-}
-
-/*
- * Wait on a condition variable.  Lock the mutex before calling.
- */
-
-status_t Condition::wait(Mutex& mutex)
-{
-    assert(mutex.mState != NULL);
-
-    int cc;
-    while ((cc = pthread_cond_wait((pthread_cond_t*)mState,
-                (pthread_mutex_t*) mutex.mState)) == EINTR) ;
-    return -cc;
-}
-
-status_t Condition::wait(Mutex& mutex, nsecs_t abstime)
-{
-    assert(mutex.mState != NULL);
-
-    struct timespec ts;
-    ts.tv_sec = abstime/1000000000;
-    ts.tv_nsec = abstime-(ts.tv_sec*1000000000);
-    
-    int cc;
-    while ((cc = pthread_cond_timedwait((pthread_cond_t*)mState,
-            (pthread_mutex_t*) mutex.mState, &ts)) == EINTR) ;
-    return -cc;
-}
-
-status_t Condition::waitRelative(Mutex& mutex, nsecs_t reltime)
-{
-    return wait(mutex, systemTime()+reltime);
-}
-
-/*
- * Signal the condition variable, allowing one thread to continue.
- */
-void Condition::signal()
-{
-    pthread_cond_signal((pthread_cond_t*) mState);
-}
-
-/*
- * Signal the condition variable, allowing all threads to continue.
- */
-void Condition::broadcast()
-{
-    pthread_cond_broadcast((pthread_cond_t*) mState);
-}
-
-#elif defined(HAVE_FUTEX)
-#if 0
-#pragma mark -
-#endif
-
-#define STATE ((futex_cond_t*) (&mState))
-
-/*
- * Constructor.  This is a simple pthread wrapper.
- */
-Condition::Condition()
-{
-    futex_cond_init(STATE);
-}
-
-/*
- * Destructor.
- */
-Condition::~Condition()
-{
-}
-
-/*
- * Wait on a condition variable.  Lock the mutex before calling.
- */
-
-status_t Condition::wait(Mutex& mutex)
-{
-    assert(mutex.mState != NULL);
-
-    int res;
-    while ((res = futex_cond_wait(STATE,
-        (futex_mutex_t*)(&mutex.mState), FUTEX_WAIT_INFINITE)) == -EINTR) ;
-
-    return -res;
-}
-
-status_t Condition::wait(Mutex& mutex, nsecs_t abstime)
-{
-    nsecs_t reltime = abstime - systemTime();
-    if (reltime <= 0) return true;
-    return waitRelative(mutex, reltime);
-}
-
-status_t Condition::waitRelative(Mutex& mutex, nsecs_t reltime)
-{
-    assert(mutex.mState != NULL);
-    int res;
-    unsigned msec = ns2ms(reltime);
-    if(msec == 0)
-        return true;
-    // This code will not time out at the correct time if interrupted by signals
-    while ((res = futex_cond_wait(STATE,
-        (futex_mutex_t*)(&mutex.mState), msec)) == -EINTR) ;
-    return res;
-}
-
-/*
- * Signal the condition variable, allowing one thread to continue.
- */
-void Condition::signal()
-{
-    futex_cond_signal(STATE);
-}
-
-/*
- * Signal the condition variable, allowing all threads to continue.
- */
-void Condition::broadcast()
-{
-    futex_cond_broadcast(STATE);
-}
-
-#undef STATE
-
+#if defined(HAVE_PTHREADS)
+// implemented as inlines in threads.h
 #elif defined(HAVE_WIN32_THREADS)
-#if 0
-#pragma mark -
-#endif
 
 /*
  * Windows doesn't have a condition variable solution.  It's possible
@@ -753,14 +484,6 @@ status_t Condition::wait(Mutex& mutex)
     return ((WinCondition*)mState)->wait(condState, hMutex, NULL);
 }
 
-status_t Condition::wait(Mutex& mutex, nsecs_t abstime)
-{
-    WinCondition* condState = (WinCondition*) mState;
-    HANDLE hMutex = (HANDLE) mutex.mState;
-
-    return ((WinCondition*)mState)->wait(condState, hMutex, &abstime);
-}
-
 status_t Condition::waitRelative(Mutex& mutex, nsecs_t reltime)
 {
     return wait(mutex, systemTime()+reltime);
@@ -840,11 +563,6 @@ void Condition::broadcast()
 #endif
 
 // ----------------------------------------------------------------------------
-
-#if 0
-#pragma mark -
-#pragma mark Thread::Thread
-#endif
 
 /*
  * This is our thread object!

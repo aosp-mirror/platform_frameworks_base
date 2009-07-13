@@ -111,7 +111,10 @@ MessageList::value_type MessageQueue::waitMessage(nsecs_t timeout)
                 if (nextEventTime > 0) {
                     // we're about to wait, flush the binder command buffer
                     IPCThreadState::self()->flushCommands();
-                    mCondition.wait(mLock, nextEventTime);
+                    const nsecs_t reltime = nextEventTime - systemTime();
+                    if (reltime > 0) {
+                        mCondition.waitRelative(mLock, reltime);
+                    }
                 }
             } else {
                 //LOGD("going to wait");

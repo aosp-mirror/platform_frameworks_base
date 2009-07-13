@@ -51,13 +51,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= $(commonSources)
 
-ifeq ($(HOST_OS),linux)
-# Use the futex based mutex and condition variable
-# implementation from android-arm because it's shared mem safe
-	LOCAL_SRC_FILES += \
-		futex_synchro.c
-endif
-
 LOCAL_MODULE:= libutils
 
 LOCAL_CFLAGS += -DLIBUTILS_NATIVE=1 $(TOOL_CFLAGS)
@@ -87,15 +80,13 @@ LOCAL_SRC_FILES:= \
 	BackupHelpers.cpp
 
 ifeq ($(TARGET_OS),linux)
-# Use the futex based mutex and condition variable
-# implementation from android-arm because it's shared mem safe
-LOCAL_SRC_FILES += futex_synchro.c
 LOCAL_LDLIBS += -lrt -ldl
 endif
 
 LOCAL_C_INCLUDES += \
 		external/zlib \
 		external/icu4c/common
+
 LOCAL_LDLIBS += -lpthread
 
 LOCAL_SHARED_LIBRARIES := \
@@ -106,8 +97,7 @@ LOCAL_SHARED_LIBRARIES := \
 ifneq ($(TARGET_SIMULATOR),true)
 ifeq ($(TARGET_OS)-$(TARGET_ARCH),linux-x86)
 # This is needed on x86 to bring in dl_iterate_phdr for CallStack.cpp
-LOCAL_SHARED_LIBRARIES += \
-	libdl
+LOCAL_SHARED_LIBRARIES += libdl
 endif # linux-x86
 endif # sim
 
