@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
+import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 
@@ -260,8 +261,8 @@ public interface Phone {
 
     /**
      * Get current coarse-grained voice call state.
-     * Use {@link #registerForPhoneStateChanged(Handler, int, Object)
-     * registerForPhoneStateChanged()} for change notification. <p>
+     * Use {@link #registerForPreciseCallStateChanged(Handler, int, Object)
+     * registerForPreciseCallStateChanged()} for change notification. <p>
      * If the phone has an active call and call waiting occurs,
      * then the phone state is RINGING not OFFHOOK
      * <strong>Note:</strong>
@@ -315,18 +316,21 @@ public interface Phone {
     void unregisterForUnknownConnection(Handler h);
 
     /**
-     * Notifies when any aspect of the voice call state changes.
+     * Register for getting notifications for change in the Call State {@link Call.State}
+     * This is called PreciseCallState because the call state is more precise than the
+     * {@link Phone.State} which can be obtained using the {@link PhoneStateListener}
+     *
      * Resulting events will have an AsyncResult in <code>Message.obj</code>.
      * AsyncResult.userData will be set to the obj argument here.
      * The <em>h</em> parameter is held only by a weak reference.
      */
-    void registerForPhoneStateChanged(Handler h, int what, Object obj);
+    void registerForPreciseCallStateChanged(Handler h, int what, Object obj);
 
     /**
      * Unregisters for voice call state change notifications.
      * Extraneous calls are tolerated silently.
      */
-    void unregisterForPhoneStateChanged(Handler h);
+    void unregisterForPreciseCallStateChanged(Handler h);
 
 
     /**
@@ -556,8 +560,8 @@ public interface Phone {
     /**
      * Answers a ringing or waiting call. Active calls, if any, go on hold.
      * Answering occurs asynchronously, and final notification occurs via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      *
      * @exception CallStateException when no call is ringing or waiting
      */
@@ -567,8 +571,8 @@ public interface Phone {
      * Reject (ignore) a ringing call. In GSM, this means UDUB
      * (User Determined User Busy). Reject occurs asynchronously,
      * and final notification occurs via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      *
      * @exception CallStateException when no call is ringing or waiting
      */
@@ -578,8 +582,8 @@ public interface Phone {
      * Places any active calls on hold, and makes any held calls
      *  active. Switch occurs asynchronously and may fail.
      * Final notification occurs via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      *
      * @exception CallStateException if a call is ringing, waiting, or
      * dialing/alerting. In these cases, this operation may not be performed.
@@ -596,8 +600,8 @@ public interface Phone {
     /**
      * Conferences holding and active. Conference occurs asynchronously
      * and may fail. Final notification occurs via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      *
      * @exception CallStateException if canConference() would return false.
      * In these cases, this operation may not be performed.
@@ -631,8 +635,8 @@ public interface Phone {
      * Connects the two calls and disconnects the subscriber from both calls
      * Explicit Call Transfer occurs asynchronously
      * and may fail. Final notification occurs via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      *
      * @exception CallStateException if canTransfer() would return false.
      * In these cases, this operation may not be performed.
@@ -659,8 +663,8 @@ public interface Phone {
      * IDLE, ACTIVE, DIALING, ALERTING, or DISCONNECTED.
      *
      * State change notification is available via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      */
     Call getForegroundCall();
 
@@ -676,8 +680,8 @@ public interface Phone {
      * IDLE, HOLDING or DISCONNECTED.
      *
      * State change notification is available via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      */
     Call getBackgroundCall();
 
@@ -693,8 +697,8 @@ public interface Phone {
      * IDLE, INCOMING, WAITING or DISCONNECTED.
      *
      * State change notification is available via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      */
     Call getRingingCall();
 
@@ -1067,8 +1071,8 @@ public interface Phone {
 
     /**
      * Gets current mute status. Use
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}
      * as a change notifcation, although presently phone state changed is not
      * fired when setMute() is called.
      *

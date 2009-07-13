@@ -119,7 +119,7 @@ public abstract class PhoneBase implements Phone {
     }
 
 
-    protected final RegistrantList mPhoneStateRegistrants
+    protected final RegistrantList mPreciseCallStateRegistrants
             = new RegistrantList();
 
     protected final RegistrantList mNewRingingConnectionRegistrants
@@ -221,25 +221,24 @@ public abstract class PhoneBase implements Phone {
     }
 
     // Inherited documentation suffices.
-    public void registerForPhoneStateChanged(Handler h, int what, Object obj) {
+    public void registerForPreciseCallStateChanged(Handler h, int what, Object obj) {
         checkCorrectThread(h);
 
-        mPhoneStateRegistrants.addUnique(h, what, obj);
+        mPreciseCallStateRegistrants.addUnique(h, what, obj);
     }
 
     // Inherited documentation suffices.
-    public void unregisterForPhoneStateChanged(Handler h) {
-        mPhoneStateRegistrants.remove(h);
+    public void unregisterForPreciseCallStateChanged(Handler h) {
+        mPreciseCallStateRegistrants.remove(h);
     }
 
     /**
-     * Notify registrants of a PhoneStateChanged.
      * Subclasses of Phone probably want to replace this with a
      * version scoped to their packages
      */
-    protected void notifyCallStateChangedP() {
+    protected void notifyPreciseCallStateChangedP() {
         AsyncResult ar = new AsyncResult(null, this, null);
-        mPhoneStateRegistrants.notifyRegistrants(ar);
+        mPreciseCallStateRegistrants.notifyRegistrants(ar);
     }
 
     // Inherited documentation suffices.

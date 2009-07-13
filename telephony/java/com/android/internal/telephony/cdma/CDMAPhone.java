@@ -36,6 +36,7 @@ import android.telephony.SignalStrength;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.telephony.Call;
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
@@ -783,19 +784,19 @@ public class CDMAPhone extends PhoneBase {
     }
 
    /**
-     * Notify any interested party of a Phone state change.
+     * Notify any interested party of a Phone state change  {@link Phone.State}
      */
     /*package*/ void notifyPhoneStateChanged() {
         mNotifier.notifyPhoneState(this);
     }
 
     /**
-     * Notifies registrants (ie, activities in the Phone app) about
-     * changes to call state (including Phone and Connection changes).
+     * Notify registrants of a change in the call state. This notifies changes in {@link Call.State}
+     * Use this when changes in the precise call state are needed, else use notifyPhoneStateChanged.
      */
-    /*package*/ void notifyCallStateChanged() {
+    /*package*/ void notifyPreciseCallStateChanged() {
         /* we'd love it if this was package-scoped*/
-        super.notifyCallStateChangedP();
+        super.notifyPreciseCallStateChangedP();
     }
 
      void notifyServiceStateChanged(ServiceState ss) {

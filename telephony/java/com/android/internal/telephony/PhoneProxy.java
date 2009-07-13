@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
+import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.util.Log;
@@ -210,12 +211,12 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.unregisterForUnknownConnection(h);
     }
 
-    public void registerForPhoneStateChanged(Handler h, int what, Object obj) {
-        mActivePhone.registerForPhoneStateChanged(h, what, obj);
+    public void registerForPreciseCallStateChanged(Handler h, int what, Object obj) {
+        mActivePhone.registerForPreciseCallStateChanged(h, what, obj);
     }
 
-    public void unregisterForPhoneStateChanged(Handler h) {
-        mActivePhone.unregisterForPhoneStateChanged(h);
+    public void unregisterForPreciseCallStateChanged(Handler h) {
+        mActivePhone.unregisterForPreciseCallStateChanged(h);
     }
 
     public void registerForNewRingingConnection(Handler h, int what, Object obj) {

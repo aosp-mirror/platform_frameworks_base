@@ -212,7 +212,7 @@ public final class GsmCallTracker extends CallTracker {
         }
 
         updatePhoneState();
-        phone.notifyCallStateChanged();
+        phone.notifyPreciseCallStateChanged();
 
         return pendingMO;
     }
@@ -279,7 +279,7 @@ public final class GsmCallTracker extends CallTracker {
         internalClearDisconnected();
 
         updatePhoneState();
-        phone.notifyCallStateChanged();
+        phone.notifyPreciseCallStateChanged();
     }
 
     boolean
@@ -600,7 +600,7 @@ public final class GsmCallTracker extends CallTracker {
         }
 
         if (hasNonHangupStateChanged || newRinging != null) {
-            phone.notifyCallStateChanged();
+            phone.notifyPreciseCallStateChanged();
         }
 
         //dumpState();
@@ -883,7 +883,7 @@ public final class GsmCallTracker extends CallTracker {
 
                 updatePhoneState();
 
-                phone.notifyCallStateChanged();
+                phone.notifyPreciseCallStateChanged();
                 droppedDuringPoll.clear();
             break;
 

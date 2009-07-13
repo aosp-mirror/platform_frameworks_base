@@ -51,6 +51,7 @@ import static com.android.internal.telephony.CommandsInterface.CF_REASON_UNCONDI
 import static com.android.internal.telephony.CommandsInterface.SERVICE_CLASS_VOICE;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_BASEBAND_VERSION;
 
+import com.android.internal.telephony.Call;
 import com.android.internal.telephony.CallForwardInfo;
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.CommandsInterface;
@@ -378,20 +379,19 @@ public class GSMPhone extends PhoneBase {
     }
 
     /**
-     * Notify any interested party of a Phone state change.
+     * Notify any interested party of a Phone state change {@link Phone.State}
      */
     /*package*/ void notifyPhoneStateChanged() {
         mNotifier.notifyPhoneState(this);
     }
 
     /**
-     * Notifies registrants (ie, activities in the Phone app) about
-     * changes to call state (including Phone and Connection changes).
+     * Notify registrants of a change in the call state. This notifies changes in {@link Call.State}
+     * Use this when changes in the precise call state are needed, else use notifyPhoneStateChanged.
      */
-    /*package*/ void
-    notifyCallStateChanged() {
+    /*package*/ void notifyPreciseCallStateChanged() {
         /* we'd love it if this was package-scoped*/
-        super.notifyCallStateChangedP();
+        super.notifyPreciseCallStateChangedP();
     }
 
     /*package*/ void

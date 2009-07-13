@@ -222,7 +222,7 @@ public final class CdmaCallTracker extends CallTracker {
         }
 
         updatePhoneState();
-        phone.notifyCallStateChanged();
+        phone.notifyPreciseCallStateChanged();
 
         return pendingMO;
     }
@@ -305,7 +305,7 @@ public final class CdmaCallTracker extends CallTracker {
         internalClearDisconnected();
 
         updatePhoneState();
-        phone.notifyCallStateChanged();
+        phone.notifyPreciseCallStateChanged();
     }
 
     boolean
@@ -644,7 +644,7 @@ public final class CdmaCallTracker extends CallTracker {
         }
 
         if (hasNonHangupStateChanged || newRinging != null) {
-            phone.notifyCallStateChanged();
+            phone.notifyPreciseCallStateChanged();
         }
 
         //dumpState();
@@ -678,7 +678,7 @@ public final class CdmaCallTracker extends CallTracker {
             // the hangup reason is user ignoring or timing out. So conn.onDisconnect()
             // is not called here. Instead, conn.onLocalDisconnect() is called.
             conn.onLocalDisconnect();
-            phone.notifyCallStateChanged();
+            phone.notifyPreciseCallStateChanged();
             return;
         } else {
             try {
@@ -821,7 +821,7 @@ public final class CdmaCallTracker extends CallTracker {
         // the status of the call is after a call waiting is answered,
         // 3 way call merged or a switch between calls.
         foregroundCall.setGeneric(true);
-        phone.notifyCallStateChanged();
+        phone.notifyPreciseCallStateChanged();
     }
 
     private Phone.SuppService getFailedService(int what) {
@@ -926,7 +926,7 @@ public final class CdmaCallTracker extends CallTracker {
 
                 updatePhoneState();
 
-                phone.notifyCallStateChanged();
+                phone.notifyPreciseCallStateChanged();
                 droppedDuringPoll.clear();
             break;
 
