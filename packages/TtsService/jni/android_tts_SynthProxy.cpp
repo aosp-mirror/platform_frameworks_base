@@ -33,6 +33,8 @@
 #define DEFAULT_TTS_FORMAT      AudioSystem::PCM_16_BIT
 #define DEFAULT_TTS_NB_CHANNELS 1
 #define DEFAULT_TTS_BUFFERSIZE  1024
+// TODO use the TTS stream type when available
+#define DEFAULT_TTS_STREAM_TYPE AudioSystem::MUSIC
 
 #define USAGEMODE_PLAY_IMMEDIATELY 0
 #define USAGEMODE_WRITE_TO_FILE    1
@@ -46,10 +48,12 @@ struct fields_t {
     jmethodID   synthProxyMethodPost;
 };
 
+// structure to hold the data that is used each time the TTS engine has synthesized more data
 struct afterSynthData_t {
     jint jniStorage;
     int  usageMode;
     FILE* outputFile;
+    AudioSystem::stream_type streamType;
 };
 
 // ----------------------------------------------------------------------------
@@ -62,6 +66,7 @@ class SynthProxyJniStorage {
         jobject                   tts_ref;
         TtsEngine*                mNativeSynthInterface;
         AudioTrack*               mAudioOut;
+        AudioSystem::stream_type  mStreamType;
         uint32_t                  mSampleRate;
         AudioSystem::audio_format mAudFormat;
         int                       mNbChannels;
@@ -73,6 +78,7 @@ class SynthProxyJniStorage {
             tts_ref = NULL;
             mNativeSynthInterface = NULL;
             mAudioOut = NULL;
+            mStreamType = DEFAULT_TTS_STREAM_TYPE;
             mSampleRate = DEFAULT_TTS_RATE;
             mAudFormat  = DEFAULT_TTS_FORMAT;
             mNbChannels = DEFAULT_TTS_NB_CHANNELS;
@@ -97,34 +103,33 @@ class SynthProxyJniStorage {
             }
         }
 
-        void createAudioOut(uint32_t rate, AudioSystem::audio_format format,
-                int channel) {
+        void createAudioOut(AudioSystem::stream_type streamType, uint32_t rate,
+                AudioSystem::audio_format format, int channel) {
             mSampleRate = rate;
             mAudFormat  = format;
             mNbChannels = channel;
 
-            // TODO use the TTS stream type
-            int streamType = AudioSystem::MUSIC;
+            mStreamType = streamType;
 
             // retrieve system properties to ensure successful creation of the
             // AudioTrack object for playback
             int afSampleRate;
-            if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
+            if (AudioSystem::getOutputSamplingRate(&afSampleRate, mStreamType) != NO_ERROR) {
                 afSampleRate = 44100;
             }
             int afFrameCount;
-            if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
+            if (AudioSystem::getOutputFrameCount(&afFrameCount, mStreamType) != NO_ERROR) {
                 afFrameCount = 2048;
             }
             uint32_t afLatency;
-            if (AudioSystem::getOutputLatency(&afLatency, streamType) != NO_ERROR) {
+            if (AudioSystem::getOutputLatency(&afLatency, mStreamType) != NO_ERROR) {
                 afLatency = 500;
             }
             uint32_t minBufCount = afLatency / ((1000 * afFrameCount)/afSampleRate);
             if (minBufCount < 2) minBufCount = 2;
             int minFrameCount = (afFrameCount * rate * minBufCount)/afSampleRate;
 
-            mAudioOut = new AudioTrack(streamType, rate, format, channel,
+            mAudioOut = new AudioTrack(mStreamType, rate, format, channel,
                     minFrameCount > 4096 ? minFrameCount : 4096,
                     0, 0, 0, 0); // not using an AudioTrack callback
 
@@ -142,21 +147,21 @@ class SynthProxyJniStorage {
 
 
 // ----------------------------------------------------------------------------
-void prepAudioTrack(SynthProxyJniStorage* pJniData,
-        uint32_t rate, AudioSystem::audio_format format, int channel)
-{
+void prepAudioTrack(SynthProxyJniStorage* pJniData, AudioSystem::stream_type streamType,
+        uint32_t rate, AudioSystem::audio_format format, int channel) {
     // Don't bother creating a new audiotrack object if the current
-    // object is already set.
+    // object is already initialized with the same audio parameters.
     if ( pJniData->mAudioOut &&
          (rate == pJniData->mSampleRate) &&
          (format == pJniData->mAudFormat) &&
-         (channel == pJniData->mNbChannels) ){
+         (channel == pJniData->mNbChannels) &&
+         (streamType == pJniData->mStreamType) ){
         return;
     }
     if (pJniData->mAudioOut){
         pJniData->killAudio();
     }
-    pJniData->createAudioOut(rate, format, channel);
+    pJniData->createAudioOut(streamType, rate, format, channel);
 }
 
 
@@ -186,7 +191,7 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         }
 
         if (bufferSize > 0) {
-            prepAudioTrack(pJniData, rate, format, channel);
+            prepAudioTrack(pJniData, pForAfter->streamType, rate, format, channel);
             if (pJniData->mAudioOut) {
                 pJniData->mAudioOut->write(wav, bufferSize);
                 //LOGV("AudioTrack wrote: %d bytes", bufferSize);
@@ -241,7 +246,7 @@ android_tts_SynthProxy_native_setup(JNIEnv *env, jobject thiz,
     SynthProxyJniStorage* pJniStorage = new SynthProxyJniStorage();
 
     prepAudioTrack(pJniStorage,
-            DEFAULT_TTS_RATE, DEFAULT_TTS_FORMAT, DEFAULT_TTS_NB_CHANNELS);
+            DEFAULT_TTS_STREAM_TYPE, DEFAULT_TTS_RATE, DEFAULT_TTS_FORMAT, DEFAULT_TTS_NB_CHANNELS);
 
     const char *nativeSoLibNativeString =
             env->GetStringUTFChars(nativeSoLib, 0);
@@ -526,7 +531,7 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
 static int
 android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
-        jstring textJavaString)
+        jstring textJavaString, jint javaStreamType)
 {
     int result = TTS_FAILURE;
 
@@ -545,6 +550,7 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
     afterSynthData_t* pForAfter = new (afterSynthData_t);
     pForAfter->jniStorage = jniData;
     pForAfter->usageMode  = USAGEMODE_PLAY_IMMEDIATELY;
+    pForAfter->streamType = (AudioSystem::stream_type) javaStreamType;
 
     if (pSynthData->mNativeSynthInterface) {
         const char *textNativeString = env->GetStringUTFChars(textJavaString, 0);
@@ -672,7 +678,7 @@ static JNINativeMethod gMethods[] = {
         (void*)android_tts_SynthProxy_stop
     },
     {   "native_speak",
-        "(ILjava/lang/String;)I",
+        "(ILjava/lang/String;I)I",
         (void*)android_tts_SynthProxy_speak
     },
     {   "native_synthesizeToFile",
