@@ -67,7 +67,7 @@ public class CDMAPhone extends PhoneBase {
     private static final boolean LOCAL_DEBUG = true;
 
     // Default Emergency Callback Mode exit timer
-    private static final int DEFAULT_ECM_EXIT_TIMER_VALUE = 30000;
+    private static final int DEFAULT_ECM_EXIT_TIMER_VALUE = 300000;
     static final String VM_COUNT_CDMA = "vm_count_key_cdma";
     private static final String VM_NUMBER_CDMA = "vm_number_key_cdma";
     private String mVmNumber = null;
@@ -395,7 +395,7 @@ public class CDMAPhone extends PhoneBase {
         return mSST.getPrlVersion();
     }
 
-    public String getCdmaMIN() {
+    public String getCdmaMin() {
         return mSST.getCdmaMin();
     }
 
@@ -429,8 +429,8 @@ public class CDMAPhone extends PhoneBase {
     public String getSubscriberId() {
         // Subscriber ID is the combination of MCC+MNC+MIN as CDMA IMSI
         // TODO(Moto): Replace with call to mRuimRecords.getIMSI_M() when implemented.
-        if ((getServiceState().getOperatorNumeric() != null) && (getCdmaMIN() != null)) {
-            return (getServiceState().getOperatorNumeric() + getCdmaMIN());
+        if ((getServiceState().getOperatorNumeric() != null) && (getCdmaMin() != null)) {
+            return (getServiceState().getOperatorNumeric() + getCdmaMin());
         } else {
             return null;
         }
