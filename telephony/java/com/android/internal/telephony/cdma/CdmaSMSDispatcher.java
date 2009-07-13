@@ -88,7 +88,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         int teleService = sms.getTeleService();
         boolean handled = false;
 
-        if (sms.getUserData() == null) {
+        if ((sms.getUserData() == null) && (SmsEnvelope.TELESERVICE_MWI != teleService)) {
             if (Config.LOGD) {
                 Log.d(TAG, "Received SMS without user data");
             }
@@ -99,10 +99,11 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             return Intents.RESULT_SMS_HANDLED;
         }
 
-        if (SmsEnvelope.TELESERVICE_WAP == teleService){
+        if (SmsEnvelope.TELESERVICE_WAP == teleService) {
             return processCdmaWapPdu(sms.getUserData(), sms.messageRef,
                     sms.getOriginatingAddress());
-        } else if (SmsEnvelope.TELESERVICE_VMN == teleService) {
+        } else if ((SmsEnvelope.TELESERVICE_VMN == teleService) ||
+                   (SmsEnvelope.TELESERVICE_MWI == teleService)) {
             // handling Voicemail
             int voicemailCount = sms.getNumOfVoicemails();
             Log.d(TAG, "Voicemail count=" + voicemailCount);
