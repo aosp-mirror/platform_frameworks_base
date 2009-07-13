@@ -20,7 +20,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.net.NetworkUtils;
 import android.net.vpn.VpnManager;
 import android.net.vpn.VpnProfile;
 import android.net.vpn.VpnState;
@@ -30,11 +29,8 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -69,7 +65,6 @@ abstract class VpnService<E extends VpnProfile> {
     private String mVpnDns1 = "";
     private String mVpnDns2 = "";
     private String mOriginalDomainSuffices;
-    private String mHostIp;
 
     private long mStartTime; // VPN connection start time
 
@@ -108,33 +103,10 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     /**
-     * Returns the host IP for establishing the VPN connection.
-     */
-    protected String getHostIp() throws IOException {
-        if (mHostIp == null) mHostIp = reallyGetHostIp();
-        return mHostIp;
-    }
-
-    /**
      * Returns the IP address of the specified host name.
      */
     protected String getIp(String hostName) throws IOException {
         return InetAddress.getByName(hostName).getHostAddress();
-    }
-
-    /**
-     * Returns the IP address of the default gateway.
-     */
-    protected String getGatewayIp() throws IOException {
-        Enumeration<NetworkInterface> ifces =
-                NetworkInterface.getNetworkInterfaces();
-        for (; ifces.hasMoreElements(); ) {
-            NetworkInterface ni = ifces.nextElement();
-            int gateway = NetworkUtils.getDefaultRoute(ni.getName());
-            if (gateway == 0) continue;
-            return toInetAddress(gateway).getHostAddress();
-        }
-        throw new IOException("Default gateway is not available");
     }
 
     /**
@@ -405,21 +377,6 @@ abstract class VpnService<E extends VpnProfile> {
             Log.w(TAG, "   @@ !!!    dns being overridden");
             onError();
         }
-    }
-
-    private String reallyGetHostIp() throws IOException {
-        Enumeration<NetworkInterface> ifces =
-                NetworkInterface.getNetworkInterfaces();
-        for (; ifces.hasMoreElements(); ) {
-            NetworkInterface ni = ifces.nextElement();
-            int gateway = NetworkUtils.getDefaultRoute(ni.getName());
-            if (gateway == 0) continue;
-            Enumeration<InetAddress> addrs = ni.getInetAddresses();
-            for (; addrs.hasMoreElements(); ) {
-                return addrs.nextElement().getHostAddress();
-            }
-        }
-        throw new IOException("Host IP is not available");
     }
 
     protected void sleep(int ms) {

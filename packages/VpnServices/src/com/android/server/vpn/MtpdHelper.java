@@ -48,7 +48,6 @@ class MtpdHelper {
                 "linkname", VPN_LINKNAME,
                 "name", username,
                 "password", password,
-                "ipparam", serverIp + "@" + vpnService.getGatewayIp(),
                 "refuse-eap", "nodefaultroute", "usepeerdns",
                 "idle", "1800",
                 "mtu", "1400",
