@@ -21,6 +21,7 @@
     <string name="gigabyteShort">"GB"</string>
     <string name="terabyteShort">"TB"</string>
     <string name="petabyteShort">"PB"</string>
+    <string name="fileSizeSuffix">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled">"&lt;zonder titel&gt;"</string>
     <string name="ellipsis">"…"</string>
     <string name="emptyPhoneNumber">"(Geen telefoonnummer)"</string>
@@ -48,6 +49,12 @@
     <string name="BaMmi">"Oproep blokkeren"</string>
     <string name="PwdMmi">"Wachtwoordwijziging"</string>
     <string name="PinMmi">"PIN-wijziging"</string>
+    <string name="CnipMmi">"Nummer van beller beschikbaar"</string>
+    <string name="CnirMmi">"Nummer van beller beperkt"</string>
+    <string name="ThreeWCMmi">"Driewegs bellen"</string>
+    <string name="RuacMmi">"Ongewenste, vervelende oproepen weigeren"</string>
+    <string name="CndMmi">"Weergave van nummer van beller"</string>
+    <string name="DndMmi">"Niet storen"</string>
     <string name="CLIRDefaultOnNextCallOn">"Beller-id standaard ingesteld op \'beperkt\'. Volgende oproep: beperkt."</string>
     <string name="CLIRDefaultOnNextCallOff">"Beller-id standaard ingesteld op \'beperkt\'. Volgende oproep: onbeperkt."</string>
     <string name="CLIRDefaultOffNextCallOn">"Beller-id standaard ingesteld op \'onbeperkt\'. Volgende oproep: beperkt."</string>
@@ -67,11 +74,27 @@
     <string name="serviceClassDataSync">"Synchroniseren"</string>
     <string name="serviceClassPacket">"Pakket"</string>
     <string name="serviceClassPAD">"PAD"</string>
+    <string name="roamingText0">"Roamingaanduiding aan"</string>
+    <string name="roamingText1">"Roamingaanduiding uit"</string>
+    <string name="roamingText2">"Roamingaanduiding knippert"</string>
+    <string name="roamingText3">"Uit de buurt"</string>
+    <string name="roamingText4">"Buiten het gebouw"</string>
+    <string name="roamingText5">"Roaming - Voorkeurssysteem"</string>
+    <string name="roamingText6">"Roaming - Beschikbaar systeem"</string>
+    <string name="roamingText7">"Roaming - Alliance-partner"</string>
+    <string name="roamingText8">"Roaming - Premium-partner"</string>
+    <string name="roamingText9">"Roaming - Volledige servicefunctionaliteit"</string>
+    <string name="roamingText10">"Roaming - Gedeeltelijke servicefunctionaliteit"</string>
+    <string name="roamingText11">"Roamingbanner aan"</string>
+    <string name="roamingText12">"Roamingbanner uit"</string>
+    <string name="roamingTextSearching">"Service zoeken"</string>
     <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: niet doorgeschakeld"</string>
     <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> na <xliff:g id="TIME_DELAY">{2}</xliff:g> seconden"</string>
     <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: niet doorgeschakeld"</string>
     <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: niet doorgeschakeld"</string>
+    <string name="fcComplete">"Functiecode voltooid."</string>
+    <string name="fcError">"Verbindingsprobleem of ongeldige functiecode."</string>
     <string name="httpErrorOk">"OK"</string>
     <string name="httpError">"De webpagina bevat een fout."</string>
     <string name="httpErrorLookup">"De URL kan niet worden gevonden."</string>
@@ -88,6 +111,7 @@
     <string name="httpErrorFile">"Het bestand kan niet worden geopend."</string>
     <string name="httpErrorFileNotFound">"Het opgevraagde bestand is niet gevonden."</string>
     <string name="httpErrorTooManyRequests">"Er worden te veel aanvragen verwerkt. Probeer het later opnieuw."</string>
+    <string name="certificateSaved">"Het certificaat is opgeslagen in de opslagruimte voor sleutels van het systeem."</string>
     <string name="contentServiceSync">"Synchroniseren"</string>
     <string name="contentServiceSyncNotificationTitle">"Synchroniseren"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Te veel verwijderen voor <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
@@ -133,6 +157,8 @@
     <string name="permgroupdesc_systemTools">"Toegang tot en beheer van het systeem op lager niveau."</string>
     <string name="permgrouplab_developmentTools">"Ontwikkelingshulpprogramma\'s"</string>
     <string name="permgroupdesc_developmentTools">"Functies die alleen door toepassingsontwikkelaars worden gebruikt."</string>
+    <string name="permgrouplab_storage">"Opslagruimte"</string>
+    <string name="permgroupdesc_storage">"Toegang tot de SD-kaart."</string>
     <string name="permlab_statusBar">"statusbalk uitschakelen of wijzigen"</string>
     <string name="permdesc_statusBar">"Hiermee kan een toepassing de statusbalk uitschakelen of systeempictogrammen toevoegen en verwijderen."</string>
     <string name="permlab_expandStatusBar">"statusbalk uitvouwen/samenvouwen"</string>
@@ -165,6 +191,10 @@
     <string name="permdesc_forceBack">"Hiermee kan een toepassing elke willekeurige activiteit die op de voorgrond wordt uitgevoerd, sluiten en naar de achtergrond verplaatsen. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_dump">"interne systeemstatus ophalen"</string>
     <string name="permdesc_dump">"Hiermee kan een toepassing de interne status van het systeem ophalen. Schadelijke toepassingen kunnen privé- of veiligheidsgegevens ophalen die ze normaal niet nodig hebben."</string>
+    <string name="permlab_shutdown">"gedeeltelijke uitschakeling"</string>
+    <string name="permdesc_shutdown">"Hiermee wordt activiteitenbeheer uitgeschakeld. Er wordt geen volledige uitschakeling uitgevoerd."</string>
+    <string name="permlab_stopAppSwitches">"schakelen tussen toepassingen voorkomen"</string>
+    <string name="permdesc_stopAppSwitches">"Hiermee wordt voorkomen dat de gebruiker overschakelt naar een andere toepassing."</string>
     <string name="permlab_runSetActivityWatcher">"alle startende toepassingen bijhouden en beheren"</string>
     <string name="permdesc_runSetActivityWatcher">"Hiermee kan een toepassing de manier waarop het systeem activiteiten start, bijhouden en beheren. Schadelijke toepassingen kunnen het systeem volledig in gevaar brengen. Deze machtiging is alleen voor ontwikkeling vereist, nooit voor normaal telefoongebruik."</string>
     <string name="permlab_broadcastPackageRemoved">"melding verzenden dat pakket is verwijderd"</string>
@@ -179,6 +209,8 @@
     <string name="permdesc_setAlwaysFinish">"Hiermee kan een toepassing bepalen of activiteiten altijd worden afgesloten zodra deze naar de achtergrond gaan. Nooit nodig voor normale toepassingen."</string>
     <string name="permlab_batteryStats">"accustatistieken aanpassen"</string>
     <string name="permdesc_batteryStats">"Hiermee kunnen verzamelde accustatistieken worden gewijzigd. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permlab_backup">"systeemback-up en -herstel beheren"</string>
+    <string name="permdesc_backup">"Hiermee kan de toepassing het mechanisme voor systeemback-up en -herstel beheren. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_internalSystemWindow">"niet-geautoriseerde vensters weergeven"</string>
     <string name="permdesc_internalSystemWindow">"Hiermee kunnen vensters worden gemaakt die door de interne systeemgebruikersinterface worden gebruikt. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_systemAlertWindow">"waarschuwingen op systeemniveau weergeven"</string>
@@ -245,6 +277,8 @@
     <string name="permdesc_accessMockLocation">"Neplocatiebronnen voor testdoeleinden maken. Schadelijke toepassingen kunnen dit gebruiken om de locatie en/of status te overschrijven die door de echte locatiebronnen wordt aangegeven, zoals GPS of netwerkaanbieders."</string>
     <string name="permlab_accessLocationExtraCommands">"toegang opdrachten aanbieder extra locaties"</string>
     <string name="permdesc_accessLocationExtraCommands">"Toegang tot opdrachten aanbieder extra locaties. Schadelijke toepassingen kunnen hiervan gebruik maken om de werking van GPS of andere locatiebronnen te verstoren."</string>
+    <string name="permlab_installLocationProvider">"toestemming om een locatieprovider te installeren"</string>
+    <string name="permdesc_installLocationProvider">"Neplocatiebronnen voor testdoeleinden maken. Schadelijke toepassingen kunnen dit gebruiken om de locatie en/of status te overschrijven die door de echte locatiebronnen, zoals GPS of netwerkaanbieders, wordt aangegeven of om uw locatie bij te houden en te rapporteren aan externe bronnen."</string>
     <string name="permlab_accessFineLocation">"nauwkeurige (GPS) locatie"</string>
     <string name="permdesc_accessFineLocation">"Toegang tot exacte locatiebronnen, zoals het Global Positioning System op de telefoon, indien beschikbaar. Schadelijke toepassingen kunnen dit gebruiken om te bepalen waar u zich bevindt en mogelijk extra acculading verbruiken."</string>
     <string name="permlab_accessCoarseLocation">"globale (netwerkgebaseerde) locatie"</string>
@@ -317,6 +351,8 @@
     <string name="permdesc_accessWifiState">"Hiermee kan een toepassing informatie over de Wi-Fi-status bekijken."</string>
     <string name="permlab_changeWifiState">"Wi-Fi-status wijzigen"</string>
     <string name="permdesc_changeWifiState">"Hiermee kan een toepassing zich koppelen aan en loskoppelen van Wi-Fi toegangspunten en wijzigingen aanbrengen in geconfigureerde Wi-Fi-netwerken."</string>
+    <string name="permlab_changeWifiMulticastState">"Wi-Fi Multicast-ontvangst toestaan"</string>
+    <string name="permdesc_changeWifiMulticastState">"Hiermee kan een toepassing pakketten ontvangen die niet rechtstreeks zijn geadresseerd aan uw apparaat. Dit kan handig zijn wanneer services in de buurt worden ontdekt. Dit verbruikt meer energie dan de niet-multicastmodus."</string>
     <string name="permlab_bluetoothAdmin">"bluetooth-beheer"</string>
     <string name="permdesc_bluetoothAdmin">"Hiermee kan een toepassing de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en aansluiten."</string>
     <string name="permlab_bluetooth">"Bluetooth-verbindingen maken"</string>
@@ -337,6 +373,8 @@
     <string name="permdesc_readDictionary">"Hiermee kan een toepassing privéwoorden, namen en woordcombinaties lezen die de gebruiker heeft opgeslagen in het gebruikerswoordenboek."</string>
     <string name="permlab_writeDictionary">"schrijven naar door gebruiker gedefinieerd woordenboek"</string>
     <string name="permdesc_writeDictionary">"Hiermee kan een toepassing nieuwe woorden schrijven naar het gebruikerswoordenboek."</string>
+    <string name="permlab_sdcardWrite">"inhoud op de SD-kaart aanpassen/verwijderen"</string>
+    <string name="permdesc_sdcardWrite">"Hiermee kan een toepassing schrijven naar de SD-kaart."</string>
   <string-array name="phoneTypes">
     <item>"Thuis"</item>
     <item>"Mobiel"</item>
@@ -353,6 +391,7 @@
     <item>"Overig"</item>
     <item>"Aangepast"</item>
   </string-array>
+    <string name="mobileEmailTypeName">"Mobiel"</string>
   <string-array name="postalAddressTypes">
     <item>"Thuis"</item>
     <item>"Werk"</item>
@@ -393,6 +432,8 @@
     <string name="lockscreen_pattern_correct">"Juist!"</string>
     <string name="lockscreen_pattern_wrong">"Probeer het opnieuw"</string>
     <string name="lockscreen_plugged_in">"Opladen (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
+    <skip />
     <string name="lockscreen_low_battery">"Sluit de oplader aan."</string>
     <string name="lockscreen_missing_sim_message_short">"Geen SIM-kaart."</string>
     <string name="lockscreen_missing_sim_message">"Geen SIM-kaart in telefoon."</string>
@@ -414,7 +455,8 @@
     <string name="lockscreen_glogin_invalid_input">"Gebruikersnaam of wachtwoord ongeldig."</string>
     <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button">"Meldingen wissen"</string>
+    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
+    <skip />
     <string name="status_bar_no_notifications_title">"Geen meldingen"</string>
     <string name="status_bar_ongoing_events_title">"Actief"</string>
     <string name="status_bar_latest_events_title">"Meldingen"</string>
@@ -423,6 +465,7 @@
     <string name="battery_low_title">"Sluit de oplader aan"</string>
     <string name="battery_low_subtitle">"De accu raakt op:"</string>
     <string name="battery_low_percent_format">"minder dan <xliff:g id="NUMBER">%d%%</xliff:g> resterend."</string>
+    <string name="battery_low_why">"Waarom?"</string>
     <string name="factorytest_failed">"Fabriekstest mislukt"</string>
     <string name="factorytest_not_system">"De actie FACTORY_TEST wordt alleen ondersteund voor pakketten die zijn geïnstalleerd in /system/app."</string>
     <string name="factorytest_no_action">"Er is geen pakket gevonden dat de actie FACTORY_TEST levert."</string>
@@ -431,6 +474,10 @@
     <string name="js_dialog_title_default">"JavaScript"</string>
     <string name="js_dialog_before_unload">"Wilt u deze pagina verlaten?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Kies OK om door te gaan of Annuleren om op de huidige pagina te blijven."</string>
     <string name="save_password_label">"Bevestigen"</string>
+    <string name="permlab_readHistoryBookmarks">"browsergeschiedenis en bladwijzers lezen"</string>
+    <string name="permdesc_readHistoryBookmarks">"Hiermee kan een toepassing de URL\'s lezen die u via de browser heeft bezocht, evenals alle bladwijzers van de browser."</string>
+    <string name="permlab_writeHistoryBookmarks">"browsergeschiedenis en bladwijzers schrijven"</string>
+    <string name="permdesc_writeHistoryBookmarks">"Hiermee kan een toepassing de op uw telefoon opgeslagen browsergeschiedenis of bladwijzers wijzigen. Schadelijke toepassingen kunnen hiermee uw browsergegevens verwijderen of wijzigen."</string>
     <string name="save_password_message">"Wilt u dat de browser dit wachtwoord onthoudt?"</string>
     <string name="save_password_notnow">"Niet nu"</string>
     <string name="save_password_remember">"Onthouden"</string>
@@ -538,10 +585,6 @@
     <string name="Noon">"Twaalf uur \'s middags"</string>
     <string name="midnight">"middernacht"</string>
     <string name="Midnight">"Middernacht"</string>
-    <!-- no translation found for month (7026169712234774086) -->
-    <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
-    <skip />
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"Alles selecteren"</string>
@@ -579,6 +622,7 @@
     <string name="anr_application_process">"Toepassing <xliff:g id="APPLICATION">%1$s</xliff:g> (in proces <xliff:g id="PROCESS">%2$s</xliff:g>) reageert niet."</string>
     <string name="anr_process">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> reageert niet."</string>
     <string name="force_close">"Nu sluiten"</string>
+    <string name="report">"Rapport"</string>
     <string name="wait">"Wachten"</string>
     <string name="debug">"Foutopsporing"</string>
     <string name="sendText">"Selecteer een actie voor tekst"</string>
@@ -632,22 +676,26 @@
     <string name="extmedia_format_title">"SD-kaart formatteren"</string>
     <string name="extmedia_format_message">"Weet u zeker dat u de SD-kaart wilt formatteren? Alle gegevens op uw kaart gaan dan verloren."</string>
     <string name="extmedia_format_button_format">"Formatteren"</string>
+    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
+    <skip />
+    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
+    <skip />
     <string name="select_input_method">"Invoermethode selecteren"</string>
     <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style"><u>"kandidaten"</u></string>
     <string name="ext_media_checking_notification_title">"SD-kaart voorbereiden"</string>
-    <string name="ext_media_checking_notification_message">"Controleren op fouten"</string>
+    <string name="ext_media_checking_notification_message">"Controleren op fouten."</string>
     <string name="ext_media_nofs_notification_title">"Lege SD-kaart"</string>
-    <string name="ext_media_nofs_notification_message">"De SD-kaart is leeg of gebruikt een niet-ondersteund bestandssysteem."</string>
+    <string name="ext_media_nofs_notification_message">"SD-kaart is leeg of heeft een niet-ondersteund bestandssysteem."</string>
     <string name="ext_media_unmountable_notification_title">"Beschadigde SD-kaart"</string>
-    <string name="ext_media_unmountable_notification_message">"De SD-kaart is beschadigd. U moet de kaart mogelijk opnieuw formatteren."</string>
+    <string name="ext_media_unmountable_notification_message">"SD-kaart beschadigd. U moet de kaart mogelijk opnieuw formatteren."</string>
     <string name="ext_media_badremoval_notification_title">"SD-kaart onverwachts verwijderd"</string>
     <string name="ext_media_badremoval_notification_message">"Ontkoppel de SD-kaart voordat u deze verwijdert om gegevensverlies te voorkomen."</string>
     <string name="ext_media_safe_unmount_notification_title">"De SD-kaart kan veilig worden verwijderd"</string>
-    <string name="ext_media_safe_unmount_notification_message">"De SD-kaart kan nu veilig worden verwijderd."</string>
+    <string name="ext_media_safe_unmount_notification_message">"U kunt de SD-kaart veilig verwijderen."</string>
     <string name="ext_media_nomedia_notification_title">"SD-kaart is verwijderd"</string>
-    <string name="ext_media_nomedia_notification_message">"De SD-kaart is verwijderd. Plaats een nieuwe SD-kaart om de opslagcapaciteit van uw apparaat te vergroten."</string>
+    <string name="ext_media_nomedia_notification_message">"SD-kaart verwijderd. Plaats een nieuwe."</string>
     <string name="activity_list_empty">"Geen overeenkomende activiteiten gevonden"</string>
     <string name="permlab_pkgUsageStats">"gebruiksstatistieken van component bijwerken"</string>
     <string name="permdesc_pkgUsageStats">"Hiermee kunnen verzamelde gebruiksstatistieken van een component worden gewijzigd. Niet voor gebruik door normale toepassingen."</string>
@@ -661,4 +709,6 @@
     <string name="ime_action_default">"Uitvoeren"</string>
     <string name="dial_number_using">"Nummer bellen"\n"met <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using">"Contact maken"\n"met <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="accessibility_compound_button_selected">"aangevinkt"</string>
+    <string name="accessibility_compound_button_unselected">"niet aangevinkt"</string>
 </resources>

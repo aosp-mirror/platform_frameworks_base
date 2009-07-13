@@ -21,6 +21,7 @@
     <string name="gigabyteShort">"GB"</string>
     <string name="terabyteShort">"TB"</string>
     <string name="petabyteShort">"PB"</string>
+    <string name="fileSizeSuffix">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled">"(未命名)"</string>
     <string name="ellipsis">"..."</string>
     <string name="emptyPhoneNumber">"(沒有電話號碼)"</string>
@@ -48,6 +49,12 @@
     <string name="BaMmi">"通話限制"</string>
     <string name="PwdMmi">"變更密碼"</string>
     <string name="PinMmi">"PIN 已變更"</string>
+    <string name="CnipMmi">"顯示來電號碼"</string>
+    <string name="CnirMmi">"隱藏發話號碼"</string>
+    <string name="ThreeWCMmi">"三方通話"</string>
+    <string name="RuacMmi">"拒接不想接聽的騷擾電話"</string>
+    <string name="CndMmi">"顯示發話號碼"</string>
+    <string name="DndMmi">"勿干擾"</string>
     <string name="CLIRDefaultOnNextCallOn">"預設不顯示本機號碼，下一通電話也不顯示。"</string>
     <string name="CLIRDefaultOnNextCallOff">"預設不顯示本機號碼，但下一通電話顯示。"</string>
     <string name="CLIRDefaultOffNextCallOn">"預設顯示本機號碼，但下一通電話不顯示。"</string>
@@ -67,11 +74,27 @@
     <string name="serviceClassDataSync">"同步處理"</string>
     <string name="serviceClassPacket">"封包"</string>
     <string name="serviceClassPAD">"按鍵"</string>
+    <string name="roamingText0">"漫遊指示開啟"</string>
+    <string name="roamingText1">"漫遊指示關閉"</string>
+    <string name="roamingText2">"漫遊指示閃爍"</string>
+    <string name="roamingText3">"超出鄰近範圍"</string>
+    <string name="roamingText4">"超出建築物範圍"</string>
+    <string name="roamingText5">"漫遊 - 偏好系統"</string>
+    <string name="roamingText6">"漫遊 - 可用系統"</string>
+    <string name="roamingText7">"漫遊 - 聯盟合作夥伴"</string>
+    <string name="roamingText8">"漫遊 - Google Premium 合作夥伴"</string>
+    <string name="roamingText9">"漫遊 - 完整服務功能"</string>
+    <string name="roamingText10">"漫遊 - 部份服務功能"</string>
+    <string name="roamingText11">"漫遊橫幅開啟"</string>
+    <string name="roamingText12">"漫遊橫幅關閉"</string>
+    <string name="roamingTextSearching">"正在搜尋服務"</string>
     <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：未轉接"</string>
     <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="TIME_DELAY">{2}</xliff:g> 秒後 <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：未轉接"</string>
     <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：未轉接"</string>
+    <string name="fcComplete">"功能碼輸入完成。"</string>
+    <string name="fcError">"連線發生問題或功能碼無效。"</string>
     <string name="httpErrorOk">"確定"</string>
     <string name="httpError">"網頁內容錯誤。"</string>
     <string name="httpErrorLookup">"找不到網址。"</string>
@@ -88,6 +111,7 @@
     <string name="httpErrorFile">"無法存取此檔案。"</string>
     <string name="httpErrorFileNotFound">"找不到要求的檔案。"</string>
     <string name="httpErrorTooManyRequests">"太多執行要求。請稍後再試一次。"</string>
+    <string name="certificateSaved">"憑證已儲存在系統的金鑰存放區。"</string>
     <string name="contentServiceSync">"同步處理"</string>
     <string name="contentServiceSyncNotificationTitle">"同步處理"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"同時刪除太多 <xliff:g id="CONTENT_TYPE">%s</xliff:g>。"</string>
@@ -133,6 +157,8 @@
     <string name="permgroupdesc_systemTools">"系統低階存取與控制。"</string>
     <string name="permgrouplab_developmentTools">"開發工具"</string>
     <string name="permgroupdesc_developmentTools">"只有開發者需要此功能。"</string>
+    <string name="permgrouplab_storage">"儲存"</string>
+    <string name="permgroupdesc_storage">"存取 SD 卡。"</string>
     <string name="permlab_statusBar">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar">"允許應用程式停用狀態列或新增、移除系統圖示。"</string>
     <string name="permlab_expandStatusBar">"展開/收攏狀態列"</string>
@@ -165,6 +191,10 @@
     <string name="permdesc_forceBack">"允許應用程式強制關閉在前端運作的活動並返回。一般應用程式不需要此功能。"</string>
     <string name="permlab_dump">"接收系統內部狀態"</string>
     <string name="permdesc_dump">"允許應用程式取得系統內部狀態。請注意：惡意程式可能利用此功能，不當取得私人或安全性資料。"</string>
+    <string name="permlab_shutdown">"部分關機"</string>
+    <string name="permdesc_shutdown">"讓活動管理員進入關機狀態，而不執行完整的關機程序。"</string>
+    <string name="permlab_stopAppSwitches">"防止切換應用程式"</string>
+    <string name="permdesc_stopAppSwitches">"防止使用者切換到其他應用程式。"</string>
     <string name="permlab_runSetActivityWatcher">"監視控制所有應用程式啟動狀態。"</string>
     <string name="permdesc_runSetActivityWatcher">"允許應用程式監控管理系統啟動活動。請注意：惡意程式可能因此癱瘓整個系統。此權限只在開發時需要，一般手機使用不需要此權限。"</string>
     <string name="permlab_broadcastPackageRemoved">"傳送程式已移除廣播"</string>
@@ -179,6 +209,8 @@
     <string name="permdesc_setAlwaysFinish">"允許應用程式控制哪些活動在被移到背景執行時，儘速結束。一般應用程式不需要此功能。"</string>
     <string name="permlab_batteryStats">"編輯電池狀態"</string>
     <string name="permdesc_batteryStats">"允許修改電池狀態。一般應用程式不會使用此功能。"</string>
+    <string name="permlab_backup">"控制系統備份與還原"</string>
+    <string name="permdesc_backup">"允許應用程式控制系統備份與還原機制，但一般應用程式不會使用此功能。"</string>
     <string name="permlab_internalSystemWindow">"顯示未授權視窗"</string>
     <string name="permdesc_internalSystemWindow">"允許內部系統使用介面建立視窗。一般應用程式不會使用此功能。"</string>
     <string name="permlab_systemAlertWindow">"顯示系統警示"</string>
@@ -245,6 +277,8 @@
     <string name="permdesc_accessMockLocation">"建立模擬位置來源以供測試。請注意：惡意程式可能利用此功能覆寫 GPS 或電信業者傳回的位置及/或狀態。"</string>
     <string name="permlab_accessLocationExtraCommands">"接收額外的位置提供者指令"</string>
     <string name="permdesc_accessLocationExtraCommands">"存取額外位置提供者命令。請注意：惡意程式可能利用此功能干擾 GPS 或其他位置來源。"</string>
+    <string name="permlab_installLocationProvider">"准許安裝位置提供者"</string>
+    <string name="permdesc_installLocationProvider">"建立虛構的位置來源以供測試。請注意：惡意應用程式可能利用此選項覆寫由真實位置來源 (例如 GPS 或網路供應商) 所傳回的位置及/或狀態，或者監控您的位置並將之提供給外部來源。"</string>
     <string name="permlab_accessFineLocation">"精確定位 (GPS)"</string>
     <string name="permdesc_accessFineLocation">"接收精確的位置來源 (例如：手機 GPS)。請注意：惡意程式可能使用此功能得知您的位置，並可能消耗額外電源。"</string>
     <string name="permlab_accessCoarseLocation">"約略位置 (以網路為基準)"</string>
@@ -317,6 +351,8 @@
     <string name="permdesc_accessWifiState">"允許應用程式檢視 Wi-Fi 狀態資訊。"</string>
     <string name="permlab_changeWifiState">"變更 Wi-Fi 狀態"</string>
     <string name="permdesc_changeWifiState">"允許應用程式與 Wi-Fi 存取點連線或中斷連線，並可變更 Wi-Fi 網路設定。"</string>
+    <string name="permlab_changeWifiMulticastState">"允許接收 Wi-Fi 多點傳播封包"</string>
+    <string name="permdesc_changeWifiMulticastState">"允許應用程式接收並非指定傳送給您裝置的封包，這在您發現附近有服務可使用時很有用，但消耗的電力比非多點傳播模式還要多。"</string>
     <string name="permlab_bluetoothAdmin">"藍牙管理"</string>
     <string name="permdesc_bluetoothAdmin">"允許應用程式設定本機藍牙電話，以及偵測與配對其他遠端裝置。"</string>
     <string name="permlab_bluetooth">"建立藍牙連線"</string>
@@ -337,6 +373,8 @@
     <string name="permdesc_readDictionary">"允許應用程式讀取使用者儲存在使用者字典內的任何私人字詞、名稱和詞組。"</string>
     <string name="permlab_writeDictionary">"寫入使用者定義的字典"</string>
     <string name="permdesc_writeDictionary">"允許應用程式將新字詞寫入使用者的字典。"</string>
+    <string name="permlab_sdcardWrite">"修改/刪除 SD 卡的內容"</string>
+    <string name="permdesc_sdcardWrite">"允許應用程式寫入 SD 卡。"</string>
   <string-array name="phoneTypes">
     <item>"住家電話"</item>
     <item>"行動電話"</item>
@@ -353,6 +391,7 @@
     <item>"其他信箱"</item>
     <item>"自訂"</item>
   </string-array>
+    <string name="mobileEmailTypeName">"行動裝置"</string>
   <string-array name="postalAddressTypes">
     <item>"住家"</item>
     <item>"公司"</item>
@@ -382,17 +421,19 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code">"輸入 PIN 碼"</string>
     <string name="keyguard_password_wrong_pin_code">"PIN 碼錯誤！"</string>
-    <string name="keyguard_label_text">"如要解鎖，請按 [選單]，然後按 [0]。"</string>
+    <string name="keyguard_label_text">"如要解鎖，請按 Menu 鍵，然後按 0。"</string>
     <string name="emergency_call_dialog_number_for_display">"緊急電話號碼"</string>
     <string name="lockscreen_carrier_default">"(沒有服務)"</string>
     <string name="lockscreen_screen_locked">"螢幕已鎖定。"</string>
     <string name="lockscreen_instructions_when_pattern_enabled">"按下 [選單] 解鎖或撥打緊急電話。"</string>
-    <string name="lockscreen_instructions_when_pattern_disabled">"按下 [選單] 解鎖。"</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"按下 Menu 鍵解鎖。"</string>
     <string name="lockscreen_pattern_instructions">"畫出解鎖圖形"</string>
     <string name="lockscreen_emergency_call">"緊急電話"</string>
     <string name="lockscreen_pattern_correct">"正確！"</string>
     <string name="lockscreen_pattern_wrong">"很抱歉，請再試一次"</string>
     <string name="lockscreen_plugged_in">"正在充電 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
+    <skip />
     <string name="lockscreen_low_battery">"請連接充電器。"</string>
     <string name="lockscreen_missing_sim_message_short">"沒有 SIM  卡。"</string>
     <string name="lockscreen_missing_sim_message">"手機未插入 SIM 卡。"</string>
@@ -414,7 +455,8 @@
     <string name="lockscreen_glogin_invalid_input">"使用者名稱或密碼錯誤。"</string>
     <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button">"清除通知"</string>
+    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
+    <skip />
     <string name="status_bar_no_notifications_title">"沒有通知"</string>
     <string name="status_bar_ongoing_events_title">"進行中"</string>
     <string name="status_bar_latest_events_title">"通知"</string>
@@ -423,6 +465,7 @@
     <string name="battery_low_title">"請連接充電器"</string>
     <string name="battery_low_subtitle">"電池電量即將不足："</string>
     <string name="battery_low_percent_format">"電池電量不到 <xliff:g id="NUMBER">%d%%</xliff:g>。"</string>
+    <string name="battery_low_why">"原因"</string>
     <string name="factorytest_failed">"出廠測試失敗"</string>
     <string name="factorytest_not_system">"只有安裝在 /system/app 裡的程式才能支援 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action">"找不到提供 FACTORY_TEST 的程式。"</string>
@@ -431,6 +474,10 @@
     <string name="js_dialog_title_default">"JavaScript"</string>
     <string name="js_dialog_before_unload">"離開此頁？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n" 選取 [確定] 離開此頁；或 [取消] 留在此頁。"</string>
     <string name="save_password_label">"確認"</string>
+    <string name="permlab_readHistoryBookmarks">"讀取瀏覽器的記錄與書籤"</string>
+    <string name="permdesc_readHistoryBookmarks">"允許應用程式讀取瀏覽器曾經造訪過的所有網址，以及瀏覽器的所有書籤。"</string>
+    <string name="permlab_writeHistoryBookmarks">"寫入瀏覽器的記錄與書籤"</string>
+    <string name="permdesc_writeHistoryBookmarks">"允許應用程式修改儲存在電話上的瀏覽記錄或書籤。請注意：惡意應用程式可能會使用此選項來清除或修改您瀏覽器的資料。"</string>
     <string name="save_password_message">"是否記憶此密碼？"</string>
     <string name="save_password_notnow">"現在不要"</string>
     <string name="save_password_remember">"記住"</string>
@@ -538,10 +585,6 @@
     <string name="Noon">"中午"</string>
     <string name="midnight">"午夜"</string>
     <string name="Midnight">"午夜"</string>
-    <!-- no translation found for month (7026169712234774086) -->
-    <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
-    <skip />
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"全部選取"</string>
@@ -579,6 +622,7 @@
     <string name="anr_application_process">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 無回應。"</string>
     <string name="anr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> 程序無回應。"</string>
     <string name="force_close">"強制關閉"</string>
+    <string name="report">"回報"</string>
     <string name="wait">"等待"</string>
     <string name="debug">"偵錯"</string>
     <string name="sendText">"訊息傳送方式"</string>
@@ -632,22 +676,26 @@
     <string name="extmedia_format_title">"將 SD 卡格式化"</string>
     <string name="extmedia_format_message">"確定要將 SD 卡格式化嗎？該 SD 卡中的所有資料將會遺失。"</string>
     <string name="extmedia_format_button_format">"格式化"</string>
+    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
+    <skip />
+    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
+    <skip />
     <string name="select_input_method">"選取輸入法"</string>
     <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style"><u>"待選項目"</u></string>
     <string name="ext_media_checking_notification_title">"正在準備 SD 卡"</string>
-    <string name="ext_media_checking_notification_message">"正在檢查錯誤"</string>
+    <string name="ext_media_checking_notification_message">"正在檢查錯誤。"</string>
     <string name="ext_media_nofs_notification_title">"SD 卡為空白"</string>
-    <string name="ext_media_nofs_notification_message">"SD 卡為空白或使用不支援的檔案系統。"</string>
+    <string name="ext_media_nofs_notification_message">"SD 卡內無檔案系統，或檔案系統不受支援。"</string>
     <string name="ext_media_unmountable_notification_title">"SD 卡已損壞"</string>
-    <string name="ext_media_unmountable_notification_message">"SD 卡已損壞。您可能需要將 SD 卡重新格式化。"</string>
+    <string name="ext_media_unmountable_notification_message">"SD 卡已毀損，您可能必須予以重新格式化。"</string>
     <string name="ext_media_badremoval_notification_title">"SD 卡未正常移除"</string>
     <string name="ext_media_badremoval_notification_message">"請先卸載 SD 卡，再將其移除，以免資料遺失。"</string>
     <string name="ext_media_safe_unmount_notification_title">"可安全移除 SD 卡"</string>
-    <string name="ext_media_safe_unmount_notification_message">"現在可以安全移除 SD 卡。"</string>
+    <string name="ext_media_safe_unmount_notification_message">"您現在可以安全地移除 SD 卡。"</string>
     <string name="ext_media_nomedia_notification_title">"已移除 SD 卡"</string>
-    <string name="ext_media_nomedia_notification_message">"已移除 SD 卡。請插入新的 SD 卡來增加裝置的儲存容量。"</string>
+    <string name="ext_media_nomedia_notification_message">"SD 卡已移除，請插入新的 SD 卡。"</string>
     <string name="activity_list_empty">"找不到符合的活動"</string>
     <string name="permlab_pkgUsageStats">"更新元件使用統計資料"</string>
     <string name="permdesc_pkgUsageStats">"允許修改收集到的元件使用統計資料。一般應用程式不會使用此功能。"</string>
@@ -661,4 +709,6 @@
     <string name="ime_action_default">"執行"</string>
     <string name="dial_number_using">"使用 <xliff:g id="NUMBER">%s</xliff:g>"\n"撥號"</string>
     <string name="create_contact_using">"建立手機號碼為 <xliff:g id="NUMBER">%s</xliff:g>"\n"的聯絡人"</string>
+    <string name="accessibility_compound_button_selected">"已勾選"</string>
+    <string name="accessibility_compound_button_unselected">"未勾選"</string>
 </resources>
