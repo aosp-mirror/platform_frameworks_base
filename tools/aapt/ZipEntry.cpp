@@ -90,7 +90,7 @@ status_t ZipEntry::initFromCDE(FILE* fp)
      * prefer the CDE values.)
      */
     if (!hasDD && !compareHeaders()) {
-        LOGW("WARNING: header mismatch\n");
+        LOGW("warning: header mismatch\n");
         // keep going?
     }
 

@@ -174,7 +174,7 @@ static sp<AaptFile> getResourceFile(const sp<AaptAssets>& assets, bool makeIfNec
 static status_t parsePackage(const sp<AaptAssets>& assets, const sp<AaptGroup>& grp)
 {
     if (grp->getFiles().size() != 1) {
-        fprintf(stderr, "WARNING: Multiple AndroidManifest.xml files found, using %s\n",
+        fprintf(stderr, "warning: Multiple AndroidManifest.xml files found, using %s\n",
                 grp->getFiles().valueAt(0)->getPrintableSource().string());
     }
 
@@ -419,7 +419,7 @@ static void checkForIds(const String8& path, ResXMLParser& parser)
         if (code == ResXMLTree::START_TAG) {
             ssize_t index = parser.indexOfAttribute(NULL, "id");
             if (index >= 0) {
-                fprintf(stderr, "%s:%d: WARNING: found plain 'id' attribute; did you mean the new 'android:id' name?\n",
+                fprintf(stderr, "%s:%d: warning: found plain 'id' attribute; did you mean the new 'android:id' name?\n",
                         path.string(), parser.getLineNumber());
             }
         }

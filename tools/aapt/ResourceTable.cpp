@@ -3554,26 +3554,26 @@ sp<const ResourceTable::Entry> ResourceTable::getEntry(uint32_t resID,
 
     }
     if (p == NULL) {
-        fprintf(stderr, "WARNING: Package not found for resource #%08x\n", resID);
+        fprintf(stderr, "warning: Package not found for resource #%08x\n", resID);
         return NULL;
     }
 
     int tid = Res_GETTYPE(resID);
     if (tid < 0 || tid >= (int)p->getOrderedTypes().size()) {
-        fprintf(stderr, "WARNING: Type not found for resource #%08x\n", resID);
+        fprintf(stderr, "warning: Type not found for resource #%08x\n", resID);
         return NULL;
     }
     sp<Type> t = p->getOrderedTypes()[tid];
 
     int eid = Res_GETENTRY(resID);
     if (eid < 0 || eid >= (int)t->getOrderedConfigs().size()) {
-        fprintf(stderr, "WARNING: Entry not found for resource #%08x\n", resID);
+        fprintf(stderr, "warning: Entry not found for resource #%08x\n", resID);
         return NULL;
     }
 
     sp<ConfigList> c = t->getOrderedConfigs()[eid];
     if (c == NULL) {
-        fprintf(stderr, "WARNING: Entry not found for resource #%08x\n", resID);
+        fprintf(stderr, "warning: Entry not found for resource #%08x\n", resID);
         return NULL;
     }
     
@@ -3581,7 +3581,7 @@ sp<const ResourceTable::Entry> ResourceTable::getEntry(uint32_t resID,
     if (config) cdesc = *config;
     sp<Entry> e = c->getEntries().valueFor(cdesc);
     if (c == NULL) {
-        fprintf(stderr, "WARNING: Entry configuration not found for resource #%08x\n", resID);
+        fprintf(stderr, "warning: Entry configuration not found for resource #%08x\n", resID);
         return NULL;
     }
     
@@ -3599,7 +3599,7 @@ const ResourceTable::Item* ResourceTable::getItem(uint32_t resID, uint32_t attrI
     for (size_t i=0; i<N; i++) {
         const Item& it = e->getBag().valueAt(i);
         if (it.bagKeyId == 0) {
-            fprintf(stderr, "WARNING: ID not yet assigned to '%s' in bag '%s'\n",
+            fprintf(stderr, "warning: ID not yet assigned to '%s' in bag '%s'\n",
                     String8(e->getName()).string(),
                     String8(e->getBag().keyAt(i)).string());
         }
@@ -3627,7 +3627,7 @@ bool ResourceTable::getItemValue(
                     break;
                 }
             }
-            fprintf(stderr, "WARNING: Circular reference detected in key '%s' of bag '%s'\n",
+            fprintf(stderr, "warning: Circular reference detected in key '%s' of bag '%s'\n",
                     String8(e->getName()).string(),
                     String8(e->getBag().keyAt(i)).string());
             return false;

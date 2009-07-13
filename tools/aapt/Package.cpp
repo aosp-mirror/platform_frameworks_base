@@ -168,7 +168,7 @@ status_t writeAPK(Bundle* bundle, const sp<AaptAssets>& assets,
         delete zip;        // close the file so we can remove it in Win32
         zip = NULL;
         if (unlink(outputFile.string()) != 0) {
-            fprintf(stderr, "WARNING: could not unlink '%s'\n", outputFile.string());
+            fprintf(stderr, "warning: could not unlink '%s'\n", outputFile.string());
         }
     }
 
@@ -181,7 +181,7 @@ bail:
             printf("Removing %s due to earlier failures\n", outputFile.string());
         }
         if (unlink(outputFile.string()) != 0) {
-            fprintf(stderr, "WARNING: could not unlink '%s'\n", outputFile.string());
+            fprintf(stderr, "warning: could not unlink '%s'\n", outputFile.string());
         }
     }
 
@@ -283,7 +283,7 @@ bool processFile(Bundle* bundle, ZipFile* zip,
     if (fileNameLen > excludeExtensionLen
             && (0 == strcmp(storageName.string() + (fileNameLen - excludeExtensionLen),
                             kExcludeExtension))) {
-        fprintf(stderr, "WARNING: '%s' not added to Zip\n", storageName.string());
+        fprintf(stderr, "warning: '%s' not added to Zip\n", storageName.string());
         return true;
     }
 
