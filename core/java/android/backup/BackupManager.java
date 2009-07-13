@@ -73,6 +73,9 @@ public class BackupManager {
      * {@link android.app.BackupAgent} subclass will be scheduled when you call this method.
      */
     public void dataChanged() {
+        if (!EVEN_THINK_ABOUT_DOING_RESTORE) {
+            return;
+        }
         checkServiceBinder();
         if (sService != null) {
             try {
@@ -92,6 +95,9 @@ public class BackupManager {
      * permission if the package named in the argument is not the caller's own.
      */
     public static void dataChanged(String packageName) {
+        if (!EVEN_THINK_ABOUT_DOING_RESTORE) {
+            return;
+        }
         checkServiceBinder();
         if (sService != null) {
             try {
@@ -110,6 +116,9 @@ public class BackupManager {
      * {@hide}
      */
     public IRestoreSession beginRestoreSession(String transport) {
+        if (!EVEN_THINK_ABOUT_DOING_RESTORE) {
+            return null;
+        }
         IRestoreSession binder = null;
         checkServiceBinder();
         if (sService != null) {
