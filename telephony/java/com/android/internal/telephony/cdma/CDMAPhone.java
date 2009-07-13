@@ -630,7 +630,7 @@ public class CDMAPhone extends PhoneBase {
         mCM.stopDtmf(null);
     }
 
-    public void sendBurstDtmf(String dtmfString, Message onComplete) {
+    public void sendBurstDtmf(String dtmfString, int on, int off, Message onComplete) {
         boolean check = true;
         for (int itr = 0;itr < dtmfString.length(); itr++) {
             if (!PhoneNumberUtils.is12Key(dtmfString.charAt(itr))) {
@@ -641,7 +641,7 @@ public class CDMAPhone extends PhoneBase {
             }
         }
         if ((mCT.state ==  Phone.State.OFFHOOK)&&(check)) {
-            mCM.sendBurstDtmf(dtmfString, onComplete);
+            mCM.sendBurstDtmf(dtmfString, on, off, onComplete);
         }
      }
 

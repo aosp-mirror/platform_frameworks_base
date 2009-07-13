@@ -1068,10 +1068,13 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     }
 
     public void
-    sendBurstDtmf(String dtmfString, Message result) {
+    sendBurstDtmf(String dtmfString, int on, int off, Message result) {
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_CDMA_BURST_DTMF, result);
 
+        rr.mp.writeInt(3);
         rr.mp.writeString(dtmfString);
+        rr.mp.writeString(Integer.toString(on));
+        rr.mp.writeString(Integer.toString(off));
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
                 + " : " + dtmfString);
