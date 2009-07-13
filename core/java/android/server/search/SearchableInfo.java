@@ -442,6 +442,14 @@ public final class SearchableInfo implements Parcelable {
         mActionKeys.put(keyInfo.getKeyCode(), keyInfo);
     }
 
+    /**
+     * Gets search information for the given activity.
+     *
+     * @param context Context to use for reading activity resources.
+     * @param activityInfo Activity to get search information from.
+     * @return Search information about the given activity, or {@code null} if
+     *         the activity has no or invalid searchability meta-data.
+     */
     public static SearchableInfo getActivityMetaData(Context context, ActivityInfo activityInfo) {
         // for each component, try to find metadata
         XmlResourceParser xml = 
