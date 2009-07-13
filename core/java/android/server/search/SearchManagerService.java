@@ -43,13 +43,13 @@ public class SearchManagerService extends ISearchManager.Stub {
     // Context that the service is running in.
     private final Context mContext;
 
-    // This field is initialized in initialize(), and then never modified.
-    // It is volatile since it can be accessed by multiple threads.
-    private volatile Searchables mSearchables;
+    // This field is initialized in ensureSearchablesCreated(), and then never modified.
+    // Only accessed by ensureSearchablesCreated() and getSearchables()
+    private Searchables mSearchables;
 
-    // This field is initialized in initialize(), and then never modified.
-    // It is volatile since it can be accessed by multiple threads.
-    private volatile SearchDialogWrapper mSearchDialog;
+    // This field is initialized in ensureSearchDialogCreated(), and then never modified.
+    // Only accessed by ensureSearchDialogCreated() and getSearchDialog()
+    private SearchDialogWrapper mSearchDialog;
 
     /**
      * Initializes the Search Manager service in the provided system context.
@@ -68,16 +68,18 @@ public class SearchManagerService extends ISearchManager.Stub {
     }
 
     /**
-     * Initializes the search UI and the list of searchable activities.
+     * Initializes the list of searchable activities and the search UI.
      */
     void initialize() {
-        mSearchables = createSearchables();
-        mSearchDialog = new SearchDialogWrapper(mContext);
+        ensureSearchablesCreated();
+        ensureSearchDialogCreated();
     }
 
-    private Searchables createSearchables() {
-        Searchables searchables = new Searchables(mContext);
-        searchables.buildSearchableList();
+    private synchronized void ensureSearchablesCreated() {
+        if (mSearchables != null) return;  // already created
+
+        mSearchables = new Searchables(mContext);
+        mSearchables.buildSearchableList();
 
         IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -85,8 +87,22 @@ public class SearchManagerService extends ISearchManager.Stub {
         packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addDataScheme("package");
         mContext.registerReceiver(mPackageChangedReceiver, packageFilter);
+    }
 
-        return searchables;
+    private synchronized void ensureSearchDialogCreated() {
+        if (mSearchDialog != null) return;
+
+        mSearchDialog = new SearchDialogWrapper(mContext);
+    }
+
+    private synchronized Searchables getSearchables() {
+        ensureSearchablesCreated();
+        return mSearchables;
+    }
+
+    private synchronized SearchDialogWrapper getSearchDialog() {
+        ensureSearchDialogCreated();
+        return mSearchDialog;
     }
 
     /**
@@ -102,9 +118,9 @@ public class SearchManagerService extends ISearchManager.Stub {
                     Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
                 if (DBG) Log.d(TAG, "Got " + action);
                 // Dismiss search dialog, since the search context may no longer be valid
-                mSearchDialog.stopSearch();
+                getSearchDialog().stopSearch();
                 // Update list of searchable activities
-                mSearchables.buildSearchableList();
+                getSearchables().buildSearchableList();
                 broadcastSearchablesChanged();
             }
         }
@@ -135,15 +151,14 @@ public class SearchManagerService extends ISearchManager.Stub {
      */
     public SearchableInfo getSearchableInfo(final ComponentName launchActivity,
             final boolean globalSearch) {
-        if (mSearchables == null) return null;
         if (globalSearch) {
-            return mSearchables.getDefaultSearchable();
+            return getSearchables().getDefaultSearchable();
         } else {
             if (launchActivity == null) {
                 Log.e(TAG, "getSearchableInfo(), activity == null");
                 return null;
             }
-            return mSearchables.getSearchableInfo(launchActivity);
+            return getSearchables().getSearchableInfo(launchActivity);
         }
     }
 
@@ -151,8 +166,7 @@ public class SearchManagerService extends ISearchManager.Stub {
      * Returns a list of the searchable activities that can be included in global search.
      */
     public List<SearchableInfo> getSearchablesInGlobalSearch() {
-        if (mSearchables == null) return null;
-        return mSearchables.getSearchablesInGlobalSearchList();
+        return getSearchables().getSearchablesInGlobalSearchList();
     }
 
     /**
@@ -160,8 +174,7 @@ public class SearchManagerService extends ISearchManager.Stub {
      * Can be called from any thread.
      */
     public List<SearchableInfo> getSearchablesForWebSearch() {
-        if (mSearchables == null) return null;
-        return mSearchables.getSearchablesForWebSearchList();
+        return getSearchables().getSearchablesForWebSearchList();
     }
 
     /**
@@ -169,8 +182,7 @@ public class SearchManagerService extends ISearchManager.Stub {
      * Can be called from any thread.
      */
     public SearchableInfo getDefaultSearchableForWebSearch() {
-        if (mSearchables == null) return null;
-        return mSearchables.getDefaultSearchableForWebSearch();
+        return getSearchables().getDefaultSearchableForWebSearch();
     }
 
     /**
@@ -178,8 +190,7 @@ public class SearchManagerService extends ISearchManager.Stub {
      * Can be called from any thread.
      */
     public void setDefaultWebSearch(final ComponentName component) {
-        if (mSearchables == null) return;
-        mSearchables.setDefaultWebSearch(component);
+        getSearchables().setDefaultWebSearch(component);
         broadcastSearchablesChanged();
     }
 
@@ -196,8 +207,7 @@ public class SearchManagerService extends ISearchManager.Stub {
             Bundle appSearchData,
             boolean globalSearch,
             ISearchManagerCallback searchManagerCallback) {
-        if (mSearchDialog == null) return;
-        mSearchDialog.startSearch(initialQuery,
+        getSearchDialog().startSearch(initialQuery,
                 selectInitialQuery,
                 launchActivity,
                 appSearchData,
@@ -209,8 +219,7 @@ public class SearchManagerService extends ISearchManager.Stub {
      * Cancels the search dialog. Can be called from any thread.
      */
     public void stopSearch() {
-        if (mSearchDialog == null) return;
-        mSearchDialog.stopSearch();
+        getSearchDialog().stopSearch();
     }
 
 }
