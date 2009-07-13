@@ -32,6 +32,7 @@ import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.ApplicationErrorReport;
 import android.app.Dialog;
+import android.app.IActivityController;
 import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
@@ -76,6 +77,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -825,8 +827,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     String mOrigDebugApp = null;
     boolean mOrigWaitForDebugger = false;
     boolean mAlwaysFinishActivities = false;
-    IActivityWatcher mWatcher = null;
+    IActivityController mController = null;
 
+    final RemoteCallbackList<IActivityWatcher> mWatchers
+            = new RemoteCallbackList<IActivityWatcher>();
+    
     /**
      * Callback of last caller to {@link #requestPss}.
      */
@@ -1623,7 +1628,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     /**
      * This is a simplified version of topRunningActivityLocked that provides a number of
-     * optional skip-over modes.  It is intended for use with the ActivityWatcher hook only.
+     * optional skip-over modes.  It is intended for use with the ActivityController hook only.
      * 
      * @param token If non-null, any history records matching this token will be skipped.
      * @param taskId If non-zero, we'll attempt to skip over records with the same task ID.
@@ -1728,10 +1733,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
+                    System.identityHashCode(r),
                     r.info, r.icicle, results, newIntents, !andResume,
                     isNextTransitionForward());
-            // Update usage stats for launched activity
-            updateUsageStats(r, true);
         } catch (RemoteException e) {
             if (r.launchFailed) {
                 // This is the second time we failed -- finish activity
@@ -2184,6 +2188,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mHandler.sendMessage(msg);
         }
 
+        reportResumedActivity(next);
+        
         next.thumbnail = null;
         setFocusedActivityLocked(next);
         next.resumeKeyDispatchingLocked();
@@ -2454,6 +2460,26 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
     
+    private void reportResumedActivity(HistoryRecord r) {
+        //Log.i(TAG, "**** REPORT RESUME: " + r);
+        
+        final int identHash = System.identityHashCode(r);
+        updateUsageStats(r, true);
+        
+        int i = mWatchers.beginBroadcast();
+        while (i > 0) {
+            i--;
+            IActivityWatcher w = mWatchers.getBroadcastItem(i);
+            if (w != null) {
+                try {
+                    w.activityResuming(identHash);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        mWatchers.finishBroadcast();
+    }
+    
     /**
      * Ensure that the top activity in the stack is resumed.
      *
@@ -2642,10 +2668,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 EventLog.writeEvent(LOG_AM_RESUME_ACTIVITY,
                         System.identityHashCode(next),
                         next.task.taskId, next.shortComponentName);
-                updateUsageStats(next, true);
                 
                 next.app.thread.scheduleResumeActivity(next,
                         isNextTransitionForward());
+                
                 pauseIfSleepingLocked();
 
             } catch (Exception e) {
@@ -3062,16 +3088,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             throw new SecurityException(msg);
         }
 
-        if (mWatcher != null) {
+        if (mController != null) {
             boolean abort = false;
             try {
                 // The Intent we give to the watcher has the extra data
                 // stripped off, since it can contain private information.
                 Intent watchIntent = intent.cloneFilter();
-                abort = !mWatcher.activityStarting(watchIntent,
+                abort = !mController.activityStarting(watchIntent,
                         aInfo.applicationInfo.packageName);
             } catch (RemoteException e) {
-                mWatcher = null;
+                mController = null;
             }
 
             if (abort) {
@@ -3968,16 +3994,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         synchronized(this) {
-            if (mWatcher != null) {
+            if (mController != null) {
                 // Find the first activity that is not finishing.
                 HistoryRecord next = topRunningActivityLocked(token, 0);
                 if (next != null) {
                     // ask watcher if this is allowed
                     boolean resumeOK = true;
                     try {
-                        resumeOK = mWatcher.activityResuming(next.packageName);
+                        resumeOK = mController.activityResuming(next.packageName);
                     } catch (RemoteException e) {
-                        mWatcher = null;
+                        mController = null;
                     }
     
                     if (!resumeOK) {
@@ -4469,9 +4495,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        if (mWatcher != null) {
+        if (mController != null) {
             try {
-                int res = mWatcher.appNotResponding(app.processName,
+                int res = mController.appNotResponding(app.processName,
                         app.pid, info.toString());
                 if (res != 0) {
                     if (res < 0) {
@@ -4487,7 +4513,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     }
                 }
             } catch (RemoteException e) {
-                mWatcher = null;
+                mController = null;
             }
         }
 
@@ -6612,7 +6638,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
     
     /**
-     * TODO: Add mWatcher hook
+     * TODO: Add mController hook
      */
     public void moveTaskToFront(int task) {
         enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
@@ -6757,7 +6783,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // If we have a watcher, preflight the move before committing to it.  First check
         // for *other* available tasks, but if none are available, then try again allowing the
         // current task to be selected.
-        if (mWatcher != null) {
+        if (mController != null) {
             HistoryRecord next = topRunningActivityLocked(null, task);
             if (next == null) {
                 next = topRunningActivityLocked(null, 0);
@@ -6766,9 +6792,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // ask watcher if this is allowed
                 boolean moveOK = true;
                 try {
-                    moveOK = mWatcher.activityResuming(next.packageName);
+                    moveOK = mController.activityResuming(next.packageName);
                 } catch (RemoteException e) {
-                    mWatcher = null;
+                    mController = null;
                 }
                 if (!moveOK) {
                     return false;
@@ -7679,12 +7705,20 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    public void setActivityWatcher(IActivityWatcher watcher) {
+    public void setActivityController(IActivityController controller) {
         enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
-                "setActivityWatcher()");
+                "setActivityController()");
         synchronized (this) {
-            mWatcher = watcher;
+            mController = controller;
         }
+    }
+
+    public void registerActivityWatcher(IActivityWatcher watcher) {
+        mWatchers.register(watcher);
+    }
+
+    public void unregisterActivityWatcher(IActivityWatcher watcher) {
+        mWatchers.unregister(watcher);
     }
 
     public final void enterSafeMode() {
@@ -8247,11 +8281,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 //Process.sendSignal(MY_PID, Process.SIGNAL_QUIT);
             }
 
-            if (mWatcher != null) {
+            if (mController != null) {
                 try {
                     String name = r != null ? r.processName : null;
                     int pid = r != null ? r.pid : Binder.getCallingPid();
-                    if (!mWatcher.appCrashed(name, pid,
+                    if (!mController.appCrashed(name, pid,
                             shortMsg, longMsg, crashData)) {
                         Log.w(TAG, "Force-killing crashed app " + name
                                 + " at watcher's request");
@@ -8259,7 +8293,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         return 0;
                     }
                 } catch (RemoteException e) {
-                    mWatcher = null;
+                    mController = null;
                 }
             }
 
@@ -8685,7 +8719,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     + " mDebugTransient=" + mDebugTransient
                     + " mOrigWaitForDebugger=" + mOrigWaitForDebugger);
             pw.println("  mAlwaysFinishActivities=" + mAlwaysFinishActivities
-                    + " mWatcher=" + mWatcher);
+                    + " mController=" + mController);
         }
     }
 

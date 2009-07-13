@@ -1090,6 +1090,7 @@ public final class ActivityThread {
 
     private static final class ActivityRecord {
         IBinder token;
+        int ident;
         Intent intent;
         Bundle state;
         Activity activity;
@@ -1299,12 +1300,13 @@ public final class ActivityThread {
 
         // we use token to identify this activity without having to send the
         // activity itself back to the activity manager. (matters more with ipc)
-        public final void scheduleLaunchActivity(Intent intent, IBinder token,
+        public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
                 ActivityInfo info, Bundle state, List<ResultInfo> pendingResults,
                 List<Intent> pendingNewIntents, boolean notResumed, boolean isForward) {
             ActivityRecord r = new ActivityRecord();
 
             r.token = token;
+            r.ident = ident;
             r.intent = intent;
             r.activityInfo = info;
             r.state = state;
@@ -2197,21 +2199,11 @@ public final class ActivityThread {
     }
     
     public final Activity startActivityNow(Activity parent, String id,
-            Intent intent, IBinder token, Bundle state) {
-        ActivityInfo aInfo = resolveActivityInfo(intent);
-        return startActivityNow(parent, id, intent, aInfo, token, state);
-    }
-    
-    public final Activity startActivityNow(Activity parent, String id,
-            Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state) {
-        return startActivityNow(parent, id, intent, activityInfo, token, state, null);
-    }
-
-    public final Activity startActivityNow(Activity parent, String id,
         Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state,
         Object lastNonConfigurationInstance) {
         ActivityRecord r = new ActivityRecord();
             r.token = token;
+            r.ident = 0;
             r.intent = intent;
             r.state = state;
             r.parent = parent;
@@ -2335,10 +2327,10 @@ public final class ActivityThread {
                 appContext.setOuterContext(activity);
                 CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
                 Configuration config = new Configuration(mConfiguration);
-                activity.attach(appContext, this, getInstrumentation(), r.token, app, 
-                        r.intent, r.activityInfo, title, r.parent, r.embeddedID,
-                        r.lastNonConfigurationInstance, r.lastNonConfigurationChildInstances,
-                        config);
+                activity.attach(appContext, this, getInstrumentation(), r.token,
+                        r.ident, app, r.intent, r.activityInfo, title, r.parent,
+                        r.embeddedID, r.lastNonConfigurationInstance,
+                        r.lastNonConfigurationChildInstances, config);
                 
                 if (customIntent != null) {
                     activity.mIntent = customIntent;

@@ -49,7 +49,7 @@ public interface IApplicationThread extends IInterface {
     void scheduleWindowVisibility(IBinder token, boolean showWindow) throws RemoteException;
     void scheduleResumeActivity(IBinder token, boolean isForward) throws RemoteException;
     void scheduleSendResult(IBinder token, List<ResultInfo> results) throws RemoteException;
-    void scheduleLaunchActivity(Intent intent, IBinder token,
+    void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
             ActivityInfo info, Bundle state, List<ResultInfo> pendingResults,
     		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward)
     		throws RemoteException;

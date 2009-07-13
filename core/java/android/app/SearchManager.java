@@ -1531,6 +1531,8 @@ public class SearchManager
 
     private final Context mContext;
 
+    private int mIdent;
+    
     // package private since they are used by the inner class SearchManagerCallback
     /* package */ boolean mIsShowing = false;
     /* package */ final Handler mHandler;
@@ -1544,6 +1546,13 @@ public class SearchManager
         mHandler = handler;
         mService = ISearchManager.Stub.asInterface(
                 ServiceManager.getService(Context.SEARCH_SERVICE));
+    }
+    
+    /*package*/ void setIdent(int ident) {
+        if (mIdent != 0) {
+            throw new IllegalStateException("mIdent already set");
+        }
+        mIdent = ident;
     }
     
     /**
@@ -1593,11 +1602,13 @@ public class SearchManager
                             boolean globalSearch) {
         if (DBG) debug("startSearch(), mIsShowing=" + mIsShowing);
         if (mIsShowing) return;
+        if (mIdent == 0) throw new IllegalArgumentException(
+                "Called from outside of an Activity context");
         try {
             mIsShowing = true;
             // activate the search manager and start it up!
             mService.startSearch(initialQuery, selectInitialQuery, launchActivity, appSearchData,
-                    globalSearch, mSearchManagerCallback);
+                    globalSearch, mSearchManagerCallback, mIdent);
         } catch (RemoteException ex) {
             Log.e(TAG, "startSearch() failed: " + ex);
         }

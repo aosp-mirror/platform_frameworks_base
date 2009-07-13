@@ -50,6 +50,7 @@ public class RemoteCallbackList<E extends IInterface> {
     /*package*/ HashMap<IBinder, Callback> mCallbacks
             = new HashMap<IBinder, Callback>();
     private Object[] mActiveBroadcast;
+    private int mBroadcastCount = -1;
     private boolean mKilled = false;
     
     private final class Callback implements IBinder.DeathRecipient {
@@ -195,15 +196,16 @@ public class RemoteCallbackList<E extends IInterface> {
      * This creates a copy of the callback list, which you can retrieve items
      * from using {@link #getBroadcastItem}.  Note that only one broadcast can
      * be active at a time, so you must be sure to always call this from the
-     * same thread (usually by scheduling with {@link Handler} or
+     * same thread (usually by scheduling with {@link Handler}) or
      * do your own synchronization.  You must call {@link #finishBroadcast}
      * when done.
      * 
      * <p>A typical loop delivering a broadcast looks like this:
      * 
      * <pre>
-     * final int N = callbacks.beginBroadcast();
-     * for (int i=0; i<N; i++) {
+     * int i = callbacks.beginBroadcast();
+     * while (i > 0) {
+     *     i--;
      *     try {
      *         callbacks.getBroadcastItem(i).somethingHappened();
      *     } catch (RemoteException e) {
@@ -222,7 +224,12 @@ public class RemoteCallbackList<E extends IInterface> {
      */
     public int beginBroadcast() {
         synchronized (mCallbacks) {
-            final int N = mCallbacks.size();
+            if (mBroadcastCount > 0) {
+                throw new IllegalStateException(
+                        "beginBroadcast() called while already in a broadcast");
+            }
+            
+            final int N = mBroadcastCount = mCallbacks.size();
             if (N <= 0) {
                 return 0;
             }
@@ -281,12 +288,19 @@ public class RemoteCallbackList<E extends IInterface> {
      * @see #beginBroadcast
      */
     public void finishBroadcast() {
+        if (mBroadcastCount < 0) {
+            throw new IllegalStateException(
+                    "finishBroadcast() called outside of a broadcast");
+        }
+        
         Object[] active = mActiveBroadcast;
         if (active != null) {
-            final int N = active.length;
+            final int N = mBroadcastCount;
             for (int i=0; i<N; i++) {
                 active[i] = null;
             }
         }
+        
+        mBroadcastCount = -1;
     }
 }

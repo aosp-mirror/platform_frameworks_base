@@ -16,6 +16,8 @@
 
 package android.server.search;
 
+import android.app.ActivityManagerNative;
+import android.app.IActivityWatcher;
 import android.app.ISearchManager;
 import android.app.ISearchManagerCallback;
 import android.app.SearchManager;
@@ -26,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.List;
@@ -71,8 +74,11 @@ public class SearchManagerService extends ISearchManager.Stub {
      * Initializes the list of searchable activities and the search UI.
      */
     void initialize() {
-        ensureSearchablesCreated();
-        ensureSearchDialogCreated();
+        try {
+            ActivityManagerNative.getDefault().registerActivityWatcher(
+                    mActivityWatcher);
+        } catch (RemoteException e) {
+        }
     }
 
     private synchronized void ensureSearchablesCreated() {
@@ -126,6 +132,14 @@ public class SearchManagerService extends ISearchManager.Stub {
         }
     };
 
+    private IActivityWatcher.Stub mActivityWatcher = new IActivityWatcher.Stub() {
+        public void activityResuming(int activityId) throws RemoteException {
+            if (DBG) Log.i("foo", "********************** resuming: " + activityId);
+            if (mSearchDialog == null) return;
+            mSearchDialog.activityResuming(activityId);
+        }
+    };
+    
     /**
      * Informs all listeners that the list of searchables has been updated.
      */
@@ -206,13 +220,15 @@ public class SearchManagerService extends ISearchManager.Stub {
             ComponentName launchActivity,
             Bundle appSearchData,
             boolean globalSearch,
-            ISearchManagerCallback searchManagerCallback) {
+            ISearchManagerCallback searchManagerCallback,
+            int ident) {
         getSearchDialog().startSearch(initialQuery,
                 selectInitialQuery,
                 launchActivity,
                 appSearchData,
                 globalSearch,
-                searchManagerCallback);
+                searchManagerCallback,
+                ident);
     }
 
     /**

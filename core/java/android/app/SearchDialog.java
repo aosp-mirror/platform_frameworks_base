@@ -752,6 +752,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
 
         public void afterTextChanged(Editable s) {
+            if (mSearchable == null) {
+                return;
+            }
             if (mSearchable.autoUrlDetect() && !mSearchAutoComplete.isPerformingCompletion()) {
                 // The user changed the query, check if it is a URL and if so change the search
                 // button in the soft keyboard to the 'Go' button.
