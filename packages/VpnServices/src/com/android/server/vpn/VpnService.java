@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -46,9 +47,9 @@ abstract class VpnService<E extends VpnProfile> {
     private static final String DNS2 = "net.dns2";
     private static final String VPN_DNS1 = "vpn.dns1";
     private static final String VPN_DNS2 = "vpn.dns2";
-    private static final String VPN_UP = "vpn.up";
-    private static final String VPN_IS_UP = "1";
-    private static final String VPN_IS_DOWN = "0";
+    private static final String VPN_STATUS = "vpn.status";
+    private static final String VPN_IS_UP = "ok";
+    private static final String VPN_IS_DOWN = "down";
 
     private static final String REMOTE_IP = "net.ipremote";
     private static final String DNS_DOMAIN_SUFFICES = "net.dns.search";
@@ -60,6 +61,7 @@ abstract class VpnService<E extends VpnProfile> {
 
     private VpnState mState = VpnState.IDLE;
     private boolean mInError;
+    private VpnConnectingError mError;
 
     // connection settings
     private String mOriginalDns1;
@@ -166,16 +168,23 @@ abstract class VpnService<E extends VpnProfile> {
         return mState;
     }
 
-    synchronized void onConnect(String username, String password)
-            throws IOException {
-        mState = VpnState.CONNECTING;
-        broadcastConnectivity(VpnState.CONNECTING);
+    synchronized boolean onConnect(String username, String password) {
+        try {
+            mState = VpnState.CONNECTING;
+            broadcastConnectivity(VpnState.CONNECTING);
 
-        String serverIp = getIp(getProfile().getServerName());
+            String serverIp = getIp(getProfile().getServerName());
 
-        onBeforeConnect();
-        connect(serverIp, username, password);
-        waitUntilConnectedOrTimedout();
+            onBeforeConnect();
+            connect(serverIp, username, password);
+            waitUntilConnectedOrTimedout();
+            return true;
+        } catch (Throwable e) {
+            Log.e(TAG, "onConnect()", e);
+            mError = newConnectingError(e);
+            onError();
+            return false;
+        }
     }
 
     synchronized void onDisconnect(boolean cleanUpServices) {
@@ -214,8 +223,8 @@ abstract class VpnService<E extends VpnProfile> {
 
         SystemProperties.set(VPN_DNS1, "-");
         SystemProperties.set(VPN_DNS2, "-");
-        SystemProperties.set(VPN_UP, VPN_IS_DOWN);
-        Log.d(TAG, "       VPN UP: " + SystemProperties.get(VPN_UP));
+        SystemProperties.set(VPN_STATUS, VPN_IS_DOWN);
+        Log.d(TAG, "       VPN UP: " + SystemProperties.get(VPN_STATUS));
     }
 
     private void waitUntilConnectedOrTimedout() {
@@ -224,7 +233,7 @@ abstract class VpnService<E extends VpnProfile> {
             public void run() {
                 sleep(2000); // 2 seconds
                 for (int i = 0; i < 60; i++) {
-                    if (VPN_IS_UP.equals(SystemProperties.get(VPN_UP))) {
+                    if (VPN_IS_UP.equals(SystemProperties.get(VPN_STATUS))) {
                         onConnected();
                         return;
                     } else if (mState != VpnState.CONNECTING) {
@@ -269,6 +278,13 @@ abstract class VpnService<E extends VpnProfile> {
 
         // stop the service itself
         mContext.stopSelf();
+    }
+
+    private VpnConnectingError newConnectingError(Throwable e) {
+        return new VpnConnectingError(
+                (e instanceof UnknownHostException)
+                ? VpnManager.VPN_ERROR_UNKNOWN_SERVER
+                : VpnManager.VPN_ERROR_CONNECTION_FAILED);
     }
 
     private synchronized void onOneServiceGone() {
@@ -347,7 +363,13 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     private void broadcastConnectivity(VpnState s) {
-        new VpnManager(mContext).broadcastConnectivity(mProfile.getName(), s);
+        VpnManager m = new VpnManager(mContext);
+        if ((s == VpnState.IDLE) && (mError != null)) {
+            m.broadcastConnectivity(mProfile.getName(), s,
+                    mError.getErrorCode());
+        } else {
+            m.broadcastConnectivity(mProfile.getName(), s);
+        }
     }
 
     private void startConnectivityMonitor() {
@@ -447,6 +469,9 @@ abstract class VpnService<E extends VpnProfile> {
         //@Override
         public void error(ProcessProxy p, Throwable e) {
             Log.e(TAG, "service error: " + p.getName(), e);
+            if (e instanceof VpnConnectingError) {
+                mError = (VpnConnectingError) e;
+            }
             commonCallback((AndroidServiceProxy) p);
         }
 

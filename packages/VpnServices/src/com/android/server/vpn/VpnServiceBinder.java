@@ -27,7 +27,6 @@ import android.net.vpn.VpnManager;
 import android.net.vpn.VpnProfile;
 import android.net.vpn.VpnState;
 import android.os.IBinder;
-import android.util.Log;
 
 import java.io.IOException;
 
@@ -55,6 +54,11 @@ public class VpnServiceBinder extends Service {
         }
     };
 
+    public void onStart (Intent intent, int startId) {
+        super.onStart(intent, startId);
+        setForeground(true);
+    }
+
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
@@ -62,15 +66,8 @@ public class VpnServiceBinder extends Service {
     private synchronized boolean connect(
             VpnProfile p, String username, String password) {
         if (mService != null) return false;
-        try {
-            mService = createService(p);
-            mService.onConnect(username, password);
-            return true;
-        } catch (Throwable e) {
-            Log.e(TAG, "connect()", e);
-            if (mService != null) mService.onError();
-            return false;
-        }
+        mService = createService(p);
+        return mService.onConnect(username, password);
     }
 
     private synchronized void checkStatus(VpnProfile p) {
