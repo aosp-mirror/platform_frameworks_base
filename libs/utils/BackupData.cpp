@@ -298,10 +298,12 @@ BackupDataReader::SkipEntityData()
     }
     if (m_header.entity.dataSize > 0) {
         int pos = lseek(m_fd, m_dataEndPos, SEEK_SET);
-        return pos == -1 ? (int)errno : (int)NO_ERROR;
-    } else {
-        return NO_ERROR;
+        if (pos == -1) {
+            return errno;
+        }
     }
+    SKIP_PADDING();
+    return NO_ERROR;
 }
 
 ssize_t
