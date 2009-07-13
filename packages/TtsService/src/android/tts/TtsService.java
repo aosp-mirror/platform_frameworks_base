@@ -132,7 +132,7 @@ public class TtsService extends Service implements OnCompletionListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        //Log.i("TTS", "TTS starting");
+        Log.i("TTS", "TTS starting");
 
         mResolver = getContentResolver();
 
@@ -326,6 +326,7 @@ public class TtsService extends Service implements OnCompletionListener {
      *            engines.
      */
     private int speak(String callingApp, String text, int queueMode, ArrayList<String> params) {
+        Log.i("TTS service received", text);
         if (queueMode == TextToSpeech.TTS_QUEUE_FLUSH) {
             stop(callingApp);
         }
@@ -455,14 +456,16 @@ public class TtsService extends Service implements OnCompletionListener {
                         String variant = "";
                         for (int i = 0; i < params.size() - 1; i = i + 2){
                             String param = params.get(i);
-                            if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)){
-                                setSpeechRate("", Integer.parseInt(params.get(i+1)));
-                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
-                                language = params.get(i+1);
-                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
-                                country = params.get(i+1);
-                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_VARIANT)){
-                                variant = params.get(i+1);
+                            if (param != null){
+                                if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)){
+                                    setSpeechRate("", Integer.parseInt(params.get(i+1)));
+                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
+                                    language = params.get(i+1);
+                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
+                                    country = params.get(i+1);
+                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_VARIANT)){
+                                    variant = params.get(i+1);
+                                }
                             }
                         }
                         if (language.length() > 0){
@@ -510,14 +513,16 @@ public class TtsService extends Service implements OnCompletionListener {
                         String variant = "";
                         for (int i = 0; i < params.size() - 1; i = i + 2){
                             String param = params.get(i);
-                            if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)){
-                                setSpeechRate("", Integer.parseInt(params.get(i+1)));
-                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
-                                language = params.get(i+1);
-                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
-                                country = params.get(i+1);
-                            } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_VARIANT)){
-                                variant = params.get(i+1);
+                            if (param != null){
+                                if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)){
+                                    setSpeechRate("", Integer.parseInt(params.get(i+1)));
+                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
+                                    language = params.get(i+1);
+                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
+                                    country = params.get(i+1);
+                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_VARIANT)){
+                                    variant = params.get(i+1);
+                                }
                             }
                         }
                         if (language.length() > 0){
