@@ -34,6 +34,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.PackageParser.Component;
 import android.content.res.AssetManager;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
@@ -166,41 +167,50 @@ public final class ActivityThread {
         return metrics;
     }
 
-    Resources getTopLevelResources(String appDir, PackageInfo pkgInfo) {
+    /**
+     * Creates the top level Resources for applications with the given compatibility info.
+     *
+     * @param resDir the resource directory.
+     * @param compInfo the compability info. It will use the default compatibility info when it's
+     * null.
+     */
+    Resources getTopLevelResources(String resDir, CompatibilityInfo compInfo) {
         synchronized (mPackages) {
-            //Log.w(TAG, "getTopLevelResources: " + appDir);
-            WeakReference<Resources> wr = mActiveResources.get(appDir);
+            // Resources is app scale dependent.
+            ResourcesKey key = new ResourcesKey(resDir, compInfo.applicationScale);
+            //Log.w(TAG, "getTopLevelResources: " + resDir);
+            WeakReference<Resources> wr = mActiveResources.get(key);
             Resources r = wr != null ? wr.get() : null;
             if (r != null && r.getAssets().isUpToDate()) {
-                //Log.w(TAG, "Returning cached resources " + r + " " + appDir);
+                //Log.w(TAG, "Returning cached resources " + r + " " + resDir);
                 return r;
             }
 
             //if (r != null) {
             //    Log.w(TAG, "Throwing away out-of-date resources!!!! "
-            //            + r + " " + appDir);
+            //            + r + " " + resDir);
             //}
 
             AssetManager assets = new AssetManager();
-            if (assets.addAssetPath(appDir) == 0) {
+            if (assets.addAssetPath(resDir) == 0) {
                 return null;
             }
-            ApplicationInfo appInfo;
-            try {
-                appInfo = getPackageManager().getApplicationInfo(
-                        pkgInfo.getPackageName(),
-                        PackageManager.GET_SUPPORTS_DENSITIES);
-            } catch (RemoteException e) {
-                throw new AssertionError(e);
-            }
-            //Log.i(TAG, "Resource:" + appDir + ", display metrics=" + metrics);
+
+            //Log.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
             DisplayMetrics metrics = getDisplayMetricsLocked(false);
-            r = new Resources(assets, metrics, getConfiguration(), appInfo);
+            r = new Resources(assets, metrics, getConfiguration(), compInfo);
             //Log.i(TAG, "Created app resources " + r + ": " + r.getConfiguration());
             // XXX need to remove entries when weak references go away
-            mActiveResources.put(appDir, new WeakReference<Resources>(r));
+            mActiveResources.put(key, new WeakReference<Resources>(r));
             return r;
         }
+    }
+
+    /**
+     * Creates the top level resources for the given package.
+     */
+    Resources getTopLevelResources(String resDir, PackageInfo pkgInfo) {
+        return getTopLevelResources(resDir, pkgInfo.mCompatibilityInfo);
     }
 
     final Handler getHandler() {
@@ -223,6 +233,7 @@ public final class ActivityThread {
         private Resources mResources;
         private ClassLoader mClassLoader;
         private Application mApplication;
+        private CompatibilityInfo mCompatibilityInfo;
 
         private final HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>> mReceivers
             = new HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>>();
@@ -250,6 +261,7 @@ public final class ActivityThread {
             mBaseClassLoader = baseLoader;
             mSecurityViolation = securityViolation;
             mIncludeCode = includeCode;
+            mCompatibilityInfo = new CompatibilityInfo(aInfo);
 
             if (mAppDir == null) {
                 if (mSystemContext == null) {
@@ -283,6 +295,7 @@ public final class ActivityThread {
             mIncludeCode = true;
             mClassLoader = systemContext.getClassLoader();
             mResources = systemContext.getResources();
+            mCompatibilityInfo = new CompatibilityInfo(mApplicationInfo);
         }
 
         public String getPackageName() {
@@ -1894,6 +1907,32 @@ public final class ActivityThread {
         }
     }
 
+    private final static class ResourcesKey {
+        final private String mResDir;
+        final private float mScale;
+        final private int mHash;
+        
+        ResourcesKey(String resDir, float scale) {
+            mResDir = resDir;
+            mScale = scale;
+            mHash = mResDir.hashCode() << 2 + (int) (mScale * 2);
+        }
+        
+        @Override
+        public int hashCode() {
+            return mHash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof ResourcesKey)) {
+                return false;
+            }
+            ResourcesKey peer = (ResourcesKey) obj;
+            return mResDir.equals(peer.mResDir) && mScale == peer.mScale;
+        }
+    }
+
     static IPackageManager sPackageManager;
 
     final ApplicationThread mAppThread = new ApplicationThread();
@@ -1939,8 +1978,8 @@ public final class ActivityThread {
         = new HashMap<String, WeakReference<PackageInfo>>();
     Display mDisplay = null;
     DisplayMetrics mDisplayMetrics = null;
-    HashMap<String, WeakReference<Resources> > mActiveResources
-        = new HashMap<String, WeakReference<Resources> >();
+    HashMap<ResourcesKey, WeakReference<Resources> > mActiveResources
+        = new HashMap<ResourcesKey, WeakReference<Resources> >();
 
     // The lock of mProviderMap protects the following variables.
     final HashMap<String, ProviderRecord> mProviderMap
