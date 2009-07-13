@@ -29,7 +29,7 @@
 #include <string.h>
 
 #include <cutils/atomic.h>
-#include <cutils/properties.h>
+#include <cutils/properties.h> // for property_get
 
 #include <utils/misc.h>
 
@@ -58,6 +58,8 @@
 #include "MidiFile.h"
 #include "VorbisPlayer.h"
 #include <media/PVPlayer.h>
+#include "TestPlayerStub.h"
+
 #if USE_STAGEFRIGHT
 #include "StagefrightPlayer.h"
 #endif
@@ -67,6 +69,8 @@
 #else
 #include <media/IOMX.h>
 #endif
+
+
 
 /* desktop Linux needs a little help with gettid() */
 #if defined(HAVE_GETTID) && !defined(HAVE_ANDROID_OS)
@@ -656,6 +660,10 @@ static player_type getPlayerType(int fd, int64_t offset, int64_t length)
 
 static player_type getPlayerType(const char* url)
 {
+    if (TestPlayerStub::canBeUsed(url)) {
+        return TEST_PLAYER;
+    }
+
     // use MidiFile for MIDI extensions
     int lenURL = strlen(url);
     for (int i = 0; i < NELEM(FILE_EXTS); ++i) {
@@ -706,6 +714,10 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
                     "Should not be here, stagefright player not enabled.");
             break;
 #endif
+        case TEST_PLAYER:
+            LOGV("Create Test Player stub");
+            p = new TestPlayerStub();
+            break;
     }
     if (p != NULL) {
         if (p->initCheck() == NO_ERROR) {
@@ -770,7 +782,11 @@ status_t MediaPlayerService::Client::setDataSource(const char *url)
         // now set data source
         LOGV(" setDataSource");
         mStatus = p->setDataSource(url);
-        if (mStatus == NO_ERROR) mPlayer = p;
+        if (mStatus == NO_ERROR) {
+            mPlayer = p;
+        } else {
+            LOGE("  error: %d", mStatus);
+        }
         return mStatus;
     }
 }
