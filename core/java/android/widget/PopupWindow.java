@@ -27,7 +27,6 @@ import android.view.WindowManager;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.WindowManagerImpl;
 import android.view.ViewTreeObserver.OnScrollChangedListener;
 import android.view.View.OnTouchListener;
 import android.graphics.PixelFormat;
@@ -82,6 +81,7 @@ public class PopupWindow {
     private View mPopupView;
     private boolean mFocusable;
     private int mInputMethodMode = INPUT_METHOD_FROM_FOCUSABLE;
+    private int mSoftInputMode;
     private boolean mTouchable = true;
     private boolean mOutsideTouchable = false;
     private boolean mClippingEnabled = true;
@@ -445,6 +445,30 @@ public class PopupWindow {
      */
     public void setInputMethodMode(int mode) {
         mInputMethodMode = mode;
+    }
+
+    /**
+     * Sets the operating mode for the soft input area.
+     *
+     * @param mode The desired mode, see
+     *        {@link android.view.WindowManager.LayoutParams#softInputMode}
+     *        for the full list
+     *
+     * @see android.view.WindowManager.LayoutParams#softInputMode
+     * @see #getSoftInputMode()
+     */
+    public void setSoftInputMode(int mode) {
+        mSoftInputMode = mode;
+    }
+
+    /**
+     * Returns the current value in {@link #setSoftInputMode(int)}.
+     *
+     * @see #setSoftInputMode(int)
+     * @see android.view.WindowManager.LayoutParams#softInputMode
+     */
+    public int getSoftInputMode() {
+        return mSoftInputMode;
     }
     
     /**
@@ -822,7 +846,7 @@ public class PopupWindow {
         p.flags = computeFlags(p.flags);
         p.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
         p.token = token;
-        p.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+        p.softInputMode = mSoftInputMode;
         p.setTitle("PopupWindow:" + Integer.toHexString(hashCode()));
 
         return p;
