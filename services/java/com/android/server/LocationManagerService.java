@@ -1157,13 +1157,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             return mIntent;
         }
 
-        boolean isInProximity(double latitude, double longitude) {
+        boolean isInProximity(double latitude, double longitude, float accuracy) {
             Location loc = new Location("");
             loc.setLatitude(latitude);
             loc.setLongitude(longitude);
 
             double radius = loc.distanceTo(mLocation);
-            return radius <= mRadius;
+            return radius <= Math.max(mRadius,accuracy);
         }
         
         @Override
@@ -1203,6 +1203,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             long now = System.currentTimeMillis();
             double latitude = loc.getLatitude();
             double longitude = loc.getLongitude();
+            float accuracy = loc.getAccuracy();
             ArrayList<PendingIntent> intentsToRemove = null;
 
             for (ProximityAlert alert : mProximityAlerts.values()) {
@@ -1212,7 +1213,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 if ((expiration == -1) || (now <= expiration)) {
                     boolean entered = mProximitiesEntered.contains(alert);
                     boolean inProximity =
-                        alert.isInProximity(latitude, longitude);
+                        alert.isInProximity(latitude, longitude, accuracy);
                     if (!entered && inProximity) {
                         if (LOCAL_LOGV) {
                             Log.v(TAG, "Entered alert");
