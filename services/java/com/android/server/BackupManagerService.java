@@ -1548,8 +1548,6 @@ class BackupManagerService extends IBackupManager.Stub {
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {
-            long oldId = Binder.clearCallingIdentity();
-
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
                     + " / " + (!mProvisioned ? "not " : "") + "provisioned");
             pw.println("Available transports:");
@@ -1572,8 +1570,6 @@ class BackupManagerService extends IBackupManager.Stub {
             for (BackupRequest req : mPendingBackups.values()) {
                 pw.println("    " + req);
             }
-
-            Binder.restoreCallingIdentity(oldId);
         }
     }
 }
