@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
  */
 public final class Telephony {
     private static final String TAG = "Telephony";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final boolean LOCAL_LOGV = DEBUG ? Config.LOGD : Config.LOGV;
 
     // Constructor
@@ -1148,8 +1148,14 @@ public final class Telephony {
             }
 
             Uri uri = uriBuilder.build();
+            if (DEBUG) {
+                Log.v(TAG, "getOrCreateThreadId uri: " + uri);
+            }
             Cursor cursor = SqliteWrapper.query(context, context.getContentResolver(),
                     uri, ID_PROJECTION, null, null, null);
+            if (DEBUG) {
+                Log.v(TAG, "getOrCreateThreadId cursor cnt: " + cursor.getCount());
+            }
             if (cursor != null) {
                 try {
                     if (cursor.moveToFirst()) {
@@ -1642,7 +1648,7 @@ public final class Telephony {
          *
          * It is recommended to display <em>plmn</em> before / above <em>spn</em> if
          * both are displayed.
-         * 
+         *
          * <p>Note this is a protected intent that can only be sent
          * by the system.
          */
