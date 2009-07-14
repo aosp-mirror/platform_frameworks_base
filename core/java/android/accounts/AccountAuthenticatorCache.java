@@ -33,12 +33,9 @@ import android.util.AttributeSet;
         extends RegisteredServicesCache<AuthenticatorDescription> {
     private static final String TAG = "Account";
 
-    private static final String SERVICE_INTERFACE = "android.accounts.AccountAuthenticator";
-    private static final String SERVICE_META_DATA = "android.accounts.AccountAuthenticator";
-    private static final String ATTRIBUTES_NAME = "account-authenticator";
-
     public AccountAuthenticatorCache(Context context) {
-        super(context, SERVICE_INTERFACE, SERVICE_META_DATA, ATTRIBUTES_NAME);
+        super(context, Constants.AUTHENTICATOR_INTENT_ACTION,
+                Constants.AUTHENTICATOR_META_DATA_NAME, Constants.AUTHENTICATOR_ATTRIBUTES_NAME);
     }
 
     public AuthenticatorDescription parseServiceAttributes(String packageName, AttributeSet attrs) {

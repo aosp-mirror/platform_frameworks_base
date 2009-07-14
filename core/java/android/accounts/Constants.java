@@ -40,6 +40,13 @@ public class Constants {
     public static final String ACCOUNT_AUTHENTICATOR_RESPONSE_KEY = "accountAuthenticatorResponse";
     public static final String ACCOUNT_MANAGER_RESPONSE_KEY = "accountManagerResponse";
     public static final String AUTH_FAILED_MESSAGE_KEY = "authFailedMessage";
+
+    public static final String AUTHENTICATOR_INTENT_ACTION =
+            "android.accounts.AccountAuthenticator";
+    public static final String AUTHENTICATOR_META_DATA_NAME =
+            "android.accounts.AccountAuthenticator";
+    public static final String AUTHENTICATOR_ATTRIBUTES_NAME = "account-authenticator";
+
     /**
      * Action sent as a broadcast Intent by the AccountsService
      * when accounts are added to and/or removed from the device's

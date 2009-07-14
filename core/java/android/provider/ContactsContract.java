@@ -1012,6 +1012,16 @@ public final class ContactsContract {
         public static final String SOURCE_ID = "sourceid";
 
         /**
+         * An integer that is updated whenever this contact or its data changes.
+         */
+        public static final String VERSION = "version";
+
+        /**
+         * Set to 1 whenever the version changes
+         */
+        public static final String DIRTY = "dirty";
+
+        /**
          * Flag indicating if the contacts belonging to this group should be
          * visible in any user interface.
          * <p>
