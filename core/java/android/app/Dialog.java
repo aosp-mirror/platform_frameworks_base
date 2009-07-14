@@ -86,6 +86,7 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     private Message mCancelMessage;
     private Message mDismissMessage;
+    private Message mShowMessage;
 
     /**
      * Whether to cancel the dialog when a touch is received outside of the
@@ -140,7 +141,7 @@ public class Dialog implements DialogInterface, Window.Callback,
         w.setWindowManager(mWindowManager, null, null);
         w.setGravity(Gravity.CENTER);
         mUiThread = Thread.currentThread();
-        mDismissCancelHandler = new DismissCancelHandler(this);
+        mListenersHandler = new ListenersHandler(this);
     }
 
     /**
@@ -235,6 +236,8 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
         mWindowManager.addView(mDecor, l);
         mShowing = true;
+
+        sendShowMessage();
     }
     
     /**
@@ -286,6 +289,13 @@ public class Dialog implements DialogInterface, Window.Callback,
         if (mDismissMessage != null) {
             // Obtain a new message so this dialog can be re-used
             Message.obtain(mDismissMessage).sendToTarget();
+        }
+    }
+
+    private void sendShowMessage() {
+        if (mShowMessage != null) {
+            // Obtain a new message so this dialog can be re-used
+            Message.obtain(mShowMessage).sendToTarget();
         }
     }
 
@@ -890,7 +900,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     public void setOnCancelListener(final OnCancelListener listener) {
         if (listener != null) {
-            mCancelMessage = mDismissCancelHandler.obtainMessage(CANCEL, listener);
+            mCancelMessage = mListenersHandler.obtainMessage(CANCEL, listener);
         } else {
             mCancelMessage = null;
         }
@@ -911,9 +921,22 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     public void setOnDismissListener(final OnDismissListener listener) {
         if (listener != null) {
-            mDismissMessage = mDismissCancelHandler.obtainMessage(DISMISS, listener);
+            mDismissMessage = mListenersHandler.obtainMessage(DISMISS, listener);
         } else {
             mDismissMessage = null;
+        }
+    }
+
+    /**
+     * Sets a listener to be invoked when the dialog is shown.
+     *
+     * @hide Pending API council approval
+     */
+    public void setOnShowListener(OnShowListener listener) {
+        if (listener != null) {
+            mShowMessage = mListenersHandler.obtainMessage(SHOW, listener);
+        } else {
+            mShowMessage = null;
         }
     }
 
@@ -951,13 +974,14 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     private static final int DISMISS = 0x43;
     private static final int CANCEL = 0x44;
+    private static final int SHOW = 0x45;
 
-    private Handler mDismissCancelHandler;
+    private Handler mListenersHandler;
 
-    private static final class DismissCancelHandler extends Handler {
+    private static final class ListenersHandler extends Handler {
         private WeakReference<DialogInterface> mDialog;
 
-        public DismissCancelHandler(Dialog dialog) {
+        public ListenersHandler(Dialog dialog) {
             mDialog = new WeakReference<DialogInterface>(dialog);
         }
 
@@ -969,6 +993,9 @@ public class Dialog implements DialogInterface, Window.Callback,
                     break;
                 case CANCEL:
                     ((OnCancelListener) msg.obj).onCancel(mDialog.get());
+                    break;
+                case SHOW:
+                    ((OnShowListener) msg.obj).onShow(mDialog.get());
                     break;
             }
         }
