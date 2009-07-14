@@ -16,8 +16,13 @@
 
 package android.app;
 
+import android.app.SearchManager.DialogCursorProtocol;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -37,8 +42,6 @@ import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
-
-import static android.app.SearchManager.DialogCursorProtocol;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -310,19 +313,39 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             text2 = cursor.getString(mText2Col);
         }
         ((SuggestionItemView)view).setTextStrings(text1, text2, isHtml, mProviderContext);
-        setViewIcon(cursor, views.mIcon1, mIconName1Col);
-        setViewIcon(cursor, views.mIcon2, mIconName2Col);
+        if (views.mIcon1 != null) {
+            setViewDrawable(views.mIcon1, getIcon1(cursor));
+        }
+        if (views.mIcon2 != null) {
+            setViewDrawable(views.mIcon2, getIcon2(cursor));
+        }
     }
 
-    private void setViewIcon(Cursor cursor, ImageView v, int iconNameCol) {
-        if (v == null) {
-            return;
+    private Drawable getIcon1(Cursor cursor) {
+        if (mIconName1Col < 0) {
+            return null;
         }
-        if (iconNameCol < 0) {
-            return;
-        }
-        String value = cursor.getString(iconNameCol);
+        String value = cursor.getString(mIconName1Col);
         Drawable drawable = getDrawableFromResourceValue(value);
+        if (drawable != null) {
+            return drawable;
+        }
+        return getDefaultIcon1(cursor);
+    }
+
+    private Drawable getIcon2(Cursor cursor) {
+        if (mIconName2Col < 0) {
+            return null;
+        }
+        String value = cursor.getString(mIconName2Col);
+        return getDrawableFromResourceValue(value);
+    }
+
+    /**
+     * Sets the drawable in an image view, makes sure the view is only visible if there
+     * is a drawable.
+     */
+    private void setViewDrawable(ImageView v, Drawable drawable) {
         // Set the icon even if the drawable is null, since we need to clear any
         // previous icon.
         v.setImageDrawable(drawable);
@@ -470,6 +493,88 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             // drawable = null;
         }
 
+        return drawable;
+    }
+
+    /**
+     * Gets the left-hand side icon that will be used for the current suggestion
+     * if the suggestion contains an icon column but no icon or a broken icon.
+     *
+     * @param cursor A cursor positioned at the current suggestion.
+     * @return A non-null drawable.
+     */
+    private Drawable getDefaultIcon1(Cursor cursor) {
+        // First check the component that the suggestion is originally from
+        String c = getColumnString(cursor, SearchManager.SUGGEST_COLUMN_INTENT_COMPONENT_NAME);
+        if (c != null) {
+            ComponentName component = ComponentName.unflattenFromString(c);
+            if (component != null) {
+                Drawable drawable = getActivityIconWithCache(component);
+                if (drawable != null) {
+                    return drawable;
+                }
+            } else {
+                Log.w(LOG_TAG, "Bad component name: " + c);
+            }
+        }
+
+        // Then check the component that gave us the suggestion
+        Drawable drawable = getActivityIconWithCache(mSearchable.getSearchActivity());
+        if (drawable != null) {
+            return drawable;
+        }
+
+        // Fall back to a default icon
+        return mContext.getPackageManager().getDefaultActivityIcon();
+    }
+
+    /**
+     * Gets the activity or application icon for an activity.
+     * Uses the local icon cache for fast repeated lookups.
+     *
+     * @param component Name of an activity.
+     * @return A drawable, or {@code null} if neither the activity nor the application
+     *         has an icon set.
+     */
+    private Drawable getActivityIconWithCache(ComponentName component) {
+        // First check the icon cache
+        String componentIconKey = component.flattenToShortString();
+        // Using containsKey() since we also store null values.
+        if (mOutsideDrawablesCache.containsKey(componentIconKey)) {
+            return mOutsideDrawablesCache.get(componentIconKey);
+        }
+        // Then try the activity or application icon
+        Drawable drawable = getActivityIcon(component);
+        // Stick it in the cache so we don't do this lookup again.
+        mOutsideDrawablesCache.put(componentIconKey, drawable);
+        return drawable;
+    }
+
+    /**
+     * Gets the activity or application icon for an activity.
+     *
+     * @param component Name of an activity.
+     * @return A drawable, or {@code null} if neither the acitivy or the application
+     *         have an icon set.
+     */
+    private Drawable getActivityIcon(ComponentName component) {
+        PackageManager pm = mContext.getPackageManager();
+        final ActivityInfo activityInfo;
+        try {
+            activityInfo = pm.getActivityInfo(component, PackageManager.GET_META_DATA);
+        } catch (NameNotFoundException ex) {
+            Log.w(LOG_TAG, ex.toString());
+            return null;
+        }
+        int iconId = activityInfo.getIconResource();
+        if (iconId == 0) return null;
+        String pkg = component.getPackageName();
+        Drawable drawable = pm.getDrawable(pkg, iconId, activityInfo.applicationInfo);
+        if (drawable == null) {
+            Log.w(LOG_TAG, "Invalid icon resource " + iconId + " for "
+                    + component.flattenToShortString());
+            return null;
+        }
         return drawable;
     }
 
