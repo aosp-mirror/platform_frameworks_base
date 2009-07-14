@@ -49,7 +49,7 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
 
     private static final String SEARCH_UI_THREAD_NAME = "SearchDialog";
     private static final int SEARCH_UI_THREAD_PRIORITY =
-        android.os.Process.THREAD_PRIORITY_FOREGROUND;
+        android.os.Process.THREAD_PRIORITY_DEFAULT;
 
     // Takes no arguments
     private static final int MSG_INIT = 0;
