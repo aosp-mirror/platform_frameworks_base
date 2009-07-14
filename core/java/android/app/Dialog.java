@@ -20,6 +20,7 @@ import com.android.internal.policy.PolicyManager;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -784,8 +785,17 @@ public class Dialog implements DialogInterface, Window.Callback,
      * This hook is called when the user signals the desire to start a search.
      */
     public boolean onSearchRequested() {
-        // not during dialogs, no.
-        return false;
+        final SearchManager searchManager = (SearchManager) mContext
+                .getSystemService(Context.SEARCH_SERVICE);
+
+        // associate search with owner activity if possible (otherwise it will default to
+        // global search).
+        final ComponentName appName = mOwnerActivity == null ? null
+                : mOwnerActivity.getComponentName();
+        final boolean globalSearch = (appName == null);
+        searchManager.startSearch(null, false, appName, null, globalSearch);
+        dismiss();
+        return true;
     }
 
 
