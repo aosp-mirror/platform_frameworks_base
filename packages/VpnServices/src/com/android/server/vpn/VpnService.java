@@ -299,12 +299,12 @@ abstract class VpnService<E extends VpnProfile> {
 
     private void saveVpnDnsProperties() {
         mOriginalDns1 = mOriginalDns2 = "";
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             mVpnDns1 = SystemProperties.get(VPN_DNS1);
             mVpnDns2 = SystemProperties.get(VPN_DNS2);
             if (mOriginalDns1.equals(mVpnDns1)) {
                 Log.d(TAG, "wait for vpn dns to settle in..." + i);
-                sleep(500);
+                sleep(200);
             } else {
                 mOriginalDns1 = SystemProperties.get(DNS1);
                 mOriginalDns2 = SystemProperties.get(DNS2);
@@ -317,7 +317,9 @@ abstract class VpnService<E extends VpnProfile> {
                 return;
             }
         }
-        Log.e(TAG, "saveVpnDnsProperties(): DNS not updated??");
+        Log.d(TAG, "saveVpnDnsProperties(): DNS not updated??");
+        mOriginalDns1 = mVpnDns1 = SystemProperties.get(DNS1);
+        mOriginalDns2 = mVpnDns2 = SystemProperties.get(DNS2);
     }
 
     private void saveAndSetDomainSuffices() {
@@ -374,7 +376,7 @@ abstract class VpnService<E extends VpnProfile> {
     private void checkDnsProperties() {
         String dns1 = SystemProperties.get(DNS1);
         if (!mVpnDns1.equals(dns1)) {
-            Log.w(TAG, "   @@ !!!    dns being overridden");
+            Log.w(TAG, "   dns being overridden by: " + dns1);
             onError();
         }
     }
