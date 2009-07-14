@@ -133,8 +133,8 @@
     <string name="same_month_md1_time1_md2_time2">%3$s %2$s %5$s - %8$s %7$s %10$s</string>
     <string name="same_year_wday1_md1_time1_wday2_md2_time2">%1$s %3$s %2$s %5$s - %6$s %8$s %7$s %10$s</string>
     <string name="same_month_wday1_md1_time1_wday2_md2_time2">%1$s %3$s %2$s %5$s - %6$s %8$s %7$s %10$s</string>
-    <string name="same_year_mdy1_time1_mdy2_time2">Ngày %3$s tháng %2$s năm %4$s %5$s - 'Ngày %8$s tháng %7$s năm %9$s %10$s</string>
-    <string name="same_month_mdy1_time1_mdy2_time2">Ngày %3$s tháng %2$s năm %4$s %5$s - 'Ngày %8$s tháng %7$s năm %9$s %10$s</string>
+    <string name="same_year_mdy1_time1_mdy2_time2">Ngày %3$s tháng %2$s năm %4$s %5$s - \'Ngày %8$s tháng %7$s năm %9$s %10$s</string>
+    <string name="same_month_mdy1_time1_mdy2_time2">Ngày %3$s tháng %2$s năm %4$s %5$s - \'Ngày %8$s tháng %7$s năm %9$s %10$s</string>
     <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">%1$s, %3$s %2$s %4$s %5$s - %6$s, %8$s %7$s %9$s %10$s</string>
     <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">%1$s, %3$s %2$s %4$s %5$s - %6$s, %8$s %7$s %9$s %10$s</string>
     <string name="same_month_wday1_mdy1_wday2_mdy2">%1$s, %3$s %2$s %4$s - %6$s, %8$s %7$s %9$s</string>
