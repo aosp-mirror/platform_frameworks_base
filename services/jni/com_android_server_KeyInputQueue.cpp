@@ -205,6 +205,23 @@ android_server_KeyInputQueue_getKeycodeStateDevice(JNIEnv* env, jobject clazz,
     return st;
 }
 
+static jint
+android_server_KeyInputQueue_scancodeToKeycode(JNIEnv* env, jobject clazz,
+                                            jint deviceId, jint scancode)
+{
+    jint res = 0;
+    gLock.lock();
+    if (gHub != NULL) {
+        int32_t keycode;
+        uint32_t flags;
+        gHub->scancodeToKeycode(deviceId, scancode, &keycode, &flags);
+        res = keycode;
+    }
+    gLock.unlock();
+    
+    return res;
+}
+
 static jboolean
 android_server_KeyInputQueue_hasKeys(JNIEnv* env, jobject clazz,
                                      jintArray keyCodes, jbooleanArray outFlags)
@@ -254,6 +271,8 @@ static JNINativeMethod gInputMethods[] = {
         (void*) android_server_KeyInputQueue_getKeycodeStateDevice },
     { "hasKeys", "([I[Z)Z",
         (void*) android_server_KeyInputQueue_hasKeys },
+    { "scancodeToKeycode", "(II)I",
+        (void*) android_server_KeyInputQueue_scancodeToKeycode },
 };
 
 int register_android_server_KeyInputQueue(JNIEnv* env)

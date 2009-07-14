@@ -30,10 +30,20 @@ import android.view.RawInputEvent;
 import android.view.Surface;
 import android.view.WindowManagerPolicy;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
 public abstract class KeyInputQueue {
     static final String TAG = "KeyInputQueue";
 
-    SparseArray<InputDevice> mDevices = new SparseArray<InputDevice>();
+    static final boolean DEBUG_VIRTUAL_KEYS = false;
+    
+    final SparseArray<InputDevice> mDevices = new SparseArray<InputDevice>();
+    final ArrayList<VirtualKey> mVirtualKeys = new ArrayList<VirtualKey>();
     
     int mGlobalMetaState = 0;
     boolean mHaveGlobalMetaState = false;
@@ -44,9 +54,13 @@ public abstract class KeyInputQueue {
     int mCacheCount;
 
     Display mDisplay = null;
+    int mDisplayWidth;
+    int mDisplayHeight;
     
     int mOrientation = Surface.ROTATION_0;
     int[] mKeyRotationMap = null;
+    
+    VirtualKey mPressedVirtualKey = null;
     
     PowerManager.WakeLock mWakeLock;
 
@@ -110,11 +124,106 @@ public abstract class KeyInputQueue {
         QueuedEvent next;
     }
 
+    /**
+     * A key that exists as a part of the touch-screen, outside of the normal
+     * display area of the screen.
+     */
+    static class VirtualKey {
+        int scancode;
+        int centerx;
+        int centery;
+        int width;
+        int height;
+        
+        int hitLeft;
+        int hitTop;
+        int hitRight;
+        int hitBottom;
+        
+        InputDevice lastDevice;
+        int lastKeycode;
+        
+        boolean checkHit(int x, int y) {
+            return (x >= hitLeft && x <= hitRight
+                    && y >= hitTop && y <= hitBottom);
+        }
+        
+        void computeHitRect(InputDevice dev, int dw, int dh) {
+            if (dev == lastDevice) {
+                return;
+            }
+            
+            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "computeHitRect for " + scancode
+                    + ": dev=" + dev + " absX=" + dev.absX + " absY=" + dev.absY);
+            
+            lastDevice = dev;
+            
+            int minx = dev.absX.minValue;
+            int maxx = dev.absX.maxValue;
+            
+            int halfw = width/2;
+            int left = centerx - halfw;
+            int right = centerx + halfw;
+            hitLeft = minx + ((left*maxx-minx)/dw);
+            hitRight = minx + ((right*maxx-minx)/dw);
+            
+            int miny = dev.absY.minValue;
+            int maxy = dev.absY.maxValue;
+            
+            int halfh = height/2;
+            int top = centery - halfh;
+            int bottom = centery + halfh;
+            hitTop = miny + ((top*maxy-miny)/dh);
+            hitBottom = miny + ((bottom*maxy-miny)/dh);
+        }
+    }
+    
     KeyInputQueue(Context context) {
         if (MEASURE_LATENCY) {
             lt = new LatencyTimer(100, 1000);
         }
 
+        try {
+            FileInputStream fis = new FileInputStream(
+                    "/sys/board_properties/virtualkeys.synaptics-rmi-touchscreen");
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr);
+            String str = br.readLine();
+            if (str != null) {
+                String[] it = str.split(":");
+                if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "***** VIRTUAL KEYS: " + it);
+                final int N = it.length-6;
+                for (int i=0; i<=N; i+=6) {
+                    if (!"0x01".equals(it[i])) {
+                        Log.w(TAG, "Unknown virtual key type at elem #" + i
+                                + ": " + it[i]);
+                        continue;
+                    }
+                    try {
+                        VirtualKey sb = new VirtualKey();
+                        sb.scancode = Integer.parseInt(it[i+1]);
+                        sb.centerx = Integer.parseInt(it[i+2]);
+                        sb.centery = Integer.parseInt(it[i+3]);
+                        sb.width = Integer.parseInt(it[i+4]);
+                        sb.height = Integer.parseInt(it[i+5]);
+                        if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Virtual key "
+                                + sb.scancode + ": center=" + sb.centerx + ","
+                                + sb.centery + " size=" + sb.width + "x"
+                                + sb.height);
+                        mVirtualKeys.add(sb);
+                    } catch (NumberFormatException e) {
+                        Log.w(TAG, "Bad number at region " + i + " in: "
+                                + str, e);
+                    }
+                }
+            }
+            br.close();
+        } catch (FileNotFoundException e) {
+            Log.i(TAG, "No virtual keys found");
+        } catch (IOException e) {
+            Log.w(TAG, "Error reading virtual keys", e);
+        }
+        
         PowerManager pm = (PowerManager)context.getSystemService(
                                                         Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -131,6 +240,12 @@ public abstract class KeyInputQueue {
 
     public void setDisplay(Display display) {
         mDisplay = display;
+        
+        // We assume at this point that the display dimensions reflect the
+        // natural, unrotated display.  We will perform hit tests for soft
+        // buttons based on that display.
+        mDisplayWidth = display.getWidth();
+        mDisplayHeight = display.getHeight();
     }
     
     public void getInputConfiguration(Configuration config) {
@@ -173,6 +288,7 @@ public abstract class KeyInputQueue {
     public static native int getScancodeState(int deviceId, int sw);
     public static native int getKeycodeState(int sw);
     public static native int getKeycodeState(int deviceId, int sw);
+    public static native int scancodeToKeycode(int deviceId, int scancode);
     public static native boolean hasKeys(int[] keycodes, boolean[] keyExists);
     
     public static KeyEvent newKeyEvent(InputDevice device, long downTime,
@@ -339,36 +455,127 @@ public abstract class KeyInputQueue {
                                 }
                                 
                                 MotionEvent me;
-                                me = di.mAbs.generateMotion(di, curTime, curTimeNano, true,
-                                        mDisplay, mOrientation, mGlobalMetaState);
-                                if (false) Log.v(TAG, "Absolute: x=" + di.mAbs.x
-                                        + " y=" + di.mAbs.y + " ev=" + me);
-                                if (me != null) {
-                                    if (WindowManagerPolicy.WATCH_POINTER) {
-                                        Log.i(TAG, "Enqueueing: " + me);
+                                
+                                InputDevice.MotionState ms = di.mAbs;
+                                if (ms.changed) {
+                                    ms.changed = false;
+                                    
+                                    boolean doMotion = true;
+                                    
+                                    // Look for virtual buttons.
+                                    VirtualKey vk = mPressedVirtualKey;
+                                    if (vk != null) {
+                                        doMotion = false;
+                                        if (!ms.down) {
+                                            mPressedVirtualKey = null;
+                                            ms.lastDown = ms.down;
+                                            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG,
+                                                    "Generate key up for: " + vk.scancode);
+                                            addLocked(di, curTimeNano, ev.flags,
+                                                    RawInputEvent.CLASS_KEYBOARD,
+                                                    newKeyEvent(di, di.mDownTime,
+                                                            curTime, false,
+                                                            vk.lastKeycode,
+                                                            0, vk.scancode, 0));
+                                        }
+                                    } else if (ms.down && !ms.lastDown) {
+                                        vk = findSoftButton(di);
+                                        if (vk != null) {
+                                            doMotion = false;
+                                            mPressedVirtualKey = vk;
+                                            vk.lastKeycode = scancodeToKeycode(
+                                                    di.id, vk.scancode);
+                                            ms.lastDown = ms.down;
+                                            di.mDownTime = curTime;
+                                            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG,
+                                                    "Generate key down for: " + vk.scancode
+                                                    + " (keycode=" + vk.lastKeycode + ")");
+                                            addLocked(di, curTimeNano, ev.flags,
+                                                    RawInputEvent.CLASS_KEYBOARD,
+                                                    newKeyEvent(di, di.mDownTime,
+                                                            curTime, true,
+                                                            vk.lastKeycode, 0,
+                                                            vk.scancode, 0));
+                                        }
                                     }
-                                    addLocked(di, curTimeNano, ev.flags,
-                                            RawInputEvent.CLASS_TOUCHSCREEN, me);
+                                    
+                                    if (doMotion) {
+                                        me = ms.generateMotion(di, curTime,
+                                                curTimeNano, true, mDisplay,
+                                                mOrientation, mGlobalMetaState);
+                                        if (false) Log.v(TAG, "Absolute: x=" + di.mAbs.x
+                                                + " y=" + di.mAbs.y + " ev=" + me);
+                                        if (me != null) {
+                                            if (WindowManagerPolicy.WATCH_POINTER) {
+                                                Log.i(TAG, "Enqueueing: " + me);
+                                            }
+                                            addLocked(di, curTimeNano, ev.flags,
+                                                    RawInputEvent.CLASS_TOUCHSCREEN, me);
+                                        }
+                                    }
                                 }
-                                me = di.mRel.generateMotion(di, curTime, curTimeNano, false,
-                                        mDisplay, mOrientation, mGlobalMetaState);
-                                if (false) Log.v(TAG, "Relative: x=" + di.mRel.x
-                                        + " y=" + di.mRel.y + " ev=" + me);
-                                if (me != null) {
-                                    addLocked(di, curTimeNano, ev.flags,
-                                            RawInputEvent.CLASS_TRACKBALL, me);
+                                
+                                ms = di.mRel;
+                                if (ms.changed) {
+                                    ms.changed = false;
+                                    
+                                    me = ms.generateMotion(di, curTime,
+                                            curTimeNano, false, mDisplay,
+                                            mOrientation, mGlobalMetaState);
+                                    if (false) Log.v(TAG, "Relative: x=" + di.mRel.x
+                                            + " y=" + di.mRel.y + " ev=" + me);
+                                    if (me != null) {
+                                        addLocked(di, curTimeNano, ev.flags,
+                                                RawInputEvent.CLASS_TRACKBALL, me);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-            catch (RuntimeException exc) {
+                
+            } catch (RuntimeException exc) {
                 Log.e(TAG, "InputReaderThread uncaught exception", exc);
             }
         }
     };
 
+    private VirtualKey findSoftButton(InputDevice dev) {
+        final int N = mVirtualKeys.size();
+        if (N <= 0) {
+            return null;
+        }
+        
+        final InputDevice.AbsoluteInfo absx = dev.absX;
+        final InputDevice.AbsoluteInfo absy = dev.absY;
+        final InputDevice.MotionState absm = dev.mAbs;
+        if (absx == null || absy == null || absm == null) {
+            return null;
+        }
+        
+        if (absm.x >= absx.minValue && absm.x <= absx.maxValue
+                && absm.y >= absy.minValue && absm.y <= absy.maxValue) {
+            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Input (" + absm.x
+                    + "," + absm.y + ") inside of display");
+            return null;
+        }
+        
+        for (int i=0; i<N; i++) {
+            VirtualKey sb = mVirtualKeys.get(i);
+            sb.computeHitRect(dev, mDisplayWidth, mDisplayHeight);
+            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Hit test (" + absm.x + ","
+                    + absm.y + ") in code " + sb.scancode + " - (" + sb.hitLeft
+                    + "," + sb.hitTop + ")-(" + sb.hitRight + ","
+                    + sb.hitBottom + ")");
+            if (sb.checkHit(absm.x, absm.y)) {
+                if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Hit!");
+                return sb;
+            }
+        }
+        
+        return null;
+    }
+    
     /**
      * Returns a new meta state for the given keys and old state.
      */
