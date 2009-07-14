@@ -52,7 +52,7 @@ public final class BluetoothUuid {
     }
 
     public static boolean isHandsfree(UUID uuid) {
-        return uuid.equals(Handsfree) || uuid.equals(HandsfreeAudioGateway);
+        return uuid.equals(Handsfree);
     }
 
     public static boolean isHeadset(UUID uuid) {

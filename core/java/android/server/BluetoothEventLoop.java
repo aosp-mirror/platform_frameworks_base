@@ -371,9 +371,7 @@ class BluetoothEventLoop {
 
         boolean authorized = false;
         UUID uuid = UUID.fromString(deviceUuid);
-        if (mBluetoothService.isEnabled() && (BluetoothUuid.isAudioSink(uuid) ||
-                                              BluetoothUuid.isAudioSource(uuid) ||
-                                              BluetoothUuid.isAdvAudioDist(uuid))) {
+        if (mBluetoothService.isEnabled() && BluetoothUuid.isAudioSink(uuid)) {
             BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
             authorized = a2dp.getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {
