@@ -67,9 +67,6 @@ class Request {
     /** Set if I'm using a proxy server */
     HttpHost mProxyHost;
 
-    /** True if request is .html, .js, .css */
-    boolean mHighPriority;
-
     /** True if request has been cancelled */
     volatile boolean mCancelled = false;
 
@@ -102,17 +99,15 @@ class Request {
      * @param eventHandler request will make progress callbacks on
      * this interface
      * @param headers reqeust headers
-     * @param highPriority true for .html, css, .cs
      */
     Request(String method, HttpHost host, HttpHost proxyHost, String path,
             InputStream bodyProvider, int bodyLength,
             EventHandler eventHandler,
-            Map<String, String> headers, boolean highPriority) {
+            Map<String, String> headers) {
         mEventHandler = eventHandler;
         mHost = host;
         mProxyHost = proxyHost;
         mPath = path;
-        mHighPriority = highPriority;
         mBodyProvider = bodyProvider;
         mBodyLength = bodyLength;
 
@@ -356,7 +351,7 @@ class Request {
      * for debugging
      */
     public String toString() {
-        return (mHighPriority ? "P*" : "") + mPath;
+        return mPath;
     }
 
 

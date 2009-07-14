@@ -465,8 +465,6 @@ class BrowserFrame extends Handler {
      * @param postData If the method is "POST" postData is sent as the request
      *                 body. Is null when empty.
      * @param cacheMode The cache mode to use when loading this resource.
-     * @param isHighPriority True if this resource needs to be put at the front
-     *                       of the network queue.
      * @param synchronous True if the load is synchronous.
      * @return A newly created LoadListener object.
      */
@@ -476,7 +474,6 @@ class BrowserFrame extends Handler {
                                               HashMap headers,
                                               byte[] postData,
                                               int cacheMode,
-                                              boolean isHighPriority,
                                               boolean synchronous) {
         PerfChecker checker = new PerfChecker();
 
@@ -542,8 +539,8 @@ class BrowserFrame extends Handler {
 
         if (DebugFlags.BROWSER_FRAME) {
             Log.v(LOGTAG, "startLoadingResource: url=" + url + ", method="
-                    + method + ", postData=" + postData + ", isHighPriority="
-                    + isHighPriority + ", isMainFramePage=" + isMainFramePage);
+                    + method + ", postData=" + postData + ", isMainFramePage="
+                    + isMainFramePage);
         }
 
         // Create a LoadListener
@@ -568,8 +565,7 @@ class BrowserFrame extends Handler {
             CacheManager.endCacheTransaction();
         }
 
-        FrameLoader loader = new FrameLoader(loadListener, mSettings,
-                method, isHighPriority);
+        FrameLoader loader = new FrameLoader(loadListener, mSettings, method);
         loader.setHeaders(headers);
         loader.setPostData(postData);
         // Set the load mode to the mode used for the current page.

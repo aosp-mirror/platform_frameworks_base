@@ -104,7 +104,6 @@ class LoadListener extends Handler implements EventHandler {
     private String mMethod;
     private Map<String, String> mRequestHeaders;
     private byte[] mPostData;
-    private boolean mIsHighPriority;
     // Flag to indicate that this load is synchronous.
     private boolean mSynchronous;
     private Vector<Message> mMessageQueue;
@@ -775,14 +774,12 @@ class LoadListener extends Handler implements EventHandler {
      * @param method
      * @param headers
      * @param postData
-     * @param isHighPriority
      */
     void setRequestData(String method, Map<String, String> headers, 
-            byte[] postData, boolean isHighPriority) {
+            byte[] postData) {
         mMethod = method;
         mRequestHeaders = headers;
         mPostData = postData;
-        mIsHighPriority = isHighPriority;
     }
 
     /**
@@ -1178,7 +1175,7 @@ class LoadListener extends Handler implements EventHandler {
                     // Network.requestURL.
                     Network network = Network.getInstance(getContext());
                     if (!network.requestURL(mMethod, mRequestHeaders,
-                            mPostData, this, mIsHighPriority)) {
+                            mPostData, this)) {
                         // Signal a bad url error if we could not load the
                         // redirection.
                         handleError(EventHandler.ERROR_BAD_URL,

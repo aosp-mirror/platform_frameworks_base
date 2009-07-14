@@ -149,14 +149,12 @@ class Network {
      * @param headers The http headers.
      * @param postData The body of the request.
      * @param loader A LoadListener for receiving the results of the request.
-     * @param isHighPriority True if this is high priority request.
      * @return True if the request was successfully queued.
      */
     public boolean requestURL(String method,
                               Map<String, String> headers,
                               byte [] postData,
-                              LoadListener loader,
-                              boolean isHighPriority) {
+                              LoadListener loader) {
 
         String url = loader.url();
 
@@ -188,7 +186,7 @@ class Network {
 
         RequestHandle handle = q.queueRequest(
                 url, loader.getWebAddress(), method, headers, loader,
-                bodyProvider, bodyLength, isHighPriority);
+                bodyProvider, bodyLength);
         loader.attachRequestHandle(handle);
 
         if (loader.isSynchronous()) {
