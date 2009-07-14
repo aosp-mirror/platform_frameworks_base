@@ -962,20 +962,18 @@ public final class ContactsContract {
                     "vnd.android.cursor.item/group_membership";
 
             /**
-             * The row id of the group that this group membership refers to. Either this or the
-             * GROUP_SOURCE_ID must be set. If they are both set then they must refer to the same
-             * group.
+             * The row id of the group that this group membership refers to. Exactly one of
+             * this or {@link #GROUP_SOURCE_ID} must be set when inserting a row.
              * <P>Type: INTEGER</P>
              */
             public static final String GROUP_ROW_ID = "data1";
 
             /**
-             * The source id of the group that this membership refers to. Either this or the
-             * GROUP_ROW_ID must be set. If they are both set then they must refer to the same
-             * group.
+             * The sourceid of the group that this group membership refers to.  Exactly one of
+             * this or {@link #GROUP_ROW_ID} must be set when inserting a row.
              * <P>Type: STRING</P>
              */
-            public static final String GROUP_SOURCE_ID = "data2";
+            public static final String GROUP_SOURCE_ID = "group_sourceid";
         }
     }
 
