@@ -56,7 +56,9 @@ public class Camera {
     private PictureCallback mRawImageCallback;
     private PictureCallback mJpegCallback;
     private PreviewCallback mPreviewCallback;
+    private PictureCallback mPostviewCallback;
     private AutoFocusCallback mAutoFocusCallback;
+    private ZoomCallback mZoomCallback;
     private ErrorCallback mErrorCallback;
     private boolean mOneShot;
     
@@ -72,6 +74,8 @@ public class Camera {
         mRawImageCallback = null;
         mJpegCallback = null;
         mPreviewCallback = null;
+        mPostviewCallback = null;
+        mZoomCallback = null;
 
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
@@ -245,13 +249,15 @@ public class Camera {
                 return;
 
             case CAMERA_MSG_RAW_IMAGE:
-                if (mRawImageCallback != null)
+                if (mRawImageCallback != null) {
                     mRawImageCallback.onPictureTaken((byte[])msg.obj, mCamera);
+                }
                 return;
 
             case CAMERA_MSG_COMPRESSED_IMAGE:
-                if (mJpegCallback != null)
+                if (mJpegCallback != null) {
                     mJpegCallback.onPictureTaken((byte[])msg.obj, mCamera);
+                }
                 return;
             
             case CAMERA_MSG_PREVIEW_FRAME:
@@ -263,15 +269,29 @@ public class Camera {
                 }
                 return;
 
+            case CAMERA_MSG_POSTVIEW_FRAME:
+                if (mPostviewCallback != null) {
+                    mPostviewCallback.onPictureTaken((byte[])msg.obj, mCamera);
+                }
+                return;
+
             case CAMERA_MSG_FOCUS:
-                if (mAutoFocusCallback != null)
+                if (mAutoFocusCallback != null) {
                     mAutoFocusCallback.onAutoFocus(msg.arg1 == 0 ? false : true, mCamera);
+                }
+                return;
+
+            case CAMERA_MSG_ZOOM:
+                if (mZoomCallback != null) {
+                    mZoomCallback.onZoomUpdate(msg.arg1, mCamera);
+                }
                 return;
 
             case CAMERA_MSG_ERROR :
                 Log.e(TAG, "Error " + msg.arg1);
-                if (mErrorCallback != null)
+                if (mErrorCallback != null) {
                     mErrorCallback.onError(msg.arg1, mCamera);
+                }
                 return;
 
             default:
@@ -364,13 +384,63 @@ public class Camera {
      */
     public final void takePicture(ShutterCallback shutter, PictureCallback raw,
             PictureCallback jpeg) {
-        mShutterCallback = shutter;
-        mRawImageCallback = raw;
-        mJpegCallback = jpeg;
-        native_takePicture();
+        takePicture(shutter, raw, null, jpeg);
     }
     private native final void native_takePicture();
 
+    /**
+     * Triggers an asynchronous image capture. The camera service
+     * will initiate a series of callbacks to the application as the
+     * image capture progresses. The shutter callback occurs after
+     * the image is captured. This can be used to trigger a sound
+     * to let the user know that image has been captured. The raw
+     * callback occurs when the raw image data is available. The
+     * postview callback occurs when a scaled, fully processed
+     * postview image is available (NOTE: not all hardware supports
+     * this). The jpeg callback occurs when the compressed image is
+     * available. If the application does not need a particular
+     * callback, a null can be passed instead of a callback method.
+     *
+     * @param shutter   callback after the image is captured, may be null
+     * @param raw       callback with raw image data, may be null
+     * @param postview  callback with postview image data, may be null
+     * @param jpeg      callback with jpeg image data, may be null
+     */
+    public final void takePicture(ShutterCallback shutter, PictureCallback raw,
+            PictureCallback postview, PictureCallback jpeg) {
+        mShutterCallback = shutter;
+        mRawImageCallback = raw;
+        mPostviewCallback = postview;
+        mJpegCallback = jpeg;
+        native_takePicture();
+    }
+
+    /**
+     * Handles the zoom callback.
+     */
+    public interface ZoomCallback
+    {
+        /**
+         * Callback for zoom updates
+         * @param zoomLevel   new zoom level in 1/1000 increments,
+         * e.g. a zoom of 3.2x is stored as 3200. Accuracy of the
+         * value is dependent on the hardware implementation. Not
+         * all devices will generate this callback.
+         * @param camera  the Camera service object
+         */
+        void onZoomUpdate(int zoomLevel, Camera camera);
+    };
+
+    /**
+     * Registers a callback to be invoked when the zoom
+     * level is updated by the camera driver.
+     * @param cb the callback to run
+     */
+    public final void setZoomCallback(ZoomCallback cb)
+    {
+        mZoomCallback = cb;
+    }
+    
     // These match the enum in include/ui/Camera.h
     /** Unspecified camerar error.  @see #ErrorCallback */
     public static final int CAMERA_ERROR_UNKNOWN = 1;
