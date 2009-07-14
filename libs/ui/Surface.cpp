@@ -88,6 +88,13 @@ status_t SurfaceBuffer::lock(uint32_t usage, void** vaddr)
 
 status_t SurfaceBuffer::lock(uint32_t usage, const Rect& rect, void** vaddr)
 {
+    if (rect.left < 0 || rect.right  > this->width || 
+        rect.top  < 0 || rect.bottom > this->height) {
+        LOGE("locking pixels (%d,%d,%d,%d) outside of buffer (w=%d, h=%d)",
+                rect.left, rect.top, rect.right, rect.bottom, 
+                this->width, this->height);
+        return BAD_VALUE;
+    }
     status_t res = getBufferMapper().lock(handle, usage, rect, vaddr);
     return res;
 }
@@ -112,28 +119,30 @@ status_t SurfaceBuffer::writeToParcel(Parcel* reply,
 
 // ----------------------------------------------------------------------
 
-static void copyBlt(
+static status_t copyBlt(
         const sp<SurfaceBuffer>& dst, 
         const sp<SurfaceBuffer>& src, 
         const Region& reg)
 {
-    uint8_t const * src_bits;
-    src->lock(GRALLOC_USAGE_SW_READ_OFTEN, reg.bounds(), (void**)&src_bits);
+    status_t err;
+    uint8_t const * src_bits = NULL;
+    err = src->lock(GRALLOC_USAGE_SW_READ_OFTEN, reg.bounds(), (void**)&src_bits);
+    LOGE_IF(err, "error locking src buffer %s", strerror(-err));
 
-    uint8_t* dst_bits;
-    dst->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, reg.bounds(), (void**)&dst_bits);
-    
-    size_t c;
-    Rect const* const rects = reg.getArray(&c);
-    
-    if (c) {
+    uint8_t* dst_bits = NULL;
+    err = dst->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, reg.bounds(), (void**)&dst_bits);
+    LOGE_IF(err, "error locking dst buffer %s", strerror(-err));
+
+    Region::const_iterator head(reg.begin());
+    Region::const_iterator tail(reg.end());
+    if (head != tail && src_bits && dst_bits) {
         // NOTE: dst and src must be the same format
         const size_t bpp = bytesPerPixel(src->format);
         const size_t dbpr = dst->stride * bpp;
         const size_t sbpr = src->stride * bpp;
 
-        for (size_t i=0 ; i<c ; i++) {
-            const Rect& r = rects[i];
+        while (head != tail) {
+            const Rect& r(*head++);
             ssize_t h = r.height();
             if (h <= 0) continue;
             size_t size = r.width() * bpp;
@@ -151,8 +160,13 @@ static void copyBlt(
         }
     }
     
-    src->unlock();
-    dst->unlock();
+    if (src_bits)
+        src->unlock();
+    
+    if (dst_bits)
+        dst->unlock();
+    
+    return err;
 }
 
 // ============================================================================
@@ -602,8 +616,11 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
                 newDirtyRegion.set(bounds);
             } else {
                 newDirtyRegion.andSelf(bounds);
-                if (!(lcblk->flags & eNoCopyBack)) {
-                    const sp<SurfaceBuffer>& frontBuffer(mBuffers[1-mBackbufferIndex]);
+                const sp<SurfaceBuffer>& frontBuffer(mBuffers[1-mBackbufferIndex]);
+                if (backBuffer->width  == frontBuffer->width && 
+                    backBuffer->height == frontBuffer->height &&
+                    !(lcblk->flags & eNoCopyBack)) 
+                {
                     const Region copyback(mOldDirtyRegion.subtract(newDirtyRegion));
                     if (!copyback.isEmpty() && frontBuffer!=0) {
                         // copy front to back
