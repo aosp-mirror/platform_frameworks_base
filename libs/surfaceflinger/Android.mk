@@ -28,7 +28,7 @@ endif
 # need "-lrt" on Linux simulator to pick up clock_gettime
 ifeq ($(TARGET_SIMULATOR),true)
 	ifeq ($(HOST_OS),linux)
-		LOCAL_LDLIBS += -lrt
+		LOCAL_LDLIBS += -lrt -lpthread
 	endif
 endif
 
