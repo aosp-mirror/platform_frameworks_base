@@ -17,12 +17,14 @@
 
 #include <stdint.h>
 #include <sys/types.h>
-#include <binder/Parcel.h>
 
+#include <binder/Parcel.h>
 #include <binder/IMemory.h>
-#include <utils/Errors.h>  // for status_t
 #include <media/IMediaPlayerService.h>
 #include <media/IMediaRecorder.h>
+#include <media/IOMX.h>
+
+#include <utils/Errors.h>  // for status_t
 
 namespace android {
 
@@ -33,6 +35,7 @@ enum {
     DECODE_FD,
     CREATE_MEDIA_RECORDER,
     CREATE_METADATA_RETRIEVER,
+    CREATE_OMX,
 };
 
 class BpMediaPlayerService: public BpInterface<IMediaPlayerService>
@@ -110,6 +113,13 @@ public:
         *pFormat = reply.readInt32();
         return interface_cast<IMemory>(reply.readStrongBinder());
     }
+
+    virtual sp<IOMX> createOMX() {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
+        remote()->transact(CREATE_OMX, data, &reply);
+        return interface_cast<IOMX>(reply.readStrongBinder());
+    }
 };
 
 IMPLEMENT_META_INTERFACE(MediaPlayerService, "android.media.IMediaPlayerService");
@@ -180,6 +190,12 @@ status_t BnMediaPlayerService::onTransact(
             pid_t pid = data.readInt32();
             sp<IMediaMetadataRetriever> retriever = createMetadataRetriever(pid);
             reply->writeStrongBinder(retriever->asBinder());
+            return NO_ERROR;
+        } break;
+        case CREATE_OMX: {
+            CHECK_INTERFACE(IMediaPlayerService, data, reply);
+            sp<IOMX> omx = createOMX();
+            reply->writeStrongBinder(omx->asBinder());
             return NO_ERROR;
         } break;
         default:

@@ -29,6 +29,7 @@
 namespace android {
 
 class IMediaRecorder;
+class IOMX;
 
 class IMediaPlayerService: public IInterface
 {
@@ -41,6 +42,7 @@ public:
     virtual sp<IMediaPlayer>    create(pid_t pid, const sp<IMediaPlayerClient>& client, int fd, int64_t offset, int64_t length) = 0;
     virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat) = 0;
     virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat) = 0;
+    virtual sp<IOMX>            createOMX() = 0;
 };
 
 // ----------------------------------------------------------------------------

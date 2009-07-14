@@ -18,7 +18,8 @@ LOCAL_SRC_FILES:= \
 	IMediaMetadataRetriever.cpp \
 	mediametadataretriever.cpp \
 	ToneGenerator.cpp \
-	JetPlayer.cpp
+	JetPlayer.cpp \
+        IOMX.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox
@@ -34,6 +35,7 @@ LOCAL_SHARED_LIBRARIES += libdl
 endif
 
 LOCAL_C_INCLUDES := \
-	$(call include-path-for, graphics corecg)
+	$(call include-path-for, graphics corecg) \
+        $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
 
 include $(BUILD_SHARED_LIBRARY)
