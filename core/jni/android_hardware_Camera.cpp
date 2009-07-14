@@ -29,15 +29,6 @@
 
 using namespace android;
 
-enum CallbackMessageID {
-    kShutterCallback = 0,
-    kRawCallback = 1,
-    kJpegCallback = 2,
-    kPreviewCallback = 3,
-    kAutoFocusCallback = 4,
-    kErrorCallback = 5
-};
-
 struct fields_t {
     jfieldID    context;
     jfieldID    surface;
