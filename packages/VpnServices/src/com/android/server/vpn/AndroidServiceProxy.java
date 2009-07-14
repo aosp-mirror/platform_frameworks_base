@@ -84,6 +84,7 @@ public class AndroidServiceProxy extends ProcessProxy {
                 throw new RuntimeException(e);
             }
         }
+        Log.d(mTag, "-----  Stop: " + mServiceName);
         SystemProperties.set(SVC_STOP_CMD, mServiceName);
     }
 
@@ -105,7 +106,7 @@ public class AndroidServiceProxy extends ProcessProxy {
     @Override
     protected void performTask() throws IOException {
         String svc = mServiceName;
-        Log.d(mTag, "+++++  Execute: " + svc);
+        Log.d(mTag, "+++++  Start: " + svc);
         SystemProperties.set(SVC_START_CMD, svc);
 
         boolean success = blockUntil(SVC_STATE_RUNNING, WAITING_TIME);
