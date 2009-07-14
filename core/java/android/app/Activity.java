@@ -612,6 +612,7 @@ public class Activity extends ContextThemeWrapper
     // set by the thread after the constructor and before onCreate(Bundle savedInstanceState) is called.
     private Instrumentation mInstrumentation;
     private IBinder mToken;
+    private int mIdent;
     /*package*/ String mEmbeddedID;
     private Application mApplication;
     /*package*/ Intent mIntent;
@@ -789,9 +790,6 @@ public class Activity extends ContextThemeWrapper
     protected void onCreate(Bundle savedInstanceState) {
         mVisibleFromClient = mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, true);
-        // uses super.getSystemService() since this.getSystemService() looks at the
-        // mSearchManager field.
-        mSearchManager = (SearchManager) super.getSystemService(Context.SEARCH_SERVICE);
         mCalled = true;
     }
 
@@ -2531,6 +2529,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void startSearch(String initialQuery, boolean selectInitialQuery, 
             Bundle appSearchData, boolean globalSearch) {
+        ensureSearchManager();
         mSearchManager.startSearch(initialQuery, selectInitialQuery, getComponentName(),
                         appSearchData, globalSearch); 
     }
@@ -3241,6 +3240,24 @@ public class Activity extends ContextThemeWrapper
         return getSharedPreferences(getLocalClassName(), mode);
     }
     
+    private void ensureSearchManager() {
+        if (mSearchManager != null) {
+            return;
+        }
+        
+        // uses super.getSystemService() since this.getSystemService() looks at the
+        // mSearchManager field.
+        mSearchManager = (SearchManager) super.getSystemService(Context.SEARCH_SERVICE);
+        int ident = mIdent;
+        if (ident == 0) {
+            if (mParent != null) ident = mParent.mIdent;
+            if (ident == 0) {
+                throw new IllegalArgumentException("no ident");
+            }
+        }
+        mSearchManager.setIdent(ident);
+    }
+    
     @Override
     public Object getSystemService(String name) {
         if (getBaseContext() == null) {
@@ -3251,6 +3268,7 @@ public class Activity extends ContextThemeWrapper
         if (WINDOW_SERVICE.equals(name)) {
             return mWindowManager;
         } else if (SEARCH_SERVICE.equals(name)) {
+            ensureSearchManager();
             return mSearchManager;
         }
         return super.getSystemService(name);
@@ -3450,14 +3468,17 @@ public class Activity extends ContextThemeWrapper
             Application application, Intent intent, ActivityInfo info, CharSequence title, 
             Activity parent, String id, Object lastNonConfigurationInstance,
             Configuration config) {
-        attach(context, aThread, instr, token, application, intent, info, title, parent, id,
+        attach(context, aThread, instr, token, 0, application, intent, info, title, parent, id,
             lastNonConfigurationInstance, null, config);
     }
     
-    final void attach(Context context, ActivityThread aThread, Instrumentation instr, IBinder token,
-        Application application, Intent intent, ActivityInfo info, CharSequence title, 
-        Activity parent, String id, Object lastNonConfigurationInstance,
-        HashMap<String,Object> lastNonConfigurationChildInstances, Configuration config) {
+    final void attach(Context context, ActivityThread aThread,
+            Instrumentation instr, IBinder token, int ident,
+            Application application, Intent intent, ActivityInfo info,
+            CharSequence title, Activity parent, String id,
+            Object lastNonConfigurationInstance,
+            HashMap<String,Object> lastNonConfigurationChildInstances,
+            Configuration config) {
         attachBaseContext(context);
 
         mWindow = PolicyManager.makeNewWindow(this);
@@ -3470,6 +3491,7 @@ public class Activity extends ContextThemeWrapper
         mMainThread = aThread;
         mInstrumentation = instr;
         mToken = token;
+        mIdent = ident;
         mApplication = application;
         mIntent = intent;
         mComponent = intent.getComponent();
@@ -3554,9 +3576,6 @@ public class Activity extends ContextThemeWrapper
 
     final void performPause() {
         onPause();
-
-        // dismiss the search dialog if it is open
-        mSearchManager.stopSearch();
     }
     
     final void performUserLeaving() {

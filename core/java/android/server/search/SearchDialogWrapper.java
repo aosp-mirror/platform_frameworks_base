@@ -63,12 +63,13 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     private static final int MSG_START_SEARCH = 1;
     // Takes no arguments
     private static final int MSG_STOP_SEARCH = 2;
-    // Takes no arguments
-    private static final int MSG_ON_CONFIGURATION_CHANGED = 3;
+    // arg1 is activity id
+    private static final int MSG_ACTIVITY_RESUMING = 3;
 
     private static final String KEY_INITIAL_QUERY = "q";
     private static final String KEY_LAUNCH_ACTIVITY = "a";
     private static final String KEY_APP_SEARCH_DATA = "d";
+    private static final String KEY_IDENT= "i";
 
     // Context used for getting search UI resources
     private final Context mContext;
@@ -82,9 +83,18 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     // If the search UI is visible, this is the callback for the client that showed it.
     ISearchManagerCallback mCallback = null;
 
+    // Identity of last activity that started search.
+    private int mStartedIdent = 0;
+    
+    // Identity of currently resumed activity.
+    private int mResumedIdent = 0;
+    
     // Allows disabling of search dialog for stress testing runs
     private final boolean mDisabledOnBoot;
 
+    // True if we have registered our receivers.
+    private boolean mReceiverRegistered;
+    
     /**
      * Creates a new search dialog wrapper and a search UI thread. The search dialog itself will
      * be created some asynchronously on the search UI thread.
@@ -116,15 +126,21 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     }
 
     private void registerBroadcastReceiver() {
-        IntentFilter closeDialogsFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        mContext.registerReceiver(mBroadcastReceiver, closeDialogsFilter);
-        IntentFilter configurationChangedFilter =
-                new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED);
-        mContext.registerReceiver(mBroadcastReceiver, configurationChangedFilter);
+        if (!mReceiverRegistered) {
+            IntentFilter filter = new IntentFilter(
+                    Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+            mContext.registerReceiver(mBroadcastReceiver, filter, null,
+                    mSearchUiThread);
+            mReceiverRegistered = true;
+        }
     }
 
     private void unregisterBroadcastReceiver() {
-        mContext.unregisterReceiver(mBroadcastReceiver);
+        if (mReceiverRegistered) {
+            mContext.unregisterReceiver(mBroadcastReceiver);
+            mReceiverRegistered = false;
+        }
     }
 
     /**
@@ -136,10 +152,10 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                 if (DBG) debug(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-                stopSearch();
+                performStopSearch();
             } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 if (DBG) debug(Intent.ACTION_CONFIGURATION_CHANGED);
-                onConfigurationChanged();
+                performOnConfigurationChanged();
             }
         }
     };
@@ -159,7 +175,8 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
             final ComponentName launchActivity,
             final Bundle appSearchData,
             final boolean globalSearch,
-            final ISearchManagerCallback searchManagerCallback) {
+            final ISearchManagerCallback searchManagerCallback,
+            int ident) {
         if (DBG) debug("startSearch()");
         Message msg = Message.obtain();
         msg.what = MSG_START_SEARCH;
@@ -170,6 +187,7 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
         msgData.putString(KEY_INITIAL_QUERY, initialQuery);
         msgData.putParcelable(KEY_LAUNCH_ACTIVITY, launchActivity);
         msgData.putBundle(KEY_APP_SEARCH_DATA, appSearchData);
+        msgData.putInt(KEY_IDENT, ident);
         mSearchUiThread.sendMessage(msg);
     }
 
@@ -183,12 +201,15 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     }
 
     /**
-     * Updates the search UI in response to a configuration change.
+     * Updates the currently resumed activity.
      * Can be called from any thread.
      */
-    void onConfigurationChanged() {
-        if (DBG) debug("onConfigurationChanged()");
-        mSearchUiThread.sendEmptyMessage(MSG_ON_CONFIGURATION_CHANGED);
+    public void activityResuming(int ident) {
+        if (DBG) debug("startSearch()");
+        Message msg = Message.obtain();
+        msg.what = MSG_ACTIVITY_RESUMING;
+        msg.arg1 = ident;
+        mSearchUiThread.sendMessage(msg);
     }
 
     //
@@ -213,8 +234,8 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
                 case MSG_STOP_SEARCH:
                     performStopSearch();
                     break;
-                case MSG_ON_CONFIGURATION_CHANGED:
-                    performOnConfigurationChanged();
+                case MSG_ACTIVITY_RESUMING:
+                    performActivityResuming(msg.arg1);
                     break;
             }
         }
@@ -228,12 +249,27 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
             Bundle appSearchData = msgData.getBundle(KEY_APP_SEARCH_DATA);
             boolean globalSearch = msg.arg2 != 0;
             ISearchManagerCallback searchManagerCallback = (ISearchManagerCallback) msg.obj;
+            int ident = msgData.getInt(KEY_IDENT);
             performStartSearch(initialQuery, selectInitialQuery, launchActivity,
-                    appSearchData, globalSearch, searchManagerCallback);
+                    appSearchData, globalSearch, searchManagerCallback, ident);
         }
 
     }
 
+    void updateDialogVisibility() {
+        if (mStartedIdent != 0) {
+            // mResumedIdent == 0 means we have just booted and the user
+            // hasn't yet gone anywhere.
+            if (mResumedIdent == 0 || mStartedIdent == mResumedIdent) {
+                if (DBG) Log.v(TAG, "******************* DIALOG: show");
+                mSearchDialog.show();
+            } else {
+                if (DBG) Log.v(TAG, "******************* DIALOG: hide");
+                mSearchDialog.hide();
+            }
+        }
+    }
+    
     /**
      * Actually launches the search UI.
      * This must be called on the search UI thread.
@@ -243,7 +279,8 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
             ComponentName launchActivity,
             Bundle appSearchData,
             boolean globalSearch,
-            ISearchManagerCallback searchManagerCallback) {
+            ISearchManagerCallback searchManagerCallback,
+            int ident) {
         if (DBG) debug("performStartSearch()");
 
         if (mDisabledOnBoot) {
@@ -254,8 +291,11 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
 
         registerBroadcastReceiver();
         mCallback = searchManagerCallback;
+        mStartedIdent = ident;
+        if (DBG) Log.v(TAG, "******************* DIALOG: start");
         mSearchDialog.show(initialQuery, selectInitialQuery, launchActivity, appSearchData,
                 globalSearch);
+        updateDialogVisibility();
     }
 
     /**
@@ -264,7 +304,20 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
      */
     void performStopSearch() {
         if (DBG) debug("performStopSearch()");
+        if (DBG) Log.v(TAG, "******************* DIALOG: cancel");
         mSearchDialog.cancel();
+        mStartedIdent = 0;
+    }
+
+    /**
+     * Updates the resumed activity
+     * This must be called on the search UI thread.
+     */
+    void performActivityResuming(int ident) {
+        if (DBG) debug("performResumingActivity(): mStartedIdent="
+                + mStartedIdent + ", resuming: " + ident);
+        this.mResumedIdent = ident;
+        updateDialogVisibility();
     }
 
     /**
