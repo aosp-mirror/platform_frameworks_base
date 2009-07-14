@@ -1374,6 +1374,15 @@ public final class ViewRoot extends Handler implements ViewParent,
             // is non-null and we just want to scroll to whatever that
             // rectangle is).
             View focus = mRealFocusedView;
+
+            // When in touch mode, focus points to the previously focused view,
+            // which may have been removed from the view hierarchy. The following
+            // line checks whether the view is still in the hierarchy
+            if (focus == null || focus.getParent() == null) {
+                mRealFocusedView = null;
+                return false;
+            }
+
             if (focus != mLastScrolledFocus) {
                 // If the focus has changed, then ignore any requests to scroll
                 // to a rectangle; first we want to make sure the entire focus
