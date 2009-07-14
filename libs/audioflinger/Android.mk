@@ -54,4 +54,10 @@ ifeq ($(BOARD_HAVE_BLUETOOTH),true)
   LOCAL_C_INCLUDES += $(call include-path-for, bluez)
 endif
 
+ifeq ($(TARGET_SIMULATOR),true)
+	ifeq ($(HOST_OS),linux)
+		LOCAL_LDLIBS += -lrt -lpthread
+	endif
+endif
+
 include $(BUILD_SHARED_LIBRARY)
