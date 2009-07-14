@@ -55,9 +55,9 @@ interface ITts {
 
     void addEarconFile(in String callingApp, in String earcon, in String filename);
 
-    void registerCallback(ITtsCallback cb);
+    int registerCallback(in String callingApp, ITtsCallback cb);
 
-    void unregisterCallback(ITtsCallback cb);
+    int unregisterCallback(in String callingApp, ITtsCallback cb);
 
     int playSilence(in String callingApp, in long duration, in int queueMode, in String[] params);
 }

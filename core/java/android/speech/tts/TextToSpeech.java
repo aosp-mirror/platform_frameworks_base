@@ -99,6 +99,18 @@ public class TextToSpeech {
     }
 
     /**
+     * Called when the TTS has completed saying something that has an utterance ID set.
+     *
+     * The OnUtteranceCompletedListener must implement the onUtteranceCompleted function.
+     * onUtteranceCompleted is passed a String that is the utteranceId given in
+     * the original speak call.
+     */
+    public interface OnUtteranceCompletedListener {
+        public void onUtteranceCompleted(String utteranceId);
+    }
+
+
+    /**
      * Internal constants for the TTS functionality
      *
      * {@hide}
@@ -147,6 +159,7 @@ public class TextToSpeech {
     private ServiceConnection mServiceConnection;
 
     private ITts mITts = null;
+    private ITtsCallback mITtscallback = null;
     private Context mContext = null;
     private String mPackageName = "";
     private OnInitListener mInitListener = null;
@@ -178,6 +191,7 @@ public class TextToSpeech {
         mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY] = Engine.TTS_KEY_PARAM_COUNTRY;
         mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT] = Engine.TTS_KEY_PARAM_VARIANT;
         mCachedParams[Engine.TTS_PARAM_POSITION_STREAM] = Engine.TTS_KEY_PARAM_STREAM;
+        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID] = Engine.TTS_KEY_PARAM_UTTERANCE_ID;
 
         mCachedParams[Engine.TTS_PARAM_POSITION_RATE + 1] =
                 String.valueOf(Engine.FALLBACK_TTS_DEFAULT_RATE);
@@ -189,7 +203,7 @@ public class TextToSpeech {
 
         mCachedParams[Engine.TTS_PARAM_POSITION_STREAM + 1] =
                 String.valueOf(Engine.TTS_DEFAULT_STREAM);
-        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID+ 1] = "";
+        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID + 1] = "";
 
         initTts();
     }
@@ -380,7 +394,7 @@ public class TextToSpeech {
                     }
                     extra = params.get(Engine.TTS_KEY_PARAM_UTTERANCE_ID);
                     if (extra != null) {
-                        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID] = extra;
+                        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID + 1] = extra;
                     }
                 }
                 result = mITts.speak(mPackageName, text, queueMode, mCachedParams);
@@ -437,7 +451,7 @@ public class TextToSpeech {
                     }
                     extra = params.get(Engine.TTS_KEY_PARAM_UTTERANCE_ID);
                     if (extra != null) {
-                        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID] = extra;
+                        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID + 1] = extra;
                     }
                 }
                 result = mITts.playEarcon(mPackageName, earcon, queueMode, null);
@@ -477,13 +491,19 @@ public class TextToSpeech {
      *
      * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
      */
-    public int playSilence(long durationInMs, int queueMode) {
+    public int playSilence(long durationInMs, int queueMode, HashMap<String,String> params) {
         synchronized (mStartLock) {
             int result = TTS_ERROR;
             if (!mStarted) {
                 return result;
             }
             try {
+                if ((params != null) && (!params.isEmpty())) {
+                    String extra = params.get(Engine.TTS_KEY_PARAM_UTTERANCE_ID);
+                    if (extra != null) {
+                        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID + 1] = extra;
+                    }
+                }
                 result = mITts.playSilence(mPackageName, durationInMs, queueMode, mCachedParams);
             } catch (RemoteException e) {
                 // TTS died; restart it.
@@ -845,7 +865,7 @@ public class TextToSpeech {
                     // no need to read the stream type here
                     String extra = params.get(Engine.TTS_KEY_PARAM_UTTERANCE_ID);
                     if (extra != null) {
-                        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID] = extra;
+                        mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID + 1] = extra;
                     }
                 }
                 if (mITts.synthesizeToFile(mPackageName, text, mCachedParams, filename)){
@@ -885,6 +905,54 @@ public class TextToSpeech {
         mCachedParams[Engine.TTS_PARAM_POSITION_STREAM + 1] =
                 String.valueOf(Engine.TTS_DEFAULT_STREAM);
         mCachedParams[Engine.TTS_PARAM_POSITION_UTTERANCE_ID+ 1] = "";
+    }
+
+    /**
+     * Sets the OnUtteranceCompletedListener that will fire when an utterance completes.
+     *
+     * @param listener
+     *            The OnUtteranceCompletedListener
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
+     */
+    public int setOnUtteranceCompletedListener(
+            final OnUtteranceCompletedListener listener) {
+        synchronized (mStartLock) {
+            int result = TTS_ERROR;
+            if (!mStarted) {
+                return result;
+            }
+            mITtscallback = new ITtsCallback.Stub() {
+                public void utteranceCompleted(String utteranceId) throws RemoteException {
+                    if (listener != null) {
+                        listener.onUtteranceCompleted(utteranceId);
+                    }
+                }
+            };
+            try {
+                result = mITts.registerCallback(mPackageName, mITtscallback);
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - registerCallback", "RemoteException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (NullPointerException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - registerCallback", "NullPointerException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (IllegalStateException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - registerCallback", "IllegalStateException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } finally {
+                return result;
+            }
+        }
     }
 
 }
