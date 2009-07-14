@@ -429,7 +429,6 @@
     <item>"Другой"</item>
     <item>"Особый"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"Мобильный"</string>
   <string-array name="postalAddressTypes">
     <item>"Домашний"</item>
     <item>"Рабочий"</item>

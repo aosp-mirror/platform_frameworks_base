@@ -429,7 +429,6 @@
     <item>"Άλλο"</item>
     <item>"Προσαρμοσμένο"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"Κινητό"</string>
   <string-array name="postalAddressTypes">
     <item>"Οικία"</item>
     <item>"Εργασία"</item>

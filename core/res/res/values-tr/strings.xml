@@ -429,7 +429,6 @@
     <item>"Diğer"</item>
     <item>"Özel"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"Mobil"</string>
   <string-array name="postalAddressTypes">
     <item>"Ev"</item>
     <item>"İş"</item>

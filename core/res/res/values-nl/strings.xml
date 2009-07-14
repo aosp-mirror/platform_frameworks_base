@@ -391,7 +391,6 @@
     <item>"Overig"</item>
     <item>"Aangepast"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"Mobiel"</string>
   <string-array name="postalAddressTypes">
     <item>"Thuis"</item>
     <item>"Werk"</item>

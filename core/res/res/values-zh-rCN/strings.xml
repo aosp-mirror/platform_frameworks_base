@@ -429,7 +429,6 @@
     <item>"其他邮箱"</item>
     <item>"自定义邮箱"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"手机"</string>
   <string-array name="postalAddressTypes">
     <item>"住宅地址"</item>
     <item>"单位地址"</item>

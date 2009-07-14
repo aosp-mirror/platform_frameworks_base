@@ -391,7 +391,6 @@
     <item>"Ostatní"</item>
     <item>"Vlastní"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"Mobilní"</string>
   <string-array name="postalAddressTypes">
     <item>"Domů"</item>
     <item>"Práce"</item>

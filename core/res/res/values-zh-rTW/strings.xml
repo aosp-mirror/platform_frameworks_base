@@ -391,7 +391,6 @@
     <item>"其他信箱"</item>
     <item>"自訂"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"行動裝置"</string>
   <string-array name="postalAddressTypes">
     <item>"住家"</item>
     <item>"公司"</item>

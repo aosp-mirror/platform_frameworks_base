@@ -391,7 +391,6 @@
     <item>"Autre"</item>
     <item>"Personnalisée"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"Mobile"</string>
   <string-array name="postalAddressTypes">
     <item>"Domicile"</item>
     <item>"Bureau"</item>

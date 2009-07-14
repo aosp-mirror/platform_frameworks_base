@@ -429,7 +429,6 @@
     <item>"その他"</item>
     <item>"カスタム"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"携帯"</string>
   <string-array name="postalAddressTypes">
     <item>"自宅"</item>
     <item>"仕事"</item>

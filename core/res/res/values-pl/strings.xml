@@ -391,7 +391,6 @@
     <item>"Inne"</item>
     <item>"Niestandardowy"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"Komórka"</string>
   <string-array name="postalAddressTypes">
     <item>"Dom"</item>
     <item>"Praca"</item>

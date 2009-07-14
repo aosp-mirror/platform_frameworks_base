@@ -429,7 +429,6 @@
     <item>"Övrigt"</item>
     <item>"Anpassad"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"Mobil"</string>
   <string-array name="postalAddressTypes">
     <item>"Hem"</item>
     <item>"Arbete"</item>

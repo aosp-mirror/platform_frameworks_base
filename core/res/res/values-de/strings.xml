@@ -391,7 +391,6 @@
     <item>"Andere"</item>
     <item>"Benutzerdefiniert"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"Mobil"</string>
   <string-array name="postalAddressTypes">
     <item>"Privat"</item>
     <item>"Arbeit"</item>

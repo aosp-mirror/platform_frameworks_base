@@ -429,7 +429,6 @@
     <item>"Outros"</item>
     <item>"Personalizado"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"Celular"</string>
   <string-array name="postalAddressTypes">
     <item>"Página inicial"</item>
     <item>"Trabalho"</item>
