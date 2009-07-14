@@ -712,7 +712,7 @@
     <string name="chooseActivity">"Välj en åtgärd"</string>
     <string name="noApplications">"Inga program kan utföra den här åtgärden."</string>
     <string name="aerr_title">"Tyvärr!"</string>
-    <string name="aerr_application">"Processen <xliff:g id="PROCESS">%2$s</xliff:g> för programmet <xliff:g id="APPLICATION">%1$s</xliff:g>stoppades oväntat. Försök igen."</string>
+    <string name="aerr_application">"Processen <xliff:g id="PROCESS">%2$s</xliff:g> för programmet <xliff:g id="APPLICATION">%1$s</xliff:g> stoppades oväntat. Försök igen."</string>
     <string name="aerr_process">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> avslutades oväntat. Försök igen."</string>
     <string name="anr_title">"Tyvärr!"</string>
     <string name="anr_activity_application">"Aktiviteten <xliff:g id="ACTIVITY">%1$s</xliff:g> (i programmet <xliff:g id="APPLICATION">%2$s</xliff:g>) svarar inte."</string>

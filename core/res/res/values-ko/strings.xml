@@ -108,9 +108,9 @@
     <string name="global_action_toggle_silent_mode">"무음 모드"</string>
     <string name="global_action_silent_mode_on_status">"소리 꺼짐"</string>
     <string name="global_action_silent_mode_off_status">"소리 켜짐"</string>
-    <string name="global_actions_toggle_airplane_mode">"비행기 모드"</string>
-    <string name="global_actions_airplane_mode_on_status">"비행기 모드 사용"</string>
-    <string name="global_actions_airplane_mode_off_status">"비행기 모드 사용 안함"</string>
+    <string name="global_actions_toggle_airplane_mode">"비행 모드"</string>
+    <string name="global_actions_airplane_mode_on_status">"비행 모드 사용"</string>
+    <string name="global_actions_airplane_mode_off_status">"비행 모드 사용 안함"</string>
     <string name="safeMode">"안전 모드"</string>
     <string name="android_system_label">"Android 시스템"</string>
     <string name="permgrouplab_costMoney">"요금이 부과되는 서비스"</string>
@@ -719,7 +719,7 @@
     <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 활동(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 응답하지 않습니다."</string>
     <string name="anr_application_process">"<xliff:g id="APPLICATION">%1$s</xliff:g> 응용프로그램(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 응답하지 않습니다."</string>
     <string name="anr_process">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 응답하지 않습니다."</string>
-    <string name="force_close">"강제로 닫기"</string>
+    <string name="force_close">"닫기"</string>
     <string name="wait">"대기"</string>
     <string name="debug">"디버그"</string>
     <string name="sendText">"텍스트에 대한 작업 선택"</string>

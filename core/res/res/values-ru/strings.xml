@@ -350,31 +350,31 @@
     <item>"Рабочий факс"</item>
     <item>"Домашний факс"</item>
     <item>"Пейджер"</item>
-    <item>"Другое"</item>
-    <item>"Персонализированный"</item>
+    <item>"Другой"</item>
+    <item>"Особый"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item>"Домашний"</item>
     <item>"Рабочий"</item>
     <item>"Другой"</item>
-    <item>"Персонализированный"</item>
+    <item>"Особый"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item>"Домашний"</item>
     <item>"Рабочий"</item>
     <item>"Другой"</item>
-    <item>"Персонализированный"</item>
+    <item>"Особый"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item>"Домашний"</item>
     <item>"Рабочий"</item>
     <item>"Другое"</item>
-    <item>"Персонализированный"</item>
+    <item>"Особый"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item>"Рабочий"</item>
     <item>"Другой"</item>
-    <item>"Персонализированный"</item>
+    <item>"Особый"</item>
   </string-array>
   <string-array name="imProtocols">
     <item>"AIM"</item>
@@ -390,9 +390,9 @@
     <string name="keyguard_password_wrong_pin_code">"Неверный PIN-код!"</string>
     <string name="keyguard_label_text">"Для разблокировки нажмите \"Меню\", а затем 0."</string>
     <string name="emergency_call_dialog_number_for_display">"Номер экстренной службы"</string>
-    <string name="lockscreen_carrier_default">"(Не обслуживается)"</string>
+    <string name="lockscreen_carrier_default">"(Сеть не найдена)"</string>
     <string name="lockscreen_screen_locked">"Экран заблокирован."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"Нажмите \"Меню\" для разблокировки или выполните вызов службы экстренной помощи"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Нажмите \"Меню\", чтобы разблокировать экран или вызвать службу экстренной помощи."</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"Для разблокировки нажмите \"Меню\"."</string>
     <string name="lockscreen_pattern_instructions">"Для разблокировки введите графический ключ"</string>
     <string name="lockscreen_emergency_call">"Вызов службы экстренной помощи"</string>
@@ -425,7 +425,7 @@
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"Удалить уведомления"</string>
     <string name="status_bar_no_notifications_title">"Нет уведомлений"</string>
-    <string name="status_bar_ongoing_events_title">"Текущий"</string>
+    <string name="status_bar_ongoing_events_title">"Текущие"</string>
     <string name="status_bar_latest_events_title">"Уведомления"</string>
     <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"Идет зарядка..."</string>
@@ -708,7 +708,7 @@
     <string name="capital_off">"ВЫКЛ"</string>
     <string name="whichApplication">"Завершить действие с помощью"</string>
     <string name="alwaysUse">"Использовать по умолчанию для этого действия."</string>
-    <string name="clearDefaultHintMsg">"Удалить настройки по умолчанию: \"Настройки главного экрана\" &gt; \"Приложения\" &gt; \"Управлять приложениями\"."</string>
+    <string name="clearDefaultHintMsg">"Удалить настройки по умолчанию: главный экран &gt; \"Настройки\" &gt; \"Приложения\" &gt; \"Управление приложениями\"."</string>
     <string name="chooseActivity">"Выберите действие"</string>
     <string name="noApplications">"Это действие не может выполнять ни одно приложение."</string>
     <string name="aerr_title">"Ошибка приложения!"</string>
@@ -782,13 +782,13 @@
     <string name="ext_media_nofs_notification_title">"Пустая карта SD"</string>
     <string name="ext_media_nofs_notification_message">"Карта SD пуста или использует неподдерживаемую файловую систему."</string>
     <string name="ext_media_unmountable_notification_title">"Поврежденная карта SD"</string>
-    <string name="ext_media_unmountable_notification_message">"Карта SD повреждена. Может потребоваться переформатировать ее."</string>
+    <string name="ext_media_unmountable_notification_message">"Карта SD повреждена. Возможно, потребуется отформатировать ее."</string>
     <string name="ext_media_badremoval_notification_title">"Карта SD неожиданно извлечена"</string>
     <string name="ext_media_badremoval_notification_message">"Перед извлечением карты SD отключите ее во избежание потери данных."</string>
     <string name="ext_media_safe_unmount_notification_title">"Безопасное удаление карты SD"</string>
     <string name="ext_media_safe_unmount_notification_message">"Теперь карту SD можно безопасно удалить."</string>
-    <string name="ext_media_nomedia_notification_title">"Карта SD удалена"</string>
-    <string name="ext_media_nomedia_notification_message">"Карта SD была удалена. Для увеличения емкости устройства вставьте новую карту SD."</string>
+    <string name="ext_media_nomedia_notification_title">"Отсутствует карта SD"</string>
+    <string name="ext_media_nomedia_notification_message">"Карта SD отсутствует. Для увеличения емкости устройства вставьте новую карту SD."</string>
     <string name="activity_list_empty">"Подходящих действий не найдено"</string>
     <string name="permlab_pkgUsageStats">"обновлять статистику использования компонентов"</string>
     <string name="permdesc_pkgUsageStats">"Позволяет изменять собранную статистику использования компонентов. Не предназначено для использования обычными приложениями."</string>

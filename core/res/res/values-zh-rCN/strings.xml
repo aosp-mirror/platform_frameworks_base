@@ -35,12 +35,12 @@
     <string name="serviceErased">"清除成功。"</string>
     <string name="passwordIncorrect">"密码不正确。"</string>
     <string name="mmiComplete">"MMI 完成。"</string>
-    <string name="badPin">"您键入的旧 PIN 码不正确。"</string>
-    <string name="badPuk">"您键入的 PUK 码不正确。"</string>
+    <string name="badPin">"您输入的旧 PIN 不正确。"</string>
+    <string name="badPuk">"您输入的 PUK 不正确。"</string>
     <string name="mismatchPin">"您输入的 PIN 码不一致。"</string>
-    <string name="invalidPin">"键入一个 4 至 8 位数的 PIN 码。"</string>
-    <string name="needPuk">"您的 SIM 卡被 PUK 锁定。请键入 PUK 码进行解锁。"</string>
-    <string name="needPuk2">"键入 PUK2 码以解锁 SIM 卡。"</string>
+    <string name="invalidPin">"输入一个 4 至 8 位数的 PIN。"</string>
+    <string name="needPuk">"您的 SIM 卡被 PUK 锁定。请输入 PUK 码进行解锁。"</string>
+    <string name="needPuk2">"输入 PUK2 以解锁 SIM 卡。"</string>
     <string name="ClipMmi">"收到来电显示"</string>
     <string name="ClirMmi">"外拨电话显示"</string>
     <string name="CfMmi">"呼叫转接"</string>
@@ -55,10 +55,10 @@
     <string name="serviceNotProvisioned">"未提供服务。"</string>
     <string name="CLIRPermanent">"无法更改来电显示设置。"</string>
     <string name="RestrictedChangedTitle">"访问受限情况已发生变化"</string>
-    <string name="RestrictedOnData">"数据服务遭禁用。"</string>
-    <string name="RestrictedOnEmergency">"紧急服务遭禁用。"</string>
-    <string name="RestrictedOnNormal">"语音/短信服务遭禁用。"</string>
-    <string name="RestrictedOnAll">"所有语音/短信服务均遭禁用。"</string>
+    <string name="RestrictedOnData">"数据服务已禁用。"</string>
+    <string name="RestrictedOnEmergency">"紧急服务已禁用。"</string>
+    <string name="RestrictedOnNormal">"语音/短信服务已禁用。"</string>
+    <string name="RestrictedOnAll">"所有语音/短信服务均已禁用。"</string>
     <string name="serviceClassVoice">"语音"</string>
     <string name="serviceClassData">"数据"</string>
     <string name="serviceClassFAX">"传真"</string>
@@ -195,7 +195,7 @@
     <string name="permdesc_manageAppTokens">"允许应用程序创建和管理自己的令牌，从而绕开正常的 Z 排序方式。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_injectEvents">"按键和控制按钮"</string>
     <string name="permdesc_injectEvents">"允许应用程序将其自己的输入活动（按键等）提供给其他应用程序。恶意应用程序可借此掌控手机。"</string>
-    <string name="permlab_readInputState">"记录您键入的内容和采取的操作"</string>
+    <string name="permlab_readInputState">"记录您输入的内容和采取的操作"</string>
     <string name="permdesc_readInputState">"允许应用程序查看您按的键，即使在与其他应用程序交互（例如输入密码）时也不例外。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_bindInputMethod">"绑定至输入法"</string>
     <string name="permdesc_bindInputMethod">"允许手机用户绑定至输入法的顶级界面。普通应用程序从不需要使用此权限。"</string>
@@ -249,11 +249,11 @@
     <string name="permdesc_writeCalendar">"允许应用程序修改您手机上存储的日历活动。恶意应用程序可借此清除或修改您的日历数据。"</string>
     <string name="permlab_accessMockLocation">"用于测试的模拟位置源"</string>
     <string name="permdesc_accessMockLocation">"创建用于测试的模拟位置源。恶意应用程序可借此替代真正的位置源（如 GPS 或网络提供商）返回的位置和/或状态。"</string>
-    <string name="permlab_accessLocationExtraCommands">"访问额外的位置提供程序命令"</string>
+    <string name="permlab_accessLocationExtraCommands">"允许访问额外的位置提供命令"</string>
     <string name="permdesc_accessLocationExtraCommands">"访问额外的位置提供程序命令。恶意应用程序可借此干扰 GPS 或其他位置源的运作。"</string>
-    <string name="permlab_accessFineLocation">"精准 (GPS) 位置"</string>
+    <string name="permlab_accessFineLocation">"精准位置 (GPS)"</string>
     <string name="permdesc_accessFineLocation">"访问精准的位置源，例如手机上的全球定位系统（如果适用）。恶意应用程序可能借此确定您所处的位置，并消耗额外的电池电量。"</string>
-    <string name="permlab_accessCoarseLocation">"粗略（基于网络）位置"</string>
+    <string name="permlab_accessCoarseLocation">"粗略位置（所在网络）"</string>
     <string name="permdesc_accessCoarseLocation">"访问粗略的位置源（例如蜂窝网络数据库）以确定手机的大体位置（如果适用）。恶意应用程序可借此确定您所处的大体位置。"</string>
     <string name="permlab_accessSurfaceFlinger">"访问 SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger">"允许应用程序使用 SurfaceFlinger 低级别功能。"</string>
@@ -311,7 +311,7 @@
     <string name="permdesc_getAccounts">"允许应用程序获取手机已知的帐户列表。"</string>
     <string name="permlab_accessNetworkState">"查看网络状态"</string>
     <string name="permdesc_accessNetworkState">"允许应用程序查看所有网络的状态。"</string>
-    <string name="permlab_createNetworkSockets">"完全的互联网访问"</string>
+    <string name="permlab_createNetworkSockets">"不受限制的互联网访问权限"</string>
     <string name="permdesc_createNetworkSockets">"允许应用程序创建网络套接字。"</string>
     <string name="permlab_writeApnSettings">"写入接入点名称设置"</string>
     <string name="permdesc_writeApnSettings">"允许应用程序修改 APN 设置，例如任何 APN 的代理和端口。"</string>
@@ -344,37 +344,37 @@
     <string name="permlab_writeDictionary">"写入用户定义的词典"</string>
     <string name="permdesc_writeDictionary">"允许应用程序向用户词典中写入新词。"</string>
   <string-array name="phoneTypes">
-    <item>"家庭"</item>
+    <item>"住宅电话"</item>
     <item>"手机"</item>
-    <item>"单位"</item>
+    <item>"单位电话"</item>
     <item>"单位传真"</item>
-    <item>"家庭传真"</item>
+    <item>"住宅传真"</item>
     <item>"寻呼机"</item>
-    <item>"其他"</item>
-    <item>"自定义"</item>
+    <item>"其他电话"</item>
+    <item>"自定义电话"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item>"家庭"</item>
-    <item>"单位"</item>
-    <item>"其他"</item>
-    <item>"自定义"</item>
+    <item>"住宅邮箱"</item>
+    <item>"单位邮箱"</item>
+    <item>"其他邮箱"</item>
+    <item>"自定义邮箱"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item>"家庭"</item>
-    <item>"单位"</item>
-    <item>"其他"</item>
-    <item>"自定义"</item>
+    <item>"住宅地址"</item>
+    <item>"单位地址"</item>
+    <item>"其他地址"</item>
+    <item>"自定义地址"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item>"家庭"</item>
-    <item>"单位"</item>
-    <item>"其他"</item>
-    <item>"自定义"</item>
+    <item>"住宅聊天工具"</item>
+    <item>"单位聊天工具"</item>
+    <item>"其他聊天工具"</item>
+    <item>"自定义聊天工具"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item>"单位"</item>
-    <item>"其他"</item>
-    <item>"自定义"</item>
+    <item>"其他组织"</item>
+    <item>"自定义组织"</item>
   </string-array>
   <string-array name="imProtocols">
     <item>"AIM"</item>
@@ -388,12 +388,12 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code">"输入 PIN 码"</string>
     <string name="keyguard_password_wrong_pin_code">"PIN 码不正确！"</string>
-    <string name="keyguard_label_text">"要解锁，请依次按“菜单”和 0。"</string>
+    <string name="keyguard_label_text">"要解锁，请先按 MENU 再按 0。"</string>
     <string name="emergency_call_dialog_number_for_display">"紧急电话号码"</string>
     <string name="lockscreen_carrier_default">"（无服务）"</string>
     <string name="lockscreen_screen_locked">"屏幕已锁定。"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"按“菜单”解锁或拨打紧急电话。"</string>
-    <string name="lockscreen_instructions_when_pattern_disabled">"按“菜单”解锁。"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"按 MENU 解锁或拨打紧急电话。"</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"按 MENU 解锁。"</string>
     <string name="lockscreen_pattern_instructions">"绘制解锁图案"</string>
     <string name="lockscreen_emergency_call">"紧急呼叫"</string>
     <string name="lockscreen_pattern_correct">"正确！"</string>
@@ -447,7 +447,7 @@
     <string name="open_permission_deny">"您无权打开此网页。"</string>
     <string name="text_copied">"文字已复制到剪贴板。"</string>
     <string name="more_item_label">"更多"</string>
-    <string name="prepend_shortcut_label">"“菜单”+"</string>
+    <string name="prepend_shortcut_label">"MENU+"</string>
     <string name="menu_space_shortcut_label">"空格"</string>
     <string name="menu_enter_shortcut_label">"Enter 键"</string>
     <string name="menu_delete_shortcut_label">"删除"</string>
@@ -647,18 +647,18 @@
     <string name="day_of_week_shortest_thursday">"周四"</string>
     <string name="day_of_week_shortest_friday">"周五"</string>
     <string name="day_of_week_shortest_saturday">"周六"</string>
-    <string name="month_long_january">"一月"</string>
-    <string name="month_long_february">"二月"</string>
-    <string name="month_long_march">"三月"</string>
-    <string name="month_long_april">"四月"</string>
-    <string name="month_long_may">"五月"</string>
-    <string name="month_long_june">"六月"</string>
-    <string name="month_long_july">"七月"</string>
-    <string name="month_long_august">"八月"</string>
-    <string name="month_long_september">"九月"</string>
-    <string name="month_long_october">"十月"</string>
-    <string name="month_long_november">"十一月"</string>
-    <string name="month_long_december">"十二月"</string>
+    <string name="month_long_january">"1 月"</string>
+    <string name="month_long_february">"2 月"</string>
+    <string name="month_long_march">"3 月"</string>
+    <string name="month_long_april">"4 月"</string>
+    <string name="month_long_may">"5 月"</string>
+    <string name="month_long_june">"6 月"</string>
+    <string name="month_long_july">"7 月"</string>
+    <string name="month_long_august">"8 月"</string>
+    <string name="month_long_september">"9 月"</string>
+    <string name="month_long_october">"10 月"</string>
+    <string name="month_long_november">"11 月"</string>
+    <string name="month_long_december">"12 月"</string>
     <string name="month_medium_january">"1 月"</string>
     <string name="month_medium_february">"2 月"</string>
     <string name="month_medium_march">"3 月"</string>
@@ -712,17 +712,17 @@
     <string name="chooseActivity">"选择一项操作"</string>
     <string name="noApplications">"没有应用程序可执行此操作。"</string>
     <string name="aerr_title">"很抱歉！"</string>
-    <string name="aerr_application">"应用程序<xliff:g id="APPLICATION">%1$s</xliff:g>（进程 <xliff:g id="PROCESS">%2$s</xliff:g>）已意外停止，请重试。"</string>
+    <string name="aerr_application">"应用程序<xliff:g id="APPLICATION">%1$s</xliff:g>（进程 <xliff:g id="PROCESS">%2$s</xliff:g>）意外停止，请重试。"</string>
     <string name="aerr_process">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 已意外停止，请重试。"</string>
     <string name="anr_title">"很抱歉！"</string>
-    <string name="anr_activity_application">"活动<xliff:g id="ACTIVITY">%1$s</xliff:g>（在应用程序<xliff:g id="APPLICATION">%2$s</xliff:g>中）无响应。"</string>
-    <string name="anr_activity_process">"活动<xliff:g id="ACTIVITY">%1$s</xliff:g>（在进程 <xliff:g id="PROCESS">%2$s</xliff:g> 中）无响应。"</string>
-    <string name="anr_application_process">"应用程序<xliff:g id="APPLICATION">%1$s</xliff:g>（在进程 <xliff:g id="PROCESS">%2$s</xliff:g> 中）无响应。"</string>
-    <string name="anr_process">"进程 <xliff:g id="PROCESS">%1$s</xliff:g> 无响应。"</string>
+    <string name="anr_activity_application">"<xliff:g id="ACTIVITY">%1$s</xliff:g>活动（在 <xliff:g id="APPLICATION">%2$s</xliff:g>应用程序中）无响应。"</string>
+    <string name="anr_activity_process">"<xliff:g id="ACTIVITY">%1$s</xliff:g>活动（在<xliff:g id="PROCESS">%2$s</xliff:g>进程中）无响应。"</string>
+    <string name="anr_application_process">"<xliff:g id="APPLICATION">%1$s</xliff:g>应用程序（在<xliff:g id="PROCESS">%2$s</xliff:g>进程中）无响应。"</string>
+    <string name="anr_process">"<xliff:g id="PROCESS">%1$s</xliff:g>进程无响应。"</string>
     <string name="force_close">"强行关闭"</string>
     <string name="wait">"等待"</string>
     <string name="debug">"调试"</string>
-    <string name="sendText">"选择文字操作"</string>
+    <string name="sendText">"选择要对文字执行的操作"</string>
     <string name="volume_ringtone">"铃声音量"</string>
     <string name="volume_music">"媒体音量"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"通过蓝牙播放"</string>
