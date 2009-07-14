@@ -98,6 +98,8 @@ struct layer_cblk_t     // (128 bytes)
 
 struct per_client_cblk_t   // 4KB max
 {
+    per_client_cblk_t() : lock(Mutex::SHARED) { }
+
                 Mutex           lock;
                 Condition       cv;
                 layer_cblk_t    layers[NUM_LAYERS_MAX] __attribute__((aligned(32)));
