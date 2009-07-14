@@ -337,16 +337,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mActivityContext = mSearchable.getActivityContext(getContext());
         
         // show the dialog. this will call onStart().
-        if (!isShowing()) {
-            // First make sure the keyboard is showing (if needed), so that we get the right height
-            // for the dropdown to respect the IME.
-            if (getContext().getResources().getConfiguration().hardKeyboardHidden ==
-                Configuration.HARDKEYBOARDHIDDEN_YES) {
-                InputMethodManager inputManager = (InputMethodManager)
-                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        inputManager.showSoftInputUnchecked(0, null);
-            }
-            
+        if (!isShowing()) {            
             // The Dialog uses a ContextThemeWrapper for the context; use this to change the
             // theme out from underneath us, between the global search theme and the in-app
             // search theme. They are identical except that the global search theme does not
@@ -1535,7 +1526,22 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         @Override
         public void performCompletion() {
         }
-        
+
+        /**
+         * We override this method to be sure and show the soft keyboard if appropriate when
+         * the TextView has focus.
+         */
+        @Override
+        public void onWindowFocusChanged(boolean hasWindowFocus) {
+            super.onWindowFocusChanged(hasWindowFocus);
+
+            if (hasWindowFocus) {
+                InputMethodManager inputManager = (InputMethodManager)
+                        getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.showSoftInput(this, 0);
+            }
+        }
+                
         /**
          * We override this method so that we can allow a threshold of zero, which ACTV does not.
          */
