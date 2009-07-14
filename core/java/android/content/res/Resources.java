@@ -34,6 +34,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.LongSparseArray;
+import android.view.Display;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -87,6 +88,7 @@ public class Resources {
     PluralRules mPluralRule;
     
     private final CompatibilityInfo mCompatibilityInfo;
+    private Display mDefaultDisplay;
 
     private static final LongSparseArray<Object> EMPTY_ARRAY = new LongSparseArray<Object>() {
         @Override
@@ -1913,6 +1915,24 @@ public class Resources {
         throw new NotFoundException(
                 "File " + file + " from xml type " + type + " resource ID #0x"
                 + Integer.toHexString(id));
+    }
+
+    /**
+     * Returns the display adjusted for the Resources' metrics.
+     * @hide
+     */
+    public Display getDefaultDisplay(Display defaultDisplay) {
+        if (mDefaultDisplay == null) {
+            if (!mCompatibilityInfo.isScalingRequired() && mCompatibilityInfo.supportsScreen()) {
+                // the app supports the display. just use the default one.
+                mDefaultDisplay = defaultDisplay;
+            } else {
+                // display needs adjustment.
+                mDefaultDisplay = Display.createMetricsBasedDisplay(
+                        defaultDisplay.getDisplayId(), mMetrics);
+            }
+        }
+        return mDefaultDisplay;
     }
 
     private TypedArray getCachedStyledAttributes(int len) {
