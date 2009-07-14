@@ -55,6 +55,8 @@ class GearsPermissionsManager {
     // The Gears permissions db schema version table.
     private final static String GEARS_SCHEMA_VERSION_TABLE_NAME =
         "VersionInfo";
+    // The Gears permission value that denotes "allow access to location".
+    private static final int GEARS_ALLOW_LOCATION_ACCESS = 1;
     // The shared pref name.
     private static final String LAST_KNOWN_LOCATION_SETTING =
         "lastKnownLocationSystemSetting";
@@ -119,8 +121,14 @@ class GearsPermissionsManager {
     }
 
     private void setGearsPermissionForGoogleDomains(int systemPermission) {
-        // Transform the system permission into a Gears permission
-        int gearsPermission = (systemPermission == 1 ? 1 : 2);
+        // Transform the system permission into a boolean flag. When this
+        // flag is true, it means the origins in gGearsWhiteList are added
+        // to the Gears location permission table with permission 1 (allowed).
+        // When the flag is false, the origins in gGearsWhiteList are removed
+        // from the Gears location permission table. Next time the user
+        // navigates to one of these origins, she will see the normal Gears
+        // permission prompt.
+        boolean addToGearsLocationTable = (systemPermission == 1 ? true : false);
         // Build the path to the Gears library.
 
         File file = new File(mGearsPath).getParentFile();
@@ -132,6 +140,13 @@ class GearsPermissionsManager {
                 + GEARS_DATABASE_DIR + File.separator + GEARS_DATABASE_FILE);
         // Remember whether or not we need to create the LocationAccess table.
         boolean needToCreateTables = !file.exists();
+        // If the database file does not yet exist and the system location
+        // setting says that the Gears origins need to be removed from the
+        // location permission table, it means that we don't actually need
+        // to do anything at all.
+        if (needToCreateTables && !addToGearsLocationTable) {
+            return;
+        }
         // Try opening the Gears database.
         SQLiteDatabase permissions;
         try {
@@ -177,14 +192,21 @@ class GearsPermissionsManager {
                         schema);
             }
 
-            ContentValues permissionValues = new ContentValues();
+            if (addToGearsLocationTable) {
+                ContentValues permissionValues = new ContentValues();
 
-            for (String url : sGearsWhiteList) {
-                permissionValues.put("Name", url);
-                permissionValues.put("Value", gearsPermission);
-                permissions.replace(GEARS_LOCATION_ACCESS_TABLE_NAME, null,
-                        permissionValues);
-                permissionValues.clear();
+                for (String url : sGearsWhiteList) {
+                    permissionValues.put("Name", url);
+                    permissionValues.put("Value", GEARS_ALLOW_LOCATION_ACCESS);
+                    permissions.replace(GEARS_LOCATION_ACCESS_TABLE_NAME, null,
+                            permissionValues);
+                    permissionValues.clear();
+                }
+            } else {
+                for (String url : sGearsWhiteList) {
+                    permissions.delete(GEARS_LOCATION_ACCESS_TABLE_NAME, "Name=?",
+                            new String[] { url });
+                }
             }
             // Commit the transaction.
             permissions.setTransactionSuccessful();
