@@ -76,7 +76,8 @@ public class TtsService extends Service implements OnCompletionListener {
             mCallingApp = source;
         }
 
-        public SpeechItem(String source, String text, ArrayList<String> params, int itemType, String filename) {
+        public SpeechItem(String source, String text, ArrayList<String> params,
+                int itemType, String filename) {
             mText = text;
             mParams = params;
             mType = itemType;
@@ -118,8 +119,10 @@ public class TtsService extends Service implements OnCompletionListener {
     private static final String CATEGORY = "android.intent.category.TTS";
     private static final String PKGNAME = "android.tts";
 
-    private final RemoteCallbackList<android.speech.tts.ITtsCallback> mCallbacks = new RemoteCallbackList<ITtsCallback>();
-    private HashMap<String, android.speech.tts.ITtsCallback> mCallbacksMap;
+    private final RemoteCallbackList<ITtsCallback> mCallbacks
+            = new RemoteCallbackList<ITtsCallback>();
+
+    private HashMap<String, ITtsCallback> mCallbacksMap;
 
     private Boolean mIsSpeaking;
     private ArrayList<SpeechItem> mSpeechQueue;
@@ -446,25 +449,22 @@ public class TtsService extends Service implements OnCompletionListener {
     private void silence(final SpeechItem speechItem) {
         class SilenceThread implements Runnable {
             public void run() {
-                long duration = speechItem.mDuration;
-                String callingApp = speechItem.mCallingApp;
-                ArrayList<String> params = speechItem.mParams;
                 String utteranceId = "";
-                if (params != null){
-                    for (int i = 0; i < params.size() - 1; i = i + 2){
-                        String param = params.get(i);
-                    if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_UTTERANCE_ID)){
-                        utteranceId = params.get(i+1);
+                if (speechItem.mParams != null){
+                    for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
+                        String param = speechItem.mParams.get(i);
+                        if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_UTTERANCE_ID)){
+                            utteranceId = speechItem.mParams.get(i+1);
                         }
                     }
                 }
                 try {
-                    Thread.sleep(duration);
+                    Thread.sleep(speechItem.mDuration);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } finally {
                     if (utteranceId.length() > 0){
-                        dispatchUtteranceCompletedCallback(utteranceId, callingApp);
+                        dispatchUtteranceCompletedCallback(utteranceId, speechItem.mCallingApp);
                     }
                     mCurrentSpeechItem = null;
                     processSpeechQueue();
@@ -479,9 +479,6 @@ public class TtsService extends Service implements OnCompletionListener {
     private void speakInternalOnly(final SpeechItem speechItem) {
         class SynthThread implements Runnable {
             public void run() {
-                String text = speechItem.mText;
-                ArrayList<String> params = speechItem.mParams;
-                String callingApp = speechItem.mCallingApp;
                 boolean synthAvailable = false;
                 String utteranceId = "";
                 try {
@@ -494,26 +491,28 @@ public class TtsService extends Service implements OnCompletionListener {
                         return;
                     }
                     int streamType = DEFAULT_STREAM_TYPE;
-                    if (params != null){
+                    if (speechItem.mParams != null){
                         String language = "";
                         String country = "";
                         String variant = "";
-                        for (int i = 0; i < params.size() - 1; i = i + 2){
-                            String param = params.get(i);
+                        for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
+                            String param = speechItem.mParams.get(i);
                             if (param != null) {
                                 if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)) {
-                                    setSpeechRate("", Integer.parseInt(params.get(i+1)));
+                                    setSpeechRate("",
+                                            Integer.parseInt(speechItem.mParams.get(i+1)));
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
-                                    language = params.get(i+1);
+                                    language = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
-                                    country = params.get(i+1);
+                                    country = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_VARIANT)){
-                                    variant = params.get(i+1);
+                                    variant = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_UTTERANCE_ID)){
-                                    utteranceId = params.get(i+1);
+                                    utteranceId = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_STREAM)) {
                                     try {
-                                        streamType = Integer.parseInt(params.get(i + 1));
+                                        streamType
+                                                = Integer.parseInt(speechItem.mParams.get(i + 1));
                                     } catch (NumberFormatException e) {
                                         streamType = DEFAULT_STREAM_TYPE;
                                     }
@@ -524,7 +523,7 @@ public class TtsService extends Service implements OnCompletionListener {
                             setLanguage("", language, country, variant);
                         }
                     }
-                    nativeSynth.speak(text, streamType);
+                    nativeSynth.speak(speechItem.mText, streamType);
                 } catch (InterruptedException e) {
                     Log.e("TTS speakInternalOnly", "tryLock interrupted");
                     e.printStackTrace();
@@ -536,7 +535,7 @@ public class TtsService extends Service implements OnCompletionListener {
                         synthesizerLock.unlock();
                     }
                     if (utteranceId.length() > 0){
-                        dispatchUtteranceCompletedCallback(utteranceId, callingApp);
+                        dispatchUtteranceCompletedCallback(utteranceId, speechItem.mCallingApp);
                     }
                     mCurrentSpeechItem = null;
                     processSpeechQueue();
@@ -551,13 +550,9 @@ public class TtsService extends Service implements OnCompletionListener {
     private void synthToFileInternalOnly(final SpeechItem speechItem) {
         class SynthThread implements Runnable {
             public void run() {
-                String text = speechItem.mText;
-                ArrayList<String> params = speechItem.mParams;
-                String filename = speechItem.mFilename;
-                String callingApp = speechItem.mCallingApp;
                 boolean synthAvailable = false;
                 String utteranceId = "";
-                Log.i("TTS", "Synthesizing to " + filename);
+                Log.i("TTS", "Synthesizing to " + speechItem.mFilename);
                 try {
                     synthAvailable = synthesizerLock.tryLock();
                     if (!synthAvailable) {
@@ -567,23 +562,24 @@ public class TtsService extends Service implements OnCompletionListener {
                         synth.start();
                         return;
                     }
-                    if (params != null){
+                    if (speechItem.mParams != null){
                         String language = "";
                         String country = "";
                         String variant = "";
-                        for (int i = 0; i < params.size() - 1; i = i + 2){
-                            String param = params.get(i);
+                        for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
+                            String param = speechItem.mParams.get(i);
                             if (param != null){
                                 if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)){
-                                    setSpeechRate("", Integer.parseInt(params.get(i+1)));
+                                    setSpeechRate("",
+                                            Integer.parseInt(speechItem.mParams.get(i+1)));
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
-                                    language = params.get(i+1);
+                                    language = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
-                                    country = params.get(i+1);
+                                    country = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_VARIANT)){
-                                    variant = params.get(i+1);
+                                    variant = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_UTTERANCE_ID)){
-                                    utteranceId = params.get(i+1);
+                                    utteranceId = speechItem.mParams.get(i+1);
                                 }
                             }
                         }
@@ -591,7 +587,7 @@ public class TtsService extends Service implements OnCompletionListener {
                             setLanguage("", language, country, variant);
                         }
                     }
-                    nativeSynth.synthesizeToFile(text, filename);
+                    nativeSynth.synthesizeToFile(speechItem.mText, speechItem.mFilename);
                 } catch (InterruptedException e) {
                     Log.e("TTS synthToFileInternalOnly", "tryLock interrupted");
                     e.printStackTrace();
@@ -603,7 +599,7 @@ public class TtsService extends Service implements OnCompletionListener {
                         synthesizerLock.unlock();
                     }
                     if (utteranceId.length() > 0){
-                        dispatchUtteranceCompletedCallback(utteranceId, callingApp);
+                        dispatchUtteranceCompletedCallback(utteranceId, speechItem.mCallingApp);
                     }
                     mCurrentSpeechItem = null;
                     processSpeechQueue();
