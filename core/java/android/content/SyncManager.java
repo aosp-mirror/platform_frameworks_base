@@ -1588,7 +1588,7 @@ class SyncManager implements OnAccountsUpdatedListener {
                             ContentResolver.SYNC_EXTRAS_MANUAL, false);
                     final boolean syncAutomatically =
                             mSyncStorageEngine.getSyncAutomatically(op.account, op.authority)
-                                    || mSyncStorageEngine.getMasterSyncAutomatically();
+                                    && mSyncStorageEngine.getMasterSyncAutomatically();
                     boolean syncAllowed =
                             manualSync || (backgroundDataUsageAllowed && syncAutomatically);
                     if (!syncAllowed) {

@@ -110,6 +110,8 @@ public class SyncStorageEngine extends Handler {
     
     private static final int MSG_WRITE_STATISTICS = 2;
     private static final long WRITE_STATISTICS_DELAY = 1000*60*30; // 1/2 hour
+
+    private static final boolean SYNC_ENABLED_DEFAULT = false;
     
     public static class PendingOperation {
         final Account account;
@@ -158,7 +160,7 @@ public class SyncStorageEngine extends Handler {
             this.account = account;
             this.authority = authority;
             this.ident = ident;
-            enabled = true;
+            enabled = SYNC_ENABLED_DEFAULT;
         }
     }
     
@@ -376,22 +378,29 @@ public class SyncStorageEngine extends Handler {
     }
 
     public void setSyncAutomatically(Account account, String providerName, boolean sync) {
+        boolean wasEnabled;
         synchronized (mAuthorities) {
-            AuthorityInfo authority = getAuthorityLocked(account, providerName,
-                    "setSyncAutomatically");
-            if (authority != null) {
-                authority.enabled = sync;
-            }
+            AuthorityInfo authority = getOrCreateAuthorityLocked(account, providerName, -1, false);
+            wasEnabled = authority.enabled;
+            authority.enabled = sync;
             writeAccountInfoLocked();
         }
-        
+
+        if (!wasEnabled && sync) {
+            mContext.getContentResolver().requestSync(account, providerName, new Bundle());
+        }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
     }
 
     public void setMasterSyncAutomatically(boolean flag) {
+        boolean old;
         synchronized (mAuthorities) {
+            old = mMasterSyncAutomatically;
             mMasterSyncAutomatically = flag;
             writeAccountInfoLocked();
+        }
+        if (!old && flag) {
+            mContext.getContentResolver().requestSync(null, null, new Bundle());
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
         mContext.sendBroadcast(SYNC_CONNECTION_SETTING_CHANGED_INTENT);
