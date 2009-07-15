@@ -84,6 +84,7 @@ class SynthProxyJniStorage {
             mNbChannels = DEFAULT_TTS_NB_CHANNELS;
             mBufferSize = DEFAULT_TTS_BUFFERSIZE;
             mBuffer = new int8_t[mBufferSize];
+            memset(mBuffer, 0, mBufferSize);
         }
 
         ~SynthProxyJniStorage() {
@@ -194,6 +195,7 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
             prepAudioTrack(pJniData, pForAfter->streamType, rate, format, channel);
             if (pJniData->mAudioOut) {
                 pJniData->mAudioOut->write(wav, bufferSize);
+                memset(wav, 0, bufferSize);
                 //LOGV("AudioTrack wrote: %d bytes", bufferSize);
             } else {
                 LOGE("Can't play, null audiotrack");
@@ -208,6 +210,7 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         }
         if (bufferSize > 0){
             fwrite(wav, 1, bufferSize, pForAfter->outputFile);
+            memset(wav, 0, bufferSize);
         }
     }
     // Future update:
@@ -473,6 +476,7 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     unsigned int unique_identifier;
 
+    memset(pSynthData->mBuffer, 0, pSynthData->mBufferSize);
     result = pSynthData->mNativeSynthInterface->synthesizeText(textNativeString,
             pSynthData->mBuffer, pSynthData->mBufferSize, (void *)pForAfter);
 
@@ -554,6 +558,7 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
 
     if (pSynthData->mNativeSynthInterface) {
         const char *textNativeString = env->GetStringUTFChars(textJavaString, 0);
+        memset(pSynthData->mBuffer, 0, pSynthData->mBufferSize);
         result = pSynthData->mNativeSynthInterface->synthesizeText(textNativeString,
                 pSynthData->mBuffer, pSynthData->mBufferSize, (void *)pForAfter);
         env->ReleaseStringUTFChars(textJavaString, textNativeString);
@@ -575,11 +580,11 @@ android_tts_SynthProxy_stop(JNIEnv *env, jobject thiz, jint jniData)
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
 
-    if (pSynthData->mNativeSynthInterface) {
-        result = pSynthData->mNativeSynthInterface->stop();
-    }
     if (pSynthData->mAudioOut) {
         pSynthData->mAudioOut->stop();
+    }
+    if (pSynthData->mNativeSynthInterface) {
+        result = pSynthData->mNativeSynthInterface->stop();
     }
 
     return result;
