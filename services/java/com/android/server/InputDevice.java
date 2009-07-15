@@ -66,19 +66,56 @@ public class InputDevice {
         MotionEvent generateMotion(InputDevice device, long curTime, long curTimeNano,
                 boolean isAbs, Display display, int orientation,
                 int metaState) {
-            if (!changed) {
-                return null;
-            }
-            
             float scaledX = x;
             float scaledY = y;
             float temp;
             float scaledPressure = 1.0f;
             float scaledSize = 0;
             int edgeFlags = 0;
+            
+            int action;
+            if (down != lastDown) {
+                if (isAbs) {
+                    final AbsoluteInfo absX = device.absX;
+                    final AbsoluteInfo absY = device.absY;
+                    if (down && absX != null && absY != null) {
+                        // We don't let downs start unless we are
+                        // inside of the screen.  There are two reasons for
+                        // this: to avoid spurious touches when holding
+                        // the edges of the device near the touchscreen,
+                        // and to avoid reporting events if there are virtual
+                        // keys on the touchscreen outside of the display
+                        // area.
+                        if (scaledX < absX.minValue || scaledX > absX.maxValue
+                                || scaledY < absY.minValue || scaledY > absY.maxValue) {
+                            if (false) Log.v("InputDevice", "Rejecting (" + scaledX + ","
+                                    + scaledY + "): outside of ("
+                                    + absX.minValue + "," + absY.minValue
+                                    + ")-(" + absX.maxValue + ","
+                                    + absY.maxValue + ")");
+                            return null;
+                        }
+                    }
+                } else {
+                    x = y = 0;
+                }
+                lastDown = down;
+                if (down) {
+                    action = MotionEvent.ACTION_DOWN;
+                    downTime = curTime;
+                } else {
+                    action = MotionEvent.ACTION_UP;
+                }
+                currentMove = null;
+            } else {
+                action = MotionEvent.ACTION_MOVE;
+            }
+            
             if (isAbs) {
-                int w = display.getWidth()-1;
-                int h = display.getHeight()-1;
+                final int dispW = display.getWidth()-1;
+                final int dispH = display.getHeight()-1;
+                int w = dispW;
+                int h = dispH;
                 if (orientation == Surface.ROTATION_90
                         || orientation == Surface.ROTATION_270) {
                     int tmp = w;
@@ -120,16 +157,17 @@ public class InputDevice {
                         break;
                 }
 
-                if (scaledX == 0) {
-                    edgeFlags += MotionEvent.EDGE_LEFT;
-                } else if (scaledX == display.getWidth() - 1.0f) {
-                    edgeFlags += MotionEvent.EDGE_RIGHT;
-                }
-                
-                if (scaledY == 0) {
-                    edgeFlags += MotionEvent.EDGE_TOP;
-                } else if (scaledY == display.getHeight() - 1.0f) {
-                    edgeFlags += MotionEvent.EDGE_BOTTOM;
+                if (action != MotionEvent.ACTION_DOWN) {
+                    if (scaledX <= 0) {
+                        edgeFlags += MotionEvent.EDGE_LEFT;
+                    } else if (scaledX >= dispW) {
+                        edgeFlags += MotionEvent.EDGE_RIGHT;
+                    }
+                    if (scaledY <= 0) {
+                        edgeFlags += MotionEvent.EDGE_TOP;
+                    } else if (scaledY >= dispH) {
+                        edgeFlags += MotionEvent.EDGE_BOTTOM;
+                    }
                 }
                 
             } else {
@@ -153,41 +191,25 @@ public class InputDevice {
                 }
             }
             
-            changed = false;
-            if (down != lastDown) {
-                int action;
-                lastDown = down;
-                if (down) {
-                    action = MotionEvent.ACTION_DOWN;
-                    downTime = curTime;
-                } else {
-                    action = MotionEvent.ACTION_UP;
+            if (currentMove != null) {
+                if (false) Log.i("InputDevice", "Adding batch x=" + scaledX
+                        + " y=" + scaledY + " to " + currentMove);
+                currentMove.addBatch(curTime, scaledX, scaledY,
+                        scaledPressure, scaledSize, metaState);
+                if (WindowManagerPolicy.WATCH_POINTER) {
+                    Log.i("KeyInputQueue", "Updating: " + currentMove);
                 }
-                currentMove = null;
-                if (!isAbs) {
-                    x = y = 0;
-                }
-                return MotionEvent.obtainNano(downTime, curTime, curTimeNano, action,
-                        scaledX, scaledY, scaledPressure, scaledSize, metaState,
-                        xPrecision, yPrecision, device.id, edgeFlags);
-            } else {
-                if (currentMove != null) {
-                    if (false) Log.i("InputDevice", "Adding batch x=" + scaledX
-                            + " y=" + scaledY + " to " + currentMove);
-                    currentMove.addBatch(curTime, scaledX, scaledY,
-                            scaledPressure, scaledSize, metaState);
-                    if (WindowManagerPolicy.WATCH_POINTER) {
-                        Log.i("KeyInputQueue", "Updating: " + currentMove);
-                    }
-                    return null;
-                }
-                MotionEvent me = MotionEvent.obtainNano(downTime, curTime, curTimeNano,
-                        MotionEvent.ACTION_MOVE, scaledX, scaledY,
-                        scaledPressure, scaledSize, metaState,
-                        xPrecision, yPrecision, device.id, edgeFlags);
-                currentMove = me;
-                return me;
+                return null;
             }
+            
+            MotionEvent me = MotionEvent.obtainNano(downTime, curTime,
+                    curTimeNano, action, scaledX, scaledY,
+                    scaledPressure, scaledSize, metaState,
+                    xPrecision, yPrecision, device.id, edgeFlags);
+            if (action == MotionEvent.ACTION_MOVE) {
+                currentMove = me;
+            }
+            return me;
         }
     }
     

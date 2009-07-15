@@ -240,6 +240,35 @@ int EventHub::getKeycodeState(int32_t deviceId, int code) const
     return 0;
 }
 
+status_t EventHub::scancodeToKeycode(int32_t deviceId, int scancode,
+        int32_t* outKeycode, uint32_t* outFlags) const
+{
+    AutoMutex _l(mLock);
+    device_t* device = getDevice(deviceId);
+    
+    if (device != NULL && device->layoutMap != NULL) {
+        status_t err = device->layoutMap->map(scancode, outKeycode, outFlags);
+        if (err == NO_ERROR) {
+            return NO_ERROR;
+        }
+    }
+    
+    if (mHaveFirstKeyboard) {
+        device = getDevice(mFirstKeyboardId);
+        
+        if (device != NULL && device->layoutMap != NULL) {
+            status_t err = device->layoutMap->map(scancode, outKeycode, outFlags);
+            if (err == NO_ERROR) {
+                return NO_ERROR;
+            }
+        }
+    }
+    
+    *outKeycode = 0;
+    *outFlags = 0;
+    return NAME_NOT_FOUND;
+}
+
 EventHub::device_t* EventHub::getDevice(int32_t deviceId) const
 {
     if (deviceId == 0) deviceId = mFirstKeyboardId;

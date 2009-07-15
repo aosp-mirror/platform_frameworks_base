@@ -73,6 +73,9 @@ public:
     int getKeycodeState(int key) const;
     int getKeycodeState(int32_t deviceId, int key) const;
     
+    status_t scancodeToKeycode(int32_t deviceId, int scancode,
+            int32_t* outKeycode, uint32_t* outFlags) const;
+    
     // special type codes when devices are added/removed.
     enum {
         DEVICE_ADDED = 0x10000000,
@@ -121,7 +124,7 @@ private:
     mutable Mutex   mLock;
     
     bool            mHaveFirstKeyboard;
-    int32_t         mFirstKeyboardId; // the API is that the build in keyboard is id 0, so map it
+    int32_t         mFirstKeyboardId; // the API is that the built-in keyboard is id 0, so map it
     
     struct device_ent {
         device_t* device;
