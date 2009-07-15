@@ -90,6 +90,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private static final String INSTANCE_KEY_STORED_APPDATA = "sData";
     private static final String INSTANCE_KEY_PREVIOUS_COMPONENTS = "sPrev";
     private static final String INSTANCE_KEY_USER_QUERY = "uQry";
+    
+    // The extra key used in an intent to the speech recognizer for in-app voice search.
+    private static final String EXTRA_CALLING_PACKAGE = "calling_package";
 
     private static final int SEARCH_PLATE_LEFT_PADDING_GLOBAL = 12;
     private static final int SEARCH_PLATE_LEFT_PADDING_NON_GLOBAL = 7;
@@ -847,11 +850,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * @return A completely-configured intent ready to send to the voice search activity
      */
     private Intent createVoiceAppSearchIntent(Intent baseIntent) {
+        ComponentName searchActivity = mSearchable.getSearchActivity();
+        
         // create the necessary intent to set up a search-and-forward operation
         // in the voice search system.   We have to keep the bundle separate,
         // because it becomes immutable once it enters the PendingIntent
         Intent queryIntent = new Intent(Intent.ACTION_SEARCH);
-        queryIntent.setComponent(mSearchable.getSearchActivity());
+        queryIntent.setComponent(searchActivity);
         PendingIntent pending = PendingIntent.getActivity(
                 getContext(), 0, queryIntent, PendingIntent.FLAG_ONE_SHOT);
         
@@ -891,6 +896,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         voiceIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
         voiceIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, maxResults);
+        voiceIntent.putExtra(EXTRA_CALLING_PACKAGE,
+                searchActivity == null ? null : searchActivity.toShortString());
         
         // Add the values that configure forwarding the results
         voiceIntent.putExtra(RecognizerIntent.EXTRA_RESULTS_PENDINGINTENT, pending);
