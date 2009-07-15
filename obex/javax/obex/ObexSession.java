@@ -41,10 +41,8 @@ import java.io.IOException;
  * of the same connection, which is established by server's accepting of a
  * client issued "CONNECT".
  * <P>
- * 
  * This interface serves as the common super class for
  * <CODE>ClientSession</CODE> and <CODE>ServerSession</CODE>.
- * 
  * @hide
  */
 public class ObexSession {
@@ -56,10 +54,7 @@ public class ObexSession {
     /**
      * Called when the server received an authentication challenge header. This
      * will cause the authenticator to handle the authentication challenge.
-     *
-     * @param header
-     *            the header with the authentication challenge
-     *
+     * @param header the header with the authentication challenge
      * @return <code>true</code> if the last request should be resent;
      *         <code>false</code> if the last request should not be resent
      * @throws IOException
@@ -188,10 +183,7 @@ public class ObexSession {
     /**
      * Called when the server received an authentication response header. This
      * will cause the authenticator to handle the authentication response.
-     *
-     * @param authResp
-     *            the authentication response
-     *
+     * @param authResp the authentication response
      * @return <code>true</code> if the response passed; <code>false</code> if
      *         the response failed
      */

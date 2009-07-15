@@ -39,7 +39,6 @@ import java.io.OutputStream;
 
 /**
  * This class in an implementation of the OBEX ClientSession.
- *
  * @hide
  */
 public final class ClientSession extends ObexSession {
@@ -163,7 +162,7 @@ public final class ClientSession extends ObexSession {
     }
 
     /**
-     *  0xCB Connection Id an identifier used for OBEX connection multiplexing
+     * 0xCB Connection Id an identifier used for OBEX connection multiplexing
      */
     public void setConnectionID(long id) {
         if ((id < 0) || (id > 0xFFFFFFFFL)) {
@@ -365,7 +364,6 @@ public final class ClientSession extends ObexSession {
 
     /**
      * Verifies that the connection is open.
-     *
      * @throws IOException if the connection is closed
      */
     public synchronized void ensureOpen() throws IOException {
@@ -375,9 +373,8 @@ public final class ClientSession extends ObexSession {
     }
 
     /**
-     * Set request inactive.
-     * Allows Put and get operation objects to tell this object when they are
-     * done.
+     * Set request inactive. Allows Put and get operation objects to tell this
+     * object when they are done.
      */
     /*package*/synchronized void setRequestInactive() {
         mRequestActive = false;
@@ -395,27 +392,17 @@ public final class ClientSession extends ObexSession {
     }
 
     /**
-     * Sends a standard request to the client.  It will then wait for the reply
-     * and update the header set object provided.  If any authentication
-     * headers (i.e. authentication challenge or authentication response) are
-     * received, they will be processed.
-     *
+     * Sends a standard request to the client. It will then wait for the reply
+     * and update the header set object provided. If any authentication headers
+     * (i.e. authentication challenge or authentication response) are received,
+     * they will be processed.
      * @param opCode the type of request to send to the client
-     *
-     * @param head the headers to send to the server
-     *
-     * @param challenge the nonce that was sent in the authentication
-     * challenge header located in <code>head</code>; <code>null</code>
-     * if no authentication header is included in <code>head</code>
-     *
+     * @param head the headers to send to the client
      * @param header the header object to update with the response
-     *
-     * @param input the input stream used by the Operation object; null if this
-     * is called on a CONNECT, SETPATH or DISCONNECT
-     *
-     * return <code>true</code> if the operation completed successfully;
-     * <code>false</code> if an authentication response failed to pass
-     *
+     * @param privateInput the input stream used by the Operation object; null
+     *        if this is called on a CONNECT, SETPATH or DISCONNECT return
+     *        <code>true</code> if the operation completed successfully;
+     *        <code>false</code> if an authentication response failed to pass
      * @throws IOException if an IO error occurs
      */
     public boolean sendRequest(int opCode, byte[] head, HeaderSet header,

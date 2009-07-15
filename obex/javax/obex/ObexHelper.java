@@ -43,16 +43,14 @@ import java.util.TimeZone;
 
 /**
  * This class defines a set of helper methods for the implementation of Obex.
- *
  * @hide
  */
 public final class ObexHelper {
 
     /**
-     * Defines the basic packet length used by OBEX.  Every OBEX packet has the
+     * Defines the basic packet length used by OBEX. Every OBEX packet has the
      * same basic format:<BR>
-     * Byte 0: Request or Response Code
-     * Byte 1&2: Length of the packet.
+     * Byte 0: Request or Response Code Byte 1&2: Length of the packet.
      */
     public static final int BASE_PACKET_LENGTH = 3;
 
@@ -61,17 +59,14 @@ public final class ObexHelper {
     }
 
     /**
-     * The maximum packet size for OBEX packets that this client can handle.
-     * At present, this must be changed for each port.
-     *
-     * TODO: The max packet size should be the Max incoming MTU minus
-     * TODO: L2CAP package headers and RFCOMM package headers.
-     *
-     * TODO: Retrieve the max incoming MTU from
-     * TODO: LocalDevice.getProperty().
+     * The maximum packet size for OBEX packets that this client can handle. At
+     * present, this must be changed for each port. TODO: The max packet size
+     * should be the Max incoming MTU minus TODO: L2CAP package headers and
+     * RFCOMM package headers. TODO: Retrieve the max incoming MTU from TODO:
+     * LocalDevice.getProperty().
      */
-    /** android note
-     *  set as 0xFFFE to match remote MPS
+    /*
+     * android note set as 0xFFFE to match remote MPS
      */
     public static final int MAX_PACKET_SIZE_INT = 0xFFFE;
 
@@ -119,34 +114,46 @@ public final class ObexHelper {
 
     /**
      * Updates the HeaderSet with the headers received in the byte array
-     * provided.  Invalid headers are ignored.
+     * provided. Invalid headers are ignored.
      * <P>
-     * The first two bits of an OBEX Header specifies the type of object that
-     * is being sent.  The table below specifies the meaning of the high
-     * bits.
+     * The first two bits of an OBEX Header specifies the type of object that is
+     * being sent. The table below specifies the meaning of the high bits.
      * <TABLE>
-     * <TR><TH>Bits 8 and 7</TH><TH>Value</TH><TH>Description</TH></TR>
-     * <TR><TD>00</TD><TD>0x00</TD><TD>Null Terminated Unicode text, prefixed
-     * with 2 byte unsigned integer</TD></TR>
-     * <TR><TD>01</TD><TD>0x40</TD><TD>Byte Sequence, length prefixed with
-     * 2 byte unsigned integer</TD></TR>
-     * <TR><TD>10</TD><TD>0x80</TD><TD>1 byte quantity</TD></TR>
-     * <TR><TD>11</TD><TD>0xC0</TD><TD>4 byte quantity - transmitted in
-     * network byte order (high byte first</TD></TR>
+     * <TR>
+     * <TH>Bits 8 and 7</TH>
+     * <TH>Value</TH>
+     * <TH>Description</TH>
+     * </TR>
+     * <TR>
+     * <TD>00</TD>
+     * <TD>0x00</TD>
+     * <TD>Null Terminated Unicode text, prefixed with 2 byte unsigned integer</TD>
+     * </TR>
+     * <TR>
+     * <TD>01</TD>
+     * <TD>0x40</TD>
+     * <TD>Byte Sequence, length prefixed with 2 byte unsigned integer</TD>
+     * </TR>
+     * <TR>
+     * <TD>10</TD>
+     * <TD>0x80</TD>
+     * <TD>1 byte quantity</TD>
+     * </TR>
+     * <TR>
+     * <TD>11</TD>
+     * <TD>0xC0</TD>
+     * <TD>4 byte quantity - transmitted in network byte order (high byte first</TD>
+     * </TR>
      * </TABLE>
      * This method uses the information in this table to determine the type of
-     * Java object to create and passes that object with the full header
-     * to setHeader() to update the HeaderSet object.  Invalid headers will
-     * cause an exception to be thrown.  When it is thrown, it is ignored.
-     *
+     * Java object to create and passes that object with the full header to
+     * setHeader() to update the HeaderSet object. Invalid headers will cause an
+     * exception to be thrown. When it is thrown, it is ignored.
      * @param header the HeaderSet to update
-     *
      * @param headerArray the byte array containing headers
-     *
      * @return the result of the last start body or end body header provided;
-     * the first byte in the result will specify if a body or end of body is
-     * received
-     *
+     *         the first byte in the result will specify if a body or end of
+     *         body is received
      * @throws IOException if an invalid header was found
      */
     public static byte[] updateHeaderSet(HeaderSet header, byte[] headerArray) throws IOException {
@@ -316,18 +323,13 @@ public final class ObexHelper {
 
     /**
      * Creates the header part of OBEX packet based on the header provided.
-     *
-     * TODO: Could use getHeaderList() to get the array of headers to
-     * TODO: include and then use the high two bits to determine the
-     * TODO: the type of the object and construct the byte array from
-     * TODO: that.  This will make the size smaller.
-     *
+     * TODO: Could use getHeaderList() to get the array of headers to include
+     * and then use the high two bits to determine the the type of the object
+     * and construct the byte array from that. This will make the size smaller.
      * @param head the header used to construct the byte array
-     *
      * @param nullOut <code>true</code> if the header should be set to
-     * <code>null</code> once it is added to the array or <code>false</code>
-     * if it should not be nulled out
-     *
+     *        <code>null</code> once it is added to the array or
+     *        <code>false</code> if it should not be nulled out
      * @return the header of an OBEX packet
      */
     public static byte[] createHeader(HeaderSet head, boolean nullOut) {
@@ -342,9 +344,6 @@ public final class ObexHelper {
         int length;
         HeaderSet headImpl = null;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        if (!(head instanceof HeaderSet)) {
-            throw new IllegalArgumentException("Header not created by createHeaderSet");
-        }
         headImpl = head;
 
         try {
@@ -675,18 +674,14 @@ public final class ObexHelper {
     }
 
     /**
-     * Determines where the maximum divide is between headers.  This method is
+     * Determines where the maximum divide is between headers. This method is
      * used by put and get operations to separate headers to a size that meets
      * the max packet size allowed.
-     *
      * @param headerArray the headers to separate
-     *
      * @param start the starting index to search
-     *
      * @param maxSize the maximum size of a packet
-     *
      * @return the index of the end of the header block to send or -1 if the
-     * header could not be divided because the header is too large
+     *         header could not be divided because the header is too large
      */
     public static int findHeaderEnd(byte[] headerArray, int start, int maxSize) {
 
@@ -757,9 +752,7 @@ public final class ObexHelper {
 
     /**
      * Converts the byte array to a long.
-     *
      * @param b the byte array to convert to a long
-     *
      * @return the byte array as a long
      */
     public static long convertToLong(byte[] b) {
@@ -781,10 +774,8 @@ public final class ObexHelper {
     }
 
     /**
-     * Converts the long to a 4 byte array.  The long must be non negative.
-     *
+     * Converts the long to a 4 byte array. The long must be non negative.
      * @param l the long to convert
-     *
      * @return a byte array that is the same as the long
      */
     public static byte[] convertToByteArray(long l) {
@@ -799,11 +790,9 @@ public final class ObexHelper {
     }
 
     /**
-     * Converts the String to a UNICODE byte array.  It will also add the ending
+     * Converts the String to a UNICODE byte array. It will also add the ending
      * null characters to the end of the string.
-     *
      * @param s the string to convert
-     *
      * @return the unicode byte array of the string
      */
     public static byte[] convertToUnicodeByteArray(String s) {
@@ -826,13 +815,10 @@ public final class ObexHelper {
     }
 
     /**
-     * Retrieves the value from the byte array for the tag value specified.  The
+     * Retrieves the value from the byte array for the tag value specified. The
      * array should be of the form Tag - Length - Value triplet.
-     *
      * @param tag the tag to retrieve from the byte array
-     *
      * @param triplet the byte sequence containing the tag length value form
-     *
      * @return the value of the specified tag
      */
     public static byte[] getTagValue(byte tag, byte[] triplet) {
@@ -854,11 +840,8 @@ public final class ObexHelper {
 
     /**
      * Finds the index that starts the tag value pair in the byte array provide.
-     *
      * @param tag the tag to look for
-     *
      * @param value the byte array to search
-     *
      * @return the starting index of the tag or -1 if the tag could not be found
      */
     public static int findTag(byte tag, byte[] value) {
@@ -884,16 +867,12 @@ public final class ObexHelper {
 
     /**
      * Converts the byte array provided to a unicode string.
-     *
      * @param b the byte array to convert to a string
-     *
      * @param includesNull determine if the byte string provided contains the
-     * UNICODE null character at the end or not;  if it does, it will be
-     * removed
-     *
+     *        UNICODE null character at the end or not; if it does, it will be
+     *        removed
      * @return a Unicode string
-     *
-     * @param IllegalArgumentException if the byte array has an odd length
+     * @throws IllegalArgumentException if the byte array has an odd length
      */
     public static String convertToUnicode(byte[] b, boolean includesNull) {
         if (b == null) {
@@ -926,9 +905,8 @@ public final class ObexHelper {
     }
 
     /**
-     * Compute the MD5 hash of the byte array provided.
-     * Does not accumulate input.
-     *
+     * Compute the MD5 hash of the byte array provided. Does not accumulate
+     * input.
      * @param in the byte array to hash
      * @return the MD5 hash of the byte array
      */
@@ -939,23 +917,16 @@ public final class ObexHelper {
 
     /**
      * Computes an authentication challenge header.
-     *
-     *
-     * @param nonce the challenge that will be provided to the peer;  the
-     * challenge must be 16 bytes long
-     *
+     * @param nonce the challenge that will be provided to the peer; the
+     *        challenge must be 16 bytes long
      * @param realm a short description that describes what password to use
-     *
      * @param access if <code>true</code> then full access will be granted if
-     * successful; if <code>false</code> then read only access will be granted
-     * if successful
-     *
+     *        successful; if <code>false</code> then read only access will be
+     *        granted if successful
      * @param userID if <code>true</code>, a user ID is required in the reply;
-     * if <code>false</code>, no user ID is required
-     *
-     * @throws IllegalArgumentException if the challenge is not 16 bytes
-     * long; if the realm can not be encoded in less then 255 bytes
-     *
+     *        if <code>false</code>, no user ID is required
+     * @throws IllegalArgumentException if the challenge is not 16 bytes long;
+     *         if the realm can not be encoded in less then 255 bytes
      * @throws IOException if the encoding scheme ISO 8859-1 is not supported
      */
     public static byte[] computeAuthenticationChallenge(byte[] nonce, String realm, boolean access,

@@ -40,7 +40,6 @@ import java.io.OutputStream;
 
 /**
  * This class in an implementation of the OBEX ServerSession.
- * 
  * @hide
  */
 public final class ServerSession extends ObexSession implements Runnable {
@@ -63,19 +62,11 @@ public final class ServerSession extends ObexSession implements Runnable {
 
     /**
      * Creates new ServerSession.
-     *
-     * @param trans
-     *            the connection to the client
-     *
-     * @param handler
-     *            the event listener that will process requests
-     *
-     * @param auth
-     *            the authenticator to use with this connection
-     *
-     * @throws IOException
-     *                if an error occurred while opening the input and output
-     *                streams
+     * @param trans the connection to the client
+     * @param handler the event listener that will process requests
+     * @param auth the authenticator to use with this connection
+     * @throws IOException if an error occurred while opening the input and
+     *         output streams
      */
     public ServerSession(ObexTransport trans, ServerRequestHandler handler, Authenticator auth)
             throws IOException {
@@ -163,12 +154,8 @@ public final class ServerSession extends ObexSession implements Runnable {
      * <code>ServerOperation</code> object will always reply with a
      * OBEX_HTTP_CONTINUE reply. It will only reply if further information is
      * needed.
-     *
-     * @param type
-     *            the type of request received; either 0x02 or 0x82
-     *
-     * @throws IOException
-     *                if an error occurred at the transport layer
+     * @param type the type of request received; either 0x02 or 0x82
+     * @throws IOException if an error occurred at the transport layer
      */
     private void handlePutRequest(int type) throws IOException {
         ServerOperation op = new ServerOperation(this, mInput, type, mMaxPacketLength, mListener);
@@ -191,7 +178,14 @@ public final class ServerSession extends ObexSession implements Runnable {
                 op.sendReply(response);
             }
         } catch (Exception e) {
-            sendResponse(ResponseCodes.OBEX_HTTP_INTERNAL_ERROR, null);
+            /*To fix bugs in aborted cases,
+             *(client abort file transfer prior to the last packet which has the end of body header,
+             *internal error should not be sent because server has already replied with
+             *OK response in "sendReply")
+             */
+            if (!op.isAborted) {
+                sendResponse(ResponseCodes.OBEX_HTTP_INTERNAL_ERROR, null);
+            }
         }
     }
 
@@ -205,12 +199,8 @@ public final class ServerSession extends ObexSession implements Runnable {
      * <code>ServerOperation</code> object will always reply with a
      * OBEX_HTTP_CONTINUE reply. It will only reply if further information is
      * needed.
-     *
-     * @param type
-     *            the type of request received; either 0x03 or 0x83
-     *
-     * @throws IOException
-     *                if an error occurred at the transport layer
+     * @param type the type of request received; either 0x03 or 0x83
+     * @throws IOException if an error occurred at the transport layer
      */
     private void handleGetRequest(int type) throws IOException {
         ServerOperation op = new ServerOperation(this, mInput, type, mMaxPacketLength, mListener);
@@ -227,15 +217,9 @@ public final class ServerSession extends ObexSession implements Runnable {
 
     /**
      * Send standard response.
-     *
-     * @param code
-     *            the response code to send
-     *
-     * @param header
-     *            the headers to include in the response
-     *
-     * @throws IOException
-     *                if an IO error occurs
+     * @param code the response code to send
+     * @param header the headers to include in the response
+     * @throws IOException if an IO error occurs
      */
     public void sendResponse(int code, byte[] header) throws IOException {
         int totalLength = 3;
@@ -265,9 +249,7 @@ public final class ServerSession extends ObexSession implements Runnable {
      * <code>ServerRequestHandler</code> object. After the handler processes the
      * request, this method will create a reply message to send to the server
      * with the response code provided.
-     *
-     * @throws IOException
-     *                if an error occurred at the transport layer
+     * @throws IOException if an error occurred at the transport layer
      */
     private void handleSetPathRequest() throws IOException {
         int length;
@@ -393,9 +375,7 @@ public final class ServerSession extends ObexSession implements Runnable {
      * will create a <code>HeaderSet</code> object to pass to the
      * <code>ServerRequestHandler</code> object. After the handler processes the
      * request, this method will create a reply message to send to the server.
-     *
-     * @throws IOException
-     *                if an error occurred at the transport layer
+     * @throws IOException if an error occurred at the transport layer
      */
     private void handleDisconnectRequest() throws IOException {
         int length;
@@ -500,9 +480,7 @@ public final class ServerSession extends ObexSession implements Runnable {
      * <code>ServerRequestHandler</code> object. After the handler processes the
      * request, this method will create a reply message to send to the server
      * with the response code provided.
-     *
-     * @throws IOException
-     *                if an error occurred at the transport layer
+     * @throws IOException if an error occurred at the transport layer
      */
     private void handleConnectRequest() throws IOException {
         int packetLength;
@@ -660,10 +638,7 @@ public final class ServerSession extends ObexSession implements Runnable {
     /**
      * Verifies that the response code is valid. If it is not valid, it will
      * return the <code>OBEX_HTTP_INTERNAL_ERROR</code> response code.
-     *
-     * @param code
-     *            the response code to check
-     *
+     * @param code the response code to check
      * @return the valid response code or <code>OBEX_HTTP_INTERNAL_ERROR</code>
      *         if <code>code</code> is not valid
      */
