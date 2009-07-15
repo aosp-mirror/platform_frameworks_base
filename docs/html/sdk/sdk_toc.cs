@@ -1,4 +1,4 @@
-
+<?cs if:!sdk.redirect ?>
 <ul>
   <li><?cs 
    if:android.whichdoc != "online" ?>
@@ -92,3 +92,4 @@
     changeNavLang(getLangPref());
 //-->
 </script>
+<?cs /if ?>
