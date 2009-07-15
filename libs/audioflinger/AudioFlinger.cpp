@@ -212,6 +212,7 @@ void AudioFlinger::setA2dpEnabled_l(bool enable)
     } else {
         mA2dpMixerThread->getTracks_l(tracks, activeTracks);
         mHardwareMixerThread->putTracks_l(tracks, activeTracks);
+        mA2dpMixerThread->mOutput->standby();
     }
     mA2dpEnabled = enable;
     mNotifyA2dpChange = true;
