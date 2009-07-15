@@ -1235,6 +1235,9 @@ public class WebView extends AbsoluteLayout
      * @param url The url of the resource to load.
      */
     public void loadUrl(String url) {
+        if (url == null) {
+            return;
+        }
         switchOutDrawHistory();
         mWebViewCore.sendMessage(EventHub.LOAD_URL, url);
         clearTextEntry();
