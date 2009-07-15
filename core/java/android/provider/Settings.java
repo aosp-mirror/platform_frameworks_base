@@ -2714,6 +2714,12 @@ public final class Settings {
         public static final String GMAIL_NUM_RETRY_UPHILL_OP = "gmail_discard_error_uphill_op";
 
         /**
+         * Controls if the protocol buffer version of the protocol will use a multipart request for
+         * attachment uploads. Value must be an integer where non-zero means true. Defaults to 0.
+         */
+        public static final String GMAIL_USE_MULTIPART_PROTOBUF = "gmail_use_multipart_protobuf";
+
+        /**
          * the transcoder URL for mobile devices.
          */
         public static final String TRANSCODER_URL = "mobile_transcoder_url";
