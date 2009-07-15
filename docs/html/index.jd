@@ -33,7 +33,7 @@ home=true
                                       <!-- populated by buildCarousel() -->
                                     </div>
                                 </div><!-- end list-clip -->
-                                <a href="javascript:page_right()" id="arrow-right" onclick="" class="arrow-right-off"></a>
+                                <a href="javascript:{}" id="arrow-right" onclick="" class="arrow-right-off"></a>
                                 <div class="clearer"></div>
                             </div><!-- end app-list container -->
                         </div><!-- end carousel -->
@@ -81,8 +81,8 @@ home=true
                                       <td class="imageCell"><a href="http://www.youtube.com/user/androiddevelopers"><img src="{@docRoot}assets/images/video-droid.png" style="padding:0" /></a></td>
                                       <td>
                                               <h2 class="green">Watch</h2>
-                                              <object width="150" height="140"><param name="movie" value="http://www.youtube.com/v/x1ZZ-R3p_w8&hl=en&fs=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/x1ZZ-R3p_w8&hl=en&fs=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="150" height="140"></embed></object>
-                                              <p style="margin-top:1em"><a href="http://www.youtube.com/user/androiddevelopers">More Android videos &raquo;</a></p>
+                                              <object width="150" height="140"><param name="movie" value="http://www.youtube.com/v/GARMe7Km_gk&hl=en&fs=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/GARMe7Km_gk&hl=en&fs=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="150" height="140"></embed></object>
+                                              <p style="margin-top:1em"><a href="{@docRoot}videos/index.html">More Android videos &raquo;</a></p>
                                       </td>
                               </tr>
 
