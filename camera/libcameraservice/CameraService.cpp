@@ -227,6 +227,8 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
 
     mMediaPlayerClick = newMediaPlayer("/system/media/audio/ui/camera_click.ogg");
     mMediaPlayerBeep = newMediaPlayer("/system/media/audio/ui/VideoRecord.ogg");
+    mOverlayW = 0;
+    mOverlayH = 0;
 
     // Callback is disabled by default
     mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
@@ -399,6 +401,11 @@ void CameraService::Client::disconnect()
     mHardware->cancelPicture(true, true, true);
     // Release the hardware resources.
     mHardware->release();
+    // Release the held overlay resources.
+    if (mUseOverlay)
+    {
+        mOverlayRef = 0;
+    }
     mHardware.clear();
 
     mCameraService->removeClient(mCameraClient);
@@ -420,11 +427,21 @@ status_t CameraService::Client::setPreviewDisplay(const sp<ISurface>& surface)
     result = NO_ERROR;
     // asBinder() is safe on NULL (returns NULL)
     if (surface->asBinder() != mSurface->asBinder()) {
-        if (mSurface != 0 && !mUseOverlay) {
+        if (mSurface != 0) {
             LOGD("clearing old preview surface %p", mSurface.get());
-            mSurface->unregisterBuffers();
+            if ( !mUseOverlay)
+            {
+                mSurface->unregisterBuffers();
+            }
+            else
+            {
+                // Force the destruction of any previous overlay
+                sp<Overlay> dummy;
+                mHardware->setOverlay( dummy );
+            }
         }
         mSurface = surface;
+        mOverlayRef = 0;
         // If preview has been already started, set overlay or register preview
         // buffers now.
         if (mHardware->previewEnabled()) {
@@ -520,8 +537,8 @@ status_t CameraService::Client::setOverlay()
 
     const char *format = params.getPreviewFormat();
     int fmt;
-    if (!strcmp(format, "yuv422i"))
-        fmt = OVERLAY_FORMAT_YCbCr_422_I;
+    if (!strcmp(format, "yuv422i-yuyv"))
+        fmt = OVERLAY_FORMAT_YCbYCr_422_I;
     else if (!strcmp(format, "rgb565"))
         fmt = OVERLAY_FORMAT_RGB_565;
     else {
@@ -529,16 +546,35 @@ status_t CameraService::Client::setOverlay()
         return -EINVAL;
     }
 
+    if ( w != mOverlayW || h != mOverlayH )
+    {
+        // Force the destruction of any previous overlay
+        sp<Overlay> dummy;
+        mHardware->setOverlay( dummy );
+        mOverlayRef = 0;
+    }
+
     status_t ret = NO_ERROR;
     if (mSurface != 0) {
-        sp<OverlayRef> ref = mSurface->createOverlay(w, h, fmt);
-        ret = mHardware->setOverlay(new Overlay(ref));
+        if (mOverlayRef.get() == NULL) {
+            mOverlayRef = mSurface->createOverlay(w, h, fmt);
+            if ( mOverlayRef.get() == NULL )
+            {
+                LOGE("Overlay Creation Failed!");
+                return -EINVAL;
+            }
+            ret = mHardware->setOverlay(new Overlay(mOverlayRef));
+        }
     } else {
         ret = mHardware->setOverlay(NULL);
     }
     if (ret != NO_ERROR) {
         LOGE("mHardware->setOverlay() failed with status %d\n", ret);
     }
+
+    mOverlayW = w;
+    mOverlayH = h;
+
     return ret;
 }
 
@@ -1092,6 +1128,7 @@ void CameraService::Client::postPreviewFrame(const sp<IMemory>& mem)
     ssize_t offset;
     size_t size;
     sp<IMemoryHeap> heap = mem->getMemory(&offset, &size);
+    if ( !mUseOverlay )
     {
         Mutex::Autolock surfaceLock(mSurfaceLock);
         if (mSurface != NULL) {

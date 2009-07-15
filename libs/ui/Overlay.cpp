@@ -59,6 +59,18 @@ status_t Overlay::queueBuffer(overlay_buffer_t buffer)
     return mOverlayData->queueBuffer(mOverlayData, buffer);
 }
 
+status_t Overlay::setCrop(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+{
+    if (mStatus != NO_ERROR) return mStatus;
+    return mOverlayData->setCrop(mOverlayData, x, y, w, h);
+}
+
+status_t Overlay::getCrop(uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h)
+{
+    if (mStatus != NO_ERROR) return mStatus;
+    return mOverlayData->getCrop(mOverlayData, x, y, w, h);
+}
+
 int32_t Overlay::getBufferCount() const
 {
     if (mStatus != NO_ERROR) return mStatus;
@@ -73,6 +85,15 @@ void* Overlay::getBufferAddress(overlay_buffer_t buffer)
 
 void Overlay::destroy() {  
     if (mStatus != NO_ERROR) return;
+
+    // Must delete the objects in reverse creation order, thus the
+    //  data side must be closed first and then the destroy send to
+    //  the control side.
+    if (mOverlayData) {
+        overlay_data_close(mOverlayData);
+        mOverlayData = NULL;
+    }
+
     mOverlayRef->mOverlayChannel->destroy();
 }
 
