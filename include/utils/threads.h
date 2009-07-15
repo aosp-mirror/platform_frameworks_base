@@ -190,8 +190,14 @@ inline thread_id_t getThreadId() {
  */
 class Mutex {
 public:
+    enum {
+        NORMAL = 0,
+        SHARED = 1
+    };
+    
                 Mutex();
                 Mutex(const char* name);
+                Mutex(int type, const char* name = NULL);
                 ~Mutex();
 
     // lock or unlock the mutex
@@ -234,6 +240,17 @@ inline Mutex::Mutex() {
 }
 inline Mutex::Mutex(const char* name) {
     pthread_mutex_init(&mMutex, NULL);
+}
+inline Mutex::Mutex(int type, const char* name) {
+    if (type == SHARED) {
+        pthread_mutexattr_t attr;
+        pthread_mutexattr_init(&attr);
+        pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED);
+        pthread_mutex_init(&mMutex, &attr);
+        pthread_mutexattr_destroy(&attr);
+    } else {
+        pthread_mutex_init(&mMutex, NULL);
+    }
 }
 inline Mutex::~Mutex() {
     pthread_mutex_destroy(&mMutex);

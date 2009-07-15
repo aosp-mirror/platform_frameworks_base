@@ -891,7 +891,7 @@ void AudioTrack::AudioTrackThread::onFirstRef()
 // =========================================================================
 
 audio_track_cblk_t::audio_track_cblk_t()
-    : user(0), server(0), userBase(0), serverBase(0), buffers(0), frameCount(0),
+    : lock(Mutex::SHARED), user(0), server(0), userBase(0), serverBase(0), buffers(0), frameCount(0),
     loopStart(UINT_MAX), loopEnd(UINT_MAX), loopCount(0), volumeLR(0), flowControlFlag(1), forceReady(0)
 {
 }
