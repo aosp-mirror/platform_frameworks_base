@@ -187,6 +187,9 @@ public final class ContactsContract {
         public static final Uri CONTENT_SUMMARY_STREQUENT_FILTER_URI = Uri.withAppendedPath(
                 CONTENT_SUMMARY_STREQUENT_URI, "filter");
 
+        public static final Uri CONTENT_SUMMARY_GROUP_URI = Uri.withAppendedPath(
+                CONTENT_SUMMARY_URI, "group");
+
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
