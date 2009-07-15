@@ -38,6 +38,7 @@ import com.android.internal.R;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -70,7 +71,12 @@ class LoadListener extends Handler implements EventHandler {
     private static final int HTTP_NOT_FOUND = 404;
     private static final int HTTP_PROXY_AUTH = 407;
 
-    private static final String CERT_MIMETYPE = "application/x-x509-ca-cert";
+    private static HashSet<String> sCertificateMimeTypeMap;
+    static {
+        sCertificateMimeTypeMap = new HashSet<String>();
+        sCertificateMimeTypeMap.add("application/x-x509-ca-cert");
+        sCertificateMimeTypeMap.add("application/x-pkcs12");
+    }
 
     private static int sNativeLoaderCount;
 
@@ -311,7 +317,17 @@ class LoadListener extends Handler implements EventHandler {
             if (mMimeType.equals("text/plain") ||
                     mMimeType.equals("application/octet-stream")) {
 
-                String newMimeType = guessMimeTypeFromExtension();
+                // for attachment, use the filename in the Content-Disposition
+                // to guess the mimetype
+                String contentDisposition = headers.getContentDisposition();
+                String url = null;
+                if (contentDisposition != null) {
+                    url = URLUtil.parseContentDisposition(contentDisposition);
+                }
+                if (url == null) {
+                    url = mUrl;
+                }
+                String newMimeType = guessMimeTypeFromExtension(url);
                 if (newMimeType != null) {
                     mMimeType = newMimeType;
                 }
@@ -918,7 +934,7 @@ class LoadListener extends Handler implements EventHandler {
 
     // This commits the headers without checking the response status code.
     private void commitHeaders() {
-        if (mIsMainPageLoader && CERT_MIMETYPE.equals(mMimeType)) {
+        if (mIsMainPageLoader && sCertificateMimeTypeMap.contains(mMimeType)) {
             // In the case of downloading certificate, we will save it to the
             // Keystore in commitLoad. Do not call webcore.
             return;
@@ -963,7 +979,7 @@ class LoadListener extends Handler implements EventHandler {
     private void commitLoad() {
         if (mCancelled) return;
 
-        if (mIsMainPageLoader && CERT_MIMETYPE.equals(mMimeType)) {
+        if (mIsMainPageLoader && sCertificateMimeTypeMap.contains(mMimeType)) {
             // In the case of downloading certificate, we will save it to the
             // Keystore and stop the current loading so that it will not
             // generate a new history page
@@ -1393,7 +1409,7 @@ class LoadListener extends Handler implements EventHandler {
             // of frames. If no content-type was specified, it is fine to
             // default to text/html.
             mMimeType = "text/html";
-            String newMimeType = guessMimeTypeFromExtension();
+            String newMimeType = guessMimeTypeFromExtension(mUrl);
             if (newMimeType != null) {
                 mMimeType = newMimeType;
             }
@@ -1403,14 +1419,14 @@ class LoadListener extends Handler implements EventHandler {
     /**
      * guess MIME type based on the file extension.
      */
-    private String guessMimeTypeFromExtension() {
+    private String guessMimeTypeFromExtension(String url) {
         // PENDING: need to normalize url
         if (DebugFlags.LOAD_LISTENER) {
-            Log.v(LOGTAG, "guessMimeTypeFromExtension: mURL = " + mUrl);
+            Log.v(LOGTAG, "guessMimeTypeFromExtension: url = " + url);
         }
 
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                MimeTypeMap.getFileExtensionFromUrl(mUrl));
+                MimeTypeMap.getFileExtensionFromUrl(url));
     }
 
     /**
