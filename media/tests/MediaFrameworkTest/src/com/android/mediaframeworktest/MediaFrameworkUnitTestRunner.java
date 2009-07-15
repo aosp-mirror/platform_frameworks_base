@@ -24,16 +24,16 @@ import junit.framework.TestSuite;
 
 /**
  * Instrumentation Test Runner for all media framework unit tests.
- * 
+ *
  * Make sure that MediaFrameworkUnitTestRunner has been added to
  * AndroidManifest.xml file, and then "make -j4 mediaframeworktest; adb sync"
  * to build and upload mediaframeworktest to the phone or emulator.
- * 
+ *
  * Example on running all unit tests for a single class:
  * adb shell am instrument -e class \
- * com.android.mediaframeworktest.unit.MediaMetadataRetrieverUnitTest \ 
+ * com.android.mediaframeworktest.unit.MediaMetadataRetrieverUnitTest \
  * -w com.android.mediaframeworktest/.MediaFrameworkUnitTestRunner
- * 
+ *
  * Example on running all unit tests for the media framework:
  * adb shell am instrument \
  * -w com.android.mediaframeworktest/.MediaFrameworkUnitTestRunner
@@ -54,12 +54,12 @@ public class MediaFrameworkUnitTestRunner extends InstrumentationTestRunner {
     public ClassLoader getLoader() {
         return MediaFrameworkUnitTestRunner.class.getClassLoader();
     }
-    
+
     // Running all unit tests checking the state machine may be time-consuming.
     private void addMediaMetadataRetrieverStateUnitTests(TestSuite suite) {
         suite.addTestSuite(MediaMetadataRetrieverTest.class);
     }
-    
+
     // Running all unit tests checking the state machine may be time-consuming.
     private void addMediaRecorderStateUnitTests(TestSuite suite) {
         suite.addTestSuite(MediaRecorderPrepareStateUnitTest.class);
@@ -87,5 +87,6 @@ public class MediaFrameworkUnitTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(MediaPlayerSetLoopingStateUnitTest.class);
         suite.addTestSuite(MediaPlayerSetAudioStreamTypeStateUnitTest.class);
         suite.addTestSuite(MediaPlayerSetVolumeStateUnitTest.class);
+        suite.addTestSuite(MediaPlayerMetadataParserTest.class);
     }
 }
