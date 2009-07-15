@@ -79,13 +79,7 @@ public final class ContactsContract {
         }
     }
 
-    public interface AggregatesColumns {
-        /**
-         * The display name for the contact.
-         * <P>Type: TEXT</P>
-         */
-        public static final String DISPLAY_NAME = "display_name";
-
+    public interface ContactOptionsColumns {
         /**
          * The number of times a person has been contacted
          * <P>Type: INTEGER</P>
@@ -116,6 +110,14 @@ public final class ContactsContract {
          * <P>Type: INTEGER (0 for false, 1 for true)</P>
          */
         public static final String SEND_TO_VOICEMAIL = "send_to_voicemail";
+    }
+
+    public interface AggregatesColumns {
+        /**
+         * The display name for the contact.
+         * <P>Type: TEXT</P>
+         */
+        public static final String DISPLAY_NAME = "display_name";
 
         /**
          * Reference to the row in the data table holding the primary phone number.
@@ -146,7 +148,8 @@ public final class ContactsContract {
      * Constants for the aggregates table, which contains a record per group
      * of contact representing the same person.
      */
-    public static final class Aggregates implements BaseColumns, AggregatesColumns {
+    public static final class Aggregates implements BaseColumns, AggregatesColumns,
+            ContactOptionsColumns {
         /**
          * This utility class cannot be instantiated
          */
@@ -247,7 +250,7 @@ public final class ContactsContract {
     /**
      * Constants for the contacts table, which contains the base contact information.
      */
-    public static final class Contacts implements BaseColumns {
+    public static final class Contacts implements BaseColumns, ContactOptionsColumns {
         /**
          * This utility class cannot be instantiated
          */
@@ -323,6 +326,29 @@ public final class ContactsContract {
          * Set to 1 whenever the version changes
          */
         public static final String DIRTY = "dirty";
+
+        /**
+         * The aggregation mode for this contact.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String AGGREGATION_MODE = "aggregation_mode";
+
+        /**
+         * Aggregation mode: aggregate asynchronously.
+         */
+        public static final int AGGREGATION_MODE_DEFAULT = 0;
+
+        /**
+         * Aggregation mode: aggregate at the time the contact is inserted/updated.
+         */
+        public static final int AGGREGATION_MODE_IMMEDITATE = 1;
+
+        /**
+         * Aggregation mode: never aggregate this contact (note that the contact will not
+         * have a corresponding Aggregate and therefore will not be included in Aggregates
+         * query results.)
+         */
+        public static final int AGGREGATION_MODE_DISABLED = 2;
 
         /**
          * A sub-directory of a single contact that contains all of their {@link Data} rows.
