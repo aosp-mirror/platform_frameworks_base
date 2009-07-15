@@ -16,33 +16,36 @@
 
 package com.android.internal.policy.impl;
 
+import com.android.internal.R;
+import com.android.internal.telephony.IccCard;
+import com.android.internal.widget.LockPatternUtils;
+
 import android.accounts.AccountManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.SystemProperties;
-import com.android.internal.telephony.IccCard;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.PixelFormat;
-import android.graphics.ColorFilter;
-import com.android.internal.R;
-import com.android.internal.widget.LockPatternUtils;
 
 /**
  * The host view for all of the screens of the pattern unlock screen.  There are
  * two {@link Mode}s of operation, lock and unlock.  This will show the appropriate
- * screen, and listen for callbacks via {@link com.android.internal.policy.impl.KeyguardScreenCallback
+ * screen, and listen for callbacks via
+ * {@link com.android.internal.policy.impl.KeyguardScreenCallback}
  * from the current screen.
  *
- * This view, in turn, communicates back to {@link com.android.internal.policy.impl.KeyguardViewManager}
+ * This view, in turn, communicates back to
+ * {@link com.android.internal.policy.impl.KeyguardViewManager}
  * via its {@link com.android.internal.policy.impl.KeyguardViewCallback}, as appropriate.
  */
 public class LockPatternKeyguardView extends KeyguardViewBase {
@@ -55,12 +58,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final KeyguardWindowController mWindowController;
-    
+
     private View mLockScreen;
     private View mUnlockScreen;
 
     private boolean mScreenOn = false;
-    private boolean mHasAccount = false; // assume they don't have an account until we know better
+    private boolean mEnableFallback = false; // assume no fallback UI until we know better
 
 
     /**
@@ -149,7 +152,26 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             KeyguardWindowController controller) {
         super(context);
 
-        mHasAccount = AccountManager.get(context).blockingGetAccounts().length > 0;
+        final boolean hasAccount = AccountManager.get(context).blockingGetAccounts().length > 0;
+        boolean hasSAMLAccount = false;
+        if (hasAccount) {
+            /* If we have a SAML account which requires web login we can not use the
+             fallback screen UI to ask the user for credentials.
+             For now we will disable fallback screen in this case.
+             Ultimately we could consider bringing up a web login from GLS
+             but need to make sure that it will work in the "locked screen" mode. */
+
+            try {
+                hasSAMLAccount =
+                    AccountManager.get(context).blockingGetAccountsWithTypeAndFeatures(
+                            "com.GOOGLE.GAIA", new String[] {"saml"}).length > 0;
+            } catch (Exception e) {
+                // We err on the side of caution.
+                // In case of error we assume we have a SAML account.
+                hasSAMLAccount = true;
+            }
+        }
+        mEnableFallback = hasAccount && !hasSAMLAccount;
 
         mRequiresSim =
                 TextUtils.isEmpty(SystemProperties.get("keyguard.no_require_sim"));
@@ -159,7 +181,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         mWindowController = controller;
 
         mMode = getInitialMode();
-        
+
         mKeyguardScreenCallback = new KeyguardScreenCallback() {
 
             public void goToLockScreen() {
@@ -225,11 +247,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             public void reportFailedPatternAttempt() {
                 mUpdateMonitor.reportFailedAttempt();
                 final int failedAttempts = mUpdateMonitor.getFailedAttempts();
-                if (mHasAccount && failedAttempts ==
-                        (LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET 
+                if (mEnableFallback && failedAttempts ==
+                        (LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
                                 - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
                     showAlmostAtAccountLoginDialog();
-                } else if (mHasAccount
+                } else if (mEnableFallback
                         && failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
                     mLockPatternUtils.setPermanentlyLocked(true);
                     updateScreen(mMode);
@@ -238,9 +260,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                     showTimeoutDialog();
                 }
             }
-            
+
             public boolean doesFallbackUnlockScreenExist() {
-                return mHasAccount;
+                return mEnableFallback;
             }
         };
 
@@ -384,7 +406,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         // do this before changing visibility so focus isn't requested before the input
         // flag is set
         mWindowController.setNeedsInput(((KeyguardScreen)visibleScreen).needsInput());
-        
+
 
         if (mScreenOn) {
             if (goneScreen.getVisibility() == View.VISIBLE) {
