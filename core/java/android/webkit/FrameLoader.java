@@ -28,7 +28,6 @@ class FrameLoader {
 
     private final LoadListener mListener;
     private final String mMethod;
-    private final boolean mIsHighPriority;
     private final WebSettings mSettings;
     private Map<String, String> mHeaders;
     private byte[] mPostData;
@@ -52,11 +51,10 @@ class FrameLoader {
     private static final String LOGTAG = "webkit";
     
     FrameLoader(LoadListener listener, WebSettings settings,
-            String method, boolean highPriority) {
+            String method) {
         mListener = listener;
         mHeaders = null;
         mMethod = method;
-        mIsHighPriority = highPriority;
         mCacheMode = WebSettings.LOAD_NORMAL;
         mSettings = settings;
     }
@@ -175,8 +173,7 @@ class FrameLoader {
             // as response from the cache could be a redirect
             // and we may need to initiate a network request if the cache
             // can't satisfy redirect URL
-            mListener.setRequestData(mMethod, mHeaders, mPostData, 
-                    mIsHighPriority);
+            mListener.setRequestData(mMethod, mHeaders, mPostData);
             return true;
         }
 
@@ -190,7 +187,7 @@ class FrameLoader {
         
         try {
             ret = mNetwork.requestURL(mMethod, mHeaders,
-                    mPostData, mListener, mIsHighPriority);
+                    mPostData, mListener);
         } catch (android.net.ParseException ex) {
             error = EventHandler.ERROR_BAD_URL;
         } catch (java.lang.RuntimeException ex) {
