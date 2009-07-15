@@ -242,6 +242,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     private SettingsObserver mSettingsObserver;
     
     private boolean mIsScanModeActive;
+    private boolean mEnableRssiPolling;
 
     // Wi-Fi run states:
     private static final int RUN_STATE_STARTING = 1;
@@ -340,6 +341,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     private void setSupplicantState(SupplicantState state) {
         mWifiInfo.setSupplicantState(state);
         updateNetworkInfo();
+        checkPollTimer();
     }
 
     public SupplicantState getSupplicantState() {
@@ -354,6 +356,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     private void setSupplicantState(String stateName) {
         mWifiInfo.setSupplicantState(stateName);
         updateNetworkInfo();
+        checkPollTimer();
     }
 
     /**
@@ -550,8 +553,10 @@ public class WifiStateTracker extends NetworkStateTracker {
      * Set the interval timer for polling connection information
      * that is not delivered asynchronously.
      */
-    private synchronized void setPollTimer () {
-        if (!hasMessages(EVENT_POLL_INTERVAL)) {
+    private synchronized void checkPollTimer() {
+        if (mEnableRssiPolling &&
+                mWifiInfo.getSupplicantState() == SupplicantState.COMPLETED &&
+                !hasMessages(EVENT_POLL_INTERVAL)) {
             sendEmptyMessageDelayed(EVENT_POLL_INTERVAL, POLL_STATUS_INTERVAL_MSECS);
         }
     }
@@ -649,6 +654,13 @@ public class WifiStateTracker extends NetworkStateTracker {
             }
         }
         setBluetoothScanMode(isBluetoothPlaying);
+    }
+
+    public void enableRssiPolling(boolean enable) {
+        if (mEnableRssiPolling != enable) {
+            mEnableRssiPolling = enable;
+            checkPollTimer();
+        }
     }
 
     @Override
@@ -1031,9 +1043,7 @@ public class WifiStateTracker extends NetworkStateTracker {
             case EVENT_POLL_INTERVAL:
                 if (mWifiInfo.getSupplicantState() != SupplicantState.UNINITIALIZED) {
                     requestPolledInfo(mWifiInfo, true);
-                    if (mWifiInfo.getSupplicantState() == SupplicantState.COMPLETED) {
-                        setPollTimer();
-                    }
+                    checkPollTimer();
                 }
                 break;
             
@@ -1170,7 +1180,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     }
 
     private void configureInterface() {
-        setPollTimer();
+        checkPollTimer();
         mLastSignalLevel = -1;
         if (!mUseStaticIp) {
             if (!mHaveIpAddress && !mObtainingIpAddress) {

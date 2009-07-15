@@ -171,6 +171,7 @@ public class WifiService extends IWifiManager.Stub {
     WifiService(Context context, WifiStateTracker tracker) {
         mContext = context;
         mWifiStateTracker = tracker;
+        mWifiStateTracker.enableRssiPolling(true);
         mBatteryStats = BatteryStatsService.getService();
         
         mScanResultCache = new LinkedHashMap<String, ScanResult>(
@@ -1367,9 +1368,11 @@ public class WifiService extends IWifiManager.Stub {
                 mAlarmManager.cancel(mIdleIntent);
                 mDeviceIdle = false;
                 mScreenOff = false;
+                mWifiStateTracker.enableRssiPolling(true);
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 Log.d(TAG, "ACTION_SCREEN_OFF");
                 mScreenOff = true;
+                mWifiStateTracker.enableRssiPolling(false);
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
                  * AND the "stay on while plugged in" setting doesn't match the
