@@ -285,25 +285,53 @@ class BackupManagerService extends IBackupManager.Stub {
     private void initPackageTracking() {
         if (DEBUG) Log.v(TAG, "Initializing package tracking");
 
-        // Keep a log of what apps we've ever backed up
+        // Keep a log of what apps we've ever backed up.  Because we might have
+        // rebooted in the middle of an operation that was removing something from
+        // this log, we sanity-check its contents here and reconstruct it.
         mEverStored = new File(mBaseStateDir, "processed");
+        File tempProcessedFile = new File(mBaseStateDir, "processed.new");
         try {
-            mEverStoredStream = new RandomAccessFile(mEverStored, "rwd");
+            RandomAccessFile temp = new RandomAccessFile(tempProcessedFile, "rw");
+            mEverStoredStream = new RandomAccessFile(mEverStored, "r");
 
             // parse its existing contents
             mEverStoredStream.seek(0);
+            temp.seek(0);
             try {
                 while (true) {
+                    PackageInfo info;
                     String pkg = mEverStoredStream.readUTF();
-                    mEverStoredApps.add(pkg);
-                    if (DEBUG) Log.v(TAG, "   + " + pkg);
+                    try {
+                        info = mPackageManager.getPackageInfo(pkg, 0);
+                        mEverStoredApps.add(pkg);
+                        temp.writeUTF(pkg);
+                        if (DEBUG) Log.v(TAG, "   + " + pkg);
+                    } catch (NameNotFoundException e) {
+                        // nope, this package was uninstalled; don't include it
+                        if (DEBUG) Log.v(TAG, "   - " + pkg);
+                    }
                 }
             } catch (EOFException e) {
                 // now we're at EOF
             }
+
+            // Once we've rewritten the backup history log, atomically replace the
+            // old one with the new one then reopen the file for continuing use.
+            temp.close();
+            mEverStoredStream.close();
+            tempProcessedFile.renameTo(mEverStored);
+            mEverStoredStream = new RandomAccessFile(mEverStored, "rwd");
         } catch (IOException e) {
             Log.e(TAG, "Unable to open known-stored file!");
             mEverStoredStream = null;
+        }
+
+        // If we were in the middle of removing something from the ever-backed-up
+        // file, there might be a transient "processed.new" file still present.
+        // We've reconstructed a coherent state at this point though, so we can
+        // safely discard that file now.
+        if (tempProcessedFile.exists()) {
+            tempProcessedFile.delete();
         }
 
         // Register for broadcasts about package install, etc., so we can
@@ -573,6 +601,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     for (ApplicationInfo entry: set) {
                         if (entry.packageName.equals(pkg.packageName)) {
                             set.remove(entry);
+                            removeEverBackedUp(pkg.packageName);
                             break;
                         }
                     }
@@ -618,7 +647,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Called from the backup thread: record that the given app has been successfully
     // backed up at least once
     void logBackupComplete(String packageName) {
-        if (mEverStoredStream != null) {
+        if (mEverStoredStream != null && !packageName.equals(PACKAGE_MANAGER_SENTINEL)) {
             synchronized (mEverStoredApps) {
                 if (mEverStoredApps.add(packageName)) {
                     try {
@@ -632,6 +661,43 @@ class BackupManagerService extends IBackupManager.Stub {
                         }
                         mEverStoredStream = null;
                     }
+                }
+            }
+        }
+    }
+
+    // Remove our awareness of having ever backed up the given package
+    void removeEverBackedUp(String packageName) {
+        if (DEBUG) Log.v(TAG, "Removing backed-up knowledge of " + packageName
+                + ", new set:");
+
+        if (mEverStoredStream != null) {
+            synchronized (mEverStoredApps) {
+                // Rewrite the file and rename to overwrite.  If we reboot in the middle,
+                // we'll recognize on initialization time that the package no longer
+                // exists and fix it up then.
+                File tempKnownFile = new File(mBaseStateDir, "processed.new");
+                try {
+                    mEverStoredStream.close();
+                    RandomAccessFile known = new RandomAccessFile(tempKnownFile, "rw");
+                    mEverStoredApps.remove(packageName);
+                    for (String s : mEverStoredApps) {
+                        known.writeUTF(s);
+                        if (DEBUG) Log.v(TAG, "    " + s);
+                    }
+                    known.close();
+                    tempKnownFile.renameTo(mEverStored);
+                    mEverStoredStream = new RandomAccessFile(mEverStored, "rwd");
+                } catch (IOException e) {
+                    // Bad: we couldn't create the new copy.  For safety's sake we
+                    // abandon the whole process and remove all what's-backed-up
+                    // state entirely, meaning we'll force a backup pass for every
+                    // participant on the next boot or [re]install.
+                    Log.w(TAG, "Error rewriting backed-up set; halting log");
+                    mEverStoredStream = null;
+                    mEverStoredApps.clear();
+                    tempKnownFile.delete();
+                    mEverStored.delete();
                 }
             }
         }
