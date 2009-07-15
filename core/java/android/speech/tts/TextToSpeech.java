@@ -113,43 +113,131 @@ public class TextToSpeech {
     /**
      * Internal constants for the TTS functionality
      *
-     * {@hide}
      */
     public class Engine {
         // default values for a TTS engine when settings are not found in the provider
+        /**
+         * {@hide}
+         */
         public static final int FALLBACK_TTS_DEFAULT_RATE = 100; // 1x
+        /**
+         * {@hide}
+         */
         public static final int FALLBACK_TTS_DEFAULT_PITCH = 100;// 1x
+        /**
+         * {@hide}
+         */
         public static final int FALLBACK_TTS_USE_DEFAULTS = 0; // false
+        /**
+         * {@hide}
+         */
         public static final String FALLBACK_TTS_DEFAULT_SYNTH = "com.svox.pico";
 
         // default values for rendering
         public static final int TTS_DEFAULT_STREAM = AudioManager.STREAM_MUSIC;
 
         // return codes for a TTS engine's check data activity
+        /**
+         * Indicates success when checking the installation status of the resources used by the
+         * text-to-speech engine with the android.intent.action.CHECK_TTS_DATA intent.
+         */
         public static final int CHECK_VOICE_DATA_PASS = 1;
+        /**
+         * Indicates failure when checking the installation status of the resources used by the
+         * text-to-speech engine with the android.intent.action.CHECK_TTS_DATA intent.
+         */
         public static final int CHECK_VOICE_DATA_FAIL = 0;
+        /**
+         * Indicates erroneous data when checking the installation status of the resources used by
+         * the text-to-speech engine with the android.intent.action.CHECK_TTS_DATA intent.
+         */
         public static final int CHECK_VOICE_DATA_BAD_DATA = -1;
+        /**
+         * Indicates missing resources when checking the installation status of the resources used
+         * by the text-to-speech engine with the android.intent.action.CHECK_TTS_DATA intent.
+         */
         public static final int CHECK_VOICE_DATA_MISSING_DATA = -2;
-        public static final int CHECK_VOICE_DATA_MISSING_DATA_NO_SDCARD = -3;
+        /**
+         * Indicates missing storage volume when checking the installation status of the resources
+         * used by the text-to-speech engine with the android.intent.action.CHECK_TTS_DATA intent.
+         */
+        public static final int CHECK_VOICE_DATA_MISSING_VOLUME = -3;
 
         // return codes for a TTS engine's check data activity
+        /**
+         * Extra information received with the android.intent.action.CHECK_TTS_DATA intent where
+         * the text-to-speech engine specifies the path to its resources.
+         */
         public static final String VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
+        /**
+         * Extra information received with the android.intent.action.CHECK_TTS_DATA intent where
+         * the text-to-speech engine specifies the file names of its resources under the
+         * resource path.
+         */
         public static final String VOICE_DATA_FILES = "dataFiles";
+        /**
+         * Extra information received with the android.intent.action.CHECK_TTS_DATA intent where
+         * the text-to-speech engine specifies the locale associated with each resource file.
+         */
         public static final String VOICE_DATA_FILES_INFO = "dataFilesInfo";
 
-        // keys for the parameters passed with speak commands
+        // keys for the parameters passed with speak commands. Hidden keys are used internally
+        // to maintain engine state for each TextToSpeech instance.
+        /**
+         * {@hide}
+         */
         public static final String TTS_KEY_PARAM_RATE = "rate";
+        /**
+         * {@hide}
+         */
         public static final String TTS_KEY_PARAM_LANGUAGE = "language";
+        /**
+         * {@hide}
+         */
         public static final String TTS_KEY_PARAM_COUNTRY = "country";
+        /**
+         * {@hide}
+         */
         public static final String TTS_KEY_PARAM_VARIANT = "variant";
+        /**
+         * Parameter key to specify the audio stream type to be used when speaking text
+         * or playing back a file.
+         */
         public static final String TTS_KEY_PARAM_STREAM = "streamType";
+        /**
+         * Parameter key to identify an utterance in the completion listener after text has been
+         * spoken, a file has been played back or a silence duration has elapsed.
+         */
         public static final String TTS_KEY_PARAM_UTTERANCE_ID = "utteranceId";
+
+        // key positions in the array of cached parameters
+        /**
+         * {@hide}
+         */
         protected static final int TTS_PARAM_POSITION_RATE = 0;
+        /**
+         * {@hide}
+         */
         protected static final int TTS_PARAM_POSITION_LANGUAGE = 2;
+        /**
+         * {@hide}
+         */
         protected static final int TTS_PARAM_POSITION_COUNTRY = 4;
+        /**
+         * {@hide}
+         */
         protected static final int TTS_PARAM_POSITION_VARIANT = 6;
+        /**
+         * {@hide}
+         */
         protected static final int TTS_PARAM_POSITION_STREAM = 8;
+        /**
+         * {@hide}
+         */
         protected static final int TTS_PARAM_POSITION_UTTERANCE_ID = 10;
+        /**
+         * {@hide}
+         */
         protected static final int TTS_NB_CACHED_PARAMS = 6;
     }
 
