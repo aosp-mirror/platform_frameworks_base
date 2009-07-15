@@ -100,18 +100,18 @@ class BackupManagerService extends IBackupManager.Stub {
     private PowerManager mPowerManager;
     private AlarmManager mAlarmManager;
 
-    private boolean mEnabled;   // access to this is synchronized on 'this'
-    private boolean mProvisioned;
-    private PowerManager.WakeLock mWakelock;
-    private final BackupHandler mBackupHandler = new BackupHandler();
-    private PendingIntent mRunBackupIntent;
-    private BroadcastReceiver mRunBackupReceiver;
-    private IntentFilter mRunBackupFilter;
+    boolean mEnabled;   // access to this is synchronized on 'this'
+    boolean mProvisioned;
+    PowerManager.WakeLock mWakelock;
+    final BackupHandler mBackupHandler = new BackupHandler();
+    PendingIntent mRunBackupIntent;
+    BroadcastReceiver mRunBackupReceiver;
+    IntentFilter mRunBackupFilter;
     // map UIDs to the set of backup client services within that UID's app set
-    private final SparseArray<HashSet<ApplicationInfo>> mBackupParticipants
+    final SparseArray<HashSet<ApplicationInfo>> mBackupParticipants
         = new SparseArray<HashSet<ApplicationInfo>>();
     // set of backup services that have pending changes
-    private class BackupRequest {
+    class BackupRequest {
         public ApplicationInfo appInfo;
         public boolean fullBackup;
 
@@ -125,35 +125,35 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
     // Backups that we haven't started yet.
-    private HashMap<ApplicationInfo,BackupRequest> mPendingBackups
+    HashMap<ApplicationInfo,BackupRequest> mPendingBackups
             = new HashMap<ApplicationInfo,BackupRequest>();
 
     // Pseudoname that we use for the Package Manager metadata "package"
-    private static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
+    static final String PACKAGE_MANAGER_SENTINEL = "@pm@";
 
     // locking around the pending-backup management
-    private final Object mQueueLock = new Object();
+    final Object mQueueLock = new Object();
 
     // The thread performing the sequence of queued backups binds to each app's agent
     // in succession.  Bind notifications are asynchronously delivered through the
     // Activity Manager; use this lock object to signal when a requested binding has
     // completed.
-    private final Object mAgentConnectLock = new Object();
-    private IBackupAgent mConnectedAgent;
-    private volatile boolean mConnecting;
+    final Object mAgentConnectLock = new Object();
+    IBackupAgent mConnectedAgent;
+    volatile boolean mConnecting;
 
     // A similar synchronicity mechanism around clearing apps' data for restore
-    private final Object mClearDataLock = new Object();
-    private volatile boolean mClearingData;
+    final Object mClearDataLock = new Object();
+    volatile boolean mClearingData;
 
     // Transport bookkeeping
-    private final HashMap<String,IBackupTransport> mTransports
+    final HashMap<String,IBackupTransport> mTransports
             = new HashMap<String,IBackupTransport>();
-    private String mCurrentTransport;
-    private IBackupTransport mLocalTransport, mGoogleTransport;
-    private RestoreSession mActiveRestoreSession;
+    String mCurrentTransport;
+    IBackupTransport mLocalTransport, mGoogleTransport;
+    RestoreSession mActiveRestoreSession;
 
-    private class RestoreParams {
+    class RestoreParams {
         public IBackupTransport transport;
         public IRestoreObserver observer;
         public long token;
@@ -165,7 +165,7 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    private class ClearParams {
+    class ClearParams {
         public IBackupTransport transport;
         public PackageInfo packageInfo;
 
@@ -176,11 +176,17 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     // Where we keep our journal files and other bookkeeping
-    private File mBaseStateDir;
-    private File mDataDir;
-    private File mJournalDir;
-    private File mJournal;
-    private RandomAccessFile mJournalStream;
+    File mBaseStateDir;
+    File mDataDir;
+    File mJournalDir;
+    File mJournal;
+    RandomAccessFile mJournalStream;
+
+    // Keep a log of all the apps we've ever backed up
+    private File mEverStored;
+    private RandomAccessFile mEverStoredStream;
+    HashSet<String> mEverStoredApps = new HashSet<String>();
+
 
     public BackupManagerService(Context context) {
         mContext = context;
@@ -214,6 +220,9 @@ class BackupManagerService extends IBackupManager.Stub {
         mJournalDir = new File(mBaseStateDir, "pending");
         mJournalDir.mkdirs();   // creates mBaseStateDir along the way
         makeJournalLocked();    // okay because no other threads are running yet
+
+        // Set up the various sorts of package tracking we do
+        initPackageTracking();
 
         // Build our mapping of uid to backup client services.  This implicitly
         // schedules a backup pass on the Package Manager metadata the first
@@ -249,14 +258,6 @@ class BackupManagerService extends IBackupManager.Stub {
         // leftover journal files into the pending backup set
         parseLeftoverJournals();
 
-        // Register for broadcasts about package install, etc., so we can
-        // update the provider list.
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addDataScheme("package");
-        mContext.registerReceiver(mBroadcastReceiver, filter);
-
         // Power management
         mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "backup");
 
@@ -279,6 +280,39 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
         }
+    }
+
+    private void initPackageTracking() {
+        if (DEBUG) Log.v(TAG, "Initializing package tracking");
+
+        // Keep a log of what apps we've ever backed up
+        mEverStored = new File(mBaseStateDir, "processed");
+        try {
+            mEverStoredStream = new RandomAccessFile(mEverStored, "rwd");
+
+            // parse its existing contents
+            mEverStoredStream.seek(0);
+            try {
+                while (true) {
+                    String pkg = mEverStoredStream.readUTF();
+                    mEverStoredApps.add(pkg);
+                    if (DEBUG) Log.v(TAG, "   + " + pkg);
+                }
+            } catch (EOFException e) {
+                // now we're at EOF
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to open known-stored file!");
+            mEverStoredStream = null;
+        }
+
+        // Register for broadcasts about package install, etc., so we can
+        // update the provider list.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addDataScheme("package");
+        mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
     private void makeJournalLocked() {
@@ -485,6 +519,17 @@ class BackupManagerService extends IBackupManager.Stub {
                     mBackupParticipants.put(uid, set);
                 }
                 set.add(pkg.applicationInfo);
+
+                // If we've never seen this app before, schedule a backup for it
+                if (!mEverStoredApps.contains(pkg.packageName)) {
+                    if (DEBUG) Log.i(TAG, "New app " + pkg.packageName
+                            + " never backed up; scheduling");
+                    try {
+                        dataChanged(pkg.packageName);
+                    } catch (RemoteException e) {
+                        // can't happen; it's a local method call
+                    }
+                }
             }
         }
     }
@@ -540,7 +585,7 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     // Returns the set of all applications that define an android:backupAgent attribute
-    private List<PackageInfo> allAgentPackages() {
+    List<PackageInfo> allAgentPackages() {
         // !!! TODO: cache this and regenerate only when necessary
         int flags = PackageManager.GET_SIGNATURES;
         List<PackageInfo> packages = mPackageManager.getInstalledPackages(flags);
@@ -568,6 +613,28 @@ class BackupManagerService extends IBackupManager.Stub {
         List<PackageInfo> allApps = allAgentPackages();
         removePackageParticipantsLockedInner(packageName, allApps);
         addPackageParticipantsLockedInner(packageName, allApps);
+    }
+
+    // Called from the backup thread: record that the given app has been successfully
+    // backed up at least once
+    void logBackupComplete(String packageName) {
+        if (mEverStoredStream != null) {
+            synchronized (mEverStoredApps) {
+                if (mEverStoredApps.add(packageName)) {
+                    try {
+                        mEverStoredStream.writeUTF(packageName);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Unable to log backup of " + packageName + ", ceasing log");
+                        try {
+                            mEverStoredStream.close();
+                        } catch (IOException ioe) {
+                            // we're dropping it; no need to handle an exception on close here
+                        }
+                        mEverStoredStream = null;
+                    }
+                }
+            }
+        }
     }
 
     // Return the given transport
@@ -799,6 +866,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 boolean success = false;
                 try {
                     agent.doBackup(savedState, backupData, newState);
+                    logBackupComplete(packageName);
                     success = true;
                 } finally {
                     if (savedState != null) {
@@ -1235,7 +1303,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
         } else {
-            Log.w(TAG, "dataChanged but no participant pkg='" + packageName + "'");
+            Log.w(TAG, "dataChanged but no participant pkg='" + packageName + "'"
+                    + " uid=" + Binder.getCallingUid());
         }
     }
 
@@ -1565,6 +1634,10 @@ class BackupManagerService extends IBackupManager.Stub {
                 for (ApplicationInfo app: participants) {
                     pw.println("    " + app.toString());
                 }
+            }
+            pw.println("Ever backed up: " + mEverStoredApps.size());
+            for (String pkg : mEverStoredApps) {
+                pw.println("    " + pkg);
             }
             pw.println("Pending: " + mPendingBackups.size());
             for (BackupRequest req : mPendingBackups.values()) {
