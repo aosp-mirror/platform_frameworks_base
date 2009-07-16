@@ -1891,7 +1891,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         break;
                     case WindowManagerPolicy.TRANSIT_TASK_TO_BACK:
                         animAttr = enter
-                        ? com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation
+                                ? com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation
                                 : com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
                         break;
                 }
@@ -7232,17 +7232,27 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
     public static WindowManager.LayoutParams findAnimations(
             ArrayList<AppWindowToken> order,
-            ArrayList<AppWindowToken> tokenList1,
-            ArrayList<AppWindowToken> tokenList2) {
+            ArrayList<AppWindowToken> openingTokenList1,
+            ArrayList<AppWindowToken> closingTokenList2) {
         // We need to figure out which animation to use...
+
+        // First, check if there is a compatible window in opening/closing
+        // apps, and use it if exists.
         WindowManager.LayoutParams animParams = null;
         int animSrc = 0;
-
+        animParams = findCompatibleWindowParams(openingTokenList1);
+        if (animParams == null) {
+            animParams = findCompatibleWindowParams(closingTokenList2);
+        }
+        if (animParams != null) {
+            return animParams;
+        }
+        
         //Log.i(TAG, "Looking for animations...");
         for (int i=order.size()-1; i>=0; i--) {
             AppWindowToken wtoken = order.get(i);
             //Log.i(TAG, "Token " + wtoken + " with " + wtoken.windows.size() + " windows");
-            if (tokenList1.contains(wtoken) || tokenList2.contains(wtoken)) {
+            if (openingTokenList1.contains(wtoken) || closingTokenList2.contains(wtoken)) {
                 int j = wtoken.windows.size();
                 while (j > 0) {
                     j--;
@@ -7268,6 +7278,21 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
 
         return animParams;
+    }
+
+    private static LayoutParams findCompatibleWindowParams(ArrayList<AppWindowToken> tokenList) {
+        for (int appCount = tokenList.size() - 1; appCount >= 0; appCount--) {
+            AppWindowToken wtoken = tokenList.get(appCount);
+            // Just checking one window is sufficient as all windows have the compatible flag 
+            // if the application is in compatibility mode.
+            if (wtoken.windows.size() > 0) {
+                WindowManager.LayoutParams params = wtoken.windows.get(0).mAttrs;
+                if ((params.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
+                    return params;
+                }
+            }
+        }
+        return null;
     }
 
     // -------------------------------------------------------------
@@ -9277,16 +9302,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             // width is the screen width {@see AppWindowToken#stepAnimatinoLocked}
             mWidth = width;
         }
-        
-        @Override
-        public boolean willChangeTransformationMatrix() {
-            return true;
-        }
 
         @Override
-        public boolean willChangeBounds() {
-            return true;
+        public int getZAdjustment() {
+            return Animation.ZORDER_TOP;
         }
     }
 }
-

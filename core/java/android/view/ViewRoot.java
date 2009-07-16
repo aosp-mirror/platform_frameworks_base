@@ -497,8 +497,12 @@ public final class ViewRoot extends Handler implements ViewParent,
     void setLayoutParams(WindowManager.LayoutParams attrs, boolean newView) {
         synchronized (this) {
             int oldSoftInputMode = mWindowAttributes.softInputMode;
+            // preserve compatible window flag if exists.
+            int compatibleWindowFlag =
+                mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
             mWindowAttributes.copyFrom(attrs);
-
+            mWindowAttributes.flags |= compatibleWindowFlag;
+            
             if (newView) {
                 mSoftInputMode = attrs.softInputMode;
                 requestLayout();
@@ -1301,7 +1305,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                 if (DEBUG_DRAW) {
                     Context cxt = mView.getContext();
                     Log.i(TAG, "Drawing: package:" + cxt.getPackageName() +
-                            ", metrics=" + mView.getContext().getResources().getDisplayMetrics());
+                            ", metrics=" + cxt.getResources().getDisplayMetrics() +
+                            ", compatibilityInfo=" + cxt.getResources().getCompatibilityInfo());
                 }
                 int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
                 try {
