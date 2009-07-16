@@ -1068,6 +1068,23 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             unregisterActivityWatcher(watcher);
             return true;
         }
+        
+        case START_ACTIVITY_IN_PACKAGE_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            int uid = data.readInt();
+            Intent intent = Intent.CREATOR.createFromParcel(data);
+            String resolvedType = data.readString();
+            IBinder resultTo = data.readStrongBinder();
+            String resultWho = data.readString();    
+            int requestCode = data.readInt();
+            boolean onlyIfNeeded = data.readInt() != 0;
+            int result = startActivityInPackage(uid, intent, resolvedType,
+                    resultTo, resultWho, requestCode, onlyIfNeeded);
+            reply.writeNoException();
+            reply.writeInt(result);
+            return true;
+        }
         }
         
         return super.onTransact(code, data, reply, flags);
@@ -2330,5 +2347,27 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     
+    public int startActivityInPackage(int uid,
+            Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, boolean onlyIfNeeded)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(uid);
+        intent.writeToParcel(data, 0);
+        data.writeString(resolvedType);
+        data.writeStrongBinder(resultTo);
+        data.writeString(resultWho);
+        data.writeInt(requestCode);
+        data.writeInt(onlyIfNeeded ? 1 : 0);
+        mRemote.transact(START_ACTIVITY_IN_PACKAGE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int result = reply.readInt();
+        reply.recycle();
+        data.recycle();
+        return result;
+    }
+        
     private IBinder mRemote;
 }
