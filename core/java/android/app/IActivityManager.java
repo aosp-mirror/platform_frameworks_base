@@ -262,6 +262,11 @@ public interface IActivityManager extends IInterface {
     public void unregisterActivityWatcher(IActivityWatcher watcher)
             throws RemoteException;
 
+    public int startActivityInPackage(int uid,
+            Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, boolean onlyIfNeeded)
+            throws RemoteException;
+        
     /*
      * Private non-Binder interfaces
      */
@@ -415,4 +420,5 @@ public interface IActivityManager extends IInterface {
     int UNBIND_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+91;
     int REGISTER_ACTIVITY_WATCHER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+92;
     int UNREGISTER_ACTIVITY_WATCHER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+93;
+    int START_ACTIVITY_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;
 }
