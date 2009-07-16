@@ -254,15 +254,15 @@ class BatteryService extends Binder {
             // Separate broadcast is sent for power connected / not connected
             // since the standard intent will not wake any applications and some
             // applications may want to have smart behavior based on this.
+            Intent statusIntent = new Intent();
+            statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             if (mPlugType != 0 && mLastPlugType == 0) {
-                Intent intent = new Intent(Intent.ACTION_POWER_CONNECTED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                mContext.sendBroadcast(intent);
+                statusIntent.setAction(Intent.ACTION_POWER_CONNECTED);
+                mContext.sendBroadcast(statusIntent);
             }
             else if (mPlugType == 0 && mLastPlugType != 0) {
-                Intent intent = new Intent(Intent.ACTION_POWER_DISCONNECTED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                mContext.sendBroadcast(intent);
+                statusIntent.setAction(Intent.ACTION_POWER_DISCONNECTED);
+                mContext.sendBroadcast(statusIntent);
             }
 
             final boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
@@ -289,10 +289,12 @@ class BatteryService extends Binder {
             sendIntent();
             if (sendBatteryLow) {
                 mSentLowBatteryBroadcast = true;
-                mContext.sendBroadcast(new Intent(Intent.ACTION_BATTERY_LOW));
+                statusIntent.setAction(Intent.ACTION_BATTERY_LOW);
+                mContext.sendBroadcast(statusIntent);
             } else if (mSentLowBatteryBroadcast && mLastBatteryLevel >= BATTERY_LEVEL_CLOSE_WARNING) {
                 mSentLowBatteryBroadcast = false;
-                mContext.sendBroadcast(new Intent(Intent.ACTION_BATTERY_OKAY));
+                statusIntent.setAction(Intent.ACTION_BATTERY_OKAY);
+                mContext.sendBroadcast(statusIntent);
             }
             
             // This needs to be done after sendIntent() so that we get the lastest battery stats.
