@@ -20,10 +20,12 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.util.Log;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Set;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.TimeZone;
 
 
 /**
@@ -102,15 +104,20 @@ public class Metadata
     public static final Set<Integer> MATCH_NONE = Collections.EMPTY_SET;
     public static final Set<Integer> MATCH_ALL = Collections.singleton(ANY);
 
-    public static final int STRING_VAL = 1;
-    public static final int INTEGER_VAL = 2;
-    public static final int LONG_VAL = 3;
-    public static final int DOUBLE_VAL = 4;
-    public static final int TIMED_TEXT_VAL = 5;
-    private static final int LAST_TYPE = 5;
+    public static final int STRING_VAL     = 1;
+    public static final int INTEGER_VAL    = 2;
+    public static final int BOOLEAN_VAL    = 3;
+    public static final int LONG_VAL       = 4;
+    public static final int DOUBLE_VAL     = 5;
+    public static final int TIMED_TEXT_VAL = 6;
+    public static final int DATE_VAL       = 7;
+    public static final int BYTE_ARRAY_VAL = 8;
+    // FIXME: misses a type for shared heap is missing (MemoryFile).
+    // FIXME: misses a type for bitmaps.
+    private static final int LAST_TYPE = 8;
 
     private static final String TAG = "media.Metadata";
-    private static final int kMetaHeaderSize = 8;  // 8 bytes for the size + the marker
+    private static final int kMetaHeaderSize = 8;  //  size + marker
     private static final int kMetaMarker = 0x4d455441;  // 'M' 'E' 'T' 'A'
     private static final int kRecordHeaderSize = 12; // size + id + type
 
@@ -122,21 +129,28 @@ public class Metadata
     // Used to look up if a key was present too.
     // Key: Metadata ID
     // Value: Offset of the metadata type field in the record.
-    private final HashMap<Integer, Integer> mKeyToPosMap = new HashMap<Integer, Integer>();
+    private final HashMap<Integer, Integer> mKeyToPosMap =
+            new HashMap<Integer, Integer>();
 
     /**
-     * Helper class to hold a pair (time, text). Can be used to implement caption.
+     * Helper class to hold a triple (time, duration, text). Can be used to
+     * implement caption.
      */
     public class TimedText {
         private Date mTime;
+        private int mDuration;  // millisec
         private String mText;
-        public TimedText(final Date time, final String text) {
+
+        public TimedText(Date time, int duration, String text) {
             mTime = time;
+            mDuration = duration;
             mText = text;
         }
+
         public String toString() {
             StringBuilder res = new StringBuilder(80);
-            res.append(mTime).append(":").append(mText);
+            res.append(mTime).append("-").append(mDuration)
+                    .append(":").append(mText);
             return res.toString();
         }
     }
@@ -300,44 +314,64 @@ public class Metadata
         return mKeyToPosMap.containsKey(metadataId);
     }
 
-    // Accessors
+    // Accessors.
+    // Caller must make sure the key is present using the {@code has}
+    // method otherwise a RuntimeException will occur.
+
     public String getString(final int key) {
-        // FIXME: Implement.
-        return new String();
+        checkType(key, STRING_VAL);
+        return mParcel.readString();
     }
 
     public int getInt(final int key) {
-        // FIXME: Implement.
-        return 0;
+        checkType(key, INTEGER_VAL);
+        return mParcel.readInt();
+    }
+
+    public boolean getBoolean(final int key) {
+        checkType(key, BOOLEAN_VAL);
+        return mParcel.readInt() == 1;
     }
 
     public long getLong(final int key) {
-        // FIXME: Implement.
-        return 0;
+        checkType(key, LONG_VAL);
+        return mParcel.readLong();
     }
 
     public double getDouble(final int key) {
-        // FIXME: Implement.
-        return 0.0;
+        checkType(key, DOUBLE_VAL);
+        return mParcel.readDouble();
     }
 
     public byte[] getByteArray(final int key) {
-        return new byte[0];
-    }
-
-    public Bitmap getBitmap(final int key) {
-        // FIXME: Implement.
-        return null;
+        checkType(key, BYTE_ARRAY_VAL);
+        return mParcel.createByteArray();
     }
 
     public Date getDate(final int key) {
-        // FIXME: Implement.
-        return new Date();
+        checkType(key, DATE_VAL);
+        final long timeSinceEpoch = mParcel.readLong();
+        final String timeZone = mParcel.readString();
+
+        if (timeZone.length() == 0) {
+            return new Date(timeSinceEpoch);
+        } else {
+            TimeZone tz = TimeZone.getTimeZone(timeZone);
+            Calendar cal = Calendar.getInstance(tz);
+
+            cal.setTimeInMillis(timeSinceEpoch);
+            return cal.getTime();
+        }
     }
 
     public TimedText getTimedText(final int key) {
-        // FIXME: Implement.
-        return new TimedText(new Date(0), "<missing>");
+        checkType(key, TIMED_TEXT_VAL);
+        final Date startTime = new Date(mParcel.readLong());  // epoch
+        final int duration = mParcel.readInt();  // millisec
+
+        return new TimedText(startTime,
+                             duration,
+                             mParcel.readString());
     }
 
     // @return the last available system metadata id. Ids are
@@ -359,5 +393,17 @@ public class Metadata
             return false;
         }
         return true;
+    }
+
+    // Check the type of the data match what is expected.
+    private void checkType(final int key, final int expectedType) {
+        final int pos = mKeyToPosMap.get(key);
+
+        mParcel.setDataPosition(pos);
+
+        final int type = mParcel.readInt();
+        if (type != expectedType) {
+            throw new IllegalStateException("Wrong type " + expectedType + " but got " + type);
+        }
     }
 }
