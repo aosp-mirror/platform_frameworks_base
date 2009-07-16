@@ -57,6 +57,9 @@ public:
 
         uint32_t mIndexCount;
         uint16_t *mIndicies;
+
+        uint32_t mRestartCounts;
+        uint16_t *mRestarts;
     };
 
     Verticies_t * mVerticies;

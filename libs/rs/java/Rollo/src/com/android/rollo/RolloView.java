@@ -37,6 +37,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.graphics.PixelFormat;
 
 public class RolloView extends RSSurfaceView {
 
@@ -44,6 +45,7 @@ public class RolloView extends RSSurfaceView {
         super(context);
 
         //setFocusable(true);
+        getHolder().setFormat(PixelFormat.TRANSLUCENT);
     }
 
     private RenderScript mRS;
@@ -55,6 +57,8 @@ public class RolloView extends RSSurfaceView {
         mRS = createRenderScript();
         mRender = new RolloRS();
         mRender.init(mRS, getResources(), w, h);
+
+
     }
 
     @Override

@@ -3,7 +3,7 @@
     package="com.android.rollo">
     <application android:label="Rollo">
         <activity android:name="Rollo"
-                  android:theme="@android:style/Theme.Black.NoTitleBar">
+                  android:theme="@android:style/Theme.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
