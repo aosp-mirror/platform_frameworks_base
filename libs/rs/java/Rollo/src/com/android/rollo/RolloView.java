@@ -19,6 +19,7 @@ package com.android.rollo;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
+import java.lang.Float;
 
 import android.renderscript.RSSurfaceView;
 import android.renderscript.RenderScript;
@@ -43,8 +44,7 @@ public class RolloView extends RSSurfaceView {
 
     public RolloView(Context context) {
         super(context);
-
-        //setFocusable(true);
+        setFocusable(true);
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
     }
 
@@ -57,8 +57,6 @@ public class RolloView extends RSSurfaceView {
         mRS = createRenderScript();
         mRender = new RolloRS();
         mRender.init(mRS, getResources(), w, h);
-
-
     }
 
     @Override
@@ -69,6 +67,13 @@ public class RolloView extends RSSurfaceView {
         return super.onKeyDown(keyCode, event);
     }
 
+    boolean mControlMode = false;
+    boolean mFlingMode = false;
+    float mFlingX = 0;
+    float mFlingY = 0;
+    float mColumn = -1;
+    float mCurve = 1;
+    float mZoom = 1;
 
     @Override
     public boolean onTouchEvent(MotionEvent ev)
@@ -78,14 +83,100 @@ public class RolloView extends RSSurfaceView {
         if (act == ev.ACTION_UP) {
             ret = false;
         }
-        float x = ev.getX();
-        x = (x - 180) / 40;
-        //Log.e("rs", Float(x).toString());
 
-        mRender.setPosition(x, ev.getPressure());
-        //mRender.newTouchPosition((int)ev.getX(), (int)ev.getY());
+        float nx = ev.getX() / getWidth();
+        float ny = ev.getY() / getHeight();
+
+        if((ny > 0.85f) || mControlMode) {
+            mRender.setShadow(0, 0, 0);
+            mFlingMode = false;
+
+            // Projector control
+            if((nx > 0.2f) && (nx < 0.8f) || mControlMode) {
+                if(act != ev.ACTION_UP) {
+                    float zoom = 5.f;//1.f + 10.f * ev.getSize();
+                    if(mControlMode) {
+                        float dx = nx - mFlingX;
+
+                        if(ny < 0.9) {
+                            zoom = 5.f - ((0.9f - ny) * 10.f);
+                            if(zoom < 1) {
+                                zoom = 1;
+                                mControlMode = false;
+                            }
+                        }
+                        mColumn += dx * 3;// * zoom;
+                        mColumn += -(mZoom - zoom) * (nx - 0.5f) * 2 * zoom;
+                        mZoom = zoom;
+
+                        if(mColumn > 1) {
+                            mColumn = 1;
+                        }
+                        mRender.setPosition(mColumn);
+                    } else {
+                        mControlMode = true;
+                        mZoom = 5;
+                    }
+                    mFlingX = nx;
+                    mRender.setZoom(zoom);
+                } else {
+                    mControlMode = false;
+                    mRender.setZoom(1.f);
+                }
+            } else {
+                if(nx > 0.2f) {
+                    mCurve += 0.1f;
+                    if(mCurve > 2) {
+                        mCurve = 2;
+                    }
+                }
+                if(nx < 0.8f) {
+                    mCurve -= 0.1f;
+                    if(mCurve < (-2)) {
+                        mCurve = -2;
+                    }
+                }
+                mRender.setCurve(mCurve);
+            }
+
+        } else {
+            // icon control
+            if(act != ev.ACTION_UP) {
+                if(mFlingMode) {
+                    float dx = nx - mFlingX;
+                    mColumn += dx * 5;
+                    if(mColumn > 1) {
+                        mColumn = 1;
+                    }
+                    mRender.setPosition(mColumn);
+                }
+                mFlingMode = true;
+                mFlingX = nx;
+                mFlingY = ny;
+                //mRender.setShadow(nx, ny, ev.getSize());
+            } else {
+                mFlingMode = false;
+                mRender.setShadow(nx, ny, 0);
+            }
+        }
+
+
         return ret;
     }
+
+    @Override
+    public boolean onTrackballEvent(MotionEvent ev)
+    {
+        float x = ev.getX();
+        float y = ev.getY();
+        //Float tx = new Float(x);
+        //Float ty = new Float(y);
+        //Log.e("rs", "tbe " + tx.toString() + ", " + ty.toString());
+
+
+        return true;
+    }
+       
 }
 
 

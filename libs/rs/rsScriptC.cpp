@@ -133,13 +133,17 @@ extern "C" const void * loadVp(uint32_t bank, uint32_t offset)
 extern "C" float loadF(uint32_t bank, uint32_t offset)
 {
     GET_TLS();
-    return static_cast<const float *>(sc->mSlots[bank]->getPtr())[offset];
+    float f = static_cast<const float *>(sc->mSlots[bank]->getPtr())[offset];
+    //LOGE("loadF %i %i = %f %x", bank, offset, f, ((int *)&f)[0]);
+    return f;
 }
 
 extern "C" int32_t loadI32(uint32_t bank, uint32_t offset)
 {
     GET_TLS();
-    return static_cast<const int32_t *>(sc->mSlots[bank]->getPtr())[offset];
+    int32_t t = static_cast<const int32_t *>(sc->mSlots[bank]->getPtr())[offset];
+    //LOGE("loadI32 %i %i = %i", bank, offset, t);
+    return t;
 }
 
 extern "C" uint32_t loadU32(uint32_t bank, uint32_t offset)
@@ -163,6 +167,7 @@ extern "C" void loadEnvMatrix(uint32_t bank, uint32_t offset, rsc_Matrix *m)
 
 extern "C" void storeF(uint32_t bank, uint32_t offset, float v)
 {
+    //LOGE("storeF %i %i %f", bank, offset, v);
     GET_TLS();
     static_cast<float *>(sc->mSlots[bank]->getPtr())[offset] = v;
 }
@@ -307,6 +312,47 @@ extern "C" void drawRect(int32_t x1, int32_t x2, int32_t y1, int32_t y2)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
+extern "C" void drawQuadF(float x1, float y1, float z1,
+                          float x2, float y2, float z2,
+                          float x3, float y3, float z3,
+                          float x4, float y4, float z4)
+{
+    GET_TLS();
+
+    //LOGE("Quad");
+    //LOGE("%4.2f, %4.2f, %4.2f", x1, y1, z1);
+    //LOGE("%4.2f, %4.2f, %4.2f", x2, y2, z2);
+    //LOGE("%4.2f, %4.2f, %4.2f", x3, y3, z3);
+    //LOGE("%4.2f, %4.2f, %4.2f", x4, y4, z4);
+
+    float vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
+    static const float tex[] = {0,0, 0,1, 1,1, 1,0};
+
+
+    rsc->setupCheck();
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vtx);
+
+    glClientActiveTexture(GL_TEXTURE0);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, 0, tex);
+    glClientActiveTexture(GL_TEXTURE1);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, 0, tex);
+    glClientActiveTexture(GL_TEXTURE0);
+
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+
+    //glColorPointer(4, GL_UNSIGNED_BYTE, 12, ptr);
+
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+}
+
 extern "C" void drawQuad(int32_t x1, int32_t y1, int32_t z1,
                          int32_t x2, int32_t y2, int32_t z2,
                          int32_t x3, int32_t y3, int32_t z3,
@@ -366,6 +412,28 @@ extern "C" int32_t cosx(int32_t angle)
     a *= 3.14f / 180.f;
     float s = (float)cos(a);
     return int32_t(s * 0x10000);
+}
+
+extern "C" float sinf(float angle)
+{
+    float s = (float)sin(angle);
+    return s;
+}
+
+extern "C" float cosf(float angle)
+{
+    float s = (float)cos(angle);
+    return s;
+}
+
+extern "C" void pfClearColor(float r, float g, float b, float a)
+{
+    //LOGE("c %f %f %f %f", r, g, b, a);
+    GET_TLS();
+    sc->mEnviroment.mClearColor[0] = r;
+    sc->mEnviroment.mClearColor[1] = g;
+    sc->mEnviroment.mClearColor[2] = b;
+    sc->mEnviroment.mClearColor[3] = a;
 }
 
 extern "C" void pfBindTexture(RsProgramFragment vpf, uint32_t slot, RsAllocation va)

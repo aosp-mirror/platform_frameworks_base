@@ -37,6 +37,16 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 public class RolloRS {
+    public static final int STATE_POS_X = 0;
+    public static final int STATE_POS_Y = 1;
+    public static final int STATE_PRESSURE = 2;
+    public static final int STATE_ZOOM = 3;
+    public static final int STATE_WARP = 4;
+    public static final int STATE_ORIENTATION = 5;
+    public static final int STATE_SELECTION = 6;
+    public static final int STATE_FIRST_VISIBLE = 7;
+    public static final int STATE_COUNT = 8;
+
 
     public RolloRS() {
     }
@@ -48,9 +58,33 @@ public class RolloRS {
         initRS();
     }
 
-    public void setPosition(float dx, float pressure) {
-        mAllocStateBuf[0] += (int)(dx);
-        mAllocStateBuf[2] = (int)(pressure * 0x40000);
+    public void setPosition(float column) {
+        mAllocStateBuf[STATE_FIRST_VISIBLE] = (int)(column * 20);
+        mAllocState.data(mAllocStateBuf);
+    }
+
+    public void setShadow(float x, float y, float size) {
+        // x and y are normalized at this point.
+        mAllocStateBuf[STATE_POS_X] = (int)(x * 1000);
+        mAllocStateBuf[STATE_POS_Y] = (int)(y * 1000);
+        mAllocStateBuf[STATE_PRESSURE] = (int)(size * 1000);
+
+        Log.e("rs","shadow x=" + Integer.toString(mAllocStateBuf[STATE_POS_X]) +
+              "  y=" + Integer.toString(mAllocStateBuf[STATE_POS_X]) +
+              "  s=" + Integer.toString(mAllocStateBuf[STATE_PRESSURE]));
+        mAllocState.data(mAllocStateBuf);
+    }
+
+    public void setZoom(float z) {
+        Log.e("rs", "zoom " + Float.toString(z));
+
+        mAllocStateBuf[STATE_ZOOM] = (int)(z * 10.f);
+        mAllocState.data(mAllocStateBuf);
+    }
+
+    public void setCurve(float c) {
+        mAllocStateBuf[STATE_WARP] = (int)(c * 100);
+        Log.e("rs", "curve " + Integer.toString(mAllocStateBuf[STATE_WARP]));
         mAllocState.data(mAllocStateBuf);
     }
 
@@ -63,7 +97,7 @@ public class RolloRS {
 
     private RenderScript.Sampler mSampler;
     private RenderScript.ProgramFragmentStore mPFSBackground;
-    private RenderScript.ProgramFragmentStore mPFSImages;
+    private RenderScript.ProgramFragmentStore mPFSShadow;
     private RenderScript.ProgramFragment mPFBackground;
     private RenderScript.ProgramFragment mPFImages;
     private RenderScript.ProgramVertex mPV;
@@ -76,6 +110,9 @@ public class RolloRS {
 
     private int[] mAllocIconIDBuf;
     private RenderScript.Allocation mAllocIconID;
+
+    private int[] mAllocScratchBuf;
+    private RenderScript.Allocation mAllocScratch;
 
     private void initNamed() {
         mRS.samplerBegin();
@@ -101,13 +138,22 @@ public class RolloRS {
         mPFImages.bindSampler(mSampler, 1);
 
         mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
+        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.LESS);
         mRS.programFragmentStoreDitherEnable(false);
         mRS.programFragmentStoreDepthMask(false);
         mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.ONE, 
                                           RenderScript.BlendDstFunc.ONE);
         mPFSBackground = mRS.programFragmentStoreCreate();
         mPFSBackground.setName("PFS");
+
+        mRS.programFragmentStoreBegin(null, null);
+        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
+        mRS.programFragmentStoreDitherEnable(false);
+        mRS.programFragmentStoreDepthMask(true);
+        mRS.programFragmentStoreColorMask(false, false, false, false);
+        mPFSShadow = mRS.programFragmentStoreCreate();
+        mPFSShadow.setName("PFSShadow");
+
 
 
         mPVAlloc = new ProgramVertexAlloc(mRS);
@@ -123,8 +169,16 @@ public class RolloRS {
         //mPVAlloc.setupOrthoNormalized(320, 480);
         mRS.contextBindProgramVertex(mPV);
 
+        mAllocScratchBuf = new int[32];
+        for(int ct=0; ct < mAllocScratchBuf.length; ct++) {
+            mAllocScratchBuf[ct] = 0;
+        }
+        mAllocScratch = mRS.allocationCreatePredefSized(
+            RenderScript.ElementPredefined.USER_I32, mAllocScratchBuf.length);
+        mAllocScratch.data(mAllocScratchBuf);
 
         Log.e("rs", "Done loading named");
+
 
 
         {
@@ -190,18 +244,21 @@ public class RolloRS {
 
     private void initRS() {
         mRS.scriptCBegin();
-        mRS.scriptCSetClearColor(0.0f, 0.0f, 0.1f, 0.5f);
-        //mRS.scriptCSetScript(mRes, R.raw.rollo);
-        mRS.scriptCSetScript(mRes, R.raw.rollo2);
+        mRS.scriptCSetClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        mRS.scriptCSetScript(mRes, R.raw.rollo);
+        //mRS.scriptCSetScript(mRes, R.raw.rollo2);
         mRS.scriptCSetRoot(true);
+        //mRS.scriptCSetClearDepth(0);
         mScript = mRS.scriptCCreate();
 
-        mAllocStateBuf = new int[] {0, 38, 0};
+        mAllocStateBuf = new int[] {0, 0, 0, 8, 0, 0, 0, 0, 38, 0};
         mAllocState = mRS.allocationCreatePredefSized(
             RenderScript.ElementPredefined.USER_I32, mAllocStateBuf.length);
         mScript.bindAllocation(mAllocState, 0);
         mScript.bindAllocation(mAllocIconID, 1);
-        setPosition(0, 0);
+        mScript.bindAllocation(mAllocScratch, 2);
+        setPosition(0);
+        setZoom(1);
 
         //RenderScript.File f = mRS.fileOpen("/sdcard/test.a3d");
 
