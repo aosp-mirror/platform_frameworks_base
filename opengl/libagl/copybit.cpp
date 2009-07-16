@@ -295,6 +295,9 @@ static bool copybit(GLint x, GLint y,
 
     clipRectRegion it(c);
     status_t err = copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);
+    if (err != NO_ERROR) {
+        c->textures.tmu[0].texture->try_copybit = false;
+    }
     return err == NO_ERROR ? true : false;
 }
 

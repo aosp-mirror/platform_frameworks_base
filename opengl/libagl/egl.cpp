@@ -48,10 +48,6 @@
 #include "texture.h"
 #include "matrix.h"
 
-#ifdef LIBAGL_USE_GRALLOC_COPYBITS
-#include "gralloc_priv.h"
-#endif // LIBAGL_USE_GRALLOC_COPYBITS
-
 #undef NELEM
 #define NELEM(x) (sizeof(x)/sizeof(*(x)))
 
@@ -622,11 +618,10 @@ EGLBoolean egl_window_surface_v2_t::bindDrawSurface(ogles_context_t* gl)
 
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
     gl->copybits.drawSurfaceBuffer = 0;
-    if (supportedCopybitsDestinationFormat(buffer.format)) {
-        buffer_handle_t handle = this->buffer->handle;
-        if (handle != NULL) {
-            private_handle_t* hand = private_handle_t::dynamicCast(handle);
-            if (hand != NULL && hand->usesPhysicallyContiguousMemory()) {
+    if (gl->copybits.blitEngine != NULL) {
+        if (supportedCopybitsDestinationFormat(buffer.format)) {
+            buffer_handle_t handle = this->buffer->handle;
+            if (handle != NULL) {
                 gl->copybits.drawSurfaceBuffer = handle;
             }
         }

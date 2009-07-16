@@ -27,7 +27,6 @@
 
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
 #include "copybit.h"
-#include "gralloc_priv.h"
 #endif // LIBAGL_USE_GRALLOC_COPYBITS
 
 namespace android {
@@ -1540,20 +1539,9 @@ void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
     sp<EGLTextureObject> tex = getAndBindActiveTextureObject(c);
     tex->setImage(native_buffer);
 
-    /*
-     * Here an implementation can retrieve the buffer_handle_t of this buffer
-     * which gives it access to an arbitrary-defined kernel resource
-     * (or anything else for that matter).
-     * There needs to be an intimate knowledge between GLES and buffer_handle_t,
-     * so make sure to validate the handle before using it.
-     * Typically, buffer_handle_t comes from the gralloc HAL which is provided
-     * by the implementor of GLES.
-     *
-     */
 #ifdef LIBAGL_USE_GRALLOC_COPYBITS
     tex->try_copybit = false;
-    private_handle_t* hnd = private_handle_t::dynamicCast(native_buffer->handle);
-    if (hnd && hnd->usesPhysicallyContiguousMemory()) {
+    if (c->copybits.blitEngine != NULL) {
         tex->try_copybit = true;
     }
 #endif // LIBAGL_USE_GRALLOC_COPYBITS
