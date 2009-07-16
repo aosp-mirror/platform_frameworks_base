@@ -18,17 +18,23 @@ package com.android.internal.telephony.cdma;
 
 import android.app.ActivityManagerNative;
 import android.content.Context;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.SharedPreferences;
+import android.database.SQLException;
+import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Registrant;
 import android.os.RegistrantList;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.provider.Telephony;
 import android.telephony.CellLocation;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
@@ -42,6 +48,10 @@ import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.DataConnection;
+// TODO(Moto): need to move MccTable from telephony.gsm to telephony
+// since there is no difference between CDMA and GSM for MccTable and
+// CDMA uses gsm's MccTable is not good.
+import com.android.internal.telephony.gsm.MccTable;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccException;
 import com.android.internal.telephony.IccFileHandler;
@@ -56,6 +66,10 @@ import com.android.internal.telephony.PhoneSubInfo;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
+
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
 
 import java.util.List;
 import java.util.Timer;
@@ -164,6 +178,23 @@ public class CDMAPhone extends PhoneBase {
         // get the string that specifies the carrier OTA Sp number
         mCarrierOtaSpNumSchema = SystemProperties.get(
                 TelephonyProperties.PROPERTY_OTASP_NUM_SCHEMA,"");
+
+        // Sets operator alpha property by retrieving from build-time system property
+        String operatorAlpha = SystemProperties.get("ro.cdma.home.operator.alpha");
+        setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, operatorAlpha);
+
+        // Sets operator numeric property by retrieving from build-time system property
+        String operatorNumeric = SystemProperties.get("ro.cdma.home.operator.numeric");
+        setSystemProperty(PROPERTY_ICC_OPERATOR_NUMERIC, operatorNumeric);
+
+        // Sets iso country property by retrieving from build-time system property
+        setIsoCountryProperty(operatorNumeric);
+
+        // Sets current entry in the telephony carrier table
+        updateCurrentCarrierInProvider(operatorNumeric);
+
+        // Updates MCC MNC device configuration information
+        updateMccMncConfiguration(operatorNumeric);
 
         // Notify voicemails.
         notifier.notifyMessageWaitingChanged(this);
@@ -438,13 +469,7 @@ public class CDMAPhone extends PhoneBase {
     }
 
     public String getSubscriberId() {
-        // Subscriber ID is the combination of MCC+MNC+MIN as CDMA IMSI
-        // TODO(Moto): Replace with call to mRuimRecords.getIMSI_M() when implemented.
-        if ((getServiceState().getOperatorNumeric() != null) && (getCdmaMin() != null)) {
-            return (getServiceState().getOperatorNumeric() + getCdmaMin());
-        } else {
-            return null;
-        }
+        return mSST.getImsi();
     }
 
     public boolean canConference() {
@@ -1365,4 +1390,66 @@ public class CDMAPhone extends PhoneBase {
         editor.commit();
     }
 
+    /**
+     * Sets PROPERTY_ICC_OPERATOR_ISO_COUNTRY property
+     *
+     */
+    private void setIsoCountryProperty(String operatorNumeric) {
+        if (TextUtils.isEmpty(operatorNumeric)) {
+            setSystemProperty(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, "");
+        } else {
+            String iso = "";
+            try {
+                iso = MccTable.countryCodeForMcc(Integer.parseInt(
+                        operatorNumeric.substring(0,3)));
+            } catch (NumberFormatException ex) {
+                Log.w(LOG_TAG, "countryCodeForMcc error" + ex);
+            } catch (StringIndexOutOfBoundsException ex) {
+                Log.w(LOG_TAG, "countryCodeForMcc error" + ex);
+            }
+
+            setSystemProperty(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, iso);
+        }
+    }
+
+    /**
+     * Sets the "current" field in the telephony provider according to the build-time
+     * operator numeric property
+     *
+     * @return true for success; false otherwise.
+     */
+    // TODO(Moto): move this method into PhoneBase, since it looks identical to
+    // the one in GsmPhone
+    private boolean updateCurrentCarrierInProvider(String operatorNumeric) {
+        if (!TextUtils.isEmpty(operatorNumeric)) {
+            try {
+                Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
+                ContentValues map = new ContentValues();
+                map.put(Telephony.Carriers.NUMERIC, operatorNumeric);
+                getContext().getContentResolver().insert(uri, map);
+                return true;
+            } catch (SQLException e) {
+                Log.e(LOG_TAG, "Can't store current operator", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Updates MCC and MNC device configuration information for application retrieving
+     * correct version of resources
+     *
+     */
+    private void updateMccMncConfiguration(String operatorNumeric) {
+        if (operatorNumeric.length() >= 5) {
+            Configuration config = new Configuration();
+            config.mcc = Integer.parseInt(operatorNumeric.substring(0,3));
+            config.mnc = Integer.parseInt(operatorNumeric.substring(3));
+            try {
+                ActivityManagerNative.getDefault().updateConfiguration(config);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Can't update configuration", e);
+            }
+        }
+    }
 }
