@@ -22,7 +22,6 @@
 #include <utils/Log.h>
 #include <utils/Timers.h>
 #include <utils/threads.h>
-#include <utils/List.h>
 #include <utils/Errors.h>
 
 #include <stdlib.h>
@@ -84,7 +83,7 @@ EventHub::EventHub(void)
     : mError(NO_INIT), mHaveFirstKeyboard(false), mFirstKeyboardId(0)
     , mDevicesById(0), mNumDevicesById(0)
     , mOpeningDevices(0), mClosingDevices(0)
-    , mDevices(0), mFDs(0), mFDCount(0)
+    , mDevices(0), mFDs(0), mFDCount(0), mOpened(false)
 {
     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
 #ifdef EV_SW
@@ -99,11 +98,6 @@ EventHub::~EventHub(void)
 {
     release_wake_lock(WAKE_LOCK_ID);
     // we should free stuff here...
-}
-
-void EventHub::onFirstRef()
-{
-    mError = openPlatformInput() ? NO_ERROR : UNKNOWN_ERROR;
 }
 
 status_t EventHub::errorCheck() const
@@ -269,6 +263,12 @@ status_t EventHub::scancodeToKeycode(int32_t deviceId, int scancode,
     return NAME_NOT_FOUND;
 }
 
+void EventHub::addExcludedDevice(const char* deviceName)
+{
+    String8 name(deviceName);
+    mExcludedDevices.push_back(name);
+}
+
 EventHub::device_t* EventHub::getDevice(int32_t deviceId) const
 {
     if (deviceId == 0) deviceId = mFirstKeyboardId;
@@ -306,7 +306,12 @@ bool EventHub::getEvent(int32_t* outDeviceId, int32_t* outType,
 
     // Note that we only allow one caller to getEvent(), so don't need
     // to do locking here...  only when adding/removing devices.
-    
+
+    if (!mOpened) {
+        mError = openPlatformInput() ? NO_ERROR : UNKNOWN_ERROR;
+        mOpened = true;
+    }
+
     while(1) {
 
         // First, report any devices that had last been added/removed.
@@ -511,6 +516,19 @@ int EventHub::open_device(const char *deviceName)
     if(ioctl(fd, EVIOCGUNIQ(sizeof(idstr) - 1), &idstr) < 1) {
         //fprintf(stderr, "could not get idstring for %s, %s\n", deviceName, strerror(errno));
         idstr[0] = '\0';
+    }
+
+    // check to see if the device is on our excluded list
+    List<String8>::iterator iter = mExcludedDevices.begin();
+    List<String8>::iterator end = mExcludedDevices.end();
+    for ( ; iter != end; iter++) {
+        const char* name = *iter;
+        if (strcmp(name, idstr) == 0) {
+            LOGD("ignoring event id %s driver %s\n", deviceName, name);
+            close(fd);
+            fd = -1;
+            return -1;
+        }
     }
 
     int devid = 0;
@@ -763,6 +781,7 @@ int EventHub::read_notify(int nfd)
     int event_pos = 0;
     struct inotify_event *event;
 
+LOGD("EventHub::read_notify nfd: %d\n", nfd);
     res = read(nfd, event_buf, sizeof(event_buf));
     if(res < (int)sizeof(*event)) {
         if(errno == EINTR)

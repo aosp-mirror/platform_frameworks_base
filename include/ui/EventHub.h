@@ -75,7 +75,11 @@ public:
     
     status_t scancodeToKeycode(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const;
-    
+
+    // exclude a particular device from opening
+    // this can be used to ignore input devices for sensors
+    void addExcludedDevice(const char* deviceName);
+
     // special type codes when devices are added/removed.
     enum {
         DEVICE_ADDED = 0x10000000,
@@ -88,10 +92,9 @@ public:
     virtual bool getEvent(int32_t* outDeviceId, int32_t* outType,
             int32_t* outScancode, int32_t* outKeycode, uint32_t *outFlags,
             int32_t* outValue, nsecs_t* outWhen);
-    
+
 protected:
     virtual ~EventHub();
-    virtual void onFirstRef();
     
 private:
     bool openPlatformInput(void);
@@ -139,7 +142,10 @@ private:
     device_t        **mDevices;
     struct pollfd   *mFDs;
     int             mFDCount;
-    
+
+    bool            mOpened;
+    List<String8>   mExcludedDevices;
+
     // device ids that report particular switches.
 #ifdef EV_SW
     int32_t         mSwitches[SW_MAX+1];
