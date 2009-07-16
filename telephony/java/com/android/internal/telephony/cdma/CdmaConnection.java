@@ -161,8 +161,8 @@ public class CdmaConnection extends Connection {
 
         isIncoming = false;
         cnapName = null;
-        cnapNamePresentation = 0;
-        numberPresentation = 0;
+        cnapNamePresentation = Connection.PRESENTATION_ALLOWED;
+        numberPresentation = Connection.PRESENTATION_ALLOWED;
         createTime = System.currentTimeMillis();
 
         if (parent != null) {
