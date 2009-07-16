@@ -17,6 +17,8 @@
 #ifndef ANDROID_RS_CONTEXT_H
 #define ANDROID_RS_CONTEXT_H
 
+#include "rsUtils.h"
+
 #include <utils/Vector.h>
 #include <ui/Surface.h>
 

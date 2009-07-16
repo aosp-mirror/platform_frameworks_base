@@ -24,6 +24,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+#include <EGL/egl.h>
+#include <math.h>
+
 #include "RenderScript.h"
 
 namespace android {
