@@ -450,6 +450,109 @@ public class TextToSpeech {
 
 
     /**
+     * Adds a mapping between a string of text and a sound resource in a
+     * package.
+     *
+     * @see #TTS.playEarcon(String earcon, int queueMode, String[] params)
+     *
+     * @param earcon The name of the earcon
+     *            Example: <b><code>"[tick]"</code></b><br/>
+     *
+     * @param packagename
+     *            Pass the packagename of the application that contains the
+     *            resource. If the resource is in your own application (this is
+     *            the most common case), then put the packagename of your
+     *            application here.<br/>
+     *            Example: <b>"com.google.marvin.compass"</b><br/>
+     *            The packagename can be found in the AndroidManifest.xml of
+     *            your application.
+     *            <p>
+     *            <code>&lt;manifest xmlns:android=&quot;...&quot;
+     *      package=&quot;<b>com.google.marvin.compass</b>&quot;&gt;</code>
+     *            </p>
+     *
+     * @param resourceId
+     *            Example: <b><code>R.raw.tick_snd</code></b>
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
+     */
+    public int addEarcon(String earcon, String packagename, int resourceId) {
+        synchronized(mStartLock) {
+            if (!mStarted) {
+                return TTS_ERROR;
+            }
+            try {
+                mITts.addEarcon(mPackageName, earcon, packagename, resourceId);
+                return TTS_SUCCESS;
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - addEarcon", "RemoteException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (NullPointerException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - addEarcon", "NullPointerException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (IllegalStateException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - addEarcon", "IllegalStateException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            }
+            return TTS_ERROR;
+        }
+    }
+
+
+    /**
+     * Adds a mapping between a string of text and a sound file. Using this, it
+     * is possible to add custom earcons.
+     *
+     * @param earcon
+     *            The name of the earcon
+     * @param filename
+     *            The full path to the sound file (for example:
+     *            "/sdcard/mysounds/tick.wav")
+     *
+     * @return Code indicating success or failure. See TTS_ERROR and TTS_SUCCESS.
+     */
+    public int addEarcon(String earcon, String filename) {
+        synchronized (mStartLock) {
+            if (!mStarted) {
+                return TTS_ERROR;
+            }
+            try {
+                mITts.addEarconFile(mPackageName, earcon, filename);
+                return TTS_SUCCESS;
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - addEarcon", "RemoteException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (NullPointerException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - addEarcon", "NullPointerException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (IllegalStateException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - addEarcon", "IllegalStateException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            }
+            return TTS_ERROR;
+        }
+    }
+
+
+    /**
      * Speaks the string using the specified queuing strategy and speech
      * parameters. Note that the speech parameters are not universally supported
      * by all engines and will be treated as a hint. The TTS library will try to
