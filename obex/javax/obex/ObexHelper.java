@@ -875,7 +875,7 @@ public final class ObexHelper {
      * @throws IllegalArgumentException if the byte array has an odd length
      */
     public static String convertToUnicode(byte[] b, boolean includesNull) {
-        if (b == null) {
+        if (b == null || b.length == 0) {
             return null;
         }
         int arrayLength = b.length;
