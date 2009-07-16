@@ -54,6 +54,10 @@ public:
     virtual status_t    setLooping(int loop);
     virtual player_type playerType() { return VORBIS_PLAYER; }
     virtual status_t    invoke(const Parcel& request, Parcel *reply) {return INVALID_OPERATION;}
+    virtual status_t    getMetadata(const SortedVector<MetadataType>& ids,
+                                    Parcel *records)  {
+        return INVALID_OPERATION;
+    }
 
 private:
             status_t    setdatasource(const char *path, int fd, int64_t offset, int64_t length);

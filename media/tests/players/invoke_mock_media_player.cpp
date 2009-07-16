@@ -20,14 +20,17 @@
 
 #include <string.h>
 
-#include "binder/Parcel.h"
-#include "media/MediaPlayerInterface.h"
-#include "utils/Errors.h"
+#include <binder/Parcel.h>
+#include <media/MediaPlayerInterface.h>
+#include <utils/Errors.h>
 
+using android::INVALID_OPERATION;
 using android::ISurface;
 using android::MediaPlayerBase;
+using android::MetadataType;
 using android::OK;
 using android::Parcel;
+using android::SortedVector;
 using android::TEST_PLAYER;
 using android::UNKNOWN_ERROR;
 using android::player_type;
@@ -75,6 +78,9 @@ class Player: public MediaPlayerBase
     virtual status_t    setLooping(int loop) {return OK;}
     virtual player_type playerType() {return TEST_PLAYER;}
     virtual status_t    invoke(const Parcel& request, Parcel *reply);
+    virtual status_t    getMetadata(const SortedVector<MetadataType>& ids,
+                                    Parcel *records) {return INVALID_OPERATION;}
+
   private:
     // Take a request, copy it to the reply.
     void ping(const Parcel& request, Parcel *reply);
