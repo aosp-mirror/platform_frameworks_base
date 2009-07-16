@@ -15,8 +15,8 @@ home=true
                                 <div id="announcement" style="width:270px">
                                   <p>The Google I/O developer conference took place May 27-28 in San Francisco. 
                                     If you missed the conference, you can experience the Android sessions
-                                    by viewing YouTube videos and presentation slides.</p>
-                                  <p><a href="http://code.google.com/events/io/sessions.html#mobile">See the Mobile sessions at Google I/O &raquo;</a></p>
+                                    by viewing YouTube videos.</p>
+                                  <p><a href="{@docRoot}videos/index.html">See the sessions from Google I/O &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->  
                         </div><!-- end topAnnouncement -->
@@ -122,10 +122,10 @@ home=true
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"SDK 1.5 r2",
+      'name':"SDK 1.5 r3",
       'img':"sdk-large.png",
       'title':"Android 1.5 SDK",
-      'desc': "<p>Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r2/index.html'>Download Android 1.5 SDK</a></p>"
+      'desc': "<p>Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r3/index.html'>Download Android 1.5 SDK &raquo;</a></p>"
     },
 
     'mapskey': {
