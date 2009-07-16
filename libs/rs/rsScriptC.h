@@ -69,6 +69,14 @@ public:
 
     void clear();
     void runCompiler(Context *rsc);
+
+    struct SymbolTable_t {
+        const char * mName;
+        void * mPtr;
+        const char * mDecl;
+    };
+    static SymbolTable_t gSyms[];
+    static const SymbolTable_t * lookupSymbol(const char *);
 };
 
 

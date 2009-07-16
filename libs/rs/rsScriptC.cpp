@@ -130,7 +130,7 @@ extern "C" const void * loadVp(uint32_t bank, uint32_t offset)
     return &static_cast<const uint8_t *>(sc->mSlots[bank]->getPtr())[offset];
 }
 
-extern "C" float loadF(uint32_t bank, uint32_t offset)
+static float SC_loadF(uint32_t bank, uint32_t offset)
 {
     GET_TLS();
     float f = static_cast<const float *>(sc->mSlots[bank]->getPtr())[offset];
@@ -138,7 +138,7 @@ extern "C" float loadF(uint32_t bank, uint32_t offset)
     return f;
 }
 
-extern "C" int32_t loadI32(uint32_t bank, uint32_t offset)
+static int32_t SC_loadI32(uint32_t bank, uint32_t offset)
 {
     GET_TLS();
     int32_t t = static_cast<const int32_t *>(sc->mSlots[bank]->getPtr())[offset];
@@ -146,7 +146,7 @@ extern "C" int32_t loadI32(uint32_t bank, uint32_t offset)
     return t;
 }
 
-extern "C" uint32_t loadU32(uint32_t bank, uint32_t offset)
+static uint32_t SC_loadU32(uint32_t bank, uint32_t offset)
 {
     GET_TLS();
     return static_cast<const uint32_t *>(sc->mSlots[bank]->getPtr())[offset];
@@ -165,20 +165,20 @@ extern "C" void loadEnvMatrix(uint32_t bank, uint32_t offset, rsc_Matrix *m)
 }
 
 
-extern "C" void storeF(uint32_t bank, uint32_t offset, float v)
+static void SC_storeF(uint32_t bank, uint32_t offset, float v)
 {
     //LOGE("storeF %i %i %f", bank, offset, v);
     GET_TLS();
     static_cast<float *>(sc->mSlots[bank]->getPtr())[offset] = v;
 }
 
-extern "C" void storeI32(uint32_t bank, uint32_t offset, int32_t v)
+static void SC_storeI32(uint32_t bank, uint32_t offset, int32_t v)
 {
     GET_TLS();
     static_cast<int32_t *>(sc->mSlots[bank]->getPtr())[offset] = v;
 }
 
-extern "C" void storeU32(uint32_t bank, uint32_t offset, uint32_t v)
+static void SC_storeU32(uint32_t bank, uint32_t offset, uint32_t v)
 {
     GET_TLS();
     static_cast<uint32_t *>(sc->mSlots[bank]->getPtr())[offset] = v;
@@ -312,10 +312,10 @@ extern "C" void drawRect(int32_t x1, int32_t x2, int32_t y1, int32_t y2)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-extern "C" void drawQuadF(float x1, float y1, float z1,
-                          float x2, float y2, float z2,
-                          float x3, float y3, float z3,
-                          float x4, float y4, float z4)
+static void SC_drawQuad(float x1, float y1, float z1,
+                        float x2, float y2, float z2,
+                        float x3, float y3, float z3,
+                        float x4, float y4, float z4)
 {
     GET_TLS();
 
@@ -473,15 +473,15 @@ extern "C" void contextBindProgramFragment(RsProgramFragment pf)
 
 static rsc_FunctionTable scriptCPtrTable = {
     loadVp,
-    loadF,
-    loadI32,
-    loadU32,
+    SC_loadF,
+    SC_loadI32,
+    SC_loadU32,
     loadEnvVec4,
     loadEnvMatrix,
 
-    storeF,
-    storeI32,
-    storeU32,
+    SC_storeF,
+    SC_storeI32,
+    SC_storeU32,
     storeEnvVec4,
     storeEnvMatrix,
 
@@ -575,6 +575,48 @@ void ScriptCState::clear()
 
 }
 
+ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
+    { "loadI32", (void *)&SC_loadI32, "int loadI32(int, int)" },
+    { "loadF", (void *)&SC_loadF, "float loadF(int, int)" },
+    { "storeI32", (void *)&SC_storeI32, "void storeI32(int, int, int)" },
+    { "storeF", (void *)&SC_storeF, "void storeF(int, int, float)" },
+    { "drawQuad", (void *)&SC_drawQuad, "drawQuad(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
+    { "sinf", (void *)&sinf, "float sinf(float)" },
+    { "cosf", (void *)&cosf, "float cosf(float)" },
+    { "contextBindProgramFragmentStore", (void *)&contextBindProgramFragmentStore, "" },
+    { "pfClearColor", (void *)&pfClearColor, "" },
+    { "pfBindTexture", (void *)&pfBindTexture, "" },
+
+
+    { NULL, NULL, NULL }
+};
+
+const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbol(const char *sym)
+{
+    ScriptCState::SymbolTable_t *syms = gSyms;
+
+    while (syms->mPtr) {
+        if (!strcmp(syms->mName, sym)) {
+            return syms;
+        }
+        syms++;
+    }
+    return NULL;
+}
+
+static ACCvoid* symbolLookup(ACCvoid* pContext, const ACCchar* name) 
+{
+    const ScriptCState::SymbolTable_t *sym = ScriptCState::lookupSymbol(name);
+
+    if (sym) {
+        return sym->mPtr;
+    }
+
+    LOGE("ScriptC sym lookup failed for %s", name);
+
+    // Default to calling dlsym to allow any global symbol:
+    return NULL;
+}
 
 void ScriptCState::runCompiler(Context *rsc)
 {
@@ -586,6 +628,7 @@ void ScriptCState::runCompiler(Context *rsc)
     const char* scriptSource[] = {tmp.string(), mProgram.mScriptText};
     int scriptLength[] = {tmp.length(), mProgram.mScriptTextLength} ;
     accScriptSource(mAccScript, sizeof(scriptLength) / sizeof(int), scriptSource, scriptLength);
+    accRegisterSymbolCallback(mAccScript, symbolLookup, NULL);
     accCompileScript(mAccScript);
     accGetScriptLabel(mAccScript, "main", (ACCvoid**) &mProgram.mScript);
     rsAssert(mProgram.mScript);
