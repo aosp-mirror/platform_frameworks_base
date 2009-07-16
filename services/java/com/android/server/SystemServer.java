@@ -52,6 +52,7 @@ import java.lang.reflect.InvocationTargetException;
 class ServerThread extends Thread {
     private static final String TAG = "SystemServer";
     private final static boolean INCLUDE_DEMO = false;
+    private final static boolean INCLUDE_BACKUP = false;
 
     private static final int LOG_BOOT_PROGRESS_SYSTEM_RUN = 3010;
 
@@ -318,8 +319,10 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting Backup Service");
-                ServiceManager.addService(Context.BACKUP_SERVICE, new BackupManagerService(context));
+                if (INCLUDE_BACKUP) {
+                    Log.i(TAG, "Starting Backup Service");
+                    ServiceManager.addService(Context.BACKUP_SERVICE, new BackupManagerService(context));
+                }
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Backup Service", e);
             }
