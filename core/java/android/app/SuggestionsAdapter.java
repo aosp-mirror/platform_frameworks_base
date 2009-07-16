@@ -351,7 +351,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         CharSequence text = null;
         if (textCol >= 0) {
             String str = cursor.getString(textCol);
-            if (isHtml && !TextUtils.isEmpty(str)) {
+            if (isHtml && looksLikeHtml(str)) {
                 text = Html.fromHtml(str);
             } else {
                 text = str;
@@ -365,6 +365,15 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         } else {
             v.setVisibility(View.VISIBLE);
         }
+    }
+
+    private static boolean looksLikeHtml(String str) {
+        if (TextUtils.isEmpty(str)) return false;
+        for (int i = str.length() - 1; i >= 0; i--) {
+            char c = str.charAt(i);
+            if (c == '<' || c == '&') return true;
+        }
+        return false;
     }
 
     private Drawable getIcon1(Cursor cursor) {
