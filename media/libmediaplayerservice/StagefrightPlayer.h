@@ -1,0 +1,60 @@
+/*
+**
+** Copyright 2009, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+
+#ifndef ANDROID_STAGEFRIGHTPLAYER_H
+#define ANDROID_STAGEFRIGHTPLAYER_H
+
+#include <media/MediaPlayerInterface.h>
+
+namespace android {
+
+class MediaPlayerImpl;
+
+class StagefrightPlayer : public MediaPlayerInterface {
+public:
+    StagefrightPlayer();
+    virtual ~StagefrightPlayer();
+
+    virtual status_t initCheck();
+    virtual status_t setDataSource(const char *url);
+    virtual status_t setDataSource(int fd, int64_t offset, int64_t length);
+    virtual status_t setVideoSurface(const sp<ISurface> &surface);
+    virtual status_t prepare();
+    virtual status_t prepareAsync();
+    virtual status_t start();
+    virtual status_t stop();
+    virtual status_t pause();
+    virtual bool isPlaying();
+    virtual status_t seekTo(int msec);
+    virtual status_t getCurrentPosition(int *msec);
+    virtual status_t getDuration(int *msec);
+    virtual status_t reset();
+    virtual status_t setLooping(int loop);
+    virtual player_type playerType();
+    virtual status_t invoke(const Parcel &request, Parcel *reply);
+    virtual void setAudioSink(const sp<AudioSink> &audioSink);
+
+private:
+    MediaPlayerImpl *mPlayer;
+
+    StagefrightPlayer(const StagefrightPlayer &);
+    StagefrightPlayer &operator=(const StagefrightPlayer &);
+};
+
+}  // namespace android
+
+#endif  // ANDROID_STAGEFRIGHTPLAYER_H

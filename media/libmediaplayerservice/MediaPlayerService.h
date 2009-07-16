@@ -35,6 +35,7 @@ typedef int32_t MetadataType;
 
 class IMediaRecorder;
 class IMediaMetadataRetriever;
+class IOMX;
 
 #define CALLBACK_ANTAGONIZER 0
 #if CALLBACK_ANTAGONIZER
@@ -75,7 +76,12 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual ssize_t         frameSize() const;
         virtual uint32_t        latency() const;
         virtual float           msecsPerFrame() const;
-        virtual status_t        open(uint32_t sampleRate, int channelCount, int format, int bufferCount=4);
+
+        virtual status_t        open(
+                uint32_t sampleRate, int channelCount,
+                int format, int bufferCount,
+                AudioCallback cb, void *cookie);
+
         virtual void            start();
         virtual ssize_t         write(const void* buffer, size_t size);
         virtual void            stop();
@@ -90,8 +96,12 @@ class MediaPlayerService : public BnMediaPlayerService
         static int              getMinBufferCount();
     private:
         static void             setMinBufferCount();
+        static void             CallbackWrapper(
+                int event, void *me, void *info);
 
         AudioTrack*             mTrack;
+        AudioCallback           mCallback;
+        void *                  mCallbackCookie;
         int                     mStreamType;
         float                   mLeftVolume;
         float                   mRightVolume;
@@ -119,7 +129,12 @@ class MediaPlayerService : public BnMediaPlayerService
         virtual ssize_t         frameSize() const { return ssize_t(mChannelCount * ((mFormat == AudioSystem::PCM_16_BIT)?sizeof(int16_t):sizeof(u_int8_t))); }
         virtual uint32_t        latency() const;
         virtual float           msecsPerFrame() const;
-        virtual status_t        open(uint32_t sampleRate, int channelCount, int format, int bufferCount=1);
+
+        virtual status_t        open(
+                uint32_t sampleRate, int channelCount, int format,
+                int bufferCount = 1,
+                AudioCallback cb = NULL, void *cookie = NULL);
+
         virtual void            start() {}
         virtual ssize_t         write(const void* buffer, size_t size);
         virtual void            stop() {}
@@ -166,6 +181,7 @@ public:
     virtual sp<IMediaPlayer>    create(pid_t pid, const sp<IMediaPlayerClient>& client, int fd, int64_t offset, int64_t length);
     virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
     virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
+    virtual sp<IOMX>            createOMX();
 
     virtual status_t            dump(int fd, const Vector<String16>& args);
 

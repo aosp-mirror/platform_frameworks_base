@@ -58,6 +58,15 @@
 #include "MidiFile.h"
 #include "VorbisPlayer.h"
 #include <media/PVPlayer.h>
+#if USE_STAGEFRIGHT
+#include "StagefrightPlayer.h"
+#endif
+
+#ifdef BUILD_WITH_STAGEFRIGHT
+#include <OMX.h>
+#else
+#include <media/IOMX.h>
+#endif
 
 /* desktop Linux needs a little help with gettid() */
 #if defined(HAVE_GETTID) && !defined(HAVE_ANDROID_OS)
@@ -186,6 +195,10 @@ typedef struct {
     const player_type playertype;
 } extmap;
 extmap FILE_EXTS [] =  {
+#if USE_STAGEFRIGHT
+        {".mp4", STAGEFRIGHT_PLAYER},
+        {".3gp", STAGEFRIGHT_PLAYER},
+#endif
         {".mid", SONIVOX_PLAYER},
         {".midi", SONIVOX_PLAYER},
         {".smf", SONIVOX_PLAYER},
@@ -269,6 +282,14 @@ sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClie
     }
     ::close(fd);
     return c;
+}
+
+sp<IOMX> MediaPlayerService::createOMX() {
+#ifdef BUILD_WITH_STAGEFRIGHT
+    return new OMX;
+#else
+    return NULL;
+#endif
 }
 
 status_t MediaPlayerService::AudioCache::dump(int fd, const Vector<String16>& args) const
@@ -577,6 +598,7 @@ void MediaPlayerService::Client::disconnect()
         p = mPlayer;
     }
     mClient.clear();
+
     mPlayer.clear();
 
     // clear the notification to prevent callbacks to dead client
@@ -624,13 +646,16 @@ static player_type getPlayerType(int fd, int64_t offset, int64_t length)
         EAS_Shutdown(easdata);
     }
 
+#if USE_STAGEFRIGHT
+    return STAGEFRIGHT_PLAYER;
+#endif
+
     // Fall through to PV
     return PV_PLAYER;
 }
 
 static player_type getPlayerType(const char* url)
 {
-
     // use MidiFile for MIDI extensions
     int lenURL = strlen(url);
     for (int i = 0; i < NELEM(FILE_EXTS); ++i) {
@@ -642,6 +667,10 @@ static player_type getPlayerType(const char* url)
             }
         }
     }
+
+#if USE_STAGEFRIGHT
+    return STAGEFRIGHT_PLAYER;
+#endif
 
     // Fall through to PV
     return PV_PLAYER;
@@ -666,6 +695,17 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
             LOGV(" create VorbisPlayer");
             p = new VorbisPlayer();
             break;
+#if USE_STAGEFRIGHT
+        case STAGEFRIGHT_PLAYER:
+            LOGV(" create StagefrightPlayer");
+            p = new StagefrightPlayer;
+            break;
+#else
+        case STAGEFRIGHT_PLAYER:
+            LOG_ALWAYS_FATAL(
+                    "Should not be here, stagefright player not enabled.");
+            break;
+#endif
     }
     if (p != NULL) {
         if (p->initCheck() == NO_ERROR) {
@@ -1136,7 +1176,8 @@ Exit:
 #undef LOG_TAG
 #define LOG_TAG "AudioSink"
 MediaPlayerService::AudioOutput::AudioOutput()
-{
+    : mCallback(NULL),
+      mCallbackCookie(NULL) {
     mTrack = 0;
     mStreamType = AudioSystem::MUSIC;
     mLeftVolume = 1.0;
@@ -1206,8 +1247,13 @@ float MediaPlayerService::AudioOutput::msecsPerFrame() const
     return mMsecsPerFrame;
 }
 
-status_t MediaPlayerService::AudioOutput::open(uint32_t sampleRate, int channelCount, int format, int bufferCount)
+status_t MediaPlayerService::AudioOutput::open(
+        uint32_t sampleRate, int channelCount, int format, int bufferCount,
+        AudioCallback cb, void *cookie)
 {
+    mCallback = cb;
+    mCallbackCookie = cookie;
+
     // Check argument "bufferCount" against the mininum buffer count
     if (bufferCount < mMinBufferCount) {
         LOGD("bufferCount (%d) is too small and increased to %d", bufferCount, mMinBufferCount);
@@ -1228,7 +1274,17 @@ status_t MediaPlayerService::AudioOutput::open(uint32_t sampleRate, int channelC
     }
 
     frameCount = (sampleRate*afFrameCount*bufferCount)/afSampleRate;
-    AudioTrack *t = new AudioTrack(mStreamType, sampleRate, format, channelCount, frameCount);
+
+    AudioTrack *t;
+    if (mCallback != NULL) {
+        t = new AudioTrack(
+                mStreamType, sampleRate, format, channelCount, frameCount,
+                0 /* flags */, CallbackWrapper, this);
+    } else {
+        t = new AudioTrack(
+                mStreamType, sampleRate, format, channelCount, frameCount);
+    }
+
     if ((t == 0) || (t->initCheck() != NO_ERROR)) {
         LOGE("Unable to create audio track");
         delete t;
@@ -1254,6 +1310,8 @@ void MediaPlayerService::AudioOutput::start()
 
 ssize_t MediaPlayerService::AudioOutput::write(const void* buffer, size_t size)
 {
+    LOG_FATAL_IF(mCallback != NULL, "Don't call write if supplying a callback.");
+
     //LOGV("write(%p, %u)", buffer, size);
     if (mTrack) return mTrack->write(buffer, size);
     return NO_INIT;
@@ -1294,6 +1352,20 @@ void MediaPlayerService::AudioOutput::setVolume(float left, float right)
     }
 }
 
+// static
+void MediaPlayerService::AudioOutput::CallbackWrapper(
+        int event, void *cookie, void *info) {
+    if (event != AudioTrack::EVENT_MORE_DATA) {
+        return;
+    }
+
+    AudioOutput *me = (AudioOutput *)cookie;
+    AudioTrack::Buffer *buffer = (AudioTrack::Buffer *)info;
+
+    (*me->mCallback)(
+            me, buffer->raw, buffer->size, me->mCallbackCookie);
+}
+
 #undef LOG_TAG
 #define LOG_TAG "AudioCache"
 MediaPlayerService::AudioCache::AudioCache(const char* name) :
@@ -1314,8 +1386,14 @@ float MediaPlayerService::AudioCache::msecsPerFrame() const
     return mMsecsPerFrame;
 }
 
-status_t MediaPlayerService::AudioCache::open(uint32_t sampleRate, int channelCount, int format, int bufferCount)
+status_t MediaPlayerService::AudioCache::open(
+        uint32_t sampleRate, int channelCount, int format, int bufferCount,
+        AudioCallback cb, void *cookie)
 {
+    if (cb != NULL) {
+        return UNKNOWN_ERROR;  // TODO: implement this.
+    }
+
     LOGV("open(%u, %d, %d, %d)", sampleRate, channelCount, format, bufferCount);
     if (mHeap->getHeapID() < 0) return NO_INIT;
     mSampleRate = sampleRate;

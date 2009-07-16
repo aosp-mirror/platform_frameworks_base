@@ -32,7 +32,8 @@ class Parcel;
 enum player_type {
     PV_PLAYER = 1,
     SONIVOX_PLAYER = 2,
-    VORBIS_PLAYER = 3
+    VORBIS_PLAYER = 3,
+    STAGEFRIGHT_PLAYER = 4
 };
 
 
@@ -51,6 +52,9 @@ public:
     // AudioSink: abstraction layer for audio output
     class AudioSink : public RefBase {
     public:
+        typedef void (*AudioCallback)(
+                AudioSink *audioSink, void *buffer, size_t size, void *cookie);
+
         virtual             ~AudioSink() {}
         virtual bool        ready() const = 0; // audio output is open and ready
         virtual bool        realtime() const = 0; // audio output is real-time output
@@ -60,7 +64,17 @@ public:
         virtual ssize_t     frameSize() const = 0;
         virtual uint32_t    latency() const = 0;
         virtual float       msecsPerFrame() const = 0;
-        virtual status_t    open(uint32_t sampleRate, int channelCount, int format=AudioSystem::PCM_16_BIT, int bufferCount=DEFAULT_AUDIOSINK_BUFFERCOUNT) = 0;
+
+        // If no callback is specified, use the "write" API below to submit
+        // audio data. Otherwise return a full buffer of audio data on each
+        // callback.
+        virtual status_t    open(
+                uint32_t sampleRate, int channelCount,
+                int format=AudioSystem::PCM_16_BIT,
+                int bufferCount=DEFAULT_AUDIOSINK_BUFFERCOUNT,
+                AudioCallback cb = NULL,
+                void *cookie = NULL) = 0;
+
         virtual void        start() = 0;
         virtual ssize_t     write(const void* buffer, size_t size) = 0;
         virtual void        stop() = 0;

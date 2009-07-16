@@ -29,9 +29,22 @@ LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime
 
 LOCAL_C_INCLUDES := external/tremor/Tremor \
-    $(call include-path-for, graphics corecg)
+	$(call include-path-for, graphics corecg) \
+	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
 
 LOCAL_MODULE:= libmediaplayerservice
+
+ifeq ($(BUILD_WITH_STAGEFRIGHT),true)
+    LOCAL_SRC_FILES += StagefrightPlayer.cpp
+
+    LOCAL_SHARED_LIBRARIES += \
+	libstagefright        \
+	libstagefright_omx
+
+    LOCAL_C_INCLUDES += $(TOP)/frameworks/base/media/libstagefright/omx
+
+    LOCAL_CFLAGS += -DBUILD_WITH_STAGEFRIGHT -DUSE_STAGEFRIGHT
+endif
 
 include $(BUILD_SHARED_LIBRARY)
 
