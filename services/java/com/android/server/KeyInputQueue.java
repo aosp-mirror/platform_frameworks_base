@@ -18,11 +18,13 @@ package com.android.server;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.Environment;
 import android.os.LatencyTimer;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.Xml;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -30,9 +32,16 @@ import android.view.RawInputEvent;
 import android.view.Surface;
 import android.view.WindowManagerPolicy;
 
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -42,6 +51,8 @@ public abstract class KeyInputQueue {
 
     static final boolean DEBUG_VIRTUAL_KEYS = false;
     
+    private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
+
     final SparseArray<InputDevice> mDevices = new SparseArray<InputDevice>();
     final ArrayList<VirtualKey> mVirtualKeys = new ArrayList<VirtualKey>();
     
@@ -177,12 +188,8 @@ public abstract class KeyInputQueue {
             hitBottom = miny + ((bottom*maxy-miny)/dh);
         }
     }
-    
-    KeyInputQueue(Context context) {
-        if (MEASURE_LATENCY) {
-            lt = new LatencyTimer(100, 1000);
-        }
 
+    private void readVirtualKeys() {
         try {
             FileInputStream fis = new FileInputStream(
                     "/sys/board_properties/virtualkeys.synaptics-rmi-touchscreen");
@@ -223,6 +230,47 @@ public abstract class KeyInputQueue {
         } catch (IOException e) {
             Log.w(TAG, "Error reading virtual keys", e);
         }
+    }
+
+    private void readExcludedDevices() {
+        // Read partner-provided list of excluded input devices
+        XmlPullParser parser = null;
+        // Environment.getRootDirectory() is a fancy way of saying ANDROID_ROOT or "/system".
+        File confFile = new File(Environment.getRootDirectory(), EXCLUDED_DEVICES_PATH);
+        FileReader confreader = null;
+        try {
+            confreader = new FileReader(confFile);
+            parser = Xml.newPullParser();
+            parser.setInput(confreader);
+            XmlUtils.beginDocument(parser, "devices");
+
+            while (true) {
+                XmlUtils.nextElement(parser);
+                if (!"device".equals(parser.getName())) {
+                    break;
+                }
+                String name = parser.getAttributeValue(null, "name");
+                if (name != null) {
+                    Log.d(TAG, "addExcludedDevice " + name);
+                    addExcludedDevice(name);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // It's ok if the file does not exist.
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while parsing '" + confFile.getAbsolutePath() + "'", e);
+        } finally {
+            try { if (confreader != null) confreader.close(); } catch (IOException e) { }
+        }
+    }
+
+    KeyInputQueue(Context context) {
+        if (MEASURE_LATENCY) {
+            lt = new LatencyTimer(100, 1000);
+        }
+
+        readVirtualKeys();
+        readExcludedDevices();
         
         PowerManager pm = (PowerManager)context.getSystemService(
                                                         Context.POWER_SERVICE);
@@ -280,6 +328,7 @@ public abstract class KeyInputQueue {
     
     public static native String getDeviceName(int deviceId);
     public static native int getDeviceClasses(int deviceId);
+    public static native void addExcludedDevice(String deviceName);
     public static native boolean getAbsoluteInfo(int deviceId, int axis,
             InputDevice.AbsoluteInfo outInfo);
     public static native int getSwitchState(int sw);
@@ -305,6 +354,7 @@ public abstract class KeyInputQueue {
     
     Thread mThread = new Thread("InputDeviceReader") {
         public void run() {
+            Log.d(TAG, "InputDeviceReader.run()");
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
             

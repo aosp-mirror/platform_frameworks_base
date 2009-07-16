@@ -110,6 +110,23 @@ android_server_KeyInputQueue_getDeviceName(JNIEnv* env, jobject clazz,
     return NULL;
 }
 
+static void
+android_server_KeyInputQueue_addExcludedDevice(JNIEnv* env, jobject clazz,
+                                              jstring deviceName)
+{
+    gLock.lock();
+    sp<EventHub> hub = gHub;
+    if (hub == NULL) {
+        hub = new EventHub;
+        gHub = hub;
+    }
+    gLock.unlock();
+
+    const char* nameStr = env->GetStringUTFChars(deviceName, NULL);
+    gHub->addExcludedDevice(nameStr);
+    env->ReleaseStringUTFChars(deviceName, nameStr);
+}
+
 static jboolean
 android_server_KeyInputQueue_getAbsoluteInfo(JNIEnv* env, jobject clazz,
                                              jint deviceId, jint axis,
@@ -255,6 +272,8 @@ static JNINativeMethod gInputMethods[] = {
         (void*) android_server_KeyInputQueue_getDeviceClasses },
     { "getDeviceName", "(I)Ljava/lang/String;",
         (void*) android_server_KeyInputQueue_getDeviceName },
+    { "addExcludedDevice", "(Ljava/lang/String;)V",
+        (void*) android_server_KeyInputQueue_addExcludedDevice },
     { "getAbsoluteInfo", "(IILcom/android/server/InputDevice$AbsoluteInfo;)Z",
         (void*) android_server_KeyInputQueue_getAbsoluteInfo },
     { "getSwitchState", "(I)I",
