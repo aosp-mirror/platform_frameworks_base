@@ -809,7 +809,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readFrameBuffer">read frame buffer</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readFrameBuffer">Allows application to 
+    <string name="permdesc_readFrameBuffer">Allows application to
         read the content of the frame buffer.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -970,10 +970,38 @@
         the phone\'s time zone.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accountManagerService">act as the AccountManagerService</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accountManagerService">Allows an
+    application to make calls to AccountAuthenticators</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_getAccounts">discover known accounts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getAccounts">Allows an application to get
       the list of accounts known by the phone.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_authenticateAccounts">act as an account authenticator</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_authenticateAccounts">Allows an application
+    to use the account authenticator capabilities of the
+    AccountManager, including creating accounts and getting and
+    setting their passwords.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_manageAccounts">manage the accounts list</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_manageAccounts">Allows an application to
+    perform operations like adding, and removing accounts and deleting
+    their password.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_useCredentials">use the authentication
+    credentials of an account</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_useCredentials">Allows an application to
+    request authentication tokens.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessNetworkState">view network state</string>
@@ -1797,7 +1825,7 @@
     <string name="adb_active_notification_title">USB debugging connected</string>
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_message">A computer is connected to your phone.</string>
-    
+
     <!-- Used to replace %s in urls retreived from the signin server with locales.  For Some        -->
     <!-- devices we don't support all the locales we ship to and need to replace the '%s' with a    -->
     <!-- locale string based on mcc values.  By default (0-length string) we don't replace the %s   -->
@@ -2047,5 +2075,20 @@
 
      <!-- Title for the unselected state of a CompoundButton. -->
      <string name="accessibility_compound_button_unselected">not checked</string>
+
+     <string name="grant_credentials_permission_message_desc">The
+     listed applications are requesting permission to access the login credentials for account %s from
+     %s. Do you wish to grant this permission? If so then your answer will be remembered and you will not be prompted
+     again.</string>
+
+     <string name="grant_credentials_permission_message_with_authtokenlabel_desc">The
+     listed applications are requesting permission to access the %s login credentials for account %s from
+     %s. Do you wish to grant this permission? If so then your answer will be remembered and you will not be prompted
+     again.</string>
+
+     <string name="allow">Allow</string>
+     <string name="deny">Deny</string>
+     <string name="permission_request_notification_title">Permission Requested</string>
+     <string name="permission_request_notification_subtitle">for account %s</string>
 
 </resources>

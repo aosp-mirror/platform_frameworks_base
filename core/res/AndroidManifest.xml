@@ -25,7 +25,7 @@
     <!-- Special broadcasts that only the system can send -->
     <!-- ================================================ -->
     <eat-comment />
-    
+
     <protected-broadcast android:name="android.intent.action.SCREEN_OFF" />
     <protected-broadcast android:name="android.intent.action.SCREEN_ON" />
     <protected-broadcast android:name="android.intent.action.USER_PRESENT" />
@@ -52,7 +52,7 @@
     <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />
     <protected-broadcast android:name="android.intent.action.NEW_OUTGOING_CALL" />
     <protected-broadcast android:name="android.intent.action.REBOOT" />
-    
+
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
@@ -309,6 +309,14 @@
         android:description="@string/permdesc_bluetooth"
         android:label="@string/permlab_bluetooth" />
 
+    <!-- Allows applications to call into AccountAuthenticators. Only
+    the system can get this permission. -->
+    <permission android:name="android.permission.ACCOUNT_MANAGER_SERVICE"
+        android:permissionGroup="android.permission-group.ACCOUNTS"
+        android:protectionLevel="signature"
+        android:description="@string/permdesc_accountManagerService"
+        android:label="@string/permlab_accountManagerService" />
+
     <!-- ================================== -->
     <!-- Permissions for accessing accounts -->
     <!-- ================================== -->
@@ -329,6 +337,28 @@
         android:protectionLevel="normal"
         android:description="@string/permdesc_getAccounts"
         android:label="@string/permlab_getAccounts" />
+
+    <!-- Allows an application to act as an AccountAuthenticator for
+         the AccountManager -->
+    <permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"
+        android:permissionGroup="android.permission-group.ACCOUNTS"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_authenticateAccounts"
+        android:description="@string/permdesc_authenticateAccounts" />
+
+    <!-- Allows an application to request authtokens from the AccountManager -->
+    <permission android:name="android.permission.USE_CREDENTIALS"
+        android:permissionGroup="android.permission-group.ACCOUNTS"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_useCredentials"
+        android:description="@string/permdesc_useCredentials" />
+
+    <!-- Allows an application to manage the list of accounts in the AccountManager -->
+    <permission android:name="android.permission.MANAGE_ACCOUNTS"
+        android:permissionGroup="android.permission-group.ACCOUNTS"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_manageAccounts"
+        android:description="@string/permdesc_manageAccounts" />
 
     <!-- ================================== -->
     <!-- Permissions for accessing hardware -->
@@ -1089,6 +1119,11 @@
         </activity>
 
         <activity android:name="android.accounts.ChooseAccountActivity"
+                android:excludeFromRecents="true"
+                android:exported="true">
+        </activity>
+
+        <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
                 android:excludeFromRecents="true"
                 android:exported="true">
         </activity>

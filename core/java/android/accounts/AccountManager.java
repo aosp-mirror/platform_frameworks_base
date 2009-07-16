@@ -652,6 +652,13 @@ public class AccountManager {
                     // that we see
                     mActivity.startActivity(intent);
                     // leave the Future running to wait for the real response to this request
+                } else if (bundle.getBoolean("retry")) {
+                    try {
+                        doWork();
+                    } catch (RemoteException e) {
+                        // this will only happen if the system process is dead, which means
+                        // we will be dying ourselves
+                    }
                 } else {
                     set(bundle);
                 }
