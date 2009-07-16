@@ -17,13 +17,22 @@
 package android.webkit;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Selection;
 import android.text.Spannable;
+import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.method.MovementMethod;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -61,6 +70,7 @@ import java.util.ArrayList;
     // Keep track of the text before the change so we know whether we actually
     // need to send down the DOM events.
     private String          mPreChange;
+    private Drawable        mBackground;
     // Array to store the final character added in onTextChanged, so that its
     // KeyEvents may be determined.
     private char[]          mCharacter = new char[1];
@@ -80,9 +90,6 @@ import java.util.ArrayList;
         mWebView = webView;
         mMaxLength = -1;
         setImeOptions(EditorInfo.IME_ACTION_NONE);
-        // Allow webkit's drawing to show through
-        setWillNotDraw(true);
-        setCursorVisible(false);
     }
 
     @Override
@@ -456,7 +463,65 @@ import java.util.ArrayList;
         if (inPassword) {
             setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.
                     TYPE_TEXT_VARIATION_PASSWORD);
+            createBackground();
         }
+        // For password fields, draw the WebTextView.  For others, just show
+        // webkit's drawing.
+        setWillNotDraw(!inPassword);
+        setBackgroundDrawable(inPassword ? mBackground : null);
+        // For non-password fields, avoid the invals from TextView's blinking
+        // cursor
+        setCursorVisible(inPassword);
+    }
+
+    /**
+     * Private class used for the background of a password textfield.
+     */
+    private static class OutlineDrawable extends Drawable {
+        public void draw(Canvas canvas) {
+            Rect bounds = getBounds();
+            Paint paint = new Paint();
+            paint.setAntiAlias(true);
+            // Draw the background.
+            paint.setColor(Color.WHITE);
+            canvas.drawRect(bounds, paint);
+            // Draw the outline.
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(Color.BLACK);
+            canvas.drawRect(bounds, paint);
+        }
+        // Always want it to be opaque.
+        public int getOpacity() {
+            return PixelFormat.OPAQUE;
+        }
+        // These are needed because they are abstract in Drawable.
+        public void setAlpha(int alpha) { }
+        public void setColorFilter(ColorFilter cf) { }
+    }
+
+    /**
+     * Create a background for the WebTextView and set up the paint for drawing
+     * the text.  This way, we can see the password transformation of the
+     * system, which (optionally) shows the actual text before changing to dots.
+     * The background is necessary to hide the webkit-drawn text beneath.
+     */
+    private void createBackground() {
+        if (mBackground != null) {
+            return;
+        }
+        mBackground = new OutlineDrawable();
+
+        setGravity(Gravity.CENTER_VERTICAL);
+        // Turn on subpixel text, and turn off kerning, so it better matches
+        // the text in webkit.
+        TextPaint paint = getPaint();
+        int flags = paint.getFlags() | Paint.SUBPIXEL_TEXT_FLAG |
+                Paint.ANTI_ALIAS_FLAG & ~Paint.DEV_KERN_TEXT_FLAG;
+        paint.setFlags(flags);
+        // Set the text color to black, regardless of the theme.  This ensures
+        // that other applications that use embedded WebViews will properly
+        // display the text in password textfields.
+        setTextColor(Color.BLACK);
     }
 
     /* package */ void setMaxLength(int maxLength) {
