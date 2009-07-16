@@ -51,8 +51,6 @@ public final class RuimRecords extends IccRecords {
 
     private String mImsi;
     private String mMyMobileNumber;
-    private String mSid;
-    private String mNid;
     private String mMin2Min1;
 
     private String mPrlVersion;
@@ -223,8 +221,6 @@ public final class RuimRecords extends IccRecords {
                 }
 
                 mMyMobileNumber = localTemp[0];
-                mSid = localTemp[1];
-                mNid = localTemp[2];
                 mMin2Min1 = localTemp[3];
                 mPrlVersion = localTemp[4];
 
