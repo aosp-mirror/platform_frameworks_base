@@ -10,6 +10,7 @@ LOCAL_SRC_FILES:=               \
     MediaRecorderClient.cpp \
     MediaPlayerService.cpp \
     MetadataRetrieverClient.cpp \
+    TestPlayerStub.cpp \
     VorbisPlayer.cpp \
     MidiFile.cpp
 
@@ -27,6 +28,10 @@ LOCAL_SHARED_LIBRARIES := \
     libopencore_author \
     libmedia \
     libandroid_runtime
+
+ifneq ($(TARGET_SIMULATOR),true)
+LOCAL_SHARED_LIBRARIES += libdl
+endif
 
 LOCAL_C_INCLUDES := external/tremor/Tremor \
 	$(call include-path-for, graphics corecg) \

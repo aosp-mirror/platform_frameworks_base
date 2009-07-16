@@ -23,6 +23,7 @@ import com.android.mediaframeworktest.functional.MediaMimeTest;
 import com.android.mediaframeworktest.functional.MediaPlayerApiTest;
 import com.android.mediaframeworktest.functional.MediaRecorderTest;
 import com.android.mediaframeworktest.functional.SimTonesTest;
+import com.android.mediaframeworktest.functional.MediaPlayerInvokeTest;
 
 import junit.framework.TestSuite;
 
@@ -32,7 +33,7 @@ import android.test.InstrumentationTestSuite;
 
 /**
  * Instrumentation Test Runner for all MediaPlayer tests.
- * 
+ *
  * Running all tests:
  *
  * adb shell am instrument \
@@ -52,6 +53,7 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(MediaRecorderTest.class);
         suite.addTestSuite(MediaAudioTrackTest.class);
         suite.addTestSuite(MediaMimeTest.class);
+        suite.addTestSuite(MediaPlayerInvokeTest.class);
         return suite;
     }
 
@@ -60,5 +62,3 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         return MediaFrameworkTestRunner.class.getClassLoader();
     }
 }
-
-
