@@ -396,7 +396,6 @@ public final class MotionEvent implements Parcelable {
     }
 
     /**
-<<<<<<< HEAD:core/java/android/view/MotionEvent.java
      * Returns the time (in ns) when this specific event was generated.
      * The value is in nanosecond precision but it may not have nanosecond accuracy.
      *
@@ -409,13 +408,6 @@ public final class MotionEvent implements Parcelable {
     /**
      * Returns the X coordinate of this event.  Whole numbers are pixels; the 
      * value may have a fraction for input devices that are sub-pixel precise. 
-|||||||
-     * Returns the X coordinate of this event.  Whole numbers are pixels; the 
-     * value may have a fraction for input devices that are sub-pixel precise. 
-=======
-     * Returns the X coordinate of this event.  Whole numbers are pixels; the
-     * value may have a fraction for input devices that are sub-pixel precise.
->>>>>>> cafdea61a85c8f5d0646cc9413a09346c637f43f:core/java/android/view/MotionEvent.java
      */
     public final float getX() {
         return mX;
