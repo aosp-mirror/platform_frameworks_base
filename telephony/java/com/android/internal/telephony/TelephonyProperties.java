@@ -109,4 +109,10 @@ public interface TelephonyProperties
 
     /** The international dialing prefix conversion string */
     static final String PROPERTY_IDP_STRING = "ro.cdma.idpstring";
+
+    /**
+     * Defines the schema for the carrier specified OTASP number
+     */
+    static final String PROPERTY_OTASP_NUM_SCHEMA = "ro.cdma.otaspnumschema";
+
 }
