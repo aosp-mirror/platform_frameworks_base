@@ -61,8 +61,10 @@ void ProgramFragmentStore::setupGL()
         glDisable(GL_BLEND);
     }
 
+    //LOGE("pfs  %i, %i, %x", mDepthWriteEnable, mDepthTestEnable, mDepthFunc);
+
     glDepthMask(mDepthWriteEnable);
-    if(mDepthTestEnable) {
+    if(mDepthTestEnable || mDepthWriteEnable) {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(mDepthFunc);
     } else {
