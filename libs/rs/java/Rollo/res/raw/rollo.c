@@ -25,7 +25,7 @@
 void pfClearColor(float, float, float, float);
 float loadF(int, int);
 void storeF(int, int, float);
-void drawQuadF(float x1, float y1, float z1,
+void drawQuad(float x1, float y1, float z1,
                          float x2, float y2, float z2,
                           float x3, float y3, float z3,
                           float x4, float y4, float z4);
@@ -80,10 +80,10 @@ int main(void* con, int ft, int launchID)
 
         float yb = (0.5f - y) * 5.f + 0.2f;
 
-        drawQuadF(xlt, 5.f, 1,
-                  xrt, 5.f, 1,
-                  x + s, yb, 1,
-                  x - s, yb, 1);
+        drawQuad(xlt, 5.f, 1,
+                 xrt, 5.f, 1,
+                 x + s, yb, 1,
+                 x - s, yb, 1);
 
         contextBindProgramFragmentStore(NAMED_PFS);
     }
@@ -106,11 +106,12 @@ int main(void* con, int ft, int launchID)
         float tz1 = tmpCos * diam + (tmpSin * scale);
         float tz2 = tz1 - (tmpSin * scale * 2.f);
 
+        int y;
         for (y = 0; (y < rowCount) && iconCount; y++) {
             float ty1 = ((y * 3.0f) - 4.5f) * scale;
             float ty2 = ty1 + scale * 2.f;
             pfBindTexture(NAMED_PF, 0, loadI32(1, y));
-            drawQuadF(tx1, ty1, tz1,
+            drawQuad(tx1, ty1, tz1,
                      tx2, ty1, tz2,
                      tx2, ty2, tz2,
                      tx1, ty2, tz1);
