@@ -123,19 +123,10 @@ public final class RuimRecords extends IccRecords {
 
         adnCache.reset();
 
-        phone.setSystemProperty(TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC, null);
-        phone.setSystemProperty(TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY, null);
-
         // recordsRequested is set to false indicating that the SIM
         // read requests made so far are not valid. This is set to
         // true only when fresh set of read requests are made.
         recordsRequested = false;
-    }
-
-    /** Returns null if RUIM is not yet ready */
-    public String getIMSI_M() {
-        // TODO(Moto): mImsi is not initialized, fix.
-        return mImsi;
     }
 
     public String getMdnNumber() {
