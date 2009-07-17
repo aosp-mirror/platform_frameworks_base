@@ -74,14 +74,6 @@ public class BluetoothDevice {
     /** An existing bond was explicitly revoked */
     public static final int UNBOND_REASON_REMOVED = 6;
 
-    /* The user will be prompted to enter a pin */
-    public static final int PAIRING_VARIANT_PIN = 0;
-    /* The user will be prompted to enter a passkey */
-    public static final int PAIRING_VARIANT_PASSKEY = 1;
-    /* The user will be prompted to confirm the passkey displayed on the screen */
-    public static final int PAIRING_VARIANT_CONFIRMATION = 2;
-
-
     private static final String TAG = "BluetoothDevice";
 
     private final IBluetoothDevice mService;
@@ -366,24 +358,9 @@ public class BluetoothDevice {
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
-
-    public boolean setPasskey(String address, int passkey) {
+    public boolean cancelPin(String address) {
         try {
-            return mService.setPasskey(address, passkey);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    public boolean setPairingConfirmation(String address, boolean confirm) {
-        try {
-            return mService.setPairingConfirmation(address, confirm);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    public boolean cancelPairingUserInput(String address) {
-        try {
-            return mService.cancelPairingUserInput(address);
+            return mService.cancelPin(address);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }

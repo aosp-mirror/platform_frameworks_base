@@ -50,8 +50,6 @@ static jmethodID method_onCreatePairedDeviceResult;
 static jmethodID method_onGetDeviceServiceChannelResult;
 
 static jmethodID method_onRequestPinCode;
-static jmethodID method_onRequestPasskey;
-static jmethodID method_onRequestConfirmation;
 static jmethodID method_onAgentAuthorize;
 static jmethodID method_onAgentCancel;
 
@@ -91,10 +89,6 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onAgentCancel = env->GetMethodID(clazz, "onAgentCancel", "()V");
     method_onRequestPinCode = env->GetMethodID(clazz, "onRequestPinCode",
                                                "(Ljava/lang/String;I)V");
-    method_onRequestPasskey = env->GetMethodID(clazz, "onRequestPasskey",
-                                               "(Ljava/lang/String;I)V");
-    method_onRequestConfirmation = env->GetMethodID(clazz, "onRequestConfirmation",
-                                               "(Ljava/lang/String;II)V");
 
     field_mNativeData = env->GetFieldID(clazz, "mNativeData", "I");
 #endif
@@ -875,38 +869,6 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         dbus_message_ref(msg);  // increment refcount because we pass to java
         env->CallVoidMethod(nat->me, method_onRequestPinCode,
                                        env->NewStringUTF(object_path),
-                                       int(msg));
-        return DBUS_HANDLER_RESULT_HANDLED;
-    } else if (dbus_message_is_method_call(msg,
-            "org.bluez.Agent", "RequestPasskey")) {
-        char *object_path;
-        if (!dbus_message_get_args(msg, NULL,
-                                   DBUS_TYPE_OBJECT_PATH, &object_path,
-                                   DBUS_TYPE_INVALID)) {
-            LOGE("%s: Invalid arguments for RequestPasskey() method", __FUNCTION__);
-            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-        }
-
-        dbus_message_ref(msg);  // increment refcount because we pass to java
-        env->CallVoidMethod(nat->me, method_onRequestPasskey,
-                                       env->NewStringUTF(object_path),
-                                       int(msg));
-    } else if (dbus_message_is_method_call(msg,
-            "org.bluez.Agent", "RequestConfirmation")) {
-        char *object_path;
-        uint32_t passkey;
-        if (!dbus_message_get_args(msg, NULL,
-                                   DBUS_TYPE_OBJECT_PATH, &object_path,
-                                   DBUS_TYPE_UINT32, &passkey,
-                                   DBUS_TYPE_INVALID)) {
-            LOGE("%s: Invalid arguments for RequestConfirmation() method", __FUNCTION__);
-            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-        }
-
-        dbus_message_ref(msg);  // increment refcount because we pass to java
-        env->CallVoidMethod(nat->me, method_onRequestConfirmation,
-                                       env->NewStringUTF(object_path),
-                                       passkey,
                                        int(msg));
         return DBUS_HANDLER_RESULT_HANDLED;
     } else if (dbus_message_is_method_call(msg,

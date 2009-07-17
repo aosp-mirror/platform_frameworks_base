@@ -437,65 +437,6 @@ static jint isEnabledNative(JNIEnv *env, jobject object) {
     return -1;
 }
 
-static jboolean setPairingConfirmationNative(JNIEnv *env, jobject object,
-                                             jstring address, bool confirm,
-                                             int nativeData) {
-#ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
-    native_data_t *nat = get_native_data(env, object);
-    if (nat) {
-        DBusMessage *msg = (DBusMessage *)nativeData;
-        DBusMessage *reply;
-        if (confirm) {
-            reply = dbus_message_new_method_return(msg);
-        } else {
-            reply = dbus_message_new_error(msg,
-                "org.bluez.Error.Rejected", "User rejected confirmation");
-        }
-
-        if (!reply) {
-            LOGE("%s: Cannot create message reply to RequestConfirmation to "
-                 "D-Bus\n", __FUNCTION__);
-            dbus_message_unref(msg);
-            return JNI_FALSE;
-        }
-
-        dbus_connection_send(nat->conn, reply, NULL);
-        dbus_message_unref(msg);
-        dbus_message_unref(reply);
-        return JNI_TRUE;
-    }
-#endif
-    return JNI_FALSE;
-}
-
-static jboolean setPasskeyNative(JNIEnv *env, jobject object, jstring address,
-                         int passkey, int nativeData) {
-#ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
-    native_data_t *nat = get_native_data(env, object);
-    if (nat) {
-        DBusMessage *msg = (DBusMessage *)nativeData;
-        DBusMessage *reply = dbus_message_new_method_return(msg);
-        if (!reply) {
-            LOGE("%s: Cannot create message reply to return Passkey code to "
-                 "D-Bus\n", __FUNCTION__);
-            dbus_message_unref(msg);
-            return JNI_FALSE;
-        }
-
-        dbus_message_append_args(reply, DBUS_TYPE_UINT32, (uint32_t *)&passkey,
-                                 DBUS_TYPE_INVALID);
-
-        dbus_connection_send(nat->conn, reply, NULL);
-        dbus_message_unref(msg);
-        dbus_message_unref(reply);
-        return JNI_TRUE;
-    }
-#endif
-    return JNI_FALSE;
-}
-
 static jboolean setPinNative(JNIEnv *env, jobject object, jstring address,
                          jstring pin, int nativeData) {
 #ifdef HAVE_BLUETOOTH
@@ -526,17 +467,17 @@ static jboolean setPinNative(JNIEnv *env, jobject object, jstring address,
     return JNI_FALSE;
 }
 
-static jboolean cancelPairingUserInputNative(JNIEnv *env, jobject object,
-                                            jstring address, int nativeData) {
+static jboolean cancelPinNative(JNIEnv *env, jobject object, jstring address,
+                            int nativeData) {
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
     native_data_t *nat = get_native_data(env, object);
     if (nat) {
         DBusMessage *msg = (DBusMessage *)nativeData;
         DBusMessage *reply = dbus_message_new_error(msg,
-                "org.bluez.Error.Canceled", "Pairing User Input was canceled");
+                "org.bluez.Error.Canceled", "PIN Entry was canceled");
         if (!reply) {
-            LOGE("%s: Cannot create message reply to return cancelUserInput to"
+            LOGE("%s: Cannot create message reply to return PIN cancel to "
                  "D-BUS\n", __FUNCTION__);
             dbus_message_unref(msg);
             return JNI_FALSE;
@@ -724,12 +665,8 @@ static JNINativeMethod sMethods[] = {
     {"getDeviceServiceChannelNative", "(Ljava/lang/String;Ljava/lang/String;I)I",
       (void *)getDeviceServiceChannelNative},
 
-    {"setPairingConfirmationNative", "(Ljava/lang/String;ZI)Z",
-            (void *)setPairingConfirmationNative},
-    {"setPasskeyNative", "(Ljava/lang/String;II)Z", (void *)setPasskeyNative},
     {"setPinNative", "(Ljava/lang/String;Ljava/lang/String;I)Z", (void *)setPinNative},
-    {"cancelPairingUserInputNative", "(Ljava/lang/String;I)Z",
-            (void *)cancelPairingUserInputNative},
+    {"cancelPinNative", "(Ljava/lang/String;I)Z", (void *)cancelPinNative},
 };
 
 int register_android_server_BluetoothDeviceService(JNIEnv *env) {
