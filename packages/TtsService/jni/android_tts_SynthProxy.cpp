@@ -286,6 +286,7 @@ android_tts_SynthProxy_native_finalize(JNIEnv *env, jobject thiz, jint jniData)
 {
     if (jniData) {
         SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
+        env->DeleteGlobalRef(pSynthData->tts_ref);
         delete pSynthData;
     }
 }
