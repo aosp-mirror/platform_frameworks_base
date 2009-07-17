@@ -77,6 +77,7 @@ public:
     };
     static SymbolTable_t gSyms[];
     static const SymbolTable_t * lookupSymbol(const char *);
+    static void appendDecls(String8 *str);
 };
 
 

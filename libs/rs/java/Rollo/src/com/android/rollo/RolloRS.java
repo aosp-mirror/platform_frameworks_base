@@ -24,6 +24,7 @@ import android.renderscript.ProgramVertexAlloc;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -188,20 +189,21 @@ public class RolloRS {
                 RenderScript.ElementPredefined.USER_I32, mAllocIconIDBuf.length);
 
             
-            BitmapDrawable bd;
             Bitmap b;
-            
-            bd = (BitmapDrawable)mRes.getDrawable(R.drawable.browser);
-            mIcons[0] = mRS.allocationCreateFromBitmap(bd.getBitmap(), RenderScript.ElementPredefined.RGB_565, true);
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inScaled = false;
 
-            bd = (BitmapDrawable)mRes.getDrawable(R.drawable.market);
-            mIcons[1] = mRS.allocationCreateFromBitmap(bd.getBitmap(), RenderScript.ElementPredefined.RGB_565, true);
+            b = BitmapFactory.decodeResource(mRes, R.raw.browser, opts);
+            mIcons[0] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
 
-            bd = (BitmapDrawable)mRes.getDrawable(R.drawable.photos);
-            mIcons[2] = mRS.allocationCreateFromBitmap(bd.getBitmap(), RenderScript.ElementPredefined.RGB_565, true);
+            b = BitmapFactory.decodeResource(mRes, R.raw.market, opts);
+            mIcons[1] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
 
-            bd = (BitmapDrawable)mRes.getDrawable(R.drawable.settings);
-            mIcons[3] = mRS.allocationCreateFromBitmap(bd.getBitmap(), RenderScript.ElementPredefined.RGB_565, true);
+            b = BitmapFactory.decodeResource(mRes, R.raw.photos, opts);
+            mIcons[2] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+
+            b = BitmapFactory.decodeResource(mRes, R.raw.settings, opts);
+            mIcons[3] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
 
             for(int ct=0; ct < mIcons.length; ct++) {
                 mIcons[ct].uploadToTexture(0);
