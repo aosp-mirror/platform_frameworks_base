@@ -959,7 +959,38 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         return setPinNative(address, pinString, data.intValue());
     }
 
-    public synchronized boolean cancelPin(String address) {
+    public synchronized boolean setPasskey(String address, int passkey) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        if (passkey < 0 || passkey > 999999 || !BluetoothDevice.checkBluetoothAddress(address)) {
+            return false;
+        }
+        address = address.toUpperCase();
+        Integer data = mEventLoop.getPasskeyAgentRequestData().remove(address);
+        if (data == null) {
+            Log.w(TAG, "setPasskey(" + address + ") called but no native data available, " +
+                  "ignoring. Maybe the PasskeyAgent Request was cancelled by the remote device" +
+                  " or by bluez.\n");
+            return false;
+        }
+        return setPasskeyNative(address, passkey, data.intValue());
+    }
+
+    public synchronized boolean setPairingConfirmation(String address, boolean confirm) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        address = address.toUpperCase();
+        Integer data = mEventLoop.getPasskeyAgentRequestData().remove(address);
+        if (data == null) {
+            Log.w(TAG, "setPasskey(" + address + ") called but no native data available, " +
+                  "ignoring. Maybe the PasskeyAgent Request was cancelled by the remote device" +
+                  " or by bluez.\n");
+            return false;
+        }
+        return setPairingConfirmationNative(address, confirm, data.intValue());
+    }
+
+    public synchronized boolean cancelPairingUserInput(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
@@ -968,12 +999,12 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         address = address.toUpperCase();
         Integer data = mEventLoop.getPasskeyAgentRequestData().remove(address);
         if (data == null) {
-            Log.w(TAG, "cancelPin(" + address + ") called but no native data available, " +
-                  "ignoring. Maybe the PasskeyAgent Request was already cancelled by the remote " +
-                  "or by bluez.\n");
+            Log.w(TAG, "cancelUserInputNative(" + address + ") called but no native data " +
+                "available, ignoring. Maybe the PasskeyAgent Request was already cancelled " +
+                "by the remote or by bluez.\n");
             return false;
         }
-        return cancelPinNative(address, data.intValue());
+        return cancelPairingUserInputNative(address, data.intValue());
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -1160,7 +1191,10 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private native int getDeviceServiceChannelNative(String objectPath, String uuid,
             int attributeId);
 
-    private native boolean cancelPinNative(String address, int nativeData);
+    private native boolean cancelPairingUserInputNative(String address, int nativeData);
     private native boolean setPinNative(String address, String pin, int nativeData);
+    private native boolean setPasskeyNative(String address, int passkey, int nativeData);
+    private native boolean setPairingConfirmationNative(String address, boolean confirm,
+            int nativeData);
 
 }

@@ -317,23 +317,53 @@ class BluetoothEventLoop {
             }
             mBluetoothService.setRemoteDeviceProperty(address, name, uuid);
         }
-
     }
 
-    private void onRequestPinCode(String objectPath, int nativeData) {
+    private String checkPairingRequestAndGetAddress(String objectPath, int nativeData) {
         String address = mBluetoothService.getAddressFromObjectPath(objectPath);
         if (address == null) {
-            Log.e(TAG, "Unable to get device address in onRequestPinCode, returning null");
-            return;
+            Log.e(TAG, "Unable to get device address in checkPairingRequestAndGetAddress, " +
+                  "returning null");
+            return null;
         }
         address = address.toUpperCase();
         mPasskeyAgentRequestData.put(address, new Integer(nativeData));
 
         if (mBluetoothService.getBluetoothState() == BluetoothDevice.BLUETOOTH_STATE_TURNING_OFF) {
             // shutdown path
-            mBluetoothService.cancelPin(address);
-            return;
+            mBluetoothService.cancelPairingUserInput(address);
+            return null;
         }
+        return address;
+    }
+
+    private void onRequestConfirmation(String objectPath, int passkey, int nativeData) {
+        String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
+        if (address == null) return;
+
+        Intent intent = new Intent(BluetoothIntent.PAIRING_REQUEST_ACTION);
+        intent.putExtra(BluetoothIntent.ADDRESS, address);
+        intent.putExtra(BluetoothIntent.PASSKEY, passkey);
+        intent.putExtra(BluetoothIntent.PAIRING_VARIANT,
+                BluetoothDevice.PAIRING_VARIANT_CONFIRMATION);
+        mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        return;
+    }
+
+    private void onRequestPasskey(String objectPath, int nativeData) {
+        String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
+        if (address == null) return;
+
+        Intent intent = new Intent(BluetoothIntent.PAIRING_REQUEST_ACTION);
+        intent.putExtra(BluetoothIntent.ADDRESS, address);
+        intent.putExtra(BluetoothIntent.PAIRING_VARIANT, BluetoothDevice.PAIRING_VARIANT_PASSKEY);
+        mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        return;
+    }
+
+    private void onRequestPinCode(String objectPath, int nativeData) {
+        String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
+        if (address == null) return;
 
         if (mBluetoothService.getBondState().getBondState(address) ==
                 BluetoothDevice.BOND_BONDING) {
@@ -358,6 +388,7 @@ class BluetoothEventLoop {
         }
         Intent intent = new Intent(BluetoothIntent.PAIRING_REQUEST_ACTION);
         intent.putExtra(BluetoothIntent.ADDRESS, address);
+        intent.putExtra(BluetoothIntent.PAIRING_VARIANT, BluetoothDevice.PAIRING_VARIANT_PIN);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
         return;
     }
@@ -386,9 +417,9 @@ class BluetoothEventLoop {
     }
 
     private void onAgentCancel() {
-        // We immediately response to DBUS Authorize() so this should not
-        // usually happen
-        log("onAgentCancel");
+        Intent intent = new Intent(BluetoothIntent.PAIRING_CANCEL_ACTION);
+        mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        return;
     }
 
     private void onRestartRequired() {
