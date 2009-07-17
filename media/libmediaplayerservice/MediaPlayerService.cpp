@@ -99,6 +99,8 @@ const int kMaxFilterSize = 64;  // I pulled that out of thin air.
 // Keep in sync with ANY in Metadata.java
 const int32_t kAny = 0;
 
+const int32_t kMetaMarker = 0x4d455441;  // 'M' 'E' 'T' 'A'
+
 
 // Unmarshall a filter from a Parcel.
 // Filter format in a parcel:
@@ -870,10 +872,14 @@ status_t MediaPlayerService::Client::setMetadataFilter(const Parcel& filter)
 status_t MediaPlayerService::Client::getMetadata(
         bool update_only, bool apply_filter, Parcel *reply)
 {
-    status_t status;
-    reply->writeInt32(-1);  // Placeholder for the return code
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == 0) return UNKNOWN_ERROR;
 
-    SortedVector<MetadataType> updates;
+    status_t status;
+    // Placeholder for the return code, updated by the caller.
+    reply->writeInt32(-1);
+
+    SortedVector<MetadataType> ids;
 
     // We don't block notifications while we fetch the data. We clear
     // mMetadataUpdated first so we don't lose notifications happening
@@ -881,15 +887,34 @@ status_t MediaPlayerService::Client::getMetadata(
     {
         Mutex::Autolock lock(mLock);
         if (update_only) {
-            updates = mMetadataUpdated;
+            ids = mMetadataUpdated;
         }
         mMetadataUpdated.clear();
     }
 
-    // FIXME: Implement, query the native player and do the optional filtering, etc...
-    status = OK;
+    const size_t begin = reply->dataPosition();
+    reply->writeInt32(-1);  // Placeholder for the length of the metadata
+    reply->writeInt32(kMetaMarker);
 
-    return status;
+    status = p->getMetadata(ids, reply);
+
+    if (status != OK) {
+        reply->setDataPosition(begin);
+        LOGE("getMetadata failed %d", status);
+        return status;
+    }
+
+    // FIXME: Implement filtering on the result. Not critical since
+    // filtering takes place on the update notifications already. This
+    // would be when all the metadata are fetch and a filter is set.
+
+    const size_t end = reply->dataPosition();
+
+    // Everything is fine, update the metadata length.
+    reply->setDataPosition(begin);
+    reply->writeInt32(end - begin);
+    reply->setDataPosition(end);
+    return OK;
 }
 
 status_t MediaPlayerService::Client::prepareAsync()
