@@ -1042,6 +1042,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 mSearchAutoComplete.setSelection(selPoint);
                 mSearchAutoComplete.setListSelection(0);
                 mSearchAutoComplete.clearListSelection();
+                mSearchAutoComplete.ensureImeVisible();
+                
                 return true;
             }
             
