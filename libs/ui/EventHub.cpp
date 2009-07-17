@@ -509,6 +509,20 @@ int EventHub::open_device(const char *deviceName)
         //fprintf(stderr, "could not get device name for %s, %s\n", deviceName, strerror(errno));
         name[0] = '\0';
     }
+
+    // check to see if the device is on our excluded list
+    List<String8>::iterator iter = mExcludedDevices.begin();
+    List<String8>::iterator end = mExcludedDevices.end();
+    for ( ; iter != end; iter++) {
+        const char* test = *iter;
+        if (strcmp(name, test) == 0) {
+            LOGI("ignoring event id %s driver %s\n", deviceName, test);
+            close(fd);
+            fd = -1;
+            return -1;
+        }
+    }
+
     if(ioctl(fd, EVIOCGPHYS(sizeof(location) - 1), &location) < 1) {
         //fprintf(stderr, "could not get location for %s, %s\n", deviceName, strerror(errno));
         location[0] = '\0';
@@ -516,19 +530,6 @@ int EventHub::open_device(const char *deviceName)
     if(ioctl(fd, EVIOCGUNIQ(sizeof(idstr) - 1), &idstr) < 1) {
         //fprintf(stderr, "could not get idstring for %s, %s\n", deviceName, strerror(errno));
         idstr[0] = '\0';
-    }
-
-    // check to see if the device is on our excluded list
-    List<String8>::iterator iter = mExcludedDevices.begin();
-    List<String8>::iterator end = mExcludedDevices.end();
-    for ( ; iter != end; iter++) {
-        const char* name = *iter;
-        if (strcmp(name, idstr) == 0) {
-            LOGD("ignoring event id %s driver %s\n", deviceName, name);
-            close(fd);
-            fd = -1;
-            return -1;
-        }
     }
 
     int devid = 0;
