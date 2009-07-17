@@ -40,6 +40,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
+import android.widget.Filter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -90,6 +91,12 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private final Runnable mStartSpinnerRunnable;
     private final Runnable mStopSpinnerRunnable;
 
+    /**
+     * The amount of time we delay in the filter when the user presses the delete key.
+     * @see Filter#setDelayer(android.widget.Filter.Delayer).
+     */
+    private static final long DELETE_KEY_POST_DELAY = 500L;
+
     public SuggestionsAdapter(Context context, SearchDialog searchDialog, SearchableInfo searchable,
             WeakHashMap<String, Drawable> outsideDrawablesCache, boolean globalSearchMode) {
         super(context,
@@ -119,6 +126,18 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 mSearchDialog.setWorking(false);
             }
         };
+
+        // delay 500ms when deleting
+        getFilter().setDelayer(new Filter.Delayer() {
+
+            private int mPreviousLength = 0;
+
+            public long getPostingDelay(CharSequence constraint) {
+                long delay = constraint.length() < mPreviousLength ? DELETE_KEY_POST_DELAY : 0;
+                mPreviousLength = constraint.length();
+                return delay;
+            }
+        });
     }
 
     /**
