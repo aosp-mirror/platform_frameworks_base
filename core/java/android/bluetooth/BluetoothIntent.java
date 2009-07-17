@@ -57,6 +57,10 @@ public interface BluetoothIntent {
         "android.bluetooth.intent.BOND_PREVIOUS_STATE";
     public static final String REASON =
         "android.bluetooth.intent.REASON";
+    public static final String PAIRING_VARIANT =
+        "android.bluetooth.intent.PAIRING_VARIANT";
+    public static final String PASSKEY =
+        "android.bluetooth.intent.PASSKEY";
 
     /** Broadcast when the local Bluetooth device state changes, for example
      *  when Bluetooth is enabled. Will contain int extra's BLUETOOTH_STATE and
