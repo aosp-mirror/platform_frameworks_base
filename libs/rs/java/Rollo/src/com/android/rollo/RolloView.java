@@ -90,7 +90,6 @@ public class RolloView extends RSSurfaceView {
         mRender.setTouch(ret);
 
         if((ny > 0.85f) || mControlMode) {
-            mRender.setShadow(0, 0, 0);
             mFlingMode = false;
 
             // Projector control
@@ -107,7 +106,7 @@ public class RolloView extends RSSurfaceView {
                                 mControlMode = false;
                             }
                         }
-                        mColumn += dx * 3;// * zoom;
+                        mColumn += -dx * 2.3;// * zoom;
                         mColumn += -(mZoom - zoom) * (nx - 0.5f) * 2 * zoom;
                         mZoom = zoom;
 
@@ -155,10 +154,8 @@ public class RolloView extends RSSurfaceView {
                 mFlingMode = true;
                 mFlingX = nx;
                 mFlingY = ny;
-                //mRender.setShadow(nx, ny, ev.getSize());
             } else {
                 mFlingMode = false;
-                mRender.setShadow(nx, ny, 0);
             }
         }
 

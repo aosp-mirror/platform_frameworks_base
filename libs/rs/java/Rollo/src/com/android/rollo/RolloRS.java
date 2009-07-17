@@ -70,18 +70,6 @@ public class RolloRS {
         mAllocState.data(mAllocStateBuf);
     }
 
-    public void setShadow(float x, float y, float size) {
-        // x and y are normalized at this point.
-        mAllocStateBuf[STATE_POS_X] = (int)(x * 1000);
-        mAllocStateBuf[STATE_POS_Y] = (int)(y * 1000);
-        mAllocStateBuf[STATE_PRESSURE] = (int)(size * 1000);
-
-        //Log.e("rs","shadow x=" + Integer.toString(mAllocStateBuf[STATE_POS_X]) +
-              //"  y=" + Integer.toString(mAllocStateBuf[STATE_POS_X]) +
-              //"  s=" + Integer.toString(mAllocStateBuf[STATE_PRESSURE]));
-        mAllocState.data(mAllocStateBuf);
-    }
-
     public void setZoom(float z) {
         //Log.e("rs", "zoom " + Float.toString(z));
 
@@ -104,7 +92,6 @@ public class RolloRS {
 
     private RenderScript.Sampler mSampler;
     private RenderScript.ProgramFragmentStore mPFSBackground;
-    private RenderScript.ProgramFragmentStore mPFSShadow;
     private RenderScript.ProgramFragment mPFBackground;
     private RenderScript.ProgramFragment mPFImages;
     private RenderScript.ProgramVertex mPV;
@@ -152,16 +139,6 @@ public class RolloRS {
                                           RenderScript.BlendDstFunc.ONE);
         mPFSBackground = mRS.programFragmentStoreCreate();
         mPFSBackground.setName("PFS");
-
-        mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
-        mRS.programFragmentStoreDitherEnable(false);
-        mRS.programFragmentStoreDepthMask(true);
-        mRS.programFragmentStoreColorMask(false, false, false, false);
-        mPFSShadow = mRS.programFragmentStoreCreate();
-        mPFSShadow.setName("PFSShadow");
-
-
 
         mPVAlloc = new ProgramVertexAlloc(mRS);
         mRS.programVertexBegin(null, null);
