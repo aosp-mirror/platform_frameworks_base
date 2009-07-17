@@ -130,6 +130,8 @@ public class TtsService extends Service implements OnCompletionListener {
     private HashMap<String, SoundResource> mUtterances;
     private MediaPlayer mPlayer;
     private SpeechItem mCurrentSpeechItem;
+    private HashMap<SpeechItem, Boolean> mKillList; // Used to ensure that in-flight synth calls
+                                                    // are killed when stop is used.
     private TtsService mSelf;
 
     private ContentResolver mResolver;
@@ -158,6 +160,7 @@ public class TtsService extends Service implements OnCompletionListener {
         mSpeechQueue = new ArrayList<SpeechItem>();
         mPlayer = null;
         mCurrentSpeechItem = null;
+        mKillList = new HashMap<SpeechItem, Boolean>();
 
         setDefaultSettings();
     }
@@ -396,6 +399,7 @@ public class TtsService extends Service implements OnCompletionListener {
                 if ((mCurrentSpeechItem != null) &&
                      mCurrentSpeechItem.mCallingApp.equals(callingApp)) {
                     result = nativeSynth.stop();
+                    mKillList.put(mCurrentSpeechItem, true);
                     if (mPlayer != null) {
                         try {
                             mPlayer.stop();
@@ -445,6 +449,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     ((mCurrentSpeechItem.mType != SpeechItem.TEXT_TO_FILE) ||
                       mCurrentSpeechItem.mCallingApp.equals(callingApp))) {
                     result = nativeSynth.stop();
+                    mKillList.put(mCurrentSpeechItem, true);
                     if (mPlayer != null) {
                         try {
                             mPlayer.stop();
@@ -578,7 +583,10 @@ public class TtsService extends Service implements OnCompletionListener {
                             setLanguage("", language, country, variant);
                         }
                     }
-                    nativeSynth.speak(speechItem.mText, streamType);
+                    // Only do the synthesis if it has not been killed by a subsequent utterance.
+                    if (mKillList.get(speechItem) == null){
+                        nativeSynth.speak(speechItem.mText, streamType);
+                    }
                 } catch (InterruptedException e) {
                     Log.e("TTS speakInternalOnly", "tryLock interrupted");
                     e.printStackTrace();
@@ -641,7 +649,10 @@ public class TtsService extends Service implements OnCompletionListener {
                             setLanguage("", language, country, variant);
                         }
                     }
-                    nativeSynth.synthesizeToFile(speechItem.mText, speechItem.mFilename);
+                    // Only do the synthesis if it has not been killed by a subsequent utterance.
+                    if (mKillList.get(speechItem) == null){
+                        nativeSynth.synthesizeToFile(speechItem.mText, speechItem.mFilename);
+                    }
                 } catch (InterruptedException e) {
                     Log.e("TTS synthToFileInternalOnly", "tryLock interrupted");
                     e.printStackTrace();
