@@ -75,6 +75,9 @@ class AudioTrackJniStorage {
         int                        mStreamType;
 
     AudioTrackJniStorage() {
+        mCallbackData.audioTrack_class = 0;
+        mCallbackData.audioTrack_ref = 0;
+        mStreamType = AudioSystem::DEFAULT;
     }
 
     ~AudioTrackJniStorage() {
@@ -318,6 +321,8 @@ native_init_failure:
     env->SetIntField(thiz, javaAudioTrackFields.nativeTrackInJavaObj, 0);
     
 native_track_failure:
+    env->DeleteGlobalRef(lpJniStorage->mCallbackData.audioTrack_class);
+    env->DeleteGlobalRef(lpJniStorage->mCallbackData.audioTrack_ref);
     delete lpJniStorage;
     env->SetIntField(thiz, javaAudioTrackFields.jniData, 0);
     return AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED;
@@ -415,6 +420,9 @@ static void android_media_AudioTrack_native_finalize(JNIEnv *env,  jobject thiz)
     AudioTrackJniStorage* pJniStorage = (AudioTrackJniStorage *)env->GetIntField(
         thiz, javaAudioTrackFields.jniData);
     if (pJniStorage) {
+        // delete global refs created in native_setup
+        env->DeleteGlobalRef(pJniStorage->mCallbackData.audioTrack_class);
+        env->DeleteGlobalRef(pJniStorage->mCallbackData.audioTrack_ref);
         //LOGV("deleting pJniStorage: %x\n", (int)pJniStorage);
         delete pJniStorage;
     }
