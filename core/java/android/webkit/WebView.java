@@ -4494,6 +4494,38 @@ public class WebView extends AbsoluteLayout
         nativeSelectBestAt(rect);
     }
 
+    /**
+     * Set our starting point and time for a drag from the WebTextView.
+     */
+    /*package*/ void initiateTextFieldDrag(float x, float y, long eventTime) {
+        if (!inEditingMode()) {
+            return;
+        }
+        mLastTouchX = x + (float) (mWebTextView.getLeft() - mScrollX);
+        mLastTouchY = y + (float) (mWebTextView.getTop() - mScrollY);
+        mLastTouchTime = eventTime;
+        if (!mScroller.isFinished()) {
+            mScroller.abortAnimation();
+            mPrivateHandler.removeMessages(RESUME_WEBCORE_UPDATE);
+        }
+        mSnapScrollMode = SNAP_NONE;
+        mVelocityTracker = VelocityTracker.obtain();
+        mTouchMode = TOUCH_DRAG_START_MODE;
+    }
+
+    /**
+     * Given a motion event from the WebTextView, set its location to our
+     * coordinates, and handle the event.
+     */
+    /*package*/ boolean textFieldDrag(MotionEvent event) {
+        if (!inEditingMode()) {
+            return false;
+        }
+        event.offsetLocation((float) (mWebTextView.getLeft() - mScrollX),
+                (float) (mWebTextView.getTop() - mScrollY));
+        return onTouchEvent(event);
+    }
+
     /*package*/ void shortPressOnTextField() {
         if (inEditingMode()) {
             View v = mWebTextView;

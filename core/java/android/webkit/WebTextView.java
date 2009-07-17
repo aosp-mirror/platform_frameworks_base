@@ -31,6 +31,7 @@ import android.text.Spannable;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.method.MovementMethod;
+import android.text.method.Touch;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyCharacterMap;
@@ -71,6 +72,12 @@ import java.util.ArrayList;
     // need to send down the DOM events.
     private String          mPreChange;
     private Drawable        mBackground;
+    // Variables for keeping track of the touch down, to send to the WebView
+    // when a drag starts
+    private float           mDragStartX;
+    private float           mDragStartY;
+    private long            mDragStartTime;
+    private boolean         mDragSent;
     // Array to store the final character added in onTextChanged, so that its
     // KeyEvents may be determined.
     private char[]          mCharacter = new char[1];
@@ -363,6 +370,65 @@ import java.util.ArrayList;
             }
         }
         updateCachedTextfield();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int initialScrollX = -1;
+        int initialScrollY = -1;
+        int selectionStart = -1;
+        int selectionEnd = -1;
+        int action = event.getAction();
+        if (action == MotionEvent.ACTION_MOVE) {
+            Spannable buffer = getText();
+            initialScrollX = Touch.getInitialScrollX(this, buffer);
+            initialScrollY = Touch.getInitialScrollY(this, buffer);
+            selectionStart = Selection.getSelectionStart(buffer);
+            selectionEnd = Selection.getSelectionEnd(buffer);
+        }
+        super.onTouchEvent(event);
+        switch (action) {
+        case MotionEvent.ACTION_DOWN:
+            // This event may be the start of a drag, so store it to pass to the
+            // WebView if it is.
+            mDragStartX = event.getX();
+            mDragStartY = event.getY();
+            mDragStartTime = event.getEventTime();
+            mDragSent = false;
+            break;
+        case MotionEvent.ACTION_MOVE:
+            if (mScrollX != initialScrollX
+                    || mScrollY != initialScrollY) {
+                // TextView scrolled, so return true.
+                // FIXME: Need to make the webkit text scroll to reflect this
+                return true;
+            }
+            if (Selection.getSelectionStart(getText()) != selectionStart
+                    || Selection.getSelectionEnd(getText()) != selectionEnd) {
+                // Selection changed, so return true
+                return true;
+            }
+            if (mWebView != null) {
+                // Only want to set the initial state once.
+                if (!mDragSent) {
+                    mWebView.initiateTextFieldDrag(mDragStartX, mDragStartY,
+                            mDragStartTime);
+                    mDragSent = true;
+                }
+                return mWebView.textFieldDrag(event);
+            }
+            return false;
+        case MotionEvent.ACTION_UP:
+        case MotionEvent.ACTION_CANCEL:
+            // Necessary for the WebView to reset its state
+            if (mWebView != null && mDragSent) {
+                mWebView.onTouchEvent(event);
+            }
+            break;
+        default:
+            break;
+        }
+        return true;
     }
 
     @Override
