@@ -657,7 +657,7 @@ public class MediaScanner
 
             ContentValues values = toValues();
             String title = values.getAsString(MediaStore.MediaColumns.TITLE);
-            if (TextUtils.isEmpty(title.trim())) {
+            if (title == null || TextUtils.isEmpty(title.trim())) {
                 title = values.getAsString(MediaStore.MediaColumns.DATA);
                 // extract file name after last slash
                 int lastSlash = title.lastIndexOf('/');
