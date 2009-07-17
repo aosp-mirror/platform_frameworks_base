@@ -21,6 +21,9 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /*
  * Check the Java layer that parses serialized metadata in Parcel
  * works as expected.
@@ -89,16 +92,6 @@ public class MediaPlayerMetadataParserTest extends AndroidTestCase {
         mParcel.writeInt(kMarker);
     }
 
-    // Insert a string record at the current position.
-    private void writeStringRecord(int metadataId, String val) {
-        final int start = mParcel.dataPosition();
-        mParcel.writeInt(-1);  // Placeholder for the length
-        mParcel.writeInt(metadataId);
-        mParcel.writeInt(Metadata.STRING_VAL);
-        mParcel.writeString(val);
-        adjustSize(start);
-    }
-
     // ----------------------------------------------------------------------
     // START OF THE TESTS
 
@@ -133,7 +126,9 @@ public class MediaPlayerMetadataParserTest extends AndroidTestCase {
         assertParse();
     }
 
+    // ----------------------------------------------------------------------
     // RECORDS
+    // ----------------------------------------------------------------------
 
     // A record header should be at least 12 bytes long
     @SmallTest
@@ -222,5 +217,222 @@ public class MediaPlayerMetadataParserTest extends AndroidTestCase {
         assertFalse(mMetadata.has(Metadata.TITLE));
         assertFalse(mMetadata.has(Metadata.GENRE));
         assertFalse(mMetadata.has(Metadata.firstCustomId()));
+    }
+
+    // ----------------------------------------------------------------------
+    // GETTERS
+    // ----------------------------------------------------------------------
+
+    // getString
+    @SmallTest
+    public void testGetString() throws Exception {
+        writeStringRecord(Metadata.TITLE, "a title");
+        writeStringRecord(Metadata.GENRE, "comedy");
+        adjustSize();
+        assertParse();
+
+        assertEquals("a title", mMetadata.getString(Metadata.TITLE));
+        assertEquals("comedy", mMetadata.getString(Metadata.GENRE));
+    }
+
+    // get an empty string.
+    @SmallTest
+    public void testGetEmptyString() throws Exception {
+        writeStringRecord(Metadata.TITLE, "");
+        adjustSize();
+        assertParse();
+
+        assertEquals("", mMetadata.getString(Metadata.TITLE));
+    }
+
+    // get a string when a NULL value was in the parcel
+    @SmallTest
+    public void testGetNullString() throws Exception {
+        writeStringRecord(Metadata.TITLE, null);
+        adjustSize();
+        assertParse();
+
+        assertEquals(null, mMetadata.getString(Metadata.TITLE));
+    }
+
+    // get a string when an integer is actually present
+    @SmallTest
+    public void testWrongType() throws Exception {
+        writeIntRecord(Metadata.DURATION, 5);
+        adjustSize();
+        assertParse();
+
+        try {
+            mMetadata.getString(Metadata.DURATION);
+        } catch (IllegalStateException ise) {
+            return;
+        }
+        fail("Exception was not thrown");
+    }
+
+    // getInt
+    @SmallTest
+    public void testGetInt() throws Exception {
+        writeIntRecord(Metadata.CD_TRACK_NUM, 1);
+        adjustSize();
+        assertParse();
+
+        assertEquals(1, mMetadata.getInt(Metadata.CD_TRACK_NUM));
+    }
+
+    // getBoolean
+    @SmallTest
+    public void testGetBoolean() throws Exception {
+        writeBooleanRecord(Metadata.DRM_CRIPPLED, true);
+        adjustSize();
+        assertParse();
+
+        assertEquals(true, mMetadata.getBoolean(Metadata.DRM_CRIPPLED));
+    }
+
+    // getLong
+    @SmallTest
+    public void testGetLong() throws Exception {
+        writeLongRecord(Metadata.DURATION, 1L);
+        adjustSize();
+        assertParse();
+
+        assertEquals(1L, mMetadata.getLong(Metadata.DURATION));
+    }
+
+    // getDouble
+    @SmallTest
+    public void testGetDouble() throws Exception {
+        writeDoubleRecord(Metadata.VIDEO_FRAME_RATE, 29.97);
+        adjustSize();
+        assertParse();
+
+        assertEquals(29.97, mMetadata.getDouble(Metadata.VIDEO_FRAME_RATE));
+    }
+
+    // getByteArray
+    @SmallTest
+    public void testGetByteArray() throws Exception {
+        byte data[] = new byte[]{1,2,3,4,5};
+
+        writeByteArrayRecord(Metadata.ALBUM_ART, data);
+        adjustSize();
+        assertParse();
+
+        byte res[] = mMetadata.getByteArray(Metadata.ALBUM_ART);
+        for (int i = 0; i < data.length; ++i) {
+            assertEquals(data[i], res[i]);
+        }
+    }
+
+    // getDate
+    @SmallTest
+    public void testGetDate() throws Exception {
+        writeDateRecord(Metadata.DATE, 0, "PST");
+        adjustSize();
+        assertParse();
+
+        assertEquals(new Date(0), mMetadata.getDate(Metadata.DATE));
+    }
+
+    // getTimedText
+    @SmallTest
+    public void testGetTimedText() throws Exception {
+        Date now = Calendar.getInstance().getTime();
+        writeTimedTextRecord(Metadata.CAPTION, now.getTime(),
+                             10, "Some caption");
+        adjustSize();
+        assertParse();
+
+        Metadata.TimedText caption = mMetadata.getTimedText(Metadata.CAPTION);
+        assertEquals("" + now + "-" + 10 + ":Some caption", caption.toString());
+    }
+
+    // ----------------------------------------------------------------------
+    // HELPERS TO APPEND RECORDS
+    // ----------------------------------------------------------------------
+
+    // Insert a string record at the current position.
+    private void writeStringRecord(int metadataId, String val) {
+        final int start = mParcel.dataPosition();
+        mParcel.writeInt(-1);  // Placeholder for the length
+        mParcel.writeInt(metadataId);
+        mParcel.writeInt(Metadata.STRING_VAL);
+        mParcel.writeString(val);
+        adjustSize(start);
+    }
+
+    // Insert an int record at the current position.
+    private void writeIntRecord(int metadataId, int val) {
+        final int start = mParcel.dataPosition();
+        mParcel.writeInt(-1);  // Placeholder for the length
+        mParcel.writeInt(metadataId);
+        mParcel.writeInt(Metadata.INTEGER_VAL);
+        mParcel.writeInt(val);
+        adjustSize(start);
+    }
+
+    // Insert a boolean record at the current position.
+    private void writeBooleanRecord(int metadataId, boolean val) {
+        final int start = mParcel.dataPosition();
+        mParcel.writeInt(-1);  // Placeholder for the length
+        mParcel.writeInt(metadataId);
+        mParcel.writeInt(Metadata.BOOLEAN_VAL);
+        mParcel.writeInt(val ? 1 : 0);
+        adjustSize(start);
+    }
+
+    // Insert a Long record at the current position.
+    private void writeLongRecord(int metadataId, long val) {
+        final int start = mParcel.dataPosition();
+        mParcel.writeInt(-1);  // Placeholder for the length
+        mParcel.writeInt(metadataId);
+        mParcel.writeInt(Metadata.LONG_VAL);
+        mParcel.writeLong(val);
+        adjustSize(start);
+    }
+
+    // Insert a Double record at the current position.
+    private void writeDoubleRecord(int metadataId, double val) {
+        final int start = mParcel.dataPosition();
+        mParcel.writeInt(-1);  // Placeholder for the length
+        mParcel.writeInt(metadataId);
+        mParcel.writeInt(Metadata.DOUBLE_VAL);
+        mParcel.writeDouble(val);
+        adjustSize(start);
+    }
+
+    // Insert a ByteArray record at the current position.
+    private void writeByteArrayRecord(int metadataId, byte[] val) {
+        final int start = mParcel.dataPosition();
+        mParcel.writeInt(-1);  // Placeholder for the length
+        mParcel.writeInt(metadataId);
+        mParcel.writeInt(Metadata.BYTE_ARRAY_VAL);
+        mParcel.writeByteArray(val);
+        adjustSize(start);
+    }
+
+    // Insert a Date record at the current position.
+    private void writeDateRecord(int metadataId, long time, String tz) {
+        final int start = mParcel.dataPosition();
+        mParcel.writeInt(-1);  // Placeholder for the length
+        mParcel.writeInt(metadataId);
+        mParcel.writeInt(Metadata.DATE_VAL);
+        mParcel.writeLong(time);
+        mParcel.writeString(tz);
+        adjustSize(start);
+    }
+
+    // Insert a TimedText record at the current position.
+    private void writeTimedTextRecord(int metadataId, long begin,
+                                      int duration, String text) {
+        final int start = mParcel.dataPosition();
+        mParcel.writeInt(-1);  // Placeholder for the length
+        mParcel.writeInt(metadataId);
+        mParcel.writeInt(Metadata.TIMED_TEXT_VAL);
+        mParcel.writeLong(begin);
+        mParcel.writeInt(duration);
+        mParcel.writeString(text);
+        adjustSize(start);
     }
 }
