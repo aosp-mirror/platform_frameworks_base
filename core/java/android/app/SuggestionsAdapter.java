@@ -61,8 +61,8 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private SearchDialog mSearchDialog;
     private SearchableInfo mSearchable;
     private Context mProviderContext;
-    private WeakHashMap<String, Drawable> mOutsideDrawablesCache;
-    private SparseArray<Drawable> mBackgroundsCache;
+    private WeakHashMap<String, Drawable.ConstantState> mOutsideDrawablesCache;
+    private SparseArray<Drawable.ConstantState> mBackgroundsCache;
     private boolean mGlobalSearchMode;
 
     // Cached column indexes, updated when the cursor changes.
@@ -97,8 +97,10 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      */
     private static final long DELETE_KEY_POST_DELAY = 500L;
 
-    public SuggestionsAdapter(Context context, SearchDialog searchDialog, SearchableInfo searchable,
-            WeakHashMap<String, Drawable> outsideDrawablesCache, boolean globalSearchMode) {
+    public SuggestionsAdapter(Context context, SearchDialog searchDialog,
+            SearchableInfo searchable,
+            WeakHashMap<String, Drawable.ConstantState> outsideDrawablesCache,
+            boolean globalSearchMode) {
         super(context,
                 com.android.internal.R.layout.search_dropdown_item_icons_2line,
                 null,   // no initial cursor
@@ -112,7 +114,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         mProviderContext = mSearchable.getProviderContext(mContext, activityContext);
 
         mOutsideDrawablesCache = outsideDrawablesCache;
-        mBackgroundsCache = new SparseArray<Drawable>();
+        mBackgroundsCache = new SparseArray<Drawable.ConstantState>();
         mGlobalSearchMode = globalSearchMode;
 
         mStartSpinnerRunnable = new Runnable() {
@@ -345,11 +347,10 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (backgroundColor == 0) {
             return null;
         } else {
-            Drawable cachedBg = mBackgroundsCache.get(backgroundColor);
+            Drawable.ConstantState cachedBg = mBackgroundsCache.get(backgroundColor);
             if (cachedBg != null) {
                 if (DBG) Log.d(LOG_TAG, "Background cache hit for color " + backgroundColor);
-                // copy the drawable so that they don't share states
-                return cachedBg.getConstantState().newDrawable();
+                return cachedBg.newDrawable();
             }
             if (DBG) Log.d(LOG_TAG, "Creating new background for color " + backgroundColor);
             ColorDrawable transparent = new ColorDrawable(0);
@@ -358,7 +359,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             newBg.addState(new int[]{android.R.attr.state_selected}, transparent);
             newBg.addState(new int[]{android.R.attr.state_pressed}, transparent);
             newBg.addState(new int[]{}, background);
-            mBackgroundsCache.put(backgroundColor, newBg);
+            mBackgroundsCache.put(backgroundColor, newBg.getConstantState());
             return newBg;
         }
     }
@@ -523,12 +524,13 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
 
         // First, check the cache.
-        Drawable drawable = mOutsideDrawablesCache.get(drawableId);
-        if (drawable != null) {
+        Drawable.ConstantState cached = mOutsideDrawablesCache.get(drawableId);
+        if (cached != null) {
             if (DBG) Log.d(LOG_TAG, "Found icon in cache: " + drawableId);
-            return drawable;
+            return cached.newDrawable();
         }
 
+        Drawable drawable = null;
         try {
             // Not cached, try using it as a plain resource ID in the provider's context.
             int resourceId = Integer.parseInt(drawableId);
@@ -560,7 +562,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             // If we got a drawable for this resource id, then stick it in the
             // map so we don't do this lookup again.
             if (drawable != null) {
-                mOutsideDrawablesCache.put(drawableId, drawable);
+                mOutsideDrawablesCache.put(drawableId, drawable.getConstantState());
             }
         } catch (Resources.NotFoundException nfe) {
             if (DBG) Log.d(LOG_TAG, "Icon resource not found: " + drawableId);
@@ -615,12 +617,14 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         String componentIconKey = component.flattenToShortString();
         // Using containsKey() since we also store null values.
         if (mOutsideDrawablesCache.containsKey(componentIconKey)) {
-            return mOutsideDrawablesCache.get(componentIconKey);
+            Drawable.ConstantState cached = mOutsideDrawablesCache.get(componentIconKey);
+            return cached == null ? null : cached.newDrawable();
         }
         // Then try the activity or application icon
         Drawable drawable = getActivityIcon(component);
         // Stick it in the cache so we don't do this lookup again.
-        mOutsideDrawablesCache.put(componentIconKey, drawable);
+        Drawable.ConstantState toCache = drawable == null ? null : drawable.getConstantState();
+        mOutsideDrawablesCache.put(componentIconKey, toCache);
         return drawable;
     }
 
