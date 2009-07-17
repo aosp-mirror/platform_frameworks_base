@@ -262,6 +262,7 @@ public final class CdmaCallTracker extends CallTracker {
             // triggered by updateParent.
             cwConn.updateParent(ringingCall, foregroundCall);
             cwConn.onConnectedInOrOut();
+            updatePhoneState();
             switchWaitingOrHoldingAndActive();
         } else {
             throw new CallStateException("phone not ringing");
@@ -531,17 +532,6 @@ public final class CdmaCallTracker extends CallTracker {
                 // Dropped connections are removed from the CallTracker
                 // list but kept in the Call list
                 connections[i] = null;
-            } else if (conn != null && dc != null && !conn.compareTo(dc)) {
-                // Connection in CLCC response does not match what
-                // we were tracking. Assume dropped call and new call
-
-                droppedDuringPoll.add(conn);
-                connections[i] = new CdmaConnection (phone.getContext(), dc, this, i);
-
-                if (connections[i].getCall() == ringingCall) {
-                    newRinging = connections[i];
-                } // else something strange happened
-                hasNonHangupStateChanged = true;
             } else if (conn != null && dc != null) { /* implicit conn.compareTo(dc) */
                 boolean changed;
                 changed = conn.update(dc);
@@ -679,6 +669,7 @@ public final class CdmaCallTracker extends CallTracker {
             // is not called here. Instead, conn.onLocalDisconnect() is called.
             conn.onLocalDisconnect();
             phone.notifyPreciseCallStateChanged();
+            updatePhoneState();
             return;
         } else {
             try {
@@ -865,6 +856,7 @@ public final class CdmaCallTracker extends CallTracker {
         // Create a new CdmaConnection which attaches itself to ringingCall.
         ringingCall.setGeneric(false);
         new CdmaConnection(phone.getContext(), cw, this, ringingCall);
+        updatePhoneState();
 
         // Finally notify application
         notifyCallWaitingInfo(cw);
