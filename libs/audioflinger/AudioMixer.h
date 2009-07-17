@@ -85,6 +85,8 @@ public:
 
     uint32_t    trackNames() const { return mTrackNames; }
 
+    static void ditherAndClamp(int32_t* out, int32_t const *sums, size_t c);
+
 private:
 
     enum {
@@ -176,7 +178,6 @@ private:
     static void volumeRampStereo(track_t* t, int32_t* out, size_t frameCount, int32_t* temp);
     static void track__16BitsStereo(track_t* t, int32_t* out, size_t numFrames, int32_t* temp);
     static void track__16BitsMono(track_t* t, int32_t* out, size_t numFrames, int32_t* temp);
-    static void ditherAndClamp(int32_t* out, int32_t const *sums, size_t c);
 
     static void process__validate(state_t* state, void* output);
     static void process__nop(state_t* state, void* output);

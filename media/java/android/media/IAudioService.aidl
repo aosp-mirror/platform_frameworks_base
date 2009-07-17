@@ -29,9 +29,9 @@ interface IAudioService {
     
     void setStreamVolume(int streamType, int index, int flags);
     
-   	void setStreamSolo(int streamType, boolean state, IBinder cb);
+    void setStreamSolo(int streamType, boolean state, IBinder cb);
    	
-   	void setStreamMute(int streamType, boolean state, IBinder cb);
+    void setStreamMute(int streamType, boolean state, IBinder cb);
     
     int getStreamVolume(int streamType);
     
@@ -46,22 +46,10 @@ interface IAudioService {
     int getVibrateSetting(int vibrateType);
     
     boolean shouldVibrate(int vibrateType);
-    
-    void setMicrophoneMute(boolean on);
-
-    boolean isMicrophoneMute();
 
     void setMode(int mode);
 
     int getMode();
-
-    void setRouting(int mode, int routes, int mask);
-
-    int getRouting(int mode);
-
-    boolean isMusicActive();
-
-    void setParameter(String key, String value);
 
     oneway void playSoundEffect(int effectType);
   

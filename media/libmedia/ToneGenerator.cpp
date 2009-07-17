@@ -1001,7 +1001,7 @@ bool ToneGenerator::initAudioTrack() {
 
    // Open audio track in mono, PCM 16bit, default sampling rate, default buffer size
     mpAudioTrack
-            = new AudioTrack(mStreamType, 0, AudioSystem::PCM_16_BIT, 1, 0, 0, audioCallback, this, 0);
+            = new AudioTrack(mStreamType, 0, AudioSystem::PCM_16_BIT, AudioSystem::CHANNEL_OUT_MONO, 0, 0, audioCallback, this, 0);
 
     if (mpAudioTrack == 0) {
         LOGE("AudioTrack allocation failed");

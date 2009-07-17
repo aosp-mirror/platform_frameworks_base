@@ -1310,11 +1310,21 @@ status_t MediaPlayerService::AudioOutput::open(
     AudioTrack *t;
     if (mCallback != NULL) {
         t = new AudioTrack(
-                mStreamType, sampleRate, format, channelCount, frameCount,
-                0 /* flags */, CallbackWrapper, this);
+                mStreamType,
+                sampleRate,
+                format,
+                (channelCount == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO,
+                frameCount,
+                0 /* flags */,
+                CallbackWrapper,
+                this);
     } else {
         t = new AudioTrack(
-                mStreamType, sampleRate, format, channelCount, frameCount);
+                mStreamType,
+                sampleRate,
+                format,
+                (channelCount == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO,
+                frameCount);
     }
 
     if ((t == 0) || (t->initCheck() != NO_ERROR)) {

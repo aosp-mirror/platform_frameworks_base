@@ -28,6 +28,7 @@
 
 #include <media/AudioSystem.h>
 #include <media/AudioRecord.h>
+#include <media/mediarecorder.h>
 
 #include <binder/IServiceManager.h>
 #include <utils/Log.h>
@@ -45,7 +46,7 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 AudioRecord::AudioRecord()
-    : mStatus(NO_INIT)
+    : mStatus(NO_INIT), mInput(0)
 {
 }
 
@@ -53,15 +54,15 @@ AudioRecord::AudioRecord(
         int inputSource,
         uint32_t sampleRate,
         int format,
-        int channelCount,
+        uint32_t channels,
         int frameCount,
         uint32_t flags,
         callback_t cbf,
         void* user,
         int notificationFrames)
-    : mStatus(NO_INIT)
+    : mStatus(NO_INIT), mInput(0)
 {
-    mStatus = set(inputSource, sampleRate, format, channelCount,
+    mStatus = set(inputSource, sampleRate, format, channels,
             frameCount, flags, cbf, user, notificationFrames);
 }
 
@@ -78,6 +79,7 @@ AudioRecord::~AudioRecord()
         }
         mAudioRecord.clear();
         IPCThreadState::self()->flushCommands();
+        AudioSystem::releaseInput(mInput);
     }
 }
 
@@ -85,7 +87,7 @@ status_t AudioRecord::set(
         int inputSource,
         uint32_t sampleRate,
         int format,
-        int channelCount,
+        uint32_t channels,
         int frameCount,
         uint32_t flags,
         callback_t cbf,
@@ -94,7 +96,7 @@ status_t AudioRecord::set(
         bool threadCanCallJava)
 {
 
-    LOGV("set(): sampleRate %d, channelCount %d, frameCount %d",sampleRate, channelCount, frameCount);
+    LOGV("set(): sampleRate %d, channels %d, frameCount %d",sampleRate, channels, frameCount);
     if (mAudioRecord != 0) {
         return INVALID_OPERATION;
     }
@@ -104,8 +106,8 @@ status_t AudioRecord::set(
         return NO_INIT;
     }
 
-    if (inputSource == DEFAULT_INPUT) {
-        inputSource = MIC_INPUT;
+    if (inputSource == AUDIO_SOURCE_DEFAULT) {
+        inputSource = AUDIO_SOURCE_MIC;
     }
 
     if (sampleRate == 0) {
@@ -115,15 +117,21 @@ status_t AudioRecord::set(
     if (format == 0) {
         format = AudioSystem::PCM_16_BIT;
     }
-    if (channelCount == 0) {
-        channelCount = 1;
-    }
-
     // validate parameters
-    if (format != AudioSystem::PCM_16_BIT) {
+    if (!AudioSystem::isValidFormat(format)) {
+        LOGE("Invalid format");
         return BAD_VALUE;
     }
-    if (channelCount != 1 && channelCount != 2) {
+
+    if (!AudioSystem::isInputChannel(channels)) {
+        return BAD_VALUE;
+    }
+    int channelCount = AudioSystem::popCount(channels);
+
+    mInput = AudioSystem::getInput(inputSource,
+                                    sampleRate, format, channels, (AudioSystem::audio_in_acoustics)flags);
+    if (mInput == 0) {
+        LOGE("Could not get audio output for stream type %d", inputSource);
         return BAD_VALUE;
     }
 
@@ -132,14 +140,22 @@ status_t AudioRecord::set(
     if (AudioSystem::getInputBufferSize(sampleRate, format, channelCount, &inputBuffSizeInBytes)
             != NO_ERROR) {
         LOGE("AudioSystem could not query the input buffer size.");
-        return NO_INIT;    
+        return NO_INIT;
     }
+
     if (inputBuffSizeInBytes == 0) {
         LOGE("Recording parameters are not supported: sampleRate %d, channelCount %d, format %d",
             sampleRate, channelCount, format);
         return BAD_VALUE;
     }
+
     int frameSizeInBytes = channelCount * (format == AudioSystem::PCM_16_BIT ? 2 : 1);
+    if (AudioSystem::isLinearPCM(format)) {
+        frameSizeInBytes = channelCount * (format == AudioSystem::PCM_16_BIT ? sizeof(int16_t) : sizeof(int8_t));
+    } else {
+        frameSizeInBytes = sizeof(int8_t);
+    }
+
 
     // We use 2* size of input buffer for ping pong use of record buffer.
     int minFrameCount = 2 * inputBuffSizeInBytes / frameSizeInBytes;
@@ -157,11 +173,11 @@ status_t AudioRecord::set(
 
     // open record channel
     status_t status;
-    sp<IAudioRecord> record = audioFlinger->openRecord(getpid(), inputSource,
+    sp<IAudioRecord> record = audioFlinger->openRecord(getpid(), mInput,
                                                        sampleRate, format,
                                                        channelCount,
                                                        frameCount,
-                                                       ((uint16_t)flags) << 16, 
+                                                       ((uint16_t)flags) << 16,
                                                        &status);
     if (record == 0) {
         LOGE("AudioFlinger could not create record track, status: %d", status);
@@ -188,7 +204,7 @@ status_t AudioRecord::set(
     mFormat = format;
     // Update buffer size in case it has been limited by AudioFlinger during track creation
     mFrameCount = mCblk->frameCount;
-    mChannelCount = channelCount;
+    mChannelCount = (uint8_t)channelCount;
     mActive = 0;
     mCbf = cbf;
     mNotificationFrames = notificationFrames;
@@ -234,7 +250,11 @@ uint32_t AudioRecord::frameCount() const
 
 int AudioRecord::frameSize() const
 {
-    return channelCount()*((format() == AudioSystem::PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
+    if (AudioSystem::isLinearPCM(mFormat)) {
+        return channelCount()*((format() == AudioSystem::PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
+    } else {
+        return sizeof(uint8_t);
+    }
 }
 
 int AudioRecord::inputSource() const
@@ -262,15 +282,18 @@ status_t AudioRecord::start()
      }
 
     if (android_atomic_or(1, &mActive) == 0) {
-        mNewPosition = mCblk->user + mUpdatePeriod;
-        mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
-        mCblk->waitTimeMs = 0;
-        if (t != 0) {
-           t->run("ClientRecordThread", THREAD_PRIORITY_AUDIO_CLIENT);
-        } else {
-            setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
+        ret = AudioSystem::startInput(mInput);
+        if (ret == NO_ERROR) {
+            mNewPosition = mCblk->user + mUpdatePeriod;
+            mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+            mCblk->waitTimeMs = 0;
+            if (t != 0) {
+               t->run("ClientRecordThread", THREAD_PRIORITY_AUDIO_CLIENT);
+            } else {
+                setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
+            }
+            ret = mAudioRecord->start();
         }
-        ret = mAudioRecord->start();
     }
 
     if (t != 0) {
@@ -301,6 +324,7 @@ status_t AudioRecord::stop()
         } else {
             setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_NORMAL);
         }
+        AudioSystem::stopInput(mInput);
     }
 
     if (t != 0) {
@@ -421,7 +445,7 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
         "this shouldn't happen (user=%08x, server=%08x)", cblk->user, cblk->server);
 
     cblk->waitTimeMs = 0;
-    
+
     if (framesReq > framesReady) {
         framesReq = framesReady;
     }
@@ -437,7 +461,7 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
     audioBuffer->channelCount= mChannelCount;
     audioBuffer->format      = mFormat;
     audioBuffer->frameCount  = framesReq;
-    audioBuffer->size        = framesReq*mChannelCount*sizeof(int16_t);
+    audioBuffer->size        = framesReq*cblk->frameSize;
     audioBuffer->raw         = (int8_t*)cblk->buffer(u);
     active = mActive;
     return active ? status_t(NO_ERROR) : status_t(STOPPED);
@@ -468,7 +492,7 @@ ssize_t AudioRecord::read(void* buffer, size_t userSize)
 
     do {
 
-        audioBuffer.frameCount = userSize/mChannelCount/sizeof(int16_t);
+        audioBuffer.frameCount = userSize/frameSize();
 
         // Calling obtainBuffer() with a negative wait count causes
         // an (almost) infinite wait time.
@@ -519,8 +543,8 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
 
     do {
         audioBuffer.frameCount = frames;
-        // Calling obtainBuffer() with a wait count of 1 
-        // limits wait time to WAIT_PERIOD_MS. This prevents from being 
+        // Calling obtainBuffer() with a wait count of 1
+        // limits wait time to WAIT_PERIOD_MS. This prevents from being
         // stuck here not being able to handle timed events (position, markers).
         status_t err = obtainBuffer(&audioBuffer, 1);
         if (err < NO_ERROR) {
@@ -548,14 +572,14 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
         if (readSize > reqSize) readSize = reqSize;
 
         audioBuffer.size = readSize;
-        audioBuffer.frameCount = readSize/mChannelCount/sizeof(int16_t);
+        audioBuffer.frameCount = readSize/frameSize();
         frames -= audioBuffer.frameCount;
 
         releaseBuffer(&audioBuffer);
 
     } while (frames);
 
-    
+
     // Manage overrun callback
     if (mActive && (mCblk->framesAvailable_l() == 0)) {
         LOGV("Overrun user: %x, server: %x, flowControlFlag %d", mCblk->user, mCblk->server, mCblk->flowControlFlag);

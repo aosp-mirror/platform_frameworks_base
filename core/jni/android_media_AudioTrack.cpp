@@ -103,7 +103,7 @@ class AudioTrackJniStorage {
 #define AUDIOTRACK_ERROR_BAD_VALUE                 -2
 #define AUDIOTRACK_ERROR_INVALID_OPERATION         -3
 #define AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM         -16
-#define AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELCOUNT -17
+#define AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK -17
 #define AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT       -18
 #define AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE   -19
 #define AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED    -20
@@ -164,11 +164,11 @@ static void audioCallback(int event, void* user, void *info) {
 // ----------------------------------------------------------------------------
 static int
 android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-        jint streamType, jint sampleRateInHertz, jint nbChannels, 
+        jint streamType, jint sampleRateInHertz, jint channels,
         jint audioFormat, jint buffSizeInBytes, jint memoryMode)
 {
-    LOGV("sampleRate=%d, audioFormat(from Java)=%d, nbChannels=%d, buffSize=%d", 
-        sampleRateInHertz, audioFormat, nbChannels, buffSizeInBytes);
+    LOGV("sampleRate=%d, audioFormat(from Java)=%d, channels=%x, buffSize=%d",
+        sampleRateInHertz, audioFormat, channels, buffSizeInBytes);
     int afSampleRate;
     int afFrameCount;
 
@@ -181,10 +181,11 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         return AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }
 
-    if ((nbChannels == 0) || (nbChannels > 2)) {
-        LOGE("Error creating AudioTrack: channel count is not 1 or 2.");
-        return AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELCOUNT;
+    if (!AudioSystem::isOutputChannel(channels)) {
+        LOGE("Error creating AudioTrack: invalid channel mask.");
+        return AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK;
     }
+    int nbChannels = AudioSystem::popCount(channels);
     
     // check the stream type
     AudioSystem::stream_type atStreamType;
@@ -231,15 +232,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     int bytesPerSample = audioFormat == javaAudioTrackFields.PCM16 ? 2 : 1;
     int format = audioFormat == javaAudioTrackFields.PCM16 ? 
             AudioSystem::PCM_16_BIT : AudioSystem::PCM_8_BIT;
-    int frameCount;
-    if (buffSizeInBytes == -1) {
-        // compute the frame count based on the system's output frame count 
-        // and the native sample rate
-        frameCount = (sampleRateInHertz*afFrameCount)/afSampleRate;
-    } else {
-        // compute the frame count based on the specified buffer size
-        frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
-    }
+    int frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
     
     AudioTrackJniStorage* lpJniStorage = new AudioTrackJniStorage();
     
@@ -271,7 +264,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             atStreamType,// stream type
             sampleRateInHertz,
             format,// word length, PCM
-            nbChannels,
+            channels,
             frameCount,
             0,// flags
             audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user)
@@ -291,7 +284,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             atStreamType,// stream type
             sampleRateInHertz,
             format,// word length, PCM
-            nbChannels,
+            channels,
             frameCount,
             0,// flags
             audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user));

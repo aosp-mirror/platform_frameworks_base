@@ -29,25 +29,41 @@ namespace android {
 
 // ----------------------------------------------------------------------------
 
-A2dpAudioInterface::A2dpAudioInterface() :
-    mOutput(0)
+//AudioHardwareInterface* A2dpAudioInterface::createA2dpInterface()
+//{
+//    AudioHardwareInterface* hw = 0;
+//
+//    hw = AudioHardwareInterface::create();
+//    LOGD("new A2dpAudioInterface(hw: %p)", hw);
+//    hw = new A2dpAudioInterface(hw);
+//    return hw;
+//}
+
+A2dpAudioInterface::A2dpAudioInterface(AudioHardwareInterface* hw) :
+    mOutput(0), mHardwareInterface(hw), mBluetoothEnabled(true)
 {
 }
 
 A2dpAudioInterface::~A2dpAudioInterface()
 {
-    delete mOutput;
+    closeOutputStream((AudioStreamOut *)mOutput);
+    delete mHardwareInterface;
 }
 
 status_t A2dpAudioInterface::initCheck()
 {
-    return 0;
+    if (mHardwareInterface == 0) return NO_INIT;
+    return mHardwareInterface->initCheck();
 }
 
 AudioStreamOut* A2dpAudioInterface::openOutputStream(
-        int format, int channelCount, uint32_t sampleRate, status_t *status)
+        uint32_t devices, int *format, uint32_t *channels, uint32_t *sampleRate, status_t *status)
 {
-    LOGD("A2dpAudioInterface::openOutputStream %d, %d, %d\n", format, channelCount, sampleRate);
+    if (!AudioSystem::isA2dpDevice((AudioSystem::audio_devices)devices)) {
+        LOGV("A2dpAudioInterface::openOutputStream() open HW device: %x", devices);
+        return mHardwareInterface->openOutputStream(devices, format, channels, sampleRate, status);
+    }
+
     status_t err = 0;
 
     // only one output stream allowed
@@ -59,71 +75,127 @@ AudioStreamOut* A2dpAudioInterface::openOutputStream(
 
     // create new output stream
     A2dpAudioStreamOut* out = new A2dpAudioStreamOut();
-    if ((err = out->set(format, channelCount, sampleRate)) == NO_ERROR) {
+    if ((err = out->set(devices, format, channels, sampleRate)) == NO_ERROR) {
         mOutput = out;
+        mOutput->setBluetoothEnabled(mBluetoothEnabled);
     } else {
         delete out;
     }
-    
+
     if (status)
         *status = err;
     return mOutput;
 }
 
+void A2dpAudioInterface::closeOutputStream(AudioStreamOut* out) {
+    if (mOutput == 0 || mOutput != out) {
+        LOGW("Attempt to close invalid output stream");
+    }
+    else {
+        delete mOutput;
+        mOutput = 0;
+    }
+}
+
+
 AudioStreamIn* A2dpAudioInterface::openInputStream(
-        int inputSource, int format, int channelCount, uint32_t sampleRate,
-        status_t *status, AudioSystem::audio_in_acoustics acoustics)
+        uint32_t devices, int *format, uint32_t *channels, uint32_t *sampleRate, status_t *status,
+        AudioSystem::audio_in_acoustics acoustics)
 {
-    if (status)
-        *status = -1;
-    return NULL;
+    return mHardwareInterface->openInputStream(devices, format, channels, sampleRate, status, acoustics);
+}
+
+void A2dpAudioInterface::closeInputStream(AudioStreamIn* in)
+{
+    return mHardwareInterface->closeInputStream(in);
+}
+
+status_t A2dpAudioInterface::setMode(int mode)
+{
+    return mHardwareInterface->setMode(mode);
 }
 
 status_t A2dpAudioInterface::setMicMute(bool state)
 {
-    return 0;
+    return mHardwareInterface->setMicMute(state);
 }
 
 status_t A2dpAudioInterface::getMicMute(bool* state)
 {
-    return 0;
+    return mHardwareInterface->getMicMute(state);
 }
 
-status_t A2dpAudioInterface::setParameter(const char *key, const char *value)
+status_t A2dpAudioInterface::setParameters(const String8& keyValuePairs)
 {
-    LOGD("setParameter %s,%s\n", key, value);
+    AudioParameter param = AudioParameter(keyValuePairs);
+    String8 value;
+    String8 key;
+    status_t status = NO_ERROR;
 
-    if (!key || !value)
-        return -EINVAL;
+    LOGV("setParameters() %s", keyValuePairs.string());
 
-    if (strcmp(key, "a2dp_sink_address") == 0) {
-        return mOutput->setAddress(value);
+    key = "bluetooth_enabled";
+    if (param.get(key, value) == NO_ERROR) {
+        mBluetoothEnabled = (value == "true");
+        if (mOutput) {
+            mOutput->setBluetoothEnabled(mBluetoothEnabled);
+        }
+        param.remove(key);
     }
-    if (strcmp(key, "bluetooth_enabled") == 0) {
-        mOutput->setBluetoothEnabled(strcmp(value, "true") == 0);
+
+    if (param.size()) {
+        status_t hwStatus = mHardwareInterface->setParameters(param.toString());
+        if (status == NO_ERROR) {
+            status = hwStatus;
+        }
     }
 
-    return 0;
+    return status;
+}
+
+String8 A2dpAudioInterface::getParameters(const String8& keys)
+{
+    AudioParameter param = AudioParameter(keys);
+    AudioParameter a2dpParam = AudioParameter();
+    String8 value;
+    String8 key;
+
+    key = "bluetooth_enabled";
+    if (param.get(key, value) == NO_ERROR) {
+        value = mBluetoothEnabled ? "true" : "false";
+        a2dpParam.add(key, value);
+        param.remove(key);
+    }
+
+    String8 keyValuePairs  = a2dpParam.toString();
+
+    if (param.size()) {
+        keyValuePairs += ";";
+        keyValuePairs += mHardwareInterface->getParameters(param.toString());
+    }
+
+    LOGV("getParameters() %s", keyValuePairs.string());
+    return keyValuePairs;
+}
+
+size_t A2dpAudioInterface::getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
+{
+    return mHardwareInterface->getInputBufferSize(sampleRate, format, channelCount);
 }
 
 status_t A2dpAudioInterface::setVoiceVolume(float v)
 {
-    return 0;
+    return mHardwareInterface->setVoiceVolume(v);
 }
 
 status_t A2dpAudioInterface::setMasterVolume(float v)
 {
-    return 0;
-}
-
-status_t A2dpAudioInterface::doRouting()
-{
-    return 0;
+    return mHardwareInterface->setMasterVolume(v);
 }
 
 status_t A2dpAudioInterface::dump(int fd, const Vector<String16>& args)
 {
-    return 0;
+    return mHardwareInterface->dumpState(fd, args);
 }
 
 // ----------------------------------------------------------------------------
@@ -132,7 +204,7 @@ A2dpAudioInterface::A2dpAudioStreamOut::A2dpAudioStreamOut() :
     mFd(-1), mStandby(true), mStartCount(0), mRetryCount(0), mData(NULL),
     // assume BT enabled to start, this is safe because its only the
     // enabled->disabled transition we are worried about
-    mBluetoothEnabled(true)
+    mBluetoothEnabled(true), mDevice(0)
 {
     // use any address by default
     strcpy(mA2dpAddress, "00:00:00:00:00:00");
@@ -140,27 +212,43 @@ A2dpAudioInterface::A2dpAudioStreamOut::A2dpAudioStreamOut() :
 }
 
 status_t A2dpAudioInterface::A2dpAudioStreamOut::set(
-        int format, int channels, uint32_t rate)
+        uint32_t device, int *pFormat, uint32_t *pChannels, uint32_t *pRate)
 {
-    LOGD("A2dpAudioStreamOut::set %d, %d, %d\n", format, channels, rate);
+    int lFormat = pFormat ? *pFormat : 0;
+    uint32_t lChannels = pChannels ? *pChannels : 0;
+    uint32_t lRate = pRate ? *pRate : 0;
+
+    LOGD("A2dpAudioStreamOut::set %x, %d, %d, %d\n", device, lFormat, lChannels, lRate);
 
     // fix up defaults
-    if (format == 0) format = AudioSystem::PCM_16_BIT;
-    if (channels == 0) channels = channelCount();
-    if (rate == 0) rate = sampleRate();
+    if (lFormat == 0) lFormat = format();
+    if (lChannels == 0) lChannels = channels();
+    if (lRate == 0) lRate = sampleRate();
 
     // check values
-    if ((format != AudioSystem::PCM_16_BIT) ||
-            (channels != channelCount()) ||
-            (rate != sampleRate()))
+    if ((lFormat != format()) ||
+            (lChannels != channels()) ||
+            (lRate != sampleRate())){
+        if (pFormat) *pFormat = format();
+        if (pChannels) *pChannels = channels();
+        if (pRate) *pRate = sampleRate();
         return BAD_VALUE;
+    }
 
+    if (pFormat) *pFormat = lFormat;
+    if (pChannels) *pChannels = lChannels;
+    if (pRate) *pRate = lRate;
+
+    mDevice = device;
     return NO_ERROR;
 }
 
 A2dpAudioInterface::A2dpAudioStreamOut::~A2dpAudioStreamOut()
 {
+    LOGV("A2dpAudioStreamOut destructor");
+    standby();
     close();
+    LOGV("A2dpAudioStreamOut destructor returning from close()");
 }
 
 ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t bytes)
@@ -230,6 +318,59 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::standby()
     return result;
 }
 
+status_t A2dpAudioInterface::A2dpAudioStreamOut::setParameters(const String8& keyValuePairs)
+{
+    AudioParameter param = AudioParameter(keyValuePairs);
+    String8 value;
+    String8 key = String8("a2dp_sink_address");
+    status_t status = NO_ERROR;
+    int device;
+    LOGV("A2dpAudioStreamOut::setParameters() %s", keyValuePairs.string());
+
+    if (param.get(key, value) == NO_ERROR) {
+        if (value.length() != strlen("00:00:00:00:00:00")) {
+            status = BAD_VALUE;
+        } else {
+            setAddress(value.string());
+        }
+        param.remove(key);
+    }
+    key = AudioParameter::keyRouting;
+    if (param.getInt(key, device) == NO_ERROR) {
+        if (AudioSystem::isA2dpDevice((AudioSystem::audio_devices)device)) {
+            mDevice = device;
+            status = NO_ERROR;
+        } else {
+            status = BAD_VALUE;
+        }
+        param.remove(key);
+    }
+
+    if (param.size()) {
+        status = BAD_VALUE;
+    }
+    return status;
+}
+
+String8 A2dpAudioInterface::A2dpAudioStreamOut::getParameters(const String8& keys)
+{
+    AudioParameter param = AudioParameter(keys);
+    String8 value;
+    String8 key = String8("a2dp_sink_address");
+
+    if (param.get(key, value) == NO_ERROR) {
+        value = mA2dpAddress;
+        param.add(key, value);
+    }
+    key = AudioParameter::keyRouting;
+    if (param.get(key, value) == NO_ERROR) {
+        param.addInt(key, (int)mDevice);
+    }
+
+    LOGV("A2dpAudioStreamOut::getParameters() %s", param.toString().string());
+    return param.toString();
+}
+
 status_t A2dpAudioInterface::A2dpAudioStreamOut::setAddress(const char* address)
 {
     Mutex::Autolock lock(mLock);
@@ -260,12 +401,14 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::setBluetoothEnabled(bool enable
 status_t A2dpAudioInterface::A2dpAudioStreamOut::close()
 {
     Mutex::Autolock lock(mLock);
+    LOGV("A2dpAudioStreamOut::close() calling close_l()");
     return close_l();
 }
 
 status_t A2dpAudioInterface::A2dpAudioStreamOut::close_l()
 {
     if (mData) {
+        LOGV("A2dpAudioStreamOut::close_l() calling a2dp_cleanup(mData)");
         a2dp_cleanup(mData);
         mData = NULL;
     }
@@ -276,6 +419,5 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::dump(int fd, const Vector<Strin
 {
     return NO_ERROR;
 }
-
 
 }; // namespace android

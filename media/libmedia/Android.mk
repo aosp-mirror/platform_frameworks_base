@@ -20,7 +20,8 @@ LOCAL_SRC_FILES:= \
     mediametadataretriever.cpp \
     ToneGenerator.cpp \
     JetPlayer.cpp \
-    IOMX.cpp
+    IOMX.cpp \
+ 	IAudioPolicyService.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox

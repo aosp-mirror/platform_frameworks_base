@@ -37,15 +37,58 @@ public class AudioFormat {
     public static final int ENCODING_PCM_8BIT = 3;  // accessed by native code
 
     /** Invalid audio channel configuration */
-    public static final int CHANNEL_CONFIGURATION_INVALID   = 0;
+    /** @deprecated use CHANNEL_INVALID instead  */
+    @Deprecated    public static final int CHANNEL_CONFIGURATION_INVALID   = 0;
     /** Default audio channel configuration */
-    public static final int CHANNEL_CONFIGURATION_DEFAULT   = 1;
+    /** @deprecated use CHANNEL_OUT_DEFAULT or CHANNEL_IN_DEFAULT instead  */
+    @Deprecated    public static final int CHANNEL_CONFIGURATION_DEFAULT   = 1;
     /** Mono audio configuration */
-    public static final int CHANNEL_CONFIGURATION_MONO      = 2;
+    /** @deprecated use CHANNEL_OUT_MONO or CHANNEL_IN_MONO instead  */
+    @Deprecated    public static final int CHANNEL_CONFIGURATION_MONO      = 2;
     /** Stereo (2 channel) audio configuration */
-    public static final int CHANNEL_CONFIGURATION_STEREO    = 3;
+    /** @deprecated use CHANNEL_OUT_STEREO or CHANNEL_IN_STEREO instead  */
+    @Deprecated    public static final int CHANNEL_CONFIGURATION_STEREO    = 3;
+
+    /** Invalid audio channel mask */
+    public static final int CHANNEL_INVALID   = -1;
+    /** Default audio channel mask */
+    // Channel mask definitions must be kept in sync with native values in include/media/AudioSystem.h
+    public static final int CHANNEL_OUT_DEFAULT = 0;
+    public static final int CHANNEL_OUT_FRONT_LEFT = 0x1;
+    public static final int CHANNEL_OUT_FRONT_RIGHT = 0x2;
+    public static final int CHANNEL_OUT_FRONT_CENTER = 0x4;
+    public static final int CHANNEL_OUT_LOW_FREQUENCY = 0x8;
+    public static final int CHANNEL_OUT_BACK_LEFT = 0x10;
+    public static final int CHANNEL_OUT_BACK_RIGHT = 0x20;
+    public static final int CHANNEL_OUT_FRONT_LEFT_OF_CENTER = 0x40;
+    public static final int CHANNEL_OUT_FRONT_RIGHT_OF_CENTER = 0x80;
+    public static final int CHANNEL_OUT_BACK_CENTER = 0x100;
+    public static final int CHANNEL_OUT_MONO = CHANNEL_OUT_FRONT_LEFT;
+    public static final int CHANNEL_OUT_STEREO = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT);
+    public static final int CHANNEL_OUT_QUAD = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
+            CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT);
+    public static final int CHANNEL_OUT_SURROUND = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
+            CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_BACK_CENTER);
+    public static final int CHANNEL_OUT_5POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
+            CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT);
+    public static final int CHANNEL_OUT_7POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
+            CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT |
+            CHANNEL_OUT_FRONT_LEFT_OF_CENTER | CHANNEL_OUT_FRONT_RIGHT_OF_CENTER);
+
+    public static final int CHANNEL_IN_DEFAULT = 0;
+    public static final int CHANNEL_IN_LEFT = 0x10000;
+    public static final int CHANNEL_IN_RIGHT = 0x20000;
+    public static final int CHANNEL_IN_FRONT = 0x40000;
+    public static final int CHANNEL_IN_BACK = 0x80000;
+    public static final int CHANNEL_IN_LEFT_PROCESSED = 0x100000;
+    public static final int CHANNEL_IN_RIGHT_PROCESSED = 0x200000;
+    public static final int CHANNEL_IN_FRONT_PROCESSED = 0x400000;
+    public static final int CHANNEL_IN_BACK_PROCESSED = 0x800000;
+    public static final int CHANNEL_IN_PRESSURE = 0x1000000;
+    public static final int CHANNEL_IN_X_AXIS = 0x2000000;
+    public static final int CHANNEL_IN_Y_AXIS = 0x4000000;
+    public static final int CHANNEL_IN_Z_AXIS = 0x8000000;
+    public static final int CHANNEL_IN_MONO = CHANNEL_IN_FRONT;
+    public static final int CHANNEL_IN_STEREO = (CHANNEL_IN_LEFT | CHANNEL_IN_RIGHT);
 
 }
-
-
-

@@ -527,13 +527,14 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
     // wrong audio audio buffer size  (mAudioBufferSize)
     unsigned long toggle = mToggle ^ 1;
     void *userData = (void *)((unsigned long)this | toggle);
+    uint32_t channels = (numChannels == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO;
     
 #ifdef USE_SHARED_MEM_BUFFER
     newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
-            numChannels, sample->getIMemory(), 0, callback, userData);
+            channels, sample->getIMemory(), 0, callback, userData);
 #else
     newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
-            numChannels, frameCount, 0, callback, userData, bufferFrames);
+            channels, frameCount, 0, callback, userData, bufferFrames);
 #endif
     if (newTrack->initCheck() != NO_ERROR) {
         LOGE("Error creating AudioTrack");

@@ -27,7 +27,7 @@
 #include <media/IAudioTrack.h>
 #include <media/IAudioRecord.h>
 #include <media/IAudioFlingerClient.h>
-
+#include <utils/String8.h>
 
 namespace android {
 
@@ -50,11 +50,12 @@ public:
                                 int frameCount,
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
+                                void *output,
                                 status_t *status) = 0;
 
     virtual sp<IAudioRecord> openRecord(
                                 pid_t pid,
-                                int inputSource,
+                                void *input,
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
@@ -65,11 +66,11 @@ public:
     /* query the audio hardware state. This state never changes,
      * and therefore can be cached.
      */
-    virtual     uint32_t    sampleRate(int output) const = 0;
-    virtual     int         channelCount(int output) const = 0;
-    virtual     int         format(int output) const = 0;
-    virtual     size_t      frameCount(int output) const = 0;
-    virtual     uint32_t    latency(int output) const = 0;
+    virtual     uint32_t    sampleRate(void *output) const = 0;
+    virtual     int         channelCount(void *output) const = 0;
+    virtual     int         format(void *output) const = 0;
+    virtual     size_t      frameCount(void *output) const = 0;
+    virtual     uint32_t    latency(void *output) const = 0;
 
     /* set/get the audio hardware state. This will probably be used by
      * the preference panel, mostly.
@@ -83,19 +84,14 @@ public:
     /* set/get stream type state. This will probably be used by
      * the preference panel, mostly.
      */
-    virtual     status_t    setStreamVolume(int stream, float value) = 0;
+    virtual     status_t    setStreamVolume(int stream, float value, void *output) = 0;
     virtual     status_t    setStreamMute(int stream, bool muted) = 0;
 
-    virtual     float       streamVolume(int stream) const = 0;
+    virtual     float       streamVolume(int stream, void *output) const = 0;
     virtual     bool        streamMute(int stream) const = 0;
 
-    // set/get audio routing
-    virtual     status_t    setRouting(int mode, uint32_t routes, uint32_t mask) = 0;
-    virtual     uint32_t    getRouting(int mode) const = 0;
-
-    // set/get audio mode
+    // set audio mode
     virtual     status_t    setMode(int mode) = 0;
-    virtual     int         getMode() const = 0;
 
     // mic mute/state
     virtual     status_t    setMicMute(bool state) = 0;
@@ -104,22 +100,34 @@ public:
     // is a music stream active?
     virtual     bool        isMusicActive() const = 0;
 
-    // pass a generic configuration parameter to libaudio
-    // Temporary interface, do not use
-    // TODO: Replace with a more generic key:value get/set mechanism
-    virtual     status_t  setParameter(const char* key, const char* value) = 0;
+    virtual     status_t    setParameters(void *ioHandle, const String8& keyValuePairs) = 0;
+    virtual     String8     getParameters(void *ioHandle, const String8& keys) = 0;
     
     // register a current process for audio output change notifications
     virtual void registerClient(const sp<IAudioFlingerClient>& client) = 0;
     
     // retrieve the audio recording buffer size
     virtual size_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount) = 0;
-    
-    // force AudioFlinger thread out of standby
-    virtual     void        wakeUp() = 0;
 
-    // is A2DP output enabled
-    virtual     bool        isA2dpEnabled() const = 0;
+    virtual void *openOutput(uint32_t *pDevices,
+                                    uint32_t *pSamplingRate,
+                                    uint32_t *pFormat,
+                                    uint32_t *pChannels,
+                                    uint32_t *pLatencyMs,
+                                    uint32_t flags) = 0;
+    virtual void *openDuplicateOutput(void *output1, void *output2) = 0;
+    virtual status_t closeOutput(void *output) = 0;
+    virtual status_t suspendOutput(void *output) = 0;
+    virtual status_t restoreOutput(void *output) = 0;
+
+    virtual void *openInput(uint32_t *pDevices,
+                                    uint32_t *pSamplingRate,
+                                    uint32_t *pFormat,
+                                    uint32_t *pChannels,
+                                    uint32_t acoustics) = 0;
+    virtual status_t closeInput(void *input) = 0;
+
+    virtual status_t setStreamOutput(uint32_t stream, void *output) = 0;
 };
 
 

@@ -89,7 +89,7 @@ public class JetPlayer
     // Jet rendering audio parameters
     private static final int JET_OUTPUT_RATE = 22050; // _SAMPLE_RATE_22050 in Android.mk
     private static final int JET_OUTPUT_CHANNEL_CONFIG =
-            AudioFormat.CHANNEL_CONFIGURATION_STEREO; // NUM_OUTPUT_CHANNELS=2 in Android.mk
+            AudioFormat.CHANNEL_OUT_STEREO; // NUM_OUTPUT_CHANNELS=2 in Android.mk
 
     
     //--------------------------------------------

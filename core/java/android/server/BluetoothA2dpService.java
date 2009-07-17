@@ -54,7 +54,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
 
-    private static final String A2DP_SINK_ADDRESS = "a2dp_sink_address";
     private static final String BLUETOOTH_ENABLED = "bluetooth_enabled";
 
     private static final int MESSAGE_CONNECT_TO = 1;
@@ -238,7 +237,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                     }
             }
         }
-        mAudioManager.setParameter(BLUETOOTH_ENABLED, "true");
+        mAudioManager.setParameters(BLUETOOTH_ENABLED+"=true");
     }
 
     private synchronized void onBluetoothDisable() {
@@ -262,8 +261,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             }
             mAudioDevices.clear();
         }
-        mAudioManager.setBluetoothA2dpOn(false);
-        mAudioManager.setParameter(BLUETOOTH_ENABLED, "false");
+
+        mAudioManager.setParameters(BLUETOOTH_ENABLED+"=false");
     }
 
     public synchronized int connectSink(String address) {
@@ -403,8 +402,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                    Intent intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
                    mContext.sendBroadcast(intent);
                 }
-                if (--mSinkCount == 0)
-                    mAudioManager.setBluetoothA2dpOn(false);
+                mSinkCount--;
             } else if (state == BluetoothA2dp.STATE_CONNECTED) {
                 mSinkCount ++;
             }
@@ -417,11 +415,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
             if (DBG) log("A2DP state : address: " + address + " State:" + prevState + "->" + state);
-
-            if (state == BluetoothA2dp.STATE_CONNECTED) {
-                mAudioManager.setParameter(A2DP_SINK_ADDRESS, address);
-                mAudioManager.setBluetoothA2dpOn(true);
-            }
         }
     }
 

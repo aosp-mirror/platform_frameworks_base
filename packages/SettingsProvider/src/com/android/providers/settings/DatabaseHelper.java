@@ -64,7 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
-    private static final int DATABASE_VERSION = 36;
+    private static final int DATABASE_VERSION = 37;
 
     private Context mContext;
 
@@ -414,7 +414,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 36;
         }
-        
+        if (upgradeVersion == 36) {
+           // This upgrade adds the STREAM_SYSTEM_ENFORCED type to the list of
+            // types affected by ringer modes (silent, vibrate, etc.)
+            db.beginTransaction();
+            try {
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "'");
+                int newValue = (1 << AudioManager.STREAM_RING)
+                        | (1 << AudioManager.STREAM_NOTIFICATION)
+                        | (1 << AudioManager.STREAM_SYSTEM)
+                        | (1 << AudioManager.STREAM_SYSTEM_ENFORCED);
+                db.execSQL("INSERT INTO system ('name', 'value') values ('"
+                        + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "', '"
+                        + String.valueOf(newValue) + "')");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 36;
+        }
+
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -575,7 +595,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // By default, only the ring/notification and system streams are affected
         loadSetting(stmt, Settings.System.MODE_RINGER_STREAMS_AFFECTED,
                 (1 << AudioManager.STREAM_RING) | (1 << AudioManager.STREAM_NOTIFICATION) |
-                (1 << AudioManager.STREAM_SYSTEM));
+                (1 << AudioManager.STREAM_SYSTEM) | (1 << AudioManager.STREAM_SYSTEM_ENFORCED));
 
         loadSetting(stmt, Settings.System.MUTE_STREAMS_AFFECTED,
                 ((1 << AudioManager.STREAM_MUSIC) |

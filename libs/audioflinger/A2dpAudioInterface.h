@@ -32,38 +32,44 @@ class A2dpAudioInterface : public AudioHardwareBase
     class A2dpAudioStreamOut;
 
 public:
-                        A2dpAudioInterface();
+                        A2dpAudioInterface(AudioHardwareInterface* hw);
     virtual             ~A2dpAudioInterface();
     virtual status_t    initCheck();
 
     virtual status_t    setVoiceVolume(float volume);
     virtual status_t    setMasterVolume(float volume);
 
+    virtual status_t    setMode(int mode);
+
     // mic mute
     virtual status_t    setMicMute(bool state);
     virtual status_t    getMicMute(bool* state);
 
-    // Temporary interface, do not use
-    // TODO: Replace with a more generic key:value get/set mechanism
-    virtual status_t    setParameter(const char *key, const char *value);
+    virtual status_t    setParameters(const String8& keyValuePairs);
+    virtual String8     getParameters(const String8& keys);
+
+    virtual size_t      getInputBufferSize(uint32_t sampleRate, int format, int channelCount);
 
     // create I/O streams
     virtual AudioStreamOut* openOutputStream(
-                                int format=0,
-                                int channelCount=0,
-                                uint32_t sampleRate=0,
+                                uint32_t devices,
+                                int *format=0,
+                                uint32_t *channels=0,
+                                uint32_t *sampleRate=0,
                                 status_t *status=0);
+    virtual    void        closeOutputStream(AudioStreamOut* out);
 
     virtual AudioStreamIn* openInputStream(
-                                int inputSource,
-                                int format,
-                                int channelCount,
-                                uint32_t sampleRate,
+                                uint32_t devices,
+                                int *format,
+                                uint32_t *channels,
+                                uint32_t *sampleRate,
                                 status_t *status,
                                 AudioSystem::audio_in_acoustics acoustics);
+    virtual    void        closeInputStream(AudioStreamIn* in);
+//    static AudioHardwareInterface* createA2dpInterface();
 
 protected:
-    virtual status_t    doRouting();
     virtual status_t    dump(int fd, const Vector<String16>& args);
 
 private:
@@ -71,19 +77,22 @@ private:
     public:
                             A2dpAudioStreamOut();
         virtual             ~A2dpAudioStreamOut();
-                status_t    set(int format,
-                                int channelCount,
-                                uint32_t sampleRate);
+                status_t    set(uint32_t device,
+                                int *pFormat,
+                                uint32_t *pChannels,
+                                uint32_t *pRate);
         virtual uint32_t    sampleRate() const { return 44100; }
         // SBC codec wants a multiple of 512
         virtual size_t      bufferSize() const { return 512 * 20; }
-        virtual int         channelCount() const { return 2; }
+        virtual uint32_t    channels() const { return AudioSystem::CHANNEL_OUT_STEREO; }
         virtual int         format() const { return AudioSystem::PCM_16_BIT; }
         virtual uint32_t    latency() const { return ((1000*bufferSize())/frameSize())/sampleRate() + 200; }
-        virtual status_t    setVolume(float volume) { return INVALID_OPERATION; }
+        virtual status_t    setVolume(float left, float right) { return INVALID_OPERATION; }
         virtual ssize_t     write(const void* buffer, size_t bytes);
                 status_t    standby();
         virtual status_t    dump(int fd, const Vector<String16>& args);
+        virtual status_t    setParameters(const String8& keyValuePairs);
+        virtual String8     getParameters(const String8& keys);
 
     private:
         friend class A2dpAudioInterface;
@@ -102,10 +111,17 @@ private:
                 void*       mData;
                 Mutex       mLock;
                 bool        mBluetoothEnabled;
+                uint32_t    mDevice;
     };
 
+    friend class A2dpAudioStreamOut;
+
     A2dpAudioStreamOut*     mOutput;
+    AudioHardwareInterface  *mHardwareInterface;
+    char        mA2dpAddress[20];
+    bool        mBluetoothEnabled;
 };
+
 
 // ----------------------------------------------------------------------------
 

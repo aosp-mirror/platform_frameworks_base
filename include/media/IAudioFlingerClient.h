@@ -20,7 +20,7 @@
 
 #include <utils/RefBase.h>
 #include <binder/IInterface.h>
-
+#include <utils/KeyedVector.h>
 
 namespace android {
 
@@ -31,8 +31,8 @@ class IAudioFlingerClient : public IInterface
 public:
     DECLARE_META_INTERFACE(AudioFlingerClient);
 
-    // Notifies a change of audio output from/to hardware to/from A2DP.
-    virtual void a2dpEnabledChanged(bool enabled) = 0;
+    // Notifies a change of audio input/output configuration.
+    virtual void ioConfigChanged(int event, void *param1, void *param2) = 0;
 
 };
 
