@@ -353,67 +353,6 @@ static void SC_drawQuad(float x1, float y1, float z1,
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
-extern "C" void drawQuad(int32_t x1, int32_t y1, int32_t z1,
-                         int32_t x2, int32_t y2, int32_t z2,
-                         int32_t x3, int32_t y3, int32_t z3,
-                         int32_t x4, int32_t y4, int32_t z4)
-{
-    GET_TLS();
-    //x1 = (x1 << 16);
-    //x2 = (x2 << 16);
-    //y1 = (y1 << 16);
-    //y2 = (y2 << 16);
-
-    //LOGE("Quad");
-    //LOGE("0x%08x, 0x%08x, 0x%08x", x1, y1, z1);
-    //LOGE("0x%08x, 0x%08x, 0x%08x", x2, y2, z2);
-    //LOGE("0x%08x, 0x%08x, 0x%08x", x3, y3, z3);
-    //LOGE("0x%08x, 0x%08x, 0x%08x", x4, y4, z4);
-
-    int32_t vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
-    static const int32_t tex[] = {0,0, 0,0x10000, 0x10000,0x10000, 0x10000,0};
-
-
-    rsc->setupCheck();
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FIXED, 0, vtx);
-
-    glClientActiveTexture(GL_TEXTURE0);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glTexCoordPointer(2, GL_FIXED, 0, tex);
-    glClientActiveTexture(GL_TEXTURE1);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glTexCoordPointer(2, GL_FIXED, 0, tex);
-    glClientActiveTexture(GL_TEXTURE0);
-
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-
-    //glColorPointer(4, GL_UNSIGNED_BYTE, 12, ptr);
-
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-}
-
-extern "C" int32_t sinx(int32_t angle)
-{
-    float a = ((float)angle) / 0x10000;
-    a *= 3.14f / 180.f;
-    float s = (float)sin(a);
-    return int32_t(s * 0x10000);
-}
-
-extern "C" int32_t cosx(int32_t angle)
-{
-    float a = ((float)angle) / 0x10000;
-    a *= 3.14f / 180.f;
-    float s = (float)cos(a);
-    return int32_t(s * 0x10000);
-}
-
 extern "C" float sinf(float angle)
 {
     float s = (float)sin(angle);
@@ -580,12 +519,12 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "loadF", (void *)&SC_loadF, "float loadF(int, int)" },
     { "storeI32", (void *)&SC_storeI32, "void storeI32(int, int, int)" },
     { "storeF", (void *)&SC_storeF, "void storeF(int, int, float)" },
-    { "drawQuad", (void *)&SC_drawQuad, "drawQuad(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
+    { "drawQuad", (void *)&SC_drawQuad, "void drawQuad(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
     { "sinf", (void *)&sinf, "float sinf(float)" },
     { "cosf", (void *)&cosf, "float cosf(float)" },
-    { "contextBindProgramFragmentStore", (void *)&contextBindProgramFragmentStore, "" },
-    { "pfClearColor", (void *)&pfClearColor, "" },
-    { "pfBindTexture", (void *)&pfBindTexture, "" },
+    { "contextBindProgramFragmentStore", (void *)&contextBindProgramFragmentStore, "void contextBindProgramFragmentStore(int)" },
+    { "pfClearColor", (void *)&pfClearColor, "void pfClearColor(float, float, float, float)" },
+    { "pfBindTexture", (void *)&pfBindTexture, "void pfBindTexture(int, int, int)" },
 
 
     { NULL, NULL, NULL }
@@ -618,12 +557,24 @@ static ACCvoid* symbolLookup(ACCvoid* pContext, const ACCchar* name)
     return NULL;
 }
 
+void ScriptCState::appendDecls(String8 *str)
+{
+    ScriptCState::SymbolTable_t *syms = gSyms;
+    while (syms->mPtr) {
+        str->append(syms->mDecl);
+        str->append(";\n");
+        syms++;
+    }
+}
+
 void ScriptCState::runCompiler(Context *rsc)
 {
     mAccScript = accCreateScript();
     String8 tmp;
 
     rsc->appendNameDefines(&tmp);
+    appendDecls(&tmp);
+    //tmp.append("#line 1\n");
 
     const char* scriptSource[] = {tmp.string(), mProgram.mScriptText};
     int scriptLength[] = {tmp.length(), mProgram.mScriptTextLength} ;
@@ -632,6 +583,14 @@ void ScriptCState::runCompiler(Context *rsc)
     accCompileScript(mAccScript);
     accGetScriptLabel(mAccScript, "main", (ACCvoid**) &mProgram.mScript);
     rsAssert(mProgram.mScript);
+
+    if (!mProgram.mScript) {
+        ACCchar buf[4096];
+        ACCsizei len;
+        accGetScriptInfoLog(mAccScript, sizeof(buf), &len, buf);
+        LOGE(buf);
+
+    }
 
     mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
     mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());
