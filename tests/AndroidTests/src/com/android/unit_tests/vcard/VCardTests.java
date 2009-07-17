@@ -14,36 +14,130 @@
  * limitations under the License.
  */
 
-package com.android.unit_tests;
+package com.android.unit_tests.vcard;
 
 import android.content.ContentValues;
-import android.syncml.pim.PropertyNode;
-import android.syncml.pim.VDataBuilder;
-import android.syncml.pim.VNode;
-import android.syncml.pim.vcard.VCardException;
-import android.syncml.pim.vcard.VCardParser_V21;
-import android.syncml.pim.vcard.VCardParser_V30;
+import android.pim.vcard.ContactStruct;
+import android.pim.vcard.EntryHandler;
+import android.pim.vcard.VCardBuilder;
+import android.pim.vcard.VCardBuilderCollection;
+import android.pim.vcard.VCardConfig;
+import android.pim.vcard.VCardDataBuilder;
+import android.pim.vcard.VCardParser;
+import android.pim.vcard.VCardParser_V21;
+import android.pim.vcard.VCardParser_V30;
+import android.pim.vcard.exception.VCardException;
 import android.test.AndroidTestCase;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Vector;
+import java.util.List;
+import java.util.Map;
 
 public class VCardTests extends AndroidTestCase {
 
+    // TODO: Use EntityIterator, which is added in Eclair.
+    private static class EntryHolder implements EntryHandler {
+        public List<ContactStruct> contacts = new ArrayList<ContactStruct>();
+        public void onEntryCreated(ContactStruct contactStruct) {
+            contacts.add(contactStruct);
+        }
+        public void onFinal() {
+        }
+    }
+    
+    static void verify(ContactStruct expected, ContactStruct actual) {
+        if (!equalsString(expected.getName(), actual.getName())) {
+            fail(String.format("Names do not equal: \"%s\" != \"%s\"",
+                    expected.getName(), actual.getName()));
+        }
+        if (!equalsString(
+                expected.getPhoneticName(), actual.getPhoneticName())) {
+            fail(String.format("Phonetic names do not equal: \"%s\" != \"%s\"",
+                    expected.getPhoneticName(), actual.getPhoneticName()));
+        }
+        {
+            final byte[] expectedPhotoBytes = expected.getPhotoBytes();
+            final byte[] actualPhotoBytes = actual.getPhotoBytes();
+            if (!((expectedPhotoBytes == null && actualPhotoBytes == null) ||
+                    Arrays.equals(expectedPhotoBytes, actualPhotoBytes))) {
+                fail("photoBytes is not equal.");
+            }
+        }
+        verifyInternal(expected.getNotes(), actual.getNotes(), "notes");
+        verifyInternal(expected.getPhoneList(), actual.getPhoneList(), "phones");
+        verifyInternal(expected.getContactMethodList(), actual.getContactMethodList(),
+                "contact lists");
+        verifyInternal(expected.getOrganizationList(), actual.getOrganizationList(),
+                "organizations");
+        {
+            final Map<String, List<String>> expectedMap =
+                expected.getExtensionMap();
+            final Map<String, List<String>> actualMap =
+                actual.getExtensionMap();
+            if (verifySize((expectedMap == null ? 0 : expectedMap.size()),
+                    (actualMap == null ? 0 : actualMap.size()), "extensions") > 0) {
+                for (String key : expectedMap.keySet()) {
+                    if (!actualMap.containsKey(key)) {
+                        fail(String.format(
+                                "Actual does not have %s extension while expected has",
+                                key));
+                    }
+                    final List<String> expectedList = expectedMap.get(key);
+                    final List<String> actualList = actualMap.get(key);
+                    verifyInternal(expectedList, actualList,
+                            String.format("extension \"%s\"", key));
+                }
+            }
+        }
+    }
+    
+    private static boolean equalsString(String a, String b) {
+        if (a == null || a.length() == 0) {
+            return b == null || b.length() == 0;
+        } else {
+            return a.equals(b);
+        }
+    }
+    
+    private static int verifySize(int expectedSize, int actualSize, String name) {
+        if (expectedSize != actualSize) {
+            fail(String.format("Size of %s is different: %d != %d", 
+                    name, expectedSize, actualSize));
+        }
+        return expectedSize;
+    }
+        
+    private static <T> void verifyInternal(final List<T> expected, final List<T> actual,
+            String name) {
+        if(verifySize((expected == null ? 0 : expected.size()),
+                (actual == null ? 0 : actual.size()), name) > 0) {
+            int size = expected.size();
+            for (int i = 0; i < size; i++) {
+                final T expectedObj = expected.get(i);
+                final T actualObj = actual.get(i);
+                if (!expected.equals(actual)) {
+                    fail(String.format("The %i %s are different: %s != %s",
+                            i, name, expectedObj, actualObj));
+                }
+            }
+        }
+    }
+
     private class PropertyNodesVerifier {
-        private HashMap<String, Vector<PropertyNode>> mPropertyNodeMap;
+        private HashMap<String, ArrayList<PropertyNode>> mPropertyNodeMap;
         public PropertyNodesVerifier(PropertyNode... nodes) {
-            mPropertyNodeMap = new HashMap<String, Vector<PropertyNode>>();
+            mPropertyNodeMap = new HashMap<String, ArrayList<PropertyNode>>();
             for (PropertyNode propertyNode : nodes) {
                 String propName = propertyNode.propName;
-                Vector<PropertyNode> expectedNodes =
+                ArrayList<PropertyNode> expectedNodes =
                     mPropertyNodeMap.get(propName);
                 if (expectedNodes == null) {
-                    expectedNodes = new Vector<PropertyNode>();
+                    expectedNodes = new ArrayList<PropertyNode>();
                     mPropertyNodeMap.put(propName, expectedNodes);
                 }
                 expectedNodes.add(propertyNode);
@@ -53,7 +147,7 @@ public class VCardTests extends AndroidTestCase {
         public void verify(VNode vnode) {
             for (PropertyNode propertyNode : vnode.propList) {
                 String propName = propertyNode.propName;
-                Vector<PropertyNode> nodes = mPropertyNodeMap.get(propName);
+                ArrayList<PropertyNode> nodes = mPropertyNodeMap.get(propName);
                 if (nodes == null) {
                     fail("Unexpected propName \"" + propName + "\" exists.");
                 }
@@ -81,8 +175,8 @@ public class VCardTests extends AndroidTestCase {
                 }
             }
             if (mPropertyNodeMap.size() != 0) {
-                Vector<String> expectedProps = new Vector<String>();
-                for (Vector<PropertyNode> nodes : mPropertyNodeMap.values()) {
+                ArrayList<String> expectedProps = new ArrayList<String>();
+                for (ArrayList<PropertyNode> nodes : mPropertyNodeMap.values()) {
                     for (PropertyNode node : nodes) {
                         expectedProps.add(node.propName);
                     }
@@ -93,25 +187,82 @@ public class VCardTests extends AndroidTestCase {
         }
     }
     
-    public void testV21SimpleCase() throws IOException, VCardException {
-        VCardParser_V21 parser = new VCardParser_V21();
-        VDataBuilder builder = new VDataBuilder();
-        InputStream is = getContext().getResources().openRawResource(R.raw.v21_simple);
+    public void testV21SimpleCase1_1() throws IOException, VCardException {
+        VCardParser parser = new VCardParser_V21();
+        VCardDataBuilder builder = new VCardDataBuilder(VCardConfig.NAME_ORDER_TYPE_ENGLISH);
+        EntryHolder holder = new EntryHolder();
+        builder.addEntryHandler(holder);
+        InputStream is = getContext().getResources().openRawResource(R.raw.v21_simple_1);
         assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
         is.close();
-        assertEquals(1, builder.vNodeList.size());
+        assertEquals(1, holder.contacts.size());
+        verify(new ContactStruct("Roid Ando", null,
+                null, null, null, null, null, null),
+                holder.contacts.get(0));
+    }
+    
+    public void testV21SimpleCase1_2() throws IOException, VCardException {
+        VCardParser parser = new VCardParser_V21();
+        VCardDataBuilder builder = new VCardDataBuilder(VCardConfig.NAME_ORDER_TYPE_JAPANESE);
+        EntryHolder holder = new EntryHolder();
+        builder.addEntryHandler(holder);
+        InputStream is = getContext().getResources().openRawResource(R.raw.v21_simple_1);
+        assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
+        is.close();
+        assertEquals(1, holder.contacts.size());
+        verify(new ContactStruct("Ando Roid", null,
+                null, null, null, null, null, null),
+                holder.contacts.get(0));
+    }
+    
+    public void testV21SimpleCase2() throws IOException, VCardException {
+        VCardParser parser = new VCardParser_V21();
+        VCardDataBuilder builder = new VCardDataBuilder(VCardConfig.NAME_ORDER_TYPE_ENGLISH);
+        EntryHolder holder = new EntryHolder();
+        builder.addEntryHandler(holder);
+        InputStream is = getContext().getResources().openRawResource(R.raw.v21_simple_2);
+        assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
+        is.close();
+        assertEquals(1, holder.contacts.size());
+        verify(new ContactStruct("Ando Roid", null,
+                null, null, null, null, null, null),
+                holder.contacts.get(0));
+    }
+
+    public void testV21SimpleCase3() throws IOException, VCardException {
+        VCardParser parser = new VCardParser_V21();
+        VCardDataBuilder builder1 = new VCardDataBuilder(VCardConfig.NAME_ORDER_TYPE_ENGLISH);
+        EntryHolder holder = new EntryHolder();
+        builder1.addEntryHandler(holder);
+        VNodeBuilder builder2 = new VNodeBuilder();
+        VCardBuilderCollection collection =
+            new VCardBuilderCollection(
+                    new ArrayList<VCardBuilder>(Arrays.asList(builder1, builder2)));
+        InputStream is = getContext().getResources().openRawResource(R.raw.v21_simple_3);
+        assertEquals(true, parser.parse(is,"ISO-8859-1", collection));
+        is.close();
+
+        assertEquals(1, builder2.vNodeList.size());
+        VNode vnode = builder2.vNodeList.get(0); 
         PropertyNodesVerifier verifier = new PropertyNodesVerifier(
                 new PropertyNode("N", "Ando;Roid;",
                         Arrays.asList("Ando", "Roid", ""),
                         null, null, null, null),
                 new PropertyNode("FN", "Ando Roid",
                         null, null, null, null, null));
-        verifier.verify(builder.vNodeList.get(0));
+        verifier.verify(vnode);
+        
+        // FN is prefered.
+        assertEquals(1, holder.contacts.size());
+        ContactStruct actual = holder.contacts.get(0); 
+        verify(new ContactStruct("Ando Roid", null,
+                null, null, null, null, null, null),
+                actual);
     }
-    
+
     public void testV21BackslashCase() throws IOException, VCardException {
         VCardParser_V21 parser = new VCardParser_V21();
-        VDataBuilder builder = new VDataBuilder();
+        VNodeBuilder builder = new VNodeBuilder();
         InputStream is = getContext().getResources().openRawResource(R.raw.v21_backslash);
         assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
         is.close();
@@ -129,7 +280,7 @@ public class VCardTests extends AndroidTestCase {
     
     public void testV21ComplicatedCase() throws IOException, VCardException {
         VCardParser_V21 parser = new VCardParser_V21();
-        VDataBuilder builder = new VDataBuilder();
+        VNodeBuilder builder = new VNodeBuilder();
         InputStream is = getContext().getResources().openRawResource(R.raw.v21_complicated);
         assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
         is.close();
@@ -585,7 +736,7 @@ public class VCardTests extends AndroidTestCase {
     
     public void testV21Japanese1() throws IOException, VCardException {
         VCardParser_V21 parser = new VCardParser_V21();
-        VDataBuilder builder = new VDataBuilder();
+        VNodeBuilder builder = new VNodeBuilder();
         InputStream is = getContext().getResources().openRawResource(R.raw.v21_japanese_1);
         assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
         is.close();
@@ -616,7 +767,7 @@ public class VCardTests extends AndroidTestCase {
     
     public void testV21Japanese2() throws IOException, VCardException {
         VCardParser_V21 parser = new VCardParser_V21();
-        VDataBuilder builder = new VDataBuilder();
+        VNodeBuilder builder = new VNodeBuilder();
         InputStream is = getContext().getResources().openRawResource(R.raw.v21_japanese_2);
         assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
         is.close();
@@ -660,7 +811,7 @@ public class VCardTests extends AndroidTestCase {
     
     public void testV21MultipleEntryCase() throws IOException, VCardException {
         VCardParser_V21 parser = new VCardParser_V21();
-        VDataBuilder builder = new VDataBuilder();
+        VNodeBuilder builder = new VNodeBuilder();
         InputStream is = getContext().getResources().openRawResource(R.raw.v21_multiple_entry);
         assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
         is.close();
@@ -741,7 +892,7 @@ public class VCardTests extends AndroidTestCase {
     
     public void testV30SimpleCase() throws IOException, VCardException {
         VCardParser_V21 parser = new VCardParser_V30();
-        VDataBuilder builder = new VDataBuilder();
+        VNodeBuilder builder = new VNodeBuilder();
         InputStream is = getContext().getResources().openRawResource(R.raw.v30_simple);
         assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
         is.close();
