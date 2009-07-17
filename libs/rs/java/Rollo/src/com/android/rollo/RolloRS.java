@@ -47,6 +47,7 @@ public class RolloRS {
     public static final int STATE_SELECTION = 6;
     public static final int STATE_FIRST_VISIBLE = 7;
     public static final int STATE_COUNT = 8;
+    public static final int STATE_TOUCH = 9;
 
 
     public RolloRS() {
@@ -64,20 +65,25 @@ public class RolloRS {
         mAllocState.data(mAllocStateBuf);
     }
 
+    public void setTouch(boolean touch) {
+        mAllocStateBuf[STATE_TOUCH] = touch ? 1 : 0;
+        mAllocState.data(mAllocStateBuf);
+    }
+
     public void setShadow(float x, float y, float size) {
         // x and y are normalized at this point.
         mAllocStateBuf[STATE_POS_X] = (int)(x * 1000);
         mAllocStateBuf[STATE_POS_Y] = (int)(y * 1000);
         mAllocStateBuf[STATE_PRESSURE] = (int)(size * 1000);
 
-        Log.e("rs","shadow x=" + Integer.toString(mAllocStateBuf[STATE_POS_X]) +
-              "  y=" + Integer.toString(mAllocStateBuf[STATE_POS_X]) +
-              "  s=" + Integer.toString(mAllocStateBuf[STATE_PRESSURE]));
+        //Log.e("rs","shadow x=" + Integer.toString(mAllocStateBuf[STATE_POS_X]) +
+              //"  y=" + Integer.toString(mAllocStateBuf[STATE_POS_X]) +
+              //"  s=" + Integer.toString(mAllocStateBuf[STATE_PRESSURE]));
         mAllocState.data(mAllocStateBuf);
     }
 
     public void setZoom(float z) {
-        Log.e("rs", "zoom " + Float.toString(z));
+        //Log.e("rs", "zoom " + Float.toString(z));
 
         mAllocStateBuf[STATE_ZOOM] = (int)(z * 10.f);
         mAllocState.data(mAllocStateBuf);
@@ -253,7 +259,7 @@ public class RolloRS {
         //mRS.scriptCSetClearDepth(0);
         mScript = mRS.scriptCCreate();
 
-        mAllocStateBuf = new int[] {0, 0, 0, 8, 0, 0, 0, 0, 38, 0};
+        mAllocStateBuf = new int[] {0, 0, 0, 8, 0, 0, 0, 0, 38, 0, 0};
         mAllocState = mRS.allocationCreatePredefSized(
             RenderScript.ElementPredefined.USER_I32, mAllocStateBuf.length);
         mScript.bindAllocation(mAllocState, 0);
