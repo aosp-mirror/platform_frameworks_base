@@ -654,9 +654,15 @@ bool AaptGroupEntry::getDensityName(const char* name,
                                     ResTable_config* out)
 {
     if (strcmp(name, kWildcardName) == 0) {
-        if (out) out->density = 0;
+        if (out) out->density = ResTable_config::DENSITY_DEFAULT;
         return true;
     }
+    
+    if (strcmp(name, "nodpi") == 0) {
+        if (out) out->density = ResTable_config::DENSITY_NONE;
+        return true;
+    }
+    
     char* c = (char*)name;
     while (*c >= '0' && *c <= '9') {
         c++;

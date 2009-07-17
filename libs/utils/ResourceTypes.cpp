@@ -4007,7 +4007,16 @@ void ResTable::print(bool inclValues) const
                         printf("      NON-INTEGER ResTable_type ADDRESS: %p\n", type);
                         continue;
                     }
-                    printf("      config %d lang=%c%c cnt=%c%c orien=%d touch=%d density=%d key=%d infl=%d nav=%d w=%d h=%d lyt=%d\n",
+                    char density[16];
+                    uint16_t dval = dtohs(type->config.density);
+                    if (dval == ResTable_config::DENSITY_DEFAULT) {
+                        strcpy(density, "def");
+                    } else if (dval == ResTable_config::DENSITY_NONE) {
+                        strcpy(density, "non");
+                    } else {
+                        sprintf(density, "%d", (int)dval);
+                    }
+                    printf("      config %d lang=%c%c cnt=%c%c orien=%d touch=%d density=%s key=%d infl=%d nav=%d w=%d h=%d lyt=%d\n",
                            (int)configIndex,
                            type->config.language[0] ? type->config.language[0] : '-',
                            type->config.language[1] ? type->config.language[1] : '-',
@@ -4015,7 +4024,7 @@ void ResTable::print(bool inclValues) const
                            type->config.country[1] ? type->config.country[1] : '-',
                            type->config.orientation,
                            type->config.touchscreen,
-                           dtohs(type->config.density),
+                           density,
                            type->config.keyboard,
                            type->config.inputFlags,
                            type->config.navigation,

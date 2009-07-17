@@ -31,8 +31,6 @@ public final class Bitmap implements Parcelable {
      *
      * @see Bitmap#getDensityScale()
      * @see Bitmap#setDensityScale(float)
-     *
-     * @hide pending API council approval
      */
     public static final float DENSITY_SCALE_UNKNOWN = -1.0f;
 
@@ -84,11 +82,9 @@ public final class Bitmap implements Parcelable {
      * @see #setDensityScale(float)
      * @see #isAutoScalingEnabled()
      * @see #setAutoScalingEnabled(boolean)
-     * @see android.util.DisplayMetrics#DEFAULT_DENSITY
+     * @see android.util.DisplayMetrics#DENSITY_DEFAULT
      * @see android.util.DisplayMetrics#density
      * @see #DENSITY_SCALE_UNKNOWN
-     *
-     * @hide pending API council approval
      */
     public float getDensityScale() {
         return mDensityScale;
@@ -106,11 +102,9 @@ public final class Bitmap implements Parcelable {
      * @see #getDensityScale()
      * @see #isAutoScalingEnabled()
      * @see #setAutoScalingEnabled(boolean)
-     * @see android.util.DisplayMetrics#DEFAULT_DENSITY
+     * @see android.util.DisplayMetrics#DENSITY_DEFAULT
      * @see android.util.DisplayMetrics#density
      * @see #DENSITY_SCALE_UNKNOWN
-     *
-     * @hide pending API council approval
      */
     public void setDensityScale(float densityScale) {
         mDensityScale = densityScale;
@@ -132,8 +126,6 @@ public final class Bitmap implements Parcelable {
      * @see #setAutoScalingEnabled(boolean)
      * @see #getDensityScale()
      * @see #setDensityScale(float)
-     *
-     * @hide pending API council approval
      */
     public boolean isAutoScalingEnabled() {
         return mAutoScaling;
@@ -150,8 +142,6 @@ public final class Bitmap implements Parcelable {
      * the bitmap will never be automatically scaled at drawing time.</p>
      *
      * @param autoScalingEnabled True to scale the bitmap at drawing time, false otherwise.
-     *
-     * @hide pending API council approval
      */
     public void setAutoScalingEnabled(boolean autoScalingEnabled) {
         mAutoScaling = autoScalingEnabled;
@@ -465,8 +455,8 @@ public final class Bitmap implements Parcelable {
 
         // The new bitmap was created from a known bitmap source so assume that
         // they use the same density scale
-        bitmap.setDensityScale(source.getDensityScale());
-        bitmap.setAutoScalingEnabled(source.isAutoScalingEnabled());
+        bitmap.mDensityScale = source.mDensityScale;
+        bitmap.mAutoScaling = source.mAutoScaling;
 
         return bitmap;
     }
@@ -616,11 +606,9 @@ public final class Bitmap implements Parcelable {
      * by the density scale factor.
      *
      * @return The scaled width of this bitmap, according to the density scale factor.
-     *
-     * @hide pending API council approval
      */
     public int getScaledWidth() {
-        final float scale = getDensityScale();
+        final float scale = mDensityScale;
         return scale == DENSITY_SCALE_UNKNOWN ? getWidth() : (int) (getWidth() / scale);
     }
 
@@ -629,11 +617,9 @@ public final class Bitmap implements Parcelable {
      * by the density scale factor.
      *
      * @return The scaled height of this bitmap, according to the density scale factor.
-     *
-     * @hide pending API council approval
      */
     public int getScaledHeight() {
-        final float scale = getDensityScale();
+        final float scale = mDensityScale;
         return scale == DENSITY_SCALE_UNKNOWN ? getWidth() : (int) (getHeight() / scale);
     }
 
