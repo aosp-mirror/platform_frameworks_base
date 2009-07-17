@@ -104,7 +104,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                     break;
                 }
             } else if (action.equals(BluetoothIntent.REMOTE_DEVICE_CONNECTED_ACTION)) {
-                if (getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF) {
+                if (getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF &&
+                        isSinkDevice(address)) {
                     // This device is a preferred sink. Make an A2DP connection
                     // after a delay. We delay to avoid connection collisions,
                     // and to give other profiles such as HFP a chance to
@@ -183,6 +184,18 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (value.equalsIgnoreCase("playing"))
             return BluetoothA2dp.STATE_PLAYING;
         return -1;
+    }
+
+    private boolean isSinkDevice(String address) {
+        String uuids[] = mBluetoothService.getRemoteUuids(address);
+        UUID uuid;
+        for (String deviceUuid: uuids) {
+            uuid = UUID.fromString(deviceUuid);
+            if (BluetoothUuid.isAudioSink(uuid)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private synchronized boolean addAudioSink (String address) {
