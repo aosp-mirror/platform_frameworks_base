@@ -23,22 +23,20 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Canvas;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.server.search.SearchableInfo;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
@@ -63,6 +61,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private SearchableInfo mSearchable;
     private Context mProviderContext;
     private WeakHashMap<String, Drawable> mOutsideDrawablesCache;
+    private SparseArray<Drawable> mBackgroundsCache;
     private boolean mGlobalSearchMode;
 
     // Cached column indexes, updated when the cursor changes.
@@ -106,6 +105,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         mProviderContext = mSearchable.getProviderContext(mContext, activityContext);
 
         mOutsideDrawablesCache = outsideDrawablesCache;
+        mBackgroundsCache = new SparseArray<Drawable>();
         mGlobalSearchMode = globalSearchMode;
 
         mStartSpinnerRunnable = new Runnable() {
@@ -256,7 +256,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View v = new SuggestionItemView(context, cursor);
+        View v = super.newView(context, cursor, parent);
         v.setTag(new ChildViewCache(v));
         return v;
     }
@@ -301,23 +301,69 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (mBackgroundColorCol != -1) {
             backgroundColor = cursor.getInt(mBackgroundColorCol);
         }
-        ((SuggestionItemView)view).setColor(backgroundColor);
+        Drawable background = getItemBackground(backgroundColor);
+        view.setBackgroundDrawable(background);
 
         final boolean isHtml = mFormatCol > 0 && "html".equals(cursor.getString(mFormatCol));
-        String text1 = null;
-        if (mText1Col >= 0) {
-            text1 = cursor.getString(mText1Col);
-        }
-        String text2 = null;
-        if (mText2Col >= 0) {
-            text2 = cursor.getString(mText2Col);
-        }
-        ((SuggestionItemView)view).setTextStrings(text1, text2, isHtml, mProviderContext);
+        setViewText(cursor, views.mText1, mText1Col, isHtml);
+        setViewText(cursor, views.mText2, mText2Col, isHtml);
+
         if (views.mIcon1 != null) {
             setViewDrawable(views.mIcon1, getIcon1(cursor));
         }
         if (views.mIcon2 != null) {
             setViewDrawable(views.mIcon2, getIcon2(cursor));
+        }
+    }
+
+    /**
+     * Gets a drawable with no color when selected or pressed, and the given color when
+     * neither selected nor pressed.
+     *
+     * @return A drawable, or {@code null} if the given color is transparent.
+     */
+    private Drawable getItemBackground(int backgroundColor) {
+        if (backgroundColor == 0) {
+            return null;
+        } else {
+            Drawable cachedBg = mBackgroundsCache.get(backgroundColor);
+            if (cachedBg != null) {
+                if (DBG) Log.d(LOG_TAG, "Background cache hit for color " + backgroundColor);
+                // copy the drawable so that they don't share states
+                return cachedBg.getConstantState().newDrawable();
+            }
+            if (DBG) Log.d(LOG_TAG, "Creating new background for color " + backgroundColor);
+            ColorDrawable transparent = new ColorDrawable(0);
+            ColorDrawable background = new ColorDrawable(backgroundColor);
+            StateListDrawable newBg = new StateListDrawable();
+            newBg.addState(new int[]{android.R.attr.state_selected}, transparent);
+            newBg.addState(new int[]{android.R.attr.state_pressed}, transparent);
+            newBg.addState(new int[]{}, background);
+            mBackgroundsCache.put(backgroundColor, newBg);
+            return newBg;
+        }
+    }
+
+    private void setViewText(Cursor cursor, TextView v, int textCol, boolean isHtml) {
+        if (v == null) {
+            return;
+        }
+        CharSequence text = null;
+        if (textCol >= 0) {
+            String str = cursor.getString(textCol);
+            if (isHtml && !TextUtils.isEmpty(str)) {
+                text = Html.fromHtml(str);
+            } else {
+                text = str;
+            }
+        }
+        // Set the text even if it's null, since we need to clear any previous text.
+        v.setText(text);
+
+        if (TextUtils.isEmpty(text)) {
+            v.setVisibility(View.GONE);
+        } else {
+            v.setVisibility(View.VISIBLE);
         }
     }
 
@@ -592,181 +638,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             return null;
         }
         return cursor.getString(col);
-    }
-
-    /**
-     * A parent viewgroup class which holds the actual suggestion item as a child.
-     *
-     * The sole purpose of this class is to draw the given background color when the item is in
-     * normal state and not draw the background color when it is pressed, so that when pressed the
-     * list view's selection highlight will be displayed properly (if we draw our background it
-     * draws on top of the list view selection highlight).
-     */
-    private class SuggestionItemView extends ViewGroup {
-        /**
-         * Parses a given HTMl string and manages Spannable variants of the string for different
-         * states of the suggestion item (selected, pressed and normal). Colors for these different
-         * states are specified in the html font tag color attribute in the format '@<RESOURCEID>'
-         * where RESOURCEID is the ID of a ColorStateList or Color resource. 
-         */
-        private class MultiStateText {
-            private CharSequence mNormal = null;  // text to display in normal state.
-            private CharSequence mSelected = null;  // text to display in selected state.
-            private CharSequence mPressed = null;  // text to display in pressed state.
-            private String mPlainText = null;  // valid if the text is stateless plain text.
-
-            public MultiStateText(boolean isHtml, String text, Context context) {
-                if (!isHtml || text == null) {
-                    mPlainText = text;
-                    return;
-                }
-
-                String textNormal = text;
-                String textSelected = text;
-                String textPressed = text;
-                int textLength = text.length();
-                int start = text.indexOf("\"@");
-
-                // For each font color attribute which has the value in the form '@<RESOURCEID>',
-                // try to load the resource and create the display strings for the 3 states.
-                while (start >= 0) {
-                    start++;
-                    int end = text.indexOf("\"", start);
-                    if (end == -1) break;
-
-                    String colorIdString = text.substring(start, end);
-                    int colorId = Integer.parseInt(colorIdString.substring(1));
-                    try {
-                        // The following call works both for color lists and colors.
-                        ColorStateList csl = context.getResources().getColorStateList(colorId);
-                        int normalColor = csl.getColorForState(
-                                View.EMPTY_STATE_SET, csl.getDefaultColor());
-                        int selectedColor = csl.getColorForState(
-                                View.SELECTED_STATE_SET, csl.getDefaultColor());
-                        int pressedColor = csl.getColorForState(
-                                View.PRESSED_STATE_SET, csl.getDefaultColor());
-
-                        // Convert the int color values into a hex string, and strip the first 2
-                        // characters which will be the alpha (html doesn't want this).
-                        textNormal = textNormal.replace(colorIdString,
-                                "#" + Integer.toHexString(normalColor).substring(2));
-                        textSelected = textSelected.replace(colorIdString,
-                                "#" + Integer.toHexString(selectedColor).substring(2));
-                        textPressed = textPressed.replace(colorIdString,
-                                "#" + Integer.toHexString(pressedColor).substring(2));
-                    } catch (Resources.NotFoundException e) {
-                        // Nothing to do.
-                    }
-
-                    start = text.indexOf("\"@", end);
-                }
-                mNormal = Html.fromHtml(textNormal);
-                mSelected = Html.fromHtml(textSelected);
-                mPressed = Html.fromHtml(textPressed);
-            }
-            public CharSequence normal() {
-                return (mPlainText != null) ? mPlainText : mNormal;
-            }
-            public CharSequence selected() {
-                return (mPlainText != null) ? mPlainText : mSelected;
-            }
-            public CharSequence pressed() {
-                return (mPlainText != null) ? mPlainText : mPressed;
-            }
-        }
-
-        private int mBackgroundColor;  // the background color to draw in normal state.
-        private View mView;  // the suggestion item's view.
-        private MultiStateText mText1Strings = null;
-        private MultiStateText mText2Strings = null;
-
-        protected SuggestionItemView(Context context, Cursor cursor) {
-            // Initialize ourselves
-            super(context);
-            mBackgroundColor = 0;  // transparent by default.
-
-            // For our layout use the default list item height from the current theme.
-            TypedValue lineHeight = new TypedValue();
-            context.getTheme().resolveAttribute(
-                    com.android.internal.R.attr.searchResultListItemHeight, lineHeight, true);
-            DisplayMetrics metrics = new DisplayMetrics();
-            metrics.setToDefaults();
-            AbsListView.LayoutParams layout = new AbsListView.LayoutParams(
-                    AbsListView.LayoutParams.FILL_PARENT,
-                    (int)lineHeight.getDimension(metrics));
-
-            setLayoutParams(layout);
-
-            // Initialize the child view
-            mView = SuggestionsAdapter.super.newView(context, cursor, this);
-            if (mView != null) {
-                addView(mView, layout.width, layout.height);
-                mView.setVisibility(View.VISIBLE);
-            }
-        }
-
-        private void setInitialTextForView(TextView view, MultiStateText multiState,
-                String plainText) {
-            // Set the text even if it's null, since we need to clear any previous text.
-            CharSequence text = (multiState != null) ? multiState.normal() : plainText;
-            view.setText(text);
-
-            if (TextUtils.isEmpty(text)) {
-                view.setVisibility(View.GONE);
-            } else {
-                view.setVisibility(View.VISIBLE);
-            }
-        }
-
-        public void setTextStrings(String text1, String text2, boolean isHtml, Context context) {
-            mText1Strings = new MultiStateText(isHtml, text1, context);
-            mText2Strings = new MultiStateText(isHtml, text2, context);
-
-            ChildViewCache views = (ChildViewCache) getTag();
-            setInitialTextForView(views.mText1, mText1Strings, text1);
-            setInitialTextForView(views.mText2, mText2Strings, text2);
-        }
-
-        public void updateTextViewContentIfRequired() {
-            // Check if the pressed or selected state has changed since the last call.
-            boolean isPressedNow = isPressed();
-            boolean isSelectedNow = isSelected();
-
-            ChildViewCache views = (ChildViewCache) getTag();
-            views.mText1.setText((isPressedNow ? mText1Strings.pressed() :
-                (isSelectedNow ? mText1Strings.selected() : mText1Strings.normal())));
-            views.mText2.setText((isPressedNow ? mText2Strings.pressed() :
-                (isSelectedNow ? mText2Strings.selected() : mText2Strings.normal())));
-        }
-
-        public void setColor(int backgroundColor) {
-            mBackgroundColor = backgroundColor;
-        }
-
-        @Override
-        public void dispatchDraw(Canvas canvas) {
-            updateTextViewContentIfRequired();
-
-            if (mBackgroundColor != 0 && !isPressed() && !isSelected()) {
-                canvas.drawColor(mBackgroundColor);
-            }
-            super.dispatchDraw(canvas);
-        }
-
-        @Override
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            if (mView != null) {
-                mView.measure(widthMeasureSpec, heightMeasureSpec);
-            }
-        }
-
-        @Override
-        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-            if (mView != null) {
-                mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
-            }
-        }
     }
 
 }
