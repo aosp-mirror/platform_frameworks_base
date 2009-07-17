@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <stddef.h>
 #include <sys/time.h>
 
 #include <media/stagefright/TimeSource.h>

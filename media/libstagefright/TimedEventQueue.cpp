@@ -16,6 +16,7 @@
 
 #undef __STRICT_ANSI__
 #define __STDINT_LIMITS
+#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
 #define LOG_TAG "TimedEventQueue"

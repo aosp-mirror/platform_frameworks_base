@@ -18,6 +18,8 @@
 
 #define TIME_SOURCE_H_
 
+#include <stdint.h>
+
 namespace android {
 
 class TimeSource {
