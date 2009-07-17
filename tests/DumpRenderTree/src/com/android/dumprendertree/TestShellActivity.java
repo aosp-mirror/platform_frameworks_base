@@ -228,8 +228,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        Log.e(LOGTAG, "Low memory, kill self");
-        System.exit(1);
+        Log.e(LOGTAG, "Low memory, clearing caches");
+        mWebView.freeMemory();
     }
 
     // Dump the page
