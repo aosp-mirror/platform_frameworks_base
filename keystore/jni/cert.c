@@ -136,28 +136,124 @@ err:
     return ret_code;
 }
 
-int is_pkcs12(const char *buf, int bufLen)
+PKCS12 *get_p12_handle(const char *buf, int bufLen)
 {
-    int ret = 0;
     BIO *bp = NULL;
     PKCS12  *p12 = NULL;
 
-    if (!buf || bufLen < 1) goto err;
+    if (!buf || (bufLen < 1) || (buf[0] != 48)) goto err;
 
     bp = BIO_new(BIO_s_mem());
     if (!bp) goto err;
 
-    if (buf[0] != 48) goto err; // it is not DER.
-
     if (!BIO_write(bp, buf, bufLen)) goto err;
 
-    if ((p12 = d2i_PKCS12_bio(bp, NULL)) != NULL) {
-        PKCS12_free(p12);
-        ret = 1;
-    }
+    p12 = d2i_PKCS12_bio(bp, NULL);
+
 err:
     if (bp) BIO_free(bp);
+    return p12;
+}
+
+PKCS12_KEYSTORE *get_pkcs12_keystore_handle(const char *buf, int bufLen,
+                                            const char *passwd)
+{
+    PKCS12_KEYSTORE *p12store = NULL;
+    EVP_PKEY *pkey = NULL;
+    X509 *cert = NULL;
+    STACK_OF(X509) *certs = NULL;
+    PKCS12  *p12 = get_p12_handle(buf, bufLen);
+
+    if (p12 == NULL) return NULL;
+    if (!PKCS12_parse(p12, passwd, &pkey, &cert, &certs)) {
+        LOGE("Can not parse PKCS12 content");
+        PKCS12_free(p12);
+        return NULL;
+    }
+    if ((p12store = malloc(sizeof(PKCS12_KEYSTORE))) == NULL) {
+        if (cert) X509_free(cert);
+        if (pkey) EVP_PKEY_free(pkey);
+        if (certs) sk_X509_free(certs);
+    }
+    p12store->p12 = p12;
+    p12store->pkey = pkey;
+    p12store->cert = cert;
+    p12store->certs = certs;
+    return p12store;
+}
+
+void free_pkcs12_keystore(PKCS12_KEYSTORE *p12store)
+{
+    if (p12store != NULL) {
+        if (p12store->cert) X509_free(p12store->cert);
+        if (p12store->pkey) EVP_PKEY_free(p12store->pkey);
+        if (p12store->certs) sk_X509_free(p12store->certs);
+        free(p12store);
+    }
+}
+
+int is_pkcs12(const char *buf, int bufLen)
+{
+    int ret = 0;
+    PKCS12  *p12 = get_p12_handle(buf, bufLen);
+    if (p12 != NULL) ret = 1;
+    PKCS12_free(p12);
     return ret;
+}
+
+static int convert_to_pem(void *data, int is_cert, char *buf, int size)
+{
+    int len = 0;
+    BIO *bio = NULL;
+
+    if (data == NULL) return -1;
+
+    if ((bio = BIO_new(BIO_s_mem())) == NULL) goto err;
+    if (is_cert) {
+        if ((len = PEM_write_bio_X509(bio, (X509*)data)) == 0) {
+            goto err;
+        }
+    } else {
+        if ((len = PEM_write_bio_PrivateKey(bio, (EVP_PKEY *)data, NULL,
+                                            NULL, 0, NULL, NULL)) == 0) {
+            goto err;
+        }
+    }
+    if (len < size && (len = BIO_read(bio, buf, size - 1)) > 0) {
+        buf[len] = 0;
+    }
+err:
+    if (bio) BIO_free(bio);
+    return (len == 0) ? -1 : 0;
+}
+
+int get_pkcs12_certificate(PKCS12_KEYSTORE *p12store, char *buf, int size)
+{
+    if ((p12store != NULL) && (p12store->cert != NULL)) {
+        return convert_to_pem((void*)p12store->cert, 1, buf, size);
+    }
+    return -1;
+}
+
+int get_pkcs12_private_key(PKCS12_KEYSTORE *p12store, char *buf, int size)
+{
+    if ((p12store != NULL) && (p12store->pkey != NULL)) {
+        return convert_to_pem((void*)p12store->pkey, 0, buf, size);
+    }
+    return -1;
+}
+
+int pop_pkcs12_certs_stack(PKCS12_KEYSTORE *p12store, char *buf, int size)
+{
+    X509 *cert = NULL;
+
+    if ((p12store != NULL) && (p12store->certs != NULL) &&
+        ((cert = sk_X509_pop(p12store->certs)) != NULL)) {
+        int ret = convert_to_pem((void*)cert, 1, buf, size);
+        X509_free(cert);
+        return ret;
+    }
+    return -1;
 }
 
 X509* parse_cert(const char *buf, int bufLen)
