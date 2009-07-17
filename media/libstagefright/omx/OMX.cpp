@@ -217,6 +217,7 @@ void OMX::threadEntry() {
 
                 header->nFilledLen = 0;
                 header->nOffset = 0;
+                header->hMarkTargetComponent = NULL;
                 header->nFlags = 0;
 
                 NodeMeta *node_meta = static_cast<NodeMeta *>(
@@ -238,6 +239,7 @@ void OMX::threadEntry() {
 
                 header->nFilledLen = msg.u.extended_buffer_data.range_length;
                 header->nOffset = msg.u.extended_buffer_data.range_offset;
+                header->hMarkTargetComponent = NULL;
                 header->nFlags = msg.u.extended_buffer_data.flags;
                 header->nTimeStamp = msg.u.extended_buffer_data.timestamp;
 
