@@ -3528,8 +3528,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         intent = new Intent(intent);
 
         // Collect information about the target of the Intent.
-        // Must do this before locking, because resolving the intent
-        // may require launching a process to run its content provider.
         ActivityInfo aInfo;
         try {
             ResolveInfo rInfo =
@@ -3663,17 +3661,24 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    final int startActivityInPackage(int uid,
+    public final int startActivityInPackage(int uid,
             Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded) {
+        
+        // This is so super not safe, that only the system (or okay root)
+        // can do it.
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != 0 && callingUid != Process.myUid()) {
+            throw new SecurityException(
+                    "startActivityInPackage only available to the system");
+        }
+        
         final boolean componentSpecified = intent.getComponent() != null;
         
         // Don't modify the client's object!
         intent = new Intent(intent);
 
         // Collect information about the target of the Intent.
-        // Must do this before locking, because resolving the intent
-        // may require launching a process to run its content provider.
         ActivityInfo aInfo;
         try {
             ResolveInfo rInfo =
