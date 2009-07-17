@@ -366,13 +366,8 @@ void IPCThreadState::restoreCallingIdentity(int64_t token)
 
 void IPCThreadState::clearCaller()
 {
-    if (mProcess->supportsProcesses()) {
-        mCallingPid = getpid();
-        mCallingUid = getuid();
-    } else {
-        mCallingPid = -1;
-        mCallingUid = -1;
-    }
+    mCallingPid = getpid();
+    mCallingUid = getuid();
 }
 
 void IPCThreadState::flushCommands()
