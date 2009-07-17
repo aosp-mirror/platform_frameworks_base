@@ -4,13 +4,9 @@
 #pragma stateFragmentStore(PFS)
 
 // Scratch buffer layout
-// 0: fadeIn
-// 1: zoomFade
-
 #define SCRATCH_FADE 0
 #define SCRATCH_ZOOM 1
 #define SCRATCH_ROT 2
-
 
 #define STATE_POS_X             0
 #define STATE_POS_Y             1
@@ -21,16 +17,13 @@
 #define STATE_SELECTION         6
 #define STATE_FIRST_VISIBLE     7
 #define STATE_COUNT             8
+#define STATE_TOUCH             9
 
-void pfClearColor(float, float, float, float);
-float loadF(int, int);
-void storeF(int, int, float);
-void drawQuad(float x1, float y1, float z1,
-                         float x2, float y2, float z2,
-                          float x3, float y3, float z3,
-                          float x4, float y4, float z4);
-float sinf(float);
-float cosf(float);
+float filter(float val, float target, float str)
+{
+    float delta = (target - val);
+    return val + delta * str;
+}
 
 int main(void* con, int ft, int launchID)
 {
@@ -48,14 +41,17 @@ int main(void* con, int ft, int launchID)
         storeF(2, 0, f);
     }
 
-    float zoom = loadF(2, SCRATCH_ZOOM);
+    float touchCut = 1.f;
+    if (loadI32(0, STATE_TOUCH)) {
+        touchCut = 5.f;
+    }
+
     float targetZoom = ((float)loadI32(0, STATE_ZOOM)) / 10.f;
-    zoom = zoom + (targetZoom - zoom) * 0.15f;
+    float zoom = filter(loadF(2, SCRATCH_ZOOM), targetZoom, 0.15 * touchCut);
     storeF(2, SCRATCH_ZOOM, zoom);
 
-    float rot = loadF(2, SCRATCH_ROT);
     float targetRot = loadI32(0, STATE_FIRST_VISIBLE) / 180.0f * 3.14f;
-    rot = rot + (targetRot - rot) * 0.15f;
+    float rot = filter(loadF(2, SCRATCH_ROT), targetRot, 0.1f * touchCut);
     storeF(2, SCRATCH_ROT, rot);
 
     float diam = 8.f;// + curve * 2.f;

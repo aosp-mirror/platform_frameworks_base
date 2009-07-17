@@ -87,6 +87,8 @@ public class RolloView extends RSSurfaceView {
         float nx = ev.getX() / getWidth();
         float ny = ev.getY() / getHeight();
 
+        mRender.setTouch(ret);
+
         if((ny > 0.85f) || mControlMode) {
             mRender.setShadow(0, 0, 0);
             mFlingMode = false;
@@ -99,7 +101,7 @@ public class RolloView extends RSSurfaceView {
                         float dx = nx - mFlingX;
 
                         if(ny < 0.9) {
-                            zoom = 5.f - ((0.9f - ny) * 10.f);
+                            zoom = 5.f - ((0.9f - ny) * 15.f);
                             if(zoom < 1) {
                                 zoom = 1;
                                 mControlMode = false;

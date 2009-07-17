@@ -326,7 +326,7 @@ static void SC_drawQuad(float x1, float y1, float z1,
     //LOGE("%4.2f, %4.2f, %4.2f", x4, y4, z4);
 
     float vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
-    static const float tex[] = {0,0, 0,1, 1,1, 1,0};
+    static const float tex[] = {0,1, 1,1, 1,0, 0,0};
 
 
     rsc->setupCheck();
@@ -351,18 +351,6 @@ static void SC_drawQuad(float x1, float y1, float z1,
     //glColorPointer(4, GL_UNSIGNED_BYTE, 12, ptr);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-}
-
-extern "C" float sinf(float angle)
-{
-    float s = (float)sin(angle);
-    return s;
-}
-
-extern "C" float cosf(float angle)
-{
-    float s = (float)cos(angle);
-    return s;
 }
 
 extern "C" void pfClearColor(float r, float g, float b, float a)
@@ -522,6 +510,7 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "drawQuad", (void *)&SC_drawQuad, "void drawQuad(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
     { "sinf", (void *)&sinf, "float sinf(float)" },
     { "cosf", (void *)&cosf, "float cosf(float)" },
+    { "fabs", (void *)&fabs, "float fabs(float)" },
     { "contextBindProgramFragmentStore", (void *)&contextBindProgramFragmentStore, "void contextBindProgramFragmentStore(int)" },
     { "pfClearColor", (void *)&pfClearColor, "void pfClearColor(float, float, float, float)" },
     { "pfBindTexture", (void *)&pfBindTexture, "void pfBindTexture(int, int, int)" },
