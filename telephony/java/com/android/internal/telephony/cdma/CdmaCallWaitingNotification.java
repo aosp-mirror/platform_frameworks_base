@@ -16,12 +16,16 @@
 
 package com.android.internal.telephony.cdma;
 
+import android.util.Log;
+import com.android.internal.telephony.Connection;
+
 /**
  * Represents a Supplementary Service Notification received from the network.
  *
  * {@hide}
  */
 public class CdmaCallWaitingNotification {
+    static final String LOG_TAG = "CDMA";
     public String number =null;
     public int numberPresentation = 0;
     public String name = null;
@@ -30,7 +34,6 @@ public class CdmaCallWaitingNotification {
     public int signalType = 0;
     public int alertPitch = 0;
     public int signal = 0;
-
 
     public String toString()
     {
@@ -45,4 +48,17 @@ public class CdmaCallWaitingNotification {
             + " signal: " + signal ;
     }
 
+    public static int
+    presentationFromCLIP(int cli)
+    {
+        switch(cli) {
+            case 0: return Connection.PRESENTATION_ALLOWED;
+            case 1: return Connection.PRESENTATION_RESTRICTED;
+            case 2: return Connection.PRESENTATION_UNKNOWN;
+            default:
+                // This shouldn't happen, just log an error and treat as Unknown
+                Log.d(LOG_TAG, "Unexpected presentation " + cli);
+                return Connection.PRESENTATION_UNKNOWN;
+        }
+    }
 }

@@ -2553,7 +2553,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 break;
 
             case RIL_UNSOL_CDMA_CALL_WAITING:
-                if (RILJ_LOGD) unsljLog(response);
+                if (RILJ_LOGD) unsljLogRet(response, ret);
 
                 if (mCallWaitingInfoRegistrants != null) {
                     mCallWaitingInfoRegistrants.notifyRegistrants(
@@ -2980,7 +2980,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         CdmaCallWaitingNotification notification = new CdmaCallWaitingNotification();
 
         notification.number = p.readString();
-        notification.numberPresentation = p.readInt();
+        notification.numberPresentation = notification.presentationFromCLIP(p.readInt());
         notification.name = p.readString();
         notification.namePresentation = notification.numberPresentation;
         notification.isPresent = p.readInt();
