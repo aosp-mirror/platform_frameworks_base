@@ -224,7 +224,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     SkBitmap bitmap;
 
     bitmap.setConfig(config, width, height);
-    if (!GraphicsJNI::setJavaPixelRef(env, &bitmap, NULL)) {
+    if (!GraphicsJNI::setJavaPixelRef(env, &bitmap, NULL, true)) {
         return NULL;
     }
 
@@ -240,7 +240,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
 static jobject Bitmap_copy(JNIEnv* env, jobject, const SkBitmap* src,
                            SkBitmap::Config dstConfig, jboolean isMutable) {
     SkBitmap            result;
-    JavaPixelAllocator  allocator(env);
+    JavaPixelAllocator  allocator(env, true);
 
     if (!src->copyTo(&result, dstConfig, &allocator)) {
         return NULL;
@@ -356,7 +356,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         }
     }
 
-    if (!GraphicsJNI::setJavaPixelRef(env, bitmap, ctable)) {
+    if (!GraphicsJNI::setJavaPixelRef(env, bitmap, ctable, true)) {
         ctable->safeUnref();
         delete bitmap;
         return NULL;
