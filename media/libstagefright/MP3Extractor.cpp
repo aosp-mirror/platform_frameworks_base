@@ -73,6 +73,8 @@ static bool get_mp3_frame_size(
 
     if (bitrate_index == 0 || bitrate_index == 0x0f) {
         // Disallow "free" bitrate.
+
+        LOGE("We disallow 'free' bitrate for now.");
         return false;
     }
 
@@ -174,7 +176,7 @@ static bool Resync(
     const size_t kMaxFrameSize = 4096;
     uint8_t *buffer = new uint8_t[kMaxFrameSize];
     
-    off_t pos = *inout_pos;
+    off_t pos = *inout_pos - kMaxFrameSize;
     size_t buffer_offset = kMaxFrameSize;
     size_t buffer_length = kMaxFrameSize;
     bool valid = false;
@@ -184,7 +186,7 @@ static bool Resync(
                 break;
             }
 
-            pos += buffer_length;
+            pos += buffer_offset;
 
             if (pos >= *inout_pos + 128 * 1024) {
                 // Don't scan forever.
@@ -217,42 +219,45 @@ static bool Resync(
 
         size_t frame_size;
         int sample_rate, num_channels, bitrate;
-        if (get_mp3_frame_size(header, &frame_size,
+        if (!get_mp3_frame_size(header, &frame_size,
                                &sample_rate, &num_channels, &bitrate)) {
-            LOGV("found possible 1st frame at %ld", pos + buffer_offset);
+            ++buffer_offset;
+            continue;
+        }
 
-            // We found what looks like a valid frame,
-            // now find its successors.
+        LOGV("found possible 1st frame at %ld", pos + buffer_offset);
 
-            off_t test_pos = pos + buffer_offset + frame_size;
+        // We found what looks like a valid frame,
+        // now find its successors.
 
-            valid = true;
-            for (int j = 0; j < 3; ++j) {
-                uint8_t tmp[4];
-                if (source->read_at(test_pos, tmp, 4) < 4) {
-                    valid = false;
-                    break;
-                }
-                
-                uint32_t test_header = U32_AT(tmp);
+        off_t test_pos = pos + buffer_offset + frame_size;
 
-                LOGV("subsequent header is %08x", test_header);
-
-                if ((test_header & kMask) != (header & kMask)) {
-                    valid = false;
-                    break;
-                }
-
-                size_t test_frame_size;
-                if (!get_mp3_frame_size(test_header, &test_frame_size)) {
-                    valid = false;
-                    break;
-                }
-
-                LOGV("found subsequent frame #%d at %ld", j + 2, test_pos);
-
-                test_pos += test_frame_size;
+        valid = true;
+        for (int j = 0; j < 3; ++j) {
+            uint8_t tmp[4];
+            if (source->read_at(test_pos, tmp, 4) < 4) {
+                valid = false;
+                break;
             }
+            
+            uint32_t test_header = U32_AT(tmp);
+
+            LOGV("subsequent header is %08x", test_header);
+
+            if ((test_header & kMask) != (header & kMask)) {
+                valid = false;
+                break;
+            }
+
+            size_t test_frame_size;
+            if (!get_mp3_frame_size(test_header, &test_frame_size)) {
+                valid = false;
+                break;
+            }
+
+            LOGV("found subsequent frame #%d at %ld", j + 2, test_pos);
+
+            test_pos += test_frame_size;
         }
 
         if (valid) {
