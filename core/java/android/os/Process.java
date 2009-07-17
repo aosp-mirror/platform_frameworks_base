@@ -739,7 +739,7 @@ public class Process {
     public static final native void sendSignal(int pid, int signal);
     
     /** @hide */
-    public static final native int getFreeMemory();
+    public static final native long getFreeMemory();
     
     /** @hide */
     public static final native void readProcLines(String path,

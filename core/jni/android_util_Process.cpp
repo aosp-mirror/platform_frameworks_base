@@ -368,7 +368,7 @@ static int pid_compare(const void* v1, const void* v2)
     return *((const jint*)v1) - *((const jint*)v2);
 }
 
-jint android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
+static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
 {
     int fd = open("/proc/meminfo", O_RDONLY);
     
@@ -388,7 +388,7 @@ jint android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
     buffer[len] = 0;
 
     int numFound = 0;
-    int mem = 0;
+    jlong mem = 0;
     
     static const char* const sums[] = { "MemFree:", "Cached:", NULL };
     static const int sumsLen[] = { strlen("MemFree:"), strlen("Cached:"), NULL };
@@ -407,7 +407,7 @@ jint android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
                     p++;
                     if (*p == 0) p--;
                 }
-                mem += atoi(num) * 1024;
+                mem += atoll(num) * 1024;
                 numFound++;
                 break;
             }
@@ -857,7 +857,7 @@ static const JNINativeMethod methods[] = {
     {"setGid", "(I)I", (void*)android_os_Process_setGid},
     {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},
     {"supportsProcesses", "()Z", (void*)android_os_Process_supportsProcesses},
-    {"getFreeMemory", "()I", (void*)android_os_Process_getFreeMemory},
+    {"getFreeMemory", "()J", (void*)android_os_Process_getFreeMemory},
     {"readProcLines", "(Ljava/lang/String;[Ljava/lang/String;[J)V", (void*)android_os_Process_readProcLines},
     {"getPids", "(Ljava/lang/String;[I)[I", (void*)android_os_Process_getPids},
     {"readProcFile", "(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_readProcFile},
