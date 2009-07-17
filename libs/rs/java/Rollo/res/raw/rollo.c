@@ -32,7 +32,6 @@ int main(void* con, int ft, int launchID)
     int col;
     int imageID;
     int iconCount;
-    int pressure;
 
     float f = loadF(2, 0);
     pfClearColor(0.0f, 0.0f, 0.0f, f);
@@ -57,48 +56,16 @@ int main(void* con, int ft, int launchID)
     float diam = 8.f;// + curve * 2.f;
     float scale = 1.0f / zoom;
 
-    pressure = loadI32(0, STATE_PRESSURE);
-    if (pressure) {
-        contextBindProgramFragmentStore(NAMED_PFSShadow);
-
-        // compute the projected shadow
-        float x = loadI32(0, STATE_POS_X) / 1000.f;
-        float y = loadI32(0, STATE_POS_Y) / 1000.f;
-        float s = loadI32(0, STATE_PRESSURE) / 1000.f;
-
-        s = s * 3.f;
-
-        float dxdy1 = (x - 0.5f - s) / (1.001f - y);
-        float dxdy2 = (x - 0.5f + s) / (1.001f - y);
-
-        float xlt = y * dxdy1 + x;
-        float xrt = y * dxdy2 + x;
-
-        float yb = (0.5f - y) * 5.f + 0.2f;
-
-        drawQuad(xlt, 5.f, 1,
-                 xrt, 5.f, 1,
-                 x + s, yb, 1,
-                 x - s, yb, 1);
-
-        contextBindProgramFragmentStore(NAMED_PFS);
-    }
-
-
     rot = rot * scale;
     float rotStep = 20.0f / 180.0f * 3.14f * scale;
-    //pressure = loadI32(0, 2);
     rowCount = 4;
     iconCount = 32;//loadI32(0, 1);
     while (iconCount) {
         float tmpSin = sinf(rot);
         float tmpCos = cosf(rot);
 
-        //tmpCos = tmpCos * curve;
-
         float tx1 = tmpSin * diam - (tmpCos * scale);
         float tx2 = tx1 + (tmpCos * scale * 2.f);
-
         float tz1 = tmpCos * diam + (tmpSin * scale);
         float tz2 = tz1 - (tmpSin * scale * 2.f);
 
