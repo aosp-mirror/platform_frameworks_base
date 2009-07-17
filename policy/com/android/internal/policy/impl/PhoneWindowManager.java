@@ -1690,13 +1690,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mKeyguardMediator.isInputRestricted();
     }
 
-    /**
-     * Callback from {@link KeyguardViewMediator}
-     */
-    public void onKeyguardShow() {
-        sendCloseSystemWindows();
-    }
-
     void sendCloseSystemWindows() {
         sendCloseSystemWindows(mContext, null);
     }

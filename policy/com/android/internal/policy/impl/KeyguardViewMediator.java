@@ -857,7 +857,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             // manager not to honor request for userActivity.
             mRealPowerManager.enableUserActivity(false);
 
-            mCallback.onKeyguardShow();
             mKeyguardViewManager.show();
             mShowing = true;
         }

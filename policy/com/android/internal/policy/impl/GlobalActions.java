@@ -80,6 +80,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         // get notified of phone state changes
@@ -483,9 +484,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
+            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
+                    || Intent.ACTION_SCREEN_OFF.equals(action)) {
                 String reason = intent.getStringExtra(PhoneWindowManager.SYSTEM_DIALOG_REASON_KEY);
-                if (! PhoneWindowManager.SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS.equals(reason)) {
+                if (!PhoneWindowManager.SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS.equals(reason)) {
                     mHandler.sendEmptyMessage(MESSAGE_DISMISS);
                 }
             }
