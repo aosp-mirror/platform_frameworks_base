@@ -210,8 +210,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         if (mDropDownAlwaysVisible
                 && mPopup.isShowing()
                 && mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED) {
-            mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-            showDropDown();
+            ensureImeVisible();
         }
     }
 
@@ -1072,10 +1071,20 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     /**
      * Issues a runnable to show the dropdown as soon as possible.
      *
-     * @hide internal used only by Search Dialog
+     * @hide internal used only by SearchDialog
      */
     public void showDropDownAfterLayout() {
         post(mShowDropDownRunnable);
+    }
+    
+    /**
+     * Ensures that the drop down is not obscuring the IME.
+     * 
+     * @hide internal used only here and SearchDialog
+     */
+    public void ensureImeVisible() {
+        mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+        showDropDown();
     }
 
     /**
