@@ -184,8 +184,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     // number of fixes we have received since we started navigating
     private int mFixCount;
 
-    private boolean mAgpsConfigured;
-
     // true if we started navigation
     private boolean mStarted;
 
@@ -356,7 +354,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                 try {
                     int port = Integer.parseInt(portString);
                     native_set_agps_server(AGPS_TYPE_SUPL, host, port);
-                    mAgpsConfigured = true;
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
                 }
@@ -368,7 +365,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                 try {
                     int port = Integer.parseInt(portString);
                     native_set_agps_server(AGPS_TYPE_C2K, host, port);
-                    mAgpsConfigured = true;
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse C2K_PORT: " + portString);
                 }
@@ -722,7 +718,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             if (DEBUG) Log.d(TAG, "startNavigating");
             mStarted = true;
             int positionMode;
-            if (mAgpsConfigured && Settings.Secure.getInt(mContext.getContentResolver(),
+            if (Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.ASSISTED_GPS_ENABLED, 0) != 0) {
                 positionMode = GPS_POSITION_MODE_MS_BASED;
             } else {
