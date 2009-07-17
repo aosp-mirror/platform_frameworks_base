@@ -139,8 +139,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     
     // A weak map of drawables we've gotten from other packages, so we don't load them
     // more than once.
-    private final WeakHashMap<String, Drawable> mOutsideDrawablesCache =
-            new WeakHashMap<String, Drawable>();
+    private final WeakHashMap<String, Drawable.ConstantState> mOutsideDrawablesCache =
+            new WeakHashMap<String, Drawable.ConstantState>();
 
     // Last known IME options value for the search edit text.
     private int mSearchAutoCompleteImeOptions;
