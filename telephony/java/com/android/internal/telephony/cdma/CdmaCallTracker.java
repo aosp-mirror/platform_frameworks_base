@@ -957,6 +957,7 @@ public final class CdmaCallTracker extends CallTracker {
                 if (ar.exception == null) {
                     // Assume 3 way call is connected
                     pendingMO.onConnectedInOrOut();
+                    pendingMO = null;
                 }
             break;
 
