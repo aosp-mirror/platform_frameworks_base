@@ -325,6 +325,32 @@
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+
+        <item name="textAppearance">@android:style/TextAppearance</item>
+        <item name="textAppearanceInverse">@android:style/TextAppearance.Inverse</item>
+
+        <item name="textColorPrimary">@android:color/primary_text_dark</item>
+        <item name="textColorSecondary">@android:color/secondary_text_dark</item>
+        <item name="textColorTertiary">@android:color/tertiary_text_dark</item>
+        <item name="textColorPrimaryInverse">@android:color/primary_text_light</item>
+        <item name="textColorSecondaryInverse">@android:color/secondary_text_light</item>
+        <item name="textColorTertiaryInverse">@android:color/tertiary_text_light</item>
+        <item name="textColorPrimaryDisableOnly">@android:color/primary_text_dark_disable_only</item>
+        <item name="textColorPrimaryInverseDisableOnly">@android:color/primary_text_light_disable_only</item>
+        <item name="textColorPrimaryNoDisable">@android:color/primary_text_dark_nodisable</item>
+        <item name="textColorSecondaryNoDisable">@android:color/secondary_text_dark_nodisable</item>
+        <item name="textColorPrimaryInverseNoDisable">@android:color/primary_text_light_nodisable</item>
+        <item name="textColorSecondaryInverseNoDisable">@android:color/secondary_text_light_nodisable</item>
+        <item name="textColorHint">@android:color/hint_foreground_dark</item>
+        <item name="textColorHintInverse">@android:color/hint_foreground_light</item>
+        <item name="textColorSearchUrl">@android:color/search_url_text</item>
+
+        <item name="textAppearanceLarge">@android:style/TextAppearance.Large</item>
+        <item name="textAppearanceMedium">@android:style/TextAppearance.Medium</item>
+        <item name="textAppearanceSmall">@android:style/TextAppearance.Small</item>
+        <item name="textAppearanceLargeInverse">@android:style/TextAppearance.Large.Inverse</item>
+        <item name="textAppearanceMediumInverse">@android:style/TextAppearance.Medium.Inverse</item>
+        <item name="textAppearanceSmallInverse">@android:style/TextAppearance.Small.Inverse</item>
     </style>
 
     <!-- Default theme for alert dialog windows, which is used by the
