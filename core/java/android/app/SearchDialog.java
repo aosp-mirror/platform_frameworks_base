@@ -28,7 +28,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Animatable;
@@ -322,16 +321,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (!globalSearch && mSearchable == null) {
             globalSearch = true;
             mSearchable = searchManager.getSearchableInfo(componentName, globalSearch);
-            
-            // If we still get back null (i.e., there's not even a searchable info available
-            // for global search), then really give up.
-            if (mSearchable == null) {
-                // Unfortunately, we can't log here.  it would be logspam every time the user
-                // clicks the "search" key on a non-search app.
-                return false;
-            }
         }
-        
+
+        // If there's not even a searchable info available for global search, then really give up.
+        if (mSearchable == null) {
+            Log.w(LOG_TAG, "No global search provider.");
+            return false;
+        }
+
         mLaunchComponent = componentName;
         mAppSearchData = appSearchData;
         // Using globalSearch here is just an optimization, just calling
@@ -702,7 +699,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (DBG) Log.d(LOG_TAG, "onKeyDown(" + keyCode + "," + event + ")");
-        
+        if (mSearchable == null) {
+            return false;
+        }
+
         // handle back key to go back to previous searchable, etc.
         if (handleBackKey(keyCode, event)) {
             return true;
@@ -737,6 +737,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 int before, int after) {
             if (DBG_LOG_TIMING) {
                 dbgLogTiming("onTextChanged()");
+            }
+            if (mSearchable == null) {
+                return;
             }
             updateWidgetState();
             if (!mSearchAutoComplete.isPerformingCompletion()) {
@@ -1563,6 +1566,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
          */
         @Override
         public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+            if (mSearchDialog.mSearchable == null) {
+                return false;
+            }
             if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
                 if (mSearchDialog.backToPreviousComponent()) {
                     return true;
