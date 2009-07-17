@@ -23,6 +23,7 @@ static jfieldID gOptions_configFieldID;
 static jfieldID gOptions_ditherFieldID;
 static jfieldID gOptions_purgeableFieldID;
 static jfieldID gOptions_shareableFieldID;
+static jfieldID gOptions_nativeAllocFieldID;
 static jfieldID gOptions_widthFieldID;
 static jfieldID gOptions_heightFieldID;
 static jfieldID gOptions_mimeFieldID;
@@ -300,6 +301,11 @@ static bool optionsShareable(JNIEnv* env, jobject options) {
             env->GetBooleanField(options, gOptions_shareableFieldID);
 }
 
+static bool optionsReportSizeToVM(JNIEnv* env, jobject options) {
+    return NULL == options ||
+            !env->GetBooleanField(options, gOptions_nativeAllocFieldID);
+}
+
 static jobject nullObjectReturn(const char msg[]) {
     if (msg) {
         SkDebugf("--- %s\n", msg);
@@ -330,6 +336,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     SkBitmap::Config prefConfig = SkBitmap::kNo_Config;
     bool doDither = true;
     bool isPurgeable = allowPurgeable && optionsPurgeable(env, options);
+    bool reportSizeToVM = optionsReportSizeToVM(env, options);
     
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
@@ -355,7 +362,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     decoder->setDitherImage(doDither);
 
     NinePatchPeeker     peeker;
-    JavaPixelAllocator  javaAllocator(env);
+    JavaPixelAllocator  javaAllocator(env, reportSizeToVM);
     SkBitmap*           bitmap = new SkBitmap;
     Res_png_9patch      dummy9Patch;
 
@@ -699,6 +706,7 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_ditherFieldID = getFieldIDCheck(env, gOptions_class, "inDither", "Z");
     gOptions_purgeableFieldID = getFieldIDCheck(env, gOptions_class, "inPurgeable", "Z");
     gOptions_shareableFieldID = getFieldIDCheck(env, gOptions_class, "inInputShareable", "Z");
+    gOptions_nativeAllocFieldID = getFieldIDCheck(env, gOptions_class, "inNativeAlloc", "Z");
     gOptions_widthFieldID = getFieldIDCheck(env, gOptions_class, "outWidth", "I");
     gOptions_heightFieldID = getFieldIDCheck(env, gOptions_class, "outHeight", "I");
     gOptions_mimeFieldID = getFieldIDCheck(env, gOptions_class, "outMimeType", "Ljava/lang/String;");
