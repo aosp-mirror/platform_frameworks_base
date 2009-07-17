@@ -986,6 +986,9 @@ public interface WindowManager extends ViewManager {
                 sb.append(" or=");
                 sb.append(screenOrientation);
             }
+            if ((flags & FLAG_COMPATIBLE_WINDOW) != 0) {
+                sb.append(" compatible=true");
+            }
             sb.append('}');
             return sb.toString();
         }

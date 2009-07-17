@@ -38,7 +38,12 @@ public class CompatibilityInfo {
     private static final String TAG = "CompatibilityInfo";
     
     /** default compatibility info object for compatible applications */
-    public static final CompatibilityInfo DEFAULT_COMPATIBILITY_INFO = new CompatibilityInfo(); 
+    public static final CompatibilityInfo DEFAULT_COMPATIBILITY_INFO = new CompatibilityInfo() {
+        @Override
+        public void setExpandable(boolean expandable) {
+            throw new UnsupportedOperationException("trying to change default compatibility info");
+        }
+    };
 
     /**
      * The default width of the screen in portrait mode. 
@@ -191,7 +196,7 @@ public class CompatibilityInfo {
     @Override
     public String toString() {
         return "CompatibilityInfo{scale=" + applicationScale +
-                ", compatibility flag=" + mCompatibilityFlags + "}"; 
+                ", supports screen=" + supportsScreen() + "}";
     }
 
     /**

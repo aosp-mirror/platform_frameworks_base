@@ -5,6 +5,7 @@
 #include "SkRegion.h"
 #include <android_runtime/AndroidRuntime.h>
 
+//#define REPORT_SIZE_TO_JVM
 //#define TRACK_LOCK_COUNT
 
 void doThrow(JNIEnv* env, const char* exc, const char* msg) {
@@ -444,7 +445,7 @@ private:
 };
 
 bool GraphicsJNI::setJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
-                                  SkColorTable* ctable) {
+                                  SkColorTable* ctable, bool reportSizeToVM) {
     Sk64 size64 = bitmap->getSize64();
     if (size64.isNeg() || !size64.is32()) {
         doThrow(env, "java/lang/IllegalArgumentException",
@@ -453,35 +454,41 @@ bool GraphicsJNI::setJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
     }
     
     size_t size = size64.get32();
-    //    SkDebugf("-------------- inform VM we've allocated %d bytes\n", size);
     jlong jsize = size;  // the VM wants longs for the size
-    bool r = env->CallBooleanMethod(gVMRuntime_singleton,
-                                     gVMRuntime_trackExternalAllocationMethodID,
-                                     jsize);
-    if (GraphicsJNI::hasException(env)) {
-        return false;
+    if (reportSizeToVM) {
+        //    SkDebugf("-------------- inform VM we've allocated %d bytes\n", size);
+        bool r = env->CallBooleanMethod(gVMRuntime_singleton,
+                                    gVMRuntime_trackExternalAllocationMethodID,
+                                    jsize);
+        if (GraphicsJNI::hasException(env)) {
+            return false;
+        }
+        if (!r) {
+            LOGE("VM won't let us allocate %zd bytes\n", size);
+            doThrowOOME(env, "bitmap size exceeds VM budget");
+            return false;
+        }
     }
-    if (!r) {
-        LOGE("VM won't let us allocate %zd bytes\n", size);
-        doThrowOOME(env, "bitmap size exceeds VM budget");
-        return false;
-    }
-    
     // call the version of malloc that returns null on failure
     void* addr = sk_malloc_flags(size, 0);
     if (NULL == addr) {
-        //        SkDebugf("-------------- inform VM we're releasing %d bytes which we couldn't allocate\n", size);
-        // we didn't actually allocate it, so inform the VM
-        env->CallVoidMethod(gVMRuntime_singleton,
-                             gVMRuntime_trackExternalFreeMethodID,
-                             jsize);
-        if (!GraphicsJNI::hasException(env)) {
-            doThrowOOME(env, "bitmap size too large for malloc");
+        if (reportSizeToVM) {
+            //        SkDebugf("-------------- inform VM we're releasing %d bytes which we couldn't allocate\n", size);
+            // we didn't actually allocate it, so inform the VM
+            env->CallVoidMethod(gVMRuntime_singleton,
+                                 gVMRuntime_trackExternalFreeMethodID,
+                                 jsize);
+            if (!GraphicsJNI::hasException(env)) {
+                doThrowOOME(env, "bitmap size too large for malloc");
+            }
         }
         return false;
     }
     
-    bitmap->setPixelRef(new AndroidPixelRef(env, addr, size, ctable))->unref();
+    SkPixelRef* pr = reportSizeToVM ?
+                        new AndroidPixelRef(env, addr, size, ctable) :
+                        new SkMallocPixelRef(addr, size, ctable);
+    bitmap->setPixelRef(pr)->unref();
     // since we're already allocated, we lockPixels right away
     // HeapAllocator behaves this way too
     bitmap->lockPixels();
@@ -490,12 +497,11 @@ bool GraphicsJNI::setJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-JavaPixelAllocator::JavaPixelAllocator(JNIEnv* env) : fEnv(env)
-{
-}
+JavaPixelAllocator::JavaPixelAllocator(JNIEnv* env, bool reportSizeToVM)
+    : fEnv(env), fReportSizeToVM(reportSizeToVM) {}
     
 bool JavaPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
-    return GraphicsJNI::setJavaPixelRef(fEnv, bitmap, ctable);
+    return GraphicsJNI::setJavaPixelRef(fEnv, bitmap, ctable, fReportSizeToVM);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

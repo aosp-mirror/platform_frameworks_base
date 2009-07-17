@@ -16,11 +16,19 @@
 
 package android.security;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+
 import android.content.Context;
 import android.content.Intent;
 import android.security.Keystore;
 import android.text.TextUtils;
-
+import android.util.Log;
 
 /**
  * The CertTool class provides the functions to list the certs/keys,
@@ -41,12 +49,12 @@ public class CertTool {
     public static final String KEY_NAMESPACE = "namespace";
     public static final String KEY_DESCRIPTION = "description";
 
-    private static final String TAG = "CertTool";
+    public static final String TITLE_CA_CERT = "CA Certificate";
+    public static final String TITLE_USER_CERT = "User Certificate";
+    public static final String TITLE_PKCS12_KEYSTORE = "PKCS12 Keystore";
+    public static final String TITLE_PRIVATE_KEY = "Private Key";
 
-    private static final String TITLE_CA_CERT = "CA Certificate";
-    private static final String TITLE_USER_CERT = "User Certificate";
-    private static final String TITLE_PKCS12_KEYSTORE = "PKCS12 Keystore";
-    private static final String TITLE_PRIVATE_KEY = "Private Key";
+    private static final String TAG = "CertTool";
     private static final String UNKNOWN = "Unknown";
     private static final String ISSUER_NAME = "Issuer Name:";
     private static final String DISTINCT_NAME = "Distinct Name:";
@@ -58,6 +66,11 @@ public class CertTool {
     private static final String KEYNAME_DELIMITER = "_";
     private static final Keystore sKeystore = Keystore.getInstance();
 
+    private native int getPkcs12Handle(byte[] data, String password);
+    private native String getPkcs12Certificate(int handle);
+    private native String getPkcs12PrivateKey(int handle);
+    private native String popPkcs12CertificateStack(int handle);
+    private native void freePkcs12Handle(int handle);
     private native String generateCertificateRequest(int bits, String subject);
     private native boolean isPkcs12Keystore(byte[] data);
     private native int generateX509Certificate(byte[] data);
@@ -130,10 +143,35 @@ public class CertTool {
         intent.putExtra(KEY_NAMESPACE + "1", namespace);
     }
 
+    public int addPkcs12Keystore(byte[] p12Data, String password,
+            String keyname) {
+        int handle, i = 0;
+        String pemData;
+        Log.i("CertTool", "addPkcs12Keystore()");
+
+        if ((handle = getPkcs12Handle(p12Data, password)) == 0) return -1;
+        if ((pemData = getPkcs12Certificate(handle)) != null) {
+            sKeystore.put(USER_CERTIFICATE, keyname, pemData);
+        }
+        if ((pemData = getPkcs12PrivateKey(handle)) != null) {
+            sKeystore.put(USER_KEY, keyname, pemData);
+        }
+        while ((pemData = this.popPkcs12CertificateStack(handle)) != null) {
+            if (i++ > 0) {
+                sKeystore.put(CA_CERTIFICATE, keyname + i, pemData);
+            } else {
+                sKeystore.put(CA_CERTIFICATE, keyname, pemData);
+            }
+        }
+        freePkcs12Handle(handle);
+        return 0;
+    }
+
     public synchronized void addCertificate(byte[] data, Context context) {
         int handle;
         Intent intent = null;
 
+        Log.i("CertTool", "addCertificate()");
         if (isPkcs12Keystore(data)) {
             intent = prepareIntent(TITLE_PKCS12_KEYSTORE, data, USER_KEY,
                     UNKNOWN, UNKNOWN);
