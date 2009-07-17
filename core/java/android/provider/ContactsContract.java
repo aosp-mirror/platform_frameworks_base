@@ -192,7 +192,6 @@ public final class ContactsContract {
 
         public static final Uri CONTENT_SUMMARY_GROUP_URI = Uri.withAppendedPath(
                 CONTENT_SUMMARY_URI, "group");
-
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
@@ -601,9 +600,20 @@ public final class ContactsContract {
         }
 
         /**
+         * The base types that all "Typed" data kinds support.
+         */
+        public interface BaseTypes {
+
+            /**
+             * A custom type. The custom label should be supplied by user.
+             */
+            public static int TYPE_CUSTOM = 0;
+        }
+
+        /**
          * Columns common across the specific types.
          */
-        private interface CommonColumns {
+        private interface CommonColumns extends BaseTypes{
             /**
              * The type of data, for example Home or Work.
              * <P>Type: INTEGER</P>
@@ -621,17 +631,6 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String LABEL = "data3";
-        }
-
-        /**
-         * The base types that all "Typed" data kinds support.
-         */
-        public interface BaseTypes {
-
-            /**
-             * A custom type. The custom label should be supplied by user.
-             */
-            public static int TYPE_CUSTOM = 0;
         }
 
         /**
@@ -700,17 +699,11 @@ public final class ContactsContract {
         /**
          * A nickname.
          */
-        public static final class Nickname implements BaseTypes {
+        public static final class Nickname implements CommonColumns {
             private Nickname() {}
 
             /** Mime-type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/nickname";
-
-            /**
-             * The type of data, for example Home or Work.
-             * <P>Type: INTEGER</P>
-             */
-            public static final String TYPE = "data1";
 
             public static final int TYPE_DEFAULT = 1;
             public static final int TYPE_OTHER_NAME = 2;
@@ -721,19 +714,13 @@ public final class ContactsContract {
             /**
              * The name itself
              */
-            public static final String NAME = "data2";
-
-            /**
-             * The user provided label, only used if TYPE is {@link #TYPE_CUSTOM}.
-             * <P>Type: TEXT</P>
-             */
-            public static final String LABEL = "data3";
+            public static final String NAME = DATA;
         }
 
         /**
          * Common data definition for telephone numbers.
          */
-        public static final class Phone implements BaseCommonColumns, CommonColumns, BaseTypes {
+        public static final class Phone implements BaseCommonColumns, CommonColumns {
             private Phone() {}
 
             /** Mime-type used when storing this in data table. */
@@ -774,13 +761,13 @@ public final class ContactsContract {
              * The phone number as the user entered it.
              * <P>Type: TEXT</P>
              */
-            public static final String NUMBER = "data2";
+            public static final String NUMBER = DATA;
         }
 
         /**
          * Common data definition for email addresses.
          */
-        public static final class Email implements BaseCommonColumns, CommonColumns, BaseTypes {
+        public static final class Email implements BaseCommonColumns, CommonColumns {
             private Email() {}
 
             /** Mime-type used when storing this in data table. */
@@ -794,7 +781,7 @@ public final class ContactsContract {
         /**
          * Common data definition for postal addresses.
          */
-        public static final class Postal implements BaseCommonColumns, CommonColumns, BaseTypes {
+        public static final class Postal implements BaseCommonColumns, CommonColumns {
             private Postal() {}
 
             /** Mime-type used when storing this in data table. */
@@ -822,7 +809,7 @@ public final class ContactsContract {
        /**
         * Common data definition for IM addresses.
         */
-        public static final class Im implements BaseCommonColumns, CommonColumns, BaseTypes {
+        public static final class Im implements BaseCommonColumns, CommonColumns {
             private Im() {}
 
             /** Mime-type used when storing this in data table. */
@@ -882,33 +869,20 @@ public final class ContactsContract {
         /**
          * Common data definition for organizations.
          */
-        public static final class Organization implements BaseCommonColumns, BaseTypes {
+        public static final class Organization implements BaseCommonColumns, CommonColumns {
             private Organization() {}
 
             /** Mime-type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/organization";
 
-            /**
-             * The type of data, for example Home or Work.
-             * <P>Type: INTEGER</P>
-             */
-            public static final String TYPE = "data1";
-
-            public static final int TYPE_HOME = 1;
-            public static final int TYPE_WORK = 2;
-            public static final int TYPE_OTHER = 3;
-
-            /**
-             * The user provided label, only used if TYPE is {@link #TYPE_CUSTOM}.
-             * <P>Type: TEXT</P>
-             */
-            public static final String LABEL = "data2";
+            public static final int TYPE_WORK = 1;
+            public static final int TYPE_OTHER = 2;
 
             /**
              * The company as the user entered it.
              * <P>Type: TEXT</P>
              */
-            public static final String COMPANY = "data3";
+            public static final String COMPANY = DATA;
 
             /**
              * The position title at this company as the user entered it.
