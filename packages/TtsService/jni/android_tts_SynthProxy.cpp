@@ -608,24 +608,6 @@ android_tts_SynthProxy_shutdown(JNIEnv *env, jobject thiz, jint jniData)
 }
 
 
-// TODO add buffer format
-static void
-android_tts_SynthProxy_playAudioBuffer(JNIEnv *env, jobject thiz, jint jniData,
-        int bufferPointer, int bufferSize)
-{
-LOGI("android_tts_SynthProxy_playAudioBuffer");
-    if (jniData == 0) {
-        LOGE("android_tts_SynthProxy_playAudioBuffer(): invalid JNI data");
-        return;
-    }
-
-    SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
-    short* wav = (short*) bufferPointer;
-    pSynthData->mAudioOut->write(wav, bufferSize);
-    //LOGI("AudioTrack wrote: %d bytes", bufferSize);
-}
-
-
 static jobjectArray
 android_tts_SynthProxy_getLanguage(JNIEnv *env, jobject thiz, jint jniData)
 {
@@ -710,10 +692,6 @@ static JNINativeMethod gMethods[] = {
     {   "native_setPitch",
         "(II)I",
         (void*)android_tts_SynthProxy_setPitch
-    },
-    {   "native_playAudioBuffer",
-        "(III)V",
-        (void*)android_tts_SynthProxy_playAudioBuffer
     },
     {   "native_getLanguage",
         "(I)[Ljava/lang/String;",
