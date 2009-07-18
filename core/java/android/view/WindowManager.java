@@ -483,19 +483,12 @@ public interface WindowManager extends ViewManager {
          * {@hide} */
         public static final int FLAG_SHOW_WHEN_LOCKED = 0x00080000;
 
-        /** Window flag: special flag to let a window ignore the compatibility scaling.
-         * This is used by SurfaceView to pass this info into ViewRoot, and not used
-         * by WindowManager.
-         *
-         * {@hide} */
-        public static final int FLAG_NO_COMPATIBILITY_SCALING = 0x00100000;
-
         /** Window flag: special flag to limit the size of the window to be
          * original size ([320x480] x density). Used to create window for applications
          * running under compatibility mode.
          *
          * {@hide} */
-        public static final int FLAG_COMPATIBLE_WINDOW = 0x00200000;
+        public static final int FLAG_COMPATIBLE_WINDOW = 0x00100000;
 
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
