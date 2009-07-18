@@ -57,6 +57,7 @@ public class VpnServiceBinder extends Service {
     public void onStart (Intent intent, int startId) {
         super.onStart(intent, startId);
         setForeground(true);
+        android.util.Log.d("VpnServiceBinder", "becomes a foreground service");
     }
 
     public IBinder onBind(Intent intent) {
