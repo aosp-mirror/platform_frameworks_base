@@ -87,7 +87,7 @@ public class Resources {
     /*package*/ final DisplayMetrics mMetrics = new DisplayMetrics();
     PluralRules mPluralRule;
     
-    private final CompatibilityInfo mCompatibilityInfo;
+    private CompatibilityInfo mCompatibilityInfo;
     private Display mDefaultDisplay;
 
     private static final LongSparseArray<Object> EMPTY_ARRAY = new LongSparseArray<Object>() {
@@ -1385,6 +1385,15 @@ public class Resources {
         return mCompatibilityInfo;
     }
 
+    /**
+     * This is just for testing.
+     * @hide
+     */
+    public void setCompatibilityInfo(CompatibilityInfo ci) {
+        mCompatibilityInfo = ci;
+        updateConfiguration(mConfiguration, mMetrics);
+    }
+    
     /**
      * Return a resource identifier for the given resource name.  A fully
      * qualified resource name is of the form "package:type/entry".  The first

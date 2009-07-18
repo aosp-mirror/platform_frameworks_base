@@ -81,10 +81,8 @@ public class BitmapFactory {
         /**
          * The desired pixel density of the bitmap.
          *
-         * @see android.util.DisplayMetrics#DEFAULT_DENSITY
+         * @see android.util.DisplayMetrics#DENSITY_DEFAULT
          * @see android.util.DisplayMetrics#density
-         *
-         * @hide pending API council approval
          */
         public int inDensity;
 
@@ -97,8 +95,6 @@ public class BitmapFactory {
          * a non-scaled version of the bitmap. In this case,
          * {@link android.graphics.Bitmap#setAutoScalingEnabled(boolean)} can be used
          * to properly scale the bitmap at drawing time.</p>
-         *
-         * @hide pending API council approval
          */
         public boolean inScaled;
 
@@ -238,8 +234,6 @@ public class BitmapFactory {
     /**
      * Decode a new Bitmap from an InputStream. This InputStream was obtained from
      * resources, which we pass to be able to scale the bitmap accordingly.
-     *
-     * @hide
      */
     public static Bitmap decodeStream(Resources res, TypedValue value, InputStream is,
             Rect pad, Options opts) {
@@ -251,15 +245,19 @@ public class BitmapFactory {
         Bitmap bm = decodeStream(is, pad, opts);
 
         if (bm != null && res != null && value != null) {
+            final int density = value.density;
+            if (density == TypedValue.DENSITY_NONE) {
+                return bm;
+            }
+            
             byte[] np = bm.getNinePatchChunk();
             final boolean isNinePatch = np != null && NinePatch.isNinePatchChunk(np);
 
-            final int density = value.density;
             if (opts.inDensity == 0) {
                 opts.inDensity = density == TypedValue.DENSITY_DEFAULT ?
-                        DisplayMetrics.DEFAULT_DENSITY : density;
+                        DisplayMetrics.DENSITY_DEFAULT : density;
             }
-            float scale = opts.inDensity / (float) DisplayMetrics.DEFAULT_DENSITY;
+            float scale = opts.inDensity / (float) DisplayMetrics.DENSITY_DEFAULT;
 
             if (opts.inScaled || isNinePatch) {
                 bm.setDensityScale(1.0f);

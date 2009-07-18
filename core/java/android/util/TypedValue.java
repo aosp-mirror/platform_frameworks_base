@@ -140,11 +140,15 @@ public class TypedValue {
 
     /**
      * If {@link #density} is equal to this value, then the density should be
-     * treated as the system's default density value: {@link DisplayMetrics#DEFAULT_DENSITY}.
-     *
-     * @hide Pending API council approval
+     * treated as the system's default density value: {@link DisplayMetrics#DENSITY_DEFAULT}.
      */
     public static final int DENSITY_DEFAULT = 0;
+
+    /**
+     * If {@link #density} is equal to this value, then there is no density
+     * associated with the resource and it should not be scaled.
+     */
+    public static final int DENSITY_NONE = 0xffff;
 
     /* ------------------------------------------------------------ */
 
@@ -171,8 +175,6 @@ public class TypedValue {
 
     /**
      * If the Value came from a resource, this holds the corresponding pixel density.
-     * 
-     * @hide Pending API council approval
      * */
     public int density;
 

@@ -27,17 +27,31 @@ import android.os.*;
  */
 public class DisplayMetrics {
     /**
-     * The reference density used throughout the system.
-     * 
-     * @hide Pending API council approval
+     * Standard quantized DPI for low-density screens.
      */
-    public static final int DEFAULT_DENSITY = 160;
+    public static final int DENSITY_LOW = 120;
+
+    /**
+     * Standard quantized DPI for medium-density screens.
+     */
+    public static final int DENSITY_MEDIUM = 160;
+
+    /**
+     * Standard quantized DPI for high-density screens.
+     */
+    public static final int DENSITY_HIGH = 240;
+
+    /**
+     * The reference density used throughout the system.
+     */
+    public static final int DENSITY_DEFAULT = DENSITY_MEDIUM;
 
     /**
      * The device's density.
-     * @hide
+     * @hide becase eventually this should be able to change while
+     * running, so shouldn't be a constant.
      */
-    public static final int DEVICE_DENSITY = getDeviceDensity();
+    public static final int DENSITY_DEVICE = getDeviceDensity();
 
     /**
      * The absolute width of the display in pixels.
@@ -62,7 +76,7 @@ public class DisplayMetrics {
      * 320x480 but the screen size remained 1.5"x2" then the density would be 
      * increased (probably to 1.5).
      *
-     * @see #DEFAULT_DENSITY
+     * @see #DENSITY_DEFAULT
      */
     public float density;
     /**
@@ -95,10 +109,10 @@ public class DisplayMetrics {
     public void setToDefaults() {
         widthPixels = 0;
         heightPixels = 0;
-        density = DEVICE_DENSITY / (float) DEFAULT_DENSITY;
+        density = DENSITY_DEVICE / (float) DENSITY_DEFAULT;
         scaledDensity = density;
-        xdpi = DEVICE_DENSITY;
-        ydpi = DEVICE_DENSITY;
+        xdpi = DENSITY_DEVICE;
+        ydpi = DENSITY_DEVICE;
     }
 
     /**
@@ -176,6 +190,6 @@ public class DisplayMetrics {
         // The reason for this is that ro.sf.lcd_density is write-once and is
         // set by the init process when it parses build.prop before anything else.
         return SystemProperties.getInt("qemu.sf.lcd_density",
-                SystemProperties.getInt("ro.sf.lcd_density", DEFAULT_DENSITY));
+                SystemProperties.getInt("ro.sf.lcd_density", DENSITY_DEFAULT));
     }
 }
