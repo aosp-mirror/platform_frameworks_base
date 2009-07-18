@@ -71,9 +71,8 @@ public class VpnServiceBinder extends Service {
     }
 
     private synchronized void checkStatus(VpnProfile p) {
-        if (mService == null) broadcastConnectivity(p.getName(), VpnState.IDLE);
-
-        if (!p.getName().equals(mService.mProfile.getName())) {
+        if ((mService == null)
+                || (!p.getName().equals(mService.mProfile.getName()))) {
             broadcastConnectivity(p.getName(), VpnState.IDLE);
         } else {
             broadcastConnectivity(p.getName(), mService.getState());
