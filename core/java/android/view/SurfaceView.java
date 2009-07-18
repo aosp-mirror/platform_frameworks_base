@@ -17,7 +17,6 @@
 package android.view;
 
 import android.content.Context;
-import android.content.res.CompatibilityInfo;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
@@ -257,7 +256,7 @@ public class SurfaceView extends View {
     public boolean dispatchTouchEvent(MotionEvent event) {
         // SurfaceView uses pre-scaled size unless fixed size is requested. This hook
         // scales the event back to the pre-scaled coordinates for such surface.
-        if (mRequestedWidth < 0 && mTranslator != null) {
+        if (mScaled) {
             MotionEvent scaledBack = MotionEvent.obtain(event);
             scaledBack.scale(mTranslator.applicationScale);
             try {
@@ -291,6 +290,8 @@ public class SurfaceView extends View {
     public void setWindowType(int type) {
         mWindowType = type;
     }
+
+    boolean mScaled = false;
     
     private void updateWindow(boolean force) {
         if (!mHaveFrame) {
@@ -310,6 +311,9 @@ public class SurfaceView extends View {
         if (mRequestedWidth <= 0 && mTranslator != null) {
             myWidth *= appScale;
             myHeight *= appScale;
+            mScaled = true;
+        } else {
+            mScaled = false;
         }
 
         getLocationInWindow(mLocation);
@@ -534,6 +538,7 @@ public class SurfaceView extends View {
     private SurfaceHolder mSurfaceHolder = new SurfaceHolder() {
         
         private static final String LOG_TAG = "SurfaceHolder";
+        private int mSaveCount;
         
         public boolean isCreating() {
             return mIsCreating;
@@ -628,6 +633,10 @@ public class SurfaceView extends View {
             if (localLOGV) Log.i(TAG, "Returned canvas: " + c);
             if (c != null) {
                 mLastLockTime = SystemClock.uptimeMillis();
+                if (mScaled) {
+                    mSaveCount = c.save();
+                    mTranslator.translateCanvas(c);
+                }
                 return c;
             }
             
@@ -650,6 +659,9 @@ public class SurfaceView extends View {
         }
 
         public void unlockCanvasAndPost(Canvas canvas) {
+            if (mScaled) {
+                canvas.restoreToCount(mSaveCount);
+            }
             mSurface.unlockCanvasAndPost(canvas);
             mSurfaceLock.unlock();
         }
