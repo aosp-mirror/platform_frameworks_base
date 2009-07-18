@@ -212,8 +212,10 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     
     // failure:
 native_init_failure:
+    env->DeleteGlobalRef(lpCallbackData->audioRecord_class);
+    env->DeleteGlobalRef(lpCallbackData->audioRecord_ref);
     delete lpCallbackData;
-    
+
 native_track_failure:
     delete lpRecorder;
 
@@ -274,6 +276,8 @@ static void android_media_AudioRecord_finalize(JNIEnv *env,  jobject thiz) {
         thiz, javaAudioRecordFields.nativeCallbackCookie);
     if (lpCookie) {
         LOGV("deleting lpCookie: %x\n", (int)lpCookie);
+        env->DeleteGlobalRef(lpCookie->audioRecord_class);
+        env->DeleteGlobalRef(lpCookie->audioRecord_ref);
         delete lpCookie;
     }
 
