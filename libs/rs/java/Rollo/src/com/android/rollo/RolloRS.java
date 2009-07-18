@@ -38,11 +38,11 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 public class RolloRS {
-    public static final int STATE_POS_X = 0;
-    public static final int STATE_POS_Y = 1;
-    public static final int STATE_PRESSURE = 2;
+    //public static final int STATE_SELECTED_ID = 0;
+    public static final int STATE_DONE = 1;
+    //public static final int STATE_PRESSURE = 2;
     public static final int STATE_ZOOM = 3;
-    public static final int STATE_WARP = 4;
+    //public static final int STATE_WARP = 4;
     public static final int STATE_ORIENTATION = 5;
     public static final int STATE_SELECTION = 6;
     public static final int STATE_FIRST_VISIBLE = 7;
@@ -61,7 +61,7 @@ public class RolloRS {
     }
 
     public void setPosition(float column) {
-        mAllocStateBuf[STATE_FIRST_VISIBLE] = (int)(column * 20);
+        mAllocStateBuf[STATE_FIRST_VISIBLE] = (int)(column * (-20));
         mAllocState.data(mAllocStateBuf);
     }
 
@@ -73,23 +73,22 @@ public class RolloRS {
     public void setZoom(float z) {
         //Log.e("rs", "zoom " + Float.toString(z));
 
-        mAllocStateBuf[STATE_ZOOM] = (int)(z * 10.f);
+        mAllocStateBuf[STATE_ZOOM] = (int)(z * 1000.f);
         mAllocState.data(mAllocStateBuf);
     }
 
-    public void setCurve(float c) {
-        mAllocStateBuf[STATE_WARP] = (int)(c * 100);
-        Log.e("rs", "curve " + Integer.toString(mAllocStateBuf[STATE_WARP]));
+    public void setSelected(int index) {
+        Log.e("rs",  "setSelected " + Integer.toString(index));
+
+        mAllocStateBuf[STATE_SELECTION] = index;
+        mAllocStateBuf[STATE_DONE] = 1;
         mAllocState.data(mAllocStateBuf);
     }
 
 
     private Resources mRes;
     private RenderScript mRS;
-
-
     private RenderScript.Script mScript;
-
     private RenderScript.Sampler mSampler;
     private RenderScript.ProgramFragmentStore mPFSBackground;
     private RenderScript.ProgramFragment mPFBackground;
@@ -123,13 +122,10 @@ public class RolloRS {
 
         mRS.programFragmentBegin(null, null);
         mRS.programFragmentSetTexEnable(0, true);
-        //mRS.programFragmentSetTexEnable(1, true);
-        //mRS.programFragmentSetEnvMode(0, RS_TEX_ENV_MODE_REPLACE);
-        //mRS.programFragmentSetEnvMode(1, RS_TEX_ENV_MODE_MODULATE);
+        mRS.programFragmentSetTexEnvMode(0, RenderScript.EnvMode.MODULATE);
         mPFImages = mRS.programFragmentCreate();
         mPFImages.setName("PF");
         mPFImages.bindSampler(mSampler, 0);
-        mPFImages.bindSampler(mSampler, 1);
 
         mRS.programFragmentStoreBegin(null, null);
         mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.LESS);

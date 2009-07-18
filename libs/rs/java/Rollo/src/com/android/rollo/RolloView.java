@@ -40,8 +40,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.graphics.PixelFormat;
 
-public class RolloView extends RSSurfaceView {
 
+public class RolloView extends RSSurfaceView {
     public RolloView(Context context) {
         super(context);
         setFocusable(true);
@@ -68,12 +68,47 @@ public class RolloView extends RSSurfaceView {
     }
 
     boolean mControlMode = false;
+    boolean mZoomMode = false;
     boolean mFlingMode = false;
     float mFlingX = 0;
     float mFlingY = 0;
     float mColumn = -1;
-    float mCurve = 1;
+    float mOldColumn;
     float mZoom = 1;
+
+    int mIconCount = 38;
+    int mRows = 4;
+    int mColumns = (mIconCount + mRows - 1) / mRows;
+
+    float mMaxZoom = ((float)mColumns) / 3.f;
+
+
+    void setColumn(boolean clamp)
+    {
+        //Log.e("rs", " col = " + Float.toString(mColumn));
+        float c = mColumn;
+        if(c > (mColumns -2)) {
+            c = (mColumns -2);
+        }
+        if(c < 1) {
+            c = 1;
+        }
+        mRender.setPosition(c);
+        if(clamp) {
+            mColumn = c;
+        }
+    }
+
+    void computeSelection(float x, float y)
+    {
+        float col = mColumn + (x - 0.5f) * 3;
+        int iCol = (int)(col + 0.25f);
+
+        float row = (y / 0.8f) * mRows;
+        int iRow = (int)(row - 0.25f);
+
+        mRender.setSelected(iCol * mRows + iRow);
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev)
@@ -95,61 +130,53 @@ public class RolloView extends RSSurfaceView {
             // Projector control
             if((nx > 0.2f) && (nx < 0.8f) || mControlMode) {
                 if(act != ev.ACTION_UP) {
-                    float zoom = 5.f;//1.f + 10.f * ev.getSize();
+                    float zoom = mMaxZoom;
                     if(mControlMode) {
+                        if(!mZoomMode) {
+                            zoom = 1.f;
+                        }
                         float dx = nx - mFlingX;
 
-                        if(ny < 0.9) {
-                            zoom = 5.f - ((0.9f - ny) * 15.f);
+                        if((ny < 0.9) && mZoomMode) {
+                            zoom = mMaxZoom - ((0.9f - ny) * 10.f);
                             if(zoom < 1) {
                                 zoom = 1;
-                                mControlMode = false;
+                                mZoomMode = false;
                             }
+                            mOldColumn = mColumn;
                         }
-                        mColumn += -dx * 2.3;// * zoom;
-                        mColumn += -(mZoom - zoom) * (nx - 0.5f) * 2 * zoom;
-                        mZoom = zoom;
-
-                        if(mColumn > 1) {
-                            mColumn = 1;
+                        mColumn += dx * 4;// * zoom;
+                        if(zoom > 1.01f) {
+                            mColumn += (mZoom - zoom) * (nx - 0.5f) * 4 * zoom;
                         }
-                        mRender.setPosition(mColumn);
                     } else {
+                        mOldColumn = mColumn;
+                        mColumn = ((float)mColumns) / 2;
                         mControlMode = true;
-                        mZoom = 5;
+                        mZoomMode = true;
                     }
+                    mZoom = zoom;
                     mFlingX = nx;
                     mRender.setZoom(zoom);
                 } else {
+                    if(mControlMode && (mZoom < 1.01f)) {
+                        computeSelection(nx, ny);
+                    }
                     mControlMode = false;
+                    mColumn = mOldColumn;
                     mRender.setZoom(1.f);
                 }
             } else {
-                if(nx > 0.2f) {
-                    mCurve += 0.1f;
-                    if(mCurve > 2) {
-                        mCurve = 2;
-                    }
-                }
-                if(nx < 0.8f) {
-                    mCurve -= 0.1f;
-                    if(mCurve < (-2)) {
-                        mCurve = -2;
-                    }
-                }
-                mRender.setCurve(mCurve);
+                // Do something with corners here....
             }
+            setColumn(true);
 
         } else {
             // icon control
             if(act != ev.ACTION_UP) {
                 if(mFlingMode) {
-                    float dx = nx - mFlingX;
-                    mColumn += dx * 5;
-                    if(mColumn > 1) {
-                        mColumn = 1;
-                    }
-                    mRender.setPosition(mColumn);
+                    mColumn += (mFlingX - nx) * 5;
+                    setColumn(true);
                 }
                 mFlingMode = true;
                 mFlingX = nx;
@@ -175,7 +202,7 @@ public class RolloView extends RSSurfaceView {
 
         return true;
     }
-       
+
 }
 
 

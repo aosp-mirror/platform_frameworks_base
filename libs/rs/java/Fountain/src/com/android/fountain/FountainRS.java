@@ -56,11 +56,7 @@ public class FountainRS {
     private RenderScript.Allocation mVertAlloc;
     private RenderScript.Script mScript;
     private RenderScript.ProgramFragmentStore mPFS;
-    private RenderScript.ProgramFragmentStore mPFS2;
     private RenderScript.ProgramFragment mPF;
-    private RenderScript.ProgramFragment mPF2;
-    private RenderScript.Allocation mTexture;
-    private RenderScript.Sampler mSampler;
 
     private Bitmap mBackground;
 
@@ -74,16 +70,6 @@ public class FountainRS {
         mPartAlloc.setName("PartBuffer");
         mVertAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, partCount * 5 + 1);
 
-        {
-            Drawable d = mRes.getDrawable(R.drawable.gadgets_clock_mp3);
-            BitmapDrawable bd = (BitmapDrawable)d;
-            Bitmap b = bd.getBitmap();
-            mTexture = mRS.allocationCreateFromBitmap(b,
-                                                      RenderScript.ElementPredefined.RGB_565,
-                                                      false);
-            mTexture.uploadToTexture(0);
-        }
-
         mRS.programFragmentStoreBegin(null, null);
         mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.SRC_ALPHA, RenderScript.BlendDstFunc.ONE);
         mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
@@ -92,32 +78,9 @@ public class FountainRS {
         mPFS = mRS.programFragmentStoreCreate();
         mPFS.setName("PFSBlend");
 
-        mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
-        mRS.programFragmentStoreDepthMask(false);
-        mRS.programFragmentStoreDitherEnable(false);
-        mPFS2 = mRS.programFragmentStoreCreate();
-        mPFS2.setName("PFSReplace");
-        mRS.contextBindProgramFragmentStore(mPFS2);
-
-        mRS.samplerBegin();
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MAG, RenderScript.SamplerValue.NEAREST);
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN, RenderScript.SamplerValue.NEAREST);
-        mSampler = mRS.samplerCreate();
-
-
         mRS.programFragmentBegin(null, null);
         mPF = mRS.programFragmentCreate();
         mPF.setName("PgmFragParts");
-
-        mRS.programFragmentBegin(null, null);
-        mRS.programFragmentSetTexEnable(0, true);
-        mPF2 = mRS.programFragmentCreate();
-        mRS.contextBindProgramFragment(mPF2);
-        mPF2.bindTexture(mTexture, 0);
-        mPF2.bindSampler(mSampler, 0);
-        mPF2.setName("PgmFragBackground");
-
 
         mParams[0] = 0;
         mParams[1] = partCount;
