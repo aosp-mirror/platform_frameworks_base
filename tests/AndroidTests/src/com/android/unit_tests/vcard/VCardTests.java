@@ -29,6 +29,8 @@ import android.pim.vcard.VCardParser_V30;
 import android.pim.vcard.exception.VCardException;
 import android.test.AndroidTestCase;
 
+import com.android.unit_tests.R;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
