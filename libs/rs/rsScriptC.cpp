@@ -197,7 +197,7 @@ extern "C" void storeEnvMatrix(uint32_t bank, uint32_t offset, const rsc_Matrix 
 }
 
 
-extern "C" void color(float r, float g, float b, float a)
+static void SC_color(float r, float g, float b, float a)
 {
     glColor4f(r, g, b, a);
 }
@@ -253,15 +253,17 @@ extern "C" void disable(uint32_t p)
     glDisable(p);
 }
 
-extern "C" uint32_t scriptRand(uint32_t max)
+static float SC_randf(float max)
 {
-    return (uint32_t)(((float)rand()) * max / RAND_MAX);
+    float r = (float)rand();
+    return r / RAND_MAX * max;
 }
 
 // Assumes (GL_FIXED) x,y,z (GL_UNSIGNED_BYTE)r,g,b,a
-extern "C" void drawTriangleArray(RsAllocation alloc, uint32_t count)
+static void SC_drawTriangleArray(int ialloc, uint32_t count)
 {
     GET_TLS();
+    RsAllocation alloc = (RsAllocation)ialloc;
 
     const Allocation *a = (const Allocation *)alloc;
     const uint32_t *ptr = (const uint32_t *)a->getPtr();
@@ -398,7 +400,8 @@ extern "C" void contextBindProgramFragment(RsProgramFragment pf)
 }
 
 
-static rsc_FunctionTable scriptCPtrTable = {
+static rsc_FunctionTable scriptCPtrTable;
+/* = {
     loadVp,
     SC_loadF,
     SC_loadI32,
@@ -424,7 +427,7 @@ static rsc_FunctionTable scriptCPtrTable = {
     matrixScale,
     matrixTranslate,
 
-    color,
+    SC_color,
 
     pfBindTexture,
     pfBindSampler,
@@ -437,7 +440,7 @@ static rsc_FunctionTable scriptCPtrTable = {
     enable,
     disable,
 
-    scriptRand,
+    SC_randf,
     contextBindProgramFragment,
     contextBindProgramFragmentStore,
 
@@ -445,11 +448,11 @@ static rsc_FunctionTable scriptCPtrTable = {
     renderTriangleMesh,
     renderTriangleMeshRange,
 
-    drawTriangleArray,
+    SC_drawTriangleArray,
     drawRect
 
 };
-
+*/
 
 bool ScriptC::run(Context *rsc, uint32_t launchIndex)
 {
@@ -503,17 +506,28 @@ void ScriptCState::clear()
 }
 
 ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
+    // IO
     { "loadI32", (void *)&SC_loadI32, "int loadI32(int, int)" },
+    //{ "loadU32", (void *)&SC_loadU32, "unsigned int loadU32(int, int)" },
     { "loadF", (void *)&SC_loadF, "float loadF(int, int)" },
     { "storeI32", (void *)&SC_storeI32, "void storeI32(int, int, int)" },
+    //{ "storeU32", (void *)&SC_storeU32, "void storeU32(int, int, unsigned int)" },
     { "storeF", (void *)&SC_storeF, "void storeF(int, int, float)" },
-    { "drawQuad", (void *)&SC_drawQuad, "void drawQuad(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
+
+    // math
     { "sinf", (void *)&sinf, "float sinf(float)" },
     { "cosf", (void *)&cosf, "float cosf(float)" },
     { "fabs", (void *)&fabs, "float fabs(float)" },
+    { "randf", (void *)&SC_randf, "float randf(float)" },
+
+    // context
+    { "drawQuad", (void *)&SC_drawQuad, "void drawQuad(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
     { "contextBindProgramFragmentStore", (void *)&contextBindProgramFragmentStore, "void contextBindProgramFragmentStore(int)" },
     { "pfClearColor", (void *)&pfClearColor, "void pfClearColor(float, float, float, float)" },
     { "pfBindTexture", (void *)&pfBindTexture, "void pfBindTexture(int, int, int)" },
+
+    { "color", (void *)&SC_color, "void color(float, float, float, float)" },
+    { "drawTriangleArray", (void *)&SC_drawTriangleArray, "void drawTriangleArray(int ialloc, int count)" },
 
 
     { NULL, NULL, NULL }

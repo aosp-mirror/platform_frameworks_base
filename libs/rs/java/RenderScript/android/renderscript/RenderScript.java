@@ -846,6 +846,10 @@ public class RenderScript {
         nProgramFragmentSetTexEnable(slot, enable);
     }
 
+    public void programFragmentSetTexEnvMode(int slot, EnvMode env) {
+        nProgramFragmentSetEnvMode(slot, env.mID);
+    }
+
     public ProgramFragment programFragmentCreate() {
         int id = nProgramFragmentCreate();
         return new ProgramFragment(id);

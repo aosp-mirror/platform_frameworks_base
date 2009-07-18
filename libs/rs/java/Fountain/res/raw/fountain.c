@@ -2,8 +2,8 @@
 
 #pragma version(1)
 #pragma stateVertex(default)
-#pragma stateFragment(PgmFragBackground)
-#pragma stateFragmentStore(PFSReplace)
+#pragma stateFragment(PgmFragParts)
+#pragma stateFragmentStore(PFSBlend)
 
 
 int main(int launchID) {
@@ -34,15 +34,11 @@ int main(int launchID) {
         }
     }
 
-    drawRect(0, 256, 0, 512);
-    contextBindProgramFragment(NAMED_PgmFragParts);
-    contextBindProgramFragmentStore(NAMED_PFSBlend);
-
     if (touch) {
         newPart = loadI32(2, 0);
         for (ct2=0; ct2<rate; ct2++) {
-            dx = scriptRand(0x10000) - 0x8000;
-            dy = scriptRand(0x10000) - 0x8000;
+            dx = (int)((randf(1.f) - 0.5f) * 0x10000);
+            dy = (int)((randf(1.f) - 0.5f) * 0x10000);
 
             idx = newPart * 5 + 1;
             storeI32(2, idx, dx);
@@ -74,15 +70,15 @@ int main(int launchID) {
                 dstIdx = drawCount * 9;
                 c = 0xffafcf | ((life >> lifeShift) << 24);
 
-                storeU32(1, dstIdx, c);
+                storeI32(1, dstIdx, c);
                 storeI32(1, dstIdx + 1, posx);
                 storeI32(1, dstIdx + 2, posy);
 
-                storeU32(1, dstIdx + 3, c);
+                storeI32(1, dstIdx + 3, c);
                 storeI32(1, dstIdx + 4, posx + 0x10000);
                 storeI32(1, dstIdx + 5, posy + dy * 4);
 
-                storeU32(1, dstIdx + 6, c);
+                storeI32(1, dstIdx + 6, c);
                 storeI32(1, dstIdx + 7, posx - 0x10000);
                 storeI32(1, dstIdx + 8, posy + dy * 4);
                 drawCount ++;
