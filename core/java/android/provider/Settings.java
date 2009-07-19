@@ -2508,9 +2508,15 @@ public final class Settings {
         public static final String CHECKIN_EVENTS = "checkin_events";
 
         /**
-         * Event tags for list of services to upload during checkin.
+         * Comma-separated list of service names to dump and upload during checkin.
          */
         public static final String CHECKIN_DUMPSYS_LIST = "checkin_dumpsys_list";
+
+        /**
+         * Comma-separated list of packages to specify for each service that is
+         * dumped (currently only meaningful for user activity).
+         */
+        public static final String CHECKIN_PACKAGE_LIST = "checkin_package_list";
 
         /**
          * The interval (in seconds) between periodic checkin attempts.

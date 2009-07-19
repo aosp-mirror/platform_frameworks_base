@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -617,7 +618,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
     }
     
     private void collectDumpInfoFLOCK(PrintWriter pw, boolean isCompactOutput,
-            boolean deleteAfterPrint) {
+            boolean deleteAfterPrint, HashSet<String> packages) {
         List<String> fileList = getUsageStatsFileListFLOCK();
         if (fileList == null) {
             return;
@@ -633,7 +634,8 @@ public final class UsageStatsService extends IUsageStats.Stub {
             String dateStr = file.substring(FILE_PREFIX.length());
             try {
                 Parcel in = getParcelForFile(dFile);
-                collectDumpInfoFromParcelFLOCK(in, pw, dateStr, isCompactOutput);
+                collectDumpInfoFromParcelFLOCK(in, pw, dateStr, isCompactOutput,
+                        packages);
                 if (deleteAfterPrint) {
                     // Delete old file after collecting info only for checkin requests
                     dFile.delete();
@@ -648,7 +650,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
     }
     
     private void collectDumpInfoFromParcelFLOCK(Parcel in, PrintWriter pw,
-            String date, boolean isCompactOutput) {
+            String date, boolean isCompactOutput, HashSet<String> packages) {
         StringBuilder sb = new StringBuilder(512);
         if (isCompactOutput) {
             sb.append("D:");
@@ -678,7 +680,10 @@ public final class UsageStatsService extends IUsageStats.Stub {
             }
             sb.setLength(0);
             PkgUsageStatsExtended pus = new PkgUsageStatsExtended(in);
-            if (isCompactOutput) {
+            if (packages != null && !packages.contains(pkgName)) {
+                // This package has not been requested -- don't print
+                // anything for it.
+            } else if (isCompactOutput) {
                 sb.append("P:");
                 sb.append(pkgName);
                 sb.append(',');
@@ -765,6 +770,25 @@ public final class UsageStatsService extends IUsageStats.Stub {
         return false;
     }
     
+    /**
+     * Searches array of arguments for the specified string's data
+     * @param args array of argument strings
+     * @param value value to search for
+     * @return the string of data after the arg, or null if there is none
+     */
+    private static String scanArgsData(String[] args, String value) {
+        if (args != null) {
+            final int N = args.length;
+            for (int i=0; i<N; i++) {
+                if (value.equals(args[i])) {
+                    i++;
+                    return i < N ? args[i] : null;
+                }
+            }
+        }
+        return null;
+    }
+    
     @Override
     /*
      * The data persisted to file is parsed and the stats are computed. 
@@ -773,6 +797,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
         final boolean isCheckinRequest = scanArgs(args, "--checkin");
         final boolean isCompactOutput = isCheckinRequest || scanArgs(args, "-c");
         final boolean deleteAfterPrint = isCheckinRequest || scanArgs(args, "-d");
+        final String rawPackages = scanArgsData(args, "--packages");
         
         // Make sure the current stats are written to the file.  This
         // doesn't need to be done if we are deleting files after printing,
@@ -781,8 +806,27 @@ public final class UsageStatsService extends IUsageStats.Stub {
             writeStatsToFile(true);
         }
         
+        HashSet<String> packages = null;
+        if (rawPackages != null) {
+            if (!"*".equals(rawPackages)) {
+                // A * is a wildcard to show all packages.
+                String[] names = rawPackages.split(",");
+                for (String n : names) {
+                    if (packages == null) {
+                        packages = new HashSet<String>();
+                    }
+                    packages.add(n);
+                }
+            }
+        } else if (isCheckinRequest) {
+            // If checkin doesn't specify any packages, then we simply won't
+            // show anything.
+            Log.w(TAG, "Checkin without packages");
+            return;
+        }
+        
         synchronized (mFileLock) {
-            collectDumpInfoFLOCK(pw, isCompactOutput, deleteAfterPrint);
+            collectDumpInfoFLOCK(pw, isCompactOutput, deleteAfterPrint, packages);
         }
     }
 
