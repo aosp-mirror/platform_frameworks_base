@@ -17,6 +17,8 @@
 package com.google.android.test.dpi;
 
 import android.app.Activity;
+import android.app.ActivityThread;
+import android.app.Application;
 import android.os.Bundle;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
@@ -31,6 +33,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
+import android.util.DisplayMetrics;
 
 public class DpiTestActivity extends Activity {
     public DpiTestActivity() {
@@ -45,7 +48,10 @@ public class DpiTestActivity extends Activity {
     
     public void init(boolean noCompat) {
         try {
-            ApplicationInfo ai = getPackageManager().getApplicationInfo(
+            // This is all a dirty hack.  Don't think a real application should
+            // be doing it.
+            Application app = ActivityThread.currentActivityThread().getApplication();
+            ApplicationInfo ai = app.getPackageManager().getApplicationInfo(
                     "com.google.android.test.dpi",
                     PackageManager.GET_SUPPORTS_DENSITIES);
             if (noCompat) {
@@ -53,8 +59,8 @@ public class DpiTestActivity extends Activity {
                     | ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS
                     | ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS;
                 ai.supportsDensities = new int[] { ApplicationInfo.ANY_DENSITY };
+                app.getResources().setCompatibilityInfo(new CompatibilityInfo(ai));
             }
-            getResources().setCompatibilityInfo(new CompatibilityInfo(ai));
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException("ouch", e);
         }
@@ -192,7 +198,10 @@ public class DpiTestActivity extends Activity {
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            setMeasuredDimension(mBitmap.getScaledWidth(), mBitmap.getScaledHeight());
+            final DisplayMetrics metrics = getResources().getDisplayMetrics();
+            setMeasuredDimension(
+                    mBitmap.getScaledWidth(metrics),
+                    mBitmap.getScaledHeight(metrics));
         }
 
         @Override

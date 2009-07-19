@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.DisplayMetrics;
 
 import java.io.OutputStream;
 import java.nio.Buffer;
@@ -605,22 +606,60 @@ public final class Bitmap implements Parcelable {
      * Convenience method that returns the width of this bitmap divided
      * by the density scale factor.
      *
+     * @param canvas The Canvas the bitmap will be drawn to.
      * @return The scaled width of this bitmap, according to the density scale factor.
      */
-    public int getScaledWidth() {
+    public int getScaledWidth(Canvas canvas) {
         final float scale = mDensityScale;
-        return scale == DENSITY_SCALE_UNKNOWN ? getWidth() : (int) (getWidth() / scale);
+        if (!mAutoScaling || scale < 0) {
+            return getWidth();
+        }
+        return (int)(getWidth() * canvas.getDensityScale() / scale);
     }
 
     /**
      * Convenience method that returns the height of this bitmap divided
      * by the density scale factor.
      *
+     * @param canvas The Canvas the bitmap will be drawn to.
      * @return The scaled height of this bitmap, according to the density scale factor.
      */
-    public int getScaledHeight() {
+    public int getScaledHeight(Canvas canvas) {
         final float scale = mDensityScale;
-        return scale == DENSITY_SCALE_UNKNOWN ? getWidth() : (int) (getHeight() / scale);
+        if (!mAutoScaling || scale < 0) {
+            return getHeight();
+        }
+        return (int)(getHeight() * canvas.getDensityScale() / scale);
+    }
+
+    /**
+     * Convenience method that returns the width of this bitmap divided
+     * by the density scale factor.
+     *
+     * @param metrics The target display metrics.
+     * @return The scaled width of this bitmap, according to the density scale factor.
+     */
+    public int getScaledWidth(DisplayMetrics metrics) {
+        final float scale = mDensityScale;
+        if (!mAutoScaling || scale < 0) {
+            return getWidth();
+        }
+        return (int)(getWidth() * metrics.density / scale);
+    }
+
+    /**
+     * Convenience method that returns the height of this bitmap divided
+     * by the density scale factor.
+     *
+     * @param metrics The target display metrics.
+     * @return The scaled height of this bitmap, according to the density scale factor.
+     */
+    public int getScaledHeight(DisplayMetrics metrics) {
+        final float scale = mDensityScale;
+        if (!mAutoScaling || scale < 0) {
+            return getHeight();
+        }
+        return (int)(getHeight() * metrics.density / scale);
     }
 
     /**

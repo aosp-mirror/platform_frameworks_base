@@ -85,6 +85,11 @@ public class CompatibilityInfo {
     private static final int SCALING_EXPANDABLE_MASK = SCALING_REQUIRED | EXPANDABLE;
 
     /**
+     * The effective screen density we have selected for this application.
+     */
+    public final int applicationDensity;
+    
+    /**
      * Application's scale.
      */
     public final float applicationScale;
@@ -107,28 +112,34 @@ public class CompatibilityInfo {
         }
         
         float packageDensityScale = -1.0f;
+        int packageDensity = 0;
         if (appInfo.supportsDensities != null) {
             int minDiff = Integer.MAX_VALUE;
             for (int density : appInfo.supportsDensities) {
-                if (density == ApplicationInfo.ANY_DENSITY) { 
+                if (density == ApplicationInfo.ANY_DENSITY) {
+                    packageDensity = DisplayMetrics.DENSITY_DEVICE;
                     packageDensityScale = 1.0f;
                     break;
                 }
                 int tmpDiff = Math.abs(DisplayMetrics.DENSITY_DEVICE - density);
                 if (tmpDiff == 0) {
+                    packageDensity = DisplayMetrics.DENSITY_DEVICE;
                     packageDensityScale = 1.0f;
                     break;
                 }
                 // prefer higher density (appScale>1.0), unless that's only option.
                 if (tmpDiff < minDiff && packageDensityScale < 1.0f) {
+                    packageDensity = density;
                     packageDensityScale = DisplayMetrics.DENSITY_DEVICE / (float) density;
                     minDiff = tmpDiff;
                 }
             }
         }
         if (packageDensityScale > 0.0f) {
+            applicationDensity = packageDensity;
             applicationScale = packageDensityScale;
         } else {
+            applicationDensity = DisplayMetrics.DENSITY_DEFAULT;
             applicationScale =
                     DisplayMetrics.DENSITY_DEVICE / (float) DisplayMetrics.DENSITY_DEFAULT;
         }
@@ -139,9 +150,11 @@ public class CompatibilityInfo {
         }
     }
 
-    private CompatibilityInfo(int appFlags, int compFlags, float scale, float invertedScale) {
+    private CompatibilityInfo(int appFlags, int compFlags,
+            int dens, float scale, float invertedScale) {
         this.appFlags = appFlags;
         mCompatibilityFlags = compFlags;
+        applicationDensity = dens;
         applicationScale = scale;
         applicationInvertedScale = invertedScale;
     }
@@ -151,6 +164,7 @@ public class CompatibilityInfo {
                 | ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS
                 | ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS,
                 EXPANDABLE | CONFIGURED_EXPANDABLE,
+                DisplayMetrics.DENSITY_DEVICE,
                 1.0f,
                 1.0f);
     }
@@ -160,7 +174,7 @@ public class CompatibilityInfo {
      */
     public CompatibilityInfo copy() {
         CompatibilityInfo info = new CompatibilityInfo(appFlags, mCompatibilityFlags,
-                applicationScale, applicationInvertedScale);
+                applicationDensity, applicationScale, applicationInvertedScale);
         return info;
     }
  
