@@ -25,7 +25,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="DpiTestActivityNoCompat" android:label="DpiTestCompat">
+        <activity android:name="DpiTestNoCompatActivity" android:label="DpiTestNoCompat">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
