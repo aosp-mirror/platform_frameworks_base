@@ -1295,11 +1295,8 @@ public class RelativeLayout extends ViewGroup {
                     if (rule > 0) {
                         // The node this node depends on
                         final Node dependency = keyNodes.get(rule);
-                        if (dependency == node) {
-                            throw new IllegalStateException("A view cannot have a dependency" +
-                                    " on itself");
-                        }
-                        if (dependency == null) {
+                        // Skip unknowns and self dependencies
+                        if (dependency == null || dependency == node) {
                             continue;
                         }
                         // Add the current node as a dependent
