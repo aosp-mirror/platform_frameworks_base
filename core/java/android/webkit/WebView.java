@@ -4918,6 +4918,11 @@ public class WebView extends AbsoluteLayout
                         }
                     }
                     setNewZoomScale(scale, false);
+                    // As we are on a new page, remove the WebTextView.  This
+                    // is necessary for page loads driven by webkit, and in
+                    // particular when the user was on a password field, so
+                    // the WebTextView was visible.
+                    clearTextEntry();
                     break;
                 case MOVE_OUT_OF_PLUGIN:
                     if (nativePluginEatsNavKey()) {
