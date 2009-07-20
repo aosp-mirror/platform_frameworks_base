@@ -550,12 +550,14 @@ class BrowserFrame extends Handler {
         mCallbackProxy.onLoadResource(url);
 
         if (LoadListener.getNativeLoaderCount() > MAX_OUTSTANDING_REQUESTS) {
+            // send an error message, so that loadListener can be deleted
+            // after this is returned. This is important as LoadListener's 
+            // nativeError will remove the request from its DocLoader's request
+            // list. But the set up is not done until this method is returned.
             loadListener.error(
                     android.net.http.EventHandler.ERROR, mContext.getString(
                             com.android.internal.R.string.httpErrorTooManyRequests));
-            loadListener.notifyError();
-            loadListener.tearDown();
-            return null;
+            return loadListener;
         }
 
         // during synchronous load, the WebViewCore thread is blocked, so we
