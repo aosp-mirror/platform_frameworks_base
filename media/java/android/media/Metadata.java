@@ -123,9 +123,11 @@ public class Metadata
     private static final int LAST_TYPE = 8;
 
     private static final String TAG = "media.Metadata";
-    private static final int kMetaHeaderSize = 8;  //  size + marker
+    private static final int kInt32Size = 4;
+    private static final int kMetaHeaderSize = 2 * kInt32Size; //  size + marker
+    private static final int kRecordHeaderSize = 3 * kInt32Size; // size + id + type
+
     private static final int kMetaMarker = 0x4d455441;  // 'M' 'E' 'T' 'A'
-    private static final int kRecordHeaderSize = 12; // size + id + type
 
     // After a successful parsing, set the parcel with the serialized metadata.
     private Parcel mParcel;
@@ -280,8 +282,8 @@ public class Metadata
         final int pin = parcel.dataPosition();  // to roll back in case of errors.
         final int size = parcel.readInt();
 
-        // Magic 4 below is for the int32 'size' just read.
-        if (parcel.dataAvail() + 4 < size || size < kMetaHeaderSize) {
+        // The extra kInt32Size below is to account for the int32 'size' just read.
+        if (parcel.dataAvail() + kInt32Size < size || size < kMetaHeaderSize) {
             Log.e(TAG, "Bad size " + size + " avail " + parcel.dataAvail() + " position " + pin);
             parcel.setDataPosition(pin);
             return false;

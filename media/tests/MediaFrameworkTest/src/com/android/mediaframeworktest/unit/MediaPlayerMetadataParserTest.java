@@ -32,7 +32,6 @@ import java.util.Date;
 
 public class MediaPlayerMetadataParserTest extends AndroidTestCase {
     private static final String TAG = "MediaPlayerMetadataTest";
-    private static final int kToken = 0xdeadbeef;
     private static final int kMarker = 0x4d455441;  // 'M' 'E' 'T' 'A'
     private static final int kHeaderSize = 8;
 
