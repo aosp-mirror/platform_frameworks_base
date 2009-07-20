@@ -2,24 +2,25 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-	AudioTrack.cpp \
-	IAudioFlinger.cpp \
-	IAudioFlingerClient.cpp \
-	IAudioTrack.cpp \
-	IAudioRecord.cpp \
-	AudioRecord.cpp \
-	AudioSystem.cpp \
-	mediaplayer.cpp \
-	IMediaPlayerService.cpp \
-	IMediaPlayerClient.cpp \
-	IMediaPlayer.cpp \
-	IMediaRecorder.cpp \
-	mediarecorder.cpp \
-	IMediaMetadataRetriever.cpp \
-	mediametadataretriever.cpp \
-	ToneGenerator.cpp \
-	JetPlayer.cpp \
-        IOMX.cpp
+    AudioTrack.cpp \
+    IAudioFlinger.cpp \
+    IAudioFlingerClient.cpp \
+    IAudioTrack.cpp \
+    IAudioRecord.cpp \
+    AudioRecord.cpp \
+    AudioSystem.cpp \
+    mediaplayer.cpp \
+    IMediaPlayerService.cpp \
+    IMediaPlayerClient.cpp \
+    IMediaPlayer.cpp \
+    IMediaRecorder.cpp \
+    Metadata.cpp \
+    mediarecorder.cpp \
+    IMediaMetadataRetriever.cpp \
+    mediametadataretriever.cpp \
+    ToneGenerator.cpp \
+    JetPlayer.cpp \
+    IOMX.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox

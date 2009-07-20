@@ -104,7 +104,7 @@ public class Metadata
     public static final int SEEK_FORWARD_AVAILABLE = 31;  // Boolean
 
     private static final int LAST_SYSTEM = 31;
-    private static final int FIRST_CUSTOM = 8092;
+    private static final int FIRST_CUSTOM = 8192;
 
     // Shorthands to set the MediaPlayer's metadata filter.
     public static final Set<Integer> MATCH_NONE = Collections.EMPTY_SET;

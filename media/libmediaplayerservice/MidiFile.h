@@ -49,10 +49,6 @@ public:
     virtual status_t    invoke(const Parcel& request, Parcel *reply) {
         return INVALID_OPERATION;
     }
-    virtual status_t    getMetadata(const SortedVector<MetadataType>& ids,
-                                    Parcel *records)  {
-        return INVALID_OPERATION;
-    }
 
 private:
             status_t    createOutputTrack();
