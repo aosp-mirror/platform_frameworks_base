@@ -1246,6 +1246,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
         Log.d(LOG_TAG, "launching " + intent);
         getContext().startActivity(intent);
+
+        if (!mGlobalSearchMode) {
+            dismiss();
+        }
     }
     
     /**
