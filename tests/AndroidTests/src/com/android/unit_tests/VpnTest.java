@@ -19,6 +19,7 @@ package com.android.unit_tests;
 import android.net.vpn.L2tpIpsecProfile;
 import android.net.vpn.VpnType;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
 
 /**
  * Unit test class to test VPN api
