@@ -820,14 +820,14 @@ public class TextToSpeech {
                 if (speechRate > 0) {
                     int rate = (int)(speechRate*100);
                     mCachedParams[Engine.TTS_PARAM_POSITION_RATE + 1] = String.valueOf(rate);
-                    result = mITts.setSpeechRate(mPackageName, rate);
+                    // the rate is not set here, instead it is cached so it will be associated
+                    // with all upcoming utterances.
+                    if (speechRate > 0.0f) {
+                        result = TTS_SUCCESS;
+                    } else {
+                        result = TTS_ERROR;
+                    }
                 }
-            } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setSpeechRate", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
             } catch (NullPointerException e) {
                 // TTS died; restart it.
                 Log.e("TextToSpeech.java - setSpeechRate", "NullPointerException");
@@ -907,7 +907,9 @@ public class TextToSpeech {
      * @param loc
      *            The locale describing the language to be used.
      *
-     * @return Code indicating the support status for the locale. See the TTS_LANG_ codes.
+     * @return code indicating the support status for the locale. See {@link #TTS_LANG_AVAILABLE},
+     *         {@link #TTS_LANG_COUNTRY_AVAILABLE}, {@link #TTS_LANG_COUNTRY_VAR_AVAILABLE},
+     *         {@link #TTS_LANG_MISSING_DATA} and {@link #TTS_LANG_NOT_SUPPORTED}.
      */
     public int setLanguage(Locale loc) {
         synchronized (mStartLock) {
@@ -919,7 +921,10 @@ public class TextToSpeech {
                 mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1] = loc.getISO3Language();
                 mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY + 1] = loc.getISO3Country();
                 mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT + 1] = loc.getVariant();
-                result = mITts.setLanguage(mPackageName,
+                // the language is not set here, instead it is cached so it will be associated
+                // with all upcoming utterances. But we still need to change the language support,
+                // which is achieved by calling isLanguageAvailable()
+                result = mITts.isLanguageAvailable(
                         mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1],
                         mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY + 1],
                         mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT + 1] );
@@ -994,8 +999,9 @@ public class TextToSpeech {
      * @param loc
      *            The Locale describing the language to be used.
      *
-     * @return one of TTS_LANG_NOT_SUPPORTED, TTS_LANG_MISSING_DATA, TTS_LANG_AVAILABLE,
-     *         TTS_LANG_COUNTRY_AVAILABLE, TTS_LANG_COUNTRY_VAR_AVAILABLE.
+     * @return code indicating the support status for the locale. See {@link #TTS_LANG_AVAILABLE},
+     *         {@link #TTS_LANG_COUNTRY_AVAILABLE}, {@link #TTS_LANG_COUNTRY_VAR_AVAILABLE},
+     *         {@link #TTS_LANG_MISSING_DATA} and {@link #TTS_LANG_NOT_SUPPORTED}.
      */
     public int isLanguageAvailable(Locale loc) {
         synchronized (mStartLock) {
