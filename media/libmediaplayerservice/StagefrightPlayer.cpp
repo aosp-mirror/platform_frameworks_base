@@ -205,4 +205,9 @@ void StagefrightPlayer::setAudioSink(const sp<AudioSink> &audioSink) {
     }
 }
 
+status_t StagefrightPlayer::getMetadata(
+        const SortedVector<MetadataType> &ids, Parcel *records) {
+    return INVALID_OPERATION;
+}
+
 }  // namespace android
