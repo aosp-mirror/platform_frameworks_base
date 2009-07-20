@@ -54,5 +54,8 @@ interface IBluetoothDevice
     int getRemoteServiceChannel(in String address, String uuid);
 
     boolean setPin(in String address, in byte[] pin);
-    boolean cancelPin(in String address);
+    boolean setPasskey(in String address, int passkey);
+    boolean setPairingConfirmation(in String address, boolean confirm);
+    boolean cancelPairingUserInput(in String address);
+
 }
