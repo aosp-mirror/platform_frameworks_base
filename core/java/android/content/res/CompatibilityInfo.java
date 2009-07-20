@@ -114,14 +114,14 @@ public class CompatibilityInfo {
                     packageDensityScale = 1.0f;
                     break;
                 }
-                int tmpDiff = Math.abs(DisplayMetrics.DEVICE_DENSITY - density);
+                int tmpDiff = Math.abs(DisplayMetrics.DENSITY_DEVICE - density);
                 if (tmpDiff == 0) {
                     packageDensityScale = 1.0f;
                     break;
                 }
                 // prefer higher density (appScale>1.0), unless that's only option.
                 if (tmpDiff < minDiff && packageDensityScale < 1.0f) {
-                    packageDensityScale = DisplayMetrics.DEVICE_DENSITY / (float) density;
+                    packageDensityScale = DisplayMetrics.DENSITY_DEVICE / (float) density;
                     minDiff = tmpDiff;
                 }
             }
@@ -130,7 +130,7 @@ public class CompatibilityInfo {
             applicationScale = packageDensityScale;
         } else {
             applicationScale =
-                    DisplayMetrics.DEVICE_DENSITY / (float) DisplayMetrics.DEFAULT_DENSITY;
+                    DisplayMetrics.DENSITY_DEVICE / (float) DisplayMetrics.DENSITY_DEFAULT;
         }
 
         applicationInvertedScale = 1.0f / applicationScale;

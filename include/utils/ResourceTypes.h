@@ -825,7 +825,8 @@ struct ResTable_config
     };
     
     enum {
-        DENSITY_ANY = 0
+        DENSITY_DEFAULT = 0,
+        DENSITY_NONE = 0xffff
     };
     
     union {
