@@ -106,6 +106,13 @@ public class AndroidServiceProxy extends ProcessProxy {
     @Override
     protected void performTask() throws IOException {
         String svc = mServiceName;
+        Log.d(mTag, "-----  Stop the daemon just in case: " + mServiceName);
+        SystemProperties.set(SVC_STOP_CMD, mServiceName);
+        if (!blockUntil(SVC_STATE_STOPPED, 5)) {
+            throw new IOException("cannot start service anew: " + svc
+                    + ", it is still running");
+        }
+
         Log.d(mTag, "+++++  Start: " + svc);
         SystemProperties.set(SVC_START_CMD, svc);
 

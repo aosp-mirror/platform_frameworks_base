@@ -17,6 +17,8 @@
 package com.google.android.test.dpi;
 
 import android.app.Activity;
+import android.app.ActivityThread;
+import android.app.Application;
 import android.os.Bundle;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
@@ -28,8 +30,42 @@ import android.widget.TextView;
 import android.widget.ScrollView;
 import android.view.View;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.res.CompatibilityInfo;
+import android.util.DisplayMetrics;
 
 public class DpiTestActivity extends Activity {
+    public DpiTestActivity() {
+        super();
+        init(false);
+    }
+    
+    public DpiTestActivity(boolean noCompat) {
+        super();
+        init(noCompat);
+    }
+    
+    public void init(boolean noCompat) {
+        try {
+            // This is all a dirty hack.  Don't think a real application should
+            // be doing it.
+            Application app = ActivityThread.currentActivityThread().getApplication();
+            ApplicationInfo ai = app.getPackageManager().getApplicationInfo(
+                    "com.google.android.test.dpi",
+                    PackageManager.GET_SUPPORTS_DENSITIES);
+            if (noCompat) {
+                ai.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS
+                    | ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS
+                    | ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS;
+                ai.supportsDensities = new int[] { ApplicationInfo.ANY_DENSITY };
+                app.getResources().setCompatibilityInfo(new CompatibilityInfo(ai));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException("ouch", e);
+        }
+    }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +107,13 @@ public class DpiTestActivity extends Activity {
         addCanvasBitmap(layout, R.drawable.logo160dpi, false);
         addCanvasBitmap(layout, R.drawable.logo240dpi, false);
         addLabelToRoot(root, "Autoscaled bitmap");
+        addChildToRoot(root, layout);
+
+        layout = new LinearLayout(this);
+        addResourceDrawable(layout, R.drawable.logonodpi120);
+        addResourceDrawable(layout, R.drawable.logonodpi160);
+        addResourceDrawable(layout, R.drawable.logonodpi240);
+        addLabelToRoot(root, "No-dpi resource drawable");
         addChildToRoot(root, layout);
 
         setContentView(scrollWrap(root));
@@ -155,7 +198,10 @@ public class DpiTestActivity extends Activity {
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            setMeasuredDimension(mBitmap.getScaledWidth(), mBitmap.getScaledHeight());
+            final DisplayMetrics metrics = getResources().getDisplayMetrics();
+            setMeasuredDimension(
+                    mBitmap.getScaledWidth(metrics),
+                    mBitmap.getScaledHeight(metrics));
         }
 
         @Override

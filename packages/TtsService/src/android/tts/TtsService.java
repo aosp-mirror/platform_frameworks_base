@@ -551,16 +551,16 @@ public class TtsService extends Service implements OnCompletionListener {
                         return;
                     }
                     int streamType = DEFAULT_STREAM_TYPE;
+                    String language = "";
+                    String country = "";
+                    String variant = "";
+                    String speechRate = "";
                     if (speechItem.mParams != null){
-                        String language = "";
-                        String country = "";
-                        String variant = "";
                         for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
                             String param = speechItem.mParams.get(i);
                             if (param != null) {
                                 if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)) {
-                                    setSpeechRate("",
-                                            Integer.parseInt(speechItem.mParams.get(i+1)));
+                                    speechRate = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
                                     language = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
@@ -579,12 +579,15 @@ public class TtsService extends Service implements OnCompletionListener {
                                 }
                             }
                         }
+                    }
+                    // Only do the synthesis if it has not been killed by a subsequent utterance.
+                    if (mKillList.get(speechItem) == null) {
                         if (language.length() > 0){
                             setLanguage("", language, country, variant);
                         }
-                    }
-                    // Only do the synthesis if it has not been killed by a subsequent utterance.
-                    if (mKillList.get(speechItem) == null){
+                        if (speechRate.length() > 0){
+                            setSpeechRate("", Integer.parseInt(speechRate));
+                        }
                         nativeSynth.speak(speechItem.mText, streamType);
                     }
                 } catch (InterruptedException e) {
@@ -624,16 +627,16 @@ public class TtsService extends Service implements OnCompletionListener {
                         synth.start();
                         return;
                     }
+                    String language = "";
+                    String country = "";
+                    String variant = "";
+                    String speechRate = "";
                     if (speechItem.mParams != null){
-                        String language = "";
-                        String country = "";
-                        String variant = "";
                         for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
                             String param = speechItem.mParams.get(i);
-                            if (param != null){
-                                if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)){
-                                    setSpeechRate("",
-                                            Integer.parseInt(speechItem.mParams.get(i+1)));
+                            if (param != null) {
+                                if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)) {
+                                    speechRate = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
                                     language = speechItem.mParams.get(i+1);
                                 } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
@@ -645,12 +648,15 @@ public class TtsService extends Service implements OnCompletionListener {
                                 }
                             }
                         }
-                        if (language.length() > 0){
-                            setLanguage("", language, country, variant);
-                        }
                     }
                     // Only do the synthesis if it has not been killed by a subsequent utterance.
                     if (mKillList.get(speechItem) == null){
+                        if (language.length() > 0){
+                            setLanguage("", language, country, variant);
+                        }
+                        if (speechRate.length() > 0){
+                            setSpeechRate("", Integer.parseInt(speechRate));
+                        }
                         nativeSynth.synthesizeToFile(speechItem.mText, speechItem.mFilename);
                     }
                 } catch (InterruptedException e) {

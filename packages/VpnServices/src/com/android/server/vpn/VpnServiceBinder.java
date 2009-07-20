@@ -57,6 +57,7 @@ public class VpnServiceBinder extends Service {
     public void onStart (Intent intent, int startId) {
         super.onStart(intent, startId);
         setForeground(true);
+        android.util.Log.d("VpnServiceBinder", "becomes a foreground service");
     }
 
     public IBinder onBind(Intent intent) {
@@ -71,9 +72,8 @@ public class VpnServiceBinder extends Service {
     }
 
     private synchronized void checkStatus(VpnProfile p) {
-        if (mService == null) broadcastConnectivity(p.getName(), VpnState.IDLE);
-
-        if (!p.getName().equals(mService.mProfile.getName())) {
+        if ((mService == null)
+                || (!p.getName().equals(mService.mProfile.getName()))) {
             broadcastConnectivity(p.getName(), VpnState.IDLE);
         } else {
             broadcastConnectivity(p.getName(), mService.getState());
