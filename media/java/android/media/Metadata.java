@@ -280,8 +280,9 @@ public class Metadata
         final int pin = parcel.dataPosition();  // to roll back in case of errors.
         final int size = parcel.readInt();
 
-        if (parcel.dataAvail() < size || size < kMetaHeaderSize) {
-            Log.e(TAG, "Bad size " + size);
+        // Magic 4 below is for the int32 'size' just read.
+        if (parcel.dataAvail() + 4 < size || size < kMetaHeaderSize) {
+            Log.e(TAG, "Bad size " + size + " avail " + parcel.dataAvail() + " position " + pin);
             parcel.setDataPosition(pin);
             return false;
         }

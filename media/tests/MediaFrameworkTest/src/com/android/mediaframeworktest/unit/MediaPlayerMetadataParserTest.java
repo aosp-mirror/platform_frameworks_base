@@ -56,15 +56,10 @@ public class MediaPlayerMetadataParserTest extends AndroidTestCase {
         assertEquals(0, mParcel.dataPosition());
     }
 
-    // Check parsing of the parcel is successful. Before the
-    // invocation of the parser a token is inserted. When the parser
-    // returns, the parcel should be positioned at the token (check it
-    // does not read too much data).
+    // Check parsing of the parcel is successful.
     private void assertParse() throws Exception {
-        mParcel.writeInt(kToken);
         mParcel.setDataPosition(0);
         assertTrue(mMetadata.parse(mParcel));
-        assertEquals(kToken, mParcel.readInt());
     }
 
     // Write the number of bytes from the start of the parcel to the
