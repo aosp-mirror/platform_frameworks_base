@@ -194,6 +194,7 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         if (bufferSize > 0) {
             prepAudioTrack(pJniData, pForAfter->streamType, rate, format, channel);
             if (pJniData->mAudioOut) {
+                pJniData->mAudioOut->start();
                 pJniData->mAudioOut->write(wav, bufferSize);
                 memset(wav, 0, bufferSize);
                 //LOGV("AudioTrack wrote: %d bytes", bufferSize);
@@ -549,7 +550,6 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
 
     if (pSynthData->mAudioOut) {
         pSynthData->mAudioOut->stop();
-        pSynthData->mAudioOut->start();
     }
 
     afterSynthData_t* pForAfter = new (afterSynthData_t);
