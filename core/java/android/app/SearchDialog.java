@@ -1247,6 +1247,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         Log.d(LOG_TAG, "launching " + intent);
         getContext().startActivity(intent);
 
+        // in global search mode, SearchDialogWrapper#performActivityResuming will handle hiding
+        // the dialog when the next activity starts, but for in-app search, we still need to
+        // dismiss the dialog.
         if (!mGlobalSearchMode) {
             dismiss();
         }
