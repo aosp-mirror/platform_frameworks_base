@@ -1534,7 +1534,6 @@ public class SearchManager
     private int mIdent;
     
     // package private since they are used by the inner class SearchManagerCallback
-    /* package */ boolean mIsShowing = false;
     /* package */ final Handler mHandler;
     /* package */ OnDismissListener mDismissListener = null;
     /* package */ OnCancelListener mCancelListener = null;
@@ -1600,12 +1599,9 @@ public class SearchManager
                             ComponentName launchActivity,
                             Bundle appSearchData,
                             boolean globalSearch) {
-        if (DBG) debug("startSearch(), mIsShowing=" + mIsShowing);
-        if (mIsShowing) return;
         if (mIdent == 0) throw new IllegalArgumentException(
                 "Called from outside of an Activity context");
         try {
-            mIsShowing = true;
             // activate the search manager and start it up!
             mService.startSearch(initialQuery, selectInitialQuery, launchActivity, appSearchData,
                     globalSearch, mSearchManagerCallback, mIdent);
@@ -1626,15 +1622,10 @@ public class SearchManager
      * @see #startSearch
      */
     public void stopSearch() {
-        if (DBG) debug("stopSearch(), mIsShowing=" + mIsShowing);
-        if (!mIsShowing) return;
+        if (DBG) debug("stopSearch()");
         try {
             mService.stopSearch();
-            // onDismiss will also clear this, but we do it here too since onDismiss() is
-            // called asynchronously.
-            mIsShowing = false;
         } catch (RemoteException ex) {
-            Log.e(TAG, "stopSearch() failed: " + ex);
         }
     }
 
@@ -1648,8 +1639,13 @@ public class SearchManager
      * @hide
      */
     public boolean isVisible() {
-        if (DBG) debug("isVisible(), mIsShowing=" + mIsShowing);
-        return mIsShowing;
+        if (DBG) debug("isVisible()");
+        try {
+            return mService.isVisible();
+        } catch (RemoteException e) {
+            Log.e(TAG, "isVisible() failed: " + e);
+            return false;
+        }
     }
 
     /**
@@ -1701,7 +1697,6 @@ public class SearchManager
         private final Runnable mFireOnDismiss = new Runnable() {
             public void run() {
                 if (DBG) debug("mFireOnDismiss");
-                mIsShowing = false;
                 if (mDismissListener != null) {
                     mDismissListener.onDismiss();
                 }
@@ -1711,7 +1706,6 @@ public class SearchManager
         private final Runnable mFireOnCancel = new Runnable() {
             public void run() {
                 if (DBG) debug("mFireOnCancel");
-                // doesn't need to clear mIsShowing since onDismiss() always gets called too
                 if (mCancelListener != null) {
                     mCancelListener.onCancel();
                 }

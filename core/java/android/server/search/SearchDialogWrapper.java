@@ -45,8 +45,6 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     private static final String TAG = "SearchManagerService";
     private static final boolean DBG = false;
 
-    private static final String DISABLE_SEARCH_PROPERTY = "dev.disablesearchdialog";
-
     private static final String SEARCH_UI_THREAD_NAME = "SearchDialog";
     private static final int SEARCH_UI_THREAD_PRIORITY =
         android.os.Process.THREAD_PRIORITY_DEFAULT;
@@ -88,12 +86,11 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     
     // Identity of currently resumed activity.
     private int mResumedIdent = 0;
-    
-    // Allows disabling of search dialog for stress testing runs
-    private final boolean mDisabledOnBoot;
 
     // True if we have registered our receivers.
     private boolean mReceiverRegistered;
+
+    private volatile boolean mVisible = false;
     
     /**
      * Creates a new search dialog wrapper and a search UI thread. The search dialog itself will
@@ -104,8 +101,6 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     public SearchDialogWrapper(Context context) {
         mContext = context;
 
-        mDisabledOnBoot = !TextUtils.isEmpty(SystemProperties.get(DISABLE_SEARCH_PROPERTY));
-
         // Create the search UI thread
         HandlerThread t = new HandlerThread(SEARCH_UI_THREAD_NAME, SEARCH_UI_THREAD_PRIORITY);
         t.start();
@@ -113,6 +108,10 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
 
         // Create search UI on the search UI thread
         mSearchUiThread.sendEmptyMessage(MSG_INIT);
+    }
+
+    public boolean isVisible() {
+        return mVisible;
     }
 
     /**
@@ -151,8 +150,10 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
-                if (DBG) debug(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-                performStopSearch();
+                if (!"search".equals(intent.getStringExtra("reason"))) {
+                    if (DBG) debug(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+                    performStopSearch();
+                }
             } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 if (DBG) debug(Intent.ACTION_CONFIGURATION_CHANGED);
                 performOnConfigurationChanged();
@@ -205,7 +206,7 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
      * Can be called from any thread.
      */
     public void activityResuming(int ident) {
-        if (DBG) debug("startSearch()");
+        if (DBG) debug("activityResuming(ident=" + ident + ")");
         Message msg = Message.obtain();
         msg.what = MSG_ACTIVITY_RESUMING;
         msg.arg1 = ident;
@@ -256,20 +257,6 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
 
     }
 
-    void updateDialogVisibility() {
-        if (mStartedIdent != 0) {
-            // mResumedIdent == 0 means we have just booted and the user
-            // hasn't yet gone anywhere.
-            if (mResumedIdent == 0 || mStartedIdent == mResumedIdent) {
-                if (DBG) Log.v(TAG, "******************* DIALOG: show");
-                mSearchDialog.show();
-            } else {
-                if (DBG) Log.v(TAG, "******************* DIALOG: hide");
-                mSearchDialog.hide();
-            }
-        }
-    }
-    
     /**
      * Actually launches the search UI.
      * This must be called on the search UI thread.
@@ -283,19 +270,20 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
             int ident) {
         if (DBG) debug("performStartSearch()");
 
-        if (mDisabledOnBoot) {
-            Log.d(TAG, "ignoring start search request because " + DISABLE_SEARCH_PROPERTY
-                    + " system property is set.");
-            return;
-        }
-
         registerBroadcastReceiver();
         mCallback = searchManagerCallback;
+
+        // clean up any hidden dialog that we were waiting to resume
+        if (mStartedIdent != 0) {
+            mSearchDialog.dismiss();
+        }
+
         mStartedIdent = ident;
         if (DBG) Log.v(TAG, "******************* DIALOG: start");
+
         mSearchDialog.show(initialQuery, selectInitialQuery, launchActivity, appSearchData,
                 globalSearch);
-        updateDialogVisibility();
+        mVisible = true;
     }
 
     /**
@@ -306,6 +294,7 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
         if (DBG) debug("performStopSearch()");
         if (DBG) Log.v(TAG, "******************* DIALOG: cancel");
         mSearchDialog.cancel();
+        mVisible = false;
         mStartedIdent = 0;
     }
 
@@ -317,7 +306,21 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
         if (DBG) debug("performResumingActivity(): mStartedIdent="
                 + mStartedIdent + ", resuming: " + ident);
         this.mResumedIdent = ident;
-        updateDialogVisibility();
+        if (mStartedIdent != 0) {
+            if (mStartedIdent == mResumedIdent) {
+                // we are resuming into the activity where we previously hid the dialog, bring it
+                // back
+                if (DBG) Log.v(TAG, "******************* DIALOG: show");
+                mSearchDialog.show();
+                mVisible = true;
+            } else {
+                // resuming into some other activity; hide ourselves in case we ever come back
+                // so we can show ourselves quickly again
+                if (DBG) Log.v(TAG, "******************* DIALOG: hide");
+                mSearchDialog.hide();
+                mVisible = false;
+            }
+        }
     }
 
     /**
@@ -333,20 +336,15 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
      */
     public void onDismiss(DialogInterface dialog) {
         if (DBG) debug("onDismiss()");
-        if (mCallback != null) {
-            try {
-                // should be safe to do on the search UI thread, since it's a oneway interface
-                mCallback.onDismiss();
-            } catch (DeadObjectException ex) {
-                // The process that hosted the callback has died, do nothing
-            } catch (RemoteException ex) {
-                Log.e(TAG, "onDismiss() failed: " + ex);
-            }
-            // we don't need the callback anymore, release it
-            mCallback = null;
-        }
+        mStartedIdent = 0;
+        mVisible = false;
+        callOnDismiss();
+
+        // we don't need the callback anymore, release it
+        mCallback = null;
         unregisterBroadcastReceiver();
     }
+
 
     /**
      * Called by {@link SearchDialog} when the user or activity cancels search.
@@ -354,6 +352,22 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
      */
     public void onCancel(DialogInterface dialog) {
         if (DBG) debug("onCancel()");
+        callOnCancel();
+    }
+
+    private void callOnDismiss() {
+        if (mCallback == null) return;
+        try {
+            // should be safe to do on the search UI thread, since it's a oneway interface
+            mCallback.onDismiss();
+        } catch (DeadObjectException ex) {
+            // The process that hosted the callback has died, do nothing
+        } catch (RemoteException ex) {
+            Log.e(TAG, "onDismiss() failed: " + ex);
+        }
+    }
+
+    private void callOnCancel() {
         if (mCallback != null) {
             try {
                 // should be safe to do on the search UI thread, since it's a oneway interface
