@@ -1370,7 +1370,8 @@ class LoadListener extends Handler implements EventHandler {
      */
     private boolean ignoreCallbacks() {
         return (mCancelled || mAuthHeader != null ||
-                (mStatusCode > 300 && mStatusCode < 400));
+                // Allow 305 (Use Proxy) to call through.
+                (mStatusCode > 300 && mStatusCode < 400 && mStatusCode != 305));
     }
 
     /**

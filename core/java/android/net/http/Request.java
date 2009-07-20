@@ -417,8 +417,7 @@ class Request {
         }
         return status >= HttpStatus.SC_OK
             && status != HttpStatus.SC_NO_CONTENT
-            && status != HttpStatus.SC_NOT_MODIFIED
-            && status != HttpStatus.SC_RESET_CONTENT;
+            && status != HttpStatus.SC_NOT_MODIFIED;
     }
 
     /**
