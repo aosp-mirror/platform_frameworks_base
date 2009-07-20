@@ -2510,7 +2510,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (cb == null) {
             return false;
         } else {
-            sendCloseSystemWindows();
+            sendCloseSystemWindows("search");
             return cb.onSearchRequested();
         }
     }
