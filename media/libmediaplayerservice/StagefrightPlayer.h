@@ -48,6 +48,9 @@ public:
     virtual status_t invoke(const Parcel &request, Parcel *reply);
     virtual void setAudioSink(const sp<AudioSink> &audioSink);
 
+    virtual status_t getMetadata(
+            const SortedVector<MetadataType> &ids, Parcel *records);
+
 private:
     MediaPlayerImpl *mPlayer;
 
