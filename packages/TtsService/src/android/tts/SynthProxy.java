@@ -109,13 +109,6 @@ public class SynthProxy {
     }
 
     /**
-     * Plays the given audio buffer.
-     */
-    public void playAudioBuffer(int bufferPointer, int bufferSize) {
-        native_playAudioBuffer(mJniData, bufferPointer, bufferSize);
-    }
-
-    /**
      * Returns the currently set language, country and variant information.
      */
     public String[] getLanguage() {
@@ -179,9 +172,6 @@ public class SynthProxy {
     private native final int native_setSpeechRate(int jniData, int speechRate);
 
     private native final int native_setPitch(int jniData, int speechRate);
-
-    // TODO add buffer format
-    private native final void native_playAudioBuffer(int jniData, int bufferPointer, int bufferSize);
 
     private native final String[] native_getLanguage(int jniData);
 
