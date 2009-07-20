@@ -746,6 +746,15 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         opt.optionString = "-Xincludeselectedmethod";
         mOptions.add(opt);
     }
+
+    /*
+     * Enable profile collection on JIT'ed code.
+     */
+    property_get("dalvik.vm.jit.profile", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        opt.optionString = "-Xjitprofile";
+        mOptions.add(opt);
+    }
 #endif
 
     if (executionMode == kEMIntPortable) {
