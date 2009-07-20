@@ -362,6 +362,34 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID) \
 		-hdf sdk.current $(framework_docs_SDK_CURRENT_DIR)
 
+# ====  the api stubs and current.xml ===========================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
+LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+
+LOCAL_MODULE := api-stubs
+
+LOCAL_DROIDDOC_OPTIONS:=\
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		-stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_stubs_current_intermediates/src \
+		-apixml $(INTERNAL_PLATFORM_API_FILE) \
+		-nodocs
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
+
+include $(BUILD_DROIDDOC)
+
+$(full_target): $(framework_built)
+$(INTERNAL_PLATFORM_API_FILE): $(full_target)
+$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
+
 # ====  static html in the sdk ==================================
 include $(CLEAR_VARS)
 
@@ -380,10 +408,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-title "Android SDK" \
 		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
 		-todo $(OUT_DOCS)/$(LOCAL_MODULE)-docs-todo.html \
-		-stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_stubs_current_intermediates/src \
-		-apixml $(INTERNAL_PLATFORM_API_FILE) \
 		-sdkvalues $(OUT_DOCS) \
-		-warning 3 \
 		-hdf android.whichdoc offline
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
@@ -399,8 +424,6 @@ $(static_doc_index_redirect): \
 
 $(full_target): $(static_doc_index_redirect)
 $(full_target): $(framework_built)
-$(INTERNAL_PLATFORM_API_FILE): $(full_target)
-$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
 
 # ==== docs for the web (on the google app engine server) =======================
