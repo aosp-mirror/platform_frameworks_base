@@ -84,7 +84,7 @@ int main(void* con, int ft, int launchID)
         for (y = rowCount -1; (y >= 0) && iconCount; y--) {
             float ty1 = ((y * 3.0f) - 4.5f) * scale;
             float ty2 = ty1 + scale * 2.f;
-            pfBindTexture(NAMED_PF, 0, loadI32(1, y));
+            bindTexture(NAMED_PF, 0, loadI32(1, y));
             color(1.0f, 1.0f, 1.0f, 1.0f);
             if (done && (index != selectedID)) {
                 color(0.4f, 0.4f, 0.4f, 1.0f);

@@ -175,7 +175,7 @@ public class RolloView extends RSSurfaceView {
             // icon control
             if(act != ev.ACTION_UP) {
                 if(mFlingMode) {
-                    mColumn += (mFlingX - nx) * 5;
+                    mColumn += (mFlingX - nx) * 4;
                     setColumn(true);
                 }
                 mFlingMode = true;
