@@ -91,7 +91,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     }
 
     public void clearCache() {
-      mWebView.clearCache(true);
+      mWebView.freeMemory();
     }
 
     @Override
