@@ -4908,6 +4908,22 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    resourcePath="); pw.println(ps.resourcePathString);
                     if (ps.pkg != null) {
                         pw.print("    dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
+                        pw.print("    targetSdk="); pw.println(ps.pkg.applicationInfo.targetSdkVersion);
+                        pw.print("    densities="); pw.println(ps.pkg.supportsDensityList);
+                        ArrayList<String> screens = new ArrayList<String>();
+                        if ((ps.pkg.applicationInfo.flags & 
+                                ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS) != 0) {
+                            screens.add("medium");
+                        }
+                        if ((ps.pkg.applicationInfo.flags & 
+                                ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+                            screens.add("large");
+                        }
+                        if ((ps.pkg.applicationInfo.flags & 
+                                ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {
+                            screens.add("small,");
+                        }
+                        pw.print("    supportsScreens="); pw.println(screens);
                     }
                     pw.print("    timeStamp="); pw.println(ps.getTimeStampStr());
                     pw.print("    signatures="); pw.println(ps.signatures);

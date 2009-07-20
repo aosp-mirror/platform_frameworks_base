@@ -224,8 +224,7 @@ public class CompatibilityInfo {
             if (DBG) Log.d(TAG, "no translation required");
             return null;
         }
-        if (!isScalingRequired() ||
-            (params.flags & WindowManager.LayoutParams.FLAG_NO_COMPATIBILITY_SCALING) != 0) {
+        if (!isScalingRequired()) {
             return null;
         }
         return new Translator();

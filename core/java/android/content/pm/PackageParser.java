@@ -979,12 +979,12 @@ public class PackageParser {
         /**
          * TODO: enable this before code freeze. b/1967935
          * *
-         */
         if ((densities == null || densities.length == 0)
                 && (pkg.applicationInfo.targetSdkVersion
                         >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
             pkg.supportsDensities = ApplicationInfo.ANY_DENSITIES_ARRAY;
         }
+         */
 
         return pkg;
     }

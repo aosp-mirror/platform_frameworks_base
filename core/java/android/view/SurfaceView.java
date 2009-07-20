@@ -258,7 +258,7 @@ public class SurfaceView extends View {
         // scales the event back to the pre-scaled coordinates for such surface.
         if (mScaled) {
             MotionEvent scaledBack = MotionEvent.obtain(event);
-            scaledBack.scale(mTranslator.applicationScale);
+            mTranslator.translateEventInScreenToAppWindow(event);
             try {
                 return super.dispatchTouchEvent(scaledBack);
             } finally {
@@ -297,7 +297,8 @@ public class SurfaceView extends View {
         if (!mHaveFrame) {
             return;
         }
-        mTranslator = ((ViewRoot)getRootView().getParent()).mTranslator;
+        ViewRoot viewRoot = (ViewRoot) getRootView().getParent();
+        mTranslator = viewRoot.mTranslator;
 
         float appScale = mTranslator == null ? 1.0f : mTranslator.applicationScale;
         
@@ -357,8 +358,10 @@ public class SurfaceView extends View {
                               | WindowManager.LayoutParams.FLAG_SCALED
                               | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                               | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                              | WindowManager.LayoutParams.FLAG_NO_COMPATIBILITY_SCALING
                               ;
+                if (!getContext().getResources().getCompatibilityInfo().supportsScreen()) {
+                    mLayout.flags |= WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+                }
 
                 mLayout.memoryType = mRequestedType;
 
