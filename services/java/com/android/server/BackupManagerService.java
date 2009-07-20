@@ -1276,7 +1276,11 @@ class BackupManagerService extends IBackupManager.Stub {
                 File savedStateName = new File(mStateDir, packageName);
                 newStateName.renameTo(savedStateName);
             } catch (Exception e) {
+                // If the agent fails restore, it might have put the app's data
+                // into an incoherent state.  For consistency we wipe its data
+                // again in this case before propagating the exception
                 Log.e(TAG, "Error restoring data for " + packageName, e);
+                clearApplicationDataSynchronous(packageName);
             }
         }
     }
