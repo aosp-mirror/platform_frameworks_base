@@ -98,6 +98,7 @@ LOCAL_SRC_FILES:= \
 	rsSampler.cpp \
 	rsScript.cpp \
 	rsScriptC.cpp \
+	rsScriptC_Lib.cpp \
 	rsThreadIO.cpp \
 	rsType.cpp \
 	rsTriangleMesh.cpp

@@ -23,47 +23,36 @@ int main(int index)
 {
     int f1,f2,f3,f4, f5,f6,f7,f8, f9,f10,f11,f12, f13,f14,f15,f16;
     int g1,g2,g3,g4, g5,g6,g7,g8, g9,g10,g11,g12, g13,g14,g15,g16;
-    int float_1;
-    int float_0;
-    int float_2;
-    int float_90;
-    int float_0_5;
-    int trans;  // float
-    int rot;   // float
+    float trans;
+    float rot;
     int x;
     float focusPos;  // float
     int focusID;
     int lastFocusID;
     int imgCount;
 
-    float_2 = intToFloat(2);
-    float_1 = intToFloat(1);
-    float_0 = intToFloat(0);
-    float_90= intToFloat(90);
-    float_0_5 = fixedtoFloat(0x8000);
-
     trans = loadF(1, 0);
     rot = loadF(1, 1);
 
-    matrixLoadScale(&f16, float_2, float_2, float_2);
-    matrixTranslate(&f16, 0, 0, trans);
-    matrixRotate(&f16, float_90, 0, 0, float_1);
-    matrixRotate(&f16, rot, float_1, 0, 0);
-    storeEnvMatrix(3, 0, &f16);
+    matrixLoadScale(&f16, 2.f, 2.f, 2.f);
+    matrixTranslate(&f16, 0.f, 0.f, trans);
+    matrixRotate(&f16, 90.f, 0.f, 0.f, 1.f);
+    matrixRotate(&f16, rot, 1.f, 0.f, 0.f);
+    storeMatrix(3, 0, &f16);
 
     //materialDiffuse(con, 0.0f, 0.0f, 0.0f, 1.0f);
     //materialSpecular(con, 0.5f, 0.5f, 0.5f, 0.5f);
     //materialShininess(intToFloat(20));
     //lightPosition(con, 0.2f, -0.2f, -2.0f, 0.0f);
     //enable(con, GL_LIGHTING);
-    renderTriangleMesh(NAMED_mesh);
+    drawTriangleMesh(NAMED_mesh);
 
 
 
     //int imgId = 0;
 
-    contextBindProgramFragmentStore(NAMED_PFImages);
-    contextBindProgramFragment(NAMED_PFSImages);
+    bindProgramFragmentStore(NAMED_PFImages);
+    bindProgramFragment(NAMED_PFSImages);
 
     //focusPos = loadF(1, 2);
     //focusID = 0;

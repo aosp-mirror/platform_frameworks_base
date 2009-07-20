@@ -32,6 +32,7 @@ namespace renderscript {
 class ScriptC : public Script
 {
 public:
+    typedef int (*RunScript_t)(uint32_t launchIndex);
 
     ScriptC();
     virtual ~ScriptC();
@@ -44,7 +45,7 @@ public:
         int mVersionMajor;
         int mVersionMinor;
 
-        rsc_RunScript mScript;
+        RunScript_t mScript;
     };
 
     Program_t mProgram;
@@ -73,7 +74,8 @@ public:
     struct SymbolTable_t {
         const char * mName;
         void * mPtr;
-        const char * mDecl;
+        const char * mRet;
+        const char * mParam;
     };
     static SymbolTable_t gSyms[];
     static const SymbolTable_t * lookupSymbol(const char *);
