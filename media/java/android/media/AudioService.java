@@ -1327,10 +1327,12 @@ public class AudioService extends IAudioService.Stub {
         }
 
         private void persistVolume(VolumeStreamState streamState) {
-            System.putInt(mContentResolver, streamState.mVolumeIndexSettingName,
-                    streamState.mIndex);
-            System.putInt(mContentResolver, streamState.mLastAudibleVolumeIndexSettingName,
-                    streamState.mLastAudibleIndex);
+            if (streamState.mStreamType != AudioManager.STREAM_BLUETOOTH_SCO) {
+                System.putInt(mContentResolver, streamState.mVolumeIndexSettingName,
+                        streamState.mIndex);
+                System.putInt(mContentResolver, streamState.mLastAudibleVolumeIndexSettingName,
+                        streamState.mLastAudibleIndex);
+            }
         }
 
         private void persistRingerMode() {
