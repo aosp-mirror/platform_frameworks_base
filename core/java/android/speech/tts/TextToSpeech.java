@@ -921,10 +921,8 @@ public class TextToSpeech {
                 mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1] = loc.getISO3Language();
                 mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY + 1] = loc.getISO3Country();
                 mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT + 1] = loc.getVariant();
-                // the language is not set here, instead it is cached so it will be associated
-                // with all upcoming utterances. But we still need to change the language support,
-                // which is achieved by calling isLanguageAvailable()
-                result = mITts.isLanguageAvailable(
+
+                result = mITts.setLanguage(mPackageName,
                         mCachedParams[Engine.TTS_PARAM_POSITION_LANGUAGE + 1],
                         mCachedParams[Engine.TTS_PARAM_POSITION_COUNTRY + 1],
                         mCachedParams[Engine.TTS_PARAM_POSITION_VARIANT + 1] );
