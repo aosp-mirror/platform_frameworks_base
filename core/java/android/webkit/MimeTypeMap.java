@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 /**
  * Two-way map that maps MIME-types to file extensions and vice versa.
  */
-public /* package */ class MimeTypeMap {
+public class MimeTypeMap {
 
     /**
      * Singleton MIME-type map instance:
@@ -39,7 +39,6 @@ public /* package */ class MimeTypeMap {
      */
     private HashMap<String, String> mExtensionToMimeTypeMap;
 
-
     /**
      * Creates a new MIME-type map.
      */
@@ -50,7 +49,10 @@ public /* package */ class MimeTypeMap {
 
     /**
      * Returns the file extension or an empty string iff there is no
-     * extension.
+     * extension. This method is a convenience method for obtaining the
+     * extension of a url and has undefined results for other Strings.
+     * @param url
+     * @return The file extension of the given url.
      */
     public static String getFileExtensionFromUrl(String url) {
         if (url != null && url.length() > 0) {
@@ -80,8 +82,7 @@ public /* package */ class MimeTypeMap {
      * Load an entry into the map. This does not check if the item already
      * exists, it trusts the caller!
      */
-    private void loadEntry(String mimeType, String extension, 
-            boolean textType) {
+    private void loadEntry(String mimeType, String extension) {
         //
         // if we have an existing x --> y mapping, we do not want to
         // override it with another mapping x --> ?
@@ -94,18 +95,12 @@ public /* package */ class MimeTypeMap {
             mMimeTypeToExtensionMap.put(mimeType, extension);
         }
 
-        //
-        // here, we don't want to map extensions to text MIME types;
-        // otherwise, we will start replacing generic text/plain and
-        // text/html with text MIME types that our platform does not
-        // understand.
-        //
-        if (!textType) {
-            mExtensionToMimeTypeMap.put(extension, mimeType);
-        }
+        mExtensionToMimeTypeMap.put(extension, mimeType);
     }
 
     /**
+     * Return true if the given MIME type has an entry in the map.
+     * @param mimeType A MIME type (i.e. text/plain)
      * @return True iff there is a mimeType entry in the map.
      */
     public boolean hasMimeType(String mimeType) {
@@ -117,7 +112,9 @@ public /* package */ class MimeTypeMap {
     }
 
     /**
-     * @return The extension for the MIME type or null iff there is none.
+     * Return the MIME type for the given extension.
+     * @param extension A file extension without the leading '.'
+     * @return The MIME type for the given extension or null iff there is none.
      */
     public String getMimeTypeFromExtension(String extension) {
         if (extension != null && extension.length() > 0) {
@@ -128,18 +125,23 @@ public /* package */ class MimeTypeMap {
     }
 
     /**
+     * Return true if the given extension has a registered MIME type.
+     * @param extension A file extension without the leading '.'
      * @return True iff there is an extension entry in the map.
      */
     public boolean hasExtension(String extension) {
         if (extension != null && extension.length() > 0) {
             return mExtensionToMimeTypeMap.containsKey(extension);
         }
-
         return false;
     }
 
     /**
-     * @return The MIME type for the extension or null iff there is none.
+     * Return the registered extension for the given MIME type. Note that some
+     * MIME types map to multiple extensions. This call will return the most
+     * common extension for the given MIME type.
+     * @param mimeType A MIME type (i.e. text/plain)
+     * @return The extension for the given MIME type or null iff there is none.
      */
     public String getExtensionFromMimeType(String mimeType) {
         if (mimeType != null && mimeType.length() > 0) {
@@ -150,6 +152,7 @@ public /* package */ class MimeTypeMap {
     }
 
     /**
+     * Get the singleton instance of MimeTypeMap.
      * @return The singleton instance of the MIME-type map.
      */
     public static MimeTypeMap getSingleton() {
@@ -164,341 +167,311 @@ public /* package */ class MimeTypeMap {
             // mail.google.com/a/google.com
             //
             // and "active" MIME types (due to potential security issues).
-            //
-            // Also, notice that not all data from this table is actually
-            // added (see loadEntry method for more details).
 
-            sMimeTypeMap.loadEntry("application/andrew-inset", "ez", false);
-            sMimeTypeMap.loadEntry("application/dsptype", "tsp", false);
-            sMimeTypeMap.loadEntry("application/futuresplash", "spl", false);
-            sMimeTypeMap.loadEntry("application/hta", "hta", false);
-            sMimeTypeMap.loadEntry("application/mac-binhex40", "hqx", false);
-            sMimeTypeMap.loadEntry("application/mac-compactpro", "cpt", false);
-            sMimeTypeMap.loadEntry("application/mathematica", "nb", false);
-            sMimeTypeMap.loadEntry("application/msaccess", "mdb", false);
-            sMimeTypeMap.loadEntry("application/oda", "oda", false);
-            sMimeTypeMap.loadEntry("application/ogg", "ogg", false);
-            sMimeTypeMap.loadEntry("application/pdf", "pdf", false);
-            sMimeTypeMap.loadEntry("application/pgp-keys", "key", false);
-            sMimeTypeMap.loadEntry("application/pgp-signature", "pgp", false);
-            sMimeTypeMap.loadEntry("application/pics-rules", "prf", false);
-            sMimeTypeMap.loadEntry("application/rar", "rar", false);
-            sMimeTypeMap.loadEntry("application/rdf+xml", "rdf", false);
-            sMimeTypeMap.loadEntry("application/rss+xml", "rss", false);
-            sMimeTypeMap.loadEntry("application/zip", "zip", false);
+            sMimeTypeMap.loadEntry("application/andrew-inset", "ez");
+            sMimeTypeMap.loadEntry("application/dsptype", "tsp");
+            sMimeTypeMap.loadEntry("application/futuresplash", "spl");
+            sMimeTypeMap.loadEntry("application/hta", "hta");
+            sMimeTypeMap.loadEntry("application/mac-binhex40", "hqx");
+            sMimeTypeMap.loadEntry("application/mac-compactpro", "cpt");
+            sMimeTypeMap.loadEntry("application/mathematica", "nb");
+            sMimeTypeMap.loadEntry("application/msaccess", "mdb");
+            sMimeTypeMap.loadEntry("application/oda", "oda");
+            sMimeTypeMap.loadEntry("application/ogg", "ogg");
+            sMimeTypeMap.loadEntry("application/pdf", "pdf");
+            sMimeTypeMap.loadEntry("application/pgp-keys", "key");
+            sMimeTypeMap.loadEntry("application/pgp-signature", "pgp");
+            sMimeTypeMap.loadEntry("application/pics-rules", "prf");
+            sMimeTypeMap.loadEntry("application/rar", "rar");
+            sMimeTypeMap.loadEntry("application/rdf+xml", "rdf");
+            sMimeTypeMap.loadEntry("application/rss+xml", "rss");
+            sMimeTypeMap.loadEntry("application/zip", "zip");
             sMimeTypeMap.loadEntry("application/vnd.android.package-archive", 
-                    "apk", false);
-            sMimeTypeMap.loadEntry("application/vnd.cinderella", "cdy", false);
-            sMimeTypeMap.loadEntry("application/vnd.ms-pki.stl", "stl", false);
+                    "apk");
+            sMimeTypeMap.loadEntry("application/vnd.cinderella", "cdy");
+            sMimeTypeMap.loadEntry("application/vnd.ms-pki.stl", "stl");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.oasis.opendocument.database", "odb", 
-                    false);
+                    "application/vnd.oasis.opendocument.database", "odb");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.oasis.opendocument.formula", "odf", 
-                    false);
+                    "application/vnd.oasis.opendocument.formula", "odf");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.oasis.opendocument.graphics", "odg", 
-                    false);
+                    "application/vnd.oasis.opendocument.graphics", "odg");
             sMimeTypeMap.loadEntry(
                     "application/vnd.oasis.opendocument.graphics-template",
-                    "otg", false);
+                    "otg");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.oasis.opendocument.image", "odi", false);
+                    "application/vnd.oasis.opendocument.image", "odi");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.oasis.opendocument.spreadsheet", "ods", 
-                    false);
+                    "application/vnd.oasis.opendocument.spreadsheet", "ods");
             sMimeTypeMap.loadEntry(
                     "application/vnd.oasis.opendocument.spreadsheet-template",
-                    "ots", false);
+                    "ots");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.oasis.opendocument.text", "odt", false);
+                    "application/vnd.oasis.opendocument.text", "odt");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.oasis.opendocument.text-master", "odm", 
-                    false);
+                    "application/vnd.oasis.opendocument.text-master", "odm");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.oasis.opendocument.text-template", "ott", 
-                    false);
+                    "application/vnd.oasis.opendocument.text-template", "ott");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.oasis.opendocument.text-web", "oth", 
-                    false);
-            sMimeTypeMap.loadEntry("application/vnd.rim.cod", "cod", false);
-            sMimeTypeMap.loadEntry("application/vnd.smaf", "mmf", false);
-            sMimeTypeMap.loadEntry("application/vnd.stardivision.calc", "sdc", 
-                    false);
-            sMimeTypeMap.loadEntry("application/vnd.stardivision.draw", "sda", 
-                    false);
+                    "application/vnd.oasis.opendocument.text-web", "oth");
+            sMimeTypeMap.loadEntry("application/vnd.rim.cod", "cod");
+            sMimeTypeMap.loadEntry("application/vnd.smaf", "mmf");
+            sMimeTypeMap.loadEntry("application/vnd.stardivision.calc", "sdc");
+            sMimeTypeMap.loadEntry("application/vnd.stardivision.draw", "sda");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.stardivision.impress", "sdd", false);
+                    "application/vnd.stardivision.impress", "sdd");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.stardivision.impress", "sdp", false);
-            sMimeTypeMap.loadEntry("application/vnd.stardivision.math", "smf", 
-                    false);
-            sMimeTypeMap.loadEntry("application/vnd.stardivision.writer", "sdw", 
-                    false);
-            sMimeTypeMap.loadEntry("application/vnd.stardivision.writer", "vor", 
-                    false);
+                    "application/vnd.stardivision.impress", "sdp");
+            sMimeTypeMap.loadEntry("application/vnd.stardivision.math", "smf");
+            sMimeTypeMap.loadEntry("application/vnd.stardivision.writer",
+                    "sdw");
+            sMimeTypeMap.loadEntry("application/vnd.stardivision.writer",
+                    "vor");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.stardivision.writer-global", "sgl", false);
-            sMimeTypeMap.loadEntry("application/vnd.sun.xml.calc", "sxc", 
-                    false);
+                    "application/vnd.stardivision.writer-global", "sgl");
+            sMimeTypeMap.loadEntry("application/vnd.sun.xml.calc", "sxc");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.sun.xml.calc.template", "stc", false);
-            sMimeTypeMap.loadEntry("application/vnd.sun.xml.draw", "sxd", 
-                    false);
+                    "application/vnd.sun.xml.calc.template", "stc");
+            sMimeTypeMap.loadEntry("application/vnd.sun.xml.draw", "sxd");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.sun.xml.draw.template", "std", false);
-            sMimeTypeMap.loadEntry("application/vnd.sun.xml.impress", "sxi", 
-                    false);
+                    "application/vnd.sun.xml.draw.template", "std");
+            sMimeTypeMap.loadEntry("application/vnd.sun.xml.impress", "sxi");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.sun.xml.impress.template", "sti", false);
-            sMimeTypeMap.loadEntry("application/vnd.sun.xml.math", "sxm", 
-                    false);
-            sMimeTypeMap.loadEntry("application/vnd.sun.xml.writer", "sxw", 
-                    false);
+                    "application/vnd.sun.xml.impress.template", "sti");
+            sMimeTypeMap.loadEntry("application/vnd.sun.xml.math", "sxm");
+            sMimeTypeMap.loadEntry("application/vnd.sun.xml.writer", "sxw");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.sun.xml.writer.global", "sxg", false);
+                    "application/vnd.sun.xml.writer.global", "sxg");
             sMimeTypeMap.loadEntry(
-                    "application/vnd.sun.xml.writer.template", "stw", false);
-            sMimeTypeMap.loadEntry("application/vnd.visio", "vsd", false);
-            sMimeTypeMap.loadEntry("application/x-abiword", "abw", false);
-            sMimeTypeMap.loadEntry("application/x-apple-diskimage", "dmg", 
-                    false);
-            sMimeTypeMap.loadEntry("application/x-bcpio", "bcpio", false);
-            sMimeTypeMap.loadEntry("application/x-bittorrent", "torrent", 
-                    false);
-            sMimeTypeMap.loadEntry("application/x-cdf", "cdf", false);
-            sMimeTypeMap.loadEntry("application/x-cdlink", "vcd", false);
-            sMimeTypeMap.loadEntry("application/x-chess-pgn", "pgn", false);
-            sMimeTypeMap.loadEntry("application/x-cpio", "cpio", false);
-            sMimeTypeMap.loadEntry("application/x-debian-package", "deb", 
-                    false);
-            sMimeTypeMap.loadEntry("application/x-debian-package", "udeb", 
-                    false);
-            sMimeTypeMap.loadEntry("application/x-director", "dcr", false);
-            sMimeTypeMap.loadEntry("application/x-director", "dir", false);
-            sMimeTypeMap.loadEntry("application/x-director", "dxr", false);
-            sMimeTypeMap.loadEntry("application/x-dms", "dms", false);
-            sMimeTypeMap.loadEntry("application/x-doom", "wad", false);
-            sMimeTypeMap.loadEntry("application/x-dvi", "dvi", false);
-            sMimeTypeMap.loadEntry("application/x-flac", "flac", false);
-            sMimeTypeMap.loadEntry("application/x-font", "pfa", false);
-            sMimeTypeMap.loadEntry("application/x-font", "pfb", false);
-            sMimeTypeMap.loadEntry("application/x-font", "gsf", false);
-            sMimeTypeMap.loadEntry("application/x-font", "pcf", false);
-            sMimeTypeMap.loadEntry("application/x-font", "pcf.Z", false);
-            sMimeTypeMap.loadEntry("application/x-freemind", "mm", false);
-            sMimeTypeMap.loadEntry("application/x-futuresplash", "spl", false);
-            sMimeTypeMap.loadEntry("application/x-gnumeric", "gnumeric", false);
-            sMimeTypeMap.loadEntry("application/x-go-sgf", "sgf", false);
-            sMimeTypeMap.loadEntry("application/x-graphing-calculator", "gcf", 
-                    false);
-            sMimeTypeMap.loadEntry("application/x-gtar", "gtar", false);
-            sMimeTypeMap.loadEntry("application/x-gtar", "tgz", false);
-            sMimeTypeMap.loadEntry("application/x-gtar", "taz", false);
-            sMimeTypeMap.loadEntry("application/x-hdf", "hdf", false);
-            sMimeTypeMap.loadEntry("application/x-ica", "ica", false);
-            sMimeTypeMap.loadEntry("application/x-internet-signup", "ins", 
-                    false);
-            sMimeTypeMap.loadEntry("application/x-internet-signup", "isp", 
-                    false);
-            sMimeTypeMap.loadEntry("application/x-iphone", "iii", false);
-            sMimeTypeMap.loadEntry("application/x-iso9660-image", "iso", false);
-            sMimeTypeMap.loadEntry("application/x-jmol", "jmz", false);
-            sMimeTypeMap.loadEntry("application/x-kchart", "chrt", false);
-            sMimeTypeMap.loadEntry("application/x-killustrator", "kil", false);
-            sMimeTypeMap.loadEntry("application/x-koan", "skp", false);
-            sMimeTypeMap.loadEntry("application/x-koan", "skd", false);
-            sMimeTypeMap.loadEntry("application/x-koan", "skt", false);
-            sMimeTypeMap.loadEntry("application/x-koan", "skm", false);
-            sMimeTypeMap.loadEntry("application/x-kpresenter", "kpr", false);
-            sMimeTypeMap.loadEntry("application/x-kpresenter", "kpt", false);
-            sMimeTypeMap.loadEntry("application/x-kspread", "ksp", false);
-            sMimeTypeMap.loadEntry("application/x-kword", "kwd", false);
-            sMimeTypeMap.loadEntry("application/x-kword", "kwt", false);
-            sMimeTypeMap.loadEntry("application/x-latex", "latex", false);
-            sMimeTypeMap.loadEntry("application/x-lha", "lha", false);
-            sMimeTypeMap.loadEntry("application/x-lzh", "lzh", false);
-            sMimeTypeMap.loadEntry("application/x-lzx", "lzx", false);
-            sMimeTypeMap.loadEntry("application/x-maker", "frm", false);
-            sMimeTypeMap.loadEntry("application/x-maker", "maker", false);
-            sMimeTypeMap.loadEntry("application/x-maker", "frame", false);
-            sMimeTypeMap.loadEntry("application/x-maker", "fb", false);
-            sMimeTypeMap.loadEntry("application/x-maker", "book", false);
-            sMimeTypeMap.loadEntry("application/x-maker", "fbdoc", false);
-            sMimeTypeMap.loadEntry("application/x-mif", "mif", false);
-            sMimeTypeMap.loadEntry("application/x-ms-wmd", "wmd", false);
-            sMimeTypeMap.loadEntry("application/x-ms-wmz", "wmz", false);
-            sMimeTypeMap.loadEntry("application/x-msi", "msi", false);
-            sMimeTypeMap.loadEntry("application/x-ns-proxy-autoconfig", "pac", 
-                    false);
-            sMimeTypeMap.loadEntry("application/x-nwc", "nwc", false);
-            sMimeTypeMap.loadEntry("application/x-object", "o", false);
-            sMimeTypeMap.loadEntry("application/x-oz-application", "oza", 
-                    false);
-            sMimeTypeMap.loadEntry("application/x-pkcs12", "p12", false);
-            sMimeTypeMap.loadEntry("application/x-pkcs7-certreqresp", "p7r", 
-                    false);
-            sMimeTypeMap.loadEntry("application/x-pkcs7-crl", "crl", false);
-            sMimeTypeMap.loadEntry("application/x-quicktimeplayer", "qtl", 
-                    false);
-            sMimeTypeMap.loadEntry("application/x-shar", "shar", false);
-            sMimeTypeMap.loadEntry("application/x-stuffit", "sit", false);
-            sMimeTypeMap.loadEntry("application/x-sv4cpio", "sv4cpio", false);
-            sMimeTypeMap.loadEntry("application/x-sv4crc", "sv4crc", false);
-            sMimeTypeMap.loadEntry("application/x-tar", "tar", false);
-            sMimeTypeMap.loadEntry("application/x-texinfo", "texinfo", false);
-            sMimeTypeMap.loadEntry("application/x-texinfo", "texi", false);
-            sMimeTypeMap.loadEntry("application/x-troff", "t", false);
-            sMimeTypeMap.loadEntry("application/x-troff", "roff", false);
-            sMimeTypeMap.loadEntry("application/x-troff-man", "man", false);
-            sMimeTypeMap.loadEntry("application/x-ustar", "ustar", false);
-            sMimeTypeMap.loadEntry("application/x-wais-source", "src", false);
-            sMimeTypeMap.loadEntry("application/x-wingz", "wz", false);
-            sMimeTypeMap.loadEntry(
-                    "application/x-webarchive", "webarchive", false); // added
-            sMimeTypeMap.loadEntry("application/x-x509-ca-cert", "crt", false);
-            sMimeTypeMap.loadEntry("application/x-xcf", "xcf", false);
-            sMimeTypeMap.loadEntry("application/x-xfig", "fig", false);
-            sMimeTypeMap.loadEntry("application/xhtml+xml", "xhtml", false);
-            sMimeTypeMap.loadEntry("audio/basic", "snd", false);
-            sMimeTypeMap.loadEntry("audio/midi", "mid", false);
-            sMimeTypeMap.loadEntry("audio/midi", "midi", false);
-            sMimeTypeMap.loadEntry("audio/midi", "kar", false);
-            sMimeTypeMap.loadEntry("audio/mpeg", "mpga", false);
-            sMimeTypeMap.loadEntry("audio/mpeg", "mpega", false);
-            sMimeTypeMap.loadEntry("audio/mpeg", "mp2", false);
-            sMimeTypeMap.loadEntry("audio/mpeg", "mp3", false);
-            sMimeTypeMap.loadEntry("audio/mpeg", "m4a", false);
-            sMimeTypeMap.loadEntry("audio/mpegurl", "m3u", false);
-            sMimeTypeMap.loadEntry("audio/prs.sid", "sid", false);
-            sMimeTypeMap.loadEntry("audio/x-aiff", "aif", false);
-            sMimeTypeMap.loadEntry("audio/x-aiff", "aiff", false);
-            sMimeTypeMap.loadEntry("audio/x-aiff", "aifc", false);
-            sMimeTypeMap.loadEntry("audio/x-gsm", "gsm", false);
-            sMimeTypeMap.loadEntry("audio/x-mpegurl", "m3u", false);
-            sMimeTypeMap.loadEntry("audio/x-ms-wma", "wma", false);
-            sMimeTypeMap.loadEntry("audio/x-ms-wax", "wax", false);
-            sMimeTypeMap.loadEntry("audio/x-pn-realaudio", "ra", false);
-            sMimeTypeMap.loadEntry("audio/x-pn-realaudio", "rm", false);
-            sMimeTypeMap.loadEntry("audio/x-pn-realaudio", "ram", false);
-            sMimeTypeMap.loadEntry("audio/x-realaudio", "ra", false);
-            sMimeTypeMap.loadEntry("audio/x-scpls", "pls", false);
-            sMimeTypeMap.loadEntry("audio/x-sd2", "sd2", false);
-            sMimeTypeMap.loadEntry("audio/x-wav", "wav", false);
-            sMimeTypeMap.loadEntry("image/bmp", "bmp", false); // added
-            sMimeTypeMap.loadEntry("image/gif", "gif", false);
-            sMimeTypeMap.loadEntry("image/ico", "cur", false); // added
-            sMimeTypeMap.loadEntry("image/ico", "ico", false); // added
-            sMimeTypeMap.loadEntry("image/ief", "ief", false);
-            sMimeTypeMap.loadEntry("image/jpeg", "jpeg", false);
-            sMimeTypeMap.loadEntry("image/jpeg", "jpg", false);
-            sMimeTypeMap.loadEntry("image/jpeg", "jpe", false);
-            sMimeTypeMap.loadEntry("image/pcx", "pcx", false);
-            sMimeTypeMap.loadEntry("image/png", "png", false);
-            sMimeTypeMap.loadEntry("image/svg+xml", "svg", false);
-            sMimeTypeMap.loadEntry("image/svg+xml", "svgz", false);
-            sMimeTypeMap.loadEntry("image/tiff", "tiff", false);
-            sMimeTypeMap.loadEntry("image/tiff", "tif", false);
-            sMimeTypeMap.loadEntry("image/vnd.djvu", "djvu", false);
-            sMimeTypeMap.loadEntry("image/vnd.djvu", "djv", false);
-            sMimeTypeMap.loadEntry("image/vnd.wap.wbmp", "wbmp", false);
-            sMimeTypeMap.loadEntry("image/x-cmu-raster", "ras", false);
-            sMimeTypeMap.loadEntry("image/x-coreldraw", "cdr", false);
-            sMimeTypeMap.loadEntry("image/x-coreldrawpattern", "pat", false);
-            sMimeTypeMap.loadEntry("image/x-coreldrawtemplate", "cdt", false);
-            sMimeTypeMap.loadEntry("image/x-corelphotopaint", "cpt", false);
-            sMimeTypeMap.loadEntry("image/x-icon", "ico", false);
-            sMimeTypeMap.loadEntry("image/x-jg", "art", false);
-            sMimeTypeMap.loadEntry("image/x-jng", "jng", false);
-            sMimeTypeMap.loadEntry("image/x-ms-bmp", "bmp", false);
-            sMimeTypeMap.loadEntry("image/x-photoshop", "psd", false);
-            sMimeTypeMap.loadEntry("image/x-portable-anymap", "pnm", false);
-            sMimeTypeMap.loadEntry("image/x-portable-bitmap", "pbm", false);
-            sMimeTypeMap.loadEntry("image/x-portable-graymap", "pgm", false);
-            sMimeTypeMap.loadEntry("image/x-portable-pixmap", "ppm", false);
-            sMimeTypeMap.loadEntry("image/x-rgb", "rgb", false);
-            sMimeTypeMap.loadEntry("image/x-xbitmap", "xbm", false);
-            sMimeTypeMap.loadEntry("image/x-xpixmap", "xpm", false);
-            sMimeTypeMap.loadEntry("image/x-xwindowdump", "xwd", false);
-            sMimeTypeMap.loadEntry("model/iges", "igs", false);
-            sMimeTypeMap.loadEntry("model/iges", "iges", false);
-            sMimeTypeMap.loadEntry("model/mesh", "msh", false);
-            sMimeTypeMap.loadEntry("model/mesh", "mesh", false);
-            sMimeTypeMap.loadEntry("model/mesh", "silo", false);
-            sMimeTypeMap.loadEntry("text/calendar", "ics", true);
-            sMimeTypeMap.loadEntry("text/calendar", "icz", true);
-            sMimeTypeMap.loadEntry("text/comma-separated-values", "csv", true);
-            sMimeTypeMap.loadEntry("text/css", "css", true);
-            sMimeTypeMap.loadEntry("text/h323", "323", true);
-            sMimeTypeMap.loadEntry("text/iuls", "uls", true);
-            sMimeTypeMap.loadEntry("text/mathml", "mml", true);
+                    "application/vnd.sun.xml.writer.template", "stw");
+            sMimeTypeMap.loadEntry("application/vnd.visio", "vsd");
+            sMimeTypeMap.loadEntry("application/x-abiword", "abw");
+            sMimeTypeMap.loadEntry("application/x-apple-diskimage", "dmg");
+            sMimeTypeMap.loadEntry("application/x-bcpio", "bcpio");
+            sMimeTypeMap.loadEntry("application/x-bittorrent", "torrent");
+            sMimeTypeMap.loadEntry("application/x-cdf", "cdf");
+            sMimeTypeMap.loadEntry("application/x-cdlink", "vcd");
+            sMimeTypeMap.loadEntry("application/x-chess-pgn", "pgn");
+            sMimeTypeMap.loadEntry("application/x-cpio", "cpio");
+            sMimeTypeMap.loadEntry("application/x-debian-package", "deb");
+            sMimeTypeMap.loadEntry("application/x-debian-package", "udeb");
+            sMimeTypeMap.loadEntry("application/x-director", "dcr");
+            sMimeTypeMap.loadEntry("application/x-director", "dir");
+            sMimeTypeMap.loadEntry("application/x-director", "dxr");
+            sMimeTypeMap.loadEntry("application/x-dms", "dms");
+            sMimeTypeMap.loadEntry("application/x-doom", "wad");
+            sMimeTypeMap.loadEntry("application/x-dvi", "dvi");
+            sMimeTypeMap.loadEntry("application/x-flac", "flac");
+            sMimeTypeMap.loadEntry("application/x-font", "pfa");
+            sMimeTypeMap.loadEntry("application/x-font", "pfb");
+            sMimeTypeMap.loadEntry("application/x-font", "gsf");
+            sMimeTypeMap.loadEntry("application/x-font", "pcf");
+            sMimeTypeMap.loadEntry("application/x-font", "pcf.Z");
+            sMimeTypeMap.loadEntry("application/x-freemind", "mm");
+            sMimeTypeMap.loadEntry("application/x-futuresplash", "spl");
+            sMimeTypeMap.loadEntry("application/x-gnumeric", "gnumeric");
+            sMimeTypeMap.loadEntry("application/x-go-sgf", "sgf");
+            sMimeTypeMap.loadEntry("application/x-graphing-calculator", "gcf");
+            sMimeTypeMap.loadEntry("application/x-gtar", "gtar");
+            sMimeTypeMap.loadEntry("application/x-gtar", "tgz");
+            sMimeTypeMap.loadEntry("application/x-gtar", "taz");
+            sMimeTypeMap.loadEntry("application/x-hdf", "hdf");
+            sMimeTypeMap.loadEntry("application/x-ica", "ica");
+            sMimeTypeMap.loadEntry("application/x-internet-signup", "ins");
+            sMimeTypeMap.loadEntry("application/x-internet-signup", "isp");
+            sMimeTypeMap.loadEntry("application/x-iphone", "iii");
+            sMimeTypeMap.loadEntry("application/x-iso9660-image", "iso");
+            sMimeTypeMap.loadEntry("application/x-jmol", "jmz");
+            sMimeTypeMap.loadEntry("application/x-kchart", "chrt");
+            sMimeTypeMap.loadEntry("application/x-killustrator", "kil");
+            sMimeTypeMap.loadEntry("application/x-koan", "skp");
+            sMimeTypeMap.loadEntry("application/x-koan", "skd");
+            sMimeTypeMap.loadEntry("application/x-koan", "skt");
+            sMimeTypeMap.loadEntry("application/x-koan", "skm");
+            sMimeTypeMap.loadEntry("application/x-kpresenter", "kpr");
+            sMimeTypeMap.loadEntry("application/x-kpresenter", "kpt");
+            sMimeTypeMap.loadEntry("application/x-kspread", "ksp");
+            sMimeTypeMap.loadEntry("application/x-kword", "kwd");
+            sMimeTypeMap.loadEntry("application/x-kword", "kwt");
+            sMimeTypeMap.loadEntry("application/x-latex", "latex");
+            sMimeTypeMap.loadEntry("application/x-lha", "lha");
+            sMimeTypeMap.loadEntry("application/x-lzh", "lzh");
+            sMimeTypeMap.loadEntry("application/x-lzx", "lzx");
+            sMimeTypeMap.loadEntry("application/x-maker", "frm");
+            sMimeTypeMap.loadEntry("application/x-maker", "maker");
+            sMimeTypeMap.loadEntry("application/x-maker", "frame");
+            sMimeTypeMap.loadEntry("application/x-maker", "fb");
+            sMimeTypeMap.loadEntry("application/x-maker", "book");
+            sMimeTypeMap.loadEntry("application/x-maker", "fbdoc");
+            sMimeTypeMap.loadEntry("application/x-mif", "mif");
+            sMimeTypeMap.loadEntry("application/x-ms-wmd", "wmd");
+            sMimeTypeMap.loadEntry("application/x-ms-wmz", "wmz");
+            sMimeTypeMap.loadEntry("application/x-msi", "msi");
+            sMimeTypeMap.loadEntry("application/x-ns-proxy-autoconfig", "pac");
+            sMimeTypeMap.loadEntry("application/x-nwc", "nwc");
+            sMimeTypeMap.loadEntry("application/x-object", "o");
+            sMimeTypeMap.loadEntry("application/x-oz-application", "oza");
+            sMimeTypeMap.loadEntry("application/x-pkcs12", "p12");
+            sMimeTypeMap.loadEntry("application/x-pkcs7-certreqresp", "p7r");
+            sMimeTypeMap.loadEntry("application/x-pkcs7-crl", "crl");
+            sMimeTypeMap.loadEntry("application/x-quicktimeplayer", "qtl");
+            sMimeTypeMap.loadEntry("application/x-shar", "shar");
+            sMimeTypeMap.loadEntry("application/x-stuffit", "sit");
+            sMimeTypeMap.loadEntry("application/x-sv4cpio", "sv4cpio");
+            sMimeTypeMap.loadEntry("application/x-sv4crc", "sv4crc");
+            sMimeTypeMap.loadEntry("application/x-tar", "tar");
+            sMimeTypeMap.loadEntry("application/x-texinfo", "texinfo");
+            sMimeTypeMap.loadEntry("application/x-texinfo", "texi");
+            sMimeTypeMap.loadEntry("application/x-troff", "t");
+            sMimeTypeMap.loadEntry("application/x-troff", "roff");
+            sMimeTypeMap.loadEntry("application/x-troff-man", "man");
+            sMimeTypeMap.loadEntry("application/x-ustar", "ustar");
+            sMimeTypeMap.loadEntry("application/x-wais-source", "src");
+            sMimeTypeMap.loadEntry("application/x-wingz", "wz");
+            sMimeTypeMap.loadEntry("application/x-webarchive", "webarchive");
+            sMimeTypeMap.loadEntry("application/x-x509-ca-cert", "crt");
+            sMimeTypeMap.loadEntry("application/x-xcf", "xcf");
+            sMimeTypeMap.loadEntry("application/x-xfig", "fig");
+            sMimeTypeMap.loadEntry("application/xhtml+xml", "xhtml");
+            sMimeTypeMap.loadEntry("audio/basic", "snd");
+            sMimeTypeMap.loadEntry("audio/midi", "mid");
+            sMimeTypeMap.loadEntry("audio/midi", "midi");
+            sMimeTypeMap.loadEntry("audio/midi", "kar");
+            sMimeTypeMap.loadEntry("audio/mpeg", "mpga");
+            sMimeTypeMap.loadEntry("audio/mpeg", "mpega");
+            sMimeTypeMap.loadEntry("audio/mpeg", "mp2");
+            sMimeTypeMap.loadEntry("audio/mpeg", "mp3");
+            sMimeTypeMap.loadEntry("audio/mpeg", "m4a");
+            sMimeTypeMap.loadEntry("audio/mpegurl", "m3u");
+            sMimeTypeMap.loadEntry("audio/prs.sid", "sid");
+            sMimeTypeMap.loadEntry("audio/x-aiff", "aif");
+            sMimeTypeMap.loadEntry("audio/x-aiff", "aiff");
+            sMimeTypeMap.loadEntry("audio/x-aiff", "aifc");
+            sMimeTypeMap.loadEntry("audio/x-gsm", "gsm");
+            sMimeTypeMap.loadEntry("audio/x-mpegurl", "m3u");
+            sMimeTypeMap.loadEntry("audio/x-ms-wma", "wma");
+            sMimeTypeMap.loadEntry("audio/x-ms-wax", "wax");
+            sMimeTypeMap.loadEntry("audio/x-pn-realaudio", "ra");
+            sMimeTypeMap.loadEntry("audio/x-pn-realaudio", "rm");
+            sMimeTypeMap.loadEntry("audio/x-pn-realaudio", "ram");
+            sMimeTypeMap.loadEntry("audio/x-realaudio", "ra");
+            sMimeTypeMap.loadEntry("audio/x-scpls", "pls");
+            sMimeTypeMap.loadEntry("audio/x-sd2", "sd2");
+            sMimeTypeMap.loadEntry("audio/x-wav", "wav");
+            sMimeTypeMap.loadEntry("image/bmp", "bmp");
+            sMimeTypeMap.loadEntry("image/gif", "gif");
+            sMimeTypeMap.loadEntry("image/ico", "cur");
+            sMimeTypeMap.loadEntry("image/ico", "ico");
+            sMimeTypeMap.loadEntry("image/ief", "ief");
+            sMimeTypeMap.loadEntry("image/jpeg", "jpeg");
+            sMimeTypeMap.loadEntry("image/jpeg", "jpg");
+            sMimeTypeMap.loadEntry("image/jpeg", "jpe");
+            sMimeTypeMap.loadEntry("image/pcx", "pcx");
+            sMimeTypeMap.loadEntry("image/png", "png");
+            sMimeTypeMap.loadEntry("image/svg+xml", "svg");
+            sMimeTypeMap.loadEntry("image/svg+xml", "svgz");
+            sMimeTypeMap.loadEntry("image/tiff", "tiff");
+            sMimeTypeMap.loadEntry("image/tiff", "tif");
+            sMimeTypeMap.loadEntry("image/vnd.djvu", "djvu");
+            sMimeTypeMap.loadEntry("image/vnd.djvu", "djv");
+            sMimeTypeMap.loadEntry("image/vnd.wap.wbmp", "wbmp");
+            sMimeTypeMap.loadEntry("image/x-cmu-raster", "ras");
+            sMimeTypeMap.loadEntry("image/x-coreldraw", "cdr");
+            sMimeTypeMap.loadEntry("image/x-coreldrawpattern", "pat");
+            sMimeTypeMap.loadEntry("image/x-coreldrawtemplate", "cdt");
+            sMimeTypeMap.loadEntry("image/x-corelphotopaint", "cpt");
+            sMimeTypeMap.loadEntry("image/x-icon", "ico");
+            sMimeTypeMap.loadEntry("image/x-jg", "art");
+            sMimeTypeMap.loadEntry("image/x-jng", "jng");
+            sMimeTypeMap.loadEntry("image/x-ms-bmp", "bmp");
+            sMimeTypeMap.loadEntry("image/x-photoshop", "psd");
+            sMimeTypeMap.loadEntry("image/x-portable-anymap", "pnm");
+            sMimeTypeMap.loadEntry("image/x-portable-bitmap", "pbm");
+            sMimeTypeMap.loadEntry("image/x-portable-graymap", "pgm");
+            sMimeTypeMap.loadEntry("image/x-portable-pixmap", "ppm");
+            sMimeTypeMap.loadEntry("image/x-rgb", "rgb");
+            sMimeTypeMap.loadEntry("image/x-xbitmap", "xbm");
+            sMimeTypeMap.loadEntry("image/x-xpixmap", "xpm");
+            sMimeTypeMap.loadEntry("image/x-xwindowdump", "xwd");
+            sMimeTypeMap.loadEntry("model/iges", "igs");
+            sMimeTypeMap.loadEntry("model/iges", "iges");
+            sMimeTypeMap.loadEntry("model/mesh", "msh");
+            sMimeTypeMap.loadEntry("model/mesh", "mesh");
+            sMimeTypeMap.loadEntry("model/mesh", "silo");
+            sMimeTypeMap.loadEntry("text/calendar", "ics");
+            sMimeTypeMap.loadEntry("text/calendar", "icz");
+            sMimeTypeMap.loadEntry("text/comma-separated-values", "csv");
+            sMimeTypeMap.loadEntry("text/css", "css");
+            sMimeTypeMap.loadEntry("text/h323", "323");
+            sMimeTypeMap.loadEntry("text/iuls", "uls");
+            sMimeTypeMap.loadEntry("text/mathml", "mml");
             // add it first so it will be the default for ExtensionFromMimeType
-            sMimeTypeMap.loadEntry("text/plain", "txt", true);
-            sMimeTypeMap.loadEntry("text/plain", "asc", true);
-            sMimeTypeMap.loadEntry("text/plain", "text", true);
-            sMimeTypeMap.loadEntry("text/plain", "diff", true);
-            sMimeTypeMap.loadEntry("text/plain", "pot", true);
-            sMimeTypeMap.loadEntry("text/richtext", "rtx", true);
-            sMimeTypeMap.loadEntry("text/rtf", "rtf", true);
-            sMimeTypeMap.loadEntry("text/texmacs", "ts", true);
-            sMimeTypeMap.loadEntry("text/text", "phps", true);
-            sMimeTypeMap.loadEntry("text/tab-separated-values", "tsv", true);
-            sMimeTypeMap.loadEntry("text/x-bibtex", "bib", true);
-            sMimeTypeMap.loadEntry("text/x-boo", "boo", true);
-            sMimeTypeMap.loadEntry("text/x-c++hdr", "h++", true);
-            sMimeTypeMap.loadEntry("text/x-c++hdr", "hpp", true);
-            sMimeTypeMap.loadEntry("text/x-c++hdr", "hxx", true);
-            sMimeTypeMap.loadEntry("text/x-c++hdr", "hh", true);
-            sMimeTypeMap.loadEntry("text/x-c++src", "c++", true);
-            sMimeTypeMap.loadEntry("text/x-c++src", "cpp", true);
-            sMimeTypeMap.loadEntry("text/x-c++src", "cxx", true);
-            sMimeTypeMap.loadEntry("text/x-chdr", "h", true);
-            sMimeTypeMap.loadEntry("text/x-component", "htc", true);
-            sMimeTypeMap.loadEntry("text/x-csh", "csh", true);
-            sMimeTypeMap.loadEntry("text/x-csrc", "c", true);
-            sMimeTypeMap.loadEntry("text/x-dsrc", "d", true);
-            sMimeTypeMap.loadEntry("text/x-haskell", "hs", true);
-            sMimeTypeMap.loadEntry("text/x-java", "java", true);
-            sMimeTypeMap.loadEntry("text/x-literate-haskell", "lhs", true);
-            sMimeTypeMap.loadEntry("text/x-moc", "moc", true);
-            sMimeTypeMap.loadEntry("text/x-pascal", "p", true);
-            sMimeTypeMap.loadEntry("text/x-pascal", "pas", true);
-            sMimeTypeMap.loadEntry("text/x-pcs-gcd", "gcd", true);
-            sMimeTypeMap.loadEntry("text/x-setext", "etx", true);
-            sMimeTypeMap.loadEntry("text/x-tcl", "tcl", true);
-            sMimeTypeMap.loadEntry("text/x-tex", "tex", true);
-            sMimeTypeMap.loadEntry("text/x-tex", "ltx", true);
-            sMimeTypeMap.loadEntry("text/x-tex", "sty", true);
-            sMimeTypeMap.loadEntry("text/x-tex", "cls", true);
-            sMimeTypeMap.loadEntry("text/x-vcalendar", "vcs", true);
-            sMimeTypeMap.loadEntry("text/x-vcard", "vcf", true);
-            sMimeTypeMap.loadEntry("video/3gpp", "3gp", false);
-            sMimeTypeMap.loadEntry("video/3gpp", "3g2", false);
-            sMimeTypeMap.loadEntry("video/dl", "dl", false);
-            sMimeTypeMap.loadEntry("video/dv", "dif", false);
-            sMimeTypeMap.loadEntry("video/dv", "dv", false);
-            sMimeTypeMap.loadEntry("video/fli", "fli", false);
-            sMimeTypeMap.loadEntry("video/mpeg", "mpeg", false);
-            sMimeTypeMap.loadEntry("video/mpeg", "mpg", false);
-            sMimeTypeMap.loadEntry("video/mpeg", "mpe", false);
-            sMimeTypeMap.loadEntry("video/mp4", "mp4", false);
-            sMimeTypeMap.loadEntry("video/mpeg", "VOB", false);
-            sMimeTypeMap.loadEntry("video/quicktime", "qt", false);
-            sMimeTypeMap.loadEntry("video/quicktime", "mov", false);
-            sMimeTypeMap.loadEntry("video/vnd.mpegurl", "mxu", false);
-            sMimeTypeMap.loadEntry("video/x-la-asf", "lsf", false);
-            sMimeTypeMap.loadEntry("video/x-la-asf", "lsx", false);
-            sMimeTypeMap.loadEntry("video/x-mng", "mng", false);
-            sMimeTypeMap.loadEntry("video/x-ms-asf", "asf", false);
-            sMimeTypeMap.loadEntry("video/x-ms-asf", "asx", false);
-            sMimeTypeMap.loadEntry("video/x-ms-wm", "wm", false);
-            sMimeTypeMap.loadEntry("video/x-ms-wmv", "wmv", false);
-            sMimeTypeMap.loadEntry("video/x-ms-wmx", "wmx", false);
-            sMimeTypeMap.loadEntry("video/x-ms-wvx", "wvx", false);
-            sMimeTypeMap.loadEntry("video/x-msvideo", "avi", false);
-            sMimeTypeMap.loadEntry("video/x-sgi-movie", "movie", false);
-            sMimeTypeMap.loadEntry("x-conference/x-cooltalk", "ice", false);
-            sMimeTypeMap.loadEntry("x-epoc/x-sisx-app", "sisx", false);
+            sMimeTypeMap.loadEntry("text/plain", "txt");
+            sMimeTypeMap.loadEntry("text/plain", "asc");
+            sMimeTypeMap.loadEntry("text/plain", "text");
+            sMimeTypeMap.loadEntry("text/plain", "diff");
+            sMimeTypeMap.loadEntry("text/plain", "pot");
+            sMimeTypeMap.loadEntry("text/richtext", "rtx");
+            sMimeTypeMap.loadEntry("text/rtf", "rtf");
+            sMimeTypeMap.loadEntry("text/texmacs", "ts");
+            sMimeTypeMap.loadEntry("text/text", "phps");
+            sMimeTypeMap.loadEntry("text/tab-separated-values", "tsv");
+            sMimeTypeMap.loadEntry("text/x-bibtex", "bib");
+            sMimeTypeMap.loadEntry("text/x-boo", "boo");
+            sMimeTypeMap.loadEntry("text/x-c++hdr", "h++");
+            sMimeTypeMap.loadEntry("text/x-c++hdr", "hpp");
+            sMimeTypeMap.loadEntry("text/x-c++hdr", "hxx");
+            sMimeTypeMap.loadEntry("text/x-c++hdr", "hh");
+            sMimeTypeMap.loadEntry("text/x-c++src", "c++");
+            sMimeTypeMap.loadEntry("text/x-c++src", "cpp");
+            sMimeTypeMap.loadEntry("text/x-c++src", "cxx");
+            sMimeTypeMap.loadEntry("text/x-chdr", "h");
+            sMimeTypeMap.loadEntry("text/x-component", "htc");
+            sMimeTypeMap.loadEntry("text/x-csh", "csh");
+            sMimeTypeMap.loadEntry("text/x-csrc", "c");
+            sMimeTypeMap.loadEntry("text/x-dsrc", "d");
+            sMimeTypeMap.loadEntry("text/x-haskell", "hs");
+            sMimeTypeMap.loadEntry("text/x-java", "java");
+            sMimeTypeMap.loadEntry("text/x-literate-haskell", "lhs");
+            sMimeTypeMap.loadEntry("text/x-moc", "moc");
+            sMimeTypeMap.loadEntry("text/x-pascal", "p");
+            sMimeTypeMap.loadEntry("text/x-pascal", "pas");
+            sMimeTypeMap.loadEntry("text/x-pcs-gcd", "gcd");
+            sMimeTypeMap.loadEntry("text/x-setext", "etx");
+            sMimeTypeMap.loadEntry("text/x-tcl", "tcl");
+            sMimeTypeMap.loadEntry("text/x-tex", "tex");
+            sMimeTypeMap.loadEntry("text/x-tex", "ltx");
+            sMimeTypeMap.loadEntry("text/x-tex", "sty");
+            sMimeTypeMap.loadEntry("text/x-tex", "cls");
+            sMimeTypeMap.loadEntry("text/x-vcalendar", "vcs");
+            sMimeTypeMap.loadEntry("text/x-vcard", "vcf");
+            sMimeTypeMap.loadEntry("video/3gpp", "3gp");
+            sMimeTypeMap.loadEntry("video/3gpp", "3g2");
+            sMimeTypeMap.loadEntry("video/dl", "dl");
+            sMimeTypeMap.loadEntry("video/dv", "dif");
+            sMimeTypeMap.loadEntry("video/dv", "dv");
+            sMimeTypeMap.loadEntry("video/fli", "fli");
+            sMimeTypeMap.loadEntry("video/mpeg", "mpeg");
+            sMimeTypeMap.loadEntry("video/mpeg", "mpg");
+            sMimeTypeMap.loadEntry("video/mpeg", "mpe");
+            sMimeTypeMap.loadEntry("video/mp4", "mp4");
+            sMimeTypeMap.loadEntry("video/mpeg", "VOB");
+            sMimeTypeMap.loadEntry("video/quicktime", "qt");
+            sMimeTypeMap.loadEntry("video/quicktime", "mov");
+            sMimeTypeMap.loadEntry("video/vnd.mpegurl", "mxu");
+            sMimeTypeMap.loadEntry("video/x-la-asf", "lsf");
+            sMimeTypeMap.loadEntry("video/x-la-asf", "lsx");
+            sMimeTypeMap.loadEntry("video/x-mng", "mng");
+            sMimeTypeMap.loadEntry("video/x-ms-asf", "asf");
+            sMimeTypeMap.loadEntry("video/x-ms-asf", "asx");
+            sMimeTypeMap.loadEntry("video/x-ms-wm", "wm");
+            sMimeTypeMap.loadEntry("video/x-ms-wmv", "wmv");
+            sMimeTypeMap.loadEntry("video/x-ms-wmx", "wmx");
+            sMimeTypeMap.loadEntry("video/x-ms-wvx", "wvx");
+            sMimeTypeMap.loadEntry("video/x-msvideo", "avi");
+            sMimeTypeMap.loadEntry("video/x-sgi-movie", "movie");
+            sMimeTypeMap.loadEntry("x-conference/x-cooltalk", "ice");
+            sMimeTypeMap.loadEntry("x-epoc/x-sisx-app", "sisx");
         }
 
         return sMimeTypeMap;
