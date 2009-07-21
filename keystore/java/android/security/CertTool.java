@@ -53,6 +53,7 @@ public class CertTool {
     public static final String TITLE_USER_CERT = "User Certificate";
     public static final String TITLE_PKCS12_KEYSTORE = "PKCS12 Keystore";
     public static final String TITLE_PRIVATE_KEY = "Private Key";
+    public static final int INCORRECT_PKCS12_PASSPHRASE = -100;
 
     private static final String TAG = "CertTool";
     private static final String UNKNOWN = "Unknown";
@@ -143,28 +144,45 @@ public class CertTool {
         intent.putExtra(KEY_NAMESPACE + "1", namespace);
     }
 
-    public int addPkcs12Keystore(byte[] p12Data, String password,
-            String keyname) {
-        int handle, i = 0;
+    private int extractAndStoreKeysFromPkcs12(int handle, String keyname) {
+        int ret, i = 0;
         String pemData;
-        Log.i("CertTool", "addPkcs12Keystore()");
 
-        if ((handle = getPkcs12Handle(p12Data, password)) == 0) return -1;
         if ((pemData = getPkcs12Certificate(handle)) != null) {
-            sKeystore.put(USER_CERTIFICATE, keyname, pemData);
+            if ((ret = sKeystore.put(USER_CERTIFICATE, keyname, pemData)) != 0) {
+                return ret;
+            }
         }
         if ((pemData = getPkcs12PrivateKey(handle)) != null) {
-            sKeystore.put(USER_KEY, keyname, pemData);
+            if ((ret = sKeystore.put(USER_KEY, keyname, pemData)) != 0) {
+                return ret;
+            }
         }
         while ((pemData = this.popPkcs12CertificateStack(handle)) != null) {
             if (i++ > 0) {
-                sKeystore.put(CA_CERTIFICATE, keyname + i, pemData);
+                if ((ret = sKeystore.put(CA_CERTIFICATE, keyname + i, pemData)) != 0) {
+                    return ret;
+                }
             } else {
-                sKeystore.put(CA_CERTIFICATE, keyname, pemData);
+                if ((ret = sKeystore.put(CA_CERTIFICATE, keyname, pemData)) != 0) {
+                    return ret;
+                }
             }
         }
-        freePkcs12Handle(handle);
         return 0;
+    }
+
+    public int addPkcs12Keystore(byte[] p12Data, String password,
+            String keyname) {
+        int handle, ret;
+        Log.i("CertTool", "addPkcs12Keystore()");
+
+        if ((handle = getPkcs12Handle(p12Data, password)) == 0) {
+            return INCORRECT_PKCS12_PASSPHRASE;
+        }
+        ret = extractAndStoreKeysFromPkcs12(handle, keyname);
+        freePkcs12Handle(handle);
+        return ret;
     }
 
     public synchronized void addCertificate(byte[] data, Context context) {
