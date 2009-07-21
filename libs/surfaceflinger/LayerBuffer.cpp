@@ -575,6 +575,7 @@ LayerBuffer::OverlaySource::OverlaySource(LayerBuffer& layer,
     mFormat = overlay->format; 
     mWidthStride = overlay->w_stride;
     mHeightStride = overlay->h_stride;
+    mInitialized = false;
 
     mOverlayHandle = overlay->getHandleRef(overlay);
     
@@ -614,8 +615,9 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
     // this code-path must be as tight as possible, it's called each time
     // the screen is composited.
     if (UNLIKELY(mOverlay != 0)) {
-        if (mVisibilityChanged) {
+        if (mVisibilityChanged || !mInitialized) {
             mVisibilityChanged = false;
+            mInitialized = true;
             const Rect& bounds = mLayer.getTransformedBounds();
             int x = bounds.left;
             int y = bounds.top;
@@ -627,7 +629,7 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
             if (mOverlay) {
                 overlay_control_device_t* overlay_dev = mOverlayDevice;
                 overlay_dev->setPosition(overlay_dev, mOverlay, x,y,w,h);
-                overlay_dev->setParameter(overlay_dev, mOverlay, 
+                overlay_dev->setParameter(overlay_dev, mOverlay,
                         OVERLAY_TRANSFORM, mLayer.getOrientation());
                 overlay_dev->commit(overlay_dev, mOverlay);
             }

@@ -175,6 +175,7 @@ private:
         int32_t mWidthStride;
         int32_t mHeightStride;
         mutable Mutex mLock;
+        bool mInitialized;
     };
 
 
