@@ -87,6 +87,11 @@ public class PowerProfile {
     public static final String POWER_BLUETOOTH_ACTIVE = "bluetooth.active";
 
     /**
+     * Power consumption when Bluetooth driver gets an AT command.
+     */
+    public static final String POWER_BLUETOOTH_AT_CMD = "bluetooth.at";
+
+    /**
      * Power consumption when screen is on, not including the backlight power.
      */
     public static final String POWER_SCREEN_ON = "screen.on";
