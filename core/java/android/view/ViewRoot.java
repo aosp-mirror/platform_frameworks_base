@@ -907,7 +907,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             mHeight = frame.height();
 
             if (initialized) {
-                mGlCanvas.setViewport((int) (mWidth * appScale), (int) (mHeight * appScale));
+                mGlCanvas.setViewport((int) (mWidth * appScale + 0.5f),
+                        (int) (mHeight * appScale + 0.5f));
             }
 
             boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
@@ -1237,7 +1238,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         if (fullRedrawNeeded) {
             mAttachInfo.mIgnoreDirtyState = true;
-            dirty.union(0, 0, (int) (mWidth * appScale), (int) (mHeight * appScale));
+            dirty.union(0, 0, (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
         }
 
         if (DEBUG_ORIENTATION || DEBUG_DRAW) {
@@ -1749,7 +1750,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                             if (mGlCanvas != null) {
                                 float appScale = mAttachInfo.mApplicationScale;
                                 mGlCanvas.setViewport(
-                                        (int) (mWidth * appScale), (int) (mHeight * appScale));
+                                        (int) (mWidth * appScale + 0.5f),
+                                        (int) (mHeight * appScale + 0.5f));
                             }
                         }
                     }
@@ -2394,8 +2396,8 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
         int relayoutResult = sWindowSession.relayout(
                 mWindow, params,
-                (int) (mView.mMeasuredWidth * appScale),
-                (int) (mView.mMeasuredHeight * appScale),
+                (int) (mView.mMeasuredWidth * appScale + 0.5f),
+                (int) (mView.mMeasuredHeight * appScale + 0.5f),
                 viewVisibility, insetsPending, mWinFrame,
                 mPendingContentInsets, mPendingVisibleInsets, mSurface);
         if (restore) {
