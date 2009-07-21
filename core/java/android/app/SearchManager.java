@@ -1494,11 +1494,17 @@ public class SearchManager
      * Intent action broadcasted to inform that the searchables list or default have changed.
      * Components should handle this intent if they cache any searchable data and wish to stay
      * up to date on changes.
-     *
-     * @hide Pending API council approval.
      */
     public final static String INTENT_ACTION_SEARCHABLES_CHANGED
             = "android.search.action.SEARCHABLES_CHANGED";
+    
+    /**
+     * Intent action broadcasted to inform that the search settings have changed in some way.
+     * Either searchables have been enabled or disabled, or a different web search provider
+     * has been chosen.
+     */
+    public final static String INTENT_ACTION_SEARCH_SETTINGS_CHANGED
+            = "android.search.action.SETTINGS_CHANGED";
 
     /**
      * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
