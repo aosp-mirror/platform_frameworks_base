@@ -446,14 +446,14 @@ public abstract class KeyInputQueue {
                             boolean down;
                             if (ev.value != 0) {
                                 down = true;
-                                di.mDownTime = curTime;
+                                di.mKeyDownTime = curTime;
                             } else {
                                 down = false;
                             }
                             int keycode = rotateKeyCodeLocked(ev.keycode);
                             addLocked(di, curTimeNano, ev.flags,
                                     RawInputEvent.CLASS_KEYBOARD,
-                                    newKeyEvent(di, di.mDownTime, curTime, down,
+                                    newKeyEvent(di, di.mKeyDownTime, curTime, down,
                                             keycode, 0, scancode,
                                             ((ev.flags & WindowManagerPolicy.FLAG_WOKE_HERE) != 0)
                                              ? KeyEvent.FLAG_WOKE_HERE : 0));
@@ -461,29 +461,47 @@ public abstract class KeyInputQueue {
                             if (ev.scancode == RawInputEvent.BTN_TOUCH &&
                                     (classes&RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
                                 di.mAbs.changed = true;
-                                di.mAbs.down = ev.value != 0;
-                            }
-                            if (ev.scancode == RawInputEvent.BTN_MOUSE &&
+                                di.mAbs.mDown[0] = ev.value != 0;
+                            } else if (ev.scancode == RawInputEvent.BTN_2 &&
+                                    (classes&RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
+                                di.mAbs.changed = true;
+                                di.mAbs.mDown[1] = ev.value != 0;
+                            } else if (ev.scancode == RawInputEvent.BTN_MOUSE &&
                                     (classes&RawInputEvent.CLASS_TRACKBALL) != 0) {
                                 di.mRel.changed = true;
-                                di.mRel.down = ev.value != 0;
+                                di.mRel.mDown[0] = ev.value != 0;
                                 send = true;
                             }
     
                         } else if (ev.type == RawInputEvent.EV_ABS &&
                                 (classes&RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
+                            // Finger 1
                             if (ev.scancode == RawInputEvent.ABS_X) {
                                 di.mAbs.changed = true;
-                                di.mAbs.x = ev.value;
+                                di.mAbs.mCurData[MotionEvent.SAMPLE_X] = ev.value;
                             } else if (ev.scancode == RawInputEvent.ABS_Y) {
                                 di.mAbs.changed = true;
-                                di.mAbs.y = ev.value;
+                                di.mAbs.mCurData[MotionEvent.SAMPLE_Y] = ev.value;
                             } else if (ev.scancode == RawInputEvent.ABS_PRESSURE) {
                                 di.mAbs.changed = true;
-                                di.mAbs.pressure = ev.value;
+                                di.mAbs.mCurData[MotionEvent.SAMPLE_PRESSURE] = ev.value;
+                                di.mAbs.mCurData[MotionEvent.NUM_SAMPLE_DATA
+                                                 + MotionEvent.SAMPLE_PRESSURE] = ev.value;
                             } else if (ev.scancode == RawInputEvent.ABS_TOOL_WIDTH) {
                                 di.mAbs.changed = true;
-                                di.mAbs.size = ev.value;
+                                di.mAbs.mCurData[MotionEvent.SAMPLE_SIZE] = ev.value;
+                                di.mAbs.mCurData[MotionEvent.NUM_SAMPLE_DATA
+                                                 + MotionEvent.SAMPLE_SIZE] = ev.value;
+
+                            // Finger 2
+                            } else if (ev.scancode == RawInputEvent.ABS_HAT0X) {
+                                di.mAbs.changed = true;
+                                di.mAbs.mCurData[MotionEvent.NUM_SAMPLE_DATA
+                                                 + MotionEvent.SAMPLE_X] = ev.value;
+                            } else if (ev.scancode == RawInputEvent.ABS_HAT0Y) {
+                                di.mAbs.changed = true;
+                                di.mAbs.mCurData[MotionEvent.NUM_SAMPLE_DATA
+                                                 + MotionEvent.SAMPLE_Y] = ev.value;
                             }
     
                         } else if (ev.type == RawInputEvent.EV_REL &&
@@ -491,10 +509,10 @@ public abstract class KeyInputQueue {
                             // Add this relative movement into our totals.
                             if (ev.scancode == RawInputEvent.REL_X) {
                                 di.mRel.changed = true;
-                                di.mRel.x += ev.value;
+                                di.mRel.mCurData[MotionEvent.SAMPLE_X] += ev.value;
                             } else if (ev.scancode == RawInputEvent.REL_Y) {
                                 di.mRel.changed = true;
-                                di.mRel.y += ev.value;
+                                di.mRel.mCurData[MotionEvent.SAMPLE_Y] += ev.value;
                             }
                         }
                         
@@ -516,33 +534,33 @@ public abstract class KeyInputQueue {
                                     VirtualKey vk = mPressedVirtualKey;
                                     if (vk != null) {
                                         doMotion = false;
-                                        if (!ms.down) {
+                                        if (!ms.mDown[0]) {
                                             mPressedVirtualKey = null;
-                                            ms.lastDown = ms.down;
+                                            ms.mLastDown[0] = ms.mDown[0];
                                             if (DEBUG_VIRTUAL_KEYS) Log.v(TAG,
                                                     "Generate key up for: " + vk.scancode);
                                             addLocked(di, curTimeNano, ev.flags,
                                                     RawInputEvent.CLASS_KEYBOARD,
-                                                    newKeyEvent(di, di.mDownTime,
+                                                    newKeyEvent(di, di.mKeyDownTime,
                                                             curTime, false,
                                                             vk.lastKeycode,
                                                             0, vk.scancode, 0));
                                         }
-                                    } else if (ms.down && !ms.lastDown) {
+                                    } else if (ms.mDown[0] && !ms.mLastDown[0]) {
                                         vk = findSoftButton(di);
                                         if (vk != null) {
                                             doMotion = false;
                                             mPressedVirtualKey = vk;
                                             vk.lastKeycode = scancodeToKeycode(
                                                     di.id, vk.scancode);
-                                            ms.lastDown = ms.down;
-                                            di.mDownTime = curTime;
+                                            ms.mLastDown[0] = ms.mDown[0];
+                                            di.mKeyDownTime = curTime;
                                             if (DEBUG_VIRTUAL_KEYS) Log.v(TAG,
                                                     "Generate key down for: " + vk.scancode
                                                     + " (keycode=" + vk.lastKeycode + ")");
                                             addLocked(di, curTimeNano, ev.flags,
                                                     RawInputEvent.CLASS_KEYBOARD,
-                                                    newKeyEvent(di, di.mDownTime,
+                                                    newKeyEvent(di, di.mKeyDownTime,
                                                             curTime, true,
                                                             vk.lastKeycode, 0,
                                                             vk.scancode, 0));
@@ -550,11 +568,18 @@ public abstract class KeyInputQueue {
                                     }
                                     
                                     if (doMotion) {
-                                        me = ms.generateMotion(di, curTime,
-                                                curTimeNano, true, mDisplay,
+                                        // XXX Need to be able to generate
+                                        // multiple events here, for example
+                                        // if two fingers change up/down state
+                                        // at the same time.
+                                        me = ms.generateAbsMotion(di, curTime,
+                                                curTimeNano, mDisplay,
                                                 mOrientation, mGlobalMetaState);
-                                        if (false) Log.v(TAG, "Absolute: x=" + di.mAbs.x
-                                                + " y=" + di.mAbs.y + " ev=" + me);
+                                        if (false) Log.v(TAG, "Absolute: x="
+                                                + di.mAbs.mCurData[MotionEvent.SAMPLE_X]
+                                                + " y="
+                                                + di.mAbs.mCurData[MotionEvent.SAMPLE_Y]
+                                                + " ev=" + me);
                                         if (me != null) {
                                             if (WindowManagerPolicy.WATCH_POINTER) {
                                                 Log.i(TAG, "Enqueueing: " + me);
@@ -569,11 +594,14 @@ public abstract class KeyInputQueue {
                                 if (ms.changed) {
                                     ms.changed = false;
                                     
-                                    me = ms.generateMotion(di, curTime,
-                                            curTimeNano, false, mDisplay,
+                                    me = ms.generateRelMotion(di, curTime,
+                                            curTimeNano,
                                             mOrientation, mGlobalMetaState);
-                                    if (false) Log.v(TAG, "Relative: x=" + di.mRel.x
-                                            + " y=" + di.mRel.y + " ev=" + me);
+                                    if (false) Log.v(TAG, "Relative: x="
+                                            + di.mRel.mCurData[MotionEvent.SAMPLE_X]
+                                            + " y="
+                                            + di.mRel.mCurData[MotionEvent.SAMPLE_Y]
+                                            + " ev=" + me);
                                     if (me != null) {
                                         addLocked(di, curTimeNano, ev.flags,
                                                 RawInputEvent.CLASS_TRACKBALL, me);
@@ -603,21 +631,28 @@ public abstract class KeyInputQueue {
             return null;
         }
         
-        if (absm.x >= absx.minValue && absm.x <= absx.maxValue
-                && absm.y >= absy.minValue && absm.y <= absy.maxValue) {
-            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Input (" + absm.x
-                    + "," + absm.y + ") inside of display");
+        if (absm.mCurData[MotionEvent.SAMPLE_X] >= absx.minValue
+                && absm.mCurData[MotionEvent.SAMPLE_X] <= absx.maxValue
+                && absm.mCurData[MotionEvent.SAMPLE_Y] >= absy.minValue
+                && absm.mCurData[MotionEvent.SAMPLE_Y] <= absy.maxValue) {
+            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Input ("
+                    + absm.mCurData[MotionEvent.SAMPLE_X]
+                    + "," + absm.mCurData[MotionEvent.SAMPLE_Y]
+                    + ") inside of display");
             return null;
         }
         
         for (int i=0; i<N; i++) {
             VirtualKey sb = mVirtualKeys.get(i);
             sb.computeHitRect(dev, mDisplayWidth, mDisplayHeight);
-            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Hit test (" + absm.x + ","
-                    + absm.y + ") in code " + sb.scancode + " - (" + sb.hitLeft
+            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Hit test ("
+                    + absm.mCurData[MotionEvent.SAMPLE_X] + ","
+                    + absm.mCurData[MotionEvent.SAMPLE_Y] + ") in code "
+                    + sb.scancode + " - (" + sb.hitLeft
                     + "," + sb.hitTop + ")-(" + sb.hitRight + ","
                     + sb.hitBottom + ")");
-            if (sb.checkHit(absm.x, absm.y)) {
+            if (sb.checkHit(absm.mCurData[MotionEvent.SAMPLE_X],
+                    absm.mCurData[MotionEvent.SAMPLE_Y])) {
                 if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Hit!");
                 return sb;
             }
@@ -772,8 +807,8 @@ public abstract class KeyInputQueue {
             if (ev.event == ev.inputDevice.mRel.currentMove) {
                 if (false) Log.i(TAG, "Detach rel " + ev.event);
                 ev.inputDevice.mRel.currentMove = null;
-                ev.inputDevice.mRel.x = 0;
-                ev.inputDevice.mRel.y = 0;
+                ev.inputDevice.mRel.mCurData[MotionEvent.SAMPLE_X] = 0;
+                ev.inputDevice.mRel.mCurData[MotionEvent.SAMPLE_Y] = 0;
             }
             recycleLocked(ev);
         }
