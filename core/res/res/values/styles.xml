@@ -687,8 +687,8 @@
 
     <style name="MediaButton">
         <item name="android:background">@android:drawable/media_button_background</item>
-        <item name="android:layout_width">71px</item>
-        <item name="android:layout_height">52px</item>
+        <item name="android:layout_width">71dip</item>
+        <item name="android:layout_height">52dip</item>
     </style>
 
     <style name="MediaButton.Previous">
