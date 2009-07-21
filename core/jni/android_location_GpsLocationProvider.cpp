@@ -176,7 +176,7 @@ static jboolean android_location_GpsLocationProvider_start(JNIEnv* env, jobject 
 {
     int result = sGpsInterface->set_position_mode(positionMode, (singleFix ? 0 : fixFrequency));
     if (result) {
-        return result;
+        return false;
     }
 
     return (sGpsInterface->start() == 0);
@@ -270,6 +270,12 @@ static void android_location_GpsLocationProvider_inject_time(JNIEnv* env, jobjec
     sGpsInterface->inject_time(time, timeReference, uncertainty);
 }
 
+static void android_location_GpsLocationProvider_inject_location(JNIEnv* env, jobject obj,
+        jdouble latitude, jdouble longitude, jfloat accuracy)
+{
+    sGpsInterface->inject_location(latitude, longitude, accuracy);
+}
+
 static jboolean android_location_GpsLocationProvider_supports_xtra(JNIEnv* env, jobject obj)
 {
     if (!sGpsXtraInterface) {
@@ -330,13 +336,15 @@ static void android_location_GpsLocationProvider_agps_data_conn_failed(JNIEnv* e
 }
 
 static void android_location_GpsLocationProvider_set_agps_server(JNIEnv* env, jobject obj,
-        jint type, jint addr, jint port)
+        jint type, jstring hostname, jint port)
 {
     if (!sAGpsInterface) {
         sAGpsInterface = (const AGpsInterface*)sGpsInterface->get_extension(AGPS_INTERFACE);
     }
     if (sAGpsInterface) {
-        sAGpsInterface->set_server(type, addr, port);
+        const char *c_hostname = env->GetStringUTFChars(hostname, NULL);
+        sAGpsInterface->set_server(type, c_hostname, port);
+        env->ReleaseStringUTFChars(hostname, c_hostname);
     }
 }
 
@@ -353,12 +361,13 @@ static JNINativeMethod sMethods[] = {
     {"native_wait_for_event", "()V", (void*)android_location_GpsLocationProvider_wait_for_event},
     {"native_read_sv_status", "([I[F[F[F[I)I", (void*)android_location_GpsLocationProvider_read_sv_status},
     {"native_inject_time", "(JJI)V", (void*)android_location_GpsLocationProvider_inject_time},
+    {"native_inject_location", "(DDF)V", (void*)android_location_GpsLocationProvider_inject_location},
     {"native_supports_xtra", "()Z", (void*)android_location_GpsLocationProvider_supports_xtra},
     {"native_inject_xtra_data", "([BI)V", (void*)android_location_GpsLocationProvider_inject_xtra_data},
     {"native_agps_data_conn_open", "(Ljava/lang/String;)V", (void*)android_location_GpsLocationProvider_agps_data_conn_open},
     {"native_agps_data_conn_closed", "()V", (void*)android_location_GpsLocationProvider_agps_data_conn_closed},
     {"native_agps_data_conn_failed", "()V", (void*)android_location_GpsLocationProvider_agps_data_conn_failed},
-    {"native_set_agps_server", "(III)V", (void*)android_location_GpsLocationProvider_set_agps_server},
+    {"native_set_agps_server", "(ILjava/lang/String;I)V", (void*)android_location_GpsLocationProvider_set_agps_server},
 };
 
 int register_android_location_GpsLocationProvider(JNIEnv* env)

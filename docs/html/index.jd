@@ -5,32 +5,36 @@ home=true
 	<div id="mainBodyFixed">
               <div id="mainBodyLeft">			
                     <div id="homeMiddle">
-                        <div id="homeTitle">
-                            <h2>Developer Announcements</h2>
-                        </div><!-- end homeTitle -->
-                        <div id="announcement-block">
-                        <!-- total max width is 520px -->
-                            <img src="{@docRoot}assets/images/home/IO-logo.png" alt="Google I/O Developer Conference 2009" width="242px" />
-                            <div id="announcement" style="width:270px">
-                              <p>Google I/O is a two-day developer event that will take place May 27-28 at Moscone Center, San Francisco. The agenda includes a number of great sessions on Android topics by team engineers and other developers.</p>
-                              <p><a href="http://code.google.com/events/io/">Learn more &raquo;</a></p>
-                            </div> <!-- end annoucement -->
-                        </div> <!-- end annoucement-block -->
-                        <div id="carouselMain">
-                            <div id="bulletinImg"></div>
-                            <div id="bulletinDesc"></div>
-                        </div>
-                        <div class="clearer"></div>
-                        <div class="app-list-container" align="center"> 
-                            <a href="javascript:{}" id="arrow-left" onclick="" class="arrow-left-off"></a>
-                            <div id="list-clip">
-                                <div style="left: 0px;" id="app-list">
-                                  <!-- populated by buildCarousel() -->
-                                </div>
-                            </div><!-- end list-clip -->
-                            <a href="javascript:page_right()" id="arrow-right" onclick="" class="arrow-right-on"></a>
+                        <div id="topAnnouncement">
+                            <div id="homeTitle">
+                                <h2>Developer Announcements</h2>
+                            </div><!-- end homeTitle -->
+                            <div id="announcement-block">
+                            <!-- total max width is 520px -->
+                                <img src="/assets/images/home/IO-logo.png" alt="Google I/O Developer Conference 2009" width="242px" />
+                                <div id="announcement" style="width:270px">
+                                  <p>Google I/O is a two-day developer event that will take place May 27-28 at Moscone Center, San Francisco. The agenda includes a number of great sessions on Android topics by team engineers and other developers.</p>
+                                  <p><a href="http://code.google.com/events/io/">Learn more &raquo;</a></p>
+                                </div> <!-- end annoucement -->
+                            </div> <!-- end annoucement-block -->  
+                        </div><!-- end topAnnouncement -->
+                        <div id="carousel">
+                            <div id="carouselMain">
+                                <div id="bulletinImg"></div>
+                                <div id="bulletinDesc"></div>
+                            </div>
                             <div class="clearer"></div>
-                        </div><!-- end app-list container -->
+                            <div class="app-list-container" align="center"> 
+                                <a href="javascript:{}" id="arrow-left" onclick="" class="arrow-left-off"></a>
+                                <div id="list-clip">
+                                    <div style="left: 0px;" id="app-list">
+                                      <!-- populated by buildCarousel() -->
+                                    </div>
+                                </div><!-- end list-clip -->
+                                <a href="javascript:page_right()" id="arrow-right" onclick="" class="arrow-right-on"></a>
+                                <div class="clearer"></div>
+                            </div><!-- end app-list container -->
+                        </div><!-- end carousel -->
                     </div><!-- end homeMiddle -->
 
                     <div style="clear:both">&nbsp;</div>
@@ -116,10 +120,10 @@ home=true
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"SDK 1.5 r1",
+      'name':"SDK 1.5 r2",
       'img':"sdk-large.png",
-      'title':"Android 1.5 SDK r1",
-      'desc': "<p>The final version of the Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r1/index.html'>Download Android 1.5 SDK</a></p>"
+      'title':"Android 1.5 SDK",
+      'desc': "<p>Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r2/index.html'>Download Android 1.5 SDK</a></p>"
     },
 
     'mapskey': {

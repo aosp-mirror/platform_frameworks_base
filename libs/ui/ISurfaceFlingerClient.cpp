@@ -35,6 +35,13 @@
 
 // ---------------------------------------------------------------------------
 
+/* ideally AID_GRAPHICS would be in a semi-public header
+ * or there would be a way to map a user/group name to its id
+ */
+#ifndef AID_GRAPHICS
+#define AID_GRAPHICS 1003
+#endif
+
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
@@ -136,13 +143,13 @@ status_t BnSurfaceFlingerClient::onTransact(
      
      IPCThreadState* ipc = IPCThreadState::self();
      const int pid = ipc->getCallingPid();
-     const int self_pid    = getpid();
-     if (UNLIKELY(pid != self_pid)) {
+     const int uid = ipc->getCallingUid();
+     const int self_pid = getpid();
+     if (UNLIKELY(pid != self_pid && uid != AID_GRAPHICS)) {
          // we're called from a different process, do the real check
          if (!checkCallingPermission(
                  String16("android.permission.ACCESS_SURFACE_FLINGER")))
          {
-             const int uid = ipc->getCallingUid();
              LOGE("Permission Denial: "
                      "can't openGlobalTransaction pid=%d, uid=%d", pid, uid);
              return PERMISSION_DENIED;

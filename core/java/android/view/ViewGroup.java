@@ -24,15 +24,16 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.graphics.RectF;
+import android.graphics.Region;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.Config;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
@@ -52,6 +53,15 @@ import java.util.ArrayList;
  * <p>
  * Also see {@link LayoutParams} for layout attributes.
  * </p>
+ *
+ * @attr ref android.R.styleable#ViewGroup_clipChildren
+ * @attr ref android.R.styleable#ViewGroup_clipToPadding
+ * @attr ref android.R.styleable#ViewGroup_layoutAnimation
+ * @attr ref android.R.styleable#ViewGroup_animationCache
+ * @attr ref android.R.styleable#ViewGroup_persistentDrawingCache
+ * @attr ref android.R.styleable#ViewGroup_alwaysDrawnWithCache
+ * @attr ref android.R.styleable#ViewGroup_addStatesFromChildren
+ * @attr ref android.R.styleable#ViewGroup_descendantFocusability
  */
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
     private static final boolean DBG = false;
@@ -89,7 +99,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * Internal flags.
-     * 
+     *
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
@@ -142,7 +152,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * to get the index of the child to draw for that iteration.
      */
     protected static final int FLAG_USE_CHILD_DRAWING_ORDER = 0x400;
-    
+
     /**
      * When set, this ViewGroup supports static transformations on children; this causes
      * {@link #getChildStaticTransformation(View, android.view.animation.Transformation)} to be
@@ -151,7 +161,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Any subclass overriding
      * {@link #getChildStaticTransformation(View, android.view.animation.Transformation)} should
      * set this flags in {@link #mGroupFlags}.
-     * 
+     *
      * {@hide}
      */
     protected static final int FLAG_SUPPORT_STATIC_TRANSFORMATIONS = 0x800;
@@ -212,7 +222,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * When set, this ViewGroup should not intercept touch events.
      */
     private static final int FLAG_DISALLOW_INTERCEPT = 0x80000;
-    
+
     /**
      * Indicates which types of drawing caches are to be kept in memory.
      * This field should be made private, so it is hidden from the SDK.
@@ -601,6 +611,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public void addFocusables(ArrayList<View> views, int direction) {
+        addFocusables(views, direction, FOCUSABLES_TOUCH_MODE);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
         final int focusableCount = views.size();
 
         final int descendantFocusability = getDescendantFocusability();
@@ -612,7 +630,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             for (int i = 0; i < count; i++) {
                 final View child = children[i];
                 if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
-                    child.addFocusables(views, direction);
+                    child.addFocusables(views, direction, focusableMode);
                 }
             }
         }
@@ -625,7 +643,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             descendantFocusability != FOCUS_AFTER_DESCENDANTS ||
                 // No focusable descendants
                 (focusableCount == views.size())) {
-            super.addFocusables(views, direction);
+            super.addFocusables(views, direction, focusableMode);
         }
     }
 
@@ -680,7 +698,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         ViewParent parent = mParent;
         if (parent != null) parent.recomputeViewAttributes(this);
     }
-    
+
     @Override
     void dispatchCollectViewAttributes(int visibility) {
         visibility |= mViewFlags&VISIBILITY_MASK;
@@ -812,16 +830,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
             }
         }
-        
+
         boolean isUpOrCancel = (action == MotionEvent.ACTION_UP) ||
-                (action == MotionEvent.ACTION_CANCEL); 
+                (action == MotionEvent.ACTION_CANCEL);
 
         if (isUpOrCancel) {
             // Note, we've already copied the previous state to our local
             // variable, so this takes effect on the next event
             mGroupFlags &= ~FLAG_DISALLOW_INTERCEPT;
         }
-        
+
         // The event wasn't an ACTION_DOWN, dispatch it to our target if
         // we have one.
         final View target = mMotionTarget;
@@ -868,18 +886,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@inheritDoc}
      */
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-        
+
         if (disallowIntercept == ((mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0)) {
             // We're already in this state, assume our ancestors are too
             return;
         }
-        
+
         if (disallowIntercept) {
             mGroupFlags |= FLAG_DISALLOW_INTERCEPT;
         } else {
             mGroupFlags &= ~FLAG_DISALLOW_INTERCEPT;
         }
-        
+
         // Pass it up to our parent
         if (mParent != null) {
             mParent.requestDisallowInterceptTouchEvent(disallowIntercept);
@@ -1020,6 +1038,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        boolean populated = false;
+        for (int i = 0, count = getChildCount(); i < count; i++) {
+            populated |= getChildAt(i).dispatchPopulateAccessibilityEvent(event);
+        }
+        return populated;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -1139,7 +1166,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final View child = children[i];
                 if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
                     child.setDrawingCacheEnabled(true);
-                    child.buildDrawingCache();
+                    child.buildDrawingCache(true);
                 }
             }
 
@@ -1181,7 +1208,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     bindLayoutAnimation(child);
                     if (cache) {
                         child.setDrawingCacheEnabled(true);
-                        child.buildDrawingCache();
+                        child.buildDrawingCache(true);
                     }
                 }
             }
@@ -1274,7 +1301,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             post(end);
         }
     }
-    
+
     /**
      * Returns the index of the child to draw for this iteration. Override this
      * if you want to change the drawing order of children. By default, it
@@ -1282,14 +1309,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * <p>
      * NOTE: In order for this method to be called, the
      * {@link #FLAG_USE_CHILD_DRAWING_ORDER} must be set.
-     * 
+     *
      * @param i The current iteration.
      * @return The index of the child to draw this iteration.
      */
     protected int getChildDrawingOrder(int childCount, int i) {
         return i;
     }
-    
+
     private void notifyAnimationListener() {
         mGroupFlags &= ~FLAG_NOTIFY_ANIMATION_LISTENER;
         mGroupFlags |= FLAG_ANIMATION_DONE;
@@ -1403,9 +1430,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        // Clear the flag as early as possible to allow draw() implementations
+        // Sets the flag as early as possible to allow draw() implementations
         // to call invalidate() successfully when doing animations
-        child.mPrivateFlags = (child.mPrivateFlags & ~DIRTY_MASK) | DRAWN;
+        child.mPrivateFlags |= DRAWN;
 
         if (!concatMatrix && canvas.quickReject(cl, ct, cr, cb, Canvas.EdgeType.BW) &&
                 (child.mPrivateFlags & DRAW_ANIMATION) == 0) {
@@ -1417,10 +1444,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int sx = child.mScrollX;
         final int sy = child.mScrollY;
 
+        boolean scalingRequired = false;
         Bitmap cache = null;
         if ((flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
                 (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
-            cache = child.getDrawingCache();
+            cache = child.getDrawingCache(true);
+            if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
         }
 
         final boolean hasNoCache = cache == null;
@@ -1430,6 +1459,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             canvas.translate(cl - sx, ct - sy);
         } else {
             canvas.translate(cl, ct);
+            if (scalingRequired) {
+                // mAttachInfo cannot be null, otherwise scalingRequired == false
+                final float scale = 1.0f / mAttachInfo.mApplicationScale;
+                canvas.scale(scale, scale);
+            }
         }
 
         float alpha = 1.0f;
@@ -1472,7 +1506,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (hasNoCache) {
                 canvas.clipRect(sx, sy, sx + (cr - cl), sy + (cb - ct));
             } else {
-                canvas.clipRect(0, 0, cr - cl, cb - ct);
+                if (!scalingRequired) {
+                    canvas.clipRect(0, 0, cr - cl, cb - ct);
+                } else {
+                    canvas.clipRect(0, 0, cache.getWidth(), cache.getHeight());
+                }
             }
         }
 
@@ -1482,6 +1520,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (ViewDebug.TRACE_HIERARCHY) {
                     ViewDebug.trace(this, ViewDebug.HierarchyTraceType.DRAW);
                 }
+                child.mPrivateFlags &= ~DIRTY_MASK;
                 child.dispatchDraw(canvas);
             } else {
                 child.draw(canvas);
@@ -1546,7 +1585,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             children[i].setSelected(selected);
         }
     }
-    
+
     @Override
     protected void dispatchSetPressed(boolean pressed) {
         final View[] children = mChildren;
@@ -1577,7 +1616,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * {@inheritDoc}
      *
-     * @see #setStaticTransformationsEnabled(boolean) 
+     * @see #setStaticTransformationsEnabled(boolean)
      */
     protected boolean getChildStaticTransformation(View child, Transformation t) {
         return false;
@@ -1844,10 +1883,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (child.hasFocus()) {
             requestChildFocus(child, child.findFocus());
         }
-        
+
         AttachInfo ai = mAttachInfo;
         if (ai != null) {
-            boolean lastKeepOn = ai.mKeepScreenOn; 
+            boolean lastKeepOn = ai.mKeepScreenOn;
             ai.mKeepScreenOn = false;
             child.dispatchAttachedToWindow(mAttachInfo, (mViewFlags&VISIBILITY_MASK));
             if (ai.mKeepScreenOn) {
@@ -2047,7 +2086,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         needGlobalAttributesUpdate(false);
-        
+
         removeFromArray(index);
 
         if (clearChildFocus) {
@@ -2080,7 +2119,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
 
             needGlobalAttributesUpdate(false);
-            
+
             if (notifyListener) {
                 onHierarchyChangeListener.onChildViewRemoved(this, view);
             }
@@ -2128,7 +2167,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         View clearChildFocus = null;
 
         needGlobalAttributesUpdate(false);
-        
+
         for (int i = count - 1; i >= 0; i--) {
             final View view = children[i];
 
@@ -2173,7 +2212,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (child == mFocused) {
             child.clearFocus();
         }
-        
+
         if (animate && child.getAnimation() != null) {
             addDisappearingView(child);
         } else if (child.mAttachInfo != null) {
@@ -2323,7 +2362,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final boolean drawAnimation = (child.mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION;
 
             // Check whether the child that requests the invalidate is fully opaque
-            final boolean isOpaque = child.isOpaque();
+            final boolean isOpaque = child.isOpaque() && !drawAnimation &&
+                    child.getAnimation() != null;
             // Mark the child as dirty, using the appropriate flag
             // Make sure we do not set both flags at the same time
             final int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
@@ -3135,7 +3175,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
     }
-    
+
 
     @Override
     protected boolean fitSystemWindows(Rect insets) {
@@ -3269,7 +3309,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * laid out. See
      * {@link android.R.styleable#ViewGroup_Layout ViewGroup Layout Attributes}
      * for a list of all child view attributes that this class supports.
-     * 
+     *
      * <p>
      * The base LayoutParams class just describes how big the view wants to be
      * for both width and height. For each dimension, it can specify one of:
@@ -3400,7 +3440,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          * @param output the String to prepend to the internal representation
          * @return a String with the following format: output +
          *         "ViewGroup.LayoutParams={ width=WIDTH, height=HEIGHT }"
-         * 
+         *
          * @hide
          */
         public String debug(String output) {
@@ -3413,7 +3453,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
          *
          * @param size the size to convert
          * @return a String instance representing the supplied size
-         * 
+         *
          * @hide
          */
         protected static String sizeToString(int size) {

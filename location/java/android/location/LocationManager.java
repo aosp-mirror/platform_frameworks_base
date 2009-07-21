@@ -1279,27 +1279,6 @@ public class LocationManager {
     }
 
     /**
-     * Installs a location collector.
-     *
-     * @param provider Binder interface for the location collector
-     *
-     * @return true if the command succeeds.
-     *
-     * Requires the android.permission.INSTALL_LOCATION_COLLECTOR permission.
-     *
-     * {@hide}
-     */
-    public boolean installLocationCollector(ILocationCollector collector) {
-        try {
-            mService.installLocationCollector(collector);
-            return true;
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setLocationCollector: ", e);
-            return false;
-        }
-    }
-
-    /**
      * Installs a geocoder server.
      *
      * @param provider Binder interface for the geocoder provider

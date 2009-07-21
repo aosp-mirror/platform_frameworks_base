@@ -16,6 +16,8 @@
 
 package android.backup;
 
+import android.backup.IRestoreSession;
+
 /**
  * Direct interface to the Backup Manager Service that applications invoke on.  The only
  * operation currently needed is a simple notification that the app has made changes to
@@ -30,12 +32,102 @@ interface IBackupManager {
     /**
      * Tell the system service that the caller has made changes to its
      * data, and therefore needs to undergo an incremental backup pass.
+     *
+     * Any application can invoke this method for its own package, but
+     * only callers who hold the android.permission.BACKUP permission
+     * may invoke it for arbitrary packages.
      */
-    oneway void dataChanged(String packageName);
+    void dataChanged(String packageName);
 
     /**
-     * Schedule a full backup of the given package.
-     * !!! TODO: protect with a signature-or-system permission?
+     * Erase all backed-up data for the given package from the storage
+     * destination.
+     *
+     * Any application can invoke this method for its own package, but
+     * only callers who hold the android.permission.BACKUP permission
+     * may invoke it for arbitrary packages.
      */
-    oneway void scheduleFullBackup(String packageName);
+    void clearBackupData(String packageName);
+
+    /**
+     * Notifies the Backup Manager Service that an agent has become available.  This
+     * method is only invoked by the Activity Manager.
+     */
+    void agentConnected(String packageName, IBinder agent);
+
+    /**
+     * Notify the Backup Manager Service that an agent has unexpectedly gone away.
+     * This method is only invoked by the Activity Manager.
+     */
+    void agentDisconnected(String packageName);
+
+    /**
+     * Enable/disable the backup service entirely.  When disabled, no backup
+     * or restore operations will take place.  Data-changed notifications will
+     * still be observed and collected, however, so that changes made while the
+     * mechanism was disabled will still be backed up properly if it is enabled
+     * at some point in the future.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    void setBackupEnabled(boolean isEnabled);
+
+    /**
+     * Indicate that any necessary one-time provisioning has occurred.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    void setBackupProvisioned(boolean isProvisioned);
+
+    /**
+     * Report whether the backup mechanism is currently enabled.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    boolean isBackupEnabled();
+
+    /**
+     * Schedule an immediate backup attempt for all pending updates.  This is
+     * primarily intended for transports to use when they detect a suitable
+     * opportunity for doing a backup pass.  If there are no pending updates to
+     * be sent, no action will be taken.  Even if some updates are pending, the
+     * transport will still be asked to confirm via the usual requestBackupTime()
+     * method.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    void backupNow();
+
+    /**
+     * Identify the currently selected transport.  Callers must hold the
+     * android.permission.BACKUP permission to use this method.
+     */
+    String getCurrentTransport();
+
+    /**
+     * Request a list of all available backup transports' names.  Callers must
+     * hold the android.permission.BACKUP permission to use this method.
+     */
+    String[] listAllTransports();
+
+    /**
+     * Specify the current backup transport.  Callers must hold the
+     * android.permission.BACKUP permission to use this method.
+     *
+     * @param transport The name of the transport to select.  This should be one
+     * of {@link BackupManager.TRANSPORT_GOOGLE} or {@link BackupManager.TRANSPORT_ADB}.
+     * @return The name of the previously selected transport.  If the given transport
+     *   name is not one of the currently available transports, no change is made to
+     *   the current transport setting and the method returns null.
+     */
+    String selectBackupTransport(String transport);
+
+    /**
+     * Begin a restore session with the given transport (which may differ from the
+     * currently-active backup transport).
+     *
+     * @param transport The name of the transport to use for the restore operation.
+     * @return An interface to the restore session, or null on error.
+     */
+    IRestoreSession beginRestoreSession(String transportID);
 }

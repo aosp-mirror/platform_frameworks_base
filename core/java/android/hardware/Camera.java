@@ -39,13 +39,16 @@ import android.os.Message;
 public class Camera {
     private static final String TAG = "Camera";
     
-    // These match the enum in libs/android_runtime/android_hardware_Camera.cpp
-    private static final int SHUTTER_CALLBACK = 0;
-    private static final int RAW_PICTURE_CALLBACK = 1;
-    private static final int JPEG_PICTURE_CALLBACK = 2;
-    private static final int PREVIEW_CALLBACK = 3;
-    private static final int AUTOFOCUS_CALLBACK = 4;
-    private static final int ERROR_CALLBACK = 5;
+    // These match the enums in frameworks/base/include/ui/Camera.h
+    private static final int CAMERA_MSG_ERROR = 0;
+    private static final int CAMERA_MSG_SHUTTER = 1;
+    private static final int CAMERA_MSG_FOCUS = 2;
+    private static final int CAMERA_MSG_ZOOM = 3;
+    private static final int CAMERA_MSG_PREVIEW_FRAME = 4;
+    private static final int CAMERA_MSG_VIDEO_FRAME = 5;
+    private static final int CAMERA_MSG_POSTVIEW_FRAME = 6;
+    private static final int CAMERA_MSG_RAW_IMAGE = 7;
+    private static final int CAMERA_MSG_COMPRESSED_IMAGE = 8;
 
     private int mNativeContext; // accessed by native methods
     private EventHandler mEventHandler;
@@ -152,7 +155,11 @@ public class Camera {
      * @throws IOException if the method fails.
      */
     public final void setPreviewDisplay(SurfaceHolder holder) throws IOException {
-        setPreviewDisplay(holder.getSurface());
+        if (holder != null) {
+            setPreviewDisplay(holder.getSurface());
+        } else {
+            setPreviewDisplay((Surface)null);
+        }
     }
 
     private native final void setPreviewDisplay(Surface surface);
@@ -231,22 +238,23 @@ public class Camera {
         @Override
         public void handleMessage(Message msg) {
             switch(msg.what) {
-            case SHUTTER_CALLBACK:
+            case CAMERA_MSG_SHUTTER:
                 if (mShutterCallback != null) {
                     mShutterCallback.onShutter();
                 }
                 return;
-            case RAW_PICTURE_CALLBACK:
+
+            case CAMERA_MSG_RAW_IMAGE:
                 if (mRawImageCallback != null)
                     mRawImageCallback.onPictureTaken((byte[])msg.obj, mCamera);
                 return;
 
-            case JPEG_PICTURE_CALLBACK:
+            case CAMERA_MSG_COMPRESSED_IMAGE:
                 if (mJpegCallback != null)
                     mJpegCallback.onPictureTaken((byte[])msg.obj, mCamera);
                 return;
             
-            case PREVIEW_CALLBACK:
+            case CAMERA_MSG_PREVIEW_FRAME:
                 if (mPreviewCallback != null) {
                     mPreviewCallback.onPreviewFrame((byte[])msg.obj, mCamera);
                     if (mOneShot) {
@@ -255,12 +263,12 @@ public class Camera {
                 }
                 return;
 
-            case AUTOFOCUS_CALLBACK:
+            case CAMERA_MSG_FOCUS:
                 if (mAutoFocusCallback != null)
                     mAutoFocusCallback.onAutoFocus(msg.arg1 == 0 ? false : true, mCamera);
                 return;
 
-            case ERROR_CALLBACK:
+            case CAMERA_MSG_ERROR :
                 Log.e(TAG, "Error " + msg.arg1);
                 if (mErrorCallback != null)
                     mErrorCallback.onError(msg.arg1, mCamera);
@@ -363,7 +371,7 @@ public class Camera {
     }
     private native final void native_takePicture();
 
-    // These match the enum in libs/android_runtime/android_hardware_Camera.cpp
+    // These match the enum in include/ui/Camera.h
     /** Unspecified camerar error.  @see #ErrorCallback */
     public static final int CAMERA_ERROR_UNKNOWN = 1;
     /** Media server died. In this case, the application must release the

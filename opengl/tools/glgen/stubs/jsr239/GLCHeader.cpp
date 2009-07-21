@@ -44,9 +44,11 @@ static jclass OOMEClass;
 static jclass UOEClass;
 static jclass IAEClass;
 static jclass AIOOBEClass;
+static jclass G11ImplClass;
 static jmethodID getBasePointerID;
 static jmethodID getBaseArrayID;
 static jmethodID getBaseArrayOffsetID;
+static jmethodID allowIndirectBuffersID;
 static jfieldID positionID;
 static jfieldID limitID;
 static jfieldID elementSizeShiftID;
@@ -62,13 +64,17 @@ nativeClassInitBuffer(JNIEnv *_env)
     jclass bufferClassLocal = _env->FindClass("java/nio/Buffer");
     bufferClass = (jclass) _env->NewGlobalRef(bufferClassLocal);
 
+    jclass g11impClassLocal = _env->FindClass("com/google/android/gles_jni/GLImpl");
+    G11ImplClass = (jclass) _env->NewGlobalRef(g11impClassLocal);
+
     getBasePointerID = _env->GetStaticMethodID(nioAccessClass,
             "getBasePointer", "(Ljava/nio/Buffer;)J");
     getBaseArrayID = _env->GetStaticMethodID(nioAccessClass,
             "getBaseArray", "(Ljava/nio/Buffer;)Ljava/lang/Object;");
     getBaseArrayOffsetID = _env->GetStaticMethodID(nioAccessClass,
             "getBaseArrayOffset", "(Ljava/nio/Buffer;)I");
-
+    allowIndirectBuffersID = _env->GetStaticMethodID(g11impClassLocal,
+            "allowIndirectBuffers", "(Ljava/lang/String;)Z");
     positionID = _env->GetFieldID(bufferClass, "position", "I");
     limitID = _env->GetFieldID(bufferClass, "limit", "I");
     elementSizeShiftID =
@@ -118,6 +124,9 @@ getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining)
     
     *array = (jarray) _env->CallStaticObjectMethod(nioAccessClass,
             getBaseArrayID, buffer);
+    if (*array == NULL) {
+        return (void*) NULL;
+    }
     offset = _env->CallStaticIntMethod(nioAccessClass,
             getBaseArrayOffsetID, buffer);
     data = _env->GetPrimitiveArrayCritical(*array, (jboolean *) 0);
@@ -130,6 +139,45 @@ releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit)
 {
     _env->ReleasePrimitiveArrayCritical(array, data,
 					   commit ? 0 : JNI_ABORT);
+}
+
+extern "C" {
+extern char*  __progname;
+}
+
+static bool
+allowIndirectBuffers(JNIEnv *_env) {
+    static jint sIndirectBufferCompatability;
+    if (sIndirectBufferCompatability == 0) {
+        jobject appName = _env->NewStringUTF(::__progname);
+        sIndirectBufferCompatability = _env->CallStaticBooleanMethod(G11ImplClass, allowIndirectBuffersID, appName) ? 2 : 1;
+    }
+    return sIndirectBufferCompatability == 2;
+}
+
+static void *
+getDirectBufferPointer(JNIEnv *_env, jobject buffer) {
+    if (!buffer) {
+        return NULL;
+    }
+    void* buf = _env->GetDirectBufferAddress(buffer);
+    if (buf) {
+        jint position = _env->GetIntField(buffer, positionID);
+        jint elementSizeShift = _env->GetIntField(buffer, elementSizeShiftID);
+        buf = ((char*) buf) + (position << elementSizeShift);
+    } else {
+        if (allowIndirectBuffers(_env)) {
+            jarray array = 0;
+            jint remaining;
+            buf = getPointer(_env, buffer, &array, &remaining);
+            if (array) {
+                releasePointer(_env, array, buf, 0);
+            }
+        } else {
+            _env->ThrowNew(IAEClass, "Must use a native order direct Buffer");
+        }
+    }
+    return buf;
 }
 
 static int

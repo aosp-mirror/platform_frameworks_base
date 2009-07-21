@@ -25,16 +25,16 @@ import android.net.http.HttpAuthHeader;
 import android.net.http.RequestHandle;
 import android.net.http.SslCertificate;
 import android.net.http.SslError;
-import android.net.http.SslCertificate;
 
 import android.os.Handler;
 import android.os.Message;
+import android.security.CertTool;
 import android.util.Log;
 import android.webkit.CacheManager.CacheResult;
+import android.widget.Toast;
 
 import com.android.internal.R;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,6 +71,8 @@ class LoadListener extends Handler implements EventHandler {
     private static final int HTTP_AUTH = 401;
     private static final int HTTP_NOT_FOUND = 404;
     private static final int HTTP_PROXY_AUTH = 407;
+
+    private static final String CERT_MIMETYPE = "application/x-x509-ca-cert";
 
     private static int sNativeLoaderCount;
 
@@ -934,6 +936,12 @@ class LoadListener extends Handler implements EventHandler {
 
     // This commits the headers without checking the response status code.
     private void commitHeaders() {
+        if (mIsMainPageLoader && CERT_MIMETYPE.equals(mMimeType)) {
+            // In the case of downloading certificate, we will save it to the
+            // Keystore in commitLoad. Do not call webcore.
+            return;
+        }
+
         // Commit the headers to WebCore
         int nativeResponse = createNativeResponse();
         // The native code deletes the native response object.
@@ -973,6 +981,30 @@ class LoadListener extends Handler implements EventHandler {
      */
     private void commitLoad() {
         if (mCancelled) return;
+
+        if (mIsMainPageLoader && CERT_MIMETYPE.equals(mMimeType)) {
+            // In the case of downloading certificate, we will save it to the
+            // Keystore and stop the current loading so that it will not
+            // generate a new history page
+            byte[] cert = new byte[mDataBuilder.getByteSize()];
+            int position = 0;
+            ByteArrayBuilder.Chunk c;
+            while (true) {
+                c = mDataBuilder.getFirstChunk();
+                if (c == null) break;
+
+                if (c.mLength != 0) {
+                    System.arraycopy(c.mArray, 0, cert, position, c.mLength);
+                    position += c.mLength;
+                }
+                mDataBuilder.releaseChunk(c);
+            }
+            CertTool.getInstance().addCertificate(cert, mContext);
+            Toast.makeText(mContext, R.string.certificateSaved,
+                    Toast.LENGTH_SHORT).show();
+            mBrowserFrame.stopLoading();
+            return;
+        }
 
         // Give the data to WebKit now
         PerfChecker checker = new PerfChecker();

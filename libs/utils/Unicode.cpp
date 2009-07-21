@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "utils/AndroidUnicode.h"
-#include "characterData.h"
+#include <utils/AndroidUnicode.h>
+#include "CharacterData.h"
 
 #define LOG_TAG "Unicode"
-#include "utils/Log.h"
+#include <utils/Log.h>
 
 // ICU headers for using macros
 #include <unicode/utf16.h>

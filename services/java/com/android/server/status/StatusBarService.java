@@ -19,6 +19,7 @@ package com.android.server.status;
 import com.android.internal.R;
 import com.android.internal.util.CharSequences;
 
+import android.app.ActivityManagerNative;
 import android.app.Dialog;
 import android.app.IStatusBar;
 import android.app.PendingIntent;
@@ -118,6 +119,7 @@ public class StatusBarService extends IStatusBar.Stub
         public void binderDied() {
             Log.i(TAG, "binder died for pkg=" + pkg);
             disable(0, token, pkg);
+            token.unlinkToDeath(this, 0);
         }
     }
 
@@ -493,6 +495,7 @@ public class StatusBarService extends IStatusBar.Stub
             if (what == 0 || !token.isBinderAlive()) {
                 if (tok != null) {
                     mDisableRecords.remove(i);
+                    tok.token.unlinkToDeath(tok, 0);
                 }
             } else {
                 if (tok == null) {
@@ -1253,6 +1256,14 @@ public class StatusBarService extends IStatusBar.Stub
         }
 
         public void onClick(View v) {
+            try {
+                // The intent we are sending is for the application, which
+                // won't have permission to immediately start an activity after
+                // the user switches to home.  We know it is safe to do at this
+                // point, so make sure new activity switches are now allowed.
+                ActivityManagerNative.getDefault().resumeAppSwitches();
+            } catch (RemoteException e) {
+            }
             try {
                 mIntent.send();
                 mNotificationCallbacks.onNotificationClick(mPkg, mId);

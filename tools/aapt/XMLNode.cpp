@@ -524,10 +524,28 @@ const Vector<sp<XMLNode> >& XMLNode::getChildren() const
     return mChildren;
 }
 
+const String8& XMLNode::getFilename() const
+{
+    return mFilename;
+}
+    
 const Vector<XMLNode::attribute_entry>&
     XMLNode::getAttributes() const
 {
     return mAttributes;
+}
+
+const XMLNode::attribute_entry* XMLNode::getAttribute(const String16& ns,
+        const String16& name) const
+{
+    for (size_t i=0; i<mAttributes.size(); i++) {
+        const attribute_entry& ae(mAttributes.itemAt(i));
+        if (ae.ns == ns && ae.name == name) {
+            return &ae;
+        }
+    }
+    
+    return NULL;
 }
 
 const String16& XMLNode::getCData() const
@@ -550,6 +568,38 @@ int32_t XMLNode::getEndLineNumber() const
     return mEndLineNumber;
 }
 
+sp<XMLNode> XMLNode::searchElement(const String16& tagNamespace, const String16& tagName)
+{
+    if (getType() == XMLNode::TYPE_ELEMENT
+            && mNamespaceUri == tagNamespace
+            && mElementName == tagName) {
+        return this;
+    }
+    
+    for (size_t i=0; i<mChildren.size(); i++) {
+        sp<XMLNode> found = mChildren.itemAt(i)->searchElement(tagNamespace, tagName);
+        if (found != NULL) {
+            return found;
+        }
+    }
+    
+    return NULL;
+}
+
+sp<XMLNode> XMLNode::getChildElement(const String16& tagNamespace, const String16& tagName)
+{
+    for (size_t i=0; i<mChildren.size(); i++) {
+        sp<XMLNode> child = mChildren.itemAt(i);
+        if (child->getType() == XMLNode::TYPE_ELEMENT
+                && child->mNamespaceUri == tagNamespace
+                && child->mElementName == tagName) {
+            return child;
+        }
+    }
+    
+    return NULL;
+}
+
 status_t XMLNode::addChild(const sp<XMLNode>& child)
 {
     if (getType() == TYPE_CDATA) {
@@ -558,6 +608,17 @@ status_t XMLNode::addChild(const sp<XMLNode>& child)
     }
     //printf("Adding child %p to parent %p\n", child.get(), this);
     mChildren.add(child);
+    return NO_ERROR;
+}
+
+status_t XMLNode::insertChildAt(const sp<XMLNode>& child, size_t index)
+{
+    if (getType() == TYPE_CDATA) {
+        SourcePos(mFilename, child->getStartLineNumber()).error("Child to CDATA node.");
+        return UNKNOWN_ERROR;
+    }
+    //printf("Adding child %p to parent %p\n", child.get(), this);
+    mChildren.insertAt(child, index);
     return NO_ERROR;
 }
 

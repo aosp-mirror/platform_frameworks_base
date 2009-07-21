@@ -512,6 +512,9 @@
         <!-- The screen orientation has changed, that is the user has
              rotated the device. -->
         <flag name="orientation" value="0x0080" />
+        <!-- The screen orientation has changed, that is the user has
+             rotated the device. -->
+        <flag name="screenLayout" value="0x0100" />
         <!-- The font scaling factor has changed, that is the user has
              selected a new global font size. -->
         <flag name="fontScale" value="0x40000000" />
@@ -570,6 +573,15 @@
     <!-- Application's requirement for five way navigation -->
     <attr name="reqFiveWayNav" format="boolean" />
 
+    <!-- The name of the class implementing <code>BackupAgent</code> to manage
+         backup and restore of the application's settings to external storage. -->
+    <attr name="backupAgent" format="string" />
+
+    <!-- Whether the application allows its data to be backed up at all.  This
+         attribute defaults to 'true':  unless the application opts out, the
+         user will be able to back up its data to desktop storage. -->
+    <attr name="allowBackup" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -587,7 +599,8 @@
          {@link #AndroidManifestUsesPermission uses-permission},
          {@link #AndroidManifestUsesConfiguration uses-configuration},
          {@link #AndroidManifestApplication application},
-         {@link #AndroidManifestInstrumentation instrumentation}.  -->
+         {@link #AndroidManifestInstrumentation instrumentation},
+         {@link #AndroidManifestUsesFeature uses-feature}.  -->
     <declare-styleable name="AndroidManifest">
         <attr name="versionCode" />
         <attr name="versionName" />
@@ -643,6 +656,8 @@
         <attr name="manageSpaceActivity" />
         <attr name="allowClearUserData" />
         <attr name="testOnly" />
+        <attr name="backupAgent" />
+        <attr name="allowBackup" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be
@@ -754,6 +769,22 @@
         <attr name="reqFiveWayNav" />
     </declare-styleable>
 
+    <!-- The <code>uses-feature</code> tag specifies
+         a specific feature used by the application.
+         For example an application might specify that it requires
+         specific version of open gl. Multiple such attribute
+         values can be specified by the application.
+
+         <p>This appears as a child tag of the root
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestUsesFeature" parent="AndroidManifest">
+        <!-- The GLES driver version number needed by an application.
+             The higher 16 bits represent the major number and the lower 16 bits
+             represent the minor number. For example for GL 1.2 referring to
+             0x00000102, the actual value should be set as 0x00010002. -->
+        <attr name="glEsVersion" format="integer"/>
+    </declare-styleable>
+
     <!-- The <code>uses-sdk</code> tag describes the SDK features that the
          containing package must be running on to operate correctly.
          
@@ -799,10 +830,68 @@
     <!-- The <code>supports-density</code> specifies a screen density that this
          package supports. Application can specify multiple densities it supports.
          <p>This appears as a child tag of the
-         {@link #AndroidManifestApplication application} tag. -->
-    <declare-styleable name="AndroidManifestSupportsDensity" parent="AndroidManifestApplication">
-        <!-- Required value of the density in dip (device independent pixel). -->
-        <attr name="density" format="integer" />
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestSupportsDensity" parent="AndroidManifest">
+        <!-- Required value of the density in dip (device independent pixel).
+             You should use one of the pre-defined constants for the standard
+             screen densities defined here.
+        -->
+        <attr name="density" format="integer">
+            <!-- A low density screen, such as a QVGA or WQVGA screen in a
+                 typical hand-held phone.  The constant for this is 120. -->
+            <enum name="low" value="120" />
+            <!-- A medium density screen, such as an HVGA screen in a
+                 typical hand-held phone.  The constant for this is 160. -->
+            <enum name="medium" value="160" />
+            <!-- A high density screen, such as a VGA or WVGA screen in a
+                 typical hand-held phone.  The constant for this is 240. -->
+            <enum name="high" value="240" />
+        </attr>
+    </declare-styleable>
+
+    <!-- The <code>supports-screens</code> specifies the screen dimensions an
+         application supports.  By default a modern application supports all
+         screen sizes and must explicitly disable certain screen sizes here;
+         older applications are assumed to only support the traditional normal
+         (HVGA) screen size.  Note that screen size is a separate axis from
+         density, and is determined as the available pixels to an application
+         after density scaling has been applied.
+         
+         <p>This appears as a child tag of the
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestSupportsScreens" parent="AndroidManifest">
+        <!-- Indicates whether the application supports smaller screen form-factors.
+             A small screen is defined as one with a smaller aspect ratio than
+             the traditional HVGA screen; that is, for a portrait screen, less
+             tall than an HVGA screen.  In practice, this means a QVGA low
+             density or VGA high density screen.  An application that does
+             not support small screens <em>will not be available</em> for
+             small screen devices, since there is little the platform can do
+             to make such an application work on a smaller screen. -->
+        <attr name="smallScreens" format="boolean" />
+        <!-- Indicates whether an application supports the normal screen
+             form-factors.  Traditionally this is an HVGA normal density
+             screen, but WQVGA low density and WVGA high density are also
+             considered to be normal.  This attribute is true by default,
+             and applications currently should leave it that way. -->
+        <attr name="normalScreens" format="boolean" />
+        <!-- Indicates whether the application supports larger screen form-factors.
+             A large screen is defined as a screen that is significantly larger
+             than a normal phone screen, and thus may require some special care
+             on the application's part to make good use of it.  An example would
+             be a VGA <em>normal density</em> screen, though even larger screens
+             are certainly possible.  An application that does not support
+             large screens will be placed as a postage stamp on such a
+             screen, so that it retains the dimensions it was originally
+             designed for. -->
+        <attr name="largeScreens" format="boolean" />
+    </declare-styleable>
+
+    <!-- The <code>expandable</code> specifies if this package supports screen metrics
+         other than 320x480 dip.
+         <p>This appears as a child tag of the
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestExpandable" parent="AndroidManifest">
     </declare-styleable>
 
     <!-- The <code>provider</code> tag declares a

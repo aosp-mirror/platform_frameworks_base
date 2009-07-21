@@ -21,8 +21,8 @@ import android.app.ITransientNotification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
-import android.os.RemoteException;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.view.Gravity;
@@ -278,7 +278,7 @@ public class Toast {
         }
         tv.setText(s);
     }
-    
+
     // =======================================================================================
     // All the gunk below is the interaction with the Notification Service, which handles
     // the proper ordering of these system-wide.
@@ -373,6 +373,7 @@ public class Toast {
                             TAG, "REMOVE! " + mView + " in " + this);
                     mWM.removeView(mView);
                 }
+
                 mView = null;
             }
         }

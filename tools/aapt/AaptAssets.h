@@ -37,6 +37,7 @@ enum {
     AXIS_KEYBOARD,
     AXIS_NAVIGATION,
     AXIS_SCREENSIZE,
+    AXIS_SCREENLAYOUT,
     AXIS_VERSION
 };
 
@@ -62,6 +63,7 @@ public:
     String8 keyboard;
     String8 navigation;
     String8 screenSize;
+    String8 screenLayout;
     String8 version;
 
     bool initFromDirName(const char* dir, String8* resType);
@@ -78,6 +80,7 @@ public:
     static bool getKeyboardName(const char* name, ResTable_config* out = NULL);
     static bool getNavigationName(const char* name, ResTable_config* out = NULL);
     static bool getScreenSizeName(const char* name, ResTable_config* out = NULL);
+    static bool getScreenLayoutName(const char* name, ResTable_config* out = NULL);
     static bool getVersionName(const char* name, ResTable_config* out = NULL);
 
     int compare(const AaptGroupEntry& o) const;

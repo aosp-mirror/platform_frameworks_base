@@ -75,7 +75,7 @@ class LineReader
      * Returns NULL on EOF
      */
 
-    String 
+    String
     getNextLine(boolean ctrlZ)
     {
         int i = 0;
@@ -131,7 +131,7 @@ class InterpreterEx extends Exception
     String result;
 }
 
-public class ModelInterpreter 
+public class ModelInterpreter
             implements Runnable, SimulatedRadioControl
 {
     static final int MAX_CALLS = 6;
@@ -153,14 +153,14 @@ public class ModelInterpreter
     SimulatedGsmCallState simulatedCallState;
 
     HandlerThread mHandlerThread;
-   
+
     int pausedResponseCount;
     Object pausedResponseMonitor = new Object();
 
     //***** Events
 
     static final int PROGRESS_CALL_STATE        = 1;
-    
+
     //***** Constructor
 
     public
@@ -181,7 +181,7 @@ public class ModelInterpreter
         ss.bind(sa);
 
         init();
-    }    
+    }
 
     private void
     init()
@@ -190,7 +190,7 @@ public class ModelInterpreter
         mHandlerThread = new HandlerThread("ModelInterpreter");
         mHandlerThread.start();
         Looper looper = mHandlerThread.getLooper();
-        simulatedCallState = new SimulatedGsmCallState(looper);        
+        simulatedCallState = new SimulatedGsmCallState(looper);
     }
 
     //***** Runnable Implementation
@@ -204,7 +204,7 @@ public class ModelInterpreter
                 try {
                     s = ss.accept();
                 } catch (java.io.IOException ex) {
-                    Log.w(LOG_TAG, 
+                    Log.w(LOG_TAG,
                         "IOException on socket.accept(); stopping", ex);
                     return;
                 }
@@ -213,15 +213,15 @@ public class ModelInterpreter
                     in = s.getInputStream();
                     out = s.getOutputStream();
                 } catch (java.io.IOException ex) {
-                    Log.w(LOG_TAG, 
+                    Log.w(LOG_TAG,
                         "IOException on accepted socket(); re-listening", ex);
                     continue;
                 }
 
                 Log.i(LOG_TAG, "New connection accepted");
             }
-        
-    
+
+
             lineReader = new LineReader (in);
 
             println ("Welcome");
@@ -271,14 +271,14 @@ public class ModelInterpreter
 
 
     //***** Instance Methods
-    
+
     /** Start the simulated phone ringing */
     public void
     triggerRing(String number)
     {
         synchronized (this) {
             boolean success;
-            
+
             success = simulatedCallState.triggerRing(number);
 
             if (success) {
@@ -307,10 +307,10 @@ public class ModelInterpreter
      */
     public void
     setAutoProgressConnectingCall(boolean b)
-    {        
+    {
         simulatedCallState.setAutoProgressConnectingCall(b);
     }
-    
+
     public void
     setNextDialFailImmediately(boolean b)
     {
@@ -321,7 +321,7 @@ public class ModelInterpreter
     {
         //FIXME implement
     }
-    
+
 
     /** hangup ringing, dialing, or actuve calls */
     public void
@@ -373,7 +373,7 @@ public class ModelInterpreter
 
     public void triggerSsn(int a, int b) {}
     public void triggerIncomingUssd(String statusCode, String message) {}
-    
+
     public void
     triggerIncomingSMS(String message)
     {
@@ -386,7 +386,7 @@ public class ModelInterpreter
 
         // source address: +18005551212
         pdu.append("918100551521F0");
-        
+
         // protocol ID and data coding scheme
         pdu.append("0000");
 
@@ -421,7 +421,7 @@ public class ModelInterpreter
                 pausedResponseMonitor.notifyAll();
             }
         }
-    }    
+    }
 
     //***** Private Instance Methods
 
@@ -429,11 +429,11 @@ public class ModelInterpreter
     onAnswer() throws InterpreterEx
     {
         boolean success;
-        
+
         success = simulatedCallState.onAnswer();
 
         if (!success) {
-            throw new InterpreterEx("ERROR");            
+            throw new InterpreterEx("ERROR");
         }
     }
 
@@ -445,7 +445,7 @@ public class ModelInterpreter
         success = simulatedCallState.onAnswer();
 
         if (!success) {
-            throw new InterpreterEx("ERROR");            
+            throw new InterpreterEx("ERROR");
         }
 
         finalResponse = "NO CARRIER";
@@ -471,12 +471,12 @@ public class ModelInterpreter
             throw new InterpreterEx("ERROR");
         }
     }
-    
+
     private void
     releaseHeldOrUDUB() throws InterpreterEx
     {
         boolean success;
-        
+
         success = simulatedCallState.releaseHeldOrUDUB();
 
         if (!success) {
@@ -488,19 +488,19 @@ public class ModelInterpreter
     releaseActiveAcceptHeldOrWaiting() throws InterpreterEx
     {
         boolean success;
-        
+
         success = simulatedCallState.releaseActiveAcceptHeldOrWaiting();
 
         if (!success) {
             throw new InterpreterEx("ERROR");
         }
-    }    
+    }
 
     private void
     switchActiveAndHeldOrWaiting() throws InterpreterEx
     {
         boolean success;
-        
+
         success = simulatedCallState.switchActiveAndHeldOrWaiting();
 
         if (!success) {
@@ -512,7 +512,7 @@ public class ModelInterpreter
     separateCall(int index) throws InterpreterEx
     {
         boolean success;
-        
+
         success = simulatedCallState.separateCall(index);
 
         if (!success) {
@@ -524,7 +524,7 @@ public class ModelInterpreter
     conference() throws InterpreterEx
     {
         boolean success;
-        
+
         success = simulatedCallState.conference();
 
         if (!success) {
@@ -536,7 +536,7 @@ public class ModelInterpreter
     onDial(String command) throws InterpreterEx
     {
         boolean success;
-        
+
         success = simulatedCallState.onDial(command.substring(1));
 
         if (!success) {
@@ -566,7 +566,7 @@ public class ModelInterpreter
 
         println("+CMGS: 1");
     }
-    
+
     void
     processLine (String line) throws InterpreterEx
     {
@@ -645,8 +645,8 @@ public class ModelInterpreter
         }
 ***/
     }
-    
-    void 
+
+    void
     println (String s)
     {
         synchronized(this) {
@@ -663,7 +663,7 @@ public class ModelInterpreter
         }
     }
 
-    void 
+    void
     print (String s)
     {
         synchronized(this) {
@@ -714,8 +714,8 @@ public class ModelInterpreter
         {"+CIMI",    "320720000000000\r"},
         {"+CSCS=?",  "+CSCS: (\"HEX\",\"UCS2\")\r"},
         {"+CFUN?",   "+CFUN: 1\r"},
-        {"+COPS=3,0;+COPS?;+COPS=3,1;+COPS?;+COPS=3,2;+COPS?",  
-                "+COPS: 0,0,\"Android\"\r" 
+        {"+COPS=3,0;+COPS?;+COPS=3,1;+COPS?;+COPS=3,2;+COPS?",
+                "+COPS: 0,0,\"Android\"\r"
                 + "+COPS: 0,1,\"Android\"\r"
                 + "+COPS: 0,2,\"310995\"\r"},
         {"+CREG?",   "+CREG: 2,5, \"0113\", \"6614\"\r"},

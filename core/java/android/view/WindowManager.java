@@ -18,7 +18,6 @@ package android.view;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -209,6 +208,15 @@ public interface WindowManager extends ViewManager {
          */
         public static final int TYPE_APPLICATION_ATTACHED_DIALOG = FIRST_SUB_WINDOW+3;
         
+        /**
+         * Window type: window for showing overlays on top of media windows.
+         * These windows are displayed between TYPE_APPLICATION_MEDIA and the
+         * application window.  They should be translucent to be useful.  This
+         * is a big ugly hack so:
+         * @hide
+         */
+        public static final int TYPE_APPLICATION_MEDIA_OVERLAY  = FIRST_SUB_WINDOW+4;
+    
         /**
          * End of types of sub-windows.
          */
@@ -466,6 +474,21 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_WATCH_OUTSIDE_TOUCH = 0x00040000;
         
+        /** Window flag: special flag to let windows be shown when the screen
+         * is locked. This will let application windows take precedence over
+         * key guard or any other lock screens. Can be used with
+         * {@link #FLAG_KEEP_SCREEN_ON} to turn screen on and display windows
+         * directly before showing the key guard window
+         *
+         * {@hide} */
+        public static final int FLAG_SHOW_WHEN_LOCKED = 0x00080000;
+
+        /** Window flag: special flag to let a window ignore the compatibility scaling.
+         * This is used by SurfaceView to create a window that does not scale the content.
+         *
+         * {@hide} */
+        public static final int FLAG_NO_COMPATIBILITY_SCALING = 0x00100000;
+
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
          * it is created.
@@ -787,6 +810,7 @@ public interface WindowManager extends ViewManager {
             screenOrientation = in.readInt();
         }
     
+        @SuppressWarnings({"PointlessBitwiseExpression"})
         public static final int LAYOUT_CHANGED = 1<<0;
         public static final int TYPE_CHANGED = 1<<1;
         public static final int FLAGS_CHANGED = 1<<2;
@@ -800,6 +824,9 @@ public interface WindowManager extends ViewManager {
         public static final int SCREEN_ORIENTATION_CHANGED = 1<<10;
         public static final int SCREEN_BRIGHTNESS_CHANGED = 1<<11;
     
+        // internal buffer to backup/restore parameters under compatibility mode.
+        private int[] mCompatibilityParamsBackup = null;
+        
         public final int copyFrom(LayoutParams o) {
             int changes = 0;
     
@@ -957,36 +984,45 @@ public interface WindowManager extends ViewManager {
 
         /**
          * Scale the layout params' coordinates and size.
-         * Returns the original info as a backup so that the caller can
-         * restore the layout params;
+         * @hide
          */
-        void scale(float scale, int[] backup) {
-            if (scale != 1.0f) {
-                backup[0] = x;
-                backup[1] = y;
-                x *= scale;
-                y *= scale;
-                if (width > 0) {
-                    backup[2] = width;
-                    width *= scale;
-                }
-                if (height > 0) {
-                    backup[3] = height;
-                    height *= scale;
-                }
+        public void scale(float scale) {
+            x *= scale;
+            y *= scale;
+            if (width > 0) {
+                width *= scale;
+            }
+            if (height > 0) {
+                height *= scale;
             }
         }
 
         /**
-         * Restore the layout params' coordinates and size.
+         * Backup the layout parameters used in compatibility mode.
+         * @see LayoutParams#restore()
          */
-        void restore(int[] backup) {
-            x = backup[0];
-            y = backup[1];
-            if (width > 0) {
-                width = backup[2];
+        void backup() {
+            int[] backup = mCompatibilityParamsBackup;
+            if (backup == null) {
+                // we backup 4 elements, x, y, width, height
+                backup = mCompatibilityParamsBackup = new int[4];
             }
-            if (height > 0) {
+            backup[0] = x;
+            backup[1] = y;
+            backup[2] = width;
+            backup[3] = height;
+        }
+
+        /**
+         * Restore the layout params' coordinates, size and gravity
+         * @see LayoutParams#backup()
+         */
+        void restore() {
+            int[] backup = mCompatibilityParamsBackup;
+            if (backup != null) {
+                x = backup[0];
+                y = backup[1];
+                width = backup[2];
                 height = backup[3];
             }
         }

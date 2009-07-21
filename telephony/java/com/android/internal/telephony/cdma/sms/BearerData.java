@@ -17,12 +17,17 @@
 package com.android.internal.telephony.cdma.sms;
 
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import android.telephony.SmsMessage;
 
+import android.text.format.Time;
+
+import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.cdma.sms.UserData;
+import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 
 import com.android.internal.util.HexDump;
 import com.android.internal.util.BitwiseInputStream;
@@ -32,21 +37,22 @@ import com.android.internal.util.BitwiseOutputStream;
 /**
  * An object to encode and decode CDMA SMS bearer data.
  */
-public final class BearerData{
+public final class BearerData {
     private final static String LOG_TAG = "SMS";
 
     /**
      * Bearer Data Subparameter Indentifiers
      * (See 3GPP2 C.S0015-B, v2.0, table 4.5-1)
+     * NOTE: Commented subparameter types are not implemented.
      */
     private final static byte SUBPARAM_MESSAGE_IDENTIFIER               = 0x00;
     private final static byte SUBPARAM_USER_DATA                        = 0x01;
     private final static byte SUBPARAM_USER_REPONSE_CODE                = 0x02;
     private final static byte SUBPARAM_MESSAGE_CENTER_TIME_STAMP        = 0x03;
-    //private final static byte SUBPARAM_VALIDITY_PERIOD_ABSOLUTE         = 0x04;
-    //private final static byte SUBPARAM_VALIDITY_PERIOD_RELATIVE         = 0x05;
-    //private final static byte SUBPARAM_DEFERRED_DELIVERY_TIME_ABSOLUTE  = 0x06;
-    //private final static byte SUBPARAM_DEFERRED_DELIVERY_TIME_RELATIVE  = 0x07;
+    private final static byte SUBPARAM_VALIDITY_PERIOD_ABSOLUTE         = 0x04;
+    private final static byte SUBPARAM_VALIDITY_PERIOD_RELATIVE         = 0x05;
+    private final static byte SUBPARAM_DEFERRED_DELIVERY_TIME_ABSOLUTE  = 0x06;
+    private final static byte SUBPARAM_DEFERRED_DELIVERY_TIME_RELATIVE  = 0x07;
     private final static byte SUBPARAM_PRIORITY_INDICATOR               = 0x08;
     private final static byte SUBPARAM_PRIVACY_INDICATOR                = 0x09;
     private final static byte SUBPARAM_REPLY_OPTION                     = 0x0A;
@@ -56,7 +62,7 @@ public final class BearerData{
     private final static byte SUBPARAM_CALLBACK_NUMBER                  = 0x0E;
     private final static byte SUBPARAM_MESSAGE_DISPLAY_MODE             = 0x0F;
     //private final static byte SUBPARAM_MULTIPLE_ENCODING_USER_DATA      = 0x10;
-    //private final static byte SUBPARAM_MESSAGE_DEPOSIT_INDEX            = 0x11;
+    private final static byte SUBPARAM_MESSAGE_DEPOSIT_INDEX            = 0x11;
     //private final static byte SUBPARAM_SERVICE_CATEGORY_PROGRAM_DATA    = 0x12;
     //private final static byte SUBPARAM_SERVICE_CATEGORY_PROGRAM_RESULTS = 0x13;
     private final static byte SUBPARAM_MESSAGE_STATUS                   = 0x14;
@@ -77,7 +83,7 @@ public final class BearerData{
     public static final int MESSAGE_TYPE_DELIVER_REPORT = 0x07;
     public static final int MESSAGE_TYPE_SUBMIT_REPORT  = 0x08;
 
-    public byte messageType;
+    public int messageType;
 
     /**
      * 16-bit value indicating the message ID, which increments modulo 65536.
@@ -96,7 +102,7 @@ public final class BearerData{
     public static final int PRIORITY_EMERGENCY     = 0x3;
 
     public boolean priorityIndicatorSet = false;
-    public byte priority = PRIORITY_NORMAL;
+    public int priority = PRIORITY_NORMAL;
 
     /**
      * Supported privacy modes for CDMA SMS messages
@@ -108,7 +114,7 @@ public final class BearerData{
     public static final int PRIVACY_SECRET         = 0x3;
 
     public boolean privacyIndicatorSet = false;
-    public byte privacy = PRIVACY_NOT_RESTRICTED;
+    public int privacy = PRIVACY_NOT_RESTRICTED;
 
     /**
      * Supported alert priority modes for CDMA SMS messages
@@ -133,7 +139,7 @@ public final class BearerData{
     public static final int DISPLAY_MODE_USER           = 0x2;
 
     public boolean displayModeSet = false;
-    public byte displayMode = DISPLAY_MODE_DEFAULT;
+    public int displayMode = DISPLAY_MODE_DEFAULT;
 
     /**
      * Language Indicator values.  NOTE: the spec (3GPP2 C.S0015-B,
@@ -189,8 +195,12 @@ public final class BearerData{
     public int messageStatus = STATUS_UNDEFINED;
 
     /**
-     * 1-bit value that indicates whether a User Data Header is present.
+     * 1-bit value that indicates whether a User Data Header (UDH) is present.
      * (See 3GPP2 C.S0015-B, v2, 4.5.1)
+     *
+     * NOTE: during encoding, this value will be set based on the
+     * presence of a UDH in the structured data, any existing setting
+     * will be overwritten.
      */
     public boolean hasUserDataHeader;
 
@@ -201,23 +211,94 @@ public final class BearerData{
      */
     public UserData userData;
 
-    //public UserResponseCode userResponseCode;
+    /**
+     * The User Response Code subparameter is used in the SMS User
+     * Acknowledgment Message to respond to previously received short
+     * messages. This message center-specific element carries the
+     * identifier of a predefined response. (See 3GPP2 C.S.0015-B, v2,
+     * 4.5.3)
+     */
+    public boolean userResponseCodeSet = false;
+    public int userResponseCode;
 
     /**
      * 6-byte-field, see 3GPP2 C.S0015-B, v2, 4.5.4
-     * year, month, day, hours, minutes, seconds;
      */
-    public byte[] timeStamp;
+    public static class TimeStamp extends Time {
 
-    //public SmsTime validityPeriodAbsolute;
-    //public SmsRelTime validityPeriodRelative;
-    //public SmsTime deferredDeliveryTimeAbsolute;
-    //public SmsRelTime deferredDeliveryTimeRelative;
+        public TimeStamp() {
+            super(Time.TIMEZONE_UTC);
+        }
+
+        public static TimeStamp fromByteArray(byte[] data) {
+            TimeStamp ts = new TimeStamp();
+            // C.S0015-B v2.0, 4.5.4: range is 1996-2095
+            int year = IccUtils.beBcdByteToInt(data[0]);
+            if (year > 99 || year < 0) return null;
+            ts.year = year >= 96 ? year + 1900 : year + 2000;
+            int month = IccUtils.beBcdByteToInt(data[1]);
+            if (month < 1 || month > 12) return null;
+            ts.month = month - 1;
+            int day = IccUtils.beBcdByteToInt(data[2]);
+            if (day < 1 || day > 31) return null;
+            ts.monthDay = day;
+            int hour = IccUtils.beBcdByteToInt(data[3]);
+            if (hour < 0 || hour > 23) return null;
+            ts.hour = hour;
+            int minute = IccUtils.beBcdByteToInt(data[4]);
+            if (minute < 0 || minute > 59) return null;
+            ts.minute = minute;
+            int second = IccUtils.beBcdByteToInt(data[5]);
+            if (second < 0 || second > 59) return null;
+            ts.second = second;
+            return ts;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("TimeStamp ");
+            builder.append("{ year=" + year);
+            builder.append(", month=" + month);
+            builder.append(", day=" + monthDay);
+            builder.append(", hour=" + hour);
+            builder.append(", minute=" + minute);
+            builder.append(", second=" + second);
+            builder.append(" }");
+            return builder.toString();
+        }
+    }
+
+    public TimeStamp msgCenterTimeStamp;
+    public TimeStamp validityPeriodAbsolute;
+    public TimeStamp deferredDeliveryTimeAbsolute;
 
     /**
-     * Reply Option
-     * 1-bit values which indicate whether SMS acknowledgment is requested or not.
-     * (See 3GPP2 C.S0015-B, v2, 4.5.11)
+     * Relative time is specified as one byte, the value of which
+     * falls into a series of ranges, as specified below.  The idea is
+     * that shorter time intervals allow greater precision -- the
+     * value means minutes from zero until the MINS_LIMIT (inclusive),
+     * upon which it means hours until the HOURS_LIMIT, and so
+     * forth. (See 3GPP2 C.S0015-B, v2, 4.5.6-1)
+     */
+    public static final int RELATIVE_TIME_MINS_LIMIT      = 143;
+    public static final int RELATIVE_TIME_HOURS_LIMIT     = 167;
+    public static final int RELATIVE_TIME_DAYS_LIMIT      = 196;
+    public static final int RELATIVE_TIME_WEEKS_LIMIT     = 244;
+    public static final int RELATIVE_TIME_INDEFINITE      = 245;
+    public static final int RELATIVE_TIME_NOW             = 246;
+    public static final int RELATIVE_TIME_MOBILE_INACTIVE = 247;
+    public static final int RELATIVE_TIME_RESERVED        = 248;
+
+    public boolean validityPeriodRelativeSet;
+    public int validityPeriodRelative;
+    public boolean deferredDeliveryTimeRelativeSet;
+    public int deferredDeliveryTimeRelative;
+
+    /**
+     * The Reply Option subparameter contains 1-bit values which
+     * indicate whether SMS acknowledgment is requested or not.  (See
+     * 3GPP2 C.S0015-B, v2, 4.5.11)
      */
     public boolean userAckReq;
     public boolean deliveryAckReq;
@@ -225,12 +306,26 @@ public final class BearerData{
     public boolean reportReq;
 
     /**
-     * The number of Messages element (8-bit value) is a decimal number in the 0 to 99 range
-     * representing the number of messages stored at the Voice Mail System. This element is
-     * used by the Voice Mail Notification service.
-     * (See 3GPP2 C.S0015-B, v2, 4.5.12)
+     * The Number of Messages subparameter (8-bit value) is a decimal
+     * number in the 0 to 99 range representing the number of messages
+     * stored at the Voice Mail System. This element is used by the
+     * Voice Mail Notification service.  (See 3GPP2 C.S0015-B, v2,
+     * 4.5.12)
      */
     public int numberOfMessages;
+
+    /**
+     * The Message Deposit Index subparameter is assigned by the
+     * message center as a unique index to the contents of the User
+     * Data subparameter in each message sent to a particular mobile
+     * station. The mobile station, when replying to a previously
+     * received short message which included a Message Deposit Index
+     * subparameter, may include the Message Deposit Index of the
+     * received message to indicate to the message center that the
+     * original contents of the message are to be included in the
+     * reply.  (See 3GPP2 C.S0015-B, v2, 4.5.18)
+     */
+    public int depositIndex;
 
     /**
      * 4-bit or 8-bit value that indicates the number to be dialed in reply to a
@@ -248,25 +343,36 @@ public final class BearerData{
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("BearerData:\n");
-        builder.append("  messageType: " + messageType + "\n");
-        builder.append("  messageId: " + (int)messageId + "\n");
-        builder.append("  priority: " + (priorityIndicatorSet ? priority : "not set") + "\n");
-        builder.append("  privacy: " + (privacyIndicatorSet ? privacy : "not set") + "\n");
-        builder.append("  alert: " + (alertIndicatorSet ? alert : "not set") + "\n");
-        builder.append("  displayMode: " + (displayModeSet ? displayMode : "not set") + "\n");
-        builder.append("  language: " + (languageIndicatorSet ? language : "not set") + "\n");
-        builder.append("  errorClass: " + (messageStatusSet ? errorClass : "not set") + "\n");
-        builder.append("  msgStatus: " + (messageStatusSet ? messageStatus : "not set") + "\n");
-        builder.append("  hasUserDataHeader: " + hasUserDataHeader + "\n");
-        builder.append("  timeStamp: " + timeStamp + "\n");
-        builder.append("  userAckReq: " + userAckReq + "\n");
-        builder.append("  deliveryAckReq: " + deliveryAckReq + "\n");
-        builder.append("  readAckReq: " + readAckReq + "\n");
-        builder.append("  reportReq: " + reportReq + "\n");
-        builder.append("  numberOfMessages: " + numberOfMessages + "\n");
-        builder.append("  callbackNumber: " + callbackNumber + "\n");
-        builder.append("  userData: " + userData + "\n");
+        builder.append("BearerData ");
+        builder.append("{ messageType=" + messageType);
+        builder.append(", messageId=" + (int)messageId);
+        builder.append(", priority=" + (priorityIndicatorSet ? priority : "unset"));
+        builder.append(", privacy=" + (privacyIndicatorSet ? privacy : "unset"));
+        builder.append(", alert=" + (alertIndicatorSet ? alert : "unset"));
+        builder.append(", displayMode=" + (displayModeSet ? displayMode : "unset"));
+        builder.append(", language=" + (languageIndicatorSet ? language : "unset"));
+        builder.append(", errorClass=" + (messageStatusSet ? errorClass : "unset"));
+        builder.append(", msgStatus=" + (messageStatusSet ? messageStatus : "unset"));
+        builder.append(", msgCenterTimeStamp=" +
+                ((msgCenterTimeStamp != null) ? msgCenterTimeStamp : "unset"));
+        builder.append(", validityPeriodAbsolute=" +
+                ((validityPeriodAbsolute != null) ? validityPeriodAbsolute : "unset"));
+        builder.append(", validityPeriodRelative=" +
+                ((validityPeriodRelativeSet) ? validityPeriodRelative : "unset"));
+        builder.append(", deferredDeliveryTimeAbsolute=" +
+                ((deferredDeliveryTimeAbsolute != null) ? deferredDeliveryTimeAbsolute : "unset"));
+        builder.append(", deferredDeliveryTimeRelative=" +
+                ((deferredDeliveryTimeRelativeSet) ? deferredDeliveryTimeRelative : "unset"));
+        builder.append(", userAckReq=" + userAckReq);
+        builder.append(", deliveryAckReq=" + deliveryAckReq);
+        builder.append(", readAckReq=" + readAckReq);
+        builder.append(", reportReq=" + reportReq);
+        builder.append(", numberOfMessages=" + numberOfMessages);
+        builder.append(", callbackNumber=" + callbackNumber);
+        builder.append(", depositIndex=" + depositIndex);
+        builder.append(", hasUserDataHeader=" + hasUserDataHeader);
+        builder.append(", userData=" + userData);
+        builder.append(" }");
         return builder.toString();
     }
 
@@ -281,25 +387,60 @@ public final class BearerData{
         outStream.skip(3);
     }
 
-    private static byte[] encode7bitAscii(String msg)
+    private static int countAsciiSeptets(CharSequence msg, boolean force) {
+        int msgLen = msg.length();
+        if (force) return msgLen;
+        for (int i = 0; i < msgLen; i++) {
+            if (UserData.charToAscii.get(msg.charAt(i), -1) == -1) {
+                return -1;
+            }
+        }
+        return msgLen;
+    }
+
+    /**
+     * Calculate the message text encoding length, fragmentation, and other details.
+     *
+     * @param force ignore (but still count) illegal characters if true
+     * @return septet count, or -1 on failure
+     */
+    public static TextEncodingDetails calcTextEncodingDetails(CharSequence msg,
+            boolean force7BitEncoding) {
+        TextEncodingDetails ted;
+        int septets = countAsciiSeptets(msg, force7BitEncoding);
+        if (septets != -1 && septets <= SmsMessage.MAX_USER_DATA_SEPTETS) {
+            ted = new TextEncodingDetails();
+            ted.msgCount = 1;
+            ted.codeUnitCount = septets;
+            ted.codeUnitsRemaining = SmsMessage.MAX_USER_DATA_SEPTETS - septets;
+            ted.codeUnitSize = SmsMessage.ENCODING_7BIT;
+        } else {
+            ted = com.android.internal.telephony.gsm.SmsMessage.calculateLength(
+                    msg, force7BitEncoding);
+        }
+        return ted;
+    }
+
+    private static byte[] encode7bitAscii(String msg, boolean force)
         throws CodingException
     {
         try {
             BitwiseOutputStream outStream = new BitwiseOutputStream(msg.length());
-            byte[] expandedData = msg.getBytes("US-ASCII");
-            for (int i = 0; i < expandedData.length; i++) {
-                int charCode = expandedData[i];
-                // Test ourselves for ASCII membership, since Java seems not to care.
-                if ((charCode < UserData.PRINTABLE_ASCII_MIN_INDEX) ||
-                        (charCode > UserData.PRINTABLE_ASCII_MAX_INDEX)) {
-                    throw new CodingException("illegal ASCII code (" + charCode + ")");
+            int msgLen = msg.length();
+            for (int i = 0; i < msgLen; i++) {
+                int charCode = UserData.charToAscii.get(msg.charAt(i), -1);
+                if (charCode == -1) {
+                    if (force) {
+                        outStream.write(7, UserData.UNENCODABLE_7_BIT_CHAR);
+                    } else {
+                        throw new CodingException("cannot ASCII encode (" + msg.charAt(i) + ")");
+                    }
+                } else {
+                    outStream.write(7, charCode);
                 }
-                outStream.write(7, expandedData[i]);
             }
             return outStream.toByteArray();
-        } catch  (java.io.UnsupportedEncodingException ex) {
-            throw new CodingException("7bit ASCII encode failed: " + ex);
-        } catch  (BitwiseOutputStream.AccessException ex) {
+        } catch (BitwiseOutputStream.AccessException ex) {
             throw new CodingException("7bit ASCII encode failed: " + ex);
         }
     }
@@ -308,24 +449,31 @@ public final class BearerData{
         throws CodingException
     {
         try {
-            return msg.getBytes("utf-16be"); // XXX(do not submit) -- make sure decode matches
+            return msg.getBytes("utf-16be");
         } catch (java.io.UnsupportedEncodingException ex) {
             throw new CodingException("UTF-16 encode failed: " + ex);
         }
     }
 
-    private static byte[] encode7bitGsm(String msg)
+    private static int calcUdhSeptetPadding(int userDataHeaderLen) {
+        int udhBits = userDataHeaderLen * 8;
+        int udhSeptets = (udhBits + 6) / 7;
+        int paddingBits = (udhSeptets * 7) - udhBits;
+        return paddingBits;
+    }
+
+    private static byte[] encode7bitGsm(String msg, int paddingBits)
         throws CodingException
     {
         try {
-            /**
-             * TODO(cleanup): find some way to do this without the copy.
+            /*
+             * TODO(cleanup): It would be nice if GsmAlphabet provided
+             * an option to produce just the data without prepending
+             * the length.
              */
-            byte []fullData = GsmAlphabet.stringToGsm7BitPacked(msg);
+            byte []fullData = GsmAlphabet.stringToGsm7BitPacked(msg, 0, -1, paddingBits, true);
             byte []data = new byte[fullData.length - 1];
-            for (int i = 0; i < data.length; i++) {
-                data[i] = fullData[i + 1];
-            }
+            System.arraycopy(fullData, 1, data, 0, fullData.length - 1);
             return data;
         } catch (com.android.internal.telephony.EncodeException ex) {
             throw new CodingException("7bit GSM encode failed: " + ex);
@@ -335,51 +483,85 @@ public final class BearerData{
     private static void encodeUserDataPayload(UserData uData)
         throws CodingException
     {
+        // TODO(cleanup): UDH can only occur in EMS mode, meaning
+        // encapsulation of GSM encoding, and so the logic here should
+        // be refactored to more cleanly reflect this constraint.
+
+        byte[] headerData = null;
+        if (uData.userDataHeader != null) headerData = SmsHeader.toByteArray(uData.userDataHeader);
+        int headerDataLen = (headerData == null) ? 0 : headerData.length + 1;  // + length octet
+
+        byte[] payloadData;
+        int codeUnitCount;
         if (uData.msgEncodingSet) {
             if (uData.msgEncoding == UserData.ENCODING_OCTET) {
                 if (uData.payload == null) {
                     Log.e(LOG_TAG, "user data with octet encoding but null payload");
-                    // TODO(code_review): reasonable for fail case? or maybe bail on encoding?
-                    uData.payload = new byte[0];
+                    payloadData = new byte[0];
+                    codeUnitCount = 0;
+                } else {
+                    payloadData = uData.payload;
+                    codeUnitCount = uData.payload.length;
                 }
             } else {
                 if (uData.payloadStr == null) {
                     Log.e(LOG_TAG, "non-octet user data with null payloadStr");
-                    // TODO(code_review): reasonable for fail case? or maybe bail on encoding?
                     uData.payloadStr = "";
                 }
                 if (uData.msgEncoding == UserData.ENCODING_GSM_7BIT_ALPHABET) {
-                    uData.payload = encode7bitGsm(uData.payloadStr);
+                    int paddingBits = calcUdhSeptetPadding(headerDataLen);
+                    payloadData = encode7bitGsm(uData.payloadStr, paddingBits);
+                    codeUnitCount = ((payloadData.length + headerDataLen) * 8) / 7;
                 } else if (uData.msgEncoding == UserData.ENCODING_7BIT_ASCII) {
-                    uData.payload = encode7bitAscii(uData.payloadStr);
+                    payloadData = encode7bitAscii(uData.payloadStr, true);
+                    codeUnitCount = uData.payloadStr.length();
                 } else if (uData.msgEncoding == UserData.ENCODING_UNICODE_16) {
-                    uData.payload = encodeUtf16(uData.payloadStr);
+                    payloadData = encodeUtf16(uData.payloadStr);
+                    codeUnitCount = uData.payloadStr.length();
                 } else {
                     throw new CodingException("unsupported user data encoding (" +
                                               uData.msgEncoding + ")");
                 }
-                uData.numFields = uData.payloadStr.length();
             }
         } else {
             if (uData.payloadStr == null) {
                 Log.e(LOG_TAG, "user data with null payloadStr");
-                // TODO(code_review): reasonable for fail case? or maybe bail on encoding?
                 uData.payloadStr = "";
             }
             try {
-                uData.payload = encode7bitAscii(uData.payloadStr);
-                uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
+                if (headerData == null) {
+                    payloadData = encode7bitAscii(uData.payloadStr, false);
+                    codeUnitCount = uData.payloadStr.length();
+                    uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
+                } else {
+                    // If there is a header, we are in EMS mode, in
+                    // which case we use GSM encodings.
+                    int paddingBits = calcUdhSeptetPadding(headerDataLen);
+                    payloadData = encode7bitGsm(uData.payloadStr, paddingBits);
+                    codeUnitCount = ((payloadData.length + headerDataLen) * 8) / 7;
+                    uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
+                }
             } catch (CodingException ex) {
-                uData.payload = encodeUtf16(uData.payloadStr);
+                payloadData = encodeUtf16(uData.payloadStr);
+                codeUnitCount = uData.payloadStr.length();
                 uData.msgEncoding = UserData.ENCODING_UNICODE_16;
             }
             uData.msgEncodingSet = true;
-            uData.numFields = uData.payloadStr.length();
         }
-        if (uData.payload.length > SmsMessage.MAX_USER_DATA_BYTES) {
-            throw new CodingException("encoded user data too large (" + uData.payload.length +
+
+        int totalLength = payloadData.length + headerDataLen;
+        if (totalLength > SmsMessage.MAX_USER_DATA_BYTES) {
+            throw new CodingException("encoded user data too large (" + totalLength +
                                       " > " + SmsMessage.MAX_USER_DATA_BYTES + " bytes)");
         }
+
+        uData.numFields = codeUnitCount;
+        uData.payload = new byte[totalLength];
+        if (headerData != null) {
+            uData.payload[0] = (byte)headerData.length;
+            System.arraycopy(headerData, 0, uData.payload, 1, headerData.length);
+        }
+        System.arraycopy(payloadData, 0, uData.payload, headerDataLen, payloadData.length);
     }
 
     private static void encodeUserData(BearerData bData, BitwiseOutputStream outStream)
@@ -394,11 +576,6 @@ public final class BearerData{
          *
          */
         int dataBits = (bData.userData.payload.length * 8) - bData.userData.paddingBits;
-        byte[] headerData = null;
-        if (bData.hasUserDataHeader) {
-            headerData = bData.userData.userDataHeader.toByteArray();
-            dataBits += headerData.length * 8;
-        }
         int paramBits = dataBits + 13;
         if ((bData.userData.msgEncoding == UserData.ENCODING_IS91_EXTENDED_PROTOCOL) ||
             (bData.userData.msgEncoding == UserData.ENCODING_GSM_DCS)) {
@@ -413,7 +590,6 @@ public final class BearerData{
             outStream.write(8, bData.userData.msgType);
         }
         outStream.write(8, bData.userData.numFields);
-        if (headerData != null) outStream.writeByteArray(headerData.length * 8, headerData);
         outStream.writeByteArray(dataBits, bData.userData.payload);
         if (paddingBits > 0) outStream.write(paddingBits, 0);
     }
@@ -502,11 +678,11 @@ public final class BearerData{
         outStream.write(8, bData.numberOfMessages);
     }
 
-    private static void encodeMsgCenterTimeStamp(BearerData bData, BitwiseOutputStream outStream)
+    private static void encodeValidityPeriodRel(BearerData bData, BitwiseOutputStream outStream)
         throws BitwiseOutputStream.AccessException
     {
-        outStream.write(8, 6);
-        outStream.writeByteArray(6 * 8, bData.timeStamp);
+        outStream.write(8, 1);
+        outStream.write(8, bData.validityPeriodRelative);
     }
 
     private static void encodePrivacyIndicator(BearerData bData, BitwiseOutputStream outStream)
@@ -557,6 +733,8 @@ public final class BearerData{
      * @return data byta array of raw encoded SMS bearer data.
      */
     public static byte[] encode(BearerData bData) {
+        bData.hasUserDataHeader = ((bData.userData != null) &&
+                (bData.userData.userDataHeader != null));
         try {
             BitwiseOutputStream outStream = new BitwiseOutputStream(200);
             outStream.write(8, SUBPARAM_MESSAGE_IDENTIFIER);
@@ -577,9 +755,9 @@ public final class BearerData{
                 outStream.write(8, SUBPARAM_NUMBER_OF_MESSAGES);
                 encodeMsgCount(bData, outStream);
             }
-            if (bData.timeStamp != null) {
-                outStream.write(8, SUBPARAM_MESSAGE_CENTER_TIME_STAMP);
-                encodeMsgCenterTimeStamp(bData, outStream);
+            if (bData.validityPeriodRelativeSet) {
+                outStream.write(8, SUBPARAM_VALIDITY_PERIOD_RELATIVE);
+                encodeValidityPeriodRel(bData, outStream);
             }
             if (bData.privacyIndicatorSet) {
                 outStream.write(8, SUBPARAM_PRIVACY_INDICATOR);
@@ -630,7 +808,7 @@ public final class BearerData{
     private static void decodeUserData(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException
     {
-        byte paramBytes = inStream.read(8);
+        int paramBytes = inStream.read(8);
         bData.userData = new UserData();
         bData.userData.msgEncoding = inStream.read(5);
         bData.userData.msgEncodingSet = true;
@@ -698,7 +876,7 @@ public final class BearerData{
             inStream.skip(offset);
             byte[] expandedData = new byte[numFields];
             for (int i = 0; i < numFields; i++) {
-                expandedData[i] = inStream.read(7);
+                expandedData[i] = (byte)inStream.read(7);
             }
             return new String(expandedData, 0, numFields, "US-ASCII");
         } catch (java.io.UnsupportedEncodingException ex) {
@@ -711,7 +889,12 @@ public final class BearerData{
     private static String decode7bitGsm(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        String result = GsmAlphabet.gsm7BitPackedToString(data, offset, numFields);
+        int paddingBits = calcUdhSeptetPadding(offset);
+        numFields -= (((offset * 8) + paddingBits) / 7);
+        // TODO: It seems wrong that only Gsm7 bit encodings would
+        // take into account the header in numFields calculations.
+        // This should be verified.
+        String result = GsmAlphabet.gsm7BitPackedToString(data, offset, numFields, paddingBits);
         if (result == null) {
             throw new CodingException("7bit GSM decoding failed");
         }
@@ -723,11 +906,11 @@ public final class BearerData{
     {
         int offset = 0;
         if (hasUserDataHeader) {
-            int udhLen = userData.payload[0];
-            offset += udhLen;
+            int udhLen = userData.payload[0] & 0x00FF;
+            offset += udhLen + 1;
             byte[] headerData = new byte[udhLen];
             System.arraycopy(userData.payload, 1, headerData, 0, udhLen);
-            userData.userDataHeader = SmsHeader.parse(headerData);
+            userData.userDataHeader = SmsHeader.fromByteArray(headerData);
         }
         switch (userData.msgEncoding) {
         case UserData.ENCODING_OCTET:
@@ -750,10 +933,126 @@ public final class BearerData{
         }
     }
 
+    /**
+     * IS-91 Voice Mail message decoding
+     * (See 3GPP2 C.S0015-A, Table 4.3.1.4.1-1)
+     * (For character encodings, see TIA/EIA/IS-91, Annex B)
+     *
+     * Protocol Summary: The user data payload may contain 3-14
+     * characters.  The first two characters are parsed as a number
+     * and indicate the number of voicemails.  The third character is
+     * either a SPACE or '!' to indicate normal or urgent priority,
+     * respectively.  Any following characters are treated as normal
+     * text user data payload.
+     *
+     * Note that the characters encoding is 6-bit packed.
+     */
+    private static void decodeIs91VoicemailStatus(BearerData bData)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        BitwiseInputStream inStream = new BitwiseInputStream(bData.userData.payload);
+        int dataLen = inStream.available() / 6;  // 6-bit packed character encoding.
+        int numFields = bData.userData.numFields;
+        if ((dataLen > 14) || (dataLen < 3) || (dataLen < numFields)) {
+            throw new CodingException("IS-91 voicemail status decoding failed");
+        }
+        try {
+            StringBuffer strbuf = new StringBuffer(dataLen);
+            while (inStream.available() >= 6) {
+                strbuf.append(UserData.IA5_MAP[inStream.read(6)]);
+            }
+            String data = strbuf.toString();
+            bData.numberOfMessages = Integer.parseInt(data.substring(0, 2));
+            char prioCode = data.charAt(2);
+            if (prioCode == ' ') {
+                bData.priority = PRIORITY_NORMAL;
+            } else if (prioCode == '!') {
+                bData.priority = PRIORITY_URGENT;
+            } else {
+                throw new CodingException("IS-91 voicemail status decoding failed: " +
+                        "illegal priority setting (" + prioCode + ")");
+            }
+            bData.priorityIndicatorSet = true;
+            bData.userData.payloadStr = data.substring(3, numFields - 3);
+       } catch (java.lang.NumberFormatException ex) {
+            throw new CodingException("IS-91 voicemail status decoding failed: " + ex);
+        } catch (java.lang.IndexOutOfBoundsException ex) {
+            throw new CodingException("IS-91 voicemail status decoding failed: " + ex);
+        }
+    }
+
+    /**
+     * IS-91 Short Message decoding
+     * (See 3GPP2 C.S0015-A, Table 4.3.1.4.1-1)
+     * (For character encodings, see TIA/EIA/IS-91, Annex B)
+     *
+     * Protocol Summary: The user data payload may contain 1-14
+     * characters, which are treated as normal text user data payload.
+     * Note that the characters encoding is 6-bit packed.
+     */
+    private static void decodeIs91ShortMessage(BearerData bData)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        BitwiseInputStream inStream = new BitwiseInputStream(bData.userData.payload);
+        int dataLen = inStream.available() / 6;  // 6-bit packed character encoding.
+        int numFields = bData.userData.numFields;
+        if ((dataLen > 14) || (dataLen < numFields)) {
+            throw new CodingException("IS-91 voicemail status decoding failed");
+        }
+        StringBuffer strbuf = new StringBuffer(dataLen);
+        for (int i = 0; i < numFields; i++) {
+            strbuf.append(UserData.IA5_MAP[inStream.read(6)]);
+        }
+        bData.userData.payloadStr = strbuf.toString();
+    }
+
+    /**
+     * IS-91 CLI message (callback number) decoding
+     * (See 3GPP2 C.S0015-A, Table 4.3.1.4.1-1)
+     *
+     * Protocol Summary: The data payload may contain 1-32 digits,
+     * encoded using standard 4-bit DTMF, which are treated as a
+     * callback number.
+     */
+    private static void decodeIs91Cli(BearerData bData) throws CodingException {
+        BitwiseInputStream inStream = new BitwiseInputStream(bData.userData.payload);
+        int dataLen = inStream.available() / 4;  // 4-bit packed DTMF digit encoding.
+        int numFields = bData.userData.numFields;
+        if ((dataLen > 14) || (dataLen < 3) || (dataLen < numFields)) {
+            throw new CodingException("IS-91 voicemail status decoding failed");
+        }
+        CdmaSmsAddress addr = new CdmaSmsAddress();
+        addr.digitMode = CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF;
+        addr.origBytes = bData.userData.payload;
+        addr.numberOfDigits = (byte)numFields;
+        decodeSmsAddress(addr);
+        bData.callbackNumber = addr;
+    }
+
+    private static void decodeIs91(BearerData bData)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        switch (bData.userData.msgType) {
+        case UserData.IS91_MSG_TYPE_VOICEMAIL_STATUS:
+            decodeIs91VoicemailStatus(bData);
+            break;
+        case UserData.IS91_MSG_TYPE_CLI:
+            decodeIs91Cli(bData);
+            break;
+        case UserData.IS91_MSG_TYPE_SHORT_MESSAGE_FULL:
+        case UserData.IS91_MSG_TYPE_SHORT_MESSAGE:
+            decodeIs91ShortMessage(bData);
+            break;
+        default:
+            throw new CodingException("unsupported IS-91 message type (" +
+                    bData.userData.msgType + ")");
+        }
+    }
+
     private static void decodeReplyOption(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        byte paramBytes = inStream.read(8);
+        int paramBytes = inStream.read(8);
         if (paramBytes != 1) {
             throw new CodingException("REPLY_OPTION subparam size incorrect");
         }
@@ -771,6 +1070,15 @@ public final class BearerData{
             throw new CodingException("NUMBER_OF_MESSAGES subparam size incorrect");
         }
         bData.numberOfMessages = inStream.read(8);
+    }
+
+    private static void decodeDepositIndex(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 2) {
+            throw new CodingException("MESSAGE_DEPOSIT_INDEX subparam size incorrect");
+        }
+        bData.depositIndex = (inStream.read(8) << 8) | inStream.read(8);
     }
 
     private static String decodeDtmfSmsAddress(byte[] rawData, int numFields)
@@ -807,7 +1115,7 @@ public final class BearerData{
     private static void decodeCallbackNumber(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        byte paramBytes = inStream.read(8);
+        int paramBytes = inStream.read(8);
         CdmaSmsAddress addr = new CdmaSmsAddress();
         addr.digitMode = inStream.read(1);
         byte fieldBits = 4;
@@ -845,14 +1153,51 @@ public final class BearerData{
         bData.messageStatusSet = true;
     }
 
-    private static void decodeMsgCenterTimeStamp(BearerData bData,
-                                                 BitwiseInputStream inStream)
+    private static void decodeMsgCenterTimeStamp(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
         if (inStream.read(8) != 6) {
             throw new CodingException("MESSAGE_CENTER_TIME_STAMP subparam size incorrect");
         }
-        bData.timeStamp = inStream.readByteArray(6 * 8);
+        bData.msgCenterTimeStamp = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+    }
+
+    private static void decodeValidityAbs(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 6) {
+            throw new CodingException("VALIDITY_PERIOD_ABSOLUTE subparam size incorrect");
+        }
+        bData.validityPeriodAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+    }
+
+    private static void decodeDeferredDeliveryAbs(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 6) {
+            throw new CodingException("DEFERRED_DELIVERY_TIME_ABSOLUTE subparam size incorrect");
+        }
+        bData.deferredDeliveryTimeAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+    }
+
+    private static void decodeValidityRel(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 1) {
+            throw new CodingException("VALIDITY_PERIOD_RELATIVE subparam size incorrect");
+        }
+        bData.deferredDeliveryTimeRelative = inStream.read(8);
+        bData.deferredDeliveryTimeRelativeSet = true;
+    }
+
+    private static void decodeDeferredDeliveryRel(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 1) {
+            throw new CodingException("DEFERRED_DELIVERY_TIME_RELATIVE subparam size incorrect");
+        }
+        bData.validityPeriodRelative = inStream.read(8);
+        bData.validityPeriodRelativeSet = true;
     }
 
     private static void decodePrivacyIndicator(BearerData bData, BitwiseInputStream inStream)
@@ -909,6 +1254,16 @@ public final class BearerData{
         bData.alertIndicatorSet = true;
     }
 
+    private static void decodeUserResponseCode(BearerData bData, BitwiseInputStream inStream)
+        throws BitwiseInputStream.AccessException, CodingException
+    {
+        if (inStream.read(8) != 1) {
+            throw new CodingException("USER_REPONSE_CODE subparam size incorrect");
+        }
+        bData.userResponseCode = inStream.read(8);
+        bData.userResponseCodeSet = true;
+    }
+
     /**
      * Create BearerData object from serialized representation.
      * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
@@ -937,6 +1292,9 @@ public final class BearerData{
                 case SUBPARAM_USER_DATA:
                     decodeUserData(bData, inStream);
                     break;
+                case SUBPARAM_USER_REPONSE_CODE:
+                    decodeUserResponseCode(bData, inStream);
+                    break;
                 case SUBPARAM_REPLY_OPTION:
                     decodeReplyOption(bData, inStream);
                     break;
@@ -951,6 +1309,18 @@ public final class BearerData{
                     break;
                 case SUBPARAM_MESSAGE_CENTER_TIME_STAMP:
                     decodeMsgCenterTimeStamp(bData, inStream);
+                    break;
+                case SUBPARAM_VALIDITY_PERIOD_ABSOLUTE:
+                    decodeValidityAbs(bData, inStream);
+                    break;
+                case SUBPARAM_VALIDITY_PERIOD_RELATIVE:
+                    decodeValidityRel(bData, inStream);
+                    break;
+                case SUBPARAM_DEFERRED_DELIVERY_TIME_ABSOLUTE:
+                    decodeDeferredDeliveryAbs(bData, inStream);
+                    break;
+                case SUBPARAM_DEFERRED_DELIVERY_TIME_RELATIVE:
+                    decodeDeferredDeliveryRel(bData, inStream);
                     break;
                 case SUBPARAM_PRIVACY_INDICATOR:
                     decodePrivacyIndicator(bData, inStream);
@@ -967,6 +1337,9 @@ public final class BearerData{
                 case SUBPARAM_ALERT_ON_MESSAGE_DELIVERY:
                     decodeMsgDeliveryAlert(bData, inStream);
                     break;
+                case SUBPARAM_MESSAGE_DEPOSIT_INDEX:
+                    decodeDepositIndex(bData, inStream);
+                    break;
                 default:
                     throw new CodingException("unsupported bearer data subparameter ("
                                               + subparamId + ")");
@@ -976,7 +1349,18 @@ public final class BearerData{
                 throw new CodingException("missing MESSAGE_IDENTIFIER subparam");
             }
             if (bData.userData != null) {
-                decodeUserDataPayload(bData.userData, bData.hasUserDataHeader);
+                if (bData.userData.msgEncoding == UserData.ENCODING_IS91_EXTENDED_PROTOCOL) {
+                    if ((foundSubparamMask ^
+                             (1 << SUBPARAM_MESSAGE_IDENTIFIER) ^
+                             (1 << SUBPARAM_USER_DATA))
+                            != 0) {
+                        Log.e(LOG_TAG, "IS-91 must occur without extra subparams (" +
+                              foundSubparamMask + ")");
+                    }
+                    decodeIs91(bData);
+                } else {
+                    decodeUserDataPayload(bData.userData, bData.hasUserDataHeader);
+                }
             }
             return bData;
         } catch (BitwiseInputStream.AccessException ex) {

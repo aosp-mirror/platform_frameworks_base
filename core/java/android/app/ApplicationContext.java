@@ -16,8 +16,11 @@
 
 package android.app;
 
-import com.google.android.collect.Maps;
+import com.android.internal.policy.PolicyManager;
 import com.android.internal.util.XmlUtils;
+import com.google.android.collect.Maps;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.IBluetoothDevice;
@@ -29,6 +32,8 @@ import android.content.ContextWrapper;
 import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentReceiver;
+import android.content.IntentSender;
 import android.content.ReceiverCallNotAllowedException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -37,9 +42,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageStatsObserver;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
+import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -68,28 +73,29 @@ import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Looper;
-import android.os.RemoteException;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Vibrator;
 import android.os.FileUtils.FileStatus;
 import android.telephony.TelephonyManager;
 import android.text.ClipboardManager;
 import android.util.AndroidRuntimeException;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.WindowManagerImpl;
+import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
-
-import com.android.internal.policy.PolicyManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -100,15 +106,13 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.WeakHashMap;
 import java.util.Map.Entry;
-
-import org.xmlpull.v1.XmlPullParserException;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -147,6 +151,7 @@ class ReceiverRestrictedContext extends ContextWrapper {
  */
 class ApplicationContext extends Context {
     private final static String TAG = "ApplicationContext";
+    private final static boolean DEBUG = false;
     private final static boolean DEBUG_ICONS = false;
 
     private static final Object sSync = new Object();
@@ -172,6 +177,7 @@ class ApplicationContext extends Context {
     private Resources.Theme mTheme = null;
     private PackageManager mPackageManager;
     private NotificationManager mNotificationManager = null;
+    private AccessibilityManager mAccessibilityManager = null;
     private ActivityManager mActivityManager = null;
     private Context mReceiverRestrictedContext = null;
     private SearchManager mSearchManager = null;
@@ -181,6 +187,7 @@ class ApplicationContext extends Context {
     private StatusBarManager mStatusBarManager = null;
     private TelephonyManager mTelephonyManager = null;
     private ClipboardManager mClipboardManager = null;
+    private boolean mRestricted;
 
     private final Object mSync = new Object();
 
@@ -280,6 +287,14 @@ class ApplicationContext extends Context {
     }
 
     @Override
+    public ApplicationInfo getApplicationInfo() {
+        if (mPackageInfo != null) {
+            return mPackageInfo.getApplicationInfo();
+        }
+        throw new RuntimeException("Not supported in system context");
+    }
+
+    @Override
     public String getPackageResourcePath() {
         if (mPackageInfo != null) {
             return mPackageInfo.getResDir();
@@ -299,10 +314,14 @@ class ApplicationContext extends Context {
         return new File(prefsFile.getPath() + ".bak");
     }
 
+    public File getSharedPrefsFile(String name) {
+        return makeFilename(getPreferencesDir(), name + ".xml");
+    }
+
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         SharedPreferencesImpl sp;
-        File f = makeFilename(getPreferencesDir(), name + ".xml");
+        File f = getSharedPrefsFile(name);
         synchronized (sSharedPrefs) {
             sp = sSharedPrefs.get(f);
             if (sp != null && !sp.hasFileChanged()) {
@@ -547,19 +566,6 @@ class ApplicationContext extends Context {
         } catch (RemoteException e) {
             // Shouldn't happen!
             return 0;
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public float getApplicationScale() {
-        if (mPackageInfo != null) {
-            return mPackageInfo.getApplicationScale();
-        } else {
-            // same as system density
-            return 1.0f;
         }
     }
 
@@ -904,6 +910,8 @@ class ApplicationContext extends Context {
             return getNotificationManager();
         } else if (KEYGUARD_SERVICE.equals(name)) {
             return new KeyguardManager();
+        } else if (ACCESSIBILITY_SERVICE.equals(name)) {
+            return AccessibilityManager.getInstance(this);
         } else if (LOCATION_SERVICE.equals(name)) {
             return getLocationManager();
         } else if (SEARCH_SERVICE.equals(name)) {
@@ -1033,11 +1041,6 @@ class ApplicationContext extends Context {
     }
 
     private SearchManager getSearchManager() {
-        // This is only useable in Activity Contexts
-        if (getActivityToken() == null) {
-            throw new AndroidRuntimeException(
-                "Acquiring SearchManager objects only valid in Activity Contexts.");
-        }
         synchronized (mSync) {
             if (mSearchManager == null) {
                 mSearchManager = new SearchManager(getOuterContext(), mMainThread.getHandler());
@@ -1238,7 +1241,7 @@ class ApplicationContext extends Context {
     @Override
     public int checkUriPermission(Uri uri, String readPermission,
             String writePermission, int pid, int uid, int modeFlags) {
-        if (false) {
+        if (DEBUG) {
             Log.i("foo", "checkUriPermission: uri=" + uri + "readPermission="
                     + readPermission + " writePermission=" + writePermission
                     + " pid=" + pid + " uid=" + uid + " mode" + modeFlags);
@@ -1337,8 +1340,22 @@ class ApplicationContext extends Context {
             mMainThread.getPackageInfo(packageName, flags);
         if (pi != null) {
             ApplicationContext c = new ApplicationContext();
+            c.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
             c.init(pi, null, mMainThread);
             if (c.mResources != null) {
+                Resources newRes = c.mResources;
+                if (mResources.getCompatibilityInfo().applicationScale !=
+                    newRes.getCompatibilityInfo().applicationScale) {
+                    DisplayMetrics dm = mMainThread.getDisplayMetricsLocked(false);
+                    c.mResources = new Resources(newRes.getAssets(), dm,
+                            newRes.getConfiguration(),
+                            mResources.getCompatibilityInfo().copy());
+                    if (DEBUG) {
+                        Log.d(TAG, "loaded context has different scaling. Using container's" +
+                                " compatiblity info:" + mResources.getDisplayMetrics());
+                    }
+
+                }
                 return c;
             }
         }
@@ -1346,6 +1363,11 @@ class ApplicationContext extends Context {
         // Should be a better exception.
         throw new PackageManager.NameNotFoundException(
             "Application package " + packageName + " not found");
+    }
+
+    @Override
+    public boolean isRestricted() {
+        return mRestricted;
     }
 
     private File getDataDirFile() {
@@ -1453,7 +1475,7 @@ class ApplicationContext extends Context {
         if ((mode&MODE_WORLD_WRITEABLE) != 0) {
             perms |= FileUtils.S_IWOTH;
         }
-        if (false) {
+        if (DEBUG) {
             Log.i(TAG, "File " + name + ": mode=0x" + Integer.toHexString(mode)
                   + ", perms=0x" + Integer.toHexString(perms));
         }
@@ -1516,43 +1538,33 @@ class ApplicationContext extends Context {
             throw new NameNotFoundException(packageName);
         }
 
-        public Intent getLaunchIntentForPackage(String packageName)
-                throws NameNotFoundException {
+        @Override
+        public Intent getLaunchIntentForPackage(String packageName) {
             // First see if the package has an INFO activity; the existence of
             // such an activity is implied to be the desired front-door for the
             // overall package (such as if it has multiple launcher entries).
-            Intent intent = getLaunchIntentForPackageCategory(this, packageName,
-                    Intent.CATEGORY_INFO);
-            if (intent != null) {
-                return intent;
-            }
-            
+            Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
+            intentToResolve.addCategory(Intent.CATEGORY_INFO);
+            intentToResolve.setPackage(packageName);
+            ResolveInfo resolveInfo = resolveActivity(intentToResolve, 0);
+
             // Otherwise, try to find a main launcher activity.
-            return getLaunchIntentForPackageCategory(this, packageName,
-                    Intent.CATEGORY_LAUNCHER);
-        }
-        
-        // XXX This should be implemented as a call to the package manager,
-        // to reduce the work needed.
-        static Intent getLaunchIntentForPackageCategory(PackageManager pm,
-                String packageName, String category) {
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            Intent intentToResolve = new Intent(Intent.ACTION_MAIN, null);
-            intentToResolve.addCategory(category);
-            final List<ResolveInfo> apps =
-                    pm.queryIntentActivities(intentToResolve, 0);
-            // I wish there were a way to directly get the "main" activity of a
-            // package but ...
-            for (ResolveInfo app : apps) {
-                if (app.activityInfo.packageName.equals(packageName)) {
-                    intent.setClassName(packageName, app.activityInfo.name);
-                    return intent;
-                }
+            if (resolveInfo == null) {
+                // reuse the intent instance
+                intentToResolve.removeCategory(Intent.CATEGORY_INFO);
+                intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
+                intentToResolve.setPackage(packageName);
+                resolveInfo = resolveActivity(intentToResolve, 0);
             }
-            return null;
+            if (resolveInfo == null) {
+                return null;
+            }
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setClassName(packageName, resolveInfo.activityInfo.name);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            return intent;
         }
-        
+
         @Override
         public int[] getPackageGids(String packageName)
             throws NameNotFoundException {
@@ -2024,8 +2036,7 @@ class ApplicationContext extends Context {
             ActivityThread.PackageInfo pi = mContext.mMainThread.getPackageInfoNoCheck(app);
             Resources r = mContext.mMainThread.getTopLevelResources(
                     app.uid == Process.myUid() ? app.sourceDir
-                    : app.publicSourceDir,
-                    pi.getApplicationScale());
+                    : app.publicSourceDir, pi);
             if (r != null) {
                 return r;
             }
@@ -2363,11 +2374,11 @@ class ApplicationContext extends Context {
                 // Should never happen!
             }
         }
-        
+
         @Override
-        public void freeStorage(long idealStorageSize, PendingIntent opFinishedIntent) {
+        public void freeStorage(long freeStorageSize, IntentSender pi) {
             try {
-                mPM.freeStorage(idealStorageSize, opFinishedIntent);
+                mPM.freeStorage(freeStorageSize, pi);
             } catch (RemoteException e) {
                 // Should never happen!
             }
@@ -2420,6 +2431,16 @@ class ApplicationContext extends Context {
             }
         }
         
+        @Override
+        public void replacePreferredActivity(IntentFilter filter,
+                int match, ComponentName[] set, ComponentName activity) {
+            try {
+                mPM.replacePreferredActivity(filter, match, set, activity);
+            } catch (RemoteException e) {
+                // Should never happen!
+            }
+        }
+
         @Override
         public void clearPackagePreferredActivities(String packageName) {
             try {

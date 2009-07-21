@@ -46,7 +46,6 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
     private final DatePicker mDatePicker;
     private final OnDateSetListener mCallBack;
     private final Calendar mCalendar;
-    private final java.text.DateFormat mDateFormat;
     private final java.text.DateFormat mTitleDateFormat;
     private final String[] mWeekDays;
 
@@ -108,7 +107,6 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         DateFormatSymbols symbols = new DateFormatSymbols();
         mWeekDays = symbols.getShortWeekdays();
         
-        mDateFormat = DateFormat.getMediumDateFormat(context);
         mTitleDateFormat = java.text.DateFormat.
                                 getDateInstance(java.text.DateFormat.FULL);
         mCalendar = Calendar.getInstance();

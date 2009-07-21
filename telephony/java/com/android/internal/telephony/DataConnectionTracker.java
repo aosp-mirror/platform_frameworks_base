@@ -63,7 +63,8 @@ public abstract class DataConnectionTracker extends Handler {
         NONE,
         DATAIN,
         DATAOUT,
-        DATAINANDOUT
+        DATAINANDOUT,
+        DORMANT
     }
 
     //***** Event Codes
@@ -92,19 +93,20 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int EVENT_NV_READY = 31;
     protected static final int EVENT_PS_RESTRICT_ENABLED = 32;
     protected static final int EVENT_PS_RESTRICT_DISABLED = 33;
+    public static final int EVENT_CLEAN_UP_CONNECTION = 34;
 
     //***** Constants
     protected static final int RECONNECT_DELAY_INITIAL_MILLIS = 5 * 1000;
 
-    /** Cap out with 1 hour retry interval. */
-    protected static final int RECONNECT_DELAY_MAX_MILLIS = 60 * 60 * 1000;
+    /** Cap out with 30 min retry interval. */
+    protected static final int RECONNECT_DELAY_MAX_MILLIS = 30 * 60 * 1000;
 
     /** Slow poll when attempting connection recovery. */
     protected static final int POLL_NETSTAT_SLOW_MILLIS = 5000;
     /** Default ping deadline, in seconds. */
-    protected final int DEFAULT_PING_DEADLINE = 5;
+    protected static final int DEFAULT_PING_DEADLINE = 5;
     /** Default max failure count before attempting to network re-registration. */
-    protected final int DEFAULT_MAX_PDP_RESET_FAIL = 3;
+    protected static final int DEFAULT_MAX_PDP_RESET_FAIL = 3;
 
     /**
      * After detecting a potential connection problem, this is the max number
@@ -148,7 +150,7 @@ public abstract class DataConnectionTracker extends Handler {
 
     /** Intent sent when the reconnect alarm fires. */
     protected PendingIntent mReconnectIntent = null;
-    
+
     /** CID of active data connection */
     protected int cidActive;
 
@@ -216,7 +218,7 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     // abstract handler methods
-    protected abstract void onTrySetupData();
+    protected abstract void onTrySetupData(String reason);
     protected abstract void onRoamingOff();
     protected abstract void onRoamingOn();
     protected abstract void onRadioAvailable();
@@ -225,13 +227,18 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract void onDisconnectDone(AsyncResult ar);
     protected abstract void onVoiceCallStarted();
     protected abstract void onVoiceCallEnded();
+    protected abstract void onCleanUpConnection(boolean tearDown, String reason);
 
   //***** Overridden from Handler
     public void handleMessage (Message msg) {
         switch (msg.what) {
 
             case EVENT_TRY_SETUP_DATA:
-                onTrySetupData();
+                String reason = null;
+                if (msg.obj instanceof String) {
+                    reason = (String)msg.obj;
+                }
+                onTrySetupData(reason);
                 break;
 
             case EVENT_ROAMING_OFF:
@@ -267,17 +274,16 @@ public abstract class DataConnectionTracker extends Handler {
                 onVoiceCallEnded();
                 break;
 
+            case EVENT_CLEAN_UP_CONNECTION:
+                boolean tearDown = (msg.arg1 == 0) ? false : true;
+                onCleanUpConnection(tearDown, (String)msg.obj);
+                break;
+
             default:
                 Log.e("DATA", "Unidentified event = " + msg.what);
                 break;
         }
     }
-
-    /**
-     * Simply tear down data connections due to radio off 
-     * and don't setup again.
-     */
-    public abstract void cleanConnectionBeforeRadioOff();
 
     /**
      * Report the current state of data connectivity (enabled or disabled)

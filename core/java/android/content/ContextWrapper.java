@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -120,6 +121,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public ApplicationInfo getApplicationInfo() {
+        return mBase.getApplicationInfo();
+    }
+    
+    @Override
     public String getPackageResourcePath() {
         return mBase.getPackageResourcePath();
     }
@@ -127,6 +133,11 @@ public class ContextWrapper extends Context {
     @Override
     public String getPackageCodePath() {
         return mBase.getPackageCodePath();
+    }
+
+    @Override
+    public File getSharedPrefsFile(String name) {
+        return mBase.getSharedPrefsFile(name);
     }
 
     @Override
@@ -420,11 +431,8 @@ public class ContextWrapper extends Context {
         return mBase.createPackageContext(packageName, flags);
     }
 
-    /**
-     * @hide
-     */
     @Override
-    public float getApplicationScale() {
-        return mBase.getApplicationScale();
+    public boolean isRestricted() {
+        return mBase.isRestricted();
     }
 }

@@ -87,17 +87,17 @@ public class ViewDebug {
      * check that this value is set to true as not to affect performance.
      */
     public static final boolean TRACE_RECYCLER = false;
-    
+
     /**
      * The system property of dynamic switch for capturing view information
      * when it is set, we dump interested fields and methods for the view on focus
-     */    
+     */
     static final String SYSTEM_PROPERTY_CAPTURE_VIEW = "debug.captureview";
-        
+
     /**
      * The system property of dynamic switch for capturing event information
      * when it is set, we log key events, touch/motion and trackball events
-     */    
+     */
     static final String SYSTEM_PROPERTY_CAPTURE_EVENT = "debug.captureevent";
 
     /**
@@ -216,7 +216,7 @@ public class ViewDebug {
          * <pre>
          *
          * A specified String is output when the following is true:
-         * 
+         *
          * @return An array of int to String mappings
          */
         FlagToString[] flagMapping() default { };
@@ -228,7 +228,7 @@ public class ViewDebug {
          *
          * @return true if the properties of this property should be dumped
          *
-         * @see #prefix() 
+         * @see #prefix()
          */
         boolean deepExport() default false;
 
@@ -313,15 +313,15 @@ public class ViewDebug {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface CapturedViewProperty {
         /**
-         * When retrieveReturn is true, we need to retrieve second level methods 
+         * When retrieveReturn is true, we need to retrieve second level methods
          * e.g., we need myView.getFirstLevelMethod().getSecondLevelMethod()
-         * we will set retrieveReturn = true on the annotation of 
+         * we will set retrieveReturn = true on the annotation of
          * myView.getFirstLevelMethod()
-         * @return true if we need the second level methods 
+         * @return true if we need the second level methods
          */
-        boolean retrieveReturn() default false;        
+        boolean retrieveReturn() default false;
     }
-        
+
     private static HashMap<Class<?>, Method[]> mCapturedViewMethodsForClasses = null;
     private static HashMap<Class<?>, Field[]> mCapturedViewFieldsForClasses = null;
 
@@ -401,7 +401,7 @@ public class ViewDebug {
      */
     public static long getViewRootInstanceCount() {
         return ViewRoot.getInstanceCount();
-    }    
+    }
 
     /**
      * Outputs a trace to the currently opened recycler traces. The trace records the type of
@@ -624,7 +624,7 @@ public class ViewDebug {
      *
      * This method will return immediately if TRACE_HIERARCHY is false.
      *
-     * @see #startHierarchyTracing(String, View) 
+     * @see #startHierarchyTracing(String, View)
      * @see #trace(View, android.view.ViewDebug.HierarchyTraceType)
      */
     public static void stopHierarchyTracing() {
@@ -671,7 +671,7 @@ public class ViewDebug {
 
         sHierarhcyRoot = null;
     }
-    
+
     static void dispatchCommand(View view, String command, String parameters,
             OutputStream clientStream) throws IOException {
 
@@ -1039,10 +1039,10 @@ public class ViewDebug {
 
         final ArrayList<Method> foundMethods = new ArrayList<Method>();
         methods = klass.getDeclaredMethods();
-        
+
         int count = methods.length;
         for (int i = 0; i < count; i++) {
-            final Method method = methods[i];            
+            final Method method = methods[i];
             if (method.getParameterTypes().length == 0 &&
                     method.isAnnotationPresent(ExportedProperty.class) &&
                     method.getReturnType() != Void.class) {
@@ -1075,7 +1075,7 @@ public class ViewDebug {
             klass = klass.getSuperclass();
         } while (klass != Object.class);
     }
-    
+
     private static void exportMethods(Context context, Object view, BufferedWriter out,
             Class<?> klass, String prefix) throws IOException {
 
@@ -1235,10 +1235,11 @@ public class ViewDebug {
         for (int j = 0; j < count; j++) {
             final FlagToString flagMapping = mapping[j];
             final boolean ifTrue = flagMapping.outputIf();
-            final boolean test = (intValue & flagMapping.mask()) == flagMapping.equals();
+            final int maskResult = intValue & flagMapping.mask();
+            final boolean test = maskResult == flagMapping.equals();
             if ((test && ifTrue) || (!test && !ifTrue)) {
                 final String name = flagMapping.name();
-                final String value = ifTrue ? "true" : "false";
+                final String value = "0x" + Integer.toHexString(maskResult);
                 writeEntry(out, prefix, name, "", value);
             }
         }
@@ -1259,7 +1260,7 @@ public class ViewDebug {
 
         for (int j = 0; j < valuesCount; j++) {
             String name;
-            String value;
+            String value = null;
 
             final int intValue = array[j];
 
@@ -1275,7 +1276,6 @@ public class ViewDebug {
                 }
             }
 
-            value = String.valueOf(intValue);
             if (hasMapping) {
                 int mappingCount = mapping.length;
                 for (int k = 0; k < mappingCount; k++) {
@@ -1288,7 +1288,9 @@ public class ViewDebug {
             }
 
             if (resolveId) {
-                value = (String) resolveId(context, intValue);
+                if (value == null) value = (String) resolveId(context, intValue);
+            } else {
+                value = String.valueOf(intValue);
             }
 
             writeEntry(out, prefix, name, suffix, value);
@@ -1396,10 +1398,10 @@ public class ViewDebug {
 
         final ArrayList<Method> foundMethods = new ArrayList<Method>();
         methods = klass.getMethods();
-        
+
         int count = methods.length;
         for (int i = 0; i < count; i++) {
-            final Method method = methods[i];            
+            final Method method = methods[i];
             if (method.getParameterTypes().length == 0 &&
                     method.isAnnotationPresent(CapturedViewProperty.class) &&
                     method.getReturnType() != Void.class) {
@@ -1413,14 +1415,14 @@ public class ViewDebug {
 
         return methods;
     }
-              
-    private static String capturedViewExportMethods(Object obj, Class<?> klass, 
+
+    private static String capturedViewExportMethods(Object obj, Class<?> klass,
             String prefix) {
 
         if (obj == null) {
             return "null";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         final Method[] methods = capturedViewGetPropertyMethods(klass);
 
@@ -1430,41 +1432,41 @@ public class ViewDebug {
             try {
                 Object methodValue = method.invoke(obj, (Object[]) null);
                 final Class<?> returnType = method.getReturnType();
-                
+
                 CapturedViewProperty property = method.getAnnotation(CapturedViewProperty.class);
                 if (property.retrieveReturn()) {
                     //we are interested in the second level data only
                     sb.append(capturedViewExportMethods(methodValue, returnType, method.getName() + "#"));
-                } else {                    
+                } else {
                     sb.append(prefix);
                     sb.append(method.getName());
                     sb.append("()=");
-                    
+
                     if (methodValue != null) {
-                        final String value = methodValue.toString().replace("\n", "\\n");                        
-                        sb.append(value);                        
+                        final String value = methodValue.toString().replace("\n", "\\n");
+                        sb.append(value);
                     } else {
                         sb.append("null");
                     }
                     sb.append("; ");
                 }
               } catch (IllegalAccessException e) {
-                  //Exception IllegalAccess, it is OK here 
+                  //Exception IllegalAccess, it is OK here
                   //we simply ignore this method
               } catch (InvocationTargetException e) {
-                  //Exception InvocationTarget, it is OK here 
+                  //Exception InvocationTarget, it is OK here
                   //we simply ignore this method
-              }              
-        }        
+              }
+        }
         return sb.toString();
     }
 
     private static String capturedViewExportFields(Object obj, Class<?> klass, String prefix) {
-        
+
         if (obj == null) {
             return "null";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         final Field[] fields = capturedViewGetPropertyFields(klass);
 
@@ -1486,25 +1488,25 @@ public class ViewDebug {
                 }
                 sb.append(' ');
             } catch (IllegalAccessException e) {
-                //Exception IllegalAccess, it is OK here 
+                //Exception IllegalAccess, it is OK here
                 //we simply ignore this field
             }
         }
         return sb.toString();
     }
-    
+
     /**
-     * Dump view info for id based instrument test generation 
+     * Dump view info for id based instrument test generation
      * (and possibly further data analysis). The results are dumped
-     * to the log. 
+     * to the log.
      * @param tag for log
      * @param view for dump
      */
-    public static void dumpCapturedView(String tag, Object view) {        
+    public static void dumpCapturedView(String tag, Object view) {
         Class<?> klass = view.getClass();
         StringBuilder sb = new StringBuilder(klass.getName() + ": ");
         sb.append(capturedViewExportFields(view, klass, ""));
-        sb.append(capturedViewExportMethods(view, klass, ""));        
-        Log.d(tag, sb.toString());        
+        sb.append(capturedViewExportMethods(view, klass, ""));
+        Log.d(tag, sb.toString());
     }
 }

@@ -890,16 +890,10 @@ public class JniCodeEmitter {
                                 cname +
                                 " = (" +
                                 cfunc.getArgType(cIndex).getDeclaration() +
-                                ") _env->GetDirectBufferAddress(" +
-                                (mUseCPlusPlus ? "" : "_env, ") +
+                                ") getDirectBufferPointer(_env, " +
                                 cname + "_buf);");
                         String iii = "    ";
-                        out.println(iii + indent + "if ( ! " + cname + " ) {");
-                        out.println(iii + iii + indent +
-                                (mUseCPlusPlus ? "_env" : "(*_env)") +
-                                "->ThrowNew(" +
-                                (mUseCPlusPlus ? "" : "_env, ") +
-                                "IAEClass, \"Must use a native order direct Buffer\");");
+                        out.println(iii + indent + "if ( ! " + cname + " ) {");	
                         out.println(iii + iii + indent + "return;");
                         out.println(iii + indent + "}");
                     } else {

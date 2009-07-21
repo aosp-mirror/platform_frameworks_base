@@ -142,20 +142,25 @@ public final class CharsetUtils {
 
     /**
      * Returns whether the given character set name indicates the Shift-JIS
-     * encoding.
+     * encoding. Returns false if the name is null.
      * 
      * @param charsetName the character set name
      * @return {@code true} if the name corresponds to Shift-JIS or
      * {@code false} if not
      */
     private static boolean isShiftJis(String charsetName) {
-        if (charsetName.length() != 9) {
-            // Bail quickly if the length doesn't match.
+        // Bail quickly if the length doesn't match.
+        if (charsetName == null) {
+            return false;
+        }
+        int length = charsetName.length();
+        if (length != 4 && length != 9) {
             return false;
         }
 
         return charsetName.equalsIgnoreCase("shift_jis")
-            || charsetName.equalsIgnoreCase("shift-jis");
+            || charsetName.equalsIgnoreCase("shift-jis")
+            || charsetName.equalsIgnoreCase("sjis");
     }
 
     /**

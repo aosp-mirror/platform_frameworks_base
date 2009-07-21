@@ -22,16 +22,12 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.Handler;
-import android.os.Message;
 import android.os.SystemClock;
-import android.util.Config;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -86,6 +82,7 @@ public class AppWidgetHostView extends FrameLayout {
      * @param animationIn Resource ID of in animation to use
      * @param animationOut Resource ID of out animation to use
      */
+    @SuppressWarnings({"UnusedDeclaration"})
     public AppWidgetHostView(Context context, int animationIn, int animationOut) {
         super(context);
         mContext = context;
@@ -272,7 +269,7 @@ public class AppWidgetHostView extends FrameLayout {
         try {
             if (mInfo != null) {
                 Context theirContext = mContext.createPackageContext(
-                        mInfo.provider.getPackageName(), 0 /* no flags */);
+                        mInfo.provider.getPackageName(), Context.CONTEXT_RESTRICTED);
                 LayoutInflater inflater = (LayoutInflater)
                         theirContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 inflater = inflater.cloneInContext(theirContext);

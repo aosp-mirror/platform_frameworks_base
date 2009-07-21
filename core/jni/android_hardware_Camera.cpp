@@ -38,12 +38,6 @@ enum CallbackMessageID {
     kErrorCallback = 5
 };
 
-enum CameraError {
-    kCameraErrorUnknown = 1,
-    kCameraErrorMediaServer = 100
-};
-
-
 struct fields_t {
     jfieldID    context;
     jfieldID    surface;
@@ -53,19 +47,33 @@ struct fields_t {
 static fields_t fields;
 static Mutex sLock;
 
-struct camera_context_t {
+// provides persistent context for calls from native code to Java
+class JNICameraContext: public CameraListener
+{
+public:
+    JNICameraContext(JNIEnv* env, jobject weak_this, jclass clazz, const sp<Camera>& camera);
+    ~JNICameraContext() { release(); }
+    virtual void notify(int32_t msgType, int32_t ext1, int32_t ext2);
+    virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr);
+    sp<Camera> getCamera() { Mutex::Autolock _l(mLock); return mCamera; }
+    void release();
+
+private:
+    void copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int msgType);
+
     jobject     mCameraJObjectWeak;     // weak reference to java object
     jclass      mCameraJClass;          // strong reference to java class
     sp<Camera>  mCamera;                // strong reference to native object 
+    Mutex       mLock;
 };
 
-sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, camera_context_t** pContext)
+sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, JNICameraContext** pContext)
 {
     sp<Camera> camera;
     Mutex::Autolock _l(sLock);
-    camera_context_t* context = reinterpret_cast<camera_context_t*>(env->GetIntField(thiz, fields.context));
+    JNICameraContext* context = reinterpret_cast<JNICameraContext*>(env->GetIntField(thiz, fields.context));
     if (context != NULL) {
-        camera = context->mCamera;
+        camera = context->getCamera();
     }
     LOGV("get_native_camera: context=%p, camera=%p", context, camera.get());
     if (camera == 0) {
@@ -76,30 +84,108 @@ sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, camera_context_t** pCont
     return camera;
 }
 
-static void err_callback(status_t err, void *cookie)
+JNICameraContext::JNICameraContext(JNIEnv* env, jobject weak_this, jclass clazz, const sp<Camera>& camera)
 {
-    camera_context_t* context = reinterpret_cast<camera_context_t*>(cookie);
-    if ((context == NULL) || (context->mCamera == 0)) return;
+    mCameraJObjectWeak = env->NewGlobalRef(weak_this);
+    mCameraJClass = (jclass)env->NewGlobalRef(clazz);
+    mCamera = camera;
+}
 
-    LOGV("err_callback: context=%p, camera=%p", context, context->mCamera.get());
-
-    int error;
-    switch (err) {
-    case DEAD_OBJECT:
-        error = kCameraErrorMediaServer;
-        break;
-    default:
-        error = kCameraErrorUnknown;
-        break;
-    }
-
+void JNICameraContext::release()
+{
+    LOGV("release");
+    Mutex::Autolock _l(mLock);
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    if (env == NULL) {
-        LOGE("err_callback on dead VM");
+
+    if (mCameraJObjectWeak != NULL) {
+        env->DeleteGlobalRef(mCameraJObjectWeak);
+        mCameraJObjectWeak = NULL;
+    }
+    if (mCameraJClass != NULL) {
+        env->DeleteGlobalRef(mCameraJClass);
+        mCameraJClass = NULL;
+    }
+    mCamera.clear();
+}
+
+void JNICameraContext::notify(int32_t msgType, int32_t ext1, int32_t ext2)
+{
+    LOGV("notify");
+
+    // VM pointer will be NULL if object is released
+    Mutex::Autolock _l(mLock);
+    if (mCameraJObjectWeak == NULL) {
+        LOGW("callback on dead camera object");
         return;
     }
-    env->CallStaticVoidMethod(context->mCameraJClass, fields.post_event,
-            context->mCameraJObjectWeak, kErrorCallback, error, 0, NULL);
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
+            mCameraJObjectWeak, msgType, ext1, ext2);
+}
+
+void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int msgType)
+{
+    jbyteArray obj = NULL;
+
+    // allocate Java byte array and copy data
+    if (dataPtr != NULL) {
+        ssize_t offset;
+        size_t size;
+        sp<IMemoryHeap> heap = dataPtr->getMemory(&offset, &size);
+        LOGV("postData: off=%d, size=%d", offset, size);
+        uint8_t *heapBase = (uint8_t*)heap->base();
+
+        if (heapBase != NULL) {
+            uint8_t *data = heapBase + offset;
+            obj = env->NewByteArray(size);
+            if (obj == NULL) {
+                LOGE("Couldn't allocate byte array for JPEG data");
+                env->ExceptionClear();
+            } else {
+                jbyte *bytes = env->GetByteArrayElements(obj, NULL);
+                memcpy(bytes, data, size);
+                env->ReleaseByteArrayElements(obj, bytes, 0);
+
+            }
+        } else {
+            LOGE("image heap is NULL");
+        }
+    }
+
+    // post image data to Java
+    env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
+            mCameraJObjectWeak, msgType, 0, 0, obj);
+    if (obj) {
+        env->DeleteLocalRef(obj);
+    }
+}
+
+void JNICameraContext::postData(int32_t msgType, const sp<IMemory>& dataPtr)
+{
+    // VM pointer will be NULL if object is released
+    Mutex::Autolock _l(mLock);
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (mCameraJObjectWeak == NULL) {
+        LOGW("callback on dead camera object");
+        return;
+    }
+
+    // return data based on callback type
+    switch(msgType) {
+    case CAMERA_MSG_VIDEO_FRAME:
+        // should never happen
+        break;
+    // don't return raw data to Java
+    case CAMERA_MSG_RAW_IMAGE:
+        LOGV("rawCallback");
+        env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
+                mCameraJObjectWeak, msgType, 0, 0, NULL);
+        break;
+    default:
+        LOGV("dataCallback(%d, %p)", msgType, dataPtr.get());
+        copyAndPost(env, dataPtr, msgType);
+        break;
+    }
 }
 
 // connect to camera service
@@ -115,33 +201,24 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobj
 
     // make sure camera hardware is alive
     if (camera->getStatus() != NO_ERROR) {
-        jniThrowException(env, "java/io/IOException", "Camera initialization failed");
+        jniThrowException(env, "java/lang/RuntimeException", "Camera initialization failed");
         return;
     }
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
-        LOGE("Can't find android/hardware/Camera");
-        // XXX no idea what to throw here, can this even happen?
-        jniThrowException(env, "java/lang/Exception", NULL);
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/hardware/Camera");
         return;
     }
 
     // We use a weak reference so the Camera object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
-    camera_context_t* context = new camera_context_t;
-    context->mCameraJObjectWeak = env->NewGlobalRef(weak_this);
-    context->mCameraJClass = (jclass)env->NewGlobalRef(clazz);
-    context->mCamera = camera;
+    sp<JNICameraContext> context = new JNICameraContext(env, weak_this, clazz, camera);
+    context->incStrong(thiz);
+    camera->setListener(context);
 
     // save context in opaque field
-    env->SetIntField(thiz, fields.context, (int)context);
-
-    LOGV("native_setup: mCameraJObjectWeak=%x, camera_obj=%x, context=%p",
-            (int)context->mCameraJObjectWeak, (int)thiz, context);
-
-    // set error callback
-    camera->setErrorCallback(err_callback, context);
+    env->SetIntField(thiz, fields.context, (int)context.get());
 }
 
 // disconnect from camera service
@@ -150,11 +227,11 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobj
 // finalizer is invoked later.
 static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
 {
-    camera_context_t* context = NULL;
+    JNICameraContext* context = NULL;
     sp<Camera> camera;
     {
         Mutex::Autolock _l(sLock);
-        context = reinterpret_cast<camera_context_t*>(env->GetIntField(thiz, fields.context));
+        context = reinterpret_cast<JNICameraContext*>(env->GetIntField(thiz, fields.context));
 
         // Make sure we do not attempt to callback on a deleted Java object.
         env->SetIntField(thiz, fields.context, 0);
@@ -162,21 +239,18 @@ static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
 
     // clean up if release has not been called before
     if (context != NULL) {
-        camera = context->mCamera;
-        context->mCamera.clear();
+        camera = context->getCamera();
+        context->release();
         LOGV("native_release: context=%p camera=%p", context, camera.get());
 
         // clear callbacks
         if (camera != NULL) {
-            camera->setPreviewCallback(NULL, NULL, FRAME_CALLBACK_FLAG_NOOP);
-            camera->setErrorCallback(NULL, NULL);
+            camera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_NOOP);
             camera->disconnect();
-            env->DeleteGlobalRef(context->mCameraJObjectWeak);
-            env->DeleteGlobalRef(context->mCameraJClass);
         }
 
         // remove context to prevent further Java access
-        delete context;
+        context->decStrong(thiz);
     }
 }
 
@@ -186,52 +260,13 @@ static void android_hardware_Camera_setPreviewDisplay(JNIEnv *env, jobject thiz,
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
-    sp<Surface> surface = reinterpret_cast<Surface*>(env->GetIntField(jSurface, fields.surface));
+    sp<Surface> surface = NULL;
+    if (jSurface != NULL) {
+        surface = reinterpret_cast<Surface*>(env->GetIntField(jSurface, fields.surface));
+    }
     if (camera->setPreviewDisplay(surface) != NO_ERROR) {
         jniThrowException(env, "java/io/IOException", "setPreviewDisplay failed");
     }
-}
-
-static void preview_callback(const sp<IMemory>& mem, void *cookie)
-{
-    LOGV("preview_callback");
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    if (env == NULL) {
-        LOGE("preview_callback on dead VM");
-        return;
-    }
-    camera_context_t* context = reinterpret_cast<camera_context_t*>(cookie);
-    if ((context == NULL) || (context->mCamera == 0)) {
-        LOGW("context or camera is NULL in preview_callback");
-        return;
-    }
-    LOGV("native_release: context=%p camera=%p", context, context->mCamera.get());
-
-    int arg1 = 0, arg2 = 0;
-    jobject obj = NULL;
-
-    ssize_t offset;
-    size_t size;
-    sp<IMemoryHeap> heap = mem->getMemory(&offset, &size);
-
-    uint8_t *data = ((uint8_t *)heap->base()) + offset;
-
-    jbyteArray array = env->NewByteArray(size);
-    if (array == NULL) {
-        LOGE("Couldn't allocate byte array for YUV data");
-        env->ExceptionClear();
-        return;
-    }
-
-    jbyte *bytes = env->GetByteArrayElements(array, NULL);
-    memcpy(bytes, data, size);
-    env->ReleaseByteArrayElements(array, bytes, 0);
-
-    obj = array;
-
-    env->CallStaticVoidMethod(context->mCameraJClass, fields.post_event,
-            context->mCameraJObjectWeak, kPreviewCallback, arg1, arg2, obj);
-    env->DeleteLocalRef(array);
 }
 
 static void android_hardware_Camera_startPreview(JNIEnv *env, jobject thiz)
@@ -241,7 +276,7 @@ static void android_hardware_Camera_startPreview(JNIEnv *env, jobject thiz)
     if (camera == 0) return;
 
     if (camera->startPreview() != NO_ERROR) {
-        jniThrowException(env, "java/io/IOException", "startPreview failed");
+        jniThrowException(env, "java/lang/RuntimeException", "startPreview failed");
         return;
     }
 }
@@ -269,7 +304,7 @@ static void android_hardware_Camera_setHasPreviewCallback(JNIEnv *env, jobject t
     // Important: Only install preview_callback if the Java code has called
     // setPreviewCallback() with a non-null value, otherwise we'd pay to memcpy
     // each preview frame for nothing.
-    camera_context_t* context;
+    JNICameraContext* context;
     sp<Camera> camera = get_native_camera(env, thiz, &context);
     if (camera == 0) return;
 
@@ -279,130 +314,32 @@ static void android_hardware_Camera_setHasPreviewCallback(JNIEnv *env, jobject t
     } else {
         callback_flag = FRAME_CALLBACK_FLAG_NOOP;
     }
-    camera->setPreviewCallback(installed ? preview_callback : NULL, context, callback_flag);
-}
-
-static void autofocus_callback_impl(bool success, void *cookie)
-{
-    LOGV("autoFocusCallback");
-    camera_context_t* context = reinterpret_cast<camera_context_t*>(cookie);
-
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    if (env == NULL) {
-        LOGE("autofocus_callback on dead VM");
-        return;
-    }
-    env->CallStaticVoidMethod(context->mCameraJClass, fields.post_event,
-            context->mCameraJObjectWeak, kAutoFocusCallback, success, 0, NULL);
+    camera->setPreviewCallbackFlags(callback_flag);
 }
 
 static void android_hardware_Camera_autoFocus(JNIEnv *env, jobject thiz)
 {
     LOGV("autoFocus");
-    camera_context_t* context;
+    JNICameraContext* context;
     sp<Camera> c = get_native_camera(env, thiz, &context);
     if (c == 0) return;
 
-    c->setAutoFocusCallback(autofocus_callback_impl, context);
     if (c->autoFocus() != NO_ERROR) {
-        jniThrowException(env, "java/io/IOException", "autoFocus failed");
+        jniThrowException(env, "java/lang/RuntimeException", "autoFocus failed");
     }
-}
-
-static void jpeg_callback(const sp<IMemory>& mem, void *cookie)
-{
-    LOGV("jpegCallback");
-    camera_context_t* context = reinterpret_cast<camera_context_t*>(cookie);
-
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    if (env == NULL) {
-        LOGE("jpeg`_callback on dead VM");
-        return;
-    }
-    int arg1 = 0, arg2 = 0;
-    jobject obj = NULL;
-
-    if (mem == NULL) {
-        env->CallStaticVoidMethod(context->mCameraJClass, fields.post_event,
-                                  context->mCameraJObjectWeak, kJpegCallback, arg1, arg2, NULL);
-        return;
-    }
-    ssize_t offset;
-    size_t size;
-    sp<IMemoryHeap> heap = mem->getMemory(&offset, &size);
-    LOGV("jpeg_callback: mem off=%d, size=%d", offset, size);
-
-    uint8_t *heap_base = (uint8_t *)heap->base();
-    if (heap_base == NULL) {
-        LOGE("YUV heap is NULL");
-        return;
-    }
-
-    uint8_t *data = heap_base + offset;
-
-    jbyteArray array = env->NewByteArray(size);
-    if (array == NULL) {
-        LOGE("Couldn't allocate byte array for JPEG data");
-        env->ExceptionClear();
-        return;
-    }
-
-    jbyte *bytes = env->GetByteArrayElements(array, NULL);
-    memcpy(bytes, data, size);
-    env->ReleaseByteArrayElements(array, bytes, 0);
-
-    obj = array;
-
-    env->CallStaticVoidMethod(context->mCameraJClass, fields.post_event,
-                              context->mCameraJObjectWeak, kJpegCallback, arg1, arg2, obj);
-    env->DeleteLocalRef(array);
-}
-
-static void shutter_callback_impl(void *cookie)
-{
-    LOGV("shutterCallback");
-    camera_context_t* context = reinterpret_cast<camera_context_t*>(cookie);
-
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    if (env == NULL) {
-        LOGE("shutter_callback on dead VM");
-        return;
-    }
-    env->CallStaticVoidMethod(context->mCameraJClass, fields.post_event,
-                              context->mCameraJObjectWeak, kShutterCallback, 0, 0, NULL);
-}
-
-static void raw_callback(const sp<IMemory>& mem __attribute__((unused)),
-                         void *cookie)
-{
-    LOGV("rawCallback");
-    camera_context_t* context = reinterpret_cast<camera_context_t*>(cookie);
-
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    if (env == NULL) {
-        LOGE("raw_callback on dead VM");
-        return;
-    }
-    env->CallStaticVoidMethod(context->mCameraJClass, fields.post_event,
-                              context->mCameraJObjectWeak, kRawCallback, 0, 0, NULL);
 }
 
 static void android_hardware_Camera_takePicture(JNIEnv *env, jobject thiz)
 {
     LOGV("takePicture");
-    camera_context_t* context;
+    JNICameraContext* context;
     sp<Camera> camera = get_native_camera(env, thiz, &context);
     if (camera == 0) return;
 
-    camera->setShutterCallback(shutter_callback_impl, context);
-    camera->setRawCallback(raw_callback, context);
-    camera->setJpegCallback(jpeg_callback, context);
     if (camera->takePicture() != NO_ERROR) {
-        jniThrowException(env, "java/io/IOException", "takePicture failed");
+        jniThrowException(env, "java/lang/RuntimeException", "takePicture failed");
         return;
     }
-
-    return;
 }
 
 static void android_hardware_Camera_setParameters(JNIEnv *env, jobject thiz, jstring params)
@@ -418,7 +355,7 @@ static void android_hardware_Camera_setParameters(JNIEnv *env, jobject thiz, jst
         env->ReleaseStringCritical(params, str);
     }
     if (camera->setParameters(params8) != NO_ERROR) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", "setParameters failed");
+        jniThrowException(env, "java/lang/RuntimeException", "setParameters failed");
         return;
     }
 }

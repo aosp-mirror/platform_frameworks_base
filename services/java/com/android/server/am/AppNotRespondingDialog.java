@@ -18,7 +18,10 @@ package com.android.server.am;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
@@ -26,6 +29,13 @@ import android.os.Process;
 import android.util.Log;
 
 class AppNotRespondingDialog extends BaseErrorDialog {
+    private static final String TAG = "AppNotRespondingDialog";
+
+    // Event 'what' codes
+    static final int FORCE_CLOSE = 1;
+    static final int WAIT = 2;
+    static final int WAIT_AND_REPORT = 3;
+
     private final ActivityManagerService mService;
     private final ProcessRecord mProc;
     
@@ -67,10 +77,19 @@ class AppNotRespondingDialog extends BaseErrorDialog {
                 ? res.getString(resid, name1.toString(), name2.toString())
                 : res.getString(resid, name1.toString()));
 
-        setButton(res.getText(com.android.internal.R.string.force_close),
-                mHandler.obtainMessage(1));
-        setButton2(res.getText(com.android.internal.R.string.wait),
-                mHandler.obtainMessage(2));
+        setButton(DialogInterface.BUTTON_POSITIVE,
+                res.getText(com.android.internal.R.string.force_close),
+                mHandler.obtainMessage(FORCE_CLOSE));
+        setButton(DialogInterface.BUTTON_NEUTRAL,
+                res.getText(com.android.internal.R.string.wait),
+                mHandler.obtainMessage(WAIT));
+
+        if (app.errorReportReceiver != null) {
+            setButton(DialogInterface.BUTTON_NEGATIVE,
+                    res.getText(com.android.internal.R.string.report),
+                    mHandler.obtainMessage(WAIT_AND_REPORT));
+        }
+
         setTitle(res.getText(com.android.internal.R.string.anr_title));
         getWindow().addFlags(FLAG_SYSTEM_ERROR);
         getWindow().setTitle("Application Not Responding: " + app.info.processName);
@@ -81,16 +100,23 @@ class AppNotRespondingDialog extends BaseErrorDialog {
 
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
+            Intent appErrorIntent = null;
             switch (msg.what) {
-                case 1:
+                case FORCE_CLOSE:
                     // Kill the application.
                     mService.killAppAtUsersRequest(mProc,
                             AppNotRespondingDialog.this, true);
                     break;
-                case 2:
+                case WAIT_AND_REPORT:
+                case WAIT:
                     // Continue waiting for the application.
                     synchronized (mService) {
                         ProcessRecord app = mProc;
+
+                        if (msg.what == WAIT_AND_REPORT) {
+                            appErrorIntent = mService.createAppErrorIntentLocked(app);
+                        }
+
                         app.notResponding = false;
                         app.notRespondingReport = null;
                         if (app.anrDialog == AppNotRespondingDialog.this) {
@@ -98,6 +124,14 @@ class AppNotRespondingDialog extends BaseErrorDialog {
                         }
                     }
                     break;
+            }
+
+            if (appErrorIntent != null) {
+                try {
+                    getContext().startActivity(appErrorIntent);
+                } catch (ActivityNotFoundException e) {
+                    Log.w(TAG, "bug report receiver dissappeared", e);
+                }
             }
         }
     };

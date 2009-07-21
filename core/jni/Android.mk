@@ -19,6 +19,7 @@ LOCAL_SRC_FILES:= \
 	ActivityManager.cpp \
 	AndroidRuntime.cpp \
 	CursorWindow.cpp \
+	Time.cpp \
 	com_google_android_gles_jni_EGLImpl.cpp \
 	com_google_android_gles_jni_GLImpl.cpp.arm \
 	android_opengl_GLES10.cpp \
@@ -117,7 +118,10 @@ LOCAL_SRC_FILES:= \
 	android_location_GpsLocationProvider.cpp \
 	com_android_internal_os_ZygoteInit.cpp \
 	com_android_internal_graphics_NativeUtils.cpp \
-	android_backup_FileBackupHelper.cpp
+	android_backup_BackupDataInput.cpp \
+	android_backup_BackupDataOutput.cpp \
+	android_backup_FileBackupHelperBase.cpp \
+	android_backup_BackupHelperDispatcher.cpp
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
@@ -164,8 +168,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libicui18n \
 	libicudata \
 	libmedia \
-	libwpa_client \
-	libemoji
+	libwpa_client
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
 LOCAL_C_INCLUDES += \

@@ -62,13 +62,10 @@ public abstract class CellLocation {
      * @hide
      */
     public static CellLocation newFromBundle(Bundle bundle) {
-        // TODO: My need to be use: Settings.Secure.getInt(mContext, Settings.Secure.CURRENT_ACTIVE_PHONE, 0))
-        //       instead of SystemProperties???
-
-        // NOTE here TelephonyManager.getDefault().getPhoneType() cannot be used since at startup
-        //      ITelephony have not been created
-        if (RILConstants.CDMA_PHONE ==
-                SystemProperties.getInt(Settings.Secure.CURRENT_ACTIVE_PHONE, RILConstants.GSM_PHONE)) {
+        // TelephonyManager.getDefault().getPhoneType() handles the case when
+        // ITelephony interface is not up yet.
+        int type = TelephonyManager.getDefault().getPhoneType();
+        if (type == RILConstants.CDMA_PHONE) {
             return new CdmaCellLocation(bundle);
         } else {
             return new GsmCellLocation(bundle);
@@ -85,17 +82,13 @@ public abstract class CellLocation {
      *
      */
     public static CellLocation getEmpty() {
-        // TODO: My need to be use: Settings.Secure.getInt(mContext, Settings.Secure.CURRENT_ACTIVE_PHONE, 0))
-        //       instead of SystemProperties???
-
-        // NOTE here TelephonyManager.getDefault().getPhoneType() cannot be used since at startup
-        //      ITelephony have not been created
-        if (RILConstants.CDMA_PHONE ==
-                SystemProperties.getInt(Settings.Secure.CURRENT_ACTIVE_PHONE, RILConstants.GSM_PHONE)) {
+        // TelephonyManager.getDefault().getPhoneType() handles the case when
+        // ITelephony interface is not up yet.
+        int type = TelephonyManager.getDefault().getPhoneType();
+        if (type == RILConstants.CDMA_PHONE) {
             return new CdmaCellLocation();
         } else {
             return new GsmCellLocation();
         }
     }
-
 }

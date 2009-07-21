@@ -5,6 +5,7 @@
 #include <vector>
 #include <set>
 #include <stdarg.h>
+#include <stdio.h>
 
 using namespace std;
 

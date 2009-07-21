@@ -311,7 +311,7 @@ static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStream* stream,
                                    int sampleSize) {
     SkPixelRef* pr;
     // only use ashmem for large images, since mmaps come at a price
-    if (bitmap->getSize() >= 32 * 65536) {
+    if (bitmap->getSize() >= 32 * 1024) {
         pr = new SkImageRef_ashmem(stream, bitmap->config(), sampleSize);
     } else {
         pr = new SkImageRef_GlobalPool(stream, bitmap->config(), sampleSize);
@@ -520,7 +520,10 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz,
     */
     AutoFDSeek as(descriptor);
 
-    return doDecode(env, stream, padding, bitmapFactoryOptions, true);
+    /* Allow purgeable iff we own the FD, i.e., in the puregeable and
+       shareable case.
+    */
+    return doDecode(env, stream, padding, bitmapFactoryOptions, weOwnTheFD);
 }
 
 /*  make a deep copy of the asset, and return it as a stream, or NULL if there

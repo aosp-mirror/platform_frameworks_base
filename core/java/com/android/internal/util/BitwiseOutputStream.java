@@ -82,6 +82,9 @@ public class BitwiseOutputStream {
     /**
      * Write some data and increment the current position.
      *
+     * The 8-bit limit on access to bitwise streams is intentional to
+     * avoid endianness issues.
+     *
      * @param bits the amount of data to write (gte 0, lte 8)
      * @param data to write, will be masked to expose only bits param from lsb
      */
@@ -95,8 +98,8 @@ public class BitwiseOutputStream {
         int offset = 16 - (mPos & 0x07) - bits;  // &7==%8
         data <<= offset;
         mPos += bits;
-        mBuf[index] |= (data >>> 8);
-        if (offset < 8) mBuf[index + 1] |= (data & 0x00FF);
+        mBuf[index] |= data >>> 8;
+        if (offset < 8) mBuf[index + 1] |= data & 0xFF;
     }
 
     /**

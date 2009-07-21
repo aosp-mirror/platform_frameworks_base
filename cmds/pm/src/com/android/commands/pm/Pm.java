@@ -543,6 +543,9 @@ public final class Pm {
         case PackageManager.INSTALL_FAILED_TEST_ONLY:
             s = "INSTALL_FAILED_TEST_ONLY";
             break;
+        case PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE:
+            s = "INSTALL_FAILED_CPU_ABI_INCOMPATIBLE";
+            break;
         case PackageManager.INSTALL_PARSE_FAILED_NOT_APK:
             s = "INSTALL_PARSE_FAILED_NOT_APK";
             break;

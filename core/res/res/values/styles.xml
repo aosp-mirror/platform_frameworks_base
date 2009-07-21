@@ -124,6 +124,12 @@
         <item name="windowExitAnimation">@anim/shrink_fade_out_from_bottom</item>
     </style>
 
+    <!-- {@hide} -->
+    <style name="Animation.SlidingCard">
+        <item name="windowEnterAnimation">@anim/slide_in_up</item>
+        <item name="windowExitAnimation">@anim/slide_out_down</item>
+    </style>
+
     <!-- Window animations that are applied to input method overlay windows.
          {@hide Pending API council approval} -->
     <style name="Animation.InputMethod">
@@ -169,6 +175,23 @@
     <style name="Widget.AbsListView">
         <item name="android:scrollbars">vertical</item>
         <item name="android:fadingEdge">vertical</item>
+    </style>
+
+    <style name="Widget.GestureOverlayView">
+        <item name="android:gestureStrokeWidth">12.0</item>
+        <item name="android:gestureColor">#ffffff00</item>
+        <item name="android:uncertainGestureColor">#48ffff00</item>
+        <item name="android:fadeOffset">420</item>
+        <item name="android:fadeDuration">150</item>
+        <item name="android:gestureStrokeLengthThreshold">50.0</item>
+        <item name="android:gestureStrokeSquarenessThreshold">0.275</item>
+        <item name="android:gestureStrokeAngleThreshold">40.0</item>
+        <item name="android:eventsInterceptionEnabled">true</item>
+    </style>
+
+    <style name="Widget.GestureOverlayView.White">
+        <item name="android:gestureColor">#ff00ff00</item>
+        <item name="android:uncertainGestureColor">#4800ff00</item>
     </style>
 
     <style name="Widget.Button">
@@ -220,7 +243,7 @@
 
     <style name="Widget.ProgressBar">
         <item name="android:indeterminateOnly">true</item>
-        <item name="android:indeterminateDrawable">@android:drawable/progress_medium</item>
+        <item name="android:indeterminateDrawable">@android:drawable/progress_medium_white</item>
         <item name="android:indeterminateBehavior">repeat</item>
         <item name="android:indeterminateDuration">3500</item>
         <item name="android:minWidth">48dip</item>
@@ -230,7 +253,7 @@
     </style>
 
     <style name="Widget.ProgressBar.Large">
-        <item name="android:indeterminateDrawable">@android:drawable/progress_large</item>
+        <item name="android:indeterminateDrawable">@android:drawable/progress_large_white</item>
         <item name="android:minWidth">76dip</item>
         <item name="android:maxWidth">76dip</item>
         <item name="android:minHeight">76dip</item>
@@ -238,13 +261,25 @@
     </style>
     
     <style name="Widget.ProgressBar.Small">
-        <item name="android:indeterminateDrawable">@android:drawable/progress_small</item>
+        <item name="android:indeterminateDrawable">@android:drawable/progress_small_white</item>
         <item name="android:minWidth">16dip</item>
         <item name="android:maxWidth">16dip</item>
         <item name="android:minHeight">16dip</item>
         <item name="android:maxHeight">16dip</item>
     </style>
 
+    <style name="Widget.ProgressBar.Inverse">
+        <item name="android:indeterminateDrawable">@android:drawable/progress_medium</item>
+    </style>
+
+    <style name="Widget.ProgressBar.Large.Inverse">
+        <item name="android:indeterminateDrawable">@android:drawable/progress_large</item>
+    </style>
+
+    <style name="Widget.ProgressBar.Small.Inverse">
+        <item name="android:indeterminateDrawable">@android:drawable/progress_small</item>
+    </style> 
+    
     <style name="Widget.ProgressBar.Small.Title">
         <item name="android:indeterminateDrawable">@android:drawable/progress_small_titlebar</item>
     </style>

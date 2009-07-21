@@ -21,13 +21,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Container class for STK GET INPUT, GET IN KEY commands parameters. 
+ * Container class for STK GET INPUT, GET IN KEY commands parameters.
  *
  */
 public class Input implements Parcelable {
     public String text;
     public String defaultText;
-    public Bitmap icon; 
+    public Bitmap icon;
     public int minLen;
     public int maxLen;
     public boolean ucs2;

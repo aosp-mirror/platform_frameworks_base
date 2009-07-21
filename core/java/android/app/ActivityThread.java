@@ -23,6 +23,7 @@ import android.content.ContentProvider;
 import android.content.Context;
 import android.content.IContentProvider;
 import android.content.Intent;
+import android.content.IIntentReceiver;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -31,6 +32,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.PackageParser.Component;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -46,6 +48,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -72,6 +75,7 @@ import org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImpl;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -115,6 +119,7 @@ public final class ActivityThread {
     private static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
     private static final boolean DEBUG_BROADCAST = false;
     private static final boolean DEBUG_RESULTS = false;
+    private static final boolean DEBUG_BACKUP = true;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
@@ -161,7 +166,7 @@ public final class ActivityThread {
         return metrics;
     }
 
-    Resources getTopLevelResources(String appDir, float applicationScale) {
+    Resources getTopLevelResources(String appDir, PackageInfo pkgInfo) {
         synchronized (mPackages) {
             //Log.w(TAG, "getTopLevelResources: " + appDir);
             WeakReference<Resources> wr = mActiveResources.get(appDir);
@@ -180,23 +185,17 @@ public final class ActivityThread {
             if (assets.addAssetPath(appDir) == 0) {
                 return null;
             }
-            DisplayMetrics metrics = getDisplayMetricsLocked(false);
-            // density used to load resources
-            // scaledDensity is calculated in Resources constructor
-            //
-            boolean usePreloaded = true;
-
-            // TODO: use explicit flag to indicate the compatibility mode.
-            if (applicationScale != 1.0f) {
-                usePreloaded = false;
-                DisplayMetrics newMetrics = new DisplayMetrics();
-                newMetrics.setTo(metrics);
-                float newDensity = metrics.density / applicationScale;
-                newMetrics.updateDensity(newDensity);
-                metrics = newMetrics;
+            ApplicationInfo appInfo;
+            try {
+                appInfo = getPackageManager().getApplicationInfo(
+                        pkgInfo.getPackageName(),
+                        PackageManager.GET_SUPPORTS_DENSITIES);
+            } catch (RemoteException e) {
+                throw new AssertionError(e);
             }
             //Log.i(TAG, "Resource:" + appDir + ", display metrics=" + metrics);
-            r = new Resources(assets, metrics, getConfiguration(), usePreloaded);
+            DisplayMetrics metrics = getDisplayMetricsLocked(false);
+            r = new Resources(assets, metrics, getConfiguration(), appInfo);
             //Log.i(TAG, "Created app resources " + r + ": " + r.getConfiguration());
             // XXX need to remove entries when weak references go away
             mActiveResources.put(appDir, new WeakReference<Resources>(r));
@@ -224,7 +223,6 @@ public final class ActivityThread {
         private Resources mResources;
         private ClassLoader mClassLoader;
         private Application mApplication;
-        private float mApplicationScale;
 
         private final HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>> mReceivers
             = new HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>>();
@@ -267,8 +265,6 @@ public final class ActivityThread {
                 mClassLoader = mSystemContext.getClassLoader();
                 mResources = mSystemContext.getResources();
             }
-
-            mApplicationScale = -1.0f;
         }
 
         public PackageInfo(ActivityThread activityThread, String name,
@@ -287,54 +283,18 @@ public final class ActivityThread {
             mIncludeCode = true;
             mClassLoader = systemContext.getClassLoader();
             mResources = systemContext.getResources();
-            mApplicationScale = systemContext.getApplicationScale();
         }
 
         public String getPackageName() {
             return mPackageName;
         }
 
+        public ApplicationInfo getApplicationInfo() {
+            return mApplicationInfo;
+        }
+        
         public boolean isSecurityViolation() {
             return mSecurityViolation;
-        }
-
-        public float getApplicationScale() {
-            if (mApplicationScale > 0.0f) {
-                return mApplicationScale;
-            }
-            DisplayMetrics metrics = mActivityThread.getDisplayMetricsLocked(false);
-            // Find out the density scale (relative to 160) of the supported density  that
-            // is closest to the system's density.
-            try {
-                ApplicationInfo ai = getPackageManager().getApplicationInfo(
-                        mPackageName, PackageManager.GET_SUPPORTS_DENSITIES);
-
-                float appScale = -1.0f;
-                if (ai.supportsDensities != null) {
-                    int minDiff = Integer.MAX_VALUE;
-                    for (int density : ai.supportsDensities) {
-                        int tmpDiff = (int) Math.abs(DisplayMetrics.DEVICE_DENSITY - density);
-                        if (tmpDiff == 0) {
-                            appScale = 1.0f;
-                            break;
-                        }
-                        // prefer higher density (appScale>1.0), unless that's only option.
-                        if (tmpDiff < minDiff && appScale < 1.0f) {
-                            appScale = DisplayMetrics.DEVICE_DENSITY / density;
-                            minDiff = tmpDiff;
-                        }
-                    }
-                }
-                if (appScale < 0.0f) {
-                    mApplicationScale = metrics.density;
-                } else {
-                    mApplicationScale = appScale;
-                }
-            } catch (RemoteException e) {
-                throw new AssertionError(e);
-            }
-            if (localLOGV) Log.v(TAG, "appScale=" + mApplicationScale + ", pkg=" + mPackageName);
-            return mApplicationScale;
         }
 
         /**
@@ -494,12 +454,12 @@ public final class ActivityThread {
 
         public Resources getResources(ActivityThread mainThread) {
             if (mResources == null) {
-                mResources = mainThread.getTopLevelResources(mResDir, getApplicationScale());
+                mResources = mainThread.getTopLevelResources(mResDir, this);
             }
             return mResources;
         }
 
-        public Application makeApplication() {
+        public Application makeApplication(boolean forceDefaultAppClass) {
             if (mApplication != null) {
                 return mApplication;
             }
@@ -507,7 +467,7 @@ public final class ActivityThread {
             Application app = null;
             
             String appClass = mApplicationInfo.className;
-            if (appClass == null) {
+            if (forceDefaultAppClass || (appClass == null)) {
                 appClass = "android.app.Application";
             }
 
@@ -1199,6 +1159,16 @@ public final class ActivityThread {
         }
     }
 
+    private static final class CreateBackupAgentData {
+        ApplicationInfo appInfo;
+        int backupMode;
+        public String toString() {
+            return "CreateBackupAgentData{appInfo=" + appInfo
+                    + " backupAgent=" + appInfo.backupAgentName
+                    + " mode=" + backupMode + "}";
+        }
+    }
+    
     private static final class CreateServiceData {
         IBinder token;
         ServiceInfo info;
@@ -1239,6 +1209,7 @@ public final class ActivityThread {
         Bundle instrumentationArgs;
         IInstrumentationWatcher instrumentationWatcher;
         int debugMode;
+        boolean restrictedBackupMode;
         Configuration config;
         boolean handlingProfiling;
         public String toString() {
@@ -1265,6 +1236,11 @@ public final class ActivityThread {
         ApplicationContext context;
         String what;
         String who;
+    }
+
+    private static final class ProfilerControlData {
+        String path;
+        ParcelFileDescriptor fd;
     }
 
     private final class ApplicationThread extends ApplicationThreadNative {
@@ -1374,6 +1350,21 @@ public final class ActivityThread {
             queueOrSendMessage(H.RECEIVER, r);
         }
 
+        public final void scheduleCreateBackupAgent(ApplicationInfo app, int backupMode) {
+            CreateBackupAgentData d = new CreateBackupAgentData();
+            d.appInfo = app;
+            d.backupMode = backupMode;
+
+            queueOrSendMessage(H.CREATE_BACKUP_AGENT, d);
+        }
+
+        public final void scheduleDestroyBackupAgent(ApplicationInfo app) {
+            CreateBackupAgentData d = new CreateBackupAgentData();
+            d.appInfo = app;
+
+            queueOrSendMessage(H.DESTROY_BACKUP_AGENT, d);
+        }
+
         public final void scheduleCreateService(IBinder token,
                 ServiceInfo info) {
             CreateServiceData s = new CreateServiceData();
@@ -1419,7 +1410,7 @@ public final class ActivityThread {
                 ApplicationInfo appInfo, List<ProviderInfo> providers,
                 ComponentName instrumentationName, String profileFile,
                 Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
-                int debugMode, Configuration config,
+                int debugMode, boolean isRestrictedBackupMode, Configuration config,
                 Map<String, IBinder> services) {
             Process.setArgV0(processName);
 
@@ -1437,6 +1428,7 @@ public final class ActivityThread {
             data.instrumentationArgs = instrumentationArgs;
             data.instrumentationWatcher = instrumentationWatcher;
             data.debugMode = debugMode;
+            data.restrictedBackupMode = isRestrictedBackupMode;
             data.config = config;
             queueOrSendMessage(H.BIND_APPLICATION, data);
         }
@@ -1509,10 +1501,25 @@ public final class ActivityThread {
             }
         }
         
-        public void profilerControl(boolean start, String path) {
-            queueOrSendMessage(H.PROFILER_CONTROL, path, start ? 1 : 0);
+        public void profilerControl(boolean start, String path, ParcelFileDescriptor fd) {
+            ProfilerControlData pcd = new ProfilerControlData();
+            pcd.path = path;
+            pcd.fd = fd;
+            queueOrSendMessage(H.PROFILER_CONTROL, pcd, start ? 1 : 0);
         }
 
+        public void setSchedulingGroup(int group) {
+            // Note: do this immediately, since going into the foreground
+            // should happen regardless of what pending work we have to do
+            // and the activity manager will wait for us to report back that
+            // we are done before sending us to the background.
+            try {
+                Process.setProcessGroup(Process.myPid(), group);
+            } catch (Exception e) {
+                Log.w(TAG, "Failed setting process group to " + group, e);
+            }
+        }
+        
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
@@ -1706,6 +1713,8 @@ public final class ActivityThread {
         public static final int ACTIVITY_CONFIGURATION_CHANGED = 125;
         public static final int RELAUNCH_ACTIVITY       = 126;
         public static final int PROFILER_CONTROL        = 127;
+        public static final int CREATE_BACKUP_AGENT     = 128;
+        public static final int DESTROY_BACKUP_AGENT     = 129;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -1737,6 +1746,8 @@ public final class ActivityThread {
                     case ACTIVITY_CONFIGURATION_CHANGED: return "ACTIVITY_CONFIGURATION_CHANGED";
                     case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
                     case PROFILER_CONTROL: return "PROFILER_CONTROL";
+                    case CREATE_BACKUP_AGENT: return "CREATE_BACKUP_AGENT";
+                    case DESTROY_BACKUP_AGENT: return "DESTROY_BACKUP_AGENT";
                 }
             }
             return "(unknown)";
@@ -1837,7 +1848,13 @@ public final class ActivityThread {
                     handleActivityConfigurationChanged((IBinder)msg.obj);
                     break;
                 case PROFILER_CONTROL:
-                    handleProfilerControl(msg.arg1 != 0, (String)msg.obj);
+                    handleProfilerControl(msg.arg1 != 0, (ProfilerControlData)msg.obj);
+                    break;
+                case CREATE_BACKUP_AGENT:
+                    handleCreateBackupAgent((CreateBackupAgentData)msg.obj);
+                    break;
+                case DESTROY_BACKUP_AGENT:
+                    handleDestroyBackupAgent((CreateBackupAgentData)msg.obj);
                     break;
             }
         }
@@ -1896,6 +1913,8 @@ public final class ActivityThread {
     Application mInitialApplication;
     final ArrayList<Application> mAllApplications
             = new ArrayList<Application>();
+    // set of instantiated backup agents, keyed by package name
+    final HashMap<String, BackupAgent> mBackupAgents = new HashMap<String, BackupAgent>();
     static final ThreadLocal sThreadLocal = new ThreadLocal();
     Instrumentation mInstrumentation;
     String mInstrumentationAppDir = null;
@@ -2079,6 +2098,10 @@ public final class ActivityThread {
         return mInitialApplication;
     }
     
+    public String getProcessName() {
+        return mBoundApplication.processName;
+    }
+    
     public ApplicationContext getSystemContext() {
         synchronized (this) {
             if (mSystemContext == null) {
@@ -2257,7 +2280,7 @@ public final class ActivityThread {
         }
 
         try {
-            Application app = r.packageInfo.makeApplication();
+            Application app = r.packageInfo.makeApplication(false);
             
             if (localLOGV) Log.v(TAG, "Performing launch of " + r);
             if (localLOGV) Log.v(
@@ -2452,7 +2475,7 @@ public final class ActivityThread {
         }
 
         try {
-            Application app = packageInfo.makeApplication();
+            Application app = packageInfo.makeApplication(false);
             
             if (localLOGV) Log.v(
                 TAG, "Performing receive of " + data.intent
@@ -2495,6 +2518,85 @@ public final class ActivityThread {
         }
     }
 
+    // Instantiate a BackupAgent and tell it that it's alive
+    private final void handleCreateBackupAgent(CreateBackupAgentData data) {
+        if (DEBUG_BACKUP) Log.v(TAG, "handleCreateBackupAgent: " + data);
+
+        // no longer idle; we have backup work to do
+        unscheduleGcIdler();
+
+        // instantiate the BackupAgent class named in the manifest
+        PackageInfo packageInfo = getPackageInfoNoCheck(data.appInfo);
+        String packageName = packageInfo.mPackageName;
+        if (mBackupAgents.get(packageName) != null) {
+            Log.d(TAG, "BackupAgent " + "  for " + packageName
+                    + " already exists");
+            return;
+        }
+        
+        BackupAgent agent = null;
+        String classname = data.appInfo.backupAgentName;
+        if (classname == null) {
+            if (data.backupMode == IApplicationThread.BACKUP_MODE_INCREMENTAL) {
+                Log.e(TAG, "Attempted incremental backup but no defined agent for "
+                        + packageName);
+                return;
+            }
+            classname = "android.app.FullBackupAgent";
+        }
+        try {
+            java.lang.ClassLoader cl = packageInfo.getClassLoader();
+            agent = (BackupAgent) cl.loadClass(data.appInfo.backupAgentName).newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to instantiate backup agent "
+                    + data.appInfo.backupAgentName + ": " + e.toString(), e);
+        }
+        
+        // set up the agent's context
+        try {
+            if (DEBUG_BACKUP) Log.v(TAG, "Initializing BackupAgent "
+                    + data.appInfo.backupAgentName);
+            
+            ApplicationContext context = new ApplicationContext();
+            context.init(packageInfo, null, this);
+            context.setOuterContext(agent);
+            agent.attach(context);
+            agent.onCreate();
+
+            // tell the OS that we're live now
+            IBinder binder = agent.onBind();
+            try {
+                ActivityManagerNative.getDefault().backupAgentCreated(packageName, binder);
+            } catch (RemoteException e) {
+                // nothing to do.
+            }
+            mBackupAgents.put(packageName, agent);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to create BackupAgent "
+                    + data.appInfo.backupAgentName + ": " + e.toString(), e);
+        }
+    }
+
+    // Tear down a BackupAgent
+    private final void handleDestroyBackupAgent(CreateBackupAgentData data) {
+        if (DEBUG_BACKUP) Log.v(TAG, "handleDestroyBackupAgent: " + data);
+        
+        PackageInfo packageInfo = getPackageInfoNoCheck(data.appInfo);
+        String packageName = packageInfo.mPackageName;
+        BackupAgent agent = mBackupAgents.get(packageName);
+        if (agent != null) {
+            try {
+                agent.onDestroy();
+            } catch (Exception e) {
+                Log.w(TAG, "Exception thrown in onDestroy by backup agent of " + data.appInfo);
+                e.printStackTrace();
+            }
+            mBackupAgents.remove(packageName);
+        } else {
+            Log.w(TAG, "Attempt to destroy unknown backup agent " + data);
+        }
+    }
+
     private final void handleCreateService(CreateServiceData data) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
@@ -2520,7 +2622,7 @@ public final class ActivityThread {
             ApplicationContext context = new ApplicationContext();
             context.init(packageInfo, null, this);
 
-            Application app = packageInfo.makeApplication();
+            Application app = packageInfo.makeApplication(false);
             context.setOuterContext(service);
             service.attach(context, this, data.info.name, data.token, app,
                     ActivityManagerNative.getDefault());
@@ -3134,7 +3236,7 @@ public final class ActivityThread {
                             r.activity.getComponentName().getClassName());
                     if (!r.activity.mCalled) {
                         throw new SuperNotCalledException(
-                            "Activity " + r.intent.getComponent().toShortString()
+                            "Activity " + safeToComponentShortString(r.intent)
                             + " did not call through to super.onPause()");
                     }
                 } catch (SuperNotCalledException e) {
@@ -3143,7 +3245,7 @@ public final class ActivityThread {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
                                 "Unable to pause activity "
-                                + r.intent.getComponent().toShortString()
+                                + safeToComponentShortString(r.intent)
                                 + ": " + e.toString(), e);
                     }
                 }
@@ -3158,7 +3260,7 @@ public final class ActivityThread {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
                                 "Unable to stop activity "
-                                + r.intent.getComponent().toShortString()
+                                + safeToComponentShortString(r.intent)
                                 + ": " + e.toString(), e);
                     }
                 }
@@ -3183,7 +3285,7 @@ public final class ActivityThread {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
                                 "Unable to retain child activities "
-                                + r.intent.getComponent().toShortString()
+                                + safeToComponentShortString(r.intent)
                                 + ": " + e.toString(), e);
                     }
                 }
@@ -3194,7 +3296,7 @@ public final class ActivityThread {
                 r.activity.onDestroy();
                 if (!r.activity.mCalled) {
                     throw new SuperNotCalledException(
-                        "Activity " + r.intent.getComponent().toShortString() +
+                        "Activity " + safeToComponentShortString(r.intent) +
                         " did not call through to super.onDestroy()");
                 }
                 if (r.window != null) {
@@ -3205,8 +3307,7 @@ public final class ActivityThread {
             } catch (Exception e) {
                 if (!mInstrumentation.onException(r.activity, e)) {
                     throw new RuntimeException(
-                            "Unable to destroy activity "
-                            + r.intent.getComponent().toShortString()
+                            "Unable to destroy activity " + safeToComponentShortString(r.intent)
                             + ": " + e.toString(), e);
                 }
             }
@@ -3214,6 +3315,11 @@ public final class ActivityThread {
         mActivities.remove(token);
 
         return r;
+    }
+
+    private static String safeToComponentShortString(Intent intent) {
+        ComponentName component = intent.getComponent();
+        return component == null ? "[Unknown]" : component.toShortString();
     }
 
     private final void handleDestroyActivity(IBinder token, boolean finishing,
@@ -3475,8 +3581,6 @@ public final class ActivityThread {
             }
             mConfiguration.updateFrom(config);
             DisplayMetrics dm = getDisplayMetricsLocked(true);
-            DisplayMetrics appDm = new DisplayMetrics();
-            appDm.setTo(dm);
 
             // set it for java, this also affects newly created Resources
             if (config.locale != null) {
@@ -3496,11 +3600,7 @@ public final class ActivityThread {
                     WeakReference<Resources> v = it.next();
                     Resources r = v.get();
                     if (r != null) {
-                        // keep the original density based on application cale.
-                        appDm.updateDensity(r.getDisplayMetrics().density);
-                        r.updateConfiguration(config, appDm);
-                        // reset
-                        appDm.setTo(dm);
+                        r.updateConfiguration(config, dm);
                         //Log.i(TAG, "Updated app resources " + v.getKey()
                         //        + " " + r + ": " + r.getConfiguration());
                     } else {
@@ -3528,15 +3628,20 @@ public final class ActivityThread {
         performConfigurationChanged(r.activity, mConfiguration);
     }
 
-    final void handleProfilerControl(boolean start, String path) {
+    final void handleProfilerControl(boolean start, ProfilerControlData pcd) {
         if (start) {
-            File file = new File(path);
-            file.getParentFile().mkdirs();
             try {
-                Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
+                Debug.startMethodTracing(pcd.path, pcd.fd.getFileDescriptor(),
+                        8 * 1024 * 1024, 0);
             } catch (RuntimeException e) {
-                Log.w(TAG, "Profiling failed on path " + path
+                Log.w(TAG, "Profiling failed on path " + pcd.path
                         + " -- can the process access this path?");
+            } finally {
+                try {
+                    pcd.fd.close();
+                } catch (IOException e) {
+                    Log.w(TAG, "Failure closing profile fd", e);
+                }
             }
         } else {
             Debug.stopMethodTracing();
@@ -3591,6 +3696,13 @@ public final class ActivityThread {
          * Initialize the default locale in this process for the reasons we set the time zone.
          */
         Locale.setDefault(data.config.locale);
+
+        /*
+         * Update the system configuration since its preloaded and might not
+         * reflect configuration changes. The configuration object passed
+         * in AppBindData can be safely assumed to be up to date
+         */
+        Resources.getSystem().updateConfiguration(mConfiguration, null);
 
         data.info = getPackageInfoNoCheck(data.appInfo);
 
@@ -3682,7 +3794,9 @@ public final class ActivityThread {
             mInstrumentation = new Instrumentation();
         }
 
-        Application app = data.info.makeApplication();
+        // If the app is being launched for full backup or restore, bring it up in
+        // a restricted environment with the base application class.
+        Application app = data.info.makeApplication(data.restrictedBackupMode);
         mInitialApplication = app;
 
         List<ProviderInfo> providers = data.providers;
@@ -3867,7 +3981,10 @@ public final class ActivityThread {
             ProviderRecord pr = mProviderMap.get(name);
             if (pr.mProvider.asBinder() == provider.asBinder()) {
                 Log.i(TAG, "Removing dead content provider: " + name);
-                mProviderMap.remove(name);
+                ProviderRecord removed = mProviderMap.remove(name);
+                if (removed != null) {
+                    removed.mProvider.asBinder().unlinkToDeath(removed, 0);
+                }
             }
         }
     }
@@ -3876,7 +3993,10 @@ public final class ActivityThread {
         ProviderRecord pr = mProviderMap.get(name);
         if (pr.mProvider.asBinder() == provider.asBinder()) {
             Log.i(TAG, "Removing dead content provider: " + name);
-            mProviderMap.remove(name);
+            ProviderRecord removed = mProviderMap.remove(name);
+            if (removed != null) {
+                removed.mProvider.asBinder().unlinkToDeath(removed, 0);
+            }
         }
     }
 

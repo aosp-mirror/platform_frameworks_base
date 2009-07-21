@@ -38,15 +38,15 @@ manifest and resource files.</li>
 
 <p>To begin developing Android applications in the Eclipse IDE with ADT, you first need to 
 download the Eclipse IDE and then download and install the ADT plugin. To do so, follow the 
-steps given in <a href="{@docRoot}sdk/1.5_r1/installing.html#installingplugin">Installing 
+steps given in <a href="{@docRoot}sdk/{@sdkCurrent}/installing.html#installingplugin">Installing 
 the ADT Plugin</a>.</p>
 
 <p>If you are already developing applications using a version of ADT earlier than 0.9, make
 sure to upgrade to the latest version before continuing. See the guide to
-<a href="{@docRoot}sdk/1.5_r1/upgrading.html#UpdateAdt">Update Your Eclipse ADT Plugin</a>.</p>
+<a href="{@docRoot}sdk/{@sdkCurrent}/upgrading.html#UpdateAdt">Updating Your Eclipse ADT Plugin</a>.</p>
 
 <p class="note"><strong>Note:</strong> This guide assumes you are using the latest version of
-the ADT plugin (0.9). While most of the information covered also applies to previous 
+the ADT plugin. While most of the information covered also applies to previous 
 versions, if you are using an older version, you may want to consult this document from
 the set of documentation included in your SDK package (instead of the online version).</p>
 
@@ -138,9 +138,9 @@ folders and files in your new project:</p>
 <p><em>Wait!</em> Before you can run your application on the Android Emulator, 
 you <strong>must</strong> create an Android Virtual Device (AVD). 
 An AVD is a configuration that specifies the Android platform to be used on the emulator.
-You can read more about AVDs in the <a href="{@docRoot}guide/developing/index.html#avd">Developing
-Overview</a>, but if you just want to get started, follow the simple guide below to create
-an AVD.</p>
+You can read more in the <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual
+Devices</a> document, but if you just want to get started, follow the simple guide below to
+create an AVD.</p>
 
 <p>If you will be running your applications only on actual device hardware, you do not 
 need an AVD &mdash; see 

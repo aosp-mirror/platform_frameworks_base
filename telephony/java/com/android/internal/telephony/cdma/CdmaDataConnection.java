@@ -146,12 +146,16 @@ public class CdmaDataConnection extends DataConnection {
                 null, obtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE));
     }
 
+    private void tearDownData(Message msg) {
+        if (phone.mCM.getRadioState().isOn()) {
+            phone.mCM.deactivateDataCall(cid, obtainMessage(EVENT_DEACTIVATE_DONE, msg));
+        }
+    }
+
     protected void disconnect(Message msg) {
         onDisconnect = msg;
         if (state == State.ACTIVE) {
-            if (phone.mCM.getRadioState().isOn()) {
-                phone.mCM.deactivateDataCall(cid, obtainMessage(EVENT_DEACTIVATE_DONE, msg));
-            }
+            tearDownData(msg);
         } else if (state == State.ACTIVATING) {
             receivedDisconnectReq = true;
         } else {
@@ -229,7 +233,7 @@ public class CdmaDataConnection extends DataConnection {
 
         switch (rilCause) {
             case PS_NET_DOWN_REASON_OPERATOR_DETERMINED_BARRING:
-                cause = FailCause.BARRED;
+                cause = FailCause.OPERATOR_BARRED;
                 break;
             case PS_NET_DOWN_REASON_AUTH_FAILED:
                 cause = FailCause.USER_AUTHENTICATION;
@@ -280,7 +284,7 @@ public class CdmaDataConnection extends DataConnection {
                 // Don't bother reporting success if there's already a
                 // pending disconnect request, since DataConnectionTracker
                 // has already updated its state.
-                disconnect(onDisconnect);
+                tearDownData(onDisconnect);
             } else {
                 String[] response = ((String[]) ar.result);
                 cid = Integer.parseInt(response[0]);

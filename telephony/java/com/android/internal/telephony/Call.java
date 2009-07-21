@@ -46,6 +46,13 @@ public abstract class Call {
     public State state = State.IDLE;
 
 
+    // Flag to indicate if the current calling/caller information
+    // is accurate. If false the information is known to be accurate.
+    //
+    // For CDMA, during call waiting/3 way, there is no network response
+    // if call waiting is answered, network timed out, dropped, 3 way
+    // merged, etc.
+    protected boolean isGeneric = false;
 
     /* Instance Methods */
 
@@ -126,6 +133,7 @@ public abstract class Call {
 
             if (t < time) {
                 earliest = c;
+                time = t;
             }
         }
 
@@ -157,10 +165,8 @@ public abstract class Call {
 
     public long
     getEarliestConnectTime() {
-        List l;
         long time = Long.MAX_VALUE;
-
-        l = getConnections();
+        List l = getConnections();
 
         if (l.size() == 0) {
             return 0;
@@ -189,4 +195,44 @@ public abstract class Call {
         return getState().isRinging();
     }
 
+    /**
+     * Returns the Connection associated with this Call that was created
+     * last, or null if there are no Connections in this Call
+     */
+    public Connection
+    getLatestConnection() {
+        List l = getConnections();
+        if (l.size() == 0) {
+            return null;
+        }
+
+        long time = 0;
+        Connection latest = null;
+        for (int i = 0, s = l.size() ; i < s ; i++) {
+            Connection c = (Connection) l.get(i);
+            long t = c.getCreateTime();
+
+            if (t > time) {
+                latest = c;
+                time = t;
+            }
+        }
+
+        return latest;
+    }
+
+    /**
+     * To indicate if the connection information is accurate
+     * or not. false means accurate. Only used for CDMA.
+     */
+    public boolean isGeneric() {
+        return isGeneric;
+    }
+
+    /**
+     * Set the generic instance variable
+     */
+    public void setGeneric(boolean generic) {
+        isGeneric = generic;
+    }
 }

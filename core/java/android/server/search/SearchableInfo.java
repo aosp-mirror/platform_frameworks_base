@@ -40,7 +40,7 @@ import java.util.HashMap;
 public final class SearchableInfo implements Parcelable {
 
     // general debugging support
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String LOG_TAG = "SearchableInfo";
 
     // static strings used for XML lookups.
@@ -66,6 +66,8 @@ public final class SearchableInfo implements Parcelable {
     private final int mSearchInputType;
     private final int mSearchImeOptions;
     private final boolean mIncludeInGlobalSearch;
+    private final boolean mQueryAfterZeroResults;
+    private final String mSettingsDescription;
     private final String mSuggestAuthority;
     private final String mSuggestPath;
     private final String mSuggestSelection;
@@ -132,6 +134,14 @@ public final class SearchableInfo implements Parcelable {
      */
     public boolean shouldRewriteQueryFromText() {
         return 0 != (mSearchMode & SEARCH_MODE_QUERY_REWRITE_FROM_TEXT);
+    }
+    
+    /**
+     * Gets the description to use for this source in system search settings, or null if
+     * none has been specified.
+     */
+    public String getSettingsDescription() {
+        return mSettingsDescription;
     }
 
     /**
@@ -276,7 +286,11 @@ public final class SearchableInfo implements Parcelable {
                 EditorInfo.IME_ACTION_SEARCH);
         mIncludeInGlobalSearch = a.getBoolean(
                 com.android.internal.R.styleable.Searchable_includeInGlobalSearch, false);
+        mQueryAfterZeroResults = a.getBoolean(
+                com.android.internal.R.styleable.Searchable_queryAfterZeroResults, false);
 
+        mSettingsDescription = a.getString(
+                com.android.internal.R.styleable.Searchable_searchSettingsDescription);
         mSuggestAuthority = a.getString(
                 com.android.internal.R.styleable.Searchable_searchSuggestAuthority);
         mSuggestPath = a.getString(
@@ -317,7 +331,7 @@ public final class SearchableInfo implements Parcelable {
 
         // for now, implement some form of rules - minimal data
         if (mLabelId == 0) {
-            throw new IllegalArgumentException("No label.");
+            throw new IllegalArgumentException("Search label must be a resource reference.");
         }
     }
     
@@ -438,13 +452,18 @@ public final class SearchableInfo implements Parcelable {
         xml.close();
         
         if (DBG) {
-            Log.d(LOG_TAG, "Checked " + activityInfo.name
-                    + ",label=" + searchable.getLabelId()
-                    + ",icon=" + searchable.getIconId()
-                    + ",suggestAuthority=" + searchable.getSuggestAuthority()
-                    + ",target=" + searchable.getSearchActivity().getClassName()
-                    + ",global=" + searchable.shouldIncludeInGlobalSearch()
-                    + ",threshold=" + searchable.getSuggestThreshold());
+            if (searchable != null) {
+                Log.d(LOG_TAG, "Checked " + activityInfo.name
+                        + ",label=" + searchable.getLabelId()
+                        + ",icon=" + searchable.getIconId()
+                        + ",suggestAuthority=" + searchable.getSuggestAuthority()
+                        + ",target=" + searchable.getSearchActivity().getClassName()
+                        + ",global=" + searchable.shouldIncludeInGlobalSearch()
+                        + ",settingsDescription=" + searchable.getSettingsDescription()
+                        + ",threshold=" + searchable.getSuggestThreshold());
+            } else {
+                Log.d(LOG_TAG, "Checked " + activityInfo.name + ", no searchable meta-data");
+            }
         }
         return searchable;
     }
@@ -637,6 +656,17 @@ public final class SearchableInfo implements Parcelable {
     }
 
     /**
+     * Checks whether this searchable activity should be invoked after a query returned zero
+     * results.
+     *
+     * @return The value of the <code>queryAfterZeroResults</code> attribute,
+     *         or <code>false</code> if the attribute is not set.
+     */
+    public boolean queryAfterZeroResults() {
+        return mQueryAfterZeroResults;
+    }
+
+    /**
      * Support for parcelable and aidl operations.
      */
     public static final Parcelable.Creator<SearchableInfo> CREATOR
@@ -667,7 +697,9 @@ public final class SearchableInfo implements Parcelable {
         mSearchInputType = in.readInt();
         mSearchImeOptions = in.readInt();
         mIncludeInGlobalSearch = in.readInt() != 0;
-
+        mQueryAfterZeroResults = in.readInt() != 0;
+        
+        mSettingsDescription = in.readString();
         mSuggestAuthority = in.readString();
         mSuggestPath = in.readString();
         mSuggestSelection = in.readString();
@@ -702,7 +734,9 @@ public final class SearchableInfo implements Parcelable {
         dest.writeInt(mSearchInputType);
         dest.writeInt(mSearchImeOptions);
         dest.writeInt(mIncludeInGlobalSearch ? 1 : 0);
+        dest.writeInt(mQueryAfterZeroResults ? 1 : 0);
         
+        dest.writeString(mSettingsDescription);
         dest.writeString(mSuggestAuthority);
         dest.writeString(mSuggestPath);
         dest.writeString(mSuggestSelection);

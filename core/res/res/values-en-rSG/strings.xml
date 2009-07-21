@@ -314,10 +314,6 @@
     <skip />
     <!-- no translation found for permdesc_setAlwaysFinish (2437195869854312148) -->
     <skip />
-    <!-- no translation found for permlab_fotaUpdate (1813039882829307079) -->
-    <skip />
-    <!-- no translation found for permdesc_fotaUpdate (2544137712607584763) -->
-    <skip />
     <!-- no translation found for permlab_batteryStats (1598947993704535568) -->
     <skip />
     <!-- no translation found for permdesc_batteryStats (6247598531831307989) -->
@@ -710,7 +706,6 @@
     <!-- no translation found for lockscreen_glogin_invalid_input (4881057177478491580) -->
     <skip />
     <!-- no translation found for status_bar_time_format (2168573805413119180) -->
-    <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
     <!-- no translation found for hour_minute_ampm (1850330605794978742) -->
     <skip />
     <!-- no translation found for hour_minute_cap_ampm (1122840227537374196) -->
@@ -863,33 +858,21 @@
     <skip />
     <!-- copied from values-de/strings.xml with the crazyness of the . removed-->
     <!-- no translation found for wday1_date1_time1_wday2_date2_time2 (7066878981949584861) -->
-    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
     <!-- no translation found for wday1_date1_wday2_date2 (8671068747172261907) -->
-    <string name="wday1_date1_wday2_date2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>"</string>
     <!-- no translation found for numeric_date (5537215108967329745) -->
-    <string name="numeric_date">"<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for date1_time1_date2_time2 (3645498975775629615) -->
-    <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
     <!-- no translation found for date1_date2 (377057563556488062) -->
-    <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>"</string>
     <!-- no translation found for time1_time2 (3173474242109288305) -->
-    <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> – <xliff:g id="TIME2">%2$s</xliff:g>"</string>
     <!-- no translation found for time_wday_date (8928955562064570313) -->
-    <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <!-- no translation found for wday_date (8794741400546136975) -->
-    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <!-- no translation found for time_date (1922644512833014496) -->
-    <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
     <!-- no translation found for time_wday (1422050241301754712) -->
-    <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
     <!-- no translation found for full_date_month_first (6011143962222283357) -->
     <skip />
     <!-- no translation found for full_date_day_first (8621594762705478189) -->
-    <string name="full_date_day_first">"<xliff:g id="DAY">dd</xliff:g>  <xliff:g id="MONTH">MMMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <!-- no translation found for medium_date_month_first (48990963718825728) -->
     <skip />
     <!-- no translation found for medium_date_day_first (2898992016440387123) -->
-    <string name="medium_date_day_first">"<xliff:g id="DAY">dd</xliff:g>  <xliff:g id="MONTH">MMM</xliff:g> <xliff:g id="YEAR">yyyy</xliff:g>"</string>
     <!-- no translation found for twelve_hour_time_format (6015557937879492156) -->
     <skip />
     <!-- no translation found for twenty_four_hour_time_format (5176807998669709535) -->
@@ -903,71 +886,42 @@
     <!-- no translation found for Midnight (1260172107848123187) -->
     <skip />
     <!-- no translation found for month_day (3356633704511426364) -->
-    <string name="month_day">"<xliff:g id="day" example="9">%-d</xliff:g>  <xliff:g id="month" example="October">%B</xliff:g>"</string>
     <!-- no translation found for month (3017405760734206414) -->
     <skip />
     <!-- no translation found for month_day_year (2435948225709176752) -->
-    <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g>  <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for month_year (6228414124777343135) -->
     <skip />
     <!-- no translation found for time_of_day (8375993139317154157) -->
-    <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
     <!-- no translation found for date_and_time (9197690194373107109) -->
-    <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g>  <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for same_year_md1_md2 (9199324363135981317) -->
-    <string name="same_year_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g> –  <xliff:g id="DAY2">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
     <!-- no translation found for same_year_wday1_md1_wday2_md2 (6006392413355305178) -->
-    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>,  <xliff:g id="DAY1_0">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
     <!-- no translation found for same_year_mdy1_mdy2 (1576657593937827090) -->
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>"</string>
     <!-- no translation found for same_year_wday1_mdy1_wday2_mdy2 (9135935796468891580) -->
-    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>"</string>
     <!-- no translation found for same_year_md1_time1_md2_time2 (2172964106375558081) -->
     <skip />
     <!-- no translation found for same_year_wday1_md1_time1_wday2_md2_time2 (1702879534101786310) -->
-    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <!-- no translation found for same_year_mdy1_time1_mdy2_time2 (2476443311723358767) -->
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <!-- no translation found for same_year_wday1_mdy1_time1_wday2_mdy2_time2 (1564837340334069879) -->
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <!-- no translation found for numeric_md1_md2 (8908376522875100300) -->
-    <string name="numeric_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
     <!-- no translation found for numeric_wday1_md1_wday2_md2 (3239690882018292077) -->
-    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
     <!-- no translation found for numeric_mdy1_mdy2 (8883797176939233525) -->
-    <string name="numeric_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
     <!-- no translation found for numeric_wday1_mdy1_wday2_mdy2 (4150475769255828954) -->
-    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
     <!-- no translation found for numeric_md1_time1_md2_time2 (3624746590607741419) -->
-    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <!-- no translation found for numeric_wday1_md1_time1_wday2_md2_time2 (4258040955467298134) -->
-    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <!-- no translation found for numeric_mdy1_time1_mdy2_time2 (3598215409314517987) -->
-    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <!-- no translation found for numeric_wday1_mdy1_time1_wday2_mdy2_time2 (264076937155877259) -->
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <!-- no translation found for same_month_md1_md2 (2393563617438036111) -->
-    <string name="same_month_md1_md2">"<xliff:g id="DAY1" example="31">%3$s</xliff:g>  \u2013 <xliff:g id="DAY2" example="3">%8$s</xliff:g>  <xliff:g id="MONTH1" example="Oct">%2$s</xliff:g>"</string>
     <!-- no translation found for same_month_wday1_md1_wday2_md2 (1208946773794057819) -->
-    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
     <!-- no translation found for same_month_mdy1_mdy2 (3713236637869030492) -->
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="DAY1" example="31">%3$s</xliff:g>  \u2013 <xliff:g id="DAY2" example="3">%8$s</xliff:g>  <xliff:g id="MONTH1" example="Oct">%2$s</xliff:g> <xliff:g id="YEAR2" example="2007">%9$s</xliff:g>"</string>
     <!-- no translation found for same_month_wday1_mdy1_wday2_mdy2 (389638922479870472) -->
-    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
     <!-- no translation found for same_month_md1_time1_md2_time2 (7477075526337542685) -->
-    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <!-- no translation found for same_month_wday1_md1_time1_wday2_md2_time2 (3516978303779391173) -->
-    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <!-- no translation found for same_month_mdy1_time1_mdy2_time2 (7320410992514057310) -->
-    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <!-- no translation found for same_month_wday1_mdy1_time1_wday2_mdy2_time2 (1332950588774239228) -->
-    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>  <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>  <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
     <!-- no translation found for abbrev_month_day_year (5767271534015320250) -->
-    <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g>  <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
     <!-- no translation found for abbrev_month_year (8058929633673942490) -->
     <skip />
     <!-- no translation found for abbrev_month_day (458867920693482757) -->
-    <string name="abbrev_month_day">"<xliff:g id="day" example="31">%-d</xliff:g>  <xliff:g id="month" example="Oct">%b</xliff:g>"</string>
     <!-- no translation found for abbrev_month (1674509986330181349) -->
     <skip />
     <!-- no translation found for day_of_week_long_sunday (9057662850446501884) -->

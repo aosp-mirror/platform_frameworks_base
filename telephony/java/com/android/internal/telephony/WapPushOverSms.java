@@ -16,9 +16,10 @@
 
 package com.android.internal.telephony;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.PowerManager;
+import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.util.Config;
 import android.util.Log;
@@ -34,18 +35,17 @@ public class WapPushOverSms {
 
     private final Context mContext;
     private WspTypeDecoder pduDecoder;
-    private PowerManager.WakeLock mWakeLock;
+    private SMSDispatcher mSmsDispatcher;
 
     /**
-     * Hold the wake lock for 5 seconds, which should be enough time for 
+     * Hold the wake lock for 5 seconds, which should be enough time for
      * any receiver(s) to grab its own wake lock.
      */
     private final int WAKE_LOCK_TIMEOUT = 5000;
 
-    public WapPushOverSms(Phone phone) {
-
+    public WapPushOverSms(Phone phone, SMSDispatcher smsDispatcher) {
+        mSmsDispatcher = smsDispatcher;
         mContext = phone.getContext();
-        createWakelock();
     }
 
     /**
@@ -53,8 +53,11 @@ public class WapPushOverSms {
      * wap-230-wsp-20010705-a section 8 for details on the WAP PDU format.
      *
      * @param pdu The WAP PDU, made up of one or more SMS PDUs
+     * @return a result code from {@link Telephony.Sms.Intents}, or
+     *         {@link Activity#RESULT_OK} if the message has been broadcast
+     *         to applications
      */
-    public void dispatchWapPdu(byte[] pdu) {
+    public int dispatchWapPdu(byte[] pdu) {
 
         if (Config.LOGD) Log.d(LOG_TAG, "Rx: " + IccUtils.bytesToHexString(pdu));
 
@@ -66,7 +69,7 @@ public class WapPushOverSms {
         if ((pduType != WspTypeDecoder.PDU_TYPE_PUSH) &&
                 (pduType != WspTypeDecoder.PDU_TYPE_CONFIRMED_PUSH)) {
             if (Config.LOGD) Log.w(LOG_TAG, "Received non-PUSH WAP PDU. Type = " + pduType);
-            return;
+            return Intents.RESULT_SMS_HANDLED;
         }
 
         pduDecoder = new WspTypeDecoder(pdu);
@@ -79,7 +82,7 @@ public class WapPushOverSms {
          */
         if (pduDecoder.decodeUintvarInteger(index) == false) {
             if (Config.LOGD) Log.w(LOG_TAG, "Received PDU. Header Length error.");
-            return;
+            return Intents.RESULT_SMS_GENERIC_ERROR;
         }
         headerLength = (int)pduDecoder.getValue32();
         index += pduDecoder.getDecodedDataLength();
@@ -100,7 +103,7 @@ public class WapPushOverSms {
          */
         if (pduDecoder.decodeContentType(index) == false) {
             if (Config.LOGD) Log.w(LOG_TAG, "Received PDU. Header Content-Type error.");
-            return;
+            return Intents.RESULT_SMS_GENERIC_ERROR;
         }
         int binaryContentType;
         String mimeType = pduDecoder.getValueString();
@@ -130,7 +133,7 @@ public class WapPushOverSms {
                         Log.w(LOG_TAG,
                                 "Received PDU. Unsupported Content-Type = " + binaryContentType);
                     }
-                return;
+                return Intents.RESULT_SMS_HANDLED;
             }
         } else {
             if (mimeType.equals(WspTypeDecoder.CONTENT_MIME_TYPE_B_DRM_RIGHTS_XML)) {
@@ -147,7 +150,7 @@ public class WapPushOverSms {
                 binaryContentType = WspTypeDecoder.CONTENT_TYPE_B_MMS;
             } else {
                 if (Config.LOGD) Log.w(LOG_TAG, "Received PDU. Unknown Content-Type = " + mimeType);
-                return;
+                return Intents.RESULT_SMS_HANDLED;
             }
         }
         index += pduDecoder.getDecodedDataLength();
@@ -169,6 +172,7 @@ public class WapPushOverSms {
         if (dispatchedByApplication == false) {
             dispatchWapPdu_default(pdu, transactionId, pduType, mimeType, dataIndex);
         }
+        return Activity.RESULT_OK;
     }
 
     private void dispatchWapPdu_default(
@@ -184,7 +188,7 @@ public class WapPushOverSms {
         intent.putExtra("pduType", pduType);
         intent.putExtra("data", data);
 
-        sendBroadcast(intent, "android.permission.RECEIVE_WAP_PUSH");
+        mSmsDispatcher.dispatch(intent, "android.permission.RECEIVE_WAP_PUSH");
     }
 
     private void dispatchWapPdu_PushCO(byte[] pdu, int transactionId, int pduType) {
@@ -194,7 +198,7 @@ public class WapPushOverSms {
         intent.putExtra("pduType", pduType);
         intent.putExtra("data", pdu);
 
-        sendBroadcast(intent, "android.permission.RECEIVE_WAP_PUSH");
+        mSmsDispatcher.dispatch(intent, "android.permission.RECEIVE_WAP_PUSH");
     }
 
     private void dispatchWapPdu_MMS(byte[] pdu, int transactionId, int pduType, int dataIndex) {
@@ -209,20 +213,7 @@ public class WapPushOverSms {
         intent.putExtra("pduType", pduType);
         intent.putExtra("data", data);
 
-        sendBroadcast(intent, "android.permission.RECEIVE_MMS");
-    }
-
-    private void createWakelock() {
-        PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WapPushOverSms");
-        mWakeLock.setReferenceCounted(true);
-    }
-
-    private void sendBroadcast(Intent intent, String permission) {
-        // Hold a wake lock for WAKE_LOCK_TIMEOUT seconds, enough to give any
-        // receivers time to take their own wake locks.
-        mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
-        mContext.sendBroadcast(intent, permission);
+        mSmsDispatcher.dispatch(intent, "android.permission.RECEIVE_MMS");
     }
 }
 

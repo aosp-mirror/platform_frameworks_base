@@ -18,6 +18,8 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,8 +35,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.IBinder;
-import android.content.Context;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
 import java.lang.ref.WeakReference;
@@ -49,7 +49,7 @@ import java.lang.ref.WeakReference;
  */
 public class PopupWindow {
     /**
-     * Mode for {@link #setInputMethodMode(int): the requirements for the
+     * Mode for {@link #setInputMethodMode(int)}: the requirements for the
      * input method should be based on the focusability of the popup.  That is
      * if it is focusable than it needs to work with the input method, else
      * it doesn't.
@@ -57,16 +57,15 @@ public class PopupWindow {
     public static final int INPUT_METHOD_FROM_FOCUSABLE = 0;
     
     /**
-     * Mode for {@link #setInputMethodMode(int): this popup always needs to
+     * Mode for {@link #setInputMethodMode(int)}: this popup always needs to
      * work with an input method, regardless of whether it is focusable.  This
      * means that it will always be displayed so that the user can also operate
      * the input method while it is shown.
      */
-    
     public static final int INPUT_METHOD_NEEDED = 1;
     
     /**
-     * Mode for {@link #setInputMethodMode(int): this popup never needs to
+     * Mode for {@link #setInputMethodMode(int)}: this popup never needs to
      * work with an input method, regardless of whether it is focusable.  This
      * means that it will always be displayed to use as much space on the
      * screen as needed, regardless of whether this covers the input method.
@@ -823,6 +822,7 @@ public class PopupWindow {
         p.flags = computeFlags(p.flags);
         p.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
         p.token = token;
+        p.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         p.setTitle("PopupWindow:" + Integer.toHexString(hashCode()));
 
         return p;
@@ -990,7 +990,7 @@ public class PopupWindow {
         
         int bottomEdge = displayFrame.bottom;
         if (ignoreBottomDecorations) {
-            bottomEdge = WindowManagerImpl.getDefault().getDefaultDisplay().getHeight();
+            bottomEdge = anchor.getContext().getResources().getDisplayMetrics().heightPixels;
         }
         final int distanceToBottom = bottomEdge - (anchorPos[1] + anchor.getHeight()) - yOffset;
         final int distanceToTop = anchorPos[1] - displayFrame.top + yOffset;
@@ -1017,6 +1017,7 @@ public class PopupWindow {
             unregisterForScrollChanged();
 
             mWindowManager.removeView(mPopupView);
+
             if (mPopupView != mContentView && mPopupView instanceof ViewGroup) {
                 ((ViewGroup) mPopupView).removeView(mContentView);
             }
@@ -1071,6 +1072,20 @@ public class PopupWindow {
             mWindowManager.updateViewLayout(mPopupView, p);
         }
     }
+
+    /**
+     * <p>Updates the dimension of the popup window. Calling this function
+     * also updates the window with the current popup state as described
+     * for {@link #update()}.</p>
+     *
+     * @param width the new width
+     * @param height the new height
+     */
+    public void update(int width, int height) {
+        WindowManager.LayoutParams p = (WindowManager.LayoutParams)
+                mPopupView.getLayoutParams();
+        update(p.x, p.y, width, height, false);
+    }
     
     /**
      * <p>Updates the position and the dimension of the popup window. Width and
@@ -1115,8 +1130,7 @@ public class PopupWindow {
             return;
         }
 
-        WindowManager.LayoutParams p = (WindowManager.LayoutParams)
-                mPopupView.getLayoutParams();
+        WindowManager.LayoutParams p = (WindowManager.LayoutParams) mPopupView.getLayoutParams();
 
         boolean update = force;
 
@@ -1203,8 +1217,7 @@ public class PopupWindow {
             registerForScrollChanged(anchor, xoff, yoff);
         }
 
-        WindowManager.LayoutParams p = (WindowManager.LayoutParams)
-                mPopupView.getLayoutParams();
+        WindowManager.LayoutParams p = (WindowManager.LayoutParams) mPopupView.getLayoutParams();
 
         if (updateDimension) {
             if (width == -1) {
@@ -1316,7 +1329,16 @@ public class PopupWindow {
                 return super.onTouchEvent(event);
             }
         }
-        
+
+        @Override
+        public void sendAccessibilityEvent(int eventType) {
+            // clinets are interested in the content not the container, make it event source
+            if (mContentView != null) {
+                mContentView.sendAccessibilityEvent(eventType);
+            } else {
+                super.sendAccessibilityEvent(eventType);
+            }
+        }
     }
     
 }

@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Container class for PlayTone commands parameters. 
+ * Container class for PlayTone commands parameters.
  *
  */
 public class ToneSettings implements Parcelable {

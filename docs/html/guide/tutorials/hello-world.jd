@@ -29,7 +29,7 @@ You can then return to this tutorial and ignore anything about Eclipse.</p>
 
 <p>Before you start, you should already have the very latest SDK installed, and if you're using
 Eclipse, you should have installed the ADT plugin as well. If you have not installed these, see 
-<a href="{@docRoot}sdk/1.1_r1/installing.html">Installing the Android SDK</a> and return
+<a href="{@docRoot}sdk/{@sdkCurrent}/installing.html">Installing the Android SDK</a> and return
 here when you've completed the installation.</p>
 
 <h2 id="avd">Create an AVD</h2>
@@ -80,7 +80,7 @@ Android project in Eclipse.</p>
       "Android XML File" will also be available.)</p>
     </li>
 
-    <li>Selected "Android Project" and click <strong>Next</strong>.
+    <li>Select "Android Project" and click <strong>Next</strong>.<br/>
       <a href="images/hello_world_0.png"><img src="images/hello_world_0.png" style="height:230px" alt="" /></a>
     </li>
 
@@ -147,7 +147,7 @@ Android project in Eclipse.</p>
         built against the 1.1 platform library will run normally on the 1.5 platform. The reverse
         is not true.</p>
     </li>
-</ul>
+</ol>
 
 <p>Your Android project is now ready. It should be visible in the Package
 Explorer on the left.

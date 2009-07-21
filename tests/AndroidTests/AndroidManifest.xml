@@ -206,6 +206,12 @@
             <meta-data android:name="com.android.unit_tests.reference" android:resource="@xml/metadata" />
         </provider>
 
+        <!-- Application components used for content tests -->
+        <provider android:name=".content.MemoryFileProvider"
+                android:authorities="com.android.unit_tests.content.MemoryFileProvider"
+                android:process=":MemoryFileProvider">
+        </provider>
+
         <!-- Application components used for os tests -->
 
         <service android:name=".os.MessengerService"
@@ -213,7 +219,20 @@
         </service>
 
         <!-- Application components used for search manager tests -->
-        <!-- TODO: Removed temporarily - need to be replaced using mocks -->
+
+        <activity android:name=".SearchableActivity"
+                android:label="Searchable Activity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                    android:resource="@xml/searchable" />
+        </activity>
+
+        <provider android:name=".SuggestionProvider"
+                android:authorities="com.android.unit_tests.SuggestionProvider">
+        </provider>
 
         <!-- Used to test IPC. -->
         <service android:name=".binder.BinderTestService"

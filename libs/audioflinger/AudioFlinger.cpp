@@ -499,7 +499,8 @@ status_t AudioFlinger::setRouting(int mode, uint32_t routes, uint32_t mask)
     }
 
 #ifdef WITH_A2DP
-    LOGD("setRouting %d %d %d, tid %d, calling tid %d\n", mode, routes, mask, gettid(), IPCThreadState::self()->getCallingPid());
+    LOGV("setRouting %d %d %d, tid %d, calling tid %d\n", mode, routes, mask, gettid(),
+            IPCThreadState::self()->getCallingPid());
     if (mode == AudioSystem::MODE_NORMAL && 
             (mask & AudioSystem::ROUTE_BLUETOOTH_A2DP)) {
         AutoMutex lock(&mLock);
@@ -817,19 +818,22 @@ void AudioFlinger::handleForcedSpeakerRoute(int command)
         {
             AutoMutex lock(mHardwareLock);
             if (mForcedSpeakerCount++ == 0) {
-                mRouteRestoreTime = 0;
-                mMusicMuteSaved = mHardwareMixerThread->streamMute(AudioSystem::MUSIC);
-                if (mForcedRoute == 0 && !(mSavedRoute & AudioSystem::ROUTE_SPEAKER)) {
-                    LOGV("Route forced to Speaker ON %08x", mSavedRoute | AudioSystem::ROUTE_SPEAKER);
-                    mHardwareMixerThread->setStreamMute(AudioSystem::MUSIC, true);
-                    usleep(mHardwareMixerThread->latency()*1000);
-                    mHardwareStatus = AUDIO_HW_SET_ROUTING;
-                    mAudioHardware->setRouting(AudioSystem::MODE_NORMAL, mSavedRoute | AudioSystem::ROUTE_SPEAKER);
-                    mHardwareStatus = AUDIO_HW_IDLE;
-                    // delay track start so that audio hardware has time to siwtch routes
-                    usleep(kStartSleepTime);
+                if (mForcedRoute == 0) {
+                    mMusicMuteSaved = mHardwareMixerThread->streamMute(AudioSystem::MUSIC);
+                    LOGV("++mForcedSpeakerCount == 0, mMusicMuteSaved = %d, mRouteRestoreTime = %d", mMusicMuteSaved, mRouteRestoreTime);
+                    if (!(mSavedRoute & AudioSystem::ROUTE_SPEAKER)) {
+                        LOGV("Route forced to Speaker ON %08x", mSavedRoute | AudioSystem::ROUTE_SPEAKER);
+                        mHardwareMixerThread->setStreamMute(AudioSystem::MUSIC, true);
+                        usleep(mHardwareMixerThread->latency()*1000);
+                        mHardwareStatus = AUDIO_HW_SET_ROUTING;
+                        mAudioHardware->setRouting(AudioSystem::MODE_NORMAL, mSavedRoute | AudioSystem::ROUTE_SPEAKER);
+                        mHardwareStatus = AUDIO_HW_IDLE;
+                        // delay track start so that audio hardware has time to siwtch routes
+                        usleep(kStartSleepTime);
+                    }
                 }
                 mForcedRoute = AudioSystem::ROUTE_SPEAKER;
+                mRouteRestoreTime = 0;
             }
             LOGV("mForcedSpeakerCount incremented to %d", mForcedSpeakerCount);
         }
@@ -890,7 +894,7 @@ void AudioFlinger::handleRouteDisablesA2dp_l(int routes)
             }
             LOGV("mA2dpDisableCount decremented to %d", mA2dpDisableCount);
         } else {
-            LOGE("mA2dpDisableCount is already zero");
+            LOGV("mA2dpDisableCount is already zero");
         }
     }
 }
@@ -1277,7 +1281,7 @@ sp<AudioFlinger::MixerThread::Track>  AudioFlinger::MixerThread::createTrack_l(
     status_t lStatus;
     
     // Resampler implementation limits input sampling rate to 2 x output sampling rate.
-    if (sampleRate > MAX_SAMPLE_RATE || sampleRate > mSampleRate*2) {
+    if (sampleRate > mSampleRate*2) {
         LOGE("Sample rate out of range: %d mSampleRate %d", sampleRate, mSampleRate);
         lStatus = BAD_VALUE;
         goto Exit;
@@ -1553,7 +1557,6 @@ size_t AudioFlinger::MixerThread::getOutputFrameCount()
 AudioFlinger::MixerThread::TrackBase::TrackBase(
             const sp<MixerThread>& mixerThread,
             const sp<Client>& client,
-            int streamType,
             uint32_t sampleRate,
             int format,
             int channelCount,
@@ -1563,7 +1566,6 @@ AudioFlinger::MixerThread::TrackBase::TrackBase(
     :   RefBase(),
         mMixerThread(mixerThread),
         mClient(client),
-        mStreamType(streamType),
         mFrameCount(0),
         mState(IDLE),
         mClientTid(-1),
@@ -1594,8 +1596,8 @@ AudioFlinger::MixerThread::TrackBase::TrackBase(
                 new(mCblk) audio_track_cblk_t();
                 // clear all buffers
                 mCblk->frameCount = frameCount;
-                mCblk->sampleRate = (uint16_t)sampleRate;
-                mCblk->channels = (uint16_t)channelCount;
+                mCblk->sampleRate = sampleRate;
+                mCblk->channels = (uint8_t)channelCount;
                 if (sharedBuffer == 0) {
                     mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
                     memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
@@ -1618,8 +1620,8 @@ AudioFlinger::MixerThread::TrackBase::TrackBase(
            new(mCblk) audio_track_cblk_t();
            // clear all buffers
            mCblk->frameCount = frameCount;
-           mCblk->sampleRate = (uint16_t)sampleRate;
-           mCblk->channels = (uint16_t)channelCount;
+           mCblk->sampleRate = sampleRate;
+           mCblk->channels = (uint8_t)channelCount;
            mBuffer = (char*)mCblk + sizeof(audio_track_cblk_t);
            memset(mBuffer, 0, frameCount*channelCount*sizeof(int16_t));
            // Force underrun condition to avoid false underrun callback until first data is
@@ -1680,7 +1682,7 @@ int AudioFlinger::MixerThread::TrackBase::sampleRate() const {
 }
 
 int AudioFlinger::MixerThread::TrackBase::channelCount() const {
-    return mCblk->channels;
+    return (int)mCblk->channels;
 }
 
 void* AudioFlinger::MixerThread::TrackBase::getBuffer(uint32_t offset, uint32_t frames) const {
@@ -1713,12 +1715,13 @@ AudioFlinger::MixerThread::Track::Track(
             int channelCount,
             int frameCount,
             const sp<IMemory>& sharedBuffer)
-    :   TrackBase(mixerThread, client, streamType, sampleRate, format, channelCount, frameCount, 0, sharedBuffer)
+    :   TrackBase(mixerThread, client, sampleRate, format, channelCount, frameCount, 0, sharedBuffer)
 {
     mVolume[0] = 1.0f;
     mVolume[1] = 1.0f;
     mMute = false;
     mSharedBuffer = sharedBuffer;
+    mStreamType = streamType;
 }
 
 AudioFlinger::MixerThread::Track::~Track()
@@ -1902,15 +1905,15 @@ void AudioFlinger::MixerThread::Track::setVolume(float left, float right)
 AudioFlinger::MixerThread::RecordTrack::RecordTrack(
             const sp<MixerThread>& mixerThread,
             const sp<Client>& client,
-            int streamType,
+            int inputSource,
             uint32_t sampleRate,
             int format,
             int channelCount,
             int frameCount,
             uint32_t flags)
-    :   TrackBase(mixerThread, client, streamType, sampleRate, format,
+    :   TrackBase(mixerThread, client, sampleRate, format,
                   channelCount, frameCount, flags, 0),
-        mOverflow(false)
+        mOverflow(false), mInputSource(inputSource)
 {
 }
 
@@ -2235,7 +2238,7 @@ status_t AudioFlinger::TrackHandle::onTransact(
 
 sp<IAudioRecord> AudioFlinger::openRecord(
         pid_t pid,
-        int streamType,
+        int inputSource,
         uint32_t sampleRate,
         int format,
         int channelCount,
@@ -2258,14 +2261,8 @@ sp<IAudioRecord> AudioFlinger::openRecord(
         goto Exit;
     }
 
-    if (uint32_t(streamType) >= AudioRecord::NUM_STREAM_TYPES) {
+    if (uint32_t(inputSource) >= AudioRecord::NUM_INPUT_SOURCES) {
         LOGE("invalid stream type");
-        lStatus = BAD_VALUE;
-        goto Exit;
-    }
-
-    if (sampleRate > MAX_SAMPLE_RATE) {
-        LOGE("Sample rate out of range");
         lStatus = BAD_VALUE;
         goto Exit;
     }
@@ -2301,7 +2298,7 @@ sp<IAudioRecord> AudioFlinger::openRecord(
         frameCount = ((frameCount - 1)/inFrameCount + 1) * inFrameCount;
     
         // create new record track. The record track uses one track in mHardwareMixerThread by convention.
-        recordTrack = new MixerThread::RecordTrack(mHardwareMixerThread, client, streamType, sampleRate,
+        recordTrack = new MixerThread::RecordTrack(mHardwareMixerThread, client, inputSource, sampleRate,
                                                    format, channelCount, frameCount, flags);
     }
     if (recordTrack->getCblk() == NULL) {
@@ -2407,7 +2404,9 @@ bool AudioFlinger::AudioRecordThread::threadLoop()
                
                 LOGV("AudioRecordThread: loop starting");
                 if (mRecordTrack != 0) {
-                    input = mAudioHardware->openInputStream(mRecordTrack->format(), 
+                    input = mAudioHardware->openInputStream(
+                                    mRecordTrack->inputSource(),
+                                    mRecordTrack->format(), 
                                     mRecordTrack->channelCount(), 
                                     mRecordTrack->sampleRate(), 
                                     &mStartStatus,

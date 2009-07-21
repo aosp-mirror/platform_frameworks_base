@@ -17,7 +17,7 @@
 package com.android.server.am;
 
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.internal.os.RuntimeInit;
+import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
 import com.android.server.ProcessMap;
 import com.android.server.ProcessStats;
@@ -30,22 +30,25 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
+import android.app.ApplicationErrorReport;
 import android.app.Dialog;
 import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
-import android.app.IIntentReceiver;
-import android.app.IIntentSender;
 import android.app.IServiceConnection;
 import android.app.IThumbnailReceiver;
 import android.app.Instrumentation;
 import android.app.PendingIntent;
 import android.app.ResultInfo;
+import android.backup.IBackupManager;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -78,6 +81,9 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Checkin;
 import android.provider.Settings;
+import android.server.data.CrashData;
+import android.server.data.StackTraceElementData;
+import android.server.data.ThrowableData;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.EventLog;
@@ -92,10 +98,13 @@ import android.view.WindowManagerPolicy;
 
 import dalvik.system.Zygote;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.IllegalStateException;
 import java.lang.ref.WeakReference;
@@ -117,11 +126,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final boolean DEBUG_OOM_ADJ = localLOGV || false;
     static final boolean DEBUG_TRANSITION = localLOGV || false;
     static final boolean DEBUG_BROADCAST = localLOGV || false;
+    static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;
     static final boolean DEBUG_SERVICE = localLOGV || false;
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PROCESSES = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean DEBUG_RESULTS = localLOGV || false;
+    static final boolean DEBUG_BACKUP = localLOGV || true;
     static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
     
@@ -191,6 +202,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // Maximum number of recent tasks that we can remember.
     static final int MAX_RECENT_TASKS = 20;
 
+    // Amount of time after a call to stopAppSwitches() during which we will
+    // prevent further untrusted switches from happening.
+    static final long APP_SWITCH_DELAY_TIME = 5*1000;
+    
     // How long until we reset a task when the user returns to it.  Currently
     // 30 minutes.
     static final long ACTIVITY_INACTIVE_RESET_TIME = 1000*60*30;
@@ -273,6 +288,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     // because the user interacts with it so much.
     final int HOME_APP_ADJ;
 
+    // This is a process currently hosting a backup operation.  Killing it
+    // is not entirely fatal but is generally a bad idea.
+    final int BACKUP_APP_ADJ;
+
     // This is a process holding a secondary server -- killing it will not
     // have much of an impact as far as the user is concerned. Value set in
     // system/rootdir/init.rc on startup.
@@ -301,6 +320,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     final int EMPTY_APP_MEM;
     final int HIDDEN_APP_MEM;
     final int HOME_APP_MEM;
+    final int BACKUP_APP_MEM;
     final int SECONDARY_SERVER_MEM;
     final int VISIBLE_APP_MEM;
     final int FOREGROUND_APP_MEM;
@@ -327,6 +347,21 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     final ArrayList mHistory = new ArrayList();
 
+    /**
+     * Description of a request to start a new activity, which has been held
+     * due to app switches being disabled.
+     */
+    class PendingActivityLaunch {
+        HistoryRecord r;
+        HistoryRecord sourceRecord;
+        Uri[] grantedUriPermissions;
+        int grantedMode;
+        boolean onlyIfNeeded;
+    }
+    
+    final ArrayList<PendingActivityLaunch> mPendingActivityLaunches
+            = new ArrayList<PendingActivityLaunch>();
+    
     /**
      * List of all active broadcasts that are to be executed immediately
      * (without waiting for another broadcast to finish).  Currently this only
@@ -605,6 +640,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             = new ArrayList<ServiceRecord>();
 
     /**
+     * Backup/restore process management
+     */
+    String mBackupAppName = null;
+    BackupRecord mBackupTarget = null;
+
+    /**
      * List of PendingThumbnailsRecord objects of clients who are still
      * waiting to receive all of the thumbnails for a task.
      */
@@ -704,6 +745,20 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     int mFactoryTest;
 
+    boolean mCheckedForSetup;
+    
+    /**
+     * The time at which we will allow normal application switches again,
+     * after a call to {@link #stopAppSwitches()}.
+     */
+    long mAppSwitchesAllowedTime;
+
+    /**
+     * This is set to true after the first switch after mAppSwitchesAllowedTime
+     * is set; any switches after that will clear the time.
+     */
+    boolean mDidAppSwitch;
+    
     /**
      * Set while we are wanting to sleep, to prevent any
      * activities from being started/resumed.
@@ -756,6 +811,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * N procs were started.
      */
     int[] mProcDeaths = new int[20];
+    
+    /**
+     * This is set if we had to do a delayed dexopt of an app before launching
+     * it, to increasing the ANR timeouts in that case.
+     */
+    boolean mDidDexOpt;
     
     String mDebugApp = null;
     boolean mWaitForDebugger = false;
@@ -852,6 +913,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int SERVICE_ERROR_MSG = 18;
     static final int RESUME_TOP_ACTIVITY_MSG = 19;
     static final int PROC_START_TIMEOUT_MSG = 20;
+    static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 21;
 
     AlertDialog mUidAlert;
 
@@ -910,6 +972,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     d.show();
                     proc.anrDialog = d;
                 }
+                
+                ensureScreenEnabled();
             } break;
             case SHOW_FACTORY_ERROR_MSG: {
                 Dialog d = new FactoryErrorDialog(
@@ -952,6 +1016,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 processNextBroadcast(true);
             } break;
             case BROADCAST_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
+                    mHandler.sendMessageDelayed(nmsg, BROADCAST_TIMEOUT);
+                    return;
+                }
                 broadcastTimeout();
             } break;
             case PAUSE_TIMEOUT_MSG: {
@@ -962,9 +1032,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 activityPaused(token, null, true);
             } break;
             case IDLE_TIMEOUT_MSG: {
-                IBinder token = (IBinder)msg.obj;
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG);
+                    nmsg.obj = msg.obj;
+                    mHandler.sendMessageDelayed(nmsg, IDLE_TIMEOUT);
+                    return;
+                }
                 // We don't at this point know if the activity is fullscreen,
                 // so we need to be conservative and assume it isn't.
+                IBinder token = (IBinder)msg.obj;
                 Log.w(TAG, "Activity idle timeout for " + token);
                 activityIdleInternal(token, true);
             } break;
@@ -980,6 +1057,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 activityIdle(token);
             } break;
             case SERVICE_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(SERVICE_TIMEOUT_MSG);
+                    nmsg.obj = msg.obj;
+                    mHandler.sendMessageDelayed(nmsg, SERVICE_TIMEOUT);
+                    return;
+                }
                 serviceTimeout((ProcessRecord)msg.obj);
             } break;
             case UPDATE_TIME_ZONE: {
@@ -1016,6 +1100,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             } break;
             case LAUNCH_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(LAUNCH_TIMEOUT_MSG);
+                    mHandler.sendMessageDelayed(nmsg, LAUNCH_TIMEOUT);
+                    return;
+                }
                 synchronized (ActivityManagerService.this) {
                     if (mLaunchingActivity.isHeld()) {
                         Log.w(TAG, "Launch timeout has expired, giving up wake lock!");
@@ -1036,9 +1126,21 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             case PROC_START_TIMEOUT_MSG: {
+                if (mDidDexOpt) {
+                    mDidDexOpt = false;
+                    Message nmsg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
+                    nmsg.obj = msg.obj;
+                    mHandler.sendMessageDelayed(nmsg, PROC_START_TIMEOUT);
+                    return;
+                }
                 ProcessRecord app = (ProcessRecord)msg.obj;
                 synchronized (ActivityManagerService.this) {
                     processStartTimedOutLocked(app);
+                }
+            }
+            case DO_PENDING_ACTIVITY_LAUNCHES_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    doPendingActivityLaunchesLocked(true);
                 }
             }
             }
@@ -1301,6 +1403,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Integer.valueOf(SystemProperties.get("ro.VISIBLE_APP_ADJ"));
         SECONDARY_SERVER_ADJ =
             Integer.valueOf(SystemProperties.get("ro.SECONDARY_SERVER_ADJ"));
+        BACKUP_APP_ADJ =
+            Integer.valueOf(SystemProperties.get("ro.BACKUP_APP_ADJ"));
         HOME_APP_ADJ =
             Integer.valueOf(SystemProperties.get("ro.HOME_APP_ADJ"));
         HIDDEN_APP_MIN_ADJ =
@@ -1316,6 +1420,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Integer.valueOf(SystemProperties.get("ro.VISIBLE_APP_MEM"))*PAGE_SIZE;
         SECONDARY_SERVER_MEM =
             Integer.valueOf(SystemProperties.get("ro.SECONDARY_SERVER_MEM"))*PAGE_SIZE;
+        BACKUP_APP_MEM =
+            Integer.valueOf(SystemProperties.get("ro.BACKUP_APP_MEM"))*PAGE_SIZE;
         HOME_APP_MEM =
             Integer.valueOf(SystemProperties.get("ro.HOME_APP_MEM"))*PAGE_SIZE;
         HIDDEN_APP_MEM =
@@ -1382,7 +1488,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized (mProcessStatsThread) {
             final long now = SystemClock.uptimeMillis();
             boolean haveNewCpuStats = false;
-            
+
             if (MONITOR_CPU_USAGE &&
                     mLastCpuTime < (now-MONITOR_CPU_MIN_TIME)) {
                 mLastCpuTime = now;
@@ -1414,7 +1520,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             
-            synchronized(mBatteryStatsService.getActiveStatistics()) {
+            final BatteryStatsImpl bstats = mBatteryStatsService.getActiveStatistics();
+            synchronized(bstats) {
                 synchronized(mPidsSelfLocked) {
                     if (haveNewCpuStats) {
                         if (mBatteryStatsService.isOnBattery()) {
@@ -1426,12 +1533,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 if (pr != null) {
                                     BatteryStatsImpl.Uid.Proc ps = pr.batteryStats;
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
+                                } else {
+                                    BatteryStatsImpl.Uid.Proc ps =
+                                            bstats.getProcessStatsLocked(st.name, st.pid);
+                                    if (ps != null) {
+                                        ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-        
+
                 if (mLastWriteTime < (now-BATTERY_STATS_TIME)) {
                     mLastWriteTime = now;
                     mBatteryStatsService.getActiveStatistics().writeLocked();
@@ -1495,6 +1608,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return null;
     }
 
+    private final HistoryRecord topRunningNonDelayedActivityLocked(HistoryRecord notTop) {
+        int i = mHistory.size()-1;
+        while (i >= 0) {
+            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            if (!r.finishing && !r.delayedResume && r != notTop) {
+                return r;
+            }
+            i--;
+        }
+        return null;
+    }
+
     /**
      * This is a simplified version of topRunningActivityLocked that provides a number of
      * optional skip-over modes.  It is intended for use with the ActivityWatcher hook only.
@@ -1531,6 +1656,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return proc;
     }
 
+    private void ensurePackageDexOpt(String packageName) {
+        IPackageManager pm = ActivityThread.getPackageManager();
+        try {
+            if (pm.performDexOpt(packageName)) {
+                mDidDexOpt = true;
+            }
+        } catch (RemoteException e) {
+        }
+    }
+    
     private boolean isNextTransitionForward() {
         int transit = mWindowManager.getPendingAppTransition();
         return transit == WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
@@ -1590,6 +1725,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (r.isHomeActivity) {
                 mHomeProcess = app;
             }
+            ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
                     r.info, r.icicle, results, newIntents, !andResume,
                     isNextTransitionForward());
@@ -1640,6 +1776,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             r.stopped = true;
         }
 
+        // Launch the new version setup screen if needed.  We do this -after-
+        // launching the initial activity (that is, home), so that it can have
+        // a chance to initialize itself while in the background, making the
+        // switch back to it faster and look better.
+        startSetupActivityLocked();
+        
         return true;
     }
 
@@ -1995,6 +2137,25 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (prev != null) {
             prev.resumeKeyDispatchingLocked();
         }
+
+        if (prev.app != null && prev.cpuTimeAtResume > 0 && mBatteryStatsService.isOnBattery()) {
+            long diff = 0;
+            synchronized (mProcessStatsThread) {
+                diff = mProcessStats.getCpuTimeForPid(prev.app.pid) - prev.cpuTimeAtResume;
+            }
+            if (diff > 0) {
+                BatteryStatsImpl bsi = mBatteryStatsService.getActiveStatistics();
+                synchronized (bsi) {
+                    BatteryStatsImpl.Uid.Proc ps =
+                            bsi.getProcessStatsLocked(prev.info.applicationInfo.uid,
+                            prev.info.packageName);
+                    if (ps != null) {
+                        ps.addForegroundTimeLocked(diff);
+                    }
+                }
+            }
+        }
+        prev.cpuTimeAtResume = 0; // reset it
     }
 
     /**
@@ -2027,6 +2188,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         next.resumeKeyDispatchingLocked();
         ensureActivitiesVisibleLocked(null, 0);
         mWindowManager.executeAppTransition();
+
+        // Mark the point when the activity is resuming
+        // TODO: To be more accurate, the mark should be before the onCreate,
+        //       not after the onResume. But for subsequent starts, onResume is fine.
+        if (next.app != null) {
+            synchronized (mProcessStatsThread) {
+                next.cpuTimeAtResume = mProcessStats.getCpuTimeForPid(next.app.pid);
+            }
+        } else {
+            next.cpuTimeAtResume = 0; // Couldn't get the cpu time of process
+        }
     }
 
     /**
@@ -2191,6 +2363,96 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    private boolean startHomeActivityLocked() {
+        if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
+                && mTopAction == null) {
+            // We are running in factory test mode, but unable to find
+            // the factory test app, so just sit around displaying the
+            // error message and don't try to start anything.
+            return false;
+        }
+        Intent intent = new Intent(
+            mTopAction,
+            mTopData != null ? Uri.parse(mTopData) : null);
+        intent.setComponent(mTopComponent);
+        if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+            intent.addCategory(Intent.CATEGORY_HOME);
+        }
+        ActivityInfo aInfo =
+            intent.resolveActivityInfo(mContext.getPackageManager(),
+                    STOCK_PM_FLAGS);
+        if (aInfo != null) {
+            intent.setComponent(new ComponentName(
+                    aInfo.applicationInfo.packageName, aInfo.name));
+            // Don't do this if the home app is currently being
+            // instrumented.
+            ProcessRecord app = getProcessRecordLocked(aInfo.processName,
+                    aInfo.applicationInfo.uid);
+            if (app == null || app.instrumentationClass == null) {
+                intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivityLocked(null, intent, null, null, 0, aInfo,
+                        null, null, 0, 0, 0, false, false);
+            }
+        }
+        
+        
+        return true;
+    }
+    
+    /**
+     * Starts the "new version setup screen" if appropriate.
+     */
+    private void startSetupActivityLocked() {
+        // Only do this once per boot.
+        if (mCheckedForSetup) {
+            return;
+        }
+        
+        // We will show this screen if the current one is a different
+        // version than the last one shown, and we are not running in
+        // low-level factory test mode.
+        final ContentResolver resolver = mContext.getContentResolver();
+        if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL &&
+                Settings.Secure.getInt(resolver,
+                        Settings.Secure.DEVICE_PROVISIONED, 0) != 0) {
+            mCheckedForSetup = true;
+            
+            // See if we should be showing the platform update setup UI.
+            Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
+            List<ResolveInfo> ris = mSelf.mContext.getPackageManager()
+                    .queryIntentActivities(intent, PackageManager.GET_META_DATA);
+            
+            // We don't allow third party apps to replace this.
+            ResolveInfo ri = null;
+            for (int i=0; ris != null && i<ris.size(); i++) {
+                if ((ris.get(i).activityInfo.applicationInfo.flags
+                        & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    ri = ris.get(i);
+                    break;
+                }
+            }
+            
+            if (ri != null) {
+                String vers = ri.activityInfo.metaData != null
+                        ? ri.activityInfo.metaData.getString(Intent.METADATA_SETUP_VERSION)
+                        : null;
+                if (vers == null && ri.activityInfo.applicationInfo.metaData != null) {
+                    vers = ri.activityInfo.applicationInfo.metaData.getString(
+                            Intent.METADATA_SETUP_VERSION);
+                }
+                String lastVers = Settings.Secure.getString(
+                        resolver, Settings.Secure.LAST_SETUP_SHOWN);
+                if (vers != null && !vers.equals(lastVers)) {
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.setComponent(new ComponentName(
+                            ri.activityInfo.packageName, ri.activityInfo.name));
+                    startActivityLocked(null, intent, null, null, 0, ri.activityInfo,
+                            null, null, 0, 0, 0, false, false);
+                }
+            }
+        }
+    }
+    
     /**
      * Ensure that the top activity in the stack is resumed.
      *
@@ -2212,39 +2474,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (next == null) {
             // There are no more activities!  Let's just start up the
             // Launcher...
-            if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
-                    && mTopAction == null) {
-                // We are running in factory test mode, but unable to find
-                // the factory test app, so just sit around displaying the
-                // error message and don't try to start anything.
-                return false;
-            }
-            Intent intent = new Intent(
-                mTopAction,
-                mTopData != null ? Uri.parse(mTopData) : null);
-            intent.setComponent(mTopComponent);
-            if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
-                intent.addCategory(Intent.CATEGORY_HOME);
-            }
-            ActivityInfo aInfo =
-                intent.resolveActivityInfo(mContext.getPackageManager(),
-                        STOCK_PM_FLAGS);
-            if (aInfo != null) {
-                intent.setComponent(new ComponentName(
-                        aInfo.applicationInfo.packageName, aInfo.name));
-                // Don't do this if the home app is currently being
-                // instrumented.
-                ProcessRecord app = getProcessRecordLocked(aInfo.processName,
-                        aInfo.applicationInfo.uid);
-                if (app == null || app.instrumentationClass == null) {
-                    intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivityLocked(null, intent, null, null, 0, aInfo,
-                            null, null, 0, 0, 0, false, false);
-                }
-            }
-            return true;
+            return startHomeActivityLocked();
         }
 
+        next.delayedResume = false;
+        
         // If the top activity is the resumed one, nothing to do.
         if (mResumedActivity == next && next.state == ActivityState.RESUMED) {
             // Make sure we have executed any pending transitions, since there
@@ -2471,7 +2705,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return true;
     }
 
-    private final void startActivityLocked(HistoryRecord r, boolean newTask) {
+    private final void startActivityLocked(HistoryRecord r, boolean newTask,
+            boolean doResume) {
         final int NH = mHistory.size();
 
         int addPos = -1;
@@ -2558,7 +2793,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if ((r.intent.getFlags()
                         &Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
                     resetTaskIfNeededLocked(r, r);
-                    doShow = topRunningActivityLocked(null) == r;
+                    doShow = topRunningNonDelayedActivityLocked(null) == r;
                 }
             }
             if (SHOW_APP_STARTING_ICON && doShow) {
@@ -2588,13 +2823,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mWindowManager.validateAppTokens(mHistory);
         }
 
-        resumeTopActivityLocked(null);
+        if (doResume) {
+            resumeTopActivityLocked(null);
+        }
     }
 
     /**
      * Perform clear operation as requested by
-     * {@link Intent#FLAG_ACTIVITY_CLEAR_TOP}: assuming the top task on the
-     * stack is the one that the new activity is being launched in, look for
+     * {@link Intent#FLAG_ACTIVITY_CLEAR_TOP}: search from the top of the
+     * stack to the given task, then look for
      * an instance of that activity in the stack and, if found, finish all
      * activities on top of it and return the instance.
      *
@@ -2602,9 +2839,21 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @return Returns the old activity that should be continue to be used,
      * or null if none was found.
      */
-    private final HistoryRecord performClearTopTaskLocked(int taskId,
+    private final HistoryRecord performClearTaskLocked(int taskId,
             HistoryRecord newR, boolean doClear) {
         int i = mHistory.size();
+        
+        // First find the requested task.
+        while (i > 0) {
+            i--;
+            HistoryRecord r = (HistoryRecord)mHistory.get(i);
+            if (r.task.taskId == taskId) {
+                i++;
+                break;
+            }
+        }
+        
+        // Now clear it.
         while (i > 0) {
             i--;
             HistoryRecord r = (HistoryRecord)mHistory.get(i);
@@ -2636,7 +2885,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // instance of the activity so a new fresh one can be started.
                 if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE) {
                     if (!ret.finishing) {
-                        int index = indexOfTokenLocked(ret, false);
+                        int index = indexOfTokenLocked(ret);
                         if (index >= 0) {
                             finishActivityLocked(ret, 0, Activity.RESULT_CANCELED,
                                     null, "clear");
@@ -2729,7 +2978,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         HistoryRecord sourceRecord = null;
         HistoryRecord resultRecord = null;
         if (resultTo != null) {
-            int index = indexOfTokenLocked(resultTo, false);
+            int index = indexOfTokenLocked(resultTo);
             if (DEBUG_RESULTS) Log.v(
                 TAG, "Sending result to " + resultTo + " (index " + index + ")");
             if (index >= 0) {
@@ -2840,15 +3089,75 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 intent, resolvedType, aInfo, mConfiguration,
                 resultRecord, resultWho, requestCode, componentSpecified);
 
-        HistoryRecord notTop = (launchFlags&Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP)
-                != 0 ? r : null;
-
+        if (mResumedActivity == null
+                || mResumedActivity.info.applicationInfo.uid != callingUid) {
+            if (!checkAppSwitchAllowedLocked(callingPid, callingUid, "Activity start")) {
+                PendingActivityLaunch pal = new PendingActivityLaunch();
+                pal.r = r;
+                pal.sourceRecord = sourceRecord;
+                pal.grantedUriPermissions = grantedUriPermissions;
+                pal.grantedMode = grantedMode;
+                pal.onlyIfNeeded = onlyIfNeeded;
+                mPendingActivityLaunches.add(pal);
+                return START_SWITCHES_CANCELED;
+            }
+        }
+        
+        if (mDidAppSwitch) {
+            // This is the second allowed switch since we stopped switches,
+            // so now just generally allow switches.  Use case: user presses
+            // home (switches disabled, switch to home, mDidAppSwitch now true);
+            // user taps a home icon (coming from home so allowed, we hit here
+            // and now allow anyone to switch again).
+            mAppSwitchesAllowedTime = 0;
+        } else {
+            mDidAppSwitch = true;
+        }
+     
+        doPendingActivityLaunchesLocked(false);
+        
+        return startActivityUncheckedLocked(r, sourceRecord,
+                grantedUriPermissions, grantedMode, onlyIfNeeded, true);
+    }
+  
+    private final void doPendingActivityLaunchesLocked(boolean doResume) {
+        final int N = mPendingActivityLaunches.size();
+        if (N <= 0) {
+            return;
+        }
+        for (int i=0; i<N; i++) {
+            PendingActivityLaunch pal = mPendingActivityLaunches.get(i);
+            startActivityUncheckedLocked(pal.r, pal.sourceRecord,
+                    pal.grantedUriPermissions, pal.grantedMode, pal.onlyIfNeeded,
+                    doResume && i == (N-1));
+        }
+        mPendingActivityLaunches.clear();
+    }
+    
+    private final int startActivityUncheckedLocked(HistoryRecord r,
+            HistoryRecord sourceRecord, Uri[] grantedUriPermissions,
+            int grantedMode, boolean onlyIfNeeded, boolean doResume) {
+        final Intent intent = r.intent;
+        final int callingUid = r.launchedFromUid;
+        
+        int launchFlags = intent.getFlags();
+        
         // We'll invoke onUserLeaving before onPause only if the launching
         // activity did not explicitly state that this is an automated launch.
         mUserLeaving = (launchFlags&Intent.FLAG_ACTIVITY_NO_USER_ACTION) == 0;
         if (DEBUG_USER_LEAVING) Log.v(TAG,
                 "startActivity() => mUserLeaving=" + mUserLeaving);
         
+        // If the caller has asked not to resume at this point, we make note
+        // of this in the record so that we can skip it when trying to find
+        // the top running activity.
+        if (!doResume) {
+            r.delayedResume = true;
+        }
+        
+        HistoryRecord notTop = (launchFlags&Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP)
+                != 0 ? r : null;
+
         // If the onlyIfNeeded flag is set, then we can do this if the activity
         // being launched is the same as the one making the call...  or, as
         // a special case, if we do not know the caller then we count the
@@ -2856,7 +3165,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (onlyIfNeeded) {
             HistoryRecord checkedCaller = sourceRecord;
             if (checkedCaller == null) {
-                checkedCaller = topRunningActivityLocked(notTop);
+                checkedCaller = topRunningNonDelayedActivityLocked(notTop);
             }
             if (!checkedCaller.realActivity.equals(r.realActivity)) {
                 // Caller is not the same as launcher, so always needed.
@@ -2894,7 +3203,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             launchFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
         }
 
-        if (resultRecord != null && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
+        if (r.resultTo != null && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             // For whatever reason this activity is being launched into a new
             // task...  yet the caller has requested a result back.  Well, that
             // is pretty messed up, so instead immediately send back a cancel
@@ -2902,10 +3211,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // dependency on its originator.
             Log.w(TAG, "Activity is launching as a new task, so cancelling activity result.");
             sendActivityResultLocked(-1,
-                resultRecord, resultWho, requestCode,
+                    r.resultTo, r.resultWho, r.requestCode,
                 Activity.RESULT_CANCELED, null);
             r.resultTo = null;
-            resultRecord = null;
         }
 
         boolean addingToTask = false;
@@ -2916,7 +3224,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // If bring to front is requested, and no result is requested, and
             // we can find a task that was started with this same
             // component, then instead of launching bring that one to the front.
-            if (resultRecord == null) {
+            if (r.resultTo == null) {
                 // See if there is a task to bring to the front.  If this is
                 // a SINGLE_INSTANCE activity, there can be one and only one
                 // instance of it in the history, and it is always in its own
@@ -2938,7 +3246,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     // to have the same behavior as if a new instance was
                     // being started, which means not bringing it to the front
                     // if the caller is not itself in the front.
-                    HistoryRecord curTop = topRunningActivityLocked(notTop);
+                    HistoryRecord curTop = topRunningNonDelayedActivityLocked(notTop);
                     if (curTop.task != taskTop.task) {
                         r.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
                         boolean callerAtFront = sourceRecord == null
@@ -2959,7 +3267,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // the client said not to do anything if that
                         // is the case, so this is it!  And for paranoia, make
                         // sure we have correctly resumed the top activity.
-                        resumeTopActivityLocked(null);
+                        if (doResume) {
+                            resumeTopActivityLocked(null);
+                        }
                         return START_RETURN_INTENT_TO_CALLER;
                     }
                     if ((launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0
@@ -2969,7 +3279,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // from the task up to the one being started.  In most
                         // cases this means we are resetting the task to its
                         // initial state.
-                        HistoryRecord top = performClearTopTaskLocked(
+                        HistoryRecord top = performClearTaskLocked(
                                 taskTop.task.taskId, r, true);
                         if (top != null) {
                             if (top.frontOfTask) {
@@ -3035,7 +3345,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // We didn't do anything...  but it was needed (a.k.a., client
                         // don't use that intent!)  And for paranoia, make
                         // sure we have correctly resumed the top activity.
-                        resumeTopActivityLocked(null);
+                        if (doResume) {
+                            resumeTopActivityLocked(null);
+                        }
                         return START_TASK_TO_FRONT;
                     }
                 }
@@ -3052,8 +3364,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // If the activity being launched is the same as the one currently
             // at the top, then we need to check if it should only be launched
             // once.
-            HistoryRecord top = topRunningActivityLocked(notTop);
-            if (top != null && resultRecord == null) {
+            HistoryRecord top = topRunningNonDelayedActivityLocked(notTop);
+            if (top != null && r.resultTo == null) {
                 if (top.realActivity.equals(r.realActivity)) {
                     if (top.app != null && top.app.thread != null) {
                         if ((launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
@@ -3062,7 +3374,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             logStartActivity(LOG_AM_NEW_INTENT, top, top.task);
                             // For paranoia, make sure we have correctly
                             // resumed the top activity.
-                            resumeTopActivityLocked(null);
+                            if (doResume) {
+                                resumeTopActivityLocked(null);
+                            }
                             if (onlyIfNeeded) {
                                 // We don't need to start a new activity, and
                                 // the client said not to do anything if that
@@ -3077,9 +3391,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
         } else {
-            if (resultRecord != null) {
+            if (r.resultTo != null) {
                 sendActivityResultLocked(-1,
-                    resultRecord, resultWho, requestCode,
+                        r.resultTo, r.resultWho, r.requestCode,
                     Activity.RESULT_CANCELED, null);
             }
             return START_CLASS_NOT_FOUND;
@@ -3088,7 +3402,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         boolean newTask = false;
 
         // Should this be considered a new task?
-        if (resultRecord == null && !addingToTask
+        if (r.resultTo == null && !addingToTask
                 && (launchFlags&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
             // todo: should do better management of integers.
             mCurTask++;
@@ -3108,14 +3422,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // In this case, we are adding the activity to an existing
                 // task, but the caller has asked to clear that task if the
                 // activity is already running.
-                HistoryRecord top = performClearTopTaskLocked(
+                HistoryRecord top = performClearTaskLocked(
                         sourceRecord.task.taskId, r, true);
                 if (top != null) {
                     logStartActivity(LOG_AM_NEW_INTENT, r, top.task);
                     deliverNewIntentLocked(top, r.intent);
                     // For paranoia, make sure we have correctly
                     // resumed the top activity.
-                    resumeTopActivityLocked(null);
+                    if (doResume) {
+                        resumeTopActivityLocked(null);
+                    }
                     return START_DELIVERED_TO_TOP;
                 }
             } else if (!addingToTask &&
@@ -3128,7 +3444,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     HistoryRecord top = moveActivityToFrontLocked(where);
                     logStartActivity(LOG_AM_NEW_INTENT, r, top.task);
                     deliverNewIntentLocked(top, r.intent);
-                    resumeTopActivityLocked(null);
+                    if (doResume) {
+                        resumeTopActivityLocked(null);
+                    }
                     return START_DELIVERED_TO_TOP;
                 }
             }
@@ -3157,7 +3475,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             EventLog.writeEvent(LOG_AM_CREATE_TASK, r.task.taskId);
         }
         logStartActivity(LOG_AM_CREATE_ACTIVITY, r, r.task);
-        startActivityLocked(r, newTask);
+        startActivityLocked(r, newTask, doResume);
         return START_SUCCESS;
     }
 
@@ -3226,7 +3544,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         synchronized (this) {
-            int index = indexOfTokenLocked(callingActivity, false);
+            int index = indexOfTokenLocked(callingActivity);
             if (index < 0) {
                 return false;
             }
@@ -3376,7 +3694,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public void setRequestedOrientation(IBinder token,
             int requestedOrientation) {
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -3398,7 +3716,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public int getRequestedOrientation(IBinder token) {
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
             }
@@ -3454,7 +3772,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             TAG, "Finishing activity: token=" + token
             + ", result=" + resultCode + ", data=" + resultData);
 
-        int index = indexOfTokenLocked(token, false);
+        int index = indexOfTokenLocked(token);
         if (index < 0) {
             return false;
         }
@@ -3578,7 +3896,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private final HistoryRecord finishCurrentActivityLocked(HistoryRecord r,
             int mode) {
-        final int index = indexOfTokenLocked(r, false);
+        final int index = indexOfTokenLocked(r);
         if (index < 0) {
             return null;
         }
@@ -3703,7 +4021,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public final void finishSubActivity(IBinder token, String resultWho,
             int requestCode) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -4253,7 +4571,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         synchronized(this) {
-            int index = indexOfTokenLocked(token, true);
+            int index = indexOfTokenLocked(token);
             if (index < 0) {
                 return;
             }
@@ -4523,6 +4841,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 mPendingBroadcast = null;
                 scheduleBroadcastsLocked();
             }
+            if (mBackupTarget != null && mBackupTarget.app.pid == pid) {
+                Log.w(TAG, "Unattached app died before backup, skipping");
+                try {
+                    IBackupManager bm = IBackupManager.Stub.asInterface(
+                            ServiceManager.getService(Context.BACKUP_SERVICE));
+                    bm.agentDisconnected(app.info.packageName);
+                } catch (RemoteException e) {
+                    // Can't happen; the backup manager is local
+                }
+            }
         } else {
             Log.w(TAG, "Spurious process start timeout - pid not known for " + app);
         }
@@ -4587,6 +4915,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         app.thread = thread;
         app.curAdj = app.setAdj = -100;
+        app.curSchedGroup = app.setSchedGroup = Process.THREAD_GROUP_DEFAULT;
         app.forcingToForeground = null;
         app.foregroundServices = false;
         app.debugging = false;
@@ -4610,11 +4939,23 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     mWaitForDebugger = mOrigWaitForDebugger;
                 }
             }
+            // If the app is being launched for restore or full backup, set it up specially
+            boolean isRestrictedBackupMode = false;
+            if (mBackupTarget != null && mBackupAppName.equals(processName)) {
+                isRestrictedBackupMode = (mBackupTarget.backupMode == BackupRecord.RESTORE)
+                        || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL);
+            }
+            ensurePackageDexOpt(app.instrumentationInfo != null
+                    ? app.instrumentationInfo.packageName
+                    : app.info.packageName);
+            if (app.instrumentationClass != null) {
+                ensurePackageDexOpt(app.instrumentationClass.getPackageName());
+            }
             thread.bindApplication(processName, app.instrumentationInfo != null
                     ? app.instrumentationInfo : app.info, providers,
                     app.instrumentationClass, app.instrumentationProfileFile,
                     app.instrumentationArguments, app.instrumentationWatcher, testMode, 
-                    mConfiguration, getCommonServicesLocked());
+                    isRestrictedBackupMode, mConfiguration, getCommonServicesLocked());
             updateLRUListLocked(app, false);
             app.lastRequestedGc = SystemClock.uptimeMillis();
         } catch (Exception e) {
@@ -4692,6 +5033,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 finishReceiverLocked(br.receiver, br.resultCode, br.resultData,
                         br.resultExtras, br.resultAbort, true);
                 scheduleBroadcastsLocked();
+            }
+        }
+
+        // Check whether the next backup agent is in this process...
+        if (!badApp && mBackupTarget != null && mBackupTarget.appInfo.uid == app.info.uid) {
+            if (DEBUG_BACKUP) Log.v(TAG, "New app is backup target, launching agent for " + app);
+            ensurePackageDexOpt(mBackupTarget.appInfo.packageName);
+            try {
+                thread.scheduleCreateBackupAgent(mBackupTarget.appInfo, mBackupTarget.backupMode);
+            } catch (Exception e) {
+                Log.w(TAG, "Exception scheduling backup agent creation: ");
+                e.printStackTrace();
             }
         }
 
@@ -4790,7 +5143,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
 
             // Get the activity record.
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
 
@@ -4911,6 +5264,20 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    final void ensureScreenEnabled() {
+        boolean enableScreen;
+        synchronized (this) {
+            enableScreen = !mBooted;
+            mBooted = true;
+        }
+
+        if (enableScreen) {
+            EventLog.writeEvent(LOG_BOOT_PROGRESS_ENABLE_SCREEN,
+                SystemClock.uptimeMillis());
+            enableScreenAfterBoot();
+        }
+    }
+    
     public final void activityPaused(IBinder token, Bundle icicle) {
         // Refuse possible leaked file descriptors
         if (icicle != null && icicle.hasFileDescriptors()) {
@@ -4930,7 +5297,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         HistoryRecord r = null;
 
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 r = (HistoryRecord)mHistory.get(index);
                 if (!timeout) {
@@ -4961,7 +5328,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         final long origId = Binder.clearCallingIdentity();
 
         synchronized (this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 r = (HistoryRecord)mHistory.get(index);
                 r.thumbnail = thumbnail;
@@ -4991,7 +5358,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized (this) {
             mHandler.removeMessages(DESTROY_TIMEOUT_MSG, token);
             
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 if (r.state == ActivityState.DESTROYING) {
@@ -5018,7 +5385,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private HistoryRecord getCallingRecordLocked(IBinder token) {
-        int index = indexOfTokenLocked(token, true);
+        int index = indexOfTokenLocked(token);
         if (index >= 0) {
             HistoryRecord r = (HistoryRecord)mHistory.get(index);
             if (r != null) {
@@ -5030,7 +5397,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public ComponentName getActivityClassForToken(IBinder token) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 return r.intent.getComponent();
@@ -5041,7 +5408,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     public String getPackageForToken(IBinder token) {
         synchronized(this) {
-            int index = indexOfTokenLocked(token, false);
+            int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
                 return r.packageName;
@@ -5080,7 +5447,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             HistoryRecord activity = null;
             if (type == INTENT_SENDER_ACTIVITY_RESULT) {
-                int index = indexOfTokenLocked(token, false);
+                int index = indexOfTokenLocked(token);
                 if (index < 0) {
                     return null;
                 }
@@ -6251,6 +6618,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 "moveTaskToFront()");
 
         synchronized(this) {
+            if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
+                    Binder.getCallingUid(), "Task to front")) {
+                return;
+            }
             final long origId = Binder.clearCallingIdentity();
             try {
                 int N = mRecentTasks.size();
@@ -6335,6 +6706,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 "moveTaskToBack()");
 
         synchronized(this) {
+            if (mResumedActivity != null && mResumedActivity.task.taskId == task) {
+                if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
+                        Binder.getCallingUid(), "Task to back")) {
+                    return;
+                }
+            }
             final long origId = Binder.clearCallingIdentity();
             moveTaskToBackLocked(task);
             Binder.restoreCallingIdentity(origId);
@@ -6438,6 +6815,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 "moveTaskBackwards()");
 
         synchronized(this) {
+            if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
+                    Binder.getCallingUid(), "Task backwards")) {
+                return;
+            }
             final long origId = Binder.clearCallingIdentity();
             moveTaskBackwardsLocked(task);
             Binder.restoreCallingIdentity(origId);
@@ -6587,7 +6968,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         synchronized(this) {
             if (r == null) {
-                int index = indexOfTokenLocked(token, false);
+                int index = indexOfTokenLocked(token);
                 if (index < 0) {
                     return;
                 }
@@ -6670,6 +7051,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 app.pubProviders.put(cpi.name, cpr);
                 app.addPackage(cpi.applicationInfo.packageName);
+                ensurePackageDexOpt(cpi.applicationInfo.packageName);
             }
         }
         return providers;
@@ -7179,6 +7561,55 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public void stopAppSwitches() {
+        if (checkCallingPermission(android.Manifest.permission.STOP_APP_SWITCHES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.STOP_APP_SWITCHES);
+        }
+        
+        synchronized(this) {
+            mAppSwitchesAllowedTime = SystemClock.uptimeMillis()
+                    + APP_SWITCH_DELAY_TIME;
+            mDidAppSwitch = false;
+            mHandler.removeMessages(DO_PENDING_ACTIVITY_LAUNCHES_MSG);
+            Message msg = mHandler.obtainMessage(DO_PENDING_ACTIVITY_LAUNCHES_MSG);
+            mHandler.sendMessageDelayed(msg, APP_SWITCH_DELAY_TIME);
+        }
+    }
+    
+    public void resumeAppSwitches() {
+        if (checkCallingPermission(android.Manifest.permission.STOP_APP_SWITCHES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.STOP_APP_SWITCHES);
+        }
+        
+        synchronized(this) {
+            // Note that we don't execute any pending app switches... we will
+            // let those wait until either the timeout, or the next start
+            // activity request.
+            mAppSwitchesAllowedTime = 0;
+        }
+    }
+    
+    boolean checkAppSwitchAllowedLocked(int callingPid, int callingUid,
+            String name) {
+        if (mAppSwitchesAllowedTime < SystemClock.uptimeMillis()) {
+            return true;
+        }
+            
+        final int perm = checkComponentPermission(
+                android.Manifest.permission.STOP_APP_SWITCHES, callingPid,
+                callingUid, -1);
+        if (perm == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        
+        Log.w(TAG, name + " request from " + callingUid + " stopped");
+        return false;
+    }
+    
     public void setDebugApp(String packageName, boolean waitForDebugger,
             boolean persistent) {
         enforceCallingPermission(android.Manifest.permission.SET_DEBUG_APP,
@@ -7595,6 +8026,31 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return handleAppCrashLocked(app);
     }
 
+    private ComponentName getErrorReportReceiver(ProcessRecord app) {
+        IPackageManager pm = ActivityThread.getPackageManager();
+        try {
+            // was an installer package name specified when this app was
+            // installed?
+            String installerPackageName = pm.getInstallerPackageName(app.info.packageName);
+            if (installerPackageName == null) {
+                return null;
+            }
+
+            // is there an Activity in this package that handles ACTION_APP_ERROR?
+            Intent intent = new Intent(Intent.ACTION_APP_ERROR);
+            intent.setPackage(installerPackageName);
+            ResolveInfo info = pm.resolveIntent(intent, null, 0);
+            if (info == null || info.activityInfo == null) {
+                return null;
+            }
+
+            return new ComponentName(installerPackageName, info.activityInfo.name);
+        } catch (RemoteException e) {
+            // will return null and no error report will be delivered
+        }
+        return null;
+    }
+
     void makeAppNotRespondingLocked(ProcessRecord app,
             String tag, String shortMsg, String longMsg, byte[] crashData) {
         app.notResponding = true;
@@ -7713,6 +8169,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     void startAppProblemLocked(ProcessRecord app) {
+        app.errorReportReceiver = getErrorReportReceiver(app);
         skipCurrentReceiverLocked(app);
     }
 
@@ -7745,7 +8202,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public int handleApplicationError(IBinder app, int flags,
             String tag, String shortMsg, String longMsg, byte[] crashData) {
         AppErrorResult result = new AppErrorResult();
-
         ProcessRecord r = null;
         synchronized (this) {
             if (app != null) {
@@ -7834,16 +8290,103 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         int res = result.get();
 
+        Intent appErrorIntent = null;
         synchronized (this) {
             if (r != null) {
                 mProcessCrashTimes.put(r.info.processName, r.info.uid,
                         SystemClock.uptimeMillis());
+            }
+            if (res == AppErrorDialog.FORCE_QUIT_AND_REPORT) {
+                appErrorIntent = createAppErrorIntentLocked(r);
+                res = AppErrorDialog.FORCE_QUIT;
+            }
+        }
+
+        if (appErrorIntent != null) {
+            try {
+                mContext.startActivity(appErrorIntent);
+            } catch (ActivityNotFoundException e) {
+                Log.w(TAG, "bug report receiver dissappeared", e);
             }
         }
 
         return res;
     }
     
+    Intent createAppErrorIntentLocked(ProcessRecord r) {
+        ApplicationErrorReport report = createAppErrorReportLocked(r);
+        if (report == null) {
+            return null;
+        }
+        Intent result = new Intent(Intent.ACTION_APP_ERROR);
+        result.setComponent(r.errorReportReceiver);
+        result.putExtra(Intent.EXTRA_BUG_REPORT, report);
+        result.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return result;
+    }
+
+    ApplicationErrorReport createAppErrorReportLocked(ProcessRecord r) {
+        if (r.errorReportReceiver == null) {
+            return null;
+        }
+
+        if (!r.crashing && !r.notResponding) {
+            return null;
+        }
+
+        try {
+            ApplicationErrorReport report = new ApplicationErrorReport();
+            report.packageName = r.info.packageName;
+            report.installerPackageName = r.errorReportReceiver.getPackageName();
+            report.processName = r.processName;
+
+            if (r.crashing) {
+                report.type = ApplicationErrorReport.TYPE_CRASH;
+                report.crashInfo = new ApplicationErrorReport.CrashInfo();
+
+                ByteArrayInputStream byteStream = new ByteArrayInputStream(
+                        r.crashingReport.crashData);
+                DataInputStream dataStream = new DataInputStream(byteStream);
+                CrashData crashData = new CrashData(dataStream);
+                ThrowableData throwData = crashData.getThrowableData();
+
+                report.time = crashData.getTime();
+                report.crashInfo.stackTrace = throwData.toString();
+
+                // Extract the source of the exception, useful for report
+                // clustering. Also extract the "deepest" non-null exception
+                // message.
+                String exceptionMessage = throwData.getMessage();
+                while (throwData.getCause() != null) {
+                    throwData = throwData.getCause();
+                    String msg = throwData.getMessage();
+                    if (msg != null && msg.length() > 0) {
+                       exceptionMessage = msg;
+                    }
+                }
+                StackTraceElementData trace = throwData.getStackTrace()[0];
+                report.crashInfo.exceptionMessage = exceptionMessage;
+                report.crashInfo.exceptionClassName = throwData.getType();
+                report.crashInfo.throwFileName = trace.getFileName();
+                report.crashInfo.throwClassName = trace.getClassName();
+                report.crashInfo.throwMethodName = trace.getMethodName();
+            } else if (r.notResponding) {
+                report.type = ApplicationErrorReport.TYPE_ANR;
+                report.anrInfo = new ApplicationErrorReport.AnrInfo();
+
+                report.anrInfo.activity = r.notRespondingReport.tag;
+                report.anrInfo.cause = r.notRespondingReport.shortMsg;
+                report.anrInfo.info = r.notRespondingReport.longMsg;
+            }
+
+            return report;
+        } catch (IOException e) {
+            // we don't send it
+        }
+
+        return null;
+    }
+
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState() {
         // assume our apps are happy - lazy create the list
         List<ActivityManager.ProcessErrorStateInfo> errList = null;
@@ -8475,9 +9018,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                       + " #" + i + ":");
                 r.dump(pw, prefix + "  ");
             } else if (inclOomAdj) {
-                pw.println(String.format("%s%s #%2d: oom_adj=%3d %s",
+                pw.println(String.format("%s%s #%2d: adj=%3d/%d %s",
                         prefix, (r.persistent ? persistentLabel : normalLabel),
-                        i, r.setAdj, r.toString()));
+                        i, r.setAdj, r.setSchedGroup, r.toString()));
             } else {
                 pw.println(String.format("%s%s #%2d: %s",
                         prefix, (r.persistent ? persistentLabel : normalLabel),
@@ -8540,7 +9083,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return false;
     }
 
-    private final int indexOfTokenLocked(IBinder token, boolean required) {
+    private final int indexOfTokenLocked(IBinder token) {
         int count = mHistory.size();
 
         // convert the token to an entry in the history.
@@ -8554,17 +9097,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 break;
             }
         }
-        if (index < 0 && required) {
-            RuntimeInit.crash(TAG, new InvalidTokenException(token));
-        }
 
         return index;
-    }
-
-    static class InvalidTokenException extends Exception {
-        InvalidTokenException(IBinder token) {
-            super("Bad activity token: " + token);
-        }
     }
 
     private final void killServicesLocked(ProcessRecord app,
@@ -8790,6 +9324,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             app.receivers.clear();
         }
         
+        // If the app is undergoing backup, tell the backup manager about it
+        if (mBackupTarget != null && app.pid == mBackupTarget.app.pid) {
+            if (DEBUG_BACKUP) Log.d(TAG, "App " + mBackupTarget.appInfo + " died during backup");
+            try {
+                IBackupManager bm = IBackupManager.Stub.asInterface(
+                        ServiceManager.getService(Context.BACKUP_SERVICE));
+                bm.agentDisconnected(app.info.packageName);
+            } catch (RemoteException e) {
+                // can't happen; backup manager is local
+            }
+        }
+
         // If the caller is restarting this app, then leave it in its
         // current lists and let the caller take care of it.
         if (restarting) {
@@ -9130,6 +9676,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startLaunchedLocked();
             }
+            ensurePackageDexOpt(r.serviceInfo.packageName);
             app.thread.scheduleCreateService(r, r.serviceInfo);
             created = true;
         } finally {
@@ -9579,7 +10126,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             HistoryRecord activity = null;
             if (token != null) {
-                int aindex = indexOfTokenLocked(token, false);
+                int aindex = indexOfTokenLocked(token);
                 if (aindex < 0) {
                     Log.w(TAG, "Binding with unknown activity: " + token);
                     return 0;
@@ -9906,6 +10453,128 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
     
     // =========================================================
+    // BACKUP AND RESTORE
+    // =========================================================
+    
+    // Cause the target app to be launched if necessary and its backup agent
+    // instantiated.  The backup agent will invoke backupAgentCreated() on the
+    // activity manager to announce its creation.
+    public boolean bindBackupAgent(ApplicationInfo app, int backupMode) {
+        if (DEBUG_BACKUP) Log.v(TAG, "startBackupAgent: app=" + app + " mode=" + backupMode);
+        enforceCallingPermission("android.permission.BACKUP", "startBackupAgent");
+
+        synchronized(this) {
+            // !!! TODO: currently no check here that we're already bound
+            BatteryStatsImpl.Uid.Pkg.Serv ss = null;
+            BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+            synchronized (stats) {
+                ss = stats.getServiceStatsLocked(app.uid, app.packageName, app.name);
+            }
+
+            BackupRecord r = new BackupRecord(ss, app, backupMode);
+            ComponentName hostingName = new ComponentName(app.packageName, app.backupAgentName);
+            // startProcessLocked() returns existing proc's record if it's already running
+            ProcessRecord proc = startProcessLocked(app.processName, app,
+                    false, 0, "backup", hostingName);
+            if (proc == null) {
+                Log.e(TAG, "Unable to start backup agent process " + r);
+                return false;
+            }
+
+            r.app = proc;
+            mBackupTarget = r;
+            mBackupAppName = app.packageName;
+
+            // Try not to kill the process during backup
+            updateOomAdjLocked(proc);
+
+            // If the process is already attached, schedule the creation of the backup agent now.
+            // If it is not yet live, this will be done when it attaches to the framework.
+            if (proc.thread != null) {
+                if (DEBUG_BACKUP) Log.v(TAG, "Agent proc already running: " + proc);
+                try {
+                    proc.thread.scheduleCreateBackupAgent(app, backupMode);
+                } catch (RemoteException e) {
+                    // !!! TODO: notify the backup manager that we crashed, or rely on
+                    // death notices, or...?
+                }
+            } else {
+                if (DEBUG_BACKUP) Log.v(TAG, "Agent proc not running, waiting for attach");
+            }
+            // Invariants: at this point, the target app process exists and the application
+            // is either already running or in the process of coming up.  mBackupTarget and
+            // mBackupAppName describe the app, so that when it binds back to the AM we
+            // know that it's scheduled for a backup-agent operation.
+        }
+        
+        return true;
+    }
+
+    // A backup agent has just come up                    
+    public void backupAgentCreated(String agentPackageName, IBinder agent) {
+        if (DEBUG_BACKUP) Log.v(TAG, "backupAgentCreated: " + agentPackageName
+                + " = " + agent);
+
+        synchronized(this) {
+            if (!agentPackageName.equals(mBackupAppName)) {
+                Log.e(TAG, "Backup agent created for " + agentPackageName + " but not requested!");
+                return;
+            }
+
+            long oldIdent = Binder.clearCallingIdentity();
+            try {
+                IBackupManager bm = IBackupManager.Stub.asInterface(
+                        ServiceManager.getService(Context.BACKUP_SERVICE));
+                bm.agentConnected(agentPackageName, agent);
+            } catch (RemoteException e) {
+                // can't happen; the backup manager service is local
+            } catch (Exception e) {
+                Log.w(TAG, "Exception trying to deliver BackupAgent binding: ");
+                e.printStackTrace();
+            } finally {
+                Binder.restoreCallingIdentity(oldIdent);
+            }
+        }
+    }
+
+    // done with this agent
+    public void unbindBackupAgent(ApplicationInfo appInfo) {
+        if (DEBUG_BACKUP) Log.v(TAG, "unbindBackupAgent: " + appInfo);
+        if (appInfo == null) {
+            Log.w(TAG, "unbind backup agent for null app");
+            return;
+        }
+
+        synchronized(this) {
+            if (mBackupAppName == null) {
+                Log.w(TAG, "Unbinding backup agent with no active backup");
+                return;
+            }
+
+            if (!mBackupAppName.equals(appInfo.packageName)) {
+                Log.e(TAG, "Unbind of " + appInfo + " but is not the current backup target");
+                return;
+            }
+
+            ProcessRecord proc = mBackupTarget.app;
+            mBackupTarget = null;
+            mBackupAppName = null;
+
+            // Not backing this app up any more; reset its OOM adjustment
+            updateOomAdjLocked(proc);
+
+            // If the app crashed during backup, 'thread' will be null here
+            if (proc.thread != null) {
+                try {
+                    proc.thread.scheduleDestroyBackupAgent(appInfo);
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception when unbinding backup agent:");
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    // =========================================================
     // BROADCASTS
     // =========================================================
 
@@ -10078,7 +10747,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             boolean ordered, boolean sticky, int callingPid, int callingUid) {
         intent = new Intent(intent);
 
-        if (DEBUG_BROADCAST) Log.v(
+        if (DEBUG_BROADCAST_LIGHT) Log.v(
             TAG, (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
             + " ordered=" + ordered);
         if ((resultTo != null) && !ordered) {
@@ -10114,6 +10783,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
                             uninstallPackageLocked(ssp,
                                     intent.getIntExtra(Intent.EXTRA_UID, -1), false);
+                            AttributeCache ac = AttributeCache.instance();
+                            if (ac != null) {
+                                ac.removePackage(ssp);
+                            }
                         }
                     }
                 }
@@ -10176,8 +10849,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        final ContentResolver resolver = mContext.getContentResolver();
-
         // Figure out who all will receive this broadcast.
         List receivers = null;
         List<BroadcastFilter> registeredReceivers = null;
@@ -10200,8 +10871,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         ActivityThread.getPackageManager().queryIntentReceivers(
                                 intent, resolvedType, STOCK_PM_FLAGS);
                 }
-                registeredReceivers = mReceiverResolver.queryIntent(resolver,
-                        intent, resolvedType, false);
+                registeredReceivers = mReceiverResolver.queryIntent(intent, resolvedType, false);
             }
         } catch (RemoteException ex) {
             // pm is in same process, this will never happen.
@@ -10573,9 +11243,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         boolean started = false;
         try {
-            if (DEBUG_BROADCAST) Log.v(TAG,
+            if (DEBUG_BROADCAST_LIGHT) Log.v(TAG,
                     "Delivering to component " + r.curComponent
                     + ": " + r);
+            ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             app.thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
                     r.resultCode, r.resultData, r.resultExtras, r.ordered);
             started = true;
@@ -10643,12 +11314,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 r.curFilter = filter;
                 filter.receiverList.curBroadcast = r;
                 r.state = BroadcastRecord.CALL_IN_RECEIVE;
+                if (filter.receiverList.app != null) {
+                    // Bump hosting application to no longer be in background
+                    // scheduling class.  Note that we can't do that if there
+                    // isn't an app...  but we can only be in that case for
+                    // things that directly call the IActivityManager API, which
+                    // are already core system stuff so don't matter for this.
+                    r.curApp = filter.receiverList.app;
+                    filter.receiverList.app.curReceiver = r;
+                    updateOomAdjLocked();
+                }
             }
             try {
-                if (DEBUG_BROADCAST) {
+                if (DEBUG_BROADCAST_LIGHT) {
                     int seq = r.intent.getIntExtra("seq", -1);
-                    Log.i(TAG, "Sending broadcast " + r.intent.getAction() + " seq=" + seq
-                            + " app=" + filter.receiverList.app);
+                    Log.i(TAG, "Delivering to " + filter.receiverList.app
+                            + " (seq=" + seq + "): " + r);
                 }
                 performReceive(filter.receiverList.app, filter.receiverList.receiver,
                     new Intent(r.intent), r.resultCode,
@@ -10662,6 +11343,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     r.receiver = null;
                     r.curFilter = null;
                     filter.receiverList.curBroadcast = null;
+                    if (filter.receiverList.app != null) {
+                        filter.receiverList.app.curReceiver = null;
+                    }
                 }
             }
         }
@@ -10685,6 +11369,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             while (mParallelBroadcasts.size() > 0) {
                 r = mParallelBroadcasts.remove(0);
                 final int N = r.receivers.size();
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Processing parallel broadcast "
+                        + r);
                 for (int i=0; i<N; i++) {
                     Object target = r.receivers.get(i);
                     if (DEBUG_BROADCAST)  Log.v(TAG,
@@ -10692,6 +11378,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             + target + ": " + r);
                     deliverToRegisteredReceiver(r, (BroadcastFilter)target, false);
                 }
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Done with parallel broadcast "
+                        + r);
             }
 
             // Now take care of the next serialized one...
@@ -10717,10 +11405,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
 
+            boolean looped = false;
+            
             do {
                 if (mOrderedBroadcasts.size() == 0) {
                     // No more broadcasts pending, so all done!
                     scheduleAppGcsLocked();
+                    if (looped) {
+                        // If we had finished the last ordered broadcast, then
+                        // make sure all processes have correct oom and sched
+                        // adjustments.
+                        updateOomAdjLocked();
+                    }
                     return;
                 }
                 r = mOrderedBroadcasts.get(0);
@@ -10777,9 +11473,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (DEBUG_BROADCAST) Log.v(TAG, "Cancelling BROADCAST_TIMEOUT_MSG");
                     mHandler.removeMessages(BROADCAST_TIMEOUT_MSG);
 
+                    if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Finished with ordered broadcast "
+                            + r);
+                    
                     // ... and on to the next...
                     mOrderedBroadcasts.remove(0);
                     r = null;
+                    looped = true;
                     continue;
                 }
             } while (r == null);
@@ -10793,6 +11493,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (recIdx == 0) {
                 r.dispatchTime = r.startTime;
 
+                if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Processing ordered broadcast "
+                        + r);
                 if (DEBUG_BROADCAST) Log.v(TAG,
                         "Submitting BROADCAST_TIMEOUT_MSG for "
                         + (r.startTime + BROADCAST_TIMEOUT));
@@ -11135,6 +11837,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
                 broadcastIntentLocked(null, null, intent, null, null, 0, null, null,
                         null, false, false, MY_PID, Process.SYSTEM_UID);
+                
+                AttributeCache ac = AttributeCache.instance();
+                if (ac != null) {
+                    ac.updateConfiguration(mConfiguration);
+                }
             }
         }
         
@@ -11380,6 +12087,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         app.curRawAdj = adj;
         app.curAdj = adj <= app.maxAdj ? adj : app.maxAdj;
 
+        if (mBackupTarget != null && app == mBackupTarget.app) {
+            // If possible we want to avoid killing apps while they're being backed up
+            if (adj > BACKUP_APP_ADJ) {
+                if (DEBUG_BACKUP) Log.v(TAG, "oom BACKUP_APP_ADJ for " + app);
+                adj = BACKUP_APP_ADJ;
+            }
+        }
+
         if (app.services.size() != 0 && adj > FOREGROUND_APP_ADJ) {
             // If this process has active services running in it, we would
             // like to avoid killing it unless it would prevent the current
@@ -11506,7 +12221,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         app.curAdj = adj;
-
+        app.curSchedGroup = (adj > VISIBLE_APP_ADJ && !app.persistent)
+                ? Process.THREAD_GROUP_BG_NONINTERACTIVE
+                : Process.THREAD_GROUP_DEFAULT;
+        
         return adj;
     }
 
@@ -11649,6 +12367,32 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     app.setAdj = adj;
                 } else {
                     return false;
+                }
+            }
+            if (app.setSchedGroup != app.curSchedGroup) {
+                app.setSchedGroup = app.curSchedGroup;
+                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Log.v(TAG,
+                        "Setting process group of " + app.processName
+                        + " to " + app.curSchedGroup);
+                if (true) {
+                    long oldId = Binder.clearCallingIdentity();
+                    try {
+                        Process.setProcessGroup(app.pid, app.curSchedGroup);
+                    } catch (Exception e) {
+                        Log.w(TAG, "Failed setting process group of " + app.pid
+                                + " to " + app.curSchedGroup);
+                        e.printStackTrace();
+                    } finally {
+                        Binder.restoreCallingIdentity(oldId);
+                    }
+                }
+                if (false) {
+                    if (app.thread != null) {
+                        try {
+                            app.thread.setSchedulingGroup(app.curSchedGroup);
+                        } catch (RemoteException e) {
+                        }
+                    }
                 }
             }
         }
@@ -11942,51 +12686,63 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     public boolean profileControl(String process, boolean start,
-            String path) throws RemoteException {
+            String path, ParcelFileDescriptor fd) throws RemoteException {
 
-        synchronized (this) {
-            // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
-            // its own permission.
-            if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires permission "
-                        + android.Manifest.permission.SET_ACTIVITY_WATCHER);
-            }
-            
-            ProcessRecord proc = null;
-            try {
-                int pid = Integer.parseInt(process);
-                synchronized (mPidsSelfLocked) {
-                    proc = mPidsSelfLocked.get(pid);
+        try {
+            synchronized (this) {
+                // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
+                // its own permission.
+                if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    throw new SecurityException("Requires permission "
+                            + android.Manifest.permission.SET_ACTIVITY_WATCHER);
                 }
-            } catch (NumberFormatException e) {
-            }
-            
-            if (proc == null) {
-                HashMap<String, SparseArray<ProcessRecord>> all
-                        = mProcessNames.getMap();
-                SparseArray<ProcessRecord> procs = all.get(process);
-                if (procs != null && procs.size() > 0) {
-                    proc = procs.valueAt(0);
+                
+                if (start && fd == null) {
+                    throw new IllegalArgumentException("null fd");
                 }
-            }
-            
-            if (proc == null || proc.thread == null) {
-                throw new IllegalArgumentException("Unknown process: " + process);
-            }
-            
-            boolean isSecure = "1".equals(SystemProperties.get(SYSTEM_SECURE, "0"));
-            if (isSecure) {
-                if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                    throw new SecurityException("Process not debuggable: " + proc);
+                
+                ProcessRecord proc = null;
+                try {
+                    int pid = Integer.parseInt(process);
+                    synchronized (mPidsSelfLocked) {
+                        proc = mPidsSelfLocked.get(pid);
+                    }
+                } catch (NumberFormatException e) {
                 }
-            }
+                
+                if (proc == null) {
+                    HashMap<String, SparseArray<ProcessRecord>> all
+                            = mProcessNames.getMap();
+                    SparseArray<ProcessRecord> procs = all.get(process);
+                    if (procs != null && procs.size() > 0) {
+                        proc = procs.valueAt(0);
+                    }
+                }
+                
+                if (proc == null || proc.thread == null) {
+                    throw new IllegalArgumentException("Unknown process: " + process);
+                }
+                
+                boolean isSecure = "1".equals(SystemProperties.get(SYSTEM_SECURE, "0"));
+                if (isSecure) {
+                    if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+                        throw new SecurityException("Process not debuggable: " + proc);
+                    }
+                }
             
-            try {
-                proc.thread.profilerControl(start, path);
+                proc.thread.profilerControl(start, path, fd);
+                fd = null;
                 return true;
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Process disappeared");
+            }
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Process disappeared");
+        } finally {
+            if (fd != null) {
+                try {
+                    fd.close();
+                } catch (IOException e) {
+                }
             }
         }
     }

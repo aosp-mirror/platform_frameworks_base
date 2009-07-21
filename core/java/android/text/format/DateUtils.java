@@ -62,15 +62,6 @@ public class DateUtils
             com.android.internal.R.string.day_of_week_short_friday,
             com.android.internal.R.string.day_of_week_short_saturday,
         };
-    private static final int[] sDaysShorter = new int[] {
-            com.android.internal.R.string.day_of_week_shorter_sunday,
-            com.android.internal.R.string.day_of_week_shorter_monday,
-            com.android.internal.R.string.day_of_week_shorter_tuesday,
-            com.android.internal.R.string.day_of_week_shorter_wednesday,
-            com.android.internal.R.string.day_of_week_shorter_thursday,
-            com.android.internal.R.string.day_of_week_shorter_friday,
-            com.android.internal.R.string.day_of_week_shorter_saturday,
-        };
     private static final int[] sDaysShortest = new int[] {
             com.android.internal.R.string.day_of_week_shortest_sunday,
             com.android.internal.R.string.day_of_week_shortest_monday,
@@ -79,6 +70,20 @@ public class DateUtils
             com.android.internal.R.string.day_of_week_shortest_thursday,
             com.android.internal.R.string.day_of_week_shortest_friday,
             com.android.internal.R.string.day_of_week_shortest_saturday,
+        };
+    private static final int[] sMonthsStandaloneLong = new int [] {
+            com.android.internal.R.string.month_long_standalone_january,
+            com.android.internal.R.string.month_long_standalone_february,
+            com.android.internal.R.string.month_long_standalone_march,
+            com.android.internal.R.string.month_long_standalone_april,
+            com.android.internal.R.string.month_long_standalone_may,
+            com.android.internal.R.string.month_long_standalone_june,
+            com.android.internal.R.string.month_long_standalone_july,
+            com.android.internal.R.string.month_long_standalone_august,
+            com.android.internal.R.string.month_long_standalone_september,
+            com.android.internal.R.string.month_long_standalone_october,
+            com.android.internal.R.string.month_long_standalone_november,
+            com.android.internal.R.string.month_long_standalone_december,
         };
     private static final int[] sMonthsLong = new int [] {
             com.android.internal.R.string.month_long_january,
@@ -127,7 +132,7 @@ public class DateUtils
             com.android.internal.R.string.pm,
         };
     private static Configuration sLastConfig;
-    private static String sStatusTimeFormat;
+    private static java.text.DateFormat sStatusTimeFormat;
     private static String sElapsedFormatMMSS;
     private static String sElapsedFormatHMMSS;
     
@@ -142,6 +147,9 @@ public class DateUtils
     public static final long HOUR_IN_MILLIS = MINUTE_IN_MILLIS * 60;
     public static final long DAY_IN_MILLIS = HOUR_IN_MILLIS * 24;
     public static final long WEEK_IN_MILLIS = DAY_IN_MILLIS * 7;
+    /**
+     * This constant is actually the length of 364 days, not of a year!
+     */
     public static final long YEAR_IN_MILLIS = WEEK_IN_MILLIS * 52;
 
     // The following FORMAT_* symbols are used for specifying the format of
@@ -171,8 +179,14 @@ public class DateUtils
 
     // Date and time format strings that are constant and don't need to be
     // translated.
+    /**
+     * This is not actually the preferred 24-hour date format in all locales.
+     */
     public static final String HOUR_MINUTE_24 = "%H:%M";
     public static final String MONTH_FORMAT = "%B";
+    /**
+     * This is not actually a useful month name in all locales.
+     */
     public static final String ABBREV_MONTH_FORMAT = "%b";
     public static final String NUMERIC_MONTH_FORMAT = "%m";
     public static final String MONTH_DAY_FORMAT = "%-d";
@@ -255,18 +269,15 @@ public class DateUtils
      * For use with the 'abbrev' parameter of {@link #getDayOfWeekString} and {@link #getMonthString}.
      * @more
      * <p>e.g. "Su" or "Jan"
-     * <p>In some languages, the results returned for LENGTH_SHORT may be the same as
-     * return for {@link #LENGTH_MEDIUM}.
+     * <p>In most languages, the results returned for LENGTH_SHORT will be the same as
+     * the results returned for {@link #LENGTH_MEDIUM}.
      */
     public static final int LENGTH_SHORT = 30;
 
     /**
      * Request an even shorter abbreviated version of the name.
-     * For use with the 'abbrev' parameter of {@link #getDayOfWeekString} and {@link #getMonthString}.
-     * @more
-     * <p>e.g. "M", "Tu", "Th" or "J"
-     * <p>In some languages, the results returned for LENGTH_SHORTEST may be the same as
-     * return for {@link #LENGTH_SHORTER}.
+     * Do not use this.  Currently this will always return the same result
+     * as {@link #LENGTH_SHORT}.
      */
     public static final int LENGTH_SHORTER = 40;
 
@@ -275,8 +286,8 @@ public class DateUtils
      * For use with the 'abbrev' parameter of {@link #getDayOfWeekString} and {@link #getMonthString}.
      * @more
      * <p>e.g. "S", "T", "T" or "J"
-     * <p>In some languages, the results returned for LENGTH_SHORTEST may be the same as
-     * return for {@link #LENGTH_SHORTER}.
+     * <p>In some languages, the results returned for LENGTH_SHORTEST will be the same as
+     * the results returned for {@link #LENGTH_SHORT}.
      */
     public static final int LENGTH_SHORTEST = 50;
 
@@ -284,9 +295,12 @@ public class DateUtils
      * Return a string for the day of the week.
      * @param dayOfWeek One of {@link Calendar#SUNDAY Calendar.SUNDAY},
      *               {@link Calendar#MONDAY Calendar.MONDAY}, etc.
-     * @param abbrev One of {@link #LENGTH_LONG}, {@link #LENGTH_SHORT}, {@link #LENGTH_SHORTER}
-     *               or {@link #LENGTH_SHORTEST}.  For forward compatibility, anything else
-     *               will return the same as {#LENGTH_MEDIUM}.
+     * @param abbrev One of {@link #LENGTH_LONG}, {@link #LENGTH_SHORT},
+     *               {@link #LENGTH_MEDIUM}, or {@link #LENGTH_SHORTEST}.
+     *               Note that in most languages, {@link #LENGTH_SHORT}
+     *               will return the same as {@link #LENGTH_MEDIUM}.
+     *               Undefined lengths will return {@link #LENGTH_MEDIUM}
+     *               but may return something different in the future.
      * @throws IndexOutOfBoundsException if the dayOfWeek is out of bounds.
      */
     public static String getDayOfWeekString(int dayOfWeek, int abbrev) {
@@ -295,7 +309,7 @@ public class DateUtils
             case LENGTH_LONG:       list = sDaysLong;       break;
             case LENGTH_MEDIUM:     list = sDaysMedium;     break;
             case LENGTH_SHORT:      list = sDaysShort;      break;
-            case LENGTH_SHORTER:    list = sDaysShorter;    break;
+            case LENGTH_SHORTER:    list = sDaysShort;      break;
             case LENGTH_SHORTEST:   list = sDaysShortest;   break;
             default:                list = sDaysMedium;     break;
         }
@@ -316,13 +330,14 @@ public class DateUtils
     }
 
     /**
-     * Return a localized string for the day of the week.
+     * Return a localized string for the month of the year.
      * @param month One of {@link Calendar#JANUARY Calendar.JANUARY},
      *               {@link Calendar#FEBRUARY Calendar.FEBRUARY}, etc.
-     * @param abbrev One of {@link #LENGTH_LONG}, {@link #LENGTH_SHORT}, {@link #LENGTH_SHORTER}
-     *               or {@link #LENGTH_SHORTEST}.  For forward compatibility, anything else
-     *               will return the same as {#LENGTH_MEDIUM}.
-     * @return Localized day of the week.
+     * @param abbrev One of {@link #LENGTH_LONG}, {@link #LENGTH_MEDIUM},
+     *               or {@link #LENGTH_SHORTEST}.
+     *               Undefined lengths will return {@link #LENGTH_MEDIUM}
+     *               but may return something different in the future.
+     * @return Localized month of the year.
      */
     public static String getMonthString(int month, int abbrev) {
         // Note that here we use sMonthsMedium for MEDIUM, SHORT and SHORTER. 
@@ -332,6 +347,40 @@ public class DateUtils
         int[] list;
         switch (abbrev) {
             case LENGTH_LONG:       list = sMonthsLong;     break;
+            case LENGTH_MEDIUM:     list = sMonthsMedium;   break;
+            case LENGTH_SHORT:      list = sMonthsMedium;   break;
+            case LENGTH_SHORTER:    list = sMonthsMedium;   break;
+            case LENGTH_SHORTEST:   list = sMonthsShortest; break;
+            default:                list = sMonthsMedium;   break;
+        }
+
+        Resources r = Resources.getSystem();
+        return r.getString(list[month - Calendar.JANUARY]);
+    }
+
+    /**
+     * Return a localized string for the month of the year, for
+     * contexts where the month is not formatted together with
+     * a day of the month.
+     *
+     * @param month One of {@link Calendar#JANUARY Calendar.JANUARY},
+     *               {@link Calendar#FEBRUARY Calendar.FEBRUARY}, etc.
+     * @param abbrev One of {@link #LENGTH_LONG}, {@link #LENGTH_MEDIUM},
+     *               or {@link #LENGTH_SHORTEST}.
+     *               Undefined lengths will return {@link #LENGTH_MEDIUM}
+     *               but may return something different in the future.
+     * @return Localized month of the year.
+     * @hide Pending API council approval
+     */
+    public static String getStandaloneMonthString(int month, int abbrev) {
+        // Note that here we use sMonthsMedium for MEDIUM, SHORT and SHORTER. 
+        // This is a shortcut to not spam the translators with too many variations
+        // of the same string.  If we find that in a language the distinction
+        // is necessary, we can can add more without changing this API.
+        int[] list;
+        switch (abbrev) {
+            case LENGTH_LONG:       list = sMonthsStandaloneLong;
+                                                            break;
             case LENGTH_MEDIUM:     list = sMonthsMedium;   break;
             case LENGTH_SHORT:      list = sMonthsMedium;   break;
             case LENGTH_SHORTER:    list = sMonthsMedium;   break;
@@ -572,7 +621,7 @@ public class DateUtils
             Configuration cfg = r.getConfiguration();
             if (sLastConfig == null || !sLastConfig.equals(cfg)) {
                 sLastConfig = cfg;
-                sStatusTimeFormat = r.getString(com.android.internal.R.string.status_bar_time_format);
+                sStatusTimeFormat = java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT);
                 sElapsedFormatMMSS = r.getString(com.android.internal.R.string.elapsed_time_short_format_mm_ss);
                 sElapsedFormatHMMSS = r.getString(com.android.internal.R.string.elapsed_time_short_format_h_mm_ss);
             }
@@ -586,7 +635,7 @@ public class DateUtils
      */
     public static final CharSequence timeString(long millis) {
         initFormatStrings();
-        return DateFormat.format(sStatusTimeFormat, millis);
+        return sStatusTimeFormat.format(millis);
     }
 
     /**
@@ -1066,7 +1115,9 @@ public class DateUtils
      * 
      * <p>
      * If FORMAT_CAP_AMPM is set and 12-hour time is used, then the "AM"
-     * and "PM" are capitalized.
+     * and "PM" are capitalized.  You should not use this flag
+     * because in some locales these terms cannot be capitalized, and in
+     * many others it doesn't make sense to do so even though it is possible.
      * 
      * <p>
      * If FORMAT_NO_NOON is set and 12-hour time is used, then "12pm" is
@@ -1074,15 +1125,19 @@ public class DateUtils
      * 
      * <p>
      * If FORMAT_CAP_NOON is set and 12-hour time is used, then "Noon" is
-     * shown instead of "noon".
+     * shown instead of "noon".  You should probably not use this flag
+     * because in many locales it will not make sense to capitalize
+     * the term.
      * 
      * <p>
      * If FORMAT_NO_MIDNIGHT is set and 12-hour time is used, then "12am" is
      * shown instead of "midnight".
      * 
      * <p>
-     * If FORMAT_CAP_NOON is set and 12-hour time is used, then "Midnight" is
-     * shown instead of "midnight".
+     * If FORMAT_CAP_MIDNIGHT is set and 12-hour time is used, then "Midnight"
+     * is shown instead of "midnight".  You should probably not use this
+     * flag because in many locales it will not make sense to capitalize
+     * the term.
      * 
      * <p>
      * If FORMAT_12HOUR is set and the time is shown, then the time is
@@ -1224,8 +1279,8 @@ public class DateUtils
                 use24Hour = DateFormat.is24HourFormat(context);
             }
             if (use24Hour) {
-                startTimeFormat = HOUR_MINUTE_24;
-                endTimeFormat = HOUR_MINUTE_24;
+                startTimeFormat = endTimeFormat =
+                    res.getString(com.android.internal.R.string.hour_minute_24);
             } else {
                 boolean abbrevTime = (flags & (FORMAT_ABBREV_TIME | FORMAT_ABBREV_ALL)) != 0;
                 boolean capAMPM = (flags & FORMAT_CAP_AMPM) != 0;
@@ -1392,7 +1447,8 @@ public class DateUtils
         if (numericDate) {
             monthFormat = NUMERIC_MONTH_FORMAT;
         } else if (abbrevMonth) {
-            monthFormat = ABBREV_MONTH_FORMAT;
+            monthFormat =
+                res.getString(com.android.internal.R.string.short_format_month);
         } else {
             monthFormat = MONTH_FORMAT;
         }

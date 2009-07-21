@@ -55,33 +55,39 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mVoicePrivacyOnRegistrants = new RegistrantList();
     protected RegistrantList mVoicePrivacyOffRegistrants = new RegistrantList();
     protected Registrant mUnsolOemHookRawRegistrant;
+    protected RegistrantList mOtaProvisionRegistrants = new RegistrantList();
+    protected RegistrantList mCallWaitingInfoRegistrants = new RegistrantList();
+    protected RegistrantList mDisplayInfoRegistrants = new RegistrantList();
+    protected RegistrantList mSignalInfoRegistrants = new RegistrantList();
+    protected RegistrantList mNumberInfoRegistrants = new RegistrantList();
+    protected RegistrantList mRedirNumInfoRegistrants = new RegistrantList();
+    protected RegistrantList mLineControlInfoRegistrants = new RegistrantList();
+    protected RegistrantList mT53ClirInfoRegistrants = new RegistrantList();
+    protected RegistrantList mT53AudCntrlInfoRegistrants = new RegistrantList();
+
     protected Registrant mSMSRegistrant;
     protected Registrant mNITZTimeRegistrant;
     protected Registrant mSignalStrengthRegistrant;
     protected Registrant mUSSDRegistrant;
     protected Registrant mSmsOnSimRegistrant;
-    /** Registrant for handling SMS Status Reports */
     protected Registrant mSmsStatusRegistrant;
-    /** Registrant for handling Supplementary Service Notifications */
     protected Registrant mSsnRegistrant;
     protected Registrant mStkSessionEndRegistrant;
     protected Registrant mStkProCmdRegistrant;
     protected Registrant mStkEventRegistrant;
     protected Registrant mStkCallSetUpRegistrant;
-    /** Registrant for handling SIM/RUIM SMS storage full messages */
     protected Registrant mIccSmsFullRegistrant;
-    /** Registrant for handling Icc Refresh notifications */
+    protected Registrant mEmergencyCallbackModeRegistrant;
     protected Registrant mIccRefreshRegistrant;
-    /** Registrant for handling RING notifications */
     protected Registrant mRingRegistrant;
-    /** Registrant for handling RESTRICTED STATE changed notification */
     protected Registrant mRestrictedStateRegistrant;
+    protected Registrant mGsmBroadcastSmsRegistrant;
 
-    //Network Mode received from PhoneFactory
+    // Network Mode received from PhoneFactory
     protected int mNetworkMode;
-    //CDMA subscription received from PhoneFactory
+    // CDMA subscription received from PhoneFactory
     protected int mCdmaSubscription;
-    //Type of Phone, GSM or CDMA. Set by CDMAPhone or GSMPhone.
+    // Type of Phone, GSM or CDMA. Set by CDMAPhone or GSMPhone.
     protected int mPhoneType;
 
 
@@ -332,6 +338,14 @@ public abstract class BaseCommands implements CommandsInterface {
         mSMSRegistrant.clear();
     }
 
+    public void setOnNewGsmBroadcastSms(Handler h, int what, Object obj) {
+        mGsmBroadcastSmsRegistrant = new Registrant (h, what, obj);
+    }
+
+    public void unSetOnNewGsmBroadcastSms(Handler h) {
+        mGsmBroadcastSmsRegistrant.clear();
+    }
+
     public void setOnSmsOnSim(Handler h, int what, Object obj) {
         mSmsOnSimRegistrant = new Registrant (h, what, obj);
     }
@@ -424,6 +438,10 @@ public abstract class BaseCommands implements CommandsInterface {
         mIccRefreshRegistrant = new Registrant (h, what, obj);
     }
 
+    public void setEmergencyCallbackMode(Handler h, int what, Object obj) {
+        mEmergencyCallbackModeRegistrant = new Registrant (h, what, obj);
+    }
+
     public void unSetOnIccRefresh(Handler h) {
         mIccRefreshRegistrant.clear();
     }
@@ -462,12 +480,93 @@ public abstract class BaseCommands implements CommandsInterface {
         mRestrictedStateRegistrant.clear();
     }
 
+    public void registerForDisplayInfo(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mDisplayInfoRegistrants.add(r);
+    }
+
+    public void unregisterForDisplayInfo(Handler h) {
+        mDisplayInfoRegistrants.remove(h);
+    }
+
+    public void registerForCallWaitingInfo(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mCallWaitingInfoRegistrants.add(r);
+    }
+
+    public void unregisterForCallWaitingInfo(Handler h) {
+        mCallWaitingInfoRegistrants.remove(h);
+    }
+
+    public void registerForSignalInfo(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mSignalInfoRegistrants.add(r);
+    }
+
     public void setOnUnsolOemHookRaw(Handler h, int what, Object obj) {
         mUnsolOemHookRawRegistrant = new Registrant (h, what, obj);
     }
 
     public void unSetOnUnsolOemHookRaw(Handler h) {
         mUnsolOemHookRawRegistrant.clear();
+    }
+
+    public void unregisterForSignalInfo(Handler h) {
+        mSignalInfoRegistrants.remove(h);
+    }
+
+    public void registerForCdmaOtaProvision(Handler h,int what, Object obj){
+        Registrant r = new Registrant (h, what, obj);
+        mOtaProvisionRegistrants.add(r);
+    }
+
+    public void unregisterForCdmaOtaProvision(Handler h){
+        mOtaProvisionRegistrants.remove(h);
+    }
+
+    public void registerForNumberInfo(Handler h,int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mNumberInfoRegistrants.add(r);
+    }
+
+    public void unregisterForNumberInfo(Handler h){
+        mNumberInfoRegistrants.remove(h);
+    }
+
+     public void registerForRedirectedNumberInfo(Handler h,int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mRedirNumInfoRegistrants.add(r);
+    }
+
+    public void unregisterForRedirectedNumberInfo(Handler h) {
+        mRedirNumInfoRegistrants.remove(h);
+    }
+
+    public void registerForLineControlInfo(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mLineControlInfoRegistrants.add(r);
+    }
+
+    public void unregisterForLineControlInfo(Handler h) {
+        mLineControlInfoRegistrants.remove(h);
+    }
+
+    public void registerFoT53ClirlInfo(Handler h,int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mT53ClirInfoRegistrants.add(r);
+    }
+
+    public void unregisterForT53ClirInfo(Handler h) {
+        mT53ClirInfoRegistrants.remove(h);
+    }
+
+    public void registerForT53AudioControlInfo(Handler h,int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mT53AudCntrlInfoRegistrants.add(r);
+    }
+
+    public void unregisterForT53AudioControlInfo(Handler h) {
+        mT53AudCntrlInfoRegistrants.remove(h);
     }
 
     //***** Protected Methods

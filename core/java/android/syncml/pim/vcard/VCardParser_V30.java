@@ -16,8 +16,9 @@
 
 package android.syncml.pim.vcard;
 
+import android.util.Log;
+
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -26,9 +27,11 @@ import java.util.HashSet;
  * Please refer to vCard Specification 3.0 (http://tools.ietf.org/html/rfc2426)
  */
 public class VCardParser_V30 extends VCardParser_V21 {
+    private static final String LOG_TAG = "VCardParser_V30";
+    
     private static final HashSet<String> acceptablePropsWithParam = new HashSet<String>(
             Arrays.asList(
-                    "LOGO", "PHOTO", "LABEL", "FN", "TITLE", "SOUND", 
+                    "BEGIN", "LOGO", "PHOTO", "LABEL", "FN", "TITLE", "SOUND", 
                     "VERSION", "TEL", "EMAIL", "TZ", "GEO", "NOTE", "URL",
                     "BDAY", "ROLE", "REV", "UID", "KEY", "MAILER", // 2.1
                     "NAME", "PROFILE", "SOURCE", "NICKNAME", "CLASS",
@@ -51,8 +54,14 @@ public class VCardParser_V30 extends VCardParser_V21 {
     
     @Override
     protected boolean isValidPropertyName(String propertyName) {
-        return acceptablePropsWithParam.contains(propertyName) ||
-            acceptablePropsWithoutParam.contains(propertyName);
+        if (!(acceptablePropsWithParam.contains(propertyName) ||
+                acceptablePropsWithoutParam.contains(propertyName) ||
+                propertyName.startsWith("X-")) &&
+                !mWarningValueMap.contains(propertyName)) {
+            mWarningValueMap.add(propertyName);
+            Log.w(LOG_TAG, "Property name unsupported by vCard 3.0: " + propertyName);
+        }
+        return true;
     }
     
     @Override
@@ -100,7 +109,21 @@ public class VCardParser_V30 extends VCardParser_V21 {
                 }
             } else if (line.charAt(0) == ' ' || line.charAt(0) == '\t') {
                 if (builder != null) {
-                    // TODO: Check whether MIME requires only one whitespace.
+                    // See Section 5.8.1 of RFC 2425 (MIME-DIR document).
+                    // Following is the excerpts from it.  
+                    //
+                    // DESCRIPTION:This is a long description that exists on a long line.
+                    // 
+                    // Can be represented as:
+                    //
+                    // DESCRIPTION:This is a long description
+                    //  that exists on a long line.
+                    //
+                    // It could also be represented as:
+                    //
+                    // DESCRIPTION:This is a long descrip
+                    //  tion that exists o
+                    //  n a long line.
                     builder.append(line.substring(1));
                 } else if (mPreviousLine != null) {
                     builder = new StringBuilder();
@@ -113,10 +136,13 @@ public class VCardParser_V30 extends VCardParser_V21 {
             } else {
                 if (mPreviousLine == null) {
                     mPreviousLine = line;
+                    if (builder != null) {
+                        return builder.toString();
+                    }
                 } else {
                     String ret = mPreviousLine;
                     mPreviousLine = line;
-                    return ret;                    
+                    return ret;
                 }
             }
         }
@@ -130,15 +156,16 @@ public class VCardParser_V30 extends VCardParser_V21 {
      *         [group "."] "END" ":" "VCARD" 1*CRLF
      */
     @Override
-    protected boolean readBeginVCard() throws IOException, VCardException {
+    protected boolean readBeginVCard(boolean allowGarbage) throws IOException, VCardException {
         // TODO: vCard 3.0 supports group.
-        return super.readBeginVCard();
+        return super.readBeginVCard(allowGarbage);
     }
     
     @Override
-    protected void readEndVCard() throws VCardException {
+    protected void readEndVCard(boolean useCache, boolean allowGarbage)
+            throws IOException, VCardException {
         // TODO: vCard 3.0 supports group.
-        super.readEndVCard();
+        super.readEndVCard(useCache, allowGarbage);
     }
 
     /**
@@ -214,23 +241,6 @@ public class VCardParser_V30 extends VCardParser_V21 {
         throw new VCardException("AGENT in vCard 3.0 is not supported yet.");
     }
     
-    // vCard 3.0 supports "B" as BASE64 encoding.
-    @Override
-    protected void handlePropertyValue(
-            String propertyName, String propertyValue) throws
-            IOException, VCardException {
-        if (mEncoding != null && mEncoding.equalsIgnoreCase("B")) {
-            String result = getBase64(propertyValue);
-            if (mBuilder != null) {
-                ArrayList<String> v = new ArrayList<String>();
-                v.add(result);
-                mBuilder.propertyValues(v);
-            }
-        }
-        
-        super.handlePropertyValue(propertyName, propertyValue);
-    }
-    
     /**
      * vCard 3.0 does not require two CRLF at the last of BASE64 data.
      * It only requires that data should be MIME-encoded.
@@ -259,27 +269,38 @@ public class VCardParser_V30 extends VCardParser_V21 {
     }
     
     /**
-     * Return unescapeText(text).
-     * In vCard 3.0, 8bit text is always encoded.
-     */
-    @Override
-    protected String maybeUnescapeText(String text) {
-        return unescapeText(text);
-    }
-
-    /**
      * ESCAPED-CHAR = "\\" / "\;" / "\," / "\n" / "\N")
      *              ; \\ encodes \, \n or \N encodes newline
      *              ; \; encodes ;, \, encodes ,
-     */
+     *              
+     * Note: Apple escape ':' into '\:' while does not escape '\'
+     */ 
     @Override
-    protected String unescapeText(String text) {
-        // In String#replaceAll(), "\\\\" means single slash. 
-        return text.replaceAll("\\\\;", ";")
-            .replaceAll("\\\\:", ":")
-            .replaceAll("\\\\,", ",")
-            .replaceAll("\\\\n", "\r\n")
-            .replaceAll("\\\\N", "\r\n")
-            .replaceAll("\\\\\\\\", "\\\\");
+    protected String maybeUnescapeText(String text) {
+        StringBuilder builder = new StringBuilder();
+        int length = text.length();
+        for (int i = 0; i < length; i++) {
+            char ch = text.charAt(i);
+            if (ch == '\\' && i < length - 1) {
+                char next_ch = text.charAt(++i); 
+                if (next_ch == 'n' || next_ch == 'N') {
+                    builder.append("\r\n");
+                } else {
+                    builder.append(next_ch);
+                }
+            } else {
+                builder.append(ch);
+            }
+        }
+        return builder.toString();
+    }
+    
+    @Override
+    protected String maybeUnescape(char ch) {
+        if (ch == 'n' || ch == 'N') {
+            return "\r\n";
+        } else {
+            return String.valueOf(ch);
+        }
     }
 }

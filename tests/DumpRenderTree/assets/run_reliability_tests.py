@@ -10,14 +10,16 @@
 
 import logging
 import optparse
-import random
+import os
 import subprocess
 import sys
 import time
+from Numeric import *
 
 TEST_LIST_FILE = "/sdcard/android/reliability_tests_list.txt"
 TEST_STATUS_FILE = "/sdcard/android/reliability_running_test.txt"
 TEST_TIMEOUT_FILE = "/sdcard/android/reliability_timeout_test.txt"
+TEST_LOAD_TIME_FILE = "/sdcard/android/reliability_load_time.txt"
 HTTP_URL_FILE = "urllist_http"
 HTTPS_URL_FILE = "urllist_https"
 NUM_URLS = 25
@@ -41,39 +43,66 @@ def DumpRenderTreeFinished(adb_cmd):
   return adb_output.strip() == "#DONE"
 
 
-def RandomPick(file_name, approx_size, num_needed):
-  """Randomly pick lines from the text file specifed.
+def RemoveDeviceFile(adb_cmd, file_name):
+  shell_cmd_str = adb_cmd + " shell rm " + file_name
+  subprocess.Popen(shell_cmd_str,
+                   shell=True, stdout=subprocess.PIPE,
+                   stderr=subprocess.PIPE).communicate()
 
-  Args:
-    file_name: the text file where lines should be picked from
-    approx_size: an approximate size of the text file
-    num_needed: how many lines are needed from the file
 
-  Returns:
-    an array of string
-  """
-  p = float(num_needed) / approx_size
-  num_picked = 0
-  lines = []
-  random.seed()
+def Bugreport(url, bugreport_dir, adb_cmd):
+  """Pull a bugreport from the device."""
+  bugreport_filename = "%s/reliability_bugreport_%d.txt" % (bugreport_dir,
+                                                            int(time.time()))
 
-  while num_picked < num_needed:
-    file_handle = open(file_name, "r")
-    for line in file_handle:
-      line = line.strip()
-      if float(random.randint(0, approx_size)) / approx_size < p:
-        lines.append(line)
-        num_picked += 1
-        if num_picked == num_needed:
-          break
-    file_handle.close()
-  return lines
+  # prepend the report with url
+  handle = open(bugreport_filename, "w")
+  handle.writelines("Bugreport for crash in url - %s\n\n" % url)
+  handle.close()
+
+  cmd = "%s bugreport >> %s" % (adb_cmd, bugreport_filename)
+  os.system(cmd)
+
+
+def ProcessPageLoadTime(raw_log):
+  """Processes the raw page load time logged by test app."""
+  log_handle = open(raw_log, "r")
+  load_times = {}
+
+  for line in log_handle:
+    line = line.strip()
+    pair = line.split("|")
+    if len(pair) != 2:
+      logging.info("Line has more than one '|': " + line)
+      continue
+    if pair[0] not in load_times:
+      load_times[pair[0]] = []
+    try:
+      pair[1] = int(pair[1])
+    except ValueError:
+      logging.info("Lins has non-numeric load time: " + line)
+      continue
+    load_times[pair[0]].append(pair[1])
+
+  log_handle.close()
+
+  # rewrite the average time to file
+  log_handle = open(raw_log, "w")
+  for url, times in load_times.iteritems():
+    # calculate std
+    arr = array(times)
+    avg = average(arr)
+    d = arr - avg
+    std = sqrt(sum(d * d) / len(arr))
+    output = ("%-70s%-10d%-10d%-12.2f%-12.2f%s\n" %
+              (url, min(arr), max(arr), avg, std,
+               array2string(arr)))
+    log_handle.write(output)
+  log_handle.close()
 
 
 def main(options, args):
   """Send the url list to device and start testing, restart if crashed."""
-
-  generate_url = False
 
   # Set up logging format.
   log_level = logging.INFO
@@ -84,33 +113,37 @@ def main(options, args):
 
   # Include all tests if none are specified.
   if not args:
-    path = "/tmp/url_list_%d.txt" % time.time()
-    generate_url = True
-    logging.info("A URL list is not provided, will be automatically generated.")
+    print "Missing URL list file"
+    sys.exit(1)
   else:
     path = args[0]
 
   if not options.crash_file:
-    print "missing crash file name, use --crash-file to specify"
+    print "Missing crash file name, use --crash-file to specify"
     sys.exit(1)
   else:
     crashed_file = options.crash_file
 
   if not options.timeout_file:
-    print "missing timeout file, use --timeout-file to specify"
+    print "Missing timeout file, use --timeout-file to specify"
     sys.exit(1)
   else:
     timedout_file = options.timeout_file
 
-  http = RandomPick(HTTP_URL_FILE, 500000, NUM_URLS)
-  https = RandomPick(HTTPS_URL_FILE, 45000, NUM_URLS)
+  if not options.delay:
+    manual_delay = 0
+  else:
+    manual_delay = options.delay
 
-  if generate_url:
-    file_handle = open(path, "w")
-    for i in range(0, NUM_URLS):
-      file_handle.write(http[i] + "\n")
-      file_handle.write(https[i] + "\n")
-    file_handle.close()
+  if not options.bugreport:
+    bugreport_dir = "."
+  else:
+    bugreport_dir = options.bugreport
+  if not os.path.exists(bugreport_dir):
+    os.makedirs(bugreport_dir)
+  if not os.path.isdir(bugreport_dir):
+    logging.error("Cannot create results dir: " + bugreport_dir)
+    sys.exit(1)
 
   adb_cmd = "adb "
   if options.adb_options:
@@ -128,6 +161,11 @@ def main(options, args):
     logging.error(adb_error)
     sys.exit(1)
 
+  # clean up previous results
+  RemoveDeviceFile(adb_cmd, TEST_STATUS_FILE)
+  RemoveDeviceFile(adb_cmd, TEST_TIMEOUT_FILE)
+  RemoveDeviceFile(adb_cmd, TEST_LOAD_TIME_FILE)
+
   logging.info("Running the test ...")
 
   # Count crashed tests.
@@ -142,11 +180,15 @@ def main(options, args):
 
   # Call ReliabilityTestsAutoTest#startReliabilityTests
   test_cmd = (test_cmd_prefix + " -e class "
-              "com.android.dumprendertree.ReliabilityTestsAutoTest#"
-              "startReliabilityTests -e timeout " + timeout_ms
-              + test_cmd_postfix)
+              "com.android.dumprendertree.ReliabilityTest#"
+              "runReliabilityTest -e timeout %s -e delay %s" %
+              (str(timeout_ms), str(manual_delay)))
 
-  time_start = time.time()
+  if options.logtime:
+    test_cmd += " -e logtime true"
+
+  test_cmd += test_cmd_postfix
+
   adb_output = subprocess.Popen(test_cmd, shell=True,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE).communicate()[0]
@@ -157,19 +199,12 @@ def main(options, args):
                                     stdout=subprocess.PIPE).communicate()[0]
     logging.info(crashed_test + " CRASHED")
     crashed_tests.append(crashed_test)
+    Bugreport(crashed_test, bugreport_dir, adb_cmd)
     logging.info("Resuming reliability test runner...")
 
-    test_cmd = (test_cmd_prefix + " -e class "
-                "com.android.dumprendertree.ReliabilityTestsAutoTest#"
-                "resumeReliabilityTests -e timeout " + timeout_ms
-                + test_cmd_postfix)
     adb_output = subprocess.Popen(test_cmd, shell=True, stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE).communicate()[0]
 
-  time_end = time.time()
-  fp = open("time_stat", "a")
-  fp.writelines("%.2f\n" % ((time_end - time_start) / NUM_URLS / 2))
-  fp.close()
   if (adb_output.find("INSTRUMENTATION_FAILED") != -1 or
       adb_output.find("Process crashed.") != -1):
     logging.error("Error happened : " + adb_output)
@@ -186,29 +221,46 @@ def main(options, args):
   else:
     logging.info("No crash found.")
 
+  # get timeout file from sdcard
   test_cmd = (adb_cmd + "pull \"" + TEST_TIMEOUT_FILE + "\" \""
               + timedout_file +  "\"")
-
   subprocess.Popen(test_cmd, shell=True, stdout=subprocess.PIPE,
                    stderr=subprocess.PIPE).communicate()
+
+  if options.logtime:
+    # get logged page load times from sdcard
+    test_cmd = (adb_cmd + "pull \"" + TEST_LOAD_TIME_FILE + "\" \""
+                + options.logtime +  "\"")
+    subprocess.Popen(test_cmd, shell=True, stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE).communicate()
+    ProcessPageLoadTime(options.logtime)
 
 
 if "__main__" == __name__:
   option_parser = optparse.OptionParser()
-  option_parser.add_option("", "--time-out-ms",
+  option_parser.add_option("-t", "--time-out-ms",
                            default=60000,
                            help="set the timeout for each test")
-  option_parser.add_option("", "--verbose", action="store_true",
+  option_parser.add_option("-v", "--verbose", action="store_true",
                            default=False,
                            help="include debug-level logging")
-  option_parser.add_option("", "--adb-options",
+  option_parser.add_option("-a", "--adb-options",
                            default=None,
                            help="pass options to adb, such as -d -e, etc")
-  option_parser.add_option("", "--crash-file",
+  option_parser.add_option("-c", "--crash-file",
                            default="reliability_crashed_sites.txt",
                            help="the list of sites that cause browser to crash")
-  option_parser.add_option("", "--timeout-file",
+  option_parser.add_option("-f", "--timeout-file",
                            default="reliability_timedout_sites.txt",
-                           help="the list of sites that timedout during test.")
+                           help="the list of sites that timedout during test")
+  option_parser.add_option("-d", "--delay",
+                           default=0,
+                           help="add a manual delay between pages (in ms)")
+  option_parser.add_option("-b", "--bugreport",
+                           default=".",
+                           help="the directory to store bugreport for crashes")
+  option_parser.add_option("-l", "--logtime",
+                           default=None,
+                           help="Logs page load time for each url to the file")
   opts, arguments = option_parser.parse_args()
   main(opts, arguments)

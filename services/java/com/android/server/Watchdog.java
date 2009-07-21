@@ -504,6 +504,7 @@ public class Watchdog extends Thread {
                 if (mPhoneMemMonitor.checkLocked(curTime, mPhonePid,
                         mPhonePss)) {
                     // Just kill the phone process and let it restart.
+                    Log.i(TAG, "Watchdog is killing the phone process");
                     Process.killProcess(mPhonePid);
                 }
             } else {
@@ -848,6 +849,7 @@ public class Watchdog extends Thread {
 
             // Only kill the process if the debugger is not attached.
             if (!Debug.isDebuggerConnected()) {
+                Log.i(TAG, "Watchdog is killing the system process");
                 Process.killProcess(Process.myPid());
             }
         }

@@ -129,12 +129,8 @@ OverlayRef::OverlayRef(overlay_handle_t handle, const sp<IOverlay>& channel,
 OverlayRef::~OverlayRef()
 {
     if (mOwnHandle) {
-        /* FIXME: handles should be promoted to "real" API and be handled by 
-         * the framework */
-        for (int i=0 ; i<mOverlayHandle->numFds ; i++) {
-            close(mOverlayHandle->data[i]);
-        }
-        free((void*)mOverlayHandle);
+        native_handle_close(mOverlayHandle);
+        native_handle_delete(const_cast<native_handle*>(mOverlayHandle));
     }
 }
 
@@ -147,7 +143,7 @@ sp<OverlayRef> OverlayRef::readFromParcel(const Parcel& data) {
         uint32_t f = data.readInt32();
         uint32_t ws = data.readInt32();
         uint32_t hs = data.readInt32();
-        native_handle* handle = data.readNativeHandle(NULL, NULL);
+        native_handle* handle = data.readNativeHandle();
 
         result = new OverlayRef();
         result->mOverlayHandle = handle;
@@ -169,7 +165,7 @@ status_t OverlayRef::writeToParcel(Parcel* reply, const sp<OverlayRef>& o) {
         reply->writeInt32(o->mFormat);
         reply->writeInt32(o->mWidthStride);
         reply->writeInt32(o->mHeightStride);
-        reply->writeNativeHandle(*(o->mOverlayHandle));
+        reply->writeNativeHandle(o->mOverlayHandle);
     } else {
         reply->writeStrongBinder(NULL);
     }

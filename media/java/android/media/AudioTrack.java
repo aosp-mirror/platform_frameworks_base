@@ -425,8 +425,7 @@ public class AudioTrack
     }
     
     /**
-     * Returns the current playback rate in Hz. Note that this rate may differ from the one set
-     * with {@link #setPlaybackRate(int)} as the value effectively used is implementation-dependent.
+     * Returns the current playback rate in Hz.
      */
     public int getPlaybackRate() {
         return native_get_playback_rate();
@@ -651,18 +650,13 @@ public class AudioTrack
      * Sets the playback sample rate for this track. This sets the sampling rate at which
      * the audio data will be consumed and played back, not the original sampling rate of the
      * content. Setting it to half the sample rate of the content will cause the playback to
-     * last twice as long, but will also result result in a negative pitch shift.
-     * The current implementation supports a maximum sample rate of 64kHz.
-     * Use {@link #getSampleRate()} to check the rate actually used in hardware after 
-     * potential clamping.
+     * last twice as long, but will also result in a negative pitch shift.
+     * The valid sample rate range if from 1Hz to twice the value returned by
+     * {@link #getNativeOutputSampleRate(int)}.
      * @param sampleRateInHz the sample rate expressed in Hz
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
      */
-    // FIXME: the implementation should support twice the hardware output sample rate
-    //   (see {@link #getNativeOutputSampleRate(int)}), but currently
-    //  due to the representation of the sample rate in the native layer, the sample rate
-    //  is limited to 65535Hz
     public int setPlaybackRate(int sampleRateInHz) {
         if (mState != STATE_INITIALIZED) {
             return ERROR_INVALID_OPERATION;
@@ -670,8 +664,7 @@ public class AudioTrack
         if (sampleRateInHz <= 0) {
             return ERROR_BAD_VALUE;
         }
-        native_set_playback_rate(sampleRateInHz);
-        return SUCCESS;
+        return native_set_playback_rate(sampleRateInHz);
     }
 
 
@@ -1031,8 +1024,8 @@ public class AudioTrack
 
     private native final void native_setVolume(float leftVolume, float rightVolume);
 
-    private native final void native_set_playback_rate(int sampleRateInHz);
-    private native final int  native_get_playback_rate();
+    private native final int native_set_playback_rate(int sampleRateInHz);
+    private native final int native_get_playback_rate();
 
     private native final int native_set_marker_pos(int marker);
     private native final int native_get_marker_pos();

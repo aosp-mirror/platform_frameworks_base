@@ -457,7 +457,7 @@ public final class Parcel {
      * Flatten a Map into the parcel at the current dataPosition(),
      * growing dataCapacity() if needed.  The Map keys must be String objects.
      */
-    private void writeMapInternal(Map<String,Object> val) {
+    /* package */ void writeMapInternal(Map<String,Object> val) {
         if (val == null) {
             writeInt(-1);
             return;
@@ -480,23 +480,7 @@ public final class Parcel {
             return;
         }
 
-        if (val.mParcelledData != null) {
-            int length = val.mParcelledData.dataSize();
-            appendFrom(val.mParcelledData, 0, length);
-        } else {
-            writeInt(-1); // dummy, will hold length
-            int oldPos = dataPosition();
-            writeInt(0x4C444E42); // 'B' 'N' 'D' 'L'
-
-            writeMapInternal(val.mMap);
-            int newPos = dataPosition();
-
-            // Backpatch length
-            setDataPosition(oldPos - 4);
-            int length = newPos - oldPos;
-            writeInt(length);
-            setDataPosition(newPos);
-        }
+        val.writeToParcel(this, 0);
     }
 
     /**
@@ -1352,58 +1336,16 @@ public final class Parcel {
      * Returns null if the previously written Bundle object was null.
      */
     public final Bundle readBundle(ClassLoader loader) {
-        int offset = dataPosition();
         int length = readInt();
         if (length < 0) {
             return null;
         }
-        int magic = readInt();
-        if (magic != 0x4C444E42) {
-            //noinspection ThrowableInstanceNeverThrown
-            String st = Log.getStackTraceString(new RuntimeException());
-            Log.e("Bundle", "readBundle: bad magic number");
-            Log.e("Bundle", "readBundle: trace = " + st);
-        }
-
-        // Advance within this Parcel
-        setDataPosition(offset + length + 4);
-
-        Parcel p = new Parcel(0);
-        p.setDataPosition(0);
-        p.appendFrom(this, offset, length + 4);
-        p.setDataPosition(0);
-        final Bundle bundle = new Bundle(p);
+        
+        final Bundle bundle = new Bundle(this, length);
         if (loader != null) {
             bundle.setClassLoader(loader);
         }
         return bundle;
-    }
-
-    /**
-     * Read and return a new Bundle object from the parcel at the current
-     * dataPosition().  Returns null if the previously written Bundle object was
-     * null.  The returned bundle will have its contents fully unpacked using
-     * the given ClassLoader.
-     */
-    /* package */ Bundle readBundleUnpacked(ClassLoader loader) {
-        int length = readInt();
-        if (length == -1) {
-            return null;
-        }
-        int magic = readInt();
-        if (magic != 0x4C444E42) {
-            //noinspection ThrowableInstanceNeverThrown
-            String st = Log.getStackTraceString(new RuntimeException());
-            Log.e("Bundle", "readBundleUnpacked: bad magic number");
-            Log.e("Bundle", "readBundleUnpacked: trace = " + st);
-        }
-        Bundle m = new Bundle(loader);
-        int N = readInt();
-        if (N < 0) {
-            return null;
-        }
-        readMapInternal(m.mMap, N, loader);
-        return m;
     }
 
     /**
@@ -1998,7 +1940,7 @@ public final class Parcel {
     private native void init(int obj);
     private native void destroy();
 
-    private void readMapInternal(Map outVal, int N,
+    /* package */ void readMapInternal(Map outVal, int N,
         ClassLoader loader) {
         while (N > 0) {
             Object key = readValue(loader);

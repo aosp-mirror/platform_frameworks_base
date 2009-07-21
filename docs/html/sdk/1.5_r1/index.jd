@@ -1,6 +1,7 @@
 sdk.version=1.5
 sdk.rel.id=1
 sdk.date=April 2009
+sdk.not_latest_version=true
 
 sdk.win_download=android-sdk-windows-1.5_r1.zip
 sdk.win_bytes=176263368

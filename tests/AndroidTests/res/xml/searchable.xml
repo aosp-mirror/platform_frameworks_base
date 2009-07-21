@@ -15,7 +15,12 @@
 -->
 
 <searchable xmlns:android="http://schemas.android.com/apk/res/android"
-    android:label="SearchManagerTest"
-    android:hint="SearchManagerTest Hint"
-/>
+    android:label="@string/searchable_label"
+    android:hint="@string/searchable_hint"
+    android:searchSuggestAuthority="com.android.unit_tests.SuggestionProvider"
+    >
 
+        <actionkey android:keycode="KEYCODE_CALL"
+            android:suggestActionMsgColumn="suggest_action_msg_call" />
+
+</searchable>

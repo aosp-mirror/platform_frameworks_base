@@ -27,27 +27,36 @@ public abstract class Connection {
     public static int PRESENTATION_UNKNOWN = 3;    // no specified or unknown by network
     public static int PRESENTATION_PAYPHONE = 4;   // show pay phone info
 
-    
+
     public enum DisconnectCause {
-        NOT_DISCONNECTED,   /* has not yet disconnected */
-        INCOMING_MISSED,    /* an incoming call that was missed and never answered */
-        NORMAL,             /* normal; remote */
-        LOCAL,              /* normal; local hangup */
-        BUSY,               /* outgoing call to busy line */
-        CONGESTION,         /* outgoing call to congested network */
-        MMI,                /* not presently used; dial() returns null */
-        INVALID_NUMBER,     /* invalid dial string */
+        NOT_DISCONNECTED,               /* has not yet disconnected */
+        INCOMING_MISSED,                /* an incoming call that was missed and never answered */
+        NORMAL,                         /* normal; remote */
+        LOCAL,                          /* normal; local hangup */
+        BUSY,                           /* outgoing call to busy line */
+        CONGESTION,                     /* outgoing call to congested network */
+        MMI,                            /* not presently used; dial() returns null */
+        INVALID_NUMBER,                 /* invalid dial string */
         LOST_SIGNAL,
-        LIMIT_EXCEEDED,     /* eg GSM ACM limit exceeded */
-        INCOMING_REJECTED,  /* an incoming call that was rejected */
-        POWER_OFF,          /* radio is turned off explicitly */
-        OUT_OF_SERVICE,     /* out of service */
-        ICC_ERROR,          /* No ICC, ICC locked, or other ICC error */
-        CALL_BARRED,        /* call was blocked by call barrring */
-        FDN_BLOCKED,        /* call was blocked by fixed dial number */
-        CS_RESTRICTED,      /* call was blocked by restricted all voice access */
-        CS_RESTRICTED_NORMAL,/* call was blocked by restricted normal voice access */
-        CS_RESTRICTED_EMERGENCY/* call was blocked by restricted emergency voice access */
+        LIMIT_EXCEEDED,                 /* eg GSM ACM limit exceeded */
+        INCOMING_REJECTED,              /* an incoming call that was rejected */
+        POWER_OFF,                      /* radio is turned off explicitly */
+        OUT_OF_SERVICE,                 /* out of service */
+        ICC_ERROR,                      /* No ICC, ICC locked, or other ICC error */
+        CALL_BARRED,                    /* call was blocked by call barrring */
+        FDN_BLOCKED,                    /* call was blocked by fixed dial number */
+        CS_RESTRICTED,                  /* call was blocked by restricted all voice access */
+        CS_RESTRICTED_NORMAL,           /* call was blocked by restricted normal voice access */
+        CS_RESTRICTED_EMERGENCY,        /* call was blocked by restricted emergency voice access */
+        CDMA_LOCKED_UNTIL_POWER_CYCLE,  /* MS is locked until next power cycle */
+        CDMA_DROP,
+        CDMA_INTERCEPT,                 /* INTERCEPT order received, MS state idle entered */
+        CDMA_REORDER,                   /* MS has been redirected, call is cancelled */
+        CDMA_SO_REJECT,                 /* service option rejection */
+        CDMA_RETRY_ORDER,               /* requeseted service is rejected, retry delay is set */
+        CDMA_ACCESS_FAILURE,
+        CDMA_PREEMPTED,
+        CDMA_NOT_EMERGENCY              /* not an emergency call */
     }
 
     Object userData;
@@ -62,6 +71,31 @@ public abstract class Connection {
      */
 
     public abstract String getAddress();
+
+    /**
+     * Gets cdma CNAP name  associated with connection
+     * @return cnap name or null if unavailable
+     */
+    public String getCnapName() {
+        return null;
+    }
+
+    /**
+     * Get orignal dial string
+     * @return orignal dial string or null if unavailable
+     */
+    public String getOrigDialString(){
+        return null;
+    }
+
+    /**
+     * Gets cdma CNAP presentation associated with connection
+     * @return cnap name or null if unavailable
+     */
+
+    public int getCnapNamePresentation() {
+       return 0;
+    };
 
     /**
      * @return Call that owns this Connection, or null if none
@@ -195,8 +229,14 @@ public abstract class Connection {
         WILD,           /* The post dial string playback is waiting for a
                            call to proceedAfterWildChar() */
         COMPLETE,       /* The post dial string playback is complete */
-        CANCELLED       /* The post dial string playback was cancelled
+        CANCELLED,       /* The post dial string playback was cancelled
                            with cancelPostDial() */
+        PAUSE           /* The post dial string playback is pausing for a
+                           call to processNextPostDialChar*/
+    }
+
+    public void clearUserData(){
+        userData = null;
     }
 
     public abstract PostDialState getPostDialState();
@@ -220,8 +260,8 @@ public abstract class Connection {
     /**
      * Cancel any post
      */
-    public abstract void cancelPostDial();       
-    
+    public abstract void cancelPostDial();
+
     /**
      * Returns the caller id presentation type for incoming and waiting calls
      * @return one of PRESENTATION_*

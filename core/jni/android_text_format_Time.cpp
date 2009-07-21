@@ -23,7 +23,7 @@
 #include "jni.h"
 #include "utils/misc.h"
 #include "android_runtime/AndroidRuntime.h"
-#include <utils/TimeUtils.h>
+#include "TimeUtils.h"
 #include <nativehelper/JNIHelp.h>
 #include <cutils/tztime.h>
 
@@ -44,6 +44,7 @@ static jfieldID g_timezoneField = 0;
 
 static jfieldID g_shortMonthsField = 0;
 static jfieldID g_longMonthsField = 0;
+static jfieldID g_longStandaloneMonthsField = 0;
 static jfieldID g_shortWeekdaysField = 0;
 static jfieldID g_longWeekdaysField = 0;
 static jfieldID g_timeOnlyFormatField = 0;
@@ -193,6 +194,7 @@ static jstring android_text_format_Time_format(JNIEnv* env, jobject This,
     static jobject js_locale_previous = NULL;
     static struct strftime_locale locale;
     static jstring js_mon[12], js_month[12], js_wday[7], js_weekday[7];
+    static jstring js_standalone_month[12];
     static jstring js_X_fmt, js_x_fmt, js_c_fmt, js_am, js_pm, js_date_fmt;
 
     Time t;
@@ -206,8 +208,10 @@ static jstring android_text_format_Time_format(JNIEnv* env, jobject This,
             for (int i = 0; i < 12; i++) {
                 env->ReleaseStringUTFChars(js_mon[i], locale.mon[i]);
                 env->ReleaseStringUTFChars(js_month[i], locale.month[i]);
+                env->ReleaseStringUTFChars(js_standalone_month[i], locale.standalone_month[i]);
                 env->DeleteGlobalRef(js_mon[i]);
                 env->DeleteGlobalRef(js_month[i]);
+                env->DeleteGlobalRef(js_standalone_month[i]);
             }
 
             for (int i = 0; i < 7; i++) {
@@ -243,6 +247,12 @@ static jstring android_text_format_Time_format(JNIEnv* env, jobject This,
         for (int i = 0; i < 12; i++) {
             js_month[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i));
             locale.month[i] = env->GetStringUTFChars(js_month[i], NULL);
+        }
+
+        ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_longStandaloneMonthsField);
+        for (int i = 0; i < 12; i++) {
+            js_standalone_month[i] = (jstring) env->NewGlobalRef(env->GetObjectArrayElement(ja, i));
+            locale.standalone_month[i] = env->GetStringUTFChars(js_standalone_month[i], NULL);
         }
 
         ja = (jobjectArray) env->GetStaticObjectField(timeClass, g_shortWeekdaysField);
@@ -639,6 +649,7 @@ int register_android_text_format_Time(JNIEnv* env)
 
     g_shortMonthsField = env->GetStaticFieldID(timeClass, "sShortMonths", "[Ljava/lang/String;");
     g_longMonthsField = env->GetStaticFieldID(timeClass, "sLongMonths", "[Ljava/lang/String;");
+    g_longStandaloneMonthsField = env->GetStaticFieldID(timeClass, "sLongStandaloneMonths", "[Ljava/lang/String;");
     g_shortWeekdaysField = env->GetStaticFieldID(timeClass, "sShortWeekdays", "[Ljava/lang/String;");
     g_longWeekdaysField = env->GetStaticFieldID(timeClass, "sLongWeekdays", "[Ljava/lang/String;");
     g_timeOnlyFormatField = env->GetStaticFieldID(timeClass, "sTimeOnlyFormat", "Ljava/lang/String;");

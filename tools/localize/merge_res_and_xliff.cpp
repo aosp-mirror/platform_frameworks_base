@@ -3,6 +3,7 @@
 #include "file_utils.h"
 #include "Perforce.h"
 #include "log.h"
+#include <stdio.h>
 
 static set<StringResource>::const_iterator
 find_id(const set<StringResource>& s, const string& id, int index)

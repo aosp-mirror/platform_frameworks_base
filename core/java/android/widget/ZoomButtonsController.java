@@ -81,27 +81,27 @@ public class ZoomButtonsController implements View.OnTouchListener {
     private static final int ZOOM_CONTROLS_TOUCH_PADDING = 20;
     private int mTouchPaddingScaledSq;
 
-    private Context mContext;
-    private WindowManager mWindowManager;
+    private final Context mContext;
+    private final WindowManager mWindowManager;
     private boolean mAutoDismissControls = true;
 
     /**
      * The view that is being zoomed by this zoom controller.
      */
-    private View mOwnerView;
+    private final View mOwnerView;
 
     /**
      * The location of the owner view on the screen. This is recalculated
      * each time the zoom controller is shown.
      */
-    private int[] mOwnerViewRawLocation = new int[2];
+    private final int[] mOwnerViewRawLocation = new int[2];
 
     /**
      * The container that is added as a window.
      */
-    private FrameLayout mContainer;
+    private final FrameLayout mContainer;
     private LayoutParams mContainerLayoutParams;
-    private int[] mContainerRawLocation = new int[2];
+    private final int[] mContainerRawLocation = new int[2];
 
     private ZoomControls mControls;
 
@@ -113,7 +113,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
     /**
      * The {@link #mTouchTargetView}'s location in window, set on touch down.
      */
-    private int[] mTouchTargetWindowLocation = new int[2];
+    private final int[] mTouchTargetWindowLocation = new int[2];
 
     /**
      * If the zoom controller is dismissed but the user is still in a touch
@@ -128,8 +128,8 @@ public class ZoomButtonsController implements View.OnTouchListener {
     /** Whether the container has been added to the window manager. */
     private boolean mIsVisible;
 
-    private Rect mTempRect = new Rect();
-    private int[] mTempIntArray = new int[2];
+    private final Rect mTempRect = new Rect();
+    private final int[] mTempIntArray = new int[2];
 
     private OnZoomListener mCallback;
 
@@ -141,13 +141,13 @@ public class ZoomButtonsController implements View.OnTouchListener {
      */
     private Runnable mPostedVisibleInitializer;
 
-    private IntentFilter mConfigurationChangedFilter =
+    private final IntentFilter mConfigurationChangedFilter =
             new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED);
 
     /**
      * Needed to reposition the zoom controls after configuration changes.
      */
-    private BroadcastReceiver mConfigurationChangedReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mConfigurationChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (!mIsVisible) return;
@@ -167,7 +167,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
      */
     private static final int MSG_POST_SET_VISIBLE = 4;
 
-    private Handler mHandler = new Handler() {
+    private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -444,6 +444,9 @@ public class ZoomButtonsController implements View.OnTouchListener {
     }
 
     private void refreshPositioningVariables() {
+        // if the mOwnerView is detached from window then skip.
+        if (mOwnerView.getWindowToken() == null) return;
+
         // Position the zoom controls on the bottom of the owner view.
         int ownerHeight = mOwnerView.getHeight();
         int ownerWidth = mOwnerView.getWidth();

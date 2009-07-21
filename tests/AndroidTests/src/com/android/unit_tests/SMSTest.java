@@ -69,10 +69,15 @@ public class SMSTest extends AndroidTestCase {
 
         SmsHeader header = sms.getUserDataHeader();
         assertNotNull(header);
-
-        Iterator<SmsHeader.Element> elements = header.getElements().iterator();
-        assertNotNull(elements);
-
+        assertNotNull(header.concatRef);
+        assertEquals(header.concatRef.refNumber, 42);
+        assertEquals(header.concatRef.msgCount, 2);
+        assertEquals(header.concatRef.seqNumber, 1);
+        assertEquals(header.concatRef.isEightBits, true);
+        assertNotNull(header.portAddrs);
+        assertEquals(header.portAddrs.destPort, 2948);
+        assertEquals(header.portAddrs.origPort, 9200);
+        assertEquals(header.portAddrs.areEightBits, false);
 
         pdu = "07914140279510F6440A8111110301003BF56080207130238A3B0B05040B8423F"
                 + "000032A0202362E3130322E3137312E3135302F524E453955304A6D7135514141"
@@ -81,9 +86,15 @@ public class SMSTest extends AndroidTestCase {
 
         header = sms.getUserDataHeader();
         assertNotNull(header);
-
-        elements = header.getElements().iterator();
-        assertNotNull(elements);
+        assertNotNull(header.concatRef);
+        assertEquals(header.concatRef.refNumber, 42);
+        assertEquals(header.concatRef.msgCount, 2);
+        assertEquals(header.concatRef.seqNumber, 2);
+        assertEquals(header.concatRef.isEightBits, true);
+        assertNotNull(header.portAddrs);
+        assertEquals(header.portAddrs.destPort, 2948);
+        assertEquals(header.portAddrs.origPort, 9200);
+        assertEquals(header.portAddrs.areEightBits, false);
 
         /*
         * UCS-2 encoded SMS

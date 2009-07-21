@@ -110,7 +110,10 @@
         <item><xliff:g id="id">alarm_clock</xliff:g></item>
         <item><xliff:g id="id">battery</xliff:g></item>
         <item><xliff:g id="id">phone_signal</xliff:g></item>
+        <item><xliff:g id="id">phone_evdo_signal</xliff:g></item>
         <item><xliff:g id="id">data_connection</xliff:g></item>
+        <item><xliff:g id="id">cdma_eri</xliff:g></item>
+        <item><xliff:g id="id">tty</xliff:g></item>
         <item><xliff:g id="id">volume</xliff:g></item>
         <item><xliff:g id="id">mute</xliff:g></item>
         <item><xliff:g id="id">speakerphone</xliff:g></item>
@@ -121,5 +124,15 @@
         <item><xliff:g id="id">sync_active</xliff:g></item>
         <item><xliff:g id="id">sync_failing</xliff:g></item>
         <item><xliff:g id="id">ime</xliff:g></item>
+    </string-array>
+
+    <!-- Do not translate. Each string points to the component name of an ACTION_WEB_SEARCH
+         handling activity. On startup if there were no preferred ACTION_WEB_SEARCH handlers,
+         the first component from this list which is found to be installed is set as the
+         preferred activity. -->
+    <string-array name="default_web_search_providers">
+        <item>com.google.android.providers.enhancedgooglesearch/.Launcher</item>
+        <item>com.android.googlesearch/.GoogleSearch</item>
+        <item>com.android.websearch/.Search.1</item>
     </string-array>
 </resources>

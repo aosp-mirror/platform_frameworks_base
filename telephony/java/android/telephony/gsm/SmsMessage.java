@@ -21,6 +21,7 @@ import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.EncodeException;
+import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.SmsMessageBase.SubmitPduBase;
 
@@ -369,7 +370,8 @@ public class SmsMessage {
 
         if (PHONE_TYPE_CDMA == activePhone) {
             spb = com.android.internal.telephony.cdma.SmsMessage.getSubmitPdu(scAddress,
-                    destinationAddress, message, statusReportRequested, header);
+                    destinationAddress, message, statusReportRequested,
+                    SmsHeader.fromByteArray(header));
         } else {
             spb = com.android.internal.telephony.gsm.SmsMessage.getSubmitPdu(scAddress,
                     destinationAddress, message, statusReportRequested, header);
@@ -395,7 +397,7 @@ public class SmsMessage {
 
         if (PHONE_TYPE_CDMA == activePhone) {
             spb = com.android.internal.telephony.cdma.SmsMessage.getSubmitPdu(scAddress,
-                    destinationAddress, message, statusReportRequested);
+                    destinationAddress, message, statusReportRequested, null);
         } else {
             spb = com.android.internal.telephony.gsm.SmsMessage.getSubmitPdu(scAddress,
                     destinationAddress, message, statusReportRequested);
@@ -744,4 +746,3 @@ public class SmsMessage {
         }
     }
 }
-

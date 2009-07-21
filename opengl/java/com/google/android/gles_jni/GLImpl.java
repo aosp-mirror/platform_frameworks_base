@@ -19,6 +19,12 @@
 
 package com.google.android.gles_jni;
 
+import android.app.ActivityThread;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
+import android.os.Build;
+import android.util.Log;
+
 import java.nio.Buffer;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL10Ext;
@@ -43,9 +49,30 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
     public GLImpl() {
     }
 
-     public void glGetPointerv(int pname, java.nio.Buffer[] params) {
-         throw new UnsupportedOperationException("glGetPointerv");
-     }
+    public void glGetPointerv(int pname, java.nio.Buffer[] params) {
+        throw new UnsupportedOperationException("glGetPointerv");
+    }
+
+    private static boolean allowIndirectBuffers(String appName) {
+        boolean result = false;
+        int version = 0;
+        IPackageManager pm = ActivityThread.getPackageManager();
+        try {
+            ApplicationInfo applicationInfo = pm.getApplicationInfo(appName, 0);
+            if (applicationInfo != null) {
+                version = applicationInfo.targetSdkVersion;
+            }
+        } catch (android.os.RemoteException e) {
+            // ignore
+        }
+        Log.e("OpenGLES", String.format(
+            "Application %s (SDK target %d) called a GL11 Pointer method with an indirect Buffer.",
+            appName, version));
+        if (version <= Build.VERSION_CODES.CUPCAKE) {
+            result = true;
+        }
+        return result;
+    }
 
     // C function void glActiveTexture ( GLenum texture )
 

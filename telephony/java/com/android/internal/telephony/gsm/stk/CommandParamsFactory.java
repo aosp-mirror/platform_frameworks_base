@@ -635,7 +635,7 @@ class CommandParamsFactory extends Handler {
 
     /**
      * Processes SET_UP_EVENT_LIST proactive command from the SIM card.
-     * 
+     *
      * @param cmdDet Command Details object retrieved.
      * @param ctlvs List of ComprehensionTlv objects following Command Details
      *        object and Device Identities object within the proactive command

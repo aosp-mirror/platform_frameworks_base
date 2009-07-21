@@ -114,6 +114,8 @@ public class HorizontalScrollView extends FrameLayout {
     private boolean mSmoothScrollingEnabled = true;
 
     private int mTouchSlop;
+    private int mMinimumVelocity;
+    private int mMaximumVelocity;
 
     public HorizontalScrollView(Context context) {
         this(context, null);
@@ -179,7 +181,10 @@ public class HorizontalScrollView extends FrameLayout {
         setFocusable(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setWillNotDraw(false);
-        mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        final ViewConfiguration configuration = ViewConfiguration.get(mContext);
+        mTouchSlop = configuration.getScaledTouchSlop();
+        mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
+        mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
     }
 
     @Override
@@ -477,12 +482,10 @@ public class HorizontalScrollView extends FrameLayout {
                 break;
             case MotionEvent.ACTION_UP:
                 final VelocityTracker velocityTracker = mVelocityTracker;
-                velocityTracker.computeCurrentVelocity(1000);
+                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                 int initialVelocity = (int) velocityTracker.getXVelocity();
 
-                if ((Math.abs(initialVelocity) >
-                        ViewConfiguration.get(mContext).getScaledMinimumFlingVelocity()) &&
-                        getChildCount() > 0) {
+                if ((Math.abs(initialVelocity) > mMinimumVelocity) && getChildCount() > 0) {
                     fling(-initialVelocity);
                 }
 

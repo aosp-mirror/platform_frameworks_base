@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -316,8 +317,11 @@ public final class MoreAsserts {
      */
     public static void assertContentsInOrder(
             String message, Iterable<?> actual, Object... expected) {
-        Assert.assertEquals(message,
-                Arrays.asList(expected), Lists.newArrayList(actual));
+        ArrayList actualList = new ArrayList();
+        for (Object o : actual) {
+            actualList.add(o);
+        }
+        Assert.assertEquals(message, Arrays.asList(expected), actualList);
     }
 
     /**

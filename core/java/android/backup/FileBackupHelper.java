@@ -20,54 +20,53 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import java.io.File;
 import java.io.FileDescriptor;
 
 /** @hide */
-public class FileBackupHelper {
+public class FileBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "FileBackupHelper";
+
+    Context mContext;
+    File mFilesDir;
+    String[] mFiles;
+
+    public FileBackupHelper(Context context, String... files) {
+        super(context);
+
+        mContext = context;
+        mFilesDir = context.getFilesDir();
+        mFiles = files;
+    }
 
     /**
      * Based on oldState, determine which of the files from the application's data directory
      * need to be backed up, write them to the data stream, and fill in newState with the
      * state as it exists now.
      */
-    public static void performBackup(Context context,
-            ParcelFileDescriptor oldState, BackupDataOutput data,
-            ParcelFileDescriptor newState, String[] files) {
-        String basePath = context.getFilesDir().getAbsolutePath();
-        performBackup_checked(basePath, oldState, data, newState, files);
+    public void performBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
+            ParcelFileDescriptor newState) {
+        // file names
+        String[] files = mFiles;
+        File base = mContext.getFilesDir();
+        final int N = files.length;
+        String[] fullPaths = new String[N];
+        for (int i=0; i<N; i++) {
+            fullPaths[i] = (new File(base, files[i])).getAbsolutePath();
+        }
+
+        // go
+        performBackup_checked(oldState, data, newState, fullPaths, files);
     }
 
-    /**
-     * Check the parameters so the native code doens't have to throw all the exceptions
-     * since it's easier to do that from java.
-     */
-    static void performBackup_checked(String basePath,
-            ParcelFileDescriptor oldState, BackupDataOutput data,
-            ParcelFileDescriptor newState, String[] files) {
-        if (files.length == 0) {
-            return;
-        }
-        if (basePath == null) {
-            throw new NullPointerException();
-        }
-        // oldStateFd can be null
-        FileDescriptor oldStateFd = oldState != null ? oldState.getFileDescriptor() : null;
-        if (data.fd == null) {
-            throw new NullPointerException();
-        }
-        FileDescriptor newStateFd = newState.getFileDescriptor();
-        if (newStateFd == null) {
-            throw new NullPointerException();
-        }
-
-        int err = performBackup_native(basePath, oldStateFd, data.fd, newStateFd, files);
-
-        if (err != 0) {
-            throw new RuntimeException("Backup failed"); // TODO: more here
+    public void restoreEntity(BackupDataInputStream data) {
+        // TODO: turn this off before ship
+        Log.d(TAG, "got entity '" + data.getKey() + "' size=" + data.size());
+        String key = data.getKey();
+        if (isKeyInList(key, mFiles)) {
+            File f = new File(mFilesDir, key);
+            writeFile(f, data);
         }
     }
-
-    native private static int performBackup_native(String basePath, FileDescriptor oldState,
-            FileDescriptor data, FileDescriptor newState, String[] files);
 }
+

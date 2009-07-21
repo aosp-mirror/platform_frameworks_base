@@ -67,13 +67,10 @@
         android:textAppearance="?android:attr/textAppearanceSearchResultTitle"
         android:singleLine="true"
         android:layout_width="fill_parent"
-        android:layout_height="29dip"
-        android:paddingTop="4dip"
-        android:gravity="center_vertical"
-        android:layout_alignParentTop="true"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_toRightOf="@android:id/icon1"
         android:layout_toLeftOf="@android:id/icon2"
-        android:layout_above="@android:id/text2"
-        android:layout_alignWithParentIfMissing="true" />
+        android:layout_above="@android:id/text2" />
     
 </RelativeLayout>

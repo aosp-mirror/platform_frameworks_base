@@ -44,6 +44,7 @@ public interface TelephonyProperties
      *  Availability: when registered to a network
      */
     static final String PROPERTY_OPERATOR_ALPHA = "gsm.operator.alpha";
+    //TODO: most of these proprieties are generic, substitute gsm. with phone. bug 1856959
 
     /** Numeric name (MCC+MNC) of current registered operator.
      *  Availability: when registered to a network
@@ -67,6 +68,8 @@ public interface TelephonyProperties
      *  Availability: when registered to a network
      */
     static final String PROPERTY_OPERATOR_ISO_COUNTRY = "gsm.operator.iso-country";
+
+    static final String CURRENT_ACTIVE_PHONE = "gsm.current.phone-type";
 
     //****** SIM Card
     /**
@@ -95,4 +98,12 @@ public interface TelephonyProperties
      */
     static String PROPERTY_DATA_NETWORK_TYPE = "gsm.network.type";
 
+    /** Indicate if phone is in emergency callback mode */
+    static final String PROPERTY_INECM_MODE = "ril.cdma.inecmmode";
+
+    /** Indicate the timer value for exiting emergency callback mode */
+    static final String PROPERTY_ECM_EXIT_TIMER = "ro.cdma.ecmexittimer";
+
+    /** The international dialing prefix conversion string */
+    static final String PROPERTY_IDP_STRING = "ro.cdma.idpstring";
 }

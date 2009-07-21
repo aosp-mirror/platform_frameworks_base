@@ -23,6 +23,16 @@ status_t compileXmlFile(const sp<AaptAssets>& assets,
     if (root == NULL) {
         return UNKNOWN_ERROR;
     }
+    
+    return compileXmlFile(assets, root, target, table, options);
+}
+
+status_t compileXmlFile(const sp<AaptAssets>& assets,
+                        const sp<XMLNode>& root,
+                        const sp<AaptFile>& target,
+                        ResourceTable* table,
+                        int options)
+{
     if ((options&XML_COMPILE_STRIP_WHITESPACE) != 0) {
         root->removeWhitespace(true, NULL);
     } else  if ((options&XML_COMPILE_COMPACT_WHITESPACE) != 0) {
@@ -651,6 +661,7 @@ status_t compileResourceFile(Bundle* bundle,
     const String16 string_array16("string-array");
     const String16 integer_array16("integer-array");
     const String16 public16("public");
+    const String16 public_padding16("public-padding");
     const String16 private_symbols16("private-symbols");
     const String16 skip16("skip");
     const String16 eat_comment16("eat-comment");
@@ -685,7 +696,7 @@ status_t compileResourceFile(Bundle* bundle,
 
     bool hasErrors = false;
     
-    uint32_t nextPublicId = 0;
+    DefaultKeyedVector<String16, uint32_t> nextPublicId(0);
 
     ResXMLTree::event_code_t code;
     do {
@@ -718,6 +729,7 @@ status_t compileResourceFile(Bundle* bundle,
             String16 curType;
             int32_t curFormat = ResTable_map::TYPE_ANY;
             bool curIsBag = false;
+            bool curIsBagReplaceOnOverwrite = false;
             bool curIsStyled = false;
             bool curIsPseudolocalizable = false;
             bool localHasErrors = false;
@@ -774,15 +786,15 @@ status_t compileResourceFile(Bundle* bundle,
                         hasErrors = localHasErrors = true;
                     } else {
                         ident = identValue.data;
-                        nextPublicId = ident+1;
+                        nextPublicId.replaceValueFor(type, ident+1);
                     }
-                } else if (nextPublicId == 0) {
+                } else if (nextPublicId.indexOfKey(type) < 0) {
                     srcPos.error("No 'id' attribute supplied <public>,"
                             " and no previous id defined in this file.\n");
                     hasErrors = localHasErrors = true;
                 } else if (!localHasErrors) {
-                    ident = nextPublicId;
-                    nextPublicId++;
+                    ident = nextPublicId.valueFor(type);
+                    nextPublicId.replaceValueFor(type, ident+1);
                 }
 
                 if (!localHasErrors) {
@@ -810,6 +822,116 @@ status_t compileResourceFile(Bundle* bundle,
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::END_TAG) {
                         if (strcmp16(block.getElementName(&len), public16.string()) == 0) {
+                            break;
+                        }
+                    }
+                }
+                continue;
+
+            } else if (strcmp16(block.getElementName(&len), public_padding16.string()) == 0) {
+                SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
+            
+                String16 type;
+                ssize_t typeIdx = block.indexOfAttribute(NULL, "type");
+                if (typeIdx < 0) {
+                    srcPos.error("A 'type' attribute is required for <public-padding>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                type = String16(block.getAttributeStringValue(typeIdx, &len));
+
+                String16 name;
+                ssize_t nameIdx = block.indexOfAttribute(NULL, "name");
+                if (nameIdx < 0) {
+                    srcPos.error("A 'name' attribute is required for <public-padding>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                name = String16(block.getAttributeStringValue(nameIdx, &len));
+
+                uint32_t start = 0;
+                ssize_t startIdx = block.indexOfAttribute(NULL, "start");
+                if (startIdx >= 0) {
+                    const char16_t* startStr = block.getAttributeStringValue(startIdx, &len);
+                    Res_value startValue;
+                    if (!ResTable::stringToInt(startStr, len, &startValue)) {
+                        srcPos.error("Given 'start' attribute is not an integer: %s\n",
+                                String8(block.getAttributeStringValue(startIdx, &len)).string());
+                        hasErrors = localHasErrors = true;
+                    } else {
+                        start = startValue.data;
+                    }
+                } else if (nextPublicId.indexOfKey(type) < 0) {
+                    srcPos.error("No 'start' attribute supplied <public-padding>,"
+                            " and no previous id defined in this file.\n");
+                    hasErrors = localHasErrors = true;
+                } else if (!localHasErrors) {
+                    start = nextPublicId.valueFor(type);
+                }
+
+                uint32_t end = 0;
+                ssize_t endIdx = block.indexOfAttribute(NULL, "end");
+                if (endIdx >= 0) {
+                    const char16_t* endStr = block.getAttributeStringValue(endIdx, &len);
+                    Res_value endValue;
+                    if (!ResTable::stringToInt(endStr, len, &endValue)) {
+                        srcPos.error("Given 'end' attribute is not an integer: %s\n",
+                                String8(block.getAttributeStringValue(endIdx, &len)).string());
+                        hasErrors = localHasErrors = true;
+                    } else {
+                        end = endValue.data;
+                    }
+                } else {
+                    srcPos.error("No 'end' attribute supplied <public-padding>\n");
+                    hasErrors = localHasErrors = true;
+                }
+
+                if (end >= start) {
+                    nextPublicId.replaceValueFor(type, end+1);
+                } else {
+                    srcPos.error("Padding start '%ul' is after end '%ul'\n",
+                            start, end);
+                    hasErrors = localHasErrors = true;
+                }
+                
+                String16 comment(
+                    block.getComment(&len) ? block.getComment(&len) : nulStr);
+                for (uint32_t curIdent=start; curIdent<=end; curIdent++) {
+                    if (localHasErrors) {
+                        break;
+                    }
+                    String16 curName(name);
+                    char buf[64];
+                    sprintf(buf, "%d", (int)(end-curIdent+1));
+                    curName.append(String16(buf));
+                    
+                    err = outTable->addEntry(srcPos, myPackage, type, curName,
+                                             String16("padding"), NULL, &curParams, false,
+                                             ResTable_map::TYPE_STRING, overwrite);
+                    if (err < NO_ERROR) {
+                        hasErrors = localHasErrors = true;
+                        break;
+                    }
+                    err = outTable->addPublic(srcPos, myPackage, type,
+                            curName, curIdent);
+                    if (err < NO_ERROR) {
+                        hasErrors = localHasErrors = true;
+                        break;
+                    }
+                    sp<AaptSymbols> symbols = assets->getSymbolsFor(String8("R"));
+                    if (symbols != NULL) {
+                        symbols = symbols->addNestedSymbol(String8(type), srcPos);
+                    }
+                    if (symbols != NULL) {
+                        symbols->makeSymbolPublic(String8(curName), srcPos);
+                        symbols->appendComment(String8(curName), comment, srcPos);
+                    } else {
+                        srcPos.error("Unable to create symbols!\n");
+                        hasErrors = localHasErrors = true;
+                    }
+                }
+
+                while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+                    if (code == ResXMLTree::END_TAG) {
+                        if (strcmp16(block.getElementName(&len), public_padding16.string()) == 0) {
                             break;
                         }
                     }
@@ -1050,6 +1172,7 @@ status_t compileResourceFile(Bundle* bundle,
                 curTag = &array16;
                 curType = array16;
                 curIsBag = true;
+                curIsBagReplaceOnOverwrite = true;
                 ssize_t formatIdx = block.indexOfAttribute(NULL, "format");
                 if (formatIdx >= 0) {
                     String16 formatStr = String16(block.getAttributeStringValue(
@@ -1068,12 +1191,14 @@ status_t compileResourceFile(Bundle* bundle,
                 curType = array16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
                 curIsBag = true;
+                curIsBagReplaceOnOverwrite = true;
                 curIsPseudolocalizable = true;
             } else if (strcmp16(block.getElementName(&len), integer_array16.string()) == 0) {
                 curTag = &integer_array16;
                 curType = array16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_INTEGER;
                 curIsBag = true;
+                curIsBagReplaceOnOverwrite = true;
             } else {
                 SourcePos(in->getPrintableSource(), block.getLineNumber()).error(
                         "Found tag %s where item is expected\n",
@@ -1108,9 +1233,10 @@ status_t compileResourceFile(Bundle* bundle,
                 }
 
                 if (!localHasErrors) {
-                    err = outTable->startBag(SourcePos(in->getPrintableSource(), block.getLineNumber()),
-                                             myPackage, curType, ident, parentIdent, &curParams, 
-                                             overwrite);
+                    err = outTable->startBag(SourcePos(in->getPrintableSource(),
+                            block.getLineNumber()), myPackage, curType, ident,
+                            parentIdent, &curParams,
+                            overwrite, curIsBagReplaceOnOverwrite);
                     if (err != NO_ERROR) {
                         hasErrors = localHasErrors = true;
                     }
@@ -1307,7 +1433,7 @@ status_t ResourceTable::addIncludedResources(Bundle* bundle, const sp<AaptAssets
             } else if (id != 0) {
                 if (id == 127) {
                     if (mHaveAppPackage) {
-                        fprintf(stderr, "Included resource have two application packages!\n");
+                        fprintf(stderr, "Included resources have two application packages!\n");
                         return UNKNOWN_ERROR;
                     }
                     mHaveAppPackage = true;
@@ -1390,8 +1516,9 @@ status_t ResourceTable::addEntry(const SourcePos& sourcePos,
                String8(value).string());
     }
 #endif
-    
-    sp<Entry> e = getEntry(package, type, name, sourcePos, params, doSetIndex);
+
+    sp<Entry> e = getEntry(package, type, name, sourcePos, overwrite,
+                           params, doSetIndex);
     if (e == NULL) {
         return UNKNOWN_ERROR;
     }
@@ -1408,6 +1535,7 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
                                  const String16& name,
                                  const String16& bagParent,
                                  const ResTable_config* params,
+                                 bool overlay,
                                  bool replace, bool isId)
 {
     status_t result = NO_ERROR;
@@ -1428,8 +1556,12 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
                sourcePos.file.striing(), sourcePos.line, String8(type).string());
     }
 #endif
-    
-    sp<Entry> e = getEntry(package, type, name, sourcePos, params);
+    if (overlay && !hasBagOrEntry(package, type, name)) {
+        sourcePos.error("Can't add new bags in an overlay.  See '%s'\n",
+                        String8(name).string());
+        return UNKNOWN_ERROR;
+    }
+    sp<Entry> e = getEntry(package, type, name, sourcePos, overlay, params);
     if (e == NULL) {
         return UNKNOWN_ERROR;
     }
@@ -1450,7 +1582,7 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
         return result;
     }
 
-    if (replace) { 
+    if (overlay && replace) { 
         return e->emptyBag(sourcePos);
     }
     return result;
@@ -1483,8 +1615,7 @@ status_t ResourceTable::addBag(const SourcePos& sourcePos,
                sourcePos.file.striing(), sourcePos.line, String8(type).string());
     }
 #endif
-    
-    sp<Entry> e = getEntry(package, type, name, sourcePos, params);
+    sp<Entry> e = getEntry(package, type, name, sourcePos, replace, params);
     if (e == NULL) {
         return UNKNOWN_ERROR;
     }
@@ -2767,7 +2898,7 @@ status_t ResourceTable::Entry::setItem(const SourcePos& sourcePos,
                         mItem.sourcePos.file.string(), mItem.sourcePos.line);
         return UNKNOWN_ERROR;
     }
-    
+
     mType = TYPE_ITEM;
     mItem = item;
     mItemFormat = format;
@@ -3087,11 +3218,17 @@ status_t ResourceTable::Type::addPublic(const SourcePos& sourcePos,
 sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
                                                        const SourcePos& sourcePos,
                                                        const ResTable_config* config,
-                                                       bool doSetIndex)
+                                                       bool doSetIndex,
+                                                       bool overlay)
 {
     int pos = -1;
     sp<ConfigList> c = mConfigs.valueFor(entry);
     if (c == NULL) {
+        if (overlay == true) {
+            sourcePos.error("Resource %s appears in overlay but not"
+                            " in the base package.\n", String8(entry).string());
+            return NULL;
+        }
         c = new ConfigList(entry, sourcePos);
         mConfigs.add(entry, c);
         pos = (int)mOrderedConfigs.size();
@@ -3390,6 +3527,7 @@ sp<ResourceTable::Entry> ResourceTable::getEntry(const String16& package,
                                                  const String16& type,
                                                  const String16& name,
                                                  const SourcePos& sourcePos,
+                                                 bool overlay,
                                                  const ResTable_config* config,
                                                  bool doSetIndex)
 {
@@ -3397,7 +3535,7 @@ sp<ResourceTable::Entry> ResourceTable::getEntry(const String16& package,
     if (t == NULL) {
         return NULL;
     }
-    return t->getEntry(name, sourcePos, config, doSetIndex);
+    return t->getEntry(name, sourcePos, config, doSetIndex, overlay);
 }
 
 sp<const ResourceTable::Entry> ResourceTable::getEntry(uint32_t resID,

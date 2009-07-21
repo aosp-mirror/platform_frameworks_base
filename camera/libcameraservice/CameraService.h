@@ -58,10 +58,8 @@ public:
 
             void            removeClient(const sp<ICameraClient>& cameraClient);
 
-#if DEBUG_HEAP_LEAKS
     virtual status_t onTransact(
         uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
-#endif
 
 private:
 
@@ -159,6 +157,8 @@ private:
         status_t                startCameraMode(camera_mode mode);
         status_t                startPreviewMode();
         status_t                startRecordingMode();
+        status_t                setOverlay();
+        status_t                registerPreviewBuffers();
 
         // Ensures atomicity among the public methods
         mutable     Mutex                       mLock;
@@ -196,7 +196,12 @@ private:
                             CameraService();
     virtual                 ~CameraService();
 
-    mutable     Mutex                       mLock;
+    // We use a count for number of clients (shoule only be 0 or 1).
+    volatile    int32_t                     mUsers;
+    virtual     void                        incUsers();
+    virtual     void                        decUsers();
+
+    mutable     Mutex                       mServiceLock;
                 wp<Client>                  mClient;
 
 #if DEBUG_HEAP_LEAKS

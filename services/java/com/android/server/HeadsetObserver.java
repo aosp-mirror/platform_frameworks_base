@@ -35,6 +35,7 @@ import java.io.FileNotFoundException;
  */
 class HeadsetObserver extends UEventObserver {
     private static final String TAG = HeadsetObserver.class.getSimpleName();
+    private static final boolean LOG = false;
 
     private static final String HEADSET_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/h2w";
     private static final String HEADSET_STATE_PATH = "/sys/class/switch/h2w/state";
@@ -61,7 +62,7 @@ class HeadsetObserver extends UEventObserver {
 
     @Override
     public void onUEvent(UEventObserver.UEvent event) {
-        Log.v(TAG, "Headset UEVENT: " + event.toString());
+        if (LOG) Log.v(TAG, "Headset UEVENT: " + event.toString());
 
         try {
             update(event.get("SWITCH_NAME"), Integer.parseInt(event.get("SWITCH_STATE")));

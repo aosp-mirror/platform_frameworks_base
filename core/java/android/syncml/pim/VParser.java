@@ -26,6 +26,9 @@ import java.io.UnsupportedEncodingException;
  *
  */
 abstract public class VParser {
+    // Assume that "iso-8859-1" is able to map "all" 8bit characters to some unicode and
+    // decode the unicode to the original charset. If not, this setting will cause some bug. 
+    public static String DEFAULT_CHARSET = "iso-8859-1";
 
     /**
      * The buffer used to store input stream
@@ -95,6 +98,20 @@ abstract public class VParser {
         return (mBuffer.length() == sum);
     }
 
+    /**
+     * Parse the given stream with the default encoding.
+     * 
+     * @param is
+     *            The source to parse.
+     * @param builder
+     *            The v builder which used to construct data.
+     * @return Return true for success, otherwise false.
+     * @throws IOException
+     */
+    public boolean parse(InputStream is, VBuilder builder) throws IOException {
+        return parse(is, DEFAULT_CHARSET, builder);
+    }
+    
     /**
      * Copy the content of input stream and filter the "folding"
      */

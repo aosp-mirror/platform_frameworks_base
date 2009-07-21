@@ -132,6 +132,19 @@ releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit)
 					   commit ? 0 : JNI_ABORT);
 }
 
+static void *
+getDirectBufferPointer(JNIEnv *_env, jobject buffer) {
+    char* buf = (char*) _env->GetDirectBufferAddress(buffer);
+    if (buf) {
+        jint position = _env->GetIntField(buffer, positionID);
+        jint elementSizeShift = _env->GetIntField(buffer, elementSizeShiftID);
+        buf += position << elementSizeShift;
+    } else {
+        _env->ThrowNew(IAEClass, "Must use a native order direct Buffer");
+    }
+    return (void*) buf;
+}
+
 static int
 getNumCompressedTextureFormats() {
     int numCompressedTextureFormats = 0;

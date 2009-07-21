@@ -16,7 +16,13 @@
 
 package com.android.internal.telephony.gsm;
 
-import com.android.internal.telephony.Phone;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ALPHA;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISROAMING;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_NUMERIC;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -38,6 +44,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Telephony.Intents;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.util.Config;
@@ -49,20 +56,10 @@ import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.IccCard;
-import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyEventLog;
 import com.android.internal.telephony.TelephonyIntents;
-
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ALPHA;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISROAMING;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_NUMERIC;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -73,15 +70,13 @@ import java.util.TimeZone;
  * {@hide}
  */
 final class GsmServiceStateTracker extends ServiceStateTracker {
+
     //***** Instance Variables
     GSMPhone phone;
     GsmCellLocation cellLoc;
     GsmCellLocation newCellLoc;
     int mPreferredNetworkType;
     RestrictedState rs;
-
-    int rssi = 99;     // signal strength 0-31, 99=unknown
-                       // That's "received signal strength indication" fyi
 
     private int gprsState = ServiceState.STATE_OUT_OF_SERVICE;
     private int newGPRSState = ServiceState.STATE_OUT_OF_SERVICE;
@@ -121,7 +116,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     private boolean mStartedGprsRegCheck = false;
     // Already sent the event-log for no gprs register
     private boolean mReportedGprsNoReg = false;
-    
+
     /**
      * The Notification object given to the NotificationManager.
      */
@@ -151,9 +146,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     static final int CS_DISABLED = 1004;            // Access Control enables all voice/sms service
     static final int CS_NORMAL_ENABLED = 1005;      // Access Control blocks normal voice/sms service
     static final int CS_EMERGENCY_ENABLED = 1006;   // Access Control blocks emergency call service
-    
+
     // notification id
-    static final int PS_NOTIFICATION = 888; //id to update and cancel PS restricted 
+    static final int PS_NOTIFICATION = 888; //id to update and cancel PS restricted
     static final int CS_NOTIFICATION = 999; //id to update and cancel CS restricted
 
     private ContentObserver mAutoTimeObserver = new ContentObserver(new Handler()) {
@@ -177,6 +172,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         cellLoc = new GsmCellLocation();
         newCellLoc = new GsmCellLocation();
         rs = new RestrictedState();
+        mSignalStrength = new SignalStrength();
 
         PowerManager powerManager =
                 (PowerManager)phone.getContext().getSystemService(Context.POWER_SERVICE);
@@ -201,7 +197,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         cr.registerContentObserver(
                 Settings.System.getUriFor(Settings.System.AUTO_TIME), true,
                 mAutoTimeObserver);
-        setRssiDefaultValues();
+        setSignalStrengthDefaultValues();
         mNeedToRegForSimLoaded = true;
     }
 
@@ -280,7 +276,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * @param obj placed in Message.obj
      */
     /*protected*/  void registerForPsRestrictedEnabled(Handler h, int what, Object obj) {
-        Log.d(LOG_TAG, "[DSAC DEB] " + "registerForPsRestrictedEnabled "); 
+        Log.d(LOG_TAG, "[DSAC DEB] " + "registerForPsRestrictedEnabled ");
         Registrant r = new Registrant(h, what, obj);
         psRestrictEnabledRegistrants.add(r);
 
@@ -300,7 +296,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * @param obj placed in Message.obj
      */
     /*protected*/  void registerForPsRestrictedDisabled(Handler h, int what, Object obj) {
-        Log.d(LOG_TAG, "[DSAC DEB] " + "registerForPsRestrictedDisabled "); 
+        Log.d(LOG_TAG, "[DSAC DEB] " + "registerForPsRestrictedDisabled ");
         Registrant r = new Registrant(h, what, obj);
         psRestrictDisabledRegistrants.add(r);
 
@@ -308,7 +304,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             r.notifyRegistrant();
         }
     }
-    
+
     /*protected*/  void unregisterForPsRestrictedDisabled(Handler h) {
         psRestrictDisabledRegistrants.remove(h);
     }
@@ -506,13 +502,13 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 }
                 mStartedGprsRegCheck = false;
                 break;
-                
+
             case EVENT_RESTRICTED_STATE_CHANGED:
                 // This is a notification from
                 // CommandsInterface.setOnRestrictedStateChanged
 
                 Log.d(LOG_TAG, "[DSAC DEB] " + "EVENT_RESTRICTED_STATE_CHANGED");
-                
+
                 ar = (AsyncResult) msg.obj;
 
                 onRestrictedStateChanged(ar);
@@ -541,12 +537,15 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                         (dcTracker.getAnyDataEnabled() ? 1 : 0) );
                 EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_DATA_STATE_RADIO_OFF, val);
             }
-            dcTracker.cleanConnectionBeforeRadioOff();
-            
+            Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_CONNECTION);
+            msg.arg1 = 1; // tearDown is true
+            msg.obj = GSMPhone.REASON_RADIO_TURNED_OFF;
+            dcTracker.sendMessage(msg);
+
             // poll data state up to 15 times, with a 100ms delay
             // totaling 1.5 sec. Normal data disable action will finish in 100ms.
             for (int i = 0; i < MAX_NUM_DATA_STATE_READS; i++) {
-                if (dcTracker.getState() != DataConnectionTracker.State.CONNECTED 
+                if (dcTracker.getState() != DataConnectionTracker.State.CONNECTED
                         && dcTracker.getState() != DataConnectionTracker.State.DISCONNECTING) {
                     Log.d(LOG_TAG, "Data shutdown complete.");
                     break;
@@ -557,7 +556,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             cm.setRadioPower(false, null);
         } // Otherwise, we're in the desired state
     }
-    
+
     protected void updateSpnDisplay() {
         int rule = phone.mSIMRecords.getDisplayRule(ss.getOperatorNumeric());
         String spn = phone.mSIMRecords.getServiceProviderName();
@@ -699,9 +698,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
     }
 
-    private void
-    setRssiDefaultValues() {
-        rssi = 99;
+    private void setSignalStrengthDefaultValues() {
+        mSignalStrength = new SignalStrength(99, -1, -1, -1, -1, -1, -1, true);
     }
 
     /**
@@ -722,7 +720,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             case RADIO_UNAVAILABLE:
                 newSS.setStateOutOfService();
                 newCellLoc.setStateInvalid();
-                setRssiDefaultValues();
+                setSignalStrengthDefaultValues();
                 mGotCountryCode = false;
 
                 pollStateDone();
@@ -731,7 +729,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             case RADIO_OFF:
                 newSS.setStateOff();
                 newCellLoc.setStateInvalid();
-                setRssiDefaultValues();
+                setSignalStrengthDefaultValues();
                 mGotCountryCode = false;
 
                 pollStateDone();
@@ -745,10 +743,10 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 Log.d(LOG_TAG, "Radio Technology Change ongoing, setting SS to off");
                 newSS.setStateOff();
                 newCellLoc.setStateInvalid();
-                setRssiDefaultValues();
+                setSignalStrengthDefaultValues();
                 mGotCountryCode = false;
 
-                pollStateDone();
+                //NOTE: pollStateDone() is not needed in this case
                 break;
 
             default:
@@ -1044,17 +1042,18 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     }
 
     /**
-     *  send signal-strength-changed notification if rssi changed
+     *  send signal-strength-changed notification if changed
      *  Called both for solicited and unsolicited signal stength updates
      */
     private void
     onSignalStrengthResult(AsyncResult ar) {
-        int oldRSSI = rssi;
+        SignalStrength oldSignalStrength = mSignalStrength;
+        int rssi = 99;
 
         if (ar.exception != null) {
-            // 99 = unknown
+            // -1 = unknown
             // most likely radio is resetting/disconnected
-            rssi = 99;
+            setSignalStrengthDefaultValues();
         } else {
             int[] ints = (int[])ar.result;
 
@@ -1067,13 +1066,16 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             }
         }
 
-        if (rssi != oldRSSI) {
+        mSignalStrength = new SignalStrength(rssi, -1, -1, -1,
+                -1, -1, -1, true);
+
+        if (!mSignalStrength.equals(oldSignalStrength)) {
             try { // This takes care of delayed EVENT_POLL_SIGNAL_STRENGTH (scheduled after
                   // POLL_PERIOD_MILLIS) during Radio Technology Change)
                 phone.notifySignalStrength();
            } catch (NullPointerException ex) {
-                Log.d(LOG_TAG, "onSignalStrengthResult() Phone already destroyed: " + ex 
-                        + "Signal Stranth not notified");
+                log("onSignalStrengthResult() Phone already destroyed: " + ex
+                        + "SignalStrength not notified");
            }
         }
     }
@@ -1089,27 +1091,27 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     {
         Log.d(LOG_TAG, "[DSAC DEB] " + "onRestrictedStateChanged");
         RestrictedState newRs = new RestrictedState();
- 
+
         Log.d(LOG_TAG, "[DSAC DEB] " + "current rs at enter "+ rs);
-        
+
         if (ar.exception == null) {
             int[] ints = (int[])ar.result;
             int state = ints[0];
-            
+
             newRs.setCsEmergencyRestricted(
                     ((state & RILConstants.RIL_RESTRICTED_STATE_CS_EMERGENCY) != 0) ||
                     ((state & RILConstants.RIL_RESTRICTED_STATE_CS_ALL) != 0) );
             //ignore the normal call and data restricted state before SIM READY
-            if (phone.getIccCard().getState() == IccCard.State.READY) { 
+            if (phone.getIccCard().getState() == IccCard.State.READY) {
                 newRs.setCsNormalRestricted(
                         ((state & RILConstants.RIL_RESTRICTED_STATE_CS_NORMAL) != 0) ||
                         ((state & RILConstants.RIL_RESTRICTED_STATE_CS_ALL) != 0) );
                 newRs.setPsRestricted(
                         (state & RILConstants.RIL_RESTRICTED_STATE_PS_ALL)!= 0);
             }
-            
-            Log.d(LOG_TAG, "[DSAC DEB] " + "new rs "+ newRs);         
-            
+
+            Log.d(LOG_TAG, "[DSAC DEB] " + "new rs "+ newRs);
+
             if (!rs.isPsRestricted() && newRs.isPsRestricted()) {
                 psRestrictEnabledRegistrants.notifyRegistrants();
                 setNotification(PS_ENABLED);
@@ -1117,9 +1119,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 psRestrictDisabledRegistrants.notifyRegistrants();
                 setNotification(PS_DISABLED);
             }
-            
+
             /**
-             * There are two kind of cs restriction, normal and emergency. So 
+             * There are two kind of cs restriction, normal and emergency. So
              * there are 4 x 4 combinations in current and new restricted states
              * and we only need to notify when state is changed.
              */
@@ -1129,32 +1131,32 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     setNotification(CS_DISABLED);
                 } else if (!newRs.isCsNormalRestricted()) {
                     // remove normal restriction
-                    setNotification(CS_EMERGENCY_ENABLED); 
+                    setNotification(CS_EMERGENCY_ENABLED);
                 } else if (!newRs.isCsEmergencyRestricted()) {
                     // remove emergency restriction
-                    setNotification(CS_NORMAL_ENABLED); 
+                    setNotification(CS_NORMAL_ENABLED);
                 }
             } else if (rs.isCsEmergencyRestricted() && !rs.isCsNormalRestricted()) {
                 if (!newRs.isCsRestricted()) {
                     // remove all restriction
-                    setNotification(CS_DISABLED); 
+                    setNotification(CS_DISABLED);
                 } else if (newRs.isCsRestricted()) {
                     // enable all restriction
                     setNotification(CS_ENABLED);
                 } else if (newRs.isCsNormalRestricted()) {
                     // remove emergency restriction and enable normal restriction
-                    setNotification(CS_NORMAL_ENABLED); 
+                    setNotification(CS_NORMAL_ENABLED);
                 }
             } else if (!rs.isCsEmergencyRestricted() && rs.isCsNormalRestricted()) {
                 if (!newRs.isCsRestricted()) {
                     // remove all restriction
-                    setNotification(CS_DISABLED); 
+                    setNotification(CS_DISABLED);
                 } else if (newRs.isCsRestricted()) {
                     // enable all restriction
                     setNotification(CS_ENABLED);
                 } else if (newRs.isCsEmergencyRestricted()) {
                     // remove normal restriction and enable emergency restriction
-                    setNotification(CS_EMERGENCY_ENABLED); 
+                    setNotification(CS_EMERGENCY_ENABLED);
                 }
             } else {
                 if (newRs.isCsRestricted()) {
@@ -1162,10 +1164,10 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     setNotification(CS_ENABLED);
                 } else if (newRs.isCsEmergencyRestricted()) {
                     // enable emergency restriction
-                    setNotification(CS_EMERGENCY_ENABLED); 
+                    setNotification(CS_EMERGENCY_ENABLED);
                 } else if (newRs.isCsNormalRestricted()) {
                     // enable normal restriction
-                    setNotification(CS_NORMAL_ENABLED); 
+                    setNotification(CS_NORMAL_ENABLED);
                 }
             }
 
@@ -1527,7 +1529,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
     /**
      * Post a notification to NotificationManager for restricted state
-     * 
+     *
      * @param notifyType is one state of PS/CS_*_ENABLE/DISABLE
      */
     private void setNotification(int notifyType) {
@@ -1546,7 +1548,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         CharSequence details = "";
         CharSequence title = context.getText(com.android.internal.R.string.RestrictedChangedTitle);
         int notificationId = CS_NOTIFICATION;
-        
+
         switch (notifyType) {
         case PS_ENABLED:
             notificationId = PS_NOTIFICATION;
@@ -1557,24 +1559,24 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             break;
         case CS_ENABLED:
             details = context.getText(com.android.internal.R.string.RestrictedOnAll);;
-            break;   
+            break;
         case CS_NORMAL_ENABLED:
             details = context.getText(com.android.internal.R.string.RestrictedOnNormal);;
-            break;   
+            break;
         case CS_EMERGENCY_ENABLED:
             details = context.getText(com.android.internal.R.string.RestrictedOnEmergency);;
-            break;   
+            break;
         case CS_DISABLED:
             // do nothing and cancel the notification later
-            break;  
+            break;
         }
-        
+
         Log.d(LOG_TAG, "[DSAC DEB] " + "put notification " + title + " / " +details);
         mNotification.tickerText = title;
-        mNotification.setLatestEventInfo(context, title, details, 
+        mNotification.setLatestEventInfo(context, title, details,
                 mNotification.contentIntent);
-        
-        NotificationManager notificationManager = (NotificationManager) 
+
+        NotificationManager notificationManager = (NotificationManager)
             context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (notifyType == PS_DISABLED || notifyType == CS_DISABLED) {
@@ -1584,5 +1586,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             // update restricted state notification
             notificationManager.notify(notificationId, mNotification);
         }
+    }
+
+    private void log(String s) {
+        Log.d(LOG_TAG, "[GsmServiceStateTracker] " + s);
     }
 }

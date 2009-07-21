@@ -45,7 +45,7 @@ void usage(void)
         " %s l[ist] [-v] [-a] file.{zip,jar,apk}\n"
         "   List contents of Zip-compatible archive.\n\n", gProgName);
     fprintf(stderr,
-        " %s d[ump] WHAT file.{apk} [asset [asset ...]]\n"
+        " %s d[ump] [--values] WHAT file.{apk} [asset [asset ...]]\n"
         "   badging          Print the label and icon for the app declared in APK.\n"
         "   permissions      Print the permissions from the APK.\n"
         "   resources        Print the resource table from the APK.\n"
@@ -54,9 +54,10 @@ void usage(void)
         "   xmlstrings       Print the strings of the given compiled xml assets.\n\n", gProgName);
     fprintf(stderr,
         " %s p[ackage] [-d][-f][-m][-u][-v][-x][-z][-M AndroidManifest.xml] \\\n"
-        "        [-0 extension [-0 extension ...]] \\\n"
-        "        [-g tolerance] \\\n"
-        "        [-j jarfile] \\\n"
+        "        [-0 extension [-0 extension ...]] [-g tolerance] [-j jarfile] \\\n"
+        "        [--min-sdk-version VAL] [--target-sdk-version VAL] \\\n"
+        "        [--max-sdk-version VAL] [--app-version VAL] \\\n"
+        "        [--app-version-name TEXT] \\\n"
         "        [-I base-package [-I base-package ...]] \\\n"
         "        [-A asset-source-dir] [-P public-definitions-file] \\\n"
         "        [-S resource-sources [-S resource-sources ...]] "
@@ -115,7 +116,19 @@ void usage(void)
         "       and the first match found (left to right) will take precedence."
         "   -0  specifies an additional extension for which such files will not\n"
         "       be stored compressed in the .apk.  An empty string means to not\n"
-        "       compress any files at all.\n");
+        "       compress any files at all.\n"
+        "   --min-sdk-version\n"
+        "       inserts android:minSdkVersion in to manifest.\n"
+        "   --target-sdk-version\n"
+        "       inserts android:targetSdkVersion in to manifest.\n"
+        "   --max-sdk-version\n"
+        "       inserts android:maxSdkVersion in to manifest.\n"
+        "   --values\n"
+        "       when used with \"dump resources\" also includes resource values.\n"
+        "   --version-code\n"
+        "       inserts android:versionCode in to manifest.\n"
+        "   --version-name\n"
+        "       inserts android:versionName in to manifest.\n");
 }
 
 /*
@@ -338,6 +351,61 @@ int main(int argc, char* const argv[])
                 } else {
                     bundle.setCompressionMethod(ZipEntry::kCompressStored);
                 }
+                break;
+            case '-':
+                if (strcmp(cp, "-min-sdk-version") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--min-sdk-version' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setMinSdkVersion(argv[0]);
+                } else if (strcmp(cp, "-target-sdk-version") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--target-sdk-version' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setTargetSdkVersion(argv[0]);
+                } else if (strcmp(cp, "-max-sdk-version") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--max-sdk-version' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setMaxSdkVersion(argv[0]);
+                } else if (strcmp(cp, "-version-code") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--version-code' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setVersionCode(argv[0]);
+                } else if (strcmp(cp, "-version-name") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--version-name' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setVersionName(argv[0]);
+                } else if (strcmp(cp, "-values") == 0) {
+                    bundle.setValues(true);
+                } else {
+                    fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
+                    wantUsage = true;
+                    goto bail;
+                }
+                cp += strlen(cp) - 1;
                 break;
             default:
                 fprintf(stderr, "ERROR: Unknown flag '-%c'\n", *cp);

@@ -241,7 +241,13 @@ public class InstrumentationTestCase extends TestCase {
                 try {
                     final Field keyCodeField = KeyEvent.class.getField("KEYCODE_" + key);
                     final int keyCode = keyCodeField.getInt(null);
-                    instrumentation.sendKeyDownUpSync(keyCode);
+                    try {
+                        instrumentation.sendKeyDownUpSync(keyCode);
+                    } catch (SecurityException e) {
+                        // Ignore security exceptions that are now thrown
+                        // when trying to send to another app, to retain
+                        // compatibility with existing tests.
+                    }
                 } catch (NoSuchFieldException e) {
                     Log.w("ActivityTestCase", "Unknown keycode: KEYCODE_" + key);
                     break;
@@ -266,7 +272,13 @@ public class InstrumentationTestCase extends TestCase {
         final Instrumentation instrumentation = getInstrumentation();
 
         for (int i = 0; i < count; i++) {
-            instrumentation.sendKeyDownUpSync(keys[i]);
+            try {
+                instrumentation.sendKeyDownUpSync(keys[i]);
+            } catch (SecurityException e) {
+                // Ignore security exceptions that are now thrown
+                // when trying to send to another app, to retain
+                // compatibility with existing tests.
+            }
         }
 
         instrumentation.waitForIdleSync();
@@ -292,7 +304,13 @@ public class InstrumentationTestCase extends TestCase {
             final int keyCount = keys[i];
             final int keyCode = keys[i + 1];
             for (int j = 0; j < keyCount; j++) {
-                instrumentation.sendKeyDownUpSync(keyCode);
+                try {
+                    instrumentation.sendKeyDownUpSync(keyCode);
+                } catch (SecurityException e) {
+                    // Ignore security exceptions that are now thrown
+                    // when trying to send to another app, to retain
+                    // compatibility with existing tests.
+                }
             }
         }
 

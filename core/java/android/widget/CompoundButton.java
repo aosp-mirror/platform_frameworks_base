@@ -26,7 +26,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.Gravity;
-
+import android.view.accessibility.AccessibilityEvent;
 
 /**
  * <p>
@@ -124,6 +124,7 @@ public abstract class CompoundButton extends Button implements Checkable {
             if (mOnCheckedChangeWidgetListener != null) {
                 mOnCheckedChangeWidgetListener.onCheckedChanged(this, mChecked);
             }
+
             mBroadcasting = false;            
         }
     }
@@ -202,6 +203,25 @@ public abstract class CompoundButton extends Button implements Checkable {
         }
 
         refreshDrawableState();
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        boolean populated = super.dispatchPopulateAccessibilityEvent(event);
+
+        if (!populated) {
+            int resourceId = 0;
+            if (mChecked) {
+                resourceId = R.string.accessibility_compound_button_selected;
+            } else {
+                resourceId = R.string.accessibility_compound_button_unselected;
+            }
+            String state = getResources().getString(resourceId);
+            event.getText().add(state);
+            event.setChecked(mChecked);
+        }
+
+        return populated;
     }
 
     @Override

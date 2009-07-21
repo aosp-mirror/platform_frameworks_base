@@ -503,7 +503,7 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
     // TODO: In the future, we might be on the same thread if the app is
     // running in the same process as the media server. In that case,
     // this will deadlock.
-    // 
+    //
     // The threadId hack below works around this for the care of prepare
     // and seekTo within the same process.
     // FIXME: Remember, this is a hack, it's not even a hack that is applied
@@ -511,7 +511,7 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
      if (mLockThreadId != getThreadId()) {
         mLock.lock();
         locked = true;
-    } 
+    }
 
     if (mPlayer == 0) {
         LOGV("notify(%d, %d, %d) callback on disconnected mediaplayer", msg, ext1, ext2);

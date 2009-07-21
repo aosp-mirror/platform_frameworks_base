@@ -175,6 +175,22 @@
         android:label="@string/permlab_writeDictionary"
         android:description="@string/permdesc_writeDictionary" />
 
+    <!-- Allows an application to read (but not write) the user's
+        browsing history and bookmarks. -->
+    <permission android:name="android.permission.READ_HISTORY_BOOKMARKS"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:label="@string/permlab_readHistoryBookmarks"
+        android:description="@string/permdesc_readHistoryBookmarks"
+        android:protectionLevel="dangerous" />
+
+    <!-- Allows an application to write (but not read) the user's
+        browsing history and bookmarks. -->
+    <permission android:name="android.permission.WRITE_HISTORY_BOOKMARKS"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:label="@string/permlab_writeHistoryBookmarks"
+        android:description="@string/permdesc_writeHistoryBookmarks"
+        android:protectionLevel="dangerous" />
+
     <!-- ======================================= -->
     <!-- Permissions for accessing location info -->
     <!-- ======================================= -->
@@ -219,12 +235,6 @@
         android:protectionLevel="signatureOrSystem"
         android:label="@string/permlab_installLocationProvider"
         android:description="@string/permdesc_installLocationProvider" />
-
-    <!-- Allows an application to install a location collector into the Location Manager -->
-    <permission android:name="android.permission.INSTALL_LOCATION_COLLECTOR"
-        android:protectionLevel="signatureOrSystem"
-        android:label="@string/permlab_installLocationCollector"
-        android:description="@string/permdesc_installLocationCollector" />
 
     <!-- ======================================= -->
     <!-- Permissions for accessing networks -->
@@ -388,12 +398,12 @@
         android:label="@string/permgrouplab_storage"
         android:description="@string/permgroupdesc_storage" />
 
-    <!-- Allows an application to write to the SD card -->
-    <permission android:name="android.permission.SDCARD_WRITE"
+    <!-- Allows an application to write to external storage -->
+    <permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:permissionGroup="android.permission-group.STORAGE"
         android:label="@string/permlab_sdcardWrite"
         android:description="@string/permdesc_sdcardWrite"
-        android:protectionLevel="normal" />
+        android:protectionLevel="dangerous" />
 
     <!-- ============================================ -->
     <!-- Permissions for low-level system interaction -->
@@ -650,6 +660,13 @@
         android:description="@string/permdesc_changeWifiState"
         android:label="@string/permlab_changeWifiState" />
 
+    <!-- Allows applications to enter Wi-Fi Multicast mode -->
+    <permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="dangerous"
+        android:description="@string/permdesc_changeWifiMulticastState"
+        android:label="@string/permlab_changeWifiMulticastState" />
+
     <!-- Allows applications to discover and pair bluetooth devices -->
     <permission android:name="android.permission.BLUETOOTH_ADMIN"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
@@ -737,31 +754,11 @@
         android:description="@string/permdesc_statusBar"
         android:protectionLevel="signatureOrSystem" />
 
-    <!-- Allows an application to force any currently running process to be
-         in the foreground. -->
-    <permission android:name="android.permission.SET_PROCESS_FOREGROUND"
-        android:label="@string/permlab_setProcessForeground"
-        android:description="@string/permdesc_setProcessForeground"
-        android:protectionLevel="signature" />
-
     <!-- Allows an application to force a BACK operation on whatever is the
          top activity. -->
     <permission android:name="android.permission.FORCE_BACK"
         android:label="@string/permlab_forceBack"
         android:description="@string/permdesc_forceBack"
-        android:protectionLevel="signature" />
-
-    <!-- Allows an application to publish system-level services.  Such services
-         can only be published from processes that never go away, so this is
-         not something that any normal application can do. -->
-    <permission android:name="android.permission.ADD_SYSTEM_SERVICE"
-        android:label="@string/permlab_addSystemService"
-        android:description="@string/permdesc_addSystemService"
-        android:protectionLevel="signature" />
-
-    <permission android:name="android.permission.FOTA_UPDATE"
-        android:label="@string/permlab_fotaUpdate"
-        android:description="@string/permdesc_fotaUpdate"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to update device statistics. Not for
@@ -803,12 +800,20 @@
         android:description="@string/permdesc_runSetActivityWatcher"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to watch and control how activities are
-         started globally in the system.  Only for is in debugging
-         (usually the monkey command). -->
+    <!-- Allows an application to call the activity manager shutdown() API
+         to put the higher-level system there into a shutdown state. -->
     <permission android:name="android.permission.SHUTDOWN"
         android:label="@string/permlab_shutdown"
         android:description="@string/permdesc_shutdown"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an application to tell the activity manager to temporarily
+         stop application switches, putting it into a special mode that
+         prevents applications from immediately switching away from some
+         critical UI such as the home screen. -->
+    <permission android:name="android.permission.STOP_APP_SWITCHES"
+        android:label="@string/permlab_stopAppSwitches"
+        android:description="@string/permdesc_stopAppSwitches"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to retrieve the current state of keys and
@@ -963,6 +968,13 @@
         android:description="@string/permdesc_batteryStats"
         android:protectionLevel="normal" />
 
+    <!-- Allows an application to control the backup and restore process
+         @hide pending API council -->
+    <permission android:name="android.permission.BACKUP"
+        android:label="@string/permlab_backup"
+        android:description="@string/permdesc_backup"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- Allows an application to tell the AppWidget service which application
          can access AppWidget's data.  The normal user flow is that a user
          picks an AppWidget to go into a particular host, thereby giving that
@@ -973,7 +985,7 @@
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:label="@string/permlab_bindGadget"
         android:description="@string/permdesc_bindGadget"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows applications to change the background data setting
          @hide pending API council -->
@@ -988,6 +1000,7 @@
                  android:hasCode="false"
                  android:label="@string/android_system_label"
                  android:allowClearUserData="false"
+                 android:backupAgent="com.android.internal.backup.SystemBackupAgent"
                  android:icon="@drawable/ic_launcher_android">
         <activity android:name="com.android.internal.app.ChooserActivity"
                 android:theme="@style/Theme.Dialog.Alert"

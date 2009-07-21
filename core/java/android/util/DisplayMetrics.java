@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
 import android.os.*;
 
 
@@ -35,8 +37,7 @@ public class DisplayMetrics {
      * The device's density.
      * @hide
      */
-    public static final int DEVICE_DENSITY = SystemProperties.getInt("ro.sf.lcd_density",
-            DEFAULT_DENSITY);
+    public static final int DEVICE_DENSITY = getDeviceDensity();
 
     /**
      * The absolute width of the display in pixels.
@@ -101,22 +102,83 @@ public class DisplayMetrics {
     }
 
     /**
-     * Set the display metrics' density and update parameters depend on it.
-     * @hide
+     * Update the display metrics based on the compatibility info and orientation
+     * NOTE: DO NOT EXPOSE THIS API!  It is introducing a circular dependency
+     * with the higher-level android.res package.
+     * {@hide}
      */
-    public void updateDensity(float newDensity) {
-        float ratio = newDensity / density;
-        density = newDensity;
-        scaledDensity = density;
-        widthPixels *= ratio;
-        heightPixels *= ratio;
-        xdpi *= ratio;
-        ydpi *= ratio;
+    public void updateMetrics(CompatibilityInfo compatibilityInfo, int orientation,
+            int screenLayout) {
+        int xOffset = 0;
+        if (!compatibilityInfo.isConfiguredExpandable()) {
+            // Note: this assume that configuration is updated before calling
+            // updateMetrics method.
+            if (screenLayout == Configuration.SCREENLAYOUT_LARGE) {
+                // This is a large screen device and the app is not 
+                // compatible with large screens, to diddle it.
+                
+                compatibilityInfo.setExpandable(false);
+                // Figure out the compatibility width and height of the screen.
+                int defaultWidth;
+                int defaultHeight;
+                switch (orientation) {
+                    case Configuration.ORIENTATION_LANDSCAPE: {
+                        defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
+                        defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
+                        break;
+                    }
+                    case Configuration.ORIENTATION_PORTRAIT:
+                    case Configuration.ORIENTATION_SQUARE:
+                    default: {
+                        defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
+                        defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
+                        break;
+                    }
+                    case Configuration.ORIENTATION_UNDEFINED: {
+                        // don't change
+                        return;
+                    }
+                }
+                
+                if (defaultWidth < widthPixels) {
+                    // content/window's x offset in original pixels
+                    xOffset = ((widthPixels - defaultWidth) / 2);
+                    widthPixels = defaultWidth;
+                }
+                if (defaultHeight < heightPixels) {
+                    heightPixels = defaultHeight;
+                }
+                
+            } else {
+                // the screen size is same as expected size. make it expandable
+                compatibilityInfo.setExpandable(true);
+            }
+        }
+        compatibilityInfo.setVisibleRect(xOffset, widthPixels, heightPixels);
+        if (compatibilityInfo.isScalingRequired()) {
+            float invertedRatio = compatibilityInfo.applicationInvertedScale;
+            density *= invertedRatio;
+            scaledDensity *= invertedRatio;
+            xdpi *= invertedRatio;
+            ydpi *= invertedRatio;
+            widthPixels *= invertedRatio;
+            heightPixels *= invertedRatio;
+        }
     }
 
+    @Override
     public String toString() {
         return "DisplayMetrics{density=" + density + ", width=" + widthPixels +
             ", height=" + heightPixels + ", scaledDensity=" + scaledDensity +
             ", xdpi=" + xdpi + ", ydpi=" + ydpi + "}";
+    }
+
+    private static int getDeviceDensity() {
+        // qemu.sf.lcd_density can be used to override ro.sf.lcd_density
+        // when running in the emulator, allowing for dynamic configurations.
+        // The reason for this is that ro.sf.lcd_density is write-once and is
+        // set by the init process when it parses build.prop before anything else.
+        return SystemProperties.getInt("qemu.sf.lcd_density",
+                SystemProperties.getInt("ro.sf.lcd_density", DEFAULT_DENSITY));
     }
 }

@@ -1,21 +1,28 @@
 /*
- *  Rect.cpp
- *  Android
+ * Copyright (C) 2009 The Android Open Source Project
  *
- *  Created on 10/14/05.
- *  Copyright 2005 The Android Open Source Project
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include <ui/Rect.h>
 
 namespace android {
 
-inline int min(int a, int b) {
+static inline int min(int a, int b) {
     return (a<b) ? a : b;
 }
 
-inline int max(int a, int b) {
+static inline int max(int a, int b) {
     return (a>b) ? a : b;
 }
 
@@ -64,14 +71,16 @@ Rect& Rect::offsetBy(int x, int y)
     return *this;
 }
 
-Rect Rect::operator + (const Point& rhs) const
+const Rect Rect::operator + (const Point& rhs) const
 {
-    return Rect(left+rhs.x, top+rhs.y, right+rhs.x, bottom+rhs.y); 
+    const Rect result(left+rhs.x, top+rhs.y, right+rhs.x, bottom+rhs.y);
+    return result;
 }
 
-Rect Rect::operator - (const Point& rhs) const
+const Rect Rect::operator - (const Point& rhs) const
 {
-    return Rect(left-rhs.x, top-rhs.y, right-rhs.x, bottom-rhs.y); 
+    const Rect result(left-rhs.x, top-rhs.y, right-rhs.x, bottom-rhs.y);
+    return result;
 }
 
 bool Rect::intersect(const Rect& with, Rect* result) const

@@ -16,227 +16,242 @@
 
 package com.android.internal.telephony;
 
+import android.telephony.SmsMessage;
+
 import com.android.internal.util.HexDump;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 import java.util.ArrayList;
 
 /**
- * This class represents a SMS user data header.
- *
+ * SMS user data header, as specified in TS 23.040 9.2.3.24.
  */
 public class SmsHeader {
-    /** See TS 23.040 9.2.3.24 for description of this element ID. */
-    public static final int CONCATENATED_8_BIT_REFERENCE = 0x00;
-    /** See TS 23.040 9.2.3.24 for description of this element ID. */
-    public static final int SPECIAL_SMS_MESSAGE_INDICATION = 0x01;
-    /** See TS 23.040 9.2.3.24 for description of this element ID. */
-    public static final int APPLICATION_PORT_ADDRESSING_8_BIT = 0x04;
-    /** See TS 23.040 9.2.3.24 for description of this element ID. */
-    public static final int APPLICATION_PORT_ADDRESSING_16_BIT= 0x05;
-    /** See TS 23.040 9.2.3.24 for description of this element ID. */
-    public static final int CONCATENATED_16_BIT_REFERENCE = 0x08;
+
+    // TODO(cleanup): this datastructure is generally referred to as
+    // the 'user data header' or UDH, and so the class name should
+    // change to reflect this...
+
+    /** SMS user data header information element identifiers.
+     * (see TS 23.040 9.2.3.24)
+     */
+    public static final int ELT_ID_CONCATENATED_8_BIT_REFERENCE       = 0x00;
+    public static final int ELT_ID_SPECIAL_SMS_MESSAGE_INDICATION     = 0x01;
+    public static final int ELT_ID_APPLICATION_PORT_ADDRESSING_8_BIT  = 0x04;
+    public static final int ELT_ID_APPLICATION_PORT_ADDRESSING_16_BIT = 0x05;
+    public static final int ELT_ID_SMSC_CONTROL_PARAMS                = 0x06;
+    public static final int ELT_ID_UDH_SOURCE_INDICATION              = 0x07;
+    public static final int ELT_ID_CONCATENATED_16_BIT_REFERENCE      = 0x08;
+    public static final int ELT_ID_WIRELESS_CTRL_MSG_PROTOCOL         = 0x09;
+    public static final int ELT_ID_TEXT_FORMATTING                    = 0x0A;
+    public static final int ELT_ID_PREDEFINED_SOUND                   = 0x0B;
+    public static final int ELT_ID_USER_DEFINED_SOUND                 = 0x0C;
+    public static final int ELT_ID_PREDEFINED_ANIMATION               = 0x0D;
+    public static final int ELT_ID_LARGE_ANIMATION                    = 0x0E;
+    public static final int ELT_ID_SMALL_ANIMATION                    = 0x0F;
+    public static final int ELT_ID_LARGE_PICTURE                      = 0x10;
+    public static final int ELT_ID_SMALL_PICTURE                      = 0x11;
+    public static final int ELT_ID_VARIABLE_PICTURE                   = 0x12;
+    public static final int ELT_ID_USER_PROMPT_INDICATOR              = 0x13;
+    public static final int ELT_ID_EXTENDED_OBJECT                    = 0x14;
+    public static final int ELT_ID_REUSED_EXTENDED_OBJECT             = 0x15;
+    public static final int ELT_ID_COMPRESSION_CONTROL                = 0x16;
+    public static final int ELT_ID_OBJECT_DISTR_INDICATOR             = 0x17;
+    public static final int ELT_ID_STANDARD_WVG_OBJECT                = 0x18;
+    public static final int ELT_ID_CHARACTER_SIZE_WVG_OBJECT          = 0x19;
+    public static final int ELT_ID_EXTENDED_OBJECT_DATA_REQUEST_CMD   = 0x1A;
+    public static final int ELT_ID_RFC_822_EMAIL_HEADER               = 0x20;
+    public static final int ELT_ID_HYPERLINK_FORMAT_ELEMENT           = 0x21;
+    public static final int ELT_ID_REPLY_ADDRESS_ELEMENT              = 0x22;
+    public static final int ELT_ID_ENHANCED_VOICE_MAIL_INFORMATION    = 0x23;
 
     public static final int PORT_WAP_PUSH = 2948;
-    public static final int PORT_WAP_WSP = 9200;
+    public static final int PORT_WAP_WSP  = 9200;
 
-    private byte[] m_data;
-    private ArrayList<Element> m_elements = new ArrayList<Element>();
-    public int nbrOfHeaders;
+    public static class PortAddrs {
+        public int destPort;
+        public int origPort;
+        public boolean areEightBits;
+    }
+
+    public static class ConcatRef {
+        public int refNumber;
+        public int seqNumber;
+        public int msgCount;
+        public boolean isEightBits;
+    }
 
     /**
-     * Creates an SmsHeader object from raw user data header bytes.
-     *
-     * @param data is user data header bytes
-     * @return an SmsHeader object
+     * A header element that is not explicitly parsed, meaning not
+     * PortAddrs or ConcatRef.
      */
-    public static SmsHeader parse(byte[] data) {
-        SmsHeader header = new SmsHeader();
-        header.m_data = data;
+    public static class MiscElt {
+        public int id;
+        public byte[] data;
+    }
 
-        int index = 0;
-        header.nbrOfHeaders = 0;
-        while (index < data.length) {
-            int id = data[index++] & 0xff;
-            int length = data[index++] & 0xff;
-            byte[] elementData = new byte[length];
-            System.arraycopy(data, index, elementData, 0, length);
-            header.add(new Element(id, elementData));
-            index += length;
-            header.nbrOfHeaders++;
+    public PortAddrs portAddrs;
+    public ConcatRef concatRef;
+    public ArrayList<MiscElt> miscEltList = new ArrayList<MiscElt>();
+
+    public SmsHeader() {}
+
+    /**
+     * Create structured SmsHeader object from serialized byte array representation.
+     * (see TS 23.040 9.2.3.24)
+     * @param data is user data header bytes
+     * @return SmsHeader object
+     */
+    public static SmsHeader fromByteArray(byte[] data) {
+        ByteArrayInputStream inStream = new ByteArrayInputStream(data);
+        SmsHeader smsHeader = new SmsHeader();
+        while (inStream.available() > 0) {
+            /**
+             * NOTE: as defined in the spec, ConcatRef and PortAddr
+             * fields should not reoccur, but if they do the last
+             * occurrence is to be used.  Also, for ConcatRef
+             * elements, if the count is zero, sequence is zero, or
+             * sequence is larger than count, the entire element is to
+             * be ignored.
+             */
+            int id = inStream.read();
+            int length = inStream.read();
+            ConcatRef concatRef;
+            PortAddrs portAddrs;
+            switch (id) {
+            case ELT_ID_CONCATENATED_8_BIT_REFERENCE:
+                concatRef = new ConcatRef();
+                concatRef.refNumber = inStream.read();
+                concatRef.msgCount = inStream.read();
+                concatRef.seqNumber = inStream.read();
+                concatRef.isEightBits = true;
+                if (concatRef.msgCount != 0 && concatRef.seqNumber != 0 &&
+                        concatRef.seqNumber <= concatRef.msgCount) {
+                    smsHeader.concatRef = concatRef;
+                }
+                break;
+            case ELT_ID_CONCATENATED_16_BIT_REFERENCE:
+                concatRef = new ConcatRef();
+                concatRef.refNumber = (inStream.read() << 8) | inStream.read();
+                concatRef.msgCount = inStream.read();
+                concatRef.seqNumber = inStream.read();
+                concatRef.isEightBits = false;
+                if (concatRef.msgCount != 0 && concatRef.seqNumber != 0 &&
+                        concatRef.seqNumber <= concatRef.msgCount) {
+                    smsHeader.concatRef = concatRef;
+                }
+                break;
+            case ELT_ID_APPLICATION_PORT_ADDRESSING_8_BIT:
+                portAddrs = new PortAddrs();
+                portAddrs.destPort = inStream.read();
+                portAddrs.origPort = inStream.read();
+                portAddrs.areEightBits = true;
+                smsHeader.portAddrs = portAddrs;
+                break;
+            case ELT_ID_APPLICATION_PORT_ADDRESSING_16_BIT:
+                portAddrs = new PortAddrs();
+                portAddrs.destPort = (inStream.read() << 8) | inStream.read();
+                portAddrs.origPort = (inStream.read() << 8) | inStream.read();
+                portAddrs.areEightBits = false;
+                smsHeader.portAddrs = portAddrs;
+                break;
+            default:
+                MiscElt miscElt = new MiscElt();
+                miscElt.id = id;
+                miscElt.data = new byte[length];
+                inStream.read(miscElt.data, 0, length);
+                smsHeader.miscEltList.add(miscElt);
+            }
+        }
+        return smsHeader;
+    }
+
+    /**
+     * Create serialized byte array representation from structured SmsHeader object.
+     * (see TS 23.040 9.2.3.24)
+     * @return Byte array representing the SmsHeader
+     */
+    public static byte[] toByteArray(SmsHeader smsHeader) {
+        if ((smsHeader.portAddrs == null) &&
+            (smsHeader.concatRef == null) &&
+            (smsHeader.miscEltList.size() == 0)) {
+            return null;
         }
 
-        return header;
-    }
-
-    public SmsHeader() { }
-
-    /**
-     * Returns the list of SmsHeader Elements that make up the header.
-     *
-     * @return the list of SmsHeader Elements.
-     */
-    public ArrayList<Element> getElements() {
-        return m_elements;
-    }
-
-    /**
-     * Add an element to the SmsHeader.
-     *
-     * @param element to add.
-     */
-    public void add(Element element) {
-        m_elements.add(element);
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream(SmsMessage.MAX_USER_DATA_BYTES);
+        ConcatRef concatRef = smsHeader.concatRef;
+        if (concatRef != null) {
+            if (concatRef.isEightBits) {
+                outStream.write(ELT_ID_CONCATENATED_8_BIT_REFERENCE);
+                outStream.write(3);
+                outStream.write(concatRef.refNumber);
+            } else {
+                outStream.write(ELT_ID_CONCATENATED_16_BIT_REFERENCE);
+                outStream.write(4);
+                outStream.write(concatRef.refNumber >>> 8);
+                outStream.write(concatRef.refNumber & 0x00FF);
+            }
+            outStream.write(concatRef.msgCount);
+            outStream.write(concatRef.seqNumber);
+        }
+        PortAddrs portAddrs = smsHeader.portAddrs;
+        if (portAddrs != null) {
+            if (portAddrs.areEightBits) {
+                outStream.write(ELT_ID_APPLICATION_PORT_ADDRESSING_8_BIT);
+                outStream.write(2);
+                outStream.write(portAddrs.destPort);
+                outStream.write(portAddrs.origPort);
+            } else {
+                outStream.write(ELT_ID_APPLICATION_PORT_ADDRESSING_16_BIT);
+                outStream.write(4);
+                outStream.write(portAddrs.destPort >>> 8);
+                outStream.write(portAddrs.destPort & 0x00FF);
+                outStream.write(portAddrs.origPort >>> 8);
+                outStream.write(portAddrs.origPort & 0x00FF);
+            }
+        }
+        for (MiscElt miscElt : smsHeader.miscEltList) {
+            outStream.write(miscElt.id);
+            outStream.write(miscElt.data.length);
+            outStream.write(miscElt.data, 0, miscElt.data.length);
+        }
+        return outStream.toByteArray();
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-
-        builder.append("UDH LENGTH: " + m_data.length + " octets");
-        builder.append("UDH: ");
-        builder.append(HexDump.toHexString(m_data));
-        builder.append("\n");
-
-        for (Element e : getElements()) {
-            builder.append("  0x" + HexDump.toHexString((byte)e.getID()) + " - ");
-            switch (e.getID()) {
-                case CONCATENATED_8_BIT_REFERENCE: {
-                    builder.append("Concatenated Short Message 8bit ref\n");
-                    byte[] data = e.getData();
-                    builder.append("    " + data.length + " (0x");
-                    builder.append(HexDump.toHexString((byte)data.length)
-                            + ") Bytes - Information Element\n");
-                    builder.append("      " + data[0] + " : SM reference number\n");
-                    builder.append("      " + data[1] + " : number of messages\n");
-                    builder.append("      " + data[2] + " : this SM sequence number\n");
-                    break;
-                }
-
-                case CONCATENATED_16_BIT_REFERENCE: {
-                    builder.append("Concatenated Short Message 16bit ref\n");
-                    byte[] data = e.getData();
-                    builder.append("    " + data.length + " (0x");
-                    builder.append(HexDump.toHexString((byte)data.length)
-                            + ") Bytes - Information Element\n");
-                    builder.append("      " + (data[0] & 0xff) * 256 + (data[1] & 0xff)
-                            + " : SM reference number\n");
-                    builder.append("      " + data[2] + " : number of messages\n");
-                    builder.append("      " + data[3] + " : this SM sequence number\n");
-                    break;
-                }
-
-                case APPLICATION_PORT_ADDRESSING_8_BIT:
-                {
-                    builder.append("Application port addressing 8bit\n");
-                    byte[] data = e.getData();
-
-                    builder.append("    " + data.length + " (0x");
-                    builder.append(HexDump.toHexString(
-                            (byte)data.length) + ") Bytes - Information Element\n");
-
-                    int source = (data[0] & 0xff);
-                    builder.append("      " + source + " : DESTINATION port\n");
-
-                    int dest = (data[1] & 0xff);
-                    builder.append("      " + dest + " : SOURCE port\n");
-                    break;
-                }
-
-                case APPLICATION_PORT_ADDRESSING_16_BIT: {
-                    builder.append("Application port addressing 16bit\n");
-                    byte[] data = e.getData();
-
-                    builder.append("    " + data.length + " (0x");
-                    builder.append(HexDump.toHexString((byte)data.length)
-                            + ") Bytes - Information Element\n");
-
-                    int source = (data[0] & 0xff) << 8;
-                    source |= (data[1] & 0xff);
-                    builder.append("      " + source + " : DESTINATION port\n");
-
-                    int dest = (data[2] & 0xff) << 8;
-                    dest |= (data[3] & 0xff);
-                    builder.append("      " + dest + " : SOURCE port\n");
-                    break;
-                }
-
-                default: {
-                    builder.append("Unknown element\n");
-                    break;
-                }
-            }
+        builder.append("UserDataHeader ");
+        builder.append("{ ConcatRef ");
+        if (concatRef == null) {
+            builder.append("unset");
+        } else {
+            builder.append("{ refNumber=" + concatRef.refNumber);
+            builder.append(", msgCount=" + concatRef.msgCount);
+            builder.append(", seqNumber=" + concatRef.seqNumber);
+            builder.append(", isEightBits=" + concatRef.isEightBits);
+            builder.append(" }");
         }
-
+        builder.append(", PortAddrs ");
+        if (portAddrs == null) {
+            builder.append("unset");
+        } else {
+            builder.append("{ destPort=" + portAddrs.destPort);
+            builder.append(", origPort=" + portAddrs.origPort);
+            builder.append(", areEightBits=" + portAddrs.areEightBits);
+            builder.append(" }");
+        }
+        for (MiscElt miscElt : miscEltList) {
+            builder.append(", MiscElt ");
+            builder.append("{ id=" + miscElt.id);
+            builder.append(", length=" + miscElt.data.length);
+            builder.append(", data=" + HexDump.toHexString(miscElt.data));
+            builder.append(" }");
+        }
+        builder.append(" }");
         return builder.toString();
     }
 
-    private int calcSize() {
-        int size = 1; // +1 for the UDHL field
-        for (Element e : m_elements) {
-            size += e.getData().length;
-            size += 2; // 1 byte ID, 1 byte length
-        }
-
-        return size;
-    }
-
-    /**
-     * Converts SmsHeader object to a byte array as specified in TS 23.040 9.2.3.24.
-     * @return Byte array representing the SmsHeader
-     */
-    public byte[] toByteArray() {
-        if (m_elements.size() == 0) return null;
-
-        if (m_data == null) {
-            int size = calcSize();
-            int cur = 1;
-            m_data = new byte[size];
-
-            m_data[0] = (byte) (size-1);  // UDHL does not include itself
-
-            for (Element e : m_elements) {
-                int length = e.getData().length;
-                m_data[cur++] = (byte) e.getID();
-                m_data[cur++] = (byte) length;
-                System.arraycopy(e.getData(), 0, m_data, cur, length);
-                cur += length;
-            }
-        }
-
-        return m_data;
-    }
-
-    /**
-     * A single Element in the SMS User Data Header.
-     *
-     * See TS 23.040 9.2.3.24.
-     *
-     */
-    public static class Element {
-        private byte[] m_data;
-        private int m_id;
-
-        public Element(int id, byte[] data) {
-            m_id = id;
-            m_data = data;
-        }
-
-        /**
-         * Returns the Information Element Identifier for this element.
-         *
-         * @return the IE identifier.
-         */
-        public int getID() {
-            return m_id;
-        }
-
-        /**
-         * Returns the data portion of this element.
-         *
-         * @return element data.
-         */
-        public byte[] getData() {
-            return m_data;
-        }
-    }
 }

@@ -195,6 +195,8 @@ public class MultiAutoCompleteTextView extends AutoCompleteTextView {
      */
     @Override
     protected void replaceText(CharSequence text) {
+        clearComposingText();
+
         int end = getSelectionEnd();
         int start = mTokenizer.findTokenStart(getText(), end);
 

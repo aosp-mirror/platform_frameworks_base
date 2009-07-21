@@ -38,6 +38,7 @@ import android.net.wifi.WifiNative;
 import android.net.wifi.WifiStateTracker;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.SupplicantState;
 import android.net.NetworkStateTracker;
 import android.net.DhcpInfo;
 import android.os.Binder;
@@ -49,6 +50,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.text.TextUtils;
@@ -64,6 +66,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import com.android.internal.app.IBatteryStats;
+import android.backup.IBackupManager;
 import com.android.server.am.BatteryStatsService;
 
 /**
@@ -96,8 +99,8 @@ public class WifiService extends IWifiManager.Stub {
     private int mScanLocksAcquired;
     private int mScanLocksReleased;
 
-    private final List<WifiMulticaster> mMulticasters =
-            new ArrayList<WifiMulticaster>();
+    private final List<Multicaster> mMulticasters =
+            new ArrayList<Multicaster>();
     private int mMulticastEnabled;
     private int mMulticastDisabled;
 
@@ -588,6 +591,12 @@ public class WifiService extends IWifiManager.Stub {
 
     }
 
+    private void enforceMulticastChangePermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_WIFI_MULTICAST_STATE,
+                "WifiService");
+    }
+
     /**
      * see {@link WifiManager#getWifiState()}
      * @return One of {@link WifiManager#WIFI_STATE_DISABLED},
@@ -1054,6 +1063,94 @@ public class WifiService extends IWifiManager.Stub {
                 break setVariables;
             }
 
+            if ((config.eap != null) && !WifiNative.setNetworkVariableCommand(
+                    netId,
+                    WifiConfiguration.eapVarName,
+                    config.eap)) {
+                if (DBG) {
+                    Log.d(TAG, config.SSID + ": failed to set eap: "+
+                          config.eap);
+                }
+                break setVariables;
+            }
+
+            if ((config.identity != null) && !WifiNative.setNetworkVariableCommand(
+                    netId,
+                    WifiConfiguration.identityVarName,
+                    config.identity)) {
+                if (DBG) {
+                    Log.d(TAG, config.SSID + ": failed to set identity: "+
+                          config.identity);
+                }
+                break setVariables;
+            }
+
+            if ((config.anonymousIdentity != null) && !WifiNative.setNetworkVariableCommand(
+                    netId,
+                    WifiConfiguration.anonymousIdentityVarName,
+                    config.anonymousIdentity)) {
+                if (DBG) {
+                    Log.d(TAG, config.SSID + ": failed to set anonymousIdentity: "+
+                          config.anonymousIdentity);
+                }
+                break setVariables;
+            }
+
+            if ((config.password != null) && !WifiNative.setNetworkVariableCommand(
+                    netId,
+                    WifiConfiguration.passwordVarName,
+                    config.password)) {
+                if (DBG) {
+                    Log.d(TAG, config.SSID + ": failed to set password: "+
+                          config.password);
+                }
+                break setVariables;
+            }
+
+            if ((config.clientCert != null) && !WifiNative.setNetworkVariableCommand(
+                    netId,
+                    WifiConfiguration.clientCertVarName,
+                    config.clientCert)) {
+                if (DBG) {
+                    Log.d(TAG, config.SSID + ": failed to set clientCert: "+
+                          config.clientCert);
+                }
+                break setVariables;
+            }
+
+            if ((config.caCert != null) && !WifiNative.setNetworkVariableCommand(
+                    netId,
+                    WifiConfiguration.caCertVarName,
+                    config.caCert)) {
+                if (DBG) {
+                    Log.d(TAG, config.SSID + ": failed to set caCert: "+
+                          config.caCert);
+                }
+                break setVariables;
+            }
+
+            if ((config.privateKey != null) && !WifiNative.setNetworkVariableCommand(
+                    netId,
+                    WifiConfiguration.privateKeyVarName,
+                    config.privateKey)) {
+                if (DBG) {
+                    Log.d(TAG, config.SSID + ": failed to set privateKey: "+
+                          config.privateKey);
+                }
+                break setVariables;
+            }
+
+            if ((config.privateKeyPasswd != null) && !WifiNative.setNetworkVariableCommand(
+                    netId,
+                    WifiConfiguration.privateKeyPasswdVarName,
+                    config.privateKeyPasswd)) {
+                if (DBG) {
+                    Log.d(TAG, config.SSID + ": failed to set privateKeyPasswd: "+
+                          config.privateKeyPasswd);
+                }
+                break setVariables;
+            }
+
             return netId;
         }
 
@@ -1353,6 +1450,16 @@ public class WifiService extends IWifiManager.Stub {
                 }
             }
         }
+        // Inform the backup manager about a data change
+        IBackupManager ibm = IBackupManager.Stub.asInterface(
+                ServiceManager.getService(Context.BACKUP_SERVICE));
+        if (ibm != null) {
+            try {
+                ibm.dataChanged("com.android.providers.settings");
+            } catch (Exception e) {
+                // Try again later
+            }
+        }
         return result;
     }
 
@@ -1449,10 +1556,12 @@ public class WifiService extends IWifiManager.Stub {
                     Settings.System.getInt(mContext.getContentResolver(),
                                            Settings.System.STAY_ON_WHILE_PLUGGED_IN, 0);
             if (action.equals(Intent.ACTION_SCREEN_ON)) {
+                Log.d(TAG, "ACTION_SCREEN_ON");
                 mAlarmManager.cancel(mIdleIntent);
                 mDeviceIdle = false;
                 mScreenOff = false;
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                Log.d(TAG, "ACTION_SCREEN_OFF");
                 mScreenOff = true;
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
@@ -1461,12 +1570,21 @@ public class WifiService extends IWifiManager.Stub {
                  * or plugged in to AC).
                  */
                 if (!shouldWifiStayAwake(stayAwakeConditions, mPluggedType)) {
-                    long triggerTime = System.currentTimeMillis() + idleMillis;
-                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
+                    WifiInfo info = mWifiStateTracker.requestConnectionInfo();
+                    if (info.getSupplicantState() != SupplicantState.COMPLETED) {
+                        // do not keep Wifi awake when screen is off if Wifi is not associated
+                        mDeviceIdle = true;
+                        updateWifiState();
+                    } else {
+                        long triggerTime = System.currentTimeMillis() + idleMillis;
+                        Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
+                        mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
+                    }
                 }
                 /* we can return now -- there's nothing to do until we get the idle intent back */
                 return;
             } else if (action.equals(ACTION_DEVICE_IDLE)) {
+                Log.d(TAG, "got ACTION_DEVICE_IDLE");
                 mDeviceIdle = true;
             } else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 /*
@@ -1477,9 +1595,11 @@ public class WifiService extends IWifiManager.Stub {
                  * the already-set timer.
                  */
                 int pluggedType = intent.getIntExtra("plugged", 0);
+                Log.d(TAG, "ACTION_BATTERY_CHANGED pluggedType: " + pluggedType);
                 if (mScreenOff && shouldWifiStayAwake(stayAwakeConditions, mPluggedType) &&
                         !shouldWifiStayAwake(stayAwakeConditions, pluggedType)) {
                     long triggerTime = System.currentTimeMillis() + idleMillis;
+                    Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
                     mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
                     mPluggedType = pluggedType;
                     return;
@@ -1732,7 +1852,7 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    private class WifiLock extends WifiDeathRecipient {
+    private class WifiLock extends DeathRecipient {
         WifiLock(int lockMode, String tag, IBinder binder) {
             super(lockMode, tag, binder);
         }
@@ -1780,7 +1900,9 @@ public class WifiService extends IWifiManager.Stub {
         private WifiLock removeLock(IBinder binder) {
             int index = findLockByBinder(binder);
             if (index >= 0) {
-                return mList.remove(index);
+                WifiLock ret = mList.remove(index);
+                ret.unlinkDeathRecipient();
+                return ret;
             } else {
                 return null;
             }
@@ -1875,13 +1997,13 @@ public class WifiService extends IWifiManager.Stub {
         return hadLock;
     }
 
-    private abstract class WifiDeathRecipient
+    private abstract class DeathRecipient
             implements IBinder.DeathRecipient {
         String mTag;
         int mMode;
         IBinder mBinder;
 
-        WifiDeathRecipient(int mode, String tag, IBinder binder) {
+        DeathRecipient(int mode, String tag, IBinder binder) {
             super();
             mTag = tag;
             mMode = mode;
@@ -1892,15 +2014,19 @@ public class WifiService extends IWifiManager.Stub {
                 binderDied();
             }
         }
+
+        void unlinkDeathRecipient() {
+            mBinder.unlinkToDeath(this, 0);
+        }
     }
 
-    private class WifiMulticaster extends WifiDeathRecipient {
-        WifiMulticaster(String tag, IBinder binder) {
+    private class Multicaster extends DeathRecipient {
+        Multicaster(String tag, IBinder binder) {
             super(Binder.getCallingUid(), tag, binder);
         }
 
         public void binderDied() {
-            Log.e(TAG, "WifiMulticaster binderDied");
+            Log.e(TAG, "Multicaster binderDied");
             synchronized (mMulticasters) {
                 int i = mMulticasters.indexOf(this);
                 if (i != -1) {
@@ -1910,7 +2036,7 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         public String toString() {
-            return "WifiMulticaster{" + mTag + " binder=" + mBinder + "}";
+            return "Multicaster{" + mTag + " binder=" + mBinder + "}";
         }
 
         public int getUid() {
@@ -1918,12 +2044,12 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    public void enableWifiMulticast(IBinder binder, String tag) {
-        enforceChangePermission();
+    public void acquireMulticastLock(IBinder binder, String tag) {
+        enforceMulticastChangePermission();
 
         synchronized (mMulticasters) {
             mMulticastEnabled++;
-            mMulticasters.add(new WifiMulticaster(tag, binder));
+            mMulticasters.add(new Multicaster(tag, binder));
             // Note that we could call stopPacketFiltering only when
             // our new size == 1 (first call), but this function won't
             // be called often and by making the stopPacket call each
@@ -1941,15 +2067,15 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    public void disableWifiMulticast() {
-        enforceChangePermission();
+    public void releaseMulticastLock() {
+        enforceMulticastChangePermission();
 
         int uid = Binder.getCallingUid();
         synchronized (mMulticasters) {
             mMulticastDisabled++;
             int size = mMulticasters.size();
             for (int i = size - 1; i >= 0; i--) {
-                WifiMulticaster m = mMulticasters.get(i);
+                Multicaster m = mMulticasters.get(i);
                 if ((m != null) && (m.getUid() == uid)) {
                     removeMulticasterLocked(i, uid);
                 }
@@ -1959,7 +2085,10 @@ public class WifiService extends IWifiManager.Stub {
 
     private void removeMulticasterLocked(int i, int uid)
     {
-        mMulticasters.remove(i);
+        Multicaster removed = mMulticasters.remove(i);
+        if (removed != null) {
+            removed.unlinkDeathRecipient();
+        }
         if (mMulticasters.size() == 0) {
             WifiNative.startPacketFiltering();
         }
@@ -1973,7 +2102,7 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
-    public boolean isWifiMulticastEnabled() {
+    public boolean isMulticastEnabled() {
         enforceAccessPermission();
 
         synchronized (mMulticasters) {

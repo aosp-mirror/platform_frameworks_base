@@ -23,7 +23,10 @@ import android.app.ISearchManager;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.server.search.SearchableInfo;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -37,12 +40,11 @@ import android.util.AndroidRuntimeException;
  *   com.android.unit_tests/android.test.InstrumentationTestRunner
  */
 public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalActivity> {
-    
-    // If non-zero, enable a set of tests that start and stop the search manager.
-    // This is currently disabled because it's causing an unwanted jump from the unit test
-    // activity into the contacts activity.  We'll put this back after we disable that jump.
-    private static final int TEST_SEARCH_START = 0;
-    
+
+    private ComponentName SEARCHABLE_ACTIVITY =
+            new ComponentName("com.android.unit_tests",
+                    "com.android.unit_tests.SearchableActivity");
+
     /*
      * Bug list of test ideas.
      * 
@@ -88,7 +90,30 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
         super.setUp();
         
         Activity testActivity = getActivity();
-        mContext = (Context)testActivity;
+        mContext = testActivity;
+    }
+
+    private ISearchManager getSearchManagerService() {
+        return ISearchManager.Stub.asInterface(
+                ServiceManager.getService(Context.SEARCH_SERVICE));
+    }
+
+    // Checks that the search UI is visible.
+    private void assertSearchVisible() {
+        SearchManager searchManager = (SearchManager)
+                mContext.getSystemService(Context.SEARCH_SERVICE);
+        assertTrue("SearchManager thinks search UI isn't visible when it should be",
+                searchManager.isVisible());
+    }
+
+    // Checks that the search UI is not visible.
+    // This checks both the SearchManager and the SearchManagerService,
+    // since SearchManager keeps a local variable for the visibility.
+    private void assertSearchNotVisible() {
+        SearchManager searchManager = (SearchManager)
+                mContext.getSystemService(Context.SEARCH_SERVICE);
+        assertFalse("SearchManager thinks search UI is visible when it shouldn't be",
+                searchManager.isVisible());
     }
 
     /**
@@ -97,29 +122,7 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
      */
     @MediumTest
     public void testSearchManagerInterfaceAvailable() {
-        ISearchManager searchManager1 = ISearchManager.Stub.asInterface(
-                ServiceManager.getService(Context.SEARCH_SERVICE));
-        assertNotNull(searchManager1);
-    }
-    
-    /**
-     * The goal of this test is to confirm that we can *only* obtain a search manager
-     * interface from an Activity context.
-     */
-    @MediumTest
-    public void testSearchManagerContextRestrictions() {
-        SearchManager searchManager1 = (SearchManager)
-                mContext.getSystemService(Context.SEARCH_SERVICE);
-        assertNotNull(searchManager1);
-        
-        Context applicationContext = mContext.getApplicationContext();
-        // this should fail, because you can't get a SearchManager from a non-Activity context
-        try {
-            applicationContext.getSystemService(Context.SEARCH_SERVICE);
-            assertFalse("Shouldn't retrieve SearchManager from a non-Activity context", true);
-        } catch (AndroidRuntimeException e) {
-            // happy here - we should catch this.
-        }
+        assertNotNull(getSearchManagerService());
     }
     
     /**
@@ -135,38 +138,129 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
         SearchManager searchManager2 = (SearchManager)
                 mContext.getSystemService(Context.SEARCH_SERVICE);
         assertNotNull(searchManager2);
-        assertSame( searchManager1, searchManager2 );
+        assertSame(searchManager1, searchManager2 );
     }
-    
+
+    @MediumTest
+    public void testSearchables() {
+        SearchManager searchManager = (SearchManager)
+                mContext.getSystemService(Context.SEARCH_SERVICE);
+        SearchableInfo si;
+
+        si = searchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, false);
+        assertNotNull(si);
+        assertFalse(searchManager.isDefaultSearchable(si));
+        si = searchManager.getSearchableInfo(SEARCHABLE_ACTIVITY, true);
+        assertNotNull(si);
+        assertTrue(searchManager.isDefaultSearchable(si));
+        si = searchManager.getSearchableInfo(null, true);
+        assertNotNull(si);
+        assertTrue(searchManager.isDefaultSearchable(si));
+    }
+
+    /**
+     * Tests that rapid calls to start-stop-start doesn't cause problems.
+     */
+    @MediumTest
+    public void testSearchManagerFastInvocations() throws Exception {
+         SearchManager searchManager = (SearchManager)
+                 mContext.getSystemService(Context.SEARCH_SERVICE);
+         assertNotNull(searchManager);
+         assertSearchNotVisible();
+
+         searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
+         assertSearchVisible();
+         searchManager.stopSearch();
+         searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
+         searchManager.stopSearch();
+         assertSearchNotVisible();
+    }
+
+    /**
+     * Tests that startSearch() is idempotent.
+     */
+    @MediumTest
+    public void testStartSearchIdempotent() throws Exception {
+         SearchManager searchManager = (SearchManager)
+                 mContext.getSystemService(Context.SEARCH_SERVICE);
+         assertNotNull(searchManager);
+         assertSearchNotVisible();
+
+         searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
+         searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
+         assertSearchVisible();
+         searchManager.stopSearch();
+         assertSearchNotVisible();
+    }
+
+    /**
+     * Tests that stopSearch() is idempotent and can be called when the search UI is not visible.
+     */
+    @MediumTest
+    public void testStopSearchIdempotent() throws Exception {
+         SearchManager searchManager = (SearchManager)
+                 mContext.getSystemService(Context.SEARCH_SERVICE);
+         assertNotNull(searchManager);
+         assertSearchNotVisible();
+         searchManager.stopSearch();
+         assertSearchNotVisible();
+
+         searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
+         assertSearchVisible();
+         searchManager.stopSearch();
+         searchManager.stopSearch();
+         assertSearchNotVisible();
+    }
+
     /**
      * The goal of this test is to confirm that we can start and then
      * stop a simple search.
      */
-    
-   @MediumTest
-   public void testSearchManagerInvocations() {
+    @MediumTest
+    public void testSearchManagerInvocations() throws Exception {
         SearchManager searchManager = (SearchManager)
                 mContext.getSystemService(Context.SEARCH_SERVICE);
         assertNotNull(searchManager);
-        
-            // TODO: make a real component name, or remove this need
-        final ComponentName cn = new ComponentName("", "");
+        assertSearchNotVisible();
 
-        if (TEST_SEARCH_START != 0) {
-            // These tests should simply run to completion w/o exceptions
-            searchManager.startSearch(null, false, cn, null, false);
-            searchManager.stopSearch();
-            
-            searchManager.startSearch("", false, cn, null, false);
-            searchManager.stopSearch();
-            
-            searchManager.startSearch("test search string", false, cn, null, false);
-            searchManager.stopSearch();
-            
-            searchManager.startSearch("test search string", true, cn, null, false);
-            searchManager.stopSearch();
-        }
-     }
+        // These tests should simply run to completion w/o exceptions
+        searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
+        assertSearchVisible();
+        searchManager.stopSearch();
+        assertSearchNotVisible();
+
+        searchManager.startSearch("", false, SEARCHABLE_ACTIVITY, null, false);
+        assertSearchVisible();
+        searchManager.stopSearch();
+        assertSearchNotVisible();
+
+        searchManager.startSearch("test search string", false, SEARCHABLE_ACTIVITY, null, false);
+        assertSearchVisible();
+        searchManager.stopSearch();
+        assertSearchNotVisible();
+
+        searchManager.startSearch("test search string", true, SEARCHABLE_ACTIVITY, null, false);
+        assertSearchVisible();
+        searchManager.stopSearch();
+        assertSearchNotVisible();
+    }
+
+    @MediumTest
+    public void testSearchDialogState() throws Exception {
+        SearchManager searchManager = (SearchManager)
+                mContext.getSystemService(Context.SEARCH_SERVICE);
+        assertNotNull(searchManager);
+
+        Bundle searchState;
+
+        // search dialog not visible, so no state should be stored
+        searchState = searchManager.saveSearchDialog();
+        assertNull(searchState);
+
+        searchManager.startSearch("test search string", true, SEARCHABLE_ACTIVITY, null, false);
+        searchState = searchManager.saveSearchDialog();
+        assertNotNull(searchState);
+        searchManager.stopSearch();
+    }
 
 }
-

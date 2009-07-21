@@ -54,7 +54,7 @@ public:
 
     virtual sp<IAudioRecord> openRecord(
                                 pid_t pid,
-                                int streamType,
+                                int inputSource,
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,

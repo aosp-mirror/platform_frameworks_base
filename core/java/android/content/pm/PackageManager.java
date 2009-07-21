@@ -16,12 +16,11 @@
 
 package android.content.pm;
 
-
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -398,6 +397,15 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_TEST_ONLY = -15;
 
     /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the package being installed contains native code, but none that is
+     * compatible with the the device's CPU_ABI.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_CPU_ABI_INCOMPATIBLE = -16;
+
+    /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser was given a path that is not a file, or does not end with the expected
@@ -563,9 +571,8 @@ public abstract class PackageManager {
      * launch the main activity in the package, or null if the package does
      * not contain such an activity.
      */
-    public abstract Intent getLaunchIntentForPackage(String packageName)
-            throws NameNotFoundException;
-    
+    public abstract Intent getLaunchIntentForPackage(String packageName);
+
     /**
      * Return an array of all of the secondary group-ids that have been
      * assigned to a package.
@@ -1491,7 +1498,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract void freeStorageAndNotify(long freeStorageSize, IPackageDataObserver observer);
-    
+
     /**
      * Free storage by deleting LRU sorted list of cache files across
      * all applications. If the currently available free storage
@@ -1509,13 +1516,13 @@ public abstract class PackageManager {
      * and the current free storage is YY,
      * if XX is less than YY, just return. if not free XX-YY number
      * of bytes if possible.
-     * @param opFinishedIntent PendingIntent call back used to
+     * @param pi IntentSender call back used to
      * notify when the operation is completed.May be null
      * to indicate that no call back is desired.
      * 
      * @hide
      */
-    public abstract void freeStorage(long freeStorageSize, PendingIntent opFinishedIntent);
+    public abstract void freeStorage(long freeStorageSize, IntentSender pi);
 
     /**
      * Retrieve the size information for a package.
@@ -1602,6 +1609,26 @@ public abstract class PackageManager {
      * preferred.
      */
     public abstract void addPreferredActivity(IntentFilter filter, int match,
+            ComponentName[] set, ComponentName activity);
+
+    /**
+     * Replaces an existing preferred activity mapping to the system, and if that were not present
+     * adds a new preferred activity.  This will be used
+     * to automatically select the given activity component when
+     * {@link Context#startActivity(Intent) Context.startActivity()} finds
+     * multiple matching activities and also matches the given filter.
+     *
+     * @param filter The set of intents under which this activity will be
+     * made preferred.
+     * @param match The IntentFilter match category that this preference
+     * applies to.
+     * @param set The set of activities that the user was picking from when
+     * this preference was made.
+     * @param activity The component name of the activity that is to be
+     * preferred.
+     * @hide
+     */
+    public abstract void replacePreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity);
 
     /**

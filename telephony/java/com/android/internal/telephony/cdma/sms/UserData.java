@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.cdma.sms;
 
+import android.util.SparseIntArray;
+
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.util.HexDump;
 
@@ -38,8 +40,26 @@ public class UserData {
     public static final int ENCODING_GSM_DCS                    = 0x0A;
 
     /**
+     * IS-91 message types.
+     * (See TIA/EIS/IS-91-A-ENGL 1999, table 3.7.1.1-3)
+     */
+    public static final int IS91_MSG_TYPE_VOICEMAIL_STATUS   = 0x82;
+    public static final int IS91_MSG_TYPE_SHORT_MESSAGE_FULL = 0x83;
+    public static final int IS91_MSG_TYPE_CLI                = 0x84;
+    public static final int IS91_MSG_TYPE_SHORT_MESSAGE      = 0x85;
+
+    /**
      * IA5 data encoding character mappings.
      * (See CCITT Rec. T.50 Tables 1 and 3)
+     *
+     * Note this mapping is the the same as for printable ASCII
+     * characters, with a 0x20 offset, meaning that the ASCII SPACE
+     * character occurs with code 0x20.
+     *
+     * Note this mapping is also equivalent to that used by the IS-91
+     * protocol, except for the latter using only 6 bits, and hence
+     * mapping only entries up to the '_' character.
+     *
      */
     public static final char[] IA5_MAP = {
         ' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
@@ -50,10 +70,27 @@ public class UserData {
         'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~'};
 
     /**
+     * Character to use when forced to encode otherwise unencodable
+     * characters, meaning those not in the respective ASCII or GSM
+     * 7-bit encoding tables.  Current choice is SPACE, which is 0x20
+     * in both the GSM-7bit and ASCII-7bit encodings.
+     */
+    static final byte UNENCODABLE_7_BIT_CHAR = 0x20;
+
+    /**
      * Only elements between these indices in the ASCII table are printable.
      */
     public static final int PRINTABLE_ASCII_MIN_INDEX = 0x20;
-    public static final int PRINTABLE_ASCII_MAX_INDEX = 0x7F;
+    public static final int ASCII_LF_INDEX = 0x0A;
+    public static final int ASCII_CR_INDEX = 0x0D;
+    public static final SparseIntArray charToAscii = new SparseIntArray();
+    static {
+        for (int i = 0; i < IA5_MAP.length; i++) {
+            charToAscii.put(IA5_MAP[i], PRINTABLE_ASCII_MIN_INDEX + i);
+        }
+        charToAscii.put('\r', ASCII_LF_INDEX);
+        charToAscii.put('\n', ASCII_CR_INDEX);
+    }
 
     /**
      * Mapping for IA5 values less than 32 are flow control signals
@@ -73,7 +110,6 @@ public class UserData {
     public int msgEncoding;
     public boolean msgEncodingSet = false;
 
-    // XXX needed when encoding is IS91 or DCS (not supported yet):
     public int msgType;
 
     /**
@@ -93,14 +129,15 @@ public class UserData {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("UserData:\n");
-        builder.append("  msgEncoding: " + (msgEncodingSet ? msgEncoding : "not set") + "\n");
-        builder.append("  msgType: " + msgType + "\n");
-        builder.append("  paddingBits: " + paddingBits + "\n");
-        builder.append("  numFields: " + (int)numFields + "\n");
-        builder.append("  userDataHeader: " + userDataHeader + "\n");
-        builder.append("  payload: '" + HexDump.toHexString(payload) + "'");
-        builder.append(", payloadStr: '" + payloadStr + "'");
+        builder.append("UserData ");
+        builder.append("{ msgEncoding=" + (msgEncodingSet ? msgEncoding : "unset"));
+        builder.append(", msgType=" + msgType);
+        builder.append(", paddingBits=" + paddingBits);
+        builder.append(", numFields=" + (int)numFields);
+        builder.append(", userDataHeader=" + userDataHeader);
+        builder.append(", payload='" + HexDump.toHexString(payload) + "'");
+        builder.append(", payloadStr='" + payloadStr + "'");
+        builder.append(" }");
         return builder.toString();
     }
 

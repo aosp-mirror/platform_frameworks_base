@@ -137,6 +137,8 @@ public final class Checkin {
             CRASHES_TRUNCATED,
             ELAPSED_REALTIME_SEC,
             ELAPSED_UPTIME_SEC,
+            HTTP_REQUEST,
+            HTTP_REUSED,
             HTTP_STATUS,
             PHONE_GSM_REGISTERED,
             PHONE_GPRS_ATTEMPTED,
@@ -351,6 +353,3 @@ public final class Checkin {
         }
     }
 }
-
-
-

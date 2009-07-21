@@ -182,7 +182,7 @@ public class GsmAlphabet {
             return stringToGsm7BitPacked(data);
         }
 
-        int headerBits = header.length * 8;
+        int headerBits = (header.length + 1) * 8;
         int headerSeptets = headerBits / 7;
         headerSeptets += (headerBits % 7) > 0 ? 1 : 0;
 
@@ -194,7 +194,8 @@ public class GsmAlphabet {
                 (headerSeptets*7), true);
 
         // Paste in the header
-        System.arraycopy(header, 0, ret, 1, header.length);
+        ret[1] = (byte)header.length;
+        System.arraycopy(header, 0, ret, 2, header.length);
         return ret;
     }
 
@@ -573,52 +574,6 @@ public class GsmAlphabet {
             }
         }
         return size;
-    }
-
-    /**
-     * Returns the index into <code>s</code> of the first character
-     * after <code>limit</code> octets have been reached, starting at
-     * index <code>start</code>.  This is used when dividing messages
-     * in UCS2 encoding into units within the SMS message size limit.
-     *
-     * @param s source string
-     * @param start index of where to start counting septets
-     * @param limit maximum septets to include,
-     *   e.g. <code>MAX_USER_DATA_BYTES</code>
-     * @return index of first character that won't fit, or the length
-     *   of the entire string if everything fits
-     */
-    public static int
-    findUCS2LimitIndex(String s, int start, int limit) {
-        int numCharToBeEncoded = s.length() - start;
-        return ((numCharToBeEncoded*2 > limit)? limit/2: numCharToBeEncoded) + start;
-    }
-
-    /**
-     * Returns the index into <code>s</code> of the first character
-     * after <code>limit</code> septets/octets have been reached
-     * according to the <code>encodingType</code>, starting at
-     * index <code>start</code>.  This is used when dividing messages
-     * units within the SMS message size limit.
-     *
-     * @param s source string
-     * @param start index of where to start counting septets
-     * @param limit maximum septets to include,
-     *   e.g. <code>MAX_USER_DATA_BYTES</code>
-     * @return index of first character that won't fit, or the length
-     *   of the entire string if everything fits
-     */
-    public static int
-    findLimitIndex(String s, int start, int limit, int encodingType) throws EncodeException {
-        if (encodingType == SmsMessage.ENCODING_7BIT) {
-            return findGsmSeptetLimitIndex(s, start, limit);
-        }
-        else if (encodingType == SmsMessage.ENCODING_16BIT) {
-            return findUCS2LimitIndex(s, start, limit);
-        }
-        else {
-            throw new EncodeException("Unsupported encoding type: " + encodingType);
-        }
     }
 
     // Set in the static initializer

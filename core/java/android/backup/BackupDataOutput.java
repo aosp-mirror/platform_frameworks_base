@@ -19,27 +19,59 @@ package android.backup;
 import android.content.Context;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 
 /** @hide */
 public class BackupDataOutput {
-    /* package */ FileDescriptor fd;
+    int mBackupWriter;
 
     public static final int OP_UPDATE = 1;
     public static final int OP_DELETE = 2;
 
-    public BackupDataOutput(Context context, FileDescriptor fd) {
-        this.fd = fd;
+    public BackupDataOutput(FileDescriptor fd) {
+        if (fd == null) throw new NullPointerException();
+        mBackupWriter = ctor(fd);
+        if (mBackupWriter == 0) {
+            throw new RuntimeException("Native initialization failed with fd=" + fd);
+        }
     }
 
-    public void close() {
-        // do we close the fd?
+    // A dataSize of -1 indicates that the record under this key should be deleted
+    public int writeEntityHeader(String key, int dataSize) throws IOException {
+        int result = writeEntityHeader_native(mBackupWriter, key, dataSize);
+        if (result >= 0) {
+            return result;
+        } else {
+            throw new IOException("result=0x" + Integer.toHexString(result));
+        }
     }
-    public native void flush();
-    public native void write(byte[] buffer);
-    public native void write(int oneByte);
-    public native void write(byte[] buffer, int offset, int count);
 
-    public native void writeOperation(int op);
-    public native void writeKey(String key);
+    public int writeEntityData(byte[] data, int size) throws IOException {
+        int result = writeEntityData_native(mBackupWriter, data, size);
+        if (result >= 0) {
+            return result;
+        } else {
+            throw new IOException("result=0x" + Integer.toHexString(result));
+        }
+    }
+
+    public void setKeyPrefix(String keyPrefix) {
+        setKeyPrefix_native(mBackupWriter, keyPrefix);
+    }
+
+    protected void finalize() throws Throwable {
+        try {
+            dtor(mBackupWriter);
+        } finally {
+            super.finalize();
+        }
+    }
+
+    private native static int ctor(FileDescriptor fd);
+    private native static void dtor(int mBackupWriter);
+
+    private native static int writeEntityHeader_native(int mBackupWriter, String key, int dataSize);
+    private native static int writeEntityData_native(int mBackupWriter, byte[] data, int size);
+    private native static void setKeyPrefix_native(int mBackupWriter, String keyPrefix);
 }
 

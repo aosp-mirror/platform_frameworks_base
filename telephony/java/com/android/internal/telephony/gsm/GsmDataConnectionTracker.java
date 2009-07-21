@@ -28,10 +28,9 @@ import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
-import android.os.Handler;
 import android.os.INetStatService;
 import android.os.Message;
 import android.os.RemoteException;
@@ -42,7 +41,6 @@ import android.preference.PreferenceManager;
 import android.provider.Checkin;
 import android.provider.Settings;
 import android.provider.Telephony;
-import android.provider.Settings.SettingNotFoundException;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
@@ -50,12 +48,12 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 
+import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.DataConnection;
-import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.TelephonyEventLog;
+import com.android.internal.telephony.DataConnection.FailCause;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,6 +65,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private static final String LOG_TAG = "GSM";
     private static final boolean DBG = true;
 
+    private GSMPhone mGsmPhone;
     /**
      * Handles changes to the APN db.
      */
@@ -87,6 +86,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     // Indicates baseband will not auto-attach
     private boolean noAutoAttach = false;
     long nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+    private boolean mReregisterOnReconnectFailure = false;
     private ContentResolver mResolver;
 
     private boolean mPingTestActive = false;
@@ -150,7 +150,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private static final int POLL_PDP_MILLIS = 5 * 1000;
 
-    //WINK:TODO: Teleca, is this really gsm specific, what about CDMA?
     private static final String INTENT_RECONNECT_ALARM = "com.android.internal.telephony.gprs-reconnect";
     private static final String INTENT_RECONNECT_ALARM_EXTRA_REASON = "reason";
 
@@ -177,9 +176,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
                 String reason = intent.getStringExtra(INTENT_RECONNECT_ALARM_EXTRA_REASON);
                 if (state == State.FAILED) {
-                    cleanUpConnection(false, reason);
+                    Message msg = obtainMessage(EVENT_CLEAN_UP_CONNECTION);
+                    msg.arg1 = 0; // tearDown is false
+                    msg.obj = (String) reason;
+                    sendMessage(msg);
                 }
-                trySetupData(reason);
+                sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
             } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 final android.net.NetworkInfo networkInfo = (NetworkInfo)
                         intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
@@ -204,6 +206,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     GsmDataConnectionTracker(GSMPhone p) {
         super(p);
+        mGsmPhone = p;
 
         p.mCM.registerForAvailable (this, EVENT_RADIO_AVAILABLE, null);
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
@@ -250,17 +253,17 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         //Unregister for all events
         phone.mCM.unregisterForAvailable(this);
         phone.mCM.unregisterForOffOrNotAvailable(this);
-        ((GSMPhone) phone).mSIMRecords.unregisterForRecordsLoaded(this);
+        mGsmPhone.mSIMRecords.unregisterForRecordsLoaded(this);
         phone.mCM.unregisterForDataStateChanged(this);
-        ((GSMPhone) phone).mCT.unregisterForVoiceCallEnded(this);
-        ((GSMPhone) phone).mCT.unregisterForVoiceCallStarted(this);
-        ((GSMPhone) phone).mSST.unregisterForGprsAttached(this);
-        ((GSMPhone) phone).mSST.unregisterForGprsDetached(this);
-        ((GSMPhone) phone).mSST.unregisterForRoamingOn(this);
-        ((GSMPhone) phone).mSST.unregisterForRoamingOff(this);
-        ((GSMPhone) phone).mSST.unregisterForPsRestrictedEnabled(this);
-        ((GSMPhone) phone).mSST.unregisterForPsRestrictedDisabled(this);
-        
+        mGsmPhone.mCT.unregisterForVoiceCallEnded(this);
+        mGsmPhone.mCT.unregisterForVoiceCallStarted(this);
+        mGsmPhone.mSST.unregisterForGprsAttached(this);
+        mGsmPhone.mSST.unregisterForGprsDetached(this);
+        mGsmPhone.mSST.unregisterForRoamingOn(this);
+        mGsmPhone.mSST.unregisterForRoamingOff(this);
+        mGsmPhone.mSST.unregisterForPsRestrictedEnabled(this);
+        mGsmPhone.mSST.unregisterForPsRestrictedDisabled(this);
+
         phone.getContext().unregisterReceiver(this.mIntentReceiver);
         phone.getContext().getContentResolver().unregisterContentObserver(this.apnObserver);
 
@@ -362,7 +365,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * The APN of the specified type is no longer needed. Ensure that if
      * use of the default APN has not been explicitly disabled, we are connected
      * to the default APN.
-     * @param type the APN type. The only valid values are currently 
+     * @param type the APN type. The only valid values are currently
      * {@link Phone#APN_TYPE_MMS} and {@link Phone#APN_TYPE_SUPL}.
      * @return
      */
@@ -374,10 +377,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             removeMessages(EVENT_RESTORE_DEFAULT_APN);
             setEnabled(type, false);
             if (isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
+                mRequestedApnType = Phone.APN_TYPE_DEFAULT;
                 if (dataEnabled[APN_DEFAULT_ID]) {
                     return Phone.APN_ALREADY_ACTIVE;
                 } else {
-                    cleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+                    Message msg = obtainMessage(EVENT_CLEAN_UP_CONNECTION);
+                    msg.arg1 = 1; // tearDown is true;
+                    msg.obj = Phone.REASON_DATA_DISABLED;
+                    sendMessage(msg);
                     return Phone.APN_REQUEST_STARTED;
                 }
             } else {
@@ -407,10 +414,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     public boolean isDataConnectionAsDesired() {
         boolean roaming = phone.getServiceState().getRoaming();
 
-        if (((GSMPhone) phone).mSIMRecords.getRecordsLoaded() &&
-                ((GSMPhone) phone).mSST.getCurrentGprsState() == ServiceState.STATE_IN_SERVICE &&
+        if (mGsmPhone.mSIMRecords.getRecordsLoaded() &&
+                mGsmPhone.mSST.getCurrentGprsState() == ServiceState.STATE_IN_SERVICE &&
                 (!roaming || getDataOnRoamingEnabled()) &&
-            !mIsWifiConnected && 
+            !mIsWifiConnected &&
             !mIsPsRestricted ) {
             return (state == State.CONNECTED);
         }
@@ -477,7 +484,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             setEnabled(Phone.APN_TYPE_DEFAULT, true);
             // trySetupData() will be a no-op if we are currently
             // connected to the MMS APN
-            return trySetupData(Phone.REASON_DATA_ENABLED);
+            sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
+            return true;
         } else if (!enable) {
             setEnabled(Phone.APN_TYPE_DEFAULT, false);
             // Don't tear down if there is an active APN and it handles MMS or SUPL.
@@ -486,20 +494,15 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 (isApnTypeActive(Phone.APN_TYPE_SUPL) && isEnabled(Phone.APN_TYPE_SUPL))) {
                 return false;
             }
-            cleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+            Message msg = obtainMessage(EVENT_CLEAN_UP_CONNECTION);
+            msg.arg1 = 1; // tearDown is true
+            msg.obj = Phone.REASON_DATA_DISABLED;
+            sendMessage(msg);
             return true;
         } else {
             // isEnabled && enable
             return true;
         }
-    }
-    
-    /**
-     * Simply tear down data connections due to radio off 
-     * and don't setup again.
-     */
-    public void cleanConnectionBeforeRadioOff() {
-        cleanUpConnection(true, Phone.REASON_RADIO_TURNED_OFF);
     }
 
     /**
@@ -565,7 +568,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (DBG) log("***trySetupData due to " + (reason == null ? "(unspecified)" : reason));
 
         Log.d(LOG_TAG, "[DSAC DEB] " + "trySetupData with mIsPsRestricted=" + mIsPsRestricted);
-        
+
         if (phone.getSimulatedRadioControl() != null) {
             // Assume data is connected on the simulator
             // FIXME  this can be improved
@@ -576,22 +579,23 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return true;
         }
 
-        int gprsState = ((GSMPhone) phone).mSST.getCurrentGprsState();
+        int gprsState = mGsmPhone.mSST.getCurrentGprsState();
         boolean roaming = phone.getServiceState().getRoaming();
+        boolean desiredPowerState = mGsmPhone.mSST.getDesiredPowerState();
 
         if ((state == State.IDLE || state == State.SCANNING)
                 && (gprsState == ServiceState.STATE_IN_SERVICE || noAutoAttach)
-                && ((GSMPhone) phone).mSIMRecords.getRecordsLoaded()
-                && ( ((GSMPhone) phone).mSST.isConcurrentVoiceAndData() ||
-                     phone.getState() == Phone.State.IDLE )
+                && mGsmPhone.mSIMRecords.getRecordsLoaded()
+                && phone.getState() == Phone.State.IDLE
                 && isDataAllowed()
-                && !mIsPsRestricted ) {
+                && !mIsPsRestricted
+                && desiredPowerState ) {
 
             if (state == State.IDLE) {
                 waitingApns = buildWaitingApns();
                 if (waitingApns.isEmpty()) {
                     if (DBG) log("No APN found");
-                    notifyNoData(PdpConnection.FailCause.BAD_APN);
+                    notifyNoData(PdpConnection.FailCause.MISSING_UKNOWN_APN);
                     return false;
                 } else {
                     log ("Create from allApns : " + apnListToString(allApns));
@@ -607,13 +611,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 log("trySetupData: Not ready for data: " +
                     " dataState=" + state +
                     " gprsState=" + gprsState +
-                    " sim=" + ((GSMPhone) phone).mSIMRecords.getRecordsLoaded() +
-                    " UMTS=" + ((GSMPhone) phone).mSST.isConcurrentVoiceAndData() +
+                    " sim=" + mGsmPhone.mSIMRecords.getRecordsLoaded() +
+                    " UMTS=" + mGsmPhone.mSST.isConcurrentVoiceAndData() +
                     " phoneState=" + phone.getState() +
                     " dataEnabled=" + getAnyDataEnabled() +
                     " roaming=" + roaming +
                     " dataOnRoamingEnable=" + getDataOnRoamingEnabled() +
-                    " ps restricted=" + mIsPsRestricted);
+                    " ps restricted=" + mIsPsRestricted +
+                    " desiredPowerState=" + desiredPowerState);
             return false;
         }
     }
@@ -638,6 +643,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             mReconnectIntent = null;
         }
 
+        setState(State.DISCONNECTING);
+
         for (DataConnection conn : pdpList) {
             PdpConnection pdp = (PdpConnection) conn;
             if (tearDown) {
@@ -649,25 +656,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
         stopNetStatPoll();
 
-        /*
-         * If we've been asked to tear down the connection,
-         * set the state to DISCONNECTING. However, there's
-         * a race that can occur if for some reason we were
-         * already in the IDLE state. In that case, the call
-         * to pdp.disconnect() above will immediately post
-         * a message to the handler thread that the disconnect
-         * is done, and if the handler runs before the code
-         * below does, the handler will have set the state to
-         * IDLE before the code below runs. If we didn't check
-         * for that, future calls to trySetupData would fail,
-         * and we would never get out of the DISCONNECTING state.
-         */ 
         if (!tearDown) {
             setState(State.IDLE);
             phone.notifyDataConnection(reason);
             mActiveApn = null;
-        } else if (state != State.IDLE) {
-            setState(State.DISCONNECTING);
         }
     }
 
@@ -779,7 +771,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     private boolean
-    pdpStatesHasCID (ArrayList<PDPContextState> states, int cid) {
+    pdpStatesHasCID (ArrayList<DataCallState> states, int cid) {
         for (int i = 0, s = states.size() ; i < s ; i++) {
             if (states.get(i).cid == cid) return true;
         }
@@ -788,9 +780,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     private boolean
-    pdpStatesHasActiveCID (ArrayList<PDPContextState> states, int cid) {
+    pdpStatesHasActiveCID (ArrayList<DataCallState> states, int cid) {
         for (int i = 0, s = states.size() ; i < s ; i++) {
-            if (states.get(i).cid == cid) return (states.get(i).active != 0);
+            if ((states.get(i).cid == cid) && (states.get(i).active != 0)) {
+                return true;
+            }
         }
 
         return false;
@@ -805,7 +799,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         isConnected = (state != State.IDLE && state != State.FAILED);
 
         // The "current" may no longer be valid.  MMS depends on this to send properly.
-        ((GSMPhone) phone).updateCurrentCarrierInProvider();
+        mGsmPhone.updateCurrentCarrierInProvider();
 
         // TODO: It'd be nice to only do this if the changed entrie(s)
         // match the current operator.
@@ -813,6 +807,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (state != State.DISCONNECTING) {
             cleanUpConnection(isConnected, Phone.REASON_APN_CHANGED);
             if (!isConnected) {
+                // reset reconnect timer
+                nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                mReregisterOnReconnectFailure = false;
                 trySetupData(Phone.REASON_APN_CHANGED);
             }
         }
@@ -825,9 +822,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * previous state
      */
     protected void onPdpStateChanged (AsyncResult ar, boolean explicitPoll) {
-        ArrayList<PDPContextState> pdpStates;
+        ArrayList<DataCallState> pdpStates;
 
-        pdpStates = (ArrayList<PDPContextState>)(ar.result);
+        pdpStates = (ArrayList<DataCallState>)(ar.result);
 
         if (ar.exception != null) {
             // This is probably "radio not available" or something
@@ -893,6 +890,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         startNetStatPoll();
         // reset reconnect timer
         nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+        mReregisterOnReconnectFailure = false;
     }
 
     private void setupDnsProperties() {
@@ -963,7 +961,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             } else {
                 mPdpResetCount = 0;
                 EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_REREGISTER_NETWORK, sentSinceLastRecv);
-                ((GSMPhone) phone).mSST.reRegisterNetwork(null);
+                mGsmPhone.mSST.reRegisterNetwork(null);
             }
             // TODO: Add increasingly drastic recovery steps, eg,
             // reset the radio, reset the device.
@@ -1056,7 +1054,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
 
             int watchdogTrigger = Settings.Gservices.getInt(mResolver,
-                    Settings.Gservices.PDP_WATCHDOG_TRIGGER_PACKET_COUNT, 
+                    Settings.Gservices.PDP_WATCHDOG_TRIGGER_PACKET_COUNT,
                     NUMBER_SENT_PACKETS_OF_HANG);
 
             if (sentSinceLastRecv >= watchdogTrigger) {
@@ -1079,7 +1077,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
                     // Slow down the poll interval to let things happen
                     netStatPollPeriod = Settings.Gservices.getInt(mResolver,
-                            Settings.Gservices.PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS, 
+                            Settings.Gservices.PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS,
                             POLL_NETSTAT_SLOW_MILLIS);
                 } else {
                     if (DBG) log("Sent " + String.valueOf(sentSinceLastRecv) +
@@ -1112,7 +1110,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
         }
     };
-    
+
     private void runPingTest () {
         int status = -1;
         try {
@@ -1161,22 +1159,36 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     /**
      * Return true if data connection need to be setup after disconnected due to
      * reason.
-     * 
+     *
      * @param reason the reason why data is disconnected
-     * @return true if try setup data connection is need for this reason 
+     * @return true if try setup data connection is need for this reason
      */
     private boolean retryAfterDisconnected(String reason) {
         boolean retry = true;
-        
+
         if ( Phone.REASON_RADIO_TURNED_OFF.equals(reason) ||
-             Phone.REASON_DATA_DISABLED.equals(reason) ) { 
+             Phone.REASON_DATA_DISABLED.equals(reason) ) {
             retry = false;
         }
         return retry;
-    }   
+    }
 
     private void reconnectAfterFail(FailCause lastFailCauseCode, String reason) {
         if (state == State.FAILED) {
+            if (nextReconnectDelay > RECONNECT_DELAY_MAX_MILLIS) {
+                if (mReregisterOnReconnectFailure) {
+                    // We have already tried to re-register to the network.
+                    // This might be a problem with the data network.
+                    nextReconnectDelay = RECONNECT_DELAY_MAX_MILLIS;
+                } else {
+                    // Try to Re-register to the network.
+                    Log.d(LOG_TAG, "PDP activate failed, Reregistering to the network");
+                    mReregisterOnReconnectFailure = true;
+                    mGsmPhone.mSST.reRegisterNetwork(null);
+                    nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                    return;
+                }
+            }
             Log.d(LOG_TAG, "PDP activate failed. Scheduling next attempt for "
                     + (nextReconnectDelay / 1000) + "s");
 
@@ -1192,9 +1204,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
             // double it for next time
             nextReconnectDelay *= 2;
-            if (nextReconnectDelay > RECONNECT_DELAY_MAX_MILLIS) {
-                nextReconnectDelay = RECONNECT_DELAY_MAX_MILLIS;
-            }
 
             if (!shouldPostNotification(lastFailCauseCode)) {
                 Log.d(LOG_TAG,"NOT Posting GPRS Unavailable notification "
@@ -1214,7 +1223,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (state == State.FAILED) {
             cleanUpConnection(false, null);
         }
-        sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
+        sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA, Phone.REASON_SIM_LOADED));
     }
 
     protected void onEnableNewApn() {
@@ -1223,17 +1232,16 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         cleanUpConnection(true, Phone.REASON_APN_SWITCHED);
     }
 
-    protected void onTrySetupData() {
-        trySetupData(null);
+    protected void onTrySetupData(String reason) {
+        trySetupData(reason);
     }
 
     protected void onRestoreDefaultApn() {
         if (DBG) Log.d(LOG_TAG, "Restore default APN");
         setEnabled(Phone.APN_TYPE_MMS, false);
-
+        mRequestedApnType = Phone.APN_TYPE_DEFAULT;
         if (!isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
             cleanUpConnection(true, Phone.REASON_RESTORE_DEFAULT_APN);
-            mRequestedApnType = Phone.APN_TYPE_DEFAULT;
         }
     }
 
@@ -1269,6 +1277,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         // Make sure our reconnect delay starts at the initial value
         // next time the radio comes on
         nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+        mReregisterOnReconnectFailure = false;
 
         if (phone.getSimulatedRadioControl() != null) {
             // Assume data is connected on the simulator
@@ -1326,19 +1335,13 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             cause = (PdpConnection.FailCause) (ar.result);
             if(DBG) log("PDP setup failed " + cause);
                     // Log this failure to the Event Logs.
-            if (cause == PdpConnection.FailCause.BAD_APN || 
-                    cause == PdpConnection.FailCause.BAD_PAP_SECRET ||
-                    cause == PdpConnection.FailCause.BARRED ||
-                    cause == PdpConnection.FailCause.RADIO_ERROR_RETRY ||
-                    cause == PdpConnection.FailCause.SUSPENED_TEMPORARY ||
-                    cause == PdpConnection.FailCause.UNKNOWN ||
-                    cause == PdpConnection.FailCause.USER_AUTHENTICATION) {
+            if (cause.isEventLoggable()) {
                 int cid = -1;
                 GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
                 if (loc != null) cid = loc.getCid();
 
                 EventLog.List val = new EventLog.List(
-                        cause.ordinal(), cid, 
+                        cause.ordinal(), cid,
                         TelephonyManager.getDefault().getNetworkType());
                 EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_RADIO_PDP_SETUP_FAIL, val);
             }
@@ -1346,20 +1349,20 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             // No try for permanent failure
             if (cause.isPermanentFail()) {
                 notifyNoData(cause);
+                return;
             }
 
-            if (tryNextApn(cause)) {
-                waitingApns.remove(0);
-                if (waitingApns.isEmpty()) {
-                    // No more to try, start delayed retry
-                    startDelayedRetry(cause, reason);
-                } else {
-                    // we still have more apns to try
-                    setState(State.SCANNING);
-                    trySetupData(reason);
-                }
-            } else {
+            waitingApns.remove(0);
+            if (waitingApns.isEmpty()) {
+                // No more to try, start delayed retry
                 startDelayedRetry(cause, reason);
+            } else {
+                // we still have more apns to try
+                setState(State.SCANNING);
+                // Wait a bit before trying the next APN, so that
+                // we're not tying up the RIL command channel
+                sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason),
+                        RECONNECT_DELAY_INITIAL_MILLIS);
             }
         }
     }
@@ -1387,7 +1390,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected void onVoiceCallStarted() {
-        if (state == State.CONNECTED && !((GSMPhone) phone).mSST.isConcurrentVoiceAndData()) {
+        if (state == State.CONNECTED && ! mGsmPhone.mSST.isConcurrentVoiceAndData()) {
             stopNetStatPoll();
             phone.notifyDataConnection(Phone.REASON_VOICE_CALL_STARTED);
         }
@@ -1395,7 +1398,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     protected void onVoiceCallEnded() {
         if (state == State.CONNECTED) {
-            if (!((GSMPhone) phone).mSST.isConcurrentVoiceAndData()) {
+            if (!mGsmPhone.mSST.isConcurrentVoiceAndData()) {
                 startNetStatPoll();
                 phone.notifyDataConnection(Phone.REASON_VOICE_CALL_ENDED);
             } else {
@@ -1403,17 +1406,16 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 resetPollStats();
             }
         } else {
+            // reset reconnect timer
+            nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+            mReregisterOnReconnectFailure = false;
             // in case data setup was attempted when we were on a voice call
             trySetupData(Phone.REASON_VOICE_CALL_ENDED);
         }
     }
 
-    private boolean tryNextApn(FailCause cause) {
-        return (cause != FailCause.RADIO_NOT_AVAILABLE)
-                && (cause != FailCause.RADIO_OFF)
-                && (cause != FailCause.RADIO_ERROR_RETRY)
-                && (cause != FailCause.NO_SIGNAL)
-                && (cause != FailCause.SIM_LOCKED);
+    protected void onCleanUpConnection(boolean tearDown, String reason) {
+        cleanUpConnection(tearDown, reason);
     }
 
     private int getRestoreDefaultApnDelay() {
@@ -1436,7 +1438,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      */
     private void createAllApnList() {
         allApns = new ArrayList<ApnSetting>();
-        String operator = ((GSMPhone) phone).mSIMRecords.getSIMOperatorNumeric();
+        String operator = mGsmPhone.mSIMRecords.getSIMOperatorNumeric();
 
         if (operator != null) {
             String selection = "numeric = '" + operator + "'";
@@ -1462,7 +1464,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (allApns.isEmpty()) {
             if (DBG) log("No APN found for carrier: " + operator);
             preferredApn = null;
-            notifyNoData(PdpConnection.FailCause.BAD_APN);
+            notifyNoData(PdpConnection.FailCause.MISSING_UKNOWN_APN);
         } else {
             preferredApn = getPreferredApn();
             Log.d(LOG_TAG, "Get PreferredAPN");
@@ -1478,7 +1480,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         DataConnection pdp;
 
         for (int i = 0; i < PDP_CONNECTION_POOL_SIZE; i++) {
-            pdp = new PdpConnection((GSMPhone) phone);
+            pdp = new PdpConnection(mGsmPhone);
             pdpList.add(pdp);
          }
     }
@@ -1497,7 +1499,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      */
     private ArrayList<ApnSetting> buildWaitingApns() {
         ArrayList<ApnSetting> apnList = new ArrayList<ApnSetting>();
-        String operator = ((GSMPhone )phone).mSIMRecords.getSIMOperatorNumeric();
+        String operator = mGsmPhone.mSIMRecords.getSIMOperatorNumeric();
 
         if (mRequestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
             if (canSetPreferApn && preferredApn != null) {
@@ -1568,7 +1570,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         ContentResolver resolver = phone.getContext().getContentResolver();
         resolver.delete(PREFERAPN_URI, null, null);
 
-        if (pos >= 0) {            
+        if (pos >= 0) {
             ContentValues values = new ContentValues();
             values.put(APN_ID, pos);
             resolver.insert(PREFERAPN_URI, values);
@@ -1581,7 +1583,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         Cursor cursor = phone.getContext().getContentResolver().query(
-                PREFERAPN_URI, new String[] { "_id", "name", "apn" }, 
+                PREFERAPN_URI, new String[] { "_id", "name", "apn" },
                 null, null, Telephony.Carriers.DEFAULT_SORT_ORDER);
 
         if (cursor != null) {
@@ -1665,9 +1667,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                  * PDP context and notify us with PDP_CONTEXT_CHANGED.
                  * But we should stop the network polling and prevent reset PDP.
                  */
-                Log.d(LOG_TAG, "[DSAC DEB] " + "EVENT_PS_RESTRICT_ENABLED " + mIsPsRestricted); 
+                Log.d(LOG_TAG, "[DSAC DEB] " + "EVENT_PS_RESTRICT_ENABLED " + mIsPsRestricted);
                 stopNetStatPoll();
-                mIsPsRestricted = true; 
+                mIsPsRestricted = true;
                 break;
 
             case EVENT_PS_RESTRICT_DISABLED:
@@ -1683,6 +1685,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     if (state == State.FAILED) {
                         cleanUpConnection(false, Phone.REASON_PS_RESTRICT_ENABLED);
                         nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                        mReregisterOnReconnectFailure = false;
                     }
                     trySetupData(Phone.REASON_PS_RESTRICT_ENABLED);
                 }

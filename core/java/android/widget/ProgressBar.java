@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.shapes.RoundRectShape;
 import android.graphics.drawable.shapes.Shape;
 import android.util.AttributeSet;
@@ -683,7 +684,7 @@ public class ProgressBar extends View {
             return;
         }
 
-        if (mIndeterminateDrawable instanceof AnimationDrawable) {
+        if (mIndeterminateDrawable instanceof Animatable) {
             mShouldStartAnimationDrawable = true;
             mAnimation = null;
         } else {
@@ -708,8 +709,8 @@ public class ProgressBar extends View {
     void stopAnimation() {
         mAnimation = null;
         mTransformation = null;
-        if (mIndeterminateDrawable instanceof AnimationDrawable) {
-            ((AnimationDrawable) mIndeterminateDrawable).stop();
+        if (mIndeterminateDrawable instanceof Animatable) {
+            ((Animatable) mIndeterminateDrawable).stop();
             mShouldStartAnimationDrawable = false;
         }
     }
@@ -818,8 +819,8 @@ public class ProgressBar extends View {
             }
             d.draw(canvas);
             canvas.restore();
-            if (mShouldStartAnimationDrawable && d instanceof AnimationDrawable) {
-                ((AnimationDrawable) d).start();
+            if (mShouldStartAnimationDrawable && d instanceof Animatable) {
+                ((Animatable) d).start();
                 mShouldStartAnimationDrawable = false;
             }
         }

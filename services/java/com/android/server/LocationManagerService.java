@@ -46,7 +46,6 @@ import android.location.Address;
 import android.location.IGeocodeProvider;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
-import android.location.ILocationCollector;
 import android.location.ILocationListener;
 import android.location.ILocationManager;
 import android.location.ILocationProvider;
@@ -66,15 +65,12 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.util.Config;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
-import android.util.SparseIntArray;
 
 import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.location.LocationProviderProxy;
 import com.android.internal.location.MockProvider;
-import com.android.server.am.BatteryStatsService;
 
 /**
  * The service class that manages LocationProviders and issues location
@@ -107,8 +103,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         android.Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS;
     private static final String INSTALL_LOCATION_PROVIDER =
         android.Manifest.permission.INSTALL_LOCATION_PROVIDER;
-    private static final String INSTALL_LOCATION_COLLECTOR =
-        android.Manifest.permission.INSTALL_LOCATION_COLLECTOR;
 
     // Set of providers that are explicitly enabled
     private final Set<String> mEnabledProviders = new HashSet<String>();
@@ -170,9 +164,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     // Last known location for each provider
     private HashMap<String,Location> mLastKnownLocation =
         new HashMap<String,Location>();
-
-    // Location collector
-    private ILocationCollector mCollector;
 
     private int mNetworkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
 
@@ -516,6 +507,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     private void removeProvider(LocationProviderProxy provider) {
         mProviders.remove(provider);
+        provider.unlinkProvider();
         mProvidersByName.remove(provider.getName());
     }
 
@@ -630,16 +622,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         }
     }
 
-    public void installLocationCollector(ILocationCollector collector) {
-        if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_COLLECTOR)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires INSTALL_LOCATION_COLLECTOR permission");
-        }
-
-        // FIXME - only support one collector
-        mCollector = collector;
-    }
-
     public void installGeocodeProvider(IGeocodeProvider provider) {
         if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_PROVIDER)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -666,14 +648,14 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     private void checkPermissionsSafe(String provider) {
         if (LocationManager.GPS_PROVIDER.equals(provider)
-            && (mContext.checkCallingPermission(ACCESS_FINE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
             throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
         }
         if (LocationManager.NETWORK_PROVIDER.equals(provider)
-            && (mContext.checkCallingPermission(ACCESS_FINE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)
-            && (mContext.checkCallingPermission(ACCESS_COARSE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
             throw new SecurityException(
                 "Requires ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION permission");
@@ -682,14 +664,14 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     private boolean isAllowedProviderSafe(String provider) {
         if (LocationManager.GPS_PROVIDER.equals(provider)
-            && (mContext.checkCallingPermission(ACCESS_FINE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
             return false;
         }
         if (LocationManager.NETWORK_PROVIDER.equals(provider)
-            && (mContext.checkCallingPermission(ACCESS_FINE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)
-            && (mContext.checkCallingPermission(ACCESS_COARSE_LOCATION)
+            && (mContext.checkCallingOrSelfPermission(ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)) {
             return false;
         }
@@ -788,8 +770,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 if (!record.mReceiver.callProviderEnabledLocked(provider, enabled)) {
                     if (deadReceivers == null) {
                         deadReceivers = new ArrayList<Receiver>();
-                        deadReceivers.add(record.mReceiver);
                     }
+                    deadReceivers.add(record.mReceiver);
                 }
                 listeners++;
             }
@@ -1093,7 +1075,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         if (mGpsStatusProvider == null) {
             return false;
         }
-        if (mContext.checkCallingPermission(ACCESS_FINE_LOCATION) !=
+        if (mContext.checkCallingOrSelfPermission(ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires ACCESS_FINE_LOCATION permission");
         }
@@ -1121,7 +1103,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         // first check for permission to the provider
         checkPermissionsSafe(provider);
         // and check for ACCESS_LOCATION_EXTRA_COMMANDS
-        if ((mContext.checkCallingPermission(ACCESS_LOCATION_EXTRA_COMMANDS)
+        if ((mContext.checkCallingOrSelfPermission(ACCESS_LOCATION_EXTRA_COMMANDS)
                 != PackageManager.PERMISSION_GRANTED)) {
             throw new SecurityException("Requires ACCESS_LOCATION_EXTRA_COMMANDS permission");
         }
@@ -1619,23 +1601,19 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
                     synchronized (mLock) {
                         Location location = (Location) msg.obj;
+                        String provider = location.getProvider();
 
-                        if (mCollector != null && 
-                                LocationManager.GPS_PROVIDER.equals(location.getProvider())) {
-                            try {
-                                mCollector.updateLocation(location);
-                            } catch (RemoteException e) {
-                                Log.w(TAG, "mCollector.updateLocation failed");
-                                mCollector = null;
+                        // notify other providers of the new location
+                        for (int i = mProviders.size() - 1; i >= 0; i--) {
+                            LocationProviderProxy proxy = mProviders.get(i);
+                            if (!provider.equals(proxy.getName())) {
+                                proxy.updateLocation(location);
                             }
                         }
 
-                        String provider = location.getProvider();
-                        if (!isAllowedBySettingsLocked(provider)) {
-                            return;
+                        if (isAllowedBySettingsLocked(provider)) {
+                            handleLocationChangedLocked(location);
                         }
-
-                        handleLocationChangedLocked(location);
                     }
                 }
             } catch (Exception e) {
@@ -1935,7 +1913,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         synchronized (mLock) {
             pw.println("Current Location Manager state:");
             pw.println("  sProvidersLoaded=" + sProvidersLoaded);
-            pw.println("  mCollector=" + mCollector);
             pw.println("  Listeners:");
             int N = mReceivers.size();
             for (int i=0; i<N; i++) {

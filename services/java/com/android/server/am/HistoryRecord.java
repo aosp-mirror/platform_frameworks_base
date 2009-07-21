@@ -66,6 +66,7 @@ class HistoryRecord extends IApplicationToken.Stub {
     int theme;              // resource identifier of activity's theme.
     TaskRecord task;        // the task this is in.
     long startTime;         // when we starting launching this activity
+    long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     Configuration configuration; // configuration activity was last running in
     HistoryRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
@@ -85,6 +86,7 @@ class HistoryRecord extends IApplicationToken.Stub {
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
     boolean haveState;      // have we gotten the last activity state?
     boolean stopped;        // is activity pause finished?
+    boolean delayedResume;  // not yet resumed because of stopped app switches?
     boolean finishing;      // activity in pending finish list?
     boolean configDestroy;  // need to destroy due to config change?
     int configChangeFlags;  // which config values have changed
@@ -146,6 +148,7 @@ class HistoryRecord extends IApplicationToken.Stub {
                 pw.print(" icicle="); pw.println(icicle);
         pw.print(prefix); pw.print("state="); pw.print(state);
                 pw.print(" stopped="); pw.print(stopped);
+                pw.print(" delayedResume="); pw.print(delayedResume);
                 pw.print(" finishing="); pw.println(finishing);
         pw.print(prefix); pw.print("keysPaused="); pw.print(keysPaused);
                 pw.print(" inHistory="); pw.print(inHistory);
@@ -191,6 +194,7 @@ class HistoryRecord extends IApplicationToken.Stub {
         launchFailed = false;
         haveState = false;
         stopped = false;
+        delayedResume = false;
         finishing = false;
         configDestroy = false;
         keysPaused = false;
@@ -456,6 +460,12 @@ class HistoryRecord extends IApplicationToken.Stub {
             HistoryRecord r = getWaitingHistoryRecordLocked();
             if (r != null && r.app != null) {
                 if (r.app.debugging) {
+                    return false;
+                }
+                
+                if (service.mDidDexOpt) {
+                    // Give more time since we were dexopting.
+                    service.mDidDexOpt = false;
                     return false;
                 }
                 

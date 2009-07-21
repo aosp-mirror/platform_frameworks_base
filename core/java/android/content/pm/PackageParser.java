@@ -55,6 +55,32 @@ import java.util.jar.JarFile;
  * {@hide}
  */
 public class PackageParser {
+    /** @hide */
+    public static class NewPermissionInfo {
+        public final String name;
+        public final int sdkVersion;
+        public final int fileVersion;
+        
+        public NewPermissionInfo(String name, int sdkVersion, int fileVersion) {
+            this.name = name;
+            this.sdkVersion = sdkVersion;
+            this.fileVersion = fileVersion;
+        }
+    }
+    
+    /**
+     * List of new permissions that have been added since 1.0.
+     * NOTE: These must be declared in SDK version order, with permissions
+     * added to older SDKs appearing before those added to newer SDKs.
+     * @hide
+     */
+    public static final PackageParser.NewPermissionInfo NEW_PERMISSIONS[] =
+        new PackageParser.NewPermissionInfo[] {
+            new PackageParser.NewPermissionInfo(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    android.os.Build.VERSION_CODES.DONUT, 0),
+            new PackageParser.NewPermissionInfo(android.Manifest.permission.READ_PHONE_STATE,
+                    android.os.Build.VERSION_CODES.DONUT, 0)
+    };
 
     private String mArchiveSourcePath;
     private String[] mSeparateProcesses;
@@ -616,7 +642,6 @@ public class PackageParser {
 
         final Package pkg = new Package(pkgName);
         boolean foundApp = false;
-        boolean targetsSdk = false;
         
         TypedArray sa = res.obtainAttributes(attrs,
                 com.android.internal.R.styleable.AndroidManifest);
@@ -643,6 +668,11 @@ public class PackageParser {
         }
         sa.recycle();
 
+        // Resource boolean are -1, so 1 means we don't know the value.
+        int supportsSmallScreens = 1;
+        int supportsNormalScreens = 1;
+        int supportsLargeScreens = 1;
+        
         int outerDepth = parser.getDepth();
         while ((type=parser.next()) != parser.END_DOCUMENT
                && (type != parser.END_TAG || parser.getDepth() > outerDepth)) {
@@ -723,6 +753,18 @@ public class PackageParser {
 
                 XmlUtils.skipCurrentTag(parser);
 
+            } else if (tagName.equals("uses-feature")) {
+                ConfigurationInfo cPref = new ConfigurationInfo();
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestUsesFeature);
+                cPref.reqGlEsVersion = sa.getInt(
+                        com.android.internal.R.styleable.AndroidManifestUsesFeature_glEsVersion,
+                        ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
+                sa.recycle();
+                pkg.configPreferences.add(cPref);
+
+                XmlUtils.skipCurrentTag(parser);
+
             } else if (tagName.equals("uses-sdk")) {
                 if (mSdkVersion > 0) {
                     sa = res.obtainAttributes(attrs,
@@ -740,7 +782,7 @@ public class PackageParser {
                             targetCode = minCode = val.string.toString();
                         } else {
                             // If it's not a string, it's an integer.
-                            minVers = val.data;
+                            targetVers = minVers = val.data;
                         }
                     }
                     
@@ -761,6 +803,25 @@ public class PackageParser {
 
                     sa.recycle();
 
+                    if (minCode != null) {
+                        if (!minCode.equals(mSdkCodename)) {
+                            if (mSdkCodename != null) {
+                                outError[0] = "Requires development platform " + minCode
+                                        + " (current platform is " + mSdkCodename + ")";
+                            } else {
+                                outError[0] = "Requires development platform " + minCode
+                                        + " but this is a release platform.";
+                            }
+                            mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
+                            return null;
+                        }
+                    } else if (minVers > mSdkVersion) {
+                        outError[0] = "Requires newer sdk version #" + minVers
+                                + " (current version is #" + mSdkVersion + ")";
+                        mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
+                        return null;
+                    }
+                    
                     if (targetCode != null) {
                         if (!targetCode.equals(mSdkCodename)) {
                             if (mSdkCodename != null) {
@@ -774,18 +835,10 @@ public class PackageParser {
                             return null;
                         }
                         // If the code matches, it definitely targets this SDK.
-                        targetsSdk = true;
-                    } else if (targetVers >= mSdkVersion) {
-                        // If they have explicitly targeted our current version
-                        // or something after it, then note this.
-                        targetsSdk = true;
-                    }
-                    
-                    if (minVers > mSdkVersion) {
-                        outError[0] = "Requires newer sdk version #" + minVers
-                                + " (current version is #" + mSdkVersion + ")";
-                        mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
-                        return null;
+                        pkg.applicationInfo.targetSdkVersion
+                                = android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
+                    } else {
+                        pkg.applicationInfo.targetSdkVersion = targetVers;
                     }
                     
                     if (maxVers < mSdkVersion) {
@@ -811,6 +864,42 @@ public class PackageParser {
                     + parser.getName();
                 mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return null;
+
+
+            } else if (tagName.equals("supports-density")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestSupportsDensity);
+
+                int density = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsDensity_density, -1);
+
+                sa.recycle();
+
+                if (density != -1 && !pkg.supportsDensityList.contains(density)) {
+                    pkg.supportsDensityList.add(density);
+                }
+
+                XmlUtils.skipCurrentTag(parser);
+
+            } else if (tagName.equals("supports-screens")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens);
+
+                // This is a trick to get a boolean and still able to detect
+                // if a value was actually set.
+                supportsSmallScreens = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_smallScreens,
+                        supportsSmallScreens);
+                supportsNormalScreens = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_normalScreens,
+                        supportsNormalScreens);
+                supportsLargeScreens = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_largeScreens,
+                        supportsLargeScreens);
+
+                sa.recycle();
+                
+                XmlUtils.skipCurrentTag(parser);
             } else {
                 Log.w(TAG, "Bad element under <manifest>: "
                       + parser.getName());
@@ -824,15 +913,39 @@ public class PackageParser {
             mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_EMPTY;
         }
 
-        if (targetsSdk) {
-            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_TARGETS_SDK;
+        final int NP = PackageParser.NEW_PERMISSIONS.length;
+        for (int ip=0; ip<NP; ip++) {
+            final PackageParser.NewPermissionInfo npi
+                    = PackageParser.NEW_PERMISSIONS[ip];
+            if (pkg.applicationInfo.targetSdkVersion >= npi.sdkVersion) {
+                break;
+            }
+            if (!pkg.requestedPermissions.contains(npi.name)) {
+                Log.i(TAG, "Impliciting adding " + npi.name + " to old pkg "
+                        + pkg.packageName);
+                pkg.requestedPermissions.add(npi.name);
+            }
         }
         
         if (pkg.usesLibraries.size() > 0) {
             pkg.usesLibraryFiles = new String[pkg.usesLibraries.size()];
             pkg.usesLibraries.toArray(pkg.usesLibraryFiles);
         }
-
+        
+        if (supportsSmallScreens < 0 || (supportsSmallScreens > 0
+                && pkg.applicationInfo.targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS;
+        }
+        if (supportsNormalScreens != 0) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS;
+        }
+        if (supportsLargeScreens < 0 || (supportsLargeScreens > 0
+                && pkg.applicationInfo.targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
+        }
+        
         int size = pkg.supportsDensityList.size();
         if (size > 0) {
             int densities[] = pkg.supportsDensities = new int[size];
@@ -1142,6 +1255,19 @@ public class PackageParser {
                     outError);
         }
 
+        boolean allowBackup = sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestApplication_allowBackup, true);
+        if (allowBackup) {
+            ai.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+            String backupAgent = sa.getNonResourceString(
+                    com.android.internal.R.styleable.AndroidManifestApplication_backupAgent);
+            if (backupAgent != null) {
+                ai.backupAgentName = buildClassName(pkgName, backupAgent, outError);
+                Log.v(TAG, "android:backupAgent = " + ai.backupAgentName
+                        + " from " + pkgName + "+" + backupAgent);
+            }
+        }
+        
         TypedValue v = sa.peekValue(
                 com.android.internal.R.styleable.AndroidManifestApplication_label);
         if (v != null && (ai.labelRes=v.resourceId) == 0) {
@@ -1294,21 +1420,6 @@ public class PackageParser {
 
                 if (lname != null && !owner.usesLibraries.contains(lname)) {
                     owner.usesLibraries.add(lname);
-                }
-
-                XmlUtils.skipCurrentTag(parser);
-
-            } else if (tagName.equals("supports-density")) {
-                sa = res.obtainAttributes(attrs,
-                        com.android.internal.R.styleable.AndroidManifestSupportsDensity);
-
-                int density = sa.getInteger(
-                        com.android.internal.R.styleable.AndroidManifestSupportsDensity_density, -1);
-
-                sa.recycle();
-
-                if (density != -1 && !owner.supportsDensityList.contains(density)) {
-                    owner.supportsDensityList.add(density);
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -2219,6 +2330,17 @@ public class PackageParser {
         // preferred up order.
         public int mPreferredOrder = 0;
 
+        // For use by package manager service to keep track of which apps
+        // have been installed with forward locking.
+        public boolean mForwardLocked;
+        
+        // For use by the package manager to keep track of the path to the
+        // file an app came from.
+        public String mScanPath;
+        
+        // For use by package manager to keep track of where it has done dexopt.
+        public boolean mDidDexOpt;
+        
         // Additional data supplied by callers.
         public Object mExtras;
         
@@ -2368,7 +2490,7 @@ public class PackageParser {
             return true;
         }
         if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0
-            && p.supportsDensities != null) {
+                && p.supportsDensities != null) {
             return true;
         }
         return false;

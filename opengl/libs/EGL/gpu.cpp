@@ -118,6 +118,11 @@ request_gpu_t* gpu_acquire(void* user)
         return 0;
     }
 
+    if (info.regs == 0) {
+        LOGD("requestGPU() failed");
+        return 0;
+    }
+
     bool failed = false;
     request_gpu_t* gpu = &gRegions;
     memset(gpu, 0, sizeof(*gpu));

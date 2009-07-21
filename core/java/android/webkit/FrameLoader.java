@@ -364,7 +364,7 @@ class FrameLoader {
         String cookie = CookieManager.getInstance().getCookie(
                 mListener.getWebAddress());
         if (cookie != null && cookie.length() > 0) {
-            mHeaders.put("cookie", cookie);
+            mHeaders.put("Cookie", cookie);
         }
     }
 }

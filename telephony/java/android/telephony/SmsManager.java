@@ -22,7 +22,6 @@ import android.os.ServiceManager;
 import android.text.TextUtils;
 
 import com.android.internal.telephony.EncodeException;
-import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.ISms;
 import com.android.internal.telephony.IccConstants;
 import com.android.internal.telephony.SmsRawData;
@@ -31,14 +30,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static android.telephony.SmsMessage.ENCODING_7BIT;
-import static android.telephony.SmsMessage.ENCODING_8BIT;
-import static android.telephony.SmsMessage.ENCODING_16BIT;
-import static android.telephony.SmsMessage.ENCODING_UNKNOWN;
-import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
-import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
-import static android.telephony.SmsMessage.MAX_USER_DATA_SEPTETS;
-import static android.telephony.SmsMessage.MAX_USER_DATA_SEPTETS_WITH_HEADER;
+/*
+ * TODO(code review): Curious question... Why are a lot of these
+ * methods not declared as static, since they do not seem to require
+ * any local object state?  Assumedly this cannot be changed without
+ * interfering with the API...
+ */
 
 /**
  * Manages SMS operations such as sending data, text, and pdu SMS messages.
@@ -88,7 +85,7 @@ public final class SmsManager {
     }
 
     /**
-     * Divide a text message into several messages, none bigger than
+     * Divide a message text into several fragments, none bigger than
      * the maximum SMS message size.
      *
      * @param text the original message.  Must not be null.
@@ -96,40 +93,7 @@ public final class SmsManager {
      *   comprise the original message
      */
     public ArrayList<String> divideMessage(String text) {
-        int size = text.length();
-        int[] params = SmsMessage.calculateLength(text, false);
-            /* SmsMessage.calculateLength returns an int[4] with:
-             *   int[0] being the number of SMS's required,
-             *   int[1] the number of code units used,
-             *   int[2] is the number of code units remaining until the next message.
-             *   int[3] is the encoding type that should be used for the message.
-             */
-        int messageCount = params[0];
-        int encodingType = params[3];
-        ArrayList<String> result = new ArrayList<String>(messageCount);
-
-        int start = 0;
-        int limit;
-
-        if (messageCount > 1) {
-            limit = (encodingType == ENCODING_7BIT)?
-                MAX_USER_DATA_SEPTETS_WITH_HEADER: MAX_USER_DATA_BYTES_WITH_HEADER;
-        } else {
-            limit = (encodingType == ENCODING_7BIT)?
-                MAX_USER_DATA_SEPTETS: MAX_USER_DATA_BYTES;
-        }
-
-        try {
-            while (start < size) {
-                int end = GsmAlphabet.findLimitIndex(text, start, limit, encodingType);
-                result.add(text.substring(start, end));
-                start = end;
-            }
-        }
-        catch (EncodeException e) {
-            // ignore it.
-        }
-        return result;
+        return SmsMessage.fragmentText(text);
     }
 
     /**

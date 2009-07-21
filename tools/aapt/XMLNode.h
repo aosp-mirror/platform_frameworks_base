@@ -68,6 +68,8 @@ public:
     const String16& getElementName() const;
     const Vector<sp<XMLNode> >& getChildren() const;
 
+    const String8& getFilename() const;
+    
     struct attribute_entry {
         attribute_entry() : index(~(uint32_t)0), nameResId(0)
         {
@@ -91,6 +93,8 @@ public:
 
     const Vector<attribute_entry>& getAttributes() const;
 
+    const attribute_entry* getAttribute(const String16& ns, const String16& name) const;
+    
     const String16& getCData() const;
 
     const String16& getComment() const;
@@ -98,7 +102,13 @@ public:
     int32_t getStartLineNumber() const;
     int32_t getEndLineNumber() const;
 
+    sp<XMLNode> searchElement(const String16& tagNamespace, const String16& tagName);
+    
+    sp<XMLNode> getChildElement(const String16& tagNamespace, const String16& tagName);
+    
     status_t addChild(const sp<XMLNode>& child);
+
+    status_t insertChildAt(const sp<XMLNode>& child, size_t index);
 
     status_t addAttribute(const String16& ns, const String16& name,
                           const String16& value);

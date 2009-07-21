@@ -132,6 +132,7 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
             LOGE("%s: Could not get onto the system bus!", __FUNCTION__);
             dbus_error_free(&err);
         }
+        dbus_connection_set_exit_on_disconnect(nat->conn, FALSE);
     }
 #endif
 }
@@ -161,6 +162,19 @@ static const DBusObjectPathVTable agent_vtable = {
     NULL, agent_event_filter, NULL, NULL, NULL, NULL
 };
 
+static unsigned int unix_events_to_dbus_flags(short events) {
+    return (events & DBUS_WATCH_READABLE ? POLLIN : 0) |
+           (events & DBUS_WATCH_WRITABLE ? POLLOUT : 0) |
+           (events & DBUS_WATCH_ERROR ? POLLERR : 0) |
+           (events & DBUS_WATCH_HANGUP ? POLLHUP : 0);
+}
+
+static short dbus_flags_to_unix_events(unsigned int flags) {
+    return (flags & POLLIN ? DBUS_WATCH_READABLE : 0) |
+           (flags & POLLOUT ? DBUS_WATCH_WRITABLE : 0) |
+           (flags & POLLERR ? DBUS_WATCH_ERROR : 0) |
+           (flags & POLLHUP ? DBUS_WATCH_HANGUP : 0);
+}
 
 static jboolean setUpEventLoop(native_data_t *nat) {
     LOGV(__FUNCTION__);
@@ -384,8 +398,7 @@ static void handleWatchAdd(native_data_t *nat) {
     read(nat->controlFdR, &newFD, sizeof(int));
     read(nat->controlFdR, &flags, sizeof(unsigned int));
     read(nat->controlFdR, &watch, sizeof(DBusWatch *));
-    int events = (flags & DBUS_WATCH_READABLE ? POLLIN : 0)
-            | (flags & DBUS_WATCH_WRITABLE ? POLLOUT : 0);
+    short events = dbus_flags_to_unix_events(flags);
 
     for (int y = 0; y<nat->pollMemberCount; y++) {
         if ((nat->pollData[y].fd == newFD) &&
@@ -429,8 +442,7 @@ static void handleWatchRemove(native_data_t *nat) {
 
     read(nat->controlFdR, &removeFD, sizeof(int));
     read(nat->controlFdR, &flags, sizeof(unsigned int));
-    int events = (flags & DBUS_WATCH_READABLE ? POLLIN : 0)
-            | (flags & DBUS_WATCH_WRITABLE ? POLLOUT : 0);
+    short events = dbus_flags_to_unix_events(flags);
 
     for (int y = 0; y < nat->pollMemberCount; y++) {
         if ((nat->pollData[y].fd == removeFD) &&
@@ -494,13 +506,12 @@ static void *eventLoopMain(void *ptr) {
                     }
                 }
             } else {
-                  int event = nat->pollData[i].revents;
-                  int flags = (event & POLLIN ? DBUS_WATCH_READABLE : 0) |
-                              (event & POLLOUT ? DBUS_WATCH_WRITABLE : 0);
-                  dbus_watch_handle(nat->watchData[i], event);
-                  nat->pollData[i].revents = 0;
-                  // can only do one - it may have caused a 'remove'
-                  break;
+                short events = nat->pollData[i].revents;
+                unsigned int flags = unix_events_to_dbus_flags(events);
+                dbus_watch_handle(nat->watchData[i], flags);
+                nat->pollData[i].revents = 0;
+                // can only do one - it may have caused a 'remove'
+                break;
             }
         }
         while (dbus_connection_dispatch(nat->conn) == 

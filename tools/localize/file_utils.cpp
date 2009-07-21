@@ -1,13 +1,48 @@
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include "file_utils.h"
 #include "Perforce.h"
+#include <utils/String8.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <host/Directories.h>
 #include "log.h"
+
+using namespace android;
+using namespace std;
+
+static string
+parent_dir(const string& path)
+{
+    return string(String8(path.c_str()).getPathDir().string());
+}
+
+static int
+mkdirs(const char* last)
+{
+    String8 dest;
+    const char* s = last-1;
+    int err;
+    do {
+        s++;
+        if (s > last && (*s == '.' || *s == 0)) {
+            String8 part(last, s-last);
+            dest.appendPath(part);
+#ifdef HAVE_MS_C_RUNTIME
+            err = _mkdir(dest.string());
+#else                    
+            err = mkdir(dest.string(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP);
+#endif                    
+            if (err != 0) {
+                return err;
+            }
+            last = s+1;
+        }
+    } while (*s);
+    return 0;
+}
 
 string
 translated_file_name(const string& file, const string& locale)

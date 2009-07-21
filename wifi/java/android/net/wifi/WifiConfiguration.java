@@ -42,13 +42,29 @@ public class WifiConfiguration implements Parcelable {
     public static final String priorityVarName = "priority";
     /** {@hide} */
     public static final String hiddenSSIDVarName = "scan_ssid";
+    /** {@hide} */
+    public static final String eapVarName = "eap";
+    /** {@hide} */
+    public static final String identityVarName = "identity";
+    /** {@hide} */
+    public static final String anonymousIdentityVarName = "anonymous_identity";
+    /** {@hide} */
+    public static final String passwordVarName = "password";
+    /** {@hide} */
+    public static final String clientCertVarName = "client_cert";
+    /** {@hide} */
+    public static final String caCertVarName = "ca_cert";
+    /** {@hide} */
+    public static final String privateKeyVarName = "private_key";
+    /** {@hide} */
+    public static final String privateKeyPasswdVarName = "private_key_passwd";
 
     /**
      * Recognized key management schemes.
      */
     public static class KeyMgmt {
         private KeyMgmt() { }
-        
+
         /** WPA is not used; plaintext or static WEP could be used. */
         public static final int NONE = 0;
         /** WPA pre-shared key (requires {@code preSharedKey} to be specified). */
@@ -63,7 +79,7 @@ public class WifiConfiguration implements Parcelable {
 
         public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP", "IEEE8021X" };
     }
-    
+
     /**
      * Recognized security protocols.
      */
@@ -112,7 +128,7 @@ public class WifiConfiguration implements Parcelable {
         public static final int CCMP = 2;
 
         public static final String varName = "pairwise";
-        
+
         public static final String[] strings = { "NONE", "TKIP", "CCMP" };
     }
 
@@ -202,7 +218,7 @@ public class WifiConfiguration implements Parcelable {
      * string otherwise.
      */
     public String[] wepKeys;
-    
+
     /** Default WEP key index, ranging from 0 to 3. */
     public int wepTxKeyIndex;
 
@@ -249,6 +265,40 @@ public class WifiConfiguration implements Parcelable {
      */
     public BitSet allowedGroupCiphers;
 
+    /* The following fields are used for EAP/IEEE8021X authentication */
+
+    /**
+     * The eap mode should be PEAP, TLS or TTLS.
+     * {@hide}
+     */
+    public String eap;
+    /**
+     * The identity of the user in string,
+     * which is used for the authentication.
+     * {@hide}
+     */
+    public String identity;
+    /** {@hide} */
+    public String anonymousIdentity;
+    /** {@hide} */
+    public String password;
+    /** The path of the client certificate file.
+     * {@hide}
+     */
+    public String clientCert;
+    /** The path of the CA certificate file.
+     * {@hide}
+     */
+    public String caCert;
+    /** The path of the private key file.
+     * {@hide}
+     */
+    public String privateKey;
+    /** The password of the private key file if encrypted.
+     * {@hide}
+     */
+    public String privateKeyPasswd;
+
     public WifiConfiguration() {
         networkId = -1;
         SSID = null;
@@ -263,6 +313,14 @@ public class WifiConfiguration implements Parcelable {
         wepKeys = new String[4];
         for (int i = 0; i < wepKeys.length; i++)
             wepKeys[i] = null;
+        eap = null;
+        identity = null;
+        anonymousIdentity = null;
+        password = null;
+        clientCert = null;
+        caCert = null;
+        privateKey = null;
+        privateKeyPasswd = null;
     }
 
     public String toString() {
@@ -333,10 +391,43 @@ public class WifiConfiguration implements Parcelable {
                 }
             }
         }
-        sbuf.append('\n');
+        sbuf.append('\n').append(" PSK: ");
         if (this.preSharedKey != null) {
-            sbuf.append(" PSK: ").append('*');
+            sbuf.append('*');
         }
+        sbuf.append('\n').append(" eap: ");
+        if (this.eap != null) {
+            sbuf.append(eap);
+        }
+        sbuf.append('\n').append(" Identity: ");
+        if (this.identity != null) {
+            sbuf.append(identity);
+        }
+        sbuf.append('\n').append(" AnonymousIdentity: ");
+        if (this.anonymousIdentity != null) {
+            sbuf.append(anonymousIdentity);
+        }
+        sbuf.append('\n').append(" Password: ");
+        if (this.password != null) {
+            sbuf.append(password);
+        }
+        sbuf.append('\n').append(" ClientCert: ");
+        if (this.clientCert != null) {
+            sbuf.append(clientCert);
+        }
+        sbuf.append('\n').append(" CaCert: ");
+        if (this.caCert != null) {
+            sbuf.append(caCert);
+        }
+        sbuf.append('\n').append(" PrivateKey: ");
+        if (this.privateKey != null) {
+            sbuf.append(privateKey);
+        }
+        sbuf.append('\n').append(" PrivateKeyPasswd: ");
+        if (this.privateKeyPasswd != null) {
+            sbuf.append(privateKeyPasswd);
+        }
+        sbuf.append('\n');
         return sbuf.toString();
     }
 
@@ -394,6 +485,14 @@ public class WifiConfiguration implements Parcelable {
         writeBitSet(dest, allowedAuthAlgorithms);
         writeBitSet(dest, allowedPairwiseCiphers);
         writeBitSet(dest, allowedGroupCiphers);
+        dest.writeString(eap);
+        dest.writeString(identity);
+        dest.writeString(anonymousIdentity);
+        dest.writeString(password);
+        dest.writeString(clientCert);
+        dest.writeString(caCert);
+        dest.writeString(privateKey);
+        dest.writeString(privateKeyPasswd);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -416,6 +515,14 @@ public class WifiConfiguration implements Parcelable {
                 config.allowedAuthAlgorithms  = readBitSet(in);
                 config.allowedPairwiseCiphers = readBitSet(in);
                 config.allowedGroupCiphers    = readBitSet(in);
+                config.eap = in.readString();
+                config.identity = in.readString();
+                config.anonymousIdentity = in.readString();
+                config.password = in.readString();
+                config.clientCert = in.readString();
+                config.caCert = in.readString();
+                config.privateKey = in.readString();
+                config.privateKeyPasswd = in.readString();
                 return config;
             }
 

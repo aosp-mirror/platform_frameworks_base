@@ -24,15 +24,15 @@ package com.android.internal.telephony.gsm.stk;
 public interface AppInterface {
 
     /*
-     * Intent's actions which are broadcasted by the Telephony once a new STK 
+     * Intent's actions which are broadcasted by the Telephony once a new STK
      * proactive command, session end arrive.
      */
-    public static final String STK_CMD_ACTION = 
+    public static final String STK_CMD_ACTION =
                                     "android.intent.action.stk.command";
-    public static final String STK_SESSION_END_ACTION = 
+    public static final String STK_SESSION_END_ACTION =
                                     "android.intent.action.stk.session_end";
-    
-    /* 
+
+    /*
      * Callback function from app to telephony to pass a result code and user's
      * input back to the SIM.
      */
@@ -44,20 +44,20 @@ public interface AppInterface {
      * implementation should support those.
      */
     public static enum CommandType {
-        DISPLAY_TEXT(0x21), 
-        GET_INKEY(0x22), 
-        GET_INPUT(0x23), 
-        LAUNCH_BROWSER(0x15), 
-        PLAY_TONE(0x20), 
-        REFRESH(0x01), 
-        SELECT_ITEM(0x24), 
-        SEND_SS(0x11), 
-        SEND_USSD(0x12), 
-        SEND_SMS(0x13), 
-        SEND_DTMF(0x14), 
-        SET_UP_EVENT_LIST(0x05), 
-        SET_UP_IDLE_MODE_TEXT(0x28), 
-        SET_UP_MENU(0x25), 
+        DISPLAY_TEXT(0x21),
+        GET_INKEY(0x22),
+        GET_INPUT(0x23),
+        LAUNCH_BROWSER(0x15),
+        PLAY_TONE(0x20),
+        REFRESH(0x01),
+        SELECT_ITEM(0x24),
+        SEND_SS(0x11),
+        SEND_USSD(0x12),
+        SEND_SMS(0x13),
+        SEND_DTMF(0x14),
+        SET_UP_EVENT_LIST(0x05),
+        SET_UP_IDLE_MODE_TEXT(0x28),
+        SET_UP_MENU(0x25),
         SET_UP_CALL(0x10);
 
         private int mValue;
@@ -72,7 +72,7 @@ public interface AppInterface {
 
         /**
          * Create a CommandType object.
-         * 
+         *
          * @param value Integer value to be converted to a CommandType object.
          * @return CommandType object whose "Type of Command" value is {@code
          *         value}. If no CommandType object has that value, null is

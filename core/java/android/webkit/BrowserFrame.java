@@ -143,6 +143,17 @@ class BrowserFrame extends Handler {
     }
 
     /**
+     * Load a url with "POST" method from the network into the main frame.
+     * @param url The url to load.
+     * @param data The data for POST request.
+     */
+    public void postUrl(String url, byte[] data) {
+        mLoadInitFromJava = true;
+        nativePostUrl(url, data);
+        mLoadInitFromJava = false;
+    }
+
+    /**
      * Load the content as if it was loaded by the provided base URL. The
      * failUrl is used as the history entry for the load data. If null or
      * an empty string is passed for the failUrl, then no history entry is
@@ -751,6 +762,8 @@ class BrowserFrame extends Handler {
      * Returns false if the url is bad.
      */
     private native void nativeLoadUrl(String url);
+
+    private native void nativePostUrl(String url, byte[] postData);
 
     private native void nativeLoadData(String baseUrl, String data,
             String mimeType, String encoding, String failUrl);

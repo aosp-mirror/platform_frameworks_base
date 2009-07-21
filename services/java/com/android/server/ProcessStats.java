@@ -54,7 +54,10 @@ public class ProcessStats {
         PROC_SPACE_TERM|PROC_OUT_LONG                   // 14: stime
     };
 
+    /** Stores user time and system time in 100ths of a second. */
     private final long[] mProcessStatsData = new long[2];
+    /** Stores user time and system time in 100ths of a second. */
+    private final long[] mSinglePidStatsData = new long[2];
 
     private static final int[] PROCESS_FULL_STATS_FORMAT = new int[] {
         PROC_SPACE_TERM,
@@ -418,7 +421,18 @@ public class ProcessStats {
         
         return pids;
     }
-    
+
+    public long getCpuTimeForPid(int pid) {
+        final String statFile = "/proc/" + pid + "/stat";
+        final long[] statsData = mSinglePidStatsData;
+        if (Process.readProcFile(statFile, PROCESS_STATS_FORMAT,
+                null, statsData, null)) {
+            long time = statsData[0] + statsData[1];
+            return time;
+        }
+        return 0;
+    }
+
     final public int getLastUserTime() {
         return mRelUserTime;
     }

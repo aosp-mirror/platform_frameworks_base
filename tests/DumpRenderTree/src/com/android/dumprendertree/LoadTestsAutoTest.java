@@ -16,18 +16,15 @@
 
 package com.android.dumprendertree;
 
+import dalvik.system.VMRuntime;
+
 import android.app.Instrumentation;
 import android.content.Intent;
-
-import android.util.Log;
-
 import android.os.Bundle;
 import android.os.Debug;
-import android.os.Debug.MemoryInfo;
+import android.os.Process;
 import android.test.ActivityInstrumentationTestCase2;
-
-import com.android.dumprendertree.TestShellActivity;
-import com.android.dumprendertree.TestShellCallback;
+import android.util.Log;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -69,52 +66,85 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
 
         TestShellActivity activity = (TestShellActivity) getActivity();
 
+        Log.v(LOGTAG, "About to run tests, calling gc first...");
+        freeMem();
+
         // Run tests
         runTestAndWaitUntilDone(activity, runner.mTestPath, runner.mTimeoutInMillis);
 
-        // TODO(fqian): let am instrumentation pass in the command line, currently
-        // am instrument does not allow spaces in the command.
         dumpMemoryInfo();
 
         // Kill activity
         activity.finish();
     }
 
+    private void freeMem() {
+        Log.v(LOGTAG, "freeMem: calling gc/finalization...");
+        final VMRuntime runtime = VMRuntime.getRuntime();
+
+        runtime.gcSoftReferences();
+        runtime.runFinalizationSync();
+        runtime.gcSoftReferences();
+        runtime.runFinalizationSync();
+        runtime.gcSoftReferences();
+        runtime.runFinalizationSync();
+        Runtime.getRuntime().runFinalization();
+        Runtime.getRuntime().gc();
+        Runtime.getRuntime().gc();
+
+    }
+
+    private void printRow(PrintStream ps, String format, Object...objs) {
+        ps.println(String.format(format, objs));
+    }
+
     private void dumpMemoryInfo() {
         try {
+            freeMem();
             Log.v(LOGTAG, "Dumping memory information.");
 
             FileOutputStream out = new FileOutputStream(LOAD_TEST_RESULT, true);
             PrintStream ps = new PrintStream(out);
 
-            MemoryInfo mi = new MemoryInfo();
-            Debug.getMemoryInfo(mi);
-
-            //try to fake the dumpsys format
-            //this will eventually be changed to XML
-            String format = "%15s:%9d%9d%9d%9d";
-            String pss =
-              String.format(format, "(Pss)",
-                  mi.nativePss, mi.dalvikPss, mi.otherPss,
-                  mi.nativePss + mi.dalvikPss + mi.otherPss);
-            String sd =
-              String.format(format, "(shared dirty)",
-                  mi.nativeSharedDirty, mi.dalvikSharedDirty, mi.otherSharedDirty,
-                  mi.nativeSharedDirty + mi.dalvikSharedDirty + mi.otherSharedDirty);
-            String pd =
-              String.format(format, "(priv dirty)",
-                  mi.nativePrivateDirty, mi.dalvikPrivateDirty, mi.otherPrivateDirty,
-                  mi.nativePrivateDirty + mi.dalvikPrivateDirty + mi.otherPrivateDirty);
-
             ps.print("\n\n\n");
-            ps.println("** MEMINFO in pid 0 [com.android.dumprendertree] **");
-            ps.println("                   native   dalvik    other    total");
-            ps.println("           size:    12060     5255      N/A    17315");
-            ps.println("      allocated:    12060     5255      N/A    17315");
-            ps.println("           free:    12060     5255      N/A    17315");
-            ps.println(pss);
-            ps.println(sd);
-            ps.println(pd);
+            ps.println("** MEMINFO in pid " + Process.myPid()
+                    + " [com.android.dumprendertree] **");
+            String formatString = "%17s %8s %8s %8s %8s";
+
+            long nativeMax = Debug.getNativeHeapSize() / 1024;
+            long nativeAllocated = Debug.getNativeHeapAllocatedSize() / 1024;
+            long nativeFree = Debug.getNativeHeapFreeSize() / 1024;
+            Runtime runtime = Runtime.getRuntime();
+            long dalvikMax = runtime.totalMemory() / 1024;
+            long dalvikFree = runtime.freeMemory() / 1024;
+            long dalvikAllocated = dalvikMax - dalvikFree;
+
+
+            Debug.MemoryInfo memInfo = new Debug.MemoryInfo();
+            Debug.getMemoryInfo(memInfo);
+
+            final int nativeShared = memInfo.nativeSharedDirty;
+            final int dalvikShared = memInfo.dalvikSharedDirty;
+            final int otherShared = memInfo.otherSharedDirty;
+
+            final int nativePrivate = memInfo.nativePrivateDirty;
+            final int dalvikPrivate = memInfo.dalvikPrivateDirty;
+            final int otherPrivate = memInfo.otherPrivateDirty;
+
+            printRow(ps, formatString, "", "native", "dalvik", "other", "total");
+            printRow(ps, formatString, "size:", nativeMax, dalvikMax, "N/A", nativeMax + dalvikMax);
+            printRow(ps, formatString, "allocated:", nativeAllocated, dalvikAllocated, "N/A",
+                    nativeAllocated + dalvikAllocated);
+            printRow(ps, formatString, "free:", nativeFree, dalvikFree, "N/A",
+                    nativeFree + dalvikFree);
+
+            printRow(ps, formatString, "(Pss):", memInfo.nativePss, memInfo.dalvikPss,
+                    memInfo.otherPss, memInfo.nativePss + memInfo.dalvikPss + memInfo.otherPss);
+
+            printRow(ps, formatString, "(shared dirty):", nativeShared, dalvikShared, otherShared,
+                    nativeShared + dalvikShared + otherShared);
+            printRow(ps, formatString, "(priv dirty):", nativePrivate, dalvikPrivate, otherPrivate,
+                    nativePrivate + dalvikPrivate + otherPrivate);
             ps.print("\n\n\n");
             ps.flush();
             ps.close();
@@ -134,7 +164,7 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
                     LoadTestsAutoTest.this.notifyAll();
                 }
             }
-            
+
             public void timedOut(String url) {
             }
         });

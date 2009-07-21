@@ -23,13 +23,15 @@
                 <category android:name="android.intent.category.TEST" />
             </intent-filter>
         </activity>
-        <activity android:name="TestShellActivity" android:launchMode="singleTop">
-        </activity>
+        <activity android:name="TestShellActivity" android:launchMode="singleTop" />
+        <activity android:name="ReliabilityTestActivity" />
     </application>
 
     <instrumentation android:name=".LayoutTestsAutoRunner"
         android:targetPackage="com.android.dumprendertree"
         android:label="Layout test automation runner"
     />
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_SDCARD" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 </manifest>

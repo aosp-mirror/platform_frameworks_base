@@ -61,6 +61,13 @@
 #include "GPUHardware/GPUHardware.h"
 
 
+/* ideally AID_GRAPHICS would be in a semi-public header
+ * or there would be a way to map a user/group name to its id
+ */
+#ifndef AID_GRAPHICS
+#define AID_GRAPHICS 1003
+#endif
+
 #define DISPLAY_COUNT       1
 
 namespace android {
@@ -184,7 +191,6 @@ SurfaceFlinger::SurfaceFlinger()
         mDebugCpu(0),
         mDebugFps(0),
         mDebugBackground(0),
-        mDebugNoBootAnimation(0),
         mSyncObject(),
         mDeplayedTransactionPending(0),
         mConsoleSignals(0),
@@ -207,14 +213,11 @@ void SurfaceFlinger::init()
     mDebugBackground = atoi(value);
     property_get("debug.sf.showfps", value, "0");
     mDebugFps = atoi(value);
-    property_get("debug.sf.nobootanimation", value, "0");
-    mDebugNoBootAnimation = atoi(value);
 
     LOGI_IF(mDebugRegion,           "showupdates enabled");
     LOGI_IF(mDebugCpu,              "showcpu enabled");
     LOGI_IF(mDebugBackground,       "showbackground enabled");
     LOGI_IF(mDebugFps,              "showfps enabled");
-    LOGI_IF(mDebugNoBootAnimation,  "boot animation disabled");
 }
 
 SurfaceFlinger::~SurfaceFlinger()
@@ -324,11 +327,8 @@ void SurfaceFlinger::bootFinished()
 {
     const nsecs_t now = systemTime();
     const nsecs_t duration = now - mBootTime;
-    LOGI("Boot is finished (%ld ms)", long(ns2ms(duration)) );
-    if (mBootAnimation != 0) {
-        mBootAnimation->requestExit();
-        mBootAnimation.clear();
-    }
+    LOGI("Boot is finished (%ld ms)", long(ns2ms(duration)) );  
+    property_set("ctl.stop", "bootanim");
 }
 
 void SurfaceFlinger::onFirstRef()
@@ -456,10 +456,10 @@ status_t SurfaceFlinger::readyToRun()
     if (mDebugCpu)
         mCpuGauge = new CPUGauge(this, ms2ns(500));
 
-    // the boot animation!
-    if (mDebugNoBootAnimation == false)
-        mBootAnimation = new BootAnimation(this);
-
+    
+    // start boot animation
+    property_set("ctl.start", "bootanim");
+    
     return NO_ERROR;
 }
 
@@ -771,10 +771,11 @@ void SurfaceFlinger::computeVisibleRegions(
             dirty.orSelf(layer->visibleRegionScreen);
             layer->contentDirty = false;
         } else {
-            // compute the exposed region
-            // dirty = what's visible now - what's wasn't covered before
-            //       = what's visible now & what's was covered before
-            dirty = visibleRegion.intersect(layer->coveredRegionScreen);            
+            /* compute the exposed region:
+             *    exposed = what's VISIBLE and NOT COVERED now 
+             *    but was COVERED before
+             */
+            dirty = (visibleRegion - coveredRegion) & layer->coveredRegionScreen;
         }
         dirty.subtractSelf(aboveOpaqueLayers);
 
@@ -783,7 +784,7 @@ void SurfaceFlinger::computeVisibleRegions(
 
         // updade aboveOpaqueLayers/aboveCoveredLayers for next (lower) layer
         aboveOpaqueLayers.orSelf(opaqueRegion);
-        aboveCoveredLayers.orSelf(bounds);
+        aboveCoveredLayers.orSelf(visibleRegion);
         
         // Store the visible region is screen space
         layer->setVisibleRegion(visibleRegion);
@@ -1543,13 +1544,13 @@ status_t SurfaceFlinger::onTransact(
             // codes that require permission check
             IPCThreadState* ipc = IPCThreadState::self();
             const int pid = ipc->getCallingPid();
+            const int uid = ipc->getCallingUid();
             const int self_pid = getpid();
-            if (UNLIKELY(pid != self_pid)) {
+            if (UNLIKELY(pid != self_pid && uid != AID_GRAPHICS)) {
                 // we're called from a different process, do the real check
                 if (!checkCallingPermission(
                         String16("android.permission.ACCESS_SURFACE_FLINGER")))
                 {
-                    const int uid = ipc->getCallingUid();
                     LOGE("Permission Denial: "
                             "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
                     return PERMISSION_DENIED;

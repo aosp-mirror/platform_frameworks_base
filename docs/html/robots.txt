@@ -4,4 +4,5 @@ Disallow: /gae_shell/
 Disallow: /assets/
 Disallow: /images/
 Disallow: /sdk/preview/
+Disallow: /shareables/
 Sitemap: http://developer.android.com/sitemap.txt

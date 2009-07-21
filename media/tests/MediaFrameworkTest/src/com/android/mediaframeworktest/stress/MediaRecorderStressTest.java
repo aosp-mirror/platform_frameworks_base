@@ -18,6 +18,11 @@ package com.android.mediaframeworktest.stress;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+
 import android.hardware.Camera;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -47,6 +52,8 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
     private static final long WAIT_TIME_PLAYBACK = 60000;  // 6 second
     private static final String OUTPUT_FILE = "/sdcard/temp";
     private static final String OUTPUT_FILE_EXT = ".3gp";
+    private static final String MEDIA_STRESS_OUTPUT =
+        "/sdcard/mediaStressOutput.txt";
     
     public MediaRecorderStressTest() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
@@ -62,8 +69,14 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
     public void testStressCamera() throws Exception {
         SurfaceHolder mSurfaceHolder;             
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
+        File stressOutFile = new File(MEDIA_STRESS_OUTPUT);
+        Writer output = new BufferedWriter(new FileWriter(stressOutFile, true));
+        output.write("Camera start preview stress:\n");
+        output.write("Total number of loops:" + 
+                NUMBER_OF_CAMERA_STRESS_LOOPS + "\n");
         try {        
             Log.v(TAG, "Start preview");
+            output.write("No of loop: ");
             for (int i = 0; i< NUMBER_OF_CAMERA_STRESS_LOOPS; i++){
                 mCamera = Camera.open();
                 mCamera.setPreviewDisplay(mSurfaceHolder);
@@ -71,10 +84,13 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 Thread.sleep(WAIT_TIME_CAMERA_TEST);
                 mCamera.stopPreview();
                 mCamera.release();
+                output.write(" ," + i);
             }
         } catch (Exception e) {
                 Log.v(TAG, e.toString());
         }
+        output.write("\n\n");
+        output.close();
     }
     
     //Test case for stressing the camera preview.
@@ -83,7 +99,13 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
         String filename;
         SurfaceHolder mSurfaceHolder;             
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
-        try {    
+        File stressOutFile = new File(MEDIA_STRESS_OUTPUT);
+        Writer output = new BufferedWriter(new FileWriter(stressOutFile, true));
+        output.write("H263 video record- reset after prepare Stress test\n");
+        output.write("Total number of loops:" +
+                NUMBER_OF_RECORDER_STRESS_LOOPS + "\n");
+        try {
+            output.write("No of loop: ");
             Log.v(TAG, "Start preview");
             for (int i = 0; i < NUMBER_OF_RECORDER_STRESS_LOOPS; i++){
                 Log.v(TAG, "counter = " + i);
@@ -106,10 +128,13 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 Thread.sleep(WAIT_TIME_RECORDER_TEST);  
                 mRecorder.reset();
                 mRecorder.release();
+                output.write(", " + i);
             }
         } catch (Exception e) {
                 Log.v(TAG, e.toString());
         }
+        output.write("\n\n");
+        output.close();
     }
     
     
@@ -119,8 +144,14 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
         String filename;
         SurfaceHolder mSurfaceHolder;             
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
+        File stressOutFile = new File(MEDIA_STRESS_OUTPUT);
+        Writer output = new BufferedWriter(new FileWriter(stressOutFile, true));
+        output.write("Camera and video recorder preview switching\n");
+        output.write("Total number of loops:"
+                + NUMBER_OF_SWTICHING_LOOPS_BW_CAMERA_AND_RECORDER + "\n");
         try {    
             Log.v(TAG, "Start preview");
+            output.write("No of loop: ");
             for (int i = 0; i < NUMBER_OF_SWTICHING_LOOPS_BW_CAMERA_AND_RECORDER; i++){
                 mCamera = Camera.open();
                 mCamera.setPreviewDisplay(mSurfaceHolder);
@@ -147,11 +178,14 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 Log.v(TAG, "before release");
                 Thread.sleep(WAIT_TIME_CAMERA_TEST);  
                 mRecorder.release();
-                Log.v(TAG, "release video recorder");                
+                Log.v(TAG, "release video recorder");
+                output.write(", " + i);
             }
         } catch (Exception e) {
                 Log.v(TAG, e.toString());
         }
+        output.write("\n\n");
+        output.close();
     }
     
     //Stress test case for record a video and play right away.
@@ -160,7 +194,13 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
         String filename;
         SurfaceHolder mSurfaceHolder;             
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
-        try {    
+        File stressOutFile = new File(MEDIA_STRESS_OUTPUT);
+        Writer output = new BufferedWriter(new FileWriter(stressOutFile, true));
+        output.write("Video record and play back stress test:\n");
+        output.write("Total number of loops:"
+                + NUMBER_OF_RECORDERANDPLAY_STRESS_LOOPS + "\n");
+        try {
+            output.write("No of loop: ");
             for (int i = 0; i < NUMBER_OF_RECORDERANDPLAY_STRESS_LOOPS; i++){
                 filename = OUTPUT_FILE + i + OUTPUT_FILE_EXT;
                 Log.v(TAG, filename);
@@ -189,10 +229,13 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 mp.start();
                 Thread.sleep(WAIT_TIME_PLAYBACK);
                 mp.release();
+                output.write(", " + i);
             }
         } catch (Exception e) {
                 Log.v(TAG, e.toString());
         }
+        output.write("\n\n");
+        output.close();
     }   
 }
 

@@ -50,8 +50,6 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
-#define ENABLE_CGROUP_ERR_LOGGING 0
-
 /*
  * List of cgroup names which map to ANDROID_TGROUP_ values in Thread.h
  * and Process.java
@@ -198,31 +196,24 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
 
 static int add_pid_to_cgroup(int pid, int grp)
 {
-    FILE *fp;
+    int fd;
     char path[255];
-    int rc;
+    char text[64];
 
-    sprintf(path, "/dev/cpuctl/%s/tasks", (cgroup_names[grp] ? cgroup_names[grp] : ""));
+    sprintf(path, "/dev/cpuctl/%s/tasks",
+           (cgroup_names[grp] ? cgroup_names[grp] : ""));
 
-    if (!(fp = fopen(path, "w"))) {
-#if ENABLE_CGROUP_ERR_LOGGING
-        LOGW("Unable to open %s (%s)\n", path, strerror(errno));
-#endif
-        return -errno;
+    if ((fd = open(path, O_WRONLY)) < 0)
+        return -1;
+
+    sprintf(text, "%d", pid);
+    if (write(fd, text, strlen(text)) < 0) {
+        close(fd);
+        return -1;
     }
 
-    rc = fprintf(fp, "%d", pid);
-    fclose(fp);
-
-    if (rc < 0) {
-#if ENABLE_CGROUP_ERR_LOGGING
-        LOGW("Unable to move pid %d to cgroup %s (%s)\n", pid,
-             (cgroup_names[grp] ? cgroup_names[grp] : "<default>"),
-             strerror(errno));
-#endif
-    }
-
-    return (rc < 0) ? errno : 0;
+    close(fd);
+    return 0;
 }
 
 void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
@@ -232,16 +223,55 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint
         return;
     }
 
-    if (add_pid_to_cgroup(pid, grp))
-        signalExceptionForGroupError(env, clazz, errno);
+    if (add_pid_to_cgroup(pid, grp)) {
+        // If the thread exited on us, don't generate an exception
+        if (errno != ESRCH && errno != ENOENT)
+            signalExceptionForGroupError(env, clazz, errno);
+    }
+}
+
+void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp) 
+{
+    DIR *d;
+    FILE *fp;
+    char proc_path[255];
+    struct dirent *de;
+
+    if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
+        signalExceptionForGroupError(env, clazz, EINVAL);
+        return;
+    }
+
+    sprintf(proc_path, "/proc/%d/task", pid);
+    if (!(d = opendir(proc_path))) {
+        // If the process exited on us, don't generate an exception
+        if (errno != ENOENT)
+            signalExceptionForGroupError(env, clazz, errno);
+        return;
+    }
+
+    while ((de = readdir(d))) {
+        if (de->d_name[0] == '.')
+            continue;
+
+        if (add_pid_to_cgroup(atoi(de->d_name), grp)) {
+            // If the thread exited on us, ignore it and keep going
+            if (errno != ESRCH && errno != ENOENT) {
+                signalExceptionForGroupError(env, clazz, errno);
+                closedir(d);
+                return;
+            }
+        }
+    }
+    closedir(d);
 }
 
 void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
                                               jint pid, jint pri)
 {
-    if (pri == ANDROID_PRIORITY_BACKGROUND) {
+    if (pri >= ANDROID_PRIORITY_BACKGROUND) {
         add_pid_to_cgroup(pid, ANDROID_TGROUP_BG_NONINTERACT);
-    } else if (getpriority(PRIO_PROCESS, pid) == ANDROID_PRIORITY_BACKGROUND) {
+    } else if (getpriority(PRIO_PROCESS, pid) >= ANDROID_PRIORITY_BACKGROUND) {
         add_pid_to_cgroup(pid, ANDROID_TGROUP_DEFAULT);
     }
 
@@ -466,7 +496,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
                 const String8& field = fields[i];
                 if (strncmp(p, field.string(), field.length()) == 0) {
                     p += field.length();
-                    while (*p == ' ') p++;
+                    while (*p == ' ' || *p == '\t') p++;
                     char* num = p;
                     while (*p >= '0' && *p <= '9') p++;
                     skipToEol = *p != '\n';
@@ -820,6 +850,7 @@ static const JNINativeMethod methods[] = {
     {"setThreadPriority",   "(I)V", (void*)android_os_Process_setCallingThreadPriority},
     {"getThreadPriority",   "(I)I", (void*)android_os_Process_getThreadPriority},
     {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
+    {"setProcessGroup",      "(II)V", (void*)android_os_Process_setProcessGroup},
     {"setOomAdj",   "(II)Z", (void*)android_os_Process_setOomAdj},
     {"setArgV0",    "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
     {"setUid", "(I)I", (void*)android_os_Process_setUid},

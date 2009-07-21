@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2006-2007 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -28,7 +28,7 @@ abstract class ValueParser {
 
     /**
      * Search for a Command Details object from a list.
-     * 
+     *
      * @param ctlvs List of ComprehensionTlv objects used for search
      * @return An CtlvCommandDetails object found from the objects. If no
      *         Command Details object is found, ResultException is thrown.
@@ -53,7 +53,7 @@ abstract class ValueParser {
 
     /**
      * Search for a Device Identities object from a list.
-     * 
+     *
      * @param ctlvs List of ComprehensionTlv objects used for search
      * @return An CtlvDeviceIdentities object found from the objects. If no
      *         Command Details object is found, ResultException is thrown.
@@ -77,7 +77,7 @@ abstract class ValueParser {
     /**
      * Retrieves Duration information from the Duration COMPREHENSION-TLV
      * object.
-     * 
+     *
      * @param ctlv A Text Attribute COMPREHENSION-TLV object
      * @return A Duration object
      * @throws ResultException
@@ -100,7 +100,7 @@ abstract class ValueParser {
 
     /**
      * Retrieves Item information from the COMPREHENSION-TLV object.
-     * 
+     *
      * @param ctlv A Text Attribute COMPREHENSION-TLV object
      * @return An Item
      * @throws ResultException
@@ -130,7 +130,7 @@ abstract class ValueParser {
 
     /**
      * Retrieves Item id information from the COMPREHENSION-TLV object.
-     * 
+     *
      * @param ctlv A Text Attribute COMPREHENSION-TLV object
      * @return An Item id
      * @throws ResultException
@@ -152,7 +152,7 @@ abstract class ValueParser {
 
     /**
      * Retrieves icon id from an Icon Identifier COMPREHENSION-TLV object
-     * 
+     *
      * @param ctlv An Icon Identifier COMPREHENSION-TLV object
      * @return IconId instance
      * @throws ResultException
@@ -175,7 +175,7 @@ abstract class ValueParser {
     /**
      * Retrieves item icons id from an Icon Identifier List COMPREHENSION-TLV
      * object
-     * 
+     *
      * @param ctlv An Item Icon List Identifier COMPREHENSION-TLV object
      * @return ItemsIconId instance
      * @throws ResultException
@@ -206,7 +206,7 @@ abstract class ValueParser {
     /**
      * Retrieves text attribute information from the Text Attribute
      * COMPREHENSION-TLV object.
-     * 
+     *
      * @param ctlv A Text Attribute COMPREHENSION-TLV object
      * @return A list of TextAttribute objects
      * @throws ResultException
@@ -266,7 +266,7 @@ abstract class ValueParser {
     /**
      * Retrieves alpha identifier from an Alpha Identifier COMPREHENSION-TLV
      * object.
-     * 
+     *
      * @param ctlv An Alpha Identifier COMPREHENSION-TLV object
      * @return String corresponding to the alpha identifier
      * @throws ResultException
@@ -290,7 +290,7 @@ abstract class ValueParser {
     /**
      * Retrieves text from the Text COMPREHENSION-TLV object, and decodes it
      * into a Java String.
-     * 
+     *
      * @param ctlv A Text COMPREHENSION-TLV object
      * @return A Java String object decoded from the Text object
      * @throws ResultException

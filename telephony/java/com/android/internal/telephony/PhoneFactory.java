@@ -107,27 +107,46 @@ public class PhoneFactory {
                 //reads the system properties and makes commandsinterface
                 sCommandsInterface = new RIL(context, networkMode, cdmaSubscription);
 
-                switch(networkMode) {
-                    case RILConstants.NETWORK_MODE_CDMA:
-                    case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
-                    case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
-                    case RILConstants.NETWORK_MODE_GLOBAL:
-                        sProxyPhone = new PhoneProxy(new CDMAPhone(context,
-                                sCommandsInterface, sPhoneNotifier));
-                        Log.i(LOG_TAG, "Creating CDMAPhone");
-                        break;
-                    case RILConstants.NETWORK_MODE_WCDMA_PREF:
-                    case RILConstants.NETWORK_MODE_GSM_ONLY:
-                    case RILConstants.NETWORK_MODE_WCDMA_ONLY:
-                    case RILConstants.NETWORK_MODE_GSM_UMTS:
-                    default:
-                        sProxyPhone = new PhoneProxy(new GSMPhone(context,
-                                sCommandsInterface, sPhoneNotifier));
-                        Log.i(LOG_TAG, "Creating GSMPhone");
-                        break;
+                int phoneType = getPhoneType(networkMode);
+                if (phoneType == RILConstants.GSM_PHONE) {
+                    sProxyPhone = new PhoneProxy(new GSMPhone(context,
+                            sCommandsInterface, sPhoneNotifier));
+                    Log.i(LOG_TAG, "Creating GSMPhone");
+                } else if (phoneType == RILConstants.CDMA_PHONE) {
+                    sProxyPhone = new PhoneProxy(new CDMAPhone(context,
+                            sCommandsInterface, sPhoneNotifier));
+                    Log.i(LOG_TAG, "Creating CDMAPhone");
                 }
+
                 sMadeDefaults = true;
             }
+        }
+    }
+
+    /*
+     * This function returns the type of the phone, depending
+     * on the network mode.
+     *
+     * @param network mode
+     * @return Phone Type
+     */
+    public static int getPhoneType(int networkMode) {
+        switch(networkMode) {
+        case RILConstants.NETWORK_MODE_CDMA:
+        case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
+        case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
+            return RILConstants.CDMA_PHONE;
+
+        case RILConstants.NETWORK_MODE_WCDMA_PREF:
+        case RILConstants.NETWORK_MODE_GSM_ONLY:
+        case RILConstants.NETWORK_MODE_WCDMA_ONLY:
+        case RILConstants.NETWORK_MODE_GSM_UMTS:
+            return RILConstants.GSM_PHONE;
+
+        case RILConstants.NETWORK_MODE_GLOBAL:
+            return RILConstants.CDMA_PHONE;
+        default:
+            return RILConstants.GSM_PHONE;
         }
     }
 

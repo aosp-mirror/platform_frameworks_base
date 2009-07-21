@@ -17,9 +17,11 @@
 package android.app;
 
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentSender;
+import android.content.IIntentReceiver;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.res.Configuration;
@@ -984,7 +986,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String process = data.readString();
             boolean start = data.readInt() != 0;
             String path = data.readString();
-            boolean res = profileControl(process, start, path);
+            ParcelFileDescriptor fd = data.readInt() != 0
+                    ? data.readFileDescriptor() : null;
+            boolean res = profileControl(process, start, path, fd);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -998,6 +1002,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
         
+        case STOP_APP_SWITCHES_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            stopAppSwitches();
+            reply.writeNoException();
+            return true;
+        }
+        
+        case RESUME_APP_SWITCHES_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            resumeAppSwitches();
+            reply.writeNoException();
+            return true;
+        }
+        
         case PEEK_SERVICE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             Intent service = Intent.CREATOR.createFromParcel(data);
@@ -1005,6 +1023,33 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             IBinder binder = peekService(service, resolvedType);
             reply.writeNoException();
             reply.writeStrongBinder(binder);
+            return true;
+        }
+        
+        case START_BACKUP_AGENT_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            ApplicationInfo info = ApplicationInfo.CREATOR.createFromParcel(data);
+            int backupRestoreMode = data.readInt();
+            boolean success = bindBackupAgent(info, backupRestoreMode);
+            reply.writeNoException();
+            reply.writeInt(success ? 1 : 0);
+            return true;
+        }
+
+        case BACKUP_AGENT_CREATED_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String packageName = data.readString();
+            IBinder agent = data.readStrongBinder();
+            backupAgentCreated(packageName, agent);
+            reply.writeNoException();
+            return true;
+        }
+
+        case UNBIND_BACKUP_AGENT_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            ApplicationInfo info = ApplicationInfo.CREATOR.createFromParcel(data);
+            unbindBackupAgent(info);
+            reply.writeNoException();
             return true;
         }
         }
@@ -1667,6 +1712,43 @@ class ActivityManagerProxy implements IActivityManager
         return binder;
     }
 
+    public boolean bindBackupAgent(ApplicationInfo app, int backupRestoreMode)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        app.writeToParcel(data, 0);
+        data.writeInt(backupRestoreMode);
+        mRemote.transact(START_BACKUP_AGENT_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean success = reply.readInt() != 0;
+        reply.recycle();
+        data.recycle();
+        return success;
+    }
+
+    public void backupAgentCreated(String packageName, IBinder agent) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(packageName);
+        data.writeStrongBinder(agent);
+        mRemote.transact(BACKUP_AGENT_CREATED_TRANSACTION, data, reply, 0);
+        reply.recycle();
+        data.recycle();
+    }
+
+    public void unbindBackupAgent(ApplicationInfo app) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        app.writeToParcel(data, 0);
+        mRemote.transact(UNBIND_BACKUP_AGENT_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
+    }
+
     public boolean startInstrumentation(ComponentName className, String profileFile,
             int flags, Bundle arguments, IInstrumentationWatcher watcher)
             throws RemoteException {
@@ -2152,7 +2234,7 @@ class ActivityManagerProxy implements IActivityManager
     }
     
     public boolean profileControl(String process, boolean start,
-            String path) throws RemoteException
+            String path, ParcelFileDescriptor fd) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -2160,6 +2242,12 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(process);
         data.writeInt(start ? 1 : 0);
         data.writeString(path);
+        if (fd != null) {
+            data.writeInt(1);
+            fd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        } else {
+            data.writeInt(0);
+        }
         mRemote.transact(PROFILE_CONTROL_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;
@@ -2180,6 +2268,26 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         data.recycle();
         return res;
+    }
+    
+    public void stopAppSwitches() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(STOP_APP_SWITCHES_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
+    }
+    
+    public void resumeAppSwitches() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(RESUME_APP_SWITCHES_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
     }
     
     private IBinder mRemote;

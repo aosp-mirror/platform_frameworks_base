@@ -433,7 +433,7 @@ static void checkForIds(const String8& path, ResXMLParser& parser)
     }
 }
 
-static void applyFileOverlay(const sp<AaptAssets>& assets, 
+static bool applyFileOverlay(const sp<AaptAssets>& assets,
                              const sp<ResourceTypeSet>& baseSet,
                              const char *resType)
 {
@@ -441,7 +441,7 @@ static void applyFileOverlay(const sp<AaptAssets>& assets,
     // Also add any found only in the overlay.
     sp<AaptAssets> overlay = assets->getOverlay();
     String8 resTypeString(resType);
-    
+
     // work through the linked list of overlays
     while (overlay.get()) {
         KeyedVector<String8, sp<ResourceTypeSet> >* overlayRes = overlay->getResources();
@@ -456,7 +456,7 @@ static void applyFileOverlay(const sp<AaptAssets>& assets,
             size_t overlayCount = overlaySet->size();
             for (size_t overlayIndex=0; overlayIndex<overlayCount; overlayIndex++) {
                 size_t baseIndex = baseSet->indexOfKey(overlaySet->keyAt(overlayIndex));
-                if (baseIndex != UNKNOWN_ERROR) {
+                if (baseIndex < UNKNOWN_ERROR) {
                     // look for same flavor.  For a given file (strings.xml, for example)
                     // there may be a locale specific or other flavors - we want to match
                     // the same flavor.
@@ -482,9 +482,10 @@ static void applyFileOverlay(const sp<AaptAssets>& assets,
                     }
                 } else {
                     // this group doesn't exist (a file that's only in the overlay)
-                    // add it
-                    baseSet->add(overlaySet->keyAt(overlayIndex),
-                                 overlaySet->valueAt(overlayIndex));
+                    fprintf(stderr, "aapt: error: "
+                            "*** Resource file '%s' exists only in an overlay\n",
+                            overlaySet->keyAt(overlayIndex).string());
+                    return false;
                 }
             }
             // this overlay didn't have resources for this type
@@ -492,7 +493,59 @@ static void applyFileOverlay(const sp<AaptAssets>& assets,
         // try next overlay
         overlay = overlay->getOverlay();
     }
-    return;
+    return true;
+}
+
+void addTagAttribute(const sp<XMLNode>& node, const char* ns8,
+        const char* attr8, const char* value)
+{
+    if (value == NULL) {
+        return;
+    }
+    
+    const String16 ns(ns8);
+    const String16 attr(attr8);
+    
+    if (node->getAttribute(ns, attr) != NULL) {
+        fprintf(stderr, "Warning: AndroidManifest.xml already defines %s (in %s)\n",
+                String8(attr).string(), String8(ns).string());
+        return;
+    }
+    
+    node->addAttribute(ns, attr, String16(value));
+}
+
+status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
+{
+    root = root->searchElement(String16(), String16("manifest"));
+    if (root == NULL) {
+        fprintf(stderr, "No <manifest> tag.\n");
+        return UNKNOWN_ERROR;
+    }
+    
+    addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionCode",
+            bundle->getVersionCode());
+    addTagAttribute(root, RESOURCES_ANDROID_NAMESPACE, "versionName",
+            bundle->getVersionName());
+    
+    if (bundle->getMinSdkVersion() != NULL
+            || bundle->getTargetSdkVersion() != NULL
+            || bundle->getMaxSdkVersion() != NULL) {
+        sp<XMLNode> vers = root->getChildElement(String16(), String16("uses-sdk"));
+        if (vers == NULL) {
+            vers = XMLNode::newElement(root->getFilename(), String16(), String16("uses-sdk"));
+            root->insertChildAt(vers, 0);
+        }
+        
+        addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "minSdkVersion",
+                bundle->getMinSdkVersion());
+        addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "targetSdkVersion",
+                bundle->getTargetSdkVersion());
+        addTagAttribute(vers, RESOURCES_ANDROID_NAMESPACE, "maxSdkVersion",
+                bundle->getMaxSdkVersion());
+    }
+    
+    return NO_ERROR;
 }
 
 #define ASSIGN_IT(n) \
@@ -566,13 +619,15 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         current = current->getOverlay();
     }
     // apply the overlay files to the base set
-    applyFileOverlay(assets, drawables, "drawable");
-    applyFileOverlay(assets, layouts, "layout");
-    applyFileOverlay(assets, anims, "anim");
-    applyFileOverlay(assets, xmls, "xml");
-    applyFileOverlay(assets, raws, "raw");
-    applyFileOverlay(assets, colors, "color");
-    applyFileOverlay(assets, menus, "menu");
+    if (!applyFileOverlay(assets, drawables, "drawable") ||
+            !applyFileOverlay(assets, layouts, "layout") ||
+            !applyFileOverlay(assets, anims, "anim") ||
+            !applyFileOverlay(assets, xmls, "xml") ||
+            !applyFileOverlay(assets, raws, "raw") ||
+            !applyFileOverlay(assets, colors, "color") ||
+            !applyFileOverlay(assets, menus, "menu")) {
+        return UNKNOWN_ERROR;
+    }
 
     bool hasErrors = false;
 
@@ -1013,7 +1068,15 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 
     // Generate final compiled manifest file.
     manifestFile->clearData();
-    err = compileXmlFile(assets, manifestFile, &table);
+    sp<XMLNode> manifestTree = XMLNode::parse(manifestFile);
+    if (manifestTree == NULL) {
+        return UNKNOWN_ERROR;
+    }
+    err = massageManifest(bundle, manifestTree);
+    if (err < NO_ERROR) {
+        return err;
+    }
+    err = compileXmlFile(assets, manifestTree, manifestFile, &table);
     if (err < NO_ERROR) {
         return err;
     }

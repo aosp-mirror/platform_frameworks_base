@@ -16,21 +16,22 @@
 
 package android.widget;
 
-import android.view.ViewGroup;
-import android.view.View;
-import android.view.MotionEvent;
-import android.view.VelocityTracker;
-import android.view.SoundEffectConstants;
+import android.R;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.util.AttributeSet;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.Bitmap;
-import android.os.SystemClock;
 import android.os.Handler;
 import android.os.Message;
-import android.R;
+import android.os.SystemClock;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
+import android.view.VelocityTracker;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 
 /**
  * SlidingDrawer hides content out of the screen and allows the user to drag a handle
@@ -746,6 +747,8 @@ public class SlidingDrawer extends ViewGroup {
         openDrawer();
         invalidate();
         requestLayout();
+
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
     }
 
     /**
@@ -777,6 +780,7 @@ public class SlidingDrawer extends ViewGroup {
             scrollListener.onScrollStarted();
         }
         animateClose(mVertical ? mHandle.getTop() : mHandle.getLeft());
+
         if (scrollListener != null) {
             scrollListener.onScrollEnded();
         }
@@ -798,6 +802,9 @@ public class SlidingDrawer extends ViewGroup {
             scrollListener.onScrollStarted();
         }
         animateOpen(mVertical ? mHandle.getTop() : mHandle.getLeft());
+
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+
         if (scrollListener != null) {
             scrollListener.onScrollEnded();
         }
@@ -827,6 +834,7 @@ public class SlidingDrawer extends ViewGroup {
         }
 
         mExpanded = true;
+
         if (mOnDrawerOpenListener != null) {
             mOnDrawerOpenListener.onDrawerOpened();
         }

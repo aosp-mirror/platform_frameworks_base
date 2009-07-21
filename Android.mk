@@ -64,15 +64,17 @@ endif
 ##
 ## READ ME: ########################################################
 LOCAL_SRC_FILES += \
+	core/java/android/accessibilityservice/IAccessibilityServiceConnection.aidl \
+  core/java/android/accessibilityservice/IEventListener.aidl \
 	core/java/android/accounts/IAccountsService.aidl \
 	core/java/android/app/IActivityPendingResult.aidl \
 	core/java/android/app/IActivityWatcher.aidl \
 	core/java/android/app/IAlarmManager.aidl \
+        core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
-	core/java/android/app/IIntentReceiver.aidl \
-	core/java/android/app/IIntentSender.aidl \
 	core/java/android/app/INotificationManager.aidl \
 	core/java/android/app/ISearchManager.aidl \
+	core/java/android/app/ISearchManagerCallback.aidl \
 	core/java/android/app/IServiceConnection.aidl \
 	core/java/android/app/IStatusBar.aidl \
 	core/java/android/app/IThumbnailReceiver.aidl \
@@ -80,15 +82,18 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IWallpaperService.aidl \
 	core/java/android/app/IWallpaperServiceCallback.aidl \
 	core/java/android/backup/IBackupManager.aidl \
-	core/java/android/backup/IBackupService.aidl \
+	core/java/android/backup/IRestoreObserver.aidl \
+	core/java/android/backup/IRestoreSession.aidl \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
 	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
-    core/java/android/content/IContentService.aidl \
+        core/java/android/content/IContentService.aidl \
+	core/java/android/content/IIntentReceiver.aidl \
+	core/java/android/content/IIntentSender.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
 	core/java/android/content/ISyncContext.aidl \
-    core/java/android/content/ISyncStatusObserver.aidl \
+        core/java/android/content/ISyncStatusObserver.aidl \
 	core/java/android/content/pm/IPackageDataObserver.aidl \
 	core/java/android/content/pm/IPackageDeleteObserver.aidl \
 	core/java/android/content/pm/IPackageInstallObserver.aidl \
@@ -106,6 +111,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IPermissionController.aidl \
 	core/java/android/os/IPowerManager.aidl \
 	core/java/android/text/IClipboard.aidl \
+	core/java/android/view/accessibility/IAccessibilityManager.aidl \
+	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
 	core/java/android/view/IApplicationToken.aidl \
 	core/java/android/view/IOnKeyguardExitResult.aidl \
 	core/java/android/view/IRotationWatcher.aidl \
@@ -114,6 +121,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/view/IWindowSession.aidl \
 	core/java/android/speech/IRecognitionListener.aidl \
 	core/java/android/speech/IRecognitionService.aidl \
+	core/java/android/speech/tts/ITts.aidl \
+	core/java/android/speech/tts/ITtsCallback.aidl \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
 	core/java/com/android/internal/app/IUsageStats.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
@@ -131,7 +140,6 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/IGpsStatusProvider.aidl \
-	location/java/android/location/ILocationCollector.aidl \
 	location/java/android/location/ILocationListener.aidl \
 	location/java/android/location/ILocationManager.aidl \
 	location/java/android/location/ILocationProvider.aidl \
@@ -145,7 +153,8 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/IIccPhoneBook.aidl \
 	telephony/java/com/android/internal/telephony/ISms.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
-	telephony/java/com/android/internal/telephony/IExtendedNetworkService.aidl
+	telephony/java/com/android/internal/telephony/IExtendedNetworkService.aidl \
+	vpn/java/android/net/vpn/IVpnService.aidl \
 
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
@@ -190,6 +199,7 @@ aidl_files := \
 	frameworks/base/core/java/android/app/PendingIntent.aidl \
 	frameworks/base/core/java/android/content/ComponentName.aidl \
 	frameworks/base/core/java/android/content/Intent.aidl \
+	frameworks/base/core/java/android/content/IntentSender.aidl \
 	frameworks/base/core/java/android/content/SyncStats.aidl \
 	frameworks/base/core/java/android/content/res/Configuration.aidl \
 	frameworks/base/core/java/android/appwidget/AppWidgetProviderInfo.aidl \
@@ -215,7 +225,8 @@ aidl_files := \
 	frameworks/base/location/java/android/location/Location.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
-	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl
+	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl \
+	frameworks/base/vpn/java/android/net/vpn/IVpnService.aidl \
 
 gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/framework.aidl
 $(gen): PRIVATE_SRC_FILES := $(aidl_files)
@@ -337,7 +348,7 @@ web_docs_sample_code_flags := \
 # most current Android platform version included in the SDK package. 
 framework_docs_SDK_VERSION :=  1.5
 # release version for SDK (ie "Release x")
-framework_docs_SDK_REL_ID :=   1
+framework_docs_SDK_REL_ID :=   2
 framework_docs_SDK_CURRENT_DIR := $(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \

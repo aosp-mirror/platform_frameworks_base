@@ -17,19 +17,23 @@
 package com.android.dumprendertree;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 
 public class Menu extends FileList {
-    
-    public void onCreate(Bundle icicle) 
-    {
+
+    private static final int MENU_START = 0x01;
+    private static String LOGTAG = "MenuActivity";
+    static final String LAYOUT_TESTS_LIST_FILE = "/sdcard/android/layout_tests_list.txt";
+
+    public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
     }
-    
+
     boolean fileFilter(File f) {
     	if (f.getName().startsWith("."))
     		return false;
@@ -41,14 +45,36 @@ public class Menu extends FileList {
     		return true;
     	return false;
     }
-    
-    void processFile(String filename, boolean selection)
-    {        
+
+    void processFile(String filename, boolean selection) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setClass(this, TestShellActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(TestShellActivity.TEST_URL, "file://" + filename);
         startActivity(intent);
     }
+
+    @Override
+    void processDirectory(String path, boolean selection) {
+        generateTestList(path);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setClass(this, TestShellActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra(TestShellActivity.UI_AUTO_TEST, LAYOUT_TESTS_LIST_FILE);
+        startActivity(intent);
+    }
+
+    private void generateTestList(String path) {
+        try {
+            File tests_list = new File(LAYOUT_TESTS_LIST_FILE);
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tests_list, false));
+            FsUtils.findLayoutTestsRecursively(bos, path);
+            bos.flush();
+            bos.close();
+       } catch (Exception e) {
+           Log.e(LOGTAG, "Error when creating test list: " + e.getMessage());
+       }
+    }
+
 }
 

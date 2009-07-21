@@ -27,18 +27,11 @@
     </ul>
   </li>
   <li>
-    <h2>Native Development Tools</h2>
-    <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/1.5-r1/index.html">Android 1.5 NDK, r1</a></li>
-    </ul>
-  </li>
-  <li>
     <h2>Previous SDK Releases</h2>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/1.1_r1/index.html">Android 1.1 SDK, r1</a></li>
       <li><a href="<?cs var:toroot ?>sdk/1.0_r2/index.html">Android 1.0 SDK, r2</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/1.0_r1/index.html">Android 1.0 SDK, r1</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/older_releases.html">Older Releases</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/older_releases.html">Other Releases</a></li>
     </ul>
   </li><?cs 
  /if ?>

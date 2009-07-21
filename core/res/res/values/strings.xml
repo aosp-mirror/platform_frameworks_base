@@ -30,6 +30,11 @@
     <string name="terabyteShort">TB</string>
     <!-- Suffix added to a number to signify size in petabytes. -->
     <string name="petabyteShort">PB</string>
+    <!-- Format string used to add a suffix like "KB" or "MB" to a number
+         to display a size in kilobytes, megabytes, or other size units.
+         Some languages (like French) will want to add a space between
+         the placeholders. -->
+    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g><xliff:g id="unit" example="KB">%2$s</xliff:g></string>
 
     <!-- Used in Contacts for a field that has no label and in Note Pad
          for a note with no name. -->
@@ -148,6 +153,24 @@
     <!-- Meaning: unknown.  Example: Service was enabled for: Voice, PAD -->
     <string name="serviceClassPAD">PAD</string>
 
+    <!-- CDMA Roaming Indicator Strings (non ERI)--> <skip />
+    <!-- Default roaming indicator text -->
+    <string name="roamingText0">Roaming Indicator On</string>
+    <string name="roamingText1">Roaming Indicator Off</string>
+    <string name="roamingText2">Roaming Indicator Flashing</string>
+    <string name="roamingText3">Out of Neighborhood</string>
+    <string name="roamingText4">Out of Building</string>
+    <string name="roamingText5">Roaming - Preferred System</string>
+    <string name="roamingText6">Roaming - Available System</string>
+    <string name="roamingText7">Roaming - Alliance Partner</string>
+    <string name="roamingText8">Roaming - Premium Partner</string>
+    <string name="roamingText9">Roaming - Full Service Functionality</string>
+    <string name="roamingText10">Roaming - Partial Service Functionality</string>
+    <string name="roamingText11">Roaming Banner On</string>
+    <string name="roamingText12">Roaming Banner Off</string>
+    <string name="roamingTextSearching">Searching for Service</string>
+
+
     <!--
         {0} is one of "bearerServiceCode*"
         {1} is dialing number
@@ -205,6 +228,8 @@
     <string name="httpErrorFileNotFound">The requested file was not found.</string>
     <!-- Displayed when a request failed because there are too many requests right now. -->
     <string name="httpErrorTooManyRequests">Too many requests are being processed. Try again later.</string>
+    <!-- Displayed a toast that a certificate is saved in the keystore -->
+    <string name="certificateSaved">The certificate is saved in the system\'s key store.</string>
 
     <!-- Sync notifications --> <skip />
     <!-- A notification is shown when there is a sync error.  This is the text that will scroll through the notification bar (will be seen by the user as he uses another application). -->
@@ -438,13 +463,6 @@
         forcibly restart other applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_setProcessForeground">keep from being stopped</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_setProcessForeground">Allows an application to make
-        any process run in the foreground, so it can\'t be killed.
-        Should never be needed for normal applications.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_forceBack">force application to close</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_forceBack">Allows an application to force any
@@ -460,17 +478,16 @@
         never normally need.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_addSystemService">publish low-level services</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_addSystemService">Allows application to publish
-        its own low-level system services. Malicious applications may hijack
-        the system, and steal or corrupt any data on it.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_shutdown">partial shutdown</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_shutdown">Puts the activity manager into a shutdown
         state.  Does not perform a complete shutdown.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_stopAppSwitches">prevent app switches</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_stopAppSwitches">Prevents the user from switching to
+        another application.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_runSetActivityWatcher">monitor and control all application launching</string>
@@ -519,19 +536,15 @@
         go to the background. Never needed for normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_fotaUpdate">automatically install system updates</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_fotaUpdate">Allows an application to receive
-        notifications about pending system updates and trigger their
-        installation. Malicious applications may use this to corrupt the system
-        with unauthorized updates, or generally interfere with the update
-        process.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_batteryStats">modify battery statistics</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_batteryStats">Allows the modification of
         collected battery statistics. Not for use by normal applications.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_backup">control system backup and restore</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_backup">Allows the application to control the system's backup and restore mechanism.  Not for use by normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_internalSystemWindow">display unauthorized windows</string>
@@ -763,13 +776,7 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_installLocationProvider">Create mock location sources for testing.
         Malicious applications can use this to override the location and/or status returned by real
-        location sources such as GPS or Network providers.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_installLocationCollector">permission to install a location collector</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_installLocationCollector">Create mock location sources for testing.
-        Malicious applications can use this to monitor and report your location to an external source.</string>
+        location sources such as GPS or Network providers or monitor and report your location to an external source.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessFineLocation">fine (GPS) location</string>
@@ -886,7 +893,6 @@
     <string name="permdesc_checkinProperties">Allows read/write access to
         properties uploaded by the checkin service.  Not for use by normal
         applications.</string>
-
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindGadget">choose widgets</string>
@@ -1006,6 +1012,15 @@
       configured Wi-Fi networks.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_changeWifiMulticastState">allow Wi-Fi Multicast
+      reception</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_changeWifiMulticastState">Allows an application to
+      receive packets not directly addressed to your device.  This can be
+      useful when discovering services offered near by.  It uses more power
+      than the non-multicast mode.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bluetoothAdmin">bluetooth administration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bluetoothAdmin">Allows an application to configure
@@ -1070,7 +1085,7 @@
       user dictionary.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_sdcardWrite">write to SD card</string>
+    <string name="permlab_sdcardWrite">modify/delete SD card contents</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_sdcardWrite">Allows an application to write to the SD card.</string>
 
@@ -1095,6 +1110,9 @@
         <item>Other</item>
         <item>Custom</item>
     </string-array>
+
+    <!-- String which means the type "mobile phone". -->
+    <string name="mobileEmailTypeName">Mobile</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Postal address types from android.provider.Contacts. This could be used when adding a new address for a contact, for example. -->
@@ -1174,9 +1192,12 @@
     <!-- On the unlock pattern screen, shown when the user enters the wrong lock pattern and must try again. -->
     <string name="lockscreen_pattern_wrong">Sorry, try again</string>
 
-    <!-- When the lock screen is showing and the phone plugged in, show the current
-         charge %.  -->
+    <!-- When the lock screen is showing and the phone plugged in, and the battery
+         is not fully charged, show the current charge %.  -->
     <string name="lockscreen_plugged_in">Charging (<xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>)</string>
+    <!-- When the lock screen is showing, the phone is plugged in and the battery is fully
+         charged, say that it is charged. -->
+    <string name="lockscreen_charged">Charged.</string>
 
     <!-- When the lock screen is showing and the battery is low, warn user to plug
          in the phone soon. -->
@@ -1245,15 +1266,6 @@
     <!-- Displayed to the user when unlocking the phone with a username and password fails. -->
     <string name="lockscreen_glogin_invalid_input">Invalid username or password.</string>
 
-    <!-- A format string for 12-hour time of day (example: "12:30 PM"). -->
-    <string name="status_bar_time_format">"<xliff:g id="hour" example="12">h</xliff:g>:<xliff:g id="minute" example="30">mm</xliff:g> <xliff:g id="ampm" example="AM">AA</xliff:g>"</string>
-
-    <!-- A format string for 12-hour time of day, with lower-case "am" or "pm" (example: "12:30pm"). -->
-    <string name="hour_minute_ampm">"<xliff:g id="hour" example="12">%-l</xliff:g>:<xliff:g id="minute" example="30">%M</xliff:g><xliff:g id="ampm" example="am">%P</xliff:g>"</string>
-
-    <!-- A format string for 12-hour time of day, with capital "AM" or "PM" (example: "12:30PM"). -->
-    <string name="hour_minute_cap_ampm">"<xliff:g id="hour" example="12">%-l</xliff:g>:<xliff:g id="minute" example="30">%M</xliff:g><xliff:g id="ampm" example="AM">%p</xliff:g>"</string>
-
     <!-- A format string for 12-hour time of day, just the hour, not the minute, with lower-case "am" or "pm" (example: "3pm"). -->
     <string name="hour_ampm">"<xliff:g id="hour" example="3">%-l</xliff:g><xliff:g id="ampm" example="pm">%P</xliff:g>"</string>
 
@@ -1262,7 +1274,7 @@
 
     <!-- The text for the button in the notification window-shade that clears
          all of the currently visible notifications. -->
-    <string name="status_bar_clear_all_button">Clear notifications</string>
+    <string name="status_bar_clear_all_button">Clear</string>
 
     <!-- The label in the bar at the top of the status bar when there are no notifications
          showing. -->
@@ -1295,6 +1307,9 @@
     <string name="battery_low_percent_format">less than <xliff:g id="number">%d%%</xliff:g>
     remaining.</string>
 
+    <!-- When the battery is low, this is the label of the button to go to the
+         power usage activity to find out what drained the battery. -->
+    <string name="battery_low_why">Why?</string>
 
     <!-- Title of the alert when something went wrong in the factory test. -->
     <string name="factorytest_failed">Factory test failed</string>
@@ -1321,7 +1336,23 @@
 
     <!-- Title of the WebView save password dialog.  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. -->
     <string name="save_password_label">Confirm</string>
-    
+
+    <!-- Title of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permlab_readHistoryBookmarks">read Browser\'s history and bookmarks</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permdesc_readHistoryBookmarks">Allows the application to read all
+        the URLs that the Browser has visited, and all of the Browser\'s bookmarks.</string>
+    <!-- Title of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permlab_writeHistoryBookmarks">write Browser\'s history and bookmarks</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+        they want to allow the application to do this. -->
+    <string name="permdesc_writeHistoryBookmarks">Allows an application to modify the
+        Browser\'s history or bookmarks stored on your phone. Malicious applications
+        can use this to erase or modify your Browser\'s data.</string>
+
     <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Text in the save password dialog, asking if the browser should remember a password. -->
     <string name="save_password_message">Do you want the browser to remember this password?</string>
     <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Button in the save password dialog, saying not to remember this password. -->
@@ -1354,12 +1385,6 @@
          It is also used by the home screen's search "widget". It should be short -->
     <string name="search_go">Search</string>
 
-    <!-- String used to display the date. This is shown instead of a date if the date is today's date. -->
-    <string name="today">Today</string>
-    <!-- String used to display the date. This is shown instead of a date if the date is yesterday's date. -->
-    <string name="yesterday">Yesterday</string>
-    <!-- String used to display the date. This is shown instead of a date if the date is tomorrow's date. -->
-    <string name="tomorrow">Tomorrow</string>
     <!-- String used to display the date. This is the string to say something happened 1 month ago. -->
     <string name="oneMonthDurationPast">1 month ago</string>
     <!-- String used to display the date. This is the string to say something happened more than 1 month ago. -->
@@ -1493,21 +1518,6 @@
     <!-- Appened to express the value is this unit of time. -->
     <string name="years">years</string>
 
-    <!-- Used in the list of which days of the week a calendar event recurrs on -->
-    <string name="sunday">Sunday</string>
-    <!-- Used in the list of which days of the week a calendar event recurrs on -->
-    <string name="monday">Monday</string>
-    <!-- Used in the list of which days of the week a calendar event recurrs on -->
-    <string name="tuesday">Tuesday</string>
-    <!-- Used in the list of which days of the week a calendar event recurrs on -->
-    <string name="wednesday">Wednesday</string>
-    <!-- Used in the list of which days of the week a calendar event recurrs on -->
-    <string name="thursday">Thursday</string>
-    <!-- Used in the list of which days of the week a calendar event recurrs on -->
-    <string name="friday">Friday</string>
-    <!-- Used in the list of which days of the week a calendar event recurrs on -->
-    <string name="saturday">Saturday</string>
-
     <!-- Calendar spinner item, to select that an event recurs every weekday. -->
     <string name="every_weekday">"Every weekday (Mon\u2013Fri)"</string>
     <!-- Calendar spinner item, to select that an event recurs every day. -->
@@ -1530,95 +1540,12 @@
     <string name="VideoView_error_button">OK</string>
 
 
-    <!-- AM - as in morning - as in 10:30 AM -->
-    <string name="am">"AM"</string>
 
-    <!-- PM - as in afternoon - as in 10:30 PM -->
-    <string name="pm">"PM"</string>
-
-
-    <!-- Numeric form of the day. Example: "12/31/2007" -->
-    <string name="numeric_date">"<xliff:g id="month" example="12">%m</xliff:g>/<xliff:g id="day" example="31">%d</xliff:g>/<xliff:g id="year" example="2008">%Y</xliff:g>"</string>
-
-    <!-- Format indicating a range of time, from a time on one day to a time on another day. 
-         Example: "Mon, Dec 31, 2007, 8am - Tue, Jan 1, 2008, 5pm" -->
-    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="weekday1" example="Monday">%1$s</xliff:g>, <xliff:g id="date1" example="December 31, 2007">%2$s</xliff:g>, <xliff:g id="time1" example="8am">%3$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Tuesday">%4$s</xliff:g>, <xliff:g id="date2" example="January 1, 2008">%5$s</xliff:g>, <xliff:g id="time2" example="5pm">%6$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates, from one date to another.
-         Example: "Mon, Dec 31, 2007 - Tue, Jan 1, 2008" -->
-    <string name="wday1_date1_wday2_date2">"<xliff:g id="weekday1" example="Monday">%1$s</xliff:g>, <xliff:g id="date1" example="Dec 31, 2007">%2$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Thursday">%4$s</xliff:g>, <xliff:g id="date2" example="Jan 1, 2008">%5$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of time, from a time on one day to a time on another day. 
-         Example: "Dec 31, 2007, 8am - Jan 1, 2008, 5pm" -->
-    <string name="date1_time1_date2_time2">"<xliff:g id="date1" example="Dec 31, 2007">%2$s</xliff:g>, <xliff:g id="time1" example="8am">%3$s</xliff:g> \u2013 <xliff:g id="date2" example="Jan 1, 2008">%5$s</xliff:g>, <xliff:g id="time2" example="5pm">%6$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates, from one date to another.
-         Example: "Dec 31, 2007 - Jan 1, 2008" -->
-    <string name="date1_date2">"<xliff:g id="date1" example="Dec 31, 2007">%2$s</xliff:g> \u2013 <xliff:g id="date2" example="Jan 1, 2008">%5$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of times, from one time to another.
-         Example: "10:00 - 11:00 am" -->
-    <string name="time1_time2">"<xliff:g id="time1" example="10:00">%1$s</xliff:g> \u2013 <xliff:g id="time2" example="11:00">%2$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of times on a particular date.
-         Example: "8:00 - 11:00 am, Mon, Dec 31, 2007" -->
-    <string name="time_wday_date">"<xliff:g id="time_range" example="8:00 - 11:00 am">%1$s</xliff:g>, <xliff:g id="weekday" example="Mon">%2$s</xliff:g>, <xliff:g id="date" example="Dec 31, 2007">%3$s</xliff:g>"</string>
-
-    <!-- Format indicating a weekday and date.
-         Example: "Mon, Dec 31, 2007" -->
-    <string name="wday_date">"<xliff:g id="weekday" example="Monday">%2$s</xliff:g>, <xliff:g id="date" example="Dec 31, 2007">%3$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of times on a particular date.
-         Example: "8:00 - 11:00 am, Dec 31, 2007" -->
-    <string name="time_date">"<xliff:g id="time_range" example="8:00 - 11:00 am">%1$s</xliff:g>, <xliff:g id="date" example="Dec 31, 2007">%3$s</xliff:g>"</string>
-
-    <!-- Format indicating a specific date and time.
-         Example: "Dec 31, 2007, 11:00 am" -->
-    <string name="date_time">"<xliff:g id="date" example="Dec 31, 2007">%1$s</xliff:g>, <xliff:g id="time" example="11:00 am">%2$s</xliff:g>"</string>
 
     <!-- Format indicating a relative expression and time.
          Example: "4 hours ago, 11:00 am" -->
     <string name="relative_time">"<xliff:g id="date" example="4 hours ago">%1$s</xliff:g>, <xliff:g id="time" example="11:00 am">%2$s</xliff:g>"</string>
 
-    <!-- Format indicating a range of times on a particular day of the week.
-         Example: "8:00 - 11:00 am, Mon" -->
-    <string name="time_wday">"<xliff:g id="time_range" example="8:00 - 11:00 am">%1$s</xliff:g>, <xliff:g id="weekday" example="Mon">%2$s</xliff:g>"</string>
-
-    <!-- Date format string used in contexts where the user has said they
-         want the month first, as used in the USA, with the month fully
-         spelled out.  You can remove the comma or add a period,
-         or make other punctuation changes appropriate for your locale. -->
-    <string name="full_date_month_first" format="date"><xliff:g id="month" example="December">MMMM</xliff:g> <xliff:g id="day" example="31">d</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
-
-    <!-- Date format string used in contexts where the user has said they
-         want the day of the month first, as used in Europe, with the month
-         fully spelled out.  You can remove the comma or add a period,
-         or make other punctuation changes appropriate for your locale. -->
-    <string name="full_date_day_first" format="date"><xliff:g id="day" example="31">d</xliff:g> <xliff:g id="month" example="December">MMMM</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
-
-    <!-- Date format string used in contexts where the user has said they
-         want the month first, as used in the USA, with the month
-         abbreviated.  You can remove the comma or add a period,
-         or make other punctuation changes appropriate for your locale. -->
-    <string name="medium_date_month_first" format="date"><xliff:g id="month" example="Dec.">MMM</xliff:g> <xliff:g id="day" example="31">d</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
-
-    <!-- Date format string used in contexts where the user has said they
-         want the day of the month first, as used in Europe, with the month
-         abbreviated.  You can remove the comma or add a period,
-         or make other punctuation changes appropriate for your locale. -->
-    <string name="medium_date_day_first" format="date"><xliff:g id="day" example="31">d</xliff:g> <xliff:g id="month" example="December">MMM</xliff:g>, <xliff:g id="year" example="1972">yyyy</xliff:g></string>
-
-    <!-- Time format string used in the status bar when the user has said they
-         want a 12-hour clock with AM and PM.
-         You can remove the colon
-         or make other punctuation changes appropriate for your locale. -->
-    <string name="twelve_hour_time_format" format="date"><xliff:g id="hour" example="11">h</xliff:g>:<xliff:g id="minute" example="59">mm</xliff:g> <xliff:g id="ampm" example="AM">a</xliff:g></string>
-
-    <!-- Time format string used in the status bar when the user has said they
-         want a 24-hour clock.
-         You can remove the colon
-         or make other punctuation changes appropriate for your locale. -->
-    <string name="twenty_four_hour_time_format" format="date"><xliff:g id="hour" example="23">HH</xliff:g>:<xliff:g id="minute" example="59">mm</xliff:g></string>
 
     <!-- Quoted name for 12pm, lowercase -->
     <string name="noon">"noon"</string>
@@ -1629,433 +1556,15 @@
     <!-- Quoted name for 12am, uppercase first letter -->
     <string name="Midnight">"Midnight"</string>
 
-    <!-- Date format for month and day of month.
-         Example: "October 9". -->
-    <string name="month_day">"<xliff:g id="month" example="October">%B</xliff:g> <xliff:g id="day" example="9">%-d</xliff:g>"</string>
 
-    <!-- Date format for month alone.
-         Example: "October" -->
-    <string name="month">"<xliff:g id="month" example="October">%B</xliff:g>"</string>
 
-    <!-- Date format for month, day, and year.
-         Example: "October 9, 2007" -->
-    <string name="month_day_year">"<xliff:g id="month" example="October">%B</xliff:g> <xliff:g id="day" example="9">%-d</xliff:g>, <xliff:g id="year" example="2007">%Y</xliff:g>"</string>
 
-    <!-- Date format for month and year.
-         Example: "October 2007" -->
-    <string name="month_year">"<xliff:g id="month" example="October">%B</xliff:g> <xliff:g id="year" example="2007">%Y</xliff:g>"</string>
 
-    <!-- A format string for 24-hour time of day (example "23:59"). -->
-    <string name="time_of_day">"<xliff:g id="hour" example="23">%H</xliff:g>:<xliff:g id="minute" example="59">%M</xliff:g>:<xliff:g id="second" example="59">%S</xliff:g>"</string>
 
-    <!-- Format string for date and 24-hour time of day.
-         Example: 23:59:15 Jan 31 2008 -->
-    <string name="date_and_time">"<xliff:g id="hour" example="23">%H</xliff:g>:<xliff:g id="minute" example="59">%M</xliff:g>:<xliff:g id="second" example="59">%S</xliff:g> <xliff:g id="month" example="Jan">%B</xliff:g> <xliff:g id="day" example="31">%-d</xliff:g>, <xliff:g id="year" example="2008">%Y</xliff:g>"</string>
 
-    <!-- Format indicating a range of dates in the same year.
-         Example: "Oct 31 - Nov 3" -->
-    <string name="same_year_md1_md2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>"</string>
 
-    <!-- Format indicating a range of dates in the same year, with weekday.
-         Example: "Wed, Oct 31 - Sat, Nov 3" -->
-    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>"</string>
 
-    <!-- Format indicating a range of dates in the same year.
-         Example: "Oct 31 - Nov 3, 2007" -->
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year" example="2007">%9$s</xliff:g>"</string>
 
-    <!-- Format indicating a range of dates in the same year, with weekdays.
-         Example: "Wed, Oct 31 - Sat, Nov 3, 2007" -->
-    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year" example="2007">%9$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of time from a time on one day to a time on another.
-         Example: "Oct 31, 8:00am - Nov 3, 5:00pm" -->
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of time from a time on one day to a time on another, with weekdays.
-         Example: "Wed, Oct 31, 8:00am - Sat, Nov 3, 5:00pm" -->
-    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id ="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of time from a time on one day to a time on another, with years and weekdays.
-         Example: "Oct 31, 2007, 8:00am - Nov 3, 2007, 5:00pm" -->
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of time from a time on one day to a time on another.
-     Example: "Wed, Oct 31, 2007, 8:00am - Sat, Nov 3, 2007, 5:00pm" -->
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-
-    <!-- Format indicating a range of (numeric) dates.
-          Example: "10/31 - 11/3" -->
-    <string name="numeric_md1_md2">"<xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates.
-          Example: "Wed, 10/31 - Sat, 11/3" -->
-    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates.
-          Example: "10/31/2007 - 11/3/2007" -->
-    <string name="numeric_mdy1_mdy2">"<xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>/<xliff:g id="year1" example="2007">%4$s</xliff:g> \u2013 <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>/<xliff:g id="year2" example="2007">%9$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates.
-          Example: "Wed, 10/31/2007 - Sat, 11/3/2007" -->
-    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>/<xliff:g id="year1" example="2007">%4$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>/<xliff:g id="year2" example="2007">%9$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates and times.
-          Example: "10/31, 8:00am - 11/3, 5:00pm" -->
-    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates and times.
-          Example: "Wed, 10/31, 8:00am - Sat, 11/3, 5:00pm" -->
-    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates and times.
-          Example: "10/31/2007, 8:00am - 11/3/2007, 5:00pm"  -->
-    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>/<xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>/<xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of (numeric) dates and times.
-          Example: "Wed, 10/31/2007, 8:00am - Sat, 11/3/2007, 5:00pm" -->
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="10">%2$s</xliff:g>/<xliff:g id="day1" example="31">%3$s</xliff:g>/<xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="11">%7$s</xliff:g>/<xliff:g id="day2" example="30">%8$s</xliff:g>/<xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-
-    <!-- Format indicating a range of dates.
-          Example: "Oct 9 - 10" -->
-    <string name="same_month_md1_md2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="day2" example="3">%8$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates.
-          Example: "Tue, Oct 9 - Wed, Oct 10"  -->
-    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates.
-          Example: "Oct 9 - 10, 2007" -->
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g> \u2013 <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates.
-          Example: "Tue, Oct 9, 2007 - Wed, Oct 10, 2007"  -->
-    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="year1" example="2007">%4$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates and times.
-          Example: "Oct 9, 8:00am - Oct 10, 5:00pm"  -->
-    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates and times.
-          Example: "Tue, Oct 9, 8:00am - Wed, Oct 10, 5:00pm"  -->
-    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates and times.
-          Example: "Oct 9, 2007, 8:00am - Oct 10, 2007, 5:00pm"  -->
-    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format indicating a range of dates and times.
-          Example: "Tue, Oct 9, 2007, 8:00am - Wed, Oct 10, 2007, 5:00pm" -->
-    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="weekday1" example="Wed">%1$s</xliff:g>, <xliff:g id="month1" example="Oct">%2$s</xliff:g> <xliff:g id="day1" example="31">%3$s</xliff:g>, <xliff:g id="year1" example="2007">%4$s</xliff:g>, <xliff:g id="time1" example="8:00am">%5$s</xliff:g> \u2013 <xliff:g id="weekday2" example="Sat">%6$s</xliff:g>, <xliff:g id="month2" example="Nov">%7$s</xliff:g> <xliff:g id="day2" example="3">%8$s</xliff:g>, <xliff:g id="year2" example="2007">%9$s</xliff:g>, <xliff:g id="time2" example="5:00pm">%10$s</xliff:g>"</string>
-
-    <!-- Format string for abbreviated month, day, and year.
-         Example: "Oct 9, 2007" -->
-    <string name="abbrev_month_day_year">"<xliff:g id="month" example="Oct">%b</xliff:g> <xliff:g id="day" example="9">%-d</xliff:g>, <xliff:g id="year" example="2007">%Y</xliff:g>"</string>
-
-    <!-- Format string for abbreviated month and year.
-         Example: "Oct 2007" -->
-    <string name="abbrev_month_year">"<xliff:g id="month" example="Oct">%b</xliff:g> <xliff:g id="year" example="2007">%Y</xliff:g>"</string>
-
-    <!-- Format string for abbreviated month and day.
-         Example: "Oct 9" -->
-    <string name="abbrev_month_day">"<xliff:g id="month" example="Oct">%b</xliff:g> <xliff:g id="day" example="31">%-d</xliff:g>"</string>
-
-    <!-- Format string for abbreviated month alone.
-         Example: "Oct" -->
-    <string name="abbrev_month">"<xliff:g id="month" example="Oct">%b</xliff:g>"</string>
-
-    <!-- The full spelled out version of the day of the week. -->
-    <string name="day_of_week_long_sunday">Sunday</string>
-
-    <!-- The full spelled out version of the day of the week. -->
-    <string name="day_of_week_long_monday">Monday</string>
-
-    <!-- The full spelled out version of the day of the week. -->
-    <string name="day_of_week_long_tuesday">Tuesday</string>
-
-    <!-- The full spelled out version of the day of the week. -->
-    <string name="day_of_week_long_wednesday">Wednesday</string>
-
-    <!-- The full spelled out version of the day of the week. -->
-    <string name="day_of_week_long_thursday">Thursday</string>
-
-    <!-- The full spelled out version of the day of the week. -->
-    <string name="day_of_week_long_friday">Friday</string>
-
-    <!-- The full spelled out version of the day of the week. -->
-    <string name="day_of_week_long_saturday">Saturday</string>
-
-
-    <!-- An abbreviated day of the week.  Three characters typically in western languages.
-         In US English: "Sun" stands for Sunday -->
-    <string name="day_of_week_medium_sunday">Sun</string>
-
-    <!-- An abbreviated day of the week.  Three characters typically in western languages.
-         In US English: "Mon" stands for Monday -->
-    <string name="day_of_week_medium_monday">Mon</string>
-
-    <!-- An abbreviated day of the week.  Three characters typically in western languages.
-         In US English: "Tue" stands for Tuesday -->
-    <string name="day_of_week_medium_tuesday">Tue</string>
-
-    <!-- An abbreviated day of the week.  Three characters typically in western languages.
-         In US English: "Wed" stands for Wednesday -->
-    <string name="day_of_week_medium_wednesday">Wed</string>
-
-    <!-- An abbreviated day of the week.  Three characters typically in western languages.
-         In US English: "Thu" stands for Thursday -->
-    <string name="day_of_week_medium_thursday">Thu</string>
-
-    <!-- An abbreviated day of the week.  Three characters typically in western languages.
-         In US English: "Fri" stands for Friday -->
-    <string name="day_of_week_medium_friday">Fri</string>
-
-    <!-- An abbreviated day of the week.  Three characters typically in western languages.
-         In US English: "Sat" stands for Saturday -->
-    <string name="day_of_week_medium_saturday">Sat</string>
-
-
-    <!-- An abbreviated day of the week.  Two characters typically in western languages.
-         In US English: "Su" stands for Sunday -->
-    <string name="day_of_week_short_sunday">Su</string>
-
-    <!-- An abbreviated day of the week.  Two characters typically in western languages.
-         In US English: "Mo" stands for Monday -->
-    <string name="day_of_week_short_monday">Mo</string>
-
-    <!-- An abbreviated day of the week.  Two characters typically in western languages.
-         In US English: "Tu" stands for Tuesday -->
-    <string name="day_of_week_short_tuesday">Tu</string>
-
-    <!-- An abbreviated day of the week.  Two characters typically in western languages.
-         In US English: "We" stands for Wednesday -->
-    <string name="day_of_week_short_wednesday">We</string>
-
-    <!-- An abbreviated day of the week.  Two characters typically in western languages.
-         In US English: "Th" stands for Thursday -->
-    <string name="day_of_week_short_thursday">Th</string>
-
-    <!-- An abbreviated day of the week.  Two characters typically in western languages.
-         In US English: "Fr" stands for Friday -->
-    <string name="day_of_week_short_friday">Fr</string>
-
-    <!-- An abbreviated day of the week.  Two characters typically in western languages.
-         In US English: "Sa" stands for Saturday -->
-    <string name="day_of_week_short_saturday">Sa</string>
-
-
-    <!-- An abbreviated day of the week.  One character if that is unique.  Two if necessary.
-         In US English: "Su" stands for Sunday -->
-    <string name="day_of_week_shorter_sunday">Su</string>
-
-    <!-- An abbreviated day of the week.  One character if that is unique.  Two if necessary.
-         In US English: "M" stands for Monday -->
-    <string name="day_of_week_shorter_monday">M</string>
-
-    <!-- An abbreviated day of the week.  One character if that is unique.  Two if necessary.
-         In US English: "Tu" stands for Tuesday -->
-    <string name="day_of_week_shorter_tuesday">Tu</string>
-
-    <!-- An abbreviated day of the week.  One character if that is unique.  Two if necessary.
-         In US English: "W" stands for Wednesday -->
-    <string name="day_of_week_shorter_wednesday">W</string>
-
-    <!-- An abbreviated day of the week.  One character if that is unique.  Two if necessary.
-         In US English: "Th" stands for Thursday -->
-    <string name="day_of_week_shorter_thursday">Th</string>
-
-    <!-- An abbreviated day of the week.  One character if that is unique.  Two if necessary.
-         In US English: "F" stands for Friday -->
-    <string name="day_of_week_shorter_friday">F</string>
-
-    <!-- An abbreviated day of the week.  One character if that is unique.  Two if necessary.
-         In US English: "Sa" stands for Saturday -->
-    <string name="day_of_week_shorter_saturday">Sa</string>
-
-
-    <!-- An abbreviated day of the week.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "S" stands for Sunday -->
-    <string name="day_of_week_shortest_sunday">S</string>
-
-    <!-- An abbreviated day of the week.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "M" stands for Monday -->
-    <string name="day_of_week_shortest_monday">M</string>
-
-    <!-- An abbreviated day of the week.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "T" stands for Tuesday -->
-    <string name="day_of_week_shortest_tuesday">T</string>
-
-    <!-- An abbreviated day of the week.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "W" stands for Wednesday -->
-    <string name="day_of_week_shortest_wednesday">W</string>
-
-    <!-- An abbreviated day of the week.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "T" stands for Thursday -->
-    <string name="day_of_week_shortest_thursday">T</string>
-
-    <!-- An abbreviated day of the week.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "F" stands for Friday -->
-    <string name="day_of_week_shortest_friday">F</string>
-
-    <!-- An abbreviated day of the week.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "S" stands for Saturday -->
-    <string name="day_of_week_shortest_saturday">S</string>
-
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_january">January</string>
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_february">February</string>
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_march">March</string>
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_april">April</string>
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_may">May</string>
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_june">June</string>
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_july">July</string>
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_august">August</string>
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_september">September</string>
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_october">October</string>
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_november">November</string>
-
-    <!-- The full spelled out version of the month. -->
-    <string name="month_long_december">December</string>
-
-
-    <!-- An abbreviated month name.
-        In US English: "Jan" stands for January. -->
-    <string name="month_medium_january">Jan</string>
-
-    <!-- An abbreviated month name.
-        In US English: "Feb" stands for February. -->
-    <string name="month_medium_february">Feb</string>
-
-    <!-- An abbreviated month name.
-        In US English: "Mar" stands for March. -->
-    <string name="month_medium_march">Mar</string>
-
-    <!-- An abbreviated month name.
-        In US English: "Apr" stands for April. -->
-    <string name="month_medium_april">Apr</string>
-
-    <!-- An abbreviated month name.
-        In US English: "May" stands for May. -->
-    <string name="month_medium_may">May</string>
-
-    <!-- An abbreviated month name.
-        In US English: "Jun" stands for June. -->
-    <string name="month_medium_june">Jun</string>
-
-    <!-- An abbreviated month name.
-        In US English: "Jul" stands for July. -->
-    <string name="month_medium_july">Jul</string>
-
-    <!-- An abbreviated month name.
-        In US English: "Aug" stands for August. -->
-    <string name="month_medium_august">Aug</string>
-
-    <!-- An abbreviated month name.
-        In US English: "Sep" stands for September. -->
-    <string name="month_medium_september">Sep</string>
-
-    <!-- An abbreviated month name.
-        In US English: "Oct" stands for October. -->
-    <string name="month_medium_october">Oct</string>
-
-    <!-- An abbreviated month name.
-        In US English: "Nov" stands for November. -->
-    <string name="month_medium_november">Nov</string>
-
-    <!-- An abbreviated month name.
-        In US English: "Dec" stands for December. -->
-    <string name="month_medium_december">Dec</string>
-
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "J" stands for January -->
-    <string name="month_shortest_january">J</string>
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-        In US English: "F" stands for February. -->
-    <string name="month_shortest_february">F</string>
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "M" stands for March. -->
-    <string name="month_shortest_march">M</string>
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "A" stands for April. -->
-    <string name="month_shortest_april">A</string>
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "M" stands for May. -->
-    <string name="month_shortest_may">M</string>
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "J" stands for June. -->
-    <string name="month_shortest_june">J</string>
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "J" stands for July. -->
-    <string name="month_shortest_july">J</string>
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "A" stands for August. -->
-    <string name="month_shortest_august">A</string>
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "S" stands for September. -->
-    <string name="month_shortest_september">S</string>
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "O" stands for October. -->
-    <string name="month_shortest_october">O</string>
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "N" stands for November. -->
-    <string name="month_shortest_november">N</string>
-
-    <!-- An abbreviated month name.  One character long if it makes sense.  Does not have
-         to be unique.
-         In US English: "D" stands for December. -->
-    <string name="month_shortest_december">D</string>
 
     <!-- Format string for durations like "01:23" (1 minute, 23 seconds) -->
     <string name="elapsed_time_short_format_mm_ss"><xliff:g id="minutes" example="1">%1$02d</xliff:g>:<xliff:g id="seconds" example="23">%2$02d</xliff:g></string>
@@ -2153,6 +1662,8 @@
     <string name="anr_process">Process <xliff:g id="process">%1$s</xliff:g> is not responding.</string>
     <!-- Button allowing the user to close an application that is not responding. This will kill the application. -->
     <string name="force_close">Force close</string>
+    <!-- Button allowing the user to send a bug report for application which has encountered an error. -->
+    <string name="report">Report</string>
     <!-- Button allowing the user to choose to wait for an application that is not responding to become responsive again. -->
     <string name="wait">Wait</string>
     <!-- Button allowing a developer to connect a debugger to an application that is not responding. -->
@@ -2278,6 +1789,11 @@
     <!-- See EXTMEDIA_FORMAT.    This is the button text to format the sd card. -->
     <string name="extmedia_format_button_format">Format</string>
 
+    <!-- Title of notification shown when ADB is actively connected to the phone. -->
+    <string name="adb_active_notification_title">USB debugging connected</string>
+    <!-- Message of notification shown when ADB is actively connected to the phone. -->
+    <string name="adb_active_notification_message">A computer is connected to your phone.</string>
+    
     <!-- Used to replace %s in urls retreived from the signin server with locales.  For Some        -->
     <!-- devices we don't support all the locales we ship to and need to replace the '%s' with a    -->
     <!-- locale string based on mcc values.  By default (0-length string) we don't replace the %s   -->
@@ -2296,15 +1812,15 @@
     <!-- External media notification strings -->
     <!-- Shown when external media is being checked -->
     <string name="ext_media_checking_notification_title">Preparing SD card</string>
-    <string name="ext_media_checking_notification_message">Checking for errors</string>
+    <string name="ext_media_checking_notification_message">Checking for errors.</string>
 
     <!-- Shown when external media is blank (or unsupported filesystem) -->
     <string name="ext_media_nofs_notification_title">Blank SD card</string>
-    <string name="ext_media_nofs_notification_message">The SD card is blank or using an unsupported filesystem.</string>
+    <string name="ext_media_nofs_notification_message">SD card blank or has unsupported filesystem.</string>
 
     <!-- Shown when external media is unmountable (corrupt)) -->
     <string name="ext_media_unmountable_notification_title">Damaged SD card</string>
-    <string name="ext_media_unmountable_notification_message">The SD card is damaged. You may have to reformat your card.</string>
+    <string name="ext_media_unmountable_notification_message">SD card damaged. You may have to reformat it.</string>
 
     <!-- Shown when external media is unsafely removed -->
     <string name="ext_media_badremoval_notification_title">SD card unexpectedly removed</string>
@@ -2312,11 +1828,11 @@
 
     <!-- Shown when external media has been safely removed -->
     <string name="ext_media_safe_unmount_notification_title">SD card safe to remove</string>
-    <string name="ext_media_safe_unmount_notification_message">The SD card can now be safely removed.</string>
+    <string name="ext_media_safe_unmount_notification_message">You can safely remove SD card.</string>
 
     <!-- Shown when external media is missing -->
     <string name="ext_media_nomedia_notification_title">Removed SD card</string>
-    <string name="ext_media_nomedia_notification_message">The SD has been removed. Insert a new SD card to increase your device storage.</string>
+    <string name="ext_media_nomedia_notification_message">SD card removed. Insert a new one.</string>
 
     <!-- Shown in LauncherActivity when the requested target Intent didn't return any matching Activities, leaving the list empty. -->
     <string name="activity_list_empty">No matching activities found</string>
@@ -2366,10 +1882,12 @@
 
     <!-- This string array should be overridden by the manufacture to present a list of carrier-id,locale pairs.  This is used at startup to set a default locale by checking the system property ro.carrier for the carrier-id and searching through this array -->
     <string-array translatable="false" name="carrier_locales">
-    </string-array>    
+    </string-array>
+
+     <!-- Title for the selected state of a CompoundButton. -->
+     <string name="accessibility_compound_button_selected">checked</string>
+
+     <!-- Title for the unselected state of a CompoundButton. -->
+     <string name="accessibility_compound_button_unselected">not checked</string>
+
 </resources>
-
-
-
-
-

@@ -26,6 +26,7 @@ import com.android.internal.telephony.EncodeException;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
+import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -250,6 +251,12 @@ public class SmsMessage extends SmsMessageBase{
 
             // TP-Data-Coding-Scheme
             // Default encoding, uncompressed
+            // To test writing messages to the SIM card, change this value 0x00
+            // to 0x12, which means "bits 1 and 0 contain message class, and the
+            // class is 2". Note that this takes effect for the sender. In other
+            // words, messages sent by the phone with this change will end up on
+            // the receiver's SIM card. You can then send messages to yourself
+            // (on a phone with this change) and they'll end up on the SIM card.
             bo.write(0x00);
 
             // (no TP-Validity-Period)
@@ -330,9 +337,20 @@ public class SmsMessage extends SmsMessageBase{
     public static SubmitPdu getSubmitPdu(String scAddress,
             String destinationAddress, short destinationPort, byte[] data,
             boolean statusReportRequested) {
-        if (data.length > (MAX_USER_DATA_BYTES - 7 /* UDH size */)) {
+
+        SmsHeader.PortAddrs portAddrs = new SmsHeader.PortAddrs();
+        portAddrs.destPort = destinationPort;
+        portAddrs.origPort = 0;
+        portAddrs.areEightBits = false;
+
+        SmsHeader smsHeader = new SmsHeader();
+        smsHeader.portAddrs = portAddrs;
+
+        byte[] smsHeaderData = SmsHeader.toByteArray(smsHeader);
+
+        if ((data.length + smsHeaderData.length + 1) > MAX_USER_DATA_BYTES) {
             Log.e(LOG_TAG, "SMS data message may only contain "
-                    + (MAX_USER_DATA_BYTES - 7) + " bytes");
+                    + (MAX_USER_DATA_BYTES - smsHeaderData.length - 1) + " bytes");
             return null;
         }
 
@@ -348,21 +366,12 @@ public class SmsMessage extends SmsMessageBase{
 
         // (no TP-Validity-Period)
 
-        // User data size
-        bo.write(data.length + 7);
+        // Total size
+        bo.write(data.length + smsHeaderData.length + 1);
 
-        // User data header size
-        bo.write(0x06); // header is 6 octets
-
-        // User data header, indicating the destination port
-        bo.write(SmsHeader.APPLICATION_PORT_ADDRESSING_16_BIT); // port
-                                                                // addressing
-                                                                // header
-        bo.write(0x04); // each port is 2 octets
-        bo.write((destinationPort >> 8) & 0xFF); // MSB of destination port
-        bo.write(destinationPort & 0xFF); // LSB of destination port
-        bo.write(0x00); // MSB of originating port
-        bo.write(0x00); // LSB of originating port
+        // User data header
+        bo.write(smsHeaderData.length);
+        bo.write(smsHeaderData, 0, smsHeaderData.length);
 
         // User data
         bo.write(data, 0, data.length);
@@ -556,13 +565,14 @@ public class SmsMessage extends SmsMessageBase{
             int offset = cur;
             int userDataLength = pdu[offset++] & 0xff;
             int headerSeptets = 0;
+            int userDataHeaderLength = 0;
 
             if (hasUserDataHeader) {
-                int userDataHeaderLength = pdu[offset++] & 0xff;
+                userDataHeaderLength = pdu[offset++] & 0xff;
 
                 byte[] udh = new byte[userDataHeaderLength];
                 System.arraycopy(pdu, offset, udh, 0, userDataHeaderLength);
-                userDataHeader = SmsHeader.parse(udh);
+                userDataHeader = SmsHeader.fromByteArray(udh);
                 offset += userDataHeaderLength;
 
                 int headerBits = (userDataHeaderLength + 1) * 8;
@@ -571,19 +581,34 @@ public class SmsMessage extends SmsMessageBase{
                 mUserDataSeptetPadding = (headerSeptets * 7) - headerBits;
             }
 
-            /*
-             * Here we just create the user data length to be the remainder of
-             * the pdu minus the user data hearder. This is because the count
-             * could mean the number of uncompressed sepets if the userdata is
-             * encoded in 7-bit.
-             */
-            userData = new byte[pdu.length - offset];
+            int bufferLen;
+            if (dataInSeptets) {
+                /*
+                 * Here we just create the user data length to be the remainder of
+                 * the pdu minus the user data header, since userDataLength means
+                 * the number of uncompressed sepets.
+                 */
+                bufferLen = pdu.length - offset;
+            } else {
+                /*
+                 * userDataLength is the count of octets, so just subtract the
+                 * user data header.
+                 */
+                bufferLen = userDataLength - (hasUserDataHeader ? (userDataHeaderLength + 1) : 0);
+                if (bufferLen < 0) {
+                    bufferLen = 0;
+                }
+            }
+
+            userData = new byte[bufferLen];
             System.arraycopy(pdu, offset, userData, 0, userData.length);
             cur = offset;
 
             if (dataInSeptets) {
                 // Return the number of septets
-                return userDataLength - headerSeptets;
+                int count = userDataLength - headerSeptets;
+                // If count < 0, return 0 (means UDL was probably incorrect)
+                return count < 0 ? 0 : count;
             } else {
                 // Return the number of octets
                 return userData.length;
@@ -612,8 +637,6 @@ public class SmsMessage extends SmsMessageBase{
 
         /**
          * Returns an object representing the user data headers
-         *
-         * @return an object representing the user data headers
          *
          * {@hide}
          */
@@ -715,6 +738,44 @@ public class SmsMessage extends SmsMessageBase{
         boolean moreDataPresent() {
             return (pdu.length > cur);
         }
+    }
+
+    /**
+     * Calculate the number of septets needed to encode the message.
+     *
+     * @param msgBody the message to encode
+     * @param use7bitOnly ignore (but still count) illegal characters if true
+     * @return TextEncodingDetails
+     */
+    public static TextEncodingDetails calculateLength(CharSequence msgBody,
+            boolean use7bitOnly) {
+        TextEncodingDetails ted = new TextEncodingDetails();
+        try {
+            int septets = GsmAlphabet.countGsmSeptets(msgBody, !use7bitOnly);
+            ted.codeUnitCount = septets;
+            if (septets > MAX_USER_DATA_SEPTETS) {
+                ted.msgCount = (septets / MAX_USER_DATA_SEPTETS_WITH_HEADER) + 1;
+                ted.codeUnitsRemaining = MAX_USER_DATA_SEPTETS_WITH_HEADER
+                    - (septets % MAX_USER_DATA_SEPTETS_WITH_HEADER);
+            } else {
+                ted.msgCount = 1;
+                ted.codeUnitsRemaining = MAX_USER_DATA_SEPTETS - septets;
+            }
+            ted.codeUnitSize = ENCODING_7BIT;
+        } catch (EncodeException ex) {
+            int octets = msgBody.length() * 2;
+            ted.codeUnitCount = msgBody.length();
+            if (octets > MAX_USER_DATA_BYTES) {
+                ted.msgCount = (octets / MAX_USER_DATA_BYTES_WITH_HEADER) + 1;
+                ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES_WITH_HEADER
+                          - (octets % MAX_USER_DATA_BYTES_WITH_HEADER))/2;
+            } else {
+                ted.msgCount = 1;
+                ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES - octets)/2;
+            }
+            ted.codeUnitSize = ENCODING_16BIT;
+        }
+        return ted;
     }
 
     /** {@inheritDoc} */

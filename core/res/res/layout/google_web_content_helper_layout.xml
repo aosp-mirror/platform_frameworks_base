@@ -18,10 +18,28 @@
         android:foregroundGravity="center"
         android:measureAllChildren="false">
         
-    <!-- Include the indeterminate progress dialog's layout. -->
-    <include
-            android:id="@+id/progressContainer"
-            layout="@android:layout/progress_dialog" />
+    <LinearLayout android:id="@+id/progressContainer"
+                  android:orientation="horizontal"
+                  android:layout_gravity="center"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:baselineAligned="false"
+                  android:paddingLeft="8dip"
+                  android:paddingTop="10dip"
+                  android:paddingRight="8dip"
+                  android:paddingBottom="10dip">
+
+        <ProgressBar android:id="@android:id/progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:max="10000"
+            android:layout_marginRight="12dip" />
+
+        <TextView android:id="@+id/message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" />
+    </LinearLayout>
             
     <WebView
             android:id="@+id/web"

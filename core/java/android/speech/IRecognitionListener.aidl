@@ -17,6 +17,7 @@
 package android.speech;
 
 import android.os.Bundle;
+import android.speech.RecognitionResult;
 
 /**
  * Listener for speech recognition events, used with RecognitionService.
@@ -43,13 +44,17 @@ interface IRecognitionListener {
     /** Called after the user stops speaking. */
     void onEndOfSpeech();
 
-    /** A network or recognition error occurred. */
-    void onError(in String error);
+    /**
+     * A network or recognition error occurred. The code is defined in
+     * {@link android.speech.RecognitionResult}
+     */
+    void onError(in int error);
 
     /** 
-     * Called when recognition transcripts are ready.
-     * results: an ordered list of the most likely transcripts (N-best list).
-     * @hide
+     * Called when recognition results are ready.
+     * @param results: an ordered list of the most likely results (N-best list).
+     * @param key: a key associated with the results. The same results can
+     * be retrieved asynchronously later using the key, if available. 
      */
-    void onResults(in List<String> results);
+    void onResults(in List<RecognitionResult> results, long key);
 }

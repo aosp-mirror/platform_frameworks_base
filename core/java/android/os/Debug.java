@@ -21,6 +21,7 @@ import com.android.internal.util.TypedProperties;
 import android.util.Config;
 import android.util.Log;
 
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -375,6 +376,20 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
             pathName = pathName + DEFAULT_TRACE_EXTENSION;
 
         VMDebug.startMethodTracing(pathName, bufferSize, flags);
+    }
+
+    /**
+     * Like startMethodTracing(String, int, int), but taking an already-opened
+     * FileDescriptor in which the trace is written.  The file name is also
+     * supplied simply for logging.  Makes a dup of the file descriptor.
+     * 
+     * Not exposed in the SDK unless we are really comfortable with supporting
+     * this and find it would be useful.
+     * @hide
+     */
+    public static void startMethodTracing(String traceName, FileDescriptor fd,
+        int bufferSize, int flags) {
+        VMDebug.startMethodTracing(traceName, fd, bufferSize, flags);
     }
 
     /**

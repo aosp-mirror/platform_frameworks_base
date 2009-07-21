@@ -208,12 +208,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private GpsNetworkThread mNetworkThread;
     private Object mNetworkThreadLock = new Object();
 
-    private String mSuplHost;
-    private int mSuplPort;
-    private String mC2KHost;
-    private int mC2KPort;
-    private boolean mSetSuplServer;
-    private boolean mSetC2KServer;
     private String mAGpsApn;
     private int mAGpsDataConnectionState;
     private final ConnectivityManager mConnMgr;
@@ -355,23 +349,27 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             stream.close();
             mNtpServer = mProperties.getProperty("NTP_SERVER", null);
 
-            mSuplHost = mProperties.getProperty("SUPL_HOST");
+            String host = mProperties.getProperty("SUPL_HOST");
             String portString = mProperties.getProperty("SUPL_PORT");
-            if (mSuplHost != null && portString != null) {
+            if (host != null && portString != null) {
                 try {
-                    mSuplPort = Integer.parseInt(portString);
-                    mSetSuplServer = true;
+                    int port = Integer.parseInt(portString);
+                    native_set_agps_server(AGPS_TYPE_SUPL, host, port);
+                    // use MS-Based position mode if SUPL support is enabled
+                    mPositionMode = GPS_POSITION_MODE_MS_BASED;
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
                 }
             }
 
-            mC2KHost = mProperties.getProperty("C2K_HOST");
+            host = mProperties.getProperty("C2K_HOST");
             portString = mProperties.getProperty("C2K_PORT");
-            if (mC2KHost != null && portString != null) {
+            if (host != null && portString != null) {
                 try {
-                    mC2KPort = Integer.parseInt(portString);
-                    mSetC2KServer = true;
+                    int port = Integer.parseInt(portString);
+                    native_set_agps_server(AGPS_TYPE_C2K, host, port);
+                    // use MS-Based position mode if SUPL support is enabled
+                    mPositionMode = GPS_POSITION_MODE_MS_BASED;
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse C2K_PORT: " + portString);
                 }
@@ -386,10 +384,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
      * data network (e.g., the Internet), false otherwise.
      */
     public boolean requiresNetwork() {
-        // We want updateNetworkState() to get called when the network state changes
-        // for XTRA and NTP time injection support.
-        return (mNtpServer != null || native_supports_xtra() ||
-                mSuplHost != null || mC2KHost != null);
+        return true;
     }
 
     public void updateNetworkState(int state) {
@@ -403,6 +398,17 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             // signal the network thread when the network becomes available
             mNetworkThread.signal();
         } 
+    }
+
+    /**
+     * This is called to inform us when another location provider returns a location.
+     * Someday we might use this for network location injection to aid the GPS
+     */
+    public void updateLocation(Location location) {
+        if (location.hasAccuracy()) {
+            native_inject_location(location.getLatitude(), location.getLongitude(),
+                    location.getAccuracy());
+        }
     }
 
     /**
@@ -611,27 +617,44 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             synchronized(mListeners) {
                 mListeners.remove(this);
             }
+            if (mListener != null) {
+                mListener.asBinder().unlinkToDeath(this, 0);
+            }
         }
     }
 
     public void addListener(int uid) {
-        mClientUids.put(uid, 0);
-        if (mNavigating) {
-            try {
-                mBatteryStats.noteStartGps(uid);
-            } catch (RemoteException e) {
-                Log.w(TAG, "RemoteException in addListener");
+        synchronized(mListeners) {
+            if (mClientUids.indexOfKey(uid) >= 0) {
+                // Shouldn't be here -- already have this uid.
+                Log.w(TAG, "Duplicate add listener for uid " + uid);
+                return;
+            }
+            mClientUids.put(uid, 0);
+            if (mNavigating) {
+                try {
+                    mBatteryStats.noteStartGps(uid);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException in addListener");
+                }
             }
         }
     }
 
     public void removeListener(int uid) {
-        mClientUids.delete(uid);
-        if (mNavigating) {
-            try {
-                mBatteryStats.noteStopGps(uid);
-            } catch (RemoteException e) {
-                Log.w(TAG, "RemoteException in removeListener");
+        synchronized(mListeners) {
+            if (mClientUids.indexOfKey(uid) < 0) {
+                // Shouldn't be here -- don't have this uid.
+                Log.w(TAG, "Unneeded remove listener for uid " + uid);
+                return;
+            }
+            mClientUids.delete(uid);
+            if (mNavigating) {
+                try {
+                    mBatteryStats.noteStopGps(uid);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException in removeListener");
+                }
             }
         }
     }
@@ -640,6 +663,16 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         
         if ("delete_aiding_data".equals(command)) {
             return deleteAidingData(extras);
+        }
+        if ("force_time_injection".equals(command)) {
+            return forceTimeInjection();
+        }
+        if ("force_xtra_injection".equals(command)) {
+            if (native_supports_xtra() && mNetworkThread != null) {
+                xtraDownloadRequest();
+                return true;
+            }
+            return false;
         }
         
         Log.w(TAG, "sendExtraCommand: unknown command " + command);
@@ -673,6 +706,15 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             return true;
         }
 
+        return false;
+    }
+
+    private boolean forceTimeInjection() {
+        if (Config.LOGD) Log.d(TAG, "forceTimeInjection");
+        if (mNetworkThread != null) {
+            mNetworkThread.timeInjectRequest();
+            return true;
+        }
         return false;
     }
 
@@ -811,30 +853,33 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private void reportStatus(int status) {
         if (VERBOSE) Log.v(TAG, "reportStatus status: " + status);
 
-        boolean wasNavigating = mNavigating;
-        mNavigating = (status == GPS_STATUS_SESSION_BEGIN);
-
-        if (wasNavigating != mNavigating) {
+        synchronized(mListeners) {
+            boolean wasNavigating = mNavigating;
+            mNavigating = (status == GPS_STATUS_SESSION_BEGIN);
+    
+            if (wasNavigating == mNavigating) {
+                return;
+            }
+            
             if (mNavigating) {
                 if (DEBUG) Log.d(TAG, "Acquiring wakelock");
                  mWakeLock.acquire();
             }
-            synchronized(mListeners) {
-                int size = mListeners.size();
-                for (int i = 0; i < size; i++) {
-                    Listener listener = mListeners.get(i);
-                    try {
-                        if (mNavigating) {
-                            listener.mListener.onGpsStarted(); 
-                        } else {
-                            listener.mListener.onGpsStopped(); 
-                        }
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "RemoteException in reportStatus");
-                        mListeners.remove(listener);
-                        // adjust for size of list changing
-                        size--;
+        
+            int size = mListeners.size();
+            for (int i = 0; i < size; i++) {
+                Listener listener = mListeners.get(i);
+                try {
+                    if (mNavigating) {
+                        listener.mListener.onGpsStarted(); 
+                    } else {
+                        listener.mListener.onGpsStopped(); 
                     }
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException in reportStatus");
+                    mListeners.remove(listener);
+                    // adjust for size of list changing
+                    size--;
                 }
             }
 
@@ -924,8 +969,13 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                  int result = mConnMgr.startUsingNetworkFeature(
                         ConnectivityManager.TYPE_MOBILE, Phone.FEATURE_ENABLE_SUPL);
                 if (result == Phone.APN_ALREADY_ACTIVE) {
-                    native_agps_data_conn_open(mAGpsApn);
-                    mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
+                    if (mAGpsApn != null) {
+                        native_agps_data_conn_open(mAGpsApn);
+                        mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
+                    } else {
+                        Log.e(TAG, "mAGpsApn not set when receiving Phone.APN_ALREADY_ACTIVE");
+                        native_agps_data_conn_failed();
+                    }
                 } else if (result == Phone.APN_REQUEST_STARTED) {
                     mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPENING;
                 } else {
@@ -959,29 +1009,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         }
     }
 
-    private boolean setAGpsServer(int type, String host, int port) {
-        try {
-            InetAddress inetAddress = InetAddress.getByName(host);
-            if (inetAddress != null) {
-                byte[] addrBytes = inetAddress.getAddress();
-                long addr = 0;
-                for (int i = 0; i < addrBytes.length; i++) {
-                    int temp = addrBytes[i];
-                    // signed -> unsigned
-                    if (temp < 0) temp = 256 + temp;
-                    addr = addr * 256 + temp;
-                }
-                // use MS-Based position mode if SUPL support is enabled
-                mPositionMode = GPS_POSITION_MODE_MS_BASED;
-                native_set_agps_server(type, (int)addr, port);
-            }
-        } catch (UnknownHostException e) {
-            Log.e(TAG, "unknown host for server " + host);
-            return false;
-        }
-        return true;
-    }
-
     private class GpsEventThread extends Thread {
 
         public GpsEventThread() {
@@ -1004,6 +1031,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
 
         private long mNextNtpTime = 0;
         private long mNextXtraTime = 0;
+        private boolean mTimeInjectRequested = false;
         private boolean mXtraDownloadRequested = false;
         private boolean mDone = false;
 
@@ -1054,16 +1082,17 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                     }
                     waitTime = getWaitTime();
                 } while (!mDone && ((!mXtraDownloadRequested &&
-                        !mSetSuplServer && !mSetC2KServer && waitTime > 0)
+                        !mTimeInjectRequested && waitTime > 0)
                         || !mNetworkAvailable));
                 if (Config.LOGD) Log.d(TAG, "NetworkThread out of wake loop");
                 
                 if (!mDone) {
                     if (mNtpServer != null && 
-                            mNextNtpTime <= System.currentTimeMillis()) {
+                            (mTimeInjectRequested || mNextNtpTime <= System.currentTimeMillis())) {
                         if (Config.LOGD) {
                             Log.d(TAG, "Requesting time from NTP server " + mNtpServer);
                         }
+                        mTimeInjectRequested = false;
                         if (client.requestTime(mNtpServer, 10000)) {
                             long time = client.getNtpTime();
                             long timeReference = client.getNtpTimeReference();
@@ -1081,21 +1110,10 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                         }
                     }
 
-                    // Set the AGPS server addresses if we have not yet
-                    if (mSetSuplServer) {
-                        if (setAGpsServer(AGPS_TYPE_SUPL, mSuplHost, mSuplPort)) {
-                            mSetSuplServer = false;
-                        }
-                    }
-                    if (mSetC2KServer) {
-                        if (setAGpsServer(AGPS_TYPE_C2K, mC2KHost, mC2KPort)) {
-                            mSetC2KServer = false;
-                        }
-                    }
-
                     if ((mXtraDownloadRequested || 
                             (mNextXtraTime > 0 && mNextXtraTime <= System.currentTimeMillis()))
                             && xtraDownloader != null) {
+                        mXtraDownloadRequested = false;
                         byte[] data = xtraDownloader.downloadXtraData();
                         if (data != null) {
                             if (Config.LOGD) {
@@ -1103,7 +1121,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
                             }
                             native_inject_xtra_data(data, data.length);
                             mNextXtraTime = 0;
-                            mXtraDownloadRequested = false;
                         } else {
                             mNextXtraTime = System.currentTimeMillis() + RETRY_INTERVAL;
                         }
@@ -1115,6 +1132,11 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         
         synchronized void xtraDownloadRequest() {
             mXtraDownloadRequested = true;
+            notify();
+        }
+
+        synchronized void timeInjectRequest() {
+            mTimeInjectRequested = true;
             notify();
         }
 
@@ -1177,7 +1199,8 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     // mask[0] is ephemeris mask and mask[1] is almanac mask
     private native int native_read_sv_status(int[] svs, float[] snrs,
             float[] elevations, float[] azimuths, int[] masks);
-    
+    private native void native_inject_location(double latitude, double longitude, float accuracy);
+
     // XTRA Support    
     private native void native_inject_time(long time, long timeReference, int uncertainty);
     private native boolean native_supports_xtra();
@@ -1187,5 +1210,5 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private native void native_agps_data_conn_open(String apn);
     private native void native_agps_data_conn_closed();
     private native void native_agps_data_conn_failed();
-    private native void native_set_agps_server(int type, int addr, int port);
+    private native void native_set_agps_server(int type, String hostname, int port);
 }

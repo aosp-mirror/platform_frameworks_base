@@ -237,6 +237,7 @@ public class WebView extends AbsoluteLayout
      * Helper class to get velocity for fling
      */
     VelocityTracker mVelocityTracker;
+    private int mMaximumFling;
 
     /**
      * Touch mode
@@ -395,22 +396,27 @@ public class WebView extends AbsoluteLayout
     // width which view is considered to be fully zoomed out
     static final int ZOOM_OUT_WIDTH = 1008;
 
-    private static final float DEFAULT_MAX_ZOOM_SCALE = 4.0f;
-    private static final float DEFAULT_MIN_ZOOM_SCALE = 0.25f;
+    // default scale limit. Depending on the display density
+    private static float DEFAULT_MAX_ZOOM_SCALE;
+    private static float DEFAULT_MIN_ZOOM_SCALE;
     // scale limit, which can be set through viewport meta tag in the web page
-    private float mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
-    private float mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+    private float mMaxZoomScale;
+    private float mMinZoomScale;
     private boolean mMinZoomScaleFixed = false;
 
     // initial scale in percent. 0 means using default.
     private int mInitialScale = 0;
 
+    // default scale. Depending on the display density.
+    static int DEFAULT_SCALE_PERCENT;
+    private float mDefaultScale;
+
     // set to true temporarily while the zoom control is being dragged
     private boolean mPreviewZoomOnly = false;
 
     // computed scale and inverse, from mZoomWidth.
-    private float mActualScale = 1;
-    private float mInvActualScale = 1;
+    private float mActualScale;
+    private float mInvActualScale;
     // if this is non-zero, it is used on drawing rather than mActualScale
     private float mZoomScale;
     private float mInvInitialZoomScale;
@@ -635,7 +641,7 @@ public class WebView extends AbsoluteLayout
         mZoomFitPageButton.setOnClickListener(
             new View.OnClickListener() {
                 public void onClick(View v) {
-                    zoomWithPreview(1f);
+                    zoomWithPreview(mDefaultScale);
                     updateZoomButtonsEnabled();
                 }
             });
@@ -658,7 +664,7 @@ public class WebView extends AbsoluteLayout
             // or out.
             mZoomButtonsController.setZoomInEnabled(canZoomIn);
             mZoomButtonsController.setZoomOutEnabled(canZoomOut);
-            mZoomFitPageButton.setEnabled(mActualScale != 1);
+            mZoomFitPageButton.setEnabled(mActualScale != mDefaultScale);
         }
         mZoomOverviewButton.setVisibility(canZoomScrollOut() ? View.VISIBLE:
                 View.GONE);
@@ -671,13 +677,41 @@ public class WebView extends AbsoluteLayout
         setClickable(true);
         setLongClickable(true);
 
-        final int slop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        final ViewConfiguration configuration = ViewConfiguration.get(getContext());
+        final int slop = configuration.getScaledTouchSlop();
         mTouchSlopSquare = slop * slop;
         mMinLockSnapReverseDistance = slop;
+        final float density = getContext().getResources().getDisplayMetrics().density;
         // use one line height, 16 based on our current default font, for how
         // far we allow a touch be away from the edge of a link
-        mNavSlop = (int) (16 * getContext().getResources()
-                .getDisplayMetrics().density);
+        mNavSlop = (int) (16 * density);
+        // density adjusted scale factors
+        DEFAULT_SCALE_PERCENT = (int) (100 * density);
+        mDefaultScale = density;
+        mActualScale = density;
+        mInvActualScale = 1 / density;
+        DEFAULT_MAX_ZOOM_SCALE = 4.0f * density;
+        DEFAULT_MIN_ZOOM_SCALE = 0.25f * density;
+        mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
+        mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+        mMaximumFling = configuration.getScaledMaximumFlingVelocity();
+    }
+
+    /* package */void updateDefaultZoomDensity(int zoomDensity) {
+        final float density = getContext().getResources().getDisplayMetrics().density
+                * 100 / zoomDensity;
+        if (Math.abs(density - mDefaultScale) > 0.01) {
+            float scaleFactor = density / mDefaultScale;
+            // adjust the limits
+            mNavSlop = (int) (16 * density);
+            DEFAULT_SCALE_PERCENT = (int) (100 * density);
+            DEFAULT_MAX_ZOOM_SCALE = 4.0f * density;
+            DEFAULT_MIN_ZOOM_SCALE = 0.25f * density;
+            mDefaultScale = density;
+            mMaxZoomScale *= scaleFactor;
+            mMinZoomScale *= scaleFactor;
+            setNewZoomScale(mActualScale * scaleFactor, false);
+        }
     }
 
     /* package */ boolean onSavePassword(String schemePlusHost, String username,
@@ -1115,6 +1149,29 @@ public class WebView extends AbsoluteLayout
         switchOutDrawHistory();
         mWebViewCore.sendMessage(EventHub.LOAD_URL, url);
         clearTextEntry();
+    }
+
+    /**
+     * Load the url with postData using "POST" method into the WebView. If url
+     * is not a network url, it will be loaded with {link
+     * {@link #loadUrl(String)} instead.
+     * 
+     * @param url The url of the resource to load.
+     * @param postData The data will be passed to "POST" request.
+     * 
+     * @hide pending API solidification
+     */
+    public void postUrl(String url, byte[] postData) {
+        if (URLUtil.isNetworkUrl(url)) {
+            switchOutDrawHistory();
+            HashMap arg = new HashMap();
+            arg.put("url", url);
+            arg.put("data", postData);
+            mWebViewCore.sendMessage(EventHub.POST_URL, arg);
+            clearTextEntry();
+        } else {
+            loadUrl(url);
+        }
     }
 
     /**
@@ -4103,7 +4160,7 @@ public class WebView extends AbsoluteLayout
         int maxX = Math.max(computeHorizontalScrollRange() - getViewWidth(), 0);
         int maxY = Math.max(computeVerticalScrollRange() - getViewHeight(), 0);
 
-        mVelocityTracker.computeCurrentVelocity(1000);
+        mVelocityTracker.computeCurrentVelocity(1000, mMaximumFling);
         int vx = (int) mVelocityTracker.getXVelocity();
         int vy = (int) mVelocityTracker.getYVelocity();
 
@@ -4134,9 +4191,9 @@ public class WebView extends AbsoluteLayout
     private boolean zoomWithPreview(float scale) {
         float oldScale = mActualScale;
 
-        // snap to 100% if it is close
-        if (scale > 0.95f && scale < 1.05f) {
-            scale = 1.0f;
+        // snap to DEFAULT_SCALE if it is close
+        if (scale > (mDefaultScale - 0.05) && scale < (mDefaultScale + 0.05)) {
+            scale = mDefaultScale;
         }
 
         setNewZoomScale(scale, false);
@@ -4517,9 +4574,11 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_LONGPRESS: {
-                    mTouchMode = TOUCH_DONE_MODE;
-                    performLongClick();
-                    updateTextEntry();
+                    if (!mPreventDrag) {
+                        mTouchMode = TOUCH_DONE_MODE;
+                        performLongClick();
+                        updateTextEntry();
+                    }
                     break;
                 }
                 case SWITCH_TO_ENTER:
@@ -4651,8 +4710,8 @@ public class WebView extends AbsoluteLayout
                     }
                     int initialScale = msg.arg1;
                     int viewportWidth = msg.arg2;
-                    // by default starting a new page with 100% zoom scale.
-                    float scale = 1.0f;
+                    // start a new page with DEFAULT_SCALE zoom scale.
+                    float scale = mDefaultScale;
                     if (mInitialScale > 0) {
                         scale = mInitialScale / 100.0f;
                     } else  {

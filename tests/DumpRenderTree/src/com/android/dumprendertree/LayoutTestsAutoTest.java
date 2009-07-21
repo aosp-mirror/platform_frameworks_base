@@ -178,15 +178,13 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     private void resumeTestList() {
         // read out the test name it stoped last time.
         try {
-            BufferedReader inReader = new BufferedReader(new FileReader(TEST_STATUS_FILE));
-            String line = inReader.readLine();
+            String line = FsUtils.readTestStatus(TEST_STATUS_FILE);
             for (int i = 0; i < mTestList.size(); i++) {
                 if (mTestList.elementAt(i).equals(line)) {
                     mTestList = new Vector<String>(mTestList.subList(i+1, mTestList.size()));
                     break;
                 }
             }
-            inReader.close();
         } catch (Exception e) {
             Log.e(LOGTAG, "Error reading " + TEST_STATUS_FILE);
         }
@@ -204,18 +202,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             Log.e(LOGTAG, "Fail to delete " + TEST_STATUS_FILE + " : " + e.getMessage());
         }
     }
-  
-    private void updateTestStatus(String s) {
-        // Write TEST_STATUS_FILE
-        try {
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(TEST_STATUS_FILE));
-            bos.write(s.getBytes());
-            bos.close();
-        } catch (Exception e) {
-            Log.e(LOGTAG, "Cannot update file " + TEST_STATUS_FILE);
-        }
-    }
-    
+
     private String getResultFile(String test) {
         String shortName = test.substring(0, test.lastIndexOf('.'));
         // Write actual results to result directory.
@@ -223,7 +210,10 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     }
     
     private String getExpectedResultFile(String test) {
-        String shortName = test.substring(0, test.lastIndexOf('.'));
+        int pos = test.lastIndexOf('.');
+        if(pos == -1)
+            return null;
+        String shortName = test.substring(0, pos);
         return shortName + "-expected.txt";          
     }
 
@@ -303,6 +293,10 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         });
 
         String resultFile = getResultFile(test);
+        if(resultFile == null) {
+            //simply ignore this test
+            return;
+        }
         if (mRebaselineResults) {
             String expectedResultFile = getExpectedResultFile(test);
             File f = new File(expectedResultFile);
@@ -385,12 +379,12 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         // Run tests.
         for (int i = 0; i < mTestList.size(); i++) {
             String s = mTestList.elementAt(i);
-            updateTestStatus(s);
+            FsUtils.updateTestStatus(TEST_STATUS_FILE, s);
             // Run tests
             runTestAndWaitUntilDone(activity, s, runner.mTimeoutInMillis);
         }
 
-        updateTestStatus("#DONE");
+        FsUtils.updateTestStatus(TEST_STATUS_FILE, "#DONE");
         
         activity.finish();
     }
@@ -417,7 +411,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         try {
             File tests_list = new File(LAYOUT_TESTS_LIST_FILE);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tests_list, false));
-            findTestsRecursively(bos, getTestPath());
+            FsUtils.findLayoutTestsRecursively(bos, getTestPath());
             bos.flush();
             bos.close();
        } catch (Exception e) {
@@ -425,38 +419,6 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
        }
     }
 
-    private void findTestsRecursively(BufferedOutputStream bos, String dir) throws IOException {
-         Log.v(LOGTAG, "Searching tests under " + dir);
-         
-         File d = new File(dir);
-         if (!d.isDirectory()) {
-             throw new AssertionError("A directory expected, but got " + dir);
-         }
-         
-         String[] files = d.list();
-         for (int i = 0; i < files.length; i++) {
-             String s = dir + "/" + files[i];
-             if (FileFilter.ignoreTest(s)) {
-                 Log.v(LOGTAG, "  Ignoring: " + s);
-                 continue;
-             }
-             if (s.toLowerCase().endsWith(".html") 
-                 || s.toLowerCase().endsWith(".xml")) {
-                 bos.write(s.getBytes());
-                 bos.write('\n');
-                 continue;
-             }
-             
-             File f = new File(s);
-             if (f.isDirectory()) {
-                 findTestsRecursively(bos, s);
-                 continue;
-             }
-             
-             Log.v(LOGTAG, "Skipping " + s);
-        }
-    }
-    
     // Running all the layout tests at once sometimes
     // causes the dumprendertree to run out of memory.
     // So, additional tests are added to run the tests

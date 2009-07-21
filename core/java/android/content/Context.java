@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -233,6 +234,9 @@ public abstract class Context {
     /** Return the name of this application's package. */
     public abstract String getPackageName();
 
+    /** Return the full application info for this context's package. */
+    public abstract ApplicationInfo getApplicationInfo();
+    
     /**
      * {@hide}
      * Return the full path to this context's resource files.  This is the ZIP files
@@ -254,10 +258,18 @@ public abstract class Context {
      * <p>Note: this is not generally useful for applications, since they should
      * not be directly accessing the file system.
      *
-     *
      * @return String Path to the code and assets.
      */
     public abstract String getPackageCodePath();
+
+    /**
+     * {@hide}
+     * Return the full path to the shared prefs file for the given prefs group name.
+     *
+     * <p>Note: this is not generally useful for applications, since they should
+     * not be directly accessing the file system.
+     */
+    public abstract File getSharedPrefsFile(String name);
 
     /**
      * Retrieve and hold the contents of the preferences file 'name', returning
@@ -525,16 +537,6 @@ public abstract class Context {
      * mandatory.
      */
     public abstract int getWallpaperDesiredMinimumHeight();
-
-    /**
-     * Returns the scale in which the application will be drawn on the
-     * screen. This is usually 1.0f if the application supports the device's
-     * resolution/density. This will be 1.5f, for example, if the application
-     * that supports only 160 density runs on 240 density screen.
-     *
-     * @hide
-     */
-    public abstract float getApplicationScale();
 
     /**
      * Change the current system wallpaper to a bitmap.  The given bitmap is
@@ -1135,6 +1137,15 @@ public abstract class Context {
     public static final String NOTIFICATION_SERVICE = "notification";
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.view.accessibility.AccessibilityManager} for giving the user
+     * feedback for UI events through the registered event listeners.
+     *
+     * @see #getSystemService
+     * @see android.view.accessibility.AccessibilityManager
+     */
+    public static final String ACCESSIBILITY_SERVICE = "accessibility";
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.NotificationManager} for controlling keyguard.
      *
      * @see #getSystemService
@@ -1643,6 +1654,13 @@ public abstract class Context {
      * with extreme care!
      */
     public static final int CONTEXT_IGNORE_SECURITY = 0x00000002;
+    
+    /**
+     * Flag for use with {@link #createPackageContext}: a restricted context may
+     * disable specific features. For instance, a View associated with a restricted
+     * context would ignore particular XML attributes.
+     */
+    public static final int CONTEXT_RESTRICTED = 0x00000004;
 
     /**
      * Return a new Context object for the given application name.  This
@@ -1671,4 +1689,15 @@ public abstract class Context {
      */
     public abstract Context createPackageContext(String packageName,
             int flags) throws PackageManager.NameNotFoundException;
+
+    /**
+     * Indicates whether this Context is restricted.
+     * 
+     * @return True if this Context is restricted, false otherwise.
+     * 
+     * @see #CONTEXT_RESTRICTED
+     */
+    public boolean isRestricted() {
+        return false;
+    }
 }

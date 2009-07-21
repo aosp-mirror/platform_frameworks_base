@@ -59,32 +59,32 @@ public final class MotionEvent implements Parcelable {
     public static final int ACTION_OUTSIDE          = 4;
 
     private static final boolean TRACK_RECYCLED_LOCATION = false;
-    
+
     /**
      * Flag indicating the motion event intersected the top edge of the screen.
      */
     public static final int EDGE_TOP = 0x00000001;
-    
+
     /**
      * Flag indicating the motion event intersected the bottom edge of the screen.
      */
     public static final int EDGE_BOTTOM = 0x00000002;
-    
+
     /**
      * Flag indicating the motion event intersected the left edge of the screen.
      */
     public static final int EDGE_LEFT = 0x00000004;
-    
+
     /**
      * Flag indicating the motion event intersected the right edge of the screen.
      */
     public static final int EDGE_RIGHT = 0x00000008;
-    
+
     static private final int MAX_RECYCLED = 10;
     static private Object gRecyclerLock = new Object();
     static private int gRecyclerUsed = 0;
     static private MotionEvent gRecyclerTop = null;
-    
+
     private long mDownTime;
     private long mEventTime;
     private int mAction;
@@ -109,7 +109,7 @@ public final class MotionEvent implements Parcelable {
 
     private MotionEvent() {
     }
-    
+
     static private MotionEvent obtain() {
         synchronized (gRecyclerLock) {
             if (gRecyclerTop == null) {
@@ -123,26 +123,26 @@ public final class MotionEvent implements Parcelable {
             return ev;
         }
     }
-    
+
     /**
      * Create a new MotionEvent, filling in all of the basic values that
      * define the motion.
-     * 
-     * @param downTime The time (in ms) when the user originally pressed down to start 
+     *
+     * @param downTime The time (in ms) when the user originally pressed down to start
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param eventTime  The the time (in ms) when this specific event was generated.  This 
+     * @param eventTime  The the time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param action The kind of action being performed -- one of either
      * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
      * {@link #ACTION_CANCEL}.
      * @param x The X coordinate of this event.
      * @param y The Y coordinate of this event.
-     * @param pressure The current pressure of this event.  The pressure generally 
-     * ranges from 0 (no pressure at all) to 1 (normal pressure), however 
-     * values higher than 1 may be generated depending on the calibration of 
+     * @param pressure The current pressure of this event.  The pressure generally
+     * ranges from 0 (no pressure at all) to 1 (normal pressure), however
+     * values higher than 1 may be generated depending on the calibration of
      * the input device.
      * @param size A scaled value of the approximate size of the area being pressed when
-     * touched with the finger. The actual value in pixels corresponding to the finger 
+     * touched with the finger. The actual value in pixels corresponding to the finger
      * touch is normalized with a device specific range of values
      * and scaled to a value between 0 and 1.
      * @param metaState The state of any meta / modifier keys that were in effect when
@@ -174,15 +174,15 @@ public final class MotionEvent implements Parcelable {
 
         return ev;
     }
-    
+
     /**
      * Create a new MotionEvent, filling in a subset of the basic motion
      * values.  Those not specified here are: device id (always 0), pressure
      * and size (always 1), x and y precision (always 1), and edgeFlags (always 0).
-     * 
-     * @param downTime The time (in ms) when the user originally pressed down to start 
+     *
+     * @param downTime The time (in ms) when the user originally pressed down to start
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param eventTime  The the time (in ms) when this specific event was generated.  This 
+     * @param eventTime  The the time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param action The kind of action being performed -- one of either
      * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
@@ -212,27 +212,47 @@ public final class MotionEvent implements Parcelable {
     }
 
     /**
-     * Scales down the cood of this event by the given scale.
+     * Scales down the coordination of this event by the given scale.
      *
      * @hide
      */
     public void scale(float scale) {
-        if (scale != 1.0f) {
-            mX *= scale;
-            mY *= scale;
-            mRawX *= scale;
-            mRawY *= scale;
-            mSize *= scale;
-            mXPrecision *= scale;
-            mYPrecision *= scale;
-            if (mHistory != null) {
-                float[] history = mHistory;
-                int length = history.length;
-                for (int i = 0; i < length; i += 4) {
-                    history[i] *= scale;
-                    history[i + 2] *= scale;
-                    history[i + 3] *= scale;
-                }
+        mX *= scale;
+        mY *= scale;
+        mRawX *= scale;
+        mRawY *= scale;
+        mSize *= scale;
+        mXPrecision *= scale;
+        mYPrecision *= scale;
+        if (mHistory != null) {
+            float[] history = mHistory;
+            int length = history.length;
+            for (int i = 0; i < length; i += 4) {
+                history[i] *= scale;        // X
+                history[i + 1] *= scale;    // Y
+                // no need to scale pressure ([i+2])
+                history[i + 3] *= scale;    // Size, TODO: square this?
+            }
+        }
+    }
+
+    /**
+     * Translate the coordination of the event by given x and y.
+     *
+     * @hide
+     */
+    public void translate(float dx, float dy) {
+        mX += dx;
+        mY += dy;
+        mRawX += dx;
+        mRawY += dx;
+        if (mHistory != null) {
+            float[] history = mHistory;
+            int length = history.length;
+            for (int i = 0; i < length; i += 4) {
+                history[i] += dx;        // X
+                history[i + 1] += dy;    // Y
+                // no need to translate pressure (i+2) and size (i+3) 
             }
         }
     }
@@ -265,7 +285,7 @@ public final class MotionEvent implements Parcelable {
         }
         return ev;
     }
-    
+
     /**
      * Recycle the MotionEvent, to be re-used by a later caller.  After calling
      * this function you must not ever touch the event again.
@@ -291,7 +311,7 @@ public final class MotionEvent implements Parcelable {
             }
         }
     }
-    
+
     /**
      * Return the kind of action being performed -- one of either
      * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
@@ -302,8 +322,8 @@ public final class MotionEvent implements Parcelable {
     }
 
     /**
-     * Returns the time (in ms) when the user originally pressed down to start 
-     * a stream of position events. 
+     * Returns the time (in ms) when the user originally pressed down to start
+     * a stream of position events.
      */
     public final long getDownTime() {
         return mDownTime;
@@ -317,25 +337,25 @@ public final class MotionEvent implements Parcelable {
     }
 
     /**
-     * Returns the X coordinate of this event.  Whole numbers are pixels; the 
-     * value may have a fraction for input devices that are sub-pixel precise. 
+     * Returns the X coordinate of this event.  Whole numbers are pixels; the
+     * value may have a fraction for input devices that are sub-pixel precise.
      */
     public final float getX() {
         return mX;
     }
 
     /**
-     * Returns the Y coordinate of this event.  Whole numbers are pixels; the 
-     * value may have a fraction for input devices that are sub-pixel precise. 
+     * Returns the Y coordinate of this event.  Whole numbers are pixels; the
+     * value may have a fraction for input devices that are sub-pixel precise.
      */
     public final float getY() {
         return mY;
     }
 
     /**
-     * Returns the current pressure of this event.  The pressure generally 
-     * ranges from 0 (no pressure at all) to 1 (normal pressure), however 
-     * values higher than 1 may be generated depending on the calibration of 
+     * Returns the current pressure of this event.  The pressure generally
+     * ranges from 0 (no pressure at all) to 1 (normal pressure), however
+     * values higher than 1 may be generated depending on the calibration of
      * the input device.
      */
     public final float getPressure() {
@@ -344,9 +364,9 @@ public final class MotionEvent implements Parcelable {
 
     /**
      * Returns a scaled value of the approximate size, of the area being pressed when
-     * touched with the finger. The actual value in pixels corresponding to the finger 
+     * touched with the finger. The actual value in pixels corresponding to the finger
      * touch  is normalized with the device specific range of values
-     * and scaled to a value between 0 and 1. The value of size can be used to 
+     * and scaled to a value between 0 and 1. The value of size can be used to
      * determine fat touch events.
      */
     public final float getSize() {
@@ -396,7 +416,7 @@ public final class MotionEvent implements Parcelable {
     public final float getXPrecision() {
         return mXPrecision;
     }
-    
+
     /**
      * Return the precision of the Y coordinates being reported.  You can
      * multiple this number with {@link #getY} to find the actual hardware
@@ -406,89 +426,89 @@ public final class MotionEvent implements Parcelable {
     public final float getYPrecision() {
         return mYPrecision;
     }
-    
+
     /**
      * Returns the number of historical points in this event.  These are
      * movements that have occurred between this event and the previous event.
      * This only applies to ACTION_MOVE events -- all other actions will have
      * a size of 0.
-     * 
+     *
      * @return Returns the number of historical points in the event.
      */
     public final int getHistorySize() {
         return mNumHistory;
     }
-    
+
     /**
      * Returns the time that a historical movement occurred between this event
      * and the previous event.  Only applies to ACTION_MOVE events.
-     * 
+     *
      * @param pos Which historical value to return; must be less than
      * {@link #getHistorySize}
-     * 
+     *
      * @see #getHistorySize
      * @see #getEventTime
      */
     public final long getHistoricalEventTime(int pos) {
         return mHistoryTimes[pos];
     }
-    
+
     /**
      * Returns a historical X coordinate that occurred between this event
      * and the previous event.  Only applies to ACTION_MOVE events.
-     * 
+     *
      * @param pos Which historical value to return; must be less than
      * {@link #getHistorySize}
-     * 
+     *
      * @see #getHistorySize
      * @see #getX
      */
     public final float getHistoricalX(int pos) {
         return mHistory[pos*4];
     }
-    
+
     /**
      * Returns a historical Y coordinate that occurred between this event
      * and the previous event.  Only applies to ACTION_MOVE events.
-     * 
+     *
      * @param pos Which historical value to return; must be less than
      * {@link #getHistorySize}
-     * 
+     *
      * @see #getHistorySize
      * @see #getY
      */
     public final float getHistoricalY(int pos) {
         return mHistory[pos*4 + 1];
     }
-    
+
     /**
      * Returns a historical pressure coordinate that occurred between this event
      * and the previous event.  Only applies to ACTION_MOVE events.
-     * 
+     *
      * @param pos Which historical value to return; must be less than
      * {@link #getHistorySize}
-     * 
+     *
      * @see #getHistorySize
      * @see #getPressure
      */
     public final float getHistoricalPressure(int pos) {
         return mHistory[pos*4 + 2];
     }
-    
+
     /**
      * Returns a historical size coordinate that occurred between this event
      * and the previous event.  Only applies to ACTION_MOVE events.
-     * 
+     *
      * @param pos Which historical value to return; must be less than
      * {@link #getHistorySize}
-     * 
+     *
      * @see #getHistorySize
      * @see #getSize
      */
     public final float getHistoricalSize(int pos) {
         return mHistory[pos*4 + 3];
     }
-    
+
     /**
      * Return the id for the device that this event came from.  An id of
      * zero indicates that the event didn't come from a physical device; other
@@ -497,12 +517,12 @@ public final class MotionEvent implements Parcelable {
     public final int getDeviceId() {
         return mDeviceId;
     }
-    
+
     /**
      * Returns a bitfield indicating which edges, if any, where touched by this
-     * MotionEvent. For touch events, clients can use this to determine if the 
-     * user's finger was touching the edge of the display. 
-     * 
+     * MotionEvent. For touch events, clients can use this to determine if the
+     * user's finger was touching the edge of the display.
+     *
      * @see #EDGE_LEFT
      * @see #EDGE_TOP
      * @see #EDGE_RIGHT
@@ -511,12 +531,12 @@ public final class MotionEvent implements Parcelable {
     public final int getEdgeFlags() {
         return mEdgeFlags;
     }
-    
+
 
     /**
      * Sets the bitfield indicating which edges, if any, where touched by this
-     * MotionEvent. 
-     * 
+     * MotionEvent.
+     *
      * @see #getEdgeFlags()
      */
     public final void setEdgeFlags(int flags) {
@@ -548,11 +568,11 @@ public final class MotionEvent implements Parcelable {
             pos[i+1] += deltaY;
         }
     }
- 
+
     /**
      * Set this event's location.  Applies {@link #offsetLocation} with a
      * delta from the current location to the given new location.
-     * 
+     *
      * @param x New absolute X location.
      * @param y New absolute Y location.
      */
@@ -563,13 +583,13 @@ public final class MotionEvent implements Parcelable {
             offsetLocation(deltaX, deltaY);
         }
     }
-    
+
     /**
      * Add a new movement to the batch of movements in this event.  The event's
      * current location, position and size is updated to the new values.  In
      * the future, the current values in the event will be added to a list of
      * historic values.
-     * 
+     *
      * @param x The new X position.
      * @param y The new Y position.
      * @param pressure The new pressure.
@@ -599,16 +619,16 @@ public final class MotionEvent implements Parcelable {
                 mHistoryTimes = historyTimes = newHistoryTimes;
             }
         }
-        
+
         historyTimes[N] = mEventTime;
-        
+
         final int pos = N*4;
         history[pos] = mX;
         history[pos+1] = mY;
         history[pos+2] = mPressure;
         history[pos+3] = mSize;
         mNumHistory = N+1;
-        
+
         mEventTime = eventTime;
         mX = mRawX = x;
         mY = mRawY = y;
@@ -616,7 +636,7 @@ public final class MotionEvent implements Parcelable {
         mSize = size;
         mMetaState |= metaState;
     }
-    
+
     @Override
     public String toString() {
         return "MotionEvent{" + Integer.toHexString(System.identityHashCode(this))

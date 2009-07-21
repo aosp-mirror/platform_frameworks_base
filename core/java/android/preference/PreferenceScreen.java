@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Adapter;
@@ -147,13 +148,20 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
         ListView listView = new ListView(context);
         bind(listView);
 
-        Dialog dialog = mDialog = new Dialog(context, com.android.internal.R.style.Theme_NoTitleBar);
+        // Set the title bar if title is available, else no title bar
+        final CharSequence title = getTitle();
+        Dialog dialog = mDialog = new Dialog(context, TextUtils.isEmpty(title)
+                ? com.android.internal.R.style.Theme_NoTitleBar
+                : com.android.internal.R.style.Theme);
         dialog.setContentView(listView);
+        if (!TextUtils.isEmpty(title)) {
+            dialog.setTitle(title);
+        }
         dialog.setOnDismissListener(this);
         if (state != null) {
             dialog.onRestoreInstanceState(state);
         }
-        
+
         // Add the screen to the list of preferences screens opened as dialogs
         getPreferenceManager().addPreferencesScreen(dialog);
         

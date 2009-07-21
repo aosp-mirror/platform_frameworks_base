@@ -16,40 +16,59 @@
 
 package android.widget;
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Gravity;
-import android.view.ViewDebug;
-import android.widget.RemoteViews.RemoteView;
-import android.graphics.Rect;
 import com.android.internal.R;
 
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.content.res.Resources;
+import android.graphics.Rect;
+import android.util.AttributeSet;
+import android.util.SparseArray;
+import android.util.Poolable;
+import android.util.Pool;
+import android.util.Pools;
+import android.util.PoolableManager;
+import static android.util.Log.d;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewDebug;
+import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.widget.RemoteViews.RemoteView;
+
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.LinkedList;
+import java.util.HashSet;
+import java.util.ArrayList;
 
 /**
  * A Layout where the positions of the children can be described in relation to each other or to the
  * parent. For the sake of efficiency, the relations between views are evaluated in one pass, so if
  * view Y is dependent on the position of view X, make sure the view X comes first in the layout.
- * 
+ *
  * <p>
  * Note that you cannot have a circular dependency between the size of the RelativeLayout and the
  * position of its children. For example, you cannot have a RelativeLayout whose height is set to
  * {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT WRAP_CONTENT} and a child set to
  * {@link #ALIGN_PARENT_BOTTOM}.
  * </p>
- * 
+ *
  * <p>
  * Also see {@link android.widget.RelativeLayout.LayoutParams RelativeLayout.LayoutParams} for
  * layout attributes
  * </p>
- * 
+ *
  * @attr ref android.R.styleable#RelativeLayout_gravity
  * @attr ref android.R.styleable#RelativeLayout_ignoreGravity
  */
 @RemoteView
 public class RelativeLayout extends ViewGroup {
+    private static final String LOG_TAG = "RelativeLayout";
+
+    private static final boolean DEBUG_GRAPH = false;
+
     public static final int TRUE = -1;
 
     /**
@@ -136,6 +155,13 @@ public class RelativeLayout extends ViewGroup {
     private final Rect mContentBounds = new Rect();
     private final Rect mSelfBounds = new Rect();
     private int mIgnoreGravity;
+
+    private SortedSet<View> mTopToBottomLeftToRightSet = null;
+    
+    private boolean mDirtyHierarchy;
+    private View[] mSortedHorizontalChildren = new View[0];
+    private View[] mSortedVerticalChildren = new View[0];
+    private final DependencyGraph mGraph = new DependencyGraph();
 
     public RelativeLayout(Context context) {
         super(context);
@@ -225,7 +251,54 @@ public class RelativeLayout extends ViewGroup {
     }
 
     @Override
+    public void requestLayout() {
+        super.requestLayout();
+        mDirtyHierarchy = true;
+    }
+
+    private void sortChildren() {
+        int count = getChildCount();
+        if (mSortedVerticalChildren.length != count) mSortedVerticalChildren = new View[count];
+        if (mSortedHorizontalChildren.length != count) mSortedHorizontalChildren = new View[count];
+
+        final DependencyGraph graph = mGraph;
+        graph.clear();
+
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            graph.add(child);
+        }
+
+        if (DEBUG_GRAPH) {
+            d(LOG_TAG, "=== Sorted vertical children");
+            graph.log(getResources(), ABOVE, BELOW, ALIGN_BASELINE, ALIGN_TOP, ALIGN_BOTTOM);
+            d(LOG_TAG, "=== Sorted horizontal children");
+            graph.log(getResources(), LEFT_OF, RIGHT_OF, ALIGN_LEFT, ALIGN_RIGHT);
+        }
+
+        graph.getSortedViews(mSortedVerticalChildren, ABOVE, BELOW, ALIGN_BASELINE,
+                ALIGN_TOP, ALIGN_BOTTOM);
+        graph.getSortedViews(mSortedHorizontalChildren, LEFT_OF, RIGHT_OF, ALIGN_LEFT, ALIGN_RIGHT);
+
+        if (DEBUG_GRAPH) {
+            d(LOG_TAG, "=== Ordered list of vertical children");
+            for (View view : mSortedVerticalChildren) {
+                DependencyGraph.printViewId(getResources(), view);
+            }
+            d(LOG_TAG, "=== Ordered list of horizontal children");
+            for (View view : mSortedHorizontalChildren) {
+                DependencyGraph.printViewId(getResources(), view);
+            }
+        }        
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (mDirtyHierarchy) {
+            mDirtyHierarchy = false;
+            sortChildren();
+        }
+
         int myWidth = -1;
         int myHeight = -1;
 
@@ -254,7 +327,6 @@ public class RelativeLayout extends ViewGroup {
             height = myHeight;
         }
 
-        int len = this.getChildCount();
         mHasBaselineAlignedChild = false;
 
         View ignore = null;
@@ -268,22 +340,50 @@ public class RelativeLayout extends ViewGroup {
         int right = Integer.MIN_VALUE;
         int bottom = Integer.MIN_VALUE;
 
+        boolean offsetHorizontalAxis = false;
+        boolean offsetVerticalAxis = false;
+
         if ((horizontalGravity || verticalGravity) && mIgnoreGravity != View.NO_ID) {
             ignore = findViewById(mIgnoreGravity);
         }
 
-        for (int i = 0; i < len; i++) {
-            View child = getChildAt(i);
+        final boolean isWrapContentWidth = widthMode != MeasureSpec.EXACTLY;
+        final boolean isWrapContentHeight = heightMode != MeasureSpec.EXACTLY;
+
+        View[] views = mSortedHorizontalChildren;
+        int count = views.length;
+        for (int i = 0; i < count; i++) {
+            View child = views[i];
             if (child.getVisibility() != GONE) {
                 LayoutParams params = (LayoutParams) child.getLayoutParams();
-                applySizeRules(params, myWidth, myHeight);
-                measureChild(child, params, myWidth, myHeight);
-                positionChild(child, params, myWidth, myHeight);
 
-                if (widthMode != MeasureSpec.EXACTLY) {
+                applyHorizontalSizeRules(params, myWidth);
+                measureChildHorizontal(child, params, myWidth, myHeight);
+                if (positionChildHorizontal(child, params, myWidth, isWrapContentWidth)) {
+                    offsetHorizontalAxis = true;
+                }
+            }
+        }
+
+        views = mSortedVerticalChildren;
+        count = views.length;
+
+        for (int i = 0; i < count; i++) {
+            View child = views[i];
+            if (child.getVisibility() != GONE) {
+                LayoutParams params = (LayoutParams) child.getLayoutParams();
+                
+                applyVerticalSizeRules(params, myHeight);
+                measureChild(child, params, myWidth, myHeight);
+                if (positionChildVertical(child, params, myHeight, isWrapContentHeight)) {
+                    offsetVerticalAxis = true;
+                }
+
+                if (isWrapContentWidth) {
                     width = Math.max(width, params.mRight);
                 }
-                if (heightMode != MeasureSpec.EXACTLY) {
+
+                if (isWrapContentHeight) {
                     height = Math.max(height, params.mBottom);
                 }
 
@@ -300,15 +400,15 @@ public class RelativeLayout extends ViewGroup {
         }
 
         if (mHasBaselineAlignedChild) {
-            for (int i = 0; i < len; i++) {
+            for (int i = 0; i < count; i++) {
                 View child = getChildAt(i);
                 if (child.getVisibility() != GONE) {
                     LayoutParams params = (LayoutParams) child.getLayoutParams();
                     alignBaseline(child, params);
 
                     if (child != ignore || verticalGravity) {
-                    left = Math.min(left, params.mLeft - params.leftMargin);
-                    top = Math.min(top, params.mTop - params.topMargin);
+                        left = Math.min(left, params.mLeft - params.leftMargin);
+                        top = Math.min(top, params.mTop - params.topMargin);
                     }
 
                     if (child != ignore || horizontalGravity) {
@@ -319,8 +419,8 @@ public class RelativeLayout extends ViewGroup {
             }
         }
 
-        if (widthMode != MeasureSpec.EXACTLY) {
-            // Width already has left padding in it since it was calculated by looking at 
+        if (isWrapContentWidth) {
+            // Width already has left padding in it since it was calculated by looking at
             // the right of each child view
             width += mPaddingRight;
 
@@ -330,9 +430,23 @@ public class RelativeLayout extends ViewGroup {
 
             width = Math.max(width, getSuggestedMinimumWidth());
             width = resolveSize(width, widthMeasureSpec);
+
+            if (offsetHorizontalAxis) {
+                    for (int i = 0; i < count; i++) {
+                    View child = getChildAt(i);
+                    if (child.getVisibility() != GONE) {
+                        LayoutParams params = (LayoutParams) child.getLayoutParams();
+                        final int[] rules = params.getRules();
+                        if (rules[CENTER_IN_PARENT] != 0 || rules[CENTER_HORIZONTAL] != 0) {
+                            centerHorizontal(child, params, width);
+                        }
+                    }
+                }
+            }
         }
-        if (heightMode != MeasureSpec.EXACTLY) {
-            // Height already has top padding in it since it was calculated by looking at 
+
+        if (isWrapContentHeight) {
+            // Height already has top padding in it since it was calculated by looking at
             // the bottom of each child view
             height += mPaddingBottom;
 
@@ -342,6 +456,19 @@ public class RelativeLayout extends ViewGroup {
 
             height = Math.max(height, getSuggestedMinimumHeight());
             height = resolveSize(height, heightMeasureSpec);
+
+            if (offsetVerticalAxis) {
+                for (int i = 0; i < count; i++) {
+                    View child = getChildAt(i);
+                    if (child.getVisibility() != GONE) {
+                        LayoutParams params = (LayoutParams) child.getLayoutParams();
+                        final int[] rules = params.getRules();
+                        if (rules[CENTER_IN_PARENT] != 0 || rules[CENTER_VERTICAL] != 0) {
+                            centerVertical(child, params, height);
+                        }
+                    }
+                }
+            }
         }
 
         if (horizontalGravity || verticalGravity) {
@@ -355,7 +482,7 @@ public class RelativeLayout extends ViewGroup {
             final int horizontalOffset = contentBounds.left - left;
             final int verticalOffset = contentBounds.top - top;
             if (horizontalOffset != 0 || verticalOffset != 0) {
-                for (int i = 0; i < len; i++) {
+                for (int i = 0; i < count; i++) {
                     View child = getChildAt(i);
                     if (child.getVisibility() != GONE && child != ignore) {
                         LayoutParams params = (LayoutParams) child.getLayoutParams();
@@ -409,9 +536,7 @@ public class RelativeLayout extends ViewGroup {
      * @param myWidth Width of the the RelativeLayout
      * @param myHeight Height of the RelativeLayout
      */
-    private void measureChild(View child, LayoutParams params, int myWidth,
-            int myHeight) {
-
+    private void measureChild(View child, LayoutParams params, int myWidth, int myHeight) {
         int childWidthMeasureSpec = getChildMeasureSpec(params.mLeft,
                 params.mRight, params.width,
                 params.leftMargin, params.rightMargin,
@@ -422,6 +547,21 @@ public class RelativeLayout extends ViewGroup {
                 params.topMargin, params.bottomMargin,
                 mPaddingTop, mPaddingBottom,
                 myHeight);
+        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+    }
+
+    private void measureChildHorizontal(View child, LayoutParams params, int myWidth, int myHeight) {
+        int childWidthMeasureSpec = getChildMeasureSpec(params.mLeft,
+                params.mRight, params.width,
+                params.leftMargin, params.rightMargin,
+                mPaddingLeft, mPaddingRight,
+                myWidth);
+        int childHeightMeasureSpec;
+        if (params.width == LayoutParams.FILL_PARENT) {
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.EXACTLY);
+        } else {
+            childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(myHeight, MeasureSpec.AT_MOST);
+        }
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
@@ -504,19 +644,9 @@ public class RelativeLayout extends ViewGroup {
         return MeasureSpec.makeMeasureSpec(childSpecSize, childSpecMode);
     }
 
-    /**
-     * After the child has been measured, assign it a position. Some views may
-     * already have final values for l,t,r,b. Others may have one or both edges
-     * unfixed (i.e. set to -1) in each dimension. These will get positioned
-     * based on which edge is fixed, the view's desired dimension, and whether
-     * or not it is centered.
-     *
-     * @param child Child to position
-     * @param params LayoutParams associated with child
-     * @param myWidth Width of the the RelativeLayout
-     * @param myHeight Height of the RelativeLayout
-     */
-    private void positionChild(View child, LayoutParams params, int myWidth, int myHeight) {
+    private boolean positionChildHorizontal(View child, LayoutParams params, int myWidth,
+            boolean wrapContent) {
+
         int[] rules = params.getRules();
 
         if (params.mLeft < 0 && params.mRight >= 0) {
@@ -527,13 +657,26 @@ public class RelativeLayout extends ViewGroup {
             params.mRight = params.mLeft + child.getMeasuredWidth();
         } else if (params.mLeft < 0 && params.mRight < 0) {
             // Both left and right vary
-            if (0 != rules[CENTER_IN_PARENT] || 0 != rules[CENTER_HORIZONTAL]) {
-                centerHorizontal(child, params, myWidth);
+            if (rules[CENTER_IN_PARENT] != 0 || rules[CENTER_HORIZONTAL] != 0) {
+                if (!wrapContent) {
+                    centerHorizontal(child, params, myWidth);
+                } else {
+                    params.mLeft = mPaddingLeft + params.leftMargin;
+                    params.mRight = params.mLeft + child.getMeasuredWidth();
+                }
+                return true;
             } else {
                 params.mLeft = mPaddingLeft + params.leftMargin;
                 params.mRight = params.mLeft + child.getMeasuredWidth();
             }
         }
+        return false;
+    }
+
+    private boolean positionChildVertical(View child, LayoutParams params, int myHeight,
+            boolean wrapContent) {
+
+        int[] rules = params.getRules();
 
         if (params.mTop < 0 && params.mBottom >= 0) {
             // Bottom is fixed, but top varies
@@ -543,26 +686,23 @@ public class RelativeLayout extends ViewGroup {
             params.mBottom = params.mTop + child.getMeasuredHeight();
         } else if (params.mTop < 0 && params.mBottom < 0) {
             // Both top and bottom vary
-            if (0 != rules[CENTER_IN_PARENT] || 0 != rules[CENTER_VERTICAL]) {
-                centerVertical(child, params, myHeight);
+            if (rules[CENTER_IN_PARENT] != 0 || rules[CENTER_VERTICAL] != 0) {
+                if (!wrapContent) {
+                    centerVertical(child, params, myHeight);
+                } else {
+                    params.mTop = mPaddingTop + params.topMargin;
+                    params.mBottom = params.mTop + child.getMeasuredHeight();
+                }
+                return true;
             } else {
                 params.mTop = mPaddingTop + params.topMargin;
                 params.mBottom = params.mTop + child.getMeasuredHeight();
             }
         }
+        return false;
     }
 
-    /**
-     * Set l,t,r,b values in the LayoutParams for one view based on its layout rules.
-     * Big assumption #1: All antecedents of this view have been sized & positioned
-     * Big assumption #2: The dimensions of the parent view (the RelativeLayout)
-     * are already known if they are needed.
-     *
-     * @param childParams LayoutParams for the view being positioned
-     * @param myWidth Width of the the RelativeLayout
-     * @param myHeight Height of the RelativeLayout
-     */
-    private void applySizeRules(LayoutParams childParams, int myWidth, int myHeight) {
+    private void applyHorizontalSizeRules(LayoutParams childParams, int myWidth) {
         int[] rules = childParams.getRules();
         RelativeLayout.LayoutParams anchorParams;
 
@@ -622,6 +762,11 @@ public class RelativeLayout extends ViewGroup {
                 // FIXME uh oh...
             }
         }
+    }
+
+    private void applyVerticalSizeRules(LayoutParams childParams, int myHeight) {
+        int[] rules = childParams.getRules();
+        RelativeLayout.LayoutParams anchorParams;
 
         childParams.mTop = -1;
         childParams.mBottom = -1;
@@ -684,18 +829,16 @@ public class RelativeLayout extends ViewGroup {
     private View getRelatedView(int[] rules, int relation) {
         int id = rules[relation];
         if (id != 0) {
-            View v = findViewById(id);
-            if (v == null) {
-                return null;
-            }
+            DependencyGraph.Node node = mGraph.mKeyNodes.get(id);
+            if (node == null) return null;
+            View v = node.view;
 
             // Find the first non-GONE view up the chain
             while (v.getVisibility() == View.GONE) {
                 rules = ((LayoutParams) v.getLayoutParams()).getRules();
-                v = v.findViewById(rules[relation]);
-                if (v == null) {
-                    return null;
-                }
+                node = mGraph.mKeyNodes.get((rules[relation]));
+                if (node == null) return null;
+                v = node.view;
             }
 
             return v;
@@ -782,6 +925,57 @@ public class RelativeLayout extends ViewGroup {
         return new LayoutParams(p);
     }
 
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (mTopToBottomLeftToRightSet == null) {
+            mTopToBottomLeftToRightSet = new TreeSet<View>(new TopToBottomLeftToRightComparator());
+        }
+
+        // sort children top-to-bottom and left-to-right
+        for (int i = 0, count = getChildCount(); i < count; i++) {
+            mTopToBottomLeftToRightSet.add(getChildAt(i));
+        }
+
+        for (View view : mTopToBottomLeftToRightSet) {
+            if (view.dispatchPopulateAccessibilityEvent(event)) {
+                mTopToBottomLeftToRightSet.clear();
+                return true;
+            }
+        }
+
+        mTopToBottomLeftToRightSet.clear();
+        return false;
+    }
+
+    /**
+     * Compares two views in left-to-right and top-to-bottom fashion.
+     */
+     private class TopToBottomLeftToRightComparator implements Comparator<View> {
+        public int compare(View first, View second) {
+            // top - bottom
+            int topDifference = first.getTop() - second.getTop();
+            if (topDifference != 0) {
+                return topDifference;
+            }
+            // left - right
+            int leftDifference = first.getLeft() - second.getLeft();
+            if (leftDifference != 0) {
+                return leftDifference;
+            }
+            // break tie by height
+            int heightDiference = first.getHeight() - second.getHeight();
+            if (heightDiference != 0) {
+                return heightDiference;
+            }
+            // break tie by width
+            int widthDiference = first.getWidth() - second.getWidth();
+            if (widthDiference != 0) {
+                return widthDiference;
+            }
+            return 0;
+        }
+    }
+
     /**
      * Per-child layout information associated with RelativeLayout.
      *
@@ -823,7 +1017,7 @@ public class RelativeLayout extends ViewGroup {
             @ViewDebug.IntToString(from = RIGHT_OF,            to = "rightOf")
         }, mapping = {
             @ViewDebug.IntToString(from = TRUE, to = "true"),
-            @ViewDebug.IntToString(from = 0,    to = "FALSE/NO_ID")
+            @ViewDebug.IntToString(from = 0,    to = "false/NO_ID")
         })
         private int[] mRules = new int[VERB_COUNT];
 
@@ -973,6 +1167,286 @@ public class RelativeLayout extends ViewGroup {
          */
         public int[] getRules() {
             return mRules;
+        }
+    }
+
+    private static class DependencyGraph {
+        /**
+         * List of all views in the graph.
+         */
+        private ArrayList<Node> mNodes = new ArrayList<Node>();
+
+        /**
+         * List of nodes in the graph. Each node is identified by its
+         * view id (see View#getId()).
+         */
+        private SparseArray<Node> mKeyNodes = new SparseArray<Node>();
+
+        /**
+         * Temporary data structure used to build the list of roots
+         * for this graph.
+         */
+        private LinkedList<Node> mRoots = new LinkedList<Node>();
+
+        /**
+         * Clears the graph.
+         */
+        void clear() {
+            final ArrayList<Node> nodes = mNodes;
+            final int count = nodes.size();
+
+            for (int i = 0; i < count; i++) {
+                nodes.get(i).release();
+            }
+            nodes.clear();
+
+            mKeyNodes.clear();
+            mRoots.clear();
+        }
+
+        /**
+         * Adds a view to the graph.
+         *
+         * @param view The view to be added as a node to the graph.
+         */
+        void add(View view) {
+            final int id = view.getId();
+            final Node node = Node.acquire(view);
+
+            if (id != View.NO_ID) {
+                mKeyNodes.put(id, node);
+            }
+
+            mNodes.add(node);
+        }
+
+        /**
+         * Builds a sorted list of views. The sorting order depends on the dependencies
+         * between the view. For instance, if view C needs view A to be processed first
+         * and view A needs view B to be processed first, the dependency graph
+         * is: B -> A -> C. The sorted array will contain views B, A and C in this order.
+         *
+         * @param sorted The sorted list of views. The length of this array must
+         *        be equal to getChildCount().
+         * @param rules The list of rules to take into account.
+         */
+        void getSortedViews(View[] sorted, int... rules) {
+            final LinkedList<Node> roots = findRoots(rules);
+            int index = 0;
+
+            while (roots.size() > 0) {
+                final Node node = roots.removeFirst();
+                final View view = node.view;
+                final int key = view.getId();
+
+                sorted[index++] = view;
+
+                final HashSet<Node> dependents = node.dependents;
+                for (Node dependent : dependents) {
+                    final SparseArray<Node> dependencies = dependent.dependencies;
+
+                    dependencies.remove(key);
+                    if (dependencies.size() == 0) {
+                        roots.add(dependent);
+                    }
+                }
+            }
+
+            if (index < sorted.length) {
+                throw new IllegalStateException("Circular dependencies cannot exist"
+                        + " in RelativeLayout");
+            }
+        }
+
+        /**
+         * Finds the roots of the graph. A root is a node with no dependency and
+         * with [0..n] dependents.
+         *
+         * @param rulesFilter The list of rules to consider when building the
+         *        dependencies
+         *
+         * @return A list of node, each being a root of the graph
+         */
+        private LinkedList<Node> findRoots(int[] rulesFilter) {
+            final SparseArray<Node> keyNodes = mKeyNodes;
+            final ArrayList<Node> nodes = mNodes;
+            final int count = nodes.size();
+
+            // Find roots can be invoked several times, so make sure to clear
+            // all dependents and dependencies before running the algorithm
+            for (int i = 0; i < count; i++) {
+                final Node node = nodes.get(i);
+                node.dependents.clear();
+                node.dependencies.clear();
+            }
+
+            // Builds up the dependents and dependencies for each node of the graph
+            for (int i = 0; i < count; i++) {
+                final Node node = nodes.get(i);
+
+                final LayoutParams layoutParams = (LayoutParams) node.view.getLayoutParams();
+                final int[] rules = layoutParams.mRules;
+                final int rulesCount = rulesFilter.length;
+
+                // Look only the the rules passed in parameter, this way we build only the
+                // dependencies for a specific set of rules
+                for (int j = 0; j < rulesCount; j++) {
+                    final int rule = rules[rulesFilter[j]];
+                    if (rule > 0) {
+                        // The node this node depends on
+                        final Node dependency = keyNodes.get(rule);
+                        if (dependency == node) {
+                            throw new IllegalStateException("A view cannot have a dependency" +
+                                    " on itself");
+                        }
+                        if (dependency == null) {
+                            continue;
+                        }
+                        // Add the current node as a dependent
+                        dependency.dependents.add(node);
+                        // Add a dependency to the current node
+                        node.dependencies.put(rule, dependency);
+                    }
+                }
+            }
+
+            final LinkedList<Node> roots = mRoots;
+            roots.clear();
+
+            // Finds all the roots in the graph: all nodes with no dependencies
+            for (int i = 0; i < count; i++) {
+                final Node node = nodes.get(i);
+                if (node.dependencies.size() == 0) roots.add(node);
+            }
+
+            return roots;
+        }
+
+        /**
+         * Prints the dependency graph for the specified rules.
+         *
+         * @param resources The context's resources to print the ids.
+         * @param rules The list of rules to take into account.
+         */
+        void log(Resources resources, int... rules) {
+            final LinkedList<Node> roots = findRoots(rules);
+            for (Node node : roots) {
+                printNode(resources, node);
+            }
+        }
+
+        static void printViewId(Resources resources, View view) {
+            if (view.getId() != View.NO_ID) {
+                d(LOG_TAG, resources.getResourceEntryName(view.getId()));
+            } else {
+                d(LOG_TAG, "NO_ID");
+            }
+        }
+
+        private static void appendViewId(Resources resources, Node node, StringBuilder buffer) {
+            if (node.view.getId() != View.NO_ID) {
+                buffer.append(resources.getResourceEntryName(node.view.getId()));
+            } else {
+                buffer.append("NO_ID");
+            }
+        }
+
+        private static void printNode(Resources resources, Node node) {
+            if (node.dependents.size() == 0) {
+                printViewId(resources, node.view);
+            } else {
+                for (Node dependent : node.dependents) {
+                    StringBuilder buffer = new StringBuilder();
+                    appendViewId(resources, node, buffer);
+                    printdependents(resources, dependent, buffer);
+                }
+            }
+        }
+
+        private static void printdependents(Resources resources, Node node, StringBuilder buffer) {
+            buffer.append(" -> ");
+            appendViewId(resources, node, buffer);
+
+            if (node.dependents.size() == 0) {
+                d(LOG_TAG, buffer.toString());
+            } else {
+                for (Node dependent : node.dependents) {
+                    StringBuilder subBuffer = new StringBuilder(buffer);
+                    printdependents(resources, dependent, subBuffer);
+                }
+            }
+        }
+
+        /**
+         * A node in the dependency graph. A node is a view, its list of dependencies
+         * and its list of dependents.
+         *
+         * A node with no dependent is considered a root of the graph.
+         */
+        static class Node implements Poolable<Node> {
+            /**
+             * The view representing this node in the layout.
+             */
+            View view;
+
+            /**
+             * The list of dependents for this node; a dependent is a node
+             * that needs this node to be processed first.
+             */
+            final HashSet<Node> dependents = new HashSet<Node>();
+
+            /**
+             * The list of dependencies for this node.
+             */
+            final SparseArray<Node> dependencies = new SparseArray<Node>();
+
+            /*
+             * START POOL IMPLEMENTATION
+             */
+            // The pool is static, so all nodes instances are shared across
+            // activities, that's why we give it a rather high limit
+            private static final int POOL_LIMIT = 100;
+            private static final Pool<Node> sPool = Pools.synchronizedPool(
+                    Pools.finitePool(new PoolableManager<Node>() {
+                        public Node newInstance() {
+                            return new Node();
+                        }
+
+                        public void onAcquired(Node element) {
+                        }
+
+                        public void onReleased(Node element) {
+                        }
+                    }, POOL_LIMIT)
+            );
+
+            private Node mNext;
+
+            public void setNextPoolable(Node element) {
+                mNext = element;
+            }
+
+            public Node getNextPoolable() {
+                return mNext;
+            }
+
+            static Node acquire(View view) {
+                final Node node = sPool.acquire();
+                node.view = view;
+
+                return node;
+            }
+
+            void release() {
+                view = null;
+                dependents.clear();
+                dependencies.clear();
+
+                sPool.release(this);
+            }
+            /*
+             * END POOL IMPLEMENTATION
+             */
         }
     }
 }

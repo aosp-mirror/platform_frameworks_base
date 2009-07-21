@@ -507,7 +507,7 @@ public class AppCacheTest extends AndroidTestCase {
         try {
             // Spin lock waiting for call back
             synchronized(r) {
-                getPm().freeStorage(idealStorageSize, pi);
+                getPm().freeStorage(idealStorageSize, pi.getIntentSender());
                 long waitTime = 0;
                 while(!r.isDone() && (waitTime < MAX_WAIT_TIME)) {
                     r.wait(WAIT_TIME_INCR);

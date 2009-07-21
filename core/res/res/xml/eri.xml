@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<!-- Note that IconMode can be only 0, ON or 1, FLASHING
+     The icon is turned OFF if then IconIndex = 1 -->
+
+<EriFile VersionNumber="1357"
+         NumberOfEriEntries="12"
+         EriFileType="1">
+
+         <CallPromptId Id="0"
+                       CallPromptText="CallPromptId0"/>
+
+         <CallPromptId Id="1"
+                       CallPromptText="CallPromptId1"/>
+
+         <CallPromptId Id="2"
+                       CallPromptText="CallPromptId2"/>
+
+         <EriInfo RoamingIndicator="64"
+                  IconIndex="1"
+                  IconMode="0"
+                  EriText="T-CDMA 64"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+         <EriInfo RoamingIndicator="65"
+                  IconIndex="65"
+                  IconMode="0"
+                  EriText="T-CDMA 65"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+         <EriInfo RoamingIndicator="66"
+                  IconIndex="1"
+                  IconMode="0"
+                  EriText="T-CDMA Ext 66"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+         <EriInfo RoamingIndicator="67"
+                  IconIndex="67"
+                  IconMode="0"
+                  EriText="T-CDMA Ext 67"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+         <EriInfo RoamingIndicator="68"
+                  IconIndex="68"
+                  IconMode="0"
+                  EriText="T-CDMA Roam 68"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+         <EriInfo RoamingIndicator="69"
+                  IconIndex="69"
+                  IconMode="1"
+                  EriText="T-CDMA Ext 69"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+         <EriInfo RoamingIndicator="70"
+                  IconIndex="70"
+                  IconMode="1"
+                  EriText="T-CDMA Roam 70"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+         <EriInfo RoamingIndicator="71"
+                  IconIndex="1"
+                  IconMode="0"
+                  EriText="T-CDMA Ext 71"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+         <EriInfo RoamingIndicator="72"
+                  IconIndex="72"
+                  IconMode="0"
+                  EriText="T-CDMA Ext 72"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+         <EriInfo RoamingIndicator="73"
+                  IconIndex="73"
+                  IconMode="0"
+                  EriText="T-CDMA Roam 73"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+         <EriInfo RoamingIndicator="74"
+                  IconIndex="74"
+                  IconMode="1"
+                  EriText="T-CDMA Ext 74"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+         <EriInfo RoamingIndicator="75"
+                  IconIndex="75"
+                  IconMode="1"
+                  EriText="T-CDMA Roam 75"
+                  CallPromptId="0"
+                  AlertId="0"/>
+
+</EriFile>

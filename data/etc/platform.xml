@@ -54,7 +54,7 @@
         <group gid="log" />
     </permission>
 
-    <permission name="android.permission.SDCARD_WRITE" >
+    <permission name="android.permission.WRITE_EXTERNAL_STORAGE" >
         <group gid="sdcard_rw" />
     </permission>
 
@@ -84,6 +84,24 @@
          others should have a fairly open environment in which to
          interact with the system. -->
 
+    <!-- Standard permissions granted to the shell. -->
+    <assign-permission name="android.permission.WRITE_EXTERNAL_STORAGE" uid="shell" />
+    <assign-permission name="android.permission.SEND_SMS" uid="shell" />
+    <assign-permission name="android.permission.CALL_PHONE" uid="shell" />
+    <assign-permission name="android.permission.READ_CONTACTS" uid="shell" />
+    <assign-permission name="android.permission.WRITE_CONTACTS" uid="shell" />
+    <assign-permission name="android.permission.READ_OWNER_DATA" uid="shell" />
+    <assign-permission name="android.permission.WRITE_OWNER_DATA" uid="shell" />
+    <assign-permission name="android.permission.READ_CALENDAR" uid="shell" />
+    <assign-permission name="android.permission.WRITE_CALENDAR" uid="shell" />
+    <assign-permission name="android.permission.READ_USER_DICTIONARY" uid="shell" />
+    <assign-permission name="android.permission.WRITE_USER_DICTIONARY" uid="shell" />
+    <assign-permission name="android.permission.ACCESS_FINE_LOCATION" uid="shell" />
+    <assign-permission name="android.permission.ACCESS_COARSE_LOCATION" uid="shell" />
+    <assign-permission name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" uid="shell" />
+    <assign-permission name="android.permission.ACCESS_NETWORK_STATE" uid="shell" />
+    <assign-permission name="android.permission.ACCESS_WIFI_STATE" uid="shell" />
+    <assign-permission name="android.permission.BLUETOOTH" uid="shell" />
     <!-- System tool permissions granted to the shell. -->
     <assign-permission name="android.permission.GET_TASKS" uid="shell" />
     <assign-permission name="android.permission.CHANGE_CONFIGURATION" uid="shell" />
@@ -114,10 +132,13 @@
     <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="shell" />
     <assign-permission name="android.permission.READ_FRAME_BUFFER" uid="shell" />
     <assign-permission name="android.permission.DEVICE_POWER" uid="shell" />
+    <assign-permission name="android.permission.INSTALL_LOCATION_PROVIDER" uid="shell" />
 
     <assign-permission name="android.permission.MODIFY_AUDIO_SETTINGS" uid="media" />
     <assign-permission name="android.permission.ACCESS_DRM" uid="media" />
     <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="media" />
+
+    <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="graphics" />
 
     <!-- This is a list of all the libraries available for application
          code to link against. -->

@@ -55,57 +55,83 @@ public abstract class DataConnection extends Handler {
 
     public enum FailCause {
         NONE,
-        BAD_APN,
-        BAD_PAP_SECRET,
-        BARRED,
+        OPERATOR_BARRED,
+        INSUFFICIENT_RESOURCES,
+        MISSING_UKNOWN_APN,
+        UNKNOWN_PDP_ADDRESS,
         USER_AUTHENTICATION,
+        ACTIVATION_REJECT_GGSN,
+        ACTIVATION_REJECT_UNSPECIFIED,
         SERVICE_OPTION_NOT_SUPPORTED,
         SERVICE_OPTION_NOT_SUBSCRIBED,
-        SIM_LOCKED,
-        RADIO_OFF,
-        NO_SIGNAL,
-        NO_DATA_PLAN,
+        SERVICE_OPTION_OUT_OF_ORDER,
+        NSAPI_IN_USE,
+        PROTOCOL_ERRORS,
+        REGISTRATION_FAIL,
+        GPRS_REGISTRATION_FAIL,
+        UNKNOWN,
+
         RADIO_NOT_AVAILABLE,
-        SUSPENED_TEMPORARY,
-        RADIO_ERROR_RETRY,
-        UNKNOWN;
+        RADIO_ERROR_RETRY;
 
         public boolean isPermanentFail() {
-            return (this == RADIO_OFF);
+            return (this == OPERATOR_BARRED) || (this == MISSING_UKNOWN_APN) ||
+                   (this == UNKNOWN_PDP_ADDRESS) || (this == USER_AUTHENTICATION) ||
+                   (this == ACTIVATION_REJECT_GGSN) || (this == ACTIVATION_REJECT_UNSPECIFIED) ||
+                   (this == SERVICE_OPTION_NOT_SUPPORTED) ||
+                   (this == SERVICE_OPTION_NOT_SUBSCRIBED) || (this == NSAPI_IN_USE) ||
+                   (this == PROTOCOL_ERRORS);
         }
 
+        public boolean isEventLoggable() {
+            return (this == OPERATOR_BARRED) || (this == INSUFFICIENT_RESOURCES) ||
+                    (this == UNKNOWN_PDP_ADDRESS) || (this == USER_AUTHENTICATION) ||
+                    (this == ACTIVATION_REJECT_GGSN) || (this == ACTIVATION_REJECT_UNSPECIFIED) ||
+                    (this == SERVICE_OPTION_NOT_SUBSCRIBED) ||
+                    (this == SERVICE_OPTION_NOT_SUPPORTED) ||
+                    (this == SERVICE_OPTION_OUT_OF_ORDER) || (this == NSAPI_IN_USE) ||
+                    (this == PROTOCOL_ERRORS);
+        }
+
+        @Override
         public String toString() {
             switch (this) {
             case NONE:
-                return "no error";
-            case BAD_APN:
-                return "bad apn";
-            case BAD_PAP_SECRET:
-                return "bad pap secret";
-            case BARRED:
-                return "barred";
+                return "No Error";
+            case OPERATOR_BARRED:
+                return "Operator Barred";
+            case INSUFFICIENT_RESOURCES:
+                return "Insufficient Resources";
+            case MISSING_UKNOWN_APN:
+                return "Missing / Unknown APN";
+            case UNKNOWN_PDP_ADDRESS:
+                return "Unknown PDP Address";
             case USER_AUTHENTICATION:
-                return "error user autentication";
+                return "Error User Autentication";
+            case ACTIVATION_REJECT_GGSN:
+                return "Activation Reject GGSN";
+            case ACTIVATION_REJECT_UNSPECIFIED:
+                return "Activation Reject unspecified";
             case SERVICE_OPTION_NOT_SUPPORTED:
-                return "data not supported";
+                return "Data Not Supported";
             case SERVICE_OPTION_NOT_SUBSCRIBED:
-                return "datt not subcribed";
-            case SIM_LOCKED:
-                return "sim locked";
-            case RADIO_OFF:
-                return "radio is off";
-            case NO_SIGNAL:
-                return "no signal";
-            case NO_DATA_PLAN:
-                return "no data plan";
+                return "Data Not subscribed";
+            case SERVICE_OPTION_OUT_OF_ORDER:
+                return "Data Services Out of Order";
+            case NSAPI_IN_USE:
+                return "NSAPI in use";
+            case PROTOCOL_ERRORS:
+                return "Protocol Errors";
+            case REGISTRATION_FAIL:
+                return "Network Registration Failure";
+            case GPRS_REGISTRATION_FAIL:
+                return "Data Network Registration Failure";
             case RADIO_NOT_AVAILABLE:
-                return "radio not available";
-            case SUSPENED_TEMPORARY:
-                return "suspend temporary";
+                return "Radio Not Available";
             case RADIO_ERROR_RETRY:
-                return "transient radio error";
+                return "Transient Radio Rrror";
             default:
-                return "unknown data error";
+                return "Unknown Data Error";
             }
         }
     }

@@ -20,8 +20,8 @@
 
 #define LOG_TAG "zip"
 
-#include "utils/ZipEntry.h"
-#include "utils/Log.h"
+#include <utils/ZipEntry.h>
+#include <utils/Log.h>
 
 #include <stdio.h>
 #include <string.h>

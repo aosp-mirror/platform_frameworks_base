@@ -17,8 +17,8 @@
 package com.android.server.am;
 
 import android.app.IActivityManager;
-import android.app.IIntentSender;
-import android.app.IIntentReceiver;
+import android.content.IIntentSender;
+import android.content.IIntentReceiver;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Binder;

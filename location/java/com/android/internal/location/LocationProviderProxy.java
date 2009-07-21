@@ -53,6 +53,12 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
         }
     }
 
+    public void unlinkProvider() {
+        if (mProvider != null) {
+            mProvider.asBinder().unlinkToDeath(this, 0);
+        }
+    }
+
     public String getName() {
         return mName;
     }
@@ -219,6 +225,14 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
         }
     }
 
+    public void updateLocation(Location location) {
+        try {
+            mProvider.updateLocation(location);
+        } catch (RemoteException e) {
+            Log.e(TAG, "updateLocation failed", e);
+        }
+    }
+
     public boolean sendExtraCommand(String command, Bundle extras) {
         try {
             return mProvider.sendExtraCommand(command, extras);
@@ -247,5 +261,6 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
     public void binderDied() {
         Log.w(TAG, "Location Provider " + mName + " died");
         mDead = true;
+        mProvider.asBinder().unlinkToDeath(this, 0);
     }
 }

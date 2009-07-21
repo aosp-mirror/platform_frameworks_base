@@ -408,13 +408,13 @@ public class EventRecurrence
     
     private String dayToString(Resources r, int day) {
         switch (day) {
-        case SU: return r.getString(com.android.internal.R.string.sunday);
-        case MO: return r.getString(com.android.internal.R.string.monday);
-        case TU: return r.getString(com.android.internal.R.string.tuesday);
-        case WE: return r.getString(com.android.internal.R.string.wednesday);
-        case TH: return r.getString(com.android.internal.R.string.thursday);
-        case FR: return r.getString(com.android.internal.R.string.friday);
-        case SA: return r.getString(com.android.internal.R.string.saturday);
+        case SU: return r.getString(com.android.internal.R.string.day_of_week_long_sunday);
+        case MO: return r.getString(com.android.internal.R.string.day_of_week_long_monday);
+        case TU: return r.getString(com.android.internal.R.string.day_of_week_long_tuesday);
+        case WE: return r.getString(com.android.internal.R.string.day_of_week_long_wednesday);
+        case TH: return r.getString(com.android.internal.R.string.day_of_week_long_thursday);
+        case FR: return r.getString(com.android.internal.R.string.day_of_week_long_friday);
+        case SA: return r.getString(com.android.internal.R.string.day_of_week_long_saturday);
         default: throw new IllegalArgumentException("bad day argument: " + day);
         }
     }

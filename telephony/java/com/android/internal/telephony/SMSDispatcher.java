@@ -20,11 +20,13 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.AlertDialog;
 import android.app.PendingIntent.CanceledException;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -32,6 +34,7 @@ import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.provider.Settings;
@@ -75,6 +78,7 @@ public abstract class SMSDispatcher extends Handler {
     protected static final String[] RAW_PROJECTION = new String[] {
         "pdu",
         "sequence",
+        "destination_port",
     };
 
     static final int MAIL_SEND_SMS = 1;
@@ -113,7 +117,7 @@ public abstract class SMSDispatcher extends Handler {
     /** Maximum number of times to retry sending a failed SMS. */
     private static final int MAX_SEND_RETRIES = 3;
     /** Delay before next send attempt on a failed SMS, in milliseconds. */
-    private static final int SEND_RETRY_DELAY = 2000; 
+    private static final int SEND_RETRY_DELAY = 2000;
     /** single part SMS */
     private static final int SINGLE_PART_SMS = 1;
 
@@ -122,15 +126,30 @@ public abstract class SMSDispatcher extends Handler {
      * CONCATENATED_16_BIT_REFERENCE message set.  Should be
      * incremented for each set of concatenated messages.
      */
-    protected static int sConcatenatedRef;
+    private static int sConcatenatedRef;
 
     private SmsCounter mCounter;
 
     private SmsTracker mSTracker;
 
+    /** Wake lock to ensure device stays awake while dispatching the SMS intent. */
+    private PowerManager.WakeLock mWakeLock;
+
+    /**
+     * Hold the wake lock for 5 seconds, which should be enough time for
+     * any receiver(s) to grab its own wake lock.
+     */
+    private final int WAKE_LOCK_TIMEOUT = 5000;
+
     private static SmsMessage mSmsMessage;
     private static SmsMessageBase mSmsMessageBase;
     private SmsMessageBase.SubmitPduBase mSubmitPduBase;
+    private boolean mStorageAvailable = true;
+
+    protected static int getNextConcatenatedRef() {
+        sConcatenatedRef += 1;
+        return sConcatenatedRef;
+    }
 
     /**
      *  Implement the per-application based SMS control, which only allows
@@ -155,11 +174,11 @@ public abstract class SMSDispatcher extends Handler {
 
         /**
          * Check to see if an application allow to send new SMS messages
-         *  
+         *
          * @param appName is the application sending sms
          * @param smsWaiting is the number of new sms wants to be sent
-         * @return true if application is allowed to send the requested number 
-         *         of new sms messages 
+         * @return true if application is allowed to send the requested number
+         *         of new sms messages
          */
         boolean check(String appName, int smsWaiting) {
             if (!mSmsStamp.containsKey(appName)) {
@@ -178,7 +197,7 @@ public abstract class SMSDispatcher extends Handler {
                     sent.remove(0);
             }
 
-            
+
             if ( (sent.size() + smsWaiting) <= mMaxAllowed) {
                 for (int i = 0; i < smsWaiting; i++ ) {
                     sent.add(ct);
@@ -191,14 +210,16 @@ public abstract class SMSDispatcher extends Handler {
 
     protected SMSDispatcher(PhoneBase phone) {
         mPhone = phone;
-        mWapPush = new WapPushOverSms(phone);
+        mWapPush = new WapPushOverSms(phone, this);
         mContext = phone.getContext();
         mResolver = mContext.getContentResolver();
         mCm = phone.mCM;
         mSTracker = null;
 
+        createWakelock();
+
         int check_period = Settings.Gservices.getInt(mResolver,
-                Settings.Gservices.SMS_OUTGOING_CEHCK_INTERVAL_MS,
+                Settings.Gservices.SMS_OUTGOING_CHECK_INTERVAL_MS,
                 DEFAULT_SMS_CHECK_PERIOD);
         int max_count = Settings.Gservices.getInt(mResolver,
                 Settings.Gservices.SMS_OUTGOING_CEHCK_MAX_COUNT,
@@ -211,6 +232,15 @@ public abstract class SMSDispatcher extends Handler {
 
         // Don't always start message ref at 0.
         sConcatenatedRef = new Random().nextInt(256);
+
+        // Register for device storage intents.  Use these to notify the RIL
+        // that storage for SMS is or is not available.
+        // TODO: Revisit this for a later release.  Storage reporting should
+        // rely more on application indication.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_DEVICE_STORAGE_LOW);
+        filter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
+        mContext.registerReceiver(mResultReceiver, filter);
     }
 
     public void dispose() {
@@ -252,16 +282,27 @@ public abstract class SMSDispatcher extends Handler {
 
             ar = (AsyncResult) msg.obj;
 
-                // FIXME only acknowledge on store
-            acknowledgeLastIncomingSms(true, null);
-
             if (ar.exception != null) {
                 Log.e(TAG, "Exception processing incoming SMS. Exception:" + ar.exception);
                 return;
             }
 
             sms = (SmsMessage) ar.result;
-            dispatchMessage(sms.mWrappedSmsMessage);
+            try {
+                if (mStorageAvailable) {
+                    int result = dispatchMessage(sms.mWrappedSmsMessage);
+                    if (result != Activity.RESULT_OK) {
+                        // RESULT_OK means that message was broadcast for app(s) to handle.
+                        // Any other result, we should ack here.
+                        boolean handled = (result == Intents.RESULT_SMS_HANDLED);
+                        acknowledgeLastIncomingSms(handled, result, null);
+                    }
+                } else {
+                    acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_OUT_OF_MEMORY, null);
+                }
+            } catch (RuntimeException ex) {
+                acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_GENERIC_ERROR, null);
+            }
 
             break;
 
@@ -298,11 +339,33 @@ public abstract class SMSDispatcher extends Handler {
                     sendMultipartSms(mSTracker);
                 } else {
                     sendSms(mSTracker);
-                } 
+                }
                 mSTracker = null;
             }
             break;
         }
+    }
+
+    private void createWakelock() {
+        PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SMSDispatcher");
+        mWakeLock.setReferenceCounted(true);
+    }
+
+    /**
+     * Grabs a wake lock and sends intent as an ordered broadcast.
+     * The resultReceiver will check for errors and ACK/NACK back
+     * to the RIL.
+     *
+     * @param intent intent to broadcast
+     * @param permission Receivers are required to have this permission
+     */
+    void dispatch(Intent intent, String permission) {
+        // Hold a wake lock for WAKE_LOCK_TIMEOUT seconds, enough to give any
+        // receivers time to take their own wake locks.
+        mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
+        mContext.sendOrderedBroadcast(intent, permission, mResultReceiver,
+                this, Activity.RESULT_OK, null, null);
     }
 
     /**
@@ -312,7 +375,8 @@ public abstract class SMSDispatcher extends Handler {
     private void handleIccFull(){
         // broadcast SIM_FULL intent
         Intent intent = new Intent(Intents.SIM_FULL_ACTION);
-        mPhone.getContext().sendBroadcast(intent, "android.permission.RECEIVE_SMS");
+        mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
+        mContext.sendBroadcast(intent, "android.permission.RECEIVE_SMS");
     }
 
     /**
@@ -412,19 +476,28 @@ public abstract class SMSDispatcher extends Handler {
      * Dispatches an incoming SMS messages.
      *
      * @param sms the incoming message from the phone
+     * @return a result code from {@link Telephony.Sms.Intents}, or
+     *         {@link Activity#RESULT_OK} if the message has been broadcast
+     *         to applications
      */
-    protected abstract void dispatchMessage(SmsMessageBase sms);
+    protected abstract int dispatchMessage(SmsMessageBase sms);
 
 
     /**
      * If this is the last part send the parts out to the application, otherwise
      * the part is stored for later processing.
+     *
+     * NOTE: concatRef (naturally) needs to be non-null, but portAddrs can be null.
+     * @return a result code from {@link Telephony.Sms.Intents}, or
+     *         {@link Activity#RESULT_OK} if the message has been broadcast
+     *         to applications
      */
-    protected void processMessagePart(SmsMessageBase sms, int referenceNumber,
-            int sequence, int count, int destinationPort) {
+    protected int processMessagePart(SmsMessageBase sms,
+            SmsHeader.ConcatRef concatRef, SmsHeader.PortAddrs portAddrs) {
+
         // Lookup all other related parts
         StringBuilder where = new StringBuilder("reference_number =");
-        where.append(referenceNumber);
+        where.append(concatRef.refNumber);
         where.append(" AND address = ?");
         String[] whereArgs = new String[] {sms.getOriginatingAddress()};
 
@@ -433,28 +506,27 @@ public abstract class SMSDispatcher extends Handler {
         try {
             cursor = mResolver.query(mRawUri, RAW_PROJECTION, where.toString(), whereArgs, null);
             int cursorCount = cursor.getCount();
-            if (cursorCount != count - 1) {
+            if (cursorCount != concatRef.msgCount - 1) {
                 // We don't have all the parts yet, store this one away
                 ContentValues values = new ContentValues();
                 values.put("date", new Long(sms.getTimestampMillis()));
                 values.put("pdu", HexDump.toHexString(sms.getPdu()));
                 values.put("address", sms.getOriginatingAddress());
-                values.put("reference_number", referenceNumber);
-                values.put("count", count);
-                values.put("sequence", sequence);
-                if (destinationPort != -1) {
-                    values.put("destination_port", destinationPort);
+                values.put("reference_number", concatRef.refNumber);
+                values.put("count", concatRef.msgCount);
+                values.put("sequence", concatRef.seqNumber);
+                if (portAddrs != null) {
+                    values.put("destination_port", portAddrs.destPort);
                 }
                 mResolver.insert(mRawUri, values);
-
-                return;
+                return Intents.RESULT_SMS_HANDLED;
             }
 
             // All the parts are in place, deal with them
             int pduColumn = cursor.getColumnIndex("pdu");
             int sequenceColumn = cursor.getColumnIndex("sequence");
 
-            pdus = new byte[count][];
+            pdus = new byte[concatRef.msgCount][];
             for (int i = 0; i < cursorCount; i++) {
                 cursor.moveToNext();
                 int cursorSequence = (int)cursor.getLong(sequenceColumn);
@@ -462,43 +534,48 @@ public abstract class SMSDispatcher extends Handler {
                         cursor.getString(pduColumn));
             }
             // This one isn't in the DB, so add it
-            pdus[sequence - 1] = sms.getPdu();
+            pdus[concatRef.seqNumber - 1] = sms.getPdu();
 
             // Remove the parts from the database
             mResolver.delete(mRawUri, where.toString(), whereArgs);
         } catch (SQLException e) {
             Log.e(TAG, "Can't access multipart SMS database", e);
-            return;  // TODO: NACK the message or something, don't just discard.
+            // TODO:  Would OUT_OF_MEMORY be more appropriate?
+            return Intents.RESULT_SMS_GENERIC_ERROR;
         } finally {
             if (cursor != null) cursor.close();
         }
 
+        /**
+         * TODO(cleanup): The following code has duplicated logic with
+         * the radio-specific dispatchMessage code, which is fragile,
+         * in addition to being redundant.  Instead, if this method
+         * maybe returned the reassembled message (or just contents),
+         * the following code (which is not really related to
+         * reconstruction) could be better consolidated.
+         */
+
         // Dispatch the PDUs to applications
-        switch (destinationPort) {
-        case SmsHeader.PORT_WAP_PUSH: {
-            // Build up the data stream
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            for (int i = 0; i < count; i++) {
-                SmsMessage msg = SmsMessage.createFromPdu(pdus[i]);
-                byte[] data = msg.getUserData();
-                output.write(data, 0, data.length);
+        if (portAddrs != null) {
+            if (portAddrs.destPort == SmsHeader.PORT_WAP_PUSH) {
+                // Build up the data stream
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                for (int i = 0; i < concatRef.msgCount; i++) {
+                    SmsMessage msg = SmsMessage.createFromPdu(pdus[i]);
+                    byte[] data = msg.getUserData();
+                    output.write(data, 0, data.length);
+                }
+                // Handle the PUSH
+                return mWapPush.dispatchWapPdu(output.toByteArray());
+            } else {
+                // The messages were sent to a port, so concoct a URI for it
+                dispatchPortAddressedPdus(pdus, portAddrs.destPort);
             }
-
-            // Handle the PUSH
-            mWapPush.dispatchWapPdu(output.toByteArray());
-            break;
-        }
-
-        case -1:
+        } else {
             // The messages were not sent to a port
             dispatchPdus(pdus);
-            break;
-
-        default:
-            // The messages were sent to a port, so concoct a URI for it
-            dispatchPortAddressedPdus(pdus, destinationPort);
-            break;
         }
+        return Activity.RESULT_OK;
     }
 
     /**
@@ -509,8 +586,7 @@ public abstract class SMSDispatcher extends Handler {
     protected void dispatchPdus(byte[][] pdus) {
         Intent intent = new Intent(Intents.SMS_RECEIVED_ACTION);
         intent.putExtra("pdus", pdus);
-        mPhone.getContext().sendBroadcast(
-                intent, "android.permission.RECEIVE_SMS");
+        dispatch(intent, "android.permission.RECEIVE_SMS");
     }
 
     /**
@@ -523,8 +599,7 @@ public abstract class SMSDispatcher extends Handler {
         Uri uri = Uri.parse("sms://localhost:" + port);
         Intent intent = new Intent(Intents.DATA_SMS_RECEIVED_ACTION, uri);
         intent.putExtra("pdus", pdus);
-        mPhone.getContext().sendBroadcast(
-                intent, "android.permission.RECEIVE_SMS");
+        dispatch(intent, "android.permission.RECEIVE_SMS");
     }
 
 
@@ -649,7 +724,7 @@ public abstract class SMSDispatcher extends Handler {
 
     /**
      * Send the multi-part SMS based on multipart Sms tracker
-     * 
+     *
      * @param tracker holds the multipart Sms tracker ready to be sent
      */
     protected abstract void sendMultipartSms (SmsTracker tracker);
@@ -688,13 +763,15 @@ public abstract class SMSDispatcher extends Handler {
     /**
      * Send an acknowledge message.
      * @param success indicates that last message was successfully received.
+     * @param result result code indicating any error
      * @param response callback message sent when operation completes.
      */
-    protected abstract void acknowledgeLastIncomingSms(boolean success, Message response);
+    protected abstract void acknowledgeLastIncomingSms(boolean success,
+            int result, Message response);
 
     /**
      * Check if a SmsTracker holds multi-part Sms
-     * 
+     *
      * @param tracker a SmsTracker could hold a multi-part Sms
      * @return true for tracker holds Multi-parts Sms
      */
@@ -725,7 +802,7 @@ public abstract class SMSDispatcher extends Handler {
             mRetryCount = 0;
         }
     }
-    
+
     protected SmsTracker SmsTrackerFactory(HashMap data, PendingIntent sentIntent,
             PendingIntent deliveryIntent) {
         return new SmsTracker(data, sentIntent, deliveryIntent);
@@ -740,5 +817,29 @@ public abstract class SMSDispatcher extends Handler {
                     sendMessage(obtainMessage(EVENT_SEND_CONFIRMED_SMS));
                 }
             }
+        };
+
+        private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_LOW)) {
+                    mStorageAvailable = false;
+                    mCm.reportSmsMemoryStatus(false, null);
+                } else if (intent.getAction().equals(Intent.ACTION_DEVICE_STORAGE_OK)) {
+                    mStorageAvailable = true;
+                    mCm.reportSmsMemoryStatus(true, null);
+                } else {
+                    // Assume the intent is one of the SMS receive intents that
+                    // was sent as an ordered broadcast.  Check result and ACK.
+                    int rc = getResultCode();
+                    boolean success = (rc == Activity.RESULT_OK)
+                                        || (rc == Intents.RESULT_SMS_HANDLED);
+
+                    // For a multi-part message, this only ACKs the last part.
+                    // Previous parts were ACK'd as they were received.
+                    acknowledgeLastIncomingSms(success, rc, null);
+                }
+            }
+
         };
 }

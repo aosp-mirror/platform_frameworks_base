@@ -18,8 +18,10 @@ package com.android.server;
 
 import static android.os.FileObserver.*;
 import static android.os.ParcelFileDescriptor.*;
+
 import android.app.IWallpaperService;
 import android.app.IWallpaperServiceCallback;
+import android.backup.BackupManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -154,7 +156,16 @@ class WallpaperService extends IWallpaperService.Stub {
     public ParcelFileDescriptor setWallpaper() {
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
         try {
-            return ParcelFileDescriptor.open(WALLPAPER_FILE, MODE_CREATE|MODE_READ_WRITE);
+            ParcelFileDescriptor fd = ParcelFileDescriptor.open(WALLPAPER_FILE,
+                    MODE_CREATE|MODE_READ_WRITE);
+
+            // changing the wallpaper means we'll need to back up the new one
+            long origId = Binder.clearCallingIdentity();
+            BackupManager bm = new BackupManager(mContext);
+            bm.dataChanged();
+            Binder.restoreCallingIdentity(origId);
+
+            return fd;
         } catch (FileNotFoundException e) {
             if (Config.LOGD) Log.d(TAG, "Error setting wallpaper", e);
         }

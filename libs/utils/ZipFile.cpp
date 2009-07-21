@@ -20,9 +20,9 @@
 
 #define LOG_TAG "zip"
 
-#include "utils/ZipFile.h"
-#include "utils/ZipUtils.h"
-#include "utils/Log.h"
+#include <utils/ZipFile.h>
+#include <utils/ZipUtils.h>
+#include <utils/Log.h>
 
 #include <zlib.h>
 #define DEF_MEM_LEVEL 8                // normally in zutil.h?

@@ -18,6 +18,7 @@ package android.widget;
 
 import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.FlakyTest;
 import android.test.suitebuilder.annotation.MediumTest;
 
 /**
@@ -149,6 +150,7 @@ public class AutoCompleteTextViewPopup
     }
     
     /** Test the show/hide behavior of the drop-down. */
+    @FlakyTest(tolerance=5)
     @MediumTest
     public void testPopupShow() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();

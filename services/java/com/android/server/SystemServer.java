@@ -97,6 +97,9 @@ class ServerThread extends Thread {
 
         // Critical services...
         try {
+            Log.i(TAG, "Starting Entropy Service.");
+            ServiceManager.addService("entropy", new EntropyService());
+
             Log.i(TAG, "Starting Power Manager.");
             power = new PowerManagerService();
             ServiceManager.addService(Context.POWER_SERVICE, power);
@@ -225,6 +228,14 @@ class ServerThread extends Thread {
                         ConnectivityService.getInstance(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Connectivity Service", e);
+            }
+
+            try {
+              Log.i(TAG, "Starting Accessibility Manager.");
+              ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
+                      new AccessibilityManagerService(context));
+            } catch (Throwable e) {
+              Log.e(TAG, "Failure starting Accessibility Manager", e);
             }
 
             try {

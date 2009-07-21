@@ -20,10 +20,8 @@ import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
@@ -36,15 +34,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater.Filter;
 import android.view.View.OnClickListener;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 import java.lang.Class;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
@@ -69,13 +64,7 @@ public class RemoteViews implements Parcelable, Filter {
      * The resource ID of the layout file. (Added to the parcel)
      */
     private int mLayoutId;
-    
-    /**
-     * The Context object used to inflate the layout file. Also may
-     * be used by actions if they need access to the senders resources.
-     */
-    private Context mContext;
-    
+
     /**
      * An array of actions to perform on the view tree once it has been
      * inflated
@@ -85,7 +74,7 @@ public class RemoteViews implements Parcelable, Filter {
     
     /**
      * This annotation indicates that a subclass of View is alllowed to be used
-     * with the {@link android.widget.RemoteViews} mechanism.
+     * with the {@link RemoteViews} mechanism.
      */
     @Target({ ElementType.TYPE })
     @Retention(RetentionPolicy.RUNTIME)
@@ -116,7 +105,7 @@ public class RemoteViews implements Parcelable, Filter {
         public int describeContents() {
             return 0;
         }
-    };
+    }
 
     /**
      * Equivalent to calling
@@ -232,15 +221,17 @@ public class RemoteViews implements Parcelable, Filter {
                 targetDrawable = imageView.getDrawable();
             }
             
-            // Perform modifications only if values are set correctly
-            if (alpha != -1) {
-                targetDrawable.setAlpha(alpha);
-            }
-            if (colorFilter != -1 && filterMode != null) {
-                targetDrawable.setColorFilter(colorFilter, filterMode);
-            }
-            if (level != -1) {
-                targetDrawable.setLevel(level);
+            if (targetDrawable != null) {
+                // Perform modifications only if values are set correctly
+                if (alpha != -1) {
+                    targetDrawable.setAlpha(alpha);
+                }
+                if (colorFilter != -1 && filterMode != null) {
+                    targetDrawable.setColorFilter(colorFilter, filterMode);
+                }
+                if (level != -1) {
+                    targetDrawable.setLevel(level);
+                }
             }
         }
         
@@ -289,6 +280,7 @@ public class RemoteViews implements Parcelable, Filter {
             this.viewId = in.readInt();
             this.methodName = in.readString();
             this.type = in.readInt();
+            //noinspection ConstantIfStatement
             if (false) {
                 Log.d("RemoteViews", "read viewId=0x" + Integer.toHexString(this.viewId)
                         + " methodName=" + this.methodName + " type=" + this.type);
@@ -340,31 +332,32 @@ public class RemoteViews implements Parcelable, Filter {
             out.writeInt(this.viewId);
             out.writeString(this.methodName);
             out.writeInt(this.type);
+            //noinspection ConstantIfStatement
             if (false) {
                 Log.d("RemoteViews", "write viewId=0x" + Integer.toHexString(this.viewId)
                         + " methodName=" + this.methodName + " type=" + this.type);
             }
             switch (this.type) {
                 case BOOLEAN:
-                    out.writeInt(((Boolean)this.value).booleanValue() ? 1 : 0);
+                    out.writeInt((Boolean) this.value ? 1 : 0);
                     break;
                 case BYTE:
-                    out.writeByte(((Byte)this.value).byteValue());
+                    out.writeByte((Byte) this.value);
                     break;
                 case SHORT:
-                    out.writeInt(((Short)this.value).shortValue());
+                    out.writeInt((Short) this.value);
                     break;
                 case INT:
-                    out.writeInt(((Integer)this.value).intValue());
+                    out.writeInt((Integer) this.value);
                     break;
                 case LONG:
-                    out.writeLong(((Long)this.value).longValue());
+                    out.writeLong((Long) this.value);
                     break;
                 case FLOAT:
-                    out.writeFloat(((Float)this.value).floatValue());
+                    out.writeFloat((Float) this.value);
                     break;
                 case DOUBLE:
-                    out.writeDouble(((Double)this.value).doubleValue());
+                    out.writeDouble((Double) this.value);
                     break;
                 case CHAR:
                     out.writeInt((int)((Character)this.value).charValue());
@@ -430,7 +423,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
 
             Class klass = view.getClass();
-            Method method = null;
+            Method method;
             try {
                 method = klass.getMethod(this.methodName, getParameterType());
             }
@@ -446,6 +439,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
 
             try {
+                //noinspection ConstantIfStatement
                 if (false) {
                     Log.d("RemoteViews", "view: " + klass.getName() + " calling method: "
                         + this.methodName + "(" + param.getName() + ") with "
@@ -816,13 +810,12 @@ public class RemoteViews implements Parcelable, Filter {
      * @return The inflated view hierarchy
      */
     public View apply(Context context, ViewGroup parent) {
-        View result = null;
+        View result;
 
         Context c = prepareContext(context);
 
-        Resources r = c.getResources();
-        LayoutInflater inflater = (LayoutInflater) c
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater)
+                c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         inflater = inflater.cloneInContext(c);
         inflater.setFilter(this);
@@ -858,12 +851,12 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private Context prepareContext(Context context) {
-        Context c = null;
+        Context c;
         String packageName = mPackage;
 
         if (packageName != null) {
             try {
-                c = context.createPackageContext(packageName, 0);
+                c = context.createPackageContext(packageName, Context.CONTEXT_RESTRICTED);
             } catch (NameNotFoundException e) {
                 Log.e(LOG_TAG, "Package name " + packageName + " not found");
                 c = context;
@@ -871,8 +864,6 @@ public class RemoteViews implements Parcelable, Filter {
         } else {
             c = context;
         }
-
-        mContext = c;
 
         return c;
     }

@@ -34,7 +34,7 @@ class IMediaPlayerService: public IInterface
 public:
     DECLARE_META_INTERFACE(MediaPlayerService);
 
-    virtual sp<IMediaRecorder>  createMediaRecorder(pid_t pid) = 0;  
+    virtual sp<IMediaRecorder>  createMediaRecorder(pid_t pid) = 0;
     virtual sp<IMediaMetadataRetriever> createMetadataRetriever(pid_t pid) = 0;
 
     virtual sp<IMediaPlayer>    create(pid_t pid, const sp<IMediaPlayerClient>& client, const char* url) = 0;
@@ -57,4 +57,3 @@ public:
 }; // namespace android
 
 #endif // ANDROID_IMEDIAPLAYERSERVICE_H
-

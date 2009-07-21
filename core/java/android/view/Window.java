@@ -24,7 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
+import android.view.accessibility.AccessibilityEvent;
 
 /**
  * Abstract base class for a top-level window look and behavior policy.  An
@@ -153,7 +153,16 @@ public abstract class Window {
          * @return boolean Return true if this event was consumed.
          */
         public boolean dispatchTrackballEvent(MotionEvent event);
-        
+
+        /**
+         * Called to process population of {@link AccessibilityEvent}s.
+         *
+         * @param event The event.
+         *
+         * @return boolean Return true if event population was completed.
+         */
+        public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event);
+
         /**
          * Instantiate the view to display in the panel for 'featureId'.
          * You can return null, in which case the default content (typically
@@ -367,8 +376,14 @@ public abstract class Window {
                     String title;
                     if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA) {
                         title="Media";
+                    } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY) {
+                        title="MediaOvr";
                     } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
                         title="Panel";
+                    } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL) {
+                        title="SubPanel";
+                    } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG) {
+                        title="AtchDlg";
                     } else {
                         title=Integer.toString(wp.type);
                     }

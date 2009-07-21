@@ -880,7 +880,9 @@ public class GradientDrawable extends Drawable {
             mShape = state.mShape;
             mGradient = state.mGradient;
             mOrientation = state.mOrientation;
-            mColors = state.mColors.clone();
+            if (state.mColors != null) {
+                mColors = state.mColors.clone();
+            }
             if (state.mPositions != null) {
                 mPositions = state.mPositions.clone();
             }

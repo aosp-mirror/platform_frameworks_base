@@ -21,6 +21,9 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.speech.RecognitionResult;
+import android.util.Log;
 
 import java.util.List;
 
@@ -56,6 +59,11 @@ public class RecognitionServiceUtil {
     public static final Intent sDefaultIntent = new Intent(
             RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
+    // Recognize request parameters
+    public static final String USE_LOCATION = "useLocation";
+    public static final String CONTACT_AUTH_TOKEN = "contactAuthToken";
+    
+    // Bundles
     public static final String NOISE_LEVEL = "NoiseLevel";
     public static final String SIGNAL_NOISE_RATIO = "SignalNoiseRatio";
 
@@ -72,8 +80,8 @@ public class RecognitionServiceUtil {
         public void onRmsChanged(float rmsdB) {}
         public void onBufferReceived(byte[] buf) {}
         public void onEndOfSpeech() {}
-        public void onError(String error) {}
-        public void onResults(List<String> results) {}
+        public void onError(int error) {}
+        public void onResults(List<RecognitionResult> results, long key) {}
     }
 
     /**

@@ -39,7 +39,7 @@ LOCAL_SRC_FILES:= 	\
 	GLES_CM/gl.cpp.arm 		\
 #
 
-LOCAL_SHARED_LIBRARIES += libcutils libutils libui libEGL
+LOCAL_SHARED_LIBRARIES += libcutils libEGL
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libGLESv1_CM
 

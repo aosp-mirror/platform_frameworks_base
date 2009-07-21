@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
@@ -960,7 +961,19 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public ApplicationInfo getApplicationInfo() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
     public String getPackageResourcePath() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public File getSharedPrefsFile(String name) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -1143,14 +1156,6 @@ public final class BridgeContext extends Context {
     
     @Override
     public Context getApplicationContext() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public float getApplicationScale() {
         throw new UnsupportedOperationException();
     }
 }

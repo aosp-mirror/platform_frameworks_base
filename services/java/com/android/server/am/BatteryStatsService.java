@@ -16,16 +16,18 @@
 
 package com.android.server.am;
 
-import com.android.internal.app.IBatteryStats;
-import com.android.internal.os.BatteryStatsImpl;
-
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
+import android.telephony.SignalStrength;
+import android.telephony.TelephonyManager;
 import android.util.Log;
+
+import com.android.internal.app.IBatteryStats;
+import com.android.internal.os.BatteryStatsImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -177,10 +179,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
     
-    public void notePhoneSignalStrength(int asu) {
+    public void notePhoneSignalStrength(SignalStrength signalStrength) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.notePhoneSignalStrengthLocked(asu);
+            mStats.notePhoneSignalStrengthLocked(signalStrength);
         }
     }
     
@@ -190,7 +192,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             mStats.notePhoneDataConnectionStateLocked(dataType, hasData);
         }
     }
-    
+
+    public void noteAirplaneMode(boolean airplaneMode) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteAirplaneModeLocked(airplaneMode);
+        }
+    }
+
     public void noteWifiOn(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -202,6 +211,34 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteWifiOffLocked(uid);
+        }
+    }
+
+    public void noteStartAudio(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteAudioOnLocked(uid);
+        }
+    }
+
+    public void noteStopAudio(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteAudioOffLocked(uid);
+        }
+    }
+
+    public void noteStartVideo(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteVideoOnLocked(uid);
+        }
+    }
+
+    public void noteStopVideo(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteVideoOffLocked(uid);
         }
     }
 

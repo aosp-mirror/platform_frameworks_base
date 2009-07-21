@@ -87,8 +87,9 @@ public class TabHost extends FrameLayout implements ViewTreeObserver.OnTouchMode
 
 
     /**
-      * <p>Call setup() before adding tabs if loading TabHost using findViewById(). <i><b>However</i></b>: You do
-      * not need to call setup() after getTabHost() in {@link android.app.TabActivity TabActivity}.
+      * <p>Call setup() before adding tabs if loading TabHost using findViewById().
+      * <i><b>However</i></b>: You do not need to call setup() after getTabHost()
+      * in {@link android.app.TabActivity TabActivity}.
       * Example:</p>
 <pre>mTabHost = (TabHost)findViewById(R.id.tabhost);
 mTabHost.setup();
@@ -176,7 +177,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             // leaving touch mode.. if nothing has focus, let's give it to
             // the indicator of the current tab
             if (!mCurrentView.hasFocus() || mCurrentView.isFocused()) {
-                mTabWidget.getChildAt(mCurrentTab).requestFocus();
+                mTabWidget.getChildTabViewAt(mCurrentTab).requestFocus();
             }
         }
     }
@@ -196,6 +197,12 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
         View tabIndicator = tabSpec.mIndicatorStrategy.createIndicatorView();
         tabIndicator.setOnKeyListener(mTabKeyListener);
+
+        // If this is a custom view, then do not draw the bottom strips for
+        // the tab indicators.
+        if (tabSpec.mIndicatorStrategy instanceof ViewIndicatorStrategy) {
+            mTabWidget.setDrawBottomStrips(false);
+        }
         mTabWidget.addView(tabIndicator);
         mTabSpecs.add(tabSpec);
 
@@ -234,7 +241,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
 
     public View getCurrentTabView() {
         if (mCurrentTab >= 0 && mCurrentTab < mTabSpecs.size()) {
-            return mTabWidget.getChildAt(mCurrentTab);
+            return mTabWidget.getChildTabViewAt(mCurrentTab);
         }
         return null;
     }
@@ -272,7 +279,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
                 && (mCurrentView.isRootNamespace())
                 && (mCurrentView.hasFocus())
                 && (mCurrentView.findFocus().focusSearch(View.FOCUS_UP) == null)) {
-            mTabWidget.getChildAt(mCurrentTab).requestFocus();
+            mTabWidget.getChildTabViewAt(mCurrentTab).requestFocus();
             playSoundEffect(SoundEffectConstants.NAVIGATION_UP);
             return true;
         }
@@ -363,14 +370,14 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
          * 
          * @param tag
          *            Which tab was selected.
-         * @return The view to distplay the contents of the selected tab.
+         * @return The view to display the contents of the selected tab.
          */
         View createTabContent(String tag);
     }
 
 
     /**
-     * A tab has a tab indictor, content, and a tag that is used to keep
+     * A tab has a tab indicator, content, and a tag that is used to keep
      * track of it.  This builder helps choose among these options.
      *
      * For the tab indicator, your choices are:
@@ -410,6 +417,14 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
 
         /**
+         * Specify a view as the tab indicator.
+         */
+        public TabSpec setIndicator(View view) {
+            mIndicatorStrategy = new ViewIndicatorStrategy(view);
+            return this;
+        }
+
+        /**
          * Specify the id of the view that should be used as the content
          * of the tab.
          */
@@ -436,7 +451,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
 
 
-        String getTag() {
+        public String getTag() {
             return mTag;
         }
     }
@@ -525,6 +540,22 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
     }
 
     /**
+     * How to create a tab indicator by specifying a view.
+     */
+    private class ViewIndicatorStrategy implements IndicatorStrategy {
+
+        private final View mView;
+
+        private ViewIndicatorStrategy(View view) {
+            mView = view;
+        }
+
+        public View createIndicatorView() {
+            return mView;
+        }
+    }
+
+    /**
      * How to create the tab content via a view id.
      */
     private class ViewIdContentStrategy implements ContentStrategy {
@@ -607,7 +638,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             }
             mLaunchedView = wd;
             
-            // XXX Set FOCUS_AFTER_DESCENDANTS on embedded activies for now so they can get
+            // XXX Set FOCUS_AFTER_DESCENDANTS on embedded activities for now so they can get
             // focus if none of their children have it. They need focus to be able to
             // display menu items.
             //

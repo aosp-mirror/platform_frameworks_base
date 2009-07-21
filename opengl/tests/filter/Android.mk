@@ -12,6 +12,6 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_MODULE:= test-opengl-filter
 
-LOCAL_MODULE_TAGS := tests
+LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_EXECUTABLE)

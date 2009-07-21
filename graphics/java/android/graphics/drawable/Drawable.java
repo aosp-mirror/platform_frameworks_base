@@ -745,6 +745,8 @@ public abstract class Drawable {
             drawable = new ClipDrawable();
         } else if (name.equals("rotate")) {
             drawable = new RotateDrawable();
+        } else if (name.equals("animated-rotate")) {
+            drawable = new AnimatedRotateDrawable();            
         } else if (name.equals("animation-list")) {
             drawable = new AnimationDrawable();
         } else if (name.equals("inset")) {

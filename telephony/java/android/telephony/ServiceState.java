@@ -99,12 +99,9 @@ public class ServiceState implements Parcelable {
     public static final int REGISTRATION_STATE_UNKNOWN = 4;
     /** @hide */
     public static final int REGISTRATION_STATE_ROAMING = 5;
-    /** @hide */
-    public static final int REGISTRATION_STATE_ROAMING_AFFILIATE = 6;
 
     private int mState = STATE_OUT_OF_SERVICE;
     private boolean mRoaming;
-    private int mExtendedCdmaRoaming;
     private String mOperatorAlphaLong;
     private String mOperatorAlphaShort;
     private String mOperatorNumeric;
@@ -115,6 +112,8 @@ public class ServiceState implements Parcelable {
     private boolean mCssIndicator;
     private int mNetworkId;
     private int mSystemId;
+    private int mCdmaRoamingIndicator;
+    private int mCdmaDefaultRoamingIndicator;
 
     /**
      * Create a new ServiceState from a intent notifier Bundle
@@ -159,7 +158,8 @@ public class ServiceState implements Parcelable {
         mCssIndicator = s.mCssIndicator;
         mNetworkId = s.mNetworkId;
         mSystemId = s.mSystemId;
-        mExtendedCdmaRoaming = s.mExtendedCdmaRoaming;
+        mCdmaRoamingIndicator = s.mCdmaRoamingIndicator;
+        mCdmaDefaultRoamingIndicator = s.mCdmaDefaultRoamingIndicator;
     }
 
     /**
@@ -176,7 +176,8 @@ public class ServiceState implements Parcelable {
         mCssIndicator = (in.readInt() != 0);
         mNetworkId = in.readInt();
         mSystemId = in.readInt();
-        mExtendedCdmaRoaming = in.readInt();
+        mCdmaRoamingIndicator = in.readInt();
+        mCdmaDefaultRoamingIndicator = in.readInt();
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -190,7 +191,8 @@ public class ServiceState implements Parcelable {
         out.writeInt(mCssIndicator ? 1 : 0);
         out.writeInt(mNetworkId);
         out.writeInt(mSystemId);
-        out.writeInt(mExtendedCdmaRoaming);
+        out.writeInt(mCdmaRoamingIndicator);
+        out.writeInt(mCdmaDefaultRoamingIndicator);
     }
 
     public int describeContents() {
@@ -231,15 +233,25 @@ public class ServiceState implements Parcelable {
         return mRoaming;
     }
 
-    /** @hide */
-    public int getExtendedCdmaRoaming(){
-        return this.mExtendedCdmaRoaming;
+    /**
+     * @hide
+     */
+    public int getCdmaRoamingIndicator(){
+        return this.mCdmaRoamingIndicator;
+    }
+
+    /**
+     * @hide
+     */
+    public int getCdmaDefaultRoamingIndicator(){
+        return this.mCdmaDefaultRoamingIndicator;
     }
 
     /**
      * Get current registered operator name in long alphanumeric format
      *
      * In GSM/UMTS, long format can be upto 16 characters long
+     * In CDMA, returns the ERI text, if set, otherwise the ONS
      *
      * @return long name of operator, null if unregistered or unknown
      */
@@ -289,7 +301,8 @@ public class ServiceState implements Parcelable {
                 + ((null == mOperatorAlphaLong) ? 0 : mOperatorAlphaLong.hashCode())
                 + ((null == mOperatorAlphaShort) ? 0 : mOperatorAlphaShort.hashCode())
                 + ((null == mOperatorNumeric) ? 0 : mOperatorNumeric.hashCode())
-                + (mExtendedCdmaRoaming));
+                + mCdmaRoamingIndicator
+                + mCdmaDefaultRoamingIndicator);
     }
 
     @Override
@@ -316,7 +329,9 @@ public class ServiceState implements Parcelable {
                 && equalsHandlesNulls(mCssIndicator, s.mCssIndicator)
                 && equalsHandlesNulls(mNetworkId, s.mNetworkId)
                 && equalsHandlesNulls(mSystemId, s.mSystemId)
-                && equalsHandlesNulls(mExtendedCdmaRoaming, s.mExtendedCdmaRoaming));
+                && equalsHandlesNulls(mCdmaRoamingIndicator, s.mCdmaRoamingIndicator)
+                && equalsHandlesNulls(mCdmaDefaultRoamingIndicator,
+                        s.mCdmaDefaultRoamingIndicator));
     }
 
     @Override
@@ -363,9 +378,10 @@ public class ServiceState implements Parcelable {
                 + " " + (mIsManualNetworkSelection ? "(manual)" : "")
                 + " " + radioTechnology
                 + " " + (mCssIndicator ? "CSS supported" : "CSS not supported")
-                + "NetworkId: " + mNetworkId
-                + "SystemId: " + mSystemId
-                + "ExtendedCdmaRoaming: " + mExtendedCdmaRoaming);
+                + " " + mNetworkId
+                + " " + mSystemId
+                + "RoamInd: " + mCdmaRoamingIndicator
+                + "DefRoamInd: " + mCdmaDefaultRoamingIndicator);
     }
 
     public void setStateOutOfService() {
@@ -379,7 +395,8 @@ public class ServiceState implements Parcelable {
         mCssIndicator = false;
         mNetworkId = -1;
         mSystemId = -1;
-        mExtendedCdmaRoaming = -1;
+        mCdmaRoamingIndicator = -1;
+        mCdmaDefaultRoamingIndicator = -1;
     }
 
     public void setStateOff() {
@@ -393,7 +410,8 @@ public class ServiceState implements Parcelable {
         mCssIndicator = false;
         mNetworkId = -1;
         mSystemId = -1;
-        mExtendedCdmaRoaming = -1;
+        mCdmaRoamingIndicator = -1;
+        mCdmaDefaultRoamingIndicator = -1;
     }
 
     public void setState(int state) {
@@ -404,15 +422,34 @@ public class ServiceState implements Parcelable {
         mRoaming = roaming;
     }
 
-    /** @hide */
-    public void setExtendedCdmaRoaming (int roaming) {
-        this.mExtendedCdmaRoaming = roaming;
+    /**
+     * @hide
+     */
+    public void setCdmaRoamingIndicator(int roaming) {
+        this.mCdmaRoamingIndicator = roaming;
+    }
+
+    /**
+     * @hide
+     */
+    public void setCdmaDefaultRoamingIndicator (int roaming) {
+        this.mCdmaDefaultRoamingIndicator = roaming;
     }
 
     public void setOperatorName(String longName, String shortName, String numeric) {
         mOperatorAlphaLong = longName;
         mOperatorAlphaShort = shortName;
         mOperatorNumeric = numeric;
+    }
+
+    /**
+     * In CDMA mOperatorAlphaLong can be set from the ERI
+     * text, this is done from the CDMAPhone and not from the CdmaServiceStateTracker
+     *
+     * @hide
+     */
+    public void setCdmaEriText(String longName) {
+        mOperatorAlphaLong = longName;
     }
 
     public void setIsManualSelection(boolean isManual) {
@@ -447,7 +484,8 @@ public class ServiceState implements Parcelable {
         mCssIndicator = m.getBoolean("cssIndicator");
         mNetworkId = m.getInt("networkId");
         mSystemId = m.getInt("systemId");
-        mExtendedCdmaRoaming = m.getInt("extendedCdmaRoaming");
+        mCdmaRoamingIndicator = m.getInt("cdmaRoamingIndicator");
+        mCdmaDefaultRoamingIndicator = m.getInt("cdmaDefaultRoamingIndicator");
     }
 
     /**
@@ -467,7 +505,8 @@ public class ServiceState implements Parcelable {
         m.putBoolean("cssIndicator", mCssIndicator);
         m.putInt("networkId", mNetworkId);
         m.putInt("systemId", mSystemId);
-        m.putInt("extendedCdmaRoaming", mExtendedCdmaRoaming);
+        m.putInt("cdmaRoamingIndicator", mCdmaRoamingIndicator);
+        m.putInt("cdmaDefaultRoamingIndicator", mCdmaDefaultRoamingIndicator);
     }
 
     //***** CDMA

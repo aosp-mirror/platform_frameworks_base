@@ -34,4 +34,8 @@
     
     <!-- The duration (in milliseconds) of a long animation. -->
     <integer name="config_longAnimTime">300</integer>
+
+    <!-- Flag indicating whether Last Name comes before First Name.
+         This becomes true in Japan, for example.-->
+    <bool name="config_lastname_comes_before_firstname">false</bool>
 </resources>

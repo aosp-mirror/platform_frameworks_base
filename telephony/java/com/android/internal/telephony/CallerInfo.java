@@ -70,17 +70,23 @@ public class CallerInfo {
      */
     public String name;
     public String phoneNumber;
+
+    public String cnapName;
+    public int numberPresentation;
+    public int namePresentation;
+    public boolean contactExists;
+
     public String phoneLabel;
     /* Split up the phoneLabel into number type and label name */
     public int    numberType;
     public String numberLabel;
-    
+
     public int photoResource;
     public long person_id;
     public boolean needUpdate;
     public Uri contactRefUri;
-    
-    // fields to hold individual contact preference data, 
+
+    // fields to hold individual contact preference data,
     // including the send to voicemail flag and the ringtone
     // uri reference.
     public Uri contactRingtoneUri;
@@ -110,7 +116,7 @@ public class CallerInfo {
      * number. The returned CallerInfo is null if no number is supplied.
      */
     public static CallerInfo getCallerInfo(Context context, Uri contactRef, Cursor cursor) {
-        
+
         CallerInfo info = new CallerInfo();
         info.photoResource = 0;
         info.phoneLabel = null;
@@ -118,9 +124,10 @@ public class CallerInfo {
         info.numberLabel = null;
         info.cachedPhoto = null;
         info.isCachedPhotoCurrent = false;
-        
+        info.contactExists = false;
+
         if (Config.LOGV) Log.v(TAG, "construct callerInfo from cursor");
-        
+
         if (cursor != null) {
             if (cursor.moveToFirst()) {
 
@@ -137,7 +144,7 @@ public class CallerInfo {
                 if (columnIndex != -1) {
                     info.phoneNumber = cursor.getString(columnIndex);
                 }
-                
+
                 // Look for the label/type combo
                 columnIndex = cursor.getColumnIndex(Phones.LABEL);
                 if (columnIndex != -1) {
@@ -161,7 +168,7 @@ public class CallerInfo {
                         info.person_id = cursor.getLong(columnIndex);
                     }
                 }
-                
+
                 // look for the custom ringtone, create from the string stored
                 // in the database.
                 columnIndex = cursor.getColumnIndex(People.CUSTOM_RINGTONE);
@@ -174,8 +181,9 @@ public class CallerInfo {
                 // look for the send to voicemail flag, set it to true only
                 // under certain circumstances.
                 columnIndex = cursor.getColumnIndex(People.SEND_TO_VOICEMAIL);
-                info.shouldSendToVoicemail = (columnIndex != -1) && 
+                info.shouldSendToVoicemail = (columnIndex != -1) &&
                         ((cursor.getInt(columnIndex)) == 1);
+                info.contactExists = true;
             }
             cursor.close();
         }
@@ -186,7 +194,7 @@ public class CallerInfo {
 
         return info;
     }
-    
+
     /**
      * getCallerInfo given a URI, look up in the call-log database
      * for the uri unique key.
@@ -196,11 +204,11 @@ public class CallerInfo {
      * number. The returned CallerInfo is null if no number is supplied.
      */
     public static CallerInfo getCallerInfo(Context context, Uri contactRef) {
-        
-        return getCallerInfo(context, contactRef, 
+
+        return getCallerInfo(context, contactRef,
                 context.getContentResolver().query(contactRef, null, null, null, null));
     }
-    
+
     /**
      * getCallerInfo given a phone number, look up in the call-log database
      * for the matching caller id info.
@@ -216,13 +224,13 @@ public class CallerInfo {
             return null;
         } else {
             // Change the callerInfo number ONLY if it is an emergency number
-            // or if it is the voicemail number.  If it is either, take a 
+            // or if it is the voicemail number.  If it is either, take a
             // shortcut and skip the query.
             if (PhoneNumberUtils.isEmergencyNumber(number)) {
                 CallerInfo ci = new CallerInfo();
 
                 // Note we're setting the phone number here (refer to javadoc
-                // comments at the top of CallerInfo class). 
+                // comments at the top of CallerInfo class).
                 ci.phoneNumber = context.getString(
                         com.android.internal.R.string.emergency_call_dialog_number_for_display);
                 return ci;
@@ -233,14 +241,14 @@ public class CallerInfo {
                         CallerInfo ci = new CallerInfo();
 
                         // Note we're setting the phone number here (refer to javadoc
-                        // comments at the top of CallerInfo class). 
+                        // comments at the top of CallerInfo class).
                         ci.phoneNumber = TelephonyManager.getDefault().getVoiceMailAlphaTag();
                         // TODO: FIND ANOTHER ICON
                         //info.photoResource = android.R.drawable.badge_voicemail;
                         return ci;
                     }
                 } catch (SecurityException ex) {
-                    // Don't crash if this process doesn't have permission to 
+                    // Don't crash if this process doesn't have permission to
                     // retrieve VM number.  It's still allowed to look up caller info.
                     // But don't try it again.
                     sSkipVmCheck = true;
@@ -249,16 +257,16 @@ public class CallerInfo {
         }
 
         Uri contactUri = Uri.withAppendedPath(Contacts.Phones.CONTENT_FILTER_URL,
-                                              Uri.encode(number)); 
-        
+                                              Uri.encode(number));
+
         CallerInfo info = getCallerInfo(context, contactUri);
 
-        // if no query results were returned with a viable number, 
-        // fill in the original number value we used to query with. 
+        // if no query results were returned with a viable number,
+        // fill in the original number value we used to query with.
         if (TextUtils.isEmpty(info.phoneNumber)) {
             info.phoneNumber = number;
         }
-                
+
         return info;
     }
 
@@ -270,9 +278,9 @@ public class CallerInfo {
      * @param number a phone number.
      * @return if the number belongs to a contact, the contact's name is
      * returned; otherwise, the number itself is returned.
-     * 
-     * TODO NOTE: This MAY need to refer to the Asynchronous Query API 
-     * [startQuery()], instead of getCallerInfo, but since it looks like 
+     *
+     * TODO NOTE: This MAY need to refer to the Asynchronous Query API
+     * [startQuery()], instead of getCallerInfo, but since it looks like
      * it is only being used by the provider calls in the messaging app:
      *   1. android.provider.Telephony.Mms.getDisplayAddress()
      *   2. android.provider.Telephony.Sms.getDisplayAddress()
@@ -302,5 +310,4 @@ public class CallerInfo {
             return null;
         }
     }
-}    
-
+}

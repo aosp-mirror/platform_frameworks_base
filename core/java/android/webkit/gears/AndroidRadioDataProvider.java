@@ -28,6 +28,7 @@ package android.webkit.gears;
 import android.content.Context;
 import android.telephony.CellLocation;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.gsm.GsmCellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -54,6 +55,7 @@ public final class AndroidRadioDataProvider extends PhoneStateListener {
   public static final class RadioData {
     public int cellId = -1;
     public int locationAreaCode = -1;
+    // TODO: use new SignalStrength instead of asu
     public int signalStrength = -1;
     public int mobileCountryCode = -1;
     public int mobileNetworkCode = -1;
@@ -179,6 +181,7 @@ public final class AndroidRadioDataProvider extends PhoneStateListener {
   private CellLocation cellLocation = null;
 
   /** The last known signal strength */
+  // TODO: use new SignalStrength instead of asu
   private int signalStrength = -1;
 
   /** The last known serviceState */
@@ -207,7 +210,7 @@ public final class AndroidRadioDataProvider extends PhoneStateListener {
     // Register for cell id, signal strength and service state changed
     // notifications.
     telephonyManager.listen(this, PhoneStateListener.LISTEN_CELL_LOCATION
-        | PhoneStateListener.LISTEN_SIGNAL_STRENGTH
+        | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
         | PhoneStateListener.LISTEN_SERVICE_STATE);
   }
 
@@ -226,8 +229,9 @@ public final class AndroidRadioDataProvider extends PhoneStateListener {
   }
 
   @Override
-  public void onSignalStrengthChanged(int asu) {
-    signalStrength = asu;
+  public void onSignalStrengthsChanged(SignalStrength ss) {
+    int gsmSignalStrength = ss.getGsmSignalStrength();
+    signalStrength = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
     notifyListeners();
   }
 

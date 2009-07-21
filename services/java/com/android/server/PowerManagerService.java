@@ -709,7 +709,10 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     p.awakeOnSet = true;
                 }
             } else {
-                mPokeLocks.remove(token);
+                PokeLock rLock = mPokeLocks.remove(token);
+                if (rLock != null) {
+                    token.unlinkToDeath(rLock, 0);
+                }
             }
 
             int oldPokey = mPokey;

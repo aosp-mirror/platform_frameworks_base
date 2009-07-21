@@ -71,7 +71,7 @@ namespace android {
  * The relative sizes of the stretchy segments indicates the relative
  * amount of stretchiness of the regions bordered by the segments.  For
  * example, regions 3, 7 and 11 above will take up more horizontal space
- * than regions 1, 5 and 9 since the horizonal segment associated with
+ * than regions 1, 5 and 9 since the horizontal segment associated with
  * the first set of regions is larger than the other set of regions.  The
  * ratios of the amount of horizontal (or vertical) space taken by any
  * two stretchable slices is exactly the ratio of their corresponding
@@ -87,7 +87,7 @@ namespace android {
  * the leftmost slices always start at x=0 and the rightmost slices
  * always end at the end of the image. So, for example, the regions 0,
  * 4 and 8 (which are fixed along the X axis) start at x value 0 and
- * go to xDiv[0] amd slices 2, 6 and 10 start at xDiv[1] and end at
+ * go to xDiv[0] and slices 2, 6 and 10 start at xDiv[1] and end at
  * xDiv[2].
  *
  * The array pointed to by the colors field lists contains hints for
@@ -626,25 +626,25 @@ public:
     event_code_t next();
 
     // These are available for all nodes:
-    const int32_t getCommentID() const;
+    int32_t getCommentID() const;
     const uint16_t* getComment(size_t* outLen) const;
-    const uint32_t getLineNumber() const;
+    uint32_t getLineNumber() const;
     
     // This is available for TEXT:
-    const int32_t getTextID() const;
+    int32_t getTextID() const;
     const uint16_t* getText(size_t* outLen) const;
     ssize_t getTextValue(Res_value* outValue) const;
     
     // These are available for START_NAMESPACE and END_NAMESPACE:
-    const int32_t getNamespacePrefixID() const;
+    int32_t getNamespacePrefixID() const;
     const uint16_t* getNamespacePrefix(size_t* outLen) const;
-    const int32_t getNamespaceUriID() const;
+    int32_t getNamespaceUriID() const;
     const uint16_t* getNamespaceUri(size_t* outLen) const;
     
     // These are available for START_TAG and END_TAG:
-    const int32_t getElementNamespaceID() const;
+    int32_t getElementNamespaceID() const;
     const uint16_t* getElementNamespace(size_t* outLen) const;
-    const int32_t getElementNameID() const;
+    int32_t getElementNameID() const;
     const uint16_t* getElementName(size_t* outLen) const;
     
     // Remaining methods are for retrieving information about attributes
@@ -653,14 +653,14 @@ public:
     size_t getAttributeCount() const;
     
     // Returns -1 if no namespace, -2 if idx out of range.
-    const int32_t getAttributeNamespaceID(size_t idx) const;
+    int32_t getAttributeNamespaceID(size_t idx) const;
     const uint16_t* getAttributeNamespace(size_t idx, size_t* outLen) const;
     
-    const int32_t getAttributeNameID(size_t idx) const;
+    int32_t getAttributeNameID(size_t idx) const;
     const uint16_t* getAttributeName(size_t idx, size_t* outLen) const;
-    const uint32_t getAttributeNameResID(size_t idx) const;
+    uint32_t getAttributeNameResID(size_t idx) const;
     
-    const int32_t getAttributeValueStringID(size_t idx) const;
+    int32_t getAttributeValueStringID(size_t idx) const;
     const uint16_t* getAttributeStringValue(size_t idx, size_t* outLen) const;
     
     int32_t getAttributeDataType(size_t idx) const;
@@ -866,7 +866,7 @@ struct ResTable_config
             uint8_t keyboard;
             uint8_t navigation;
             uint8_t inputFlags;
-            uint8_t pad0;
+            uint8_t inputPad0;
         };
         uint32_t input;
     };
@@ -903,6 +903,23 @@ struct ResTable_config
             uint16_t minorVersion;
         };
         uint32_t version;
+    };
+    
+    enum {
+        SCREENLAYOUT_ANY  = 0x0000,
+        SCREENLAYOUT_SMALL = 0x0001,
+        SCREENLAYOUT_NORMAL = 0x0002,
+        SCREENLAYOUT_LARGE = 0x0003,
+    };
+    
+    union {
+        struct {
+            uint8_t screenLayout;
+            uint8_t screenConfigPad0;
+            uint8_t screenConfigPad1;
+            uint8_t screenConfigPad2;
+        };
+        uint32_t screenConfig;
     };
     
     inline void copyFromDeviceNoSwap(const ResTable_config& o) {
@@ -950,6 +967,8 @@ struct ResTable_config
         diff = (int32_t)(screenSize - o.screenSize);
         if (diff != 0) return diff;
         diff = (int32_t)(version - o.version);
+        if (diff != 0) return diff;
+        diff = (int32_t)(screenLayout - o.screenLayout);
         return (int)diff;
     }
     
@@ -967,7 +986,8 @@ struct ResTable_config
         CONFIG_ORIENTATION = 0x0080,
         CONFIG_DENSITY = 0x0100,
         CONFIG_SCREEN_SIZE = 0x0200,
-        CONFIG_VERSION = 0x0400
+        CONFIG_VERSION = 0x0400,
+        CONFIG_SCREEN_LAYOUT = 0x0800
     };
     
     // Compare two configuration, returning CONFIG_* flags set for each value
@@ -985,6 +1005,7 @@ struct ResTable_config
         if (navigation != o.navigation) diffs |= CONFIG_NAVIGATION;
         if (screenSize != o.screenSize) diffs |= CONFIG_SCREEN_SIZE;
         if (version != o.version) diffs |= CONFIG_VERSION;
+        if (screenLayout != o.screenLayout) diffs |= CONFIG_SCREEN_LAYOUT;
         return diffs;
     }
     
@@ -1059,6 +1080,13 @@ struct ResTable_config
             if (screenHeight != o.screenHeight) {
                 if (!screenHeight) return false;
                 if (!o.screenHeight) return true;
+            }
+        }
+
+        if (screenConfig || o.screenConfig) {
+            if (screenLayout != o.screenLayout) {
+                if (!screenLayout) return false;
+                if (!o.screenLayout) return true;
             }
         }
 
@@ -1191,6 +1219,12 @@ struct ResTable_config
                 }
             }
 
+            if (screenConfig || o.screenConfig) {
+                if ((screenLayout != o.screenLayout) && requested->screenLayout) {
+                    return (screenLayout);
+                }
+            }
+
             if (version || o.version) {
                 if ((sdkVersion != o.sdkVersion) && requested->sdkVersion) {
                     return (sdkVersion);
@@ -1282,6 +1316,12 @@ struct ResTable_config
                 return false;
             }
         }
+        if (screenConfig != 0) {
+            if (settings.screenLayout != 0 && screenLayout != 0
+                && screenLayout != settings.screenLayout) {
+                return false;
+            }
+        }
         if (version != 0) {
             if (settings.sdkVersion != 0 && sdkVersion != 0
                 && sdkVersion != settings.sdkVersion) {
@@ -1310,13 +1350,13 @@ struct ResTable_config
 
     String8 toString() const {
         char buf[200];
-        sprintf(buf, "imsi=%d/%d lang=%c%c reg=%c%c orient=0x%02x touch=0x%02x dens=0x%02x "
-                "kbd=0x%02x nav=0x%02x input=0x%02x screenW=0x%04x screenH=0x%04x vers=%d.%d",
+        sprintf(buf, "imsi=%d/%d lang=%c%c reg=%c%c orient=%d touch=%d dens=%d "
+                "kbd=%d nav=%d input=%d scrnW=%d scrnH=%d layout=%d vers=%d.%d",
                 mcc, mnc,
                 language[0] ? language[0] : '-', language[1] ? language[1] : '-',
                 country[0] ? country[0] : '-', country[1] ? country[1] : '-',
                 orientation, touchscreen, density, keyboard, navigation, inputFlags,
-                screenWidth, screenHeight, sdkVersion, minorVersion);
+                screenWidth, screenHeight, screenLayout, sdkVersion, minorVersion);
         return String8(buf);
     }
 };
@@ -1401,7 +1441,7 @@ struct ResTable_type
  * This is the beginning of information about an entry in the resource
  * table.  It holds the reference to the name of this entry, and is
  * immediately followed by one of:
- *   * A Res_value structures, if FLAG_COMPLEX is -not- set.
+ *   * A Res_value structure, if FLAG_COMPLEX is -not- set.
  *   * An array of ResTable_map structures, if FLAG_COMPLEX is set.
  *     These supply a set of name/value mappings of data.
  */
@@ -1540,6 +1580,7 @@ public:
                  bool copyData=false);
     status_t add(Asset* asset, void* cookie,
                  bool copyData=false);
+    status_t add(ResTable* src);
 
     status_t getError() const;
 
@@ -1781,7 +1822,7 @@ public:
     void getLocales(Vector<String8>* locales) const;
 
 #ifndef HAVE_ANDROID_OS
-    void print() const;
+    void print(bool inclValues) const;
 #endif
 
 private:
@@ -1803,6 +1844,8 @@ private:
     status_t parsePackage(
         const ResTable_package* const pkg, const Header* const header);
 
+    void print_value(const Package* pkg, const Res_value& value) const;
+    
     mutable Mutex               mLock;
 
     status_t                    mError;

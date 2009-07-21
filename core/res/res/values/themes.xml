@@ -44,12 +44,14 @@
         <item name="textColorSecondaryInverse">@android:color/secondary_text_light</item>
         <item name="textColorTertiaryInverse">@android:color/tertiary_text_light</item>
         <item name="textColorPrimaryDisableOnly">@android:color/primary_text_dark_disable_only</item>
+        <item name="textColorPrimaryInverseDisableOnly">@android:color/primary_text_light_disable_only</item>
         <item name="textColorPrimaryNoDisable">@android:color/primary_text_dark_nodisable</item>
         <item name="textColorSecondaryNoDisable">@android:color/secondary_text_dark_nodisable</item>
         <item name="textColorPrimaryInverseNoDisable">@android:color/primary_text_light_nodisable</item>
         <item name="textColorSecondaryInverseNoDisable">@android:color/secondary_text_light_nodisable</item>
         <item name="textColorHint">@android:color/hint_foreground_dark</item>
         <item name="textColorHintInverse">@android:color/hint_foreground_light</item>
+        <item name="textColorSearchUrl">@android:color/search_url_text</item>
 
         <item name="textAppearanceLarge">@android:style/TextAppearance.Large</item>
         <item name="textAppearanceMedium">@android:style/TextAppearance.Medium</item>
@@ -141,7 +143,8 @@
         <item name="editTextStyle">@android:style/Widget.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.ExpandableListView</item>
         <item name="galleryStyle">@android:style/Widget.Gallery</item>
-        <item name="gridViewStyle">@android:style/Widget.GridView</item>        
+        <item name="gestureOverlayViewStyle">@android:style/Widget.GestureOverlayView</item>
+        <item name="gridViewStyle">@android:style/Widget.GridView</item>
         <item name="imageButtonStyle">@android:style/Widget.ImageButton</item>
         <item name="imageWellStyle">@android:style/Widget.ImageWell</item>
         <item name="listViewStyle">@android:style/Widget.ListView</item>
@@ -152,6 +155,9 @@
         <item name="progressBarStyleSmall">@android:style/Widget.ProgressBar.Small</item>
         <item name="progressBarStyleSmallTitle">@android:style/Widget.ProgressBar.Small.Title</item>
         <item name="progressBarStyleLarge">@android:style/Widget.ProgressBar.Large</item>
+        <item name="progressBarStyleInverse">@android:style/Widget.ProgressBar.Inverse</item>
+		<item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small.Inverse</item>
+	    <item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large.Inverse</item> 
         <item name="seekBarStyle">@android:style/Widget.SeekBar</item>
         <item name="ratingBarStyle">@android:style/Widget.RatingBar</item>
         <item name="ratingBarStyleIndicator">@android:style/Widget.RatingBar.Indicator</item>
@@ -181,6 +187,9 @@
         <item name="editTextPreferenceStyle">@android:style/Preference.DialogPreference.EditTextPreference</item>
         <item name="ringtonePreferenceStyle">@android:style/Preference.RingtonePreference</item>
         <item name="preferenceLayoutChild">@android:layout/preference_child</item>
+
+        <!-- Search widget styles -->
+        <item name="searchWidgetCorpusItemBackground">@android:color/search_widget_corpus_item_background</item>
     </style>
     
     <!-- Variant of the default (dark) theme with no title bar -->
@@ -212,6 +221,7 @@
         <item name="textColorSecondaryInverse">@android:color/secondary_text_dark</item>
         <item name="textColorTertiaryInverse">@android:color/tertiary_text_dark</item>
         <item name="textColorPrimaryDisableOnly">@android:color/primary_text_light_disable_only</item>
+        <item name="textColorPrimaryInverseDisableOnly">@android:color/primary_text_dark_disable_only</item>
         <item name="textColorPrimaryNoDisable">@android:color/primary_text_light_nodisable</item>
         <item name="textColorSecondaryNoDisable">@android:color/secondary_text_light_nodisable</item>
         <item name="textColorPrimaryInverseNoDisable">@android:color/primary_text_dark_nodisable</item>
@@ -224,9 +234,17 @@
         <item name="textCheckMark">@android:drawable/indicator_check_mark_light</item>
         <item name="textCheckMarkInverse">@android:drawable/indicator_check_mark_dark</item>
 
+        <item name="gestureOverlayViewStyle">@android:style/Widget.GestureOverlayView.White</item>
         <item name="listViewStyle">@android:style/Widget.ListView.White</item>
         <item name="listDivider">@drawable/divider_horizontal_bright</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.TextView.ListSeparator.White</item>
+        
+        <item name="progressBarStyle">@android:style/Widget.ProgressBar.Inverse</item>
+		<item name="progressBarStyleSmall">@android:style/Widget.ProgressBar.Small.Inverse</item>
+		<item name="progressBarStyleLarge">@android:style/Widget.ProgressBar.Large.Inverse</item>
+		<item name="progressBarStyleInverse">@android:style/Widget.ProgressBar</item>
+		<item name="progressBarStyleSmallInverse">@android:style/Widget.ProgressBar.Small</item>
+		<item name="progressBarStyleLargeInverse">@android:style/Widget.ProgressBar.Large</item> 
     </style>
     
     <!-- Variant of the light theme with no title bar -->
@@ -364,6 +382,12 @@
     <style name="Theme.SearchBar" parent="Theme.Panel">
         <item name="android:backgroundDimEnabled">true</item>
         <item name="windowContentOverlay">@null</item>        
+    </style>
+    
+    <!-- Theme for the search input bar when doing global search. The only
+         difference from non-global search is that we do not dim the background. -->
+    <style name="Theme.GlobalSearchBar" parent="Theme.Panel">
+        <item name="windowContentOverlay">@null</item>
     </style>
 
     <!-- Menu Themes -->

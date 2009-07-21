@@ -16,47 +16,52 @@
 
 package com.android.server;
 
+import com.android.server.status.IconData;
+import com.android.server.status.NotificationData;
+import com.android.server.status.StatusBarService;
+
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.ContentQueryMap;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
-import android.media.AudioManager;
+import android.database.ContentObserver;
 import android.media.AsyncPlayer;
-import android.media.RingtoneManager;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Binder;
-import android.os.RemoteException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Power;
+import android.os.RemoteException;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.util.Config;
+import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
-
-import com.android.server.status.IconData;
-import com.android.server.status.NotificationData;
-import com.android.server.status.StatusBarService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.io.IOException;
 
 class NotificationManagerService extends INotificationManager.Stub
 {
@@ -88,6 +93,12 @@ class NotificationManagerService extends INotificationManager.Stub
     private NotificationRecord mVibrateNotification;
     private Vibrator mVibrator = new Vibrator();
 
+    // adb
+    private int mBatteryPlugged;
+    private boolean mAdbEnabled = false;
+    private boolean mAdbNotificationShown = false;
+    private Notification mAdbNotification;
+    
     private ArrayList<NotificationRecord> mNotificationList;
 
     private ArrayList<ToastRecord> mToastQueue;
@@ -98,7 +109,7 @@ class NotificationManagerService extends INotificationManager.Stub
     private boolean mBatteryLow;
     private boolean mBatteryFull;
     private NotificationRecord mLedNotification;
-    
+
     private static final int BATTERY_LOW_ARGB = 0xFFFF0000; // Charging Low - red solid on
     private static final int BATTERY_MEDIUM_ARGB = 0xFFFFFF00;    // Charging - orange solid on
     private static final int BATTERY_FULL_ARGB = 0xFF00FF00; // Charging Full - green solid on
@@ -297,6 +308,9 @@ class NotificationManagerService extends INotificationManager.Stub
                     mBatteryFull = batteryFull;
                     updateLights();
                 }
+                
+                mBatteryPlugged = intent.getIntExtra("plugged", 0);
+                updateAdbNotification();
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)) {
                 Uri uri = intent.getData();
@@ -312,6 +326,31 @@ class NotificationManagerService extends INotificationManager.Stub
         }
     };
 
+    class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+        
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ADB_ENABLED), false, this);
+            update();
+        }
+
+        @Override public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            ContentResolver resolver = mContext.getContentResolver();
+            mAdbEnabled = Settings.Secure.getInt(resolver,
+                        Settings.Secure.ADB_ENABLED, 0) != 0;
+            updateAdbNotification();
+        }
+    }
+    private final SettingsObserver mSettingsObserver;
+    
     NotificationManagerService(Context context, StatusBarService statusBar,
             HardwareService hardware)
     {
@@ -333,6 +372,9 @@ class NotificationManagerService extends INotificationManager.Stub
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         mContext.registerReceiver(mIntentReceiver, filter);
+        
+        mSettingsObserver = new SettingsObserver(mHandler);
+        mSettingsObserver.observe();
     }
 
     // Toasts
@@ -594,6 +636,9 @@ class NotificationManagerService extends INotificationManager.Stub
                         Binder.restoreCallingIdentity(identity);
                     }
                 }
+
+                sendAccessibilityEventTypeNotificationChangedDoCheck(notification, pkg);
+
             } else {
                 if (old != null && old.statusBarKey != null) {
                     long identity = Binder.clearCallingIdentity();
@@ -674,6 +719,26 @@ class NotificationManagerService extends INotificationManager.Stub
         }
 
         idOut[0] = id;
+    }
+
+    private void sendAccessibilityEventTypeNotificationChangedDoCheck(Notification notification,
+            CharSequence packageName) {
+        AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
+        if (!manager.isEnabled()) {
+            return;
+        }
+
+        AccessibilityEvent event =
+            AccessibilityEvent.obtain(AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED);
+        event.setPackageName(packageName);
+        event.setClassName(Notification.class.getName());
+        event.setParcelableData(notification);
+        CharSequence tickerText = notification.tickerText;
+        if (!TextUtils.isEmpty(tickerText)) {
+            event.getText().add(tickerText);
+        }
+
+        manager.sendAccessibilityEvent(event);
     }
 
     private void cancelNotificationLocked(NotificationRecord r) {
@@ -869,6 +934,62 @@ class NotificationManagerService extends INotificationManager.Stub
         return -1;
     }
 
+    // This is here instead of StatusBarPolicy because it is an important
+    // security feature that we don't want people customizing the platform
+    // to accidentally lose.
+    private void updateAdbNotification() {
+        if (mAdbEnabled && mBatteryPlugged == BatteryManager.BATTERY_PLUGGED_USB) {
+            if (!mAdbNotificationShown) {
+                NotificationManager notificationManager = (NotificationManager) mContext
+                        .getSystemService(Context.NOTIFICATION_SERVICE);
+                if (notificationManager != null) {
+                    Resources r = mContext.getResources();
+                    CharSequence title = r.getText(
+                            com.android.internal.R.string.adb_active_notification_title);
+                    CharSequence message = r.getText(
+                            com.android.internal.R.string.adb_active_notification_message);
+
+                    if (mAdbNotification == null) {
+                        mAdbNotification = new Notification();
+                        mAdbNotification.icon = com.android.internal.R.drawable.stat_sys_warning;
+                        mAdbNotification.when = 0;
+                        mAdbNotification.flags = Notification.FLAG_ONGOING_EVENT;
+                        mAdbNotification.tickerText = title;
+                        mAdbNotification.defaults |= Notification.DEFAULT_SOUND;
+                    }
+
+                    Intent intent = new Intent(
+                            Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                            Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                    // Note: we are hard-coding the component because this is
+                    // an important security UI that we don't want anyone
+                    // intercepting.
+                    intent.setComponent(new ComponentName("com.android.settings",
+                            "com.android.settings.DevelopmentSettings"));
+                    PendingIntent pi = PendingIntent.getActivity(mContext, 0,
+                            intent, 0);
+
+                    mAdbNotification.setLatestEventInfo(mContext, title, message, pi);
+                    
+                    mAdbNotificationShown = true;
+                    notificationManager.notify(
+                            com.android.internal.R.string.adb_active_notification_title,
+                            mAdbNotification);
+                }
+            }
+            
+        } else if (mAdbNotificationShown) {
+            NotificationManager notificationManager = (NotificationManager) mContext
+                    .getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                mAdbNotificationShown = false;
+                notificationManager.cancel(
+                        com.android.internal.R.string.adb_active_notification_title);
+            }
+        }
+    }
+    
     // ======================================================================
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

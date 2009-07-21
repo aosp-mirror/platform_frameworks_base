@@ -332,6 +332,31 @@ public class BluetoothHeadset {
     }
 
     /**
+     * Get battery usage hint for Bluetooth Headset service.
+     * This is a monotonically increasing integer. Wraps to 0 at
+     * Integer.MAX_INT, and at boot.
+     * Current implementation returns the number of AT commands handled since
+     * boot. This is a good indicator for spammy headset/handsfree units that
+     * can keep the device awake by polling for cellular status updates. As a
+     * rule of thumb, each AT command prevents the CPU from sleeping for 500 ms
+     * @return monotonically increasing battery usage hint, or a negative error
+     *         code on error
+     * @hide
+     */
+    public int getBatteryUsageHint() {
+        if (DBG) log("getBatteryUsageHint()");
+        if (mService != null) {
+            try {
+                return mService.getBatteryUsageHint();
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return -1;
+    }
+
+    /**
      * Check class bits for possible HSP or HFP support.
      * This is a simple heuristic that tries to guess if a device with the
      * given class bits might support HSP or HFP. It is not accurate for all

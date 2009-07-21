@@ -20,23 +20,31 @@ import com.android.internal.telephony.SmsAddress;
 import com.android.internal.util.HexDump;
 
 public class CdmaSmsAddress extends SmsAddress {
+
     /**
-     * digit mode indicators
-     * (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
+     * Digit Mode Indicator is a 1-bit value that indicates whether
+     * the address digits are 4-bit DTMF codes or 8-bit codes.  (See
+     * 3GPP2 C.S0015-B, v2, 3.4.3.3)
      */
     static public final int DIGIT_MODE_4BIT_DTMF              = 0x00;
     static public final int DIGIT_MODE_8BIT_CHAR              = 0x01;
 
+    public int digitMode;
+
     /**
-     * number mode indicators
-     * (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
+     * Number Mode Indicator is 1-bit value that indicates whether the
+     * address type is a data network address or not.  (See 3GPP2
+     * C.S0015-B, v2, 3.4.3.3)
      */
     static public final int NUMBER_MODE_NOT_DATA_NETWORK      = 0x00;
     static public final int NUMBER_MODE_DATA_NETWORK          = 0x01;
 
+    public int numberMode;
+
     /**
-     *  number types for data networks
-     *  (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
+     * Number Types for data networks.
+     * (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
+     * NOTE: value is stored in the parent class ton field.
      */
     static public final int TON_UNKNOWN                   = 0x00;
     static public final int TON_INTERNATIONAL_OR_IP       = 0x01;
@@ -48,14 +56,21 @@ public class CdmaSmsAddress extends SmsAddress {
     static public final int TON_RESERVED                  = 0x07;
 
     /**
-     *  maximum lengths for fields as defined in ril_cdma_sms.h
+     * Maximum lengths for fields as defined in ril_cdma_sms.h.
      */
     static public final int SMS_ADDRESS_MAX          =  36;
     static public final int SMS_SUBADDRESS_MAX       =  36;
 
     /**
-     *  Supported numbering plan identification
-     *  (See C.S005-D, v1.0, table 2.7.1.3.2.4-3)
+     * This field shall be set to the number of address digits
+     * (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
+     */
+    public int numberOfDigits;
+
+    /**
+     * Numbering Plan identification is a 0 or 4-bit value that
+     * indicates which numbering plan identification is set.  (See
+     * 3GPP2, C.S0015-B, v2, 3.4.3.3 and C.S005-D, table2.7.1.3.2.4-3)
      */
     static public final int NUMBERING_PLAN_UNKNOWN           = 0x0;
     static public final int NUMBERING_PLAN_ISDN_TELEPHONY    = 0x1;
@@ -63,50 +78,29 @@ public class CdmaSmsAddress extends SmsAddress {
     //static protected final int NUMBERING_PLAN_TELEX             = 0x4;
     //static protected final int NUMBERING_PLAN_PRIVATE           = 0x9;
 
-    /**
-     * 1-bit value that indicates whether the address digits are 4-bit DTMF codes
-     * or 8-bit codes.
-     * (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
-     */
-    public byte digitMode;
+    public int numberPlan;
 
     /**
-     * 1-bit value that indicates whether the address type is a data network address or not.
-     * (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
+     * NOTE: the parsed string address and the raw byte array values
+     * are stored in the parent class address and origBytes fields,
+     * respectively.
      */
-    public byte numberMode;
 
-    // use parent class member ton instead public byte numberType;
-
-    /**
-     * 0 or 4-bit value that indicates which numbering plan identification is set.
-     * (See 3GPP2, C.S0015-B, v2, 3.4.3.3 and C.S005-D, table2.7.1.3.2.4-3)
-     */
-    public byte numberPlan;
-
-    /**
-     * This field shall be set to the number of address digits
-     * (See 3GPP2 C.S0015-B, v2, 3.4.3.3)
-     */
-    public byte numberOfDigits;
-
-    // use parent class member orig_bytes instead of public byte[] digits;
-
-    // Constructor
     public CdmaSmsAddress(){
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("CdmaSmsAddress:\n");
-        builder.append("  digitMode: " + digitMode + "\n");
-        builder.append("  numberMode: " + numberMode + "\n");
-        builder.append("  numberPlan: " + numberPlan + "\n");
-        builder.append("  numberOfDigits: " + numberOfDigits + "\n");
-        builder.append("  ton: " + ton + "\n");
-        builder.append("  address: " + address + "\n");
-        builder.append("  origBytes: " + HexDump.toHexString(origBytes) + "\n");
+        builder.append("CdmaSmsAddress ");
+        builder.append("{ digitMode=" + digitMode);
+        builder.append(", numberMode=" + numberMode);
+        builder.append(", numberPlan=" + numberPlan);
+        builder.append(", numberOfDigits=" + numberOfDigits);
+        builder.append(", ton=" + ton);
+        builder.append(", address=" + address);
+        builder.append(", origBytes=" + HexDump.toHexString(origBytes));
+        builder.append(" }");
         return builder.toString();
     }
 

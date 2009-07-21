@@ -1404,7 +1404,11 @@ public class Canvas {
     
     protected void finalize() throws Throwable {
         super.finalize();
-        finalizer(mNativeCanvas);
+        // If the constructor threw an exception before setting mNativeCanvas, the native finalizer
+        // must not be invoked.
+        if (mNativeCanvas != 0) {
+            finalizer(mNativeCanvas);
+        }
     }
 
     /**

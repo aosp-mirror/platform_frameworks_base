@@ -16,6 +16,9 @@
 
 package com.android.providers.settings;
 
+import java.io.FileNotFoundException;
+
+import android.backup.BackupManager;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -27,14 +30,13 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.DrmStore;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-
-import java.io.FileNotFoundException;
 
 public class SettingsProvider extends ContentProvider {
     private static final String TAG = "SettingsProvider";
@@ -44,6 +46,8 @@ public class SettingsProvider extends ContentProvider {
     private static final String TABLE_OLD_FAVORITES = "old_favorites";
 
     private DatabaseHelper mOpenHelper;
+    
+    private BackupManager mBackupManager;
 
     /**
      * Decode a content URL into the table, projection, and arguments
@@ -137,6 +141,8 @@ public class SettingsProvider extends ContentProvider {
             SystemProperties.set(property, Long.toString(version));
         }
 
+        // Inform the backup manager about a data change
+        mBackupManager.dataChanged();
         // Now send the notification through the content framework.
 
         String notify = uri.getQueryParameter("notify");
@@ -158,20 +164,25 @@ public class SettingsProvider extends ContentProvider {
                 getContext().checkCallingOrSelfPermission(
                         android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
                     PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Cannot write secure settings table");
-        
+                throw new SecurityException(
+                        String.format("Permission denial: writing to secure settings requires %1$s",
+                                android.Manifest.permission.WRITE_SECURE_SETTINGS));
+
         // TODO: Move gservices into its own provider so we don't need this nonsense.
         } else if ("gservices".equals(args.table) &&
             getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.WRITE_GSERVICES) !=
                 PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Cannot write gservices table");
+            throw new SecurityException(
+                    String.format("Permission denial: writing to gservices settings requires %1$s",
+                            android.Manifest.permission.WRITE_GSERVICES));
         }
     }
 
     @Override
     public boolean onCreate() {
         mOpenHelper = new DatabaseHelper(getContext());
+        mBackupManager = new BackupManager(getContext());
         return true;
     }
 

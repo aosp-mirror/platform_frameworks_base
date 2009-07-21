@@ -44,19 +44,21 @@ public abstract class CallTracker extends Handler {
 
     //***** Events
 
-    protected static final int EVENT_POLL_CALLS_RESULT    = 1;
-    protected static final int EVENT_CALL_STATE_CHANGE    = 2;
-    protected static final int EVENT_REPOLL_AFTER_DELAY   = 3;
-    protected static final int EVENT_OPERATION_COMPLETE       = 4;
-    protected static final int EVENT_GET_LAST_CALL_FAIL_CAUSE = 5;
+    protected static final int EVENT_POLL_CALLS_RESULT             = 1;
+    protected static final int EVENT_CALL_STATE_CHANGE             = 2;
+    protected static final int EVENT_REPOLL_AFTER_DELAY            = 3;
+    protected static final int EVENT_OPERATION_COMPLETE            = 4;
+    protected static final int EVENT_GET_LAST_CALL_FAIL_CAUSE      = 5;
 
-    protected static final int EVENT_SWITCH_RESULT        = 8;
-    protected static final int EVENT_RADIO_AVAILABLE      = 9;
-    protected static final int EVENT_RADIO_NOT_AVAILABLE  = 10;
-    protected static final int EVENT_CONFERENCE_RESULT    = 11;
-    protected static final int EVENT_SEPARATE_RESULT      = 12;
-    protected static final int EVENT_ECT_RESULT           = 13;
-
+    protected static final int EVENT_SWITCH_RESULT                 = 8;
+    protected static final int EVENT_RADIO_AVAILABLE               = 9;
+    protected static final int EVENT_RADIO_NOT_AVAILABLE           = 10;
+    protected static final int EVENT_CONFERENCE_RESULT             = 11;
+    protected static final int EVENT_SEPARATE_RESULT               = 12;
+    protected static final int EVENT_ECT_RESULT                    = 13;
+    protected static final int EVENT_EXIT_ECM_RESPONSE_CDMA        = 14;
+    protected static final int EVENT_CALL_WAITING_INFO_CDMA        = 15;
+    protected static final int EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA = 16;
 
     protected void pollCallsWhenSafe() {
         needsPoll = true;

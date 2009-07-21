@@ -24,6 +24,7 @@ import android.os.RegistrantList;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
 import android.util.Log;
+import android.os.SystemProperties;
 
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.CallTracker;
@@ -31,10 +32,11 @@ import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.DriverCall;
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.PhoneProxy;
+import com.android.internal.telephony.TelephonyProperties;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * {@hide}
@@ -56,6 +58,7 @@ public final class CdmaCallTracker extends CallTracker {
     CdmaConnection connections[] = new CdmaConnection[MAX_CONNECTIONS];
     RegistrantList voiceCallEndedRegistrants = new RegistrantList();
     RegistrantList voiceCallStartedRegistrants = new RegistrantList();
+    RegistrantList callWaitingRegistrants =  new RegistrantList();
 
 
     // connections dropped durin last poll
@@ -69,11 +72,12 @@ public final class CdmaCallTracker extends CallTracker {
 
     CdmaConnection pendingMO;
     boolean hangupPendingMO;
-
+    boolean pendingCallInECM=false;
     CDMAPhone phone;
 
     boolean desiredMute = false;    // false = mute off
 
+    int pendingCallClirMode;
     Phone.State state = Phone.State.IDLE;
 
 
@@ -90,13 +94,15 @@ public final class CdmaCallTracker extends CallTracker {
         cm.registerForCallStateChanged(this, EVENT_CALL_STATE_CHANGE, null);
         cm.registerForOn(this, EVENT_RADIO_AVAILABLE, null);
         cm.registerForNotAvailable(this, EVENT_RADIO_NOT_AVAILABLE, null);
+        cm.registerForCallWaitingInfo(this, EVENT_CALL_WAITING_INFO_CDMA, null);
+        foregroundCall.setGeneric(false);
     }
 
     public void dispose() {
         cm.unregisterForCallStateChanged(this);
         cm.unregisterForOn(this);
         cm.unregisterForNotAvailable(this);
-
+        cm.unregisterForCallWaitingInfo(this);
         for(CdmaConnection c : connections) {
             try {
                 if(c != null) hangup(c);
@@ -115,6 +121,7 @@ public final class CdmaCallTracker extends CallTracker {
 
     }
 
+    @Override
     protected void finalize() {
         Log.d(LOG_TAG, "CdmaCallTracker finalized");
     }
@@ -137,6 +144,15 @@ public final class CdmaCallTracker extends CallTracker {
 
     public void unregisterForVoiceCallEnded(Handler h) {
         voiceCallEndedRegistrants.remove(h);
+    }
+
+    public void registerForCallWaiting(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        callWaitingRegistrants.add(r);
+    }
+
+    public void unregisterForCallWaiting(Handler h) {
+        callWaitingRegistrants.remove(h);
     }
 
     private void
@@ -166,34 +182,24 @@ public final class CdmaCallTracker extends CallTracker {
             throw new CallStateException("cannot dial in current state");
         }
 
+
+        // We are initiating a call therefore even if we previously
+        // didn't know the state (i.e. Generic was true) we now know
+        // and therefore can set Generic to false.
+        foregroundCall.setGeneric(false);
+
         // The new call must be assigned to the foreground call.
         // That call must be idle, so place anything that's
         // there on hold
         if (foregroundCall.getState() == CdmaCall.State.ACTIVE) {
-            // this will probably be done by the radio anyway
-            // but the dial might fail before this happens
-            // and we need to make sure the foreground call is clear
-            // for the newly dialed connection
-            switchWaitingOrHoldingAndActive();
-
-            // Fake local state so that
-            // a) foregroundCall is empty for the newly dialed connection
-            // b) hasNonHangupStateChanged remains false in the
-            // next poll, so that we don't clear a failed dialing call
-            fakeHoldForegroundBeforeDial();
-        }
-
-        if (foregroundCall.getState() != CdmaCall.State.IDLE) {
-            //we should have failed in !canDial() above before we get here
-            throw new CallStateException("cannot dial in current state");
+            return dialThreeWay(dialString);
         }
 
         pendingMO = new CdmaConnection(phone.getContext(), dialString, this, foregroundCall);
         hangupPendingMO = false;
 
         if (pendingMO.address == null || pendingMO.address.length() == 0
-            || pendingMO.address.indexOf(PhoneNumberUtils.WILD) >= 0
-        ) {
+            || pendingMO.address.indexOf(PhoneNumberUtils.WILD) >= 0) {
             // Phone number is invalid
             pendingMO.cause = Connection.DisconnectCause.INVALID_NUMBER;
 
@@ -204,7 +210,15 @@ public final class CdmaCallTracker extends CallTracker {
             // Always unmute when initiating a new call
             setMute(false);
 
-            cm.dial(pendingMO.address, clirMode, obtainCompleteMessage());
+            String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
+            if(inEcm.equals("false")) {
+                cm.dial(pendingMO.address, clirMode, obtainCompleteMessage());
+            } else {
+                phone.exitEmergencyCallbackMode();
+                phone.setOnEcbModeExitResponse(this,EVENT_EXIT_ECM_RESPONSE_CDMA, null);
+                pendingCallClirMode=clirMode;
+                pendingCallInECM=true;
+            }
         }
 
         updatePhoneState();
@@ -219,19 +233,35 @@ public final class CdmaCallTracker extends CallTracker {
         return dial(dialString, CommandsInterface.CLIR_DEFAULT);
     }
 
-    void
-    acceptCall () throws CallStateException {
-        // FIXME if SWITCH fails, should retry with ANSWER
-        // in case the active/holding call disappeared and this
-        // is no longer call waiting
+    private Connection
+    dialThreeWay (String dialString) {
+        if (!foregroundCall.isIdle()) {
+            // Attach the new connection to foregroundCall
+            pendingMO = new CdmaConnection(phone.getContext(),
+                                dialString, this, foregroundCall);
+            cm.sendCDMAFeatureCode(pendingMO.address,
+                obtainMessage(EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA));
+            return pendingMO;
+        }
+        return null;
+    }
 
+    void
+    acceptCall() throws CallStateException {
         if (ringingCall.getState() == CdmaCall.State.INCOMING) {
             Log.i("phone", "acceptCall: incoming...");
             // Always unmute when answering a new call
             setMute(false);
             cm.acceptCall(obtainCompleteMessage());
         } else if (ringingCall.getState() == CdmaCall.State.WAITING) {
-            setMute(false);
+            CdmaConnection cwConn = (CdmaConnection)(ringingCall.getLatestConnection());
+
+            // Since there is no network response for supplimentary
+            // service for CDMA, we assume call waiting is answered.
+            // ringing Call state change to idle is in CdmaCall.detach
+            // triggered by updateParent.
+            cwConn.updateParent(ringingCall, foregroundCall);
+            cwConn.onConnectedInOrOut();
             switchWaitingOrHoldingAndActive();
         } else {
             throw new CallStateException("phone not ringing");
@@ -255,14 +285,14 @@ public final class CdmaCallTracker extends CallTracker {
         if (ringingCall.getState() == CdmaCall.State.INCOMING) {
             throw new CallStateException("cannot be in the incoming state");
         } else {
-            cm.sendCDMAFeatureCode("", obtainCompleteMessage(EVENT_SWITCH_RESULT));
+            flashAndSetGenericTrue();
         }
     }
 
     void
     conference() throws CallStateException {
-        // three way calls in CDMA will be handled by feature codes
-        Log.e(LOG_TAG, "conference: not possible in CDMA");
+        // Should we be checking state?
+        flashAndSetGenericTrue();
     }
 
     void
@@ -295,6 +325,7 @@ public final class CdmaCallTracker extends CallTracker {
                 pendingMO == null
                 && !ringingCall.isRinging()
                 && (!foregroundCall.getState().isAlive()
+                || (foregroundCall.getState() == CdmaCall.State.ACTIVE)
                 || !backgroundCall.getState().isAlive());
 
         return ret;
@@ -483,9 +514,20 @@ public final class CdmaCallTracker extends CallTracker {
                 }
                 hasNonHangupStateChanged = true;
             } else if (conn != null && dc == null) {
-                // Connection missing in CLCC response that we were
-                // tracking.
-                droppedDuringPoll.add(conn);
+                int count = foregroundCall.connections.size();
+                if (count == 0) {
+                    // Handle an unanswered MO/MT call, there is no
+                    // foregroundCall connections at this time.
+                    droppedDuringPoll.add(conn);
+                } else {
+                    // Loop through foreground call connections as
+                    // it contains the known logical connections.
+                    for (int n = 0; n < count; n++) {
+                        CdmaConnection cn = (CdmaConnection)foregroundCall.connections.get(n);
+                        droppedDuringPoll.add(cn);
+                    }
+                }
+                foregroundCall.setGeneric(false);
                 // Dropped connections are removed from the CallTracker
                 // list but kept in the Call list
                 connections[i] = null;
@@ -536,6 +578,9 @@ public final class CdmaCallTracker extends CallTracker {
             droppedDuringPoll.add(pendingMO);
             pendingMO = null;
             hangupPendingMO = false;
+            if( pendingCallInECM) {
+                pendingCallInECM = false;
+            }
         }
 
         if (newRinging != null) {
@@ -619,6 +664,22 @@ public final class CdmaCallTracker extends CallTracker {
 
             if (Phone.DEBUG_PHONE) log("hangup: set hangupPendingMO to true");
             hangupPendingMO = true;
+        } else if ((conn.getCall() == ringingCall)
+                && (ringingCall.getState() == CdmaCall.State.WAITING)) {
+            // Handle call waiting hang up case.
+            //
+            // The ringingCall state will change to IDLE in CdmaCall.detach
+            // if the ringing call connection size is 0. We don't specifically
+            // set the ringing call state to IDLE here to avoid a race condition
+            // where a new call waiting could get a hang up from an old call
+            // waiting ringingCall.
+            //
+            // PhoneApp does the call log itself since only PhoneApp knows
+            // the hangup reason is user ignoring or timing out. So conn.onDisconnect()
+            // is not called here. Instead, conn.onLocalDisconnect() is called.
+            conn.onLocalDisconnect();
+            phone.notifyCallStateChanged();
+            return;
         } else {
             try {
                 cm.hangupConnection (conn.getCDMAIndex(), obtainCompleteMessage());
@@ -753,6 +814,16 @@ public final class CdmaCallTracker extends CallTracker {
         return null;
     }
 
+    private void flashAndSetGenericTrue() throws CallStateException {
+        cm.sendCDMAFeatureCode("", obtainMessage(EVENT_SWITCH_RESULT));
+
+        // Set generic to true because in CDMA it is not known what
+        // the status of the call is after a call waiting is answered,
+        // 3 way call merged or a switch between calls.
+        foregroundCall.setGeneric(true);
+        phone.notifyCallStateChanged();
+    }
+
     private Phone.SuppService getFailedService(int what) {
         switch (what) {
             case EVENT_SWITCH_RESULT:
@@ -774,6 +845,30 @@ public final class CdmaCallTracker extends CallTracker {
         pollCallsWhenSafe();
     }
 
+    private void notifyCallWaitingInfo(CdmaCallWaitingNotification obj) {
+        if (callWaitingRegistrants != null) {
+            callWaitingRegistrants.notifyRegistrants(new AsyncResult(null, obj, null));
+        }
+    }
+
+    private void handleCallWaitingInfo (CdmaCallWaitingNotification cw) {
+        // Check how many connections in foregroundCall.
+        // If the connection in foregroundCall is more
+        // than one, then the connection information is
+        // not reliable anymore since it means either
+        // call waiting is connected or 3 way call is
+        // dialed before, so set generic.
+        if (foregroundCall.connections.size() > 1 ) {
+            foregroundCall.setGeneric(true);
+        }
+
+        // Create a new CdmaConnection which attaches itself to ringingCall.
+        ringingCall.setGeneric(false);
+        new CdmaConnection(phone.getContext(), cw, this, ringingCall);
+
+        // Finally notify application
+        notifyCallWaitingInfo(cw);
+    }
     //****** Overridden from Handler
 
     public void
@@ -796,13 +891,13 @@ public final class CdmaCallTracker extends CallTracker {
             break;
 
             case EVENT_OPERATION_COMPLETE:
-                ar = (AsyncResult)msg.obj;
                 operationComplete();
             break;
 
             case EVENT_SWITCH_RESULT:
-                  ar = (AsyncResult)msg.obj;
-                  operationComplete();
+                 // In GSM call operationComplete() here which gets the
+                 // current call list. But in CDMA there is no list so
+                 // there is nothing to do.
             break;
 
             case EVENT_GET_LAST_CALL_FAIL_CAUSE:
@@ -835,6 +930,7 @@ public final class CdmaCallTracker extends CallTracker {
                 droppedDuringPoll.clear();
             break;
 
+            case EVENT_REPOLL_AFTER_DELAY:
             case EVENT_CALL_STATE_CHANGE:
                 pollCallsWhenSafe();
             break;
@@ -847,8 +943,33 @@ public final class CdmaCallTracker extends CallTracker {
                 handleRadioNotAvailable();
             break;
 
+            case EVENT_EXIT_ECM_RESPONSE_CDMA:
+               //no matter the result, we still do the same here
+               if (pendingCallInECM) {
+                   cm.dial(pendingMO.address, pendingCallClirMode, obtainCompleteMessage());
+                   pendingCallInECM = false;
+               }
+               phone.unsetOnEcbModeExitResponse(this);
+            break;
+
+            case EVENT_CALL_WAITING_INFO_CDMA:
+               ar = (AsyncResult)msg.obj;
+               if (ar.exception == null) {
+                   handleCallWaitingInfo((CdmaCallWaitingNotification)ar.result);
+                   Log.d(LOG_TAG, "Event EVENT_CALL_WAITING_INFO_CDMA Received");
+               }
+            break;
+
+            case EVENT_THREE_WAY_DIAL_L2_RESULT_CDMA:
+                ar = (AsyncResult)msg.obj;
+                if (ar.exception == null) {
+                    // Assume 3 way call is connected
+                    pendingMO.onConnectedInOrOut();
+                }
+            break;
+
             default:{
-             throw new RuntimeException("unexpected event not handled");
+               throw new RuntimeException("unexpected event not handled");
             }
         }
     }

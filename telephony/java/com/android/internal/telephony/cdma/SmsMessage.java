@@ -277,6 +277,15 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
+     * TODO(cleanup): why do getSubmitPdu methods take an scAddr input
+     * and do nothing with it?  GSM allows us to specify a SC (eg,
+     * when responding to an SMS that explicitly requests the response
+     * is sent to a specific SC), or pass null to use the default
+     * value.  Is there no similar notion in CDMA? Or do we just not
+     * have it hooked up?
+     */
+
+    /**
      * Get an SMS-SUBMIT PDU for a destination address and a message
      *
      * @param scAddr                Service Centre address.  Null means use default.
@@ -290,88 +299,53 @@ public class SmsMessage extends SmsMessageBase {
      *         Returns null on encode error.
      * @hide
      */
-    public static SubmitPdu getSubmitPdu(String scAddr,
-            String destAddr, String message,
-            boolean statusReportRequested, byte[] headerData) {
-        /**
-         * TODO(cleanup): why does this method take an scAddr input
-         * and do nothing with it?  GSM allows us to specify a SC (eg,
-         * when responding to an SMS that explicitly requests the
-         * response is sent to a specific SC), or pass null to use the
-         * default value.  Is there no similar notion in CDMA? Or do
-         * we just not have it hooked up?
-         */
+    public static SubmitPdu getSubmitPdu(String scAddr, String destAddr, String message,
+            boolean statusReportRequested, SmsHeader smsHeader) {
 
+        /**
+         * TODO(cleanup): Do we really want silent failure like this?
+         * Would it not be much more reasonable to make sure we don't
+         * call this function if we really want nothing done?
+         */
         if (message == null || destAddr == null) {
             return null;
         }
 
         UserData uData = new UserData();
         uData.payloadStr = message;
-        if(headerData != null) {
-            /**
-             * TODO(cleanup): we force the outside to deal with _all_
-             * of the raw details of properly constructing serialized
-             * headers, unserialze here, and then promptly reserialze
-             * during encoding -- rather undesirable.
-             */
-            uData.userDataHeader = SmsHeader.parse(headerData);
-        }
-
-        return privateGetSubmitPdu(destAddr, statusReportRequested, uData, (headerData == null));
-    }
-
-
-    /**
-     * Get an SMS-SUBMIT PDU for a destination address and a message
-     *
-     * @param scAddress Service Centre address.  Null means use default.
-     * @return a <code>SubmitPdu</code> containing the encoded SC
-     *         address, if applicable, and the encoded message.
-     *         Returns null on encode error.
-     */
-    public static SubmitPdu getSubmitPdu(String scAddress,
-            String destinationAddress, String message,
-            boolean statusReportRequested) {
-        return getSubmitPdu(scAddress, destinationAddress, message, statusReportRequested, null);
+        uData.userDataHeader = smsHeader;
+        return privateGetSubmitPdu(destAddr, statusReportRequested, uData);
     }
 
     /**
      * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
      *
-     * @param scAddress Service Centre address. null == use default
-     * @param destinationAddress the address of the destination for the message
-     * @param destinationPort the port to deliver the message to at the
+     * @param scAddr Service Centre address. null == use default
+     * @param destAddr the address of the destination for the message
+     * @param destPort the port to deliver the message to at the
      *        destination
      * @param data the data for the message
      * @return a <code>SubmitPdu</code> containing the encoded SC
      *         address, if applicable, and the encoded message.
      *         Returns null on encode error.
      */
-    public static SubmitPdu getSubmitPdu(String scAddress,
-            String destAddr, short destinationPort, byte[] data,
-            boolean statusReportRequested) {
+    public static SubmitPdu getSubmitPdu(String scAddr, String destAddr, short destPort,
+            byte[] data, boolean statusReportRequested) {
 
         /**
-         * TODO(cleanup): if we had properly exposed SmsHeader
-         * information, this mess of many getSubmitPdu public
-         * interface methods that currently pollute the api could have
-         * been much more cleanly collapsed into one.
+         * TODO(cleanup): this is not a general-purpose SMS creation
+         * method, but rather something specialized to messages
+         * containing OCTET encoded (meaning non-human-readable) user
+         * data.  The name should reflect that, and not just overload.
          */
 
-        /**
-         * TODO(cleanup): header serialization should be put somewhere
-         * canonical to allow proper debugging and reuse.
-         */
-        byte[] destPort = new byte[4];
-        destPort[0] = (byte) ((destinationPort >> 8) & 0xFF); // MSB of destination port
-        destPort[1] = (byte) (destinationPort & 0xFF); // LSB of destination port
-        destPort[2] = 0x00; // MSB of originating port
-        destPort[3] = 0x00; // LSB of originating port
+        SmsHeader.PortAddrs portAddrs = new SmsHeader.PortAddrs();
+        portAddrs.destPort = destPort;
+        portAddrs.origPort = 0;
+        portAddrs.areEightBits = false;
+
         SmsHeader smsHeader = new SmsHeader();
-        smsHeader.add(
-                new SmsHeader.Element(SmsHeader.APPLICATION_PORT_ADDRESSING_16_BIT, destPort));
-        smsHeader.nbrOfHeaders = smsHeader.getElements().size();
+        smsHeader.portAddrs = portAddrs;
 
         UserData uData = new UserData();
         uData.userDataHeader = smsHeader;
@@ -379,40 +353,22 @@ public class SmsMessage extends SmsMessageBase {
         uData.msgEncodingSet = true;
         uData.payload = data;
 
-        return privateGetSubmitPdu(destAddr, statusReportRequested, uData, true);
+        return privateGetSubmitPdu(destAddr, statusReportRequested, uData);
     }
 
-    static class PduParser {
-
-        PduParser() {
-        }
-
-        /**
-         * Parses an SC timestamp and returns a currentTimeMillis()-style
-         * timestamp
-         */
-        static long getSCTimestampMillis(byte[] timestamp) {
-            // TP-Service-Centre-Time-Stamp
-            int year = IccUtils.beBcdByteToInt(timestamp[0]);
-            int month = IccUtils.beBcdByteToInt(timestamp[1]);
-            int day = IccUtils.beBcdByteToInt(timestamp[2]);
-            int hour = IccUtils.beBcdByteToInt(timestamp[3]);
-            int minute = IccUtils.beBcdByteToInt(timestamp[4]);
-            int second = IccUtils.beBcdByteToInt(timestamp[5]);
-
-            Time time = new Time(Time.TIMEZONE_UTC);
-
-            // C.S0015-B v2.0, 4.5.4: range is 1996-2095
-            time.year = year >= 96 ? year + 1900 : year + 2000;
-            time.month = month - 1;
-            time.monthDay = day;
-            time.hour = hour;
-            time.minute = minute;
-            time.second = second;
-
-            return time.toMillis(true);
-        }
-
+    /**
+     * Get an SMS-SUBMIT PDU for a data message to a destination address &amp; port
+     *
+     * @param destAddr the address of the destination for the message
+     * @param userDara the data for the message
+     * @param statusReportRequested Indicates whether a report is requested for this message.
+     * @return a <code>SubmitPdu</code> containing the encoded SC
+     *         address, if applicable, and the encoded message.
+     *         Returns null on encode error.
+     */
+    public static SubmitPdu getSubmitPdu(String destAddr, UserData userData,
+            boolean statusReportRequested) {
+        return privateGetSubmitPdu(destAddr, statusReportRequested, userData);
     }
 
     /**
@@ -445,31 +401,23 @@ public class SmsMessage extends SmsMessageBase {
      * {@inheritDoc}
      */
     public boolean isMWIClearMessage() {
-        if ((mBearerData != null) && (0 == mBearerData.numberOfMessages)) {
-            return true;
-        }
-        return false;
+        return ((mBearerData != null) && (mBearerData.numberOfMessages == 0));
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isMWISetMessage() {
-        if ((mBearerData != null) && (mBearerData.numberOfMessages >0)) {
-            return true;
-        }
-        return false;
+        return ((mBearerData != null) && (mBearerData.numberOfMessages > 0));
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isMwiDontStore() {
-        if ((mBearerData != null) && (mBearerData.numberOfMessages >0)
-                && (null == mBearerData.userData)) {
-            return true;
-        }
-        return false;
+        return ((mBearerData != null) &&
+                (mBearerData.numberOfMessages > 0) &&
+                (mBearerData.userData == null));
     }
 
     /**
@@ -478,7 +426,7 @@ public class SmsMessage extends SmsMessageBase {
      * shifted to the bits 31-16.
      */
     public int getStatus() {
-        return(status<<16);
+        return (status << 16);
     }
 
     /**
@@ -495,6 +443,18 @@ public class SmsMessage extends SmsMessageBase {
     public boolean isReplyPathPresent() {
         Log.w(LOG_TAG, "isReplyPathPresent: is not supported in CDMA mode.");
         return false;
+    }
+
+    /**
+     * Calculate the number of septets needed to encode the message.
+     *
+     * @param messageBody the message to encode
+     * @param use7bitOnly ignore (but still count) illegal characters if true
+     * @return TextEncodingDetails
+     */
+    public static TextEncodingDetails calculateLength(CharSequence messageBody,
+            boolean use7bitOnly) {
+        return BearerData.calcTextEncodingDetails(messageBody.toString(), use7bitOnly);
     }
 
     /**
@@ -518,7 +478,7 @@ public class SmsMessage extends SmsMessageBase {
      */
     private void parsePdu(byte[] pdu) {
         ByteArrayInputStream bais = new ByteArrayInputStream(pdu);
-        DataInputStream dis = new DataInputStream(new BufferedInputStream(bais));
+        DataInputStream dis = new DataInputStream(bais);
         byte length;
         int bearerDataLength;
         SmsEnvelope env = new SmsEnvelope();
@@ -568,89 +528,41 @@ public class SmsMessage extends SmsMessageBase {
     protected void parseSms() {
         mBearerData = BearerData.decode(mEnvelope.bearerData);
         messageRef = mBearerData.messageId;
+        if (mBearerData.userData != null) {
+            userData = mBearerData.userData.payload;
+            userDataHeader = mBearerData.userData.userDataHeader;
+            messageBody = mBearerData.userData.payloadStr;
+        }
 
-        // TP-Message-Type-Indicator
-        // (See 3GPP2 C.S0015-B, v2, 4.5.1)
-        int messageType = mBearerData.messageType;
-
-        switch (messageType) {
+        // TP-Message-Type-Indicator (See 3GPP2 C.S0015-B, v2, 4.5.1)
+        switch (mBearerData.messageType) {
         case BearerData.MESSAGE_TYPE_USER_ACK:
         case BearerData.MESSAGE_TYPE_READ_ACK:
         case BearerData.MESSAGE_TYPE_DELIVER:
-            // Deliver (mobile-terminated only)
-            parseSmsDeliver();
-            break;
         case BearerData.MESSAGE_TYPE_DELIVERY_ACK:
-            parseSmsDeliveryAck();
             break;
-
         default:
-            // the rest of these
-            throw new RuntimeException("Unsupported message type: " + messageType);
+            throw new RuntimeException("Unsupported message type: " + mBearerData.messageType);
         }
-    }
 
-    /**
-     * TODO(cleanup): why are there two nearly identical functions
-     * below?  More rubbish...
-     */
-
-    /**
-     * Parses a SMS-DELIVER message. (mobile-terminated only)
-     * See 3GPP2 C.S0015-B, v2, 4.4.1
-     */
-    private void parseSmsDeliver() {
         if (originatingAddress != null) {
             originatingAddress.address = new String(originatingAddress.origBytes);
             if (Config.LOGV) Log.v(LOG_TAG, "SMS originating address: "
                     + originatingAddress.address);
         }
 
-        if (mBearerData.timeStamp != null) {
-                scTimeMillis = PduParser.getSCTimestampMillis(mBearerData.timeStamp);
+        if (mBearerData.msgCenterTimeStamp != null) {
+            scTimeMillis = mBearerData.msgCenterTimeStamp.toMillis(true);
         }
 
         if (Config.LOGD) Log.d(LOG_TAG, "SMS SC timestamp: " + scTimeMillis);
 
-        parseUserData(mBearerData.userData);
-    }
-
-    /**
-     * Parses a SMS-DELIVER message. (mobile-terminated only)
-     * See 3GPP2 C.S0015-B, v2, 4.4.1
-     */
-    private void parseSmsDeliveryAck() {
-        if (originatingAddress != null) {
-            originatingAddress.address = new String(originatingAddress.origBytes);
-            if (Config.LOGV) Log.v(LOG_TAG, "SMS originating address: "
-                    + originatingAddress.address);
-        }
-
-        if (mBearerData.timeStamp != null) {
-                scTimeMillis = PduParser.getSCTimestampMillis(mBearerData.timeStamp);
-        }
-
-        if (Config.LOGD) Log.d(LOG_TAG, "SMS SC timestamp: " + scTimeMillis);
-
-        if (mBearerData.errorClass != BearerData.ERROR_UNDEFINED) {
+        // TODO(Teleca): do we really want this test to occur only for DELIVERY_ACKs?
+        if ((mBearerData.messageType == BearerData.MESSAGE_TYPE_DELIVERY_ACK) &&
+                (mBearerData.errorClass != BearerData.ERROR_UNDEFINED)) {
             status = mBearerData.errorClass << 8;
             status |= mBearerData.messageStatus;
         }
-
-        parseUserData(mBearerData.userData);
-    }
-
-    /**
-     * Copy parsed user data out from internal datastructures.
-     */
-    private void parseUserData(UserData uData) {
-        if (uData == null) {
-            return;
-        }
-
-        userData = uData.payload;
-        userDataHeader = uData.userDataHeader;
-        messageBody = uData.payloadStr;
 
         if (messageBody != null) {
             if (Config.LOGV) Log.v(LOG_TAG, "SMS message body: '" + messageBody + "'");
@@ -708,7 +620,7 @@ public class SmsMessage extends SmsMessageBase {
      * @return byte stream for SubmitPdu.
      */
     private static SubmitPdu privateGetSubmitPdu(String destAddrStr, boolean statusReportRequested,
-            UserData userData, boolean useNewId) {
+            UserData userData) {
 
         /**
          * TODO(cleanup): give this function a more meaningful name.
@@ -720,7 +632,7 @@ public class SmsMessage extends SmsMessageBase {
         BearerData bearerData = new BearerData();
         bearerData.messageType = BearerData.MESSAGE_TYPE_SUBMIT;
 
-        if (useNewId) setNextMessageId();
+        if (userData != null) setNextMessageId();
         bearerData.messageId = nextMessageId;
 
         bearerData.deliveryAckReq = statusReportRequested;
@@ -731,12 +643,15 @@ public class SmsMessage extends SmsMessageBase {
         bearerData.userData = userData;
         bearerData.hasUserDataHeader = (userData.userDataHeader != null);
 
+        int teleservice = bearerData.hasUserDataHeader ?
+                SmsEnvelope.TELESERVICE_WEMT : SmsEnvelope.TELESERVICE_WMT;
+
         byte[] encodedBearerData = BearerData.encode(bearerData);
         if (encodedBearerData == null) return null;
 
         SmsEnvelope envelope = new SmsEnvelope();
         envelope.messageType = SmsEnvelope.MESSAGE_TYPE_POINT_TO_POINT;
-        envelope.teleService = SmsEnvelope.TELESERVICE_WMT;
+        envelope.teleService = teleservice;
         envelope.destAddress = destAddr;
         envelope.bearerReply = RETURN_ACK;
         envelope.bearerData = encodedBearerData;
@@ -812,6 +727,15 @@ public class SmsMessage extends SmsMessageBase {
             dos.write(env.bearerData, 0, env.bearerData.length);
             dos.close();
 
+            /**
+             * TODO(cleanup) -- This is the only place where mPdu is
+             * defined, and this is not obviously the only place where
+             * it needs to be defined.  It would be much nicer if
+             * accessing the serialized representation used a less
+             * fragile mechanism.  Maybe the getPdu method could
+             * generate a representation if there was not yet one?
+             */
+
             mPdu = baos.toByteArray();
         } catch (IOException ex) {
             Log.e(LOG_TAG, "createPdu: conversion from object to byte array failed: " + ex);
@@ -849,6 +773,12 @@ public class SmsMessage extends SmsMessageBase {
         return asciiDigit;
     }
 
+    /** This function  shall be called to get the number of voicemails.
+     * @hide
+     */
+    /*package*/ int getNumOfVoicemails() {
+        return mBearerData.numberOfMessages;
+    }
 
 
 }

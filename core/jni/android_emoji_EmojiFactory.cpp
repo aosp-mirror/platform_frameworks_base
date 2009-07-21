@@ -1,7 +1,7 @@
 #include "SkTypes.h"
 #include "SkImageDecoder.h"
 
-#define LOG_TAG "DoCoMoEmojiFactory_jni"
+#define LOG_TAG "EmojiFactory_jni"
 #include <utils/Log.h>
 #include <utils/String8.h>
 
@@ -13,15 +13,11 @@
 
 namespace android {
 
-// Note: This class is originally developed so that libandroid_runtime does
-// not have to depend on libemoji which is optional library. However, we
-// cannot use this class, since current (2009-02-16) bionic libc does not allow
-// dlopen()-ing inside dlopen(), while not only this class but also libemoji
-// uses dlopen().
 class EmojiFactoryCaller {
  public:
-  EmojiFactoryCaller();
+  EmojiFactoryCaller() {}
   virtual ~EmojiFactoryCaller();
+  bool Init();
   EmojiFactory *TryCallGetImplementation(const char* name);
   EmojiFactory *TryCallGetAvailableImplementation();
  private:
@@ -30,35 +26,45 @@ class EmojiFactoryCaller {
   EmojiFactory *(*m_get_available_implementation)();
 };
 
-EmojiFactoryCaller::EmojiFactoryCaller() {
+bool EmojiFactoryCaller::Init() {
+  const char* error_msg;
   m_handle = dlopen("libemoji.so", RTLD_LAZY | RTLD_LOCAL);
-  const char* error_str = dlerror();
-  if (error_str) {
-    LOGI("Failed to load libemoji.so: %s", error_str);
-    return;
+
+  if (m_handle == NULL) {
+    error_msg = "Failed to load libemoji.so";
+    goto FAIL;
   }
 
   m_get_implementation =
       reinterpret_cast<EmojiFactory *(*)(const char*)>(
           dlsym(m_handle, "GetImplementation"));
-  error_str = dlerror();
-  if (error_str) {
-    LOGE("Failed to get symbol of GetImplementation: %s", error_str);
-    dlclose(m_handle);
-    m_handle = NULL;
-    return;
+  if (m_get_implementation == NULL) {
+    error_msg = "Failed to get symbol of GetImplementation";
+    goto FAIL;
   }
 
   m_get_available_implementation =
       reinterpret_cast<EmojiFactory *(*)()>(
           dlsym(m_handle,"GetAvailableImplementation"));
-  error_str = dlerror();
-  if (error_str) {
-    LOGE("Failed to get symbol of GetAvailableImplementation: %s", error_str);
+  if (m_get_available_implementation == NULL) {
+    error_msg = "Failed to get symbol of GetAvailableImplementation";
+    goto FAIL;
+  }
+
+  return true;
+
+FAIL:
+  const char* error_str = dlerror();
+  if (error_str == NULL) {
+    error_str = "unknown reason";
+  }
+
+  LOGE("%s: %s", error_msg, error_str);
+  if (m_handle != NULL) {
     dlclose(m_handle);
     m_handle = NULL;
-    return;
   }
+  return false;
 }
 
 EmojiFactoryCaller::~EmojiFactoryCaller() {
@@ -82,10 +88,9 @@ EmojiFactory *EmojiFactoryCaller::TryCallGetAvailableImplementation() {
   return m_get_available_implementation();
 }
 
-// Note: bionic libc's dlopen() does not allow recursive dlopen(). So currently
-// we cannot use EmojiFactoryCaller here.
-// static EmojiFactoryCaller* gCaller;
-// static pthread_once_t g_once = PTHREAD_ONCE_INIT;
+static EmojiFactoryCaller* gCaller;
+static pthread_once_t g_once = PTHREAD_ONCE_INIT;
+static bool lib_emoji_factory_is_ready;
 
 static jclass    gString_class;
 
@@ -95,9 +100,10 @@ static jmethodID gBitmap_constructorMethodID;
 static jclass    gEmojiFactory_class;
 static jmethodID gEmojiFactory_constructorMethodID;
 
-// static void InitializeCaller() {
-//   gCaller = new EmojiFactoryCaller();
-// }
+static void InitializeCaller() {
+  gCaller = new EmojiFactoryCaller();
+  lib_emoji_factory_is_ready = gCaller->Init();
+}
 
 static jobject create_java_EmojiFactory(
     JNIEnv* env, EmojiFactory* factory, jstring name) {
@@ -116,9 +122,11 @@ static jobject create_java_EmojiFactory(
 
 static jobject android_emoji_EmojiFactory_newInstance(
     JNIEnv* env, jobject clazz, jstring name) {
-  // pthread_once(&g_once, InitializeCaller);
-
   if (NULL == name) {
+    return NULL;
+  }
+  pthread_once(&g_once, InitializeCaller);
+  if (!lib_emoji_factory_is_ready) {
     return NULL;
   }
 
@@ -126,9 +134,11 @@ static jobject android_emoji_EmojiFactory_newInstance(
   jsize len = env->GetStringLength(name);
   String8 str(String16(jchars, len));
 
-  // EmojiFactory *factory = gCaller->TryCallGetImplementation(str.string());
-  EmojiFactory *factory = EmojiFactory::GetImplementation(str.string());
-
+  EmojiFactory *factory = gCaller->TryCallGetImplementation(str.string());
+  // EmojiFactory *factory = EmojiFactory::GetImplementation(str.string());
+  if (NULL == factory) {
+    return NULL;
+  }
   env->ReleaseStringChars(name, jchars);
 
   return create_java_EmojiFactory(env, factory, name);
@@ -136,10 +146,13 @@ static jobject android_emoji_EmojiFactory_newInstance(
 
 static jobject android_emoji_EmojiFactory_newAvailableInstance(
     JNIEnv* env, jobject clazz) {
-  // pthread_once(&g_once, InitializeCaller);
+  pthread_once(&g_once, InitializeCaller);
+  if (!lib_emoji_factory_is_ready) {
+    return NULL;
+  }
 
-  // EmojiFactory *factory = gCaller->TryCallGetAvailableImplementation();
-  EmojiFactory *factory = EmojiFactory::GetAvailableImplementation();
+  EmojiFactory *factory = gCaller->TryCallGetAvailableImplementation();
+  // EmojiFactory *factory = EmojiFactory::GetAvailableImplementation();
   if (NULL == factory) {
     return NULL;
   }

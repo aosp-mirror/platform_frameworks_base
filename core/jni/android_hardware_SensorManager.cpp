@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Sensors"
+#define LOG_TAG "SensorManager"
+
+#define LOG_NDEBUG 0
+#include "utils/Log.h"
 
 #include <hardware/sensors.h>
+#include <cutils/native_handle.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -106,12 +110,33 @@ sensors_data_uninit(JNIEnv *env, jclass clazz)
 }
 
 static jint
-sensors_data_open(JNIEnv *env, jclass clazz, jobject fdo)
+sensors_data_open(JNIEnv *env, jclass clazz, jobjectArray fdArray, jintArray intArray)
 {
     jclass FileDescriptor = env->FindClass("java/io/FileDescriptor");
-    jfieldID offset = env->GetFieldID(FileDescriptor, "descriptor", "I");
-    int fd = env->GetIntField(fdo, offset);
-    return sSensorDevice->data_open(sSensorDevice, fd); // doesn't take ownership of fd
+    jfieldID fieldOffset = env->GetFieldID(FileDescriptor, "descriptor", "I");
+    int numFds = (fdArray ? env->GetArrayLength(fdArray) : 0);
+    int numInts = (intArray ? env->GetArrayLength(intArray) : 0);
+    native_handle_t* handle = native_handle_create(numFds, numInts);
+    int offset = 0;
+
+    for (int i = 0; i < numFds; i++) {
+        jobject fdo = env->GetObjectArrayElement(fdArray, i);
+        if (fdo) {
+            handle->data[offset++] = env->GetIntField(fdo, fieldOffset);
+        } else {
+            handle->data[offset++] = -1;
+        }
+    }
+    if (numInts > 0) {
+        jint* ints = env->GetIntArrayElements(intArray, 0);
+        for (int i = 0; i < numInts; i++) {
+            handle->data[offset++] = ints[i];
+        }
+        env->ReleaseIntArrayElements(intArray, ints, 0);
+    }
+
+    // doesn't take ownership of the native handle
+    return sSensorDevice->data_open(sSensorDevice, handle);
 }
 
 static jint
@@ -157,7 +182,7 @@ static JNINativeMethod gMethods[] = {
                                             (void*)sensors_module_get_next_sensor },
     {"sensors_data_init", "()I",            (void*)sensors_data_init },
     {"sensors_data_uninit", "()I",          (void*)sensors_data_uninit },
-    {"sensors_data_open",  "(Ljava/io/FileDescriptor;)I",  (void*)sensors_data_open },
+    {"sensors_data_open",  "([Ljava/io/FileDescriptor;[I)I",  (void*)sensors_data_open },
     {"sensors_data_close", "()I",           (void*)sensors_data_close },
     {"sensors_data_poll",  "([F[I[J)I",     (void*)sensors_data_poll },
 };

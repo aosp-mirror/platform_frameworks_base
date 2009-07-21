@@ -196,7 +196,7 @@ public abstract class IccRecords extends Handler implements IccConstants {
      * If not available (eg, on an older CPHS SIM) -1 is returned if
      * getVoiceMessageWaiting() is true
      */
-    public int getCountVoiceMessages() {
+    public int getVoiceMessageCount() {
         return countVoiceMessages;
     }
 

@@ -166,14 +166,10 @@
     <string name="permdesc_changeConfiguration">"允许应用程序更改当前配置，例如语言设置或整体的字体大小。"</string>
     <string name="permlab_restartPackages">"重新启动其他应用程序"</string>
     <string name="permdesc_restartPackages">"允许应用程序强制重新启动其他应用程序。"</string>
-    <string name="permlab_setProcessForeground">"防止停止"</string>
-    <string name="permdesc_setProcessForeground">"允许应用程序在前台运行任何进程，因此该进程不能被终止。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_forceBack">"强制应用程序关闭"</string>
     <string name="permdesc_forceBack">"允许应用程序强制前台的任何活动关闭和重新开始。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_dump">"检索系统内部状态"</string>
     <string name="permdesc_dump">"允许应用程序检索系统的内部状态。恶意应用程序可能会借此检索通常它们本不需要的各种私有和安全信息。"</string>
-    <string name="permlab_addSystemService">"发布低级服务"</string>
-    <string name="permdesc_addSystemService">"允许应用程序发布自己的低级系统服务。恶意应用程序可能会借此攻击系统，以及盗取或破坏系统中的任何数据。"</string>
     <string name="permlab_runSetActivityWatcher">"监视和控制所有应用程序启动"</string>
     <string name="permdesc_runSetActivityWatcher">"允许应用程序监视和控制系统启动活动的方式。恶意应用程序可能会借此彻底损坏系统。此权限仅在开发时才需要，普通的手机应用不需要。"</string>
     <string name="permlab_broadcastPackageRemoved">"发送包删除的广播"</string>
@@ -186,8 +182,6 @@
     <string name="permdesc_setProcessLimit">"允许应用程序控制运行的进程数上限。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_setAlwaysFinish">"关闭所有后台应用程序"</string>
     <string name="permdesc_setAlwaysFinish">"允许应用程序控制活动是否始终是一转至后台就完成。普通应用程序从不需要使用此权限。"</string>
-    <string name="permlab_fotaUpdate">"自动安装系统更新"</string>
-    <string name="permdesc_fotaUpdate">"允许应用程序接收有关未决系统更新的通知并安装这些更新。恶意应用程序可能会借此通过未经授权的更新破坏系统，通常情况下，它们会干扰更新过程。"</string>
     <string name="permlab_batteryStats">"修改电池统计信息"</string>
     <string name="permdesc_batteryStats">"允许修改收集的电池统计信息。普通应用程序不能使用此权限。"</string>
     <string name="permlab_internalSystemWindow">"显示未授权的窗口"</string>
@@ -424,9 +418,6 @@
     <string name="lockscreen_glogin_password_hint">"密码"</string>
     <string name="lockscreen_glogin_submit_button">"登录"</string>
     <string name="lockscreen_glogin_invalid_input">"用户名或密码无效。"</string>
-    <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
-    <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="hour_ampm">"<xliff:g id="AMPM">%P</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
     <string name="hour_cap_ampm">"<xliff:g id="AMPM">%p</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
     <string name="status_bar_clear_all_button">"清除通知"</string>
@@ -458,9 +449,6 @@
     <string name="menu_enter_shortcut_label">"Enter 键"</string>
     <string name="menu_delete_shortcut_label">"删除"</string>
     <string name="search_go">"搜索"</string>
-    <string name="today">"今天"</string>
-    <string name="yesterday">"昨天"</string>
-    <string name="tomorrow">"明天"</string>
     <string name="oneMonthDurationPast">"1 个月前"</string>
     <string name="beforeOneMonthDurationPast">"1 个月前"</string>
   <plurals name="num_seconds_ago">
@@ -542,13 +530,6 @@
     <string name="weeks">"周"</string>
     <string name="year">"年"</string>
     <string name="years">"年"</string>
-    <string name="sunday">"周日"</string>
-    <string name="monday">"周一"</string>
-    <string name="tuesday">"周二"</string>
-    <string name="wednesday">"周三"</string>
-    <string name="thursday">"周四"</string>
-    <string name="friday">"周五"</string>
-    <string name="saturday">"周六"</string>
     <string name="every_weekday">"每个工作日（周一到周五）"</string>
     <string name="daily">"每天"</string>
     <string name="weekly">"每周的<xliff:g id="DAY">%s</xliff:g>"</string>
@@ -558,137 +539,15 @@
     <string name="VideoView_error_text_invalid_progressive_playback">"抱歉，该视频不适合在此设备上播放。"</string>
     <string name="VideoView_error_text_unknown">"很抱歉，此视频不能播放。"</string>
     <string name="VideoView_error_button">"确定"</string>
-    <string name="am">"上午"</string>
-    <string name="pm">"下午"</string>
-    <string name="numeric_date">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%m</xliff:g> 月 <xliff:g id="DAY">%d</xliff:g> 日"</string>
-    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%3$s</xliff:g> 至 <xliff:g id="DATE2">%5$s</xliff:g><xliff:g id="WEEKDAY2">%4$s</xliff:g> <xliff:g id="TIME2">%6$s</xliff:g>"</string>
-    <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g><xliff:g id="WEEKDAY1">%1$s</xliff:g>至 <xliff:g id="DATE2">%5$s</xliff:g><xliff:g id="WEEKDAY2">%4$s</xliff:g>"</string>
-    <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g> <xliff:g id="TIME1">%3$s</xliff:g> 至 <xliff:g id="DATE2">%5$s</xliff:g> <xliff:g id="TIME2">%6$s</xliff:g>"</string>
-    <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g>至 <xliff:g id="DATE2">%5$s</xliff:g>"</string>
-    <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> 至 <xliff:g id="TIME2">%2$s</xliff:g>"</string>
-    <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g><xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="wday_date">"<xliff:g id="DATE">%3$s</xliff:g><xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g> <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g><xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g><xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g> <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="full_date_month_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="MONTH">MMMM</xliff:g>' 月 '<xliff:g id="DAY">d</xliff:g>' 日'"</string>
-    <string name="full_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="MONTH">MMMM</xliff:g>' 月 '<xliff:g id="DAY">d</xliff:g>' 日'"</string>
-    <string name="medium_date_month_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="MONTH">MMM</xliff:g>' 月 '<xliff:g id="DAY">d</xliff:g>' 日'"</string>
-    <string name="medium_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' 年 '<xliff:g id="DAY">d</xliff:g>' 月 '<xliff:g id="MONTH">MMM</xliff:g>' 日'"</string>
-    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"中午"</string>
     <string name="Noon">"中午"</string>
     <string name="midnight">"午夜"</string>
     <string name="Midnight">"午夜"</string>
-    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
-    <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
-    <string name="month_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> 月"</string>
-    <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
-    <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%B</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日 <xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
-    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
-    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g>至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
-    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g>至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 – <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
-    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g>至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="numeric_mdy1_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
-    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g>至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日至 <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
-    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g>至<xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日至 <xliff:g id="DAY2">%8$s</xliff:g> 日"</string>
-    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g>至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1">%3$s</xliff:g> 日 <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2">%8$s</xliff:g> 日 <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g> 年 <xliff:g id="MONTH1">%2$s</xliff:g> 月 <xliff:g id="DAY1_0">%3$s</xliff:g> 日<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> 至 <xliff:g id="YEAR2">%9$s</xliff:g> 年 <xliff:g id="MONTH2">%7$s</xliff:g> 月 <xliff:g id="DAY2_1">%8$s</xliff:g> 日<xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%b</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
-    <string name="abbrev_month_year">"<xliff:g id="YEAR">%Y</xliff:g> 年 <xliff:g id="MONTH">%b</xliff:g> 月"</string>
-    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g> 月 <xliff:g id="DAY">%-d</xliff:g> 日"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
-    <string name="day_of_week_long_sunday">"周日"</string>
-    <string name="day_of_week_long_monday">"周一"</string>
-    <string name="day_of_week_long_tuesday">"周二"</string>
-    <string name="day_of_week_long_wednesday">"周三"</string>
-    <string name="day_of_week_long_thursday">"周四"</string>
-    <string name="day_of_week_long_friday">"周五"</string>
-    <string name="day_of_week_long_saturday">"周六"</string>
-    <string name="day_of_week_medium_sunday">"周日"</string>
-    <string name="day_of_week_medium_monday">"周一"</string>
-    <string name="day_of_week_medium_tuesday">"周二"</string>
-    <string name="day_of_week_medium_wednesday">"周三"</string>
-    <string name="day_of_week_medium_thursday">"周四"</string>
-    <string name="day_of_week_medium_friday">"周五"</string>
-    <string name="day_of_week_medium_saturday">"周六"</string>
-    <string name="day_of_week_short_sunday">"周日"</string>
-    <string name="day_of_week_short_monday">"周一"</string>
-    <string name="day_of_week_short_tuesday">"周二"</string>
-    <string name="day_of_week_short_wednesday">"周三"</string>
-    <string name="day_of_week_short_thursday">"周四"</string>
-    <string name="day_of_week_short_friday">"周五"</string>
-    <string name="day_of_week_short_saturday">"周六"</string>
-    <string name="day_of_week_shorter_sunday">"周日"</string>
-    <string name="day_of_week_shorter_monday">"周一"</string>
-    <string name="day_of_week_shorter_tuesday">"周二"</string>
-    <string name="day_of_week_shorter_wednesday">"周三"</string>
-    <string name="day_of_week_shorter_thursday">"周四"</string>
-    <string name="day_of_week_shorter_friday">"周五"</string>
-    <string name="day_of_week_shorter_saturday">"周六"</string>
-    <string name="day_of_week_shortest_sunday">"周日"</string>
-    <string name="day_of_week_shortest_monday">"周一"</string>
-    <string name="day_of_week_shortest_tuesday">"周二"</string>
-    <string name="day_of_week_shortest_wednesday">"周三"</string>
-    <string name="day_of_week_shortest_thursday">"周四"</string>
-    <string name="day_of_week_shortest_friday">"周五"</string>
-    <string name="day_of_week_shortest_saturday">"周六"</string>
-    <string name="month_long_january">"1 月"</string>
-    <string name="month_long_february">"2 月"</string>
-    <string name="month_long_march">"3 月"</string>
-    <string name="month_long_april">"4 月"</string>
-    <string name="month_long_may">"5 月"</string>
-    <string name="month_long_june">"6 月"</string>
-    <string name="month_long_july">"7 月"</string>
-    <string name="month_long_august">"8 月"</string>
-    <string name="month_long_september">"9 月"</string>
-    <string name="month_long_october">"10 月"</string>
-    <string name="month_long_november">"11 月"</string>
-    <string name="month_long_december">"12 月"</string>
-    <string name="month_medium_january">"1 月"</string>
-    <string name="month_medium_february">"2 月"</string>
-    <string name="month_medium_march">"3 月"</string>
-    <string name="month_medium_april">"4 月"</string>
-    <string name="month_medium_may">"5 月"</string>
-    <string name="month_medium_june">"6 月"</string>
-    <string name="month_medium_july">"7 月"</string>
-    <string name="month_medium_august">"8 月"</string>
-    <string name="month_medium_september">"９ 月"</string>
-    <string name="month_medium_october">"10 月"</string>
-    <string name="month_medium_november">"11 月"</string>
-    <string name="month_medium_december">"12 月"</string>
-    <string name="month_shortest_january">"1 月"</string>
-    <string name="month_shortest_february">"2 月"</string>
-    <string name="month_shortest_march">"3 月"</string>
-    <string name="month_shortest_april">"4 月"</string>
-    <string name="month_shortest_may">"5 月"</string>
-    <string name="month_shortest_june">"6 月"</string>
-    <string name="month_shortest_july">"7 月"</string>
-    <string name="month_shortest_august">"8 月"</string>
-    <string name="month_shortest_september">"9 月"</string>
-    <string name="month_shortest_october">"10 月"</string>
-    <string name="month_shortest_november">"11 月"</string>
-    <string name="month_shortest_december">"12 月"</string>
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"全选"</string>

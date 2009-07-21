@@ -23,6 +23,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.gsm.NetworkInfo;
@@ -82,9 +83,11 @@ public interface Phone {
          * <li>DATAIN = Receiving IP ppp traffic</li>
          * <li>DATAOUT = Sending IP ppp traffic</li>
          * <li>DATAINANDOUT = Both receiving and sending IP ppp traffic</li>
+         * <li>DORMANT = The data connection is still active,
+                                     but physical link is down</li>
          * </ul>
          */
-        NONE, DATAIN, DATAOUT, DATAINANDOUT;
+        NONE, DATAIN, DATAOUT, DATAINANDOUT, DORMANT;
     };
 
     enum SuppService {
@@ -99,6 +102,7 @@ public interface Phone {
     static final String DATA_APN_KEY = "apn";
     static final String DATA_IFACE_NAME_KEY = "iface";
     static final String NETWORK_UNAVAILABLE_KEY = "networkUnvailable";
+    static final String PHONE_IN_ECM_STATE = "phoneinECMState";
 
     /**
      * APN types for data connections.  These are usage categories for an APN
@@ -150,7 +154,7 @@ public interface Phone {
     static final String REASON_PS_RESTRICT_ENABLED = "psRestrictEnabled";
     static final String REASON_PS_RESTRICT_DISABLED = "psRestrictDisabled";
     static final String REASON_SIM_LOADED = "simLoaded";
-    
+
     // Used for band mode selection methods
     static final int BM_UNSPECIFIED = 0; // selected by baseband automatically
     static final int BM_EURO_BAND   = 1; // GSM-900 / DCS-1800 / WCDMA-IMT-2000
@@ -162,28 +166,53 @@ public interface Phone {
 
     // Used for preferred network type
     // Note NT_* substitute RILConstants.NETWORK_MODE_* above the Phone
-    int NT_MODE_WCDMA_PREF   = 0; /* GSM/WCDMA (WCDMA preferred) */
-    int NT_MODE_GSM_ONLY     = 1; /* GSM only */
-    int NT_MODE_WCDMA_ONLY   = 2; /* WCDMA only */
-    int NT_MODE_GSM_UMTS     = 3; /* GSM/WCDMA (auto mode, according to PRL)
-                                     AVAILABLE Application Settings menu*/
-    int NT_MODE_CDMA         = 4; /* CDMA and EvDo (auto mode, according to PRL)
-                                     AVAILABLE Application Settings menu*/
-    int NT_MODE_CDMA_NO_EVDO = 5; /* CDMA only */
-    int NT_MODE_EVDO_NO_CDMA = 6; /* EvDo only */
-    int NT_MODE_GLOBAL       = 7; /* GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL)
-                                     AVAILABLE Application Settings menu*/
-    int PREFERRED_NT_MODE    = NT_MODE_GSM_ONLY;
+    int NT_MODE_WCDMA_PREF   = RILConstants.NETWORK_MODE_WCDMA_PREF;
+    int NT_MODE_GSM_ONLY     = RILConstants.NETWORK_MODE_GSM_ONLY;
+    int NT_MODE_WCDMA_ONLY   = RILConstants.NETWORK_MODE_WCDMA_ONLY;
+    int NT_MODE_GSM_UMTS     = RILConstants.NETWORK_MODE_GSM_UMTS;
+
+    int NT_MODE_CDMA         = RILConstants.NETWORK_MODE_CDMA;
+
+    int NT_MODE_CDMA_NO_EVDO = RILConstants.NETWORK_MODE_CDMA_NO_EVDO;
+    int NT_MODE_EVDO_NO_CDMA = RILConstants.NETWORK_MODE_EVDO_NO_CDMA;
+    int NT_MODE_GLOBAL       = RILConstants.NETWORK_MODE_GLOBAL;
+
+    int PREFERRED_NT_MODE    = RILConstants.PREFERRED_NETWORK_MODE;
 
 
     // Used for CDMA roaming mode
-    static final int CDMA_RM_HOME        = 0;  //Home Networks only, as defined in PRL
-    static final int CDMA_RM_AFFILIATED = 1;  //Roaming an Affiliated networks, as defined in PRL
-    static final int CDMA_RM_ANY        = 2;  //Roaming on Any Network, as defined in PRL
+    static final int CDMA_RM_HOME        = 0;  // Home Networks only, as defined in PRL
+    static final int CDMA_RM_AFFILIATED  = 1;  // Roaming an Affiliated networks, as defined in PRL
+    static final int CDMA_RM_ANY         = 2;  // Roaming on Any Network, as defined in PRL
 
     // Used for CDMA subscription mode
-    static final int CDMA_SUBSCRIPTION_RUIM_SIM    = 0; //RUIM/SIM (default)
-    static final int CDMA_SUBSCRIPTION_NV        = 1; //NV -> non-volatile memory
+    static final int CDMA_SUBSCRIPTION_RUIM_SIM = 0; // RUIM/SIM (default)
+    static final int CDMA_SUBSCRIPTION_NV       = 1; // NV -> non-volatile memory
+
+    static final int PREFERRED_CDMA_SUBSCRIPTION = CDMA_SUBSCRIPTION_NV;
+
+    static final int TTY_MODE_OFF = 0;
+    static final int TTY_MODE_FULL = 1;
+    static final int TTY_MODE_HCO = 2;
+    static final int TTY_MODE_VCO = 3;
+
+     /**
+     * CDMA OTA PROVISION STATUS, the same as RIL_CDMA_OTA_Status in ril.h
+     */
+
+    public static final int CDMA_OTA_PROVISION_STATUS_SPL_UNLOCKED = 0;
+    public static final int CDMA_OTA_PROVISION_STATUS_SPC_RETRIES_EXCEEDED = 1;
+    public static final int CDMA_OTA_PROVISION_STATUS_A_KEY_EXCHANGED = 2;
+    public static final int CDMA_OTA_PROVISION_STATUS_SSD_UPDATED = 3;
+    public static final int CDMA_OTA_PROVISION_STATUS_NAM_DOWNLOADED = 4;
+    public static final int CDMA_OTA_PROVISION_STATUS_MDN_DOWNLOADED = 5;
+    public static final int CDMA_OTA_PROVISION_STATUS_IMSI_DOWNLOADED = 6;
+    public static final int CDMA_OTA_PROVISION_STATUS_PRL_DOWNLOADED = 7;
+    public static final int CDMA_OTA_PROVISION_STATUS_COMMITTED = 8;
+    public static final int CDMA_OTA_PROVISION_STATUS_OTAPA_STARTED = 9;
+    public static final int CDMA_OTA_PROVISION_STATUS_OTAPA_STOPPED = 10;
+    public static final int CDMA_OTA_PROVISION_STATUS_OTAPA_ABORTED = 11;
+
 
     /**
      * Get the current ServiceState. Use
@@ -200,7 +229,7 @@ public interface Phone {
     /**
      * Get the current DataState. No change notification exists at this
      * interface -- use
-     * {@link com.android.internal.telephony.PhoneStateIntentReceiver PhoneStateIntentReceiver}
+     * {@link com.android.telephony.PhoneStateListener PhoneStateListener}
      * instead.
      */
     DataState getDataConnectionState();
@@ -270,9 +299,9 @@ public interface Phone {
      * <ul><li>0 means "-113 dBm or less".</li>
      * <li>31 means "-51 dBm or greater".</li></ul>
      *
-     * @return Current signal strength in ASU's.
+     * @return Current signal strength as SignalStrength
      */
-    int getSignalStrengthASU();
+    SignalStrength getSignalStrength();
 
     /**
      * Notifies when a previously untracked non-ringing/waiting connection has appeared.
@@ -494,6 +523,21 @@ public interface Phone {
     void unregisterForInCallVoicePrivacyOff(Handler h);
 
     /**
+     * Register for notifications when CDMA OTA Provision status change
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForCdmaOtaStatusChange(Handler h, int what, Object obj);
+
+    /**
+     * Unegister for notifications when CDMA OTA Provision status change
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForCdmaOtaStatusChange(Handler h);
+
+    /**
      * Returns SIM record load state. Use
      * <code>getSimCard().registerForReady()</code> for change notification.
      *
@@ -707,6 +751,19 @@ public interface Phone {
      */
     void stopDtmf();
 
+    /**
+     * send burst DTMF tone, it can send the string as single character or multiple character
+     * ignore if there is no active call or not valid digits string.
+     * Valid digit means only includes characters ISO-LATIN characters 0-9, *, #
+     * The difference between sendDtmf and sendBurstDtmf is sendDtmf only sends one character,
+     * this api can send single character and multiple character, also, this api has response
+     * back to caller.
+     *
+     * @param dtmfString is string representing the dialing digit(s) in the active call
+     * @param onCompelte is the callback message when the action is processed by BP
+     *
+     */
+    void sendBurstDtmf(String dtmfString, Message onComplete);
 
     /**
      * Sets the radio power on/off state (off is sometimes
@@ -771,6 +828,12 @@ public interface Phone {
     String getVoiceMailNumber();
 
     /**
+     * Returns unread voicemail count. This count is shown when the  voicemail
+     * notification is expanded.<p>
+     */
+    int getVoiceMessageCount();
+
+    /**
      * Returns the alpha tag associated with the voice mail number.
      * If there is no alpha tag associated or the record is not yet available,
      * returns a default localized string. <p>
@@ -803,7 +866,7 @@ public interface Phone {
      *
      * @param commandInterfaceCFReason is one of the valid call forwarding
      *        CF_REASONS, as defined in
-     *        <code>com.android.internal.telephony.CommandsInterface./code>
+     *        <code>com.android.internal.telephony.CommandsInterface.</code>
      * @param onComplete a callback message when the action is completed.
      *        @see com.android.internal.telephony.CallForwardInfo for details.
      */
@@ -816,10 +879,10 @@ public interface Phone {
      *
      * @param commandInterfaceCFReason is one of the valid call forwarding
      *        CF_REASONS, as defined in
-     *        <code>com.android.internal.telephony.CommandsInterface./code>
+     *        <code>com.android.internal.telephony.CommandsInterface.</code>
      * @param commandInterfaceCFAction is one of the valid call forwarding
      *        CF_ACTIONS, as defined in
-     *        <code>com.android.internal.telephony.CommandsInterface./code>
+     *        <code>com.android.internal.telephony.CommandsInterface.</code>
      * @param dialingNumber is the target phone number to forward calls to
      * @param timerSeconds is used by CFNRy to indicate the timeout before
      *        forwarding is attempted.
@@ -1279,6 +1342,20 @@ public interface Phone {
 
     //***** CDMA support methods
 
+    /*
+     * TODO(Moto) TODO(Teleca): can getCdmaMin, getEsn, getMeid use more generic calls
+     * already defined getXxxx above?
+     */
+
+    /**
+     * Retrieves the MIN for CDMA phones.
+     */
+    String getCdmaMin();
+
+    /**
+     *  Retrieves PRL Version for CDMA phones
+     */
+    String getCdmaPrlVersion();
 
     /**
      * Retrieves the ESN for CDMA phones.
@@ -1306,22 +1383,22 @@ public interface Phone {
     public IccPhoneBookInterfaceManager getIccPhoneBookInterfaceManager();
 
     /**
-     * setTTYModeEnabled
+     * setTTYMode
      * sets a TTY mode option.
      *
      * @param enable is a boolean representing the state that you are
      *        requesting, true for enabled, false for disabled.
      * @param onComplete a callback message when the action is completed
      */
-    void setTTYModeEnabled(boolean enable, Message onComplete);
+    void setTTYMode(int ttyMode, Message onComplete);
 
     /**
-     * queryTTYModeEnabled
+     * queryTTYMode
      * query the status of the TTY mode
      *
      * @param onComplete a callback message when the action is completed.
      */
-    void queryTTYModeEnabled(Message onComplete);
+    void queryTTYMode(Message onComplete);
 
     /**
      * Activate or deactivate cell broadcast SMS.
@@ -1344,10 +1421,220 @@ public interface Phone {
     /**
      * Configure cell broadcast SMS.
      *
+     * TODO: Change the configValuesArray to a RIL_BroadcastSMSConfig
+     *
      * @param response
      *            Callback message is empty on completion
      */
     public void setCellBroadcastSmsConfig(int[] configValuesArray, Message response);
 
     public void notifyDataActivity();
+
+    /**
+     * Returns the CDMA ERI icon index to display
+     */
+    public int getCdmaEriIconIndex();
+
+    /**
+     * Returns the CDMA ERI icon mode,
+     * 0 - ON
+     * 1 - FLASHING
+     */
+    public int getCdmaEriIconMode();
+
+    /**
+     * Returns the CDMA ERI text,
+     */
+    public String getCdmaEriText();
+
+    /**
+     * request to exit emergency call back mode
+     * the caller should use setOnECMModeExitResponse
+     * to receive the emergency callback mode exit response
+     */
+    void exitEmergencyCallbackMode();
+
+    /**
+     * this decides if the dial number is OTA(Over the air provision) number or not
+     * @param dialStr is string representing the dialing digit(s)
+     * @return  true means the dialStr is OTA number, and false means the dialStr is not OTA number
+     */
+    boolean isOtaSpNumber(String dialStr);
+
+    /**
+     * Register for notifications when CDMA call waiting comes
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForCallWaiting(Handler h, int what, Object obj);
+
+    /**
+     * Unegister for notifications when CDMA Call waiting comes
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForCallWaiting(Handler h);
+
+
+    /**
+     * Register for signal information notifications from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a SuppServiceNotification instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+
+    void registerForSignalInfo(Handler h, int what, Object obj) ;
+    /**
+     * Unregisters for signal information notifications.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForSignalInfo(Handler h);
+
+    /**
+     * Register for display information notifications from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a SuppServiceNotification instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForDisplayInfo(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for display information notifications.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForDisplayInfo(Handler h) ;
+
+    /**
+     * Register for CDMA number information record notification from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a CdmaInformationRecords.CdmaNumberInfoRec
+     * instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForNumberInfo(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for number information record notifications.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForNumberInfo(Handler h);
+
+    /**
+     * Register for CDMA redirected number information record notification
+     * from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a CdmaInformationRecords.CdmaRedirectingNumberInfoRec
+     * instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForRedirectedNumberInfo(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for redirected number information record notification.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForRedirectedNumberInfo(Handler h);
+
+    /**
+     * Register for CDMA line control information record notification
+     * from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a CdmaInformationRecords.CdmaLineControlInfoRec
+     * instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForLineControlInfo(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for line control information notifications.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForLineControlInfo(Handler h);
+
+    /**
+     * Register for CDMA T53 CLIR information record notifications
+     * from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a CdmaInformationRecords.CdmaT53ClirInfoRec
+     * instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerFoT53ClirlInfo(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for T53 CLIR information record notification
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForT53ClirInfo(Handler h);
+
+    /**
+     * Register for CDMA T53 audio control information record notifications
+     * from the network.
+     * Message.obj will contain an AsyncResult.
+     * AsyncResult.result will be a CdmaInformationRecords.CdmaT53AudioControlInfoRec
+     * instance.
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForT53AudioControlInfo(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for T53 audio control information record notifications.
+     * Extraneous calls are tolerated silently
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unregisterForT53AudioControlInfo(Handler h);
+
+    /**
+     * registers for exit emergency call back mode request response
+     *
+     * @param h Handler that receives the notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+
+    void setOnEcbModeExitResponse(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for exit emergency call back mode request response
+     *
+     * @param h Handler to be removed from the registrant list.
+     */
+    void unsetOnEcbModeExitResponse(Handler h);
+
+
 }

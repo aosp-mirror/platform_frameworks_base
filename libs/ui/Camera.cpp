@@ -85,20 +85,6 @@ sp<Camera> Camera::create(const sp<ICamera>& camera)
 void Camera::init()
 {
     mStatus = UNKNOWN_ERROR;
-    mShutterCallback = 0;
-    mShutterCallbackCookie = 0;
-    mRawCallback = 0;
-    mRawCallbackCookie = 0;
-    mJpegCallback = 0;
-    mJpegCallbackCookie = 0;
-    mPreviewCallback = 0;
-    mPreviewCallbackCookie = 0;
-    mRecordingCallback = 0;
-    mRecordingCallbackCookie = 0;
-    mErrorCallback = 0;
-    mErrorCallbackCookie = 0;
-    mAutoFocusCallback = 0;
-    mAutoFocusCallbackCookie = 0;
 }
 
 Camera::~Camera()
@@ -127,7 +113,6 @@ void Camera::disconnect()
 {
     LOGV("disconnect");
     if (mCamera != 0) {
-        mErrorCallback = 0;
         mCamera->disconnect();
         mCamera = 0;
     }
@@ -164,21 +149,21 @@ status_t Camera::unlock()
 status_t Camera::setPreviewDisplay(const sp<Surface>& surface)
 {
     LOGV("setPreviewDisplay");
-    if (surface == 0) {
-        LOGE("app passed NULL surface");
-        return NO_INIT;
-    }
     sp <ICamera> c = mCamera;
     if (c == 0) return NO_INIT;
-    return c->setPreviewDisplay(surface->getISurface());
+    if (surface != 0) {
+        return c->setPreviewDisplay(surface->getISurface());
+    } else {
+        LOGD("app passed NULL surface");
+        return c->setPreviewDisplay(0);
+    }
 }
 
 status_t Camera::setPreviewDisplay(const sp<ISurface>& surface)
 {
     LOGV("setPreviewDisplay");
     if (surface == 0) {
-        LOGE("app passed NULL surface");
-        return NO_INIT;
+        LOGD("app passed NULL surface");
     }
     sp <ICamera> c = mCamera;
     if (c == 0) return NO_INIT;
@@ -186,7 +171,7 @@ status_t Camera::setPreviewDisplay(const sp<ISurface>& surface)
 }
 
 
-// start preview mode, must call setPreviewDisplay first
+// start preview mode
 status_t Camera::startPreview()
 {
     LOGV("startPreview");
@@ -285,125 +270,49 @@ String8 Camera::getParameters() const
     return params;
 }
 
-void Camera::setAutoFocusCallback(autofocus_callback cb, void *cookie)
+void Camera::setListener(const sp<CameraListener>& listener)
 {
-    LOGV("setAutoFocusCallback");
-    mAutoFocusCallback = cb;
-    mAutoFocusCallbackCookie = cookie;
+    Mutex::Autolock _l(mLock);
+    mListener = listener;
 }
 
-void Camera::setShutterCallback(shutter_callback cb, void *cookie)
+void Camera::setPreviewCallbackFlags(int flag)
 {
-    LOGV("setShutterCallback");
-    mShutterCallback = cb;
-    mShutterCallbackCookie = cookie;
-}
-
-void Camera::setRawCallback(frame_callback cb, void *cookie)
-{
-    LOGV("setRawCallback");
-    mRawCallback = cb;
-    mRawCallbackCookie = cookie;
-}
-
-void Camera::setJpegCallback(frame_callback cb, void *cookie)
-{
-    LOGV("setJpegCallback");
-    mJpegCallback = cb;
-    mJpegCallbackCookie = cookie;
-}
-
-void Camera::setPreviewCallback(frame_callback cb, void *cookie, int flag)
-{
-    LOGV("setPreviewCallback");
-    mPreviewCallback = cb;
-    mPreviewCallbackCookie = cookie;
+    LOGV("setPreviewCallbackFlags");
     sp <ICamera> c = mCamera;
     if (c == 0) return;
     mCamera->setPreviewCallbackFlag(flag);
 }
 
-void Camera::setRecordingCallback(frame_callback cb, void *cookie)
-{
-    LOGV("setRecordingCallback");
-    mRecordingCallback = cb;
-    mRecordingCallbackCookie = cookie;
-}
-
-void Camera::setErrorCallback(error_callback cb, void *cookie)
-{
-    LOGV("setErrorCallback");
-    mErrorCallback = cb;
-    mErrorCallbackCookie = cookie;
-}
-
 // callback from camera service
 void Camera::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2)
 {
-    switch(msgType) {
-    case CAMERA_MSG_ERROR:
-        LOGV("errorCallback");
-        if (mErrorCallback) {
-            mErrorCallback((status_t)ext1, mErrorCallbackCookie);
-        }
-        break;
-    case CAMERA_MSG_FOCUS:
-        LOGV("autoFocusCallback");
-        if (mAutoFocusCallback) {
-            mAutoFocusCallback((bool)ext1, mAutoFocusCallbackCookie);
-        }
-        break;
-    case CAMERA_MSG_SHUTTER:
-        LOGV("shutterCallback");
-        if (mShutterCallback) {
-            mShutterCallback(mShutterCallbackCookie);
-        }
-        break;
-    default:
-        LOGV("notifyCallback(%d, %d, %d)", msgType, ext1, ext2);
-        break;
+    sp<CameraListener> listener;
+    {
+        Mutex::Autolock _l(mLock);
+        listener = mListener;
+    }
+    if (listener != NULL) {
+        listener->notify(msgType, ext1, ext2);
     }
 }
 
 // callback from camera service when frame or image is ready
 void Camera::dataCallback(int32_t msgType, const sp<IMemory>& dataPtr)
 {
-    switch(msgType) {
-    case CAMERA_MSG_PREVIEW_FRAME:
-        LOGV("previewCallback");
-        if (mPreviewCallback) {
-            mPreviewCallback(dataPtr, mPreviewCallbackCookie);
-        }
-        break;
-    case CAMERA_MSG_VIDEO_FRAME:
-        LOGV("recordingCallback");
-        if (mRecordingCallback) {
-            mRecordingCallback(dataPtr, mRecordingCallbackCookie);
-        }
-        break;
-    case CAMERA_MSG_RAW_IMAGE:
-        LOGV("rawCallback");
-        if (mRawCallback) {
-            mRawCallback(dataPtr, mRawCallbackCookie);
-        }
-        break;
-    case CAMERA_MSG_COMPRESSED_IMAGE:
-        LOGV("jpegCallback");
-        if (mJpegCallback) {
-            mJpegCallback(dataPtr, mJpegCallbackCookie);
-        }
-        break;
-    default:
-        LOGV("dataCallback(%d, %p)", msgType, dataPtr.get());
-        break;
+    sp<CameraListener> listener;
+    {
+        Mutex::Autolock _l(mLock);
+        listener = mListener;
+    }
+    if (listener != NULL) {
+        listener->postData(msgType, dataPtr);
     }
 }
 
 void Camera::binderDied(const wp<IBinder>& who) {
     LOGW("ICamera died");
-    if (mErrorCallback) {
-        mErrorCallback(DEAD_OBJECT, mErrorCallbackCookie);
-    }
+    notifyCallback(CAMERA_MSG_ERROR, CAMERA_ERROR_SERVER_DIED, 0);
 }
 
 void Camera::DeathNotifier::binderDied(const wp<IBinder>& who) {

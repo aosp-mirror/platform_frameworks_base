@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony;
 
+import com.android.internal.telephony.gsm.SmsBroadcastConfigInfo;
+
 import android.os.Message;
 import android.os.Handler;
 
@@ -146,6 +148,14 @@ public interface CommandsInterface {
     static final int SIM_REFRESH_FILE_UPDATED   = 0;  // Single file updated
     static final int SIM_REFRESH_INIT           = 1;  // SIM initialized; reload all
     static final int SIM_REFRESH_RESET          = 2;  // SIM reset; may be locked
+
+    // GSM SMS fail cause for acknowledgeLastIncomingSMS. From TS 23.040, 9.2.3.22.
+    static final int GSM_SMS_FAIL_CAUSE_MEMORY_CAPACITY_EXCEEDED    = 0xD3;
+    static final int GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR           = 0xFF;
+
+    // CDMA SMS fail cause for acknowledgeLastIncomingCdmaSms.  From TS N.S00005, 6.5.2.125.
+    static final int CDMA_SMS_FAIL_CAUSE_RESOURCE_SHORTAGE          = 35;
+    static final int CDMA_SMS_FAIL_CAUSE_OTHER_TERMINAL_PROBLEM     = 39;
 
     //***** Methods
 
@@ -348,12 +358,12 @@ public interface CommandsInterface {
     void unSetOnCallRing(Handler h);
 
     /**
-     * Sets the handler for RESTRICTED_STATE changed notification, 
+     * Sets the handler for RESTRICTED_STATE changed notification,
      * eg, for Domain Specific Access Control
      * unlike the register* methods, there's only one signal strength handler
-     * 
-     * AsyncResult.result is an int[1]     
-     * response.obj.result[0] is a bitmask of RIL_RESTRICTED_STATE_* values 
+     *
+     * AsyncResult.result is an int[1]
+     * response.obj.result[0] is a bitmask of RIL_RESTRICTED_STATE_* values
      */
 
     void setOnRestrictedStateChanged(Handler h, int what, Object obj);
@@ -424,6 +434,104 @@ public interface CommandsInterface {
     void setSuppServiceNotifications(boolean enable, Message result);
     //void unSetSuppServiceNotifications(Handler h);
 
+    /**
+     * Sets the handler for Event Notifications for CDMA Display Info.
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForDisplayInfo(Handler h, int what, Object obj);
+    void unregisterForDisplayInfo(Handler h);
+
+    /**
+     * Sets the handler for Event Notifications for CallWaiting Info.
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForCallWaitingInfo(Handler h, int what, Object obj);
+    void unregisterForCallWaitingInfo(Handler h);
+
+    /**
+     * Sets the handler for Event Notifications for Signal Info.
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForSignalInfo(Handler h, int what, Object obj);
+    void unregisterForSignalInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA number information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForNumberInfo(Handler h, int what, Object obj);
+    void unregisterForNumberInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA redirected number Information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForRedirectedNumberInfo(Handler h, int what, Object obj);
+    void unregisterForRedirectedNumberInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA line control information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForLineControlInfo(Handler h, int what, Object obj);
+    void unregisterForLineControlInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA T53 CLIR information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerFoT53ClirlInfo(Handler h, int what, Object obj);
+    void unregisterForT53ClirInfo(Handler h);
+
+    /**
+     * Registers the handler for CDMA T53 audio control information record
+     * Unlike the register* methods, there's only one notification handler
+     *
+     * @param h Handler for notification message.
+     * @param what User-defined message code.
+     * @param obj User object.
+     */
+    void registerForT53AudioControlInfo(Handler h, int what, Object obj);
+    void unregisterForT53AudioControlInfo(Handler h);
+
+    /**
+     * Fires on if Modem enters Emergency Callback mode
+     */
+    void setEmergencyCallbackMode(Handler h, int what, Object obj);
+
+     /**
+      * Fires on any CDMA OTA provision status change
+      */
+     void registerForCdmaOtaProvision(Handler h,int what, Object obj);
+     void unregisterForCdmaOtaProvision(Handler h);
 
     /**
      * Returns current ICC status.
@@ -516,7 +624,7 @@ public interface CommandsInterface {
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
-     *  ar.result contains a List of PDPContextState
+     *  ar.result contains a List of DataCallState
      *  @deprecated
      */
     void getPDPContextList(Message result);
@@ -526,7 +634,7 @@ public interface CommandsInterface {
      *  retMsg.obj = AsyncResult ar
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
-     *  ar.result contains a List of PDPContextState
+     *  ar.result contains a List of DataCallState
      */
     void getDataCallList(Message result);
 
@@ -767,6 +875,12 @@ public interface CommandsInterface {
      */
     void stopDtmf(Message result);
 
+    /**
+     *  ar.exception carries exception on failure
+     *  ar.userObject contains the orignal value of result.obj
+     *  ar.result is null on success and failure
+     */
+    void sendBurstDtmf(String dtmfString, Message result);
 
     /**
      * smscPDU is smsc address in PDU form GSM BCD format prefixed
@@ -833,9 +947,9 @@ public interface CommandsInterface {
 
     void setRadioPower(boolean on, Message response);
 
-    void acknowledgeLastIncomingSMS(boolean success, Message response);
+    void acknowledgeLastIncomingGsmSms(boolean success, int cause, Message response);
 
-    void acknowledgeLastIncomingCdmaSms(boolean success, Message response);
+    void acknowledgeLastIncomingCdmaSms(boolean success, int cause, Message response);
 
     /**
      * parameters equivilient to 27.007 AT+CRSM command
@@ -1038,6 +1152,20 @@ public interface CommandsInterface {
      */
     void setSmscAddress(String address, Message result);
 
+    /**
+     * Indicates whether there is storage available for new SMS messages.
+     * @param available true if storage is available
+     * @param result callback message
+     */
+    void reportSmsMemoryStatus(boolean available, Message result);
+
+    /**
+     * Indicates to the vendor ril that StkService is running
+     * rand is eady to receive RIL_UNSOL_STK_XXXX commands.
+     *
+     * @param result callback message
+     */
+    void reportStkServiceIsRunning(Message result);
 
     void invokeOemRilRequestRaw(byte[] data, Message response);
 
@@ -1074,6 +1202,31 @@ public interface CommandsInterface {
      */
     public void handleCallSetupRequestFromSim(boolean accept, Message response);
 
+    /**
+     * Activate or deactivate cell broadcast SMS for GSM.
+     *
+     * @param activate
+     *            true = activate, false = deactivate
+     * @param result Callback message is empty on completion
+     */
+    public void setGsmBroadcastActivation(boolean activate, Message result);
+
+    /**
+     * Configure cell broadcast SMS for GSM.
+     *
+     * @param response Callback message is empty on completion
+     */
+    public void setGsmBroadcastConfig(SmsBroadcastConfigInfo[] config, Message response);
+
+    /**
+     * Query the current configuration of cell broadcast SMS of GSM.
+     *
+     * @param response
+     *        Callback message contains the configuration from the modem
+     *        on completion
+     */
+    public void getGsmBroadcastConfig(Message response);
+
     //***** new Methods for CDMA support
 
     /**
@@ -1087,13 +1240,12 @@ public interface CommandsInterface {
     public void getDeviceIdentity(Message response);
 
     /**
-     * Request the device IMSI_M / MDN / AH_SID / H_SID / H_NID.
+     * Request the device MDN / H_SID / H_NID / MIN.
      * "response" is const char **
-     *   [0] is IMSI_M if CDMA subscription is available
-     *   [1] is MDN if CDMA subscription is available
-     *   [2] is AH_SID (Analog Home SID) if CDMA subscription
-     *   [3] is H_SID (Home SID) if CDMA subscription is available
-     *   [4] is H_NID (Home SID) if CDMA subscription is available
+     *   [0] is MDN if CDMA subscription is available
+     *   [1] is H_SID (Home SID) if CDMA subscription is available
+     *   [2] is H_NID (Home NID) if CDMA subscription is available
+     *   [3] is MIN (10 digits, MIN2+MIN1) if CDMA subscription is available
      */
     public void getCDMASubscription(Message response);
 
@@ -1133,7 +1285,7 @@ public interface CommandsInterface {
      * @param enable is true to enable, false to disable
      * @param response is callback message
      */
-    void setTTYModeEnabled(boolean enable, Message response);
+    void setTTYMode(int ttyMode, Message response);
 
     /**
      *  Query the TTY mode for the CDMA phone
@@ -1142,7 +1294,7 @@ public interface CommandsInterface {
      *
      * @param response is callback message
      */
-    void queryTTYModeEnabled(Message response);
+    void queryTTYMode(Message response);
 
     /**
      * Setup a packet data connection On successful completion, the result
@@ -1181,14 +1333,14 @@ public interface CommandsInterface {
     public void deactivateDataCall(int cid, Message result);
 
     /**
-     * Activate or deactivate cell broadcast SMS.
+     * Activate or deactivate cell broadcast SMS for CDMA.
      *
      * @param activate
-     *            0 = activate, 1 = deactivate
+     *            true = activate, false = deactivate
      * @param result
      *            Callback message is empty on completion
      */
-    public void activateCdmaBroadcastSms(int activate, Message result);
+    public void setCdmaBroadcastActivation(boolean activate, Message result);
 
     /**
      * Configure cdma cell broadcast SMS.
@@ -1196,6 +1348,7 @@ public interface CommandsInterface {
      * @param result
      *            Callback message is empty on completion
      */
+    // TODO: Change the configValuesArray to a RIL_BroadcastSMSConfig
     public void setCdmaBroadcastConfig(int[] configValuesArray, Message result);
 
     /**
@@ -1205,4 +1358,12 @@ public interface CommandsInterface {
      *            Callback message contains the configuration from the modem on completion
      */
     public void getCdmaBroadcastConfig(Message result);
+
+    /**
+     *  Requests the radio's system selection module to exit emergency callback mode.
+     *  This function should only be called from CDMAPHone.java.
+     *
+     * @param response callback message
+     */
+    public void exitEmergencyCallbackMode(Message response);
 }

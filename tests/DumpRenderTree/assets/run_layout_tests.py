@@ -61,7 +61,8 @@ def DumpRenderTreeFinished(adb_cmd):
   adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
   return adb_output.strip() == "#DONE"
 
-def DiffResults(marker, new_results, old_results, diff_results, strip_reason):
+def DiffResults(marker, new_results, old_results, diff_results, strip_reason,
+                new_count_first=True):
    """ Given two result files, generate diff and
        write to diff_results file. All arguments are absolute paths
        to files.
@@ -85,21 +86,25 @@ def DiffResults(marker, new_results, old_results, diff_results, strip_reason):
      for i in range(0, len(cdict)):
        cdict[i] = cdict[i].split(' ')[0] + "\n"
 
-   # Find results in new_results missing in old_results
-   new_count=0
-   for line in ndict:
-     if line not in cdict:
-       diff_file.writelines("+ " + line)
-       new_count += 1
+   params = {
+       "new": [0, ndict, cdict, "+"],
+       "miss": [0, cdict, ndict, "-"]
+       }
+   if new_count_first:
+     order = ["new", "miss"]
+   else:
+     order = ["miss", "new"]
 
-   # Find results in old_results missing in new_results
-   missing_count=0
-   for line in cdict:
-     if line not in ndict:
-       diff_file.writelines("- " + line)
-       missing_count += 1
+   for key in order:
+     for line in params[key][1]:
+       if line not in params[key][2]:
+         if line[-1] != "\n":
+           line += "\n";
+         diff_file.writelines(params[key][3] + line)
+         params[key][0] += 1
 
-   logging.info(marker + "  >>> " + str(new_count) + " new, " + str(missing_count) + " misses")
+   logging.info(marker + "  >>> " + str(params["new"][0]) + " new, " +
+                str(params["miss"][0]) + " misses")
 
    diff_file.writelines("\n\n")
 
@@ -121,12 +126,12 @@ def CompareResults(ref_dir, results_dir):
   if os.path.exists(diff_result):
     os.remove(diff_result)
 
-  files=["passed", "failed", "nontext", "crashed"]
+  files=["crashed", "failed", "passed", "nontext"]
   for f in files:
     result_file_name = "layout_tests_" + f + ".txt"
     DiffResults(f, os.path.join(results_dir, result_file_name),
                 os.path.join(ref_dir, result_file_name), diff_result,
-                f == "failed")
+                False, f != "passed")
   logging.info("Detailed diffs are in " + diff_result)
 
 def main(options, args):

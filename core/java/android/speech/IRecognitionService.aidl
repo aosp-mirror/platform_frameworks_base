@@ -18,6 +18,7 @@ package android.speech;
 
 import android.content.Intent;
 import android.speech.IRecognitionListener;
+import android.speech.RecognitionResult;
 
 // A Service interface to speech recognition. Call startListening when
 // you want to begin capturing audio; RecognitionService will automatically
@@ -29,6 +30,8 @@ interface IRecognitionService {
     // see RecognizerIntent.java for constants used to specify the intent.
     void startListening(in Intent recognizerIntent,
         in IRecognitionListener listener);
+        
+    List<RecognitionResult> getRecognitionResults(in long key);
 
     void cancel();
 }

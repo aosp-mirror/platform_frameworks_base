@@ -16,14 +16,15 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
-
-import com.android.internal.R;
+import android.view.accessibility.AccessibilityEvent;
 
 
 /**
@@ -194,5 +195,13 @@ public class CheckedTextView extends TextView implements Checkable {
             invalidate();
         }
     }
-    
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        boolean populated = super.dispatchPopulateAccessibilityEvent(event);
+        if (!populated) {
+            event.setChecked(mChecked);
+        }
+        return populated;
+    }
 }

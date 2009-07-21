@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -39,8 +40,6 @@ public final class PhoneStateIntentReceiver extends BroadcastReceiver {
     private static final String LOG_TAG = "PHONE";
     private static final boolean DBG = false;
 
-    public static final String INTENT_KEY_ASU = "asu";
-
     private static final int NOTIF_PHONE    = 1 << 0;
     private static final int NOTIF_SERVICE  = 1 << 1;
     private static final int NOTIF_SIGNAL   = 1 << 2;
@@ -49,7 +48,8 @@ public final class PhoneStateIntentReceiver extends BroadcastReceiver {
 
     Phone.State mPhoneState = Phone.State.IDLE;
     ServiceState mServiceState = new ServiceState();
-    int mAsu  = -1;
+    SignalStrength mSignalStrength = new SignalStrength();
+
     private Context mContext;
     private Handler mTarget;
     private IntentFilter mFilter;
@@ -106,12 +106,14 @@ public final class PhoneStateIntentReceiver extends BroadcastReceiver {
      * Throws RuntimeException if client has not called notifySignalStrength()
      */
     public int getSignalStrength() {
+        // TODO: use new SignalStrength instead of asu
         if ((mWants & NOTIF_SIGNAL) == 0) {
             throw new RuntimeException
                 ("client must call notifySignalStrength(int)");
         }
+        int gsmSignalStrength = mSignalStrength.getGsmSignalStrength();
 
-        return mAsu;
+        return (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
     }
 
     /**
@@ -129,10 +131,15 @@ public final class PhoneStateIntentReceiver extends BroadcastReceiver {
 
         int dBm = -1;
 
-        if (mAsu != -1) {
-            dBm = -113 + 2*mAsu;
+        if(!mSignalStrength.isGsm()) {
+            dBm = mSignalStrength.getCdmaDbm();
+        } else {
+            int gsmSignalStrength = mSignalStrength.getGsmSignalStrength();
+            int asu = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
+            if (asu != -1) {
+                dBm = -113 + 2*asu;
+            }
         }
-
         return dBm;
     }
 
@@ -180,8 +187,7 @@ public final class PhoneStateIntentReceiver extends BroadcastReceiver {
 
         try {
             if (TelephonyIntents.ACTION_SIGNAL_STRENGTH_CHANGED.equals(action)) {
-                mAsu = intent.getIntExtra(INTENT_KEY_ASU, mAsu);
-                if (DBG) Log.d(LOG_TAG, "onReceiveIntent: set asu=" + mAsu);
+                mSignalStrength = SignalStrength.newFromBundle(intent.getExtras());
 
                 if (mTarget != null && getNotifySignalStrength()) {
                     Message message = Message.obtain(mTarget, mAsuEventWhat);

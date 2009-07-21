@@ -106,6 +106,11 @@ public class ViewConfiguration {
      * Minimum velocity to initiate a fling, as measured in pixels per second
      */
     private static final int MINIMUM_FLING_VELOCITY = 50;
+    
+    /**
+     * Maximum velocity to initiate a fling, as measured in pixels per second
+     */
+    private static final int MAXIMUM_FLING_VELOCITY = 4000;
 
     /**
      * The maximum size of View's drawing cache, expressed in bytes. This size
@@ -122,6 +127,7 @@ public class ViewConfiguration {
     private final int mEdgeSlop;
     private final int mFadingEdgeLength;
     private final int mMinimumFlingVelocity;
+    private final int mMaximumFlingVelocity;
     private final int mScrollbarSize;
     private final int mTouchSlop;
     private final int mDoubleTapSlop;
@@ -139,6 +145,7 @@ public class ViewConfiguration {
         mEdgeSlop = EDGE_SLOP;
         mFadingEdgeLength = FADING_EDGE_LENGTH;
         mMinimumFlingVelocity = MINIMUM_FLING_VELOCITY;
+        mMaximumFlingVelocity = MAXIMUM_FLING_VELOCITY;
         mScrollbarSize = SCROLL_BAR_SIZE;
         mTouchSlop = TOUCH_SLOP;
         mDoubleTapSlop = DOUBLE_TAP_SLOP;
@@ -164,6 +171,7 @@ public class ViewConfiguration {
         mEdgeSlop = (int) (density * EDGE_SLOP + 0.5f);
         mFadingEdgeLength = (int) (density * FADING_EDGE_LENGTH + 0.5f);
         mMinimumFlingVelocity = (int) (density * MINIMUM_FLING_VELOCITY + 0.5f);
+        mMaximumFlingVelocity = (int) (density * MAXIMUM_FLING_VELOCITY + 0.5f);
         mScrollbarSize = (int) (density * SCROLL_BAR_SIZE + 0.5f);
         mTouchSlop = (int) (density * TOUCH_SLOP + 0.5f);
         mDoubleTapSlop = (int) (density * DOUBLE_TAP_SLOP + 0.5f);
@@ -366,6 +374,23 @@ public class ViewConfiguration {
         return mMinimumFlingVelocity;
     }
 
+    /**
+     * @return Maximum velocity to initiate a fling, as measured in pixels per second.
+     *
+     * @deprecated Use {@link #getScaledMaximumFlingVelocity()} instead.
+     */
+    @Deprecated
+    public static int getMaximumFlingVelocity() {
+        return MAXIMUM_FLING_VELOCITY;
+    }
+
+    /**
+     * @return Maximum velocity to initiate a fling, as measured in pixels per second.
+     */
+    public int getScaledMaximumFlingVelocity() {
+        return mMaximumFlingVelocity;
+    }
+    
     /**
      * The maximum drawing cache size expressed in bytes.
      *

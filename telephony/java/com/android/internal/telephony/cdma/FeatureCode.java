@@ -84,7 +84,6 @@ public final class FeatureCode  extends Handler implements MmiCode {
 
     CDMAPhone phone;
     Context context;
-
     String action;              // '*' in CDMA
     String sc;                  // Service Code
     String poundString;         // Entire Flash string
@@ -237,10 +236,9 @@ public final class FeatureCode  extends Handler implements MmiCode {
     }
 
     /** Process a Flash Code...anything that isn't a dialing number */
-    void processCode () {
+    void processCode() {
         Log.d(LOG_TAG, "send feature code...");
-        phone.mCM.sendCDMAFeatureCode(this.poundString,
-                obtainMessage(EVENT_CDMA_FLASH_COMPLETED));
+        phone.mCM.sendCDMAFeatureCode(this.poundString, obtainMessage(EVENT_CDMA_FLASH_COMPLETED));
     }
 
     /** Called from CDMAPhone.handleMessage; not a Handler subclass */

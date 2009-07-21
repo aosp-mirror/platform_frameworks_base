@@ -201,7 +201,6 @@ public:
     /* getters, see constructor */
 
             int         streamType() const;
-            uint32_t    sampleRate() const;
             int         format() const;
             int         channelCount() const;
             uint32_t    frameCount() const;
@@ -246,7 +245,7 @@ public:
 
     /* set sample rate for this track, mostly used for games' sound effects
      */
-            void        setSampleRate(int sampleRate);
+            status_t    setSampleRate(int sampleRate);
             uint32_t    getSampleRate();
 
     /* Enables looping and sets the start and end points of looping.

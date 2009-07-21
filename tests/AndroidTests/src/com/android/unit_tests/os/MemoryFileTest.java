@@ -17,18 +17,21 @@
 package com.android.unit_tests.os;
 
 import android.os.MemoryFile;
+import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import junit.framework.TestCase;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
-public class MemoryFileTest extends TestCase {
+public class MemoryFileTest extends AndroidTestCase {
 
     private void compareBuffers(byte[] buffer1, byte[] buffer2, int length) throws Exception {
         for (int i = 0; i < length; i++) {
@@ -92,6 +95,187 @@ public class MemoryFileTest extends TestCase {
         compareBuffers(testString, buffer, testString.length);
 
         file.close();
+    }
+
+    // Tests for the IndexOutOfBoundsException cases in read().
+
+    private void readIndexOutOfBoundsException(int offset, int count, String msg)
+            throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", testString.length);
+        try {
+            file.writeBytes(testString, 0, 0, testString.length);
+            InputStream is = file.getInputStream();
+            byte[] buffer = new byte[testString.length + 10];
+            try {
+                is.read(buffer, offset, count);
+                fail(msg);
+            } catch (IndexOutOfBoundsException ex) {
+                // this is what should happen
+            } finally {
+                is.close();
+            }
+        } finally {
+            file.close();
+        }
+    }
+
+    @SmallTest
+    public void testReadNegativeOffset() throws Exception {
+        readIndexOutOfBoundsException(-1, 5,
+                "read() with negative offset should throw IndexOutOfBoundsException");
+    }
+
+    @SmallTest
+    public void testReadNegativeCount() throws Exception {
+        readIndexOutOfBoundsException(5, -1,
+                "read() with negative length should throw IndexOutOfBoundsException");
+    }
+
+    @SmallTest
+    public void testReadOffsetOverflow() throws Exception {
+        readIndexOutOfBoundsException(testString.length + 10, 5,
+                "read() with offset outside buffer should throw IndexOutOfBoundsException");
+    }
+
+    @SmallTest
+    public void testReadOffsetCountOverflow() throws Exception {
+        readIndexOutOfBoundsException(testString.length, 11,
+                "read() with offset + count outside buffer should throw IndexOutOfBoundsException");
+    }
+
+    // Test behavior of read() at end of file
+    @SmallTest
+    public void testReadEOF() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", testString.length);
+        try {
+            file.writeBytes(testString, 0, 0, testString.length);
+            InputStream is = file.getInputStream();
+            try {
+                byte[] buffer = new byte[testString.length + 10];
+                // read() with count larger than data should succeed, and return # of bytes read
+                assertEquals(testString.length, is.read(buffer));
+                compareBuffers(testString, buffer, testString.length);
+                // Read at EOF should return -1
+                assertEquals(-1, is.read());
+            } finally {
+                is.close();
+            }
+        } finally {
+            file.close();
+        }
+    }
+
+    // Tests that close() is idempotent
+    @SmallTest
+    public void testCloseClose() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        byte[] data = new byte[512];
+        file.writeBytes(data, 0, 0, 128);
+        file.close();
+        file.close();
+    }
+
+    // Tests that we can't read from a closed memory file
+    @SmallTest
+    public void testCloseRead() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        file.close();
+
+        try {
+            byte[] data = new byte[512];
+            assertEquals(128, file.readBytes(data, 0, 0, 128));
+            fail("readBytes() after close() did not throw IOException.");
+        } catch (IOException e) {
+            // this is what should happen
+        }
+    }
+
+    // Tests that we can't write to a closed memory file
+    @SmallTest
+    public void testCloseWrite() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        file.close();
+
+        try {
+            byte[] data = new byte[512];
+            file.writeBytes(data, 0, 0, 128);
+            fail("writeBytes() after close() did not throw IOException.");
+        } catch (IOException e) {
+            // this is what should happen
+        }
+    }
+
+    // Tests that we can't call allowPurging() after close()
+    @SmallTest
+    public void testCloseAllowPurging() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        byte[] data = new byte[512];
+        file.writeBytes(data, 0, 0, 128);
+        file.close();
+
+        try {
+            file.allowPurging(true);
+            fail("allowPurging() after close() did not throw IOException.");
+        } catch (IOException e) {
+            // this is what should happen
+        }
+    }
+
+    // Tests that we don't leak file descriptors or mmap areas
+    @LargeTest
+    public void testCloseLeak() throws Exception {
+        // open enough memory files that we should run out of
+        // file descriptors or address space if we leak either.
+        for (int i = 0; i < 1025; i++) {
+            MemoryFile file = new MemoryFile("MemoryFileTest", 5000000);
+            file.writeBytes(testString, 0, 0, testString.length);
+            file.close();
+        }
+    }
+
+    @SmallTest
+    public void testIsMemoryFile() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        FileDescriptor fd = file.getFileDescriptor();
+        assertNotNull(fd);
+        assertTrue(fd.valid());
+        assertTrue(MemoryFile.isMemoryFile(fd));
+        file.close();
+
+        assertFalse(MemoryFile.isMemoryFile(FileDescriptor.in));
+        assertFalse(MemoryFile.isMemoryFile(FileDescriptor.out));
+        assertFalse(MemoryFile.isMemoryFile(FileDescriptor.err));
+
+        File tempFile = File.createTempFile("MemoryFileTest",".tmp", getContext().getFilesDir());
+        assertNotNull(file);
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(tempFile);
+            FileDescriptor fileFd = out.getFD();
+            assertNotNull(fileFd);
+            assertFalse(MemoryFile.isMemoryFile(fileFd));
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+            tempFile.delete();
+        }
+    }
+
+    @SmallTest
+    public void testFileDescriptor() throws Exception {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 1000000);
+        MemoryFile ref = new MemoryFile(file.getFileDescriptor(), file.length(), "r");
+        byte[] buffer;
+
+        // write to original, read from reference
+        file.writeBytes(testString, 0, 2000, testString.length);
+        buffer = new byte[testString.length];
+        ref.readBytes(buffer, 2000, 0, testString.length);
+        compareBuffers(testString, buffer, testString.length);
+
+        file.close();
+        ref.close();  // Doesn't actually do anything, since the file descriptor is not dup(2):ed
     }
 
     private static final byte[] testString = new byte[] {

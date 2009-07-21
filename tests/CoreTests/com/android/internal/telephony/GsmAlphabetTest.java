@@ -28,18 +28,20 @@ public class GsmAlphabetTest extends TestCase {
 
     @SmallTest
     public void test7bitWithHeader() throws Exception {
-        byte[] data = new byte[3];
-        data[0] = (byte) 1;
-        data[1] = (byte) 2;
-        data[2] = (byte) 2;
+        SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+        concatRef.refNumber = 1;
+        concatRef.seqNumber = 2;
+        concatRef.msgCount = 2;
+        concatRef.isEightBits = true;
         SmsHeader header = new SmsHeader();
-        header.add(new SmsHeader.Element(SmsHeader.CONCATENATED_8_BIT_REFERENCE, data));
+        header.concatRef = concatRef;
 
-        String message = "aaaaaaaaaabbbbbbbbbbcccccccccc"; 
-        byte[] userData = GsmAlphabet.stringToGsm7BitPackedWithHeader(message, header.toByteArray());
+        String message = "aaaaaaaaaabbbbbbbbbbcccccccccc";
+        byte[] userData = GsmAlphabet.stringToGsm7BitPackedWithHeader(message,
+                SmsHeader.toByteArray(header));
         int septetCount = GsmAlphabet.countGsmSeptets(message, false);
         String parsedMessage = GsmAlphabet.gsm7BitPackedToString(
-                userData, header.toByteArray().length+1, septetCount, 1);
+                userData, SmsHeader.toByteArray(header).length+2, septetCount, 1);
         assertEquals(message, parsedMessage);
     }
 
@@ -306,4 +308,3 @@ public class GsmAlphabetTest extends TestCase {
                 GsmAlphabet.gsm8BitUnpackedToString(unpacked, 1, unpacked.length - 1));
     }
 }
-

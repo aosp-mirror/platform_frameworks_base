@@ -19,7 +19,7 @@ package com.android.internal.telephony.gsm;
 import android.telephony.ServiceState;
 
 public class RestrictedState {
-    
+
     /**
      * Set true to block packet data access due to restriction
      */
@@ -32,7 +32,7 @@ public class RestrictedState {
      * Set true to block emergency call due to restriction
      */
     private boolean mCsEmergencyRestricted;
-    
+
     public RestrictedState() {
         setPsRestricted(false);
         setCsNormalRestricted(false);
@@ -80,11 +80,11 @@ public class RestrictedState {
     public boolean isPsRestricted() {
         return mPsRestricted;
     }
-    
+
     public boolean isCsRestricted() {
         return mCsNormalRestricted && mCsEmergencyRestricted;
     }
-    
+
     @Override
     public boolean equals (Object o) {
         RestrictedState s;
@@ -107,7 +107,7 @@ public class RestrictedState {
     @Override
     public String toString() {
         String csString = "none";
-        
+
         if (mCsEmergencyRestricted && mCsNormalRestricted) {
             csString = "all";
         } else if (mCsEmergencyRestricted && !mCsNormalRestricted) {
@@ -115,7 +115,7 @@ public class RestrictedState {
         } else if (!mCsEmergencyRestricted && mCsNormalRestricted) {
             csString = "normal call";
         }
-        
+
         return  "Restricted State CS: " + csString + " PS:" + mPsRestricted;
     }
 

@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.os.Handler;
 import android.os.Message;
+import android.security.CertTool;
 import android.util.Log;
 
 final class JWebCoreJavaBridge extends Handler {
@@ -184,6 +185,15 @@ final class JWebCoreJavaBridge extends Handler {
         }
         removeMessages(TIMER_MESSAGE);
         mHasInstantTimer = false;
+    }
+
+    private String[] getKeyStrengthList() {
+        return CertTool.getInstance().getSupportedKeyStrenghs();
+    }
+
+    private String getSignedPublicKey(int index, String challenge, String url) {
+        // generateKeyPair expects organizations which we don't have. Ignore url.
+        return CertTool.getInstance().generateKeyPair(index, challenge, null);
     }
 
     private native void nativeConstructor();

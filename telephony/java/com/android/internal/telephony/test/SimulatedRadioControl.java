@@ -45,7 +45,7 @@ public interface SimulatedRadioControl
 
     /** see pauseResponses */
     public void resumeResponses();
-    
+
     public void triggerSsn(int type, int code);
 
     /** Generates an incoming USSD message. */

@@ -34,6 +34,7 @@ import android.provider.Telephony;
 import android.telephony.CellLocation;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -67,6 +68,7 @@ import com.android.internal.telephony.PhoneNotifier;
 import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.PhoneSubInfo;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.gsm.stk.StkService;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 import com.android.internal.telephony.IccVmNotSupportedException;
@@ -203,9 +205,9 @@ public class GSMPhone extends PhoneBase {
             }
         }
 
-        //Change the system setting
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.CURRENT_ACTIVE_PHONE, RILConstants.GSM_PHONE);
+        //Change the system property
+        SystemProperties.set(TelephonyProperties.CURRENT_ACTIVE_PHONE,
+                new Integer(RILConstants.GSM_PHONE).toString());
     }
 
     public void dispose() {
@@ -285,9 +287,8 @@ public class GSMPhone extends PhoneBase {
         return mDataConnection.getActiveApnString();
     }
 
-    public int
-    getSignalStrengthASU() {
-        return mSST.rssi == 99 ? -1 : mSST.rssi;
+    public SignalStrength getSignalStrength() {
+        return mSST.mSignalStrength;
     }
 
     public boolean
@@ -444,11 +445,6 @@ public class GSMPhone extends PhoneBase {
     updateMessageWaitingIndicator(boolean mwi) {
         // this also calls notifyMessageWaitingIndicator()
         mSIMRecords.setVoiceMessageWaiting(1, mwi ? -1 : 0);
-    }
-
-    public void
-    notifyMessageWaitingIndicator() {
-        mNotifier.notifyMessageWaitingChanged(this);
     }
 
     public void
@@ -825,6 +821,11 @@ public class GSMPhone extends PhoneBase {
     }
 
     public void
+    sendBurstDtmf(String dtmfString) {
+        Log.e(LOG_TAG, "[GSMPhone] sendBurstDtmf() is a CDMA method");
+    }
+
+    public void
     setRadioPower(boolean power) {
         mSST.setRadioPower(power);
     }
@@ -832,21 +833,21 @@ public class GSMPhone extends PhoneBase {
     private void storeVoiceMailNumber(String number) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(VM_NUMBER, number);        
+        editor.putString(VM_NUMBER, number);
         editor.commit();
         setVmSimImsi(getSubscriberId());
     }
 
     public String getVoiceMailNumber() {
         // Read from the SIM. If its null, try reading from the shared preference area.
-        String number = mSIMRecords.getVoiceMailNumber();        
+        String number = mSIMRecords.getVoiceMailNumber();
         if (TextUtils.isEmpty(number)) {
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
             number = sp.getString(VM_NUMBER, null);
-        }        
+        }
         return number;
     }
-    
+
     private String getVmSimImsi() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         return sp.getString(VM_SIM_IMSI, null);
@@ -858,7 +859,7 @@ public class GSMPhone extends PhoneBase {
         editor.putString(VM_SIM_IMSI, imsi);
         editor.commit();
     }
-    
+
     public String getVoiceMailAlphaTag() {
         String ret;
 
@@ -922,13 +923,13 @@ public class GSMPhone extends PhoneBase {
     public void setVoiceMailNumber(String alphaTag,
                             String voiceMailNumber,
                             Message onComplete) {
-        
-        Message resp;        
+
+        Message resp;
         mVmNumber = voiceMailNumber;
         resp = h.obtainMessage(EVENT_SET_VM_NUMBER_DONE, 0, 0, onComplete);
         mSIMRecords.setVoiceMailNumber(alphaTag, mVmNumber, resp);
     }
-    
+
     private boolean isValidCommandInterfaceCFReason (int commandInterfaceCFReason) {
         switch (commandInterfaceCFReason) {
         case CF_REASON_UNCONDITIONAL:
@@ -1307,11 +1308,11 @@ public class GSMPhone extends PhoneBase {
 
                 case EVENT_SIM_RECORDS_LOADED:
                     updateCurrentCarrierInProvider();
-                    
+
                     // Check if this is a different SIM than the previous one. If so unset the
                     // voice mail number.
                     String imsi = getVmSimImsi();
-                    if (imsi != null && !getSubscriberId().equals(imsi)) {                        
+                    if (imsi != null && !getSubscriberId().equals(imsi)) {
                         storeVoiceMailNumber(null);
                         setVmSimImsi(null);
                     }
@@ -1393,7 +1394,7 @@ public class GSMPhone extends PhoneBase {
                         onComplete.sendToTarget();
                     }
                     break;
-                    
+
                 case EVENT_SET_VM_NUMBER_DONE:
                     ar = (AsyncResult)msg.obj;
                     if (IccVmNotSupportedException.class.isInstance(ar.exception)) {
@@ -1407,7 +1408,7 @@ public class GSMPhone extends PhoneBase {
                     }
                     break;
 
-                    
+
                 case EVENT_GET_CALL_FORWARD_DONE:
                     ar = (AsyncResult)msg.obj;
                     if (ar.exception == null) {
@@ -1450,7 +1451,7 @@ public class GSMPhone extends PhoneBase {
 
     /**
      * Sets the "current" field in the telephony provider according to the SIM's operator
-     * 
+     *
      * @return true for success; false otherwise.
      */
     boolean updateCurrentCarrierInProvider() {

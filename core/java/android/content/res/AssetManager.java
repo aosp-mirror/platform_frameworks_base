@@ -601,7 +601,7 @@ public final class AssetManager {
     public native final void setConfiguration(int mcc, int mnc, String locale,
             int orientation, int touchscreen, int density, int keyboard,
             int keyboardHidden, int navigation, int screenWidth, int screenHeight,
-            int majorVersion);
+            int screenLayout, int majorVersion);
 
     /**
      * Retrieve the resource identifier for the given resource name.

@@ -163,8 +163,24 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
         return Collections.unmodifiableSet(mFilters);
     }
 
-    public List<R> queryIntent(ContentResolver resolver, Intent intent,
-            String resolvedType, boolean defaultOnly) {
+    public List<R> queryIntentFromList(Intent intent, String resolvedType, 
+            boolean defaultOnly, ArrayList<ArrayList<F>> listCut) {
+        ArrayList<R> resultList = new ArrayList<R>();
+
+        final boolean debug = localLOGV ||
+                ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
+
+        final String scheme = intent.getScheme();
+        int N = listCut.size();
+        for (int i = 0; i < N; ++i) {
+            buildResolveList(intent, debug, defaultOnly,
+                             resolvedType, scheme, listCut.get(i), resultList);
+        }
+        sortResults(resultList);
+        return resultList;
+    }
+
+    public List<R> queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
         String scheme = intent.getScheme();
 
         ArrayList<R> finalList = new ArrayList<R>();

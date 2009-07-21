@@ -23,27 +23,27 @@ package com.android.mediaframeworktest;
  *
  */
 public class MediaNames {
-  
+    //A directory to hold all kinds of media files
+    public static final String MEDIA_SAMPLE_POOL = "/sdcard/media_api/samples/";
     //Audio files
-    public static final String MP3CBR = "/sdcard/media_api/music/MP3CBR.mp3";  
-    public static final String MP3VBR = "/sdcard/media_api/music/MP3VBR.mp3";
+    public static final String MP3CBR = "/sdcard/media_api/music/MP3_256kbps_2ch.mp3";
+    public static final String MP3VBR = "/sdcard/media_api/music/MP3_256kbps_2ch_VBR.mp3";
     public static final String SHORTMP3 = "/sdcard/media_api/music/SHORTMP3.mp3";
-    public static final String MIDI = "/sdcard/media_api/music/MIDI.mid";
+    public static final String MIDI = "/sdcard/media_api/music/ants.mid";
     public static final String WMA9 = "/sdcard/media_api/music/WMA9.wma";
     public static final String WMA10 = "/sdcard/media_api/music/WMA10.wma";
-    public static final String WAV = "/sdcard/media_api/music/complicated_wav.wav";
-    public static final String AMR = "/sdcard/media_api/music/AMRNB.amr";
-    public static final String OGG = "/sdcard/media_api/music/Mists_of_Time-4T.ogg";
-    public static final String OGGSHORT = "/sdcard/media_api/music/Skippy.ogg";
+    public static final String WAV = "/sdcard/media_api/music/rings_2ch.wav";
+    public static final String AMR = "/sdcard/media_api/music/test_amr_ietf.amr";
+    public static final String OGG = "/sdcard/media_api/music/Revelation.ogg";
   
-    public static final int MP3CBR_LENGTH = 231116;  
-    public static final int MP3VBR_LENGTH = 126407;
+    public static final int MP3CBR_LENGTH = 71000;
+    public static final int MP3VBR_LENGTH = 71000;
     public static final int SHORTMP3_LENGTH = 286;
-    public static final int MIDI_LENGTH = 210528;
+    public static final int MIDI_LENGTH = 17000;
     public static final int WMA9_LENGTH = 126559;
     public static final int WMA10_LENGTH = 126559;
-    public static final int AMR_LENGTH = 126540;
-    public static final int OGG_LENGTH = 40000;
+    public static final int AMR_LENGTH = 37000;
+    public static final int OGG_LENGTH = 4000;
     public static final int SEEK_TIME = 10000;
   
     public static final long PAUSE_WAIT_TIME = 3000;
@@ -60,29 +60,21 @@ public class MediaNames {
     //public static final String VIDEO_RTSP3GP = "rtsp://193.159.241.21/sp/alizee05.3gp";
   
     //local video
-    public static final String VIDEO_MP4 = "/sdcard/media_api/video/gingerkids.MP4";
+    public static final String VIDEO_MP4 = "/sdcard/media_api/video/MPEG4_320_AAC_64.mp4";
     public static final String VIDEO_LONG_3GP = "/sdcard/media_api/video/radiohead.3gp";
     public static final String VIDEO_SHORT_3GP = "/sdcard/media_api/video/short.3gp";
     public static final String VIDEO_LARGE_SIZE_3GP = "/sdcard/media_api/video/border_large.3gp";
-    public static final String VIDEO_H263_AAC = "/sdcard/media_api/video/H263_AAC.3gp";
-    public static final String VIDEO_H263_AMR = "/sdcard/media_api/video/H263_AMR.3gp";
-    public static final String VIDEO_H264_AAC = "/sdcard/media_api/video/H264_AAC.3gp";
-    public static final String VIDEO_H264_AMR = "/sdcard/media_api/video/H264_AMR.3gp";   
+    public static final String VIDEO_H263_AAC = "/sdcard/media_api/video/H263_56_AAC_24.3gp";
+    public static final String VIDEO_H263_AMR = "/sdcard/media_api/video/H263_56_AMRNB_6.3gp";
+    public static final String VIDEO_H264_AAC = "/sdcard/media_api/video/H264_320_AAC_64.3gp";
+    public static final String VIDEO_H264_AMR = "/sdcard/media_api/video/H264_320_AMRNB_6.3gp";
     public static final String VIDEO_WMV = "/sdcard/media_api/video/bugs.wmv";
-    public static final String VIDEO_HIGHRES_H263 = "/sdcard/media_api/video/h263_qcif_30fps.3gp";
-    public static final String VIDEO_HIGHRES_MP4 = "/sdcard/media_api/video/mpeg4_qvga_24fps.3gp";
+    public static final String VIDEO_HIGHRES_H263 = "/sdcard/media_api/video/H263_500_AMRNB_12.3gp";
+    public static final String VIDEO_HIGHRES_MP4 = "/sdcard/media_api/video/H264_500_AAC_128.3gp";
     
     //ringtone
     public static final String ringtone = "/sdcard/media_api/ringtones/F1_NewVoicemail.mp3";
-  
-    //streaming mp3
-    public static final String STREAM_LARGE_MP3 = 
-      "http://wms.pv.com:7070/MediaDownloadContent/mp3/BuenaVista_04_Pueblo_Nuevo.mp3";
-    public static final String STREAM_SMALL_MP3 = 
-      "http://wms.pv.com:7070/MediaDownloadContent/mp3/ID3V2_TestFile.mp3"; 
-    public static final String STREAM_REGULAR_MP3 = 
-      "http://wms.pv.com:7070/MediaDownloadContent/mp3/ElectricCosmo.mp3";
-  
+
     //streaming mp3
     public static final String STREAM_MP3_1 = 
       "http://wms.pv.com:7070/MediaDownloadContent/mp3/chadthi_jawani_128kbps.mp3";
@@ -509,4 +501,6 @@ public class MediaNames {
       "http://sridharg.googlejunta.com/yslau/stress_media/mp3_regular.mp3";
   public static final String STREAM_MPEG4_QVGA_128k = 
       "http://sridharg.googlejunta.com/yslau/stress_media/mpeg4_qvga_24fps.3gp";
+  public static final int STREAM_H264_480_360_1411k_DURATION = 46000;
+  public static final int VIDEO_H263_AAC_DURATION = 501000;
 }

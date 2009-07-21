@@ -29,6 +29,7 @@ import android.os.RegistrantList;
 import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -90,6 +91,8 @@ public abstract class PhoneBase implements Phone {
     protected static final int EVENT_RUIM_RECORDS_LOADED            = 21;
     protected static final int EVENT_NV_READY                       = 22;
     protected static final int EVENT_SET_ENHANCED_VP                = 23;
+    protected static final int EVENT_EMERGENCY_CALLBACK_MODE_ENTER  = 24;
+    protected static final int EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE = 25;
 
     // Key used to read/write current CLIR setting
     public static final String CLIR_KEY = "clir_key";
@@ -187,7 +190,7 @@ public abstract class PhoneBase implements Phone {
         setUnitTestMode(unitTestMode);
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        mDnsCheckDisabled = sp.getBoolean(DNS_SERVER_CHECK_DISABLED_KEY, false);        
+        mDnsCheckDisabled = sp.getBoolean(DNS_SERVER_CHECK_DISABLED_KEY, false);
     }
 
     // Inherited documentation suffices.
@@ -204,7 +207,7 @@ public abstract class PhoneBase implements Phone {
         mDnsCheckDisabled = b;
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = sp.edit();
-        editor.putBoolean(DNS_SERVER_CHECK_DISABLED_KEY, b);        
+        editor.putBoolean(DNS_SERVER_CHECK_DISABLED_KEY, b);
         editor.commit();
     }
 
@@ -281,7 +284,6 @@ public abstract class PhoneBase implements Phone {
     public void unregisterForInCallVoicePrivacyOff(Handler h){
         mCM.unregisterForInCallVoicePrivacyOff(h);
     }
-
 
     /**
      * Notifiy registrants of a new ringing Connection.
@@ -567,9 +569,6 @@ public abstract class PhoneBase implements Phone {
         mCM.setPreferredNetworkType(networkType, response);
     }
 
-    /**
-     *  Set the status of the preferred Network Type: Global, CDMA only or GSM/UMTS only
-     */
     public void getPreferredNetworkType(Message response) {
         mCM.getPreferredNetworkType(response);
     }
@@ -582,12 +581,12 @@ public abstract class PhoneBase implements Phone {
         mCM.setSmscAddress(address, result);
     }
 
-    public void setTTYModeEnabled(boolean enable, Message onComplete) {
+    public void setTTYMode(int ttyMode, Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
     }
 
-    public void queryTTYModeEnabled(Message onComplete) {
+    public void queryTTYMode(Message onComplete) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
     }
@@ -632,10 +631,159 @@ public abstract class PhoneBase implements Phone {
         mNotifier.notifyDataActivity(this);
     }
 
+    public void notifyMessageWaitingIndicator() {
+        // This function is added to send the notification to DefaultPhoneNotifier.
+        mNotifier.notifyMessageWaitingChanged(this);
+    }
+
     public void notifyDataConnection(String reason) {
         mNotifier.notifyDataConnection(this, reason);
     }
 
     public abstract String getPhoneName();
 
+    /** @hide */
+    public int getVoiceMessageCount(){
+        return 0;
+    }
+
+    /**
+     * Returns the CDMA ERI icon index to display
+     */
+    public int getCdmaEriIconIndex() {
+        Log.e(LOG_TAG, "Error! getCdmaEriIconIndex should never be executed in GSM mode");
+        return -1;
+    }
+
+    /**
+     * Returns the CDMA ERI icon mode,
+     * 0 - ON
+     * 1 - FLASHING
+     */
+    public int getCdmaEriIconMode() {
+        Log.e(LOG_TAG, "Error! getCdmaEriIconMode should never be executed in GSM mode");
+        return -1;
+    }
+
+    /**
+     * Returns the CDMA ERI text,
+     */
+    public String getCdmaEriText() {
+        Log.e(LOG_TAG, "Error! getCdmaEriText should never be executed in GSM mode");
+        return "GSM nw, no ERI";
+    }
+
+    public String getCdmaMin() {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        return null;
+    }
+
+    public String getCdmaPrlVersion(){
+        //  This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        return null;
+    }
+
+    public void sendBurstDtmf(String dtmfString, Message onComplete) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void exitEmergencyCallbackMode() {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void registerForCdmaOtaStatusChange(Handler h, int what, Object obj) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void unregisterForCdmaOtaStatusChange(Handler h) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public  boolean isOtaSpNumber(String dialStr) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        return false;
+    }
+
+    public void registerForCallWaiting(Handler h, int what, Object obj){
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void unregisterForCallWaiting(Handler h){
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void registerForSignalInfo(Handler h, int what, Object obj) {
+        mCM.registerForSignalInfo(h, what, obj);
+    }
+
+    public void unregisterForSignalInfo(Handler h) {
+        mCM.unregisterForSignalInfo(h);
+    }
+
+    public void registerForDisplayInfo(Handler h, int what, Object obj) {
+        mCM.registerForDisplayInfo(h, what, obj);
+    }
+
+     public void unregisterForDisplayInfo(Handler h) {
+         mCM.unregisterForDisplayInfo(h);
+     }
+
+    public void registerForNumberInfo(Handler h, int what, Object obj) {
+        mCM.registerForNumberInfo(h, what, obj);
+    }
+
+    public void unregisterForNumberInfo(Handler h) {
+        mCM.unregisterForNumberInfo(h);
+    }
+
+    public void registerForRedirectedNumberInfo(Handler h, int what, Object obj) {
+        mCM.registerForRedirectedNumberInfo(h, what, obj);
+    }
+
+    public void unregisterForRedirectedNumberInfo(Handler h) {
+        mCM.unregisterForRedirectedNumberInfo(h);
+    }
+
+    public void registerForLineControlInfo(Handler h, int what, Object obj) {
+        mCM.registerForLineControlInfo( h, what, obj);
+    }
+
+    public void unregisterForLineControlInfo(Handler h) {
+        mCM.unregisterForLineControlInfo(h);
+    }
+
+    public void registerFoT53ClirlInfo(Handler h, int what, Object obj) {
+        mCM.registerFoT53ClirlInfo(h, what, obj);
+    }
+
+    public void unregisterForT53ClirInfo(Handler h) {
+        mCM.unregisterForT53ClirInfo(h);
+    }
+
+    public void registerForT53AudioControlInfo(Handler h, int what, Object obj) {
+        mCM.registerForT53AudioControlInfo( h, what, obj);
+    }
+
+    public void unregisterForT53AudioControlInfo(Handler h) {
+        mCM.unregisterForT53AudioControlInfo(h);
+    }
+
+     public void setOnEcbModeExitResponse(Handler h, int what, Object obj){
+         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+     }
+
+     public void unsetOnEcbModeExitResponse(Handler h){
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+     }
 }

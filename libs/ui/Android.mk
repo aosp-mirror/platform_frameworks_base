@@ -20,13 +20,11 @@ LOCAL_SRC_FILES:= \
 	LayerState.cpp \
 	Overlay.cpp \
 	PixelFormat.cpp \
-	Point.cpp \
 	Rect.cpp \
 	Region.cpp \
 	Surface.cpp \
 	SurfaceComposerClient.cpp \
-	SurfaceFlingerSynchro.cpp \
-	Time.cpp
+	SurfaceFlingerSynchro.cpp 
 
 LOCAL_SHARED_LIBRARIES := \
 	libcorecg \

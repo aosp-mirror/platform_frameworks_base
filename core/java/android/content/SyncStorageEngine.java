@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.backup.IBackupManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -35,6 +36,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -351,8 +353,18 @@ public class SyncStorageEngine extends Handler {
                 }
             }
         }
+        // Inform the backup manager about a data change
+        IBackupManager ibm = IBackupManager.Stub.asInterface(
+                ServiceManager.getService(Context.BACKUP_SERVICE));
+        if (ibm != null) {
+            try {
+                ibm.dataChanged("com.android.providers.settings");
+            } catch (RemoteException e) {
+                // Try again later
+            }
+        }
     }
-    
+
     public boolean getSyncProviderAutomatically(String account, String providerName) {
         synchronized (mAuthorities) {
             if (account != null) {

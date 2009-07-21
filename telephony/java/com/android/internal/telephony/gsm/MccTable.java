@@ -182,7 +182,7 @@ public final class MccTable
 		table.add(new MccEntry(222,"it",2,"Europe/Rome","it"));	//Italy
 		table.add(new MccEntry(225,"va",2,"Europe/Rome","it"));	//Vatican City State
 		table.add(new MccEntry(226,"ro",2));	//Romania
-		table.add(new MccEntry(228,"ch",2,"Europe/Zurich","en"));	//Switzerland (Confederation of)
+		table.add(new MccEntry(228,"ch",2,"Europe/Zurich","de"));	//Switzerland (Confederation of)
 		table.add(new MccEntry(230,"cz",2,"Europe/Prague","cs"));	//Czech Republic
 		table.add(new MccEntry(231,"sk",2));	//Slovak Republic
 		table.add(new MccEntry(232,"at",2,"Europe/Vienna","de"));	//Austria

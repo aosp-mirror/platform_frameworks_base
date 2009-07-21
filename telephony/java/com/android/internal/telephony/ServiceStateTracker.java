@@ -22,6 +22,7 @@ import android.os.Message;
 import android.os.Registrant;
 import android.os.RegistrantList;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 
 /**
  * {@hide}
@@ -49,6 +50,8 @@ public abstract class ServiceStateTracker extends Handler {
 
     public ServiceState ss;
     protected ServiceState newSS;
+
+    public SignalStrength mSignalStrength;
 
     // Used as a unique identifier to track requests associated with a poll
     // and ignore stale responses.The value is a count-down of expected responses
@@ -104,13 +107,15 @@ public abstract class ServiceStateTracker extends Handler {
     protected static final int EVENT_POLL_STATE_OPERATOR_CDMA          = 25;
     protected static final int EVENT_RUIM_READY                        = 26;
     protected static final int EVENT_RUIM_RECORDS_LOADED               = 27;
-    protected static final int EVENT_POLL_STATE_NETWORK_SELECTION_MODE_CDMA = 28;
-    protected static final int EVENT_POLL_SIGNAL_STRENGTH_CDMA         = 29;
-    protected static final int EVENT_GET_SIGNAL_STRENGTH_CDMA          = 30;
-    protected static final int EVENT_NETWORK_STATE_CHANGED_CDMA        = 31;
-    protected static final int EVENT_GET_LOC_DONE_CDMA                 = 32;
-    protected static final int EVENT_SIGNAL_STRENGTH_UPDATE_CDMA       = 33;
-    protected static final int EVENT_NV_LOADED                         = 34;
+    protected static final int EVENT_POLL_SIGNAL_STRENGTH_CDMA         = 28;
+    protected static final int EVENT_GET_SIGNAL_STRENGTH_CDMA          = 29;
+    protected static final int EVENT_NETWORK_STATE_CHANGED_CDMA        = 30;
+    protected static final int EVENT_GET_LOC_DONE_CDMA                 = 31;
+    protected static final int EVENT_SIGNAL_STRENGTH_UPDATE_CDMA       = 32;
+    protected static final int EVENT_NV_LOADED                         = 33;
+    protected static final int EVENT_POLL_STATE_CDMA_SUBSCRIPTION      = 34;
+    protected static final int EVENT_NV_READY                          = 35;
+    protected static final int EVENT_ERI_FILE_LOADED                   = 36;
 
     //***** Time Zones
     protected static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
@@ -142,12 +147,18 @@ public abstract class ServiceStateTracker extends Handler {
         "uk", // U.K
     };
 
+    //***** Registration denied reason
+    protected static final String REGISTRATION_DENIED_GEN  = "General";
+    protected static final String REGISTRATION_DENIED_AUTH = "Authentication Failure";
 
     //***** Constructors
     public ServiceStateTracker() {
 
     }
 
+    public boolean getDesiredPowerState() {
+        return mDesiredPowerState;
+    }
 
     /**
      * Registration point for combined roaming on

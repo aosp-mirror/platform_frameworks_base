@@ -317,8 +317,13 @@ static jint android_net_wifi_getRssiCommand(JNIEnv* env, jobject clazz)
     }
     // reply comes back in the form "<SSID> rssi XX" where XX is the
     // number we're interested in.  if we're associating, it returns "OK".
+    // beware - <SSID> can contain spaces.
     if (strcmp(reply, "OK") != 0) {
-    	sscanf(reply, "%*s %*s %d", &rssi);
+        char* lastSpace = strrchr(reply, ' ');
+        // lastSpace should be preceded by "rssi" and followed by the value
+        if (lastSpace && !strncmp(lastSpace - 4, "rssi", 4)) {
+            sscanf(lastSpace + 1, "%d", &rssi);
+        }
     }
     return (jint)rssi;
 }

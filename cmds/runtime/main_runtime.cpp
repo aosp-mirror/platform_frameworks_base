@@ -45,9 +45,9 @@ static const char* ZYGOTE_ARGV[] = {
     "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,3001,3002,3003",
     /* CAP_SYS_TTY_CONFIG & CAP_SYS_RESOURCE & CAP_NET_BROADCAST &
      * CAP_NET_ADMIN & CAP_NET_RAW & CAP_NET_BIND_SERVICE  & CAP_KILL &
-     * CAP_SYS_BOOT
+     * CAP_SYS_BOOT CAP_SYS_NICE
      */
-    "--capabilities=88161312,88161312",
+    "--capabilities=96549920,96549920",
     "--runtime-init",
     "--nice-name=system_server",
     "com.android.server.SystemServer"

@@ -83,7 +83,7 @@ public class GsmConnection extends Connection {
     static final int EVENT_PAUSE_DONE = 2;
     static final int EVENT_NEXT_POST_DIAL = 3;
     static final int EVENT_WAKE_LOCK_TIMEOUT = 4;
-    
+
     //***** Constants
     static final int PAUSE_DELAY_FIRST_MILLIS = 100;
     static final int PAUSE_DELAY_MILLIS = 3 * 1000;
@@ -117,7 +117,7 @@ public class GsmConnection extends Connection {
     GsmConnection (Context context, DriverCall dc, GsmCallTracker ct, int index) {
         createWakeLock(context);
         acquireWakeLock();
-		
+
         owner = ct;
         h = new MyHandler(owner.getLooper());
 
@@ -138,7 +138,7 @@ public class GsmConnection extends Connection {
     GsmConnection (Context context, String dialString, GsmCallTracker ct, GsmCall parent) {
         createWakeLock(context);
         acquireWakeLock();
-		
+
         owner = ct;
         h = new MyHandler(owner.getLooper());
 
@@ -375,7 +375,7 @@ public class GsmConnection extends Connection {
                     return DisconnectCause.ICC_ERROR;
                 } else if (causeCode == CallFailCause.ERROR_UNSPECIFIED) {
                     if (phone.mSST.rs.isCsRestricted()) {
-                        return DisconnectCause.CS_RESTRICTED; 
+                        return DisconnectCause.CS_RESTRICTED;
                     } else if (phone.mSST.rs.isCsEmergencyRestricted()) {
                         return DisconnectCause.CS_RESTRICTED_EMERGENCY;
                     } else if (phone.mSST.rs.isCsNormalRestricted()) {
@@ -575,7 +575,7 @@ public class GsmConnection extends Connection {
 
         return postDialString.substring(nextPostDialChar);
     }
-    
+
     @Override
     protected void finalize()
     {
@@ -609,7 +609,7 @@ public class GsmConnection extends Connection {
             c = 0;
         } else {
             boolean isValid;
-            
+
             setPostDialState(PostDialState.STARTED);
 
             c = postDialString.charAt(nextPostDialChar++);
@@ -680,31 +680,31 @@ public class GsmConnection extends Connection {
     }
 
     /**
-     * Set post dial state and acquire wake lock while switching to "started" 
-     * state, the wake lock will be released if state switches out of "started" 
-     * state or after WAKE_LOCK_TIMEOUT_MILLIS. 
+     * Set post dial state and acquire wake lock while switching to "started"
+     * state, the wake lock will be released if state switches out of "started"
+     * state or after WAKE_LOCK_TIMEOUT_MILLIS.
      * @param s new PostDialState
      */
     private void setPostDialState(PostDialState s) {
-        if (postDialState != PostDialState.STARTED 
+        if (postDialState != PostDialState.STARTED
                 && s == PostDialState.STARTED) {
             acquireWakeLock();
             Message msg = h.obtainMessage(EVENT_WAKE_LOCK_TIMEOUT);
             h.sendMessageDelayed(msg, WAKE_LOCK_TIMEOUT_MILLIS);
-        } else if (postDialState == PostDialState.STARTED 
+        } else if (postDialState == PostDialState.STARTED
                 && s != PostDialState.STARTED) {
             h.removeMessages(EVENT_WAKE_LOCK_TIMEOUT);
             releaseWakeLock();
         }
         postDialState = s;
     }
-    
+
     private void
     createWakeLock(Context context) {
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mPartialWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOG_TAG);
     }
-    
+
     private void
     acquireWakeLock() {
         log("acquireWakeLock");
@@ -720,7 +720,7 @@ public class GsmConnection extends Connection {
             }
         }
     }
-    
+
     private void log(String msg) {
         Log.d(LOG_TAG, "[GSMConn] " + msg);
     }
