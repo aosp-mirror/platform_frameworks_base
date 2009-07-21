@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
@@ -300,6 +301,11 @@ public class SurfaceView extends View {
         mTranslator = viewRoot.mTranslator;
 
         float appScale = mTranslator == null ? 1.0f : mTranslator.applicationScale;
+        
+        Resources res = getContext().getResources();
+        if (mTranslator != null || !res.getCompatibilityInfo().supportsScreen()) {
+            mSurface.setCompatibleDisplayMetrics(res.getDisplayMetrics());
+        }
         
         int myWidth = mRequestedWidth;
         if (myWidth <= 0) myWidth = getWidth();
