@@ -45,7 +45,6 @@ public class FilmRS {
     public void init(RenderScript rs, Resources res, int width, int height) {
         mRS = rs;
         mRes = res;
-        initNamed();
         initRS();
     }
 
@@ -77,7 +76,8 @@ public class FilmRS {
     private RenderScript.ProgramFragmentStore mPFSImages;
     private RenderScript.ProgramFragment mPFBackground;
     private RenderScript.ProgramFragment mPFImages;
-    private RenderScript.ProgramVertex mPV;
+    private RenderScript.ProgramVertex mPVBackground;
+    private RenderScript.ProgramVertex mPVImages;
     private ProgramVertexAlloc mPVA;
 
     private RenderScript.Allocation mAllocEnv;
@@ -90,20 +90,7 @@ public class FilmRS {
     private float[] mBufferPos;
     private float[] mBufferPV;
 
-    private void initNamed() {
-        mElementVertex = mRS.elementGetPredefined(
-            RenderScript.ElementPredefined.NORM_ST_XYZ_F32);
-        mElementIndex = mRS.elementGetPredefined(
-            RenderScript.ElementPredefined.INDEX_16);
-
-        mRS.triangleMeshBegin(mElementVertex, mElementIndex);
-        FilmStripMesh fsm = new FilmStripMesh();
-        fsm.init(mRS);
-        mMesh = mRS.triangleMeshCreate();
-        mMesh.setName("mesh");
-        Log.e("rs", "Done loading strips");
-
-
+    private void initSamplers() {
         mRS.samplerBegin();
         mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN,
                        RenderScript.SamplerValue.LINEAR_MIP_LINEAR);
@@ -112,19 +99,9 @@ public class FilmRS {
         mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_T,
                        RenderScript.SamplerValue.CLAMP);
         mSampler = mRS.samplerCreate();
+    }
 
-        mRS.programFragmentBegin(null, null);
-        mPFBackground = mRS.programFragmentCreate();
-        mPFBackground.setName("PFBackground");
-
-        mRS.programFragmentBegin(null, null);
-        mRS.programFragmentSetTexEnable(0, true);
-        //mRS.programFragmentSetEnvMode(0, RS_TEX_ENV_MODE_REPLACE);
-        //rsProgramFragmentSetType(0, gEnv.tex[0]->getType());
-        mPFImages = mRS.programFragmentCreate();
-        mPFImages.setName("PFImages");
-        mPFImages.bindSampler(mSampler, 0);
-
+    private void initPFS() {
         mRS.programFragmentStoreBegin(null, null);
         mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.LESS);
         mRS.programFragmentStoreDitherEnable(true);
@@ -139,26 +116,59 @@ public class FilmRS {
                                           RenderScript.BlendDstFunc.ONE);
         mPFSImages = mRS.programFragmentStoreCreate();
         mPFSImages.setName("PFSImages");
+    }
 
-        mRS.programVertexBegin(null, null);
-        mRS.programVertexSetTextureMatrixEnable(true);
-        mPV = mRS.programVertexCreate();
-        mPV.setName("PV");
+    private void initPF() {
+        mRS.programFragmentBegin(null, null);
+        mPFBackground = mRS.programFragmentCreate();
+        mPFBackground.setName("PFBackground");
 
+        mRS.programFragmentBegin(null, null);
+        mRS.programFragmentSetTexEnable(0, true);
+        //mRS.programFragmentSetEnvMode(0, RS_TEX_ENV_MODE_REPLACE);
+        //rsProgramFragmentSetType(0, gEnv.tex[0]->getType());
+        mPFImages = mRS.programFragmentCreate();
+        mPFImages.setName("PFImages");
+    }
+
+    private void initPV() {
         mRS.lightBegin();
         mLight = mRS.lightCreate();
         mLight.setPosition(0, -0.5f, -1.0f);
 
-        Log.e("rs", "Done loading named");
+        mRS.programVertexBegin(null, null);
+        mRS.programVertexSetTextureMatrixEnable(true);
+        mRS.programVertexAddLight(mLight);
+        mPVBackground = mRS.programVertexCreate();
+        mPVBackground.setName("PVBackground");
+
+        mRS.programVertexBegin(null, null);
+        mPVImages = mRS.programVertexCreate();
+        mPVImages.setName("PVImages");
     }
 
-
-    private Bitmap mBackground;
 
     int mParams[] = new int[10];
 
     private void initRS() {
-        int partCount = 1024;
+        mElementVertex = mRS.elementGetPredefined(
+            RenderScript.ElementPredefined.NORM_ST_XYZ_F32);
+        mElementIndex = mRS.elementGetPredefined(
+            RenderScript.ElementPredefined.INDEX_16);
+
+        mRS.triangleMeshBegin(mElementVertex, mElementIndex);
+        FilmStripMesh fsm = new FilmStripMesh();
+        fsm.init(mRS);
+        mMesh = mRS.triangleMeshCreate();
+        mMesh.setName("mesh");
+
+        initPFS();
+        initSamplers();
+        initPF();
+        initPV();
+        mPFImages.bindSampler(mSampler, 0);
+
+        Log.e("rs", "Done loading named");
 
         mRS.scriptCBegin();
         mRS.scriptCSetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -172,7 +182,8 @@ public class FilmRS {
             mBufferPos.length);
 
         mPVA = new ProgramVertexAlloc(mRS);
-        mPV.bindAllocation(0, mPVA.mAlloc);
+        mPVBackground.bindAllocation(0, mPVA.mAlloc);
+        mPVImages.bindAllocation(0, mPVA.mAlloc);
         mPVA.setupProjectionNormalized(320, 480);
 
 
@@ -181,10 +192,6 @@ public class FilmRS {
         mScriptStrip.bindAllocation(mPVA.mAlloc, 3);
 
 
-        //mIntAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, 10);
-        //mPartAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, partCount * 3 * 3);
-        //mPartAlloc.setName("PartBuffer");
-        //mVertAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, partCount * 5 + 1);
 /*
         {
             Resources res = getResources();
@@ -203,25 +210,6 @@ public class FilmRS {
         mPFS = mRS.programFragmentStoreCreate();
         mPFS.setName("MyBlend");
         mRS.contextBindProgramFragmentStore(mPFS);
-
-        mRS.samplerBegin();
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MAG, RenderScript.SamplerValue.LINEAR);
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN, RenderScript.SamplerValue.LINEAR);
-        mSampler = mRS.samplerCreate();
-
-
-        mParams[0] = 0;
-        mParams[1] = partCount;
-        mParams[2] = 0;
-        mParams[3] = 0;
-        mParams[4] = 0;
-        mIntAlloc.data(mParams);
-
-        int t2[] = new int[partCount * 4*3];
-        for (int ct=0; ct < t2.length; ct++) {
-            t2[ct] = 0;
-        }
-        mPartAlloc.data(t2);
         */
 
         setFilmStripPosition(0, 0);

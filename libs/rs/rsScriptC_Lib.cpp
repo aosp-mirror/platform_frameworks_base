@@ -249,6 +249,12 @@ static void SC_bindProgramFragment(RsProgramFragment pf)
 
 }
 
+static void SC_bindProgramVertex(RsProgramVertex pv)
+{
+    GET_TLS();
+    rsi_ContextBindProgramVertex(rsc, pv);
+
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Drawing
@@ -467,6 +473,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "bindProgramFragment", (void *)&SC_bindProgramFragment,
         "void", "(int)" },
     { "bindProgramFragmentStore", (void *)&SC_bindProgramFragmentStore,
+        "void", "(int)" },
+    { "bindProgramVertex", (void *)&SC_bindProgramVertex,
         "void", "(int)" },
     { "bindSampler", (void *)&SC_bindSampler,
         "void", "(int, int, int)" },

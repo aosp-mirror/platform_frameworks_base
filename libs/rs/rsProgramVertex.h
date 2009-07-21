@@ -28,6 +28,7 @@ class ProgramVertex : public Program
 {
 public:
     const static uint32_t MAX_CONSTANTS = 2;
+    const static uint32_t MAX_LIGHTS = 8;
 
     ProgramVertex(Element *in, Element *out);
     virtual ~ProgramVertex();
@@ -38,12 +39,16 @@ public:
     void setConstantType(uint32_t slot, const Type *);
     void bindAllocation(uint32_t slot, Allocation *);
     void setTextureMatrixEnable(bool e) {mTextureMatrixEnable = e;}
+    void addLight(const Light *);
 
 protected:
     bool mDirty;
+    uint32_t mLightCount;
 
     ObjectBaseRef<Allocation> mConstants[MAX_CONSTANTS];
     ObjectBaseRef<const Type> mConstantTypes[MAX_CONSTANTS];
+    ObjectBaseRef<const Light> mLights[MAX_LIGHTS];
+
 
     // Hacks to create a program for now
     bool mTextureMatrixEnable;
@@ -61,6 +66,8 @@ public:
 
     ObjectBaseRef<ProgramVertex> mDefault;
     ObjectBaseRef<Allocation> mDefaultAlloc;
+    
+
 
     ProgramVertex *mPV;
 

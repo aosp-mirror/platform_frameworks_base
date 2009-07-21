@@ -28,6 +28,7 @@ ProgramVertex::ProgramVertex(Element *in, Element *out) :
     Program(in, out)
 {
     mTextureMatrixEnable = false;
+    mLightCount = 0;
 }
 
 ProgramVertex::~ProgramVertex()
@@ -54,8 +55,29 @@ void ProgramVertex::setupGL()
         glLoadIdentity();
     }
 
-    //logMatrix("prog", &f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
-    //logMatrix("model", &f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET]);
+
+    LOGE("lights %i ", mLightCount);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    if (mLightCount) {
+        int v = 1;
+        glEnable(GL_LIGHTING);
+        glLightModelxv(GL_LIGHT_MODEL_TWO_SIDE, &v);
+        for (uint32_t ct = 0; ct < mLightCount; ct++) {
+            const Light *l = mLights[ct].get();
+            glEnable(GL_LIGHT0 + ct);
+            l->setupGL(ct);
+        }
+        for (uint32_t ct = mLightCount; ct < MAX_LIGHTS; ct++) {
+            glDisable(GL_LIGHT0 + ct);
+        }
+    } else {
+        glDisable(GL_LIGHTING);
+    }
+    
+    if (!f) {
+        LOGE("Must bind constants to vertex program");
+    }
 
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
@@ -71,6 +93,14 @@ void ProgramVertex::setConstantType(uint32_t slot, const Type *t)
 void ProgramVertex::bindAllocation(uint32_t slot, Allocation *a)
 {
     mConstants[slot].set(a);
+}
+
+void ProgramVertex::addLight(const Light *l)
+{
+    if (mLightCount < MAX_LIGHTS) {
+        mLights[mLightCount].set(l);
+        mLightCount++;
+    }
 }
 
 
@@ -136,6 +166,10 @@ void rsi_ProgramVertexSetTextureMatrixEnable(Context *rsc, bool enable)
     rsc->mStateVertex.mPV->setTextureMatrixEnable(enable);
 }
 
+void rsi_ProgramVertexAddLight(Context *rsc, RsLight light)
+{
+    rsc->mStateVertex.mPV->addLight(static_cast<const Light *>(light));
+}
 
 
 }

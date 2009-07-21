@@ -103,14 +103,10 @@ void ScriptCState::clear()
 static ACCvoid* symbolLookup(ACCvoid* pContext, const ACCchar* name) 
 {
     const ScriptCState::SymbolTable_t *sym = ScriptCState::lookupSymbol(name);
-
     if (sym) {
         return sym->mPtr;
     }
-
     LOGE("ScriptC sym lookup failed for %s", name);
-
-    // Default to calling dlsym to allow any global symbol:
     return NULL;
 }
 
@@ -121,7 +117,7 @@ void ScriptCState::runCompiler(Context *rsc)
 
     rsc->appendNameDefines(&tmp);
     appendDecls(&tmp);
-    //tmp.append("#line 1\n");
+    tmp.append("#line 1\n");
 
     const char* scriptSource[] = {tmp.string(), mProgram.mScriptText};
     int scriptLength[] = {tmp.length(), mProgram.mScriptTextLength} ;

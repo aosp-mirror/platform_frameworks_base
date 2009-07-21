@@ -32,10 +32,10 @@
 #include "rsAllocation.h"
 #include "rsAdapter.h"
 #include "rsSampler.h"
+#include "rsLight.h"
 #include "rsProgramFragment.h"
 #include "rsProgramFragmentStore.h"
 #include "rsProgramVertex.h"
-#include "rsLight.h"
 
 #include "rsgApiStructs.h"
 #include "rsLocklessFifo.h"

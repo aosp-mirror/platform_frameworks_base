@@ -1,7 +1,7 @@
 // Fountain test script
 
 #pragma version(1)
-#pragma stateVertex(PV)
+#pragma stateVertex(PVBackground)
 #pragma stateFragment(PFBackground)
 #pragma stateFragmentStore(PFSBackground)
 
@@ -43,8 +43,6 @@ int main(int index)
     //materialDiffuse(con, 0.0f, 0.0f, 0.0f, 1.0f);
     //materialSpecular(con, 0.5f, 0.5f, 0.5f, 0.5f);
     //materialShininess(intToFloat(20));
-    //lightPosition(con, 0.2f, -0.2f, -2.0f, 0.0f);
-    //enable(con, GL_LIGHTING);
     drawTriangleMesh(NAMED_mesh);
 
 
@@ -53,6 +51,7 @@ int main(int index)
 
     bindProgramFragmentStore(NAMED_PFImages);
     bindProgramFragment(NAMED_PFSImages);
+    bindProgramVertex(NAMED_PVImages);
 
     //focusPos = loadF(1, 2);
     //focusID = 0;

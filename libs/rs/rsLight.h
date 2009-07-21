@@ -36,9 +36,11 @@ public:
     void setPosition(float x, float y, float z);
     void setColor(float r, float g, float b);
 
+    void setupGL(uint32_t num) const;
+
 protected:
-    float mR, mG, mB;
-    float mX, mY, mZ;
+    float mColor[4];
+    float mPosition[4];
     bool mIsLocal;
     bool mIsMono;
 };

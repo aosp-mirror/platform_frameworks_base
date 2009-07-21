@@ -810,6 +810,14 @@ nProgramVertexSetTextureMatrixEnable(JNIEnv *_env, jobject _this, jboolean enabl
     rsProgramVertexSetTextureMatrixEnable(enable);
 }
 
+static void
+nProgramVertexAddLight(JNIEnv *_env, jobject _this, jint light)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramVertexAddLight, con(%p), light(%p)", con, (RsLight)light);
+    rsProgramVertexAddLight((RsLight)light);
+}
+
 static jint
 nProgramVertexCreate(JNIEnv *_env, jobject _this)
 {
@@ -1048,6 +1056,7 @@ static JNINativeMethod methods[] = {
 {"nProgramVertexBegin",            "(II)V",                                (void*)nProgramVertexBegin },
 {"nProgramVertexSetType",          "(II)V",                                (void*)nProgramVertexSetType },
 {"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
+{"nProgramVertexAddLight",         "(I)V",                                 (void*)nProgramVertexAddLight },
 {"nProgramVertexCreate",           "()I",                                  (void*)nProgramVertexCreate },
 
 {"nLightBegin",                    "()V",                                  (void*)nLightBegin },
