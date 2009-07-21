@@ -171,7 +171,8 @@ void JNICameraContext::postData(int32_t msgType, const sp<IMemory>& dataPtr)
                 mCameraJObjectWeak, msgType, 0, 0, NULL);
         break;
     default:
-        LOGV("dataCallback(%d, %p)", msgType, dataPtr.get());
+        // TODO: Change to LOGV
+        LOGD("dataCallback(%d, %p)", msgType, dataPtr.get());
         copyAndPost(env, dataPtr, msgType);
         break;
     }
@@ -222,6 +223,8 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobj
 // finalizer is invoked later.
 static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
 {
+    // TODO: Change to LOGV
+    LOGD("release camera");
     JNICameraContext* context = NULL;
     sp<Camera> camera;
     {
