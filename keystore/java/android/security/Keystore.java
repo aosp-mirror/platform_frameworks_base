@@ -48,49 +48,6 @@ public abstract class Keystore {
     public abstract int remove(String namespace, String keyname);
     public abstract int reset();
 
-    // TODO: for migrating to the mini-keystore, clean up from here
-    /**
-     */
-    public abstract String getCaCertificate(String key);
-
-    /**
-     */
-    public abstract String getUserCertificate(String key);
-
-    /**
-     */
-    public abstract String getUserPrivateKey(String key);
-
-    /**
-     * Returns the array of the certificate keynames in keystore if successful.
-     * Or return an empty array if error.
-     *
-     * @return array of the certificate keynames
-     */
-    public abstract String[] getAllUserCertificateKeys();
-
-    /**
-     */
-    public abstract String[] getAllCaCertificateKeys();
-
-    /**
-     */
-    public abstract String[] getSupportedKeyStrenghs();
-
-    /**
-     * Generates a key pair and returns the certificate request.
-     * @param keyStrengthIndex index to the array of supported key strengths
-     * @param challenge the challenge message in the keygen tag
-     * @param organizations the organization string, e.g.,
-     *      "/C=US/ST={state}/L={city}/O={company}/OU={app}/CN={hostname}"
-     * @return the certificate request
-     */
-    public abstract String generateKeyPair(
-            int keyStrengthIndex, String challenge, String organizations);
-
-    public abstract void addCertificate(byte[] cert);
-    // to here
-
     private static class FileKeystore extends Keystore {
         private static final String SERVICE_NAME = "keystore";
         private static final String CA_CERTIFICATE = "CaCertificate";
@@ -99,69 +56,6 @@ public abstract class Keystore {
         private static final String COMMAND_DELIMITER = " ";
         private static final ServiceCommand mServiceCommand =
                 new ServiceCommand(SERVICE_NAME);
-
-        // TODO: for migrating to the mini-keystore, start from here
-        @Override
-        public String getUserPrivateKey(String key) {
-            return "";
-        }
-
-        @Override
-        public String getUserCertificate(String key) {
-            return "";
-        }
-
-        @Override
-        public String getCaCertificate(String key) {
-            return "";
-        }
-
-        @Override
-        public String[] getAllUserCertificateKeys() {
-            return new String[0];
-        }
-
-        @Override
-        public String[] getAllCaCertificateKeys() {
-          return new String[0];
-        }
-
-        @Override
-        public String[] getSupportedKeyStrenghs() {
-            // TODO: real implementation
-            return new String[] {"High Grade", "Medium Grade"};
-        }
-
-        @Override
-        public String generateKeyPair(int keyStrengthIndex, String challenge,
-                String organizations) {
-            // TODO: real implementation
-            return "-----BEGIN CERTIFICATE REQUEST-----"
-                    + "\nMIICzjCCAbYCAQAwgYgxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlh"
-                    + "\nMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRMwEQYDVQQKEwpHb29nbGUgSW5jMRYw"
-                    + "\nFAYDVQQLEw1SZW1vdGUgQWNjZXNzMRAwDgYDVQQLEwdHbGFwdG9wMQ0wCwYDVQQD"
-                    + "\nEwR0ZXN0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAznwy7a16O35u"
-                    + "\nODLQOw6yHAxozrrX1J+c0reiIh8GYohwKrBedFnQ/FnTls6bxY4fNHD+SZvFFgvU"
-                    + "\nECBFOfRmRm7AFo51qT0t2a8qgvDLM6L1qGkmy94W28Q3OlcpF2QianHYdjyGT+Ac"
-                    + "\nYDek1Zi/E/mdPzuVM/K8tkB7n8ktC0PTm1ZtdMRauE5R0WrEhWuF6In/2gy1Q/Zh"
-                    + "\noy7/zQqpbPl2ouulvkx1Y3OXHM6XPNFLoHS1gH0HyAuBUokO0QmetRn6ngJSvz7e"
-                    + "\nVD7QYRppGp+g4BxqaV9XSxhaaKrMs4PAld9enV51X9qjvjCRBve2QxtuJgMfGJdU"
-                    + "\njGr/JweZoQIDAQABoAAwDQYJKoZIhvcNAQEFBQADggEBADtxOtEseoLOVYh6sh4b"
-                    + "\nWCdngK87uHn2bdGipFwKdNTxQDdxNQLAKdoGYIfbVsC1cDgFiufeNwVukxxymdnm"
-                    + "\nk0GGK+0O0tZKENv8ysgfbgEsHpJH9FoR5Y5XEq1etejkcgCp59dyhrSk0DLyVm0D"
-                    + "\nIfTC/nsK95H7AAGOkbbDFo2otyLNNrthYncQ9diAG0UzzLacA+86JXZmD3HyC48u"
-                    + "\nI9hsivVnTTfl9afcfVAhfxbQ6HgkhZZjbjFjfABSd4v8wKlAAqK58VxCajNVOVcV"
-                    + "\ncCzOWf6NpE7xEHCf32i8bWDP6hi0WgQcdpQwnZNKhhTLGNb23Uty6HYlJhbxexC7"
-                    + "\nUoM="
-                    + "\n-----END CERTIFICATE REQUEST-----";
-        }
-
-        @Override
-        public void addCertificate(byte[] cert) {
-            // TODO: real implementation
-        }
-
-        // to here
 
         @Override
         public int lock() {
