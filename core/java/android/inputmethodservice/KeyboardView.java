@@ -30,13 +30,13 @@ import android.graphics.drawable.Drawable;
 import android.inputmethodservice.Keyboard.Key;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -206,8 +206,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     private static final int REPEAT_INTERVAL = 50; // ~20 keys per second
     private static final int REPEAT_START_DELAY = 400;
-    private static final int LONGPRESS_TIMEOUT = 800;
-    // Deemed to be too short : ViewConfiguration.getLongPressTimeout();
+    private static final int LONGPRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
 
     private static int MAX_NEARBY_KEYS = 12;
     private int[] mDistances = new int[MAX_NEARBY_KEYS];
@@ -410,6 +409,9 @@ public class KeyboardView extends View implements View.OnClickListener {
         invalidateAllKeys();
         computeProximityThreshold(keyboard);
         mMiniKeyboardCache.clear(); // Not really necessary to do every time, but will free up views
+        // Switching to a different keyboard should abort any pending keys so that the key up
+        // doesn't get delivered to the old or new keyboard
+        mAbortKey = true; // Until the next ACTION_DOWN
     }
 
     /**
