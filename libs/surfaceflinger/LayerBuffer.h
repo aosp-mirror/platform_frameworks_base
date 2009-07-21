@@ -138,6 +138,7 @@ private:
                 sp<OverlayRef>* overlayRef, 
                 uint32_t w, uint32_t h, int32_t format);
         virtual ~OverlaySource();
+        virtual void onDraw(const Region& clip) const;
         virtual void onTransaction(uint32_t flags);
         virtual void onVisibilityResolved(const Transform& planeTransform);
     private:

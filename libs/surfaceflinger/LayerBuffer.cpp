@@ -594,6 +594,11 @@ LayerBuffer::OverlaySource::~OverlaySource()
     }
 }
 
+void LayerBuffer::OverlaySource::onDraw(const Region& clip) const
+{
+    mLayer.clearWithOpenGL(clip);
+}
+
 void LayerBuffer::OverlaySource::onTransaction(uint32_t flags)
 {
     const Layer::State& front(mLayer.drawingState());
@@ -624,6 +629,7 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
                 overlay_dev->setPosition(overlay_dev, mOverlay, x,y,w,h);
                 overlay_dev->setParameter(overlay_dev, mOverlay, 
                         OVERLAY_TRANSFORM, mLayer.getOrientation());
+                overlay_dev->commit(overlay_dev, mOverlay);
             }
         }
     }
