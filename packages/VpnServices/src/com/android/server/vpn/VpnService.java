@@ -161,6 +161,7 @@ abstract class VpnService<E extends VpnProfile> {
 
     synchronized void onDisconnect(boolean cleanUpServices) {
         try {
+            Log.d(TAG, "       disconnecting VPN...");
             mState = VpnState.DISCONNECTING;
             broadcastConnectivity(VpnState.DISCONNECTING);
             mNotification.showDisconnect();
@@ -217,6 +218,8 @@ abstract class VpnService<E extends VpnProfile> {
                 synchronized (VpnService.this) {
                     if (mState == VpnState.CONNECTING) {
                         Log.d(TAG, "       connecting timed out !!");
+                        mError = newConnectingError(
+                                new IOException("Connecting timed out"));
                         onError();
                     }
                 }
