@@ -16,6 +16,8 @@
 
 #include "rsContext.h"
 
+#include <GLES/gl.h>
+
 using namespace android;
 using namespace android::renderscript;
 
@@ -25,13 +27,15 @@ Light::Light(bool isLocal, bool isMono)
     mIsLocal = isLocal;
     mIsMono = isMono;
 
-    mX = 0;
-    mY = 0;
-    mZ = 0;
+    mPosition[0] = 0;
+    mPosition[1] = 0;
+    mPosition[2] = 1;
+    mPosition[3] = 0;
 
-    mR = 1.f;
-    mG = 1.f;
-    mB = 1.f;
+    mColor[0] = 1.f;
+    mColor[1] = 1.f;
+    mColor[2] = 1.f;
+    mColor[3] = 1.f;
 }
 
 Light::~Light()
@@ -40,16 +44,23 @@ Light::~Light()
 
 void Light::setPosition(float x, float y, float z)
 {
-    mX = x;
-    mY = y;
-    mZ = z;
+    mPosition[0] = x;
+    mPosition[1] = y;
+    mPosition[2] = z;
 }
 
 void Light::setColor(float r, float g, float b)
 {
-    mR = r;
-    mG = g;
-    mB = b;
+    mColor[0] = r;
+    mColor[1] = g;
+    mColor[2] = b;
+}
+
+void Light::setupGL(uint32_t num) const
+{
+    glLightfv(GL_LIGHT0 + num, GL_DIFFUSE, mColor);
+    glLightfv(GL_LIGHT0 + num, GL_SPECULAR, mColor);
+    glLightfv(GL_LIGHT0 + num, GL_POSITION, mPosition);
 }
 
 ////////////////////////////////////////////

@@ -403,6 +403,10 @@ ProgramVertexSetTextureMatrixEnable {
 	param bool enable
 	}
 
+ProgramVertexAddLight {
+	param RsLight light
+	}
+
 LightBegin {
 	}
 

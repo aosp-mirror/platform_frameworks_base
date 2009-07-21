@@ -156,6 +156,7 @@ public class RenderScript {
     native private void nProgramVertexBegin(int inID, int outID);
     native private void nProgramVertexSetType(int slot, int mID);
     native private void nProgramVertexSetTextureMatrixEnable(boolean enable);
+    native private void nProgramVertexAddLight(int id);
     native private int  nProgramVertexCreate();
 
     native private void nLightBegin();
@@ -720,7 +721,6 @@ public class RenderScript {
         public void bindAllocation(int slot, Allocation va) {
             nProgramVertexBindAllocation(mID, slot, va.mID);
         }
-
     }
 
     public void programVertexBegin(Element in, Element out) {
@@ -741,6 +741,10 @@ public class RenderScript {
 
     public void programVertexSetTextureMatrixEnable(boolean enable) {
         nProgramVertexSetTextureMatrixEnable(enable);
+    }
+
+    public void programVertexAddLight(Light l) {
+        nProgramVertexAddLight(l.mID);
     }
 
     public ProgramVertex programVertexCreate() {
