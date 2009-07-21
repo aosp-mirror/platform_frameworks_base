@@ -19,6 +19,7 @@ package android.provider;
 import android.content.Intent;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
+import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
@@ -138,8 +139,8 @@ public final class ContactsContract {
         public static final String PHOTO_ID = "photo_id";
 
         /**
-         * Lookup value that reflects the {@link Groups#MEMBERS_VISIBLE} state
-         * of any {@link GroupMembership} for this aggregate.
+         * Lookup value that reflects the {@link Groups#GROUP_VISIBLE} state of
+         * any {@link GroupMembership} for this aggregate.
          */
         public static final String IN_VISIBLE_GROUP = "in_visible_group";
     }
@@ -166,14 +167,16 @@ public final class ContactsContract {
          */
         public static final Uri CONTENT_SUMMARY_URI = Uri.withAppendedPath(AUTHORITY_URI,
                 "aggregates_summary");
+
         /**
          * The content:// style URI used for "type-to-filter" functionality on the
-         * {@link CONTENT_SUMMARY_URI} URI. The filter string will be used to match
+         * {@link #CONTENT_SUMMARY_URI} URI. The filter string will be used to match
          * various parts of the aggregate name. The filter argument should be passed
          * as an additional path segment after this URI.
          */
         public static final Uri CONTENT_SUMMARY_FILTER_URI = Uri.withAppendedPath(
                 CONTENT_SUMMARY_URI, "filter");
+
         /**
          * The content:// style URI for this table joined with useful data from
          * {@link Data} and {@link Presence}, filtered to include only starred aggregates
@@ -181,9 +184,10 @@ public final class ContactsContract {
          */
         public static final Uri CONTENT_SUMMARY_STREQUENT_URI = Uri.withAppendedPath(
                 CONTENT_SUMMARY_URI, "strequent");
+
         /**
          * The content:// style URI used for "type-to-filter" functionality on the
-         * {@link CONTENT_SUMMARY_STREQUENT_URI} URI. The filter string will be used to match
+         * {@link #CONTENT_SUMMARY_STREQUENT_URI} URI. The filter string will be used to match
          * various parts of the aggregate name. The filter argument should be passed
          * as an additional path segment after this URI.
          */
@@ -192,6 +196,7 @@ public final class ContactsContract {
 
         public static final Uri CONTENT_SUMMARY_GROUP_URI = Uri.withAppendedPath(
                 CONTENT_SUMMARY_URI, "group");
+
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
@@ -247,41 +252,78 @@ public final class ContactsContract {
     }
 
     /**
-     * Constants for the contacts table, which contains the base contact information.
+     * Columns that appear when each row of a table belongs to a specific
+     * account, including sync information that an account may need.
      */
-    public static final class Contacts implements BaseColumns, ContactOptionsColumns {
+    private interface SyncColumns {
         /**
-         * This utility class cannot be instantiated
-         */
-        private Contacts()  {}
-
-        /**
-         * The package name that owns this contact and all of its details. This
-         * package has control over the {@link #IS_RESTRICTED} flag, and can
-         * grant {@link RestrictionExceptions} to other packages.
-         */
-        public static final String PACKAGE = "package";
-
-        /**
-         * Flag indicating that this data entry has been restricted by the owner
-         * {@link #PACKAGE}.
-         */
-        public static final String IS_RESTRICTED = "is_restricted";
-
-        /**
-         * A reference to the name of the account to which this data belongs
+         * The name of the account instance to which this row belongs.
+         * <P>Type: TEXT</P>
          */
         public static final String ACCOUNT_NAME = "account_name";
 
         /**
-         * A reference to the type of the account to which this data belongs
+         * The type of account to which this row belongs, which when paired with
+         * {@link #ACCOUNT_NAME} identifies a specific account.
+         * <P>Type: TEXT</P>
          */
         public static final String ACCOUNT_TYPE = "account_type";
 
         /**
+         * String that uniquely identifies this row to its source account.
+         * <P>Type: TEXT</P>
+         */
+        public static final String SOURCE_ID = "sourceid";
+
+        /**
+         * Version number that is updated whenever this row or its related data
+         * changes.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String VERSION = "version";
+
+        /**
+         * Flag indicating that {@link #VERSION} has changed, and this row needs
+         * to be synchronized by its owning account.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String DIRTY = "dirty";
+
+    }
+
+    private interface ContactsColumns {
+        /**
          * A reference to the {@link Aggregates#_ID} that this data belongs to.
+         * <P>Type: INTEGER</P>
          */
         public static final String AGGREGATE_ID = "aggregate_id";
+
+        /**
+         * Flag indicating that this {@link Contacts} entry and its children has
+         * been restricted to specific platform apps.
+         * <P>Type: INTEGER (boolean)</P>
+         *
+         * @hide until finalized in future platform release
+         */
+        public static final String IS_RESTRICTED = "is_restricted";
+
+        /**
+         * The aggregation mode for this contact.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String AGGREGATION_MODE = "aggregation_mode";
+    }
+
+    /**
+     * Constants for the contacts table, which contains the base contact information.
+     */
+    public static final class Contacts implements BaseColumns, ContactsColumns, SyncColumns,
+            ContactOptionsColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Contacts() {
+        }
 
         /**
          * The content:// style URI for this table
@@ -311,28 +353,6 @@ public final class ContactsContract {
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/person";
 
         /**
-         * A string that uniquely identifies this contact to its source, which is referred to
-         * by the {@link #ACCOUNT_NAME} and {@link #ACCOUNT_TYPE}
-         */
-        public static final String SOURCE_ID = "sourceid";
-
-        /**
-         * An integer that is updated whenever this contact or its data changes.
-         */
-        public static final String VERSION = "version";
-
-        /**
-         * Set to 1 whenever the version changes
-         */
-        public static final String DIRTY = "dirty";
-
-        /**
-         * The aggregation mode for this contact.
-         * <P>Type: INTEGER</P>
-         */
-        public static final String AGGREGATION_MODE = "aggregation_mode";
-
-        /**
          * Aggregation mode: aggregate asynchronously.
          */
         public static final int AGGREGATION_MODE_DEFAULT = 0;
@@ -357,7 +377,8 @@ public final class ContactsContract {
             /**
              * no public constructor since this is a utility class
              */
-            private Data() {}
+            private Data() {
+            }
 
             /**
              * The directory twig for this sub-table
@@ -368,7 +389,14 @@ public final class ContactsContract {
 
     private interface DataColumns {
         /**
-         * The mime-type of the item represented by this row.
+         * The package name to use when creating {@link Resources} objects for
+         * this data row. This value is only designed for use when building user
+         * interfaces, and should not be used to infer the owner.
+         */
+        public static final String RES_PACKAGE = "res_package";
+
+        /**
+         * The MIME type of the item represented by this row.
          */
         public static final String MIMETYPE = "mimetype";
 
@@ -419,6 +447,16 @@ public final class ContactsContract {
         public static final String DATA9 = "data9";
         /** Generic data column, the meaning is {@link #MIMETYPE} specific */
         public static final String DATA10 = "data10";
+        /** Generic data column, the meaning is {@link #MIMETYPE} specific */
+        public static final String DATA11 = "data11";
+        /** Generic data column, the meaning is {@link #MIMETYPE} specific */
+        public static final String DATA12 = "data12";
+        /** Generic data column, the meaning is {@link #MIMETYPE} specific */
+        public static final String DATA13 = "data13";
+        /** Generic data column, the meaning is {@link #MIMETYPE} specific */
+        public static final String DATA14 = "data14";
+        /** Generic data column, the meaning is {@link #MIMETYPE} specific */
+        public static final String DATA15 = "data15";
     }
 
     /**
@@ -445,9 +483,10 @@ public final class ContactsContract {
     }
 
     /**
-     * A table that represents the result of looking up a phone number, for example for caller ID.
-     * The table joins that data row for the phone number with the contact that owns the number.
-     * To perform a lookup you must append the number you want to find to {@link #CONTENT_URI}.
+     * A table that represents the result of looking up a phone number, for
+     * example for caller ID. The table joins that data row for the phone number
+     * with the contact that owns the number. To perform a lookup you must
+     * append the number you want to find to {@link #CONTENT_FILTER_URI}.
      */
     public static final class PhoneLookup implements BaseColumns, DataColumns, AggregatesColumns {
         /**
@@ -474,35 +513,34 @@ public final class ContactsContract {
     private interface PresenceColumns {
         /**
          * Reference to the {@link Aggregates#_ID} this presence references.
+         * <P>Type: INTEGER</P>
          */
         public static final String AGGREGATE_ID = "aggregate_id";
 
         /**
          * Reference to the {@link Data#_ID} entry that owns this presence.
+         * <P>Type: INTEGER</P>
          */
         public static final String DATA_ID = "data_id";
 
         /**
          * The IM service the presence is coming from. Formatted using either
-         * {@link Contacts.ContactMethods#encodePredefinedImProtocol} or
-         * {@link Contacts.ContactMethods#encodeCustomImProtocol}.
-         * <p>
-         * Type: STRING
+         * {@link CommonDataKinds.Im#encodePredefinedImProtocol(int)} or
+         * {@link CommonDataKinds.Im#encodeCustomImProtocol(String)}.
+         * <P>Type: TEXT</P>
          */
         public static final String IM_PROTOCOL = "im_protocol";
 
         /**
          * The IM handle the presence item is for. The handle is scoped to the
          * {@link #IM_PROTOCOL}.
-         * <p>
-         * Type: STRING
+         * <P>Type: TEXT</P>
          */
         public static final String IM_HANDLE = "im_handle";
 
         /**
          * The IM account for the local user that the presence data came from.
-         * <p>
-         * Type: STRING
+         * <P>Type: TEXT</P>
          */
         public static final String IM_ACCOUNT = "im_account";
     }
@@ -573,8 +611,8 @@ public final class ContactsContract {
      */
     public static final class CommonDataKinds {
         /**
-         * The {@link Data#PACKAGE} value for common data that should be shown
-         * using a default style.
+         * The {@link Data#RES_PACKAGE} value for common data that should be
+         * shown using a default style.
          */
         public static final String PACKAGE_COMMON = "common";
 
@@ -583,18 +621,19 @@ public final class ContactsContract {
          */
         private interface BaseCommonColumns {
             /**
-             * The package name that defines this type of data.
+             * The package name to use when creating {@link Resources} objects for
+             * this data row. This value is only designed for use when building user
+             * interfaces, and should not be used to infer the owner.
              */
-            public static final String PACKAGE = "package";
+            public static final String RES_PACKAGE = "res_package";
 
             /**
-             * The mime-type of the item represented by this row.
+             * The MIME type of the item represented by this row.
              */
             public static final String MIMETYPE = "mimetype";
 
             /**
-             * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} that this
-             * data belongs to.
+             * The {@link Contacts#_ID} that this data belongs to.
              */
             public static final String CONTACT_ID = "contact_id";
         }
@@ -636,10 +675,10 @@ public final class ContactsContract {
         /**
          * Parts of the name.
          */
-        public static final class StructuredName {
+        public static final class StructuredName implements BaseCommonColumns {
             private StructuredName() {}
 
-            /** Mime-type used when storing this in data table. */
+            /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/name";
 
             /**
@@ -699,10 +738,10 @@ public final class ContactsContract {
         /**
          * A nickname.
          */
-        public static final class Nickname implements CommonColumns {
+        public static final class Nickname implements CommonColumns, BaseCommonColumns {
             private Nickname() {}
 
-            /** Mime-type used when storing this in data table. */
+            /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/nickname";
 
             public static final int TYPE_DEFAULT = 1;
@@ -723,7 +762,7 @@ public final class ContactsContract {
         public static final class Phone implements BaseCommonColumns, CommonColumns {
             private Phone() {}
 
-            /** Mime-type used when storing this in data table. */
+            /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/phone";
 
             /**
@@ -734,17 +773,17 @@ public final class ContactsContract {
 
             /**
              * The content:// style URI for all data records of the
-             * {@link Phone.CONTENT_ITEM_TYPE} mimetype, combined with the associated contact
-             * and aggregate data.
+             * {@link Phone#CONTENT_ITEM_TYPE} MIME type, combined with the
+             * associated contact and aggregate data.
              */
             public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
                     "phones");
 
             /**
              * The content:// style URI for filtering data records of the
-             * {@link Phone.CONTENT_ITEM_TYPE} mimetype, combined with the associated contact
-             * and aggregate data. The filter argument should be passed
-             * as an additional path segment after this URI.
+             * {@link Phone#CONTENT_ITEM_TYPE} MIME type, combined with the
+             * associated contact and aggregate data. The filter argument should
+             * be passed as an additional path segment after this URI.
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
                     "filter");
@@ -770,7 +809,7 @@ public final class ContactsContract {
         public static final class Email implements BaseCommonColumns, CommonColumns {
             private Email() {}
 
-            /** Mime-type used when storing this in data table. */
+            /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/email";
 
             public static final int TYPE_HOME = 1;
@@ -781,10 +820,11 @@ public final class ContactsContract {
         /**
          * Common data definition for postal addresses.
          */
-        public static final class Postal implements BaseCommonColumns, CommonColumns {
-            private Postal() {}
+        public static final class StructuredPostal implements BaseCommonColumns, CommonColumns {
+            private StructuredPostal() {
+            }
 
-            /** Mime-type used when storing this in data table. */
+            /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/postal-address";
 
             /**
@@ -795,8 +835,7 @@ public final class ContactsContract {
 
             /**
              * The content:// style URI for all data records of the
-             * {@link Postal.CONTENT_ITEM_TYPE} mimetype, combined with the associated contact
-             * and aggregate data.
+             * {@link StructuredPostal#CONTENT_ITEM_TYPE} MIME type.
              */
             public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
                     "postals");
@@ -804,6 +843,95 @@ public final class ContactsContract {
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
+
+            /**
+             * The full, unstructured postal address.
+             * <p>
+             * Type: TEXT
+             */
+            public static final String FORMATTED_ADDRESS = DATA;
+
+            /**
+             * The agent who actually receives the mail. Used in work addresses.
+             * Also for 'in care of' or 'c/o'.
+             * <p>
+             * Type: TEXT
+             */
+            public static final String AGENT = "data4";
+
+            /**
+             * Used in places where houses or buildings have names (and not
+             * necessarily numbers), eg. "The Pillars".
+             * <p>
+             * Type: TEXT
+             */
+            public static final String HOUSENAME = "data5";
+
+            /**
+             * Can be street, avenue, road, etc. This element also includes the
+             * house number and room/apartment/flat/floor number.
+             * <p>
+             * Type: TEXT
+             */
+            public static final String STREET = "data6";
+
+            /**
+             * Covers actual P.O. boxes, drawers, locked bags, etc. This is
+             * usually but not always mutually exclusive with street.
+             * <p>
+             * Type: TEXT
+             */
+            public static final String POBOX = "data7";
+
+            /**
+             * This is used to disambiguate a street address when a city
+             * contains more than one street with the same name, or to specify a
+             * small place whose mail is routed through a larger postal town. In
+             * China it could be a county or a minor city.
+             * <p>
+             * Type: TEXT
+             */
+            public static final String NEIGHBOHOOD = "data8";
+
+            /**
+             * Can be city, village, town, borough, etc. This is the postal town
+             * and not necessarily the place of residence or place of business.
+             * <p>
+             * Type: TEXT
+             */
+            public static final String CITY = "data9";
+
+            /**
+             * Handles administrative districts such as U.S. or U.K. counties
+             * that are not used for mail addressing purposes. Subregion is not
+             * intended for delivery addresses.
+             * <p>
+             * Type: TEXT
+             */
+            public static final String SUBREGION = "data10";
+
+            /**
+             * A state, province, county (in Ireland), Land (in Germany),
+             * departement (in France), etc.
+             * <p>
+             * Type: TEXT
+             */
+            public static final String REGION = "data11";
+
+            /**
+             * StructuredPostal code. Usually country-wide, but sometimes specific to the
+             * city (e.g. "2" in "Dublin 2, Ireland" addresses).
+             * <p>
+             * Type: TEXT
+             */
+            public static final String POSTCODE = "data12";
+
+            /**
+             * The name or code of the country.
+             * <p>
+             * Type: TEXT
+             */
+            public static final String COUNTRY = "data13";
         }
 
        /**
@@ -812,7 +940,7 @@ public final class ContactsContract {
         public static final class Im implements BaseCommonColumns, CommonColumns {
             private Im() {}
 
-            /** Mime-type used when storing this in data table. */
+            /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/im";
 
             public static final int TYPE_HOME = 1;
@@ -872,7 +1000,7 @@ public final class ContactsContract {
         public static final class Organization implements BaseCommonColumns, CommonColumns {
             private Organization() {}
 
-            /** Mime-type used when storing this in data table. */
+            /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/organization";
 
             public static final int TYPE_WORK = 1;
@@ -897,7 +1025,7 @@ public final class ContactsContract {
         public static final class Photo implements BaseCommonColumns {
             private Photo() {}
 
-            /** Mime-type used when storing this in data table. */
+            /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/photo";
 
             /**
@@ -915,7 +1043,7 @@ public final class ContactsContract {
         public static final class Note implements BaseCommonColumns {
             private Note() {}
 
-            /** Mime-type used when storing this in data table. */
+            /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/note";
 
             /**
@@ -931,7 +1059,7 @@ public final class ContactsContract {
         public static final class GroupMembership implements BaseCommonColumns {
             private GroupMembership() {}
 
-            /** Mime-type used when storing this in data table. */
+            /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE =
                     "vnd.android.cursor.item/group_membership";
 
@@ -945,23 +1073,29 @@ public final class ContactsContract {
             /**
              * The sourceid of the group that this group membership refers to.  Exactly one of
              * this or {@link #GROUP_ROW_ID} must be set when inserting a row.
-             * <P>Type: STRING</P>
+             * <P>Type: TEXT</P>
              */
             public static final String GROUP_SOURCE_ID = "group_sourceid";
+        }
+
+        /**
+         * Website related to the contact.
+         */
+        public static final class Website implements BaseCommonColumns {
+            private Website() {}
+
+            /** MIME type used when storing this in data table. */
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/website";
+
+            /**
+             * The website URL string.
+             * <P>Type: TEXT</P>
+             */
+            public static final String URL = "data1";
         }
     }
 
     public interface GroupsColumns {
-        /**
-         * The package name that owns this group.
-         */
-        public static final String PACKAGE = "package";
-
-        /**
-         * A unique identifier for the package that owns this group.
-         */
-        public static final String PACKAGE_ID = "package_id";
-
         /**
          * The display title of this group.
          * <p>
@@ -970,12 +1104,18 @@ public final class ContactsContract {
         public static final String TITLE = "title";
 
         /**
-         * The display title of this group to load as a resource from
-         * {@link #PACKAGE}, which may be localized.
-         * <p>
-         * Type: TEXT
+         * The package name to use when creating {@link Resources} objects for
+         * this group. This value is only designed for use when building user
+         * interfaces, and should not be used to infer the owner.
          */
-        public static final String TITLE_RESOURCE = "title_res";
+        public static final String RES_PACKAGE = "res_package";
+
+        /**
+         * The display title of this group to load as a resource from
+         * {@link #RES_PACKAGE}, which may be localized.
+         * <P>Type: TEXT</P>
+         */
+        public static final String TITLE_RES = "title_res";
 
         /**
          * The total number of {@link Aggregates} that have
@@ -997,32 +1137,6 @@ public final class ContactsContract {
         public static final String SUMMARY_WITH_PHONES = "summ_phones";
 
         /**
-         * A reference to the name of the account to which this data belongs
-         */
-        public static final String ACCOUNT_NAME = "account_name";
-
-        /**
-         * A reference to the type of the account to which this data belongs
-         */
-        public static final String ACCOUNT_TYPE = "account_type";
-
-        /**
-         * A string that uniquely identifies this contact to its source, which is referred to
-         * by the {@link #ACCOUNT_NAME} and {@link #ACCOUNT_TYPE}
-         */
-        public static final String SOURCE_ID = "sourceid";
-
-        /**
-         * An integer that is updated whenever this contact or its data changes.
-         */
-        public static final String VERSION = "version";
-
-        /**
-         * Set to 1 whenever the version changes
-         */
-        public static final String DIRTY = "dirty";
-
-        /**
          * Flag indicating if the contacts belonging to this group should be
          * visible in any user interface.
          * <p>
@@ -1034,11 +1148,12 @@ public final class ContactsContract {
     /**
      * Constants for the groups table.
      */
-    public static final class Groups implements BaseColumns, GroupsColumns {
+    public static final class Groups implements BaseColumns, GroupsColumns, SyncColumns {
         /**
          * This utility class cannot be instantiated
          */
-        private Groups()  {}
+        private Groups() {
+        }
 
         /**
          * The content:// style URI for this table
@@ -1125,53 +1240,6 @@ public final class ContactsContract {
          * contact that the rule applies to.
          */
         public static final String CONTACT_ID = "contact_id";
-    }
-
-    private interface RestrictionExceptionsColumns {
-        /**
-         * Package name of a specific data provider, which will be matched
-         * against {@link Data#PACKAGE}.
-         * <p>
-         * Type: STRING
-         */
-        public static final String PACKAGE_PROVIDER = "package_provider";
-
-        /**
-         * Package name of a specific data client, which will be matched against
-         * the incoming {@link android.os.Binder#getCallingUid()} to decide if
-         * the caller can access values with {@link Data#IS_RESTRICTED} flags.
-         * <p>
-         * Type: STRING
-         */
-        public static final String PACKAGE_CLIENT = "package_client";
-
-        /**
-         * Flag indicating if {@link #PACKAGE_PROVIDER} allows
-         * {@link #PACKAGE_CLIENT} to access restricted {@link Data} rows.
-         * <p>
-         * Type: INTEGER
-         */
-        public static final String ALLOW_ACCESS = "allow_access";
-    }
-
-    /**
-     * Constants for {@link Data} restriction exceptions. Sync adapters who
-     * insert restricted data can use this table to specify exceptions about
-     * which additional packages can access that restricted data.You can only
-     * modify rules for a {@link RestrictionExceptionsColumns#PACKAGE_PROVIDER}
-     * that your {@link android.os.Binder#getCallingUid()} owns.
-     */
-    public static final class RestrictionExceptions implements RestrictionExceptionsColumns {
-        /**
-         * This utility class cannot be instantiated
-         */
-        private RestrictionExceptions() {}
-
-        /**
-         * The content:// style URI for this table
-         */
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI,
-                "restriction_exceptions");
     }
 
     /**
@@ -1500,8 +1568,8 @@ public final class ContactsContract {
 
             /**
              * The extra field for the IM protocol
-             * <P>Type: the result of {@link Contacts.ContactMethods#encodePredefinedImProtocol}
-             * or {@link Contacts.ContactMethods#encodeCustomImProtocol}.</P>
+             * <P>Type: the result of {@link CommonDataKinds.Im#encodePredefinedImProtocol(int)}
+             * or {@link CommonDataKinds.Im#encodeCustomImProtocol(String)}.</P>
              */
             public static final String IM_PROTOCOL = "im_protocol";
 

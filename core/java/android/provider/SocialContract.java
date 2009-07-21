@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.ContactsContract.Aggregates;
@@ -36,11 +37,13 @@ public class SocialContract {
 
     private interface ActivitiesColumns {
         /**
-         * The package name that owns this social activity.
+         * The package name to use when creating {@link Resources} objects for
+         * this data row. This value is only designed for use when building user
+         * interfaces, and should not be used to infer the owner.
          * <p>
          * Type: TEXT
          */
-        public static final String PACKAGE = "package";
+        public static final String RES_PACKAGE = "res_package";
 
         /**
          * The mime-type of this social activity.
