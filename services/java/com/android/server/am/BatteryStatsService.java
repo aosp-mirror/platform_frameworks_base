@@ -41,7 +41,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     
     final BatteryStatsImpl mStats;
     Context mContext;
-    
+
     BatteryStatsService(String filename) {
         mStats = new BatteryStatsImpl(filename);
     }

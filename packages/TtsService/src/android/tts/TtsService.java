@@ -546,7 +546,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     if (!synthAvailable) {
                         Thread.sleep(100);
                         Thread synth = (new Thread(new SynthThread()));
-                        synth.setPriority(Thread.MIN_PRIORITY);
+                        //synth.setPriority(Thread.MIN_PRIORITY);
                         synth.start();
                         return;
                     }
@@ -608,7 +608,7 @@ public class TtsService extends Service implements OnCompletionListener {
             }
         }
         Thread synth = (new Thread(new SynthThread()));
-        synth.setPriority(Thread.MIN_PRIORITY);
+        //synth.setPriority(Thread.MIN_PRIORITY);
         synth.start();
     }
 
@@ -623,7 +623,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     if (!synthAvailable) {
                         Thread.sleep(100);
                         Thread synth = (new Thread(new SynthThread()));
-                        synth.setPriority(Thread.MIN_PRIORITY);
+                        //synth.setPriority(Thread.MIN_PRIORITY);
                         synth.start();
                         return;
                     }
@@ -677,7 +677,7 @@ public class TtsService extends Service implements OnCompletionListener {
             }
         }
         Thread synth = (new Thread(new SynthThread()));
-        synth.setPriority(Thread.MIN_PRIORITY);
+        //synth.setPriority(Thread.MIN_PRIORITY);
         synth.start();
     }
 

@@ -37,4 +37,5 @@ interface ISearchManager {
             ISearchManagerCallback searchManagerCallback,
             int ident);
     void stopSearch();
+    boolean isVisible();
 }

@@ -354,7 +354,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             }
             show();
         }
-
         updateUI();
         
         return true;
@@ -490,6 +489,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     private void updateUI() {
         if (mSearchable != null) {
+            mDecor.setVisibility(View.VISIBLE);
             updateSearchAutoComplete();
             updateSearchButton();
             updateSearchAppIcon();
@@ -994,7 +994,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     };
 
     @Override
-    public void dismiss() {
+    public void hide() {
         if (!isShowing()) return;
 
         // We made sure the IME was displayed, so also make sure it is closed
@@ -1005,10 +1005,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             imm.hideSoftInputFromWindow(
                     getWindow().getDecorView().getWindowToken(), 0);
         }
-        
-        super.dismiss();
+
+        super.hide();
     }
-    
+
     /**
      * React to the user typing while in the suggestions list. First, check for action
      * keys. If not handled, try refocusing regular characters into the EditText. 
@@ -1234,8 +1234,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
 
     /**
-     * Launches an intent and dismisses the search dialog (unless the intent
-     * is one of the special intents that modifies the state of the search dialog).
+     * Launches an intent, including any special intent handling.  Doesn't dismiss the dialog
+     * since that will be handled in {@link SearchDialogWrapper#performActivityResuming}
      */
     private void launchIntent(Intent intent) {
         if (intent == null) {
@@ -1244,8 +1244,15 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (handleSpecialIntent(intent)){
             return;
         }
-        dismiss();
+        Log.d(LOG_TAG, "launching " + intent);
         getContext().startActivity(intent);
+
+        // in global search mode, SearchDialogWrapper#performActivityResuming will handle hiding
+        // the dialog when the next activity starts, but for in-app search, we still need to
+        // dismiss the dialog.
+        if (!mGlobalSearchMode) {
+            dismiss();
+        }
     }
     
     /**

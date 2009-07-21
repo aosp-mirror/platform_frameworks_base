@@ -1296,11 +1296,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             }
         }
 
-        // Max height available on the screen for a popup. If this AutoCompleteTextView has
-        // the dropDownAlwaysVisible attribute, and the input method is not currently required,
-        // we then we ask for the height ignoring any bottom decorations like the input method.
-        // Otherwise we respect the input method.
-        boolean ignoreBottomDecorations = mDropDownAlwaysVisible &&
+        // Max height available on the screen for a popup.
+        boolean ignoreBottomDecorations =
                 mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED;
         final int maxHeight = mPopup.getMaxAvailableHeight(
                 getDropDownAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);

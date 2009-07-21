@@ -27,6 +27,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -1857,7 +1858,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         // is running.
         if (!mDisplayFrozen) {
             Animation a;
-            if ((lp.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
+            if (lp != null && (lp.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
                 a = new FadeInOutAnimation(enter);
                 if (DEBUG_ANIM) Log.v(TAG,
                         "applying FadeInOutAnimation for a window in compatibility mode");
@@ -5871,7 +5872,9 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
             if ((mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
                 container.intersect(mCompatibleScreenFrame);
-                display.intersect(mCompatibleScreenFrame);
+                if ((mAttrs.flags & FLAG_LAYOUT_NO_LIMITS) == 0) {
+                    display.intersect(mCompatibleScreenFrame);
+                }
             }
 
             final int pw = container.right - container.left;
@@ -6588,12 +6591,17 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 return false;
             }
             final Rect frame = shownFrame ? mShownFrame : mFrame;
-            if (frame.left <= 0 && frame.top <= 0
-                    && frame.right >= screenWidth
-                    && frame.bottom >= screenHeight) {
-                return true;
+
+            if ((mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
+                return frame.left <= mCompatibleScreenFrame.left &&
+                        frame.top <= mCompatibleScreenFrame.top &&
+                        frame.right >= mCompatibleScreenFrame.right &&
+                        frame.bottom >= mCompatibleScreenFrame.bottom;
+            } else {
+                return frame.left <= 0 && frame.top <= 0
+                        && frame.right >= screenWidth
+                        && frame.bottom >= screenHeight;
             }
-            return false;
         }
 
         /**
@@ -6610,16 +6618,13 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                  (mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0 &&
                  // only if it's visible
                  mHasDrawn && mViewVisibility == View.VISIBLE &&
-                 // and only if the application wanted to fill the screen
-                 mAttrs.width == mAttrs.FILL_PARENT &&
-                 mAttrs.height == mAttrs.FILL_PARENT &&
-                 // and only if the window is not hidden
-                 mFrame.left == mCompatibleScreenFrame.left &&
+                 // and only if the application fills the compatible screen
+                 mFrame.left <= mCompatibleScreenFrame.left &&
+                 mFrame.top <= mCompatibleScreenFrame.top &&
+                 mFrame.right >= mCompatibleScreenFrame.right &&
+                 mFrame.bottom >= mCompatibleScreenFrame.bottom &&
                  // and starting window do not need background filler
-                 mAttrs.type != mAttrs.TYPE_APPLICATION_STARTING &&
-                 // and only if the screen is bigger
-                 ((mFrame.right - mFrame.right) < screenWidth ||
-                         (mFrame.bottom - mFrame.top) < screenHeight);
+                 mAttrs.type != mAttrs.TYPE_APPLICATION_STARTING;
         }
 
         boolean isFullscreen(int screenWidth, int screenHeight) {

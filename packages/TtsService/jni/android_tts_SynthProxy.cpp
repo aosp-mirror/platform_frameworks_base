@@ -59,6 +59,9 @@ struct afterSynthData_t {
 // ----------------------------------------------------------------------------
 static fields_t javaTTSFields;
 
+// TODO move to synth member once we have multiple simultaneous engines running
+static Mutex engineMutex;
+
 // ----------------------------------------------------------------------------
 class SynthProxyJniStorage {
     public :
@@ -330,6 +333,8 @@ android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
         return result;
     }
 
+    Mutex::Autolock l(engineMutex);
+
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     const char *langNativeString = env->GetStringUTFChars(language, 0);
     const char *countryNativeString = env->GetStringUTFChars(country, 0);
@@ -389,6 +394,8 @@ android_tts_SynthProxy_setSpeechRate(JNIEnv *env, jobject thiz, jint jniData,
     char buffer [bufSize];
     sprintf(buffer, "%d", speechRate);
 
+    Mutex::Autolock l(engineMutex);
+
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     LOGI("setting speech rate to %d", speechRate);
 
@@ -410,6 +417,8 @@ android_tts_SynthProxy_setPitch(JNIEnv *env, jobject thiz, jint jniData,
         LOGE("android_tts_SynthProxy_setPitch(): invalid JNI data");
         return result;
     }
+
+    Mutex::Autolock l(engineMutex);
 
     int bufSize = 10;
     char buffer [bufSize];
@@ -442,6 +451,8 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
         LOGE("android_tts_SynthProxy_synthesizeToFile(): invalid engine handle");
         return result;
     }
+
+    Mutex::Autolock l(engineMutex);
 
     // Retrieve audio parameters before writing the file header
     AudioSystem::audio_format encoding = DEFAULT_TTS_FORMAT;
@@ -545,10 +556,11 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
         return result;
     }
 
+    Mutex::Autolock l(engineMutex);
+
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
 
     if (pSynthData->mAudioOut) {
-        pSynthData->mAudioOut->stop();
         pSynthData->mAudioOut->start();
     }
 
@@ -599,6 +611,8 @@ android_tts_SynthProxy_shutdown(JNIEnv *env, jobject thiz, jint jniData)
         LOGE("android_tts_SynthProxy_shutdown(): invalid JNI data");
         return;
     }
+
+    Mutex::Autolock l(engineMutex);
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     if (pSynthData->mNativeSynthInterface) {

@@ -508,6 +508,19 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getBatteryUptime(long curTime);
 
     /**
+     * @deprecated use getRadioDataUptime
+     */
+    public long getRadioDataUptimeMs() {
+        return getRadioDataUptime() / 1000;
+    }
+
+    /**
+     * Returns the time that the radio was on for data transfers.
+     * @return the uptime in microseconds while unplugged
+     */
+    public abstract long getRadioDataUptime();
+
+    /**
      * Returns the current battery realtime in microseconds.
      *
      * @param curTime the amount of elapsed realtime in microseconds.
@@ -1128,7 +1141,14 @@ public abstract class BatteryStats implements Parcelable {
         }
         if (!didOne) sb.append("No activity");
         pw.println(sb.toString());
-        
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  Radio data uptime when unplugged: ");
+        sb.append(getRadioDataUptime() / 1000);
+        sb.append(" ms");
+        pw.println(sb.toString());
+
         sb.setLength(0);
         sb.append(prefix);
                 sb.append("  Wifi on: "); formatTimeMs(sb, wifiOnTime / 1000);

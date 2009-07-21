@@ -1188,8 +1188,6 @@ public class SearchManager
     /**
      * Intent extra data key: This key will be used for the extra populated by the
      * {@link #SUGGEST_COLUMN_INTENT_EXTRA_DATA} column.
-     *
-     * {@hide}
      */
     public final static String EXTRA_DATA_KEY = "intent_extra_data_key";
 
@@ -1269,16 +1267,12 @@ public class SearchManager
      * result indicates the shortcut refers to a no longer valid sugggestion.
      *
      * @see #SUGGEST_COLUMN_SHORTCUT_ID
-     * 
-     * @hide pending API council approval
      */
     public final static String SUGGEST_URI_PATH_SHORTCUT = "search_suggest_shortcut";
     
     /**
      * MIME type for shortcut validation.  You'll use this in your suggestions content provider
      * in the getType() function.
-     *
-     * @hide pending API council approval
      */
     public final static String SHORTCUT_MIME_TYPE = 
             "vnd.android.cursor.item/vnd.android.search.suggest";
@@ -1389,9 +1383,7 @@ public class SearchManager
      * this element exists at the given row, this is the data that will be used when
      * forming the suggestion's intent. If not provided, the Intent's extra data field will be null.
      * This column allows suggestions to provide additional arbitrary data which will be included as
-     * an extra under the key EXTRA_DATA_KEY.
-     *
-     * @hide Pending API council approval.
+     * an extra under the key {@link #EXTRA_DATA_KEY}.
      */
     public final static String SUGGEST_COLUMN_INTENT_EXTRA_DATA = "suggest_intent_extra_data";
     /**
@@ -1425,8 +1417,6 @@ public class SearchManager
      * {@link #SUGGEST_NEVER_MAKE_SHORTCUT}, the result will not be stored as a shortcut.
      * Otherwise, the shortcut id will be used to check back for validation via
      * {@link #SUGGEST_URI_PATH_SHORTCUT}.
-     *
-     * @hide Pending API council approval.
      */
     public final static String SUGGEST_COLUMN_SHORTCUT_ID = "suggest_shortcut_id";
 
@@ -1443,8 +1433,6 @@ public class SearchManager
      * Column name for suggestions cursor. <i>Optional.</i> This column is used to specify
      * that a spinner should be shown in lieu of an icon2 while the shortcut of this suggestion
      * is being refreshed.
-     * 
-     * @hide Pending API council approval.
      */
     public final static String SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING =
             "suggest_spinner_while_refreshing";
@@ -1452,8 +1440,6 @@ public class SearchManager
     /**
      * Column value for suggestion column {@link #SUGGEST_COLUMN_SHORTCUT_ID} when a suggestion
      * should not be stored as a shortcut in global search.
-     *
-     * @hide Pending API council approval.
      */
     public final static String SUGGEST_NEVER_MAKE_SHORTCUT = "_-1";
 
@@ -1500,8 +1486,6 @@ public class SearchManager
      * Intent action for starting a web search provider's settings activity.
      * Web search providers should handle this intent if they have provider-specific
      * settings to implement.
-     * 
-     * @hide Pending API council approval.
      */
     public final static String INTENT_ACTION_WEB_SEARCH_SETTINGS
             = "android.search.action.WEB_SEARCH_SETTINGS";
@@ -1510,11 +1494,17 @@ public class SearchManager
      * Intent action broadcasted to inform that the searchables list or default have changed.
      * Components should handle this intent if they cache any searchable data and wish to stay
      * up to date on changes.
-     *
-     * @hide Pending API council approval.
      */
     public final static String INTENT_ACTION_SEARCHABLES_CHANGED
             = "android.search.action.SEARCHABLES_CHANGED";
+    
+    /**
+     * Intent action broadcasted to inform that the search settings have changed in some way.
+     * Either searchables have been enabled or disabled, or a different web search provider
+     * has been chosen.
+     */
+    public final static String INTENT_ACTION_SEARCH_SETTINGS_CHANGED
+            = "android.search.action.SETTINGS_CHANGED";
 
     /**
      * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
@@ -1534,7 +1524,6 @@ public class SearchManager
     private int mIdent;
     
     // package private since they are used by the inner class SearchManagerCallback
-    /* package */ boolean mIsShowing = false;
     /* package */ final Handler mHandler;
     /* package */ OnDismissListener mDismissListener = null;
     /* package */ OnCancelListener mCancelListener = null;
@@ -1600,12 +1589,9 @@ public class SearchManager
                             ComponentName launchActivity,
                             Bundle appSearchData,
                             boolean globalSearch) {
-        if (DBG) debug("startSearch(), mIsShowing=" + mIsShowing);
-        if (mIsShowing) return;
         if (mIdent == 0) throw new IllegalArgumentException(
                 "Called from outside of an Activity context");
         try {
-            mIsShowing = true;
             // activate the search manager and start it up!
             mService.startSearch(initialQuery, selectInitialQuery, launchActivity, appSearchData,
                     globalSearch, mSearchManagerCallback, mIdent);
@@ -1626,15 +1612,10 @@ public class SearchManager
      * @see #startSearch
      */
     public void stopSearch() {
-        if (DBG) debug("stopSearch(), mIsShowing=" + mIsShowing);
-        if (!mIsShowing) return;
+        if (DBG) debug("stopSearch()");
         try {
             mService.stopSearch();
-            // onDismiss will also clear this, but we do it here too since onDismiss() is
-            // called asynchronously.
-            mIsShowing = false;
         } catch (RemoteException ex) {
-            Log.e(TAG, "stopSearch() failed: " + ex);
         }
     }
 
@@ -1648,8 +1629,13 @@ public class SearchManager
      * @hide
      */
     public boolean isVisible() {
-        if (DBG) debug("isVisible(), mIsShowing=" + mIsShowing);
-        return mIsShowing;
+        if (DBG) debug("isVisible()");
+        try {
+            return mService.isVisible();
+        } catch (RemoteException e) {
+            Log.e(TAG, "isVisible() failed: " + e);
+            return false;
+        }
     }
 
     /**
@@ -1701,7 +1687,6 @@ public class SearchManager
         private final Runnable mFireOnDismiss = new Runnable() {
             public void run() {
                 if (DBG) debug("mFireOnDismiss");
-                mIsShowing = false;
                 if (mDismissListener != null) {
                     mDismissListener.onDismiss();
                 }
@@ -1711,7 +1696,6 @@ public class SearchManager
         private final Runnable mFireOnCancel = new Runnable() {
             public void run() {
                 if (DBG) debug("mFireOnCancel");
-                // doesn't need to clear mIsShowing since onDismiss() always gets called too
                 if (mCancelListener != null) {
                     mCancelListener.onCancel();
                 }

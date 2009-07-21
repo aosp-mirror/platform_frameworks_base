@@ -238,4 +238,8 @@ public class SearchManagerService extends ISearchManager.Stub {
         getSearchDialog().stopSearch();
     }
 
+    public boolean isVisible() {
+        return mSearchDialog != null && mSearchDialog.isVisible();
+    }
+
 }
