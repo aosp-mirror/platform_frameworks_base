@@ -399,7 +399,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     public void disableCompatibilityMode() {
-        flags |= FLAG_SUPPORTS_LARGE_SCREENS;
+        flags |= (FLAG_SUPPORTS_LARGE_SCREENS | FLAG_SUPPORTS_NORMAL_SCREENS |
+                FLAG_SUPPORTS_SMALL_SCREENS);
         supportsDensities = ANY_DENSITIES_ARRAY;
     }
 }
