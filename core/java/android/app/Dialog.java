@@ -788,6 +788,11 @@ public class Dialog implements DialogInterface, Window.Callback,
         final SearchManager searchManager = (SearchManager) mContext
                 .getSystemService(Context.SEARCH_SERVICE);
 
+        // can't start search without an associated activity (e.g a system dialog)
+        if (!searchManager.hasIdent()) {
+            return false;
+        }
+
         // associate search with owner activity if possible (otherwise it will default to
         // global search).
         final ComponentName appName = mOwnerActivity == null ? null
