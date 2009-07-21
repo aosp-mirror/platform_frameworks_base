@@ -174,6 +174,7 @@ public class TtsService extends Service implements OnCompletionListener {
         cleanUpPlayer();
 
         sNativeSynth.shutdown();
+        sNativeSynth = null;
 
         // Unregister all callbacks.
         mCallbacks.kill();
