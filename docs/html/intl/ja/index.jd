@@ -11,19 +11,17 @@ home=true
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
-                                <img src="/assets/images/home/IO-logo.png" alt="Google I/O Developer Conference 2009" width="242px" />
-                                <div id="announcement" style="width:270px">
-                                  <p>Google I/O は、サンフランシスコの Moscone Center で 5 月 27～28 日に開催された開発者会議です。このイベントに参加できなかった方は、各アンドロイド向けセッションを、YouTube ビデオ資料で体験する事が可能です。</p>
-                                  <p><a href="{@docRoot}videos/index.html">セッションを参照してください &raquo;</a></p>
+                                <img src="/assets/images/home/android_adc.png" alt="Android Developer Challenge 2" width="232px" />
+                                <div id="announcement" style="width:275px">
+                                  <p>第2Android Developer Challengeが、遂に登場しました！このアプリケーション開発コンテストでは、Androidのユーザなら誰でも簡単に参加でき、一等の賞金は$250,000 です。登録の締切日は8月31日になります。</p>
+                                  <p><a href="http://code.google.com/android/adc/">Android  Developer Challengeについて詳しくはこちら &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->  
                         </div><!-- end topAnnouncement -->
-                        <div id="carousel">
-                            <div id="carouselMain">
-                                <div id="bulletinImg"></div>
-                                <div id="bulletinDesc"></div>
-                            </div>
+                        <div id="carouselMain" style="height:210px"> <!-- this height can be adjusted based on the content height -->
+                        </div>
                             <div class="clearer"></div>
+                        <div id="carouselWheel">
                             <div class="app-list-container" align="center"> 
                                 <a href="javascript:{}" id="arrow-left" onclick="" class="arrow-left-off"></a>
                                 <div id="list-clip">
@@ -31,10 +29,10 @@ home=true
                                       <!-- populated by buildCarousel() -->
                                     </div>
                                 </div><!-- end list-clip -->
-                                <a href="javascript:page_right()" id="arrow-right" onclick="" class="arrow-right-off"></a>
+                                <a href="javascript:{ page_right(); }" id="arrow-right" onclick="" class="arrow-right-on"></a>
                                 <div class="clearer"></div>
                             </div><!-- end app-list container -->
-                        </div><!-- end carousel -->
+                        </div><!-- end carouselWheel -->
                     </div><!-- end homeMiddle -->
 
                     <div style="clear:both">&nbsp;</div>
@@ -124,6 +122,15 @@ home=true
       'img':"sdk-large.png",
       'title':"Android 1.5 SDK",
       'desc': "<p>Android 1.5 SDK の最新バージョンが公開されました。このリリースには Android 1.5 用の API、最新版デベロッパーツール、複数プラットフォーム(バージョン)サポート、そして Google API のアドオンが含まれています。</p><p><a href='{@docRoot}sdk/1.5_r3/index.html'>Android 1.5 SDK をダウンロード &raquo;</a></p>"
+    },
+    
+    'io': {
+      'layout':"imgLeft",
+      'icon':"io-small.png",
+      'name':"Google I/O",
+      'img':"io-large.png",
+      'title':"Google I/O Developer Conference",
+      'desc': "<p>Google I/O は、サンフランシスコの Moscone Center で 5 月 27～28 日に開催された開発者会議です。このイベントに参加できなかった方は、各アンドロイド向けセッションを、YouTube ビデオ資料で体験する事が可能<nobr>です</nobr>。</p><p><a href='{@docRoot}videos/index.html'>セッションを参照してください &raquo;</a></p>"
     },
 
     'mapskey': {
