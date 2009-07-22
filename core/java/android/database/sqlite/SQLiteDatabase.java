@@ -1412,8 +1412,9 @@ public class SQLiteDatabase extends SQLiteClosable {
         StringBuilder sql = new StringBuilder(120);
         sql.append("UPDATE ");
         if (algorithm != null) {
-            sql.append(" OR ");
+            sql.append("OR ");
             sql.append(algorithm.value());
+            sql.append(" ");
         }
         
         sql.append(table);
