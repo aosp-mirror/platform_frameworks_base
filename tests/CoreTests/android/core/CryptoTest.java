@@ -22,7 +22,6 @@ import junit.framework.TestCase;
 import org.apache.harmony.xnet.provider.jsse.OpenSSLMessageDigest;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.ExtendedDigest;
-import org.bouncycastle.crypto.digests.MD2Digest;
 import org.bouncycastle.crypto.digests.MD4Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
@@ -92,16 +91,6 @@ public class CryptoTest extends TestCase {
         android.util.Log.d("CryptoTest", "Time for " + ITERATIONS + " x new hash processing: " + newTime + " ms");
         
         // Assert.assertTrue("New hash should be faster", newTime < oldTime);
-    }
-
-    /**
-     * Tests the MD2 implementation.
-     */
-    @LargeTest
-    public void testMD2() {
-        Digest oldDigest = new MD2Digest();
-        Digest newDigest = OpenSSLMessageDigest.getInstance("MD2");
-        doTestMessageDigest(oldDigest, newDigest);
     }
     
     /**
