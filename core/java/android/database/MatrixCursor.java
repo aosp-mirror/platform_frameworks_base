@@ -214,53 +214,64 @@ public class MatrixCursor extends AbstractCursor {
 
     // AbstractCursor implementation.
 
+    @Override
     public int getCount() {
         return rowCount;
     }
 
+    @Override
     public String[] getColumnNames() {
         return columnNames;
     }
 
+    @Override
     public String getString(int column) {
-        return String.valueOf(get(column));
+        Object value = get(column);
+        if (value == null) return null;
+        return value.toString();
     }
 
+    @Override
     public short getShort(int column) {
         Object value = get(column);
-        return (value instanceof String)
-                ? Short.valueOf((String) value)
-                : ((Number) value).shortValue();
+        if (value == null) return 0;
+        if (value instanceof Number) return ((Number) value).shortValue();
+        return Short.parseShort(value.toString());
     }
 
+    @Override
     public int getInt(int column) {
         Object value = get(column);
-        return (value instanceof String)
-                ? Integer.valueOf((String) value)
-                : ((Number) value).intValue();
+        if (value == null) return 0;
+        if (value instanceof Number) return ((Number) value).intValue();
+        return Integer.parseInt(value.toString());
     }
 
+    @Override
     public long getLong(int column) {
         Object value = get(column);
-        return (value instanceof String)
-                ? Long.valueOf((String) value)
-                : ((Number) value).longValue();
+        if (value == null) return 0;
+        if (value instanceof Number) return ((Number) value).longValue();
+        return Long.parseLong(value.toString());
     }
 
+    @Override
     public float getFloat(int column) {
         Object value = get(column);
-        return (value instanceof String)
-                ? Float.valueOf((String) value)
-                : ((Number) value).floatValue();
+        if (value == null) return 0.0f;
+        if (value instanceof Number) return ((Number) value).floatValue();
+        return Float.parseFloat(value.toString());
     }
 
+    @Override
     public double getDouble(int column) {
         Object value = get(column);
-        return (value instanceof String)
-                ? Double.valueOf((String) value)
-                : ((Number) value).doubleValue();
+        if (value == null) return 0.0d;
+        if (value instanceof Number) return ((Number) value).doubleValue();
+        return Double.parseDouble(value.toString());
     }
 
+    @Override
     public boolean isNull(int column) {
         return get(column) == null;
     }
