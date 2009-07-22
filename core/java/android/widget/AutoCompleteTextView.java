@@ -205,11 +205,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * Private hook into the on click event, dispatched from {@link PassThroughClickListener}
      */
     private void onClickImpl() {
-        // if drop down should always visible, bring it back in front of the soft
-        // keyboard when the user touches the text field
-        if (mDropDownAlwaysVisible
-                && mPopup.isShowing()
-                && mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED) {
+        // If the dropdown is showing, bring it back in front of the soft
+        // keyboard when the user touches the text field.
+        if (mPopup.isShowing() &&
+                mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED) {
             ensureImeVisible();
         }
     }
