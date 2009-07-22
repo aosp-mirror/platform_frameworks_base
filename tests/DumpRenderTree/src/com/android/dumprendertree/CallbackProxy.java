@@ -341,7 +341,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     }
 
     public void clearAllDatabases() {
-        WebStorage.getInstance().deleteAllDatabases();
+        WebStorage.getInstance().deleteAllData();
     }
 
     public void setDatabaseQuota(long quota) {
