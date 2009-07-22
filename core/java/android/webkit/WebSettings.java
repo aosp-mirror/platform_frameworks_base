@@ -181,6 +181,7 @@ public class WebSettings {
     private boolean         mDatabaseEnabled = false;
     private String          mAppCachePath = "";
     private boolean         mAppCacheEnabled = false;
+    private long            mAppCacheMaxSize = Long.MAX_VALUE;
     private boolean         mDomStorageEnabled = false;
 
     // Class to handle messages before WebCore is ready.
@@ -991,6 +992,19 @@ public class WebSettings {
     public synchronized void setAppCachePath(String appCachePath) {
         if (appCachePath != null && !appCachePath.equals(mAppCachePath)) {
             mAppCachePath = appCachePath;
+            postSync();
+        }
+    }
+
+    /**
+     * Set the maximum size for the Application Caches content.
+     * @param appCacheMaxSize the maximum size in bytes.
+     *
+     * @hide pending api council approval
+     */
+    public synchronized void setAppCacheMaxSize(long appCacheMaxSize) {
+        if (appCacheMaxSize != mAppCacheMaxSize) {
+            mAppCacheMaxSize = appCacheMaxSize;
             postSync();
         }
     }
