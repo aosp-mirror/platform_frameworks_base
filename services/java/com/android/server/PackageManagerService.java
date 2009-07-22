@@ -262,7 +262,6 @@ class PackageManagerService extends IPackageManager.Stub {
     final ResolveInfo mResolveInfo = new ResolveInfo();
     ComponentName mResolveComponentName;
     PackageParser.Package mPlatformPackage;
-    private boolean mCompatibilityModeEnabled = true;
 
     public static final IPackageManager main(Context context, boolean factoryTest) {
         PackageManagerService m = new PackageManagerService(context, factoryTest);
@@ -765,7 +764,7 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
             if (Config.LOGV) Log.v(
-                TAG, "getApplicationInfo " + packageName
+                TAG, "getPackageInfo " + packageName
                 + ": " + p);
             if (p != null) {
                 return generatePackageInfo(p, flags);
@@ -796,7 +795,7 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
             if (Config.LOGV) Log.v(
-                TAG, "getApplicationInfo " + packageName
+                TAG, "getPackageGids" + packageName
                 + ": " + p);
             if (p != null) {
                 final PackageSetting ps = (PackageSetting)p.mExtras;
@@ -894,11 +893,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     + ": " + p);
             if (p != null) {
                 // Note: isEnabledLP() does not apply here - always return info
-                ApplicationInfo appInfo = PackageParser.generateApplicationInfo(p, flags);
-                if (!mCompatibilityModeEnabled) {
-                    appInfo.disableCompatibilityMode();
-                }
-                return appInfo;
+                return PackageParser.generateApplicationInfo(p, flags);
             }
             if ("android".equals(packageName)||"system".equals(packageName)) {
                 return mAndroidApplication;
@@ -4817,11 +4812,12 @@ class PackageManagerService extends IPackageManager.Stub {
         mSystemReady = true;
 
         // Read the compatibilty setting when the system is ready.
-        mCompatibilityModeEnabled = android.provider.Settings.System.getInt(
+        boolean compatibilityModeEnabled = android.provider.Settings.System.getInt(
                 mContext.getContentResolver(),
                 android.provider.Settings.System.COMPATIBILITY_MODE, 1) == 1;
+        PackageParser.setCompatibilityModeEnabled(compatibilityModeEnabled);
         if (DEBUG_SETTINGS) {
-            Log.d(TAG, "compatibility mode:" + mCompatibilityModeEnabled);
+            Log.d(TAG, "compatibility mode:" + compatibilityModeEnabled);
         }
     }
 
@@ -4919,6 +4915,10 @@ class PackageManagerService extends IPackageManager.Stub {
                         if ((ps.pkg.applicationInfo.flags & 
                                 ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {
                             screens.add("small,");
+                        }
+                        if ((ps.pkg.applicationInfo.flags & 
+                                ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
+                            screens.add("resizeable,");
                         }
                         pw.print("    supportsScreens="); pw.println(screens);
                     }

@@ -69,8 +69,8 @@ public class CompatibilityInfo {
     /**
      * A flag mask to indicates that the application can expand over the original size.
      * The flag is set to true if
-     * 1) Application declares its expandable in manifest file using <expandable /> or
-     * 2) The screen size is same as (320 x 480) * density. 
+     * 1) Application declares its expandable in manifest file using <supports-screens> or
+     * 2) Configuration.SCREENLAYOUT_COMPAT_NEEDED is not set
      * {@see compatibilityFlag}
      */
     private static final int EXPANDABLE = 2;
@@ -78,11 +78,28 @@ public class CompatibilityInfo {
     /**
      * A flag mask to tell if the application is configured to be expandable. This differs
      * from EXPANDABLE in that the application that is not expandable will be 
-     * marked as expandable if it runs in (320x 480) * density screen size.
+     * marked as expandable if Configuration.SCREENLAYOUT_COMPAT_NEEDED is not set.
      */
     private static final int CONFIGURED_EXPANDABLE = 4; 
 
-    private static final int SCALING_EXPANDABLE_MASK = SCALING_REQUIRED | EXPANDABLE;
+    /**
+     * A flag mask to indicates that the application supports large screens.
+     * The flag is set to true if
+     * 1) Application declares it supports large screens in manifest file using <supports-screens> or
+     * 2) The screen size is not large
+     * {@see compatibilityFlag}
+     */
+    private static final int LARGE_SCREENS = 8;
+    
+    /**
+     * A flag mask to tell if the application supports large screens. This differs
+     * from LARGE_SCREENS in that the application that does not support large
+     * screens will be marked as supporting them if the current screen is not
+     * large.
+     */
+    private static final int CONFIGURED_LARGE_SCREENS = 16; 
+
+    private static final int SCALING_EXPANDABLE_MASK = SCALING_REQUIRED | EXPANDABLE | LARGE_SCREENS;
 
     /**
      * The effective screen density we have selected for this application.
@@ -108,7 +125,10 @@ public class CompatibilityInfo {
         appFlags = appInfo.flags;
         
         if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-            mCompatibilityFlags = EXPANDABLE | CONFIGURED_EXPANDABLE;
+            mCompatibilityFlags |= LARGE_SCREENS | CONFIGURED_LARGE_SCREENS;
+        }
+        if ((appInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
+            mCompatibilityFlags |= EXPANDABLE | CONFIGURED_EXPANDABLE;
         }
         
         float packageDensityScale = -1.0f;
@@ -162,7 +182,8 @@ public class CompatibilityInfo {
     private CompatibilityInfo() {
         this(ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS
                 | ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS
-                | ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS,
+                | ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS
+                | ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS,
                 EXPANDABLE | CONFIGURED_EXPANDABLE,
                 DisplayMetrics.DENSITY_DEVICE,
                 1.0f,
@@ -190,10 +211,28 @@ public class CompatibilityInfo {
     }
 
     /**
+     * Sets large screen bit in the compatibility flag.
+     */
+    public void setLargeScreens(boolean expandable) {
+        if (expandable) {
+            mCompatibilityFlags |= CompatibilityInfo.LARGE_SCREENS;
+        } else {
+            mCompatibilityFlags &= ~CompatibilityInfo.LARGE_SCREENS;
+        }
+    }
+
+    /**
      * @return true if the application is configured to be expandable.
      */
     public boolean isConfiguredExpandable() {
         return (mCompatibilityFlags & CompatibilityInfo.CONFIGURED_EXPANDABLE) != 0;
+    }
+
+    /**
+     * @return true if the application is configured to be expandable.
+     */
+    public boolean isConfiguredLargeScreens() {
+        return (mCompatibilityFlags & CompatibilityInfo.CONFIGURED_LARGE_SCREENS) != 0;
     }
 
     /**
@@ -204,7 +243,8 @@ public class CompatibilityInfo {
     }
     
     public boolean supportsScreen() {
-        return (mCompatibilityFlags & CompatibilityInfo.EXPANDABLE) != 0;
+        return (mCompatibilityFlags & (EXPANDABLE|LARGE_SCREENS))
+                == (EXPANDABLE|LARGE_SCREENS);
     }
     
     @Override
@@ -219,8 +259,8 @@ public class CompatibilityInfo {
      * @param params the window's parameter
      */
     public Translator getTranslator(WindowManager.LayoutParams params) {
-        if ( (mCompatibilityFlags & CompatibilityInfo.SCALING_EXPANDABLE_MASK)
-                == CompatibilityInfo.EXPANDABLE) {
+        if ( (mCompatibilityFlags & SCALING_EXPANDABLE_MASK)
+                == (EXPANDABLE|LARGE_SCREENS)) {
             if (DBG) Log.d(TAG, "no translation required");
             return null;
         }
@@ -342,8 +382,8 @@ public class CompatibilityInfo {
     public static void updateCompatibleScreenFrame(DisplayMetrics dm, int orientation,
             Rect outRect) {
         int width = dm.widthPixels;
-        int portraitHeight = (int) (DEFAULT_PORTRAIT_HEIGHT * dm.density);
-        int portraitWidth = (int) (DEFAULT_PORTRAIT_WIDTH * dm.density);
+        int portraitHeight = (int) (DEFAULT_PORTRAIT_HEIGHT * dm.density + 0.5f);
+        int portraitWidth = (int) (DEFAULT_PORTRAIT_WIDTH * dm.density + 0.5f);
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             int xOffset = (width - portraitHeight) / 2 ;
             outRect.set(xOffset, 0, xOffset + portraitHeight, portraitWidth);

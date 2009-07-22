@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
@@ -301,6 +302,11 @@ public class SurfaceView extends View {
 
         float appScale = mTranslator == null ? 1.0f : mTranslator.applicationScale;
         
+        Resources res = getContext().getResources();
+        if (mTranslator != null || !res.getCompatibilityInfo().supportsScreen()) {
+            mSurface.setCompatibleDisplayMetrics(res.getDisplayMetrics());
+        }
+        
         int myWidth = mRequestedWidth;
         if (myWidth <= 0) myWidth = getWidth();
         int myHeight = mRequestedHeight;
@@ -309,8 +315,8 @@ public class SurfaceView extends View {
         // Use original size if the app specified the size of the view,
         // and let the flinger to scale up.
         if (mRequestedWidth <= 0 && mTranslator != null) {
-            myWidth *= appScale;
-            myHeight *= appScale;
+            myWidth = (int) (myWidth * appScale + 0.5f);
+            myHeight = (int) (myHeight * appScale + 0.5f);
             mScaled = true;
         } else {
             mScaled = false;

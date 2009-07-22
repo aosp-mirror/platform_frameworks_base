@@ -41,6 +41,39 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public boolean userSetLocale;
 
+    public static final int SCREENLAYOUT_SIZE_MASK = 0x0f;
+    public static final int SCREENLAYOUT_SIZE_UNDEFINED = 0x00;
+    public static final int SCREENLAYOUT_SIZE_SMALL = 0x01;
+    public static final int SCREENLAYOUT_SIZE_NORMAL = 0x02;
+    public static final int SCREENLAYOUT_SIZE_LARGE = 0x03;
+    
+    public static final int SCREENLAYOUT_LONG_MASK = 0x30;
+    public static final int SCREENLAYOUT_LONG_UNDEFINED = 0x00;
+    public static final int SCREENLAYOUT_LONG_NO = 0x10;
+    public static final int SCREENLAYOUT_LONG_YES = 0x20;
+    
+    /**
+     * Special flag we generate to indicate that the screen layout requires
+     * us to use a compatibility mode for apps that are not modern layout
+     * aware.
+     * @hide
+     */
+    public static final int SCREENLAYOUT_COMPAT_NEEDED = 0x10000000;
+    
+    /**
+     * Bit mask of overall layout of the screen.  Currently there are two
+     * fields:
+     * <p>The {@link #SCREENLAYOUT_SIZE_MASK} bits define the overall size
+     * of the screen.  They may be one of
+     * {@link #SCREENLAYOUT_SIZE_SMALL}, {@link #SCREENLAYOUT_SIZE_NORMAL},
+     * or {@link #SCREENLAYOUT_SIZE_LARGE}.
+     * 
+     * <p>The {@link #SCREENLAYOUT_LONG_MASK} defines whether the screen
+     * is wider/taller than normal.  They may be one of
+     * {@link #SCREENLAYOUT_LONG_NO} or {@link #SCREENLAYOUT_LONG_YES}.
+     */
+    public int screenLayout;
+    
     public static final int TOUCHSCREEN_UNDEFINED = 0;
     public static final int TOUCHSCREEN_NOTOUCH = 1;
     public static final int TOUCHSCREEN_STYLUS = 2;
@@ -116,18 +149,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int orientation;
     
-    public static final int SCREENLAYOUT_UNDEFINED = 0;
-    public static final int SCREENLAYOUT_SMALL = 1;
-    public static final int SCREENLAYOUT_NORMAL = 2;
-    public static final int SCREENLAYOUT_LARGE = 3;
-    
-    /**
-     * Overall layout of the screen.  May be one of
-     * {@link #SCREENLAYOUT_SMALL}, {@link #SCREENLAYOUT_NORMAL},
-     * or {@link #SCREENLAYOUT_LARGE}.
-     */
-    public int screenLayout;
-    
     /**
      * Construct an invalid Configuration.  You must call {@link #setToDefaults}
      * for this object to be valid.  {@more}
@@ -198,7 +219,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         hardKeyboardHidden = HARDKEYBOARDHIDDEN_UNDEFINED;
         navigation = NAVIGATION_UNDEFINED;
         orientation = ORIENTATION_UNDEFINED;
-        screenLayout = SCREENLAYOUT_UNDEFINED;
+        screenLayout = SCREENLAYOUT_SIZE_UNDEFINED;
     }
 
     /** {@hide} */
@@ -269,7 +290,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_ORIENTATION;
             orientation = delta.orientation;
         }
-        if (delta.screenLayout != SCREENLAYOUT_UNDEFINED
+        if (delta.screenLayout != SCREENLAYOUT_SIZE_UNDEFINED
                 && screenLayout != delta.screenLayout) {
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
             screenLayout = delta.screenLayout;
@@ -342,7 +363,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && orientation != delta.orientation) {
             changed |= ActivityInfo.CONFIG_ORIENTATION;
         }
-        if (delta.screenLayout != SCREENLAYOUT_UNDEFINED
+        if (delta.screenLayout != SCREENLAYOUT_SIZE_UNDEFINED
                 && screenLayout != delta.screenLayout) {
             changed |= ActivityInfo.CONFIG_SCREEN_LAYOUT;
         }

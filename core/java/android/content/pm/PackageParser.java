@@ -92,6 +92,8 @@ public class PackageParser {
     private static final Object mSync = new Object();
     private static WeakReference<byte[]> mReadBuffer;
 
+    private static boolean sCompatibilityModeEnabled = true; 
+
     static class ParsePackageItemArgs {
         final Package owner;
         final String[] outError;
@@ -672,6 +674,7 @@ public class PackageParser {
         int supportsSmallScreens = 1;
         int supportsNormalScreens = 1;
         int supportsLargeScreens = 1;
+        int resizeable = 1;
         
         int outerDepth = parser.getDepth();
         while ((type=parser.next()) != parser.END_DOCUMENT
@@ -881,6 +884,9 @@ public class PackageParser {
                 supportsLargeScreens = sa.getInteger(
                         com.android.internal.R.styleable.AndroidManifestSupportsScreens_largeScreens,
                         supportsLargeScreens);
+                resizeable = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_resizeable,
+                        supportsLargeScreens);
 
                 sa.recycle();
                 
@@ -966,6 +972,11 @@ public class PackageParser {
                 && pkg.applicationInfo.targetSdkVersion
                         >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
+        }
+        if (resizeable < 0 || (resizeable > 0
+                && pkg.applicationInfo.targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS;
         }
         int densities[] = null;
         int size = pkg.supportsDensityList.size();
@@ -2629,6 +2640,11 @@ public class PackageParser {
     public static ApplicationInfo generateApplicationInfo(Package p, int flags) {
         if (p == null) return null;
         if (!copyNeeded(flags, p, null)) {
+            // CompatibilityMode is global state. It's safe to modify the instance
+            // of the package.
+            if (!sCompatibilityModeEnabled) {
+                p.applicationInfo.disableCompatibilityMode();
+            }
             return p.applicationInfo;
         }
 
@@ -2642,6 +2658,9 @@ public class PackageParser {
         }
         if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0) {
             ai.supportsDensities = p.supportsDensities;
+        }
+        if (!sCompatibilityModeEnabled) {
+            ai.disableCompatibilityMode();
         }
         return ai;
     }
@@ -2826,5 +2845,12 @@ public class PackageParser {
                 + Integer.toHexString(System.identityHashCode(this))
                 + " " + service.info.name + "}";
         }
+    }
+
+    /**
+     * @hide
+     */
+    public static void setCompatibilityModeEnabled(boolean compatibilityModeEnabled) {
+        sCompatibilityModeEnabled = compatibilityModeEnabled;
     }
 }

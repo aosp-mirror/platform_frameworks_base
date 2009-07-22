@@ -19,6 +19,7 @@ package android.view;
 import android.graphics.*;
 import android.os.Parcelable;
 import android.os.Parcel;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 /**
@@ -131,6 +132,10 @@ public class Surface implements Parcelable {
     @SuppressWarnings("unused")
     private Canvas mCanvas;
 
+    // The display metrics used to provide the pseudo canvas size for applications
+    // running in compatibility mode. This is set to null for regular mode.
+    private DisplayMetrics mDisplayMetrics;
+
     /**
      * Exception thrown when a surface couldn't be created or resized
      */
@@ -167,7 +172,23 @@ public class Surface implements Parcelable {
      * {@hide}
      */
     public Surface() {
-        mCanvas = new Canvas();
+        mCanvas = new Canvas() {
+            @Override
+            public int getWidth() {
+                return mDisplayMetrics == null ? super.getWidth() : mDisplayMetrics.widthPixels;
+            }
+            @Override
+            public int getHeight() {
+                return mDisplayMetrics == null ? super.getHeight() : mDisplayMetrics.heightPixels;
+            }
+        };
+    }
+
+    /**
+     * Sets the display metrics used to provide canva's width/height in comaptibility mode.
+     */
+    void setCompatibleDisplayMetrics(DisplayMetrics metrics) {
+        mDisplayMetrics = metrics;
     }
     
     /**

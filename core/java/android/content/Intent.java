@@ -4513,6 +4513,9 @@ public class Intent implements Parcelable {
      * and {@link #FILL_IN_COMPONENT} to override the restriction where the
      * corresponding field will not be replaced if it is already set.
      *
+     * <p>Note: The component field will only be copied if {@link #FILL_IN_COMPONENT} is explicitly
+     * specified.
+     *
      * <p>For example, consider Intent A with {data="foo", categories="bar"}
      * and Intent B with {action="gotit", data-type="some/thing",
      * categories="one","two"}.

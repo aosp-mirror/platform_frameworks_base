@@ -1536,6 +1536,10 @@ public class SearchManager
         mService = ISearchManager.Stub.asInterface(
                 ServiceManager.getService(Context.SEARCH_SERVICE));
     }
+
+    /*package*/ boolean hasIdent() {
+        return mIdent != 0;
+    }
     
     /*package*/ void setIdent(int ident) {
         if (mIdent != 0) {

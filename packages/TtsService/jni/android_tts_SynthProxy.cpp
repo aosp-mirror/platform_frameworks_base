@@ -65,9 +65,9 @@ static Mutex engineMutex;
 // ----------------------------------------------------------------------------
 class SynthProxyJniStorage {
     public :
-        //jclass                    tts_class;
         jobject                   tts_ref;
         TtsEngine*                mNativeSynthInterface;
+        void*                     mEngineLibHandle;
         AudioTrack*               mAudioOut;
         AudioSystem::stream_type  mStreamType;
         uint32_t                  mSampleRate;
@@ -77,9 +77,9 @@ class SynthProxyJniStorage {
         size_t                    mBufferSize;
 
         SynthProxyJniStorage() {
-            //tts_class = NULL;
             tts_ref = NULL;
             mNativeSynthInterface = NULL;
+            mEngineLibHandle = NULL;
             mAudioOut = NULL;
             mStreamType = DEFAULT_TTS_STREAM_TYPE;
             mSampleRate = DEFAULT_TTS_RATE;
@@ -91,10 +91,16 @@ class SynthProxyJniStorage {
         }
 
         ~SynthProxyJniStorage() {
+            //LOGV("entering ~SynthProxyJniStorage()");
             killAudio();
             if (mNativeSynthInterface) {
                 mNativeSynthInterface->shutdown();
                 mNativeSynthInterface = NULL;
+            }
+            if (mEngineLibHandle) {
+                //LOGE("~SynthProxyJniStorage(): before close library");
+                int res = dlclose(mEngineLibHandle);
+                LOGE_IF( res != 0, "~SynthProxyJniStorage(): dlclose returned %d", res);
             }
             delete mBuffer;
         }
@@ -138,13 +144,14 @@ class SynthProxyJniStorage {
                     0, 0, 0, 0); // not using an AudioTrack callback
 
             if (mAudioOut->initCheck() != NO_ERROR) {
-              LOGI("AudioTrack error");
+              LOGE("createAudioOut(): AudioTrack error");
               delete mAudioOut;
               mAudioOut = NULL;
             } else {
               //LOGI("AudioTrack OK");
+              mAudioOut->setVolume(2.0f, 2.0f);
               mAudioOut->start();
-              LOGI("AudioTrack started");
+              LOGV("AudioTrack started");
             }
         }
 };
@@ -259,16 +266,18 @@ android_tts_SynthProxy_native_setup(JNIEnv *env, jobject thiz,
 
     void *engine_lib_handle = dlopen(nativeSoLibNativeString,
             RTLD_NOW | RTLD_LOCAL);
-    if (engine_lib_handle==NULL) {
-       LOGI("engine_lib_handle==NULL");
+    if (engine_lib_handle == NULL) {
+       LOGE("android_tts_SynthProxy_native_setup(): engine_lib_handle == NULL");
        // TODO report error so the TTS can't be used
     } else {
         TtsEngine *(*get_TtsEngine)() =
             reinterpret_cast<TtsEngine* (*)()>(dlsym(engine_lib_handle, "getTtsEngine"));
 
         pJniStorage->mNativeSynthInterface = (*get_TtsEngine)();
+        pJniStorage->mEngineLibHandle = engine_lib_handle;
 
         if (pJniStorage->mNativeSynthInterface) {
+            Mutex::Autolock l(engineMutex);
             pJniStorage->mNativeSynthInterface->init(ttsSynthDoneCB);
         }
     }
@@ -287,11 +296,29 @@ android_tts_SynthProxy_native_setup(JNIEnv *env, jobject thiz,
 static void
 android_tts_SynthProxy_native_finalize(JNIEnv *env, jobject thiz, jint jniData)
 {
-    if (jniData) {
-        SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
-        env->DeleteGlobalRef(pSynthData->tts_ref);
-        delete pSynthData;
+    //LOGV("entering android_tts_SynthProxy_finalize()");
+    if (jniData == 0) {
+        //LOGE("android_tts_SynthProxy_native_finalize(): invalid JNI data");
+        return;
     }
+
+    Mutex::Autolock l(engineMutex);
+
+    SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
+    env->DeleteGlobalRef(pSynthData->tts_ref);
+    delete pSynthData;
+
+    env->SetIntField(thiz, javaTTSFields.synthProxyFieldJniData, 0);
+}
+
+
+static void
+android_tts_SynthProxy_shutdown(JNIEnv *env, jobject thiz, jint jniData)
+{
+    //LOGV("entering android_tts_SynthProxy_shutdown()");
+
+    // do everything a call to finalize would
+    android_tts_SynthProxy_native_finalize(env, thiz, jniData);
 }
 
 
@@ -601,24 +628,6 @@ android_tts_SynthProxy_stop(JNIEnv *env, jobject thiz, jint jniData)
     }
 
     return result;
-}
-
-
-static void
-android_tts_SynthProxy_shutdown(JNIEnv *env, jobject thiz, jint jniData)
-{
-    if (jniData == 0) {
-        LOGE("android_tts_SynthProxy_shutdown(): invalid JNI data");
-        return;
-    }
-
-    Mutex::Autolock l(engineMutex);
-
-    SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
-    if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->shutdown();
-        pSynthData->mNativeSynthInterface = NULL;
-    }
 }
 
 

@@ -1126,6 +1126,7 @@
   <public type="attr" name="searchSettingsDescription" />
   <public type="attr" name="textColorPrimaryInverseDisableOnly" />
   <public type="attr" name="autoUrlDetect" />
+  <public type="attr" name="resizeable" />
 
   <public-padding type="attr" name="donut_resource_pad" end="0x0101029f" />
 
