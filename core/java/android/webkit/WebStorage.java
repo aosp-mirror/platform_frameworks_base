@@ -51,8 +51,9 @@ public final class WebStorage {
     // Global instance of a WebStorage
     private static WebStorage sWebStorage;
 
-    // We keep a copy of the origins, quotas and usages
-    // that we protect via a lock and update in syncValues()
+    // We keep the origins, quotas and usages as member values
+    // that we protect via a lock and update in syncValues().
+    // This is needed to transfer this data across threads.
     private static Lock mLock = new ReentrantLock();
     private static Condition mCacheUpdated = mLock.newCondition();
 
@@ -104,18 +105,15 @@ public final class WebStorage {
                             Origin website = (Origin) msg.obj;
                             nativeSetQuotaForOrigin(website.getOrigin(),
                                                     website.getQuota());
-                            syncValues();
                             } break;
 
                         case DELETE_ORIGIN: {
                             Origin website = (Origin) msg.obj;
                             nativeDeleteOrigin(website.getOrigin());
-                            syncValues();
                             } break;
 
                         case DELETE_ALL:
                             nativeDeleteAllData();
-                            syncValues();
                             break;
 
                         case UPDATE:
@@ -204,7 +202,6 @@ public final class WebStorage {
         if (origin != null) {
             if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
                 nativeSetQuotaForOrigin(origin, quota);
-                syncValues();
             } else {
                 postMessage(Message.obtain(null, SET_QUOTA_ORIGIN,
                     new Origin(origin, quota)));
@@ -220,7 +217,6 @@ public final class WebStorage {
         if (origin != null) {
             if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
                 nativeDeleteOrigin(origin);
-                syncValues();
             } else {
                 postMessage(Message.obtain(null, DELETE_ORIGIN,
                     new Origin(origin)));
@@ -235,7 +231,6 @@ public final class WebStorage {
     public void deleteAllData() {
         if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
             nativeDeleteAllData();
-            syncValues();
         } else {
             postMessage(Message.obtain(null, DELETE_ALL));
         }
@@ -276,7 +271,7 @@ public final class WebStorage {
 
     /**
      * Run on the webcore thread
-     * sync the local cached values with the real ones
+     * set the local values with the current ones
      */
     private void syncValues() {
         mLock.lock();
