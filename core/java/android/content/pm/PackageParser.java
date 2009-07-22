@@ -674,6 +674,7 @@ public class PackageParser {
         int supportsSmallScreens = 1;
         int supportsNormalScreens = 1;
         int supportsLargeScreens = 1;
+        int resizeable = 1;
         
         int outerDepth = parser.getDepth();
         while ((type=parser.next()) != parser.END_DOCUMENT
@@ -883,6 +884,9 @@ public class PackageParser {
                 supportsLargeScreens = sa.getInteger(
                         com.android.internal.R.styleable.AndroidManifestSupportsScreens_largeScreens,
                         supportsLargeScreens);
+                resizeable = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_resizeable,
+                        supportsLargeScreens);
 
                 sa.recycle();
                 
@@ -968,6 +972,11 @@ public class PackageParser {
                 && pkg.applicationInfo.targetSdkVersion
                         >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
+        }
+        if (resizeable < 0 || (resizeable > 0
+                && pkg.applicationInfo.targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS;
         }
         int densities[] = null;
         int size = pkg.supportsDensityList.size();

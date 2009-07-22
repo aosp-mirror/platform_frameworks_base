@@ -4012,11 +4012,11 @@ void ResTable::print(bool inclValues) const
                     if (dval == ResTable_config::DENSITY_DEFAULT) {
                         strcpy(density, "def");
                     } else if (dval == ResTable_config::DENSITY_NONE) {
-                        strcpy(density, "non");
+                        strcpy(density, "no");
                     } else {
                         sprintf(density, "%d", (int)dval);
                     }
-                    printf("      config %d lang=%c%c cnt=%c%c orien=%d touch=%d density=%s key=%d infl=%d nav=%d w=%d h=%d lyt=%d\n",
+                    printf("      config %d lang=%c%c cnt=%c%c orien=%d touch=%d density=%s key=%d infl=%d nav=%d w=%d h=%d sz=%d lng=%d\n",
                            (int)configIndex,
                            type->config.language[0] ? type->config.language[0] : '-',
                            type->config.language[1] ? type->config.language[1] : '-',
@@ -4030,7 +4030,8 @@ void ResTable::print(bool inclValues) const
                            type->config.navigation,
                            dtohs(type->config.screenWidth),
                            dtohs(type->config.screenHeight),
-                           type->config.screenLayout);
+                           type->config.screenLayout&ResTable_config::MASK_SCREENSIZE,
+                           type->config.screenLayout&ResTable_config::MASK_SCREENLONG);
                     size_t entryCount = dtohl(type->entryCount);
                     uint32_t entriesStart = dtohl(type->entriesStart);
                     if ((entriesStart&0x3) != 0) {
