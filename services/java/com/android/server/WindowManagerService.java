@@ -423,7 +423,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     final Rect mTempRect = new Rect();
 
     final Configuration mTempConfiguration = new Configuration();
-    int screenLayout = Configuration.SCREENLAYOUT_UNDEFINED;
+    int mScreenLayout = Configuration.SCREENLAYOUT_SIZE_UNDEFINED;
 
     // The frame use to limit the size of the app running in compatibility mode.
     Rect mCompatibleScreenFrame = new Rect();
@@ -3766,7 +3766,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         mDisplay.getMetrics(dm);
         CompatibilityInfo.updateCompatibleScreenFrame(dm, orientation, mCompatibleScreenFrame);
 
-        if (screenLayout == Configuration.SCREENLAYOUT_UNDEFINED) {
+        if (mScreenLayout == Configuration.SCREENLAYOUT_SIZE_UNDEFINED) {
             // Note we only do this once because at this point we don't
             // expect the screen to change in this way at runtime, and want
             // to avoid all of this computation for every config change.
@@ -3786,16 +3786,35 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             if (longSize < 470) {
                 // This is shorter than an HVGA normal density screen (which
                 // is 480 pixels on its long side).
-                screenLayout = Configuration.SCREENLAYOUT_SMALL;
-            } else if (longSize > 490 && shortSize > 330) {
-                // This is larger than an HVGA normal density screen (which
-                // is 480x320 pixels).
-                screenLayout = Configuration.SCREENLAYOUT_LARGE;
+                mScreenLayout = Configuration.SCREENLAYOUT_SIZE_SMALL
+                        | Configuration.SCREENLAYOUT_LONG_NO;
             } else {
-                screenLayout = Configuration.SCREENLAYOUT_NORMAL;
+                // Is this a large screen?
+                if (longSize > 640 && shortSize >= 480) {
+                    // VGA or larger screens at medium density are the point
+                    // at which we consider it to be a large screen.
+                    mScreenLayout = Configuration.SCREENLAYOUT_SIZE_LARGE;
+                } else {
+                    mScreenLayout = Configuration.SCREENLAYOUT_SIZE_NORMAL;
+                    
+                    // If this screen is wider than normal HVGA, or taller
+                    // than FWVGA, then for old apps we want to run in size
+                    // compatibility mode.
+                    if (shortSize > 321 || longSize > 570) {
+                        mScreenLayout |= Configuration.SCREENLAYOUT_COMPAT_NEEDED;
+                    }
+                }
+                
+                // Is this a long screen?
+                if (((longSize*3)/5) >= (shortSize-1)) {
+                    // Anything wider than WVGA (5:3) is considering to be long.
+                    mScreenLayout |= Configuration.SCREENLAYOUT_LONG_YES;
+                } else {
+                    mScreenLayout |= Configuration.SCREENLAYOUT_LONG_NO;
+                }
             }
         }
-        config.screenLayout = screenLayout;
+        config.screenLayout = mScreenLayout;
         
         config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
         config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;

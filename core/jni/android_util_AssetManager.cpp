@@ -553,7 +553,7 @@ static void android_content_AssetManager_setConfiguration(JNIEnv* env, jobject c
     config.touchscreen = (uint8_t)touchscreen;
     config.density = (uint16_t)density;
     config.keyboard = (uint8_t)keyboard;
-    config.inputFlags = (uint8_t)keyboardHidden<<ResTable_config::SHIFT_KEYSHIDDEN;
+    config.inputFlags = (uint8_t)keyboardHidden;
     config.navigation = (uint8_t)navigation;
     config.screenWidth = (uint16_t)screenWidth;
     config.screenHeight = (uint16_t)screenHeight;

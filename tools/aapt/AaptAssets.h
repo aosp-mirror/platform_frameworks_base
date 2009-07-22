@@ -30,6 +30,8 @@ enum {
     AXIS_MNC,
     AXIS_LANGUAGE,
     AXIS_REGION,
+    AXIS_SCREENLAYOUTSIZE,
+    AXIS_SCREENLAYOUTLONG,
     AXIS_ORIENTATION,
     AXIS_DENSITY,
     AXIS_TOUCHSCREEN,
@@ -37,7 +39,6 @@ enum {
     AXIS_KEYBOARD,
     AXIS_NAVIGATION,
     AXIS_SCREENSIZE,
-    AXIS_SCREENLAYOUT,
     AXIS_VERSION
 };
 
@@ -56,6 +57,8 @@ public:
     String8 mnc;
     String8 locale;
     String8 vendor;
+    String8 screenLayoutSize;
+    String8 screenLayoutLong;
     String8 orientation;
     String8 density;
     String8 touchscreen;
@@ -63,7 +66,6 @@ public:
     String8 keyboard;
     String8 navigation;
     String8 screenSize;
-    String8 screenLayout;
     String8 version;
 
     bool initFromDirName(const char* dir, String8* resType);
@@ -73,6 +75,8 @@ public:
     static bool getMccName(const char* name, ResTable_config* out = NULL);
     static bool getMncName(const char* name, ResTable_config* out = NULL);
     static bool getLocaleName(const char* name, ResTable_config* out = NULL);
+    static bool getScreenLayoutSizeName(const char* name, ResTable_config* out = NULL);
+    static bool getScreenLayoutLongName(const char* name, ResTable_config* out = NULL);
     static bool getOrientationName(const char* name, ResTable_config* out = NULL);
     static bool getDensityName(const char* name, ResTable_config* out = NULL);
     static bool getTouchscreenName(const char* name, ResTable_config* out = NULL);
@@ -80,7 +84,6 @@ public:
     static bool getKeyboardName(const char* name, ResTable_config* out = NULL);
     static bool getNavigationName(const char* name, ResTable_config* out = NULL);
     static bool getScreenSizeName(const char* name, ResTable_config* out = NULL);
-    static bool getScreenLayoutName(const char* name, ResTable_config* out = NULL);
     static bool getVersionName(const char* name, ResTable_config* out = NULL);
 
     int compare(const AaptGroupEntry& o) const;

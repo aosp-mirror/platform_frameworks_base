@@ -4919,6 +4919,10 @@ class PackageManagerService extends IPackageManager.Stub {
                                 ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {
                             screens.add("small,");
                         }
+                        if ((ps.pkg.applicationInfo.flags & 
+                                ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
+                            screens.add("resizeable,");
+                        }
                         pw.print("    supportsScreens="); pw.println(screens);
                     }
                     pw.print("    timeStamp="); pw.println(ps.getTimeStampStr());

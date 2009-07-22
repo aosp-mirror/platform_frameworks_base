@@ -885,6 +885,13 @@
              screen, so that it retains the dimensions it was originally
              designed for. -->
         <attr name="largeScreens" format="boolean" />
+        <!-- Indicates whether the application can resize itself to newer
+             screen sizes.  This is mostly used to distinguish between old
+             applications that may not be compatible with newly introduced
+             screen sizes and newer applications that should be; it will be
+             set for you automatically based on whether you are targeting
+             a newer platform that supports more screens. -->
+        <attr name="resizeable" format="boolean" />
     </declare-styleable>
 
     <!-- Private tag to declare system protected broadcast actions.

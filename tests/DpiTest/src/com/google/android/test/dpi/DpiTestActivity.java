@@ -57,7 +57,8 @@ public class DpiTestActivity extends Activity {
             if (noCompat) {
                 ai.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS
                     | ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS
-                    | ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS;
+                    | ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS
+                    | ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS;
                 ai.supportsDensities = new int[] { ApplicationInfo.ANY_DENSITY };
                 app.getResources().setCompatibilityInfo(new CompatibilityInfo(ai));
             }
