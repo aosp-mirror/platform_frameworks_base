@@ -136,15 +136,19 @@ public class DisplayMetrics {
                 int defaultHeight;
                 switch (orientation) {
                     case Configuration.ORIENTATION_LANDSCAPE: {
-                        defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
-                        defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
+                        defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density +
+                                0.5f);
+                        defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density +
+                                0.5f);
                         break;
                     }
                     case Configuration.ORIENTATION_PORTRAIT:
                     case Configuration.ORIENTATION_SQUARE:
                     default: {
-                        defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density);
-                        defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density);
+                        defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density +
+                                0.5f);
+                        defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density +
+                                0.5f);
                         break;
                     }
                     case Configuration.ORIENTATION_UNDEFINED: {
@@ -172,8 +176,8 @@ public class DisplayMetrics {
             scaledDensity *= invertedRatio;
             xdpi *= invertedRatio;
             ydpi *= invertedRatio;
-            widthPixels *= invertedRatio;
-            heightPixels *= invertedRatio;
+            widthPixels = (int) (widthPixels * invertedRatio + 0.5f);
+            heightPixels = (int) (heightPixels * invertedRatio + 0.5f);
         }
     }
 

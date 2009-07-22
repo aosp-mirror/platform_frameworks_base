@@ -342,8 +342,8 @@ public class CompatibilityInfo {
     public static void updateCompatibleScreenFrame(DisplayMetrics dm, int orientation,
             Rect outRect) {
         int width = dm.widthPixels;
-        int portraitHeight = (int) (DEFAULT_PORTRAIT_HEIGHT * dm.density);
-        int portraitWidth = (int) (DEFAULT_PORTRAIT_WIDTH * dm.density);
+        int portraitHeight = (int) (DEFAULT_PORTRAIT_HEIGHT * dm.density + 0.5f);
+        int portraitWidth = (int) (DEFAULT_PORTRAIT_WIDTH * dm.density + 0.5f);
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             int xOffset = (width - portraitHeight) / 2 ;
             outRect.set(xOffset, 0, xOffset + portraitHeight, portraitWidth);
