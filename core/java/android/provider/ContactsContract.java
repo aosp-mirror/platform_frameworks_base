@@ -163,7 +163,7 @@ public final class ContactsContract {
 
         /**
          * The content:// style URI for this table joined with useful data from
-         * {@link Data} and {@link Presence}.
+         * {@link Data}.
          */
         public static final Uri CONTENT_SUMMARY_URI = Uri.withAppendedPath(AUTHORITY_URI,
                 "aggregates_summary");
@@ -179,7 +179,7 @@ public final class ContactsContract {
 
         /**
          * The content:// style URI for this table joined with useful data from
-         * {@link Data} and {@link Presence}, filtered to include only starred aggregates
+         * {@link Data}, filtered to include only starred aggregates
          * and the most frequently contacted aggregates.
          */
         public static final Uri CONTENT_SUMMARY_STREQUENT_URI = Uri.withAppendedPath(
@@ -1118,6 +1118,20 @@ public final class ContactsContract {
         public static final String TITLE_RES = "title_res";
 
         /**
+         * Notes about the group.
+         * <p>
+         * Type: TEXT
+         */
+        public static final String NOTES = "notes";
+
+        /**
+         * The ID of this group if it is a System Group, i.e. a group that has a special meaning
+         * to the sync adapter, null otherwise.
+         * <P>Type: TEXT</P>
+         */
+        public static final String SYSTEM_ID = "system_id";
+
+        /**
          * The total number of {@link Aggregates} that have
          * {@link GroupMembership} in this group. Read-only value that is only
          * present when querying {@link Groups#CONTENT_SUMMARY_URI}.
@@ -1162,7 +1176,7 @@ public final class ContactsContract {
 
         /**
          * The content:// style URI for this table joined with details data from
-         * {@link Data} and {@link Presence}.
+         * {@link Data}.
          */
         public static final Uri CONTENT_SUMMARY_URI = Uri.withAppendedPath(AUTHORITY_URI,
                 "groups_summary");
