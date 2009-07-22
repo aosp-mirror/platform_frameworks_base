@@ -218,8 +218,6 @@ public:
             const sp<HeapInterface>& heap,
             const sp<AllocatorInterface>& allocator);
 
-    virtual ~MemoryDealer();
-
     virtual sp<IMemory> allocate(size_t size, uint32_t flags = 0);
     virtual void        deallocate(size_t offset);
     virtual void        dump(const char* what, uint32_t flags = 0) const;
@@ -227,6 +225,9 @@ public:
 
     sp<IMemoryHeap> getMemoryHeap() const { return heap(); }
     sp<AllocatorInterface> getAllocator() const { return allocator(); }
+
+protected:
+    virtual ~MemoryDealer();
 
 private:    
     const sp<HeapInterface>&        heap() const;
