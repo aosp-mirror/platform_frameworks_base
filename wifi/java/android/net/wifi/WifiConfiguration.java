@@ -45,6 +45,8 @@ public class WifiConfiguration implements Parcelable {
     /** {@hide} */
     public static final String eapVarName = "eap";
     /** {@hide} */
+    public static final String phase2VarName = "phase2";
+    /** {@hide} */
     public static final String identityVarName = "identity";
     /** {@hide} */
     public static final String anonymousIdentityVarName = "anonymous_identity";
@@ -273,6 +275,11 @@ public class WifiConfiguration implements Parcelable {
      */
     public String eap;
     /**
+     * The phase2 authenication could be PAP, MSCHAP, MSCHAP2, GTC.
+     * {@hide}
+     */
+    public String phase2;
+    /**
      * The identity of the user in string,
      * which is used for the authentication.
      * {@hide}
@@ -314,6 +321,7 @@ public class WifiConfiguration implements Parcelable {
         for (int i = 0; i < wepKeys.length; i++)
             wepKeys[i] = null;
         eap = null;
+        phase2 = null;
         identity = null;
         anonymousIdentity = null;
         password = null;
@@ -398,6 +406,10 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append('\n').append(" eap: ");
         if (this.eap != null) {
             sbuf.append(eap);
+        }
+        sbuf.append('\n').append(" phase2: ");
+        if (this.phase2 != null) {
+            sbuf.append(phase2);
         }
         sbuf.append('\n').append(" Identity: ");
         if (this.identity != null) {
@@ -486,6 +498,7 @@ public class WifiConfiguration implements Parcelable {
         writeBitSet(dest, allowedPairwiseCiphers);
         writeBitSet(dest, allowedGroupCiphers);
         dest.writeString(eap);
+        dest.writeString(phase2);
         dest.writeString(identity);
         dest.writeString(anonymousIdentity);
         dest.writeString(password);
@@ -516,6 +529,7 @@ public class WifiConfiguration implements Parcelable {
                 config.allowedPairwiseCiphers = readBitSet(in);
                 config.allowedGroupCiphers    = readBitSet(in);
                 config.eap = in.readString();
+                config.phase2 = in.readString();
                 config.identity = in.readString();
                 config.anonymousIdentity = in.readString();
                 config.password = in.readString();
