@@ -144,7 +144,7 @@ status_t StagefrightPlayer::seekTo(int msec) {
     if (mPlayer == NULL) {
         return NO_INIT;
     }
-    
+
     status_t err = mPlayer->seekTo((int64_t)msec * 1000);
 
     sendEvent(MEDIA_SEEK_COMPLETE);
@@ -203,11 +203,6 @@ void StagefrightPlayer::setAudioSink(const sp<AudioSink> &audioSink) {
     if (mPlayer != NULL) {
         mPlayer->setAudioSink(audioSink);
     }
-}
-
-status_t StagefrightPlayer::getMetadata(
-        const SortedVector<MetadataType> &ids, Parcel *records) {
-    return INVALID_OPERATION;
 }
 
 }  // namespace android

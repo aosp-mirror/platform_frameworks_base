@@ -26,10 +26,9 @@
 
 #include <media/mediaplayer.h>
 #include <media/AudioSystem.h>
+#include <media/Metadata.h>
 
 namespace android {
-
-typedef int32_t MetadataType;
 
 class Parcel;
 template<typename T> class SortedVector;
@@ -129,8 +128,10 @@ public:
     //            the known metadata should be returned.
     // @param[inout] records Parcel where the player appends its metadata.
     // @return OK if the call was successful.
-    virtual status_t    getMetadata(const SortedVector<MetadataType>& ids,
-                                    Parcel *records) = 0;
+    virtual status_t    getMetadata(const media::Metadata::Filter& ids,
+                                    Parcel *records) {
+        return INVALID_OPERATION;
+    };
 
 protected:
     virtual void        sendEvent(int msg, int ext1=0, int ext2=0) { if (mNotify) mNotify(mCookie, msg, ext1, ext2); }

@@ -19,6 +19,7 @@
 
 #include <utils/Errors.h>
 #include <media/MediaPlayerInterface.h>
+#include <media/Metadata.h>
 
 #define MAX_OPENCORE_INSTANCES 25
 
@@ -53,8 +54,9 @@ public:
     virtual status_t    setLooping(int loop);
     virtual player_type playerType() { return PV_PLAYER; }
     virtual status_t    invoke(const Parcel& request, Parcel *reply);
-    virtual status_t    getMetadata(const SortedVector<MetadataType>& ids,
-                                    Parcel *records);
+    virtual status_t    getMetadata(
+        const SortedVector<media::Metadata::Type>& ids,
+        Parcel *records);
 
     // make available to PlayerDriver
     void        sendEvent(int msg, int ext1=0, int ext2=0) { MediaPlayerBase::sendEvent(msg, ext1, ext2); }

@@ -94,10 +94,6 @@ class TestPlayerStub : public MediaPlayerInterface {
     virtual status_t invoke(const android::Parcel& in, android::Parcel *out) {
         return mPlayer->invoke(in, out);
     }
-    virtual status_t getMetadata(const SortedVector<MetadataType>& ids,
-                                 Parcel *records) {
-        return INVALID_OPERATION;
-    }
 
 
     // @return true if the current build is 'eng' or 'test' and the

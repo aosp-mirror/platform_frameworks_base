@@ -23,15 +23,14 @@
 #include <utils/List.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
-#include <utils/SortedVector.h>
 #include <utils/Vector.h>
 #include <ui/SurfaceComposerClient.h>
 
 #include <media/IMediaPlayerService.h>
 #include <media/MediaPlayerInterface.h>
+#include <media/Metadata.h>
 
 namespace android {
-typedef int32_t MetadataType;
 
 class IMediaRecorder;
 class IMediaMetadataRetriever;
@@ -239,12 +238,12 @@ private:
         // @param type Of the metadata to be tested.
         // @return true if the metadata should be dropped according to
         //              the filters.
-        bool shouldDropMetadata(MetadataType type) const;
+        bool shouldDropMetadata(media::Metadata::Type type) const;
 
         // Add a new element to the set of metadata updated. Noop if
         // the element exists already.
         // @param type Of the metadata to be recorded.
-        void addNewMetadataUpdate(MetadataType type);
+        void addNewMetadataUpdate(media::Metadata::Type type);
 
         mutable     Mutex                       mLock;
                     sp<MediaPlayerBase>         mPlayer;
@@ -257,14 +256,14 @@ private:
                     int32_t                     mConnId;
 
         // Metadata filters.
-        SortedVector<int32_t>       mMetadataAllow;  // protected by mLock
-        SortedVector<int32_t>       mMetadataDrop;  // protected by mLock
+        media::Metadata::Filter mMetadataAllow;  // protected by mLock
+        media::Metadata::Filter mMetadataDrop;  // protected by mLock
 
         // Metadata updated. For each MEDIA_INFO_METADATA_UPDATE
         // notification we try to update mMetadataUpdated which is a
         // set: no duplicate.
         // getMetadata clears this set.
-        SortedVector<int32_t>       mMetadataUpdated;  // protected by mLock
+        media::Metadata::Filter mMetadataUpdated;  // protected by mLock
 
 #if CALLBACK_ANTAGONIZER
                     Antagonizer*                mAntagonizer;
