@@ -165,12 +165,6 @@ public abstract class PackageManager {
     public static final int GET_CONFIGURATIONS = 0x00004000;
 
     /**
-     * {@link ApplicationInfo} flag: return the
-     * {@link ApplicationInfo#supportsDensities} that the package supports.
-     */
-    public static final int GET_SUPPORTS_DENSITIES    = 0x00008000;
-
-    /**
      * Resolution and querying flag: if set, only filters that support the
      * {@link android.content.Intent#CATEGORY_DEFAULT} will be considered for
      * matching.  This is a synonym for including the CATEGORY_DEFAULT in your

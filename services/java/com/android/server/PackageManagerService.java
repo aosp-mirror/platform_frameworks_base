@@ -4905,26 +4905,40 @@ class PackageManagerService extends IPackageManager.Stub {
                     if (ps.pkg != null) {
                         pw.print("    dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
                         pw.print("    targetSdk="); pw.println(ps.pkg.applicationInfo.targetSdkVersion);
-                        pw.print("    densities="); pw.println(ps.pkg.supportsDensityList);
-                        ArrayList<String> screens = new ArrayList<String>();
+                        pw.print("    supportsScreens=[");
+                        boolean first = true;
                         if ((ps.pkg.applicationInfo.flags & 
                                 ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS) != 0) {
-                            screens.add("medium");
+                            if (!first) pw.print(", ");
+                            first = false;
+                            pw.print("medium");
                         }
                         if ((ps.pkg.applicationInfo.flags & 
                                 ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-                            screens.add("large");
+                            if (!first) pw.print(", ");
+                            first = false;
+                            pw.print("large");
                         }
                         if ((ps.pkg.applicationInfo.flags & 
                                 ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {
-                            screens.add("small,");
+                            if (!first) pw.print(", ");
+                            first = false;
+                            pw.print("small");
                         }
                         if ((ps.pkg.applicationInfo.flags & 
                                 ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
-                            screens.add("resizeable,");
+                            if (!first) pw.print(", ");
+                            first = false;
+                            pw.print("resizeable");
                         }
-                        pw.print("    supportsScreens="); pw.println(screens);
+                        if ((ps.pkg.applicationInfo.flags & 
+                                ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
+                            if (!first) pw.print(", ");
+                            first = false;
+                            pw.print("anyDensity");
+                        }
                     }
+                    pw.println("]");
                     pw.print("    timeStamp="); pw.println(ps.getTimeStampStr());
                     pw.print("    signatures="); pw.println(ps.signatures);
                     pw.print("    permissionsFixed="); pw.print(ps.permissionsFixed);

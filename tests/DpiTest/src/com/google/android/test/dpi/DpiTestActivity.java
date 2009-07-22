@@ -52,14 +52,13 @@ public class DpiTestActivity extends Activity {
             // be doing it.
             Application app = ActivityThread.currentActivityThread().getApplication();
             ApplicationInfo ai = app.getPackageManager().getApplicationInfo(
-                    "com.google.android.test.dpi",
-                    PackageManager.GET_SUPPORTS_DENSITIES);
+                    "com.google.android.test.dpi", 0);
             if (noCompat) {
                 ai.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS
                     | ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS
                     | ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS
-                    | ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS;
-                ai.supportsDensities = new int[] { ApplicationInfo.ANY_DENSITY };
+                    | ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS
+                    | ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES;
                 app.getResources().setCompatibilityInfo(new CompatibilityInfo(ai));
             }
         } catch (PackageManager.NameNotFoundException e) {

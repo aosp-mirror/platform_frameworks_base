@@ -827,28 +827,6 @@
         <attr name="name" />
     </declare-styleable>
     
-    <!-- The <code>supports-density</code> specifies a screen density that this
-         package supports. Application can specify multiple densities it supports.
-         <p>This appears as a child tag of the
-         {@link #AndroidManifest manifest} tag. -->
-    <declare-styleable name="AndroidManifestSupportsDensity" parent="AndroidManifest">
-        <!-- Required value of the density in dip (device independent pixel).
-             You should use one of the pre-defined constants for the standard
-             screen densities defined here.
-        -->
-        <attr name="density" format="integer">
-            <!-- A low density screen, such as a QVGA or WQVGA screen in a
-                 typical hand-held phone.  The constant for this is 120. -->
-            <enum name="low" value="120" />
-            <!-- A medium density screen, such as an HVGA screen in a
-                 typical hand-held phone.  The constant for this is 160. -->
-            <enum name="medium" value="160" />
-            <!-- A high density screen, such as a VGA or WVGA screen in a
-                 typical hand-held phone.  The constant for this is 240. -->
-            <enum name="high" value="240" />
-        </attr>
-    </declare-styleable>
-
     <!-- The <code>supports-screens</code> specifies the screen dimensions an
          application supports.  By default a modern application supports all
          screen sizes and must explicitly disable certain screen sizes here;
@@ -892,6 +870,11 @@
              set for you automatically based on whether you are targeting
              a newer platform that supports more screens. -->
         <attr name="resizeable" format="boolean" />
+        <!-- Indicates whether the application can accommodate any screen
+             density.  Older applications are assumed to not be able to,
+             new ones able to.  You can explicitly supply your abilities
+             here. -->
+        <attr name="anyDensity" format="boolean" />
     </declare-styleable>
 
     <!-- Private tag to declare system protected broadcast actions.

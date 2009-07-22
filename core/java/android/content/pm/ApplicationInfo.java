@@ -169,20 +169,21 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_RESIZEABLE_FOR_SCREENS = 1<<12;
     
     /**
+     * Value for {@link #flags}: true when the application knows how to
+     * accomodate different screen densities.  Corresponds to
+     * {@link android.R.styleable#AndroidManifestSupportsScreens_anyDensity
+     * android:anyDensity}.
+     */
+    public static final int FLAG_SUPPORTS_SCREEN_DENSITIES = 1<<13;
+    
+    /**
      * Value for {@link #flags}: this is false if the application has set
      * its android:allowBackup to false, true otherwise.
      * 
      * {@hide}
      */
-    public static final int FLAG_ALLOW_BACKUP = 1<<13;
+    public static final int FLAG_ALLOW_BACKUP = 1<<14;
     
-    /**
-     * Indicates that the application supports any densities;
-     * {@hide}
-     */
-    public static final int ANY_DENSITY = -1;
-    static final int[] ANY_DENSITIES_ARRAY = { ANY_DENSITY };
-
     /**
      * Flags associated with the application.  Any combination of
      * {@link #FLAG_SYSTEM}, {@link #FLAG_DEBUGGABLE}, {@link #FLAG_HAS_CODE},
@@ -228,13 +229,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int uid;
     
     /**
-     * The list of densities in DPI that application supprots. This
-     * field is only set if the {@link PackageManager#GET_SUPPORTS_DENSITIES} flag was
-     * used when retrieving the structure.
-     */
-    public int[] supportsDensities;
-
-    /**
      * The minimum SDK version this application targets.  It may run on earilier
      * versions, but it knows how to work with any new behavior added at this
      * version.  Will be {@link android.os.Build.VERSION_CODES#CUR_DEVELOPMENT}
@@ -267,7 +261,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         pw.println(prefix + "enabled=" + enabled);
         pw.println(prefix + "manageSpaceActivityName="+manageSpaceActivityName);
         pw.println(prefix + "description=0x"+Integer.toHexString(descriptionRes));
-        pw.println(prefix + "supportsDensities=" + supportsDensities);
         super.dumpBack(pw, prefix);
     }
     
@@ -314,7 +307,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         enabled = orig.enabled;
         manageSpaceActivityName = orig.manageSpaceActivityName;
         descriptionRes = orig.descriptionRes;
-        supportsDensities = orig.supportsDensities;
     }
 
 
@@ -346,7 +338,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(manageSpaceActivityName);
         dest.writeString(backupAgentName);
         dest.writeInt(descriptionRes);
-        dest.writeIntArray(supportsDensities);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -377,7 +368,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         manageSpaceActivityName = source.readString();
         backupAgentName = source.readString();
         descriptionRes = source.readInt();
-        supportsDensities = source.createIntArray();
     }
 
     /**
@@ -408,7 +398,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public void disableCompatibilityMode() {
         flags |= (FLAG_SUPPORTS_LARGE_SCREENS | FLAG_SUPPORTS_NORMAL_SCREENS |
-                FLAG_SUPPORTS_SMALL_SCREENS | FLAG_RESIZEABLE_FOR_SCREENS);
-        supportsDensities = ANY_DENSITIES_ARRAY;
+                FLAG_SUPPORTS_SMALL_SCREENS | FLAG_RESIZEABLE_FOR_SCREENS |
+                FLAG_SUPPORTS_SCREEN_DENSITIES);
     }
 }
