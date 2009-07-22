@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.DrawableContainer;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -359,6 +360,10 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             newBg.addState(new int[]{android.R.attr.state_selected}, transparent);
             newBg.addState(new int[]{android.R.attr.state_pressed}, transparent);
             newBg.addState(new int[]{}, background);
+            // Workaround for the fact that StateListDrawable.getPadding(Rect) always returns
+            // true, and thus sets the padding of any view that has it as a background.
+            ((DrawableContainer.DrawableContainerState) newBg.getConstantState())
+                    .setVariablePadding(true);
             mBackgroundsCache.put(backgroundColor, newBg.getConstantState());
             return newBg;
         }
