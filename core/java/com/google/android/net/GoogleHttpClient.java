@@ -58,8 +58,8 @@ import java.net.URISyntaxException;
  * and otherwise tweak HTTP requests.
  */
 public class GoogleHttpClient implements HttpClient {
-
     private static final String TAG = "GoogleHttpClient";
+    private static final boolean LOCAL_LOGV = Config.LOGV || false;
 
     /** Exception thrown when a request is blocked by the URL rules. */
     public static class BlockedRequestException extends IOException {
@@ -289,9 +289,7 @@ public class GoogleHttpClient implements HttpClient {
         wrapper.setURI(uri);
         request = wrapper;
 
-        if (Config.LOGV) {
-            Log.v(TAG, "Rule " + rule.mName + ": " + original + " -> " + rewritten);
-        }
+        if (LOCAL_LOGV) Log.v(TAG, "Rule " + rule.mName + ": " + original + " -> " + rewritten);
         return executeWithoutRewriting(request, context);
     }
 

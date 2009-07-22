@@ -23,16 +23,19 @@ import android.app.IActivityManager;
 import android.app.IInstrumentationWatcher;
 import android.app.Instrumentation;
 import android.content.ComponentName;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.AndroidException;
 import android.view.IWindowManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -45,16 +48,29 @@ public class Am {
 
     private boolean mDebugOption = false;
 
+    // These are magic strings understood by the Eclipse plugin.
+    private static final String FATAL_ERROR_CODE = "Error type 1";
+    private static final String NO_SYSTEM_ERROR_CODE = "Error type 2";
+    private static final String NO_CLASS_ERROR_CODE = "Error type 3";
+
     /**
      * Command-line entry point.
      *
      * @param args The command-line arguments
      */
     public static void main(String[] args) {
-        (new Am()).run(args);
+        try {
+            (new Am()).run(args);
+        } catch (IllegalArgumentException e) {
+            showUsage();
+            System.err.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println(e.toString());
+            System.exit(1);
+        }
     }
 
-    private void run(String[] args) {
+    private void run(String[] args) throws Exception {
         if (args.length < 1) {
             showUsage();
             return;
@@ -62,16 +78,14 @@ public class Am {
 
         mAm = ActivityManagerNative.getDefault();
         if (mAm == null) {
-            System.err.println("Error type 2");
-            System.err.println("Error: Unable to connect to activity manager; is the system running?");
-            showUsage();
-            return;
+            System.err.println(NO_SYSTEM_ERROR_CODE);
+            throw new AndroidException("Can't connect to activity manager; is the system running?");
         }
 
         mArgs = args;
-
         String op = args[0];
         mNextArg = 1;
+
         if (op.equals("start")) {
             runStart();
         } else if (op.equals("instrument")) {
@@ -81,13 +95,11 @@ public class Am {
         } else if (op.equals("profile")) {
             runProfile();
         } else {
-            System.err.println("Error: Unknown command: " + op);
-            showUsage();
-            return;
+            throw new IllegalArgumentException("Unknown command: " + op);
         }
     }
 
-    private Intent makeIntent() {
+    private Intent makeIntent() throws URISyntaxException {
         Intent intent = new Intent();
         boolean hasIntentInfo = false;
 
@@ -95,186 +107,146 @@ public class Am {
         Uri data = null;
         String type = null;
 
-        try {
-            String opt;
-            while ((opt=nextOption()) != null) {
-                if (opt.equals("-a")) {
-                    intent.setAction(nextOptionData());
-                    hasIntentInfo = true;
-                } else if (opt.equals("-d")) {
-                    data = Uri.parse(nextOptionData());
-                    hasIntentInfo = true;
-                } else if (opt.equals("-t")) {
-                    type = nextOptionData();
-                    hasIntentInfo = true;
-                } else if (opt.equals("-c")) {
-                    intent.addCategory(nextOptionData());
-                    hasIntentInfo = true;
-                } else if (opt.equals("-e") || opt.equals("--es")) {
-                    String key = nextOptionData();
-                    String value = nextOptionData();
-                    intent.putExtra(key, value);
-                    hasIntentInfo = true;
-                } else if (opt.equals("--ei")) {
-                    String key = nextOptionData();
-                    String value = nextOptionData();
-                    intent.putExtra(key, Integer.valueOf(value));
-                    hasIntentInfo = true;
-                } else if (opt.equals("--ez")) {
-                    String key = nextOptionData();
-                    String value = nextOptionData();
-                    intent.putExtra(key, Boolean.valueOf(value));
-                    hasIntentInfo = true;
-                } else if (opt.equals("-n")) {
-                    String str = nextOptionData();
-                    ComponentName cn = ComponentName.unflattenFromString(str);
-                    if (cn == null) {
-                        System.err.println("Error: Bad component name: " + str);
-                        showUsage();
-                        return null;
-                    }
-                    intent.setComponent(cn);
-                    hasIntentInfo = true;
-                } else if (opt.equals("-f")) {
-                    String str = nextOptionData();
-                    intent.setFlags(Integer.decode(str).intValue());
-                } else if (opt.equals("-D")) {
-                    mDebugOption = true;
-                } else {
-                    System.err.println("Error: Unknown option: " + opt);
-                    showUsage();
-                    return null;
-                }
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("-a")) {
+                intent.setAction(nextArgRequired());
+                hasIntentInfo = true;
+            } else if (opt.equals("-d")) {
+                data = Uri.parse(nextArgRequired());
+                hasIntentInfo = true;
+            } else if (opt.equals("-t")) {
+                type = nextArgRequired();
+                hasIntentInfo = true;
+            } else if (opt.equals("-c")) {
+                intent.addCategory(nextArgRequired());
+                hasIntentInfo = true;
+            } else if (opt.equals("-e") || opt.equals("--es")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                intent.putExtra(key, value);
+                hasIntentInfo = true;
+            } else if (opt.equals("--ei")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                intent.putExtra(key, Integer.valueOf(value));
+                hasIntentInfo = true;
+            } else if (opt.equals("--ez")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                intent.putExtra(key, Boolean.valueOf(value));
+                hasIntentInfo = true;
+            } else if (opt.equals("-n")) {
+                String str = nextArgRequired();
+                ComponentName cn = ComponentName.unflattenFromString(str);
+                if (cn == null) throw new IllegalArgumentException("Bad component name: " + str);
+                intent.setComponent(cn);
+                hasIntentInfo = true;
+            } else if (opt.equals("-f")) {
+                String str = nextArgRequired();
+                intent.setFlags(Integer.decode(str).intValue());
+            } else if (opt.equals("-D")) {
+                mDebugOption = true;
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                showUsage();
+                return null;
             }
-        } catch (RuntimeException ex) {
-            System.err.println("Error: " + ex.toString());
-            showUsage();
-            return null;
         }
         intent.setDataAndType(data, type);
 
         String uri = nextArg();
         if (uri != null) {
-            try {
-                Intent oldIntent = intent;
-                try {
-                    intent = Intent.getIntent(uri);
-                } catch (java.net.URISyntaxException ex) {
-                    System.err.println("Bad URI: " + uri);
-                    showUsage();
-                    return null;
-                }
-                if (oldIntent.getAction() != null) {
-                    intent.setAction(oldIntent.getAction());
-                }
-                if (oldIntent.getData() != null || oldIntent.getType() != null) {
-                    intent.setDataAndType(oldIntent.getData(), oldIntent.getType());
-                }
-                Set cats = oldIntent.getCategories();
-                if (cats != null) {
-                    Iterator it = cats.iterator();
-                    while (it.hasNext()) {
-                        intent.addCategory((String)it.next());
-                    }
-                }
-            } catch (RuntimeException ex) {
-                System.err.println("Error creating from URI: " + ex.toString());
-                showUsage();
-                return null;
+            Intent oldIntent = intent;
+            intent = Intent.getIntent(uri);
+            if (oldIntent.getAction() != null) {
+                intent.setAction(oldIntent.getAction());
             }
-        } else if (!hasIntentInfo) {
-            System.err.println("Error: No intent supplied");
-            showUsage();
-            return null;
+            if (oldIntent.getData() != null || oldIntent.getType() != null) {
+                intent.setDataAndType(oldIntent.getData(), oldIntent.getType());
+            }
+            Set cats = oldIntent.getCategories();
+            if (cats != null) {
+                Iterator it = cats.iterator();
+                while (it.hasNext()) {
+                    intent.addCategory((String)it.next());
+                }
+            }
+            hasIntentInfo = true;
         }
 
+        if (!hasIntentInfo) throw new IllegalArgumentException("No intent supplied");
         return intent;
     }
 
-    private void runStart() {
+    private void runStart() throws Exception {
         Intent intent = makeIntent();
-        
-        if (intent != null) {
-            System.out.println("Starting: " + intent);
-            try {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                // XXX should do something to determine the MIME type.
-                int res = mAm.startActivity(null, intent, intent.getType(),
-                        null, 0, null, null, 0, false, mDebugOption);
-                switch (res) {
-                    case IActivityManager.START_SUCCESS:
-                        break;
-                    case IActivityManager.START_SWITCHES_CANCELED:
-                        System.err.println(
-                                "Warning: Activity not started because the "
-                                + " current activity is being kept for the user.");
-                        break;
-                    case IActivityManager.START_DELIVERED_TO_TOP:
-                        System.err.println(
-                                "Warning: Activity not started, intent has "
-                                + "been delivered to currently running "
-                                + "top-most instance.");
-                        break;
-                    case IActivityManager.START_RETURN_INTENT_TO_CALLER:
-                        System.err.println(
-                                "Warning: Activity not started because intent "
-                                + "should be handled by the caller");
-                        break;
-                    case IActivityManager.START_TASK_TO_FRONT:
-                        System.err.println(
-                                "Warning: Activity not started, its current "
-                                + "task has been brought to the front");
-                        break;
-                    case IActivityManager.START_INTENT_NOT_RESOLVED:
-                        System.err.println(
-                                "Error: Activity not started, unable to "
-                                + "resolve " + intent.toString());
-                        break;
-                    case IActivityManager.START_CLASS_NOT_FOUND:
-                        System.err.println("Error type 3");
-                        System.err.println("Error: Activity class " +
-                                intent.getComponent().toShortString()
-                                + " does not exist.");
-                        break;
-                    case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
-                        System.err.println(
-                                "Error: Activity not started, you requested to "
-                                + "both forward and receive its result");
-                        break;
-                    case IActivityManager.START_PERMISSION_DENIED:
-                        System.err.println(
-                                "Error: Activity not started, you do not "
-                                + "have permission to access it.");
-                        break;
-                    default:
-                        System.err.println(
-                                "Error: Activity not started, unknown error "
-                                + "code " + res);
-                        break;
-                }
-            } catch (RemoteException e) {
-                System.err.println("Error type 1");
+        System.out.println("Starting: " + intent);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // XXX should do something to determine the MIME type.
+        int res = mAm.startActivity(null, intent, intent.getType(),
+                null, 0, null, null, 0, false, mDebugOption);
+        switch (res) {
+            case IActivityManager.START_SUCCESS:
+                break;
+            case IActivityManager.START_SWITCHES_CANCELED:
+                System.err.println(
+                        "Warning: Activity not started because the "
+                        + " current activity is being kept for the user.");
+                break;
+            case IActivityManager.START_DELIVERED_TO_TOP:
+                System.err.println(
+                        "Warning: Activity not started, intent has "
+                        + "been delivered to currently running "
+                        + "top-most instance.");
+                break;
+            case IActivityManager.START_RETURN_INTENT_TO_CALLER:
+                System.err.println(
+                        "Warning: Activity not started because intent "
+                        + "should be handled by the caller");
+                break;
+            case IActivityManager.START_TASK_TO_FRONT:
+                System.err.println(
+                        "Warning: Activity not started, its current "
+                        + "task has been brought to the front");
+                break;
+            case IActivityManager.START_INTENT_NOT_RESOLVED:
                 System.err.println(
                         "Error: Activity not started, unable to "
-                        + "call on to activity manager service");
-            }
+                        + "resolve " + intent.toString());
+                break;
+            case IActivityManager.START_CLASS_NOT_FOUND:
+                System.err.println(NO_CLASS_ERROR_CODE);
+                System.err.println("Error: Activity class " +
+                        intent.getComponent().toShortString()
+                        + " does not exist.");
+                break;
+            case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
+                System.err.println(
+                        "Error: Activity not started, you requested to "
+                        + "both forward and receive its result");
+                break;
+            case IActivityManager.START_PERMISSION_DENIED:
+                System.err.println(
+                        "Error: Activity not started, you do not "
+                        + "have permission to access it.");
+                break;
+            default:
+                System.err.println(
+                        "Error: Activity not started, unknown error code " + res);
+                break;
         }
     }
 
-    private void sendBroadcast() {
+    private void sendBroadcast() throws Exception {
         Intent intent = makeIntent();
-        
-        if (intent != null) {
-            System.out.println("Broadcasting: " + intent);
-            try {
-                mAm.broadcastIntent(null, intent, null, null, 0, null, null,
-                        null, true, false);
-            } catch (RemoteException e) {
-            }
-        }
+        IntentReceiver receiver = new IntentReceiver();
+        System.out.println("Broadcasting: " + intent);
+        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, null, true, false);
+        receiver.waitForFinish();
     }
 
-    private void runInstrument() {
+    private void runInstrument() throws Exception {
         String profileFile = null;
         boolean wait = false;
         boolean rawMode = false;
@@ -283,46 +255,30 @@ public class Am {
         String argKey = null, argValue = null;
         IWindowManager wm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
 
-        try {
-            String opt;
-            while ((opt=nextOption()) != null) {
-                if (opt.equals("-p")) {
-                    profileFile = nextOptionData();
-                } else if (opt.equals("-w")) {
-                    wait = true;
-                } else if (opt.equals("-r")) {
-                    rawMode = true;
-                } else if (opt.equals("-e")) {
-                    argKey = nextOptionData();
-                    argValue = nextOptionData();
-                    args.putString(argKey, argValue);
-                } else if (opt.equals("--no_window_animation")) {
-                    no_window_animation = true;
-                } else {
-                    System.err.println("Error: Unknown option: " + opt);
-                    showUsage();
-                    return;
-                }
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("-p")) {
+                profileFile = nextArgRequired();
+            } else if (opt.equals("-w")) {
+                wait = true;
+            } else if (opt.equals("-r")) {
+                rawMode = true;
+            } else if (opt.equals("-e")) {
+                argKey = nextArgRequired();
+                argValue = nextArgRequired();
+                args.putString(argKey, argValue);
+            } else if (opt.equals("--no_window_animation")) {
+                no_window_animation = true;
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                showUsage();
+                return;
             }
-        } catch (RuntimeException ex) {
-            System.err.println("Error: " + ex.toString());
-            showUsage();
-            return;
         }
 
-        String cnArg = nextArg();
-        if (cnArg == null) {
-            System.err.println("Error: No instrumentation component supplied");
-            showUsage();
-            return;
-        }
-        
+        String cnArg = nextArgRequired();
         ComponentName cn = ComponentName.unflattenFromString(cnArg);
-        if (cn == null) {
-            System.err.println("Error: Bad component name: " + cnArg);
-            showUsage();
-            return;
-        }
+        if (cn == null) throw new IllegalArgumentException("Bad component name: " + cnArg);
 
         InstrumentationWatcher watcher = null;
         if (wait) {
@@ -331,22 +287,13 @@ public class Am {
         }
         float[] oldAnims = null;
         if (no_window_animation) {
-            try {
-                oldAnims = wm.getAnimationScales();
-                wm.setAnimationScale(0, 0.0f);
-                wm.setAnimationScale(1, 0.0f);
-            } catch (RemoteException e) {
-            }
+            oldAnims = wm.getAnimationScales();
+            wm.setAnimationScale(0, 0.0f);
+            wm.setAnimationScale(1, 0.0f);
         }
 
-        try {
-            if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher)) {
-                System.out.println("INSTRUMENTATION_FAILED: " +
-                        cn.flattenToString());
-                showUsage();
-                return;
-            }
-        } catch (RemoteException e) {
+        if (!mAm.startInstrumentation(cn, profileFile, 0, args, watcher)) {
+            throw new AndroidException("INSTRUMENTATION_FAILED: " + cn.flattenToString());
         }
 
         if (watcher != null) {
@@ -356,9 +303,57 @@ public class Am {
         }
 
         if (oldAnims != null) {
+            wm.setAnimationScales(oldAnims);
+        }
+    }
+
+    private void runProfile() throws Exception {
+        String profileFile = null;
+        boolean start = false;
+        String process = nextArgRequired();
+        ParcelFileDescriptor fd = null;
+
+        String cmd = nextArgRequired();
+        if ("start".equals(cmd)) {
+            start = true;
+            profileFile = nextArgRequired();
             try {
-                wm.setAnimationScales(oldAnims);
-            } catch (RemoteException e) {
+                fd = ParcelFileDescriptor.open(
+                        new File(profileFile),
+                        ParcelFileDescriptor.MODE_CREATE |
+                        ParcelFileDescriptor.MODE_TRUNCATE |
+                        ParcelFileDescriptor.MODE_READ_WRITE);
+            } catch (FileNotFoundException e) {
+                System.err.println("Error: Unable to open file: " + profileFile);
+                return;
+            }
+        } else if (!"stop".equals(cmd)) {
+            throw new IllegalArgumentException("Profile command " + cmd + " not valid");
+        }
+
+        if (!mAm.profileControl(process, start, profileFile, fd)) {
+            throw new AndroidException("PROFILE FAILED on process " + process);
+        }
+    }
+
+    private class IntentReceiver extends IIntentReceiver.Stub {
+        private boolean mFinished = false;
+
+        public synchronized void performReceive(
+                Intent intent, int rc, String data, Bundle ext, boolean ord) {
+            String line = "Broadcast completed: result=" + rc;
+            if (data != null) line = line + ", data=\"" + data + "\"";
+            if (ext != null) line = line + ", extras: " + ext;
+            System.out.println(line);
+            mFinished = true;
+            notifyAll();
+        }
+
+        public synchronized void waitForFinish() {
+            try {
+                while (!mFinished) wait();
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
             }
         }
     }
@@ -366,7 +361,7 @@ public class Am {
     private class InstrumentationWatcher extends IInstrumentationWatcher.Stub {
         private boolean mFinished = false;
         private boolean mRawMode = false;
-        
+
         /**
          * Set or reset "raw mode".  In "raw mode", all bundles are dumped.  In "pretty mode", 
          * if a bundle includes Instrumentation.REPORT_KEY_STREAMRESULT, just print that.
@@ -375,7 +370,7 @@ public class Am {
         public void setRawOutput(boolean rawMode) {
             mRawMode = rawMode;
         }
-        
+
         public void instrumentationStatus(ComponentName name, int resultCode, Bundle results) {
             synchronized (this) {
                 // pretty printer mode?
@@ -431,6 +426,7 @@ public class Am {
                         }
                         wait(1000);
                     } catch (InterruptedException e) {
+                        throw new IllegalStateException(e);
                     }
                 }
             }
@@ -438,62 +434,11 @@ public class Am {
         }
     }
 
-    private void runProfile() {
-        String profileFile = null;
-        boolean start = false;
-
-        String process = nextArg();
-        if (process == null) {
-            System.err.println("Error: No profile process supplied");
-            showUsage();
-            return;
-        }
-        
-        ParcelFileDescriptor fd = null;
-        
-        String cmd = nextArg();
-        if ("start".equals(cmd)) {
-            start = true;
-            profileFile = nextArg();
-            if (profileFile == null) {
-                System.err.println("Error: No profile file path supplied");
-                showUsage();
-                return;
-            }
-            try {
-                fd = ParcelFileDescriptor.open(
-                        new File(profileFile),
-                        ParcelFileDescriptor.MODE_CREATE |
-                        ParcelFileDescriptor.MODE_TRUNCATE |
-                        ParcelFileDescriptor.MODE_READ_WRITE);
-            } catch (FileNotFoundException e) {
-                System.err.println("Error: Unable to open file: " + profileFile);
-                return;
-            }
-        } else if (!"stop".equals(cmd)) {
-            System.err.println("Error: Profile command " + cmd + " not valid");
-            showUsage();
-            return;
-        }
-        
-        try {
-            if (!mAm.profileControl(process, start, profileFile, fd)) {
-                System.err.println("PROFILE FAILED on process " + process);
-                return;
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("PROFILE FAILED: " + e.getMessage());
-            return;
-        } catch (IllegalStateException e) {
-            System.out.println("PROFILE FAILED: " + e.getMessage());
-            return;
-        } catch (RemoteException e) {
-            System.out.println("PROFILE FAILED: activity manager gone");
-            return;
-        }
-    }
-
     private String nextOption() {
+        if (mCurArgData != null) {
+            String prev = mArgs[mNextArg - 1];
+            throw new IllegalArgumentException("No argument expected after \"" + prev + "\"");
+        }
         if (mNextArg >= mArgs.length) {
             return null;
         }
@@ -518,41 +463,52 @@ public class Am {
         return arg;
     }
 
-    private String nextOptionData() {
+    private String nextArg() {
         if (mCurArgData != null) {
-            return mCurArgData;
-        }
-        if (mNextArg >= mArgs.length) {
+            String arg = mCurArgData;
+            mCurArgData = null;
+            return arg;
+        } else if (mNextArg < mArgs.length) {
+            return mArgs[mNextArg++];
+        } else {
             return null;
         }
-        String data = mArgs[mNextArg];
-        mNextArg++;
-        return data;
     }
 
-    private String nextArg() {
-        if (mNextArg >= mArgs.length) {
-            return null;
+    private String nextArgRequired() {
+        String arg = nextArg();
+        if (arg == null) {
+            String prev = mArgs[mNextArg - 1];
+            throw new IllegalArgumentException("Argument expected after \"" + prev + "\"");
         }
-        String arg = mArgs[mNextArg];
-        mNextArg++;
         return arg;
     }
 
-    private void showUsage() {
-        System.err.println("usage: am [start|broadcast|instrument|profile]");
-        System.err.println("       am start [-D] INTENT");
-        System.err.println("       am broadcast INTENT");
-        System.err.println("       am instrument [-r] [-e <ARG_NAME> <ARG_VALUE>] [-p <PROF_FILE>]");
-        System.err.println("                [-w] <COMPONENT> ");
-        System.err.println("       am profile <PROCESS> [start <PROF_FILE>|stop]");
-        System.err.println("");
-        System.err.println("       INTENT is described with:");
-        System.err.println("                [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]");
-        System.err.println("                [-c <CATEGORY> [-c <CATEGORY>] ...]");
-        System.err.println("                [-e|--es <EXTRA_KEY> <EXTRA_STRING_VALUE> ...]");
-        System.err.println("                [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]");
-        System.err.println("                [-e|--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]");
-        System.err.println("                [-n <COMPONENT>] [-f <FLAGS>] [<URI>]");
+    private static void showUsage() {
+        System.err.println(
+                "usage: am [subcommand] [options]\n" +
+                "\n" +
+                "    start an Activity: am start [-D] <INTENT>\n" +
+                "        -D: enable debugging\n" +
+                "\n" +
+                "    send a broadcast Intent: am broadcast <INTENT>\n" +
+                "\n" +
+                "    start an Instrumentation: am instrument [flags] <COMPONENT>\n" +
+                "        -r: print raw results (otherwise decode REPORT_KEY_STREAMRESULT)\n" +
+                "        -e <NAME> <VALUE>: set argument <NAME> to <VALUE>\n" +
+                "        -p <FILE>: write profiling data to <FILE>\n" +
+                "        -w: wait for instrumentation to finish before returning\n" +
+                "\n" +
+                "    start profiling: am profile <PROCESS> start <FILE>\n" +
+                "    stop profiling: am profile <PROCESS> stop\n" +
+                "\n" +
+                "    <INTENT> specifications include these flags:\n" +
+                "        [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
+                "        [-c <CATEGORY> [-c <CATEGORY>] ...]\n" +
+                "        [-e|--es <EXTRA_KEY> <EXTRA_STRING_VALUE> ...]\n" +
+                "        [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
+                "        [-e|--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
+                "        [-n <COMPONENT>] [-f <FLAGS>] [<URI>]\n"
+                );
     }
 }
