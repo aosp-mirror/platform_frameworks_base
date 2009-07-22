@@ -141,7 +141,14 @@ public class SurfaceView extends View {
     int mType = -1;
     final Rect mSurfaceFrame = new Rect();
     private Translator mTranslator;
-
+    
+    // A flag to indicate that the Canvas has to be scaled
+    private boolean mScaleCanvas = false;
+    // A flag to indicate that the Canvas is in use and being scaled.
+    // This may remain to be false even if mScaleCanvas is true if the applicatio
+    // does not use the canvas (such as GLSurfaceView, VideoView).
+    private boolean mCanvasScaled = false;
+    
     public SurfaceView(Context context) {
         super(context);
         setWillNotDraw(true);
@@ -255,18 +262,21 @@ public class SurfaceView extends View {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
-        // SurfaceView uses pre-scaled size unless fixed size is requested. This hook
-        // scales the event back to the pre-scaled coordinates for such surface.
-        if (mScaled) {
+        if (mTranslator == null || mCanvasScaled) {
+            // Use the event as is if no scaling is required, or the surface's canvas
+            // is scaled too.
+            return super.dispatchTouchEvent(event);
+        } else {
+            // The surface is in native size, so we need to scale the event
+            // back to native location.
             MotionEvent scaledBack = MotionEvent.obtain(event);
-            mTranslator.translateEventInScreenToAppWindow(event);
+            // scale back to original
+            scaledBack.scale(mTranslator.applicationScale);
             try {
                 return super.dispatchTouchEvent(scaledBack);
             } finally {
                 scaledBack.recycle();
             }
-        } else {
-            return super.dispatchTouchEvent(event);
         }
     }
 
@@ -292,8 +302,6 @@ public class SurfaceView extends View {
         mWindowType = type;
     }
 
-    boolean mScaled = false;
-    
     private void updateWindow(boolean force) {
         if (!mHaveFrame) {
             return;
@@ -302,7 +310,7 @@ public class SurfaceView extends View {
         mTranslator = viewRoot.mTranslator;
 
         float appScale = mTranslator == null ? 1.0f : mTranslator.applicationScale;
-        
+
         Resources res = getContext().getResources();
         if (mTranslator != null || !res.getCompatibilityInfo().supportsScreen()) {
             mSurface.setCompatibleDisplayMetrics(res.getDisplayMetrics());
@@ -313,14 +321,15 @@ public class SurfaceView extends View {
         int myHeight = mRequestedHeight;
         if (myHeight <= 0) myHeight = getHeight();
 
-        // Use original size if the app specified the size of the view,
-        // and let the flinger to scale up.
+        // Use requested size if the app specified the size of the view
+        // and let the flinger to scale up. Otherwise, use the native size
+        // (* appScale) and assume the application can handle it.
         if (mRequestedWidth <= 0 && mTranslator != null) {
             myWidth = (int) (myWidth * appScale + 0.5f);
             myHeight = (int) (myHeight * appScale + 0.5f);
-            mScaled = true;
+            mScaleCanvas = true;
         } else {
-            mScaled = false;
+            mScaleCanvas = false;
         }
 
         getLocationInWindow(mLocation);
@@ -642,7 +651,9 @@ public class SurfaceView extends View {
             if (localLOGV) Log.i(TAG, "Returned canvas: " + c);
             if (c != null) {
                 mLastLockTime = SystemClock.uptimeMillis();
-                if (mScaled) {
+                if (mScaleCanvas) {
+                    // When the canvas is scaled, don't scale back the event's location.
+                    mCanvasScaled = true;
                     mSaveCount = c.save();
                     mTranslator.translateCanvas(c);
                 }
@@ -668,7 +679,7 @@ public class SurfaceView extends View {
         }
 
         public void unlockCanvasAndPost(Canvas canvas) {
-            if (mScaled) {
+            if (mCanvasScaled) {
                 canvas.restoreToCount(mSaveCount);
             }
             mSurface.unlockCanvasAndPost(canvas);
