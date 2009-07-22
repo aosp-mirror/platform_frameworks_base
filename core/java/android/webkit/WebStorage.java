@@ -24,7 +24,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.HashMap;
-import java.util.Vector;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Functionality for manipulating the webstorage databases.
@@ -60,7 +62,7 @@ public final class WebStorage {
     static final int DELETE_ORIGIN = 2;
     static final int DELETE_ALL = 3;
 
-    private Vector <String> mOrigins;
+    private Set <String> mOrigins;
     private HashMap <String, Long> mQuotas = new HashMap<String, Long>();
     private HashMap <String, Long> mUsages = new HashMap<String, Long>();
 
@@ -112,7 +114,7 @@ public final class WebStorage {
                             } break;
 
                         case DELETE_ALL:
-                            nativeDeleteAllDatabases();
+                            nativeDeleteAllData();
                             syncValues();
                             break;
 
@@ -129,8 +131,8 @@ public final class WebStorage {
      * @hide
      * Returns a list of origins having a database
      */
-    public Vector getOrigins() {
-        Vector ret = null;
+    public Set getOrigins() {
+        Set ret = null;
         mLock.lock();
         try {
             update();
@@ -230,9 +232,9 @@ public final class WebStorage {
      * @hide
      * Delete all databases
      */
-    public void deleteAllDatabases() {
+    public void deleteAllData() {
         if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
-            nativeDeleteAllDatabases();
+            nativeDeleteAllData();
             syncValues();
         } else {
             postMessage(Message.obtain(null, DELETE_ALL));
@@ -278,12 +280,13 @@ public final class WebStorage {
      */
     private void syncValues() {
         mLock.lock();
-        Vector tmp = nativeGetOrigins();
-        mOrigins = new Vector<String>();
+        Set tmp = nativeGetOrigins();
+        mOrigins = new HashSet<String>();
         mQuotas.clear();
         mUsages.clear();
-        for (int i = 0; i < tmp.size(); i++) {
-            String origin = (String) tmp.get(i);
+        Iterator<String> iter = tmp.iterator();
+        while (iter.hasNext()) {
+            String origin = iter.next();
             mOrigins.add(origin);
             mQuotas.put(origin, new Long(nativeGetQuotaForOrigin(origin)));
             mUsages.put(origin, new Long(nativeGetUsageForOrigin(origin)));
@@ -293,10 +296,10 @@ public final class WebStorage {
     }
 
     // Native functions
-    private static native Vector nativeGetOrigins();
+    private static native Set nativeGetOrigins();
     private static native long nativeGetUsageForOrigin(String origin);
     private static native long nativeGetQuotaForOrigin(String origin);
     private static native void nativeSetQuotaForOrigin(String origin, long quota);
     private static native void nativeDeleteOrigin(String origin);
-    private static native void nativeDeleteAllDatabases();
+    private static native void nativeDeleteAllData();
 }
