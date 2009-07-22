@@ -34,7 +34,10 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.SystemClock;
+import android.provider.Browser;
 import android.server.search.SearchableInfo;
 import android.speech.RecognizerIntent;
 import android.text.Editable;
@@ -42,6 +45,7 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.util.Regex;
+import android.util.AndroidRuntimeException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -1093,7 +1097,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     protected void launchQuerySearch(int actionKey, String actionMsg)  {
         String query = mSearchAutoComplete.getText().toString();
-        Intent intent = createIntent(Intent.ACTION_SEARCH, null, null, query, null,
+        String action = mGlobalSearchMode ? Intent.ACTION_WEB_SEARCH : Intent.ACTION_SEARCH;
+        Intent intent = createIntent(action, null, null, query, null,
                 actionKey, actionMsg);
         launchIntent(intent);
     }
@@ -1245,16 +1250,127 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return;
         }
         Log.d(LOG_TAG, "launching " + intent);
-        getContext().startActivity(intent);
-
-        // in global search mode, SearchDialogWrapper#performActivityResuming will handle hiding
-        // the dialog when the next activity starts, but for in-app search, we still need to
-        // dismiss the dialog.
-        if (!mGlobalSearchMode) {
-            dismiss();
+        try {
+            // in global search mode, we send the activity straight to the original suggestion
+            // source. this is because GlobalSearch may not have permission to launch the
+            // intent, and to avoid the extra step of going through GlobalSearch.
+            if (mGlobalSearchMode) {
+                launchGlobalSearchIntent(intent);
+            } else {
+                getContext().startActivity(intent);
+                // in global search mode, SearchDialogWrapper#performActivityResuming
+                // will handle hiding the dialog when the next activity starts, but for
+                // in-app search, we still need to dismiss the dialog.
+                dismiss();
+            }
+        } catch (RuntimeException ex) {
+            Log.e(LOG_TAG, "Failed launch activity: " + intent, ex);
         }
     }
-    
+
+    private void launchGlobalSearchIntent(Intent intent) {
+        final String packageName;
+        // GlobalSearch puts the original source of the suggestion in the
+        // 'component name' column. If set, we send the intent to that activity.
+        // We trust GlobalSearch to always set this to the suggestion source.
+        String intentComponent = intent.getStringExtra(SearchManager.COMPONENT_NAME_KEY);
+        if (intentComponent != null) {
+            ComponentName componentName = ComponentName.unflattenFromString(intentComponent);
+            intent.setComponent(componentName);
+            intent.removeExtra(SearchManager.COMPONENT_NAME_KEY);
+            // Launch the intent as the suggestion source.
+            // This prevents sources from using the search dialog to launch
+            // intents that they don't have permission for themselves.
+            packageName = componentName.getPackageName();
+        } else {
+            // If there is no component in the suggestion, it must be a built-in suggestion
+            // from GlobalSearch (e.g. "Search the web for") or the intent
+            // launched when pressing the search/go button in the search dialog.
+            // Launch the intent with the permissions of GlobalSearch.
+            packageName = mSearchable.getSearchActivity().getPackageName();
+        }
+
+        // Launch all global search suggestions as new tasks, since they don't relate
+        // to the current task.
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        setBrowserApplicationId(intent);
+
+        if (DBG) Log.d(LOG_TAG, "Launching intent " + intent.toURI() + " as " + packageName);
+        startActivityInPackage(intent, packageName);
+    }
+
+    /**
+     * If the intent is to open an HTTP or HTTPS URL, we set
+     * {@link Browser#EXTRA_APPLICATION_ID} so that any existing browser window that
+     * has been opened by us for the same URL will be reused.
+     */
+    private void setBrowserApplicationId(Intent intent) {
+        Uri data = intent.getData();
+        if (Intent.ACTION_VIEW.equals(intent.getAction()) && data != null) {
+            String scheme = data.getScheme();
+            if (scheme != null && scheme.startsWith("http")) {
+                intent.putExtra(Browser.EXTRA_APPLICATION_ID, data.toString());
+            }
+        }
+    }
+
+    /**
+     * Starts an activity as if it had been started by the given package.
+     *
+     * @param intent The description of the activity to start.
+     * @param packageName
+     * @throws ActivityNotFoundException If the intent could not be resolved to
+     *         and existing activity.
+     * @throws SecurityException If the package does not have permission to start
+     *         start the activity.
+     * @throws AndroidRuntimeException If some other error occurs.
+     */
+    private void startActivityInPackage(Intent intent, String packageName) {
+        try {
+            int uid = ActivityThread.getPackageManager().getPackageUid(packageName);
+            if (uid < 0) {
+                throw new AndroidRuntimeException("Package UID not found " + packageName);
+            }
+            String resolvedType = intent.resolveTypeIfNeeded(getContext().getContentResolver());
+            IBinder resultTo = null;
+            String resultWho = null;
+            int requestCode = -1;
+            boolean onlyIfNeeded = false;
+            int result = ActivityManagerNative.getDefault().startActivityInPackage(
+                    uid, intent, resolvedType, resultTo, resultWho, requestCode, onlyIfNeeded);
+            checkStartActivityResult(result, intent);
+        } catch (RemoteException ex) {
+            throw new AndroidRuntimeException(ex);
+        }
+    }
+
+    // Stolen from Instrumentation.checkStartActivityResult()
+    private static void checkStartActivityResult(int res, Intent intent) {
+        if (res >= IActivityManager.START_SUCCESS) {
+            return;
+        }
+        switch (res) {
+            case IActivityManager.START_INTENT_NOT_RESOLVED:
+            case IActivityManager.START_CLASS_NOT_FOUND:
+                if (intent.getComponent() != null)
+                    throw new ActivityNotFoundException(
+                            "Unable to find explicit activity class "
+                            + intent.getComponent().toShortString()
+                            + "; have you declared this activity in your AndroidManifest.xml?");
+                throw new ActivityNotFoundException(
+                        "No Activity found to handle " + intent);
+            case IActivityManager.START_PERMISSION_DENIED:
+                throw new SecurityException("Not allowed to start activity "
+                        + intent);
+            case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
+                throw new AndroidRuntimeException(
+                        "FORWARD_RESULT_FLAG used while also requesting a result");
+            default:
+                throw new AndroidRuntimeException("Unknown error code "
+                        + res + " when starting " + intent);
+        }
+    }
+
     /**
      * Handles the special intent actions declared in {@link SearchManager}.
      * 
@@ -1460,8 +1576,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             intent.putExtra(SearchManager.ACTION_KEY, actionKey);
             intent.putExtra(SearchManager.ACTION_MSG, actionMsg);
         }
-        // attempt to enforce security requirement (no 3rd-party intents)
-        intent.setComponent(mSearchable.getSearchActivity());
+        // Only allow 3rd-party intents from GlobalSearch
+        if (!mGlobalSearchMode) {
+            intent.setComponent(mSearchable.getSearchActivity());
+        }
         return intent;
     }
     
