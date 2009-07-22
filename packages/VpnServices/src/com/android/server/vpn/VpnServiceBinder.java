@@ -42,11 +42,13 @@ public class VpnServiceBinder extends Service {
 
     private final IBinder mBinder = new IVpnService.Stub() {
         public boolean connect(VpnProfile p, String username, String password) {
+            android.util.Log.d("VpnServiceBinder", "becoming foreground");
+            setForeground(true);
             return VpnServiceBinder.this.connect(p, username, password);
         }
 
         public void disconnect() {
-            if (mService != null) mService.onDisconnect(true);
+            VpnServiceBinder.this.disconnect();
         }
 
         public void checkStatus(VpnProfile p) {
@@ -54,21 +56,39 @@ public class VpnServiceBinder extends Service {
         }
     };
 
-    public void onStart (Intent intent, int startId) {
+    @Override
+    public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
-        setForeground(true);
-        android.util.Log.d("VpnServiceBinder", "becomes a foreground service");
     }
 
+    @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
-    private synchronized boolean connect(
-            VpnProfile p, String username, String password) {
+    private synchronized boolean connect(final VpnProfile p,
+            final String username, final String password) {
         if (mService != null) return false;
-        mService = createService(p);
-        return mService.onConnect(username, password);
+
+        new Thread(new Runnable() {
+            public void run() {
+                mService = createService(p);
+                mService.onConnect(username, password);
+            }
+        }).start();
+        return true;
+    }
+
+    private synchronized void disconnect() {
+        if (mService == null) return;
+
+        new Thread(new Runnable() {
+            public void run() {
+                mService.onDisconnect();
+                android.util.Log.d("VpnServiceBinder", "becoming background");
+                setForeground(false);
+            }
+        }).start();
     }
 
     private synchronized void checkStatus(VpnProfile p) {

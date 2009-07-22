@@ -25,15 +25,16 @@ import java.io.IOException;
  * The service that manages the certificate based L2TP-over-IPSec VPN connection.
  */
 class L2tpIpsecService extends VpnService<L2tpIpsecProfile> {
-    private static final String IPSEC_DAEMON = "racoon";
+    private static final String IPSEC = "racoon";
 
     @Override
     protected void connect(String serverIp, String username, String password)
             throws IOException {
         // IPSEC
-        AndroidServiceProxy ipsecService = startService(IPSEC_DAEMON);
-        ipsecService.sendCommand(serverIp, L2tpService.L2TP_PORT,
+        DaemonProxy ipsec = startDaemon(IPSEC);
+        ipsec.sendCommand(serverIp, L2tpService.L2TP_PORT,
                 getUserkeyPath(), getUserCertPath(), getCaCertPath());
+        ipsec.closeControlSocket();
 
         sleep(2000); // 2 seconds
 

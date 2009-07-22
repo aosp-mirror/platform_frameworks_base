@@ -50,14 +50,15 @@ abstract class VpnService<E extends VpnProfile> {
     private static final String REMOTE_IP = "net.ipremote";
     private static final String DNS_DOMAIN_SUFFICES = "net.dns.search";
 
+    private static final int AUTH_ERROR_CODE = 51;
+
     private final String TAG = VpnService.class.getSimpleName();
 
     E mProfile;
     VpnServiceBinder mContext;
 
     private VpnState mState = VpnState.IDLE;
-    private boolean mInError;
-    private VpnConnectingError mError;
+    private Throwable mError;
 
     // connection settings
     private String mOriginalDns1;
@@ -68,8 +69,8 @@ abstract class VpnService<E extends VpnProfile> {
 
     private long mStartTime; // VPN connection start time
 
-    // for helping managing multiple Android services
-    private ServiceHelper mServiceHelper = new ServiceHelper();
+    // for helping managing multiple daemons
+    private DaemonHelper mDaemonHelper = new DaemonHelper();
 
     // for helping showing, updating notification
     private NotificationHelper mNotification = new NotificationHelper();
@@ -81,18 +82,11 @@ abstract class VpnService<E extends VpnProfile> {
             String password) throws IOException;
 
     /**
-     * Tears down the VPN connection. The base class simply terminates all the
-     * Android services. A subclass may need to do some clean-up before that.
+     * Starts a VPN daemon.
      */
-    protected void disconnect() {
-    }
-
-    /**
-     * Starts an Android service defined in init.rc.
-     */
-    protected AndroidServiceProxy startService(String serviceName)
+    protected DaemonProxy startDaemon(String daemonName)
             throws IOException {
-        return mServiceHelper.startService(serviceName);
+        return mDaemonHelper.startDaemon(daemonName);
     }
 
     /**
@@ -107,28 +101,6 @@ abstract class VpnService<E extends VpnProfile> {
      */
     protected String getIp(String hostName) throws IOException {
         return InetAddress.getByName(hostName).getHostAddress();
-    }
-
-    /**
-     * Sets the system property. The method is blocked until the value is
-     * settled in.
-     * @param name the name of the property
-     * @param value the value of the property
-     * @throws IOException if it fails to set the property within 2 seconds
-     */
-    protected void setSystemProperty(String name, String value)
-            throws IOException {
-        SystemProperties.set(name, value);
-        for (int i = 0; i < 5; i++) {
-            String v = SystemProperties.get(name);
-            if (v.equals(value)) {
-                return;
-            } else {
-                Log.d(TAG, "sys_prop: wait for " + name + " to settle in");
-                sleep(400);
-            }
-        }
-        throw new IOException("Failed to set system property: " + name);
     }
 
     void setContext(VpnServiceBinder context, E profile) {
@@ -153,43 +125,41 @@ abstract class VpnService<E extends VpnProfile> {
             return true;
         } catch (Throwable e) {
             Log.e(TAG, "onConnect()", e);
-            mError = newConnectingError(e);
-            onError();
+            onError(e);
             return false;
         }
     }
 
-    synchronized void onDisconnect(boolean cleanUpServices) {
+    synchronized void onDisconnect() {
         try {
             Log.d(TAG, "       disconnecting VPN...");
             mState = VpnState.DISCONNECTING;
             broadcastConnectivity(VpnState.DISCONNECTING);
             mNotification.showDisconnect();
 
-            // subclass implementation
-            if (cleanUpServices) disconnect();
-
-            mServiceHelper.stop();
+            mDaemonHelper.stopAll();
         } catch (Throwable e) {
             Log.e(TAG, "onDisconnect()", e);
+        } finally {
             onFinalCleanUp();
         }
     }
 
-    synchronized void onError() {
+    private void onError(Throwable error) {
         // error may occur during or after connection setup
         // and it may be due to one or all services gone
-        mInError = true;
-        switch (mState) {
-        case CONNECTED:
-            onDisconnect(true);
-            break;
-
-        case CONNECTING:
-            onDisconnect(false);
-            break;
+        if (mError != null) {
+            Log.w(TAG, "   multiple errors occur, record the last one: "
+                    + error);
         }
+        mError = error;
+        onDisconnect();
     }
+
+    private void onError(int errorCode) {
+        onError(new VpnConnectingError(errorCode));
+    }
+
 
     private void onBeforeConnect() {
         mNotification.disableNotification();
@@ -201,41 +171,39 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     private void waitUntilConnectedOrTimedout() {
-        // Run this in the background thread to not block UI
-        new Thread(new Runnable() {
-            public void run() {
-                sleep(2000); // 2 seconds
-                for (int i = 0; i < 60; i++) {
-                    if (VPN_IS_UP.equals(SystemProperties.get(VPN_STATUS))) {
-                        onConnected();
-                        return;
-                    } else if (mState != VpnState.CONNECTING) {
-                        break;
-                    }
-                    sleep(500); // 0.5 second
-                }
-
-                synchronized (VpnService.this) {
-                    if (mState == VpnState.CONNECTING) {
-                        Log.d(TAG, "       connecting timed out !!");
-                        mError = newConnectingError(
-                                new IOException("Connecting timed out"));
-                        onError();
-                    }
-                }
+        sleep(2000); // 2 seconds
+        for (int i = 0; i < 60; i++) {
+            if (mState != VpnState.CONNECTING) {
+                break;
+            } else if (VPN_IS_UP.equals(
+                    SystemProperties.get(VPN_STATUS))) {
+                onConnected();
+                return;
+            } else if (mDaemonHelper.anySocketError()) {
+                return;
             }
-        }).start();
+            sleep(500); // 0.5 second
+        }
+
+        synchronized (VpnService.this) {
+            if (mState == VpnState.CONNECTING) {
+                Log.d(TAG, "       connecting timed out !!");
+                onError(new IOException("Connecting timed out"));
+            }
+        }
     }
 
     private synchronized void onConnected() {
         Log.d(TAG, "onConnected()");
 
+        mDaemonHelper.closeSockets();
         saveVpnDnsProperties();
         saveAndSetDomainSuffices();
-        startConnectivityMonitor();
 
         mState = VpnState.CONNECTED;
         broadcastConnectivity(VpnState.CONNECTED);
+
+        enterConnectivityLoop();
     }
 
     private synchronized void onFinalCleanUp() {
@@ -244,7 +212,7 @@ abstract class VpnService<E extends VpnProfile> {
         if (mState == VpnState.IDLE) return;
 
         // keep the notification when error occurs
-        if (!mInError) mNotification.disableNotification();
+        if (!anyError()) mNotification.disableNotification();
 
         restoreOriginalDnsProperties();
         restoreOriginalDomainSuffices();
@@ -255,37 +223,8 @@ abstract class VpnService<E extends VpnProfile> {
         mContext.stopSelf();
     }
 
-    private VpnConnectingError newConnectingError(Throwable e) {
-        return new VpnConnectingError(
-                (e instanceof UnknownHostException)
-                ? VpnManager.VPN_ERROR_UNKNOWN_SERVER
-                : VpnManager.VPN_ERROR_CONNECTION_FAILED);
-    }
-
-    private synchronized void onOneServiceGone() {
-        switch (mState) {
-        case IDLE:
-        case DISCONNECTING:
-            break;
-
-        default:
-            onError();
-        }
-    }
-
-    private synchronized void onAllServicesGone() {
-        switch (mState) {
-        case IDLE:
-            break;
-
-        case DISCONNECTING:
-            // daemons are gone; now clean up everything
-            onFinalCleanUp();
-            break;
-
-        default:
-            onError();
-        }
+    private boolean anyError() {
+        return (mError != null);
     }
 
     private void restoreOriginalDnsProperties() {
@@ -341,46 +280,65 @@ abstract class VpnService<E extends VpnProfile> {
 
     private void broadcastConnectivity(VpnState s) {
         VpnManager m = new VpnManager(mContext);
-        if ((s == VpnState.IDLE) && (mError != null)) {
-            m.broadcastConnectivity(mProfile.getName(), s,
-                    mError.getErrorCode());
+        Throwable err = mError;
+        if ((s == VpnState.IDLE) && (err != null)) {
+            if (err instanceof UnknownHostException) {
+                m.broadcastConnectivity(mProfile.getName(), s,
+                        VpnManager.VPN_ERROR_UNKNOWN_SERVER);
+            } else if (err instanceof VpnConnectingError) {
+                m.broadcastConnectivity(mProfile.getName(), s,
+                        ((VpnConnectingError) err).getErrorCode());
+            } else {
+                m.broadcastConnectivity(mProfile.getName(), s,
+                        VpnManager.VPN_ERROR_CONNECTION_FAILED);
+            }
         } else {
             m.broadcastConnectivity(mProfile.getName(), s);
         }
     }
 
-    private void startConnectivityMonitor() {
+    private void enterConnectivityLoop() {
         mStartTime = System.currentTimeMillis();
 
-        new Thread(new Runnable() {
-            public void run() {
-                Log.d(TAG, "   +++++   connectivity monitor running");
-                try {
-                    for (;;) {
-                        synchronized (VpnService.this) {
-                            if (mState != VpnState.CONNECTED) break;
-                            mNotification.update();
-                            checkConnectivity();
-                            VpnService.this.wait(1000); // 1 second
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "connectivity monitor", e);
+        Log.d(TAG, "   +++++   connectivity monitor running");
+        try {
+            for (;;) {
+                synchronized (VpnService.this) {
+                    if (mState != VpnState.CONNECTED) break;
+                    mNotification.update();
+                    checkConnectivity();
+                    VpnService.this.wait(1000); // 1 second
                 }
-                Log.d(TAG, "   -----   connectivity monitor stopped");
             }
-        }).start();
+        } catch (InterruptedException e) {
+            Log.e(TAG, "connectivity monitor", e);
+        }
+        Log.d(TAG, "   -----   connectivity monitor stopped");
     }
 
     private void checkConnectivity() {
-        checkDnsProperties();
+        if (mDaemonHelper.anyDaemonStopped() || isLocalIpChanged()) {
+            onDisconnect();
+        }
     }
 
-    private void checkDnsProperties() {
+    private boolean isLocalIpChanged() {
+        // TODO
+        if (!isDnsIntact()) {
+            Log.w(TAG, "       local IP changed");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isDnsIntact() {
         String dns1 = SystemProperties.get(DNS1);
         if (!mVpnDns1.equals(dns1)) {
             Log.w(TAG, "   dns being overridden by: " + dns1);
-            onError();
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -391,56 +349,64 @@ abstract class VpnService<E extends VpnProfile> {
         }
     }
 
-    private InetAddress toInetAddress(int addr) throws IOException {
-        byte[] aa = new byte[4];
-        for (int i= 0; i < aa.length; i++) {
-            aa[i] = (byte) (addr & 0x0FF);
-            addr >>= 8;
-        }
-        return InetAddress.getByAddress(aa);
-    }
+    private class DaemonHelper {
+        private List<DaemonProxy> mDaemonList =
+                new ArrayList<DaemonProxy>();
 
-    private class ServiceHelper implements ProcessProxy.Callback {
-        private List<AndroidServiceProxy> mServiceList =
-                new ArrayList<AndroidServiceProxy>();
-
-        // starts an Android service
-        AndroidServiceProxy startService(String serviceName)
+        synchronized DaemonProxy startDaemon(String daemonName)
                 throws IOException {
-            AndroidServiceProxy service = new AndroidServiceProxy(serviceName);
-            mServiceList.add(service);
-            service.start(this);
-            return service;
+            DaemonProxy daemon = new DaemonProxy(daemonName);
+            mDaemonList.add(daemon);
+            daemon.start();
+            return daemon;
         }
 
-        // stops all the Android services
-        void stop() {
-            if (mServiceList.isEmpty()) {
+        synchronized void stopAll() {
+            if (mDaemonList.isEmpty()) {
                 onFinalCleanUp();
             } else {
-                for (AndroidServiceProxy s : mServiceList) s.stop();
+                for (DaemonProxy s : mDaemonList) s.stop();
             }
         }
 
-        //@Override
-        public void done(ProcessProxy p) {
-            Log.d(TAG, "service done: " + p.getName());
-            commonCallback((AndroidServiceProxy) p);
+        synchronized void closeSockets() {
+            for (DaemonProxy s : mDaemonList) s.closeControlSocket();
         }
 
-        //@Override
-        public void error(ProcessProxy p, Throwable e) {
-            Log.e(TAG, "service error: " + p.getName(), e);
-            if (e instanceof VpnConnectingError) {
-                mError = (VpnConnectingError) e;
+        synchronized boolean anyDaemonStopped() {
+            for (DaemonProxy s : mDaemonList) {
+                if (s.isStopped()) {
+                    Log.w(TAG, "       daemon gone: " + s.getName());
+                    return true;
+                }
             }
-            commonCallback((AndroidServiceProxy) p);
+            return false;
         }
 
-        private void commonCallback(AndroidServiceProxy service) {
-            mServiceList.remove(service);
-            onOneServiceGone();
-            if (mServiceList.isEmpty()) onAllServicesGone();
+        private int getResultFromSocket(DaemonProxy s) {
+            try {
+                return s.getResultFromSocket();
+            } catch (IOException e) {
+                return -1;
+            }
+        }
+
+        synchronized boolean anySocketError() {
+            for (DaemonProxy s : mDaemonList) {
+                switch (getResultFromSocket(s)) {
+                    case 0:
+                        continue;
+
+                    case AUTH_ERROR_CODE:
+                        onError(VpnManager.VPN_ERROR_AUTH);
+                        return true;
+
+                    default:
+                        onError(VpnManager.VPN_ERROR_CONNECTION_FAILED);
+                        return true;
+                }
+            }
+            return false;
         }
     }
 
