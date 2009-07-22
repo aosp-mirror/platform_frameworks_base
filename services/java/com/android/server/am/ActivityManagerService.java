@@ -723,6 +723,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     Configuration mConfiguration = new Configuration();
 
     /**
+     * Hardware-reported OpenGLES version.
+     */
+    final int GL_ES_VERSION;
+
+    /**
      * List of initialization arguments to pass to all processes when binding applications to them.
      * For example, references to the commonly used services.
      */
@@ -1394,6 +1399,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         mUsageStatsService = new UsageStatsService( new File(
                 systemDir, "usagestats").toString());
+
+        GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
+            ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
 
         mConfiguration.makeDefault();
         mProcessStats.init();
@@ -11846,6 +11854,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     && mConfiguration.keyboard != Configuration.KEYBOARD_NOKEYS) {
                 config.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD;
             }
+            config.reqGlEsVersion = GL_ES_VERSION;
         }
         return config;
     }
