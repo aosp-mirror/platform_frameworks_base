@@ -1535,6 +1535,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
+        // Dismiss the popup in case onSaveInstanceState() was not invoked
+        dismissPopup();
+
         final ViewTreeObserver treeObserver = getViewTreeObserver();
         if (treeObserver != null) {
             treeObserver.removeOnTouchModeChangeListener(this);
