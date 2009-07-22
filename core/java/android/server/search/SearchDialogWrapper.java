@@ -190,6 +190,9 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
         msgData.putBundle(KEY_APP_SEARCH_DATA, appSearchData);
         msgData.putInt(KEY_IDENT, ident);
         mSearchUiThread.sendMessage(msg);
+        // be a little more eager in setting this so isVisible will return the correct value if
+        // called immediately after startSearch
+        mVisible = true;
     }
 
     /**
@@ -199,6 +202,9 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     public void stopSearch() {
         if (DBG) debug("stopSearch()");
         mSearchUiThread.sendEmptyMessage(MSG_STOP_SEARCH);
+        // be a little more eager in setting this so isVisible will return the correct value if
+        // called immediately after stopSearch
+        mVisible = false;
     }
 
     /**
