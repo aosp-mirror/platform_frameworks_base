@@ -42,6 +42,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
+import android.content.res.Resources;
 import android.content.Context;
 import android.app.ActivityManagerNative;
 import android.Manifest;
@@ -393,10 +394,14 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mView = view;
                 mWindowAttributes.copyFrom(attrs);
                 attrs = mWindowAttributes;
-
-                CompatibilityInfo compatibilityInfo =
-                        mView.getContext().getResources().getCompatibilityInfo();
+                Resources resources = mView.getContext().getResources();
+                CompatibilityInfo compatibilityInfo = resources.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator(attrs);
+
+                if (mTranslator != null || !compatibilityInfo.supportsScreen()) {
+                    mSurface.setCompatibleDisplayMetrics(resources.getDisplayMetrics());
+                }
+
                 boolean restore = false;
                 if (attrs != null && mTranslator != null) {
                     restore = true;
