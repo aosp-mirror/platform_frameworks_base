@@ -926,17 +926,16 @@ public class StatusBarPolicy {
             // Use Evdo icon
             evdoIconList = this.sSignalImages_evdo;
 
-            int evdoEcio = mSignalStrength.getEvdoEcio();
+            int evdoDbm = mSignalStrength.getEvdoDbm();
             int evdoSnr = mSignalStrength.getEvdoSnr();
-            int levelEvdoEcio = 0;
+            int levelEvdoDbm = 0;
             int levelEvdoSnr = 0;
 
-            // Ec/Io are in dB*10
-            if (evdoEcio >= -650) levelEvdoEcio = 4;
-            else if (evdoEcio >= -750) levelEvdoEcio = 3;
-            else if (evdoEcio >= -900) levelEvdoEcio = 2;
-            else if (evdoEcio >= -1050) levelEvdoEcio = 1;
-            else levelEvdoEcio = 0;
+            if (evdoDbm >= -65) levelEvdoDbm = 4;
+            else if (evdoDbm >= -75) levelEvdoDbm = 3;
+            else if (evdoDbm >= -90) levelEvdoDbm = 2;
+            else if (evdoDbm >= -105) levelEvdoDbm = 1;
+            else levelEvdoDbm = 0;
 
             if (evdoSnr > 7) levelEvdoSnr = 4;
             else if (evdoSnr > 5) levelEvdoSnr = 3;
@@ -944,7 +943,7 @@ public class StatusBarPolicy {
             else if (evdoSnr > 1) levelEvdoSnr = 1;
             else levelEvdoSnr = 0;
 
-            evdoIconLevel = (levelEvdoEcio < levelEvdoSnr) ? levelEvdoEcio : levelEvdoSnr;
+            evdoIconLevel = (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
 
             mPhoneEvdoData.iconId = evdoIconList[evdoIconLevel];
             mService.updateIcon(mPhoneEvdoIcon, mPhoneEvdoData, null);

@@ -1074,7 +1074,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
     /**
      *  send signal-strength-changed notification if changed
-     *  Called both for solicited and unsolicited signal stength updates
+     *  Called both for solicited and unsolicited signal strength updates
      */
     private void
     onSignalStrengthResult(AsyncResult ar) {
@@ -1087,15 +1087,15 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             int[] ints = (int[])ar.result;
             int offset = 2;
 
-            int cdmaDbm = (ints[offset] > 0) ? -ints[offset] : -1;
-            int cdmaEcio = (ints[offset+1] > 0) ? -ints[offset+1] : -1;
+            int cdmaDbm = (ints[offset] > 0) ? -ints[offset] : -120;
+            int cdmaEcio = (ints[offset+1] > 0) ? -ints[offset+1] : -160;
 
             int evdoRssi = -1;
             int evdoEcio = -1;
             int evdoSnr = -1;
             if ((networkType == ServiceState.RADIO_TECHNOLOGY_EVDO_0)
                     || (networkType == ServiceState.RADIO_TECHNOLOGY_EVDO_A)) {
-                evdoRssi = (ints[offset+2] > 0) ? -ints[offset+2] : -1;
+                evdoRssi = (ints[offset+2] > 0) ? -ints[offset+2] : -120;
                 evdoEcio = (ints[offset+3] > 0) ? -ints[offset+3] : -1;
                 evdoSnr  = ((ints[offset+4] > 0) && (ints[offset+4] <= 8)) ? ints[offset+4] : -1;
             }
