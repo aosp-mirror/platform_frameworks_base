@@ -541,6 +541,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             mSearchAutoComplete.setDropDownAlwaysVisible(false);
         }
 
+        mSearchAutoComplete.setForceIgnoreOutsideTouch(true);
+
         // attach the suggestions adapter, if suggestions are available
         // The existence of a suggestions authority is the proxy for "suggestions available here"
         if (mSearchable.getSuggestAuthority() != null) {
