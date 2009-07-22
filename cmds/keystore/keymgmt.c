@@ -79,14 +79,26 @@ static int encrypt_n_save(AES_KEY *enc_key, DATA_BLOB *blob,
 {
     int size, fd, ret = -1;
     unsigned char enc_blob[MAX_BLOB_LEN];
-
     char tmpfile[KEYFILE_LEN];
+
+    if ((keyfile == NULL) || (strlen(keyfile) >= (KEYFILE_LEN - 4))) {
+        LOGE("keyfile name is too long or null");
+        return -1;
+    }
     strcpy(tmpfile, keyfile);
     strcat(tmpfile, ".tmp");
 
     // prepare the blob
+    if (IV_LEN > USER_KEY_LEN) {
+        LOGE("iv length is too long.");
+        return -1;
+    }
     memcpy(blob->iv, iv, IV_LEN);
     blob->blob_size = get_blob_size(blob);
+    if (blob->blob_size > MAX_BLOB_LEN) {
+        LOGE("blob data size is too large.");
+        return -1;
+    }
     memcpy(enc_blob, blob->blob, blob->blob_size);
     AES_cbc_encrypt((unsigned char *)enc_blob, (unsigned char *)blob->blob,
                     blob->blob_size, enc_key, iv, AES_ENCRYPT);
@@ -133,8 +145,13 @@ static int store_master_key(char *upasswd, unsigned char *master_key)
     DATA_BLOB blob;
 
     // prepare the blob
+    if (strlen(MASTER_KEY_TAG) >= USER_KEY_LEN) return -1;
     strlcpy(blob.keyname, MASTER_KEY_TAG, USER_KEY_LEN);
     blob.value_size = USER_KEY_LEN;
+    if (USER_KEY_LEN > MAX_KEY_VALUE_LENGTH) {
+        LOGE("master_key length is too long.");
+        return -1;
+    }
     memcpy((void*)blob.value, (const void*)master_key, USER_KEY_LEN);
 
     // generate the encryption key
@@ -150,6 +167,10 @@ static int get_master_key(char *upasswd, unsigned char *master_key)
 
     get_decrypt_key(upasswd, &key);
     ret = load_n_decrypt(MASTER_KEY_TAG, MASTER_KEY, &key, &blob);
+    if (blob.value_size > USER_KEY_LEN) {
+        LOGE("the blob's value size is too large");
+        return -1;
+    }
     if (!ret) memcpy(master_key, blob.value, blob.value_size);
     return ret;
 }
@@ -224,8 +245,16 @@ int put_key(const char *namespace, const char *keyname,
     }
     sprintf(keyfile, KEYFILE_NAME, namespace, keyname);
     // flatten the args
+    if (strlen(keyname) >= MAX_KEY_NAME_LENGTH) {
+        LOGE("keyname is too long.");
+        return -1;
+    }
     strcpy(blob.keyname, keyname);
     blob.value_size = size;
+    if (size > MAX_KEY_VALUE_LENGTH) {
+        LOGE("the data size is too large.");
+        return -1;
+    }
     memcpy(blob.value, data, size);
     return encrypt_n_save(&encryptKey, &blob, keyfile);
 }
@@ -246,6 +275,7 @@ int get_key(const char *namespace, const char *keyname,
     ret = load_n_decrypt(keyname, keyfile, &decryptKey, &blob);
     if (!ret) {
         if ((blob.value_size > MAX_KEY_VALUE_LENGTH)) {
+            LOGE("blob value size is too large.");
             ret = -1;
         } else {
             *size = blob.value_size;
