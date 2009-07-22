@@ -991,13 +991,13 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public void scale(float scale) {
-            x *= scale;
-            y *= scale;
+            x = (int) (x * scale + 0.5f);
+            y = (int) (y * scale + 0.5f);
             if (width > 0) {
-                width *= scale;
+                width = (int) (width * scale + 0.5f);
             }
             if (height > 0) {
-                height *= scale;
+                height = (int) (height * scale + 0.5f);
             }
         }
 
