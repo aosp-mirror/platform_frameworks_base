@@ -78,6 +78,7 @@ import java.util.ArrayList;
     private float           mDragStartY;
     private long            mDragStartTime;
     private boolean         mDragSent;
+    private boolean         mPageScrolled;
     // Array to store the final character added in onTextChanged, so that its
     // KeyEvents may be determined.
     private char[]          mCharacter = new char[1];
@@ -374,38 +375,26 @@ import java.util.ArrayList;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        int initialScrollX = -1;
-        int initialScrollY = -1;
-        int selectionStart = -1;
-        int selectionEnd = -1;
-        int action = event.getAction();
-        if (action == MotionEvent.ACTION_MOVE) {
-            Spannable buffer = getText();
-            initialScrollX = Touch.getInitialScrollX(this, buffer);
-            initialScrollY = Touch.getInitialScrollY(this, buffer);
-            selectionStart = Selection.getSelectionStart(buffer);
-            selectionEnd = Selection.getSelectionEnd(buffer);
-        }
-        super.onTouchEvent(event);
-        switch (action) {
+        switch (event.getAction()) {
         case MotionEvent.ACTION_DOWN:
+            super.onTouchEvent(event);
             // This event may be the start of a drag, so store it to pass to the
             // WebView if it is.
             mDragStartX = event.getX();
             mDragStartY = event.getY();
             mDragStartTime = event.getEventTime();
             mDragSent = false;
+            mPageScrolled = false;
             break;
         case MotionEvent.ACTION_MOVE:
+            Spannable buffer = getText();
+            int initialScrollX = Touch.getInitialScrollX(this, buffer);
+            int initialScrollY = Touch.getInitialScrollY(this, buffer);
+            super.onTouchEvent(event);
             if (mScrollX != initialScrollX
                     || mScrollY != initialScrollY) {
                 // TextView scrolled, so return true.
                 // FIXME: Need to make the webkit text scroll to reflect this
-                return true;
-            }
-            if (Selection.getSelectionStart(getText()) != selectionStart
-                    || Selection.getSelectionEnd(getText()) != selectionEnd) {
-                // Selection changed, so return true
                 return true;
             }
             if (mWebView != null) {
@@ -415,11 +404,24 @@ import java.util.ArrayList;
                             mDragStartTime);
                     mDragSent = true;
                 }
-                return mWebView.textFieldDrag(event);
+                boolean scrolled = mWebView.textFieldDrag(event);
+                if (scrolled) {
+                    mPageScrolled = true;
+                    cancelLongPress();
+                    return true;
+                }
             }
             return false;
         case MotionEvent.ACTION_UP:
         case MotionEvent.ACTION_CANCEL:
+            if (!mPageScrolled) {
+                // If the page scrolled, we do not want to change the selection,
+                // and the long press has already been canceled, so there is
+                // no need to call into super.
+                // FIXME: Once we enable scrolling the text inside the
+                // textfield, need to check that as well.
+                super.onTouchEvent(event);
+            }
             // Necessary for the WebView to reset its state
             if (mWebView != null && mDragSent) {
                 mWebView.onTouchEvent(event);
