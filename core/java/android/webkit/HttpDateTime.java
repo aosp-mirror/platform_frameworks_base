@@ -23,7 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-class HttpDateTime {
+/** {@hide} */
+public final class HttpDateTime {
 
     /*
      * Regular expression for parsing HTTP-date.
