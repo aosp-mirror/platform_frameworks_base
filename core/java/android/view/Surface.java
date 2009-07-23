@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.*;
 import android.os.Parcelable;
 import android.os.Parcel;
@@ -133,8 +134,12 @@ public class Surface implements Parcelable {
     private Canvas mCanvas;
 
     // The display metrics used to provide the pseudo canvas size for applications
-    // running in compatibility mode. This is set to null for regular mode.
-    private DisplayMetrics mDisplayMetrics;
+    // running in compatibility mode. This is set to null for non compatibility mode.
+    private DisplayMetrics mCompatibleDisplayMetrics;
+
+    // A matrix to scale the matrix set by application. This is set to null for
+    // non compatibility mode.
+    private Matrix mCompatibleMatrix;
 
     /**
      * Exception thrown when a surface couldn't be created or resized
@@ -172,23 +177,70 @@ public class Surface implements Parcelable {
      * {@hide}
      */
     public Surface() {
-        mCanvas = new Canvas() {
-            @Override
-            public int getWidth() {
-                return mDisplayMetrics == null ? super.getWidth() : mDisplayMetrics.widthPixels;
-            }
-            @Override
-            public int getHeight() {
-                return mDisplayMetrics == null ? super.getHeight() : mDisplayMetrics.heightPixels;
-            }
-        };
+        mCanvas = new CompatibleCanvas();
     }
+
+    /**
+     * A Canvas class that can handle the compatibility mode. This does two things differently.
+     * <ul>
+     *  <li> Returns the width and height of the target metrics, rather than native.
+     *  For example, the canvas returns 320x480 even if an app is running in WVGA high density.
+     *  <li> Scales the matrix in setMatrix by the application scale, except if the matrix looks
+     *  like obtained from getMatrix. This is a hack to handle the case that an application
+     *  uses getMatrix to keep the original matrix, set matrix of its own, then set the original
+     *  matrix back. There is no perfect solution that works for all cases, and there are a lot of
+     *  cases that this model dose not work, but we hope this works for many apps.
+     * </ul>
+     */
+    private class CompatibleCanvas extends Canvas {
+        // A temp matrix to remember what an application obtained via {@link getMatrix}
+        private Matrix mOrigMatrix = null;
+
+        @Override
+        public int getWidth() {
+            return mCompatibleDisplayMetrics == null ?
+                    super.getWidth() : mCompatibleDisplayMetrics.widthPixels;
+        }
+
+        @Override
+        public int getHeight() {
+            return mCompatibleDisplayMetrics == null ?
+                    super.getHeight() : mCompatibleDisplayMetrics.heightPixels;
+        }
+
+        @Override
+        public void setMatrix(Matrix matrix) {
+            if (mCompatibleMatrix == null || mOrigMatrix == null || mOrigMatrix.equals(matrix)) {
+                // don't scale the matrix if it's not compatibility mode, or
+                // the matrix was obtained from getMatrix.
+                super.setMatrix(matrix);
+            } else {
+                Matrix m = new Matrix(mCompatibleMatrix);
+                m.preConcat(matrix);
+                super.setMatrix(m);
+            }
+        }
+
+        @Override
+        public void getMatrix(Matrix m) {
+            super.getMatrix(m);
+            if (mOrigMatrix == null) {
+                mOrigMatrix = new Matrix(); 
+            }
+            mOrigMatrix.set(m);
+        }
+    };
 
     /**
      * Sets the display metrics used to provide canva's width/height in comaptibility mode.
      */
-    void setCompatibleDisplayMetrics(DisplayMetrics metrics) {
-        mDisplayMetrics = metrics;
+    void setCompatibleDisplayMetrics(DisplayMetrics metrics, Translator translator) {
+        mCompatibleDisplayMetrics = metrics;
+        if (translator != null) {
+            float appScale = translator.applicationScale;
+            mCompatibleMatrix = new Matrix();
+            mCompatibleMatrix.setScale(appScale, appScale);
+        }
     }
     
     /**
