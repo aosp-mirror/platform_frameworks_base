@@ -251,6 +251,10 @@ private:
         protected:
             friend class ThreadBase;
             friend class RecordHandle;
+            friend class PlaybackThread;
+            friend class RecordThread;
+            friend class MixerThread;
+            friend class DirectOutputThread;
 
                                 TrackBase(const TrackBase&);
                                 TrackBase& operator = (const TrackBase&);
@@ -318,6 +322,8 @@ private:
                     void        sendConfigEvent(int event, int param = 0);
                     void        processConfigEvents();
 
+        mutable     Mutex                   mLock;
+
     protected:
 
         friend class Track;
@@ -329,7 +335,6 @@ private:
         friend class RecordThread;
         friend class RecordTrack;
 
-        mutable     Mutex                   mLock;
                     Condition               mWaitWorkCV;
                     sp<AudioFlinger>        mAudioFlinger;
                     uint32_t                mSampleRate;
@@ -388,7 +393,10 @@ private:
         protected:
             friend class ThreadBase;
             friend class AudioFlinger;
-            friend class AudioFlinger::TrackHandle;
+            friend class TrackHandle;
+            friend class PlaybackThread;
+            friend class MixerThread;
+            friend class DirectOutputThread;
 
                                 Track(const Track&);
                                 Track& operator = (const Track&);
@@ -510,6 +518,14 @@ private:
             bool        mute;
         };
 
+    protected:
+        int                             mType;
+        int16_t*                        mMixBuffer;
+        bool                            mSuspended;
+        int                             mBytesWritten;
+        bool                            mMasterMute;
+        SortedVector< wp<Track> >       mActiveTracks;
+
     private:
 
         friend class AudioFlinger;
@@ -531,21 +547,15 @@ private:
         virtual status_t    dumpInternals(int fd, const Vector<String16>& args);
         status_t    dumpTracks(int fd, const Vector<String16>& args);
 
-        SortedVector< wp<Track> >       mActiveTracks;
         SortedVector< sp<Track> >       mTracks;
         // mStreamTypes[] uses 1 additionnal stream type internally for the OutputTrack used by DuplicatingThread
         stream_type_t                   mStreamTypes[AudioSystem::NUM_STREAM_TYPES + 1];
         AudioStreamOut*                 mOutput;
         float                           mMasterVolume;
-        bool                            mMasterMute;
         nsecs_t                         mLastWriteTime;
         int                             mNumWrites;
         int                             mNumDelayedWrites;
         bool                            mInWrite;
-        int16_t*                        mMixBuffer;
-        bool                            mSuspended;
-        int                             mType;
-        int                             mBytesWritten;
         int                             mMinBytesToWrite;
     };
 
@@ -661,6 +671,7 @@ private:
 
         private:
             friend class AudioFlinger;
+            friend class RecordThread;
 
                                 RecordTrack(const RecordTrack&);
                                 RecordTrack& operator = (const RecordTrack&);
