@@ -1440,7 +1440,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Run a backup pass immediately for any applications that have declared
     // that they have pending updates.
     public void backupNow() throws RemoteException {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "backupNow");
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "backupNow");
 
         if (DEBUG) Log.v(TAG, "Scheduling immediate backup pass");
         synchronized (mQueueLock) {
@@ -1509,13 +1509,13 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Report whether the backup mechanism is currently enabled
     public boolean isBackupEnabled() {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "isBackupEnabled");
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "isBackupEnabled");
         return mEnabled;    // no need to synchronize just to read it
     }
 
     // Report the name of the currently active transport
     public String getCurrentTransport() {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getCurrentTransport");
         Log.v(TAG, "... getCurrentTransport() returning " + mCurrentTransport);
         return mCurrentTransport;
@@ -1544,7 +1544,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // name is not one of the available transports, no action is taken and the method
     // returns null.
     public String selectBackupTransport(String transport) {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "selectBackupTransport");
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "selectBackupTransport");
 
         synchronized (mTransports) {
             String prevTransport = null;
@@ -1598,7 +1598,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Hand off a restore session
     public IRestoreSession beginRestoreSession(String transport) {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "beginRestoreSession");
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "beginRestoreSession");
 
         synchronized(this) {
             if (mActiveRestoreSession != null) {
@@ -1624,7 +1624,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         // --- Binder interface ---
         public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
-            mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "getAvailableRestoreSets");
 
             try {
@@ -1645,7 +1645,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         public int performRestore(long token, IRestoreObserver observer)
                 throws android.os.RemoteException {
-            mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "performRestore");
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "performRestore");
 
             Log.d(TAG, "performRestore token=" + token + " observer=" + observer);
 
@@ -1666,7 +1666,7 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         public void endRestoreSession() throws android.os.RemoteException {
-            mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "endRestoreSession");
 
             Log.d(TAG, "endRestoreSession");
