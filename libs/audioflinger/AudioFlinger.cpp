@@ -781,9 +781,8 @@ void AudioFlinger::ThreadBase::processConfigEvents()
 
 AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output)
     :   ThreadBase(audioFlinger),
-        mOutput(output),
-        mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0),
-        mInWrite(false), mMixBuffer(0), mSuspended(false), mBytesWritten(0)
+        mMixBuffer(0), mSuspended(false), mBytesWritten(0), mOutput(output),
+        mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false)
 {
     readOutputParameters();
 
@@ -1007,7 +1006,7 @@ bool AudioFlinger::PlaybackThread::isMusicActive() const
         sp<Track> t = mActiveTracks[i].promote();
         if (t == 0) continue;
         Track* const track = t.get();
-        if (t->mStreamType == AudioSystem::MUSIC)
+        if (t->type() == AudioSystem::MUSIC)
             return true;
     }
     return false;
