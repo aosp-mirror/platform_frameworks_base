@@ -140,11 +140,17 @@ public class AudioManager {
     public static final int STREAM_NOTIFICATION = AudioSystem.STREAM_NOTIFICATION;
     /** @hide The audio stream for phone calls when connected to bluetooth */
     public static final int STREAM_BLUETOOTH_SCO = AudioSystem.STREAM_BLUETOOTH_SCO;
+    /** @hide The audio stream for enforced system sounds in certain countries (e.g camera in Japan) */
+    public static final int STREAM_SYSTEM_ENFORCED = AudioSystem.STREAM_SYSTEM_ENFORCED;
+    /** The audio stream for DTMF Tones */
+    public static final int STREAM_DTMF = AudioSystem.STREAM_DTMF;
+    /** @hide The audio stream for text to speech (TTS) */
+    public static final int STREAM_TTS = AudioSystem.STREAM_TTS;
     /** Number of audio streams */
     /**
      * @deprecated Use AudioSystem.getNumStreamTypes() instead
      */
-    public static final int NUM_STREAMS = AudioSystem.NUM_STREAMS;
+    @Deprecated public static final int NUM_STREAMS = AudioSystem.NUM_STREAMS;
 
 
     /** @hide Maximum volume index values for audio streams */
@@ -156,6 +162,9 @@ public class AudioManager {
         8,  // STREAM_ALARM
         8,  // STREAM_NOTIFICATION
         16, // STREAM_BLUETOOTH_SCO
+        8,  // STREAM_SYSTEM_ENFORCED
+        16, // STREAM_DTMF
+        16  // STREAM_TTS
     };
 
     /**  @hide Default volume index values for audio streams */
@@ -166,7 +175,10 @@ public class AudioManager {
         11, // STREAM_MUSIC
         6,  // STREAM_ALARM
         5,  // STREAM_NOTIFICATION
-        7   // STREAM_BLUETOOTH_SCO
+        7,  // STREAM_BLUETOOTH_SCO
+        5,  // STREAM_SYSTEM_ENFORCED
+        11, // STREAM_DTMF
+        11  // STREAM_TTS
     };
 
     /**
@@ -637,9 +649,11 @@ public class AudioManager {
      *           <var>false</var> to turn it off
      */
     public void setSpeakerphoneOn(boolean on){
-        // Temporary fix for issue #1713090 until audio routing is refactored in eclair release.
-        // MODE_INVALID indicates to AudioService that setRouting() was initiated by AudioManager
-        setRoutingP(MODE_INVALID, on ? ROUTE_SPEAKER: 0, ROUTE_SPEAKER);
+        if (on) {
+            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_SPEAKER);
+        } else {
+            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_NONE);
+        }
     }
 
     /**
@@ -648,41 +662,47 @@ public class AudioManager {
      * @return true if speakerphone is on, false if it's off
      */
     public boolean isSpeakerphoneOn() {
-        return (getRoutingP(MODE_IN_CALL) & ROUTE_SPEAKER) == 0 ? false : true;
+        if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION) == AudioSystem.FORCE_SPEAKER) {
+            return true;
+        } else {
+            return false;
+        }
      }
 
     /**
-     * Sets audio routing to the Bluetooth headset on or off.
+     * Request use of Bluetooth SCO headset for communications.
      *
-     * @param on set <var>true</var> to route SCO (voice) audio to/from Bluetooth
-     *           headset; <var>false</var> to route audio to/from phone earpiece
+     * @param on set <var>true</var> to use bluetooth SCO for communications;
+     *               <var>false</var> to not use bluetooth SCO for communications
      */
     public void setBluetoothScoOn(boolean on){
-        // Temporary fix for issue #1713090 until audio routing is refactored in eclair release.
-        // MODE_INVALID indicates to AudioService that setRouting() was initiated by AudioManager
-        setRoutingP(MODE_INVALID, on ? ROUTE_BLUETOOTH_SCO: 0, ROUTE_BLUETOOTH_SCO);
+        if (on) {
+            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_BT_SCO);
+        } else {
+            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_NONE);
+        }
     }
 
     /**
-     * Checks whether audio routing to the Bluetooth headset is on or off.
+     * Checks whether communications use Bluetooth SCO.
      *
-     * @return true if SCO audio is being routed to/from Bluetooth headset;
+     * @return true if SCO is used for communications;
      *         false if otherwise
      */
     public boolean isBluetoothScoOn() {
-        return (getRoutingP(MODE_IN_CALL) & ROUTE_BLUETOOTH_SCO) == 0 ? false : true;
+        if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION) == AudioSystem.FORCE_BT_SCO) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
-     * Sets A2DP audio routing to the Bluetooth headset on or off.
-     *
      * @param on set <var>true</var> to route A2DP audio to/from Bluetooth
      *           headset; <var>false</var> disable A2DP audio
+     * @deprecated Do not use.
      */
-    public void setBluetoothA2dpOn(boolean on){
-        // Temporary fix for issue #1713090 until audio routing is refactored in eclair release.
-        // MODE_INVALID indicates to AudioService that setRouting() was initiated by AudioManager
-        setRoutingP(MODE_INVALID, on ? ROUTE_BLUETOOTH_A2DP: 0, ROUTE_BLUETOOTH_A2DP);
+    @Deprecated public void setBluetoothA2dpOn(boolean on){
     }
 
     /**
@@ -692,7 +712,12 @@ public class AudioManager {
      *         false if otherwise
      */
     public boolean isBluetoothA2dpOn() {
-        return (getRoutingP(MODE_NORMAL) & ROUTE_BLUETOOTH_A2DP) == 0 ? false : true;
+        if (AudioSystem.getDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,"") 
+            == AudioSystem.DEVICE_STATE_UNAVAILABLE) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -700,12 +725,9 @@ public class AudioManager {
      *
      * @param on set <var>true</var> to route audio to/from wired
      *           headset; <var>false</var> disable wired headset audio
-     * @hide
+     * @deprecated Do not use.
      */
-    public void setWiredHeadsetOn(boolean on){
-        // Temporary fix for issue #1713090 until audio routing is refactored in eclair release.
-        // MODE_INVALID indicates to AudioService that setRouting() was initiated by AudioManager
-        setRoutingP(MODE_INVALID, on ? ROUTE_HEADSET: 0, ROUTE_HEADSET);
+    @Deprecated public void setWiredHeadsetOn(boolean on){
     }
 
     /**
@@ -713,10 +735,14 @@ public class AudioManager {
      *
      * @return true if audio is being routed to/from wired headset;
      *         false if otherwise
-     * @hide
      */
     public boolean isWiredHeadsetOn() {
-        return (getRoutingP(MODE_NORMAL) & ROUTE_HEADSET) == 0 ? false : true;
+        if (AudioSystem.getDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,"") 
+                == AudioSystem.DEVICE_STATE_UNAVAILABLE) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -726,12 +752,7 @@ public class AudioManager {
      *           <var>false</var> to turn mute off
      */
     public void setMicrophoneMute(boolean on){
-        IAudioService service = getService();
-        try {
-            service.setMicrophoneMute(on);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setMicrophoneMute", e);
-        }
+        AudioSystem.muteMicrophone(on);
     }
 
     /**
@@ -740,13 +761,7 @@ public class AudioManager {
      * @return true if microphone is muted, false if it's not
      */
     public boolean isMicrophoneMute() {
-        IAudioService service = getService();
-        try {
-            return service.isMicrophoneMute();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isMicrophoneMute", e);
-            return false;
-        }
+        return AudioSystem.isMicrophoneMuted();
     }
 
     /**
@@ -809,32 +824,39 @@ public class AudioManager {
     /* Routing bits for setRouting/getRouting API */
     /**
      * Routing audio output to earpiece
+     * @deprecated
      */
-    public static final int ROUTE_EARPIECE          = AudioSystem.ROUTE_EARPIECE;
+    @Deprecated public static final int ROUTE_EARPIECE          = AudioSystem.ROUTE_EARPIECE;
     /**
      * Routing audio output to spaker
+     * @deprecated
      */
-    public static final int ROUTE_SPEAKER           = AudioSystem.ROUTE_SPEAKER;
+    @Deprecated public static final int ROUTE_SPEAKER           = AudioSystem.ROUTE_SPEAKER;
     /**
      * @deprecated use {@link #ROUTE_BLUETOOTH_SCO}
+     * @deprecated
      */
     @Deprecated public static final int ROUTE_BLUETOOTH = AudioSystem.ROUTE_BLUETOOTH_SCO;
     /**
      * Routing audio output to bluetooth SCO
+     * @deprecated
      */
-    public static final int ROUTE_BLUETOOTH_SCO     = AudioSystem.ROUTE_BLUETOOTH_SCO;
+    @Deprecated public static final int ROUTE_BLUETOOTH_SCO     = AudioSystem.ROUTE_BLUETOOTH_SCO;
     /**
      * Routing audio output to headset
+     * @deprecated
      */
-    public static final int ROUTE_HEADSET           = AudioSystem.ROUTE_HEADSET;
+    @Deprecated public static final int ROUTE_HEADSET           = AudioSystem.ROUTE_HEADSET;
     /**
      * Routing audio output to bluetooth A2DP
+     * @deprecated
      */
-    public static final int ROUTE_BLUETOOTH_A2DP    = AudioSystem.ROUTE_BLUETOOTH_A2DP;
+    @Deprecated public static final int ROUTE_BLUETOOTH_A2DP    = AudioSystem.ROUTE_BLUETOOTH_A2DP;
     /**
      * Used for mask parameter of {@link #setRouting(int,int,int)}.
+     * @deprecated
      */
-    public static final int ROUTE_ALL               = AudioSystem.ROUTE_ALL;
+    @Deprecated public static final int ROUTE_ALL               = AudioSystem.ROUTE_ALL;
 
     /**
      * Sets the audio routing for a specified mode
@@ -846,16 +868,10 @@ public class AudioManager {
      * ROUTE_xxx types. Unset bits indicate the route should be left unchanged
      *
      * @deprecated   Do not set audio routing directly, use setSpeakerphoneOn(),
-     * setBluetoothScoOn(), setBluetoothA2dpOn() and setWiredHeadsetOn() methods instead.
+     * setBluetoothScoOn() methods instead.
      */
-
+    @Deprecated
     public void setRouting(int mode, int routes, int mask) {
-        IAudioService service = getService();
-        try {
-            service.setRouting(mode, routes, mask);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setRouting", e);
-        }
     }
 
     /**
@@ -869,13 +885,7 @@ public class AudioManager {
      */
     @Deprecated
     public int getRouting(int mode) {
-        IAudioService service = getService();
-        try {
-            return service.getRouting(mode);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getRouting", e);
-            return -1;
-        }
+        return -1;
     }
 
     /**
@@ -884,13 +894,7 @@ public class AudioManager {
      * @return true if any music tracks are active.
      */
     public boolean isMusicActive() {
-        IAudioService service = getService();
-        try {
-            return service.isMusicActive();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isMusicActive", e);
-            return false;
-        }
+        return AudioSystem.isMusicActive();
     }
 
     /*
@@ -906,14 +910,32 @@ public class AudioManager {
      */
     /**
      * @hide
+     * @deprecated Use {@link #setPrameters(String)} instead
      */
-    public void setParameter(String key, String value) {
-        IAudioService service = getService();
-        try {
-            service.setParameter(key, value);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setParameter", e);
-        }
+    @Deprecated public void setParameter(String key, String value) {
+        setParameters(key+"="+value);
+    }
+
+    /**
+     * Sets a variable number of parameter values to audio hardware.
+     *
+     * @param keyValuePairs list of parameters key value pairs in the form:
+     *    key1=value1;key2=value2;...
+     *
+     */
+    public void setParameters(String keyValuePairs) {
+        AudioSystem.setParameters(keyValuePairs);
+    }
+
+    /**
+     * Sets a varaible number of parameter values to audio hardware.
+     *
+     * @param keys list of parameters
+     * @return list of parameters key value pairs in the form:
+     *    key1=value1;key2=value2;...
+     */
+    public String getParameters(String keys) {
+        return AudioSystem.getParameters(keys);
     }
 
     /* Sound effect identifiers */
@@ -1082,31 +1104,4 @@ public class AudioManager {
       * {@hide}
       */
      private IBinder mICallBack = new Binder();
-
-     /**
-      * {@hide}
-      */
-     private void setRoutingP(int mode, int routes, int mask) {
-         IAudioService service = getService();
-         try {
-             service.setRouting(mode, routes, mask);
-         } catch (RemoteException e) {
-             Log.e(TAG, "Dead object in setRouting", e);
-         }
-     }
-
-
-     /**
-      * {@hide}
-      */
-     private int getRoutingP(int mode) {
-         IAudioService service = getService();
-         try {
-             return service.getRouting(mode);
-         } catch (RemoteException e) {
-             Log.e(TAG, "Dead object in getRouting", e);
-             return -1;
-         }
-     }
-
 }

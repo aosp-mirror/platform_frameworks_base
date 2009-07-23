@@ -43,10 +43,10 @@ status_t AudioHardwareStub::initCheck()
 }
 
 AudioStreamOut* AudioHardwareStub::openOutputStream(
-        int format, int channelCount, uint32_t sampleRate, status_t *status)
+        uint32_t devices, int *format, uint32_t *channels, uint32_t *sampleRate, status_t *status)
 {
     AudioStreamOutStub* out = new AudioStreamOutStub();
-    status_t lStatus = out->set(format, channelCount, sampleRate);
+    status_t lStatus = out->set(format, channels, sampleRate);
     if (status) {
         *status = lStatus;
     }
@@ -56,18 +56,22 @@ AudioStreamOut* AudioHardwareStub::openOutputStream(
     return 0;
 }
 
+void AudioHardwareStub::closeOutputStream(AudioStreamOut* out)
+{
+    delete out;
+}
+
 AudioStreamIn* AudioHardwareStub::openInputStream(
-        int inputSource, int format, int channelCount, uint32_t sampleRate,
+        uint32_t devices, int *format, uint32_t *channels, uint32_t *sampleRate,
         status_t *status, AudioSystem::audio_in_acoustics acoustics)
 {
     // check for valid input source
-    if ((inputSource < AudioRecord::DEFAULT_INPUT) ||
-        (inputSource >= AudioRecord::NUM_INPUT_SOURCES)) {
+    if (!AudioSystem::isInputDevice((AudioSystem::audio_devices)devices)) {
         return 0;
     }
 
     AudioStreamInStub* in = new AudioStreamInStub();
-    status_t lStatus = in->set(format, channelCount, sampleRate, acoustics);
+    status_t lStatus = in->set(format, channels, sampleRate, acoustics);
     if (status) {
         *status = lStatus;
     }
@@ -75,6 +79,11 @@ AudioStreamIn* AudioHardwareStub::openInputStream(
         return in;
     delete in;
     return 0;
+}
+
+void AudioHardwareStub::closeInputStream(AudioStreamIn* in)
+{
+    delete in;
 }
 
 status_t AudioHardwareStub::setVoiceVolume(float volume)
@@ -107,24 +116,19 @@ status_t AudioHardwareStub::dump(int fd, const Vector<String16>& args)
 
 // ----------------------------------------------------------------------------
 
-status_t AudioStreamOutStub::set(int format, int channels, uint32_t rate)
+status_t AudioStreamOutStub::set(int *pFormat, uint32_t *pChannels, uint32_t *pRate)
 {
-    // fix up defaults
-    if (format == 0) format = AudioSystem::PCM_16_BIT;
-    if (channels == 0) channels = channelCount();
-    if (rate == 0) rate = sampleRate();
+    if (pFormat) *pFormat = format();
+    if (pChannels) *pChannels = channels();
+    if (pRate) *pRate = sampleRate();
 
-    if ((format == AudioSystem::PCM_16_BIT) &&
-            (channels == channelCount()) &&
-            (rate == sampleRate()))
-        return NO_ERROR;
-    return BAD_VALUE;
+    return NO_ERROR;
 }
 
 ssize_t AudioStreamOutStub::write(const void* buffer, size_t bytes)
 {
     // fake timing for audio output
-    usleep(bytes * 1000000 / sizeof(int16_t) / channelCount() / sampleRate());
+    usleep(bytes * 1000000 / sizeof(int16_t) / AudioSystem::popCount(channels()) / sampleRate());
     return bytes;
 }
 
@@ -141,7 +145,7 @@ status_t AudioStreamOutStub::dump(int fd, const Vector<String16>& args)
     snprintf(buffer, SIZE, "AudioStreamOutStub::dump\n");
     snprintf(buffer, SIZE, "\tsample rate: %d\n", sampleRate());
     snprintf(buffer, SIZE, "\tbuffer size: %d\n", bufferSize());
-    snprintf(buffer, SIZE, "\tchannel count: %d\n", channelCount());
+    snprintf(buffer, SIZE, "\tchannels: %d\n", channels());
     snprintf(buffer, SIZE, "\tformat: %d\n", format());
     result.append(buffer);
     ::write(fd, result.string(), result.size());
@@ -150,20 +154,16 @@ status_t AudioStreamOutStub::dump(int fd, const Vector<String16>& args)
 
 // ----------------------------------------------------------------------------
 
-status_t AudioStreamInStub::set(int format, int channels, uint32_t rate,
+status_t AudioStreamInStub::set(int *pFormat, uint32_t *pChannels, uint32_t *pRate,
 				AudioSystem::audio_in_acoustics acoustics)
 {
-    if ((format == AudioSystem::PCM_16_BIT) &&
-            (channels == channelCount()) &&
-            (rate == sampleRate()))
-        return NO_ERROR;
-    return BAD_VALUE;
+    return NO_ERROR;
 }
 
 ssize_t AudioStreamInStub::read(void* buffer, ssize_t bytes)
 {
     // fake timing for audio input
-    usleep(bytes * 1000000 / sizeof(int16_t) / channelCount() / sampleRate());
+    usleep(bytes * 1000000 / sizeof(int16_t) / AudioSystem::popCount(channels()) / sampleRate());
     memset(buffer, 0, bytes);
     return bytes;
 }
@@ -179,7 +179,7 @@ status_t AudioStreamInStub::dump(int fd, const Vector<String16>& args)
     result.append(buffer);
     snprintf(buffer, SIZE, "\tbuffer size: %d\n", bufferSize());
     result.append(buffer);
-    snprintf(buffer, SIZE, "\tchannel count: %d\n", channelCount());
+    snprintf(buffer, SIZE, "\tchannels: %d\n", channels());
     result.append(buffer);
     snprintf(buffer, SIZE, "\tformat: %d\n", format());
     result.append(buffer);

@@ -43,7 +43,7 @@ enum tts_callback_status {
 // @param [inout] void *&       - The userdata pointer set in the original
 //                                 synth call
 // @param [in]    uint32_t      - Track sampling rate in Hz
-// @param [in]    audio_format  - The AudioSystem::audio_format enum
+// @param [in]    uint32_t      - The audio format
 // @param [in]    int           - The number of channels
 // @param [inout] int8_t *&     - A buffer of audio data only valid during the
 //                                execution of the callback
@@ -54,7 +54,7 @@ enum tts_callback_status {
 //         TTS_CALLBACK_CONTINUE to indicate the synthesis must continue if
 //            there is more data to produce.
 typedef tts_callback_status (synthDoneCB_t)(void *&, uint32_t,
-        AudioSystem::audio_format, int, int8_t *&, size_t&, tts_synth_status);
+        uint32_t, int, int8_t *&, size_t&, tts_synth_status);
 
 class TtsEngine;
 extern "C" TtsEngine* getTtsEngine();

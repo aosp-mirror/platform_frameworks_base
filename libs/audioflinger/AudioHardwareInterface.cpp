@@ -18,6 +18,7 @@
 #include <cutils/properties.h>
 #include <string.h>
 #include <unistd.h>
+//#define LOG_NDEBUG 0
 
 #define LOG_TAG "AudioHardwareInterface"
 #include <utils/Log.h>
@@ -25,15 +26,17 @@
 
 #include "AudioHardwareStub.h"
 #include "AudioHardwareGeneric.h"
+#ifdef WITH_A2DP
+#include "A2dpAudioInterface.h"
+#endif
 
-//#define DUMP_FLINGER_OUT        // if defined allows recording samples in a file
-#ifdef DUMP_FLINGER_OUT
+#ifdef ENABLE_AUDIO_DUMP
 #include "AudioDumpInterface.h"
 #endif
 
 
 // change to 1 to log routing calls
-#define LOG_ROUTING_CALLS 0
+#define LOG_ROUTING_CALLS 1
 
 namespace android {
 
@@ -48,14 +51,6 @@ static const char* routingModeStrings[] =
     "IN_CALL"
 };
 
-static const char* routeStrings[] =
-{
-    "EARPIECE ",
-    "SPEAKER ",
-    "BLUETOOTH ",
-    "HEADSET ",
-    "BLUETOOTH_A2DP "
-};
 static const char* routeNone = "NONE";
 
 static const char* displayMode(int mode)
@@ -63,22 +58,6 @@ static const char* displayMode(int mode)
     if ((mode < -2) || (mode > 2))
         return routingModeStrings[0];
     return routingModeStrings[mode+3];
-}
-
-static const char* displayRoutes(uint32_t routes)
-{
-    static char routeStr[80];
-    if (routes == 0)
-        return routeNone;
-    routeStr[0] = 0;
-    int bitMask = 1;
-    for (int i = 0; i < 4; ++i, bitMask <<= 1) {
-        if (routes & bitMask) {
-            strcat(routeStr, routeStrings[i]);
-        }
-    }
-    routeStr[strlen(routeStr)-1] = 0;
-    return routeStr;
 }
 #endif
 
@@ -112,13 +91,17 @@ AudioHardwareInterface* AudioHardwareInterface::create()
         hw = new AudioHardwareStub();
     }
     
-#ifdef DUMP_FLINGER_OUT
+#ifdef WITH_A2DP
+    hw = new A2dpAudioInterface(hw);
+#endif
+
+#ifdef ENABLE_AUDIO_DUMP
     // This code adds a record of buffers in a file to write calls made by AudioFlinger.
     // It replaces the current AudioHardwareInterface object by an intermediate one which
     // will record buffers in a file (after sending them to hardware) for testing purpose.
-    // This feature is enabled by defining symbol DUMP_FLINGER_OUT.
-    // The output file is FLINGER_DUMP_NAME. Pause are not recorded in the file.
-    
+    // This feature is enabled by defining symbol ENABLE_AUDIO_DUMP.
+    // The output file is set with setParameters("test_cmd_file_name=<name>"). Pause are not recorded in the file.
+    LOGV("opening PCM dump interface");
     hw = new AudioDumpInterface(hw);    // replace interface
 #endif
     return hw;
@@ -132,46 +115,7 @@ AudioStreamIn::~AudioStreamIn() {}
 
 AudioHardwareBase::AudioHardwareBase()
 {
-    // force a routing update on initialization
-    memset(&mRoutes, 0, sizeof(mRoutes));
     mMode = 0;
-}
-
-// generics for audio routing - the real work is done in doRouting
-status_t AudioHardwareBase::setRouting(int mode, uint32_t routes)
-{
-#if LOG_ROUTING_CALLS
-    LOGD("setRouting: mode=%s, routes=[%s]", displayMode(mode), displayRoutes(routes));
-#endif
-    if (mode == AudioSystem::MODE_CURRENT)
-        mode = mMode;
-    if ((mode < 0) || (mode >= AudioSystem::NUM_MODES))
-        return BAD_VALUE;
-    uint32_t old = mRoutes[mode];
-    mRoutes[mode] = routes;
-    if ((mode != mMode) || (old == routes))
-        return NO_ERROR;
-#if LOG_ROUTING_CALLS
-    const char* oldRouteStr = strdup(displayRoutes(old));
-    LOGD("doRouting: mode=%s, old route=[%s], new route=[%s]",
-           displayMode(mode), oldRouteStr, displayRoutes(routes));
-    delete oldRouteStr;
-#endif
-    return doRouting();
-}
-
-status_t AudioHardwareBase::getRouting(int mode, uint32_t* routes)
-{
-    if (mode == AudioSystem::MODE_CURRENT)
-        mode = mMode;
-    if ((mode < 0) || (mode >= AudioSystem::NUM_MODES))
-        return BAD_VALUE;
-    *routes = mRoutes[mode];
-#if LOG_ROUTING_CALLS
-    LOGD("getRouting: mode=%s, routes=[%s]",
-           displayMode(mode), displayRoutes(*routes));
-#endif
-    return NO_ERROR;
 }
 
 status_t AudioHardwareBase::setMode(int mode)
@@ -182,28 +126,23 @@ status_t AudioHardwareBase::setMode(int mode)
     if ((mode < 0) || (mode >= AudioSystem::NUM_MODES))
         return BAD_VALUE;
     if (mMode == mode)
-        return NO_ERROR;
-#if LOG_ROUTING_CALLS
-    LOGD("doRouting: old mode=%s, new mode=%s route=[%s]",
-            displayMode(mMode), displayMode(mode), displayRoutes(mRoutes[mode]));
-#endif
+        return ALREADY_EXISTS;
     mMode = mode;
-    return doRouting();
-}
-
-status_t AudioHardwareBase::getMode(int* mode)
-{
-    // Implement: set audio routing
-    *mode = mMode;
     return NO_ERROR;
 }
 
-status_t AudioHardwareBase::setParameter(const char* key, const char* value)
+// default implementation
+status_t AudioHardwareBase::setParameters(const String8& keyValuePairs)
 {
-    // default implementation is to ignore
     return NO_ERROR;
 }
 
+// default implementation
+String8 AudioHardwareBase::getParameters(const String8& keys)
+{
+    String8 result = String8("");
+    return result;
+}
 
 // default implementation
 size_t AudioHardwareBase::getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
@@ -233,10 +172,6 @@ status_t AudioHardwareBase::dumpState(int fd, const Vector<String16>& args)
     result.append(buffer);
     snprintf(buffer, SIZE, "\tmMode: %d\n", mMode);
     result.append(buffer);
-    for (int i = 0, n = AudioSystem::NUM_MODES; i < n; ++i) {
-        snprintf(buffer, SIZE, "\tmRoutes[%d]: %d\n", i, mRoutes[i]);
-        result.append(buffer);
-    }
     ::write(fd, result.string(), result.size());
     dump(fd, args);  // Dump the state of the concrete child.
     return NO_ERROR;

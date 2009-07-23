@@ -71,7 +71,7 @@ class SynthProxyJniStorage {
         AudioTrack*               mAudioOut;
         AudioSystem::stream_type  mStreamType;
         uint32_t                  mSampleRate;
-        AudioSystem::audio_format mAudFormat;
+        uint32_t                  mAudFormat;
         int                       mNbChannels;
         int8_t *                  mBuffer;
         size_t                    mBufferSize;
@@ -118,7 +118,6 @@ class SynthProxyJniStorage {
             mSampleRate = rate;
             mAudFormat  = format;
             mNbChannels = channel;
-
             mStreamType = streamType;
 
             // retrieve system properties to ensure successful creation of the
@@ -139,7 +138,8 @@ class SynthProxyJniStorage {
             if (minBufCount < 2) minBufCount = 2;
             int minFrameCount = (afFrameCount * rate * minBufCount)/afSampleRate;
 
-            mAudioOut = new AudioTrack(mStreamType, rate, format, channel,
+            mAudioOut = new AudioTrack(mStreamType, rate, format,
+                    (channel == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO,
                     minFrameCount > 4096 ? minFrameCount : 4096,
                     0, 0, 0, 0); // not using an AudioTrack callback
 
@@ -182,7 +182,7 @@ void prepAudioTrack(SynthProxyJniStorage* pJniData, AudioSystem::stream_type str
  * Directly speaks using AudioTrack or write to file
  */
 static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
-                           AudioSystem::audio_format format, int channel,
+                           uint32_t format, int channel,
                            int8_t *&wav, size_t &bufferSize, tts_synth_status status) {
     //LOGV("ttsSynthDoneCallback: %d bytes", bufferSize);
 
@@ -202,7 +202,7 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         }
 
         if (bufferSize > 0) {
-            prepAudioTrack(pJniData, pForAfter->streamType, rate, format, channel);
+            prepAudioTrack(pJniData, pForAfter->streamType, rate, (AudioSystem::audio_format)format, channel);
             if (pJniData->mAudioOut) {
                 pJniData->mAudioOut->write(wav, bufferSize);
                 memset(wav, 0, bufferSize);

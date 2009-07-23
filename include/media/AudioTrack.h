@@ -117,9 +117,9 @@ public:
      * streamType:         Select the type of audio stream this track is attached to
      *                     (e.g. AudioSystem::MUSIC).
      * sampleRate:         Track sampling rate in Hz.
-     * format:             PCM sample format (e.g AudioSystem::PCM_16_BIT for signed
+     * format:             Audio format (e.g AudioSystem::PCM_16_BIT for signed
      *                     16 bits per sample).
-     * channelCount:       Number of PCM channels (e.g 2 for stereo).
+     * channels:           Channel mask: see AudioSystem::audio_channels.
      * frameCount:         Total size of track PCM buffer in frames. This defines the
      *                     latency of the track.
      * flags:              Reserved for future use.
@@ -133,7 +133,7 @@ public:
                         AudioTrack( int streamType,
                                     uint32_t sampleRate  = 0,
                                     int format           = 0,
-                                    int channelCount     = 0,
+                                    int channels         = 0,
                                     int frameCount       = 0,
                                     uint32_t flags       = 0,
                                     callback_t cbf       = 0,
@@ -152,7 +152,7 @@ public:
                         AudioTrack( int streamType,
                                     uint32_t sampleRate = 0,
                                     int format          = 0,
-                                    int channelCount    = 0,
+                                    int channels        = 0,
                                     const sp<IMemory>& sharedBuffer = 0,
                                     uint32_t flags      = 0,
                                     callback_t cbf      = 0,
@@ -169,13 +169,13 @@ public:
      * Returned status (from utils/Errors.h) can be:
      *  - NO_ERROR: successful intialization
      *  - INVALID_OPERATION: AudioTrack is already intitialized
-     *  - BAD_VALUE: invalid parameter (channelCount, format, sampleRate...)
+     *  - BAD_VALUE: invalid parameter (channels, format, sampleRate...)
      *  - NO_INIT: audio server or audio hardware not initialized
      * */
             status_t    set(int streamType      =-1,
                             uint32_t sampleRate = 0,
                             int format          = 0,
-                            int channelCount    = 0,
+                            int channels        = 0,
                             int frameCount      = 0,
                             uint32_t flags      = 0,
                             callback_t cbf      = 0,
@@ -330,6 +330,16 @@ public:
      */
             status_t    reload();
 
+    /* returns a handle on the audio output used by this AudioTrack.
+     *
+     * Parameters:
+     *  none.
+     *
+     * Returned value:
+     *  handle on audio hardware output
+     */
+            audio_io_handle_t    getOutput();
+
     /* obtains a buffer of "frameCount" frames. The buffer must be
      * filled entirely. If the track is stopped, obtainBuffer() returns
      * STOPPED instead of NO_ERROR as long as there are buffers availlable,
@@ -387,7 +397,6 @@ private:
     sp<AudioTrackThread>    mAudioTrackThread;
 
     float                   mVolume[2];
-    uint32_t                mSampleRate;
     uint32_t                mFrameCount;
 
     audio_track_cblk_t*     mCblk;
@@ -395,6 +404,7 @@ private:
     uint8_t                 mFormat;
     uint8_t                 mChannelCount;
     uint8_t                 mMuted;
+    uint32_t                mChannels;
     status_t                mStatus;
     uint32_t                mLatency;
 
@@ -410,6 +420,7 @@ private:
     bool                    mMarkerReached;
     uint32_t                mNewPosition;
     uint32_t                mUpdatePeriod;
+    uint32_t                mFlags;
 };
 
 

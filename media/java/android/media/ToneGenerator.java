@@ -724,9 +724,9 @@ public class ToneGenerator
     public static final int TONE_CDMA_SIGNAL_OFF = 98;
 
     /** Maximum volume, for use with {@link #ToneGenerator(int,int)} */
-    public static final int MAX_VOLUME = AudioSystem.MAX_VOLUME;
+    public static final int MAX_VOLUME = 100;
     /** Minimum volume setting, for use with {@link #ToneGenerator(int,int)} */
-    public static final int MIN_VOLUME = AudioSystem.MIN_VOLUME;
+    public static final int MIN_VOLUME = 0;
 
 
     /**

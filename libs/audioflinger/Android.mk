@@ -1,12 +1,25 @@
 LOCAL_PATH:= $(call my-dir)
 
+#AUDIO_POLICY_TEST := true
+#ENABLE_AUDIO_DUMP := true
+
 include $(CLEAR_VARS)
+
+
+ifeq ($(AUDIO_POLICY_TEST),true)
+  ENABLE_AUDIO_DUMP := true
+endif
+
 
 LOCAL_SRC_FILES:= \
     AudioHardwareGeneric.cpp \
     AudioHardwareStub.cpp \
-    AudioDumpInterface.cpp \
     AudioHardwareInterface.cpp
+
+ifeq ($(ENABLE_AUDIO_DUMP),true)
+  LOCAL_SRC_FILES += AudioDumpInterface.cpp
+  LOCAL_CFLAGS += -DENABLE_AUDIO_DUMP
+endif
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
@@ -21,7 +34,39 @@ endif
 
 LOCAL_MODULE:= libaudiointerface
 
+ifeq ($(BOARD_HAVE_BLUETOOTH),true)
+  LOCAL_SRC_FILES += A2dpAudioInterface.cpp
+  LOCAL_SHARED_LIBRARIES += liba2dp
+  LOCAL_CFLAGS += -DWITH_BLUETOOTH -DWITH_A2DP
+  LOCAL_C_INCLUDES += $(call include-path-for, bluez)
+endif
+
 include $(BUILD_STATIC_LIBRARY)
+
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=               \
+    AudioPolicyManagerGeneric.cpp
+
+LOCAL_SHARED_LIBRARIES := \
+    libcutils \
+    libutils \
+    libmedia
+
+LOCAL_MODULE:= libaudiopolicygeneric
+
+ifeq ($(BOARD_HAVE_BLUETOOTH),true)
+  LOCAL_CFLAGS += -DWITH_A2DP
+endif
+
+ifeq ($(AUDIO_POLICY_TEST),true)
+  LOCAL_CFLAGS += -DAUDIO_POLICY_TEST
+endif
+
+LOCAL_PRELINK_MODULE := false
+
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -30,7 +75,8 @@ LOCAL_SRC_FILES:=               \
     AudioMixer.cpp.arm          \
     AudioResampler.cpp.arm      \
     AudioResamplerSinc.cpp.arm  \
-    AudioResamplerCubic.cpp.arm
+    AudioResamplerCubic.cpp.arm \
+    AudioPolicyService.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
@@ -41,17 +87,25 @@ LOCAL_SHARED_LIBRARIES := \
 
 ifeq ($(strip $(BOARD_USES_GENERIC_AUDIO)),true)
   LOCAL_STATIC_LIBRARIES += libaudiointerface
+  LOCAL_CFLAGS += -DGENERIC_AUDIO
 else
   LOCAL_SHARED_LIBRARIES += libaudio
+endif
+
+ifeq ($(TARGET_SIMULATOR),true)
+ LOCAL_LDLIBS += -ldl
+else
+ LOCAL_SHARED_LIBRARIES += libdl
 endif
 
 LOCAL_MODULE:= libaudioflinger
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
-  LOCAL_SRC_FILES += A2dpAudioInterface.cpp
-  LOCAL_SHARED_LIBRARIES += liba2dp
   LOCAL_CFLAGS += -DWITH_BLUETOOTH -DWITH_A2DP
-  LOCAL_C_INCLUDES += $(call include-path-for, bluez)
+endif
+
+ifeq ($(AUDIO_POLICY_TEST),true)
+  LOCAL_CFLAGS += -DAUDIO_POLICY_TEST
 endif
 
 ifeq ($(TARGET_SIMULATOR),true)

@@ -16,6 +16,7 @@
 */
 
 #define LOG_TAG "IAudioFlinger"
+//#define LOG_NDEBUG 0
 #include <utils/Log.h>
 
 #include <stdint.h>
@@ -44,17 +45,21 @@ enum {
     STREAM_VOLUME,
     STREAM_MUTE,
     SET_MODE,
-    GET_MODE,
-    SET_ROUTING,
-    GET_ROUTING,
     SET_MIC_MUTE,
     GET_MIC_MUTE,
     IS_MUSIC_ACTIVE,
-    SET_PARAMETER,
+    SET_PARAMETERS,
+    GET_PARAMETERS,
     REGISTER_CLIENT,
     GET_INPUTBUFFERSIZE,
-    WAKE_UP,
-    IS_A2DP_ENABLED
+    OPEN_OUTPUT,
+    OPEN_DUPLICATE_OUTPUT,
+    CLOSE_OUTPUT,
+    SUSPEND_OUTPUT,
+    RESTORE_OUTPUT,
+    OPEN_INPUT,
+    CLOSE_INPUT,
+    SET_STREAM_OUTPUT
 };
 
 class BpAudioFlinger : public BpInterface<IAudioFlinger>
@@ -74,6 +79,7 @@ public:
                                 int frameCount,
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
+                                void *output,
                                 status_t *status)
     {
         Parcel data, reply;
@@ -86,6 +92,7 @@ public:
         data.writeInt32(frameCount);
         data.writeInt32(flags);
         data.writeStrongBinder(sharedBuffer->asBinder());
+        data.write(&output, sizeof(void *));
         status_t lStatus = remote()->transact(CREATE_TRACK, data, &reply);
         if (lStatus != NO_ERROR) {
             LOGE("createTrack error: %s", strerror(-lStatus));
@@ -99,7 +106,7 @@ public:
 
     virtual sp<IAudioRecord> openRecord(
                                 pid_t pid,
-                                int inputSource,
+                                void *input,
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
@@ -110,7 +117,7 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         data.writeInt32(pid);
-        data.writeInt32(inputSource);
+        data.write(&input, sizeof(void *));
         data.writeInt32(sampleRate);
         data.writeInt32(format);
         data.writeInt32(channelCount);
@@ -124,47 +131,47 @@ public:
         return interface_cast<IAudioRecord>(reply.readStrongBinder());
     }
 
-    virtual uint32_t sampleRate(int output) const
+    virtual uint32_t sampleRate(void *output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(output);
+        data.write(&output, sizeof(void *));
         remote()->transact(SAMPLE_RATE, data, &reply);
         return reply.readInt32();
     }
 
-    virtual int channelCount(int output) const
+    virtual int channelCount(void *output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(output);
+        data.write(&output, sizeof(void *));
         remote()->transact(CHANNEL_COUNT, data, &reply);
         return reply.readInt32();
     }
 
-    virtual int format(int output) const
+    virtual int format(void *output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(output);
+        data.write(&output, sizeof(void *));
         remote()->transact(FORMAT, data, &reply);
         return reply.readInt32();
     }
 
-    virtual size_t frameCount(int output) const
+    virtual size_t frameCount(void *output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(output);
+        data.write(&output, sizeof(void *));
         remote()->transact(FRAME_COUNT, data, &reply);
         return reply.readInt32();
     }
 
-    virtual uint32_t latency(int output) const
+    virtual uint32_t latency(void *output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(output);
+        data.write(&output, sizeof(void *));
         remote()->transact(LATENCY, data, &reply);
         return reply.readInt32();
     }
@@ -203,12 +210,13 @@ public:
         return reply.readInt32();
     }
 
-    virtual status_t setStreamVolume(int stream, float value)
+    virtual status_t setStreamVolume(int stream, float value, void *output)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         data.writeInt32(stream);
         data.writeFloat(value);
+        data.write(&output, sizeof(void *));
         remote()->transact(SET_STREAM_VOLUME, data, &reply);
         return reply.readInt32();
     }
@@ -223,11 +231,12 @@ public:
         return reply.readInt32();
     }
 
-    virtual float streamVolume(int stream) const
+    virtual float streamVolume(int stream, void *output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         data.writeInt32(stream);
+        data.write(&output, sizeof(void *));
         remote()->transact(STREAM_VOLUME, data, &reply);
         return reply.readFloat();
     }
@@ -241,40 +250,12 @@ public:
         return reply.readInt32();
     }
 
-    virtual status_t setRouting(int mode, uint32_t routes, uint32_t mask)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(mode);
-        data.writeInt32(routes);
-        data.writeInt32(mask);
-        remote()->transact(SET_ROUTING, data, &reply);
-        return reply.readInt32();
-    }
-
-    virtual uint32_t getRouting(int mode) const
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(mode);
-        remote()->transact(GET_ROUTING, data, &reply);
-        return reply.readInt32();
-    }
-
     virtual status_t setMode(int mode)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         data.writeInt32(mode);
         remote()->transact(SET_MODE, data, &reply);
-        return reply.readInt32();
-    }
-
-    virtual int getMode() const
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        remote()->transact(GET_MODE, data, &reply);
         return reply.readInt32();
     }
 
@@ -303,16 +284,26 @@ public:
         return reply.readInt32();
     }
 
-    virtual status_t setParameter(const char* key, const char* value)
+    virtual status_t setParameters(void *ioHandle, const String8& keyValuePairs)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeCString(key);
-        data.writeCString(value);
-        remote()->transact(SET_PARAMETER, data, &reply);
+        data.write(&ioHandle, sizeof(void *));
+        data.writeString8(keyValuePairs);
+        remote()->transact(SET_PARAMETERS, data, &reply);
         return reply.readInt32();
     }
-    
+
+    virtual String8 getParameters(void *ioHandle, const String8& keys)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.write(&ioHandle, sizeof(void *));
+        data.writeString8(keys);
+        remote()->transact(GET_PARAMETERS, data, &reply);
+        return reply.readString8();
+    }
+
     virtual void registerClient(const sp<IAudioFlingerClient>& client)
     {
         Parcel data, reply;
@@ -320,7 +311,7 @@ public:
         data.writeStrongBinder(client->asBinder());
         remote()->transact(REGISTER_CLIENT, data, &reply);
     }
-    
+
     virtual size_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
     {
         Parcel data, reply;
@@ -331,21 +322,133 @@ public:
         remote()->transact(GET_INPUTBUFFERSIZE, data, &reply);
         return reply.readInt32();
     }
-    
-    virtual void wakeUp()
+
+    virtual void *openOutput(uint32_t *pDevices,
+                            uint32_t *pSamplingRate,
+                            uint32_t *pFormat,
+                            uint32_t *pChannels,
+                            uint32_t *pLatencyMs,
+                            uint32_t flags)
     {
         Parcel data, reply;
+        uint32_t devices = pDevices ? *pDevices : 0;
+        uint32_t samplingRate = pSamplingRate ? *pSamplingRate : 0;
+        uint32_t format = pFormat ? *pFormat : 0;
+        uint32_t channels = pChannels ? *pChannels : 0;
+        uint32_t latency = pLatencyMs ? *pLatencyMs : 0;
+
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        remote()->transact(WAKE_UP, data, &reply, IBinder::FLAG_ONEWAY);
-        return;
+        data.writeInt32(devices);
+        data.writeInt32(samplingRate);
+        data.writeInt32(format);
+        data.writeInt32(channels);
+        data.writeInt32(latency);
+        data.writeInt32(flags);
+        remote()->transact(OPEN_OUTPUT, data, &reply);
+        void *output;
+        reply.read(&output, sizeof(void *));
+        LOGV("openOutput() returned output, %p", output);
+        devices = reply.readInt32();
+        if (pDevices) *pDevices = devices;
+        samplingRate = reply.readInt32();
+        if (pSamplingRate) *pSamplingRate = samplingRate;
+        format = reply.readInt32();
+        if (pFormat) *pFormat = format;
+        channels = reply.readInt32();
+        if (pChannels) *pChannels = channels;
+        latency = reply.readInt32();
+        if (pLatencyMs) *pLatencyMs = latency;
+        return output;
     }
 
-    virtual bool isA2dpEnabled() const
+    virtual void *openDuplicateOutput(void *output1, void *output2)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        remote()->transact(IS_A2DP_ENABLED, data, &reply);
-        return (bool)reply.readInt32();
+        data.write(&output1, sizeof(void *));
+        data.write(&output2, sizeof(void *));
+        remote()->transact(OPEN_DUPLICATE_OUTPUT, data, &reply);
+        void *output;
+        reply.read(&output, sizeof(void *));
+        return output;
+    }
+
+    virtual status_t closeOutput(void *output)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.write(&output, sizeof(void *));
+        remote()->transact(CLOSE_OUTPUT, data, &reply);
+        return reply.readInt32();
+    }
+
+    virtual status_t suspendOutput(void *output)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.write(&output, sizeof(void *));
+        remote()->transact(SUSPEND_OUTPUT, data, &reply);
+        return reply.readInt32();
+    }
+
+    virtual status_t restoreOutput(void *output)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.write(&output, sizeof(void *));
+        remote()->transact(RESTORE_OUTPUT, data, &reply);
+        return reply.readInt32();
+    }
+
+    virtual void *openInput(uint32_t *pDevices,
+                                        uint32_t *pSamplingRate,
+                                        uint32_t *pFormat,
+                                        uint32_t *pChannels,
+                                        uint32_t acoustics)
+    {
+        Parcel data, reply;
+        uint32_t devices = pDevices ? *pDevices : 0;
+        uint32_t samplingRate = pSamplingRate ? *pSamplingRate : 0;
+        uint32_t format = pFormat ? *pFormat : 0;
+        uint32_t channels = pChannels ? *pChannels : 0;
+
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(devices);
+        data.writeInt32(samplingRate);
+        data.writeInt32(format);
+        data.writeInt32(channels);
+        data.writeInt32(acoustics);
+        remote()->transact(OPEN_INPUT, data, &reply);
+        void *input;
+        reply.read(&input, sizeof(void *));
+        devices = reply.readInt32();
+        if (pDevices) *pDevices = devices;
+        samplingRate = reply.readInt32();
+        if (pSamplingRate) *pSamplingRate = samplingRate;
+        format = reply.readInt32();
+        if (pFormat) *pFormat = format;
+        channels = reply.readInt32();
+        if (pChannels) *pChannels = channels;
+        return input;
+    }
+
+    virtual status_t closeInput(void *input)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.write(&input, sizeof(void *));
+        remote()->transact(CLOSE_INPUT, data, &reply);
+        return reply.readInt32();
+    }
+
+    virtual status_t setStreamOutput(uint32_t stream, void *output)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(stream);
+        data.write(&output, sizeof(void *));
+        remote()->transact(SET_STREAM_OUTPUT, data, &reply);
+        return reply.readInt32();
     }
 };
 
@@ -367,10 +470,12 @@ status_t BnAudioFlinger::onTransact(
             size_t bufferCount = data.readInt32();
             uint32_t flags = data.readInt32();
             sp<IMemory> buffer = interface_cast<IMemory>(data.readStrongBinder());
+            void *output;
+            data.read(&output, sizeof(void *));
             status_t status;
             sp<IAudioTrack> track = createTrack(pid,
                     streamType, sampleRate, format,
-                    channelCount, bufferCount, flags, buffer, &status);
+                    channelCount, bufferCount, flags, buffer, output, &status);
             reply->writeInt32(status);
             reply->writeStrongBinder(track->asBinder());
             return NO_ERROR;
@@ -378,14 +483,15 @@ status_t BnAudioFlinger::onTransact(
         case OPEN_RECORD: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             pid_t pid = data.readInt32();
-            int inputSource = data.readInt32();
+            void *input;
+            data.read(&input, sizeof(void *));
             uint32_t sampleRate = data.readInt32();
             int format = data.readInt32();
             int channelCount = data.readInt32();
             size_t bufferCount = data.readInt32();
             uint32_t flags = data.readInt32();
             status_t status;
-            sp<IAudioRecord> record = openRecord(pid, inputSource,
+            sp<IAudioRecord> record = openRecord(pid, input,
                     sampleRate, format, channelCount, bufferCount, flags, &status);
             reply->writeInt32(status);
             reply->writeStrongBinder(record->asBinder());
@@ -393,31 +499,36 @@ status_t BnAudioFlinger::onTransact(
         } break;
         case SAMPLE_RATE: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            int output = data.readInt32();
+            void *output;
+            data.read(&output, sizeof(void *));
             reply->writeInt32( sampleRate(output) );
             return NO_ERROR;
         } break;
         case CHANNEL_COUNT: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            int output = data.readInt32();
+            void *output;
+            data.read(&output, sizeof(void *));
             reply->writeInt32( channelCount(output) );
             return NO_ERROR;
         } break;
         case FORMAT: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            int output = data.readInt32();
+            void *output;
+            data.read(&output, sizeof(void *));
             reply->writeInt32( format(output) );
             return NO_ERROR;
         } break;
         case FRAME_COUNT: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            int output = data.readInt32();
+            void *output;
+            data.read(&output, sizeof(void *));
             reply->writeInt32( frameCount(output) );
             return NO_ERROR;
         } break;
         case LATENCY: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            int output = data.readInt32();
+            void *output;
+            data.read(&output, sizeof(void *));
             reply->writeInt32( latency(output) );
             return NO_ERROR;
         } break;
@@ -444,7 +555,10 @@ status_t BnAudioFlinger::onTransact(
         case SET_STREAM_VOLUME: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             int stream = data.readInt32();
-            reply->writeInt32( setStreamVolume(stream, data.readFloat()) );
+            float volume = data.readFloat();
+            void *output;
+            data.read(&output, sizeof(void *));
+            reply->writeInt32( setStreamVolume(stream, volume, output) );
             return NO_ERROR;
         } break;
         case SET_STREAM_MUTE: {
@@ -456,7 +570,9 @@ status_t BnAudioFlinger::onTransact(
         case STREAM_VOLUME: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             int stream = data.readInt32();
-            reply->writeFloat( streamVolume(stream) );
+            void *output;
+            data.read(&output, sizeof(void *));
+            reply->writeFloat( streamVolume(stream, output) );
             return NO_ERROR;
         } break;
         case STREAM_MUTE: {
@@ -465,29 +581,10 @@ status_t BnAudioFlinger::onTransact(
             reply->writeInt32( streamMute(stream) );
             return NO_ERROR;
         } break;
-        case SET_ROUTING: {
-            CHECK_INTERFACE(IAudioFlinger, data, reply);
-            int mode = data.readInt32();
-            uint32_t routes = data.readInt32();
-            uint32_t mask = data.readInt32();
-            reply->writeInt32( setRouting(mode, routes, mask) );
-            return NO_ERROR;
-        } break;
-        case GET_ROUTING: {
-            CHECK_INTERFACE(IAudioFlinger, data, reply);
-            int mode = data.readInt32();
-            reply->writeInt32( getRouting(mode) );
-            return NO_ERROR;
-        } break;
         case SET_MODE: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             int mode = data.readInt32();
             reply->writeInt32( setMode(mode) );
-            return NO_ERROR;
-        } break;
-        case GET_MODE: {
-            CHECK_INTERFACE(IAudioFlinger, data, reply);
-            reply->writeInt32( getMode() );
             return NO_ERROR;
         } break;
         case SET_MIC_MUTE: {
@@ -506,13 +603,23 @@ status_t BnAudioFlinger::onTransact(
             reply->writeInt32( isMusicActive() );
             return NO_ERROR;
         } break;
-        case SET_PARAMETER: {
+        case SET_PARAMETERS: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            const char *key = data.readCString();
-            const char *value = data.readCString();
-            reply->writeInt32( setParameter(key, value) );
+            void *ioHandle;
+            data.read(&ioHandle, sizeof(void *));
+            String8 keyValuePairs(data.readString8());
+            reply->writeInt32(setParameters(ioHandle, keyValuePairs));
             return NO_ERROR;
-        } break;
+         } break;
+        case GET_PARAMETERS: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            void *ioHandle;
+            data.read(&ioHandle, sizeof(void *));
+            String8 keys(data.readString8());
+            reply->writeString8(getParameters(ioHandle, keys));
+            return NO_ERROR;
+         } break;
+
         case REGISTER_CLIENT: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             sp<IAudioFlingerClient> client = interface_cast<IAudioFlingerClient>(data.readStrongBinder());
@@ -527,14 +634,93 @@ status_t BnAudioFlinger::onTransact(
             reply->writeInt32( getInputBufferSize(sampleRate, format, channelCount) );
             return NO_ERROR;
         } break;
-        case WAKE_UP: {
+        case OPEN_OUTPUT: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            wakeUp();
+            uint32_t devices = data.readInt32();
+            uint32_t samplingRate = data.readInt32();
+            uint32_t format = data.readInt32();
+            uint32_t channels = data.readInt32();
+            uint32_t latency = data.readInt32();
+            uint32_t flags = data.readInt32();
+            void *output = openOutput(&devices,
+                                     &samplingRate,
+                                     &format,
+                                     &channels,
+                                     &latency,
+                                     flags);
+            LOGV("OPEN_OUTPUT output, %p", output);
+            reply->write(&output, sizeof(void *));
+            reply->writeInt32(devices);
+            reply->writeInt32(samplingRate);
+            reply->writeInt32(format);
+            reply->writeInt32(channels);
+            reply->writeInt32(latency);
             return NO_ERROR;
         } break;
-        case IS_A2DP_ENABLED: {
+        case OPEN_DUPLICATE_OUTPUT: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
-            reply->writeInt32( (int)isA2dpEnabled() );
+            void *output1;
+            void *output2;
+            data.read(&output1, sizeof(void *));
+            data.read(&output2, sizeof(void *));
+            void *output = openDuplicateOutput(output1, output2);
+            reply->write(&output, sizeof(void *));
+            return NO_ERROR;
+        } break;
+        case CLOSE_OUTPUT: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            void *output;
+            data.read(&output, sizeof(void *));
+            reply->writeInt32(closeOutput(output));
+            return NO_ERROR;
+        } break;
+        case SUSPEND_OUTPUT: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            void *output;
+            data.read(&output, sizeof(void *));
+            reply->writeInt32(suspendOutput(output));
+            return NO_ERROR;
+        } break;
+        case RESTORE_OUTPUT: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            void *output;
+            data.read(&output, sizeof(void *));
+            reply->writeInt32(restoreOutput(output));
+            return NO_ERROR;
+        } break;
+        case OPEN_INPUT: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            uint32_t devices = data.readInt32();
+            uint32_t samplingRate = data.readInt32();
+            uint32_t format = data.readInt32();
+            uint32_t channels = data.readInt32();
+            uint32_t acoutics = data.readInt32();
+
+            void *input = openInput(&devices,
+                                     &samplingRate,
+                                     &format,
+                                     &channels,
+                                     acoutics);
+            reply->write(&input, sizeof(void *));
+            reply->writeInt32(devices);
+            reply->writeInt32(samplingRate);
+            reply->writeInt32(format);
+            reply->writeInt32(channels);
+            return NO_ERROR;
+        } break;
+        case CLOSE_INPUT: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            void *input;
+            data.read(&input, sizeof(void *));
+            reply->writeInt32(closeInput(input));
+            return NO_ERROR;
+        } break;
+        case SET_STREAM_OUTPUT: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            void *output;
+            uint32_t stream = data.readInt32();
+            data.read(&output, sizeof(void *));
+            reply->writeInt32(setStreamOutput(stream, output));
             return NO_ERROR;
         } break;
         default:

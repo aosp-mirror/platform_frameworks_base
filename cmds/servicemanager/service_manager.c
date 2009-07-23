@@ -30,6 +30,7 @@ static struct {
     { AID_MEDIA, "media.audio_flinger" },
     { AID_MEDIA, "media.player" },
     { AID_MEDIA, "media.camera" },
+    { AID_MEDIA, "media.audio_policy" },
     { AID_RADIO, "radio.phone" },
     { AID_RADIO, "radio.sms" },
     { AID_RADIO, "radio.phonesubinfo" },

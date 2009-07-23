@@ -39,21 +39,10 @@ class AudioRecord
 {
 public:
 
-    // input sources values must always be defined in the range
-    // [AudioRecord::DEFAULT_INPUT, AudioRecord::NUM_INPUT_SOURCES[
-    enum input_source {
-        DEFAULT_INPUT   =-1,
-        MIC_INPUT       = 0,
-        VOICE_UPLINK_INPUT = 1,
-        VOICE_DOWNLINK_INPUT = 2,
-        VOICE_CALL_INPUT = 3,
-        NUM_INPUT_SOURCES
-    };
-
     static const int DEFAULT_SAMPLE_RATE = 8000;
 
     /* Events used by AudioRecord callback function (callback_t).
-     * 
+     *
      * to keep in sync with frameworks/base/media/java/android/media/AudioRecord.java
      */
     enum event_type {
@@ -61,7 +50,7 @@ public:
         EVENT_OVERRUN = 1,          // PCM buffer overrun occured.
         EVENT_MARKER = 2,           // Record head is at the specified marker position
                                     // (See setMarkerPosition()).
-        EVENT_NEW_POS = 3,          // Record head is at a new position 
+        EVENT_NEW_POS = 3,          // Record head is at a new position
                                     // (See setPositionUpdatePeriod()).
     };
 
@@ -123,11 +112,11 @@ public:
      *
      * Parameters:
      *
-     * inputSource:        Select the audio input to record to (e.g. AudioRecord::MIC_INPUT).
+     * inputSource:        Select the audio input to record to (e.g. AUDIO_SOURCE_DEFAULT).
      * sampleRate:         Track sampling rate in Hz.
-     * format:             PCM sample format (e.g AudioSystem::PCM_16_BIT for signed
+     * format:             Audio format (e.g AudioSystem::PCM_16_BIT for signed
      *                     16 bits per sample).
-     * channelCount:       Number of PCM channels (e.g 2 for stereo).
+     * channels:           Channel mask: see AudioSystem::audio_channels.
      * frameCount:         Total size of track PCM buffer in frames. This defines the
      *                     latency of the track.
      * flags:              A bitmask of acoustic values from enum record_flags.  It enables
@@ -148,7 +137,7 @@ public:
                         AudioRecord(int inputSource,
                                     uint32_t sampleRate = 0,
                                     int format          = 0,
-                                    int channelCount    = 0,
+                                    uint32_t channels = AudioSystem::CHANNEL_IN_MONO,
                                     int frameCount      = 0,
                                     uint32_t flags      = 0,
                                     callback_t cbf = 0,
@@ -166,14 +155,14 @@ public:
      * Returned status (from utils/Errors.h) can be:
      *  - NO_ERROR: successful intialization
      *  - INVALID_OPERATION: AudioRecord is already intitialized or record device is already in use
-     *  - BAD_VALUE: invalid parameter (channelCount, format, sampleRate...)
+     *  - BAD_VALUE: invalid parameter (channels, format, sampleRate...)
      *  - NO_INIT: audio server or audio hardware not initialized
      *  - PERMISSION_DENIED: recording is not allowed for the requesting process
      * */
             status_t    set(int inputSource     = 0,
                             uint32_t sampleRate = 0,
                             int format          = 0,
-                            int channelCount    = 0,
+                            uint32_t channels = AudioSystem::CHANNEL_IN_MONO,
                             int frameCount      = 0,
                             uint32_t flags      = 0,
                             callback_t cbf = 0,
@@ -199,6 +188,7 @@ public:
 
             int         format() const;
             int         channelCount() const;
+            int         channels() const;
             uint32_t    frameCount() const;
             int         frameSize() const;
             int         inputSource() const;
@@ -222,8 +212,8 @@ public:
 
     /* Sets marker position. When record reaches the number of frames specified,
      * a callback with event type EVENT_MARKER is called. Calling setMarkerPosition
-     * with marker == 0 cancels marker notification callback. 
-     * If the AudioRecord has been opened with no callback function associated, 
+     * with marker == 0 cancels marker notification callback.
+     * If the AudioRecord has been opened with no callback function associated,
      * the operation will fail.
      *
      * Parameters:
@@ -238,10 +228,10 @@ public:
             status_t    getMarkerPosition(uint32_t *marker);
 
 
-    /* Sets position update period. Every time the number of frames specified has been recorded, 
-     * a callback with event type EVENT_NEW_POS is called. 
-     * Calling setPositionUpdatePeriod with updatePeriod == 0 cancels new position notification 
-     * callback. 
+    /* Sets position update period. Every time the number of frames specified has been recorded,
+     * a callback with event type EVENT_NEW_POS is called.
+     * Calling setPositionUpdatePeriod with updatePeriod == 0 cancels new position notification
+     * callback.
      * If the AudioRecord has been opened with no callback function associated,
      * the operation will fail.
      *
@@ -257,8 +247,8 @@ public:
             status_t    getPositionUpdatePeriod(uint32_t *updatePeriod);
 
 
-    /* Gets record head position. The position is the  total number of frames 
-     * recorded since record start. 
+    /* Gets record head position. The position is the  total number of frames
+     * recorded since record start.
      *
      * Parameters:
      *
@@ -270,8 +260,16 @@ public:
      */
             status_t    getPosition(uint32_t *position);
 
-            
-            
+    /* returns a handle on the audio input used by this AudioRecord.
+     *
+     * Parameters:
+     *  none.
+     *
+     * Returned value:
+     *  handle on audio hardware input
+     */
+            audio_io_handle_t    getInput() { return mInput; }
+
     /* obtains a buffer of "frameCount" frames. The buffer must be
      * filled entirely. If the track is stopped, obtainBuffer() returns
      * STOPPED instead of NO_ERROR as long as there are buffers availlable,
@@ -342,6 +340,7 @@ private:
     bool                    mMarkerReached;
     uint32_t                mNewPosition;
     uint32_t                mUpdatePeriod;
+    audio_io_handle_t       mInput;
 };
 
 }; // namespace android

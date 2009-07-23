@@ -28,8 +28,8 @@
 #include "android_runtime/AndroidRuntime.h"
 
 #include "utils/Log.h"
-#include "media/AudioSystem.h"
 #include "media/AudioRecord.h"
+#include "media/mediarecorder.h"
 
 
 // ----------------------------------------------------------------------------
@@ -62,7 +62,7 @@ struct audiorecord_callback_cookie {
 #define AUDIORECORD_ERROR_BAD_VALUE                 -2
 #define AUDIORECORD_ERROR_INVALID_OPERATION         -3
 #define AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT      -16
-#define AUDIORECORD_ERROR_SETUP_INVALIDCHANNELCOUNT -17
+#define AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK -17
 #define AUDIORECORD_ERROR_SETUP_INVALIDFORMAT       -18
 #define AUDIORECORD_ERROR_SETUP_INVALIDSOURCE       -19
 #define AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED    -20
@@ -122,17 +122,18 @@ static void recorderCallback(int event, void* user, void *info) {
 // ----------------------------------------------------------------------------
 static int
 android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-        jint source, jint sampleRateInHertz, jint nbChannels, 
+        jint source, jint sampleRateInHertz, jint channels,
         jint audioFormat, jint buffSizeInBytes)
 {
     //LOGV(">> Entering android_media_AudioRecord_setup");
-    //LOGV("sampleRate=%d, audioFormat=%d, nbChannels=%d, buffSizeInBytes=%d",
-    //     sampleRateInHertz, audioFormat, nbChannels,     buffSizeInBytes);
+    //LOGV("sampleRate=%d, audioFormat=%d, channels=%x, buffSizeInBytes=%d",
+    //     sampleRateInHertz, audioFormat, channels,     buffSizeInBytes);
 
-    if ((nbChannels == 0) || (nbChannels > 2)) {
+    if (!AudioSystem::isInputChannel(channels)) {
         LOGE("Error creating AudioRecord: channel count is not 1 or 2.");
-        return AUDIORECORD_ERROR_SETUP_INVALIDCHANNELCOUNT;
+        return AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK;
     }
+    uint32_t nbChannels = AudioSystem::popCount(channels);
 
     // compare the format against the Java constants
     if ((audioFormat != javaAudioRecordFields.PCM16) 
@@ -152,12 +153,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     int frameSize = nbChannels * bytesPerSample;
     size_t frameCount = buffSizeInBytes / frameSize;
     
-    // convert and check input source value
-    // input_source values defined in AudioRecord.h are equal to
-    // JAVA MediaRecord.AudioSource values minus 1.
-    AudioRecord::input_source arSource = (AudioRecord::input_source)(source - 1);
-    if (arSource < AudioRecord::DEFAULT_INPUT ||
-        arSource >= AudioRecord::NUM_INPUT_SOURCES) {
+    if (source >= AUDIO_SOURCE_LIST_END) {
         LOGE("Error creating AudioRecord: unknown source.");
         return AUDIORECORD_ERROR_SETUP_INVALIDSOURCE;
     }
@@ -184,10 +180,10 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     // we use a weak reference so the AudioRecord object can be garbage collected.
     lpCallbackData->audioRecord_ref = env->NewGlobalRef(weak_this);
     
-    lpRecorder->set(arSource,
+    lpRecorder->set(source,
         sampleRateInHertz,
         format,        // word length, PCM
-        nbChannels,
+        channels,
         frameCount,
         0,             // flags
         recorderCallback,// callback_t

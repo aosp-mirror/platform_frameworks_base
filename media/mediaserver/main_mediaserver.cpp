@@ -28,6 +28,7 @@
 #include <AudioFlinger.h>
 #include <CameraService.h>
 #include <MediaPlayerService.h>
+#include <AudioPolicyService.h>
 #include <private/android_filesystem_config.h>
 
 using namespace android;
@@ -40,6 +41,7 @@ int main(int argc, char** argv)
     AudioFlinger::instantiate();
     MediaPlayerService::instantiate();
     CameraService::instantiate();
+    AudioPolicyService::instantiate();
     ProcessState::self()->startThreadPool();
     IPCThreadState::self()->joinThreadPool();
 }

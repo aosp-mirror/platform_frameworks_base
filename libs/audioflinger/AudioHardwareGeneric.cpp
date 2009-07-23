@@ -49,8 +49,8 @@ AudioHardwareGeneric::AudioHardwareGeneric()
 AudioHardwareGeneric::~AudioHardwareGeneric()
 {
     if (mFd >= 0) ::close(mFd);
-    delete mOutput;
-    delete mInput;
+    closeOutputStream((AudioStreamOut *)mOutput);
+    closeInputStream((AudioStreamIn *)mInput);
 }
 
 status_t AudioHardwareGeneric::initCheck()
@@ -63,7 +63,7 @@ status_t AudioHardwareGeneric::initCheck()
 }
 
 AudioStreamOut* AudioHardwareGeneric::openOutputStream(
-        int format, int channelCount, uint32_t sampleRate, status_t *status)
+        uint32_t devices, int *format, uint32_t *channels, uint32_t *sampleRate, status_t *status)
 {
     AutoMutex lock(mLock);
 
@@ -77,7 +77,7 @@ AudioStreamOut* AudioHardwareGeneric::openOutputStream(
 
     // create new output stream
     AudioStreamOutGeneric* out = new AudioStreamOutGeneric();
-    status_t lStatus = out->set(this, mFd, format, channelCount, sampleRate);
+    status_t lStatus = out->set(this, mFd, devices, format, channels, sampleRate);
     if (status) {
         *status = lStatus;
     }
@@ -89,17 +89,19 @@ AudioStreamOut* AudioHardwareGeneric::openOutputStream(
     return mOutput;
 }
 
-void AudioHardwareGeneric::closeOutputStream(AudioStreamOutGeneric* out) {
-    if (out == mOutput) mOutput = 0;
+void AudioHardwareGeneric::closeOutputStream(AudioStreamOut* out) {
+    if (mOutput && out == mOutput) {
+        delete mOutput;
+        mOutput = 0;
+    }
 }
 
 AudioStreamIn* AudioHardwareGeneric::openInputStream(
-        int inputSource, int format, int channelCount, uint32_t sampleRate,
+        uint32_t devices, int *format, uint32_t *channels, uint32_t *sampleRate,
         status_t *status, AudioSystem::audio_in_acoustics acoustics)
 {
     // check for valid input source
-    if ((inputSource < AudioRecord::DEFAULT_INPUT) ||
-        (inputSource >= AudioRecord::NUM_INPUT_SOURCES)) {
+    if (!AudioSystem::isInputDevice((AudioSystem::audio_devices)devices)) {
         return 0;
     }
 
@@ -115,7 +117,7 @@ AudioStreamIn* AudioHardwareGeneric::openInputStream(
 
     // create new output stream
     AudioStreamInGeneric* in = new AudioStreamInGeneric();
-    status_t lStatus = in->set(this, mFd, format, channelCount, sampleRate, acoustics);
+    status_t lStatus = in->set(this, mFd, devices, format, channels, sampleRate, acoustics);
     if (status) {
         *status = lStatus;
     }
@@ -127,8 +129,11 @@ AudioStreamIn* AudioHardwareGeneric::openInputStream(
     return mInput;
 }
 
-void AudioHardwareGeneric::closeInputStream(AudioStreamInGeneric* in) {
-    if (in == mInput) mInput = 0;
+void AudioHardwareGeneric::closeInputStream(AudioStreamIn* in) {
+    if (mInput && in == mInput) {
+        delete mInput;
+        mInput = 0;
+    }
 }
 
 status_t AudioHardwareGeneric::setVoiceVolume(float v)
@@ -185,30 +190,42 @@ status_t AudioHardwareGeneric::dump(int fd, const Vector<String16>& args)
 status_t AudioStreamOutGeneric::set(
         AudioHardwareGeneric *hw,
         int fd,
-        int format,
-        int channels,
-        uint32_t rate)
+        uint32_t devices,
+        int *pFormat,
+        uint32_t *pChannels,
+        uint32_t *pRate)
 {
+    int lFormat = pFormat ? *pFormat : 0;
+    uint32_t lChannels = pChannels ? *pChannels : 0;
+    uint32_t lRate = pRate ? *pRate : 0;
+
     // fix up defaults
-    if (format == 0) format = AudioSystem::PCM_16_BIT;
-    if (channels == 0) channels = channelCount();
-    if (rate == 0) rate = sampleRate();
+    if (lFormat == 0) lFormat = format();
+    if (lChannels == 0) lChannels = channels();
+    if (lRate == 0) lRate = sampleRate();
 
     // check values
-    if ((format != AudioSystem::PCM_16_BIT) ||
-            (channels != channelCount()) ||
-            (rate != sampleRate()))
+    if ((lFormat != format()) ||
+            (lChannels != channels()) ||
+            (lRate != sampleRate())) {
+        if (pFormat) *pFormat = format();
+        if (pChannels) *pChannels = channels();
+        if (pRate) *pRate = sampleRate();
         return BAD_VALUE;
+    }
+
+    if (pFormat) *pFormat = lFormat;
+    if (pChannels) *pChannels = lChannels;
+    if (pRate) *pRate = lRate;
 
     mAudioHardware = hw;
     mFd = fd;
+    mDevice = devices;
     return NO_ERROR;
 }
 
 AudioStreamOutGeneric::~AudioStreamOutGeneric()
 {
-    if (mAudioHardware)
-        mAudioHardware->closeOutputStream(this);
 }
 
 ssize_t AudioStreamOutGeneric::write(const void* buffer, size_t bytes)
@@ -234,9 +251,11 @@ status_t AudioStreamOutGeneric::dump(int fd, const Vector<String16>& args)
     result.append(buffer);
     snprintf(buffer, SIZE, "\tbuffer size: %d\n", bufferSize());
     result.append(buffer);
-    snprintf(buffer, SIZE, "\tchannel count: %d\n", channelCount());
+    snprintf(buffer, SIZE, "\tchannels: %d\n", channels());
     result.append(buffer);
     snprintf(buffer, SIZE, "\tformat: %d\n", format());
+    result.append(buffer);
+    snprintf(buffer, SIZE, "\tdevice: %d\n", mDevice);
     result.append(buffer);
     snprintf(buffer, SIZE, "\tmAudioHardware: %p\n", mAudioHardware);
     result.append(buffer);
@@ -246,29 +265,68 @@ status_t AudioStreamOutGeneric::dump(int fd, const Vector<String16>& args)
     return NO_ERROR;
 }
 
+status_t AudioStreamOutGeneric::setParameters(const String8& keyValuePairs)
+{
+    AudioParameter param = AudioParameter(keyValuePairs);
+    String8 key = String8(AudioParameter::keyRouting);
+    status_t status = NO_ERROR;
+    int device;
+    LOGV("setParameters() %s", keyValuePairs.string());
+
+    if (param.getInt(key, device) == NO_ERROR) {
+        mDevice = device;
+        param.remove(key);
+    }
+
+    if (param.size()) {
+        status = BAD_VALUE;
+    }
+    return status;
+}
+
+String8 AudioStreamOutGeneric::getParameters(const String8& keys)
+{
+    AudioParameter param = AudioParameter(keys);
+    String8 value;
+    String8 key = String8(AudioParameter::keyRouting);
+
+    if (param.get(key, value) == NO_ERROR) {
+        param.addInt(key, (int)mDevice);
+    }
+
+    LOGV("getParameters() %s", param.toString().string());
+    return param.toString();
+}
+
 // ----------------------------------------------------------------------------
 
 // record functions
 status_t AudioStreamInGeneric::set(
         AudioHardwareGeneric *hw,
         int fd,
-        int format,
-        int channels,
-        uint32_t rate,
+        uint32_t devices,
+        int *pFormat,
+        uint32_t *pChannels,
+        uint32_t *pRate,
         AudioSystem::audio_in_acoustics acoustics)
 {
     // FIXME: remove logging
-    LOGD("AudioStreamInGeneric::set(%p, %d, %d, %d, %u)", hw, fd, format, channels, rate);
+    if (pFormat == 0 || pChannels == 0 || pRate == 0) return BAD_VALUE;
+    LOGD("AudioStreamInGeneric::set(%p, %d, %d, %d, %u)", hw, fd, *pFormat, *pChannels, *pRate);
     // check values
-    if ((format != AudioSystem::PCM_16_BIT) ||
-            (channels != channelCount()) ||
-            (rate != sampleRate())) {
+    if ((*pFormat != format()) ||
+        (*pChannels != channels()) ||
+        (*pRate != sampleRate())) {
         LOGE("Error opening input channel");
+        *pFormat = format();
+        *pChannels = channels();
+        *pRate = sampleRate();
         return BAD_VALUE;
     }
 
     mAudioHardware = hw;
     mFd = fd;
+    mDevice = devices;
     return NO_ERROR;
 }
 
@@ -276,14 +334,12 @@ AudioStreamInGeneric::~AudioStreamInGeneric()
 {
     // FIXME: remove logging
     LOGD("AudioStreamInGeneric destructor");
-    if (mAudioHardware)
-        mAudioHardware->closeInputStream(this);
 }
 
 ssize_t AudioStreamInGeneric::read(void* buffer, ssize_t bytes)
 {
     // FIXME: remove logging
-    LOGD("AudioStreamInGeneric::read(%p, %d) from fd %d", buffer, bytes, mFd);
+    LOGD("AudioStreamInGeneric::read(%p, %d) from fd %d", buffer, (int)bytes, mFd);
     AutoMutex lock(mLock);
     if (mFd < 0) {
         LOGE("Attempt to read from unopened device");
@@ -303,9 +359,11 @@ status_t AudioStreamInGeneric::dump(int fd, const Vector<String16>& args)
     result.append(buffer);
     snprintf(buffer, SIZE, "\tbuffer size: %d\n", bufferSize());
     result.append(buffer);
-    snprintf(buffer, SIZE, "\tchannel count: %d\n", channelCount());
+    snprintf(buffer, SIZE, "\tchannels: %d\n", channels());
     result.append(buffer);
     snprintf(buffer, SIZE, "\tformat: %d\n", format());
+    result.append(buffer);
+    snprintf(buffer, SIZE, "\tdevice: %d\n", mDevice);
     result.append(buffer);
     snprintf(buffer, SIZE, "\tmAudioHardware: %p\n", mAudioHardware);
     result.append(buffer);
@@ -313,6 +371,39 @@ status_t AudioStreamInGeneric::dump(int fd, const Vector<String16>& args)
     result.append(buffer);
     ::write(fd, result.string(), result.size());
     return NO_ERROR;
+}
+
+status_t AudioStreamInGeneric::setParameters(const String8& keyValuePairs)
+{
+    AudioParameter param = AudioParameter(keyValuePairs);
+    String8 key = String8(AudioParameter::keyRouting);
+    status_t status = NO_ERROR;
+    int device;
+    LOGV("setParameters() %s", keyValuePairs.string());
+
+    if (param.getInt(key, device) == NO_ERROR) {
+        mDevice = device;
+        param.remove(key);
+    }
+
+    if (param.size()) {
+        status = BAD_VALUE;
+    }
+    return status;
+}
+
+String8 AudioStreamInGeneric::getParameters(const String8& keys)
+{
+    AudioParameter param = AudioParameter(keys);
+    String8 value;
+    String8 key = String8(AudioParameter::keyRouting);
+
+    if (param.get(key, value) == NO_ERROR) {
+        param.addInt(key, (int)mDevice);
+    }
+
+    LOGV("getParameters() %s", param.toString().string());
+    return param.toString();
 }
 
 // ----------------------------------------------------------------------------

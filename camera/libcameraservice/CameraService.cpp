@@ -33,7 +33,6 @@
 #include "CameraService.h"
 
 #include <cutils/atomic.h>
-#include <cutils/properties.h>
 
 namespace android {
 
@@ -199,13 +198,7 @@ static sp<MediaPlayer> newMediaPlayer(const char *file)
 {
     sp<MediaPlayer> mp = new MediaPlayer();
     if (mp->setDataSource(file) == NO_ERROR) {
-        char value[PROPERTY_VALUE_MAX];
-        property_get("ro.camera.sound.forced", value, "0");
-        if (atoi(value)) {
-            mp->setAudioStreamType(AudioSystem::ENFORCED_AUDIBLE);
-        } else {
-            mp->setAudioStreamType(AudioSystem::SYSTEM);            
-        }
+        mp->setAudioStreamType(AudioSystem::ENFORCED_AUDIBLE);
         mp->prepare();
     } else {
         mp.clear();

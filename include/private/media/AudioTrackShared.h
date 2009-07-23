@@ -55,17 +55,18 @@ struct audio_track_cblk_t
                     uint32_t    volumeLR;
                 };
                 uint32_t    sampleRate;
+                // NOTE: audio_track_cblk_t::frameSize is not equal to AudioTrack::frameSize() for
+                // 8 bit PCM data: in this case,  mCblk->frameSize is based on a sample size of
+                // 16 bit because data is converted to 16 bit before being stored in buffer
+                uint32_t    frameSize;
                 uint8_t     channels;
                 uint8_t     flowControlFlag; // underrun (out) or overrrun (in) indication
                 uint8_t     out;        // out equals 1 for AudioTrack and 0 for AudioRecord
-                uint8_t     forceReady; 
+                uint8_t     forceReady;
                 uint16_t    bufferTimeoutMs; // Maximum cumulated timeout before restarting audioflinger
                 uint16_t    waitTimeMs;      // Cumulated wait time
-                // Padding ensuring that data buffer starts on a cache line boundary (32 bytes). 
-                // See AudioFlinger::TrackBase constructor
-                int32_t     Padding[1];
-                // Cache line boundary
-                
+                // Cache line boundary (32 bytes)
+
                             audio_track_cblk_t();
                 uint32_t    stepUser(uint32_t frameCount);
                 bool        stepServer(uint32_t frameCount);

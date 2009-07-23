@@ -20,35 +20,94 @@
 
 #include <stdint.h>
 #include <sys/types.h>
+#include <utils/String8.h>
+#include <utils/SortedVector.h>
 
 #include <hardware_legacy/AudioHardwareBase.h>
 
 namespace android {
 
-#define FLINGER_DUMP_NAME "/data/FlingerOut.pcm" // name of file used for dump
+#define AUDIO_DUMP_WAVE_HDR_SIZE 44
+
+class AudioDumpInterface;
 
 class AudioStreamOutDump : public AudioStreamOut {
 public:
-                        AudioStreamOutDump( AudioStreamOut* FinalStream);
+                        AudioStreamOutDump(AudioDumpInterface *interface,
+                                            int id,
+                                            AudioStreamOut* finalStream,
+                                            uint32_t devices,
+                                            int format,
+                                            uint32_t channels,
+                                            uint32_t sampleRate);
                         ~AudioStreamOutDump();
-                        virtual ssize_t     write(const void* buffer, size_t bytes);
 
-    virtual uint32_t    sampleRate() const { return mFinalStream->sampleRate(); }
-    virtual size_t      bufferSize() const { return mFinalStream->bufferSize(); }
-    virtual int         channelCount() const { return mFinalStream->channelCount(); }
-    virtual int         format() const { return mFinalStream->format(); }
-    virtual uint32_t    latency() const { return mFinalStream->latency(); }
-    virtual status_t    setVolume(float volume)
-                            { return mFinalStream->setVolume(volume); }
+    virtual ssize_t     write(const void* buffer, size_t bytes);
+    virtual uint32_t    sampleRate() const;
+    virtual size_t      bufferSize() const;
+    virtual uint32_t    channels() const;
+    virtual int         format() const;
+    virtual uint32_t    latency() const;
+    virtual status_t    setVolume(float left, float right);
     virtual status_t    standby();
-    virtual status_t    dump(int fd, const Vector<String16>& args) { return mFinalStream->dump(fd, args); }
+    virtual status_t    setParameters(const String8& keyValuePairs);
+    virtual String8     getParameters(const String8& keys);
+    virtual status_t    dump(int fd, const Vector<String16>& args);
     void                Close(void);
+    AudioStreamOut*     finalStream() { return mFinalStream; }
+    uint32_t            device() { return mDevice; }
 
 private:
+    AudioDumpInterface *mInterface;
+    int                  mId;
+    uint32_t mSampleRate;               //
+    uint32_t mFormat;                   //
+    uint32_t mChannels;                 // output configuration
+    uint32_t mLatency;                  //
+    uint32_t mDevice;                   // current device this output is routed to
+    size_t  mBufferSize;
     AudioStreamOut      *mFinalStream;
-    FILE                *mOutFile;     // output file
+    FILE                *mOutFile;      // output file
+    int                 mFileCount;
 };
 
+class AudioStreamInDump : public AudioStreamIn {
+public:
+                        AudioStreamInDump(AudioDumpInterface *interface,
+                                            int id,
+                                            AudioStreamIn* finalStream,
+                                            uint32_t devices,
+                                            int format,
+                                            uint32_t channels,
+                                            uint32_t sampleRate);
+                        ~AudioStreamInDump();
+
+    virtual uint32_t    sampleRate() const;
+    virtual size_t      bufferSize() const;
+    virtual uint32_t    channels() const;
+    virtual int         format() const;
+
+    virtual status_t    setGain(float gain);
+    virtual ssize_t     read(void* buffer, ssize_t bytes);
+    virtual status_t    standby();
+    virtual status_t    setParameters(const String8& keyValuePairs);
+    virtual String8     getParameters(const String8& keys);
+    virtual status_t    dump(int fd, const Vector<String16>& args);
+    void                Close(void);
+    AudioStreamIn*     finalStream() { return mFinalStream; }
+    uint32_t            device() { return mDevice; }
+
+private:
+    AudioDumpInterface *mInterface;
+    int                  mId;
+    uint32_t mSampleRate;               //
+    uint32_t mFormat;                   //
+    uint32_t mChannels;                 // output configuration
+    uint32_t mDevice;                   // current device this output is routed to
+    size_t  mBufferSize;
+    AudioStreamIn      *mFinalStream;
+    FILE                *mInFile;      // output file
+};
 
 class AudioDumpInterface : public AudioHardwareBase
 {
@@ -56,10 +115,13 @@ class AudioDumpInterface : public AudioHardwareBase
 public:
                         AudioDumpInterface(AudioHardwareInterface* hw);
     virtual AudioStreamOut* openOutputStream(
-                                int format=0,
-                                int channelCount=0,
-                                uint32_t sampleRate=0,
+                                uint32_t devices,
+                                int *format=0,
+                                uint32_t *channels=0,
+                                uint32_t *sampleRate=0,
                                 status_t *status=0);
+    virtual    void        closeOutputStream(AudioStreamOut* out);
+
     virtual             ~AudioDumpInterface();
 
     virtual status_t    initCheck()
@@ -75,21 +137,25 @@ public:
     virtual status_t    getMicMute(bool* state)
                             {return mFinalInterface->getMicMute(state);}
 
-    virtual status_t    setParameter(const char* key, const char* value)
-                            {return mFinalInterface->setParameter(key, value);}
+    virtual status_t    setParameters(const String8& keyValuePairs);
+    virtual String8     getParameters(const String8& keys);
 
-    virtual AudioStreamIn* openInputStream(int inputSource, int format, int channelCount,
-            uint32_t sampleRate, status_t *status, AudioSystem::audio_in_acoustics acoustics)
-        { return mFinalInterface->openInputStream(inputSource, format, channelCount, sampleRate, status, acoustics); }
+    virtual AudioStreamIn* openInputStream(uint32_t devices, int *format, uint32_t *channels,
+            uint32_t *sampleRate, status_t *status, AudioSystem::audio_in_acoustics acoustics);
+    virtual    void        closeInputStream(AudioStreamIn* in);
 
     virtual status_t    dump(int fd, const Vector<String16>& args) { return mFinalInterface->dumpState(fd, args); }
 
+            String8     fileName() const { return mFileName; }
 protected:
-    virtual status_t    doRouting() {return mFinalInterface->setRouting(mMode, mRoutes[mMode]);}
 
-    AudioHardwareInterface  *mFinalInterface;
-    AudioStreamOutDump      *mStreamOut;
-
+    AudioHardwareInterface          *mFinalInterface;
+    SortedVector<AudioStreamOutDump *>    mOutputs;
+    bool                            mFirstHwOutput;
+    SortedVector<AudioStreamInDump *>    mInputs;
+    Mutex                           mLock;
+    String8                         mPolicyCommands;
+    String8                         mFileName;
 };
 
 }; // namespace android
