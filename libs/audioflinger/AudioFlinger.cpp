@@ -235,7 +235,7 @@ status_t AudioFlinger::dump(int fd, const Vector<String16>& args)
         }
 
         // dump record threads
-        for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
+        for (size_t i = 0; i < mRecordThreads.size(); i++) {
             mRecordThreads[i]->dump(fd, args);
         }
 
