@@ -531,6 +531,8 @@ public class WebView extends AbsoluteLayout
     private float mZoomScale;
     private float mInvInitialZoomScale;
     private float mInvFinalZoomScale;
+    private int mInitialScrollX;
+    private int mInitialScrollY;
     private long mZoomStart;
     private static final int ZOOM_ANIMATION_LENGTH = 500;
 
@@ -2558,24 +2560,15 @@ public class WebView extends AbsoluteLayout
                 // set mZoomScale to be 0 as we have done animation
                 mZoomScale = 0;
             }
-            float scale = (mActualScale - zoomScale) * mInvActualScale;
-            float tx = scale * (mZoomCenterX + mScrollX);
-            float ty = scale * (mZoomCenterY + mScrollY);
-
-            // this block pins the translate to "legal" bounds. This makes the
-            // animation a bit non-obvious, but it means we won't pop when the
-            // "real" zoom takes effect
-            if (true) {
-               // canvas.translate(mScrollX, mScrollY);
-                tx -= mScrollX;
-                ty -= mScrollY;
-                tx = -pinLoc(-Math.round(tx), getViewWidth(), Math
-                        .round(mContentWidth * zoomScale));
-                ty = -pinLoc(-Math.round(ty), getViewHeight(), Math
-                        .round(mContentHeight * zoomScale));
-                tx += mScrollX;
-                ty += mScrollY;
-            }
+            float scale = zoomScale * mInvInitialZoomScale;
+            int tx = Math.round(scale * (mInitialScrollX + mZoomCenterX)
+                    - mZoomCenterX);
+            tx = -pinLoc(tx, getViewWidth(), Math.round(mContentWidth
+                    * zoomScale)) + mScrollX;
+            int ty = Math.round(scale * (mInitialScrollY + mZoomCenterY)
+                    - mZoomCenterY);
+            ty = -pinLoc(ty, getViewHeight(), Math.round(mContentHeight
+                    * zoomScale)) + mScrollY;
             canvas.translate(tx, ty);
             canvas.scale(zoomScale, zoomScale);
         } else {
@@ -4350,6 +4343,8 @@ public class WebView extends AbsoluteLayout
 
     private boolean zoomWithPreview(float scale) {
         float oldScale = mActualScale;
+        mInitialScrollX = mScrollX;
+        mInitialScrollY = mScrollY;
 
         // snap to DEFAULT_SCALE if it is close
         if (scale > (mDefaultScale - 0.05) && scale < (mDefaultScale + 0.05)) {
