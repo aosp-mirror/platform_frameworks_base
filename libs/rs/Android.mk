@@ -1,6 +1,3 @@
-# Only build if BUILD_RENDERSCRIPT is defined to true in the environment.
-ifeq ($(BUILD_RENDERSCRIPT),true)
-
 LOCAL_PATH:=$(call my-dir)
 
 
@@ -106,16 +103,16 @@ LOCAL_SRC_FILES:= \
 LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libui libacc
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libRS
-LOCAL_PRELINK_MODULE := false
 
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
 
+ifeq ($(BUILD_RENDERSCRIPT),true)
+
 # Include the subdirectories ====================
 include $(addprefix $(LOCAL_PATH)/,$(addsuffix /Android.mk,\
-            jni \
             java \
     	))
 
-endif # BUILD_RENDERSCRIPT
+endif

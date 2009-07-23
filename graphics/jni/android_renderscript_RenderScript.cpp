@@ -32,8 +32,8 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 
-#include "../RenderScript.h"
-#include "../RenderScriptEnv.h"
+#include <RenderScript.h>
+#include <RenderScriptEnv.h>
 
 //#define LOG_API LOGE
 #define LOG_API(...)

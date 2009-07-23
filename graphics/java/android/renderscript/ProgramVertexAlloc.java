@@ -20,6 +20,10 @@ import java.lang.Math;
 import android.util.Log;
 
 
+/**
+ * @hide
+ *
+ **/
 public class ProgramVertexAlloc {
     public static final int MODELVIEW_OFFSET = 0;
     public static final int PROJECTION_OFFSET = 16;

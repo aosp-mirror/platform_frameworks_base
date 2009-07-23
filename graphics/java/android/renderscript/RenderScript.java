@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * @hide
+ *
+ **/
 package android.renderscript;
 
 import java.io.InputStream;
@@ -31,6 +35,10 @@ import android.view.Surface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
+/**
+ * @hide
+ *
+ **/
 public class RenderScript {
     static final String LOG_TAG = "libRS_jni";
     private static final boolean DEBUG  = false;
@@ -48,7 +56,7 @@ public class RenderScript {
     static {
         sInitialized = false;
         try {
-            System.loadLibrary("RS_jni");
+            System.loadLibrary("rs_jni");
             _nInit();
             sInitialized = true;
         } catch (UnsatisfiedLinkError e) {
