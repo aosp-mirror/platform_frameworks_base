@@ -116,6 +116,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private boolean mDropDownAlwaysVisible = false;
 
     private boolean mDropDownDismissedOnCompletion = true;
+    
+    private boolean mForceIgnoreOutsideTouch = false;
 
     private int mLastKeyCode = KeyEvent.KEYCODE_UNKNOWN;
     private boolean mOpenBefore;
@@ -1128,6 +1130,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 heightSpec = mDropDownHeight;
             }
 
+            mPopup.setOutsideTouchable(mForceIgnoreOutsideTouch ? false : !mDropDownAlwaysVisible);
+
             mPopup.update(getDropDownAnchorView(), mDropDownHorizontalOffset,
                     mDropDownVerticalOffset, widthSpec, heightSpec);
         } else {
@@ -1153,7 +1157,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
             mPopup.setWindowLayoutMode(widthSpec, heightSpec);
             mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-            mPopup.setOutsideTouchable(true);
+            
+            // use outside touchable to dismiss drop down when touching outside of it, so
+            // only set this if the dropdown is not always visible
+            mPopup.setOutsideTouchable(mForceIgnoreOutsideTouch ? false : !mDropDownAlwaysVisible);
             mPopup.setTouchInterceptor(new PopupTouchIntercepter());
             mPopup.showAsDropDown(getDropDownAnchorView(),
                     mDropDownHorizontalOffset, mDropDownVerticalOffset);
@@ -1161,6 +1168,17 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             clearListSelection();
             post(mHideSelector);
         }
+    }
+    
+    /**
+     * Forces outside touches to be ignored. Normally if {@link #isDropDownAlwaysVisible()} is
+     * false, we allow outside touch to dismiss the dropdown. If this is set to true, then we
+     * ignore outside touch even when the drop down is not set to always visible.
+     * 
+     * @hide used only by SearchDialog
+     */
+    public void setForceIgnoreOutsideTouch(boolean forceIgnoreOutsideTouch) {
+        mForceIgnoreOutsideTouch = forceIgnoreOutsideTouch;
     }
 
     /**
