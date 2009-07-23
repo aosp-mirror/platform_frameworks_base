@@ -92,6 +92,26 @@ public class UserData {
         charToAscii.put('\n', ASCII_CR_INDEX);
     }
 
+    /*
+     * TODO(cleanup): Move this very generic functionality somewhere
+     * more general.
+     */
+    /**
+     * Given a string generate a corresponding ASCII-encoded byte
+     * array, but limited to printable characters.  If the input
+     * contains unprintable characters, return null.
+     */
+    public static byte[] stringToAscii(String str) {
+        int len = str.length();
+        byte[] result = new byte[len];
+        for (int i = 0; i < len; i++) {
+            int charCode = charToAscii.get(str.charAt(i), -1);
+            if (charCode == -1) return null;
+            result[i] = (byte)charCode;
+        }
+        return result;
+    }
+
     /**
      * Mapping for IA5 values less than 32 are flow control signals
      * and not used here.
