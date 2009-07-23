@@ -20,6 +20,7 @@ import android.text.TextUtils;
 import android.text.SpannedString;
 import android.text.SpannableString;
 import android.text.GraphicsOperations;
+import android.util.DisplayMetrics;
 
 import javax.microedition.khronos.opengles.GL;
 
@@ -47,11 +48,12 @@ public class Canvas {
     // optional field set by the caller
     private DrawFilter  mDrawFilter;
 
+    // Package-scoped for quick access.
+    /*package*/ int mDensity = DisplayMetrics.DENSITY_DEFAULT;
+    
     // Used by native code
     @SuppressWarnings({"UnusedDeclaration"})
     private int         mSurfaceFormat;
-    @SuppressWarnings({"UnusedDeclaration"})
-    private float       mDensityScale = 1.0f;
 
     /**
      * Construct an empty raster canvas. Use setBitmap() to specify a bitmap to
@@ -76,8 +78,9 @@ public class Canvas {
         throwIfRecycled(bitmap);
         mNativeCanvas = initRaster(bitmap.ni());
         mBitmap = bitmap;
-        mDensityScale = bitmap.getDensityScale();
-        if (mDensityScale == Bitmap.DENSITY_SCALE_UNKNOWN) mDensityScale = 1.0f;
+        final int density = bitmap.mDensity;
+        mDensity = density == Bitmap.DENSITY_NONE
+                ? DisplayMetrics.DENSITY_DEFAULT : density;
     }
     
     /*package*/ Canvas(int nativeCanvas) {
@@ -132,8 +135,9 @@ public class Canvas {
 
         native_setBitmap(mNativeCanvas, bitmap.ni());
         mBitmap = bitmap;
-        mDensityScale = bitmap.getDensityScale();
-        if (mDensityScale == Bitmap.DENSITY_SCALE_UNKNOWN) mDensityScale = 1.0f;
+        final int density = bitmap.mDensity;
+        mDensity = density == Bitmap.DENSITY_NONE
+                ? DisplayMetrics.DENSITY_DEFAULT : density;
     }
     
     /**
@@ -172,44 +176,34 @@ public class Canvas {
     public native int getHeight();
 
     /**
-     * <p>Returns the density scale for this Canvas' backing bitmap, expressed as a
-     * factor of the default density (160dpi.) For instance, a bitmap designed for
-     * 240dpi displays will have a density scale of 1.5 whereas a bitmap
-     * designed for 160dpi will have a density scale of 1.0.</p>
+     * <p>Returns the density for this Canvas' backing bitmap.</p>
      *
-     * <p>The default density scale is {@link Bitmap#DENSITY_SCALE_UNKNOWN}.</p>
+     * <p>The default density scale is {@link Bitmap#DENSITY_NONE}.</p>
      *
      * @return A scaling factor of the default density (160dpi) or
-     *        {@link Bitmap#DENSITY_SCALE_UNKNOWN} if the scaling factor is unknown.
+     *        {@link Bitmap#DENSITY_NONE} if the scaling factor is unknown.
      *
-     * @see #setDensityScale(float)
-     * @see Bitmap#getDensityScale() 
+     * @see #setDensity(int)
+     * @see Bitmap#getDensity() 
      */
-    public float getDensityScale() {
-        if (mBitmap != null) {
-            return mBitmap.getDensityScale();
-        }
-        return mDensityScale;
+    public int getDensity() {
+        return mDensity;
     }
 
     /**
-     * <p>Specifies the density scale for this Canvas' backing bitmap, expressed as a
-     * factor of the default density (160dpi.) For instance, a bitmap designed for
-     * 240dpi displays will have a density scale of 1.5 whereas a bitmap
-     * designed for 160dpi will have a density scale of 1.0.</p>
+     * <p>Specifies the density for this Canvas' backing bitmap.
      *
-     * @param densityScale The density scaling factor to use with this bitmap or
-     *        {@link Bitmap#DENSITY_SCALE_UNKNOWN} if the factor is unknown.
+     * @param density The density scaling factor to use with this bitmap or
+     *        {@link Bitmap#DENSITY_NONE} if the factor is unknown.
      *
-     * @see #getDensityScale()
-     * @see Bitmap#setDensityScale(float) 
+     * @see #getDensity()
+     * @see Bitmap#setDensity(int) 
      */
-    public void setDensityScale(float densityScale) {
+    public void setDensity(int density) {
         if (mBitmap != null) {
-            mBitmap.setDensityScale(densityScale);
+            mBitmap.setDensity(density);
         }
-        mDensityScale = densityScale;
-        if (mDensityScale == Bitmap.DENSITY_SCALE_UNKNOWN) mDensityScale = 1.0f;
+        mDensity = density;
     }
 
     // the SAVE_FLAG constants must match their native equivalents
@@ -945,12 +939,17 @@ public class Canvas {
     /**
      * Draw the specified bitmap, with its top/left corner at (x,y), using
      * the specified paint, transformed by the current matrix.
-     * Note: if the paint contains a maskfilter that generates a mask which
+     * 
+     * <p>Note: if the paint contains a maskfilter that generates a mask which
      * extends beyond the bitmap's original width/height (e.g. BlurMaskFilter),
      * then the bitmap will be drawn as if it were in a Shader with CLAMP mode.
      * Thus the color outside of the original width/height will be the edge
      * color replicated.
      *
+     * <p>If the bitmap and canvas have different densities, this function
+     * will take care of automatically scaling the bitmap to draw at the
+     * same density as the canvas.
+     * 
      * @param bitmap The bitmap to be drawn
      * @param left   The position of the left side of the bitmap being drawn
      * @param top    The position of the top side of the bitmap being drawn
@@ -959,20 +958,25 @@ public class Canvas {
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         throwIfRecycled(bitmap);
         native_drawBitmap(mNativeCanvas, bitmap.ni(), left, top,
-                paint != null ? paint.mNativePaint : 0, bitmap.isAutoScalingEnabled(),
-                bitmap.getDensityScale());
+                paint != null ? paint.mNativePaint : 0, mDensity, bitmap.mDensity);
     }
 
     /**
      * Draw the specified bitmap, scaling/translating automatically to fill
      * the destination rectangle. If the source rectangle is not null, it
      * specifies the subset of the bitmap to draw.
-     * Note: if the paint contains a maskfilter that generates a mask which
+     * 
+     * <p>Note: if the paint contains a maskfilter that generates a mask which
      * extends beyond the bitmap's original width/height (e.g. BlurMaskFilter),
      * then the bitmap will be drawn as if it were in a Shader with CLAMP mode.
      * Thus the color outside of the original width/height will be the edge
      * color replicated.
      *
+     * <p>This function <em>ignores the density associated with the bitmap</em>.
+     * This is because the source and destination rectangle coordinate
+     * spaces are in their respective densities, so must already have the
+     * appropriate scaling factor applied.
+     * 
      * @param bitmap The bitmap to be drawn
      * @param src    May be null. The subset of the bitmap to be drawn
      * @param dst    The rectangle that the bitmap will be scaled/translated
@@ -992,12 +996,18 @@ public class Canvas {
      * Draw the specified bitmap, scaling/translating automatically to fill
      * the destination rectangle. If the source rectangle is not null, it
      * specifies the subset of the bitmap to draw.
-     * Note: if the paint contains a maskfilter that generates a mask which
+     * 
+     * <p>Note: if the paint contains a maskfilter that generates a mask which
      * extends beyond the bitmap's original width/height (e.g. BlurMaskFilter),
      * then the bitmap will be drawn as if it were in a Shader with CLAMP mode.
      * Thus the color outside of the original width/height will be the edge
      * color replicated.
      *
+     * <p>This function <em>ignores the density associated with the bitmap</em>.
+     * This is because the source and destination rectangle coordinate
+     * spaces are in their respective densities, so must already have the
+     * appropriate scaling factor applied.
+     * 
      * @param bitmap The bitmap to be drawn
      * @param src    May be null. The subset of the bitmap to be drawn
      * @param dst    The rectangle that the bitmap will be scaled/translated
@@ -1489,8 +1499,8 @@ public class Canvas {
                                                int paint);
     private native void native_drawBitmap(int nativeCanvas, int bitmap,
                                                  float left, float top,
-                                                 int nativePaintOrZero, boolean autoScale,
-                                                 float densityScale);
+                                                 int nativePaintOrZero,
+                                                 int canvasDensity, int bitmapDensity);
     private native void native_drawBitmap(int nativeCanvas, int bitmap,
                                                  Rect src, RectF dst,
                                                  int nativePaintOrZero);

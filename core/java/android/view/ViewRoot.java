@@ -187,7 +187,7 @@ public final class ViewRoot extends Handler implements ViewParent,
      */
     AudioManager mAudioManager;
 
-    private final float mDensity;
+    private final int mDensity;
 
     public ViewRoot(Context context) {
         super();
@@ -229,7 +229,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         mAdded = false;
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
         mViewConfiguration = ViewConfiguration.get(context);
-        mDensity = context.getResources().getDisplayMetrics().density;
+        mDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
     @Override
@@ -1270,7 +1270,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
 
             // TODO: Do this in native
-            canvas.setDensityScale(mDensity);
+            canvas.setDensity(mDensity);
         } catch (Surface.OutOfResourcesException e) {
             Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
             // TODO: we should ask the window manager to do something!

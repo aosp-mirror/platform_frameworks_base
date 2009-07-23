@@ -34,6 +34,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 public class DpiTestActivity extends Activity {
     public DpiTestActivity() {
@@ -116,6 +117,13 @@ public class DpiTestActivity extends Activity {
         addLabelToRoot(root, "No-dpi resource drawable");
         addChildToRoot(root, layout);
 
+        layout = new LinearLayout(this);
+        addNinePatchResourceDrawable(layout, R.drawable.smlnpatch120dpi);
+        addNinePatchResourceDrawable(layout, R.drawable.smlnpatch160dpi);
+        addNinePatchResourceDrawable(layout, R.drawable.smlnpatch240dpi);
+        addLabelToRoot(root, "Prescaled 9-patch resource drawable");
+        addChildToRoot(root, layout);
+
         setContentView(scrollWrap(root));
     }
 
@@ -144,8 +152,8 @@ public class DpiTestActivity extends Activity {
 
         View view = new View(this);
 
-        final BitmapDrawable d = new BitmapDrawable(bitmap);
-        if (!scale) d.setDensityScale(getResources().getDisplayMetrics());
+        final BitmapDrawable d = new BitmapDrawable(getResources(), bitmap);
+        if (!scale) d.setTargetDensity(getResources().getDisplayMetrics());
         view.setBackgroundDrawable(d);
 
         view.setLayoutParams(new LinearLayout.LayoutParams(d.getIntrinsicWidth(),
@@ -172,6 +180,19 @@ public class DpiTestActivity extends Activity {
 
         view.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
+        layout.addView(view);
+    }
+
+    private void addNinePatchResourceDrawable(LinearLayout layout, int resource) {
+        View view = new View(this);
+
+        final Drawable d = getResources().getDrawable(resource);
+        view.setBackgroundDrawable(d);
+
+        Log.i("foo", "9-patch #" + Integer.toHexString(resource)
+                + " w=" + d.getIntrinsicWidth() + " h=" + d.getIntrinsicHeight());
+        view.setLayoutParams(new LinearLayout.LayoutParams(
+                d.getIntrinsicWidth()*2, d.getIntrinsicHeight()*2));
         layout.addView(view);
     }
 

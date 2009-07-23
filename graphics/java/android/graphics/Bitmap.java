@@ -30,11 +30,11 @@ public final class Bitmap implements Parcelable {
     /**
      * Indicates that the bitmap was created for an unknown pixel density.
      *
-     * @see Bitmap#getDensityScale()
-     * @see Bitmap#setDensityScale(float)
+     * @see Bitmap#getDensity()
+     * @see Bitmap#setDensity(int)
      */
-    public static final float DENSITY_SCALE_UNKNOWN = -1.0f;
-
+    public static final int DENSITY_NONE = 0;
+    
     // Note:  mNativeBitmap is used by FaceDetector_jni.cpp
     // Don't change/rename without updating FaceDetector_jni.cpp
     private final int mNativeBitmap;
@@ -45,10 +45,10 @@ public final class Bitmap implements Parcelable {
     private int mHeight = -1;
     private boolean mRecycled;
 
-    private static volatile Matrix sScaleMatrix;
+    // Package-scoped for fast access.
+    /*package*/ int mDensity = DENSITY_NONE;
 
-    private float mDensityScale = DENSITY_SCALE_UNKNOWN;
-    private boolean mAutoScaling;
+    private static volatile Matrix sScaleMatrix;
 
     /**
      * @noinspection UnusedDeclaration
@@ -70,84 +70,39 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * <p>Returns the density scale for this bitmap, expressed as a factor of
-     * the default density (160.) For instance, a bitmap designed for
-     * displays with a density of 240 will have a density scale of 1.5 whereas a bitmap
-     * designed for a density of 160 will have a density scale of 1.0.</p>
+     * <p>Returns the density for this bitmap.</p>
      *
-     * <p>The default density scale is {@link #DENSITY_SCALE_UNKNOWN}.</p>
+     * <p>The default density scale is {@link #DENSITY_NONE}.</p>
      *
-     * @return A scaling factor of the default density (160) or {@link #DENSITY_SCALE_UNKNOWN}
+     * @return A scaling factor of the default density (160) or {@link #DENSITY_NONE}
      *         if the scaling factor is unknown.
      *
-     * @see #setDensityScale(float)
-     * @see #isAutoScalingEnabled()
-     * @see #setAutoScalingEnabled(boolean)
+     * @see #setDensity(int)
      * @see android.util.DisplayMetrics#DENSITY_DEFAULT
-     * @see android.util.DisplayMetrics#density
-     * @see #DENSITY_SCALE_UNKNOWN
+     * @see android.util.DisplayMetrics#densityDpi
+     * @see #DENSITY_NONE
      */
-    public float getDensityScale() {
-        return mDensityScale;
+    public int getDensity() {
+        return mDensity;
     }
 
     /**
-     * <p>Specifies the density scale for this bitmap, expressed as a factor of
-     * the default density (160.) For instance, a bitmap designed for
-     * displays with a density of 240 will have a density scale of 1.5 whereas a bitmap
-     * designed for a density of 160 will have a density scale of 1.0.</p>
+     * <p>Specifies the density for this bitmap.  When the bitmap is
+     * drawn to a Canvas that also has a density, it will be scaled
+     * appropriately.</p>
      *
-     * @param densityScale The density scaling factor to use with this bitmap or
-     *        {@link #DENSITY_SCALE_UNKNOWN} if the factor is unknown.
+     * @param density The density scaling factor to use with this bitmap or
+     *        {@link #DENSITY_NONE} if the density is unknown.
      *
-     * @see #getDensityScale()
-     * @see #isAutoScalingEnabled()
-     * @see #setAutoScalingEnabled(boolean)
+     * @see #getDensity()
      * @see android.util.DisplayMetrics#DENSITY_DEFAULT
-     * @see android.util.DisplayMetrics#density
-     * @see #DENSITY_SCALE_UNKNOWN
+     * @see android.util.DisplayMetrics#densityDpi
+     * @see #DENSITY_NONE
      */
-    public void setDensityScale(float densityScale) {
-        mDensityScale = densityScale;
+    public void setDensity(int density) {
+        mDensity = density;
     }
-
-    /**
-     * </p>Indicates whether this bitmap will be automatically be scaled at the
-     * target's density at drawing time. If auto scaling is enabled, this bitmap
-     * will be drawn with the following scale factor:</p>
-     *
-     * <pre>scale = (bitmap density scale factor) / (target density scale factor)</pre>
-     *
-     * <p>Auto scaling is turned off by default. If auto scaling is enabled but the
-     * bitmap has an unknown density scale, then the bitmap will never be automatically
-     * scaled at drawing time.</p>
-     *
-     * @return True if the bitmap must be scaled at drawing time, false otherwise.
-     *
-     * @see #setAutoScalingEnabled(boolean)
-     * @see #getDensityScale()
-     * @see #setDensityScale(float)
-     */
-    public boolean isAutoScalingEnabled() {
-        return mAutoScaling;
-    }
-
-    /**
-     * <p>Enables or disables auto scaling for this bitmap. When auto scaling is enabled,
-     * the bitmap will be scaled at drawing time to accomodate the drawing target's pixel
-     * density. The final scale factor for this bitmap is thus defined:</p>
-     *
-     * <pre>scale = (bitmap density scale factor) / (target density scale factor)</pre>
-     *
-     * <p>If auto scaling is enabled but the bitmap has an unknown density scale, then
-     * the bitmap will never be automatically scaled at drawing time.</p>
-     *
-     * @param autoScalingEnabled True to scale the bitmap at drawing time, false otherwise.
-     */
-    public void setAutoScalingEnabled(boolean autoScalingEnabled) {
-        mAutoScaling = autoScalingEnabled;
-    }
-
+    
     /**
      * Sets the nine patch chunk.
      *
@@ -455,9 +410,8 @@ public final class Bitmap implements Parcelable {
         canvas.drawBitmap(source, srcR, dstR, paint);
 
         // The new bitmap was created from a known bitmap source so assume that
-        // they use the same density scale
-        bitmap.mDensityScale = source.mDensityScale;
-        bitmap.mAutoScaling = source.mAutoScaling;
+        // they use the same density
+        bitmap.mDensity = source.mDensity;
 
         return bitmap;
     }
@@ -603,65 +557,71 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Convenience method that returns the width of this bitmap divided
-     * by the density scale factor.
-     *
-     * @param canvas The Canvas the bitmap will be drawn to.
-     * @return The scaled width of this bitmap, according to the density scale factor.
+     * Convenience for calling {@link #getScaledWidth(int)} with the target
+     * density of the given {@link Canvas}.
      */
     public int getScaledWidth(Canvas canvas) {
-        final float scale = mDensityScale;
-        if (!mAutoScaling || scale < 0) {
-            return getWidth();
-        }
-        return (int)(getWidth() * canvas.getDensityScale() / scale);
+        return scaleFromDensity(getWidth(), mDensity, canvas.mDensity);
     }
 
     /**
-     * Convenience method that returns the height of this bitmap divided
-     * by the density scale factor.
-     *
-     * @param canvas The Canvas the bitmap will be drawn to.
-     * @return The scaled height of this bitmap, according to the density scale factor.
+     * Convenience for calling {@link #getScaledHeight(int)} with the target
+     * density of the given {@link Canvas}.
      */
     public int getScaledHeight(Canvas canvas) {
-        final float scale = mDensityScale;
-        if (!mAutoScaling || scale < 0) {
-            return getHeight();
-        }
-        return (int)(getHeight() * canvas.getDensityScale() / scale);
+        return scaleFromDensity(getHeight(), mDensity, canvas.mDensity);
+    }
+
+    /**
+     * Convenience for calling {@link #getScaledWidth(int)} with the target
+     * density of the given {@link DisplayMetrics}.
+     */
+    public int getScaledWidth(DisplayMetrics metrics) {
+        return scaleFromDensity(getWidth(), mDensity, metrics.densityDpi);
+    }
+
+    /**
+     * Convenience for calling {@link #getScaledHeight(int)} with the target
+     * density of the given {@link DisplayMetrics}.
+     */
+    public int getScaledHeight(DisplayMetrics metrics) {
+        return scaleFromDensity(getHeight(), mDensity, metrics.densityDpi);
     }
 
     /**
      * Convenience method that returns the width of this bitmap divided
      * by the density scale factor.
      *
-     * @param metrics The target display metrics.
+     * @param targetDensity The density of the target canvas of the bitmap.
      * @return The scaled width of this bitmap, according to the density scale factor.
      */
-    public int getScaledWidth(DisplayMetrics metrics) {
-        final float scale = mDensityScale;
-        if (!mAutoScaling || scale < 0) {
-            return getWidth();
-        }
-        return (int)(getWidth() * metrics.density / scale);
+    public int getScaledWidth(int targetDensity) {
+        return scaleFromDensity(getWidth(), mDensity, targetDensity);
     }
 
     /**
      * Convenience method that returns the height of this bitmap divided
      * by the density scale factor.
      *
-     * @param metrics The target display metrics.
+     * @param targetDensity The density of the target canvas of the bitmap.
      * @return The scaled height of this bitmap, according to the density scale factor.
      */
-    public int getScaledHeight(DisplayMetrics metrics) {
-        final float scale = mDensityScale;
-        if (!mAutoScaling || scale < 0) {
-            return getHeight();
-        }
-        return (int)(getHeight() * metrics.density / scale);
+    public int getScaledHeight(int targetDensity) {
+        return scaleFromDensity(getHeight(), mDensity, targetDensity);
     }
-
+    
+    /**
+     * @hide
+     */
+    static public int scaleFromDensity(int size, int sdensity, int tdensity) {
+        if (sdensity == DENSITY_NONE || sdensity == tdensity) {
+            return size;
+        }
+        
+        // Scale by tdensity / sdensity, rounding up.
+        return ( (size * tdensity) + (sdensity >> 1) ) / sdensity;
+    }
+    
     /**
      * Return the number of bytes between rows in the bitmap's pixels. Note that
      * this refers to the pixels as stored natively by the bitmap. If you call

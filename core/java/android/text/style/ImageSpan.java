@@ -43,7 +43,7 @@ public class ImageSpan extends DynamicDrawableSpan {
      */
     public ImageSpan(Bitmap b, int verticalAlignment) {
         super(verticalAlignment);
-        mDrawable = new BitmapDrawable(b);
+        mDrawable = new BitmapDrawable(mContext.getResources(), b);
         int width = mDrawable.getIntrinsicWidth();
         int height = mDrawable.getIntrinsicHeight();
         mDrawable.setBounds(0, 0, width > 0 ? width : 0, height > 0 ? height : 0); 
@@ -117,7 +117,7 @@ public class ImageSpan extends DynamicDrawableSpan {
                 InputStream is = mContext.getContentResolver().openInputStream(
                         mContentUri);
                 bitmap = BitmapFactory.decodeStream(is);
-                drawable = new BitmapDrawable(bitmap);
+                drawable = new BitmapDrawable(mContext.getResources(), bitmap);
                 drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
                         drawable.getIntrinsicHeight());
                 is.close();

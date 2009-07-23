@@ -177,11 +177,17 @@ public final class ActivityThread {
         synchronized (mPackages) {
             // Resources is app scale dependent.
             ResourcesKey key = new ResourcesKey(resDir, compInfo.applicationScale);
-            //Log.w(TAG, "getTopLevelResources: " + resDir);
+            if (false) {
+                Log.w(TAG, "getTopLevelResources: " + resDir + " / "
+                        + compInfo.applicationScale);
+            }
             WeakReference<Resources> wr = mActiveResources.get(key);
             Resources r = wr != null ? wr.get() : null;
             if (r != null && r.getAssets().isUpToDate()) {
-                //Log.w(TAG, "Returning cached resources " + r + " " + resDir);
+                if (false) {
+                    Log.w(TAG, "Returning cached resources " + r + " " + resDir
+                            + ": appScale=" + r.getCompatibilityInfo().applicationScale);
+                }
                 return r;
             }
 
@@ -198,7 +204,11 @@ public final class ActivityThread {
             //Log.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
             DisplayMetrics metrics = getDisplayMetricsLocked(false);
             r = new Resources(assets, metrics, getConfiguration(), compInfo);
-            //Log.i(TAG, "Created app resources " + r + ": " + r.getConfiguration());
+            if (false) {
+                Log.i(TAG, "Created app resources " + resDir + " " + r + ": "
+                        + r.getConfiguration() + " appScale="
+                        + r.getCompatibilityInfo().applicationScale);
+            }
             // XXX need to remove entries when weak references go away
             mActiveResources.put(key, new WeakReference<Resources>(r));
             return r;

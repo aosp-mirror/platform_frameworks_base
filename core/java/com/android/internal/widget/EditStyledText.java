@@ -1242,7 +1242,8 @@ public class EditStyledText extends EditText {
                         try {
                             InputStream is = mEST.getContext().getContentResolver().openInputStream(uri);
                             Bitmap bitmap = BitmapFactory.decodeStream(is);
-                            Drawable drawable = new BitmapDrawable(bitmap);
+                            Drawable drawable = new BitmapDrawable(
+                                    getContext().getResources(), bitmap);
                             drawable.setBounds(0, 0,
                                     drawable.getIntrinsicWidth(),
                                     drawable.getIntrinsicHeight());
