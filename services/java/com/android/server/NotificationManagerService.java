@@ -90,7 +90,7 @@ class NotificationManagerService extends INotificationManager.Stub
     private NotificationRecord mSoundNotification;
     private AsyncPlayer mSound;
     private boolean mSystemReady;
-    private int mDisabledNotifications = StatusBarManager.DISABLE_NOTIFICATION_ALERTS;
+    private int mDisabledNotifications;
 
     private NotificationRecord mVibrateNotification;
     private Vibrator mVibrator = new Vibrator();
@@ -367,6 +367,15 @@ class NotificationManagerService extends INotificationManager.Stub
         mHandler = new WorkerHandler();
         mStatusBarService = statusBar;
         statusBar.setNotificationCallbacks(mNotificationCallbacks);
+
+        // Don't start allowing notifications until the setup wizard has run once.
+        // After that, including subsequent boots, init with notifications turned on.
+        // This works on the first boot because the setup wizard will toggle this
+        // flag at least once and we'll go back to 0 after that.
+        if (0 != Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.DEVICE_PROVISIONED, 0)) {
+            mDisabledNotifications = AudioManager.STREAM_NOTIFICATION;
+        }
 
         // register for battery changed notifications
         IntentFilter filter = new IntentFilter();
