@@ -30,6 +30,10 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+/**
+ * @hide
+ *
+ **/
 public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mSurfaceHolder;
 

@@ -20,6 +20,10 @@ import java.lang.Math;
 import android.util.Log;
 
 
+/**
+ * @hide
+ *
+ **/
 public class Matrix {
 
     public Matrix() {
