@@ -379,6 +379,10 @@ public class WebView extends AbsoluteLayout
     // take control of touch events unless it says no for touch down event.
     private boolean mPreventDrag;
 
+    // To keep track of whether the current drag was initiated by a WebTextView,
+    // so that we know not to hide the cursor
+    boolean mDragFromTextInput;
+
     // Whether or not to draw the cursor ring.
     private boolean mDrawCursorRing = true;
 
@@ -3823,7 +3827,9 @@ public class WebView extends AbsoluteLayout
 
                     mTouchMode = TOUCH_DRAG_MODE;
                     WebViewCore.pauseUpdate(mWebViewCore);
-                    nativeHideCursor();
+                    if (!mDragFromTextInput) {
+                        nativeHideCursor();
+                    }
                     // remove the zoom anchor if there is any
                     if (mZoomScale != 0) {
                         mWebViewCore
@@ -4490,6 +4496,19 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Scroll the focused text field/area to match the WebTextView
+     * @param x New x position of the WebTextView in view coordinates
+     * @param y New y position of the WebTextView in view coordinates
+     */
+    /*package*/ void scrollFocusedTextInput(int x, int y) {
+        if (!inEditingMode() || mWebViewCore == null) {
+            return;
+        }
+        mWebViewCore.sendMessage(EventHub.SCROLL_TEXT_INPUT, viewToContent(x),
+                viewToContent(y));
+    }
+
+    /**
      * Set our starting point and time for a drag from the WebTextView.
      */
     /*package*/ void initiateTextFieldDrag(float x, float y, long eventTime) {
@@ -4516,9 +4535,12 @@ public class WebView extends AbsoluteLayout
         if (!inEditingMode()) {
             return false;
         }
+        mDragFromTextInput = true;
         event.offsetLocation((float) (mWebTextView.getLeft() - mScrollX),
                 (float) (mWebTextView.getTop() - mScrollY));
-        return onTouchEvent(event);
+        boolean result = onTouchEvent(event);
+        mDragFromTextInput = false;
+        return result;
     }
 
     /*package*/ void shortPressOnTextField() {

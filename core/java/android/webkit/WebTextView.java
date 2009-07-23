@@ -78,7 +78,9 @@ import java.util.ArrayList;
     private float           mDragStartY;
     private long            mDragStartTime;
     private boolean         mDragSent;
-    private boolean         mPageScrolled;
+    // True if the most recent drag event has caused either the TextView to
+    // scroll or the web page to scroll.  Gets reset after a touch down.
+    private boolean         mScrolled;
     // Array to store the final character added in onTextChanged, so that its
     // KeyEvents may be determined.
     private char[]          mCharacter = new char[1];
@@ -384,7 +386,7 @@ import java.util.ArrayList;
             mDragStartY = event.getY();
             mDragStartTime = event.getEventTime();
             mDragSent = false;
-            mPageScrolled = false;
+            mScrolled = false;
             break;
         case MotionEvent.ACTION_MOVE:
             Spannable buffer = getText();
@@ -393,8 +395,10 @@ import java.util.ArrayList;
             super.onTouchEvent(event);
             if (mScrollX != initialScrollX
                     || mScrollY != initialScrollY) {
-                // TextView scrolled, so return true.
-                // FIXME: Need to make the webkit text scroll to reflect this
+                if (mWebView != null) {
+                    mWebView.scrollFocusedTextInput(mScrollX, mScrollY);
+                }
+                mScrolled = true;
                 return true;
             }
             if (mWebView != null) {
@@ -406,7 +410,7 @@ import java.util.ArrayList;
                 }
                 boolean scrolled = mWebView.textFieldDrag(event);
                 if (scrolled) {
-                    mPageScrolled = true;
+                    mScrolled = true;
                     cancelLongPress();
                     return true;
                 }
@@ -414,12 +418,10 @@ import java.util.ArrayList;
             return false;
         case MotionEvent.ACTION_UP:
         case MotionEvent.ACTION_CANCEL:
-            if (!mPageScrolled) {
-                // If the page scrolled, we do not want to change the selection,
-                // and the long press has already been canceled, so there is
-                // no need to call into super.
-                // FIXME: Once we enable scrolling the text inside the
-                // textfield, need to check that as well.
+            if (!mScrolled) {
+                // If the page scrolled, or the TextView scrolled, we do not
+                // want to change the selection, and the long press has already
+                // been canceled, so there is no need to call into super.
                 super.onTouchEvent(event);
             }
             // Necessary for the WebView to reset its state
