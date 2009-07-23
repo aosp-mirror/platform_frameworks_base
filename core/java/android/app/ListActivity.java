@@ -152,7 +152,7 @@ import android.widget.ListView;
  *         // Query for all people contacts using the {@link android.provider.Contacts.People} convenience class.
  *         // Put a managed wrapper around the retrieved cursor so we don't have to worry about
  *         // requerying or closing it as the activity changes state.
- *         mCursor = People.query(this.getContentResolver(), null);
+ *         mCursor = this.getContentResolver().query(People.CONTENT_URI, null, null, null, null);
  *         startManagingCursor(mCursor);
  * 
  *         // Now create a new list adapter bound to the cursor. 
@@ -161,9 +161,9 @@ import android.widget.ListView;
  *                 this, // Context.
  *                 android.R.layout.two_line_list_item,  // Specify the row template to use (here, two columns bound to the two retrieved cursor 
  * rows).
- *                 mCursor,                                    // Pass in the cursor to bind to.
- *                 new String[] {People.NAME, People.COMPANY}, // Array of cursor columns to bind to.
- *                 new int[]);                                 // Parallel array of which template objects to bind to those columns.
+ *                 mCursor,                                              // Pass in the cursor to bind to.
+ *                 new String[] {People.NAME, People.COMPANY},           // Array of cursor columns to bind to.
+ *                 new int[] {android.R.id.text1, android.R.id.text2});  // Parallel array of which template objects to bind to those columns.
  * 
  *         // Bind to our new adapter.
  *         setListAdapter(adapter);
