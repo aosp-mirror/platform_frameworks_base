@@ -531,6 +531,12 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         }
 
         @Override
+        public boolean onJsTimeout() {
+            Log.v(LOGTAG, "JavaScript timeout");
+            return false;
+        }
+
+        @Override
         public void onExceededDatabaseQuota(String url_str,
                 String databaseIdentifier, long currentQuota,
                 WebStorage.QuotaUpdater callback) {
@@ -614,6 +620,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         }
 
         WebSettings settings = webview.getSettings();
+        settings.setAppCacheEnabled(true);
+        settings.setAppCachePath(getApplicationContext().getCacheDir().getPath());
+        settings.setAppCacheMaxSize(Long.MAX_VALUE);
         settings.setJavaScriptEnabled(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setSupportMultipleWindows(true);
