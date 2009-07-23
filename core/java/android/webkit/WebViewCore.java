@@ -591,6 +591,7 @@ final class WebViewCore {
     }
 
         static final String[] HandlerDebugString = {
+            "SCROLL_TEXT_INPUT", // = 99
             "LOAD_URL", // = 100;
             "STOP_LOADING", // = 101;
             "RELOAD", // = 102;
@@ -641,6 +642,7 @@ final class WebViewCore {
 
     class EventHub {
         // Message Ids
+        static final int SCROLL_TEXT_INPUT = 99;
         static final int LOAD_URL = 100;
         static final int STOP_LOADING = 101;
         static final int RELOAD = 102;
@@ -745,9 +747,10 @@ final class WebViewCore {
                 @Override
                 public void handleMessage(Message msg) {
                     if (DebugFlags.WEB_VIEW_CORE) {
-                        Log.v(LOGTAG, (msg.what < LOAD_URL || msg.what
+                        Log.v(LOGTAG, (msg.what < SCROLL_TEXT_INPUT || msg.what
                                 > FREE_MEMORY ? Integer.toString(msg.what)
-                                : HandlerDebugString[msg.what - LOAD_URL])
+                                : HandlerDebugString[msg.what
+                                        - SCROLL_TEXT_INPUT])
                                 + " arg1=" + msg.arg1 + " arg2=" + msg.arg2
                                 + " obj=" + msg.obj);
                     }
@@ -762,6 +765,10 @@ final class WebViewCore {
                             mBrowserFrame.destroy();
                             mBrowserFrame = null;
                             mNativeClass = 0;
+                            break;
+
+                        case SCROLL_TEXT_INPUT:
+                            nativeScrollFocusedTextInput(msg.arg1, msg.arg2);
                             break;
 
                         case LOAD_URL:
@@ -1796,6 +1803,11 @@ final class WebViewCore {
         Message.obtain(mWebView.mPrivateHandler,
                 WebView.CLEAR_TEXT_ENTRY).sendToTarget();
     }
+
+    /**
+     * Scroll the focused textfield to (x, y) in document space
+     */
+    private native void nativeScrollFocusedTextInput(int x, int y);
 
     // these must be in document space (i.e. not scaled/zoomed).
     private native void nativeSetScrollOffset(int gen, int dx, int dy);
