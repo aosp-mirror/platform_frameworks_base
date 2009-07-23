@@ -2991,6 +2991,13 @@ public final class Settings {
         public static final String VENDING_TOS_URL = "vending_tos_url";
 
         /**
+         * URL to navigate to in browser (not Market) when the terms of service
+         * for Vending Machine could not be accessed due to bad network
+         * connection.
+         */
+        public static final String VENDING_TOS_MISSING_URL = "vending_tos_missing_url";
+
+        /**
          * Whether to use sierraqa instead of sierra tokens for the purchase flow in
          * Vending Machine.
          *
