@@ -113,7 +113,7 @@ public final class ContactsContract {
         public static final String SEND_TO_VOICEMAIL = "send_to_voicemail";
     }
 
-    public interface AggregatesColumns {
+    private interface AggregatesColumns {
         /**
          * The display name for the contact.
          * <P>Type: TEXT</P>
@@ -143,7 +143,32 @@ public final class ContactsContract {
          * any {@link GroupMembership} for this aggregate.
          */
         public static final String IN_VISIBLE_GROUP = "in_visible_group";
+
+        /**
+         * Contact presence status.  See {@link android.provider.Im.CommonPresenceColumns}
+         * for individual status definitions.
+         */
+        public static final String PRESENCE_STATUS = Presence.PRESENCE_STATUS;
+
+        /**
+         * The type of data, for example Home or Work.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String PRIMARY_PHONE_TYPE = CommonDataKinds.Phone.TYPE;
+
+        /**
+         * The user defined label for the primary phone.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PRIMARY_PHONE_LABEL = CommonDataKinds.Phone.LABEL;
+
+        /**
+         * The primary phone number.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PRIMARY_PHONE_NUMBER = CommonDataKinds.Phone.NUMBER;
     }
+
 
     /**
      * Constants for the aggregates table, which contains a record per group
@@ -196,7 +221,6 @@ public final class ContactsContract {
 
         public static final Uri CONTENT_SUMMARY_GROUP_URI = Uri.withAppendedPath(
                 CONTENT_SUMMARY_URI, "group");
-
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
@@ -511,11 +535,19 @@ public final class ContactsContract {
      * back to specific {@link ContactsContract.Aggregates#_ID} entries.
      */
     private interface PresenceColumns {
+
         /**
-         * Reference to the {@link Aggregates#_ID} this presence references.
+         * The unique ID for a row.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String _ID = "presence_id";
+
+        /**
+         * Reference to the {@link android.provider.ContactsContract.Contacts#_ID} this presence
+         * references.
          * <P>Type: INTEGER</P>
          */
-        public static final String AGGREGATE_ID = "aggregate_id";
+        public static final String CONTACT_ID = "contact_id";
 
         /**
          * Reference to the {@link Data#_ID} entry that owns this presence.
@@ -545,8 +577,7 @@ public final class ContactsContract {
         public static final String IM_ACCOUNT = "im_account";
     }
 
-    public static final class Presence implements BaseColumns, PresenceColumns,
-            Im.CommonPresenceColumns {
+    public static final class Presence implements PresenceColumns, Im.CommonPresenceColumns {
         /**
          * This utility class cannot be instantiated
          */
