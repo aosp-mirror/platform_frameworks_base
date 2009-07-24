@@ -20,6 +20,7 @@ import android.graphics.*;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -41,24 +42,122 @@ public class NinePatchDrawable extends Drawable {
     private Paint mPaint;
     private boolean mMutated;
 
+    private int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
+
+    // These are scaled to match the target density.
+    private int mBitmapWidth;
+    private int mBitmapHeight;
+    
     NinePatchDrawable() {
     }
 
+    /**
+     * Create drawable from raw nine-patch data, not dealing with density.
+     * @deprecated Use {@link #NinePatchDrawable(Resources, Bitmap, byte[], Rect, String)}
+     * to ensure that the drawable has correctly set its target density.
+     */
     public NinePatchDrawable(Bitmap bitmap, byte[] chunk, Rect padding, String srcName) {
         this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding));
     }
     
+    /**
+     * Create drawable from raw nine-patch data, setting initial target density
+     * based on the display metrics of the resources.
+     */
+    public NinePatchDrawable(Resources res, Bitmap bitmap, byte[] chunk,
+            Rect padding, String srcName) {
+        this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding));
+        if (res != null) {
+            setTargetDensity(res.getDisplayMetrics());
+            mNinePatchState.mTargetDensity = mTargetDensity;
+        }
+    }
+    
+    /**
+     * Create drawable from existing nine-patch, not dealing with density.
+     * @deprecated Use {@link #NinePatchDrawable(Resources, NinePatch)}
+     * to ensure that the drawable has correctly set its target density.
+     */
     public NinePatchDrawable(NinePatch patch) {
         this(new NinePatchState(patch, null));
+    }
+
+    /**
+     * Create drawable from existing nine-patch, setting initial target density
+     * based on the display metrics of the resources.
+     */
+    public NinePatchDrawable(Resources res, NinePatch patch) {
+        this(new NinePatchState(patch, null));
+        if (res != null) {
+            setTargetDensity(res.getDisplayMetrics());
+            mNinePatchState.mTargetDensity = mTargetDensity;
+        }
     }
 
     private void setNinePatchState(NinePatchState state) {
         mNinePatchState = state;
         mNinePatch = state.mNinePatch;
         mPadding = state.mPadding;
+        mTargetDensity = state.mTargetDensity;
         if (state.mDither) setDither(state.mDither);
+        if (mNinePatch != null) {
+            computeBitmapSize();
+        }
     }
 
+    /**
+     * Set the density scale at which this drawable will be rendered. This
+     * method assumes the drawable will be rendered at the same density as the
+     * specified canvas.
+     *
+     * @param canvas The Canvas from which the density scale must be obtained.
+     *
+     * @see android.graphics.Bitmap#setDensity(int)
+     * @see android.graphics.Bitmap#getDensity()
+     */
+    public void setTargetDensity(Canvas canvas) {
+        setTargetDensity(canvas.getDensity());
+    }
+
+    /**
+     * Set the density scale at which this drawable will be rendered.
+     *
+     * @param metrics The DisplayMetrics indicating the density scale for this drawable.
+     *
+     * @see android.graphics.Bitmap#setDensity(int)
+     * @see android.graphics.Bitmap#getDensity()
+     */
+    public void setTargetDensity(DisplayMetrics metrics) {
+        mTargetDensity = metrics.densityDpi;
+        if (mNinePatch != null) {
+            computeBitmapSize();
+        }
+    }
+
+    /**
+     * Set the density at which this drawable will be rendered.
+     *
+     * @param density The density scale for this drawable.
+     *
+     * @see android.graphics.Bitmap#setDensity(int)
+     * @see android.graphics.Bitmap#getDensity()
+     */
+    public void setTargetDensity(int density) {
+        mTargetDensity = density == 0 ? DisplayMetrics.DENSITY_DEFAULT : density;
+        if (mNinePatch != null) {
+            computeBitmapSize();
+        }
+    }
+
+    private void computeBitmapSize() {
+        final int sdensity = mNinePatch.getDensity();
+        final int tdensity = mTargetDensity;
+        mBitmapWidth = Bitmap.scaleFromDensity(mNinePatch.getWidth(),
+                sdensity, tdensity);
+        mBitmapHeight = Bitmap.scaleFromDensity(mNinePatch.getHeight(),
+                sdensity, tdensity);
+    }
+    
     // overrides
 
     @Override
@@ -111,6 +210,7 @@ public class NinePatchDrawable extends Drawable {
         if (dither) {
             options.inDither = false;
         }
+        options.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
 
         final Rect padding = new Rect();        
         Bitmap bitmap = null;
@@ -119,7 +219,7 @@ public class NinePatchDrawable extends Drawable {
             final TypedValue value = new TypedValue();
             final InputStream is = r.openRawResource(id, value);
 
-            bitmap = BitmapFactory.decodeStream(r, value, is, padding, options);
+            bitmap = BitmapFactory.decodeResourceStream(r, value, is, padding, options);
 
             is.close();
         } catch (IOException e) {
@@ -136,6 +236,7 @@ public class NinePatchDrawable extends Drawable {
 
         setNinePatchState(new NinePatchState(
                 new NinePatch(bitmap, bitmap.getNinePatchChunk(), "XML 9-patch"), padding, dither));
+        mNinePatchState.mTargetDensity = mTargetDensity;
 
         a.recycle();
     }
@@ -153,7 +254,7 @@ public class NinePatchDrawable extends Drawable {
      */
     @Override
     public int getIntrinsicWidth() {
-        return mNinePatch.getWidth();
+        return mBitmapWidth;
     }
 
     /**
@@ -161,17 +262,17 @@ public class NinePatchDrawable extends Drawable {
      */
     @Override
     public int getIntrinsicHeight() {
-        return mNinePatch.getHeight();
+        return mBitmapHeight;
     }
 
     @Override
     public int getMinimumWidth() {
-        return mNinePatch.getWidth();
+        return mBitmapWidth;
     }
 
     @Override
     public int getMinimumHeight() {
-        return mNinePatch.getHeight();
+        return mBitmapHeight;
     }
 
     /**
@@ -211,6 +312,7 @@ public class NinePatchDrawable extends Drawable {
         final Rect mPadding;
         final boolean mDither;
         int mChangingConfigurations;
+        int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
 
         NinePatchState(NinePatch ninePatch, Rect padding) {
             this(ninePatch, padding, false);
@@ -225,8 +327,9 @@ public class NinePatchDrawable extends Drawable {
         NinePatchState(NinePatchState state) {
             mNinePatch = new NinePatch(state.mNinePatch);
             mPadding = new Rect(state.mPadding);
-            mChangingConfigurations = state.mChangingConfigurations;
             mDither = state.mDither;
+            mChangingConfigurations = state.mChangingConfigurations;
+            mTargetDensity = state.mTargetDensity;
         }
 
         @Override
