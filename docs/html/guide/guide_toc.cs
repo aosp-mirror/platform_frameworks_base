@@ -149,6 +149,7 @@
             <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design.html">Icon Design</a></li>
             <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/widget_design.html">App Widget Design</a></li>
             <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/activity_task_design.html">Activity and Task Design</a></li>
+            <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/menu_design.html">Menu Design</a></li>
           </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/performance.html">Designing for Performance</a></li>
