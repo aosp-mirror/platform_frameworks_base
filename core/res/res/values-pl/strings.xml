@@ -111,7 +111,6 @@
     <string name="httpErrorFile">"Nie można uzyskać dostępu do pliku."</string>
     <string name="httpErrorFileNotFound">"Nie znaleziono żądanego pliku."</string>
     <string name="httpErrorTooManyRequests">"Zbyt wiele żądań jest przetwarzanych. Spróbuj ponownie później."</string>
-    <string name="certificateSaved">"Certyfikat jest zapisywany w magazynie kluczy systemu."</string>
     <string name="contentServiceSync">"Synchronizacja"</string>
     <string name="contentServiceSyncNotificationTitle">"Synchronizuj"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Zbyt wiele usuwanych <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>

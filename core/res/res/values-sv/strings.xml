@@ -134,8 +134,6 @@
     <string name="httpErrorFile">"Det gick inte att komma åt filen."</string>
     <string name="httpErrorFileNotFound">"Den begärda filen hittades inte."</string>
     <string name="httpErrorTooManyRequests">"För många begäranden bearbetas. Försök igen senare."</string>
-    <!-- no translation found for certificateSaved (2832076323378077191) -->
-    <skip />
     <string name="contentServiceSync">"Synkronisera"</string>
     <string name="contentServiceSyncNotificationTitle">"Synkronisera"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"För många <xliff:g id="CONTENT_TYPE">%s</xliff:g>-borttagningar."</string>

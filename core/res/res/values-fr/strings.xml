@@ -111,7 +111,6 @@
     <string name="httpErrorFile">"Impossible d\'accéder au fichier."</string>
     <string name="httpErrorFileNotFound">"Le fichier demandé est introuvable."</string>
     <string name="httpErrorTooManyRequests">"Trop de requêtes sont en cours de traitement. Veuillez réessayer ultérieurement."</string>
-    <string name="certificateSaved">"Le certificat est enregistré dans le magasin de clés du système."</string>
     <string name="contentServiceSync">"Synchroniser"</string>
     <string name="contentServiceSyncNotificationTitle">"Synchronisation"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Trop de contenus supprimés (<xliff:g id="CONTENT_TYPE">%s</xliff:g>)."</string>

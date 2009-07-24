@@ -134,8 +134,6 @@
     <string name="httpErrorFile">"Der kunne ikke oprettes adgang til filen."</string>
     <string name="httpErrorFileNotFound">"Den anmodede fil blev ikke fundet."</string>
     <string name="httpErrorTooManyRequests">"Der behandles for mange anmodninger. Prøv igen senere."</string>
-    <!-- no translation found for certificateSaved (2832076323378077191) -->
-    <skip />
     <string name="contentServiceSync">"Synkroniser"</string>
     <string name="contentServiceSyncNotificationTitle">"Synkroniser"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"For mange <xliff:g id="CONTENT_TYPE">%s</xliff:g> sletninger"</string>

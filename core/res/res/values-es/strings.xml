@@ -111,7 +111,6 @@
     <string name="httpErrorFile">"No se ha podido acceder al archivo."</string>
     <string name="httpErrorFileNotFound">"No se ha encontrado el archivo solicitado."</string>
     <string name="httpErrorTooManyRequests">"Se están procesando demasiadas solicitudes. Vuelve a intentarlo más tarde."</string>
-    <string name="certificateSaved">"El certificado se guarda en el almacén de claves del sistema."</string>
     <string name="contentServiceSync">"Sincronización"</string>
     <string name="contentServiceSyncNotificationTitle">"Sincronización"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Demasiadas eliminaciones de <xliff:g id="CONTENT_TYPE">%s</xliff:g>"</string>

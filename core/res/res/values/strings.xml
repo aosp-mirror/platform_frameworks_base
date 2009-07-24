@@ -228,8 +228,6 @@
     <string name="httpErrorFileNotFound">The requested file was not found.</string>
     <!-- Displayed when a request failed because there are too many requests right now. -->
     <string name="httpErrorTooManyRequests">Too many requests are being processed. Try again later.</string>
-    <!-- Displayed a toast that a certificate is saved in the keystore -->
-    <string name="certificateSaved">The certificate is saved in the system\'s key store.</string>
 
     <!-- Account notifications --> <skip />
     <!-- A notification is shown when the AccountManager is unable to

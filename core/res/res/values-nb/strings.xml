@@ -134,8 +134,6 @@
     <string name="httpErrorFile">"Kunne ikke åpne filen."</string>
     <string name="httpErrorFileNotFound">"Fant ikke den forespurte filen."</string>
     <string name="httpErrorTooManyRequests">"For mange forespørsler blir behandlet. Prøv igjen senere."</string>
-    <!-- no translation found for certificateSaved (2832076323378077191) -->
-    <skip />
     <string name="contentServiceSync">"Synkronisering"</string>
     <string name="contentServiceSyncNotificationTitle">"Synkronisering"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"For mange slettinger av <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>

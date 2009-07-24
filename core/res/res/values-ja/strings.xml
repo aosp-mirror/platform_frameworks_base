@@ -134,8 +134,6 @@
     <string name="httpErrorFile">"ファイルにアクセスできませんでした。"</string>
     <string name="httpErrorFileNotFound">"要求されたファイルが見つかりませんでした。"</string>
     <string name="httpErrorTooManyRequests">"処理中のリクエストが多すぎます。しばらくしてからもう一度試してください。"</string>
-    <!-- no translation found for certificateSaved (2832076323378077191) -->
-    <skip />
     <string name="contentServiceSync">"同期"</string>
     <string name="contentServiceSyncNotificationTitle">"同期"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"<xliff:g id="CONTENT_TYPE">%s</xliff:g>での削除が多すぎます。"</string>

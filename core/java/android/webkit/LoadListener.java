@@ -31,7 +31,6 @@ import android.os.Message;
 import android.security.CertTool;
 import android.util.Log;
 import android.webkit.CacheManager.CacheResult;
-import android.widget.Toast;
 
 import com.android.internal.R;
 
@@ -997,8 +996,6 @@ class LoadListener extends Handler implements EventHandler {
                 mDataBuilder.releaseChunk(c);
             }
             CertTool.getInstance().addCertificate(cert, mContext);
-            Toast.makeText(mContext, R.string.certificateSaved,
-                    Toast.LENGTH_SHORT).show();
             mBrowserFrame.stopLoading();
             return;
         }

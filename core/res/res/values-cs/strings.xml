@@ -111,7 +111,6 @@
     <string name="httpErrorFile">"K souboru nelze získat přístup."</string>
     <string name="httpErrorFileNotFound">"Požadovaný soubor nebyl nalezen."</string>
     <string name="httpErrorTooManyRequests">"Je zpracováváno příliš mnoho požadavků. Opakujte akci později."</string>
-    <string name="certificateSaved">"Certifikát je uložen v systémovém úložišti klíčů."</string>
     <string name="contentServiceSync">"Synchronizace"</string>
     <string name="contentServiceSyncNotificationTitle">"Synchronizace"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Příliš mnoho smazaných položek služby <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
