@@ -136,6 +136,8 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             private int mPreviousLength = 0;
 
             public long getPostingDelay(CharSequence constraint) {
+                if (constraint == null) return 0;
+                
                 long delay = constraint.length() < mPreviousLength ? DELETE_KEY_POST_DELAY : 0;
                 mPreviousLength = constraint.length();
                 return delay;
@@ -196,14 +198,18 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             callCursorPreClose(mCursor);
         }
 
-        super.changeCursor(c);
-        if (c != null) {
-            mFormatCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_FORMAT);
-            mText1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1);
-            mText2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2);
-            mIconName1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
-            mIconName2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
-            mBackgroundColorCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_BACKGROUND_COLOR);
+        try {
+            super.changeCursor(c);
+            if (c != null) {
+                mFormatCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_FORMAT);
+                mText1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1);
+                mText2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_2);
+                mIconName1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_1);
+                mIconName2Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_ICON_2);
+                mBackgroundColorCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_BACKGROUND_COLOR);
+            }
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "error changing cursor and caching columns", e);
         }
     }
 
