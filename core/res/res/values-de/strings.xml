@@ -111,7 +111,6 @@
     <string name="httpErrorFile">"Auf die Datei konnte nicht zugegriffen werden."</string>
     <string name="httpErrorFileNotFound">"Die angeforderte Datei wurde nicht gefunden."</string>
     <string name="httpErrorTooManyRequests">"Es werden zurzeit zu viele Anfragen verarbeitet. Versuchen Sie es später erneut."</string>
-    <string name="certificateSaved">"Das Zertifikat wird im Schlüsselspeicher des Systems gespeichert."</string>
     <string name="contentServiceSync">"Synchronisieren"</string>
     <string name="contentServiceSyncNotificationTitle">"Synchronisieren"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Zu viele <xliff:g id="CONTENT_TYPE">%s</xliff:g> gelöscht."</string>

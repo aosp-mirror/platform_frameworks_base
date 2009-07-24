@@ -134,8 +134,6 @@
     <string name="httpErrorFile">"无法访问该文件。"</string>
     <string name="httpErrorFileNotFound">"找不到请求的文件。"</string>
     <string name="httpErrorTooManyRequests">"正在处理的请求太多，请稍后重试。"</string>
-    <!-- no translation found for certificateSaved (2832076323378077191) -->
-    <skip />
     <string name="contentServiceSync">"同步"</string>
     <string name="contentServiceSyncNotificationTitle">"同步"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"太多<xliff:g id="CONTENT_TYPE">%s</xliff:g>删除项。"</string>

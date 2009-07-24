@@ -134,8 +134,6 @@
     <string name="httpErrorFile">"Не удается получить доступ к файлу."</string>
     <string name="httpErrorFileNotFound">"Не удалось найти указанные файлы."</string>
     <string name="httpErrorTooManyRequests">"Обрабатывается слишком много запросов. Повторите попытку позднее."</string>
-    <!-- no translation found for certificateSaved (2832076323378077191) -->
-    <skip />
     <string name="contentServiceSync">"Синхр."</string>
     <string name="contentServiceSyncNotificationTitle">"Синхр."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Слишком много удалений <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>

@@ -134,8 +134,6 @@
     <string name="httpErrorFile">"Η πρόσβαση στο αρχείο δεν ήταν δυνατή."</string>
     <string name="httpErrorFileNotFound">"Το αρχείο που ζητήθηκε δεν βρέθηκε."</string>
     <string name="httpErrorTooManyRequests">"Πραγματοποιείται επεξεργασία πάρα πολλών αιτημάτων. Προσπαθήστε ξανά αργότερα."</string>
-    <!-- no translation found for certificateSaved (2832076323378077191) -->
-    <skip />
     <string name="contentServiceSync">"Συγχρονισμός"</string>
     <string name="contentServiceSyncNotificationTitle">"Συγχρονισμός"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Πάρα πολλές <xliff:g id="CONTENT_TYPE">%s</xliff:g> διαγραφές."</string>
