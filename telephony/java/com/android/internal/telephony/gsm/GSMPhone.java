@@ -1169,6 +1169,10 @@ public class GSMPhone extends PhoneBase {
         return mDataConnection.getDnsServers(apnType);
     }
 
+    public boolean isDataConnectivityEnabled() {
+        return mDataConnection.getDataEnabled();
+    }
+
     /**
      * The only circumstances under which we report that data connectivity is not
      * possible are

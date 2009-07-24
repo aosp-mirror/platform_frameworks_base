@@ -1266,6 +1266,13 @@ public interface Phone {
     boolean disableDataConnectivity();
 
     /**
+     * Report the current state of data connectivity (enabled or disabled)
+     * @return {@code false} if data connectivity has been explicitly disabled,
+     * {@code true} otherwise.
+     */
+    boolean isDataConnectivityEnabled();
+
+    /**
      * Enables the specified APN type. Only works for "special" APN types,
      * i.e., not the default APN.
      * @param type The desired APN type. Cannot be {@link #APN_TYPE_DEFAULT}.
