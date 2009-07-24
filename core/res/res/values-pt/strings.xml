@@ -134,8 +134,6 @@
     <string name="httpErrorFile">"Não foi possível acessar o arquivo."</string>
     <string name="httpErrorFileNotFound">"O arquivo solicitado não foi encontrado."</string>
     <string name="httpErrorTooManyRequests">"Há muitas solicitações sendo processadas. Tente novamente mais tarde."</string>
-    <!-- no translation found for certificateSaved (2832076323378077191) -->
-    <skip />
     <string name="contentServiceSync">"Sincronizar"</string>
     <string name="contentServiceSyncNotificationTitle">"Sincronizar"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Muitas exclusões de <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>

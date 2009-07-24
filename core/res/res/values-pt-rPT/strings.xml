@@ -134,8 +134,6 @@
     <string name="httpErrorFile">"Não foi possível aceder ao ficheiro."</string>
     <string name="httpErrorFileNotFound">"Não foi possível localizar o ficheiro pedido."</string>
     <string name="httpErrorTooManyRequests">"Existem demasiados pedidos em processamento. Tente novamente mais tarde."</string>
-    <!-- no translation found for certificateSaved (2832076323378077191) -->
-    <skip />
     <string name="contentServiceSync">"Sincronização"</string>
     <string name="contentServiceSyncNotificationTitle">"Sincronização"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Demasiadas eliminações de <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
