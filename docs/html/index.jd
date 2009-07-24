@@ -13,8 +13,10 @@ home=true
                             <!-- total max width is 520px -->
                                 <img src="/assets/images/home/IO-logo.png" alt="Google I/O Developer Conference 2009" width="242px" />
                                 <div id="announcement" style="width:270px">
-                                  <p>Google I/O is a two-day developer event that will take place May 27-28 at Moscone Center, San Francisco. The agenda includes a number of great sessions on Android topics by team engineers and other developers.</p>
-                                  <p><a href="http://code.google.com/events/io/">Learn more &raquo;</a></p>
+                                  <p>The Google I/O developer conference took place May 27-28 in San Francisco. 
+                                    If you missed the conference, you can experience the Android sessions
+                                    by viewing YouTube videos and presentation slides.</p>
+                                  <p><a href="http://code.google.com/events/io/sessions.html#mobile">See the Mobile sessions at Google I/O &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->  
                         </div><!-- end topAnnouncement -->
