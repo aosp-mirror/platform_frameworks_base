@@ -286,6 +286,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
                     SystemService.start("hsag");
                     SystemService.start("hfag");
                     SystemService.start("opush");
+                    SystemService.start("pbap");
                 }
                 break;
             case MESSAGE_FINISH_DISABLE:
