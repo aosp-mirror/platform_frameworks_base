@@ -23,6 +23,7 @@
 #include <utils/String16.h>
 #include <utils/threads.h>
 #include "AudioPolicyService.h"
+#include "AudioPolicyManagerGeneric.h"
 #include <cutils/properties.h>
 #include <dlfcn.h>
 
@@ -34,9 +35,6 @@
 #endif
 
 namespace android {
-
-const char *AudioPolicyService::sAudioPolicyLibrary = "/system/lib/libaudiopolicy.so";
-const char *AudioPolicyService::sAudioPolicyGenericLibrary = "/system/lib/libaudiopolicygeneric.so";
 
 static bool checkPermission() {
 #ifndef HAVE_ANDROID_OS
@@ -51,47 +49,29 @@ static bool checkPermission() {
 // ----------------------------------------------------------------------------
 
 AudioPolicyService::AudioPolicyService()
-    : BnAudioPolicyService() , mpPolicyManager(NULL), mpPolicyManagerLibHandle(NULL)
+    : BnAudioPolicyService() , mpPolicyManager(NULL)
 {
-    const char *audioPolicyLibrary;
     char value[PROPERTY_VALUE_MAX];
-
-#if (defined GENERIC_AUDIO) || (defined AUDIO_POLICY_TEST)
-    audioPolicyLibrary = sAudioPolicyGenericLibrary;
-    LOGV("build for GENERIC_AUDIO - using generic audio policy");
-#else
-    // if running in emulation - use the emulator driver
-    if (property_get("ro.kernel.qemu", value, 0)) {
-        LOGV("Running in emulation - using generic audio policy");
-        audioPolicyLibrary = sAudioPolicyGenericLibrary;
-    }
-    else {
-        LOGV("Using hardware specific audio policy");
-        audioPolicyLibrary = sAudioPolicyLibrary;
-    }
-#endif
-
-
-    mpPolicyManagerLibHandle = dlopen(audioPolicyLibrary, RTLD_NOW | RTLD_LOCAL);
-    if (mpPolicyManagerLibHandle == NULL) {
-       LOGW("Could not load libaudio policy library");
-       return;
-    }
-
-    AudioPolicyInterface *(*createManager)(AudioPolicyClientInterface *) =
-            reinterpret_cast<AudioPolicyInterface* (*)(AudioPolicyClientInterface *)>(dlsym(mpPolicyManagerLibHandle, "createAudioPolicyManager"));
-
-    if (createManager == NULL ) {
-        LOGW("Could not get createAudioPolicyManager method");
-        return;
-    }
 
     // start tone playback thread
     mTonePlaybacThread = new AudioCommandThread();
     // start audio commands thread
     mAudioCommandThread = new AudioCommandThread();
 
-    mpPolicyManager = (*createManager)(this);
+#if (defined GENERIC_AUDIO) || (defined AUDIO_POLICY_TEST)
+    mpPolicyManager = new AudioPolicyManagerGeneric(this);
+    LOGV("build for GENERIC_AUDIO - using generic audio policy");
+#else
+    // if running in emulation - use the emulator driver
+    if (property_get("ro.kernel.qemu", value, 0)) {
+        LOGV("Running in emulation - using generic audio policy");
+        mpPolicyManager = new AudioPolicyManagerGeneric(this);
+    }
+    else {
+        LOGV("Using hardware specific audio policy");
+        mpPolicyManager = createAudioPolicyManager(this);
+    }
+#endif
 
     // load properties
     property_get("ro.camera.sound.forced", value, "0");
@@ -106,14 +86,7 @@ AudioPolicyService::~AudioPolicyService()
     mAudioCommandThread.clear();
 
     if (mpPolicyManager) {
-        void(*destroyManager)(AudioPolicyInterface *) =
-                reinterpret_cast<void(*)(AudioPolicyInterface *)>(dlsym(mpPolicyManagerLibHandle, "destroyAudioPolicyManager"));
-
-        if (destroyManager == NULL ) {
-            LOGW("Could not get destroyAudioPolicyManager method");
-            return;
-        }
-        (*destroyManager)(mpPolicyManager);
+        delete mpPolicyManager;
     }
 }
 

@@ -54,6 +54,12 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libmedia
 
+ifeq ($(TARGET_SIMULATOR),true)
+ LOCAL_LDLIBS += -ldl
+else
+ LOCAL_SHARED_LIBRARIES += libdl
+endif
+
 LOCAL_MODULE:= libaudiopolicygeneric
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
@@ -63,8 +69,6 @@ endif
 ifeq ($(AUDIO_POLICY_TEST),true)
   LOCAL_CFLAGS += -DAUDIO_POLICY_TEST
 endif
-
-LOCAL_PRELINK_MODULE := false
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -83,7 +87,9 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
 	libbinder \
     libmedia \
-    libhardware_legacy
+    libhardware_legacy \
+    libaudiopolicygeneric \
+    libaudiopolicy
 
 ifeq ($(strip $(BOARD_USES_GENERIC_AUDIO)),true)
   LOCAL_STATIC_LIBRARIES += libaudiointerface

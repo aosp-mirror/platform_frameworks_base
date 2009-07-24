@@ -460,17 +460,6 @@ status_t AudioPolicyManagerGeneric::getStreamVolumeIndex(AudioSystem::stream_typ
 
 // ---  class factory
 
-
-extern "C" AudioPolicyInterface* createAudioPolicyManager(AudioPolicyClientInterface *clientInterface)
-{
-    return new AudioPolicyManagerGeneric(clientInterface);
-}
-
-extern "C" void destroyAudioPolicyManager(AudioPolicyInterface *interface)
-{
-    delete interface;
-}
-
 AudioPolicyManagerGeneric::AudioPolicyManagerGeneric(AudioPolicyClientInterface *clientInterface)
     :
 #ifdef AUDIO_POLICY_TEST
