@@ -1281,6 +1281,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 // again in this case before propagating the exception
                 Log.e(TAG, "Error restoring data for " + packageName, e);
                 clearApplicationDataSynchronous(packageName);
+            } finally {
+                backupDataName.delete();
             }
         }
     }
