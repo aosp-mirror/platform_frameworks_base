@@ -77,7 +77,6 @@ public abstract class ServiceStateTracker extends Handler {
     // waiting period before recheck gprs and voice registration
     public static final int DEFAULT_GPRS_CHECK_PERIOD_MILLIS = 60 * 1000;
 
-    public static final int MAX_NUM_DATA_STATE_READS = 15;
     public static final int DATA_STATE_POLL_SLEEP_MS = 100;
 
     //*****GSM events
