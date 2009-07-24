@@ -313,7 +313,7 @@ public class SurfaceView extends View {
 
         Resources res = getContext().getResources();
         if (mTranslator != null || !res.getCompatibilityInfo().supportsScreen()) {
-            mSurface.setCompatibleDisplayMetrics(res.getDisplayMetrics());
+            mSurface.setCompatibleDisplayMetrics(res.getDisplayMetrics(), mTranslator);
         }
         
         int myWidth = mRequestedWidth;
