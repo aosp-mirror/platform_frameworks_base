@@ -228,20 +228,11 @@ public class CompatibilityInfo {
     }
 
     /**
-     * Returns the translator which can translate the coordinates of the window.
-     * There are five different types of Translator.
+     * Returns the translator which translates the coordinates in compatibility mode.
      * @param params the window's parameter
      */
-    public Translator getTranslator(WindowManager.LayoutParams params) {
-        if ( (mCompatibilityFlags & SCALING_EXPANDABLE_MASK)
-                == (EXPANDABLE|LARGE_SCREENS)) {
-            if (DBG) Log.d(TAG, "no translation required");
-            return null;
-        }
-        if (!isScalingRequired()) {
-            return null;
-        }
-        return new Translator();
+    public Translator getTranslator() {
+        return isScalingRequired() ? new Translator() : null;
     }
 
     /**
