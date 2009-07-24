@@ -1665,7 +1665,9 @@ public final class ViewRoot extends Handler implements ViewParent,
                     if(Config.LOGV) {
                         captureMotionLog("captureDispatchPointer", event);
                     }
-                    event.offsetLocation(0, mCurScrollY);
+                    if (mCurScrollY != 0) {
+                        event.offsetLocation(0, mCurScrollY);
+                    }
                     if (MEASURE_LATENCY) {
                         lt.sample("A Dispatching TouchEvents", System.nanoTime() - event.getEventTimeNano());
                     }

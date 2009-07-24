@@ -35,7 +35,6 @@ import android.view.WindowManagerPolicy;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -55,6 +54,7 @@ public abstract class KeyInputQueue {
 
     final SparseArray<InputDevice> mDevices = new SparseArray<InputDevice>();
     final ArrayList<VirtualKey> mVirtualKeys = new ArrayList<VirtualKey>();
+    final HapticFeedbackCallback mHapticFeedbackCallback;
     
     int mGlobalMetaState = 0;
     boolean mHaveGlobalMetaState = false;
@@ -105,6 +105,10 @@ public abstract class KeyInputQueue {
 
     public interface FilterCallback {
         int filterEvent(QueuedEvent ev);
+    }
+    
+    public interface HapticFeedbackCallback {
+        void virtualKeyFeedback(KeyEvent event);
     }
     
     static class QueuedEvent {
@@ -264,11 +268,13 @@ public abstract class KeyInputQueue {
         }
     }
 
-    KeyInputQueue(Context context) {
+    KeyInputQueue(Context context, HapticFeedbackCallback  hapticFeedbackCallback) {
         if (MEASURE_LATENCY) {
             lt = new LatencyTimer(100, 1000);
         }
 
+        mHapticFeedbackCallback = hapticFeedbackCallback;
+        
         readVirtualKeys();
         readExcludedDevices();
         
@@ -539,14 +545,40 @@ public abstract class KeyInputQueue {
                                             ms.mLastDown[0] = ms.mDown[0];
                                             if (DEBUG_VIRTUAL_KEYS) Log.v(TAG,
                                                     "Generate key up for: " + vk.scancode);
+                                            KeyEvent event = newKeyEvent(di,
+                                                    di.mKeyDownTime, curTime, false,
+                                                    vk.lastKeycode,
+                                                    0, vk.scancode,
+                                                    KeyEvent.FLAG_VIRTUAL_HARD_KEY);
+                                            mHapticFeedbackCallback.virtualKeyFeedback(event);
                                             addLocked(di, curTimeNano, ev.flags,
                                                     RawInputEvent.CLASS_KEYBOARD,
-                                                    newKeyEvent(di, di.mKeyDownTime,
-                                                            curTime, false,
-                                                            vk.lastKeycode,
-                                                            0, vk.scancode, 0));
+                                                    event);
+                                        } else if (isInsideDisplay(di)) {
+                                            // Whoops the pointer has moved into
+                                            // the display area!  Cancel the
+                                            // virtual key and start a pointer
+                                            // motion.
+                                            mPressedVirtualKey = null;
+                                            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG,
+                                                    "Cancel key up for: " + vk.scancode);
+                                            KeyEvent event = newKeyEvent(di,
+                                                    di.mKeyDownTime, curTime, false,
+                                                    vk.lastKeycode,
+                                                    0, vk.scancode,
+                                                    KeyEvent.FLAG_CANCELED |
+                                                    KeyEvent.FLAG_VIRTUAL_HARD_KEY);
+                                            mHapticFeedbackCallback.virtualKeyFeedback(event);
+                                            addLocked(di, curTimeNano, ev.flags,
+                                                    RawInputEvent.CLASS_KEYBOARD,
+                                                    event);
+                                            doMotion = true;
+                                            for (int i=InputDevice.MAX_POINTERS-1; i>=0; i--) {
+                                                ms.mLastDown[i] = false;
+                                            }
                                         }
-                                    } else if (ms.mDown[0] && !ms.mLastDown[0]) {
+                                    }
+                                    if (doMotion && ms.mDown[0] && !ms.mLastDown[0]) {
                                         vk = findSoftButton(di);
                                         if (vk != null) {
                                             doMotion = false;
@@ -558,12 +590,15 @@ public abstract class KeyInputQueue {
                                             if (DEBUG_VIRTUAL_KEYS) Log.v(TAG,
                                                     "Generate key down for: " + vk.scancode
                                                     + " (keycode=" + vk.lastKeycode + ")");
+                                            KeyEvent event = newKeyEvent(di,
+                                                    di.mKeyDownTime, curTime, true,
+                                                    vk.lastKeycode, 0,
+                                                    vk.scancode,
+                                                    KeyEvent.FLAG_VIRTUAL_HARD_KEY);
+                                            mHapticFeedbackCallback.virtualKeyFeedback(event);
                                             addLocked(di, curTimeNano, ev.flags,
                                                     RawInputEvent.CLASS_KEYBOARD,
-                                                    newKeyEvent(di, di.mKeyDownTime,
-                                                            curTime, true,
-                                                            vk.lastKeycode, 0,
-                                                            vk.scancode, 0));
+                                                    event);
                                         }
                                     }
                                     
@@ -618,17 +653,12 @@ public abstract class KeyInputQueue {
         }
     };
 
-    private VirtualKey findSoftButton(InputDevice dev) {
-        final int N = mVirtualKeys.size();
-        if (N <= 0) {
-            return null;
-        }
-        
+    private boolean isInsideDisplay(InputDevice dev) {
         final InputDevice.AbsoluteInfo absx = dev.absX;
         final InputDevice.AbsoluteInfo absy = dev.absY;
         final InputDevice.MotionState absm = dev.mAbs;
         if (absx == null || absy == null || absm == null) {
-            return null;
+            return true;
         }
         
         if (absm.mCurData[MotionEvent.SAMPLE_X] >= absx.minValue
@@ -639,9 +669,23 @@ public abstract class KeyInputQueue {
                     + absm.mCurData[MotionEvent.SAMPLE_X]
                     + "," + absm.mCurData[MotionEvent.SAMPLE_Y]
                     + ") inside of display");
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private VirtualKey findSoftButton(InputDevice dev) {
+        final int N = mVirtualKeys.size();
+        if (N <= 0) {
             return null;
         }
         
+        if (isInsideDisplay(dev)) {
+            return null;
+        }
+        
+        final InputDevice.MotionState absm = dev.mAbs;
         for (int i=0; i<N; i++) {
             VirtualKey sb = mVirtualKeys.get(i);
             sb.computeHitRect(dev, mDisplayWidth, mDisplayHeight);

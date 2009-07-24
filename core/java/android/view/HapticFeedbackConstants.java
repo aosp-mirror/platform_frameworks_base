@@ -24,7 +24,16 @@ public class HapticFeedbackConstants {
 
     private HapticFeedbackConstants() {}
 
+    /**
+     * The user has performed a long press on an object that is resulting
+     * in an action being performed.
+     */
     public static final int LONG_PRESS = 0;
+    
+    /**
+     * The user has pressed on a virtual on-screen key.
+     */
+    public static final int VIRTUAL_KEY = 1;
     
     /**
      * Flag for {@link View#performHapticFeedback(int, int)

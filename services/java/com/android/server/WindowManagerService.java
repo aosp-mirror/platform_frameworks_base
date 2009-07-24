@@ -125,7 +125,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /** {@hide} */
-public class WindowManagerService extends IWindowManager.Stub implements Watchdog.Monitor {
+public class WindowManagerService extends IWindowManager.Stub
+        implements Watchdog.Monitor, KeyInputQueue.HapticFeedbackCallback {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean DEBUG_FOCUS = false;
@@ -4686,7 +4687,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                                     callingPid, callingUid)
                                     == PackageManager.PERMISSION_GRANTED) {
                         mPolicy.interceptKeyTi(null, keycode,
-                                nextKey.getMetaState(), down, repeatCount);
+                                nextKey.getMetaState(), down, repeatCount,
+                                nextKey.getFlags());
                     }
                     Log.w(TAG, "Event timeout during app switch: dropping "
                             + nextKey);
@@ -4709,7 +4711,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                                 callingPid, callingUid)
                                 == PackageManager.PERMISSION_GRANTED) {
                     if (mPolicy.interceptKeyTi(focus,
-                            keycode, nextKey.getMetaState(), down, repeatCount)) {
+                            keycode, nextKey.getMetaState(), down, repeatCount, 
+                            nextKey.getFlags())) {
                         return CONSUMED_EVENT_TOKEN;
                     }
                 }
@@ -5129,7 +5132,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         PowerManager.WakeLock mHoldingScreen;
 
         KeyQ() {
-            super(mContext);
+            super(mContext, WindowManagerService.this);
             PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
             mHoldingScreen = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
                     "KEEP_SCREEN_ON_FLAG");
@@ -9202,6 +9205,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         synchronized (mKeyWaiter) { }
     }
 
+    public void virtualKeyFeedback(KeyEvent event) {
+        mPolicy.keyFeedbackFromInput(event);
+    }
+    
     /**
      * DimAnimator class that controls the dim animation. This holds the surface and
      * all state used for dim animation. 

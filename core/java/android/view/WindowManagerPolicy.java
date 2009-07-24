@@ -533,14 +533,15 @@ public interface WindowManagerPolicy {
      * @param win The window that currently has focus.  This is where the key
      *            event will normally go.
      * @param code Key code.
-     * @param metaKeys TODO
+     * @param metaKeys bit mask of meta keys that are held.
      * @param down Is this a key press (true) or release (false)?
      * @param repeatCount Number of times a key down has repeated.
+     * @param flags event's flags.
      * @return Returns true if the policy consumed the event and it should
      * not be further dispatched.
      */
     public boolean interceptKeyTi(WindowState win, int code,
-                               int metaKeys, boolean down, int repeatCount);
+                               int metaKeys, boolean down, int repeatCount, int flags);
 
     /**
      * Called when layout of the windows is about to start.
@@ -790,6 +791,13 @@ public interface WindowManagerPolicy {
      * Call from application to perform haptic feedback on its window.
      */
     public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always);
+    
+    /**
+     * A special function that is called from the very low-level input queue
+     * to provide feedback to the user.  Currently only called for virtual
+     * keys.
+     */
+    public void keyFeedbackFromInput(KeyEvent event);
     
     /**
      * Called when we have stopped keeping the screen on because a window

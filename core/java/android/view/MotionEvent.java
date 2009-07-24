@@ -288,9 +288,10 @@ public final class MotionEvent implements Parcelable {
         ev.mEventTimeNano = eventTimeNano;
         ev.mAction = action;
         ev.mMetaState = metaState;
+        ev.mRawX = inData[SAMPLE_X];
+        ev.mRawY = inData[SAMPLE_Y];
         ev.mXPrecision = xPrecision;
         ev.mYPrecision = yPrecision;
-        
         ev.mNumPointers = pointers;
         ev.mNumSamples = 1;
         

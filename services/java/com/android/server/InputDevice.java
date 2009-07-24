@@ -213,7 +213,7 @@ public class InputDevice {
             
             // We only consider the first pointer when computing the edge
             // flags, since they are global to the event.
-            if (action != MotionEvent.ACTION_DOWN) {
+            if (action == MotionEvent.ACTION_DOWN) {
                 if (scaled[MotionEvent.SAMPLE_X] <= 0) {
                     edgeFlags |= MotionEvent.EDGE_LEFT;
                 } else if (scaled[MotionEvent.SAMPLE_X] >= dispW) {
