@@ -368,6 +368,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @param event The event.
      */
     private void tryRecycleLocked(AccessibilityEvent event) {
+        if (event == null) {
+            return;
+        }
         int eventType = event.getEventType();
         List<Service> services = mServices;
 
@@ -378,7 +381,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 return;
             }
         }
-
         event.recycle();
     }
 
