@@ -72,7 +72,7 @@ public class CertTool {
     private native String getPkcs12PrivateKey(int handle);
     private native String popPkcs12CertificateStack(int handle);
     private native void freePkcs12Handle(int handle);
-    private native String generateCertificateRequest(int bits, String subject);
+    private native String generateCertificateRequest(int bits, String challenge);
     private native boolean isPkcs12Keystore(byte[] data);
     private native int generateX509Certificate(byte[] data);
     private native boolean isCaCertificate(int handle);
@@ -124,7 +124,7 @@ public class CertTool {
     public String generateKeyPair(int keyStrengthIndex, String challenge,
             String dirName) {
         return generateCertificateRequest(getKeyLength(keyStrengthIndex),
-                dirName);
+                challenge);
     }
 
     private Intent prepareIntent(String title, byte[] data, String namespace,
