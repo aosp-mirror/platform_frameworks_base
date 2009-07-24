@@ -508,6 +508,10 @@ public class CDMAPhone extends PhoneBase {
         return false;
     }
 
+    public boolean isDataConnectivityEnabled() {
+        return mDataConnection.getDataEnabled();
+    }
+
     public boolean isDataConnectivityPossible() {
         boolean noData = mDataConnection.getDataEnabled() &&
                 getDataConnectionState() == DataState.DISCONNECTED;
