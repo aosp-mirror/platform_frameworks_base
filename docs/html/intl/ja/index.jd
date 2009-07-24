@@ -7,16 +7,14 @@ home=true
                     <div id="homeMiddle">
                         <div id="topAnnouncement">
                             <div id="homeTitle">
-                                <h2>Developer Announcements</h2>
+                                <h2>デベロッパーへのお知らせ</h2>
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
                                 <img src="/assets/images/home/IO-logo.png" alt="Google I/O Developer Conference 2009" width="242px" />
                                 <div id="announcement" style="width:270px">
-                                  <p>The Google I/O developer conference took place May 27-28 in San Francisco. 
-                                    If you missed the conference, you can experience the Android sessions
-                                    by viewing YouTube videos and presentation slides.</p>
-                                  <p><a href="http://code.google.com/events/io/sessions.html#mobile">See the Mobile sessions at Google I/O &raquo;</a></p>
+                                  <p>Google I/O は、サンフランシスコの Moscone Center で 5 月 27～28 日に開催された開発者会議です。このイベントに参加できなかった方は、各アンドロイド向けセッションを、YouTube ビデオやプレゼンテーションのスライド資料で体験する事が可能です。</p>
+                                  <p><a href="http://code.google.com/events/io/sessions.html#mobile">Mobile のセッションを参照してください &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->  
                         </div><!-- end topAnnouncement -->
@@ -47,9 +45,9 @@ home=true
                               <tr>
                                       <td class="imageCell"><a href="{@docRoot}sdk/index.html"><img src="{@docRoot}assets/images/icon_download.jpg" style="padding:0" /></a></td>
                                       <td>
-                                              <h2 class="green">Download</h2>
-                                              <p>The Android SDK has the tools, sample code, and docs you need to create great apps.  </p>
-                                              <p><a href="{@docRoot}sdk/{@sdkCurrent}/index.html">Learn more &raquo;</a></p>
+                                              <h2 class="green">ダウンロード</h2>
+                                              <p>Android SDK には、優れたアプリケーションの作成に必要となるツール、サンプル コード、ドキュメントが含まれています。  </p>
+                                              <p><a href="{@docRoot}sdk/{@sdkCurrent}/index.html">詳細 &raquo;</a></p>
                                       </td>
                               </tr>
                               <tr>
@@ -58,9 +56,9 @@ home=true
                               <tr>
                                       <td class="imageCell"><a href="http://www.android.com/market.html"><img src="{@docRoot}assets/images/icon_market.jpg" style="padding:0" /></a></td>
                                       <td>
-                                              <h2 class="green">Publish</h2>
-                                              <p>Android Market is an open service that lets you distribute your apps to handsets.</p>
-                                              <p><a href="http://www.android.com/market.html">Learn more &raquo;</a></p>
+                                              <h2 class="green">公開</h2>
+                                              <p>Android マーケットは、アプリケーションを携帯端末に配信するためのオープン サービスです。</p>
+                                              <p><a href="http://www.android.com/market.html">詳細 &raquo;</a></p>
                                       </td>
                               </tr>
                               <tr>
@@ -69,9 +67,9 @@ home=true
                               <tr>
                                       <td class="imageCell"><a href="http://source.android.com"><img src="{@docRoot}assets/images/icon_contribute.jpg" style="padding:0" /></a></td>
                                       <td>
-                                              <h2 class="green">Contribute</h2>
-                                              <p>Android Open Source Project gives you access to the entire platform source.</p>
-                                              <p><a href="http://source.android.com">Learn more &raquo;</a></p>
+                                              <h2 class="green">貢献</h2>
+                                              <p>Android オープンソース プロジェクトでは、プラットフォーム全体のソースコードを公開しています。</p>
+                                              <p><a href="http://source.android.com">詳細 &raquo;</a></p>
                                       </td>
                               </tr>
                               <tr>
@@ -80,9 +78,9 @@ home=true
                               <tr>
                                       <td class="imageCell"><a href="http://www.youtube.com/user/androiddevelopers"><img src="{@docRoot}assets/images/video-droid.png" style="padding:0" /></a></td>
                                       <td>
-                                              <h2 class="green">Watch</h2>
-                                              <object width="150" height="140"><param name="movie" value="http://www.youtube.com/v/x1ZZ-R3p_w8&hl=en&fs=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/x1ZZ-R3p_w8&hl=en&fs=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="150" height="140"></embed></object>
-                                              <p style="margin-top:1em"><a href="http://www.youtube.com/user/androiddevelopers">More Android videos &raquo;</a></p>
+                                              <h2 class="green">再生</h2>
+                                              <object width="150" height="140"><param name="movie" value="http://www.youtube.com/v/x1ZZ-R3p_w8&hl=ja&fs=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/x1ZZ-R3p_w8&hl=ja&fs=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="150" height="140"></embed></object>
+                                              <p style="margin-top:1em"><a href="http://www.youtube.com/user/androiddevelopers">その他の Android 動画 &raquo;</a></p>
                                       </td>
                               </tr>
 
@@ -124,17 +122,17 @@ home=true
       'icon':"sdk-small.png",
       'name':"SDK 1.5 r2",
       'img':"sdk-large.png",
-      'title':"Android 1.5 SDK",
-      'desc': "<p>Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r2/index.html'>Download Android 1.5 SDK</a></p>"
+      'title':"Android 1.5 SDK r2",
+      'desc': "<p>Android 1.5 SDK の最新バージョンが公開されました。このリリースには Android 1.5 用の API、最新版デベロッパーツール、複数プラットフォーム(バージョン)サポート、そして Google API のアドオンが含まれています。</p><p><a href='{@docRoot}sdk/1.5_r2/index.html'>Android 1.5 SDK をダウンロード</a></p>"
     },
 
     'mapskey': {
       'layout':"imgLeft",
       'icon':"maps-small.png",
-      'name':"Maps API Key",
+      'name':"Maps API キー",
       'img':"maps-large.png",
-      'title':"Maps API Key",
-      'desc':"<p>If you're writing an Android application that uses Google Maps (with MapView), you must register your application to obtain a Maps API Key. Without the key, your maps application will not work on Android devices. Obtaining a key requires just a couple of steps.</p><p><a href='http://code.google.com/android/add-ons/google-apis/maps-overview.html'>Learn more &raquo;</a></p>"
+      'title':"Maps API キー",
+      'desc':"<p>MapView から Google マップを利用する Android アプリケーションを開発する場合は、アプリケーションを登録して Maps API キーを取得する必要があります。この API キーが無いアプリケーションは、Android 上で動作しません。キーの取得は、簡単な手順で行うことができます。</p><p><a href='http://code.google.com/android/add-ons/google-apis/maps-overview.html'>詳細 &raquo;</a></p>"
     },
 
     'devphone': {
@@ -143,7 +141,7 @@ home=true
       'name':"Dev Phone 1",
       'img':"devphone-large.png",
       'title':"Android Dev Phone 1",
-      'desc': "<p>Run and debug your Android applications directly on this device. Modify and rebuild the Android operating system, and flash it onto the phone. The Android Dev Phone 1 is carrier independent, and available for purchase by any developer registered with <a href='http://market.android.com/publish'>Android Market</a>.</p><p><a href='/guide/developing/device.html#dev-phone-1'>Learn more about the Android Dev Phone 1 &raquo;</a></p>"
+      'desc': "<p>この携帯電話を使用することで、開発した Android アプリケーションの実行とデバッグを行うことができます。Android オペレーティングシステムを変更してからリビルドし、携帯電話に書き込むことができます。Android Dev Phone 1 は携帯通信会社に依存しておらず、<a href='http://market.android.com/publish'>Android マーケット</a>に登録済みのデベロッパーなら誰でも購入可能です。</p><p><a href='/guide/developing/device.html#dev-phone-1'>Android Dev Phone 1 の詳細&raquo;</a></p>"
     }
 
   }
