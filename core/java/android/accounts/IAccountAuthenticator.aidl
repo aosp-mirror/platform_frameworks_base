@@ -49,6 +49,11 @@ oneway interface IAccountAuthenticator {
         String authTokenType, in Bundle options);
 
     /**
+     * Gets the user-visible label of the given authtoken type.
+     */
+    void getAuthTokenLabel(in IAccountAuthenticatorResponse response, String authTokenType);
+
+    /**
      * prompts the user for a new password and writes it to the IAccountManager
      */
     void updateCredentials(in IAccountAuthenticatorResponse response, in Account account,

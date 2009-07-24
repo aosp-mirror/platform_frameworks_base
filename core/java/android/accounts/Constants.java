@@ -40,6 +40,7 @@ public class Constants {
     public static final String ACCOUNT_AUTHENTICATOR_RESPONSE_KEY = "accountAuthenticatorResponse";
     public static final String ACCOUNT_MANAGER_RESPONSE_KEY = "accountManagerResponse";
     public static final String AUTH_FAILED_MESSAGE_KEY = "authFailedMessage";
+    public static final String AUTH_TOKEN_LABEL_KEY = "authTokenLabelKey";
 
     public static final String AUTHENTICATOR_INTENT_ACTION =
             "android.accounts.AccountAuthenticator";

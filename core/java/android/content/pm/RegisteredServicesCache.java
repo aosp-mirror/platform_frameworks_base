@@ -114,10 +114,12 @@ public abstract class RegisteredServicesCache<V> {
     public static class ServiceInfo<V> {
         public final V type;
         public final ComponentName componentName;
+        public final int uid;
 
-        private ServiceInfo(V type, ComponentName componentName) {
+        private ServiceInfo(V type, ComponentName componentName, int uid) {
             this.type = type;
             this.componentName = componentName;
+            this.uid = uid;
         }
 
         public String toString() {
@@ -223,7 +225,10 @@ public abstract class RegisteredServicesCache<V> {
             if (v == null) {
                 return null;
             }
-            return new ServiceInfo<V>(v, componentName);
+            final android.content.pm.ServiceInfo serviceInfo = service.serviceInfo;
+            final ApplicationInfo applicationInfo = serviceInfo.applicationInfo;
+            final int uid = applicationInfo.uid;
+            return new ServiceInfo<V>(v, componentName, uid);
         } finally {
             if (parser != null) parser.close();
         }

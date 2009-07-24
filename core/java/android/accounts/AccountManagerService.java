@@ -21,6 +21,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.RegisteredServicesCache;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
@@ -33,18 +35,25 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Binder;
+import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.app.PendingIntent;
 import android.app.NotificationManager;
 import android.app.Notification;
+import android.Manifest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.R;
@@ -63,7 +72,7 @@ public class AccountManagerService extends IAccountManager.Stub {
 
     private static final int TIMEOUT_DELAY_MS = 1000 * 60;
     private static final String DATABASE_NAME = "accounts.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     private final Context mContext;
 
@@ -92,6 +101,11 @@ public class AccountManagerService extends IAccountManager.Stub {
     private static final String AUTHTOKENS_TYPE = "type";
     private static final String AUTHTOKENS_AUTHTOKEN = "authtoken";
 
+    private static final String TABLE_GRANTS = "grants";
+    private static final String GRANTS_ACCOUNTS_ID = "accounts_id";
+    private static final String GRANTS_AUTH_TOKEN_TYPE = "auth_token_type";
+    private static final String GRANTS_GRANTEE_UID = "uid";
+
     private static final String TABLE_EXTRAS = "extras";
     private static final String EXTRAS_ID = "_id";
     private static final String EXTRAS_ACCOUNTS_ID = "accounts_id";
@@ -107,8 +121,37 @@ public class AccountManagerService extends IAccountManager.Stub {
     private static final Intent ACCOUNTS_CHANGED_INTENT =
             new Intent(Constants.LOGIN_ACCOUNTS_CHANGED_ACTION);
 
+    private static final String COUNT_OF_MATCHING_GRANTS = ""
+            + "SELECT COUNT(*) FROM " + TABLE_GRANTS + ", " + TABLE_ACCOUNTS
+            + " WHERE " + GRANTS_ACCOUNTS_ID + "=" + ACCOUNTS_ID
+            + " AND " + GRANTS_GRANTEE_UID + "=?"
+            + " AND " + GRANTS_AUTH_TOKEN_TYPE + "=?"
+            + " AND " + ACCOUNTS_NAME + "=?"
+            + " AND " + ACCOUNTS_TYPE + "=?";
+
     private final LinkedHashMap<String, Session> mSessions = new LinkedHashMap<String, Session>();
-    private static final int NOTIFICATION_ID = 234;
+    private final AtomicInteger mNotificationIds = new AtomicInteger(1);
+
+    private final HashMap<Pair<Pair<Account, String>, Integer>, Integer>
+            mCredentialsPermissionNotificationIds =
+            new HashMap<Pair<Pair<Account, String>, Integer>, Integer>();
+    private final HashMap<Account, Integer> mSigninRequiredNotificationIds =
+            new HashMap<Account, Integer>();
+    private static AtomicReference<AccountManagerService> sThis =
+            new AtomicReference<AccountManagerService>();
+
+    private static final boolean isDebuggableMonkeyBuild =
+            SystemProperties.getBoolean("ro.monkey", false)
+                    && SystemProperties.getBoolean("ro.debuggable", false);
+    /**
+     * This should only be called by system code. One should only call this after the service
+     * has started.
+     * @return a reference to the AccountManagerService instance
+     * @hide
+     */
+    public static AccountManagerService getSingleton() {
+        return sThis.get();
+    }
 
     public class AuthTokenKey {
         public final Account mAccount;
@@ -163,9 +206,12 @@ public class AccountManagerService extends IAccountManager.Stub {
                 MESSAGE_CONNECTED, MESSAGE_DISCONNECTED);
 
         mSimWatcher = new SimWatcher(mContext);
+        sThis.set(this);
     }
 
     public String getPassword(Account account) {
+        checkAuthenticateAccountsPermission(account);
+
         long identityToken = clearCallingIdentity();
         try {
             SQLiteDatabase db = mOpenHelper.getReadableDatabase();
@@ -186,6 +232,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     public String getUserData(Account account, String key) {
+        checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
             SQLiteDatabase db = mOpenHelper.getReadableDatabase();
@@ -207,7 +254,6 @@ public class AccountManagerService extends IAccountManager.Stub {
                     cursor.close();
                 }
             } finally {
-                db.setTransactionSuccessful();
                 db.endTransaction();
             }
         } finally {
@@ -235,6 +281,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     public Account[] getAccounts() {
+        checkReadAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
             return getAccountsByType(null);
@@ -244,6 +291,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     public Account[] getAccountsByType(String accountType) {
+        checkReadAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
             SQLiteDatabase db = mOpenHelper.getReadableDatabase();
@@ -269,6 +317,8 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     public boolean addAccount(Account account, String password, Bundle extras) {
+        checkAuthenticateAccountsPermission(account);
+
         // fails if the account already exists
         long identityToken = clearCallingIdentity();
         try {
@@ -318,6 +368,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     public void removeAccount(Account account) {
+        checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
             final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -330,6 +381,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     public void invalidateAuthToken(String accountType, String authToken) {
+        checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
             SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -404,12 +456,12 @@ public class AccountManagerService extends IAccountManager.Stub {
             }
             return getAuthToken(db, accountId, authTokenType);
         } finally {
-            db.setTransactionSuccessful();
             db.endTransaction();
         }
     }
 
     public String peekAuthToken(Account account, String authTokenType) {
+        checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
             return readAuthTokenFromDatabase(account, authTokenType);
@@ -419,6 +471,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     public void setAuthToken(Account account, String authTokenType, String authToken) {
+        checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
             cacheAuthToken(account, authTokenType, authToken);
@@ -428,6 +481,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     public void setPassword(Account account, String password) {
+        checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
             ContentValues values = new ContentValues();
@@ -446,6 +500,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     public void clearPassword(Account account) {
+        checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
             setPassword(account, null);
@@ -455,6 +510,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     public void setUserData(Account account, String key, String value) {
+        checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
             SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -487,26 +543,39 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
+    private void onResult(IAccountManagerResponse response, Bundle result) {
+        try {
+            response.onResult(result);
+        } catch (RemoteException e) {
+            // if the caller is dead then there is no one to care about remote
+            // exceptions
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "failure while notifying response", e);
+            }
+        }
+    }
+
     public void getAuthToken(IAccountManagerResponse response, final Account account,
             final String authTokenType, final boolean notifyOnAuthFailure,
             final boolean expectActivityLaunch, final Bundle loginOptions) {
+        checkBinderPermission(Manifest.permission.USE_CREDENTIALS);
+        final int callerUid = Binder.getCallingUid();
+        final boolean permissionGranted = permissionIsGranted(account, authTokenType, callerUid);
+
         long identityToken = clearCallingIdentity();
         try {
-            String authToken = readAuthTokenFromDatabase(account, authTokenType);
-            if (authToken != null) {
-                try {
+            // if the caller has permission, do the peek. otherwise go the more expensive
+            // route of starting a Session
+            if (permissionGranted) {
+                String authToken = readAuthTokenFromDatabase(account, authTokenType);
+                if (authToken != null) {
                     Bundle result = new Bundle();
                     result.putString(Constants.AUTHTOKEN_KEY, authToken);
                     result.putString(Constants.ACCOUNT_NAME_KEY, account.mName);
                     result.putString(Constants.ACCOUNT_TYPE_KEY, account.mType);
-                    response.onResult(result);
-                } catch (RemoteException e) {
-                    // if the caller is dead then there is no one to care about remote exceptions
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "failure while notifying response", e);
-                    }
+                    onResult(response, result);
+                    return;
                 }
-                return;
             }
 
             new Session(response, account.mType, expectActivityLaunch) {
@@ -520,11 +589,27 @@ public class AccountManagerService extends IAccountManager.Stub {
                 }
 
                 public void run() throws RemoteException {
-                    mAuthenticator.getAuthToken(this, account, authTokenType, loginOptions);
+                    // If the caller doesn't have permission then create and return the
+                    // "grant permission" intent instead of the "getAuthToken" intent.
+                    if (!permissionGranted) {
+                        mAuthenticator.getAuthTokenLabel(this, authTokenType);
+                    } else {
+                        mAuthenticator.getAuthToken(this, account, authTokenType, loginOptions);
+                    }
                 }
 
                 public void onResult(Bundle result) {
                     if (result != null) {
+                        if (result.containsKey(Constants.AUTH_TOKEN_LABEL_KEY)) {
+                            Intent intent = newGrantCredentialsPermissionIntent(account, callerUid,
+                                    new AccountAuthenticatorResponse(this),
+                                    authTokenType,
+                                    result.getString(Constants.AUTH_TOKEN_LABEL_KEY));
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable(Constants.INTENT_KEY, intent);
+                            onResult(bundle);
+                            return;
+                        }
                         String authToken = result.getString(Constants.AUTHTOKEN_KEY);
                         if (authToken != null) {
                             String name = result.getString(Constants.ACCOUNT_NAME_KEY);
@@ -539,7 +624,8 @@ public class AccountManagerService extends IAccountManager.Stub {
 
                         Intent intent = result.getParcelable(Constants.INTENT_KEY);
                         if (intent != null && notifyOnAuthFailure) {
-                            doNotification(result.getString(Constants.AUTH_FAILED_MESSAGE_KEY),
+                            doNotification(
+                                    account, result.getString(Constants.AUTH_FAILED_MESSAGE_KEY),
                                     intent);
                         }
                     }
@@ -551,10 +637,92 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
+    private void createNoCredentialsPermissionNotification(Account account, Intent intent) {
+        int uid = intent.getIntExtra(
+                GrantCredentialsPermissionActivity.EXTRAS_REQUESTING_UID, -1);
+        String authTokenType = intent.getStringExtra(
+                GrantCredentialsPermissionActivity.EXTRAS_AUTH_TOKEN_TYPE);
+        String authTokenLabel = intent.getStringExtra(
+                GrantCredentialsPermissionActivity.EXTRAS_AUTH_TOKEN_LABEL);
+
+        Notification n = new Notification(android.R.drawable.stat_sys_warning, null,
+                0 /* when */);
+        final CharSequence subtitleFormatString =
+                mContext.getText(R.string.permission_request_notification_subtitle);
+        n.setLatestEventInfo(mContext,
+                mContext.getText(R.string.permission_request_notification_title),
+                String.format(subtitleFormatString.toString(), account.mName),
+                PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
+        ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
+                .notify(getCredentialPermissionNotificationId(account, authTokenType, uid), n);
+    }
+
+    private Intent newGrantCredentialsPermissionIntent(Account account, int uid,
+            AccountAuthenticatorResponse response, String authTokenType, String authTokenLabel) {
+        RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo =
+                mAuthenticatorCache.getServiceInfo(
+                        AuthenticatorDescription.newKey(account.mType));
+        if (serviceInfo == null) {
+            throw new IllegalArgumentException("unknown account type: " + account.mType);
+        }
+
+        final Context authContext;
+        try {
+            authContext = mContext.createPackageContext(
+                serviceInfo.type.packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalArgumentException("unknown account type: " + account.mType);
+        }
+
+        Intent intent = new Intent(mContext, GrantCredentialsPermissionActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addCategory(
+                String.valueOf(getCredentialPermissionNotificationId(account, authTokenType, uid)));
+        intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_ACCOUNT, account);
+        intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_AUTH_TOKEN_LABEL, authTokenLabel);
+        intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_AUTH_TOKEN_TYPE, authTokenType);
+        intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_RESPONSE, response);
+        intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_ACCOUNT_TYPE_LABEL,
+                        authContext.getString(serviceInfo.type.labelId));
+        intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_PACKAGES,
+                        mContext.getPackageManager().getPackagesForUid(uid));
+        intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_REQUESTING_UID, uid);
+        return intent;
+    }
+
+    private Integer getCredentialPermissionNotificationId(Account account, String authTokenType,
+            int uid) {
+        Integer id;
+        synchronized(mCredentialsPermissionNotificationIds) {
+            final Pair<Pair<Account, String>, Integer> key =
+                    new Pair<Pair<Account, String>, Integer>(
+                            new Pair<Account, String>(account, authTokenType), uid);
+            id = mCredentialsPermissionNotificationIds.get(key);
+            if (id == null) {
+                id = mNotificationIds.incrementAndGet();
+                mCredentialsPermissionNotificationIds.put(key, id);
+            }
+        }
+        return id;
+    }
+
+    private Integer getSigninRequiredNotificationId(Account account) {
+        Integer id;
+        synchronized(mSigninRequiredNotificationIds) {
+            id = mSigninRequiredNotificationIds.get(account);
+            if (id == null) {
+                id = mNotificationIds.incrementAndGet();
+                mSigninRequiredNotificationIds.put(account, id);
+            }
+        }
+        return id;
+    }
+
 
     public void addAcount(final IAccountManagerResponse response, final String accountType,
             final String authTokenType, final String[] requiredFeatures,
             final boolean expectActivityLaunch, final Bundle options) {
+        checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
             new Session(response, accountType, expectActivityLaunch) {
@@ -579,6 +747,7 @@ public class AccountManagerService extends IAccountManager.Stub {
 
     public void confirmCredentials(IAccountManagerResponse response,
             final Account account, final boolean expectActivityLaunch) {
+        checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
             new Session(response, account.mType, expectActivityLaunch) {
@@ -597,6 +766,7 @@ public class AccountManagerService extends IAccountManager.Stub {
 
     public void confirmPassword(IAccountManagerResponse response, final Account account,
             final String password) {
+        checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
             new Session(response, account.mType, false /* expectActivityLaunch */) {
@@ -616,6 +786,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     public void updateCredentials(IAccountManagerResponse response, final Account account,
             final String authTokenType, final boolean expectActivityLaunch,
             final Bundle loginOptions) {
+        checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
             new Session(response, account.mType, expectActivityLaunch) {
@@ -637,6 +808,7 @@ public class AccountManagerService extends IAccountManager.Stub {
 
     public void editProperties(IAccountManagerResponse response, final String accountType,
             final boolean expectActivityLaunch) {
+        checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
             new Session(response, accountType, expectActivityLaunch) {
@@ -728,6 +900,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
     public void getAccountsByTypeAndFeatures(IAccountManagerResponse response,
             String type, String[] features) {
+        checkReadAccountsPermission();
         if (type == null) {
             if (response != null) {
                 try {
@@ -929,7 +1102,12 @@ public class AccountManagerService extends IAccountManager.Stub {
         public void onResult(Bundle result) {
             mNumResults++;
             if (result != null && !TextUtils.isEmpty(result.getString(Constants.AUTHTOKEN_KEY))) {
-                cancelNotification();
+                String accountName = result.getString(Constants.ACCOUNT_NAME_KEY);
+                String accountType = result.getString(Constants.ACCOUNT_TYPE_KEY);
+                if (!TextUtils.isEmpty(accountName) && !TextUtils.isEmpty(accountType)) {
+                    Account account = new Account(accountName, accountType);
+                    cancelNotification(getSigninRequiredNotificationId(account));
+                }
             }
             IAccountManagerResponse response;
             if (mExpectActivityLaunch && result != null
@@ -1026,6 +1204,8 @@ public class AccountManagerService extends IAccountManager.Stub {
                     + AUTHTOKENS_AUTHTOKEN + " TEXT,  "
                     + "UNIQUE (" + AUTHTOKENS_ACCOUNTS_ID + "," + AUTHTOKENS_TYPE + "))");
 
+            createGrantsTable(db);
+
             db.execSQL("CREATE TABLE " + TABLE_EXTRAS + " ( "
                     + EXTRAS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                     + EXTRAS_ACCOUNTS_ID + " INTEGER, "
@@ -1037,6 +1217,10 @@ public class AccountManagerService extends IAccountManager.Stub {
                     + META_KEY + " TEXT PRIMARY KEY NOT NULL, "
                     + META_VALUE + " TEXT)");
 
+            createAccountsDeletionTrigger(db);
+        }
+
+        private void createAccountsDeletionTrigger(SQLiteDatabase db) {
             db.execSQL(""
                     + " CREATE TRIGGER " + TABLE_ACCOUNTS + "Delete DELETE ON " + TABLE_ACCOUNTS
                     + " BEGIN"
@@ -1044,7 +1228,18 @@ public class AccountManagerService extends IAccountManager.Stub {
                     + "     WHERE " + AUTHTOKENS_ACCOUNTS_ID + "=OLD." + ACCOUNTS_ID + " ;"
                     + "   DELETE FROM " + TABLE_EXTRAS
                     + "     WHERE " + EXTRAS_ACCOUNTS_ID + "=OLD." + ACCOUNTS_ID + " ;"
+                    + "   DELETE FROM " + TABLE_GRANTS
+                    + "     WHERE " + GRANTS_ACCOUNTS_ID + "=OLD." + ACCOUNTS_ID + " ;"
                     + " END");
+        }
+
+        private void createGrantsTable(SQLiteDatabase db) {
+            db.execSQL("CREATE TABLE " + TABLE_GRANTS + " (  "
+                    + GRANTS_ACCOUNTS_ID + " INTEGER NOT NULL, "
+                    + GRANTS_AUTH_TOKEN_TYPE + " STRING NOT NULL,  "
+                    + GRANTS_GRANTEE_UID + " INTEGER NOT NULL,  "
+                    + "UNIQUE (" + GRANTS_ACCOUNTS_ID + "," + GRANTS_AUTH_TOKEN_TYPE
+                    +   "," + GRANTS_GRANTEE_UID + "))");
         }
 
         @Override
@@ -1052,14 +1247,15 @@ public class AccountManagerService extends IAccountManager.Stub {
             Log.e(TAG, "upgrade from version " + oldVersion + " to version " + newVersion);
 
             if (oldVersion == 1) {
-                db.execSQL(""
-                        + " CREATE TRIGGER " + TABLE_ACCOUNTS + "Delete DELETE ON " + TABLE_ACCOUNTS
-                        + " BEGIN"
-                        + "   DELETE FROM " + TABLE_AUTHTOKENS
-                        + "     WHERE " + AUTHTOKENS_ACCOUNTS_ID + " =OLD." + ACCOUNTS_ID + " ;"
-                        + "   DELETE FROM " + TABLE_EXTRAS
-                        + "     WHERE " + EXTRAS_ACCOUNTS_ID + " =OLD." + ACCOUNTS_ID + " ;"
-                        + " END");
+                // no longer need to do anything since the work is done
+                // when upgrading from version 2
+                oldVersion++;
+            }
+
+            if (oldVersion == 2) {
+                createGrantsTable(db);
+                db.execSQL("DROP TRIGGER " + TABLE_ACCOUNTS + "Delete");
+                createAccountsDeletionTrigger(db);
                 oldVersion++;
             }
         }
@@ -1156,31 +1352,171 @@ public class AccountManagerService extends IAccountManager.Stub {
         mAuthenticatorCache.dump(fd, fout, args);
     }
 
-    private void doNotification(CharSequence message, Intent intent) {
+    private void doNotification(Account account, CharSequence message, Intent intent) {
         long identityToken = clearCallingIdentity();
         try {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "doNotification: " + message + " intent:" + intent);
             }
 
-            Notification n = new Notification(android.R.drawable.stat_sys_warning, null,
-                    0 /* when */);
-            n.setLatestEventInfo(mContext, mContext.getText(R.string.notification_title), message,
-                PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
-            ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
-                    .notify(NOTIFICATION_ID, n);
+            if (intent.getComponent() != null &&
+                    GrantCredentialsPermissionActivity.class.getName().equals(
+                            intent.getComponent().getClassName())) {
+                createNoCredentialsPermissionNotification(account, intent);
+            } else {
+                Notification n = new Notification(android.R.drawable.stat_sys_warning, null,
+                        0 /* when */);
+                n.setLatestEventInfo(mContext, mContext.getText(R.string.notification_title),
+                        message, PendingIntent.getActivity(
+                        mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
+                ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
+                        .notify(getSigninRequiredNotificationId(account), n);
+            }
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
-    private void cancelNotification() {
+    private void cancelNotification(int id) {
         long identityToken = clearCallingIdentity();
         try {
             ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
-                .cancel(NOTIFICATION_ID);
+                .cancel(id);
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    private void checkBinderPermission(String permission) {
+        final int uid = Binder.getCallingUid();
+        if (mContext.checkCallingOrSelfPermission(permission) !=
+                PackageManager.PERMISSION_GRANTED) {
+            String msg = "caller uid " + uid + " lacks " + permission;
+            Log.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "caller uid " + uid + " has " + permission);
+        }
+    }
+
+    private boolean permissionIsGranted(Account account, String authTokenType, int callerUid) {
+        final boolean fromAuthenticator = hasAuthenticatorUid(account.mType, callerUid);
+        final boolean hasExplicitGrants = hasExplicitlyGrantedPermission(account, authTokenType);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "checkGrantsOrCallingUidAgainstAuthenticator: caller uid "
+                    + callerUid + ", account " + account
+                    + ": is authenticator? " + fromAuthenticator
+                    + ", has explicit permission? " + hasExplicitGrants);
+        }
+        return fromAuthenticator || hasExplicitGrants;
+    }
+
+    private boolean hasAuthenticatorUid(String accountType, int callingUid) {
+        for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo :
+                mAuthenticatorCache.getAllServices()) {
+            if (serviceInfo.type.type.equals(accountType)) {
+                return serviceInfo.uid == callingUid;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasExplicitlyGrantedPermission(Account account, String authTokenType) {
+        if (Binder.getCallingUid() == android.os.Process.SYSTEM_UID) {
+            return true;
+        }
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        String[] args = {String.valueOf(Binder.getCallingUid()), authTokenType,
+                account.mName, account.mType};
+        final boolean permissionGranted =
+                DatabaseUtils.longForQuery(db, COUNT_OF_MATCHING_GRANTS, args) != 0;
+        if (!permissionGranted && isDebuggableMonkeyBuild) {
+            // TODO: Skip this check when running automated tests. Replace this
+            // with a more general solution.
+            Log.w(TAG, "no credentials permission for usage of " + account + ", "
+                    + authTokenType + " by uid " + Binder.getCallingUid()
+                    + " but ignoring since this is a monkey build");
+            return true;
+        }
+        return permissionGranted;
+    }
+
+    private void checkCallingUidAgainstAuthenticator(Account account) {
+        final int uid = Binder.getCallingUid();
+        if (!hasAuthenticatorUid(account.mType, uid)) {
+            String msg = "caller uid " + uid + " is different than the authenticator's uid";
+            Log.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "caller uid " + uid + " is the same as the authenticator's uid");
+        }
+    }
+
+    private void checkAuthenticateAccountsPermission(Account account) {
+        checkBinderPermission(Manifest.permission.AUTHENTICATE_ACCOUNTS);
+        checkCallingUidAgainstAuthenticator(account);
+    }
+
+    private void checkReadAccountsPermission() {
+        checkBinderPermission(Manifest.permission.GET_ACCOUNTS);
+    }
+
+    private void checkManageAccountsPermission() {
+        checkBinderPermission(Manifest.permission.MANAGE_ACCOUNTS);
+    }
+
+    /**
+     * Allow callers with the given uid permission to get credentials for account/authTokenType.
+     * <p>
+     * Although this is public it can only be accessed via the AccountManagerService object
+     * which is in the system. This means we don't need to protect it with permissions.
+     * @hide
+     */
+    public void grantAppPermission(Account account, String authTokenType, int uid) {
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            long accountId = getAccountId(db, account);
+            if (accountId >= 0) {
+                ContentValues values = new ContentValues();
+                values.put(GRANTS_ACCOUNTS_ID, accountId);
+                values.put(GRANTS_AUTH_TOKEN_TYPE, authTokenType);
+                values.put(GRANTS_GRANTEE_UID, uid);
+                db.insert(TABLE_GRANTS, GRANTS_ACCOUNTS_ID, values);
+                db.setTransactionSuccessful();
+            }
+        } finally {
+            db.endTransaction();
+        }
+        cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid));
+    }
+
+    /**
+     * Don't allow callers with the given uid permission to get credentials for
+     * account/authTokenType.
+     * <p>
+     * Although this is public it can only be accessed via the AccountManagerService object
+     * which is in the system. This means we don't need to protect it with permissions.
+     * @hide
+     */
+    public void revokeAppPermission(Account account, String authTokenType, int uid) {
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            long accountId = getAccountId(db, account);
+            if (accountId >= 0) {
+                db.delete(TABLE_GRANTS,
+                        GRANTS_ACCOUNTS_ID + "=? AND " + GRANTS_AUTH_TOKEN_TYPE + "=? AND "
+                                + GRANTS_GRANTEE_UID + "=?",
+                        new String[]{String.valueOf(accountId), authTokenType,
+                                String.valueOf(uid)});
+                db.setTransactionSuccessful();
+            }
+        } finally {
+            db.endTransaction();
+        }
+        cancelNotification(getCredentialPermissionNotificationId(account, authTokenType, uid));
     }
 }

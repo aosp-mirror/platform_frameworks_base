@@ -18,6 +18,11 @@ package android.accounts;
 
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.Binder;
+import android.util.Log;
+import android.content.pm.PackageManager;
+import android.content.Context;
+import android.Manifest;
 
 /**
  * Base class for creating AccountAuthenticators. This implements the IAccountAuthenticator
@@ -25,10 +30,17 @@ import android.os.RemoteException;
  * AccountAuthenticators.
  */
 public abstract class AbstractAccountAuthenticator {
+    private final Context mContext;
+
+    public AbstractAccountAuthenticator(Context context) {
+        mContext = context;
+    }
+
     class Transport extends IAccountAuthenticator.Stub {
         public void addAccount(IAccountAuthenticatorResponse response, String accountType,
                 String authTokenType, String[] requiredFeatures, Bundle options)
                 throws RemoteException {
+            checkBinderPermission();
             final Bundle result;
             try {
                 result = AbstractAccountAuthenticator.this.addAccount(
@@ -49,6 +61,7 @@ public abstract class AbstractAccountAuthenticator {
 
         public void confirmPassword(IAccountAuthenticatorResponse response,
                 Account account, String password) throws RemoteException {
+            checkBinderPermission();
             boolean result;
             try {
                 result = AbstractAccountAuthenticator.this.confirmPassword(
@@ -69,6 +82,7 @@ public abstract class AbstractAccountAuthenticator {
 
         public void confirmCredentials(IAccountAuthenticatorResponse response,
                 Account account) throws RemoteException {
+            checkBinderPermission();
             final Bundle result;
             try {
                 result = AbstractAccountAuthenticator.this.confirmCredentials(
@@ -83,9 +97,28 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        public void getAuthTokenLabel(IAccountAuthenticatorResponse response,
+                String authTokenType)
+                throws RemoteException {
+            checkBinderPermission();
+            try {
+                Bundle result = new Bundle();
+                result.putString(Constants.AUTH_TOKEN_LABEL_KEY,
+                        AbstractAccountAuthenticator.this.getAuthTokenLabel(authTokenType));
+                response.onResult(result);
+            } catch (IllegalArgumentException e) {
+                response.onError(Constants.ERROR_CODE_BAD_ARGUMENTS,
+                        "unknown authTokenType");
+            } catch (UnsupportedOperationException e) {
+                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                        "getAuthTokenTypeLabel not supported");
+            }
+        }
+
         public void getAuthToken(IAccountAuthenticatorResponse response,
                 Account account, String authTokenType, Bundle loginOptions)
                 throws RemoteException {
+            checkBinderPermission();
             try {
                 final Bundle result = AbstractAccountAuthenticator.this.getAuthToken(
                         new AccountAuthenticatorResponse(response), account,
@@ -103,6 +136,7 @@ public abstract class AbstractAccountAuthenticator {
 
         public void updateCredentials(IAccountAuthenticatorResponse response, Account account,
                 String authTokenType, Bundle loginOptions) throws RemoteException {
+            checkBinderPermission();
             final Bundle result;
             try {
                 result = AbstractAccountAuthenticator.this.updateCredentials(
@@ -120,6 +154,7 @@ public abstract class AbstractAccountAuthenticator {
 
         public void editProperties(IAccountAuthenticatorResponse response,
                 String accountType) throws RemoteException {
+            checkBinderPermission();
             final Bundle result;
             try {
                 result = AbstractAccountAuthenticator.this.editProperties(
@@ -136,6 +171,7 @@ public abstract class AbstractAccountAuthenticator {
 
         public void hasFeatures(IAccountAuthenticatorResponse response,
                 Account account, String[] features) throws RemoteException {
+            checkBinderPermission();
             final Bundle result;
             try {
                 result = AbstractAccountAuthenticator.this.hasFeatures(
@@ -151,6 +187,14 @@ public abstract class AbstractAccountAuthenticator {
             if (result != null) {
                 response.onResult(result);
             }
+        }
+    }
+
+    private void checkBinderPermission() {
+        final int uid = Binder.getCallingUid();
+        final String perm = Manifest.permission.ACCOUNT_MANAGER_SERVICE;
+        if (mContext.checkCallingOrSelfPermission(perm) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("caller uid " + uid + " lacks " + perm);
         }
     }
 
@@ -189,6 +233,7 @@ public abstract class AbstractAccountAuthenticator {
     public abstract Bundle getAuthToken(AccountAuthenticatorResponse response,
             Account account, String authTokenType, Bundle loginOptions)
             throws NetworkErrorException;
+    public abstract String getAuthTokenLabel(String authTokenType);
     public abstract Bundle updateCredentials(AccountAuthenticatorResponse response,
             Account account, String authTokenType, Bundle loginOptions);
     public abstract Bundle hasFeatures(AccountAuthenticatorResponse response,
