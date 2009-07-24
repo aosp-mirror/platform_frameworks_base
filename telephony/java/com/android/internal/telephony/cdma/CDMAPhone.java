@@ -777,6 +777,9 @@ public class CDMAPhone extends PhoneBase {
             Intent intent = new Intent(TelephonyIntents.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS);
             ActivityManagerNative.broadcastStickyIntent(intent, null);
             return false;
+        } else if ((mCT.state == Phone.State.OFFHOOK) && mCT.isInEmergencyCall()) {
+            // Do not allow data call to be enabled when emergency call is going on
+            return false;
         } else {
             return mDataConnection.setDataEnabled(true);
         }
