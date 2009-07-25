@@ -56,7 +56,7 @@ href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a>
 to understand the basics of how an Android application works.</p> 
 
 <p>You should also take a look at the ApiDemos application and the other sample
-applications included in the SDK, in the <code>&lt;sdk&gt;/samples/ 
+applications included in the SDK, in the <code>&lt;sdk&gt;/samples/</code>
 folder in the SDK.</p>
 
 <p>Finally, a great way to started with Android development in Eclipse is to
@@ -281,6 +281,15 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data){
 <pre>//Hide the title bar
 requestWindowFeature(Window.FEATURE_NO_TITLE);
 </pre>
+<p>A better way to achieve the same end is to specify a theme in your Android
+Manifest file:</p>
+<pre>&lt;application android:icon="@drawable/icon" android:theme="@android:style/Theme.NoTitleBar"&gt;
+</pre>
+<p>This is preferable because it tells the system not to show a title bar while
+your application is starting up. With the explicit method call, your application
+will have a title bar visible to the user until <code>onCreate</code> runs.</p>
+<p>(Note that this can be applied to either the <code>&lt;application&gt;</code>
+tag or to individual <code>&lt;activity&gt;</code> tags.)</p>
 <a name="localhostalias" id="localhostalias"></a><h2>Referring to localhost from the emulated environment</h2>
 <p>
 If you need to refer to your host computer's <em>localhost</em>, such as when you 
