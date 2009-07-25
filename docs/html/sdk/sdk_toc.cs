@@ -27,6 +27,12 @@
     </ul>
   </li>
   <li>
+    <h2>Native Development Tools</h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/1.5_r1/index.html">Android 1.5 NDK, r1</a></li>
+    </ul>
+  </li>
+  <li>
     <h2>Previous SDK Releases</h2>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/1.1_r1/index.html">Android 1.1 SDK, r1</a></li>
