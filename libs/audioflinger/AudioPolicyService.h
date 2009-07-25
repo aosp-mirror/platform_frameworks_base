@@ -109,8 +109,6 @@ private:
                         AudioPolicyService();
     virtual             ~AudioPolicyService();
 
-    static const char *sAudioPolicyLibrary;
-    static const char *sAudioPolicyGenericLibrary;
     // Thread used for tone playback and to send audio config commands to audio flinger
     // For tone playback, using a separate thread is necessary to avoid deadlock with mLock because startTone()
     // and stopTone() are normally called with mLock locked and requesting a tone start or stop will cause
@@ -185,7 +183,6 @@ private:
     AudioPolicyInterface* mpPolicyManager;          // the platform specific policy manager
     sp <AudioCommandThread> mAudioCommandThread;    // audio commands thread
     sp <AudioCommandThread> mTonePlaybacThread;     // tone playback thread
-    void *mpPolicyManagerLibHandle;
 };
 
 }; // namespace android
