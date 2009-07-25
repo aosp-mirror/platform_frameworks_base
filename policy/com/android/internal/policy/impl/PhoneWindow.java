@@ -676,6 +676,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mPanelChordingKey = 0;
             mKeycodeMenuTimeoutHandler.removeMessages(MSG_MENU_LONG_PRESS);
 
+            if (event.isCanceled()) {
+                return;
+            }
+            
             boolean playSoundEffect = false;
             PanelFeatureState st = getPanelState(featureId, true);
             if (st.isOpen || st.isHandled) {
@@ -1393,7 +1397,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mKeycodeMenuTimeoutHandler.removeMessages(MSG_CAMERA_LONG_PRESS);
                 if (!mKeycodeCameraTimeoutActive) break;
                 mKeycodeCameraTimeoutActive = false;
-                // Add short press behavior here if desired
+                if (!event.isCanceled()) {
+                    // Add short press behavior here if desired
+                }
                 return true;
             }
 
@@ -1405,7 +1411,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mKeycodeMenuTimeoutHandler.removeMessages(MSG_CALL_LONG_PRESS);
                 if (!mKeycodeCallTimeoutActive) break;
                 mKeycodeCallTimeoutActive = false;
-                startCallActivity();
+                if (!event.isCanceled()) {
+                    startCallActivity();
+                }
                 return true;
             }
 
@@ -1420,7 +1428,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     break;
                 }
                 mSearchKeyDownReceived = false;
-                launchDefaultSearch();
+                if (!event.isCanceled()) {
+                    launchDefaultSearch();
+                }
                 return true;
             }
         }
