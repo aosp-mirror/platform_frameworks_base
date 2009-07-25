@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.ContentProvider;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.FileUtils;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +24,8 @@ public class RenamingDelegatingContext extends ContextWrapper {
 
     private Context mFileContext;
     private String mFilePrefix = null;
+    private File mCacheDir;
+    private final Object mSync = new Object();
 
     private Set<String> mDatabaseNames = Sets.newHashSet();
     private Set<String> mFileNames = Sets.newHashSet();
@@ -184,6 +188,32 @@ public class RenamingDelegatingContext extends ContextWrapper {
     public String[] fileList() {
         return mFileNames.toArray(new String[]{});
     }
+    
+    /**
+     * In order to support calls to getCacheDir(), we create a temp cache dir (inside the real
+     * one) and return it instead.  This code is basically getCacheDir(), except it uses the real
+     * cache dir as the parent directory and creates a test cache dir inside that.
+     */
+    @Override
+    public File getCacheDir() {
+        synchronized (mSync) {
+            if (mCacheDir == null) {
+                mCacheDir = new File(mFileContext.getCacheDir(), renamedFileName("cache"));
+            }
+            if (!mCacheDir.exists()) {
+                if(!mCacheDir.mkdirs()) {
+                    Log.w("RenamingDelegatingContext", "Unable to create cache directory");
+                    return null;
+                }
+                FileUtils.setPermissions(
+                        mCacheDir.getPath(),
+                        FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
+                        -1, -1);
+            }
+        }
+        return mCacheDir;
+    }
+
 
 //    /**
 //     * Given an array of files returns only those whose names indicate that they belong to this
