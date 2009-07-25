@@ -1,4 +1,4 @@
-
+<?cs if:!sdk.redirect ?>
 <ul>
   <li><?cs 
    if:android.whichdoc != "online" ?>
@@ -51,7 +51,7 @@
         <span class="es">Notas de la versión de System Image</span>
         <span class="fr">Notes de version de l'image système</span>
         <span class="it">Note sulla versione dell'immagine <br />di sistema</span>
-        <span class="ja">システム イメージ バージョンに関する<br />注意事項</span>
+        <span class="ja">システム イメージ バージョンに<br />関する注意事項</span>
         <span class="zh-CN">系统图片版本说明</span>
         <span class="zh-TW">系統影像版本資訊</span>
     </h2>
@@ -92,3 +92,4 @@
     changeNavLang(getLangPref());
 //-->
 </script>
+<?cs /if ?>

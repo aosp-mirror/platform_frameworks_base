@@ -125,6 +125,7 @@ application against the Android library that corresponds to the application's
 	<li>Dialer</li>
 	<li>Email</li>
 	<li>Gallery</li>
+	<li>IME for Japanese text input</li>
 	<li>Messaging</li>
 	<li>Music</li>
 	<li>Settings</li>
