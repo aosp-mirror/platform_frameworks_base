@@ -82,9 +82,15 @@ public:
     /* release the overlay buffer and post it */
     status_t queueBuffer(overlay_buffer_t buffer);
 
+    /* change the width and height of the overlay */
+    status_t resizeInput(uint32_t width, uint32_t height);
+
     status_t setCrop(uint32_t x, uint32_t y, uint32_t w, uint32_t h) ;
 
     status_t getCrop(uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h) ;
+
+    /* set the buffer attributes */
+    status_t setParameter(int param, int value);
 
     /* returns the address of a given buffer if supported, NULL otherwise. */
     void* getBufferAddress(overlay_buffer_t buffer);

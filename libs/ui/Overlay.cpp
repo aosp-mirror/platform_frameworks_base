@@ -59,6 +59,18 @@ status_t Overlay::queueBuffer(overlay_buffer_t buffer)
     return mOverlayData->queueBuffer(mOverlayData, buffer);
 }
 
+status_t Overlay::resizeInput(uint32_t width, uint32_t height)
+{
+    if (mStatus != NO_ERROR) return mStatus;
+    return mOverlayData->resizeInput(mOverlayData, width, height);
+}
+
+status_t Overlay::setParameter(int param, int value)
+{
+    if (mStatus != NO_ERROR) return mStatus;
+    return mOverlayData->setParameter(mOverlayData, param, value);
+}
+
 status_t Overlay::setCrop(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
     if (mStatus != NO_ERROR) return mStatus;
