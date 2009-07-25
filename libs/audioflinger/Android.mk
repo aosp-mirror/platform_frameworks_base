@@ -88,14 +88,13 @@ LOCAL_SHARED_LIBRARIES := \
 	libbinder \
     libmedia \
     libhardware_legacy \
-    libaudiopolicygeneric \
-    libaudiopolicy
+    libaudiopolicygeneric
 
 ifeq ($(strip $(BOARD_USES_GENERIC_AUDIO)),true)
   LOCAL_STATIC_LIBRARIES += libaudiointerface
   LOCAL_CFLAGS += -DGENERIC_AUDIO
 else
-  LOCAL_SHARED_LIBRARIES += libaudio
+  LOCAL_SHARED_LIBRARIES += libaudio libaudiopolicy
 endif
 
 ifeq ($(TARGET_SIMULATOR),true)
