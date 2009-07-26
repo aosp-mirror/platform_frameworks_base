@@ -916,6 +916,17 @@ public class TextUtils {
         sp.setSpan(o, p.readInt(), p.readInt(), p.readInt());
     }
 
+    /**
+     * Copies the spans from the region <code>start...end</code> in
+     * <code>source</code> to the region
+     * <code>destoff...destoff+end-start</code> in <code>dest</code>.
+     * Spans in <code>source</code> that begin before <code>start</code>
+     * or end after <code>end</code> but overlap this range are trimmed
+     * as if they began at <code>start</code> or ended at <code>end</code>.
+     *
+     * @throws IndexOutOfBoundsException if any of the copied spans
+     * are out of range in <code>dest</code>.
+     */
     public static void copySpansFrom(Spanned source, int start, int end,
                                      Class kind,
                                      Spannable dest, int destoff) {

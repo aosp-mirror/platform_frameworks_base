@@ -22,7 +22,6 @@ import android.net.http.SslError;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Config;
 import android.util.Log;
 
 import java.util.LinkedList;
@@ -121,7 +120,7 @@ public class SslErrorHandler extends Handler {
      * Handles SSL error(s) on the way up to the user.
      */
     /* package */ synchronized void handleSslErrorRequest(LoadListener loader) {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "SslErrorHandler.handleSslErrorRequest(): " +
                   "url=" + loader.url());
         }
@@ -158,14 +157,14 @@ public class SslErrorHandler extends Handler {
 
             SslError error = loader.sslError();
 
-            if (Config.DEBUG) {
+            if (WebView.DEBUG) {
                 Assert.assertNotNull(error);
             }
 
             int primary = error.getPrimaryError();
             String host = loader.host();
 
-            if (Config.DEBUG) {
+            if (WebView.DEBUG) {
                 Assert.assertTrue(host != null && primary != 0);
             }
 
@@ -206,11 +205,11 @@ public class SslErrorHandler extends Handler {
      */
     /* package */ synchronized void handleSslErrorResponse(boolean proceed) {
         LoadListener loader = mLoaderQueue.poll();
-        if (Config.DEBUG) {
+        if (WebView.DEBUG) {
             Assert.assertNotNull(loader);
         }
 
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "SslErrorHandler.handleSslErrorResponse():"
                   + " proceed: " + proceed
                   + " url:" + loader.url());
@@ -222,7 +221,7 @@ public class SslErrorHandler extends Handler {
                 int primary = loader.sslError().getPrimaryError();
                 String host = loader.host();
 
-                if (Config.DEBUG) {
+                if (WebView.DEBUG) {
                     Assert.assertTrue(host != null && primary != 0);
                 }
                 boolean hasKey = mSslPrefTable.containsKey(host);

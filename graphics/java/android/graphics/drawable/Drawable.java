@@ -38,32 +38,32 @@ import android.util.TypedValue;
  * dealing with an underlying visual resource that may take a variety of forms.
  * Unlike a {@link android.view.View}, a Drawable does not have any facility to
  * receive events or otherwise interact with the user.
- * 
+ *
  * <p>In addition to simple drawing, Drawable provides a number of generic
  * mechanisms for its client to interact with what is being drawn:
- * 
+ *
  * <ul>
  *     <li> The {@link #setBounds} method <var>must</var> be called to tell the
  *     Drawable where it is drawn and how large it should be.  All Drawables
  *     should respect the requested size, often simply by scaling their
  *     imagery.  A client can find the preferred size for some Drawables with
  *     the {@link #getIntrinsicHeight} and {@link #getIntrinsicWidth} methods.
- * 
+ *
  *     <li> The {@link #getPadding} method can return from some Drawables
  *     information about how to frame content that is placed inside of them.
  *     For example, a Drawable that is intended to be the frame for a button
  *     widget would need to return padding that correctly places the label
  *     inside of itself.
- * 
+ *
  *     <li> The {@link #setState} method allows the client to tell the Drawable
  *     in which state it is to be drawn, such as "focused", "selected", etc.
  *     Some drawables may modify their imagery based on the selected state.
- * 
+ *
  *     <li> The {@link #setLevel} method allows the client to supply a single
  *     continuous controller that can modify the Drawable is displayed, such as
  *     a battery level or progress level.  Some drawables may modify their
  *     imagery based on the current level.
- * 
+ *
  *     <li> A Drawable can perform animations by calling back to its client
  *     through the {@link Callback} interface.  All clients should support this
  *     interface (via {@link #setCallback}) so that animations will work.  A
@@ -71,7 +71,7 @@ import android.util.TypedValue;
  *     {@link android.view.View#setBackgroundDrawable(Drawable)} and
  *     {@link android.widget.ImageView}.
  * </ul>
- * 
+ *
  * Though usually not visible to the application, Drawables may take a variety
  * of forms:
  *
@@ -96,7 +96,6 @@ import android.util.TypedValue;
  * and Internationalization</a>.
  */
 public abstract class Drawable {
-
     private static final Rect ZERO_BOUNDS_RECT = new Rect();
 
     private int[] mStateSet = StateSet.WILD_CARD;
@@ -131,7 +130,7 @@ public abstract class Drawable {
             onBoundsChange(mBounds);
         }
     }
-    
+
     /**
      * Specify a bounding rectangle for the Drawable. This is where the drawable
      * will draw when its draw() method is called.
@@ -151,12 +150,12 @@ public abstract class Drawable {
     public final void copyBounds(Rect bounds) {
         bounds.set(mBounds);
     }
-    
+
     /**
      * Return a copy of the drawable's bounds in a new Rect. This returns the
      * same values as getBounds(), but the returned object is guaranteed to not
      * be changed later by the drawable (i.e. it retains no reference to this
-     * rect). If the caller already has a Rect allocated, call copyBounds(rect)
+     * rect). If the caller already has a Rect allocated, call copyBounds(rect).
      *
      * @return A copy of the drawable's bounds
      */
@@ -169,27 +168,37 @@ public abstract class Drawable {
      * object may be the same object stored in the drawable (though this is not
      * guaranteed), so if a persistent copy of the bounds is needed, call
      * copyBounds(rect) instead.
+     * You should also not change the object returned by this method as it may
+     * be the same object stored in the drawable.
      *
      * @return The bounds of the drawable (which may change later, so caller
-     *         beware).
+     *         beware). DO NOT ALTER the returned object as it may change the
+     *         stored bounds of this drawable.
+     *
+     * @see #copyBounds()
+     * @see #copyBounds(android.graphics.Rect) 
      */
     public final Rect getBounds() {
+        if (mBounds == ZERO_BOUNDS_RECT) {
+            mBounds = new Rect();
+        }
+
         return mBounds;
     }
 
     /**
      * Set a mask of the configuration parameters for which this drawable
      * may change, requiring that it be re-created.
-     * 
+     *
      * @param configs A mask of the changing configuration parameters, as
      * defined by {@link android.content.res.Configuration}.
-     * 
+     *
      * @see android.content.res.Configuration
      */
     public void setChangingConfigurations(int configs) {
         mChangingConfigurations = configs;
     }
-    
+
     /**
      * Return a mask of the configuration parameters for which this drawable
      * mau change, requiring that it be re-created.  The default implementation
@@ -197,23 +206,23 @@ public abstract class Drawable {
      * {@link #setChangingConfigurations(int)} or 0 by default.  Subclasses
      * may extend this to or in the changing configurations of any other
      * drawables they hold.
-     * 
+     *
      * @return Returns a mask of the changing configuration parameters, as
      * defined by {@link android.content.res.Configuration}.
-     * 
+     *
      * @see android.content.res.Configuration
      */
     public int getChangingConfigurations() {
         return mChangingConfigurations;
     }
-    
+
     /**
      * Set to true to have the drawable dither its colors when drawn to a device
      * with fewer than 8-bits per color component. This can improve the look on
      * those devices, but can also slow down the drawing a little.
      */
     public void setDither(boolean dither) {}
-    
+
     /**
      * Set to true to have the drawable filter its bitmap when scaled or rotated
      * (for drawables that use bitmaps). If the drawable does not use bitmaps,
@@ -235,7 +244,7 @@ public abstract class Drawable {
          * Called when the drawable needs to be redrawn.  A view at this point
          * should invalidate itself (or at least the part of itself where the
          * drawable appears).
-         * 
+         *
          * @param who The drawable that is requesting the update.
          */
         public void invalidateDrawable(Drawable who);
@@ -246,7 +255,7 @@ public abstract class Drawable {
          * {@link android.os.Handler#postAtTime(Runnable, Object, long)} with
          * the parameters <var>(what, who, when)</var> to perform the
          * scheduling.
-         * 
+         *
          * @param who The drawable being scheduled.
          * @param what The action to execute.
          * @param when The time (in milliseconds) to run.  The timebase is
@@ -260,7 +269,7 @@ public abstract class Drawable {
          * generally simply call
          * {@link android.os.Handler#removeCallbacks(Runnable, Object)} with
          * the parameters <var>(what, who)</var> to unschedule the drawable.
-         * 
+         *
          * @param who The drawable being unscheduled.
          * @param what The action being unscheduled.
          */
@@ -270,7 +279,7 @@ public abstract class Drawable {
     /**
      * Bind a {@link Callback} object to this Drawable.  Required for clients
      * that want to support animated drawables.
-     * 
+     *
      * @param cb The client's Callback implementation.
      */
     public final void setCallback(Callback cb) {
@@ -281,7 +290,7 @@ public abstract class Drawable {
      * Use the current {@link Callback} implementation to have this Drawable
      * redrawn.  Does nothing if there is no Callback attached to the
      * Drawable.
-     * 
+     *
      * @see Callback#invalidateDrawable
      */
     public void invalidateSelf()
@@ -295,10 +304,10 @@ public abstract class Drawable {
      * Use the current {@link Callback} implementation to have this Drawable
      * scheduled.  Does nothing if there is no Callback attached to the
      * Drawable.
-     * 
+     *
      * @param what The action being scheduled.
      * @param when The time (in milliseconds) to run.
-     * 
+     *
      * @see Callback#scheduleDrawable
      */
     public void scheduleSelf(Runnable what, long when)
@@ -312,9 +321,9 @@ public abstract class Drawable {
      * Use the current {@link Callback} implementation to have this Drawable
      * unscheduled.  Does nothing if there is no Callback attached to the
      * Drawable.
-     * 
+     *
      * @param what The runnable that you no longer want called.
-     * 
+     *
      * @see Callback#unscheduleDrawable
      */
     public void unscheduleSelf(Runnable what)
@@ -329,13 +338,13 @@ public abstract class Drawable {
      * 255 means fully opaque.
      */
     public abstract void setAlpha(int alpha);
-    
+
     /**
      * Specify an optional colorFilter for the drawable. Pass null to remove
      * any filters.
     */
     public abstract void setColorFilter(ColorFilter cf);
-    
+
     /**
      * Specify a color and porterduff mode to be the colorfilter for this
      * drawable.
@@ -343,7 +352,7 @@ public abstract class Drawable {
     public void setColorFilter(int color, PorterDuff.Mode mode) {
         setColorFilter(new PorterDuffColorFilter(color, mode));
     }
-    
+
     public void clearColorFilter() {
         setColorFilter(null);
     }
@@ -352,34 +361,34 @@ public abstract class Drawable {
      * Indicates whether this view will change its appearance based on state.
      * Clients can use this to determine whether it is necessary to calculate
      * their state and call setState.
-     * 
+     *
      * @return True if this view changes its appearance based on state, false
      *         otherwise.
-     * 
+     *
      * @see #setState(int[])
      */
     public boolean isStateful() {
         return false;
     }
-    
+
     /**
      * Specify a set of states for the drawable. These are use-case specific,
      * so see the relevant documentation. As an example, the background for
      * widgets like Button understand the following states:
      * [{@link android.R.attr#state_focused},
      *  {@link android.R.attr#state_pressed}].
-     * 
+     *
      * <p>If the new state you are supplying causes the appearance of the
      * Drawable to change, then it is responsible for calling
      * {@link #invalidateSelf} in order to have itself redrawn, <em>and</em>
      * true will be returned from this function.
-     * 
+     *
      * <p>Note: The Drawable holds a reference on to <var>stateSet</var>
      * until a new state array is given to it, so you must not modify this
      * array during that time.</p>
-     * 
+     *
      * @param stateSet The new set of states to be displayed.
-     * 
+     *
      * @return Returns true if this change in state has caused the appearance
      * of the Drawable to change (hence requiring an invalidate), otherwise
      * returns false.
@@ -402,7 +411,7 @@ public abstract class Drawable {
     public int[] getState() {
         return mStateSet;
     }
-    
+
     /**
      * @return The current drawable that will be used by this drawable. For simple drawables, this
      *         is just the drawable itself. For drawables that change state like
@@ -422,9 +431,9 @@ public abstract class Drawable {
      * Drawable to change, then it is responsible for calling
      * {@link #invalidateSelf} in order to have itself redrawn, <em>and</em>
      * true will be returned from this function.
-     * 
+     *
      * @param level The new level, from 0 (minimum) to 10000 (maximum).
-     * 
+     *
      * @return Returns true if this change in level has caused the appearance
      * of the Drawable to change (hence requiring an invalidate), otherwise
      * returns false.
@@ -535,7 +544,7 @@ public abstract class Drawable {
      * region; subclasses can optionally override this to return an actual
      * Region if they want to supply this optimization information, but it is
      * not required that they do so.
-     * 
+     *
      * @return Returns null if the Drawables has no transparent region to
      * report, else a Region holding the parts of the Drawable's bounds that
      * are transparent.
@@ -543,11 +552,11 @@ public abstract class Drawable {
     public Region getTransparentRegion() {
         return null;
     }
-    
+
     /**
      * Override this in your subclass to change appearance if you recognize the
      * specified state.
-     * 
+     *
      * @return Returns true if the state change has caused the appearance of
      * the Drawable to change (that is, it needs to be drawn), else false
      * if it looks the same and there is no need to redraw it since its
@@ -583,13 +592,13 @@ public abstract class Drawable {
     public int getIntrinsicHeight() {
         return -1;
     }
-    
+
     /**
      * Returns the minimum width suggested by this Drawable. If a View uses this
      * Drawable as a background, it is suggested that the View use at least this
      * value for its width. (There will be some scenarios where this will not be
      * possible.) This value should INCLUDE any padding.
-     * 
+     *
      * @return The minimum width suggested by this Drawable. If this Drawable
      *         doesn't have a suggested minimum width, 0 is returned.
      */
@@ -603,7 +612,7 @@ public abstract class Drawable {
      * Drawable as a background, it is suggested that the View use at least this
      * value for its height. (There will be some scenarios where this will not be
      * possible.) This value should INCLUDE any padding.
-     * 
+     *
      * @return The minimum height suggested by this Drawable. If this Drawable
      *         doesn't have a suggested minimum height, 0 is returned.
      */
@@ -611,7 +620,7 @@ public abstract class Drawable {
         final int intrinsicHeight = getIntrinsicHeight();
         return intrinsicHeight > 0 ? intrinsicHeight : 0;
     }
-    
+
     /**
      * Return in padding the insets suggested by this Drawable for placing
      * content inside the drawable's bounds. Positive values move toward the
@@ -649,7 +658,7 @@ public abstract class Drawable {
 
     /**
      * Create a drawable from an inputstream
-     * 
+     *
      * @hide pending API council approval
      */
     public static Drawable createFromResourceStream(Resources res, TypedValue value,
@@ -736,6 +745,8 @@ public abstract class Drawable {
             drawable = new ClipDrawable();
         } else if (name.equals("rotate")) {
             drawable = new RotateDrawable();
+        } else if (name.equals("animated-rotate")) {
+            drawable = new AnimatedRotateDrawable();            
         } else if (name.equals("animation-list")) {
             drawable = new AnimationDrawable();
         } else if (name.equals("inset")) {

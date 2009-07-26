@@ -18,16 +18,20 @@ package android.test;
 
 
 import android.location.Criteria;
+import android.location.ILocationManager;
+import android.location.ILocationProvider;
 import android.location.Location;
-import android.location.LocationProviderImpl;
+import android.location.LocationProvider;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.Log;
 
 /**
  * @hide - This is part of a framework that is under development and should not be used for
  * active development.
  */
-public class TestLocationProvider extends LocationProviderImpl {
+public class TestLocationProvider extends ILocationProvider.Stub {
 
     public static final String PROVIDER_NAME = "test";
     public static final double LAT = 0;
@@ -35,90 +39,137 @@ public class TestLocationProvider extends LocationProviderImpl {
     public static final double ALTITUDE = 10000;
     public static final float SPEED = 10;
     public static final float BEARING = 1;
-    public static final int STATUS = AVAILABLE;
+    public static final int STATUS = LocationProvider.AVAILABLE;
+    private static final long LOCATION_INTERVAL = 1000;
 
+    private static final String TAG = "TestLocationProvider";
+
+    private final ILocationManager mLocationManager;
     private Location mLocation;
     private boolean mEnabled;
+    private TestLocationProviderThread mThread;
 
-    public TestLocationProvider() {
-        super(PROVIDER_NAME);
-        mLocation = new Location(PROVIDER_NAME);
-        updateLocation();
+    private class TestLocationProviderThread extends Thread {
+
+        private boolean mDone = false;
+
+        public TestLocationProviderThread() {
+            super("TestLocationProviderThread");
+        }
+
+        public void run() {            
+            // thread exits after disable() is called
+            synchronized (this) {
+                while (!mDone) {
+                    try {
+                        wait(LOCATION_INTERVAL);
+                    } catch (InterruptedException e) {
+                    }
+                    
+                    if (!mDone) {
+                        TestLocationProvider.this.updateLocation();
+                    }
+                }
+            }
+        }
+        
+        synchronized void setDone() {
+            mDone = true;
+            notify();
+        }
     }
 
-    //LocationProvider methods
+    public TestLocationProvider(ILocationManager locationManager) {
+        mLocationManager = locationManager;
+        mLocation = new Location(PROVIDER_NAME);
+    }
 
-    @Override
     public int getAccuracy() {
         return Criteria.ACCURACY_COARSE;
     }
 
-    @Override
     public int getPowerRequirement() {
         return Criteria.NO_REQUIREMENT;
     }
 
-    @Override
     public boolean hasMonetaryCost() {
         return false;
     }
 
-    @Override
     public boolean requiresCell() {
         return false;
     }
 
-    @Override
     public boolean requiresNetwork() {
         return false;
     }
 
-    @Override
     public boolean requiresSatellite() {
         return false;
     }
 
-    @Override
     public boolean supportsAltitude() {
         return true;
     }
 
-    @Override
     public boolean supportsBearing() {
         return true;
     }
 
-    @Override
     public boolean supportsSpeed() {
         return true;
     }
 
-    //LocationProviderImpl methods
-    @Override
-    public void disable() {
+    public synchronized void disable() {
         mEnabled = false;
+        if (mThread != null) {
+            mThread.setDone();
+            try {
+                mThread.join();
+            } catch (InterruptedException e) {
+            }
+            mThread = null;
+        }
     }
 
-    @Override
-    public void enable() {
-        mEnabled = true;
+    public synchronized void enable() {
+       mEnabled = true;
+        mThread = new TestLocationProviderThread();
+        mThread.start();
     }
 
-    @Override
     public boolean isEnabled() {
         return mEnabled;
     }
 
-    @Override
-    public boolean getLocation(Location l) {
-        updateLocation();
-        l.set(mLocation);
-        return true;
-    }
-
-    @Override
     public int getStatus(Bundle extras) {
         return STATUS;
+    }
+
+    public long getStatusUpdateTime() {
+        return 0;
+    }
+
+    public void enableLocationTracking(boolean enable) {
+    }
+
+    public void setMinTime(long minTime) {
+    }
+
+    public void updateNetworkState(int state) {
+    }
+
+    public void updateLocation(Location location) {
+    }
+
+    public boolean sendExtraCommand(String command, Bundle extras) {
+        return false;
+    }
+
+    public void addListener(int uid) {
+    }
+
+    public void removeListener(int uid) {
     }
 
     private void updateLocation() {
@@ -134,6 +185,11 @@ public class TestLocationProvider extends LocationProviderImpl {
         extras.putInt("extraTest", 24);
         mLocation.setExtras(extras);
         mLocation.setTime(time);
+        try {
+            mLocationManager.reportLocation(mLocation);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling updateLocation");
+        }
     }
 
 }

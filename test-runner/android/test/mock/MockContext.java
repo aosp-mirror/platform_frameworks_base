@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -100,7 +101,17 @@ public class MockContext extends Context {
     }
 
     @Override
+    public ApplicationInfo getApplicationInfo() {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
     public String getPackageResourcePath() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public File getSharedPrefsFile(String name) {
         throw new UnsupportedOperationException();
     }
 
@@ -385,5 +396,10 @@ public class MockContext extends Context {
     public Context createPackageContext(String packageName, int flags)
             throws PackageManager.NameNotFoundException {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isRestricted() {
+        throw new UnsupportedOperationException();        
     }
 }

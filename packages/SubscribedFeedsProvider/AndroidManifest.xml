@@ -10,7 +10,7 @@
     <application android:process="system"
                  android:allowClearUserData="false"
                  android:icon="@drawable/app_icon"
-                 android:label="Sync Feeds">
+                 android:label="@string/app_label">
         <uses-library android:name="com.google.android.gtalkservice" />
         <provider android:name="SubscribedFeedsProvider"
                 android:authorities="subscribedfeeds" android:syncable="false"

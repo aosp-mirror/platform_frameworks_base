@@ -186,6 +186,9 @@ static void android_server_BatteryService_update(JNIEnv* env, jobject obj)
     
     if (readFromFile(BATTERY_STATUS_PATH, buf, SIZE) > 0)
         env->SetIntField(obj, gFieldIds.mBatteryStatus, getBatteryStatus(buf));
+    else
+        env->SetIntField(obj, gFieldIds.mBatteryStatus,
+                         gConstants.statusUnknown);
     
     if (readFromFile(BATTERY_HEALTH_PATH, buf, SIZE) > 0)
         env->SetIntField(obj, gFieldIds.mBatteryHealth, getBatteryHealth(buf));

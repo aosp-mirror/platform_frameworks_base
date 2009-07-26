@@ -22,9 +22,9 @@ import java.util.List;
 
 /**
  * Class for representing COMPREHENSION-TLV objects.
- * 
+ *
  * @see "ETSI TS 101 220 subsection 7.1.1"
- * 
+ *
  * {@hide}
  */
 class ComprehensionTlv {
@@ -33,12 +33,12 @@ class ComprehensionTlv {
     private int mLength;
     private int mValueIndex;
     private byte[] mRawValue;
-    
+
     /**
      * Constructor. Private on purpose. Use
      * {@link #decodeMany(byte[], int) decodeMany} or
      * {@link #decode(byte[], int) decode} method.
-     * 
+     *
      * @param tag The tag for this object
      * @param cr Comprehension Required flag
      * @param length Length of the value
@@ -76,7 +76,7 @@ class ComprehensionTlv {
 
     /**
      * Parses a list of COMPREHENSION-TLV objects from a byte array.
-     * 
+     *
      * @param data A byte array containing data to be parsed
      * @param startIndex Index in data at which to start parsing
      * @return A list of COMPREHENSION-TLV objects parsed
@@ -97,7 +97,7 @@ class ComprehensionTlv {
 
     /**
      * Parses an COMPREHENSION-TLV object from a byte array.
-     * 
+     *
      * @param data A byte array containing data to be parsed
      * @param startIndex Index in data at which to start parsing
      * @return A COMPREHENSION-TLV object parsed
@@ -165,9 +165,9 @@ class ComprehensionTlv {
             } else {
                 throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
             }
-            
+
             return new ComprehensionTlv(tag, cr, length, data, curIndex);
-            
+
         } catch (IndexOutOfBoundsException e) {
             throw new ResultException(ResultCode.CMD_DATA_NOT_UNDERSTOOD);
         }

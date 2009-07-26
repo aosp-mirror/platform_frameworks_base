@@ -71,7 +71,7 @@ import android.util.AttributeSet;
  * @attr ref android.R.styleable#AnimationDrawableItem_duration
  * @attr ref android.R.styleable#AnimationDrawableItem_drawable
  */
-public class AnimationDrawable extends DrawableContainer implements Runnable {
+public class AnimationDrawable extends DrawableContainer implements Runnable, Animatable {
     private final AnimationState mAnimationState;
     private int mCurFrame = -1;
     private boolean mMutated;

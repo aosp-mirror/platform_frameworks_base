@@ -17,146 +17,50 @@
 package com.android.internal.telephony.gsm;
 
 import android.os.*;
-import android.database.Cursor;
-import android.provider.Telephony;
 import android.text.util.Regex;
 import android.util.EventLog;
 import android.util.Log;
 
-import java.util.ArrayList;
+import com.android.internal.telephony.CommandException;
+import com.android.internal.telephony.DataConnection;
+import com.android.internal.telephony.DataLink;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.TelephonyEventLog;
 
 /**
  * {@hide}
  */
-public class PdpConnection extends Handler {
+public class PdpConnection extends DataConnection {
 
     private static final String LOG_TAG = "GSM";
     private static final boolean DBG  = true;
-    private static final boolean FAKE_FAIL = false;
-
-    public enum PdpState {
-        ACTIVE,     /* has active pdp context */
-        ACTIVATING, /* during connecting process */
-        INACTIVE;    /* has empty pdp context */
-
-        public String toString() {
-            switch (this) {
-                case ACTIVE: return "active";
-                case ACTIVATING: return "setting up";
-                default: return "inactive";
-            }
-        }
-
-        public boolean isActive() {
-            return this == ACTIVE;
-        }
-
-        public boolean isInactive() {
-            return this == INACTIVE;
-        }
-    }
-
-    public enum PdpFailCause {
-        NONE,
-        BAD_APN,
-        BAD_PAP_SECRET,
-        BARRED,
-        USER_AUTHENTICATION,
-        SERVICE_OPTION_NOT_SUPPORTED,
-        SERVICE_OPTION_NOT_SUBSCRIBED,
-        SIM_LOCKED,
-        RADIO_OFF,
-        NO_SIGNAL,
-        NO_DATA_PLAN,
-        RADIO_NOT_AVIALABLE,
-        SUSPENED_TEMPORARY,
-        RADIO_ERROR_RETRY,
-        UNKNOWN;
-
-        public boolean isPermanentFail() {
-            return (this == RADIO_OFF);
-        }
-
-        public String toString() {
-            switch (this) {
-                case NONE: return "no error";
-                case BAD_APN: return "bad apn";
-                case BAD_PAP_SECRET:return "bad pap secret";
-                case BARRED: return "barred";
-                case USER_AUTHENTICATION: return "error user autentication";
-                case SERVICE_OPTION_NOT_SUPPORTED: return "data not supported";
-                case SERVICE_OPTION_NOT_SUBSCRIBED: return "datt not subcribed";
-                case SIM_LOCKED: return "sim locked";
-                case RADIO_OFF: return "radio is off";
-                case NO_SIGNAL: return "no signal";
-                case NO_DATA_PLAN: return "no data plan";
-                case RADIO_NOT_AVIALABLE: return "radio not available";
-                case SUSPENED_TEMPORARY: return "suspend temporary";
-                case RADIO_ERROR_RETRY: return "transient radio error";
-                default: return "unknown data error";
-            }
-        }
-    }
 
     /** Fail cause of last PDP activate, from RIL_LastPDPActivateFailCause */
-    private static final int PDP_FAIL_RIL_BARRED = 8;
-    private static final int PDP_FAIL_RIL_BAD_APN = 27;
-    private static final int PDP_FAIL_RIL_USER_AUTHENTICATION = 29;
-    private static final int PDP_FAIL_RIL_SERVICE_OPTION_NOT_SUPPORTED = 32;
-    private static final int PDP_FAIL_RIL_SERVICE_OPTION_NOT_SUBSCRIBED = 33;
-    private static final int PDP_FAIL_RIL_ERROR_UNSPECIFIED = 0xffff;
+    private static final int PDP_FAIL_OPERATOR_BARRED = 0x08;
+    private static final int PDP_FAIL_INSUFFICIENT_RESOURCES = 0x1A;
+    private static final int PDP_FAIL_MISSING_UKNOWN_APN = 0x1B;
+    private static final int PDP_FAIL_UNKNOWN_PDP_ADDRESS_TYPE = 0x1C;
+    private static final int PDP_FAIL_USER_AUTHENTICATION = 0x1D;
+    private static final int PDP_FAIL_ACTIVATION_REJECT_GGSN = 0x1E;
+    private static final int PDP_FAIL_ACTIVATION_REJECT_UNSPECIFIED = 0x1F;
+    private static final int PDP_FAIL_SERVICE_OPTION_NOT_SUPPORTED = 0x20;
+    private static final int PDP_FAIL_SERVICE_OPTION_NOT_SUBSCRIBED = 0x21;
+    private static final int PDP_FAIL_SERVICE_OPTION_OUT_OF_ORDER = 0x22;
+    private static final int PDP_FAIL_NSAPI_IN_USE      = 0x23;
+    private static final int PDP_FAIL_PROTOCOL_ERRORS   = 0x6F;
+    private static final int PDP_FAIL_ERROR_UNSPECIFIED = 0xffff;
 
-    //***** Event codes
-    private static final int EVENT_SETUP_PDP_DONE = 1;
-    private static final int EVENT_GET_LAST_FAIL_DONE = 2;
-    private static final int EVENT_LINK_STATE_CHANGED = 3;
-    private static final int EVENT_DEACTIVATE_DONE = 4;
-    private static final int EVENT_FORCE_RETRY = 5;
+    private static final int PDP_FAIL_REGISTRATION_FAIL = -1;
+    private static final int PDP_FAIL_GPRS_REGISTRATION_FAIL = -2;
 
     //***** Instance Variables
-    private GSMPhone phone;
     private String pdp_name;
-    private PdpState state;
-    private Message onConnectCompleted;
-    private Message onDisconnect;
-    private int cid;
-    private long createTime;
-    private long lastFailTime;
-    private PdpFailCause lastFailCause;
     private ApnSetting apn;
-    private String interfaceName;
-    private String ipAddress;
-    private String gatewayAddress;
-    private String[] dnsServers;
-
-    private static final String NULL_IP = "0.0.0.0";
-
-    // dataLink is only used to support pppd link
-    DataLink dataLink;
-    // receivedDisconnectReq is set when disconnect pdp link during activating
-    private boolean receivedDisconnectReq;
 
     //***** Constructor
-    PdpConnection(GSMPhone phone)
-    {
-        this.phone = phone;
-        this.state = PdpState.INACTIVE;
-        onConnectCompleted = null;
-        onDisconnect = null;
-        this.cid = -1;
-        this.createTime = -1;
-        this.lastFailTime = -1;
-        this.lastFailCause = PdpFailCause.NONE;
-        this.apn = null;
-        this.dataLink = null;
-        receivedDisconnectReq = false;
-        this.dnsServers = new String[2];
-
-        if (SystemProperties.get("ro.radio.use-ppp","no").equals("yes")) {
-            dataLink = new PppLink(phone.mDataConnection);
-            dataLink.setOnLinkChange(this, EVENT_LINK_STATE_CHANGED, null);
-        }
+    PdpConnection(GSMPhone phone) {
+        super(phone);
     }
 
     /**
@@ -171,37 +75,29 @@ public class PdpConnection extends Handler {
 
         setHttpProxy (apn.proxy, apn.port);
 
-        state = PdpState.ACTIVATING;
+        state = State.ACTIVATING;
         this.apn = apn;
         onConnectCompleted = onCompleted;
         createTime = -1;
         lastFailTime = -1;
-        lastFailCause = PdpFailCause.NONE;
+        lastFailCause = FailCause.NONE;
         receivedDisconnectReq = false;
 
-        if (FAKE_FAIL) {
-            // for debug before baseband implement error in setup PDP
-            if (apn.apn.equalsIgnoreCase("badapn")){
-                notifyFail(PdpFailCause.BAD_APN, onConnectCompleted);
-                return;
-            }
-        }
-
-        phone.mCM.setupDefaultPDP(apn.apn, apn.user, apn.password,
-                obtainMessage(EVENT_SETUP_PDP_DONE));
+        phone.mCM.setupDataCall(Integer.toString(RILConstants.GSM_PHONE), null, apn.apn, apn.user,
+                apn.password, obtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE));
     }
 
-    void disconnect(Message msg) {
-        onDisconnect = msg;
-        if (state == PdpState.ACTIVE) {
-            if (dataLink != null) {
-                dataLink.disconnect();
-            }
+    private void tearDownData(Message msg) {
+        if (phone.mCM.getRadioState().isOn()) {
+            phone.mCM.deactivateDataCall(cid, obtainMessage(EVENT_DEACTIVATE_DONE, msg));
+        }
+    }
 
-            if (phone.mCM.getRadioState().isOn()) {
-                phone.mCM.deactivateDefaultPDP(cid, obtainMessage(EVENT_DEACTIVATE_DONE, msg));
-            }
-        } else if (state == PdpState.ACTIVATING) {
+    protected void disconnect(Message msg) {
+        onDisconnect = msg;
+        if (state == State.ACTIVE) {
+            tearDownData(msg);
+        } else if (state == State.ACTIVATING) {
             receivedDisconnectReq = true;
         } else {
             // state == INACTIVE.  Nothing to do, so notify immediately.
@@ -209,20 +105,9 @@ public class PdpConnection extends Handler {
         }
     }
 
-    private void
-    setHttpProxy(String httpProxy, String httpPort)
-    {
-        if (httpProxy == null || httpProxy.length() == 0) {
-            phone.setSystemProperty("net.gprs.http-proxy", null);
-            return;
-        }
-
-        if (httpPort == null || httpPort.length() == 0) {
-            httpPort = "8080";     // Default to port 8080
-        }
-
-        phone.setSystemProperty("net.gprs.http-proxy",
-                "http://" + httpProxy + ":" + httpPort + "/");
+    public void clearSettings() {
+        super.clearSettings();
+        apn = null;
     }
 
     public String toString() {
@@ -231,61 +116,30 @@ public class PdpConnection extends Handler {
                " lastFailCause=" + lastFailCause;
     }
 
-    public long getConnectionTime() {
-        return createTime;
-    }
 
-    public long getLastFailTime() {
-        return lastFailTime;
-    }
-
-    public PdpFailCause getLastFailCause() {
-        return lastFailCause;
-    }
-
-    public ApnSetting getApn() {
-        return apn;
-    }
-
-    String getInterface() {
-        return interfaceName;
-    }
-
-    String getIpAddress() {
-        return ipAddress;
-    }
-
-    String getGatewayAddress() {
-        return gatewayAddress;
-    }
-
-    String[] getDnsServers() {
-        return dnsServers;
-    }
-
-    public PdpState getState() {
-        return state;
-    }
-
-    private void notifyFail(PdpFailCause cause, Message onCompleted) {
+    protected void notifyFail(FailCause cause, Message onCompleted) {
         if (onCompleted == null) return;
 
-        state = PdpState.INACTIVE;
+        state = State.INACTIVE;
         lastFailCause = cause;
         lastFailTime = System.currentTimeMillis();
         onConnectCompleted = null;
 
-        if (DBG) log("Notify PDP fail at " + lastFailTime
-                + " due to " + lastFailCause);
+        if (DBG) {
+            log("Notify PDP fail at " + lastFailTime +
+                    " due to " + lastFailCause);
+        }
 
         AsyncResult.forMessage(onCompleted, cause, new Exception());
         onCompleted.sendToTarget();
     }
 
-    private void notifySuccess(Message onCompleted) {
-        if (onCompleted == null) return;
+    protected void notifySuccess(Message onCompleted) {
+        if (onCompleted == null) {
+            return;
+        }
 
-        state = PdpState.ACTIVE;
+        state = State.ACTIVE;
         createTime = System.currentTimeMillis();
         onConnectCompleted = null;
         onCompleted.arg1 = cid;
@@ -296,7 +150,7 @@ public class PdpConnection extends Handler {
         onCompleted.sendToTarget();
     }
 
-    private void notifyDisconnect(Message msg) {
+    protected void notifyDisconnect(Message msg) {
         if (DBG) log("Notify PDP disconnect");
 
         if (msg != null) {
@@ -306,22 +160,7 @@ public class PdpConnection extends Handler {
         clearSettings();
     }
 
-    void clearSettings() {
-        state = PdpState.INACTIVE;
-        receivedDisconnectReq = false;
-        createTime = -1;
-        lastFailTime = -1;
-        lastFailCause = PdpFailCause.NONE;
-        apn = null;
-        onConnectCompleted = null;
-        interfaceName = null;
-        ipAddress = null;
-        gatewayAddress = null;
-        dnsServers[0] = null;
-        dnsServers[1] = null;
-    }
-
-    private void onLinkStateChanged(DataLink.LinkState linkState) {
+    protected void onLinkStateChanged(DataLink.LinkState linkState) {
         switch (linkState) {
             case LINK_UP:
                 notifySuccess(onConnectCompleted);
@@ -335,151 +174,136 @@ public class PdpConnection extends Handler {
         }
     }
 
-    private PdpFailCause getFailCauseFromRequest(int rilCause) {
-        PdpFailCause cause;
+    protected FailCause getFailCauseFromRequest(int rilCause) {
+        FailCause cause;
 
         switch (rilCause) {
-            case PDP_FAIL_RIL_BARRED:
-                cause = PdpFailCause.BARRED;
+            case PDP_FAIL_OPERATOR_BARRED:
+                cause = FailCause.OPERATOR_BARRED;
                 break;
-            case PDP_FAIL_RIL_BAD_APN:
-                cause = PdpFailCause.BAD_APN;
+            case PDP_FAIL_INSUFFICIENT_RESOURCES:
+                cause = FailCause.INSUFFICIENT_RESOURCES;
                 break;
-            case PDP_FAIL_RIL_USER_AUTHENTICATION:
-                cause = PdpFailCause.USER_AUTHENTICATION;
+            case PDP_FAIL_MISSING_UKNOWN_APN:
+                cause = FailCause.MISSING_UKNOWN_APN;
                 break;
-            case PDP_FAIL_RIL_SERVICE_OPTION_NOT_SUPPORTED:
-                cause = PdpFailCause.SERVICE_OPTION_NOT_SUPPORTED;
+            case PDP_FAIL_UNKNOWN_PDP_ADDRESS_TYPE:
+                cause = FailCause.UNKNOWN_PDP_ADDRESS;
                 break;
-            case PDP_FAIL_RIL_SERVICE_OPTION_NOT_SUBSCRIBED:
-                cause = PdpFailCause.SERVICE_OPTION_NOT_SUBSCRIBED;
+            case PDP_FAIL_USER_AUTHENTICATION:
+                cause = FailCause.USER_AUTHENTICATION;
+                break;
+            case PDP_FAIL_ACTIVATION_REJECT_GGSN:
+                cause = FailCause.ACTIVATION_REJECT_GGSN;
+                break;
+            case PDP_FAIL_ACTIVATION_REJECT_UNSPECIFIED:
+                cause = FailCause.ACTIVATION_REJECT_UNSPECIFIED;
+                break;
+            case PDP_FAIL_SERVICE_OPTION_OUT_OF_ORDER:
+                cause = FailCause.SERVICE_OPTION_OUT_OF_ORDER;
+                break;
+            case PDP_FAIL_SERVICE_OPTION_NOT_SUPPORTED:
+                cause = FailCause.SERVICE_OPTION_NOT_SUPPORTED;
+                break;
+            case PDP_FAIL_SERVICE_OPTION_NOT_SUBSCRIBED:
+                cause = FailCause.SERVICE_OPTION_NOT_SUBSCRIBED;
+                break;
+            case PDP_FAIL_NSAPI_IN_USE:
+                cause = FailCause.NSAPI_IN_USE;
+                break;
+            case PDP_FAIL_PROTOCOL_ERRORS:
+                cause = FailCause.PROTOCOL_ERRORS;
+                break;
+            case PDP_FAIL_ERROR_UNSPECIFIED:
+                cause = FailCause.UNKNOWN;
+                break;
+            case PDP_FAIL_REGISTRATION_FAIL:
+                cause = FailCause.REGISTRATION_FAIL;
+                break;
+            case PDP_FAIL_GPRS_REGISTRATION_FAIL:
+                cause = FailCause.GPRS_REGISTRATION_FAIL;
                 break;
             default:
-                cause = PdpFailCause.UNKNOWN;
+                cause = FailCause.UNKNOWN;
         }
         return cause;
     }
 
-
-    private void log(String s) {
+    protected void log(String s) {
         Log.d(LOG_TAG, "[PdpConnection] " + s);
     }
 
     @Override
-    public void handleMessage(Message msg) {
-        AsyncResult ar;
+    protected void onDeactivated(AsyncResult ar) {
+        notifyDisconnect((Message) ar.userObj);
+        if (DBG) log("PDP Connection Deactivated");
+    }
 
-        switch (msg.what) {
-            case EVENT_SETUP_PDP_DONE:
-                ar = (AsyncResult) msg.obj;
+    @Override
+    protected void onSetupConnectionCompleted(AsyncResult ar) {
+        if (ar.exception != null) {
+            Log.e(LOG_TAG, "PDP Context Init failed " + ar.exception);
 
-                if (ar.exception != null) {
-                    Log.e(LOG_TAG, "PDP Context Init failed " + ar.exception);
+            if (receivedDisconnectReq) {
+                // Don't bother reporting the error if there's already a
+                // pending disconnect request, since DataConnectionTracker
+                // has already updated its state.
+                notifyDisconnect(onDisconnect);
+            } else {
+                if ( ar.exception instanceof CommandException &&
+                        ((CommandException) (ar.exception)).getCommandError()
+                        == CommandException.Error.RADIO_NOT_AVAILABLE) {
+                    notifyFail(FailCause.RADIO_NOT_AVAILABLE,
+                            onConnectCompleted);
+                } else {
+                    phone.mCM.getLastPdpFailCause(
+                            obtainMessage(EVENT_GET_LAST_FAIL_DONE));
+                }
+            }
+        } else {
+            if (receivedDisconnectReq) {
+                // Don't bother reporting success if there's already a
+                // pending disconnect request, since DataConnectionTracker
+                // has already updated its state.
+                tearDownData(onDisconnect);
+            } else {
+                String[] response = ((String[]) ar.result);
+                cid = Integer.parseInt(response[0]);
 
-                    if (receivedDisconnectReq) {
-                        // Don't bother reporting the error if there's already a
-                        // pending disconnect request, since DataConnectionTracker
-                        // has already updated its state.
-                        notifyDisconnect(onDisconnect);
-                    } else {
-                        if ( ar.exception instanceof CommandException &&
-                                ((CommandException) (ar.exception)).getCommandError()
-                                == CommandException.Error.RADIO_NOT_AVAILABLE) {
-                            notifyFail(PdpFailCause.RADIO_NOT_AVIALABLE,
-                                    onConnectCompleted);
-                        } else {
-                            phone.mCM.getLastPdpFailCause(
-                                    obtainMessage(EVENT_GET_LAST_FAIL_DONE));
+                if (response.length > 2) {
+                    interfaceName = response[1];
+                    ipAddress = response[2];
+                    String prefix = "net." + interfaceName + ".";
+                    gatewayAddress = SystemProperties.get(prefix + "gw");
+                    dnsServers[0] = SystemProperties.get(prefix + "dns1");
+                    dnsServers[1] = SystemProperties.get(prefix + "dns2");
+                    if (DBG) {
+                        log("interface=" + interfaceName + " ipAddress=" + ipAddress
+                            + " gateway=" + gatewayAddress + " DNS1=" + dnsServers[0]
+                            + " DNS2=" + dnsServers[1]);
+                    }
+
+                    if (NULL_IP.equals(dnsServers[0]) && NULL_IP.equals(dnsServers[1])
+                                        && !((GSMPhone) phone).isDnsCheckDisabled()) {
+                        // Work around a race condition where QMI does not fill in DNS:
+                        // Deactivate PDP and let DataConnectionTracker retry.
+                        // Do not apply the race condition workaround for MMS APN
+                        // if Proxy is an IP-address.
+                        // Otherwise, the default APN will not be restored anymore.
+                        if (!apn.types[0].equals(Phone.APN_TYPE_MMS)
+                                || !isIpAddress(apn.mmsProxy)) {
+                            EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_BAD_DNS_ADDRESS,
+                                    dnsServers[0]);
+                            phone.mCM.deactivateDataCall(cid, obtainMessage(EVENT_FORCE_RETRY));
+                            return;
                         }
                     }
-                } else {
-                    if (receivedDisconnectReq) {
-                        // Don't bother reporting success if there's already a
-                        // pending disconnect request, since DataConnectionTracker
-                        // has already updated its state.
-                        // Set ACTIVE so that disconnect does the right thing.
-                        state = PdpState.ACTIVE;
-                        disconnect(onDisconnect);
-                    } else {
-                        String[] response = ((String[]) ar.result);
-                        cid = Integer.parseInt(response[0]);
-
-                        if (response.length > 2) {
-                            interfaceName = response[1];
-                            ipAddress = response[2];
-                            String prefix = "net." + interfaceName + ".";
-                            gatewayAddress = SystemProperties.get(prefix + "gw");
-                            dnsServers[0] = SystemProperties.get(prefix + "dns1");
-                            dnsServers[1] = SystemProperties.get(prefix + "dns2");
-                            if (DBG) {
-                                log("interface=" + interfaceName + " ipAddress=" + ipAddress
-                                    + " gateway=" + gatewayAddress + " DNS1=" + dnsServers[0]
-                                    + " DNS2=" + dnsServers[1]);
-                            }
-
-                            if (NULL_IP.equals(dnsServers[0]) && NULL_IP.equals(dnsServers[1])
-                                    && !phone.isDnsCheckDisabled()) {
-                                // Work around a race condition where QMI does not fill in DNS:
-                                // Deactivate PDP and let DataConnectionTracker retry.
-                                // Do not apply the race condition workaround for MMS APN
-                                // if Proxy is an IP-address.
-                                // Otherwise, the default APN will not be restored anymore.
-                                if (!apn.types[0].equals(Phone.APN_TYPE_MMS)
-                                        || !isIpAddress(apn.mmsProxy)) {
-                                    EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_BAD_DNS_ADDRESS,
-                                            dnsServers[0]);
-                                    phone.mCM.deactivateDefaultPDP(cid,
-                                            obtainMessage(EVENT_FORCE_RETRY));
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (dataLink != null) {
-                            dataLink.connect();
-                        } else {
-                            onLinkStateChanged(DataLink.LinkState.LINK_UP);
-                        }
-
-                        if (DBG) log("PDP setup on cid = " + cid);
-                    }
-                }
-                break;
-            case EVENT_FORCE_RETRY:
-                if (receivedDisconnectReq) {
-                    notifyDisconnect(onDisconnect);
-                } else {
-                    ar = (AsyncResult) msg.obj;
-                    notifyFail(PdpFailCause.RADIO_ERROR_RETRY, onConnectCompleted);
-                }
-                break;
-            case EVENT_GET_LAST_FAIL_DONE:
-                if (receivedDisconnectReq) {
-                    // Don't bother reporting the error if there's already a
-                    // pending disconnect request, since DataConnectionTracker
-                    // has already updated its state.
-                    notifyDisconnect(onDisconnect);
-                } else {
-                    ar = (AsyncResult) msg.obj;
-                    PdpFailCause cause = PdpFailCause.UNKNOWN;
-
-                    if (ar.exception == null) {
-                        int rilFailCause = ((int[]) (ar.result))[0];
-                        cause = getFailCauseFromRequest(rilFailCause);
-                    }
-                    notifyFail(cause, onConnectCompleted);
                 }
 
-                break;
-            case EVENT_LINK_STATE_CHANGED:
-                ar = (AsyncResult) msg.obj;
-                DataLink.LinkState ls  = (DataLink.LinkState) ar.result;
-                onLinkStateChanged(ls);
-                break;
-            case EVENT_DEACTIVATE_DONE:
-                ar = (AsyncResult) msg.obj;
-                notifyDisconnect((Message) ar.userObj);
-                break;
+                onLinkStateChanged(DataLink.LinkState.LINK_UP);
+
+                if (DBG) log("PDP setup on cid = " + cid);
+            }
         }
     }
 
@@ -487,5 +311,9 @@ public class PdpConnection extends Handler {
         if (address == null) return false;
 
         return Regex.IP_ADDRESS_PATTERN.matcher(apn.mmsProxy).matches();
+    }
+
+    public ApnSetting getApn() {
+        return this.apn;
     }
 }

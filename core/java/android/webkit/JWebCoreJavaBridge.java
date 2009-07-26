@@ -18,7 +18,7 @@ package android.webkit;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Config;
+import android.security.CertTool;
 import android.util.Log;
 
 final class JWebCoreJavaBridge extends Handler {
@@ -156,7 +156,7 @@ final class JWebCoreJavaBridge extends Handler {
      * @param timemillis The relative time when the timer should fire
      */
     private void setSharedTimer(long timemillis) {
-        if (Config.LOGV) Log.v(LOGTAG, "setSharedTimer " + timemillis);
+        if (WebView.LOGV_ENABLED) Log.v(LOGTAG, "setSharedTimer " + timemillis);
 
         if (timemillis <= 0) {
             // we don't accumulate the sharedTimer unless it is a delayed
@@ -180,11 +180,20 @@ final class JWebCoreJavaBridge extends Handler {
      * Stop the shared timer.
      */
     private void stopSharedTimer() {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "stopSharedTimer removing all timers");
         }
         removeMessages(TIMER_MESSAGE);
         mHasInstantTimer = false;
+    }
+
+    private String[] getKeyStrengthList() {
+        return CertTool.getInstance().getSupportedKeyStrenghs();
+    }
+
+    private String getSignedPublicKey(int index, String challenge, String url) {
+        // generateKeyPair expects organizations which we don't have. Ignore url.
+        return CertTool.getInstance().generateKeyPair(index, challenge, null);
     }
 
     private native void nativeConstructor();

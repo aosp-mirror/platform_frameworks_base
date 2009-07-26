@@ -18,18 +18,18 @@ package android.graphics;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.util.TypedValue;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 
 import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * Creates Bitmap objects from various sources, including files, streams, 
- * and byte-arrays. 
+ * Creates Bitmap objects from various sources, including files, streams,
+ * and byte-arrays.
  */
 public class BitmapFactory {
     public static class Options {
@@ -62,7 +62,7 @@ public class BitmapFactory {
          * Also, powers of 2 are often faster/easier for the decoder to honor.
          */
         public int inSampleSize;
-        
+
         /**
          * If this is non-null, the decoder will try to decode into this
          * internal configuration. If it is null, or the request cannot be met,
@@ -71,7 +71,7 @@ public class BitmapFactory {
          * as if it has per-pixel alpha (requiring a config that also does).
          */
         public Bitmap.Config inPreferredConfig;
-        
+
         /**
          * If dither is true, the decoder will atttempt to dither the decoded
          * image.
@@ -103,6 +103,32 @@ public class BitmapFactory {
         public boolean inScaled;
 
         /**
+         * If this is set to true, then the resulting bitmap will allocate its
+         * pixels such that they can be purged if the system needs to reclaim
+         * memory. In that instance, when the pixels need to be accessed again
+         * (e.g. the bitmap is drawn, getPixels() is called), they will be
+         * automatically re-decoded.
+         *
+         * For the re-decode to happen, the bitmap must have access to the
+         * encoded data, either by sharing a reference to the input
+         * or by making a copy of it. This distinction is controlled by
+         * inInputShareable. If this is true, then the bitmap may keep a shallow
+         * reference to the input. If this is false, then the bitmap will
+         * explicitly make a copy of the input data, and keep that. Even if
+         * sharing is allowed, the implementation may still decide to make a
+         * deep copy of the input data.
+         */
+        public boolean inPurgeable;
+
+        /**
+         * This field works in conjuction with inPurgeable. If inPurgeable is
+         * false, then this field is ignored. If inPurgeable is true, then this
+         * field determines whether the bitmap can share a reference to the
+         * input data (inputstream, array, etc.) or if it must make a deep copy.
+         */
+        public boolean inInputShareable;
+
+        /**
          * The resulting width of the bitmap, set independent of the state of
          * inJustDecodeBounds. However, if there is an error trying to decode,
          * outWidth will be set to -1.
@@ -121,12 +147,12 @@ public class BitmapFactory {
          * If not know, or there is an error, it is set to null.
          */
         public String outMimeType;
-        
+
         /**
          * Temp storage to use for decoding.  Suggest 16K or so.
          */
         public byte[] inTempStorage;
-        
+
         private native void requestCancel();
 
         /**
@@ -137,7 +163,7 @@ public class BitmapFactory {
          * if the operation is canceled.
          */
         public boolean mCancel;
-        
+
         /**
          *  This can be called from another thread while this options object is
          *  inside a decode... call. Calling this will notify the decoder that
@@ -219,7 +245,7 @@ public class BitmapFactory {
             if (opts.inDensity == 0) {
                 opts.inDensity = density == TypedValue.DENSITY_DEFAULT ?
                         DisplayMetrics.DEFAULT_DENSITY : density;
-            }            
+            }
             float scale = opts.inDensity / (float) DisplayMetrics.DEFAULT_DENSITY;
 
             if (opts.inScaled || isNinePatch) {
@@ -261,7 +287,7 @@ public class BitmapFactory {
      */
     public static Bitmap decodeResource(Resources res, int id, Options opts) {
         Bitmap bm = null;
-        
+
         try {
             final TypedValue value = new TypedValue();
             final InputStream is = res.openRawResource(id, value);
@@ -276,7 +302,7 @@ public class BitmapFactory {
         }
         return bm;
     }
-    
+
     /**
      * Decode an image referenced by a resource ID.
      *
@@ -307,7 +333,7 @@ public class BitmapFactory {
         }
         return nativeDecodeByteArray(data, offset, length, opts);
     }
-    
+
     /**
      * Decode an immutable bitmap from the specified byte array.
      *
@@ -320,13 +346,13 @@ public class BitmapFactory {
     public static Bitmap decodeByteArray(byte[] data, int offset, int length) {
         return decodeByteArray(data, offset, length, null);
     }
-    
+
     /**
      * Decode an input stream into a bitmap. If the input stream is null, or
      * cannot be used to decode a bitmap, the function returns null.
      * The stream's position will be where ever it was after the encoded data
      * was read.
-     * 
+     *
      * @param is The input stream that holds the raw data to be decoded into a
      *           bitmap.
      * @param outPadding If not null, return the padding rect for the bitmap if
@@ -345,7 +371,7 @@ public class BitmapFactory {
         if (is == null) {
             return null;
         }
-        
+
         // we need mark/reset to work properly
 
         if (!is.markSupported()) {
@@ -383,7 +409,7 @@ public class BitmapFactory {
      * cannot be used to decode a bitmap, the function returns null.
      * The stream's position will be where ever it was after the encoded data
      * was read.
-     * 
+     *
      * @param is The input stream that holds the raw data to be decoded into a
      *           bitmap.
      * @return The decoded bitmap, or null if the image data could not be
@@ -411,7 +437,7 @@ public class BitmapFactory {
     public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts) {
         return nativeDecodeFileDescriptor(fd, outPadding, opts);
     }
-    
+
     /**
      * Decode a bitmap from the file descriptor. If the bitmap cannot be decoded
      * return null. The position within the descriptor will not be changed when
@@ -423,7 +449,7 @@ public class BitmapFactory {
     public static Bitmap decodeFileDescriptor(FileDescriptor fd) {
         return nativeDecodeFileDescriptor(fd, null, null);
     }
-    
+
     private static native Bitmap nativeDecodeStream(InputStream is, byte[] storage,
             Rect padding, Options opts);
     private static native Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,

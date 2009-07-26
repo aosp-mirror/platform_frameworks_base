@@ -16,6 +16,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.android.test.dpi">
+    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="3" />
+    <supports-screens android:smallScreens="true" />
     <application android:label="DpiTest">
         <activity android:name="DpiTestActivity" android:label="DpiTest">
             <intent-filter>

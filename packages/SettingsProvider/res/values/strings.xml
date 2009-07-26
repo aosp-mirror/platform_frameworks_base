@@ -17,7 +17,6 @@
  */
 -->
 <resources>
-    <string name="permlab_writeGservices">Write Gservices settings.</string>
-    <string name="permdesc_writeGservices">Allows the application to
-      change the settings in Gservices.</string>
+    <!-- Name of the activity for Settings storage. -->
+    <string name="app_label">Settings Storage</string>
 </resources>

@@ -17,14 +17,12 @@
 package android.telephony.gsm;
 
 import android.os.Bundle;
-import com.android.internal.telephony.Phone;
 import android.telephony.CellLocation;
 
 /**
  * Represents the cell location on a GSM phone.
  */
-public class GsmCellLocation extends CellLocation
-{
+public class GsmCellLocation extends CellLocation {
     private int mLac;
     private int mCid;
 
@@ -82,7 +80,7 @@ public class GsmCellLocation extends CellLocation
     @Override
     public boolean equals(Object o) {
         GsmCellLocation s;
-        
+
         try {
             s = (GsmCellLocation)o;
         } catch (ClassCastException ex) {
@@ -100,7 +98,7 @@ public class GsmCellLocation extends CellLocation
     public String toString() {
         return "["+ mLac + "," + mCid + "]";
     }
-    
+
     /**
      * Test whether two objects hold the same data values or both are null
      *

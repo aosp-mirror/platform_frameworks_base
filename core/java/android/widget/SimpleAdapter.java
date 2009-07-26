@@ -25,6 +25,7 @@ import android.net.Uri;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * An easy adapter to map static data to views defined in an XML file. You can specify the data
@@ -57,6 +58,7 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
     private int mResource;
     private int mDropDownResource;
     private LayoutInflater mInflater;
+    private final WeakHashMap<View, View[]> mHolders = new WeakHashMap<View, View[]>();
 
     private SimpleFilter mFilter;
     private ArrayList<Map<String, ?>> mUnfilteredData;
@@ -128,7 +130,7 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
                 holder[i] = v.findViewById(to[i]);
             }
 
-            v.setTag(holder);
+            mHolders.put(v, holder);
         } else {
             v = convertView;
         }
@@ -160,7 +162,7 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
         }
 
         final ViewBinder binder = mViewBinder;
-        final View[] holder = (View[]) view.getTag();
+        final View[] holder = mHolders.get(view);
         final String[] from = mFrom;
         final int[] to = mTo;
         final int count = to.length;

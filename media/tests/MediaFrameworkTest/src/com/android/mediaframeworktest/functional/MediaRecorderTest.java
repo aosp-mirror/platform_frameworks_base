@@ -22,6 +22,7 @@ import com.android.mediaframeworktest.MediaNames;
 import java.io.*;
 
 import android.content.Context;
+import android.hardware.Camera;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.test.ActivityInstrumentationTestCase;
@@ -46,6 +47,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
     private SurfaceHolder mSurfaceHolder = null;
     private MediaRecorder mRecorder;
     Context mContext;
+    Camera mCamera;
   
     public MediaRecorderTest() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
@@ -146,8 +148,8 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
             Log.v(TAG, "before getduration");
             mOutputDuration = mediaPlayer.getDuration();
             Log.v(TAG, "get video dimension");
-            mOutputVideoHeight = mediaPlayer.getVideoHeight();
-            mOutputVideoWidth = mediaPlayer.getVideoWidth();
+            mOutputVideoHeight = CodecTest.videoHeight(outputFilePath);
+            mOutputVideoWidth = CodecTest.videoWidth(outputFilePath);
             mediaPlayer.release();    
         } catch (Exception e) {
             Log.v(TAG, e.toString());
@@ -234,12 +236,32 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
         assertTrue("QCIFH263 Video Only", videoRecordedResult);
     }
     
-    @Suppress
-    public void testPortraitH263() throws Exception {       
+    @LargeTest
+    /*
+     * This test case set the camera in portrait mode.
+     * Verification: validate the video dimension and the duration.
+     */
+    public void testPortraitH263() throws Exception {
         boolean videoRecordedResult = false;
-        recordVideo(15, 144, 176, MediaRecorder.VideoEncoder.H263, 
-               MediaRecorder.OutputFormat.MPEG_4, MediaNames.RECORDED_VIDEO_3GP, true);      
-        videoRecordedResult = validateVideo(MediaNames.RECORDED_VIDEO_3GP, 144, 176);
+        try {
+            mCamera = Camera.open();
+            Camera.Parameters parameters = mCamera.getParameters();
+            parameters.setPreviewSize(352, 288);
+            parameters.set("orientation", "portrait");
+            mCamera.setParameters(parameters);
+            mCamera.unlock();
+            mRecorder.setCamera(mCamera);
+            Thread.sleep(1000);
+            recordVideo(15, 352, 288, MediaRecorder.VideoEncoder.H263,
+                    MediaRecorder.OutputFormat.THREE_GPP, 
+                    MediaNames.RECORDED_PORTRAIT_H263, true);
+            videoRecordedResult = 
+                validateVideo(MediaNames.RECORDED_PORTRAIT_H263, 352, 288);
+            mCamera.lock();
+            mCamera.release();
+        } catch (Exception e) {
+            Log.v(TAG, e.toString());
+        }
         assertTrue("PortraitH263", videoRecordedResult);
     }
     

@@ -23,27 +23,27 @@ package com.android.mediaframeworktest;
  *
  */
 public class MediaNames {
-  
+    //A directory to hold all kinds of media files
+    public static final String MEDIA_SAMPLE_POOL = "/sdcard/media_api/samples/";
     //Audio files
-    public static final String MP3CBR = "/sdcard/media_api/music/MP3CBR.mp3";  
-    public static final String MP3VBR = "/sdcard/media_api/music/MP3VBR.mp3";
+    public static final String MP3CBR = "/sdcard/media_api/music/MP3_256kbps_2ch.mp3";
+    public static final String MP3VBR = "/sdcard/media_api/music/MP3_256kbps_2ch_VBR.mp3";
     public static final String SHORTMP3 = "/sdcard/media_api/music/SHORTMP3.mp3";
-    public static final String MIDI = "/sdcard/media_api/music/MIDI.mid";
+    public static final String MIDI = "/sdcard/media_api/music/ants.mid";
     public static final String WMA9 = "/sdcard/media_api/music/WMA9.wma";
     public static final String WMA10 = "/sdcard/media_api/music/WMA10.wma";
-    public static final String WAV = "/sdcard/media_api/music/complicated_wav.wav";
-    public static final String AMR = "/sdcard/media_api/music/AMRNB.amr";
-    public static final String OGG = "/sdcard/media_api/music/Mists_of_Time-4T.ogg";
-    public static final String OGGSHORT = "/sdcard/media_api/music/Skippy.ogg";
+    public static final String WAV = "/sdcard/media_api/music/rings_2ch.wav";
+    public static final String AMR = "/sdcard/media_api/music/test_amr_ietf.amr";
+    public static final String OGG = "/sdcard/media_api/music/Revelation.ogg";
   
-    public static final int MP3CBR_LENGTH = 231116;  
-    public static final int MP3VBR_LENGTH = 126407;
+    public static final int MP3CBR_LENGTH = 71000;
+    public static final int MP3VBR_LENGTH = 71000;
     public static final int SHORTMP3_LENGTH = 286;
-    public static final int MIDI_LENGTH = 210528;
+    public static final int MIDI_LENGTH = 17000;
     public static final int WMA9_LENGTH = 126559;
     public static final int WMA10_LENGTH = 126559;
-    public static final int AMR_LENGTH = 126540;
-    public static final int OGG_LENGTH = 40000;
+    public static final int AMR_LENGTH = 37000;
+    public static final int OGG_LENGTH = 4000;
     public static final int SEEK_TIME = 10000;
   
     public static final long PAUSE_WAIT_TIME = 3000;
@@ -60,29 +60,21 @@ public class MediaNames {
     //public static final String VIDEO_RTSP3GP = "rtsp://193.159.241.21/sp/alizee05.3gp";
   
     //local video
-    public static final String VIDEO_MP4 = "/sdcard/media_api/video/gingerkids.MP4";
+    public static final String VIDEO_MP4 = "/sdcard/media_api/video/MPEG4_320_AAC_64.mp4";
     public static final String VIDEO_LONG_3GP = "/sdcard/media_api/video/radiohead.3gp";
     public static final String VIDEO_SHORT_3GP = "/sdcard/media_api/video/short.3gp";
     public static final String VIDEO_LARGE_SIZE_3GP = "/sdcard/media_api/video/border_large.3gp";
-    public static final String VIDEO_H263_AAC = "/sdcard/media_api/video/H263_AAC.3gp";
-    public static final String VIDEO_H263_AMR = "/sdcard/media_api/video/H263_AMR.3gp";
-    public static final String VIDEO_H264_AAC = "/sdcard/media_api/video/H264_AAC.3gp";
-    public static final String VIDEO_H264_AMR = "/sdcard/media_api/video/H264_AMR.3gp";   
+    public static final String VIDEO_H263_AAC = "/sdcard/media_api/video/H263_56_AAC_24.3gp";
+    public static final String VIDEO_H263_AMR = "/sdcard/media_api/video/H263_56_AMRNB_6.3gp";
+    public static final String VIDEO_H264_AAC = "/sdcard/media_api/video/H264_320_AAC_64.3gp";
+    public static final String VIDEO_H264_AMR = "/sdcard/media_api/video/H264_320_AMRNB_6.3gp";
     public static final String VIDEO_WMV = "/sdcard/media_api/video/bugs.wmv";
-    public static final String VIDEO_HIGHRES_H263 = "/sdcard/media_api/video/h263_qcif_30fps.3gp";
-    public static final String VIDEO_HIGHRES_MP4 = "/sdcard/media_api/video/mpeg4_qvga_24fps.3gp";
+    public static final String VIDEO_HIGHRES_H263 = "/sdcard/media_api/video/H263_500_AMRNB_12.3gp";
+    public static final String VIDEO_HIGHRES_MP4 = "/sdcard/media_api/video/H264_500_AAC_128.3gp";
     
     //ringtone
     public static final String ringtone = "/sdcard/media_api/ringtones/F1_NewVoicemail.mp3";
-  
-    //streaming mp3
-    public static final String STREAM_LARGE_MP3 = 
-      "http://wms.pv.com:7070/MediaDownloadContent/mp3/BuenaVista_04_Pueblo_Nuevo.mp3";
-    public static final String STREAM_SMALL_MP3 = 
-      "http://wms.pv.com:7070/MediaDownloadContent/mp3/ID3V2_TestFile.mp3"; 
-    public static final String STREAM_REGULAR_MP3 = 
-      "http://wms.pv.com:7070/MediaDownloadContent/mp3/ElectricCosmo.mp3";
-  
+
     //streaming mp3
     public static final String STREAM_MP3_1 = 
       "http://wms.pv.com:7070/MediaDownloadContent/mp3/chadthi_jawani_128kbps.mp3";
@@ -380,35 +372,35 @@ public class MediaNames {
   public static final String META_DATA_MP3 [][] = {
       {"/sdcard/media_api/metaDataTestMedias/MP3/ID3V1_ID3V2.mp3", "1/10", "ID3V2.3 Album", "ID3V2.3 Artist",
           "ID3V2.3 Lyricist", "ID3V2.3 Composer", null, "Blues",
-          "ID3V2.3 Title", "1234", "321", "1"},
+          "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/ID3V2.mp3", "1/10", "ID3V2.3 Album", "ID3V2.3 Artist",
           "ID3V2.3 Lyricist", "ID3V2.3 Composer", null, "Blues", 
-          "ID3V2.3 Title", "1234", "313", "1"},
-      {"/sdcard/media_api/metaDataTestMedias/MP3/ID3V1.mp3", null, "test ID3V1 Album", "test ID3V1 Artist",
-          null, null, null, null, "test ID3V1 Title", "1234", "231332", "1"},
+          "ID3V2.3 Title", "1234", "287", "1"},
+      {"/sdcard/media_api/metaDataTestMedias/MP3/ID3V1.mp3", "1", "test ID3V1 Album", "test ID3V1 Artist",
+          null, null, null, "255", "test ID3V1 Title", "1234", "231332", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V1.mp3" , null, null, null,
               null, null, null, null, null, null, "231330", "1"},
       //The corrupted TALB field in id3v2 would not switch to id3v1 tag automatically
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TALB.mp3", "01", null, "ID3V2.3 Artist",
           "ID3V2.3 Lyricist", "ID3V2.3 Composer", null, 
-          "Blues", "ID3V2.3 Title", "1234", "321", "1"},
+          "Blues", "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TCOM.mp3", "01", "ID3V2.3 Album", 
            "ID3V2.3 Artist", "ID3V2.3 Lyricist", null, null, 
-           "Blues", "ID3V2.3 Title", "1234", "321", "1"},
+           "Blues", "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TCOM_2.mp3", "01", "ID3V2.3 Album", 
-           "ID3V2.3 Artist", null, null, null, "Blues", "ID3V2.3 Title", "1234", "321", "1"},
+           "ID3V2.3 Artist", null, null, null, "Blues", "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TRCK.mp3", "dd", "ID3V2.3 Album", 
            "ID3V2.3 Artist", "ID3V2.3 Lyricist", "ID3V2.3 Composer", null,
-           "Blues", "ID3V2.3 Title", "1234", "321", "1"},
+           "Blues", "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TRCK_2.mp3", "01", "ID3V2.3 Album", 
-           "ID3V2.3 Artist", null, null, null, null, "ID3V2.3 Title", null, "321", "1"},
+           "ID3V2.3 Artist", null, null, null, "255", "ID3V2.3 Title", "1234", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TYER.mp3", "01", "ID3V2.3 Album",
-           "ID3V2.3 Artist", null, null, null, null, "ID3V2.3 Title", "9999", "321", "1"},
+           "ID3V2.3 Artist", null, null, null, null, "ID3V2.3 Title", "9999", "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TYER_2.mp3", "01", "ID3V2.3 Album",
            "ID3V2.3 Artist", "ID3V2.3 Lyricist", "ID3V2.3 Composer", null, 
-           "Blues", "ID3V2.3 Title", null, "321", "1"},
+           "Blues", "ID3V2.3 Title", null, "295", "1"},
       {"/sdcard/media_api/metaDataTestMedias/MP3/Corrupted_ID3V2_TIT.mp3", null, null, null,
-          null, null, null, null, null, null, "577", "1"}
+          null, null, null, null, null, null, "295", "1"}
   };
 
   public static final String META_DATA_OTHERS [][] = {
@@ -432,7 +424,7 @@ public class MediaNames {
           null, null, "2005", "231180", "1"}, 
       {"/sdcard/media_api/metaDataTestMedias/MP4/kung_fu_panda_h264.mp4", null, "mp4 album Kung Fu Panda", 
           "mp4 artist Kung Fu Panda", null, null, "20080517T091451.000Z", 
-          "Kung Fu Panda", "Kung Fu Panda", "2008", "5667840", "2"},
+          "41", "Kung Fu Panda", "2008", "5667840", "2"},
       {"/sdcard/media_api/metaDataTestMedias/OGG/Ring_Classic_02.ogg", null, "Suspended Animation", 
           "John Petrucci", null, null, "20070510T125223.000Z", 
           null, null, "2005", "231180", "1"},
@@ -464,6 +456,7 @@ public class MediaNames {
   public static final String RECORDED_SQVGA_H263 = "/sdcard/SQVGA_H263.3gp";
   public static final String RECORDED_CIF_H263 = "/sdcard/CIF_H263.3gp";
   public static final String RECORDED_QCIF_H263 = "/sdcard/QCIF_H263.3gp";
+  public static final String RECORDED_PORTRAIT_H263 = "/sdcard/QCIF_mp4.3gp";
   
   public static final String RECORDED_HVGA_MP4 = "/sdcard/HVGA_mp4.mp4";
   public static final String RECORDED_QVGA_MP4 = "/sdcard/QVGA_mp4.mp4";
@@ -508,4 +501,6 @@ public class MediaNames {
       "http://sridharg.googlejunta.com/yslau/stress_media/mp3_regular.mp3";
   public static final String STREAM_MPEG4_QVGA_128k = 
       "http://sridharg.googlejunta.com/yslau/stress_media/mpeg4_qvga_24fps.3gp";
+  public static final int STREAM_H264_480_360_1411k_DURATION = 46000;
+  public static final int VIDEO_H263_AAC_DURATION = 501000;
 }

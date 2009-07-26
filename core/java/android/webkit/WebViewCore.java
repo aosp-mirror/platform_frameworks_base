@@ -29,7 +29,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
-import android.util.Config;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
@@ -43,7 +42,7 @@ final class WebViewCore {
 
     private static final String LOGTAG = "webcore";
     static final boolean DEBUG = false;
-    static final boolean LOGV_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean LOGV_ENABLED = DEBUG;
 
     static {
         // Load libwebcore during static initialization. This happens in the
@@ -98,7 +97,7 @@ final class WebViewCore {
 
     private boolean mViewportUserScalable = true;
     
-    private int mRestoredScale = 100;
+    private int mRestoredScale = WebView.DEFAULT_SCALE_PERCENT;
     private int mRestoredX = 0;
     private int mRestoredY = 0;
 
@@ -140,7 +139,7 @@ final class WebViewCore {
         // ready.
         mEventHub = new EventHub();
         // Create a WebSettings object for maintaining all settings
-        mSettings = new WebSettings(mContext);
+        mSettings = new WebSettings(mContext, mWebView);
         // The WebIconDatabase needs to be initialized within the UI thread so
         // just request the instance here.
         WebIconDatabase.getInstance();
@@ -262,6 +261,16 @@ final class WebViewCore {
      */
     protected boolean jsUnload(String url, String message) {
         return mCallbackProxy.onJsBeforeUnload(url, message);
+    }
+
+    /**
+     *
+     * Callback to notify that a JavaScript execution timeout has occured.
+     * @return True if the JavaScript execution should be interrupted. False
+     *         will continue the execution.
+     */
+    protected boolean jsInterrupt() {
+        return mCallbackProxy.onJsTimeout();
     }
 
     //-------------------------------------------------------------------------
@@ -535,6 +544,8 @@ final class WebViewCore {
             "WEBKIT_DRAW", // = 130;
             "SYNC_SCROLL", // = 131;
             "REFRESH_PLUGINS", // = 132;
+            // this will replace REFRESH_PLUGINS in the next release
+            "POST_URL", // = 142;
             "SPLIT_PICTURE_SET", // = 133;
             "CLEAR_CONTENT", // = 134;
             "SET_FINAL_FOCUS", // = 135;
@@ -580,6 +591,8 @@ final class WebViewCore {
         static final int WEBKIT_DRAW = 130;
         static final int SYNC_SCROLL = 131;
         static final int REFRESH_PLUGINS = 132;
+        // this will replace REFRESH_PLUGINS in the next release
+        static final int POST_URL = 142;
         static final int SPLIT_PICTURE_SET = 133;
         static final int CLEAR_CONTENT = 134;
         
@@ -663,6 +676,13 @@ final class WebViewCore {
                             loadUrl((String) msg.obj);
                             break;
 
+                        case POST_URL: {
+                            HashMap param = (HashMap) msg.obj;
+                            String url = (String) param.get("url");
+                            byte[] data = (byte[]) param.get("data");
+                            mBrowserFrame.postUrl(url, data);
+                            break;
+                        }
                         case LOAD_DATA:
                             HashMap loadParams = (HashMap) msg.obj;
                             String baseUrl = (String) loadParams.get("baseUrl");
@@ -1540,19 +1560,33 @@ final class WebViewCore {
         // set the viewport settings from WebKit
         setViewportSettingsFromNative();
 
+        // adjust the default scale to match the density
+        if (WebView.DEFAULT_SCALE_PERCENT != 100) {
+            float adjust = (float) WebView.DEFAULT_SCALE_PERCENT / 100.0f;
+            if (mViewportInitialScale > 0) {
+                mViewportInitialScale *= adjust;
+            }
+            if (mViewportMinimumScale > 0) {
+                mViewportMinimumScale *= adjust;
+            }
+            if (mViewportMaximumScale > 0) {
+                mViewportMaximumScale *= adjust;
+            }
+        }
+
         // infer the values if they are not defined.
         if (mViewportWidth == 0) {
             if (mViewportInitialScale == 0) {
-                mViewportInitialScale = 100;
+                mViewportInitialScale = WebView.DEFAULT_SCALE_PERCENT;
             }
             if (mViewportMinimumScale == 0) {
-                mViewportMinimumScale = 100;
+                mViewportMinimumScale = WebView.DEFAULT_SCALE_PERCENT;
             }
         }
         if (mViewportUserScalable == false) {
-            mViewportInitialScale = 100;
-            mViewportMinimumScale = 100;
-            mViewportMaximumScale = 100;
+            mViewportInitialScale = WebView.DEFAULT_SCALE_PERCENT;
+            mViewportMinimumScale = WebView.DEFAULT_SCALE_PERCENT;
+            mViewportMaximumScale = WebView.DEFAULT_SCALE_PERCENT;
         }
         if (mViewportMinimumScale > mViewportInitialScale) {
             if (mViewportInitialScale == 0) {
@@ -1566,9 +1600,10 @@ final class WebViewCore {
                 mViewportMaximumScale = mViewportInitialScale;
             } else if (mViewportInitialScale == 0) {
                 mViewportInitialScale = mViewportMaximumScale;
-            }            
+            }
         }
-        if (mViewportWidth < 0 && mViewportInitialScale == 100) {
+        if (mViewportWidth < 0
+                && mViewportInitialScale == WebView.DEFAULT_SCALE_PERCENT) {
             mViewportWidth = 0;
         }
 

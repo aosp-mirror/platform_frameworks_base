@@ -340,27 +340,33 @@ public class Contacts {
         }
 
         /**
+         * @hide Used in vCard parser code.
+         */
+        public static long tryGetMyContactsGroupId(ContentResolver resolver) {
+            Cursor groupsCursor = resolver.query(Groups.CONTENT_URI, GROUPS_PROJECTION,
+                    Groups.SYSTEM_ID + "='" + Groups.GROUP_MY_CONTACTS + "'", null, null);
+            if (groupsCursor != null) {
+                try {
+                    if (groupsCursor.moveToFirst()) {
+                        return groupsCursor.getLong(0);
+                    }
+                } finally {
+                    groupsCursor.close();
+                }
+            }
+            return 0;
+        }
+
+        /**
          * Adds a person to the My Contacts group.
-         * 
+         *
          * @param resolver the resolver to use
          * @param personId the person to add to the group
          * @return the URI of the group membership row
          * @throws IllegalStateException if the My Contacts group can't be found
          */
         public static Uri addToMyContactsGroup(ContentResolver resolver, long personId) {
-            long groupId = 0;
-            Cursor groupsCursor = resolver.query(Groups.CONTENT_URI, GROUPS_PROJECTION,
-                    Groups.SYSTEM_ID + "='" + Groups.GROUP_MY_CONTACTS + "'", null, null);
-            if (groupsCursor != null) {
-                try {
-                    if (groupsCursor.moveToFirst()) {
-                        groupId = groupsCursor.getLong(0);
-                    }
-                } finally {
-                    groupsCursor.close();
-                }
-            }
-
+            long groupId = tryGetMyContactsGroupId(resolver);
             if (groupId == 0) {
                 throw new IllegalStateException("Failed to find the My Contacts group");
             }
@@ -869,6 +875,17 @@ public class Contacts {
         public static final int TYPE_OTHER = 3;
 
         /**
+         * @hide This is temporal. TYPE_MOBILE should be added to TYPE in the future.
+         */
+        public static final int MOBILE_EMAIL_TYPE_INDEX = 2;
+
+        /**
+         * @hide This is temporal. TYPE_MOBILE should be added to TYPE in the future.
+         * This is not "mobile" but "CELL" since vCard uses it for identifying mobile phone.
+         */
+        public static final String MOBILE_EMAIL_TYPE_NAME = "_AUTO_CELL";
+
+        /**
          * The user defined label for the the contact method.
          * <P>Type: TEXT</P>
          */
@@ -1005,7 +1022,13 @@ public class Contacts {
                         }
                     } else {
                         if (!TextUtils.isEmpty(label)) {
-                            display = label;
+                            if (label.toString().equals(MOBILE_EMAIL_TYPE_NAME)) {
+                                display =
+                                    context.getString(
+                                            com.android.internal.R.string.mobileEmailTypeName);
+                            } else {
+                                display = label;
+                            }
                         }
                     }
                     break;

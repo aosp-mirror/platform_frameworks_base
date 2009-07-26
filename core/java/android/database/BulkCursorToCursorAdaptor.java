@@ -247,9 +247,11 @@ public final class BulkCursorToCursorAdaptor extends AbstractWindowedCursor {
         try {
             return mBulkCursor.respond(extras);
         } catch (RemoteException e) {
-            // This should never happen because the system kills processes that are using remote
-            // cursors when the provider process is killed.
-            throw new RuntimeException(e);
+            // the system kills processes that are using remote cursors when the provider process
+            // is killed, but this can still happen if this is being called from the system process,
+            // so, better to log and return an empty bundle.
+            Log.w(TAG, "respond() threw RemoteException, returning an empty bundle.", e);
+            return Bundle.EMPTY;
         }
     }
 }

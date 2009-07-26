@@ -165,6 +165,7 @@ int main(int argc, char *argv[]) {
     int c, fd, vibrate_fd, fds[2];
     char path[PATH_MAX];
     pid_t   pid;
+    gid_t groups[] = { AID_LOG, AID_SDCARD_RW };
 
     /* set as high priority, and protect from OOM killer */
     setpriority(PRIO_PROCESS, 0, -20);
@@ -207,7 +208,7 @@ int main(int argc, char *argv[]) {
         vibrate_fd = -1;
 
     /* switch to non-root user and group */
-    setgid(AID_LOG);
+    setgroups(sizeof(groups)/sizeof(groups[0]), groups);
     setuid(AID_SHELL);
 
     /* make it safe to use both printf and STDOUT_FILENO */ 

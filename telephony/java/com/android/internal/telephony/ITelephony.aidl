@@ -21,7 +21,7 @@ import java.util.List;
 import android.telephony.NeighboringCellInfo;
 
 /**
- * Interface used to interact with the phone.  Mostly this is used by the 
+ * Interface used to interact with the phone.  Mostly this is used by the
  * TelephonyManager class.  A few places are still using this directly.
  * Please clean them up if possible and use TelephonyManager insteadl.
  *
@@ -135,7 +135,7 @@ interface ITelephony {
     /**
      * Cancels the missed calls notification.
      */
-    void cancelMissedCallsNotification(); 
+    void cancelMissedCallsNotification();
 
     /**
      * Supply a pin to unlock the SIM.  Blocks until a result is determined.
@@ -147,7 +147,7 @@ interface ITelephony {
     /**
      * Handles PIN MMI commands (PIN/PIN2/PUK/PUK2), which are initiated
      * without SEND (so <code>dial</code> is not appropriate).
-     * 
+     *
      * @param dialString the MMI command to be executed.
      * @return true if MMI command is executed.
      */
@@ -213,4 +213,35 @@ interface ITelephony {
      int getCallState();
      int getDataActivity();
      int getDataState();
+
+    /**
+     * Returns the current active phone type as integer.
+     * Returns TelephonyManager.PHONE_TYPE_CDMA if RILConstants.CDMA_PHONE
+     * and TelephonyManager.PHONE_TYPE_GSM if RILConstants.GSM_PHONE
+     */
+    int getActivePhoneType();
+
+    /**
+     * Returns the CDMA ERI icon index to display
+     */
+    int getCdmaEriIconIndex();
+
+    /**
+     * Returns the CDMA ERI icon mode,
+     * 0 - ON
+     * 1 - FLASHING
+     */
+    int getCdmaEriIconMode();
+
+    /**
+     * Returns the CDMA ERI text,
+     */
+    String getCdmaEriText();
+
+    /**
+      * Returns the unread count of voicemails
+      */
+    int getVoiceMessageCount();
+
 }
+

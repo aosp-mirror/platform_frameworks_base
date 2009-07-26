@@ -28,6 +28,7 @@
 // This futex glue code is need on desktop linux, but is already part of bionic.
 #if !defined(HAVE_FUTEX_WRAPPERS)
 
+#include <unistd.h>
 #include <sys/syscall.h>
 typedef unsigned int u32;
 #define asmlinkage

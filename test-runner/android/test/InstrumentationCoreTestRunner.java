@@ -49,7 +49,15 @@ import android.util.Log;
  */
 public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
 
+    /**
+     * Convenience definition of our log tag.
+     */ 
     private static final String TAG = "InstrumentationCoreTestRunner";
+    
+    /**
+     * True if (and only if) we are running in single-test mode (as opposed to
+     * batch mode).
+     */
     private boolean singleTest = false;
     
     @Override
@@ -57,6 +65,7 @@ public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
         // We might want to move this to /sdcard, if is is mounted/writable.
         File cacheDir = getTargetContext().getCacheDir();
 
+        // Set some properties that the core tests absolutely need. 
         System.setProperty("user.language", "en");
         System.setProperty("user.region", "US");
         
@@ -74,38 +83,66 @@ public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
         super.onCreate(arguments);
     }
 
+    @Override
     protected AndroidTestRunner getAndroidTestRunner() {
         AndroidTestRunner runner = super.getAndroidTestRunner();
 
         runner.addTestListener(new TestListener() {
+            /**
+             * The last test class we executed code from.  
+             */
             private Class<?> lastClass;
+            
+            /**
+             * The minimum time we expect a test to take.
+             */
+            private static final int MINIMUM_TIME = 100;
+            
+            /**
+             * The start time of our current test in System.currentTimeMillis().
+             */
+            private long startTime;
             
             public void startTest(Test test) {
                 if (test.getClass() != lastClass) {
+                    lastClass = test.getClass();
                     printMemory(test.getClass());
                 }
                 
                 Thread.currentThread().setContextClassLoader(
                         test.getClass().getClassLoader());
+                
+                startTime = System.currentTimeMillis();
             }
             
             public void endTest(Test test) {
                 if (test instanceof TestCase) {
-                    if (lastClass == null) {
-                        lastClass = test.getClass();
-                    } else {
-                        if (test.getClass() != lastClass) {
-                            cleanup(lastClass);
-                            lastClass = test.getClass();
+                    cleanup((TestCase)test);
+                    
+                    /*
+                     * Make sure all tests take at least MINIMUM_TIME to
+                     * complete. If they don't, we wait a bit. The Cupcake
+                     * Binder can't handle too many operations in a very
+                     * short time, which causes headache for the CTS.
+                     */
+                    long timeTaken = System.currentTimeMillis() - startTime;
+                    
+                    if (timeTaken < MINIMUM_TIME) {
+                        try {
+                            Thread.sleep(MINIMUM_TIME - timeTaken);
+                        } catch (InterruptedException ignored) {
+                            // We don't care.
                         }
                     }
                 }
             }
             
             public void addError(Test test, Throwable t) {
+                // This space intentionally left blank.
             }
             
             public void addFailure(Test test, AssertionFailedError t) {
+                // This space intentionally left blank.
             }
             
             /**
@@ -125,30 +162,31 @@ public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
             }
 
             /**
-             * Nulls all static reference fields in the given test class. This
-             * method helps us with those test classes that don't have an
+             * Nulls all non-static reference fields in the given test class.
+             * This method helps us with those test classes that don't have an
              * explicit tearDown() method. Normally the garbage collector should
              * take care of everything, but since JUnit keeps references to all
              * test cases, a little help might be a good idea.
              */
-            private void cleanup(Class<?> clazz) {
-                if (clazz != TestCase.class) {
+            private void cleanup(TestCase test) {
+                Class<?> clazz = test.getClass();
+                
+                while (clazz != TestCase.class) {
                     Field[] fields = clazz.getDeclaredFields();
                     for (int i = 0; i < fields.length; i++) {
                         Field f = fields[i];
                         if (!f.getType().isPrimitive() &&
-                                Modifier.isStatic(f.getModifiers())) {
+                                !Modifier.isStatic(f.getModifiers())) {
                             try {
                                 f.setAccessible(true);
-                                f.set(null, null);
+                                f.set(test, null);
                             } catch (Exception ignored) {
                                 // Nothing we can do about it.
                             }
                         }
                     }
                     
-                    // don't cleanup the superclass for now
-                    //cleanup(clazz.getSuperclass());
+                    clazz = clazz.getSuperclass();
                 }
             }
             

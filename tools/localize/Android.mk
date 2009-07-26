@@ -53,4 +53,3 @@ ifeq (a,a)
 endif
 
 include $(BUILD_HOST_EXECUTABLE)
-

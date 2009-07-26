@@ -20,7 +20,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
 
-import com.android.internal.telephony.gsm.GsmAlphabet;
+import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.gsm.SIMFileHandler;
 
 import java.util.Iterator;
@@ -635,7 +635,7 @@ class CommandParamsFactory extends Handler {
 
     /**
      * Processes SET_UP_EVENT_LIST proactive command from the SIM card.
-     * 
+     *
      * @param cmdDet Command Details object retrieved.
      * @param ctlvs List of ComprehensionTlv objects following Command Details
      *        object and Device Identities object within the proactive command

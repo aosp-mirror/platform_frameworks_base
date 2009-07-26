@@ -18,6 +18,8 @@ package com.android.internal.app;
 
 import com.android.internal.os.BatteryStatsImpl;
 
+import android.telephony.SignalStrength;
+
 interface IBatteryStats {
     byte[] getStatistics();
     void noteStartWakelock(int uid, String name, int type);
@@ -33,8 +35,9 @@ interface IBatteryStats {
     void noteUserActivity(int uid, int event);
     void notePhoneOn();
     void notePhoneOff();
-    void notePhoneSignalStrength(int asu);
+    void notePhoneSignalStrength(in SignalStrength signalStrength);
     void notePhoneDataConnectionState(int dataType, boolean hasData);
+    void noteAirplaneMode(boolean isAirplaneMode);
     void noteWifiOn(int uid);
     void noteWifiOff(int uid);
     void noteWifiRunning();
@@ -45,7 +48,10 @@ interface IBatteryStats {
     void noteFullWifiLockReleased(int uid);
     void noteScanWifiLockAcquired(int uid);
     void noteScanWifiLockReleased(int uid);
+    void noteWifiMulticastEnabled(int uid);
+    void noteWifiMulticastDisabled(int uid);
     void setOnBattery(boolean onBattery, int level);
+    void recordCurrentLevel(int level);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
 }

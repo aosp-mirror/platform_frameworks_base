@@ -45,19 +45,19 @@ static jmethodID method_onSinkPlaying;
 static jmethodID method_onSinkStopped;
 
 typedef struct {
-    JNIEnv *env;
+    JavaVM *vm;
+    int envVer;
     DBusConnection *conn;
     jobject me;  // for callbacks to java
 } native_data_t;
 
 static native_data_t *nat = NULL;  // global native data
 
-extern event_loop_native_data_t *event_loop_nat;  // for the event loop JNIEnv
 #endif
 
 #ifdef HAVE_BLUETOOTH
-static void onConnectSinkResult(DBusMessage *msg, void *user);
-static void onDisconnectSinkResult(DBusMessage *msg, void *user);
+static void onConnectSinkResult(DBusMessage *msg, void *user, void *nat);
+static void onDisconnectSinkResult(DBusMessage *msg, void *user, void *nat);
 #endif
 
 /* Returns true on success (even if adapter is present but disabled).
@@ -71,7 +71,8 @@ static bool initNative(JNIEnv* env, jobject object) {
         LOGE("%s: out of memory!", __FUNCTION__);
         return false;
     }
-    nat->env = env;
+    env->GetJavaVM( &(nat->vm) );
+    nat->envVer = env->GetVersion();
     nat->me = env->NewGlobalRef(object);
 
     DBusError err;
@@ -83,6 +84,7 @@ static bool initNative(JNIEnv* env, jobject object) {
         dbus_error_free(&err);
         return false;
     }
+    dbus_connection_set_exit_on_disconnect(nat->conn, FALSE);
 #endif  /*HAVE_BLUETOOTH*/
     return true;
 }
@@ -175,7 +177,8 @@ static jboolean connectSinkNative(JNIEnv *env, jobject object, jstring path) {
 
         bool ret =
             dbus_func_args_async(env, nat->conn, -1,
-                           onConnectSinkResult, (void *)c_path_copy, c_path,
+                           onConnectSinkResult, (void *)c_path_copy, nat,
+                           c_path,
                            "org.bluez.audio.Sink", "Connect",
                            DBUS_TYPE_INVALID);
 
@@ -202,7 +205,8 @@ static jboolean disconnectSinkNative(JNIEnv *env, jobject object,
 
         bool ret =
             dbus_func_args_async(env, nat->conn, -1,
-                           onDisconnectSinkResult, (void *)c_path_copy, c_path,
+                           onDisconnectSinkResult, (void *)c_path_copy, nat,
+                           c_path,
                            "org.bluez.audio.Sink", "Disconnect",
                            DBUS_TYPE_INVALID);
         env->ReleaseStringUTFChars(path, c_path);
@@ -233,13 +237,19 @@ static jboolean isSinkConnectedNative(JNIEnv *env, jobject object, jstring path)
 }
 
 #ifdef HAVE_BLUETOOTH
-static void onConnectSinkResult(DBusMessage *msg, void *user) {
+static void onConnectSinkResult(DBusMessage *msg, void *user, void *natData) {
     LOGV(__FUNCTION__);
 
     char *c_path = (char *)user;
     DBusError err;
+    JNIEnv *env;
+
+    if (nat->vm->GetEnv((void**)&env, nat->envVer) < 0) {
+        LOGE("%s: error finding Env for our VM\n", __FUNCTION__);
+        return;
+    }
+
     dbus_error_init(&err);
-    JNIEnv *env = event_loop_nat->env;
 
     LOGV("... path = %s", c_path);
     if (dbus_set_error_from_message(&err, msg)) {
@@ -258,13 +268,19 @@ static void onConnectSinkResult(DBusMessage *msg, void *user) {
     free(c_path);
 }
 
-static void onDisconnectSinkResult(DBusMessage *msg, void *user) {
+static void onDisconnectSinkResult(DBusMessage *msg, void *user, void *natData) {
     LOGV(__FUNCTION__);
 
     char *c_path = (char *)user;
     DBusError err;
+    JNIEnv *env;
+
+    if (nat->vm->GetEnv((void**)&env, nat->envVer) < 0) {
+        LOGE("%s: error finding Env for our VM\n", __FUNCTION__);
+        return;
+    }
+
     dbus_error_init(&err);
-    JNIEnv *env = event_loop_nat->env;
 
     LOGV("... path = %s", c_path);
     if (dbus_set_error_from_message(&err, msg)) {

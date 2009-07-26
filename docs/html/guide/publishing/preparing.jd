@@ -178,8 +178,8 @@ MapView elements</h3>
 
 <div class="sidebox" style="margin-bottom:.5em;padding:1em;"><p>
 For complete information about getting a Maps API Key, see <a
-href="{@docRoot}guide/topics/location/geo/mapkey.html">Obtaining a Maps API
-Key</a>.<br></p></div>
+href="http://code.google.com/android/add-ons/google-apis/mapkey.html">
+Obtaining a Maps API Key</a>.</p></div>
 
 <p>If your application uses one or more Mapview elements, you will need to 
 register your application with the Google
@@ -221,7 +221,7 @@ to download Maps data. </li>
 </ol>
 
 <p>For more information about signing and your private key, see <a
-href="#signing">Signing Your Applications</a>.</p>
+href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>.</p>
 
 
 <h2 id="compile">Compile your application</h2>
@@ -234,7 +234,8 @@ you can compile your application for release. </p>
 <h3 id="signapp">8. Sign your application</h3>
 
 <p>Sign your application using your private key. Signing your application
-correctly is critically important. Please see <a href="#signing">Signing Your
+correctly is critically important. Please see 
+<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your
 Applications</a> for complete information. </p>
 
 <h3 id="testapp">9. Test your compiled and signed application</h3>

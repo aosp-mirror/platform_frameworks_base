@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Sensors"
+#define LOG_TAG "SensorService"
+
+#define LOG_NDEBUG 0
+#include "utils/Log.h"
 
 #include <hardware/sensors.h>
 
@@ -35,6 +38,14 @@ static struct parcel_file_descriptor_offsets_t
     jclass mClass;
     jmethodID mConstructor;
 } gParcelFileDescriptorOffsets;
+
+static struct bundle_descriptor_offsets_t
+{
+    jclass mClass;
+    jmethodID mConstructor;
+    jmethodID mPutIntArray;
+    jmethodID mPutParcelableArray;
+} gBundleOffsets;
 
 /*
  * The method below are not thread-safe and not intended to be 
@@ -59,21 +70,45 @@ android_init(JNIEnv *env, jclass clazz)
 static jobject
 android_open(JNIEnv *env, jclass clazz)
 {
-    int fd = sSensorDevice->open_data_source(sSensorDevice);
-    // new FileDescriptor()
-    jobject filedescriptor = env->NewObject(
-            gFileDescriptorOffsets.mClass, 
-            gFileDescriptorOffsets.mConstructor);
-    
-    if (filedescriptor != NULL) {
-        env->SetIntField(filedescriptor, gFileDescriptorOffsets.mDescriptor, fd);
-        // new ParcelFileDescriptor()
-        return env->NewObject(gParcelFileDescriptorOffsets.mClass,
-                gParcelFileDescriptorOffsets.mConstructor, 
-                filedescriptor);
+    native_handle_t* handle = sSensorDevice->open_data_source(sSensorDevice);
+    if (!handle) {
+        return NULL;
     }
-    close(fd);
-    return NULL;
+
+    // new Bundle()
+    jobject bundle = env->NewObject(
+            gBundleOffsets.mClass,
+            gBundleOffsets.mConstructor);
+
+    if (handle->numFds > 0) {
+        jobjectArray fdArray = env->NewObjectArray(handle->numFds,
+                gParcelFileDescriptorOffsets.mClass, NULL);
+        for (int i = 0; i < handle->numFds; i++) {
+            // new FileDescriptor()
+            jobject fd = env->NewObject(gFileDescriptorOffsets.mClass,
+                    gFileDescriptorOffsets.mConstructor);
+            env->SetIntField(fd, gFileDescriptorOffsets.mDescriptor, handle->data[i]);
+            // new ParcelFileDescriptor()
+            jobject pfd = env->NewObject(gParcelFileDescriptorOffsets.mClass,
+                    gParcelFileDescriptorOffsets.mConstructor, fd);
+            env->SetObjectArrayElement(fdArray, i, pfd);
+        }
+        // bundle.putParcelableArray("fds", fdArray);
+        env->CallVoidMethod(bundle, gBundleOffsets.mPutParcelableArray,
+                env->NewStringUTF("fds"), fdArray);
+    }
+
+    if (handle->numInts > 0) {
+        jintArray intArray = env->NewIntArray(handle->numInts);
+        env->SetIntArrayRegion(intArray, 0, handle->numInts, &handle->data[handle->numInts]);
+        // bundle.putIntArray("ints", intArray);
+        env->CallVoidMethod(bundle, gBundleOffsets.mPutIntArray,
+                env->NewStringUTF("ints"), intArray);
+    }
+
+    // delete the file handle, but don't close any file descriptors
+    native_handle_delete(handle);
+    return bundle;
 }
 
 static jboolean
@@ -99,7 +134,7 @@ android_data_wake(JNIEnv *env, jclass clazz)
 
 static JNINativeMethod gMethods[] = {
     {"_sensors_control_init",     "()I",   (void*) android_init },
-    {"_sensors_control_open",     "()Landroid/os/ParcelFileDescriptor;",  (void*) android_open },
+    {"_sensors_control_open",     "()Landroid/os/Bundle;",  (void*) android_open },
     {"_sensors_control_activate", "(IZ)Z", (void*) android_activate },
     {"_sensors_control_wake",     "()I", (void*) android_data_wake },
     {"_sensors_control_set_delay","(I)I", (void*) android_set_delay },
@@ -116,7 +151,15 @@ int register_android_server_SensorService(JNIEnv *env)
 
     clazz = env->FindClass("android/os/ParcelFileDescriptor");
     gParcelFileDescriptorOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
-    gParcelFileDescriptorOffsets.mConstructor = env->GetMethodID(clazz, "<init>", "(Ljava/io/FileDescriptor;)V");
+    gParcelFileDescriptorOffsets.mConstructor = env->GetMethodID(clazz, "<init>",
+            "(Ljava/io/FileDescriptor;)V");
+
+    clazz = env->FindClass("android/os/Bundle");
+    gBundleOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
+    gBundleOffsets.mConstructor = env->GetMethodID(clazz, "<init>", "()V");
+    gBundleOffsets.mPutIntArray = env->GetMethodID(clazz, "putIntArray", "(Ljava/lang/String;[I)V");
+    gBundleOffsets.mPutParcelableArray = env->GetMethodID(clazz, "putParcelableArray",
+            "(Ljava/lang/String;[Landroid/os/Parcelable;)V");
 
     return jniRegisterNativeMethods(env, "com/android/server/SensorService",
             gMethods, NELEM(gMethods));

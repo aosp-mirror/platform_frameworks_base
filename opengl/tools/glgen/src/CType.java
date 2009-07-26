@@ -9,77 +9,80 @@ public class CType {
     }
 
     public CType(String baseType) {
-	setBaseType(baseType);
+    setBaseType(baseType);
     }
 
     public CType(String baseType, boolean isConst, boolean isPointer) {
-	setBaseType(baseType);
-	setIsConst(isConst);
-	setIsPointer(isPointer);
+    setBaseType(baseType);
+    setIsConst(isConst);
+    setIsPointer(isPointer);
     }
 
     public String getDeclaration() {
-	return baseType + (isPointer ? " *" : "");
+    return baseType + (isPointer ? " *" : "");
     }
-    
+
     public void setIsConst(boolean isConst) {
-	this.isConst = isConst;
+    this.isConst = isConst;
     }
 
     public boolean isConst() {
-	return isConst;
+    return isConst;
     }
 
     public void setIsPointer(boolean isPointer) {
-	this.isPointer = isPointer;
+    this.isPointer = isPointer;
     }
 
     public boolean isPointer() {
-	return isPointer;
+    return isPointer;
     }
 
     boolean isVoid() {
-	String baseType = getBaseType();
-	return baseType.equals("GLvoid") ||
-	    baseType.equals("void");
+    String baseType = getBaseType();
+    return baseType.equals("GLvoid") ||
+        baseType.equals("void");
     }
 
     public boolean isTypedPointer() {
-	return isPointer() && !isVoid();
+    return isPointer() && !isVoid();
     }
 
     public void setBaseType(String baseType) {
-	this.baseType = baseType;
+    this.baseType = baseType;
     }
 
     public String getBaseType() {
-	return baseType;
+    return baseType;
     }
 
+    @Override
     public String toString() {
-	String s = "";
-	if (isConst()) {
-	    s += "const ";
-	}
-	s += baseType;
-	if (isPointer()) {
-	    s += "*";
-	}
-
-	return s;
+    String s = "";
+    if (isConst()) {
+        s += "const ";
+    }
+    s += baseType;
+    if (isPointer()) {
+        s += "*";
     }
 
+    return s;
+    }
+
+    @Override
     public int hashCode() {
-	return baseType.hashCode() ^ (isPointer ? 2 : 0) ^ (isConst ? 1 : 0);
+    return baseType.hashCode() ^ (isPointer ? 2 : 0) ^ (isConst ? 1 : 0);
     }
 
+    @Override
     public boolean equals(Object o) {
-	if (o != null && o instanceof CType) {
-	    CType c = (CType)o;
-	    return baseType.equals(c.baseType) &&
-		isPointer() == c.isPointer() &&
-		isConst() == c.isConst();
-	}
-	return false;
+    if (o != null && o instanceof CType) {
+        CType c = (CType)o;
+        return baseType.equals(c.baseType) &&
+        isPointer() == c.isPointer() &&
+        isConst() == c.isConst();
+    }
+    return false;
     }
 }

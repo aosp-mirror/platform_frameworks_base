@@ -17,13 +17,13 @@
 
 package android.hardware;
 
-import android.os.ParcelFileDescriptor;
+import android.os.Bundle;
 
 /**
  * {@hide}
  */
 interface ISensorService
 {
-    ParcelFileDescriptor getDataChanel();
+    Bundle getDataChannel();
     boolean enableSensor(IBinder listener, String name, int sensor, int enable);
 }

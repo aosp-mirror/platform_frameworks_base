@@ -1,36 +1,248 @@
 page.title=SDK Release Notes
 @jd:body
 
-<p>This document provides version-specific information about Android SDK releases. For the latest known issues, please ensure that you're viewing this page at: <a href="http://developer.android.com/sdk/RELEASENOTES.html">http://developer.android.com/sdk/RELEASENOTES.html</a>.</p>
+<p>This document provides version-specific information about Android SDK
+releases. For the latest known issues, please ensure that you're viewing this
+page at <a href="http://developer.android.com/sdk/RELEASENOTES.html">http://developer.android.com/sdk/RELEASENOTES.html</a>.</p>
+
+
+<h2 id="1.5_r2">Android 1.5 SDK, Release 2</h2>
+
+<p>This SDK release provides the same developer tools as the Android 1.5 SDK,
+Release 1, but provides an updated Android 1.5 system image that includes a
+security patch for the issue described in the oCert advisory below:</p>
+
+<p style="margin-left:2em;"><a href="http://www.ocert.org/advisories/ocert-2009-006.html">http://www.ocert.org/advisories/ocert-2009-006.html</a></p>
+
+<h2 id="1.5_r1">Android 1.5 SDK, Release 1</h2>
+
+<p>This SDK provides updates to the development tools and Android system that
+you use to create applications for compliant Android-powered devices. </p>
+
+<h3>Release Overview</h3>
+
+<p>This SDK release includes many new features for developers. Highlights of the
+changes include: </p>
+
+  <ul>
+    <li>Multiple versions of the Android platform are included (Android 1.1,
+Android 1.5). The tools are updated to let you deploy your application
+on any platform in the SDK, which helps you ensure forward-compitility and, 
+if applicable, backward-compatibility.</li>
+    <li>Introduces <a href="{@docRoot}guide/developing/tools/avd.html">Android
+Virtual Devices</a> &mdash; (AVD) configurations of options that you
+run in the emulator to better model actual devices. Each AVD gets its
+own dedicated storage area, making it much easier to work with multiple emulators 
+that are running concurrently.</li>
+    <li>Support for SDK add-ons, which extend the
+Android SDK to give you access to one or more external Android libraries and/or
+a customized (but compliant) system image that can run in the emulator. </li>
+    <li>The new Eclipse ADT plugin (version 0.9.x) offers new Wizards to let you
+create projects targetted for specific Android configurations, generate XML
+resources (such as layouts, animations, and menus), generate alternate layouts,
+and export and sign your application for publishing.</li>
+    <li>Improved JUnit support in ADT</li>
+    <li>Easier profiling of performance</li>
+    <li>Easier management of localized applications. You can now include or
+exclude locale resources when building your APK from a single
+Android project.</li>
+    <li>A new tool called "android" replaces the activitycreator script.</li>
+  </ul>
+
+<p>For details about the Android platforms included in the SDK &mdash; including
+bug fixes, features, and API changes &mdash; please read the Version Notes
+documents available at left. For a list of Android platforms included in this
+release, see the <a href="{@docRoot}sdk/1.5_r1/index.html">Download
+page</a>.</p>
+
+<h3>Installation and Upgrade Notes</h3>
+
+<p>If you've been developing an application using an Android 1.1 SDK, you need
+to make a few changes to your development environment to migrate to the new SDK.
+Tools and documentation are provided to assist you. No changes to the source
+code of an existing application should be needed, provided that your application
+is not using Android internal structures or APIs.</p>
+
+<p>To ensure that your existing application will work properly on a device
+running the latest version of the Android platform, you are strongly encouraged
+to migrate the application to the new SDK, compile it using the platform
+matching the application's original API Level, and run it against the most
+current platform. </p>
+
+<p>If you're installing the Android SDK for the first time, please see
+the instructions in <a
+href="{@docRoot}sdk/1.5_r1/installing.html">Installing the SDK</a>.
+
+<h3>SDK Add-Ons</h3>
+
+<p>This version of the SDK introduces support for SDK add-ons, which extend the
+Android SDK to give you access to one or more external Android libraries and/or
+a customized (but compliant) system image that can run in the emulator. The
+purpose of an SDK add-on is to give you a way to develop applications for a
+specific actual device (or family of devices) that extends the APIs available to
+Android applications through external libraries or system customizations. </p>
+
+<p>From the perspective of your Android development environment, an SDK add-on
+is similar to any of the Android platform targets included in the SDK &mdash; it
+includes an external library, a system image, as well as custom emulator skins
+and system properties. The add-on differs in that the Android platform it
+provides may include customized UI, resources, or behaviors, a different set of
+preinstalled applications, or other similar modifications. 
+
+<p>The SDK includes a single SDK add-on &mdash; the Google APIs add-on. The
+Google APIs add-on gives your application access to the com.google.android.maps
+external library that is included on many (if not most) Android-powered devices. 
+The Google APIs add-on also includes a {@link android.location.Geocoder Geocoder}
+backend service implementation. For more information, see the "Maps External 
+Library" section below. </p>
+
+<h3>Android Virtual Devices (AVDs)</h3>
+
+<p>The SDK now gives you the capability to compile an application against any
+one of several system targets, then run it in the emulator on top of any
+compatible system image. There are two types of targets:</p>
+<ul>
+<li>Targets that represent core Android platform versions. </li>
+<li>Targets that are SDK add-ons, which typically provide application access to
+one or more external libraries and/or a customized (but compliant) system image
+that can run in the emulator. 
+</ul>
+
+<p>A new tool called "android" lets you discover what targets and AVDs are
+available to use.</p>
+
+<p>For more information about AVDs, see <a
+href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>
+
+<h3>Other Notes</h3>
+
+<p><strong>Maps External Library</strong></p>
+
+<p>In previous versions of the SDK, the com.google.android.maps package was
+included in the standard Android library and system image. In the Android 1.5
+SDK, that is not the case. The Android 1.5 library and system image do not
+include the Maps external library (com.google.android.maps). However, the Maps
+external library is available as part of the Google APIs add-on for the Android
+SDK, downloadable from this location: </p>
+
+<p style="margin-left:2em;"><a
+href="http://code.google.com/android/add-ons/google-apis">http://code.google.com
+/android/add-ons/google-apis</a> </p>
+
+<p>For your convenience, the Google APIs add-on is included in the SDK. </p>
+
+<p>For information about how to register for a Maps API Key, see 
+<a href="http://code.google.com/android/add-ons/google-apis/mapkey.html">
+Obtaining a Maps API Key</a>.</p>
+
+<p><strong>USB Drivers for Windows</strong></p>
+
+<p>If you are using Windows and want to develop or test your application on an
+Android-powered device (such as the T-Mobile G1), you need an appropriate USB
+driver. For your convenience, the Windows version of the Android SDK includes
+these USB drivers that you can install, to let you develop on the device:</p>
+
+<ul>
+<li>USB driver for 32-bit XP and Vista</li>
+<li>USB driver for 64-bit Vista only</li>
+</ul>
+
+<p>The USB driver files are located in the
+<code>&lt;SDK&gt;/usb_driver</code> directory. For details and
+installation instructions, see <a
+href="{@docRoot}guide/developing/device.html#setting-up">Setting Up a
+Device for Development</a>.</p>
+</p>
+
+<h3>Resolved Issues, Changes</h3>
+
+<p><strong>Media</strong></p>
+<ul>
+<li>Updated documentation for {@link android.media.SoundPool
+android.media.SoundPool}</li>
+<li>{@link android.webkit.WebView} objects no longer automatically save
+thumbnails. The {@link android.webkit.WebView#capturePicture() capturePicture()}
+method will need to be called manually.</li>
+</ul>
+
+<h3>Known Issues</h3>
+
+<p><strong>Sensor problems in Emulator</strong></p>
+
+<ul>
+<li>If your application uses the Sensor API and you are running it in the
+emulator on the Android 1.5 system image, you may experience problems. Your
+application may generate ANR messages or crash when using the sensors. The
+problem is being investigated.</li>
+</ul>
+
+<p><strong>Other</strong></p>
+
+<ul>
+<li>We regret to inform developers that Android 1.5 will not include support for
+the Zilog Z80 processor architecture.</li>
+</ul>
+
 
 <h2 id="1.1_r1">Android 1.1 SDK, Release 1</h2>
 
-<p>This SDK provides the development tools and Android system image you need to create applications for Android-powered devices. Applications developed on this SDK will be compatible with mobile devices running the Android 1.1 platform. </p>
+<p>This SDK provides the development tools and Android system image you need to
+create applications for Android-powered devices. Applications developed on this
+SDK will be compatible with mobile devices running the Android 1.1 platform.
+</p>
 
-<p>This release provides an updated system image (Android 1.1), updated documentation, and the same set of development tools provided in the Android 1.0 r2 SDK. The updated system image includes bug fixes and some smaller features, as well as a few minor API changes from the 1.0 version. </p>
+<p>This release provides an updated system image (Android 1.1), updated
+documentation, and the same set of development tools provided in the Android 1.0
+r2 SDK. The updated system image includes bug fixes and some smaller features,
+as well as a few minor API changes from the 1.0 version. </p>
 
-<p>For details about the Android 1.1 system image included in the SDK &mdash; including bug fixes, features, and API changes &mdash; please read the <a href="{@docRoot}sdk/android-1.1.html">Android 1.1 Version Notes</a>.</p>
+<p>For details about the Android 1.1 system image included in the SDK &mdash;
+including bug fixes, features, and API changes &mdash; please read the <a
+href="{@docRoot}sdk/android-1.1.html">Android 1.1 Version Notes</a>.</p>
 
 <h3>App Versioning for Android 1.1</h3>
 
-<p>If you are using this SDK to build an application that is compatible <em>only</em> with Android-powered devices running the Android 1.1 platform, please note that you <strong>must</strong> set the the <code>android:minSdkVersion</code> attribute in the application's manifest to the API Level of Android 1.1 &mdash; "2".</p>
+<p>If you are using this SDK to build an application that is compatible
+<em>only</em> with Android-powered devices running the Android 1.1 platform,
+please note that you <strong>must</strong> set the the
+<code>android:minSdkVersion</code> attribute in the application's manifest to
+the API Level of Android 1.1 &mdash; "2".</p>
 
-<p>Specifically, you specify the <code>android:minSdkVersion</code> attribute in a <code>&lt;uses-sdk&gt;</code> element as a child of <code>&lt;manifest&gt;</code> in the manifest file. When set, the attribute looks like this: </p>
+<p>Specifically, you specify the <code>android:minSdkVersion</code> attribute in
+a <code>&lt;uses-sdk&gt;</code> element as a child of
+<code>&lt;manifest&gt;</code> in the manifest file. When set, the attribute
+looks like this: </p>
 
 <pre><code>&lt;manifest&gt;
   ...
-  &lt;uses-sdk minSdkVersion="2" /&gt;
+  &lt;uses-sdk android:minSdkVersion="2" /&gt;
   ...
 &lt;/manifest&gt;</code>
 </pre>
 
-<p>By setting <code>android:minSdkVersion</code> in this way, you ensure that users will only be able to install your application if their devices are running the Android 1.1 platform. In turn, this ensures that your application will function properly on their devices, especially if it uses APIs introduced in Android 1.1. </p>
+<p>By setting <code>android:minSdkVersion</code> in this way, you ensure that
+users will only be able to install your application if their devices are running
+the Android 1.1 platform. In turn, this ensures that your application will
+function properly on their devices, especially if it uses APIs introduced in
+Android 1.1. </p>
 
-<p>If your application uses APIs introduced in Android 1.1 but does not declare <code>&lt;uses-sdk minSdkVersion="2" /&gt;</code>, then it will run properly on Android 1.1 devices but <em>not</em> on Android 1.0 devices. </p>
+<p>If your application uses APIs introduced in Android 1.1 but does not declare
+<code>&lt;uses-sdk android:minSdkVersion="2" /&gt;</code>, then it will run properly on
+Android 1.1 devices but <em>not</em> on Android 1.0 devices. </p>
 
-<p>If your application does not use any new APIs introduced in Android 1.1, you can indicate Android 1.0 compatibility by removing <code>minSdkVersion</code> or setting the attribute to "1". However, before publishing your application, you must make sure to compile your application against the Android 1.0 system image (available in the Android 1.0 SDK), to ensure that it builds and functions properly for Android 1.0 devices. You should test the application against system images corresponding to the API Levels that the application is designed to be compatible with.</p>
+<p>If your application does not use any new APIs introduced in Android 1.1, you
+can indicate Android 1.0 compatibility by removing <code>android:minSdkVersion</code> or
+setting the attribute to "1". However, before publishing your application, you
+must make sure to compile your application against the Android 1.0 system image
+(available in the Android 1.0 SDK), to ensure that it builds and functions
+properly for Android 1.0 devices. You should test the application against system
+images corresponding to the API Levels that the application is designed to be
+compatible with.</p>
 
-<p>If you are sure your application is not using Android 1.1 APIs and has no need to use them, you might find it easier to keep working in the Android 1.0 SDK, rather than migrating to the Android 1.1 SDK and having to do additional testing.</p>
+<p>If you are sure your application is not using Android 1.1 APIs and has no
+need to use them, you might find it easier to keep working in the Android 1.0
+SDK, rather than migrating to the Android 1.1 SDK and having to do additional
+testing.</p>
 
 
 <h3>ADT Plugin Compatibility</h3>
@@ -52,7 +264,7 @@ application on the Android 1.1 emulator for the first time.</p>
 
 <p>If you're installing the Android SDK for the first time, please see
 the instructions in <a
-href="{@docRoot}sdk/1.1_r1/installing.html">Installing the SDK</a>.
+href="{@docRoot}sdk/1.5_r1/installing.html">Installing the SDK</a>.
 
 <h3>Other Notes</h3>
 
@@ -67,7 +279,7 @@ for authentication to the server.</p>
 <p>Developers should note that the registration service for MapView is now
 active and Google Maps is actively enforcing the Maps API Key requirement. 
 For information about how to register for a Maps API Key, see 
-<a href="{@docRoot}guide/topics/location/geo/mapkey.html">
+<a href="http://code.google.com/android/add-ons/google-apis/mapkey.html">
 Obtaining a Maps API Key</a>.</p>
 
 <p><strong>USB Drivers for Windows</strong></p>
@@ -136,9 +348,6 @@ are not working in this release.</li>
 </ul>
 
 
-
-
-
 <h2 id="1.0_r2">Android 1.0 SDK, Release 2</h2>
 
 <p>This SDK release includes the Android 1.0 platform and application API.
@@ -154,12 +363,12 @@ added.</p>
 Development Tools (ADT) Plugin for Eclipse is <strong>0.8.0</strong>. If you are
 using a previous version of ADT, you should update to the latest version for use
 with this SDK. For information about how to update your ADT plugin, see <a
-href="/android/intro/upgrading.html">Upgrading the SDK</a>.</p>
+href="{@docRoot}sdk/1.0_r2/upgrading.html">Upgrading the SDK</a>.</p>
 
 <h3>Installation and Upgrade Notes</h3>
 
 <p>If you're installing the Android SDK for the first time, please see the
-instructions in <a href="/android/intro/installing.html">Installing the
+instructions in <a href="{@docRoot}sdk/1.0_r2/installing.html">Installing the
 SDK</a>.
 
 <h3>Other Notes</h3>
@@ -180,8 +389,8 @@ MapView for authentication to the server.</p>
 <p>Developers should note that the registration service for MapView is now
 active and Google Maps is actively enforcing the Maps API Key requirement. For
 information about how to register for a Maps API Key, see <a
-href="http://code.google.com/android/toolbox/apis/mapkey.html">http://code.
-google.com/android/toolbox/apis/mapkey.html</a>.</p>
+href="http://code.google.com/android/add-ons/google-apis/mapkey.html">http://code.google.com/android/add-ons/google-apis/mapkey.html</a>.
+</p>
 
 <p><strong>USB Driver for Windows</strong></p>
 <p>If you using Windows and want to develop or test your application on an
@@ -206,7 +415,7 @@ do so, declare a custom resource element using a
 file, then declare the attribute inside. For examples, see 
 &lt;sdk&gt;/samples/ApiDemos/res/values/attrs.xml. For more information about
 custom resources, see <a
-href="/android/reference/available-resources.html#customresources">Custom
+href="{@docRoot}guide/topics/resources/available-resources.html#customresources">Custom
 Layout Resources</a>. Note that the android.R.styleable documentation is still
 provided in the SDK, but only as a reference of the platform's styleable
 attributes for the various elements.</li>
@@ -236,27 +445,27 @@ to this release.</p>
 
 <p>This SDK release is the first to include the Android 1.0 platform and application API. Applications developed on this SDK will be compatible with mobile devices running the Android 1.0 platform, when such devices are available.</p>
 
-<p>This release includes mainly bug fixes, although some smaller features were added. The Android 1.0 also includes several API changes from the 0.9 version. For more information on API changes, see the <a href="/android/migrating/0.9-1.0/changes-overview.html">Overview of Changes</a> and the <a href="/android/migrating/0.9-1.0/changes.html">API Differences Report</a>. For those porting from the M5 release, the SDK also includes the legacy changes overview and API Differences Reports. See the current Overview of Changes for more information. </p>
+<p>This release includes mainly bug fixes, although some smaller features were added. The Android 1.0 also includes several API changes from the 0.9 version. For those porting from the M5 release, the SDK also includes the legacy changes overview and API Differences Reports. See the current Overview of Changes for more information. </p>
 
 <h3>ADT Plugin Compatibility</h3>
 
-<p>For this version of the SDK &mdash; Android 1.0 SDK, Release 1 &mdash; the compatible version of the Android Development Tools (ADT) Plugin for Eclipse is <strong>0.8.0</strong>. If you are using a previous version of ADT, you should update to the latest version for use with this SDK. For information about how to update your ADT plugin, see <a href="/android/intro/upgrading.html">Upgrading the SDK</a>.</p>
+<p>For this version of the SDK &mdash; Android 1.0 SDK, Release 1 &mdash; the compatible version of the Android Development Tools (ADT) Plugin for Eclipse is <strong>0.8.0</strong>. If you are using a previous version of ADT, you should update to the latest version for use with this SDK. For information about how to update your ADT plugin, see <a href="{@docRoot}sdk/1.0_r1/upgrading.html">Upgrading the SDK</a>.</p>
 
 <h3>Installation and Upgrade Notes</h3>
 
-<p>If you've been developing an application using a previous SDK version and you want the application to run on Android-powered mobile devices, you must port the application to the Android 1.0 SDK. Please see <a href="/android/intro/upgrading.html">Upgrading the SDK</a> for detailed instructions on how to make the transition to this release.  Be sure to wipe application user data (emulator option <code>-wipe-data</code>) when running your application on the Android 1.0 SDK emulator.</p>
+<p>If you've been developing an application using a previous SDK version and you want the application to run on Android-powered mobile devices, you must port the application to the Android 1.0 SDK. Please see <a href="{@docRoot}sdk/1.0_r1/upgrading.html">Upgrading the SDK</a> for detailed instructions on how to make the transition to this release.  Be sure to wipe application user data (emulator option <code>-wipe-data</code>) when running your application on the Android 1.0 SDK emulator.</p>
 
-<p>If you're installing the Android SDK for the first time, please see the instructions in <a href="/android/intro/installing.html">Installing the SDK</a>.
+<p>If you're installing the Android SDK for the first time, please see the instructions in <a href="{@docRoot}sdk/1.0_r1/installing.html">Installing the SDK</a>.
 
 <h3>Other Notes</h3>
 
 <p><strong>MapView API Key</strong></p>
 
-<p><a href="/android/reference/com/google/android/maps/MapView.html">MapView</a> is a class that lets you easily integrate Google Maps into your application. Before you can access the maps data, you will need to register with the Google Maps service and receive a Maps API Key, which you then add to your MapView for authentication to the server.</p>
+<p>MapView is a class that lets you easily integrate Google Maps into your application. Before you can access the maps data, you will need to register with the Google Maps service and receive a Maps API Key, which you then add to your MapView for authentication to the server.</p>
 
 <p>Currently, the registration service for MapView is not yet active and Google Maps is not yet enforcing the Maps API Key requirement. However, note that the registration service will be activated soon, so that MapViews in any application deployed to a mobile device will require registration and a valid Maps API Key. </p>
 
-<p>As soon as the registration service becomes available, we will update the page at <a href="http://code.google.com/android/toolbox/apis/mapkey.html">http://code.google.com/android/toolbox/apis/mapkey.html</a> with details about how and where to register. Please check that page periodically for registration information, if you are using a MapView.</p>
+<p>As soon as the registration service becomes available, we will update the page at <a href="http://code.google.com/android/add-ons/google-apis/mapkey.html">http://code.google.com/android/add-ons/google-apis/mapkey.html</a> with details about how and where to register. Please check that page periodically for registration information, if you are using a MapView.</p>
 
 
 <h3>Resolved Issues, Changes</h3>
@@ -282,18 +491,6 @@ to this release.</p>
 <p><strong>SQLite</strong></p>
 <ul>
 <li>SQLite is now included in the SDK package on all platforms. </li>
-</ul>
-
-<h3>Known Issues</h3>
-
-<p><strong>JUnit and Eclipse/ADT</strong></p>
-<ul>
-<li>If you are developing in Eclipse/ADT and want to add JUnit test
-classes, you can do so. However, you need to set up a custom JUnit configuration
-before your tests will run properly. For detailed information about how to set
-up the JUnit configuration, see the troubleshooting topic <a
-href="/android/kb/troubleshooting.html#addjunit">Running a Junit test class
-in Eclipse</a>.</li>
 </ul>
 
 <p><strong>Other</strong></p>

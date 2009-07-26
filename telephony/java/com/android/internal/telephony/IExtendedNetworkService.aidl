@@ -1,11 +1,11 @@
 package com.android.internal.telephony;
 
 /**
- * Interface used to interact with extended MMI/USSD network service. 
+ * Interface used to interact with extended MMI/USSD network service.
  */
 interface IExtendedNetworkService {
     /**
-     * Set a MMI/USSD command to ExtendedNetworkService for further process. 
+     * Set a MMI/USSD command to ExtendedNetworkService for further process.
      * This should be called when a MMI command is placed from panel.
      * @param number the dialed MMI/USSD number.
      */

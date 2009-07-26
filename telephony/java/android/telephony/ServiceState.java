@@ -19,7 +19,7 @@ package android.telephony;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import com.android.internal.telephony.Phone;
+import android.util.Log;
 
 /**
  * Contains phone state and service related information.
@@ -34,6 +34,8 @@ import com.android.internal.telephony.Phone;
  * </ul>
  */
 public class ServiceState implements Parcelable {
+
+    static final String LOG_TAG = "PHONE";
 
     /**
      * Normal operation condition, the phone is registered
@@ -59,12 +61,59 @@ public class ServiceState implements Parcelable {
      */
     public static final int STATE_POWER_OFF = 3;
 
+
+    /**
+     * Available radio technologies for GSM, UMTS and CDMA.
+     */
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_UNKNOWN = 0;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_GPRS = 1;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_EDGE = 2;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_UMTS = 3;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_IS95A = 4;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_IS95B = 5;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_1xRTT = 6;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_EVDO_0 = 7;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_EVDO_A = 8;
+
+    /**
+     * Available registration states for GSM, UMTS and CDMA.
+     */
+    /** @hide */
+    public static final int REGISTRATION_STATE_NOT_REGISTERED_AND_NOT_SEARCHING = 0;
+    /** @hide */
+    public static final int REGISTRATION_STATE_HOME_NETWORK = 1;
+    /** @hide */
+    public static final int REGISTRATION_STATE_NOT_REGISTERED_AND_SEARCHING = 2;
+    /** @hide */
+    public static final int REGISTRATION_STATE_REGISTRATION_DENIED = 3;
+    /** @hide */
+    public static final int REGISTRATION_STATE_UNKNOWN = 4;
+    /** @hide */
+    public static final int REGISTRATION_STATE_ROAMING = 5;
+
     private int mState = STATE_OUT_OF_SERVICE;
     private boolean mRoaming;
     private String mOperatorAlphaLong;
     private String mOperatorAlphaShort;
     private String mOperatorNumeric;
     private boolean mIsManualNetworkSelection;
+
+    //***** CDMA
+    private int mRadioTechnology;
+    private boolean mCssIndicator;
+    private int mNetworkId;
+    private int mSystemId;
+    private int mCdmaRoamingIndicator;
+    private int mCdmaDefaultRoamingIndicator;
 
     /**
      * Create a new ServiceState from a intent notifier Bundle
@@ -105,6 +154,12 @@ public class ServiceState implements Parcelable {
         mOperatorAlphaShort = s.mOperatorAlphaShort;
         mOperatorNumeric = s.mOperatorNumeric;
         mIsManualNetworkSelection = s.mIsManualNetworkSelection;
+        mRadioTechnology = s.mRadioTechnology;
+        mCssIndicator = s.mCssIndicator;
+        mNetworkId = s.mNetworkId;
+        mSystemId = s.mSystemId;
+        mCdmaRoamingIndicator = s.mCdmaRoamingIndicator;
+        mCdmaDefaultRoamingIndicator = s.mCdmaDefaultRoamingIndicator;
     }
 
     /**
@@ -117,6 +172,12 @@ public class ServiceState implements Parcelable {
         mOperatorAlphaShort = in.readString();
         mOperatorNumeric = in.readString();
         mIsManualNetworkSelection = in.readInt() != 0;
+        mRadioTechnology = in.readInt();
+        mCssIndicator = (in.readInt() != 0);
+        mNetworkId = in.readInt();
+        mSystemId = in.readInt();
+        mCdmaRoamingIndicator = in.readInt();
+        mCdmaDefaultRoamingIndicator = in.readInt();
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -126,6 +187,12 @@ public class ServiceState implements Parcelable {
         out.writeString(mOperatorAlphaShort);
         out.writeString(mOperatorNumeric);
         out.writeInt(mIsManualNetworkSelection ? 1 : 0);
+        out.writeInt(mRadioTechnology);
+        out.writeInt(mCssIndicator ? 1 : 0);
+        out.writeInt(mNetworkId);
+        out.writeInt(mSystemId);
+        out.writeInt(mCdmaRoamingIndicator);
+        out.writeInt(mCdmaDefaultRoamingIndicator);
     }
 
     public int describeContents() {
@@ -167,9 +234,24 @@ public class ServiceState implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public int getCdmaRoamingIndicator(){
+        return this.mCdmaRoamingIndicator;
+    }
+
+    /**
+     * @hide
+     */
+    public int getCdmaDefaultRoamingIndicator(){
+        return this.mCdmaDefaultRoamingIndicator;
+    }
+
+    /**
      * Get current registered operator name in long alphanumeric format
      *
      * In GSM/UMTS, long format can be upto 16 characters long
+     * In CDMA, returns the ERI text, if set, otherwise the ONS
      *
      * @return long name of operator, null if unregistered or unknown
      */
@@ -213,18 +295,20 @@ public class ServiceState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return (mState * 0x1234)
+        return ((mState * 0x1234)
                 + (mRoaming ? 1 : 0)
                 + (mIsManualNetworkSelection ? 1 : 0)
                 + ((null == mOperatorAlphaLong) ? 0 : mOperatorAlphaLong.hashCode())
                 + ((null == mOperatorAlphaShort) ? 0 : mOperatorAlphaShort.hashCode())
-                + ((null == mOperatorNumeric) ? 0 : mOperatorNumeric.hashCode());
+                + ((null == mOperatorNumeric) ? 0 : mOperatorNumeric.hashCode())
+                + mCdmaRoamingIndicator
+                + mCdmaDefaultRoamingIndicator);
     }
 
     @Override
     public boolean equals (Object o) {
         ServiceState s;
-        
+
         try {
             s = (ServiceState) o;
         } catch (ClassCastException ex) {
@@ -235,21 +319,69 @@ public class ServiceState implements Parcelable {
             return false;
         }
 
-        return mState == s.mState
+        return (mState == s.mState
                 && mRoaming == s.mRoaming
                 && mIsManualNetworkSelection == s.mIsManualNetworkSelection
                 && equalsHandlesNulls(mOperatorAlphaLong, s.mOperatorAlphaLong)
                 && equalsHandlesNulls(mOperatorAlphaShort, s.mOperatorAlphaShort)
-                && equalsHandlesNulls(mOperatorNumeric, s.mOperatorNumeric);
+                && equalsHandlesNulls(mOperatorNumeric, s.mOperatorNumeric)
+                && equalsHandlesNulls(mRadioTechnology, s.mRadioTechnology)
+                && equalsHandlesNulls(mCssIndicator, s.mCssIndicator)
+                && equalsHandlesNulls(mNetworkId, s.mNetworkId)
+                && equalsHandlesNulls(mSystemId, s.mSystemId)
+                && equalsHandlesNulls(mCdmaRoamingIndicator, s.mCdmaRoamingIndicator)
+                && equalsHandlesNulls(mCdmaDefaultRoamingIndicator,
+                        s.mCdmaDefaultRoamingIndicator));
     }
 
     @Override
     public String toString() {
-        return mState + " " + (mRoaming ? "roaming" : "home")
+        String radioTechnology = new String("Error in radioTechnology");
+
+        switch(this.mRadioTechnology) {
+        case 0:
+            radioTechnology = "Unknown";
+            break;
+        case 1:
+            radioTechnology = "GPRS";
+            break;
+        case 2:
+            radioTechnology = "EDGE";
+            break;
+        case 3:
+            radioTechnology = "UMTS";
+            break;
+        case 4:
+            radioTechnology = "IS95A";
+            break;
+        case 5:
+            radioTechnology = "IS95B";
+            break;
+        case 6:
+            radioTechnology = "1xRTT";
+            break;
+        case 7:
+            radioTechnology = "EvDo rev. 0";
+            break;
+        case 8:
+            radioTechnology = "EvDo rev. A";
+            break;
+        default:
+            Log.w(LOG_TAG, "mRadioTechnology variable out of range.");
+        break;
+        }
+
+        return (mState + " " + (mRoaming ? "roaming" : "home")
                 + " " + mOperatorAlphaLong
                 + " " + mOperatorAlphaShort
                 + " " + mOperatorNumeric
-                + " " + (mIsManualNetworkSelection ? "(manual)" : "");
+                + " " + (mIsManualNetworkSelection ? "(manual)" : "")
+                + " " + radioTechnology
+                + " " + (mCssIndicator ? "CSS supported" : "CSS not supported")
+                + " " + mNetworkId
+                + " " + mSystemId
+                + "RoamInd: " + mCdmaRoamingIndicator
+                + "DefRoamInd: " + mCdmaDefaultRoamingIndicator);
     }
 
     public void setStateOutOfService() {
@@ -259,6 +391,12 @@ public class ServiceState implements Parcelable {
         mOperatorAlphaShort = null;
         mOperatorNumeric = null;
         mIsManualNetworkSelection = false;
+        mRadioTechnology = 0;
+        mCssIndicator = false;
+        mNetworkId = -1;
+        mSystemId = -1;
+        mCdmaRoamingIndicator = -1;
+        mCdmaDefaultRoamingIndicator = -1;
     }
 
     public void setStateOff() {
@@ -268,6 +406,12 @@ public class ServiceState implements Parcelable {
         mOperatorAlphaShort = null;
         mOperatorNumeric = null;
         mIsManualNetworkSelection = false;
+        mRadioTechnology = 0;
+        mCssIndicator = false;
+        mNetworkId = -1;
+        mSystemId = -1;
+        mCdmaRoamingIndicator = -1;
+        mCdmaDefaultRoamingIndicator = -1;
     }
 
     public void setState(int state) {
@@ -278,16 +422,40 @@ public class ServiceState implements Parcelable {
         mRoaming = roaming;
     }
 
+    /**
+     * @hide
+     */
+    public void setCdmaRoamingIndicator(int roaming) {
+        this.mCdmaRoamingIndicator = roaming;
+    }
+
+    /**
+     * @hide
+     */
+    public void setCdmaDefaultRoamingIndicator (int roaming) {
+        this.mCdmaDefaultRoamingIndicator = roaming;
+    }
+
     public void setOperatorName(String longName, String shortName, String numeric) {
         mOperatorAlphaLong = longName;
         mOperatorAlphaShort = shortName;
         mOperatorNumeric = numeric;
     }
 
+    /**
+     * In CDMA mOperatorAlphaLong can be set from the ERI
+     * text, this is done from the CDMAPhone and not from the CdmaServiceStateTracker
+     *
+     * @hide
+     */
+    public void setCdmaEriText(String longName) {
+        mOperatorAlphaLong = longName;
+    }
+
     public void setIsManualSelection(boolean isManual) {
         mIsManualNetworkSelection = isManual;
     }
-    
+
     /**
      * Test whether two objects hold the same data values or both are null
      *
@@ -312,6 +480,12 @@ public class ServiceState implements Parcelable {
         mOperatorAlphaShort = m.getString("operator-alpha-short");
         mOperatorNumeric = m.getString("operator-numeric");
         mIsManualNetworkSelection = m.getBoolean("manual");
+        mRadioTechnology = m.getInt("radioTechnology");
+        mCssIndicator = m.getBoolean("cssIndicator");
+        mNetworkId = m.getInt("networkId");
+        mSystemId = m.getInt("systemId");
+        mCdmaRoamingIndicator = m.getInt("cdmaRoamingIndicator");
+        mCdmaDefaultRoamingIndicator = m.getInt("cdmaDefaultRoamingIndicator");
     }
 
     /**
@@ -327,5 +501,48 @@ public class ServiceState implements Parcelable {
         m.putString("operator-alpha-short", mOperatorAlphaShort);
         m.putString("operator-numeric", mOperatorNumeric);
         m.putBoolean("manual", Boolean.valueOf(mIsManualNetworkSelection));
+        m.putInt("radioTechnology", mRadioTechnology);
+        m.putBoolean("cssIndicator", mCssIndicator);
+        m.putInt("networkId", mNetworkId);
+        m.putInt("systemId", mSystemId);
+        m.putInt("cdmaRoamingIndicator", mCdmaRoamingIndicator);
+        m.putInt("cdmaDefaultRoamingIndicator", mCdmaDefaultRoamingIndicator);
+    }
+
+    //***** CDMA
+    /** @hide */
+    public void setRadioTechnology(int state) {
+        this.mRadioTechnology = state;
+    }
+
+    /** @hide */
+    public void setCssIndicator(int css) {
+        this.mCssIndicator = (css != 0);
+    }
+
+    /** @hide */
+    public void setSystemAndNetworkId(int systemId, int networkId) {
+        this.mSystemId = systemId;
+        this.mNetworkId = networkId;
+    }
+
+    /** @hide */
+    public int getRadioTechnology() {
+        return this.mRadioTechnology;
+    }
+
+    /** @hide */
+    public int getCssIndicator() {
+        return this.mCssIndicator ? 1 : 0;
+    }
+
+    /** @hide */
+    public int getNetworkId() {
+        return this.mNetworkId;
+    }
+
+    /** @hide */
+    public int getSystemId() {
+        return this.mSystemId;
     }
 }

@@ -16,80 +16,55 @@
 
 package com.android.internal.telephony;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
-import java.util.Collections;
-
-import android.util.Log;
-import com.android.internal.telephony.gsm.GSMPhone;
-import com.android.internal.telephony.gsm.RIL;
-import com.android.internal.telephony.test.ModelInterpreter;
-import com.android.internal.telephony.test.SimulatedCommands;
-import android.os.Looper;
-import android.os.SystemProperties;
 import android.content.Context;
-import android.content.Intent;
 import android.net.LocalServerSocket;
-import android.app.ActivityManagerNative;
+import android.os.Looper;
+import android.provider.Settings;
+import android.util.Log;
+
+import com.android.internal.telephony.cdma.CDMAPhone;
+import com.android.internal.telephony.gsm.GSMPhone;
 
 /**
  * {@hide}
  */
-public class PhoneFactory
-{
-    static final String LOG_TAG="GSM";
-
+public class PhoneFactory {
+    static final String LOG_TAG = "PHONE";
     static final int SOCKET_OPEN_RETRY_MILLIS = 2 * 1000;
     static final int SOCKET_OPEN_MAX_RETRY = 3;
-    //***** Class Variables 
+    //***** Class Variables
 
-    static private ArrayList<Phone> sPhones = new ArrayList<Phone>();
+    static private Phone sProxyPhone = null;
+    static private CommandsInterface sCommandsInterface = null;
 
     static private boolean sMadeDefaults = false;
     static private PhoneNotifier sPhoneNotifier;
     static private Looper sLooper;
+    static private Context sContext;
 
-    static private Object testMailbox;
+    static final int preferredNetworkMode = RILConstants.PREFERRED_NETWORK_MODE;
+
+    static final int preferredCdmaSubscription = RILConstants.PREFERRED_CDMA_SUBSCRIPTION;
 
     //***** Class Methods
 
-    private static void
-    useNewRIL(Context context)
-    {
-        ModelInterpreter mi = null;
-        GSMPhone phone;
-
-        try {
-            if (false) {
-                mi = new ModelInterpreter(new InetSocketAddress("127.0.0.1", 6502));
-            }
-            
-            phone = new GSMPhone(context, new RIL(context), sPhoneNotifier);
-
-            registerPhone (phone);
-        } catch (IOException ex) {
-            Log.e(LOG_TAG, "Error creating ModelInterpreter", ex);
-        }
+    public static void makeDefaultPhones(Context context) {
+        makeDefaultPhone(context);
     }
-
 
     /**
      * FIXME replace this with some other way of making these
      * instances
      */
-    public static void 
-    makeDefaultPhones(Context context)
-    {
-        synchronized(Phone.class) {        
-            if (!sMadeDefaults) {  
+    public static void makeDefaultPhone(Context context) {
+        synchronized(Phone.class) {
+            if (!sMadeDefaults) {
                 sLooper = Looper.myLooper();
+                sContext = context;
 
                 if (sLooper == null) {
                     throw new RuntimeException(
-                        "PhoneFactory.makeDefaultPhones must be called from Looper thread");
+                        "PhoneFactory.makeDefaultPhone must be called from Looper thread");
                 }
 
                 int retryCount = 0;
@@ -109,7 +84,7 @@ public class PhoneFactory
                         break;
                     } else if (retryCount > SOCKET_OPEN_MAX_RETRY) {
                         throw new RuntimeException("PhoneFactory probably already running");
-                    }else {
+                    } else {
                         try {
                             Thread.sleep(SOCKET_OPEN_RETRY_MILLIS);
                         } catch (InterruptedException er) {
@@ -119,12 +94,28 @@ public class PhoneFactory
 
                 sPhoneNotifier = new DefaultPhoneNotifier();
 
-                if ((SystemProperties.get("ro.radio.noril","")).equals("")) {
-                    useNewRIL(context);
-                } else {
-                    GSMPhone phone;
-                    phone = new GSMPhone(context, new SimulatedCommands(), sPhoneNotifier);
-                    registerPhone (phone);
+                //Get preferredNetworkMode from Settings.System
+                int networkMode = Settings.Secure.getInt(context.getContentResolver(),
+                        Settings.Secure.PREFERRED_NETWORK_MODE, preferredNetworkMode);
+                Log.i(LOG_TAG, "Network Mode set to " + Integer.toString(networkMode));
+
+                //Get preferredNetworkMode from Settings.System
+                int cdmaSubscription = Settings.Secure.getInt(context.getContentResolver(),
+                        Settings.Secure.PREFERRED_CDMA_SUBSCRIPTION, preferredCdmaSubscription);
+                Log.i(LOG_TAG, "Cdma Subscription set to " + Integer.toString(cdmaSubscription));
+
+                //reads the system properties and makes commandsinterface
+                sCommandsInterface = new RIL(context, networkMode, cdmaSubscription);
+
+                int phoneType = getPhoneType(networkMode);
+                if (phoneType == RILConstants.GSM_PHONE) {
+                    sProxyPhone = new PhoneProxy(new GSMPhone(context,
+                            sCommandsInterface, sPhoneNotifier));
+                    Log.i(LOG_TAG, "Creating GSMPhone");
+                } else if (phoneType == RILConstants.CDMA_PHONE) {
+                    sProxyPhone = new PhoneProxy(new CDMAPhone(context,
+                            sCommandsInterface, sPhoneNotifier));
+                    Log.i(LOG_TAG, "Creating CDMAPhone");
                 }
 
                 sMadeDefaults = true;
@@ -132,31 +123,56 @@ public class PhoneFactory
         }
     }
 
-    public static Phone getDefaultPhone()
-    {
+    /*
+     * This function returns the type of the phone, depending
+     * on the network mode.
+     *
+     * @param network mode
+     * @return Phone Type
+     */
+    public static int getPhoneType(int networkMode) {
+        switch(networkMode) {
+        case RILConstants.NETWORK_MODE_CDMA:
+        case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
+        case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
+            return RILConstants.CDMA_PHONE;
+
+        case RILConstants.NETWORK_MODE_WCDMA_PREF:
+        case RILConstants.NETWORK_MODE_GSM_ONLY:
+        case RILConstants.NETWORK_MODE_WCDMA_ONLY:
+        case RILConstants.NETWORK_MODE_GSM_UMTS:
+            return RILConstants.GSM_PHONE;
+
+        case RILConstants.NETWORK_MODE_GLOBAL:
+            return RILConstants.CDMA_PHONE;
+        default:
+            return RILConstants.GSM_PHONE;
+        }
+    }
+
+    public static Phone getDefaultPhone() {
+        if (sLooper != Looper.myLooper()) {
+            throw new RuntimeException(
+                "PhoneFactory.getDefaultPhone must be called from Looper thread");
+        }
+
         if (!sMadeDefaults) {
             throw new IllegalStateException("Default phones haven't been made yet!");
         }
+       return sProxyPhone;
+    }
 
-        if (sLooper != Looper.myLooper()) {
-            throw new RuntimeException(
-                "PhoneFactory.getDefaultPhone must be called from Looper thread");
-        }
-
-        synchronized (sPhones) {
-            return sPhones.isEmpty() ? null : sPhones.get(0);
+    public static Phone getCdmaPhone() {
+        synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+            Phone phone = new CDMAPhone(sContext, sCommandsInterface, sPhoneNotifier);
+            return phone;
         }
     }
-    
-    public static void registerPhone(Phone p)
-    {
-        if (sLooper != Looper.myLooper()) {
-            throw new RuntimeException(
-                "PhoneFactory.getDefaultPhone must be called from Looper thread");
-        }
-        synchronized (sPhones) {
-            sPhones.add(p);
+
+    public static Phone getGsmPhone() {
+        synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+            Phone phone = new GSMPhone(sContext, sCommandsInterface, sPhoneNotifier);
+            return phone;
         }
     }
 }
-

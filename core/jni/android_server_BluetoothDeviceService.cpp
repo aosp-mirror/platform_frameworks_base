@@ -50,6 +50,7 @@ namespace android {
 // We initialize these variables when we load class
 // android.server.BluetoothDeviceService
 static jfieldID field_mNativeData;
+static jfieldID field_mEventLoop;
 
 typedef struct {
     JNIEnv *env;
@@ -57,8 +58,10 @@ typedef struct {
     const char *adapter;  // dbus object name of the local adapter
 } native_data_t;
 
-void onCreateBondingResult(DBusMessage *msg, void *user);
-void onGetRemoteServiceChannelResult(DBusMessage *msg, void *user);
+extern event_loop_native_data_t *get_EventLoop_native_data(JNIEnv *,
+                                                           jobject);
+void onCreateBondingResult(DBusMessage *msg, void *user, void *nat);
+void onGetRemoteServiceChannelResult(DBusMessage *msg, void *user, void *nat);
 
 /** Get native data stored in the opaque (Java code maintained) pointer mNativeData
  *  Perform quick sanity check, if there are any problems return NULL
@@ -78,6 +81,8 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     LOGV(__FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     field_mNativeData = get_field(env, clazz, "mNativeData", "I");
+    field_mEventLoop = get_field(env, clazz, "mEventLoop",
+            "Landroid/server/BluetoothEventLoop;");
 #endif
 }
 
@@ -104,6 +109,7 @@ static bool initializeNativeDataNative(JNIEnv* env, jobject object) {
         dbus_error_free(&err);
         return false;
     }
+    dbus_connection_set_exit_on_disconnect(nat->conn, FALSE);
 
     nat->adapter = BLUEZ_ADAPTER_OBJECT_NAME;
 #endif  /*HAVE_BLUETOOTH*/
@@ -472,14 +478,19 @@ static jboolean createBondingNative(JNIEnv *env, jobject object,
     LOGV(__FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, object);
-    if (nat) {
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
+
+    if (nat && eventLoopNat) {
         const char *c_address = env->GetStringUTFChars(address, NULL);
         LOGV("... address = %s", c_address);
         char *context_address = (char *)calloc(BTADDR_SIZE, sizeof(char));
         strlcpy(context_address, c_address, BTADDR_SIZE);  // for callback
         bool ret = dbus_func_args_async(env, nat->conn, (int)timeout_ms,
                                         onCreateBondingResult, // callback
-                                        context_address, // user data
+                                        context_address,
+                                        eventLoopNat,
                                         nat->adapter,
                                         DBUS_CLASS_NAME, "CreateBonding",
                                         DBUS_TYPE_STRING, &c_address,
@@ -856,7 +867,10 @@ static jboolean getRemoteServiceChannelNative(JNIEnv *env, jobject object,
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
     native_data_t *nat = get_native_data(env, object);
-    if (nat) {
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
+    if (nat && eventLoopNat) {
         const char *c_address = env->GetStringUTFChars(address, NULL);
         char *context_address = (char *)calloc(BTADDR_SIZE, sizeof(char));
         strlcpy(context_address, c_address, BTADDR_SIZE);
@@ -866,6 +880,7 @@ static jboolean getRemoteServiceChannelNative(JNIEnv *env, jobject object,
 
         bool ret = dbus_func_args_async(env, nat->conn, 20000,  // ms
                            onGetRemoteServiceChannelResult, context_address,
+                           eventLoopNat,
                            nat->adapter,
                            DBUS_CLASS_NAME, "GetRemoteServiceChannel",
                            DBUS_TYPE_STRING, &c_address,

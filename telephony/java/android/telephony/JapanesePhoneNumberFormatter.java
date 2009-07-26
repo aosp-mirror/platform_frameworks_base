@@ -21,11 +21,11 @@ import android.text.Editable;
 /*
  * Japanese Phone number formatting rule is a bit complicated.
  * Here are some valid examples:
- * 
+ *
  * 022-229-1234 0223-23-1234 022-301-9876 015-482-7849 0154-91-3478
  * 01547-5-4534 090-1234-1234 080-0123-6789
  * 0800-000-9999 0570-000-000 0276-00-0000
- * 
+ *
  * As you can see, there is no straight-forward rule here.
  * In order to handle this, a big array is prepared.
  */
@@ -151,14 +151,14 @@ import android.text.Editable;
     -100, -100, -45, -45, -100, -100, -100, -100, -100, -100,
     -25, -35, -35, -35, -35, -35, -35, -25, -25, -35,
     -35, -35, -35, -35, -35, -35, -35, -35, -35, -45};
-    
+
     public static void format(Editable text) {
         // Here, "root" means the position of "'":
         // 0'3, 0'90, and +81'-90
         // (dash will be deleted soon, so it is actually +81'90).
         int rootIndex = 1;
         int length = text.length();
-        if (length > 3 
+        if (length > 3
                 && text.subSequence(0, 3).toString().equals("+81")) {
             rootIndex = 3;
         } else if (length < 1 || text.charAt(0) != '0') {
@@ -176,10 +176,10 @@ import android.text.Editable;
                 i++;
             }
         }
-        
+
         length = text.length();
         int dashposition;
-        
+
         i = rootIndex;
         int base = 0;
         while (i < length) {
@@ -208,7 +208,7 @@ import android.text.Editable;
                 i++;
             }
         }
-        
+
         if (length > 3 && rootIndex == 3) {
             text.insert(rootIndex, "-");
         }

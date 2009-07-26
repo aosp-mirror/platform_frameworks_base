@@ -19,17 +19,22 @@ package com.android.server.am;
 import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 class AppErrorDialog extends BaseErrorDialog {
+    private final static String TAG = "AppErrorDialog";
+
     private final AppErrorResult mResult;
     private final ProcessRecord mProc;
 
     // Event 'what' codes
     static final int FORCE_QUIT = 0;
     static final int DEBUG = 1;
+    static final int FORCE_QUIT_AND_REPORT = 2;
 
     // 5-minute timeout, then we automatically dismiss the crash dialog
     static final long DISMISS_TIMEOUT = 1000 * 60 * 5;
@@ -58,12 +63,22 @@ class AppErrorDialog extends BaseErrorDialog {
 
         setCancelable(false);
 
-        setButton(res.getText(com.android.internal.R.string.force_close),
-                    mHandler.obtainMessage(FORCE_QUIT));
+        setButton(DialogInterface.BUTTON_POSITIVE,
+                res.getText(com.android.internal.R.string.force_close),
+                mHandler.obtainMessage(FORCE_QUIT));
+
         if ((flags&1) != 0) {
-            setButton(res.getText(com.android.internal.R.string.debug),
+            setButton(DialogInterface.BUTTON_NEUTRAL,
+                    res.getText(com.android.internal.R.string.debug),
                     mHandler.obtainMessage(DEBUG));
         }
+
+        if (app.errorReportReceiver != null) {
+            setButton(DialogInterface.BUTTON_NEGATIVE,
+                    res.getText(com.android.internal.R.string.report),
+                    mHandler.obtainMessage(FORCE_QUIT_AND_REPORT));
+        }
+
         setTitle(res.getText(com.android.internal.R.string.aerr_title));
         getWindow().addFlags(FLAG_SYSTEM_ERROR);
         getWindow().setTitle("Application Error: " + app.info.processName);

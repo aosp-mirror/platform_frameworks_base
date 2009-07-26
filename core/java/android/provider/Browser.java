@@ -34,6 +34,12 @@ public class Browser {
         Uri.parse("content://browser/bookmarks");
 
     /**
+     * The inline scheme to show embedded content in a browser.
+     * @hide
+     */
+    public static final Uri INLINE_URI = Uri.parse("inline:");
+
+    /**
      * The name of extra data when starting Browser with ACTION_VIEW or
      * ACTION_SEARCH intent.
      * <p>
@@ -53,7 +59,48 @@ public class Browser {
      * identifier.
      */
     public static final String EXTRA_APPLICATION_ID =
-            "com.android.browser.application_id";
+        "com.android.browser.application_id";
+
+    /**
+     * The content to be rendered when url's scheme is inline.
+     * @hide
+     */
+    public static final String EXTRA_INLINE_CONTENT ="com.android.browser.inline.content";
+
+    /**
+     * The encoding of the inlined content for inline scheme.
+     * @hide
+     */
+    public static final String EXTRA_INLINE_ENCODING ="com.android.browser.inline.encoding";
+
+    /**
+     * The url used when the inline content is falied to render.
+     * @hide
+     */
+    public static final String EXTRA_INLINE_FAILURL ="com.android.browser.inline.failurl";
+
+    /**
+     * The name of the extra data in the VIEW intent. The data is in boolean.
+     * <p>
+     * If the Browser is handling the intent and the setting for
+     * USE_LOCATION_FOR_SERVICES is allow, the Browser will send the location in
+     * the POST data if this extra data is presented and it is true.
+     * <p>
+     * pending api approval
+     * @hide
+     */
+    public static final String EXTRA_APPEND_LOCATION = "com.android.browser.append_location";
+
+    /**
+     * The name of the extra data in the VIEW intent. The data is in the format of
+     * a byte array.
+     * <p>
+     * Any value sent here will be passed in the http request to the provided url as post data.
+     * <p>
+     * pending api approval
+     * @hide
+     */
+    public static final String EXTRA_POST_DATA = "com.android.browser.post_data";
 
     /* if you change column order you must also change indices
        below */
@@ -132,6 +179,7 @@ public class Browser {
 
     /**
      *  Return a cursor pointing to a list of all the bookmarks.
+     *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
      *  @param cr   The ContentResolver used to access the database.
      */
     public static final Cursor getAllBookmarks(ContentResolver cr) throws 
@@ -143,6 +191,7 @@ public class Browser {
 
     /**
      *  Return a cursor pointing to a list of all visited site urls.
+     *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
      *  @param cr   The ContentResolver used to access the database.
      */
     public static final Cursor getAllVisitedUrls(ContentResolver cr) throws
@@ -154,6 +203,8 @@ public class Browser {
     /**
      *  Update the visited history to acknowledge that a site has been
      *  visited.
+     *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+     *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
      *  @param cr   The ContentResolver used to access the database.
      *  @param url  The site being visited.
      *  @param real Whether this is an actual visit, and should be added to the
@@ -203,6 +254,8 @@ public class Browser {
      * of them.  This is used to keep our history table to a
      * reasonable size.  Note: it does not prune bookmarks.  If the
      * user wants 1000 bookmarks, the user gets 1000 bookmarks.
+     *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+     *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
      *
      * @param cr The ContentResolver used to access the database.
      */
@@ -236,6 +289,7 @@ public class Browser {
 
     /**
      * Returns whether there is any history to clear.
+     *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
      * @param cr   The ContentResolver used to access the database.
      * @return boolean  True if the history can be cleared.
      */
@@ -261,6 +315,7 @@ public class Browser {
     /**
      *  Delete all entries from the bookmarks/history table which are
      *  not bookmarks.  Also set all visited bookmarks to unvisited.
+     *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
      *  @param cr   The ContentResolver used to access the database.
      */
     public static final void clearHistory(ContentResolver cr) {
@@ -270,6 +325,8 @@ public class Browser {
     /**
      * Helper function to delete all history items and revert all
      * bookmarks to zero visits which meet the criteria provided.
+     *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+     *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
      * @param cr   The ContentResolver used to access the database.
      * @param whereClause   String to limit the items affected.
      *                      null means all items.
@@ -332,6 +389,7 @@ public class Browser {
 
     /**
      * Delete all history items from begin to end.
+     *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
      * @param cr    The ContentResolver used to access the database.
      * @param begin First date to remove.  If -1, all dates before end.
      *              Inclusive.
@@ -359,6 +417,7 @@ public class Browser {
 
     /**
      * Remove a specific url from the history database.
+     *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
      * @param cr    The ContentResolver used to access the database.
      * @param url   url to remove.
      */
@@ -372,6 +431,8 @@ public class Browser {
 
     /**
      * Add a search string to the searches database.
+     *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+     *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
      * @param cr   The ContentResolver used to access the database.
      * @param search    The string to add to the searches database.
      */
@@ -401,6 +462,7 @@ public class Browser {
     }
     /**
      * Remove all searches from the search database.
+     *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
      * @param cr   The ContentResolver used to access the database.
      */
     public static final void clearSearches(ContentResolver cr) {
@@ -415,6 +477,7 @@ public class Browser {
     
     /**
      *  Request all icons from the database.
+     *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
      *  @param  cr The ContentResolver used to access the database.
      *  @param  where Clause to be used to limit the query from the database.
      *          Must be an allowable string to be passed into a database query.

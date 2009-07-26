@@ -58,7 +58,7 @@ import java.lang.ref.WeakReference;
  * MediaPlayer object driven by the supported playback control operations.
  * The ovals represent the states a MediaPlayer object may reside
  * in. The arcs represent the playback control operations that drive the object
- * state transition. There are two types of arcs. The arcs with a single arrow 
+ * state transition. There are two types of arcs. The arcs with a single arrow
  * head represent synchronous method calls, while those with
  * a double arrow head represent asynchronous method calls.</p>
  *
@@ -69,42 +69,42 @@ import java.lang.ref.WeakReference;
  * <p>From this state diagram, one can see that a MediaPlayer object has the
  *    following states:</p>
  * <ul>
- *     <li>When a MediaPlayer object is just created using <code>new</code> or 
- *         after {@link #reset()} is called, it is in the <em>Idle</em> state; and after 
- *         {@link #release()} is called, it is in the <em>End</em> state. Between these 
- *         two states is the life cycle of the MediaPlayer object. 
+ *     <li>When a MediaPlayer object is just created using <code>new</code> or
+ *         after {@link #reset()} is called, it is in the <em>Idle</em> state; and after
+ *         {@link #release()} is called, it is in the <em>End</em> state. Between these
+ *         two states is the life cycle of the MediaPlayer object.
  *         <ul>
- *         <li>There is a subtle but important difference between a newly constructed 
- *         MediaPlayer object and the MediaPlayer object after {@link #reset()} 
- *         is called. It is a programming error to invoke methods such 
- *         as {@link #getCurrentPosition()}, 
- *         {@link #getDuration()}, {@link #getVideoHeight()}, 
+ *         <li>There is a subtle but important difference between a newly constructed
+ *         MediaPlayer object and the MediaPlayer object after {@link #reset()}
+ *         is called. It is a programming error to invoke methods such
+ *         as {@link #getCurrentPosition()},
+ *         {@link #getDuration()}, {@link #getVideoHeight()},
  *         {@link #getVideoWidth()}, {@link #setAudioStreamType(int)},
  *         {@link #setLooping(boolean)},
- *         {@link #setVolume(float, float)}, {@link #pause()}, {@link #start()}, 
- *         {@link #stop()}, {@link #seekTo(int)}, {@link #prepare()} or 
- *         {@link #prepareAsync()} in the <em>Idle</em> state for both cases. If any of these 
- *         methods is called right after a MediaPlayer object is constructed, 
- *         the user supplied callback method OnErrorListener.onError() won't be 
+ *         {@link #setVolume(float, float)}, {@link #pause()}, {@link #start()},
+ *         {@link #stop()}, {@link #seekTo(int)}, {@link #prepare()} or
+ *         {@link #prepareAsync()} in the <em>Idle</em> state for both cases. If any of these
+ *         methods is called right after a MediaPlayer object is constructed,
+ *         the user supplied callback method OnErrorListener.onError() won't be
  *         called by the internal player engine and the object state remains
- *         unchanged; but if these methods are called right after {@link #reset()}, 
+ *         unchanged; but if these methods are called right after {@link #reset()},
  *         the user supplied callback method OnErrorListener.onError() will be
- *         invoked by the internal player engine and the object will be 
+ *         invoked by the internal player engine and the object will be
  *         transfered to the <em>Error</em> state. </li>
- *         <li>It is also recommended that once 
- *         a MediaPlayer object is no longer being used, call {@link #release()} immediately 
- *         so that resources used by the internal player engine associated with the 
+ *         <li>It is also recommended that once
+ *         a MediaPlayer object is no longer being used, call {@link #release()} immediately
+ *         so that resources used by the internal player engine associated with the
  *         MediaPlayer object can be released immediately. Resource may include
- *         singleton resources such as hardware acceleration components and 
+ *         singleton resources such as hardware acceleration components and
  *         failure to call {@link #release()} may cause subsequent instances of
  *         MediaPlayer objects to fallback to software implementations or fail
  *         altogether. Once the MediaPlayer
- *         object is in the <em>End</em> state, it can no longer be used and 
+ *         object is in the <em>End</em> state, it can no longer be used and
  *         there is no way to bring it back to any other state. </li>
- *         <li>Furthermore, 
- *         the MediaPlayer objects created using <code>new</code> is in the 
- *         <em>Idle</em> state, while those created with one 
- *         of the overloaded convenient <code>create</code> methods are <em>NOT</em> 
+ *         <li>Furthermore,
+ *         the MediaPlayer objects created using <code>new</code> is in the
+ *         <em>Idle</em> state, while those created with one
+ *         of the overloaded convenient <code>create</code> methods are <em>NOT</em>
  *         in the <em>Idle</em> state. In fact, the objects are in the <em>Prepared</em>
  *         state if the creation using <code>create</code> method is successful.
  *         </li>
@@ -114,23 +114,23 @@ import java.lang.ref.WeakReference;
  *         reasons, such as unsupported audio/video format, poorly interleaved
  *         audio/video, resolution too high, streaming timeout, and the like.
  *         Thus, error reporting and recovery is an important concern under
- *         these circumstances. Sometimes, due to programming errors, invoking a playback 
+ *         these circumstances. Sometimes, due to programming errors, invoking a playback
  *         control operation in an invalid state may also occur. Under all these
  *         error conditions, the internal player engine invokes a user supplied
  *         OnErrorListener.onError() method if an OnErrorListener has been
  *         registered beforehand via
  *         {@link #setOnErrorListener(android.media.MediaPlayer.OnErrorListener)}.
  *         <ul>
- *         <li>It is important to note that once an error occurs, the 
- *         MediaPlayer object enters the <em>Error</em> state (except as noted 
+ *         <li>It is important to note that once an error occurs, the
+ *         MediaPlayer object enters the <em>Error</em> state (except as noted
  *         above), even if an error listener has not been registered by the application.</li>
  *         <li>In order to reuse a MediaPlayer object that is in the <em>
- *         Error</em> state and recover from the error, 
+ *         Error</em> state and recover from the error,
  *         {@link #reset()} can be called to restore the object to its <em>Idle</em>
  *         state.</li>
- *         <li>It is good programming practice to have your application 
- *         register a OnErrorListener to look out for error notifications from 
- *         the internal player engine.</li> 
+ *         <li>It is good programming practice to have your application
+ *         register a OnErrorListener to look out for error notifications from
+ *         the internal player engine.</li>
  *         <li>IlleglStateException is
  *         thrown to prevent programming errors such as calling {@link #prepare()},
  *         {@link #prepareAsync()}, or one of the overloaded <code>setDataSource
@@ -141,28 +141,28 @@ import java.lang.ref.WeakReference;
  *         {@link #setDataSource(FileDescriptor)}, or
  *         {@link #setDataSource(String)}, or
  *         {@link #setDataSource(Context, Uri)}, or
- *         {@link #setDataSource(FileDescriptor, long, long)} transfers a 
+ *         {@link #setDataSource(FileDescriptor, long, long)} transfers a
  *         MediaPlayer object in the <em>Idle</em> state to the
  *         <em>Initialized</em> state.
  *         <ul>
- *         <li>An IllegalStateException is thrown if 
+ *         <li>An IllegalStateException is thrown if
  *         setDataSource() is called in any other state.</li>
- *         <li>It is good programming 
- *         practice to always look out for <code>IllegalArgumentException</code> 
+ *         <li>It is good programming
+ *         practice to always look out for <code>IllegalArgumentException</code>
  *         and <code>IOException</code> that may be thrown from the overloaded
  *         <code>setDataSource</code> methods.</li>
  *         </ul>
  *         </li>
  *     <li>A MediaPlayer object must first enter the <em>Prepared</em> state
- *         before playback can be started. 
+ *         before playback can be started.
  *         <ul>
  *         <li>There are two ways (synchronous vs.
  *         asynchronous) that the <em>Prepared</em> state can be reached:
  *         either a call to {@link #prepare()} (synchronous) which
  *         transfers the object to the <em>Prepared</em> state once the method call
  *         returns, or a call to {@link #prepareAsync()} (asynchronous) which
- *         first transfers the object to the <em>Preparing</em> state after the 
- *         call returns (which occurs almost right way) while the internal 
+ *         first transfers the object to the <em>Preparing</em> state after the
+ *         call returns (which occurs almost right way) while the internal
  *         player engine continues working on the rest of preparation work
  *         until the preparation work completes. When the preparation completes or when {@link #prepare()} call returns,
  *         the internal player engine then calls a user supplied callback method,
@@ -173,22 +173,22 @@ import java.lang.ref.WeakReference;
  *         the <em>Preparing</em> state is a transient state, and the behavior
  *         of calling any method with side effect while a MediaPlayer object is
  *         in the <em>Preparing</em> state is undefined.</li>
- *         <li>An IllegalStateException is 
- *         thrown if {@link #prepare()} or {@link #prepareAsync()} is called in 
- *         any other state.</li> 
- *         <li>While in the <em>Prepared</em> state, properties 
- *         such as audio/sound volume, screenOnWhilePlaying, looping can be 
+ *         <li>An IllegalStateException is
+ *         thrown if {@link #prepare()} or {@link #prepareAsync()} is called in
+ *         any other state.</li>
+ *         <li>While in the <em>Prepared</em> state, properties
+ *         such as audio/sound volume, screenOnWhilePlaying, looping can be
  *         adjusted by invoking the corresponding set methods.</li>
  *         </ul>
  *         </li>
- *     <li>To start the playback, {@link #start()} must be called. After 
+ *     <li>To start the playback, {@link #start()} must be called. After
  *         {@link #start()} returns successfully, the MediaPlayer object is in the
- *         <em>Started</em> state. {@link #isPlaying()} can be called to test 
+ *         <em>Started</em> state. {@link #isPlaying()} can be called to test
  *         whether the MediaPlayer object is in the <em>Started</em> state.
  *         <ul>
  *         <li>While in the <em>Started</em> state, the internal player engine calls
  *         a user supplied OnBufferingUpdateListener.onBufferingUpdate() callback
- *         method if a OnBufferingUpdateListener has been registered beforehand 
+ *         method if a OnBufferingUpdateListener has been registered beforehand
  *         via {@link #setOnBufferingUpdateListener(OnBufferingUpdateListener)}.
  *         This callback allows applications to keep track of the buffering status
  *         while streaming audio/video.</li>
@@ -197,44 +197,44 @@ import java.lang.ref.WeakReference;
  *         </ul>
  *         </li>
  *     <li>Playback can be paused and stopped, and the current playback position
- *         can be adjusted. Playback can be paused via {@link #pause()}. When the call to 
+ *         can be adjusted. Playback can be paused via {@link #pause()}. When the call to
  *         {@link #pause()} returns, the MediaPlayer object enters the
- *         <em>Paused</em> state. Note that the transition from the <em>Started</em> 
- *         state to the <em>Paused</em> state and vice versa happens 
- *         asynchronously in the player engine. It may take some time before 
- *         the state is updated in calls to {@link #isPlaying()}, and it can be 
+ *         <em>Paused</em> state. Note that the transition from the <em>Started</em>
+ *         state to the <em>Paused</em> state and vice versa happens
+ *         asynchronously in the player engine. It may take some time before
+ *         the state is updated in calls to {@link #isPlaying()}, and it can be
  *         a number of seconds in the case of streamed content.
  *         <ul>
- *         <li>Calling {@link #start()} to resume playback for a paused 
+ *         <li>Calling {@link #start()} to resume playback for a paused
  *         MediaPlayer object, and the resumed playback
- *         position is the same as where it was paused. When the call to 
+ *         position is the same as where it was paused. When the call to
  *         {@link #start()} returns, the paused MediaPlayer object goes back to
  *         the <em>Started</em> state.</li>
  *         <li>Calling {@link #pause()} has no effect on
  *         a MediaPlayer object that is already in the <em>Paused</em> state.</li>
  *         </ul>
  *         </li>
- *     <li>Calling  {@link #stop()} stops playback and causes a 
+ *     <li>Calling  {@link #stop()} stops playback and causes a
  *         MediaPlayer in the <em>Started</em>, <em>Paused</em>, <em>Prepared
- *         </em> or <em>PlaybackCompleted</em> state to enter the 
+ *         </em> or <em>PlaybackCompleted</em> state to enter the
  *         <em>Stopped</em> state.
  *         <ul>
- *         <li>Once in the <em>Stopped</em> state, playback cannot be started 
+ *         <li>Once in the <em>Stopped</em> state, playback cannot be started
  *         until {@link #prepare()} or {@link #prepareAsync()} are called to set
  *         the MediaPlayer object to the <em>Prepared</em> state again.</li>
- *         <li>Calling {@link #stop()} has no effect on a MediaPlayer 
+ *         <li>Calling {@link #stop()} has no effect on a MediaPlayer
  *         object that is already in the <em>Stopped</em> state.</li>
  *         </ul>
  *         </li>
- *     <li>The playback position can be adjusted with a call to 
- *         {@link #seekTo(int)}. 
+ *     <li>The playback position can be adjusted with a call to
+ *         {@link #seekTo(int)}.
  *         <ul>
  *         <li>Although the asynchronuous {@link #seekTo(int)}
  *         call returns right way, the actual seek operation may take a while to
- *         finish, especially for audio/video being streamed. When the actual 
- *         seek operation completes, the internal player engine calls a user 
+ *         finish, especially for audio/video being streamed. When the actual
+ *         seek operation completes, the internal player engine calls a user
  *         supplied OnSeekComplete.onSeekComplete() if an OnSeekCompleteListener
- *         has been registered beforehand via 
+ *         has been registered beforehand via
  *         {@link #setOnSeekCompleteListener(OnSeekCompleteListener)}.</li>
  *         <li>Please
  *         note that {@link #seekTo(int)} can also be called in the other states,
@@ -242,7 +242,7 @@ import java.lang.ref.WeakReference;
  *         </em> state.</li>
  *         <li>Furthermore, the actual current playback position
  *         can be retrieved with a call to {@link #getCurrentPosition()}, which
- *         is helpful for applications such as a Music player that need to keep 
+ *         is helpful for applications such as a Music player that need to keep
  *         track of the playback progress.</li>
  *         </ul>
  *         </li>
@@ -272,7 +272,7 @@ import java.lang.ref.WeakReference;
  *     <td>Invalid States </p></td>
  *     <td>Comments </p></td></tr>
  * <tr><td>getCurrentPosition </p></td>
- *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped, 
+ *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
  *         PlaybackCompleted} </p></td>
  *     <td>{Error}</p></td>
  *     <td>Successful invoke of this method in a valid state does not change the
@@ -282,45 +282,45 @@ import java.lang.ref.WeakReference;
  *     <td>{Prepared, Started, Paused, Stopped, PlaybackCompleted} </p></td>
  *     <td>{Idle, Initialized, Error} </p></td>
  *     <td>Successful invoke of this method in a valid state does not change the
- *         state. Calling this method in an invalid state transfers the object 
+ *         state. Calling this method in an invalid state transfers the object
  *         to the <em>Error</em> state. </p></td></tr>
  * <tr><td>getVideoHeight </p></td>
- *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped, 
+ *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
  *         PlaybackCompleted}</p></td>
  *     <td>{Error}</p></td>
  *     <td>Successful invoke of this method in a valid state does not change the
- *         state. Calling this method in an invalid state transfers the object 
+ *         state. Calling this method in an invalid state transfers the object
  *         to the <em>Error</em> state.  </p></td></tr>
  * <tr><td>getVideoWidth </p></td>
  *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
  *         PlaybackCompleted}</p></td>
  *     <td>{Error}</p></td>
- *     <td>Successful invoke of this method in a valid state does not change 
- *         the state. Calling this method in an invalid state transfers the 
+ *     <td>Successful invoke of this method in a valid state does not change
+ *         the state. Calling this method in an invalid state transfers the
  *         object to the <em>Error</em> state. </p></td></tr>
  * <tr><td>isPlaying </p></td>
- *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped, 
+ *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
  *          PlaybackCompleted}</p></td>
  *     <td>{Error}</p></td>
  *     <td>Successful invoke of this method in a valid state does not change
- *         the state. Calling this method in an invalid state transfers the 
+ *         the state. Calling this method in an invalid state transfers the
  *         object to the <em>Error</em> state. </p></td></tr>
  * <tr><td>pause </p></td>
  *     <td>{Started, Paused}</p></td>
  *     <td>{Idle, Initialized, Prepared, Stopped, PlaybackCompleted, Error}</p></td>
- *     <td>Successful invoke of this method in a valid state transfers the 
- *         object to the <em>Paused</em> state. Calling this method in an 
+ *     <td>Successful invoke of this method in a valid state transfers the
+ *         object to the <em>Paused</em> state. Calling this method in an
  *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
  * <tr><td>prepare </p></td>
  *     <td>{Initialized, Stopped} </p></td>
  *     <td>{Idle, Prepared, Started, Paused, PlaybackCompleted, Error} </p></td>
- *     <td>Successful invoke of this method in a valid state transfers the 
- *         object to the <em>Prepared</em> state. Calling this method in an 
+ *     <td>Successful invoke of this method in a valid state transfers the
+ *         object to the <em>Prepared</em> state. Calling this method in an
  *         invalid state throws an IllegalStateException.</p></td></tr>
  * <tr><td>prepareAsync </p></td>
  *     <td>{Initialized, Stopped} </p></td>
  *     <td>{Idle, Prepared, Started, Paused, PlaybackCompleted, Error} </p></td>
- *     <td>Successful invoke of this method in a valid state transfers the 
+ *     <td>Successful invoke of this method in a valid state transfers the
  *         object to the <em>Preparing</em> state. Calling this method in an
  *         invalid state throws an IllegalStateException.</p></td></tr>
  * <tr><td>release </p></td>
@@ -328,18 +328,18 @@ import java.lang.ref.WeakReference;
  *     <td>{} </p></td>
  *     <td>After {@link #release()}, the object is no longer available. </p></td></tr>
  * <tr><td>reset </p></td>
- *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped, 
+ *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
  *         PlaybackCompleted, Error}</p></td>
  *     <td>{}</p></td>
  *     <td>After {@link #reset()}, the object is like being just created.</p></td></tr>
  * <tr><td>seekTo </p></td>
  *     <td>{Prepared, Started, Paused, PlaybackCompleted} </p></td>
  *     <td>{Idle, Initialized, Stopped, Error}</p></td>
- *     <td>Successful invoke of this method in a valid state does not change 
- *         the state. Calling this method in an invalid state transfers the 
+ *     <td>Successful invoke of this method in a valid state does not change
+ *         the state. Calling this method in an invalid state transfers the
  *         object to the <em>Error</em> state. </p></td></tr>
  * <tr><td>setAudioStreamType </p></td>
- *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused, 
+ *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
  *          PlaybackCompleted}</p></td>
  *     <td>{Error}</p></td>
  *     <td>Successful invoke of this method does not change the state.</p></td></tr>
@@ -347,8 +347,8 @@ import java.lang.ref.WeakReference;
  *     <td>{Idle} </p></td>
  *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
  *          Error} </p></td>
- *     <td>Successful invoke of this method in a valid state transfers the 
- *         object to the <em>Initialized</em> state. Calling this method in an 
+ *     <td>Successful invoke of this method in a valid state transfers the
+ *         object to the <em>Initialized</em> state. Calling this method in an
  *         invalid state throws an IllegalStateException.</p></td></tr>
  * <tr><td>setDisplay </p></td>
  *     <td>any </p></td>
@@ -356,11 +356,11 @@ import java.lang.ref.WeakReference;
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
  * <tr><td>setLooping </p></td>
- *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused, 
+ *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
  *         PlaybackCompleted}</p></td>
  *     <td>{Error}</p></td>
- *     <td>Successful invoke of this method in a valid state does not change 
- *         the state. Calling this method in an 
+ *     <td>Successful invoke of this method in a valid state does not change
+ *         the state. Calling this method in an
  *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
  * <tr><td>isLooping </p></td>
  *     <td>any </p></td>
@@ -398,7 +398,7 @@ import java.lang.ref.WeakReference;
  *     <td>This method can be called in any state and calling it does not change
  *         the object state.  </p></td></tr>
  * <tr><td>setVolume </p></td>
- *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused, 
+ *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
  *          PlaybackCompleted}</p></td>
  *     <td>{Error}</p></td>
  *     <td>Successful invoke of this method does not change the state.
@@ -410,14 +410,14 @@ import java.lang.ref.WeakReference;
  * <tr><td>start </p></td>
  *     <td>{Prepared, Started, Paused, PlaybackCompleted}</p></td>
  *     <td>{Idle, Initialized, Stopped, Error}</p></td>
- *     <td>Successful invoke of this method in a valid state transfers the 
- *         object to the <em>Started</em> state. Calling this method in an 
+ *     <td>Successful invoke of this method in a valid state transfers the
+ *         object to the <em>Started</em> state. Calling this method in an
  *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
  * <tr><td>stop </p></td>
  *     <td>{Prepared, Started, Stopped, Paused, PlaybackCompleted}</p></td>
  *     <td>{Idle, Initialized, Error}</p></td>
- *     <td>Successful invoke of this method in a valid state transfers the 
- *         object to the <em>Stopped</em> state. Calling this method in an 
+ *     <td>Successful invoke of this method in a valid state transfers the
+ *         object to the <em>Stopped</em> state. Calling this method in an
  *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
  * </table>
  *
@@ -429,13 +429,13 @@ import java.lang.ref.WeakReference;
  *
  */
 public class MediaPlayer
-{    
+{
     static {
         System.loadLibrary("media_jni");
     }
-    
+
     private final static String TAG = "MediaPlayer";
-    
+
     private int mNativeContext; // accessed by native methods
     private int mListenerContext; // accessed by native methods
     private Surface mSurface; // accessed by native methods
@@ -444,16 +444,16 @@ public class MediaPlayer
     private PowerManager.WakeLock mWakeLock = null;
     private boolean mScreenOnWhilePlaying;
     private boolean mStayAwake;
-    
+
     /**
-     * Default constructor. Consider using one of the create() methods for 
+     * Default constructor. Consider using one of the create() methods for
      * synchronously instantiating a MediaPlayer from a Uri or resource.
      * <p>When done with the MediaPlayer, you should call  {@link #release()},
      * to free the resources. If not released, too many MediaPlayer instances may
      * result in an exception.</p>
      */
     public MediaPlayer() {
-   
+
         Looper looper;
         if ((looper = Looper.myLooper()) != null) {
             mEventHandler = new EventHandler(this, looper);
@@ -468,17 +468,27 @@ public class MediaPlayer
          */
         native_setup(new WeakReference<MediaPlayer>(this));
     }
-  
+
+    /*
+     * Update the MediaPlayer ISurface. Call after updating mSurface.
+     */
+    private native void _setVideoSurface();
+
     /**
      * Sets the SurfaceHolder to use for displaying the video portion of the media.
      * This call is optional. Not calling it when playing back a video will
      * result in only the audio track being played.
-     * 
+     *
      * @param sh the SurfaceHolder to use for video display
      */
     public void setDisplay(SurfaceHolder sh) {
         mSurfaceHolder = sh;
-        mSurface = sh.getSurface();
+        if (sh != null) {
+            mSurface = sh.getSurface();
+        } else {
+            mSurface = null;
+        }
+        _setVideoSurface();
         updateSurfaceScreenOn();
     }
 
@@ -488,29 +498,29 @@ public class MediaPlayer
      * <p>When done with the MediaPlayer, you should call  {@link #release()},
      * to free the resources. If not released, too many MediaPlayer instances will
      * result in an exception.</p>
-     * 
-     * @param context the Context to use 
+     *
+     * @param context the Context to use
      * @param uri the Uri from which to get the datasource
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, Uri uri) {
         return create (context, uri, null);
     }
-    
+
     /**
      * Convenience method to create a MediaPlayer for a given Uri.
      * On success, {@link #prepare()} will already have been called and must not be called again.
      * <p>When done with the MediaPlayer, you should call  {@link #release()},
      * to free the resources. If not released, too many MediaPlayer instances will
      * result in an exception.</p>
-     * 
-     * @param context the Context to use 
+     *
+     * @param context the Context to use
      * @param uri the Uri from which to get the datasource
      * @param holder the SurfaceHolder to use for displaying the video
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, Uri uri, SurfaceHolder holder) {
-        
+
         try {
             MediaPlayer mp = new MediaPlayer();
             mp.setDataSource(context, uri);
@@ -539,9 +549,9 @@ public class MediaPlayer
      * <p>When done with the MediaPlayer, you should call  {@link #release()},
      * to free the resources. If not released, too many MediaPlayer instances will
      * result in an exception.</p>
-     * 
-     * @param context the Context to use 
-     * @param resid the raw resource id (<var>R.raw.&lt;something></var>) for 
+     *
+     * @param context the Context to use
+     * @param resid the raw resource id (<var>R.raw.&lt;something></var>) for
      *              the resource to use as the datasource
      * @return a MediaPlayer object, or null if creation failed
      */
@@ -567,17 +577,17 @@ public class MediaPlayer
         }
         return null;
     }
-    
+
     /**
      * Sets the data source as a content Uri.
-     * 
+     *
      * @param context the Context to use when resolving the Uri
      * @param uri the Content URI of the data you want to play
      * @throws IllegalStateException if it is called in an invalid state
      */
     public void setDataSource(Context context, Uri uri)
         throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
-        
+
         String scheme = uri.getScheme();
         if(scheme == null || scheme.equals("file")) {
             setDataSource(uri.getPath());
@@ -607,13 +617,14 @@ public class MediaPlayer
                 fd.close();
             }
         }
+        Log.d(TAG, "Couldn't open file on client side, trying server side");
         setDataSource(uri.toString());
         return;
     }
 
     /**
      * Sets the data source (file-path or http/rtsp URL) to use.
-     * 
+     *
      * @param path the path of the file, or the http/rtsp URL of the stream you want to play
      * @throws IllegalStateException if it is called in an invalid state
      */
@@ -622,57 +633,57 @@ public class MediaPlayer
     /**
      * Sets the data source (FileDescriptor) to use. It is the caller's responsibility
      * to close the file descriptor. It is safe to do so as soon as this call returns.
-     * 
+     *
      * @param fd the FileDescriptor for the file you want to play
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public void setDataSource(FileDescriptor fd) 
+    public void setDataSource(FileDescriptor fd)
             throws IOException, IllegalArgumentException, IllegalStateException {
         // intentionally less than LONG_MAX
         setDataSource(fd, 0, 0x7ffffffffffffffL);
     }
-    
+
     /**
      * Sets the data source (FileDescriptor) to use.  It is the caller's responsibility
      * to close the file descriptor. It is safe to do so as soon as this call returns.
-     * 
+     *
      * @param fd the FileDescriptor for the file you want to play
      * @param offset the offset into the file where the data to be played starts, in bytes
      * @param length the length in bytes of the data to be played
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public native void setDataSource(FileDescriptor fd, long offset, long length) 
+    public native void setDataSource(FileDescriptor fd, long offset, long length)
             throws IOException, IllegalArgumentException, IllegalStateException;
 
     /**
      * Prepares the player for playback, synchronously.
-     * 
+     *
      * After setting the datasource and the display surface, you need to either
      * call prepare() or prepareAsync(). For files, it is OK to call prepare(),
      * which blocks until MediaPlayer is ready for playback.
-     * 
+     *
      * @throws IllegalStateException if it is called in an invalid state
      */
     public native void prepare() throws IOException, IllegalStateException;
-    
+
     /**
      * Prepares the player for playback, asynchronously.
-     * 
+     *
      * After setting the datasource and the display surface, you need to either
      * call prepare() or prepareAsync(). For streams, you should call prepareAsync(),
      * which returns immediately, rather than blocking until enough data has been
      * buffered.
-     * 
+     *
      * @throws IllegalStateException if it is called in an invalid state
      */
     public native void prepareAsync() throws IllegalStateException;
-    
+
     /**
      * Starts or resumes playback. If playback had previously been paused,
      * playback will continue from where it was paused. If playback had
      * been stopped, or never started before, playback will start at the
      * beginning.
-     * 
+     *
      * @throws IllegalStateException if it is called in an invalid state
      */
     public  void start() throws IllegalStateException {
@@ -681,10 +692,10 @@ public class MediaPlayer
     }
 
     private native void _start() throws IllegalStateException;
-    
+
     /**
-     * Stops playback after playback has been stopped or paused. 
-     * 
+     * Stops playback after playback has been stopped or paused.
+     *
      * @throws IllegalStateException if the internal player engine has not been
      * initialized.
      */
@@ -694,10 +705,10 @@ public class MediaPlayer
     }
 
     private native void _stop() throws IllegalStateException;
-    
+
     /**
      * Pauses playback. Call start() to resume.
-     * 
+     *
      * @throws IllegalStateException if the internal player engine has not been
      * initialized.
      */
@@ -707,20 +718,20 @@ public class MediaPlayer
     }
 
     private native void _pause() throws IllegalStateException;
-    
+
     /**
      * Set the low-level power management behavior for this MediaPlayer.  This
      * can be used when the MediaPlayer is not playing through a SurfaceHolder
      * set with {@link #setDisplay(SurfaceHolder)} and thus can use the
      * high-level {@link #setScreenOnWhilePlaying(boolean)} feature.
-     * 
+     *
      * <p>This function has the MediaPlayer access the low-level power manager
      * service to control the device's power usage while playing is occurring.
      * The parameter is a combination of {@link android.os.PowerManager} wake flags.
      * Use of this method requires {@link android.Manifest.permission#WAKE_LOCK}
      * permission.
      * By default, no attempt is made to keep the device awake during playback.
-     * 
+     *
      * @param context the Context to use
      * @param mode    the power/wake mode to set
      * @see android.os.PowerManager
@@ -742,14 +753,14 @@ public class MediaPlayer
             mWakeLock.acquire();
         }
     }
-    
+
     /**
      * Control whether we should use the attached SurfaceHolder to keep the
      * screen on while video playback is occurring.  This is the preferred
      * method over {@link #setWakeMode} where possible, since it doesn't
      * require that the application have permission for low-level wake lock
      * access.
-     * 
+     *
      * @param screenOn Supply true to keep the screen on, false to allow it
      * to turn off.
      */
@@ -759,7 +770,7 @@ public class MediaPlayer
             updateSurfaceScreenOn();
         }
     }
-    
+
     private void stayAwake(boolean awake) {
         if (mWakeLock != null) {
             if (awake && !mWakeLock.isHeld()) {
@@ -771,61 +782,61 @@ public class MediaPlayer
         mStayAwake = awake;
         updateSurfaceScreenOn();
     }
-    
+
     private void updateSurfaceScreenOn() {
         if (mSurfaceHolder != null) {
             mSurfaceHolder.setKeepScreenOn(mScreenOnWhilePlaying && mStayAwake);
         }
     }
-    
+
     /**
      * Returns the width of the video.
-     * 
+     *
      * @return the width of the video, or 0 if there is no video,
      * no display surface was set, or prepare()/prepareAsync()
      * have not completed yet
      */
     public native int getVideoWidth();
-    
+
     /**
      * Returns the height of the video.
-     * 
+     *
      * @return the height of the video, or 0 if there is no video,
      * no display surface was set, or prepare()/prepareAsync()
      * have not completed yet
      */
     public native int getVideoHeight();
-    
+
     /**
      * Checks whether the MediaPlayer is playing.
-     * 
+     *
      * @return true if currently playing, false otherwise
      */
     public native boolean isPlaying();
-    
+
     /**
      * Seeks to specified time position.
-     * 
+     *
      * @param msec the offset in milliseconds from the start to seek to
      * @throws IllegalStateException if the internal player engine has not been
      * initialized
      */
     public native void seekTo(int msec) throws IllegalStateException;
-    
+
     /**
      * Gets the current playback position.
-     * 
+     *
      * @return the current position in milliseconds
      */
     public native int getCurrentPosition();
-    
+
     /**
      * Gets the duration of the file.
-     * 
+     *
      * @return the duration in milliseconds
      */
     public native int getDuration();
-    
+
     /**
      * Releases resources associated with this MediaPlayer object.
      * It is considered good practice to call this method when you're
@@ -845,7 +856,7 @@ public class MediaPlayer
     }
 
     private native void _release();
-    
+
     /**
      * Resets the MediaPlayer to its uninitialized state. After calling
      * this method, you will have to initialize it again by setting the
@@ -857,13 +868,13 @@ public class MediaPlayer
         // make sure none of the listeners get called anymore
         mEventHandler.removeCallbacksAndMessages(null);
     }
-    
+
     private native void _reset();
-    
+
     /**
      * Sets the audio stream type for this MediaPlayer. See {@link AudioManager}
      * for a list of stream types.
-     *  
+     *
      * @param streamtype the audio stream type
      * @see android.media.AudioManager
      */
@@ -871,20 +882,20 @@ public class MediaPlayer
 
     /**
      * Sets the player to be looping or non-looping.
-     * 
+     *
      * @param looping whether to loop or not
      */
     public native void setLooping(boolean looping);
 
     /**
      * Checks whether the MediaPlayer is looping or non-looping.
-     * 
+     *
      * @return true if the MediaPlayer is currently looping, false otherwise
      */
     public native boolean isLooping();
 
     /**
-     * Sets the volume on this player. 
+     * Sets the volume on this player.
      * This API is recommended for balancing the output of audio streams
      * within an application. Unless you are writing an application to
      * control user settings, this API should be used in preference to
@@ -903,7 +914,7 @@ public class MediaPlayer
      * @hide
      */
     public native Bitmap getFrameAt(int msec) throws IllegalStateException;
- 
+
     private native final void native_setup(Object mediaplayer_this);
     private native final void native_finalize();
     @Override
@@ -1026,7 +1037,7 @@ public class MediaPlayer
     {
         /**
          * Called when the media file is ready for playback.
-         * 
+         *
          * @param mp the MediaPlayer that is ready for playback
          */
         void onPrepared(MediaPlayer mp);
@@ -1053,7 +1064,7 @@ public class MediaPlayer
     {
         /**
          * Called when the end of a media source is reached during playback.
-         * 
+         *
          * @param mp the MediaPlayer that reached the end of the file
          */
         void onCompletion(MediaPlayer mp);
@@ -1080,14 +1091,14 @@ public class MediaPlayer
     {
         /**
          * Called to update status in buffering a media stream.
-         * 
+         *
          * @param mp      the MediaPlayer the update pertains to
          * @param percent the percentage (0-100) of the buffer
          *                that has been filled thus far
          */
         void onBufferingUpdate(MediaPlayer mp, int percent);
     }
-   
+
     /**
      * Register a callback to be invoked when the status of a network
      * stream's buffer has changed.
@@ -1100,7 +1111,7 @@ public class MediaPlayer
     }
 
     private OnBufferingUpdateListener mOnBufferingUpdateListener;
-    
+
     /**
      * Interface definition of a callback to be invoked indicating
      * the completion of a seek operation.
@@ -1109,23 +1120,23 @@ public class MediaPlayer
     {
         /**
          * Called to indicate the completion of a seek operation.
-         * 
+         *
          * @param mp the MediaPlayer that issued the seek operation
          */
         public void onSeekComplete(MediaPlayer mp);
     }
-    
+
     /**
      * Register a callback to be invoked when a seek operation has been
      * completed.
-     * 
+     *
      * @param listener the callback that will be run
      */
     public void setOnSeekCompleteListener(OnSeekCompleteListener listener)
     {
         mOnSeekCompleteListener = listener;
     }
-    
+
     private OnSeekCompleteListener mOnSeekCompleteListener;
 
     /**
@@ -1136,25 +1147,25 @@ public class MediaPlayer
     {
         /**
          * Called to indicate the video size
-         * 
+         *
          * @param mp        the MediaPlayer associated with this callback
          * @param width     the width of the video
          * @param height    the height of the video
          */
         public void onVideoSizeChanged(MediaPlayer mp, int width, int height);
     }
-    
+
     /**
      * Register a callback to be invoked when the video size is
      * known or updated.
-     * 
+     *
      * @param listener the callback that will be run
      */
     public void setOnVideoSizeChangedListener(OnVideoSizeChangedListener listener)
     {
         mOnVideoSizeChangedListener = listener;
     }
-    
+
     private OnVideoSizeChangedListener mOnVideoSizeChangedListener;
 
     /* Do not change these values without updating their counterparts
@@ -1166,11 +1177,11 @@ public class MediaPlayer
     public static final int MEDIA_ERROR_UNKNOWN = 1;
 
     /** Media server died. In this case, the application must release the
-     * MediaPlayer object and instantiate a new one. 
+     * MediaPlayer object and instantiate a new one.
      * @see android.media.MediaPlayer.OnErrorListener
      */
     public static final int MEDIA_ERROR_SERVER_DIED = 100;
-    
+
     /** The video is streamed and its container is not valid for progressive
      * playback i.e the video's index (e.g moov atom) is not at the start of the
      * file.
@@ -1187,7 +1198,7 @@ public class MediaPlayer
     {
         /**
          * Called to indicate an error.
-         * 
+         *
          * @param mp      the MediaPlayer the error pertains to
          * @param what    the type of error that has occurred:
          * <ul>
@@ -1202,11 +1213,11 @@ public class MediaPlayer
          */
         boolean onError(MediaPlayer mp, int what, int extra);
     }
-   
+
     /**
      * Register a callback to be invoked when an error has happened
      * during an asynchronous operation.
-     * 
+     *
      * @param listener the callback that will be run
      */
     public void setOnErrorListener(OnErrorListener listener)
@@ -1251,7 +1262,7 @@ public class MediaPlayer
     {
         /**
          * Called to indicate an info or a warning.
-         * 
+         *
          * @param mp      the MediaPlayer the info pertains to.
          * @param what    the type of info or warning.
          * <ul>
@@ -1271,7 +1282,7 @@ public class MediaPlayer
 
     /**
      * Register a callback to be invoked when an info/warning is available.
-     * 
+     *
      * @param listener the callback that will be run
      */
     public void setOnInfoListener(OnInfoListener listener)

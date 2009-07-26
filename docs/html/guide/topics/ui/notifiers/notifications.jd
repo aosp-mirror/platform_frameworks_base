@@ -1,0 +1,432 @@
+page.title=Creating Status Bar Notifications
+parent.title=Notifying the User
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Key classes</h2>
+    <ol>
+      <li>{@link android.app.Notification}</li>
+      <li>{@link android.app.NotificationManager}</li>
+    </ol>
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#Basics">The Basics</a></li>
+      <li><a href="#ManageYourNotifications">Managing your Notifications</a></li>
+      <li><a href="#CreateANotification">Creating a Notification</a>
+        <ol>
+          <li><a href="#Update">Updating the notification</a></li>
+          <li><a href="#Sound">Adding a sound</a></li>
+          <li><a href="#Vibration">Adding vibration</a></li>
+          <li><a href="#Lights">Adding flashing lights</a></li>
+          <li><a href="#More">More features</a></li>
+        </ol>
+      </li>
+      <li><a href="#CustomExpandedView">Creating a Custom Expanded View</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>A status bar notification adds an icon to the system's status bar 
+(with an optional ticker-text message) and an expanded message in the "Notifications" window.
+When the user selects the expanded message, Android fires an 
+{@link android.content.Intent} that is defined by the notification (usually to launch an 
+{@link android.app.Activity}).
+You can also configure the notification to alert the user with a sound, a vibration, and flashing
+lights on the device.</p>
+
+<p>A status bar notification should be used for any case in
+which a background Service needs to alert the user about an event that requires a response. A background Service 
+<strong>should never</strong> launch an Activity on its own in order to receive user interaction.
+The Service should instead create a status bar notification that will launch the Activity
+when selected by the user.</p>
+
+<p>The screenshot below shows the status bar with a notification icon on the left side.</p>
+<img src="{@docRoot}images/status_bar.png" alt="" />
+
+<p>The next screenshot shows the notification's expanded message in the "Notifications" window.
+The user can reveal the Notifications window by pulling down the status bar
+(or selecting <em>Notifications</em> from the Home options menu).</p>
+<img src="{@docRoot}images/notifications_window.png" alt="" />
+
+
+<h2 id="Basics">The Basics</h2>
+
+<p>An {@link android.app.Activity} or {@link android.app.Service} can initiate a status bar 
+notification. Because an Activity can perform actions only while it is
+active and in focus, you should create your status bar notifications from a 
+Service. This way, the notification can be created from the background, 
+while the user is using another application or
+while the device is asleep. To create a notification, you must use two
+classes: {@link android.app.Notification} and {@link android.app.NotificationManager}.</p>
+
+<p>Use an instance of the {@link android.app.Notification} class to define the properties of your 
+status bar notification, such as the status bar icon, the expanded message, and extra settings such 
+as a sound to play. The {@link android.app.NotificationManager} is an Android system service that 
+executes and manages all Notifications. You do not instantiate the NotificationManager. In order
+to give it your Notification, you must retrieve a reference to the NotificationManager with
+{@link android.app.Activity#getSystemService(String) getSystemService()} and 
+then, when you want to notify the user, pass it your Notification object with 
+{@link android.app.NotificationManager#notify(int,Notification) notify()}. </p>
+
+<p>To create a status bar notification:</p>
+<ol>
+  <li>Get a reference to the NotificationManager:
+<pre>
+String ns = Context.NOTIFICATION_SERVICE;
+NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
+</pre>
+  </li>
+  <li>Instantiate the Notification:
+<pre>
+int icon = R.drawable.notification_icon;
+CharSequence tickerText = "Hello";
+long when = System.currentTimeMillis();
+
+Notification notification = new Notification(icon, tickerText, when);
+</pre>
+  </li>
+  <li>Define the Notification's expanded message and Intent:
+<pre>
+Context context = getApplicationContext();
+CharSequence contentTitle = "My notification";
+CharSequence contentText = "Hello World!";
+Intent notificationIntent = new Intent(this, MyClass.class);
+PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+</pre>
+  </li>
+  <li>Pass the Notification to the NotificationManager:
+<pre>
+private static final int HELLO_ID = 1;
+
+mNotificationManager.notify(HELLO_ID, notification);
+</pre>
+  <p>That's it. Your user has now been notified.</p>
+  </li>
+</ol>
+
+
+<h2 id="ManageYourNotifications">Managing your Notifications</h2>
+
+<p>The {@link android.app.NotificationManager} is a system service that manages all
+notifications. You must retrieve a reference to it with the
+{@link android.app.Activity#getSystemService(String) getSystemService()} method. 
+For example:</p>
+<pre>
+String ns = Context.NOTIFICATION_SERVICE;
+NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
+</pre>
+
+<p>When you want to send your status bar notification, pass the Notification object
+to the NotificationManager with {@link android.app.NotificationManager#notify(int,Notification)}. 
+The first parameter is the unique ID for the Notification and the second is the Notification object.
+The ID uniquely identifies the Notification from within your
+application. This is necessary if you need to update the Notification or (if
+your application manages different kinds of Notifications) select the appropriate action
+when the user returns to your application via the Intent defined in the Notification.</p>
+
+<p>To clear the status bar notification when the user selects it from the Notifications
+window, add the "FLAG_AUTO_CANCEL" flag to your Notification object. You can also clear it
+manually with {@link android.app.NotificationManager#cancel(int)}, passing it the notification ID,
+or clear all your Notifications with {@link android.app.NotificationManager#cancelAll()}.</p>
+
+
+<h2 id="CreateANotification">Creating a Notification</h2>
+
+<p>A {@link android.app.Notification} object defines the details of the notification
+message that is displayed in the status bar and "Notifications" window, and any other
+alert settings, such as sounds and blinking lights.</p>
+
+<p>A status bar notification <em>requires</em> all of the following:</p>
+<ul>
+  <li>An icon for the status bar</li>
+  <li>A title and expanded message for the expanded view (unless you define a 
+    <a href="#CustomExpandedView">custom expanded view</a>)</li>
+  <li>A {@link android.app.PendingIntent}, to be fired when the notification is selected</li>
+</ul>
+<p>Optional settings for the status bar notification include:</p>
+<ul>
+  <li>A ticker-text message for the status bar</li>
+  <li>An alert sound</li>
+  <li>A vibrate setting</li>
+  <li>A flashing LED setting</li>
+</ul>
+
+<p>The starter-kit for a new Notification includes the 
+{@link android.app.Notification#Notification(int,CharSequence,long)} constructor and the 
+{@link android.app.Notification#setLatestEventInfo(Context,CharSequence,CharSequence,PendingIntent)} 
+method. These define all the required settings for a Notification. 
+The following snippet demonstrates a basic Notification setup:</p>
+<pre>
+int icon = R.drawable.notification_icon;        // icon from resources
+CharSequence tickerText = "Hello";              // ticker-text
+long when = System.currentTimeMillis();         // notification time
+Context context = getApplicationContext();      // application Context
+CharSequence contentTitle = "My notification";  // expanded message title
+CharSequence contentText = "Hello World!";      // expanded message text
+
+Intent notificationIntent = new Intent(this, MyClass.class);
+PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+// the next two lines initialize the Notification, using the configurations above
+Notification notification = new Notification(icon, tickerText, when);
+notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+</pre>
+
+
+<h3 id="Updating">Updating the notification</h3>
+
+<p>You can update the information in your status bar notification as events 
+continue to occur in your application. For example, when a new SMS text message arrives 
+before previous messages have been read, the Messaging application updates the existing 
+notification to display the total number of new messages received.
+This practice of updating an existing Notification is much better than adding new Notifications 
+to the NotificationManager because it avoids clutter in the Notifications window.</p>
+
+<p>Because each notification is uniquely identified
+by the NotificationManager with an integer ID, you can revise the notification by calling
+{@link android.app.Notification#setLatestEventInfo(Context,CharSequence,CharSequence,PendingIntent)
+setLatestEventInfo()} with new values, change some field values of the Notification, and then call
+{@link android.app.NotificationManager#notify(int,Notification) notify()} again.</p>
+
+<p>You can revise each property with the object member fields
+(except for the Context and the expanded message title and text). You should always 
+revise the text message when you update the notification by calling
+{@link android.app.Notification#setLatestEventInfo(Context,CharSequence,CharSequence,PendingIntent)
+setLatestEventInfo()} with new values for <var>contentTitle</var> and <var>contentText</var>. 
+Then call {@link android.app.NotificationManager#notify(int,Notification) notify()} to update the 
+notification. (Of course, if you've created a <a href="#CustomExpandedView">custom expanded 
+view</a>, then updating these title and text values has no effect.)</p>
+
+
+<h3 id="Sound">Adding a sound</h3>
+
+<p>You can alert the user with the default notification sound 
+(which is defined by the user) or with a sound specified by your application.</p>
+
+<p>To use the user's default sound, add "DEFAULT_SOUND" to the <var>defaults</var> field:</p>
+<pre>
+notification.defaults |= Notification.DEFAULT_SOUND;
+</pre>
+
+<p>To use a different sound with your notifications, pass a Uri reference to the
+<var>sound</var> field.
+The following example uses a known audio file saved to the device SD card:</p>
+<pre>
+notification.sound = Uri.parse("file:///sdcard/notification/ringer.mp3");
+</pre>
+
+<p>In the next example, the audio file is chosen from the internal 
+{@link android.provider.MediaStore.Audio.Media MediaStore}'s {@link android.content.ContentProvider}:</p>
+<pre>
+notification.sound = Uri.withAppendedPath(Audio.Media.INTERNAL_CONTENT_URI, "6");
+</pre>
+
+<p>In this case, the exact ID of the media file ("6") is known and appended to the content 
+{@link android.net.Uri}. If you don't know the exact ID, you must query all the
+media available in the MediaStore with a {@link android.content.ContentResolver}. 
+See the <a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>
+documentation for more information on using a ContentResolver.</p>
+
+<p>If you want the sound to continuously repeat until the user responds to the notification
+or the notification is cancelled, add "FLAG_INSISTENT" to the <var>flags</var> field.</p>
+
+<p class="note"><strong>Note:</strong> If the <var>defaults</var> field includes 
+"DEFAULT_SOUND", then the default sound overrides any sound defined by the <var>sound</var> field.</p>
+
+
+<h3 id="Vibration">Adding vibration</h3>
+
+<p>You can alert the user with the the default 
+vibration pattern or with a vibration pattern defined by your application.</p>
+
+<p>To use the default pattern, add "DEFAULT_VIBRATE" to the <var>defaults</var> field:</p>
+<pre>
+notification.defaults |= Notification.DEFAULT_VIBRATE;
+</pre>
+
+<p>To define your own vibration pattern, pass an array of <em>long</em> values to the
+<var>vibrate</var> field:</p>
+<pre>
+long[] vibrate = {0,100,200,300};
+notification.vibrate = vibrate;
+</pre>
+
+<p>The long array defines the alternating pattern for the length of vibration off and on
+(in milliseconds). The first value is how long to wait (off) before beginning, the second 
+value is the length of the first vibration, the third is the next length off, and so on. 
+The pattern can be as long as you like, but it can't be set to repeat.
+</p>
+
+<p class="note"><strong>Note:</strong> If the <var>defaults</var> field includes 
+"DEFAULT_VIBRATE", then the default vibration overrides any vibration defined by the 
+<var>vibrate</var> field.</p>
+
+
+<h3 id="Lights">Adding flashing lights</h3>
+
+<p>To alert the user by flashing LED lights, you can implement the default 
+light pattern (if available), or define your own color and pattern for the lights.</p>
+
+<p>To use the default light setting, add "DEFAULT_LIGHTS" to the <var>defaults</var> field:</p>
+<pre>
+notification.defaults |= Notification.DEFAULT_LIGHTS;
+</pre>
+
+<p>To define your own color and pattern, define a value for the <var>ledARGB</var> field
+(for the color), the <var>ledOffMS</var> field (length of time, in milliseconds, to 
+keep the light off), the <var>ledOnMS</var> (length of time, in milliseconds, to keep the light on), 
+and also add "FLAG_SHOW_LIGHTS" to the <var>flags</var> field:</p>
+<pre>
+notification.ledARGB = 0xff00ff00;
+notification.ledOnMS = 300;
+notification.ledOffMS = 1000;
+notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+</pre>
+
+<p>In this example, the green light repeatedly flashes on for 300 milliseconds and 
+turns off for one second. Not every color in the spectrum is supported by the 
+device LEDs, and not every device supports the same colors, so the hardware 
+estimates to the best of its ability. Green is the most common notification color.</p>
+
+
+<h3 id="More">More features</h3>
+
+<p>You can add several more features to your notifications
+using Notification fields and flags. Some useful features include the following:</p>
+
+<dl>
+  <dt>"FLAG_AUTO_CANCEL" flag</dt>
+  <dd>Add this to the <var>flags</var> field to automatically cancel the notification
+  after it is selected from the Notifications window.</dd>
+  <dt>"FLAG_INSISTENT" flag</dt>
+  <dd>Add this to the <var>flags</var> field to repeat the audio until the
+  user responds.</dd>
+  <dt>"FLAG_ONGOING_EVENT" flag</dt>
+  <dd>Add this to the <var>flags</var> field to group the notification under the "Ongoing"
+  title in the Notifications window. This indicates that the application is on-going &mdash;
+  its processes is still running in the background, even when the application is not 
+  visible (such as with music or a phone call).</dd>
+  <dt>"FLAG_NO_CLEAR" flag</dt>
+  <dd>Add this to the <var>flags</var> field to indicate that the notification should 
+  <em>not</em> be cleared by the "Clear notifications" button. This is particularly useful if 
+  your notification is on-going.</dd>
+  <dt><var>number</var> field</dt>
+  <dd>This value indicates the current number of events represented by the notification.
+  The appropriate number is overlayed on top of the status bar icon.
+  If you intend to use this field, then you must start with "1" when the Notification is first
+  created. (If you change the value from zero to anything greater during an update, the number
+  is not shown.)</dd>
+  <dt><var>iconLevel</var> field</dt>
+  <dd>This value indicates the current level of a 
+  {@link android.graphics.drawable.LevelListDrawable} that is used for the notification icon.
+  You can animate the icon in the status bar by changing this value to correlate with the 
+  drawable's defined in a LevelListDrawable. See the {@link android.graphics.drawable.LevelListDrawable}
+  reference for more information.</dd>
+</dl>
+
+<p>See the {@link android.app.Notification} class reference for more information about additional 
+features that you can customize for your application.</p>
+
+
+<h2 id="CustomExpandedView">Creating a Custom Expanded View</h2>
+
+<img src="{@docRoot}images/custom_message.png" alt="" style="float:right;" />
+
+<p>By default, the expanded view used in the "Notifications" window includes a basic title and text 
+message. These are defined by the <var>contentTitle</var> and <var>contentText</var>
+parameters of the {@link android.app.Notification#setLatestEventInfo(Context,CharSequence,CharSequence,PendingIntent)
+setLatestEventInfo()} method. However, you can also define a custom layout for the expanded view using 
+{@link android.widget.RemoteViews}. The screenshot to the right shows an example of a
+custom expanded view that uses an ImageView and TextView in a LinearLayout.</p>
+
+<p>To define your own layout for the expanded message,
+instantiate a {@link android.widget.RemoteViews} object and
+pass it to the <var>contentView</var> field of your Notification. Pass the
+{@link android.app.PendingIntent} to the <var>contentIntent</var> field.</p>
+
+<p>Creating a custom expanded view is best understood with an example:</p>
+
+<ol>
+  <li>Create the XML layout for the expanded view.
+    For example, create a layout file called <code>custom_notification_layout.xml</code> and 
+    build it like so:
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:padding="3dp"
+              >
+    &lt;ImageView android:id="@+id/image"
+              android:layout_width="wrap_content"
+              android:layout_height="fill_parent"
+              android:layout_marginRight="10dp"
+              />
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="fill_parent"
+              android:textColor="#000"
+              />
+&lt;/LinearLayout>
+</pre>
+
+    <p>This layout is used for the expanded view,
+    but the content of the ImageView and TextView still needs to be defined by the applicaiton.
+    RemoteViews offers some convenient methods that allow you to define this content...</p>
+  </li>
+
+  <li>In the application code, use the RemoveViews 
+    methods to define the image and text. Then pass the RemoteViews object to the <var>contentView</var>
+    field of the Notification, as shown in this example:
+<pre>
+RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification_layout);
+contentView.setImageViewResource(R.id.image, R.drawable.notification_image);
+contentView.setTextViewText(R.id.text, "Hello, this message is in a custom expanded view");
+notification.contentView = contentView;
+</pre>
+
+    <p>As shown here, pass the applicaiton's package name and the layout 
+    resource ID to the RemoteViews constructor. Then, define the content for the ImageView and TextView,
+    using the {@link android.widget.RemoteViews#setImageViewResource(int, int) setImageViewResource()}
+    and {@link android.widget.RemoteViews#setTextViewText(int, CharSequence) setTextViewText()}.
+    In each case, pass the reference ID of the appropriate View object that you want to set, along with
+    the value for that View. Finally, the RemoteViews object is passed to the Notification in the 
+    <var>contentView</var> field.</p>
+  </li>
+
+  <li>Because you don't need the
+    {@link android.app.Notification#setLatestEventInfo(Context,CharSequence,CharSequence,PendingIntent)
+    setLatestEventInfo()} method when using a custom view, you must define the Intent for the Notification
+    with the <var>contentIntent</var> field, as in this example:
+<pre>
+Intent notificationIntent = new Intent(this, MyClass.class);
+PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+notification.contentIntent = contentIntent;
+</pre>
+  </li>
+  
+  <li>The notification can now be sent as usual:
+    <pre>mNotificationManager.notify(CUSTOM_VIEW_ID, notification);</pre>
+  </li>
+</ol>
+
+
+<p>The RemoteViews class also includes methods that you can use to easily add a 
+{@link android.widget.Chronometer} or {@link android.widget.ProgressBar} 
+in your notification's expanded view. For more information about creating custom layouts with 
+RemoteViews, refer to the {@link android.widget.RemoteViews} class reference.</p>
+
+<p class="warning"><strong>Note:</strong>
+When creating a custom expanded view, you must take special care to ensure that your 
+custom layout functions properly in different device orientations and resolutions. While this 
+advice applies to all View layouts created on Android, it is especially important in this case
+because your layout real estate is very restricted. So don't make your custom layout too 
+complex and be sure to test it in various configurations.</p>
+
+
+
+

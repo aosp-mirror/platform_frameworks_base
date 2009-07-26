@@ -1,6 +1,7 @@
 #include "Perforce.h"
 #include "log.h"
 #include <string.h>
+#include <cstdio>
 #include <stdlib.h>
 #include <sstream>
 #include <sys/types.h>

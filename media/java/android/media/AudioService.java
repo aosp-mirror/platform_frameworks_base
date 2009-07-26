@@ -100,6 +100,10 @@ public class AudioService extends IAudioService.Stub {
     private int[] mRoutes = new int[AudioSystem.NUM_MODES];
     private Object mSettingsLock = new Object();
     private boolean mMediaServerOk;
+    private boolean mSpeakerIsOn;
+    private boolean mBluetoothScoIsConnected;
+    private boolean mHeadsetIsConnected;
+    private boolean mBluetoothA2dpIsConnected;
 
     private SoundPool mSoundPool;
     private Object mSoundEffectsLock = new Object();
@@ -159,6 +163,9 @@ public class AudioService extends IAudioService.Stub {
      */
     private int mRingerMode;
 
+    /** @see System#MODE_RINGER_STREAMS_AFFECTED */
+    private int mRingerModeAffectedStreams;
+
     /** @see System#MUTE_STREAMS_AFFECTED */
     private int mMuteAffectedStreams;
 
@@ -189,6 +196,10 @@ public class AudioService extends IAudioService.Stub {
         mMediaServerOk = true;
         AudioSystem.setErrorCallback(mAudioSystemCallback);
         loadSoundEffects();
+        mSpeakerIsOn = false;
+        mBluetoothScoIsConnected = false;
+        mHeadsetIsConnected = false;
+        mBluetoothA2dpIsConnected = false;
     }
 
     private void createAudioSystemThread() {
@@ -277,6 +288,10 @@ public class AudioService extends IAudioService.Stub {
         mRingerMode = System.getInt(cr, System.MODE_RINGER, AudioManager.RINGER_MODE_NORMAL);
 
         mVibrateSetting = System.getInt(cr, System.VIBRATE_ON, 0);
+
+        mRingerModeAffectedStreams = Settings.System.getInt(cr,
+                Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                ((1 << AudioManager.STREAM_RING)|(1 << AudioManager.STREAM_NOTIFICATION)|(1 << AudioManager.STREAM_SYSTEM)));
 
         mMuteAffectedStreams = System.getInt(cr,
                 System.MUTE_STREAMS_AFFECTED,
@@ -391,7 +406,7 @@ public class AudioService extends IAudioService.Stub {
         ensureValidStreamType(streamType);
         syncRingerAndNotificationStreamVolume(streamType, index, false);
 
-        setStreamVolumeInt(streamType, index, false);
+        setStreamVolumeInt(streamType, index, false, true);
 
         // UI, etc.
         mVolumePanel.postVolumeChanged(streamType, flags);
@@ -429,7 +444,7 @@ public class AudioService extends IAudioService.Stub {
             }
             if (streamType == AudioManager.STREAM_RING) {
                 // One-off to sync notification volume to ringer volume
-                setStreamVolumeInt(AudioManager.STREAM_NOTIFICATION, index, force);
+                setStreamVolumeInt(AudioManager.STREAM_NOTIFICATION, index, force, true);
             }
         }
     }
@@ -443,10 +458,11 @@ public class AudioService extends IAudioService.Stub {
      * @param index Desired volume index of the stream
      * @param force If true, set the volume even if the desired volume is same
      * as the current volume.
+     * @param lastAudible If true, stores new index as last audible one
      */
-    private void setStreamVolumeInt(int streamType, int index, boolean force) {
+    private void setStreamVolumeInt(int streamType, int index, boolean force, boolean lastAudible) {
         VolumeStreamState streamState = mStreamStates[streamType];
-        if (streamState.setIndex(index) || force) {
+        if (streamState.setIndex(index, lastAudible) || force) {
             // Post message to set system volume (it in turn will post a message
             // to persist). Do not change volume if stream is muted.
             if (streamState.muteCount() == 0) {
@@ -509,13 +525,20 @@ public class AudioService extends IAudioService.Stub {
                 if (!isStreamAffectedByRingerMode(streamType)) continue;
                 // Bring back last audible volume
                 setStreamVolumeInt(streamType, mStreamStates[streamType].mLastAudibleIndex,
-                                   false);
+                                   false, false);
             }
         } else {
             for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
-                if (!isStreamAffectedByRingerMode(streamType)) continue;
-                // Either silent or vibrate, either way volume is 0
-                setStreamVolumeInt(streamType, 0, false);
+                if (isStreamAffectedByRingerMode(streamType)) {
+                    // Either silent or vibrate, either way volume is 0
+                    setStreamVolumeInt(streamType, 0, false, false);
+                } else {
+                    // restore stream volume in the case the stream changed from affected
+                    // to non affected by ringer mode. Does not arm to do it for streams that
+                    // are not affected as well.
+                    setStreamVolumeInt(streamType, mStreamStates[streamType].mLastAudibleIndex,
+                            false, false);
+                }
             }
         }
         
@@ -606,13 +629,14 @@ public class AudioService extends IAudioService.Stub {
         }
         synchronized (mSettingsLock) {
             if (mode != mMode) {
-                AudioSystem.setMode(mode);
-                mMode = mode;
+                if (AudioSystem.setMode(mode) == AudioSystem.AUDIO_STATUS_OK) {
+                    mMode = mode;
+                }
             }
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
             int index = mStreamStates[streamType].mIndex;
             syncRingerAndNotificationStreamVolume(streamType, index, true);
-            setStreamVolumeInt(streamType, index, true);
+            setStreamVolumeInt(streamType, index, true, true);
         }
     }
 
@@ -623,18 +647,167 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#setRouting(int, int, int) */
     public void setRouting(int mode, int routes, int mask) {
+        int incallMask = 0;
+        int ringtoneMask = 0;
+        int normalMask = 0;
+
         if (!checkAudioSettingsPermission("setRouting()")) {
             return;
         }
         synchronized (mSettingsLock) {
-            if ((mRoutes[mode] & mask) != (routes & mask)) {
-                AudioSystem.setRouting(mode, routes, mask);
-                mRoutes[mode] = (mRoutes[mode] & ~mask) | (routes & mask);
+            // Temporary fix for issue #1713090 until audio routing is refactored in eclair release.
+            // mode AudioSystem.MODE_INVALID is used only by the following AudioManager methods:
+            // setWiredHeadsetOn(), setBluetoothA2dpOn(), setBluetoothScoOn() and setSpeakerphoneOn().
+            // If applications are using AudioManager.setRouting() that is now deprecated, the routing
+            // command will be ignored.
+            if (mode == AudioSystem.MODE_INVALID) {
+                switch (mask) {
+                case AudioSystem.ROUTE_SPEAKER:
+                    // handle setSpeakerphoneOn()
+                    if (routes != 0 && !mSpeakerIsOn) {
+                        mSpeakerIsOn = true;
+                        mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_SPEAKER;
+                        incallMask = AudioSystem.ROUTE_ALL;
+                    } else if (routes == 0 && mSpeakerIsOn) {
+                        mSpeakerIsOn = false;
+                        if (mBluetoothScoIsConnected) {
+                            mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_BLUETOOTH_SCO;
+                        } else if (mHeadsetIsConnected) {
+                            mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_HEADSET;
+                        } else {
+                            mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_EARPIECE;
+                        }
+                        incallMask = AudioSystem.ROUTE_ALL;
+                    }
+                    break;
+
+                case AudioSystem.ROUTE_BLUETOOTH_SCO:
+                    // handle setBluetoothScoOn()
+                    if (routes != 0 && !mBluetoothScoIsConnected) {
+                        mBluetoothScoIsConnected = true;
+                        mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_BLUETOOTH_SCO;
+                        mRoutes[AudioSystem.MODE_RINGTONE] = (mRoutes[AudioSystem.MODE_RINGTONE] & AudioSystem.ROUTE_BLUETOOTH_A2DP) |
+                                                              AudioSystem.ROUTE_BLUETOOTH_SCO;
+                        mRoutes[AudioSystem.MODE_NORMAL] = (mRoutes[AudioSystem.MODE_NORMAL] & AudioSystem.ROUTE_BLUETOOTH_A2DP) |
+                                                            AudioSystem.ROUTE_BLUETOOTH_SCO;
+                        incallMask = AudioSystem.ROUTE_ALL;
+                        // A2DP has higher priority than SCO headset, so headset connect/disconnect events
+                        // should not affect A2DP routing
+                        ringtoneMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                        normalMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                    } else if (routes == 0 && mBluetoothScoIsConnected) {
+                        mBluetoothScoIsConnected = false;
+                        if (mHeadsetIsConnected) {
+                            mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_HEADSET;
+                            mRoutes[AudioSystem.MODE_RINGTONE] = (mRoutes[AudioSystem.MODE_RINGTONE] & AudioSystem.ROUTE_BLUETOOTH_A2DP) |
+                                                                 (AudioSystem.ROUTE_HEADSET|AudioSystem.ROUTE_SPEAKER);
+                            mRoutes[AudioSystem.MODE_NORMAL] = (mRoutes[AudioSystem.MODE_NORMAL] & AudioSystem.ROUTE_BLUETOOTH_A2DP) |
+                                                               AudioSystem.ROUTE_HEADSET;
+                        } else {
+                            if (mSpeakerIsOn) {
+                                mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_SPEAKER;
+                            } else {
+                                mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_EARPIECE;
+                            }
+                            mRoutes[AudioSystem.MODE_RINGTONE] = (mRoutes[AudioSystem.MODE_RINGTONE] & AudioSystem.ROUTE_BLUETOOTH_A2DP) |
+                                                                 AudioSystem.ROUTE_SPEAKER;
+                            mRoutes[AudioSystem.MODE_NORMAL] = (mRoutes[AudioSystem.MODE_NORMAL] & AudioSystem.ROUTE_BLUETOOTH_A2DP) |
+                                                               AudioSystem.ROUTE_SPEAKER;
+                        }
+                        incallMask = AudioSystem.ROUTE_ALL;
+                        // A2DP has higher priority than SCO headset, so headset connect/disconnect events
+                        // should not affect A2DP routing
+                        ringtoneMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                        normalMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                    }
+                    break;
+
+                case AudioSystem.ROUTE_HEADSET:
+                    // handle setWiredHeadsetOn()
+                    if (routes != 0 && !mHeadsetIsConnected) {
+                        mHeadsetIsConnected = true;
+                        // do not act upon headset connection if bluetooth SCO is connected to match phone app behavior
+                        if (!mBluetoothScoIsConnected) {
+                            mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_HEADSET;
+                            mRoutes[AudioSystem.MODE_RINGTONE] = (mRoutes[AudioSystem.MODE_RINGTONE] & AudioSystem.ROUTE_BLUETOOTH_A2DP) |
+                                                                 (AudioSystem.ROUTE_HEADSET|AudioSystem.ROUTE_SPEAKER);
+                            mRoutes[AudioSystem.MODE_NORMAL] = (mRoutes[AudioSystem.MODE_NORMAL] & AudioSystem.ROUTE_BLUETOOTH_A2DP) |
+                                                               AudioSystem.ROUTE_HEADSET;
+                            incallMask = AudioSystem.ROUTE_ALL;
+                            // A2DP has higher priority than wired headset, so headset connect/disconnect events
+                            // should not affect A2DP routing
+                            ringtoneMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                            normalMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                        }
+                    } else if (routes == 0 && mHeadsetIsConnected) {
+                        mHeadsetIsConnected = false;
+                        // do not act upon headset disconnection if bluetooth SCO is connected to match phone app behavior
+                        if (!mBluetoothScoIsConnected) {
+                            if (mSpeakerIsOn) {
+                                mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_SPEAKER;
+                            } else {
+                                mRoutes[AudioSystem.MODE_IN_CALL] = AudioSystem.ROUTE_EARPIECE;
+                            }
+                            mRoutes[AudioSystem.MODE_RINGTONE] = (mRoutes[AudioSystem.MODE_RINGTONE] & AudioSystem.ROUTE_BLUETOOTH_A2DP) |
+                                                                 AudioSystem.ROUTE_SPEAKER;
+                            mRoutes[AudioSystem.MODE_NORMAL] = (mRoutes[AudioSystem.MODE_NORMAL] & AudioSystem.ROUTE_BLUETOOTH_A2DP) |
+                                                               AudioSystem.ROUTE_SPEAKER;
+
+                            incallMask = AudioSystem.ROUTE_ALL;
+                            // A2DP has higher priority than wired headset, so headset connect/disconnect events
+                            // should not affect A2DP routing
+                            ringtoneMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                            normalMask = AudioSystem.ROUTE_ALL & ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                        }
+                    }
+                    break;
+
+                case AudioSystem.ROUTE_BLUETOOTH_A2DP:
+                    // handle setBluetoothA2dpOn()
+                    if (routes != 0 && !mBluetoothA2dpIsConnected) {
+                        mBluetoothA2dpIsConnected = true;
+                        mRoutes[AudioSystem.MODE_RINGTONE] |= AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                        mRoutes[AudioSystem.MODE_NORMAL] |= AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                        // the audio flinger chooses A2DP as a higher priority,
+                        // so there is no need to disable other routes.
+                        ringtoneMask = AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                        normalMask = AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                    } else if (routes == 0 && mBluetoothA2dpIsConnected) {
+                        mBluetoothA2dpIsConnected = false;
+                        mRoutes[AudioSystem.MODE_RINGTONE] &= ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                        mRoutes[AudioSystem.MODE_NORMAL] &= ~AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                        // the audio flinger chooses A2DP as a higher priority,
+                        // so there is no need to disable other routes.
+                        ringtoneMask = AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                        normalMask = AudioSystem.ROUTE_BLUETOOTH_A2DP;
+                    }
+                    break;
+                }
+                
+                // incallMask is != 0 means we must apply ne routing to MODE_IN_CALL mode
+                if (incallMask != 0) {
+                    AudioSystem.setRouting(AudioSystem.MODE_IN_CALL,
+                                           mRoutes[AudioSystem.MODE_IN_CALL],
+                                           incallMask);
+                }
+                // ringtoneMask is != 0 means we must apply ne routing to MODE_RINGTONE mode
+                if (ringtoneMask != 0) {
+                    AudioSystem.setRouting(AudioSystem.MODE_RINGTONE,
+                                           mRoutes[AudioSystem.MODE_RINGTONE],
+                                           ringtoneMask);
+                }
+                // normalMask is != 0 means we must apply ne routing to MODE_NORMAL mode
+                if (normalMask != 0) {
+                    AudioSystem.setRouting(AudioSystem.MODE_NORMAL,
+                                           mRoutes[AudioSystem.MODE_NORMAL],
+                                           normalMask);
+                }
+
+                int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
+                int index = mStreamStates[streamType].mIndex;
+                syncRingerAndNotificationStreamVolume(streamType, index, true);
+                setStreamVolumeInt(streamType, index, true, true);
             }
-            int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
-            int index = mStreamStates[streamType].mIndex;
-            syncRingerAndNotificationStreamVolume(streamType, index, true);
-            setStreamVolumeInt(streamType, index, true);
         }
     }
 
@@ -783,9 +956,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     public boolean isStreamAffectedByRingerMode(int streamType) {
-        int ringerModeAffectedStreams = Settings.System.getInt(mContentResolver,
-                Settings.System.MODE_RINGER_STREAMS_AFFECTED, 0);
-        return (ringerModeAffectedStreams & (1 << streamType)) != 0;
+        return (mRingerModeAffectedStreams & (1 << streamType)) != 0;
     }
 
     public boolean isStreamAffectedByMute(int streamType) {
@@ -937,15 +1108,15 @@ public class AudioService extends IAudioService.Stub {
         }
 
         public boolean adjustIndex(int deltaIndex) {
-            return setIndex(mIndex + deltaIndex);
+            return setIndex(mIndex + deltaIndex, true);
         }
 
-        public boolean setIndex(int index) {
+        public boolean setIndex(int index, boolean lastAudible) {
             int oldIndex = mIndex;
             mIndex = getValidIndex(index);
 
             if (oldIndex != mIndex) {
-                if (mIndex > 0) {
+                if (lastAudible) {
                     mLastAudibleIndex = mIndex;
                 }
                 return true;
@@ -995,7 +1166,7 @@ public class AudioService extends IAudioService.Stub {
                                 mDeathHandlers.add(this);
                                 // If the stream is not yet muted by any client, set lvel to 0
                                 if (muteCount() == 0) {
-                                    setIndex(0);
+                                    setIndex(0, false);
                                     sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, mStreamType, SENDMSG_NOOP, 0, 0,
                                             VolumeStreamState.this, 0);
                                 }
@@ -1022,7 +1193,7 @@ public class AudioService extends IAudioService.Stub {
                                     // If the stream is not mut any more, restore it's volume if
                                     // ringer mode allows it
                                     if (!isStreamAffectedByRingerMode(mStreamType) || mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
-                                        setIndex(mLastAudibleIndex);
+                                        setIndex(mLastAudibleIndex, false);
                                         sendMsg(mAudioHandler, MSG_SET_SYSTEM_VOLUME, mStreamType, SENDMSG_NOOP, 0, 0,
                                                 VolumeStreamState.this, 0);
                                     }
@@ -1247,6 +1418,10 @@ public class AudioService extends IAudioService.Stub {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             
+            mRingerModeAffectedStreams = Settings.System.getInt(mContentResolver,
+                    Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                    0);
+
             /*
              * Ensure all stream types that should be affected by ringer mode
              * are in the proper state.

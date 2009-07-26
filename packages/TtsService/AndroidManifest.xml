@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android.tts">
+    <application android:label="TTS Service">
+        <service android:enabled="true"
+                 android:name=".TtsService"
+                 android:label="TTS Service">
+            <intent-filter>
+                <action android:name="android.intent.action.START_TTS_SERVICE"/>
+                <category android:name="android.intent.category.TTS"/>
+            </intent-filter>
+        </service>
+    </application>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+</manifest>

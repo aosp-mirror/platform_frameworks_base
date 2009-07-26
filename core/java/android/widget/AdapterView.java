@@ -24,11 +24,12 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.ContextMenu;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewDebug;
 import android.view.SoundEffectConstants;
+import android.view.View;
+import android.view.ViewDebug;
+import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.accessibility.AccessibilityEvent;
 
 
 /**
@@ -618,7 +619,9 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     }
 
     /**
-     * Sets the currently selected item
+     * Sets the currently selected item. To support accessibility subclasses that
+     * override this method must invoke the overriden super method first.
+     *
      * @param position Index (starting at 0) of the data item to be selected.
      */
     public abstract void setSelection(int position);
@@ -844,6 +847,11 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
                 fireOnSelected();
             }
         }
+
+        // we fire selection events here not in View
+        if (mSelectedPosition != ListView.INVALID_POSITION && isShown() && !isInTouchMode()) {
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+        }
     }
 
     private void fireOnSelected() {
@@ -858,6 +866,35 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         } else {
             mOnItemSelectedListener.onNothingSelected(this);
         }
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        boolean populated = false;
+        // This is an exceptional case which occurs when a window gets the
+        // focus and sends a focus event via its focused child to announce
+        // current focus/selection. AdapterView fires selection but not focus
+        // events so we change the event type here.
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED) {
+            event.setEventType(AccessibilityEvent.TYPE_VIEW_SELECTED);
+        }
+
+        // we send selection events only from AdapterView to avoid
+        // generation of such event for each child
+        View selectedView = getSelectedView();
+        if (selectedView != null) {
+            populated = selectedView.dispatchPopulateAccessibilityEvent(event);
+        }
+
+        if (!populated) {
+            if (selectedView != null) {
+                event.setEnabled(selectedView.isEnabled());
+            }
+            event.setItemCount(getCount());
+            event.setCurrentItemIndex(getSelectedItemPosition());
+        }
+
+        return populated;
     }
 
     @Override

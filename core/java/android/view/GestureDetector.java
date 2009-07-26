@@ -198,6 +198,7 @@ public class GestureDetector {
     private int mTouchSlopSquare;
     private int mDoubleTapSlopSquare;
     private int mMinimumFlingVelocity;
+    private int mMaximumFlingVelocity;
 
     private static final int LONGPRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
     private static final int TAP_TIMEOUT = ViewConfiguration.getTapTimeout();
@@ -361,11 +362,13 @@ public class GestureDetector {
             doubleTapSlop = ViewConfiguration.getDoubleTapSlop();
             //noinspection deprecation
             mMinimumFlingVelocity = ViewConfiguration.getMinimumFlingVelocity();
+            mMaximumFlingVelocity = ViewConfiguration.getMaximumFlingVelocity();
         } else {
             final ViewConfiguration configuration = ViewConfiguration.get(context);
             touchSlop = configuration.getScaledTouchSlop();
             doubleTapSlop = configuration.getScaledDoubleTapSlop();
             mMinimumFlingVelocity = configuration.getScaledMinimumFlingVelocity();
+            mMaximumFlingVelocity = configuration.getScaledMaximumFlingVelocity();
         }
         mTouchSlopSquare = touchSlop * touchSlop;
         mDoubleTapSlopSquare = doubleTapSlop * doubleTapSlop;
@@ -505,7 +508,7 @@ public class GestureDetector {
 
                 // A fling must travel the minimum tap distance
                 final VelocityTracker velocityTracker = mVelocityTracker;
-                velocityTracker.computeCurrentVelocity(1000);
+                velocityTracker.computeCurrentVelocity(1000, mMaximumFlingVelocity);
                 final float velocityY = velocityTracker.getYVelocity();
                 final float velocityX = velocityTracker.getXVelocity();
 

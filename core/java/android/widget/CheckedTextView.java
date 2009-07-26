@@ -16,14 +16,15 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
-
-import com.android.internal.R;
+import android.view.accessibility.AccessibilityEvent;
 
 
 /**
@@ -33,7 +34,7 @@ import com.android.internal.R;
  * something other than {@link android.widget.ListView#CHOICE_MODE_NONE CHOICE_MODE_NONE}.
  *
  */
-public abstract class CheckedTextView extends TextView implements Checkable {
+public class CheckedTextView extends TextView implements Checkable {
     private boolean mChecked;
     private int mCheckMarkResource;
     private Drawable mCheckMarkDrawable;
@@ -194,5 +195,13 @@ public abstract class CheckedTextView extends TextView implements Checkable {
             invalidate();
         }
     }
-    
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        boolean populated = super.dispatchPopulateAccessibilityEvent(event);
+        if (!populated) {
+            event.setChecked(mChecked);
+        }
+        return populated;
+    }
 }

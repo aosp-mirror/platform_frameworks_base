@@ -413,41 +413,45 @@ class AlarmManagerService extends IAlarmManager.Stub {
         
         synchronized (mLock) {
             pw.println("Current Alarm Manager state:");
-            if (mRtcWakeupAlarms.size() > 0) {
+            if (mRtcWakeupAlarms.size() > 0 || mRtcAlarms.size() > 0) {
                 pw.println(" ");
-                pw.println("  Realtime wakeup alarms that are scheduled:");
-                dumpAlarmList(pw, mRtcWakeupAlarms, "  ", "RTC_WAKEUP");
+                pw.print("  Realtime wakeup (now=");
+                        pw.print(System.currentTimeMillis()); pw.println("):");
+                if (mRtcWakeupAlarms.size() > 0) {
+                    dumpAlarmList(pw, mRtcWakeupAlarms, "  ", "RTC_WAKEUP");
+                }
+                if (mRtcAlarms.size() > 0) {
+                    dumpAlarmList(pw, mRtcAlarms, "  ", "RTC");
+                }
             }
-            if (mRtcAlarms.size() > 0) {
+            if (mElapsedRealtimeWakeupAlarms.size() > 0 || mElapsedRealtimeAlarms.size() > 0) {
                 pw.println(" ");
-                pw.println("  Realtime alarms that are scheduled:");
-                dumpAlarmList(pw, mRtcAlarms, "  ", "RTC");
-            }
-            if (mElapsedRealtimeWakeupAlarms.size() > 0) {
-                pw.println(" ");
-                pw.println("  Elapsed realtime wakeup alarms that are scheduled:");
-                dumpAlarmList(pw, mElapsedRealtimeWakeupAlarms, "  ", "ELAPSED_REALTIME_WAKEUP");
-            }
-            if (mElapsedRealtimeAlarms.size() > 0) {
-                pw.println(" ");
-                pw.println("  Elapsed realtime alarms that are scheduled:");
-                dumpAlarmList(pw, mElapsedRealtimeAlarms, "  ", "ELAPSED_REALTIME");
+                pw.print("  Elapsed realtime wakeup (now=");
+                        pw.print(SystemClock.elapsedRealtime()); pw.println("):");
+                if (mElapsedRealtimeWakeupAlarms.size() > 0) {
+                    dumpAlarmList(pw, mElapsedRealtimeWakeupAlarms, "  ", "ELAPSED_WAKEUP");
+                }
+                if (mElapsedRealtimeAlarms.size() > 0) {
+                    dumpAlarmList(pw, mElapsedRealtimeAlarms, "  ", "ELAPSED");
+                }
             }
             
             pw.println(" ");
-            pw.println("  Broadcast ref count: " + mBroadcastRefCount);
+            pw.print("  Broadcast ref count: "); pw.println(mBroadcastRefCount);
             
             pw.println(" ");
             pw.println("  Alarm Stats:");
             for (Map.Entry<String, BroadcastStats> be : mBroadcastStats.entrySet()) {
                 BroadcastStats bs = be.getValue();
-                pw.println("  " + be.getKey());
-                pw.println("    " + bs.aggregateTime + "ms running, "
-                        + bs.numWakeup + " wakeups");
+                pw.print("  "); pw.println(be.getKey());
+                pw.print("    "); pw.print(bs.aggregateTime);
+                        pw.print("ms running, "); pw.print(bs.numWakeup);
+                        pw.println(" wakeups");
                 for (Map.Entry<Intent.FilterComparison, FilterStats> fe
                         : bs.filterStats.entrySet()) {
-                    pw.println("    " + fe.getValue().count + " alarms: "
-                            + fe.getKey().getIntent());
+                    pw.print("    "); pw.print(fe.getValue().count);
+                            pw.print(" alarms: ");
+                            pw.println(fe.getKey().getIntent().toShortString(true, false));
                 }
             }
         }
@@ -456,7 +460,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private static final void dumpAlarmList(PrintWriter pw, ArrayList<Alarm> list, String prefix, String label) {
         for (int i=list.size()-1; i>=0; i--) {
             Alarm a = list.get(i);
-            pw.println(prefix + label + " #" + i + ":");
+            pw.print(prefix); pw.print(label); pw.print(" #"); pw.print(i);
+                    pw.print(": "); pw.println(a);
             a.dump(pw, prefix + "  ");
         }
     }
@@ -561,18 +566,24 @@ class AlarmManagerService extends IAlarmManager.Stub {
         @Override
         public String toString()
         {
-            return "Alarm{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " type " + type + " " + operation.getTargetPackage() + "}";
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("Alarm{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(" type ");
+            sb.append(type);
+            sb.append(" ");
+            sb.append(operation.getTargetPackage());
+            sb.append('}');
+            return sb.toString();
         }
 
         public void dump(PrintWriter pw, String prefix)
         {
-            pw.println(prefix + this);
-            pw.println(prefix + "type=" + type + " when=" + when
-                  + " repeatInterval=" + repeatInterval
-                  + " count=" + count);
-            pw.println(prefix + "operation=" + operation);
+            pw.print(prefix); pw.print("type="); pw.print(type);
+                    pw.print(" when="); pw.print(when);
+                    pw.print(" repeatInterval="); pw.print(repeatInterval);
+                    pw.print(" count="); pw.println(count);
+            pw.print(prefix); pw.print("operation="); pw.println(operation);
         }
     }
     

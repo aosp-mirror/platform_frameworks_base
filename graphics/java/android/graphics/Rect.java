@@ -19,6 +19,8 @@ package android.graphics;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.PrintWriter;
+
 /**
  * Rect holds four integer coordinates for a rectangle. The rectangle is
  * represented by the coordinates of its 4 edges (left, top, right bottom).
@@ -78,14 +80,40 @@ public final class Rect implements Parcelable {
     }
 
     public String toString() {
-        return "Rect(" + left + ", " + top + " - " + right + ", " + bottom + ")";
+        StringBuilder sb = new StringBuilder(32);
+        sb.append("Rect("); sb.append(left); sb.append(", ");
+        sb.append(top); sb.append(" - "); sb.append(right);
+        sb.append(", "); sb.append(bottom); sb.append(")");
+        return sb.toString();
     }
 
     /**
      * Return a string representation of the rectangle in a compact form.
      */
     public String toShortString() {
-        return "[" + left + "," + top + "][" + right + "," + bottom + "]";
+        return toShortString(new StringBuilder(32));
+    }
+    
+    /**
+     * Return a string representation of the rectangle in a compact form.
+     * @hide
+     */
+    public String toShortString(StringBuilder sb) {
+        sb.setLength(0);
+        sb.append('['); sb.append(left); sb.append(',');
+        sb.append(top); sb.append("]["); sb.append(right);
+        sb.append(','); sb.append(bottom); sb.append(']');
+        return sb.toString();
+    }
+    
+    /**
+     * Print short representation to given writer.
+     * @hide
+     */
+    public void printShortString(PrintWriter pw) {
+        pw.print('['); pw.print(left); pw.print(',');
+        pw.print(top); pw.print("]["); pw.print(right);
+        pw.print(','); pw.print(bottom); pw.print(']');
     }
     
     /**
@@ -516,5 +544,18 @@ public final class Rect implements Parcelable {
         top = in.readInt();
         right = in.readInt();
         bottom = in.readInt();
+    }
+
+    /**
+     * Scales up the rect by the given scale.
+     * @hide
+     */
+    public void scale(float scale) {
+        if (scale != 1.0f) {
+            left *= scale;
+            top *= scale;
+            right *= scale;
+            bottom*= scale;
+        }
     }
 }

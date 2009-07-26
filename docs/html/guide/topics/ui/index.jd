@@ -116,7 +116,7 @@ complex layout.</p>
 
 <p>There are a variety of ways in which you can layout your views. Using more and different kinds of view groups,
 you can structure child views and view groups in an infinite number of ways.
-Some pre-defined view groups offered by Android (called layouts) include LinearLayout, RelativeLayout, AbsoluteLayout,
+Some pre-defined view groups offered by Android (called layouts) include LinearLayout, RelativeLayout,
 TableLayout, GridLayout and others. Each offers a unique set of layout parameters that are used to define the
 positions of child views and layout structure.</p>
 <p>To learn about some of the different kinds of view groups used for a layout, 

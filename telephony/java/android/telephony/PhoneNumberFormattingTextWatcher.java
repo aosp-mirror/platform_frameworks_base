@@ -25,7 +25,7 @@ import java.util.Locale;
 
 /**
  * Watches a {@link TextView} and if a phone number is entered will format it using
- * {@link PhoneNumberUtils#formatNumber(Editable, int)}. The formatting is based on 
+ * {@link PhoneNumberUtils#formatNumber(Editable, int)}. The formatting is based on
  * the current system locale when this object is created and future locale changes
  * may not take effect on this instance.
  */
@@ -35,7 +35,7 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
     static private Locale sCachedLocale;
     private boolean mFormatting;
     private boolean mDeletingHyphen;
-    private int mHyphenStart;    
+    private int mHyphenStart;
     private boolean mDeletingBackward;
 
     public PhoneNumberFormattingTextWatcher() {
@@ -60,7 +60,7 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
                     text.delete(mHyphenStart, mHyphenStart + 1);
                 }
             }
-            
+
             PhoneNumberUtils.formatNumber(text, sFormatType);
 
             mFormatting = false;
@@ -73,8 +73,8 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
             // Make sure user is deleting one char, without a selection
             final int selStart = Selection.getSelectionStart(s);
             final int selEnd = Selection.getSelectionEnd(s);
-            if (s.length() > 1 // Can delete another character 
-                    && count == 1 // Deleting only one character 
+            if (s.length() > 1 // Can delete another character
+                    && count == 1 // Deleting only one character
                     && after == 0 // Deleting
                     && s.charAt(start) == '-' // a hyphen
                     && selStart == selEnd) { // no selection
@@ -89,7 +89,7 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
             } else {
                 mDeletingHyphen = false;
             }
-        }        
+        }
     }
 
     public void onTextChanged(CharSequence s, int start, int before, int count) {

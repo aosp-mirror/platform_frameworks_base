@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.CellLocation;
 import android.util.Log;
 
@@ -11,18 +12,18 @@ import com.android.internal.telephony.IPhoneStateListener;
 
 /**
  * A listener class for monitoring changes in specific telephony states
- * on the device, including service state, signal strength, message 
+ * on the device, including service state, signal strength, message
  * waiting indicator (voicemail), and others.
  * <p>
- * Override the methods for the state that you wish to receive updates for, and 
+ * Override the methods for the state that you wish to receive updates for, and
  * pass your PhoneStateListener object, along with bitwise-or of the LISTEN_
  * flags to {@link TelephonyManager#listen TelephonyManager.listen()}.
  * <p>
  * Note that access to some telephony information is
- * permission-protected. Your application won't receive updates for protected 
- * information unless it has the appropriate permissions declared in 
+ * permission-protected. Your application won't receive updates for protected
+ * information unless it has the appropriate permissions declared in
  * its manifest file. Where permissions apply, they are noted in the
- * appropriate LISTEN_ flags. 
+ * appropriate LISTEN_ flags.
  */
 public class PhoneStateListener {
 
@@ -41,16 +42,22 @@ public class PhoneStateListener {
 
     /**
      * Listen for changes to the network signal strength (cellular).
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
      * <p>
-     * Example: The status bar uses this to control the signal-strength
-     * icon.
      *
      * @see #onSignalStrengthChanged
+     *
+     * TODO: @deprecated to be deprecated by LISTEN_SIGNAL_STRENGTHS, @see #onSignalStrengthsChanged
      */
     public static final int LISTEN_SIGNAL_STRENGTH                          = 0x00000002;
 
     /**
      * Listen for changes to the message-waiting indicator.
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
      * <p>
      * Example: The status bar uses this to determine when to display the
      * voicemail icon.
@@ -61,30 +68,34 @@ public class PhoneStateListener {
 
     /**
      * Listen for changes to the call-forwarding indicator.
-     *
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
      * @see #onCallForwardingIndicatorChanged
      */
     public static final int LISTEN_CALL_FORWARDING_INDICATOR                = 0x00000008;
 
     /**
-     * Listen for changes to the device's cell location. Note that 
+     * Listen for changes to the device's cell location. Note that
      * this will result in frequent callbacks to the listener.
      * {@more}
      * Requires Permission: {@link android.Manifest.permission#ACCESS_COARSE_LOCATION
      * ACCESS_COARSE_LOCATION}
      * <p>
-     * If you need regular location updates but want more control over 
-     * the update interval or location precision, you can set up a listener 
-     * through the {@link android.location.LocationManager location manager} 
-     * instead. 
-     * 
+     * If you need regular location updates but want more control over
+     * the update interval or location precision, you can set up a listener
+     * through the {@link android.location.LocationManager location manager}
+     * instead.
+     *
      * @see #onCellLocationChanged
      */
     public static final int LISTEN_CELL_LOCATION                            = 0x00000010;
 
     /**
      * Listen for changes to the device call state.
-     *
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
      * @see #onCallStateChanged
      */
     public static final int LISTEN_CALL_STATE                               = 0x00000020;
@@ -99,19 +110,33 @@ public class PhoneStateListener {
     /**
      * Listen for changes to the direction of data traffic on the data
      * connection (cellular).
-     *
-     * Example: The status bar uses this to display the appropriate  
+     * {@more}
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     * READ_PHONE_STATE}
+     * Example: The status bar uses this to display the appropriate
      * data-traffic icon.
      *
      * @see #onDataActivity
      */
     public static final int LISTEN_DATA_ACTIVITY                            = 0x00000080;
 
+    /**
+     * Listen for changes to the network signal strengths (cellular).
+     * <p>
+     * Example: The status bar uses this to control the signal-strength
+     * icon.
+     *
+     * @see #onSignalStrengthsChanged
+     *
+     * @hide
+     */
+    public static final int LISTEN_SIGNAL_STRENGTHS                         = 0x00000100;
+
     public PhoneStateListener() {
     }
 
     /**
-     * Callback invoked when device service state changes. 
+     * Callback invoked when device service state changes.
      *
      * @see ServiceState#STATE_EMERGENCY_ONLY
      * @see ServiceState#STATE_IN_SERVICE
@@ -129,34 +154,35 @@ public class PhoneStateListener {
      * @see ServiceState#STATE_IN_SERVICE
      * @see ServiceState#STATE_OUT_OF_SERVICE
      * @see ServiceState#STATE_POWER_OFF
+     * @deprecated, @see #onSignalStrengthsChanged
      */
     public void onSignalStrengthChanged(int asu) {
         // default implementation empty
     }
 
     /**
-     * Callback invoked when the message-waiting indicator changes. 
+     * Callback invoked when the message-waiting indicator changes.
      */
     public void onMessageWaitingIndicatorChanged(boolean mwi) {
         // default implementation empty
     }
 
     /**
-     * Callback invoked when the call-forwarding indicator changes. 
+     * Callback invoked when the call-forwarding indicator changes.
      */
     public void onCallForwardingIndicatorChanged(boolean cfi) {
         // default implementation empty
     }
 
     /**
-     * Callback invoked when device cell location changes. 
+     * Callback invoked when device cell location changes.
      */
     public void onCellLocationChanged(CellLocation location) {
         // default implementation empty
     }
 
     /**
-     * Callback invoked when device call state changes. 
+     * Callback invoked when device call state changes.
      *
      * @see TelephonyManager#CALL_STATE_IDLE
      * @see TelephonyManager#CALL_STATE_RINGING
@@ -167,7 +193,7 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when connection state changes. 
+     * Callback invoked when connection state changes.
      *
      * @see TelephonyManager#DATA_DISCONNECTED
      * @see TelephonyManager#DATA_CONNECTING
@@ -179,14 +205,29 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when data activity state changes. 
+     * Callback invoked when data activity state changes.
      *
      * @see TelephonyManager#DATA_ACTIVITY_NONE
      * @see TelephonyManager#DATA_ACTIVITY_IN
      * @see TelephonyManager#DATA_ACTIVITY_OUT
      * @see TelephonyManager#DATA_ACTIVITY_INOUT
+     * @see TelephonyManager#DATA_ACTIVITY_DORMANT
      */
     public void onDataActivity(int direction) {
+        // default implementation empty
+    }
+
+    /**
+     * Callback invoked when network signal strengths changes.
+     *
+     * @see ServiceState#STATE_EMERGENCY_ONLY
+     * @see ServiceState#STATE_IN_SERVICE
+     * @see ServiceState#STATE_OUT_OF_SERVICE
+     * @see ServiceState#STATE_POWER_OFF
+     *
+     * @hide
+     */
+    public void onSignalStrengthsChanged(SignalStrength signalStrength) {
         // default implementation empty
     }
 
@@ -229,6 +270,9 @@ public class PhoneStateListener {
         public void onDataActivity(int direction) {
             Message.obtain(mHandler, LISTEN_DATA_ACTIVITY, direction, 0, null).sendToTarget();
         }
+        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+            Message.obtain(mHandler, LISTEN_SIGNAL_STRENGTHS, 0, 0, signalStrength).sendToTarget();
+        }
     };
 
     Handler mHandler = new Handler() {
@@ -258,6 +302,9 @@ public class PhoneStateListener {
                     break;
                 case LISTEN_DATA_ACTIVITY:
                     PhoneStateListener.this.onDataActivity(msg.arg1);
+                    break;
+                case LISTEN_SIGNAL_STRENGTHS:
+                    PhoneStateListener.this.onSignalStrengthsChanged((SignalStrength)msg.obj);
                     break;
             }
         }

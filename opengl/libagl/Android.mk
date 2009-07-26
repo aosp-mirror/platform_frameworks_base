@@ -33,6 +33,8 @@ ifneq ($(TARGET_SIMULATOR),true)
 endif
 
 LOCAL_SHARED_LIBRARIES := libcutils libutils libpixelflinger
+LOCAL_CFLAGS += -fvisibility=hidden
+
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libagl
 

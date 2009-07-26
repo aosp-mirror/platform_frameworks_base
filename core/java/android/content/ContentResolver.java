@@ -25,9 +25,13 @@ import android.database.CursorWrapper;
 import android.database.IContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.text.TextUtils;
+import android.util.Config;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -85,8 +89,7 @@ public abstract class ContentResolver {
      */
     public static final String CURSOR_DIR_BASE_TYPE = "vnd.android.cursor.dir";
     
-    public ContentResolver(Context context)
-    {
+    public ContentResolver(Context context) {
         mContext = context;
     }
 
@@ -541,7 +544,7 @@ public abstract class ContentResolver {
                      A null value will remove an existing field value.
      * @param where A filter to apply to rows before deleting, formatted as an SQL WHERE clause
                     (excluding the WHERE itself).
-     * @return the URL of the newly created row
+     * @return The number of rows updated.
      * @throws NullPointerException if uri or values are null
      */
     public final int update(Uri uri, ContentValues values, String where,
@@ -605,7 +608,7 @@ public abstract class ContentResolver {
             ContentObserver observer)
     {
         try {
-            ContentServiceNative.getDefault().registerContentObserver(uri, notifyForDescendents,
+            getContentService().registerContentObserver(uri, notifyForDescendents,
                     observer.getContentObserver());
         } catch (RemoteException e) {
         }
@@ -621,7 +624,7 @@ public abstract class ContentResolver {
         try {
             IContentObserver contentObserver = observer.releaseContentObserver();
             if (contentObserver != null) {
-                ContentServiceNative.getDefault().unregisterContentObserver(
+                getContentService().unregisterContentObserver(
                         contentObserver);
             }
         } catch (RemoteException e) {
@@ -651,7 +654,7 @@ public abstract class ContentResolver {
      */
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork) {
         try {
-            ContentServiceNative.getDefault().notifyChange(
+            getContentService().notifyChange(
                     uri, observer == null ? null : observer.getContentObserver(),
                     observer != null && observer.deliverSelfNotifications(), syncToNetwork);
         } catch (RemoteException e) {
@@ -677,7 +680,7 @@ public abstract class ContentResolver {
     public void startSync(Uri uri, Bundle extras) {
         validateSyncExtrasBundle(extras);
         try {
-            ContentServiceNative.getDefault().startSync(uri, extras);
+            getContentService().startSync(uri, extras);
         } catch (RemoteException e) {
         }
     }
@@ -718,7 +721,7 @@ public abstract class ContentResolver {
 
     public void cancelSync(Uri uri) {
         try {
-            ContentServiceNative.getDefault().cancelSync(uri);
+            getContentService().cancelSync(uri);
         } catch (RemoteException e) {
         }
     }
@@ -779,6 +782,22 @@ public abstract class ContentResolver {
         }
     }
 
+    /** @hide */
+    public static final String CONTENT_SERVICE_NAME = "content";
+    
+    /** @hide */
+    public static IContentService getContentService() {
+        if (sContentService != null) {
+            return sContentService;
+        }
+        IBinder b = ServiceManager.getService(CONTENT_SERVICE_NAME);
+        if (Config.LOGV) Log.v("ContentService", "default service binder = " + b);
+        sContentService = IContentService.Stub.asInterface(b);
+        if (Config.LOGV) Log.v("ContentService", "default service = " + sContentService);
+        return sContentService;
+    }
+    
+    private static IContentService sContentService;
     private final Context mContext;
     private static final String TAG = "ContentResolver";
 }

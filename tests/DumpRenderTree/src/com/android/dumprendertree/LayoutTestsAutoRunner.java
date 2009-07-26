@@ -16,14 +16,11 @@
 
 package com.android.dumprendertree;
 
-import junit.framework.TestSuite;
-import com.android.dumprendertree.LayoutTestsAutoTest;
-
+import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
-import android.util.Log;
-import android.content.Intent;
-import android.os.Bundle;
+
+import junit.framework.TestSuite;
 
 
 /**
@@ -61,13 +58,27 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
             }
         }
         
+        String delay_str = (String) icicle.get("delay");
+        if(delay_str != null) {
+            try {
+                this.mDelay = Integer.parseInt(delay_str);
+            } catch (Exception e) {
+            }
+        }
+        
         String r = (String)icicle.get("rebaseline");
         this.mRebaseline = (r != null && r.toLowerCase().equals("true"));
         super.onCreate(icicle);
+        
+        String logtime = (String) icicle.get("logtime");
+        this.mLogtime = (logtime != null
+                && logtime.toLowerCase().equals("true"));
     }
     
     public String mTestPath = null;
     public int mTimeoutInMillis = 0;
+    public int mDelay = 0;
     public boolean mRebaseline = false;
+    public boolean mLogtime = false;
 }
 

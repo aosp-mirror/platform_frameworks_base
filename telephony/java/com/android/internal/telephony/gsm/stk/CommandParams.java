@@ -19,7 +19,7 @@ package com.android.internal.telephony.gsm.stk;
 import android.graphics.Bitmap;
 
 /**
- * Container class for proactive command parameters. 
+ * Container class for proactive command parameters.
  *
  */
 class CommandParams {
@@ -158,7 +158,7 @@ class GetInputParams extends CommandParams {
         this.input = input;
     }
 
-    boolean setIcon(Bitmap icon) { 
+    boolean setIcon(Bitmap icon) {
         if (icon != null && input != null) {
             input.icon = icon;
         }

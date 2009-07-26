@@ -35,7 +35,6 @@ import android.os.Message;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.provider.Sync;
 import android.util.EventLog;
 import android.util.Log;
 

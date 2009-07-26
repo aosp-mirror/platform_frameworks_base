@@ -498,19 +498,23 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mHorizontalDivider != null) {
+        Drawable drawable = mHorizontalDivider;
+        if (drawable != null) {
             // If we have a horizontal divider to draw, draw it at the remembered positions
-            for (int i = mHorizontalDividerRects.size() - 1; i >= 0; i--) {
-                mHorizontalDivider.setBounds(mHorizontalDividerRects.get(i));
-                mHorizontalDivider.draw(canvas);
+            final ArrayList<Rect> rects = mHorizontalDividerRects;
+            for (int i = rects.size() - 1; i >= 0; i--) {
+                drawable.setBounds(rects.get(i));
+                drawable.draw(canvas);
             }
         }
-        
-        if (mVerticalDivider != null) {
+
+        drawable = mVerticalDivider;
+        if (drawable != null) {
             // If we have a vertical divider to draw, draw it at the remembered positions
-            for (int i = mVerticalDividerRects.size() - 1; i >= 0; i--) {
-                mVerticalDivider.setBounds(mVerticalDividerRects.get(i));
-                mVerticalDivider.draw(canvas);
+            final ArrayList<Rect> rects = mVerticalDividerRects;
+            for (int i = rects.size() - 1; i >= 0; i--) {
+                drawable.setBounds(rects.get(i));
+                drawable.draw(canvas);
             }
         }
     }
@@ -520,14 +524,12 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
     }
 
     @Override
-    public LayoutParams generateLayoutParams(AttributeSet attrs)
-    {
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new IconMenuView.LayoutParams(getContext(), attrs);
     }
 
     @Override
-    protected boolean checkLayoutParams(ViewGroup.LayoutParams p)
-    {
+    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         // Override to allow type-checking of LayoutParams. 
         return p instanceof IconMenuView.LayoutParams;
     }

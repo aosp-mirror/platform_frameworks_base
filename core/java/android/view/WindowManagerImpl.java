@@ -173,7 +173,6 @@ public class WindowManagerImpl implements WindowManager {
             mRoots[index] = root;
             mParams[index] = wparams;
         }
-
         // do this last because it fires off messages to start doing things
         root.setView(view, wparams, panelParentView);
     }

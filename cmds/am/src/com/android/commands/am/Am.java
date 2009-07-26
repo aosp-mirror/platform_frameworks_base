@@ -26,10 +26,13 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.view.IWindowManager;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -194,34 +197,23 @@ public class Am {
         if (intent != null) {
             System.out.println("Starting: " + intent);
             try {
-                intent.addFlags(intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 // XXX should do something to determine the MIME type.
                 int res = mAm.startActivity(null, intent, intent.getType(),
                         null, 0, null, null, 0, false, mDebugOption);
                 switch (res) {
                     case IActivityManager.START_SUCCESS:
                         break;
-                    case IActivityManager.START_CLASS_NOT_FOUND:
-                        System.err.println("Error type 3");
-                        System.err.println("Error: Activity class " +
-                                intent.getComponent().toShortString()
-                                + " does not exist.");
+                    case IActivityManager.START_SWITCHES_CANCELED:
+                        System.err.println(
+                                "Warning: Activity not started because the "
+                                + " current activity is being kept for the user.");
                         break;
                     case IActivityManager.START_DELIVERED_TO_TOP:
                         System.err.println(
                                 "Warning: Activity not started, intent has "
                                 + "been delivered to currently running "
                                 + "top-most instance.");
-                        break;
-                    case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
-                        System.err.println(
-                                "Error: Activity not started, you requested to "
-                                + "both forward and receive its result");
-                        break;
-                    case IActivityManager.START_INTENT_NOT_RESOLVED:
-                        System.err.println(
-                                "Error: Activity not started, unable to "
-                                + "resolve " + intent.toString());
                         break;
                     case IActivityManager.START_RETURN_INTENT_TO_CALLER:
                         System.err.println(
@@ -232,6 +224,27 @@ public class Am {
                         System.err.println(
                                 "Warning: Activity not started, its current "
                                 + "task has been brought to the front");
+                        break;
+                    case IActivityManager.START_INTENT_NOT_RESOLVED:
+                        System.err.println(
+                                "Error: Activity not started, unable to "
+                                + "resolve " + intent.toString());
+                        break;
+                    case IActivityManager.START_CLASS_NOT_FOUND:
+                        System.err.println("Error type 3");
+                        System.err.println("Error: Activity class " +
+                                intent.getComponent().toShortString()
+                                + " does not exist.");
+                        break;
+                    case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
+                        System.err.println(
+                                "Error: Activity not started, you requested to "
+                                + "both forward and receive its result");
+                        break;
+                    case IActivityManager.START_PERMISSION_DENIED:
+                        System.err.println(
+                                "Error: Activity not started, you do not "
+                                + "have permission to access it.");
                         break;
                     default:
                         System.err.println(
@@ -436,6 +449,8 @@ public class Am {
             return;
         }
         
+        ParcelFileDescriptor fd = null;
+        
         String cmd = nextArg();
         if ("start".equals(cmd)) {
             start = true;
@@ -445,6 +460,16 @@ public class Am {
                 showUsage();
                 return;
             }
+            try {
+                fd = ParcelFileDescriptor.open(
+                        new File(profileFile),
+                        ParcelFileDescriptor.MODE_CREATE |
+                        ParcelFileDescriptor.MODE_TRUNCATE |
+                        ParcelFileDescriptor.MODE_READ_WRITE);
+            } catch (FileNotFoundException e) {
+                System.err.println("Error: Unable to open file: " + profileFile);
+                return;
+            }
         } else if (!"stop".equals(cmd)) {
             System.err.println("Error: Profile command " + cmd + " not valid");
             showUsage();
@@ -452,8 +477,8 @@ public class Am {
         }
         
         try {
-            if (!mAm.profileControl(process, start, profileFile)) {
-                System.out.println("PROFILE FAILED on process " + process);
+            if (!mAm.profileControl(process, start, profileFile, fd)) {
+                System.err.println("PROFILE FAILED on process " + process);
                 return;
             }
         } catch (IllegalArgumentException e) {
@@ -516,7 +541,7 @@ public class Am {
 
     private void showUsage() {
         System.err.println("usage: am [start|broadcast|instrument|profile]");
-        System.err.println("       am start -D INTENT");
+        System.err.println("       am start [-D] INTENT");
         System.err.println("       am broadcast INTENT");
         System.err.println("       am instrument [-r] [-e <ARG_NAME> <ARG_VALUE>] [-p <PROF_FILE>]");
         System.err.println("                [-w] <COMPONENT> ");

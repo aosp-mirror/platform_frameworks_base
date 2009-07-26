@@ -80,8 +80,11 @@ public:
     status_t            writeStrongBinder(const sp<IBinder>& val);
     status_t            writeWeakBinder(const wp<IBinder>& val);
 
-    // doesn't take ownership of the native_handle
-    status_t            writeNativeHandle(const native_handle& handle);
+    // Place a native_handle into the parcel (the native_handle's file-
+    // descriptors are dup'ed, so it is safe to delete the native_handle
+    // when this function returns). 
+    // Doesn't take ownership of the native_handle.
+    status_t            writeNativeHandle(const native_handle* handle);
     
     // Place a file descriptor into the parcel.  The given fd must remain
     // valid for the lifetime of the parcel.
@@ -114,12 +117,11 @@ public:
     wp<IBinder>         readWeakBinder() const;
 
     
-    // if alloc is NULL, native_handle is allocated with malloc(), otherwise
-    // alloc is used. If the function fails, the effects of alloc() must be
-    // reverted by the caller.
-    native_handle*     readNativeHandle(
-            native_handle* (*alloc)(void* cookie, int numFds, int ints),
-            void* cookie) const;
+    // Retrieve native_handle from the parcel. This returns a copy of the
+    // parcel's native_handle (the caller takes ownership). The caller
+    // must free the native_handle with native_handle_close() and 
+    // native_handle_delete().
+    native_handle*     readNativeHandle() const;
 
     
     // Retrieve a file descriptor from the parcel.  This returns the raw fd

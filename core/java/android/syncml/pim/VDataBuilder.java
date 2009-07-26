@@ -17,8 +17,10 @@
 package android.syncml.pim;
 
 import android.content.ContentValues;
+import android.util.CharsetUtils;
 import android.util.Log;
 
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
 
@@ -26,9 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Store the parse result to custom datastruct: VNode, PropertyNode
@@ -38,7 +38,13 @@ import java.util.Vector;
  */
 public class VDataBuilder implements VBuilder {
     static private String LOG_TAG = "VDATABuilder"; 
-
+    
+    /**
+     * If there's no other information available, this class uses this charset for encoding
+     * byte arrays.
+     */
+    static public String DEFAULT_CHARSET = "UTF-8"; 
+    
     /** type=VNode */
     public List<VNode> vNodeList = new ArrayList<VNode>();
     private int mNodeListPos = 0;
@@ -47,34 +53,74 @@ public class VDataBuilder implements VBuilder {
     private String mCurrentParamType;
     
     /**
-     * Assumes that each String can be encoded into byte array using this encoding.
+     * The charset using which VParser parses the text.
      */
-    private String mCharset;
+    private String mSourceCharset;
+    
+    /**
+     * The charset with which byte array is encoded to String.
+     */
+    private String mTargetCharset;
     
     private boolean mStrictLineBreakParsing;
     
     public VDataBuilder() {
-        mCharset = "ISO-8859-1";
-        mStrictLineBreakParsing = false;
+        this(VParser.DEFAULT_CHARSET, DEFAULT_CHARSET, false);
     }
 
-    public VDataBuilder(String encoding, boolean strictLineBreakParsing) {
-        mCharset = encoding;
-        mStrictLineBreakParsing = strictLineBreakParsing;
+    public VDataBuilder(String charset, boolean strictLineBreakParsing) {
+        this(null, charset, strictLineBreakParsing);
     }
     
+    /**
+     * @hide sourceCharset is temporal. 
+     */
+    public VDataBuilder(String sourceCharset, String targetCharset,
+            boolean strictLineBreakParsing) {
+        if (sourceCharset != null) {
+            mSourceCharset = sourceCharset;
+        } else {
+            mSourceCharset = VParser.DEFAULT_CHARSET;
+        }
+        if (targetCharset != null) {
+            mTargetCharset = targetCharset;
+        } else {
+            mTargetCharset = DEFAULT_CHARSET;
+        }
+        mStrictLineBreakParsing = strictLineBreakParsing;
+    }
+
     public void start() {
     }
 
     public void end() {
     }
 
+    // Note: I guess that this code assumes the Record may nest like this:
+    // START:VPOS
+    // ...
+    // START:VPOS2
+    // ...
+    // END:VPOS2
+    // ...
+    // END:VPOS
+    //
+    // However the following code has a bug.
+    // When error occurs after calling startRecord(), the entry which is probably
+    // the cause of the error remains to be in vNodeList, while endRecord() is not called.
+    //
+    // I leave this code as is since I'm not familiar with vcalendar specification.
+    // But I believe we should refactor this code in the future.
+    // Until this, the last entry has to be removed when some error occurs.
     public void startRecord(String type) {
+        
         VNode vnode = new VNode();
         vnode.parseStatus = 1;
         vnode.VName = type;
+        // I feel this should be done in endRecord(), but it cannot be done because of
+        // the reason above.
         vNodeList.add(vnode);
-        mNodeListPos = vNodeList.size()-1;
+        mNodeListPos = vNodeList.size() - 1;
         mCurrentVNode = vNodeList.get(mNodeListPos);
     }
 
@@ -90,15 +136,14 @@ public class VDataBuilder implements VBuilder {
     }
 
     public void startProperty() {
-        //  System.out.println("+ startProperty. ");
+        mCurrentPropNode = new PropertyNode();
     }
 
     public void endProperty() {
-        //  System.out.println("- endProperty. ");
+        mCurrentVNode.propList.add(mCurrentPropNode);
     }
     
     public void propertyName(String name) {
-        mCurrentPropNode = new PropertyNode();
         mCurrentPropNode.propName = name;
     }
 
@@ -122,139 +167,145 @@ public class VDataBuilder implements VBuilder {
         mCurrentParamType = null;
     }
 
-    private String encodeString(String originalString, String targetEncoding) {
-        Charset charset = Charset.forName(mCharset);
+    private String encodeString(String originalString, String targetCharset) {
+        if (mSourceCharset.equalsIgnoreCase(targetCharset)) {
+            return originalString;
+        }
+        Charset charset = Charset.forName(mSourceCharset);
         ByteBuffer byteBuffer = charset.encode(originalString);
         // byteBuffer.array() "may" return byte array which is larger than
         // byteBuffer.remaining(). Here, we keep on the safe side.
         byte[] bytes = new byte[byteBuffer.remaining()];
         byteBuffer.get(bytes);
         try {
-            return new String(bytes, targetEncoding);
+            return new String(bytes, targetCharset);
         } catch (UnsupportedEncodingException e) {
-            return null;
+            Log.e(LOG_TAG, "Failed to encode: charset=" + targetCharset);
+            return new String(bytes);
         }
     }
     
+    private String handleOneValue(String value, String targetCharset, String encoding) {
+        if (encoding != null) {
+            if (encoding.equals("BASE64") || encoding.equals("B")) {
+                // Assume BASE64 is used only when the number of values is 1.
+                mCurrentPropNode.propValue_bytes =
+                    Base64.decodeBase64(value.getBytes());
+                return value;
+            } else if (encoding.equals("QUOTED-PRINTABLE")) {
+                String quotedPrintable = value
+                .replaceAll("= ", " ").replaceAll("=\t", "\t");
+                String[] lines;
+                if (mStrictLineBreakParsing) {
+                    lines = quotedPrintable.split("\r\n");
+                } else {
+                    StringBuilder builder = new StringBuilder();
+                    int length = quotedPrintable.length();
+                    ArrayList<String> list = new ArrayList<String>();
+                    for (int i = 0; i < length; i++) {
+                        char ch = quotedPrintable.charAt(i);
+                        if (ch == '\n') {
+                            list.add(builder.toString());
+                            builder = new StringBuilder();
+                        } else if (ch == '\r') {
+                            list.add(builder.toString());
+                            builder = new StringBuilder();
+                            if (i < length - 1) {
+                                char nextCh = quotedPrintable.charAt(i + 1);
+                                if (nextCh == '\n') {
+                                    i++;
+                                }
+                            }
+                        } else {
+                            builder.append(ch);
+                        }
+                    }
+                    String finalLine = builder.toString();
+                    if (finalLine.length() > 0) {
+                        list.add(finalLine);
+                    }
+                    lines = list.toArray(new String[0]);
+                }
+                StringBuilder builder = new StringBuilder();
+                for (String line : lines) {
+                    if (line.endsWith("=")) {
+                        line = line.substring(0, line.length() - 1);
+                    }
+                    builder.append(line);
+                }
+                byte[] bytes;
+                try {
+                    bytes = builder.toString().getBytes(mSourceCharset);
+                } catch (UnsupportedEncodingException e1) {
+                    Log.e(LOG_TAG, "Failed to encode: charset=" + mSourceCharset);
+                    bytes = builder.toString().getBytes();
+                }
+                
+                try {
+                    bytes = QuotedPrintableCodec.decodeQuotedPrintable(bytes);
+                } catch (DecoderException e) {
+                    Log.e(LOG_TAG, "Failed to decode quoted-printable: " + e);
+                    return "";
+                }
+
+                try {
+                    return new String(bytes, targetCharset);
+                } catch (UnsupportedEncodingException e) {
+                    Log.e(LOG_TAG, "Failed to encode: charset=" + targetCharset);
+                    return new String(bytes);
+                }
+            }
+            // Unknown encoding. Fall back to default.
+        }
+        return encodeString(value, targetCharset);
+    }
+    
     public void propertyValues(List<String> values) {
+        if (values == null || values.size() == 0) {
+            mCurrentPropNode.propValue_bytes = null;
+            mCurrentPropNode.propValue_vector.clear();
+            mCurrentPropNode.propValue_vector.add("");
+            mCurrentPropNode.propValue = "";
+            return;
+        }
+        
         ContentValues paramMap = mCurrentPropNode.paramMap;
         
-        String charsetString = paramMap.getAsString("CHARSET"); 
-
-        boolean setupParamValues = false;
-        //decode value string to propValue_bytes
-        if (paramMap.containsKey("ENCODING")) {
-            String encoding = paramMap.getAsString("ENCODING"); 
-            if (encoding.equalsIgnoreCase("BASE64") ||
-                    encoding.equalsIgnoreCase("B")) {
-                if (values.size() > 1) {
-                    Log.e(LOG_TAG,
-                            ("BASE64 encoding is used while " +
-                             "there are multiple values (" + values.size()));
-                }
-                mCurrentPropNode.propValue_bytes =
-                    Base64.decodeBase64(values.get(0).
-                            replaceAll(" ","").replaceAll("\t","").
-                            replaceAll("\r\n","").
-                            getBytes());
-            }
-
-            if(encoding.equalsIgnoreCase("QUOTED-PRINTABLE")){
-                // if CHARSET is defined, we translate each String into the Charset.
-                List<String> tmpValues = new ArrayList<String>();
-                Vector<byte[]> byteVector = new Vector<byte[]>();
-                int size = 0;
-                try{
-                    for (String value : values) {                                    
-                        String quotedPrintable = value
-                        .replaceAll("= ", " ").replaceAll("=\t", "\t");
-                        String[] lines;
-                        if (mStrictLineBreakParsing) {
-                            lines = quotedPrintable.split("\r\n");
-                        } else {
-                            lines = quotedPrintable
-                            .replace("\r\n", "\n").replace("\r", "\n").split("\n");
-                        }
-                        StringBuilder builder = new StringBuilder();
-                        for (String line : lines) {
-                            if (line.endsWith("=")) {
-                                line = line.substring(0, line.length() - 1);
-                            }
-                            builder.append(line);
-                        }
-                        byte[] bytes = QuotedPrintableCodec.decodeQuotedPrintable(
-                                builder.toString().getBytes());
-                        if (charsetString != null) {
-                            try {
-                                tmpValues.add(new String(bytes, charsetString));
-                            } catch (UnsupportedEncodingException e) {
-                                Log.e(LOG_TAG, "Failed to encode: charset=" + charsetString);
-                                tmpValues.add(new String(bytes));
-                            }
-                        } else {
-                            tmpValues.add(new String(bytes));
-                        }
-                        byteVector.add(bytes);
-                        size += bytes.length;
-                    }  // for (String value : values) {
-                    mCurrentPropNode.propValue_vector = tmpValues;
-                    mCurrentPropNode.propValue = listToString(tmpValues);
-
-                    mCurrentPropNode.propValue_bytes = new byte[size];
-
-                    {
-                        byte[] tmpBytes = mCurrentPropNode.propValue_bytes;
-                        int index = 0;
-                        for (byte[] bytes : byteVector) {
-                            int length = bytes.length;
-                            for (int i = 0; i < length; i++, index++) {
-                                tmpBytes[index] = bytes[i];
-                            }
-                        }
-                    }
-                    setupParamValues = true;
-                } catch(Exception e) {
-                    Log.e(LOG_TAG, "Failed to decode quoted-printable: " + e);
-                }
-            }  // QUOTED-PRINTABLE
-        }  //  ENCODING
+        String targetCharset = CharsetUtils.nameForDefaultVendor(paramMap.getAsString("CHARSET")); 
+        String encoding = paramMap.getAsString("ENCODING"); 
         
-        if (!setupParamValues) {
-            // if CHARSET is defined, we translate each String into the Charset.
-            if (charsetString != null) {
-                List<String> tmpValues = new ArrayList<String>();
-                for (String value : values) {
-                    String result = encodeString(value, charsetString);
-                    if (result != null) {
-                        tmpValues.add(result);
-                    } else {
-                        Log.e(LOG_TAG, "Failed to encode: charset=" + charsetString);
-                        tmpValues.add(value);
-                    }
-                }
-                values = tmpValues;
-            }
-            
-            mCurrentPropNode.propValue_vector = values;
-            mCurrentPropNode.propValue = listToString(values);
+        if (targetCharset == null || targetCharset.length() == 0) {
+            targetCharset = mTargetCharset;
         }
-        mCurrentVNode.propList.add(mCurrentPropNode);
+        
+        for (String value : values) {
+            mCurrentPropNode.propValue_vector.add(
+                    handleOneValue(value, targetCharset, encoding));
+        }
+
+        mCurrentPropNode.propValue = listToString(mCurrentPropNode.propValue_vector);
     }
 
-    private String listToString(Collection<String> list){
-        StringBuilder typeListB = new StringBuilder();
-        for (String type : list) {
-            typeListB.append(type).append(";");
+    private String listToString(List<String> list){
+        int size = list.size();
+        if (size > 1) {
+            StringBuilder typeListB = new StringBuilder();
+            for (String type : list) {
+                typeListB.append(type).append(";");
+            }
+            int len = typeListB.length();
+            if (len > 0 && typeListB.charAt(len - 1) == ';') {
+                return typeListB.substring(0, len - 1);
+            }
+            return typeListB.toString();
+        } else if (size == 1) {
+            return list.get(0);
+        } else {
+            return "";
         }
-        int len = typeListB.length();
-        if (len > 0 && typeListB.charAt(len - 1) == ';') {
-            return typeListB.substring(0, len - 1);
-        }
-        return typeListB.toString();
     }
     
     public String getResult(){
         return null;
     }
 }
-

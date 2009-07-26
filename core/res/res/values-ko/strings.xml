@@ -161,14 +161,10 @@
     <string name="permdesc_changeConfiguration">"응용프로그램이 로케일 또는 전체 글꼴 크기 같은 현재 구성을 변경할 수 있습니다."</string>
     <string name="permlab_restartPackages">"다른 응용프로그램 다시 시작"</string>
     <string name="permdesc_restartPackages">"응용프로그램이 다른 응용프로그램을 강제로 다시 시작할 수 있습니다."</string>
-    <string name="permlab_setProcessForeground">"중지되지 않도록 하기"</string>
-    <string name="permdesc_setProcessForeground">"응용프로그램이 프로세스를 포그라운드에서 실행되도록 하여 프로세스를 중지할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
     <string name="permlab_forceBack">"강제로 응용프로그램 닫기"</string>
     <string name="permdesc_forceBack">"응용프로그램이 포그라운드에 있는 활동을 강제로 닫을 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
     <string name="permlab_dump">"시스템 내부 상태 검색"</string>
     <string name="permdesc_dump">"응용프로그램이 시스템의 내부 상태를 검색할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 일반적으로 필요하지 않은 다양한 개인 정보와 보안 정보를 검색할 수 있습니다."</string>
-    <string name="permlab_addSystemService">"하위 수준 서비스 게시"</string>
-    <string name="permdesc_addSystemService">"응용프로그램이 자체 하위 수준 시스템 서비스를 게시할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 시스템을 하이재킹하거나 시스템의 데이터를 도용 또는 손상시킬 수 있습니다."</string>
     <string name="permlab_runSetActivityWatcher">"실행 중인 모든 응용프로그램 모니터링 및 제어"</string>
     <string name="permdesc_runSetActivityWatcher">"응용프로그램이 시스템에서 활동이 시작되는 방식을 모니터링하고 제어할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 시스템을 완전히 손상시킬 수 있습니다. 이 권한은 개발 과정에만 필요하며 일반 전화기 사용 시에는 필요하지 않습니다."</string>
     <string name="permlab_broadcastPackageRemoved">"패키지 제거 브로드캐스트 보내기"</string>
@@ -181,8 +177,6 @@
     <string name="permdesc_setProcessLimit">"응용프로그램이 실행할 최대 프로세스 수를 제어할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
     <string name="permlab_setAlwaysFinish">"모든 백그라운드 응용프로그램이 닫히도록 하기"</string>
     <string name="permdesc_setAlwaysFinish">"응용프로그램이 백그라운드로 이동한 활동을 항상 바로 마칠지 여부를 제어할 수 있습니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
-    <string name="permlab_fotaUpdate">"시스템 업데이트 자동으로 설치"</string>
-    <string name="permdesc_fotaUpdate">"응용프로그램이 대기 중인 시스템 업데이트에 대한 알림을 받고 설치를 트리거할 수 있습니다. 악성 응용프로그램은 이 기능을 이용하여 인증되지 않은 업데이트로 시스템을 손상시키거나 업데이트 절차를 방해할 수 있습니다."</string>
     <string name="permlab_batteryStats">"배터리 통계 수정"</string>
     <string name="permdesc_batteryStats">"수집된 배터리 통계를 수정할 수 있습니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
     <string name="permlab_internalSystemWindow">"인증되지 않은 창 표시"</string>
@@ -418,9 +412,6 @@
     <string name="lockscreen_glogin_password_hint">"비밀번호"</string>
     <string name="lockscreen_glogin_submit_button">"로그인"</string>
     <string name="lockscreen_glogin_invalid_input">"사용자 이름 또는 비밀번호가 잘못되었습니다."</string>
-    <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
-    <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"알림 지우기"</string>
@@ -452,9 +443,6 @@
     <string name="menu_enter_shortcut_label">"입력"</string>
     <string name="menu_delete_shortcut_label">"삭제"</string>
     <string name="search_go">"검색"</string>
-    <string name="today">"오늘"</string>
-    <string name="yesterday">"어제"</string>
-    <string name="tomorrow">"내일"</string>
     <string name="oneMonthDurationPast">"한 달 전"</string>
     <string name="beforeOneMonthDurationPast">"한 달 전"</string>
   <plurals name="num_seconds_ago">
@@ -536,13 +524,6 @@
     <string name="weeks">"주"</string>
     <string name="year">"년"</string>
     <string name="years">"년"</string>
-    <string name="sunday">"일요일"</string>
-    <string name="monday">"월요일"</string>
-    <string name="tuesday">"화요일"</string>
-    <string name="wednesday">"수요일"</string>
-    <string name="thursday">"목요일"</string>
-    <string name="friday">"금요일"</string>
-    <string name="saturday">"토요일"</string>
     <string name="every_weekday">"주중 매일(월-금)"</string>
     <string name="daily">"매일"</string>
     <string name="weekly">"매주 <xliff:g id="DAY">%s</xliff:g>"</string>
@@ -552,137 +533,15 @@
     <string name="VideoView_error_text_invalid_progressive_playback">"죄송합니다. 이 기기로의 스트리밍에 적합하지 않은 동영상입니다."</string>
     <string name="VideoView_error_text_unknown">"죄송합니다. 동영상을 재생할 수 없습니다."</string>
     <string name="VideoView_error_button">"확인"</string>
-    <string name="am">"AM"</string>
-    <string name="pm">"PM"</string>
-    <string name="numeric_date">"<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
-    <string name="wday1_date1_wday2_date2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="WEEKDAY2">%4$s</xliff:g>"</string>
-    <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
-    <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>"</string>
-    <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> – <xliff:g id="TIME2">%2$s</xliff:g>"</string>
-    <string name="time_wday_date">"<xliff:g id="DATE">%3$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <string name="time_date">"<xliff:g id="DATE">%3$s</xliff:g>, <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="time_wday">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="TIME_RANGE">%1$s</xliff:g>"</string>
-    <string name="full_date_month_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>', '<xliff:g id="DAY">d</xliff:g>"</string>
-    <string name="full_date_day_first" format="date">"<xliff:g id="YEAR">yyyy</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>', '<xliff:g id="DAY">d</xliff:g>"</string>
-    <string name="medium_date_month_first" format="date">"<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="DAY">d</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>', '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"정오"</string>
     <string name="Noon">"정오"</string>
     <string name="midnight">"자정"</string>
     <string name="Midnight">"자정"</string>
-    <string name="month_day">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
-    <string name="month_day_year">"<xliff:g id="YEAR">%Y</xliff:g>, <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
-    <string name="month_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
-    <string name="date_and_time">"<xliff:g id="YEAR">%Y</xliff:g>, <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="DAY">%-d</xliff:g>, <xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
-    <string name="same_year_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR">%9$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="numeric_mdy1_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/"</string>
-    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_md1_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>"</string>
-    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1">%3$s</xliff:g>, <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2">%8$s</xliff:g>, <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>, <xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>, <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="abbrev_month_day_year">"<xliff:g id="YEAR">%Y</xliff:g> <xliff:g id="MONTH">%b</xliff:g>, <xliff:g id="DAY">%-d</xliff:g>"</string>
-    <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="abbrev_month_day">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="DAY">%-d</xliff:g>"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
-    <string name="day_of_week_long_sunday">"일요일"</string>
-    <string name="day_of_week_long_monday">"월요일"</string>
-    <string name="day_of_week_long_tuesday">"화요일"</string>
-    <string name="day_of_week_long_wednesday">"수요일"</string>
-    <string name="day_of_week_long_thursday">"목요일"</string>
-    <string name="day_of_week_long_friday">"금요일"</string>
-    <string name="day_of_week_long_saturday">"토요일"</string>
-    <string name="day_of_week_medium_sunday">"일요일"</string>
-    <string name="day_of_week_medium_monday">"월"</string>
-    <string name="day_of_week_medium_tuesday">"화"</string>
-    <string name="day_of_week_medium_wednesday">"수"</string>
-    <string name="day_of_week_medium_thursday">"목"</string>
-    <string name="day_of_week_medium_friday">"금"</string>
-    <string name="day_of_week_medium_saturday">"토"</string>
-    <string name="day_of_week_short_sunday">"일"</string>
-    <string name="day_of_week_short_monday">"월"</string>
-    <string name="day_of_week_short_tuesday">"화"</string>
-    <string name="day_of_week_short_wednesday">"수"</string>
-    <string name="day_of_week_short_thursday">"목"</string>
-    <string name="day_of_week_short_friday">"금"</string>
-    <string name="day_of_week_short_saturday">"토"</string>
-    <string name="day_of_week_shorter_sunday">"일"</string>
-    <string name="day_of_week_shorter_monday">"월"</string>
-    <string name="day_of_week_shorter_tuesday">"화"</string>
-    <string name="day_of_week_shorter_wednesday">"수"</string>
-    <string name="day_of_week_shorter_thursday">"목"</string>
-    <string name="day_of_week_shorter_friday">"금"</string>
-    <string name="day_of_week_shorter_saturday">"토"</string>
-    <string name="day_of_week_shortest_sunday">"일"</string>
-    <string name="day_of_week_shortest_monday">"3월"</string>
-    <string name="day_of_week_shortest_tuesday">"목"</string>
-    <string name="day_of_week_shortest_wednesday">"수"</string>
-    <string name="day_of_week_shortest_thursday">"목"</string>
-    <string name="day_of_week_shortest_friday">"금"</string>
-    <string name="day_of_week_shortest_saturday">"토"</string>
-    <string name="month_long_january">"1월"</string>
-    <string name="month_long_february">"2월"</string>
-    <string name="month_long_march">"3월"</string>
-    <string name="month_long_april">"4월"</string>
-    <string name="month_long_may">"5월"</string>
-    <string name="month_long_june">"6월"</string>
-    <string name="month_long_july">"7월"</string>
-    <string name="month_long_august">"8월"</string>
-    <string name="month_long_september">"9월"</string>
-    <string name="month_long_october">"10월"</string>
-    <string name="month_long_november">"11월"</string>
-    <string name="month_long_december">"12월"</string>
-    <string name="month_medium_january">"1월"</string>
-    <string name="month_medium_february">"2월"</string>
-    <string name="month_medium_march">"3월"</string>
-    <string name="month_medium_april">"4월"</string>
-    <string name="month_medium_may">"5월"</string>
-    <string name="month_medium_june">"6월"</string>
-    <string name="month_medium_july">"7월"</string>
-    <string name="month_medium_august">"8월"</string>
-    <string name="month_medium_september">"9월"</string>
-    <string name="month_medium_october">"10월"</string>
-    <string name="month_medium_november">"11월"</string>
-    <string name="month_medium_december">"12월"</string>
-    <string name="month_shortest_january">"1월"</string>
-    <string name="month_shortest_february">"금"</string>
-    <string name="month_shortest_march">"3월"</string>
-    <string name="month_shortest_april">"4월"</string>
-    <string name="month_shortest_may">"5월"</string>
-    <string name="month_shortest_june">"6월"</string>
-    <string name="month_shortest_july">"7월"</string>
-    <string name="month_shortest_august">"8월"</string>
-    <string name="month_shortest_september">"9월"</string>
-    <string name="month_shortest_october">"10월"</string>
-    <string name="month_shortest_november">"11월"</string>
-    <string name="month_shortest_december">"12월"</string>
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"모두 선택"</string>

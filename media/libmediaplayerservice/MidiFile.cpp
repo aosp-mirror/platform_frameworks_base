@@ -89,7 +89,7 @@ MidiFile::MidiFile() :
     // create playback thread
     {
         Mutex::Autolock l(mMutex);
-        createThreadEtc(renderThread, this, "midithread");
+        createThreadEtc(renderThread, this, "midithread", ANDROID_PRIORITY_AUDIO);
         mCondition.wait(mMutex);
         LOGV("thread started");
     }

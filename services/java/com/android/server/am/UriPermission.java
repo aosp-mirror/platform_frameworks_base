@@ -30,6 +30,8 @@ class UriPermission {
     final HashSet<HistoryRecord> readActivities = new HashSet<HistoryRecord>();
     final HashSet<HistoryRecord> writeActivities = new HashSet<HistoryRecord>();
     
+    String stringName;
+    
     UriPermission(int _uid, Uri _uri) {
         uid = _uid;
         uri = _uri;
@@ -65,18 +67,29 @@ class UriPermission {
     }
     
     public String toString() {
-        return "UriPermission{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + uri + "}";
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("UriPermission{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        sb.append(uri);
+        sb.append('}');
+        return stringName = sb.toString();
     }
 
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
-        pw.println(prefix + "  modeFlags=0x" + Integer.toHexString(modeFlags)
-                + " uid=" + uid 
-                + " globalModeFlags=0x"
-                + Integer.toHexString(globalModeFlags));
-        pw.println(prefix + "  readActivities=" + readActivities);
-        pw.println(prefix + "  writeActivities=" + writeActivities);
+        pw.print(prefix); pw.print("modeFlags=0x");
+                pw.print(Integer.toHexString(modeFlags));
+                pw.print(" uid="); pw.print(uid); 
+                pw.print(" globalModeFlags=0x");
+                pw.println(Integer.toHexString(globalModeFlags));
+        if (readActivities.size() != 0) {
+            pw.print(prefix); pw.print("readActivities="); pw.println(readActivities);
+        }
+        if (writeActivities.size() != 0) {
+            pw.print(prefix); pw.print("writeActivities="); pw.println(writeActivities);
+        }
     }
 }

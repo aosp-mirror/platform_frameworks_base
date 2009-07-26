@@ -1084,8 +1084,9 @@ public class Paint {
      * not null, return in it the actual width measured.
      *
      * @param text  The text to measure
-     * @param measureForwards If true, measure forwards, starting at index.
-     *                        Otherwise, measure backwards, starting with the
+     * @param measureForwards If true, measure forwards, starting with the
+     *                        first character in the string. Otherwise,
+     *                        measure backwards, starting with the
      *                        last character in the string.
      * @param maxWidth The maximum width to accumulate.
      * @param measuredWidth Optional. If not null, returns the actual width

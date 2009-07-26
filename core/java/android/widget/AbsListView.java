@@ -54,7 +54,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Common code shared between ListView and GridView
+ * Base class that can be used to implement virtualized lists of items. A list does
+ * not have a spatial definition here. For instance, subclases of this class can
+ * display the content of the list in a grid, in a carousel, as stack, etc.
  *
  * @attr ref android.R.styleable#AbsListView_listSelector
  * @attr ref android.R.styleable#AbsListView_drawSelectorOnTop
@@ -86,7 +88,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public static final int TRANSCRIPT_MODE_NORMAL = 1;
     /**
      * The list will automatically scroll to the bottom, no matter what items
-     * are currently visible. 
+     * are currently visible.
      *
      * @see #setTranscriptMode(int)
      */
@@ -123,7 +125,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Indicates the view is in the process of being flung
      */
     static final int TOUCH_MODE_FLING = 4;
-    
+
     /**
      * Indicates that the user is currently dragging the fast scroll thumb
      */
@@ -316,7 +318,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * bitmap cache after scrolling.
      */
     boolean mScrollingCacheEnabled;
-    
+
     /**
      * Whether or not to enable the fast scroll feature on this list
      */
@@ -389,7 +391,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * The last CheckForTap runnable we posted, if any
      */
     private Runnable mPendingCheckForTap;
-    
+
     /**
      * The last CheckForKeyLongPress runnable we posted, if any
      */
@@ -427,13 +429,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     private FastScroller mFastScroller;
 
-    private int mTouchSlop;
+    private boolean mGlobalLayoutListenerAddedFilter;
 
+    private int mTouchSlop;
     private float mDensityScale;
 
     private InputConnection mDefInputConnection;
     private InputConnectionWrapper mPublicInputConnection;
-    
+
+    private Runnable mClearScrollingCache;
+    private int mMinimumVelocity;
+    private int mMaximumVelocity;
+
     /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
@@ -527,21 +534,35 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         int color = a.getColor(R.styleable.AbsListView_cacheColorHint, 0);
         setCacheColorHint(color);
-        
+
         boolean enableFastScroll = a.getBoolean(R.styleable.AbsListView_fastScrollEnabled, false);
         setFastScrollEnabled(enableFastScroll);
 
         boolean smoothScrollbar = a.getBoolean(R.styleable.AbsListView_smoothScrollbar, true);
         setSmoothScrollbarEnabled(smoothScrollbar);
-        
+
         a.recycle();
     }
 
+    private void initAbsListView() {
+        // Setting focusable in touch mode will set the focusable property to true
+        setFocusableInTouchMode(true);
+        setWillNotDraw(false);
+        setAlwaysDrawnWithCacheEnabled(false);
+        setScrollingCacheEnabled(true);
+
+        final ViewConfiguration configuration = ViewConfiguration.get(mContext);
+        mTouchSlop = configuration.getScaledTouchSlop();
+        mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
+        mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
+        mDensityScale = getContext().getResources().getDisplayMetrics().density;
+    }
+
     /**
-     * Enables fast scrolling by letting the user quickly scroll through lists by 
-     * dragging the fast scroll thumb. The adapter attached to the list may want 
+     * Enables fast scrolling by letting the user quickly scroll through lists by
+     * dragging the fast scroll thumb. The adapter attached to the list may want
      * to implement {@link SectionIndexer} if it wishes to display alphabet preview and
-     * jump between sections of the list. 
+     * jump between sections of the list.
      * @see SectionIndexer
      * @see #isFastScrollEnabled()
      * @param enabled whether or not to enable fast scrolling
@@ -559,7 +580,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
     }
-    
+
     /**
      * Returns the current state of the fast scroll feature.
      * @see #setFastScrollEnabled(boolean)
@@ -569,10 +590,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public boolean isFastScrollEnabled() {
         return mFastScrollEnabled;
     }
-    
+
     /**
      * If fast scroll is visible, then don't draw the vertical scrollbar.
-     * @hide 
+     * @hide
      */
     @Override
     protected boolean isVerticalScrollBarHidden() {
@@ -590,11 +611,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * When smooth scrollbar is disabled, the position and size of the scrollbar thumb
      * is based solely on the number of items in the adapter and the position of the
      * visible items inside the adapter. This provides a stable scrollbar as the user
-     * navigates through a list of items with varying heights. 
+     * navigates through a list of items with varying heights.
      *
      * @param enabled Whether or not to enable smooth scrollbar.
      *
-     * @see #setSmoothScrollbarEnabled(boolean) 
+     * @see #setSmoothScrollbarEnabled(boolean)
      * @attr ref android.R.styleable#AbsListView_smoothScrollbar
      */
     public void setSmoothScrollbarEnabled(boolean enabled) {
@@ -710,17 +731,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
-    private void initAbsListView() {
-        // Setting focusable in touch mode will set the focusable property to true
-        setFocusableInTouchMode(true);
-        setWillNotDraw(false);
-        setAlwaysDrawnWithCacheEnabled(false);
-        setScrollingCacheEnabled(true);
-
-        mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
-        mDensityScale = getContext().getResources().getDisplayMetrics().density;
-    }
-
     private void useDefaultSelector() {
         setSelector(getResources().getDrawable(
                 com.android.internal.R.drawable.list_selector_background));
@@ -826,7 +836,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public Parcelable onSaveInstanceState() {
         /*
          * This doesn't really make sense as the place to dismiss the
-         * popup, but there don't seem to be any other useful hooks
+         * popups, but there don't seem to be any other useful hooks
          * that happen early enough to keep from getting complaints
          * about having leaked the window.
          */
@@ -906,17 +916,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private boolean acceptFilter() {
-        if (!mTextFilterEnabled || !(getAdapter() instanceof Filterable) ||
-                ((Filterable) getAdapter()).getFilter() == null) {
-            return false;
-        }
-        return true;
+        return mTextFilterEnabled && getAdapter() instanceof Filterable &&
+                ((Filterable) getAdapter()).getFilter() != null;
     }
 
     /**
      * Sets the initial value for the text filter.
      * @param filterText The text to use for the filter.
-     * 
+     *
      * @see #setTextFilterEnabled
      */
     public void setFilterText(String filterText) {
@@ -942,7 +949,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Returns the list's text filter, if available. 
+     * Returns the list's text filter, if available.
      * @return the list's text filter or null if filtering isn't enabled
      */
     public CharSequence getTextFilter() {
@@ -951,7 +958,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         return null;
     }
-    
+
     @Override
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
@@ -982,18 +989,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mSelectedTop = 0;
         mSelectorRect.setEmpty();
         invalidate();
-    }
-    
-    /**
-     * The list is empty and we need to change the layout, so *really* clear everything out.
-     * @hide - for AutoCompleteTextView & SearchDialog only
-     */
-    /* package */ void resetListAndClearViews() {
-        rememberSyncState();
-        removeAllViewsInLayout();
-        mRecycler.clear();
-        mRecycler.setViewTypeCount(mAdapter.getViewTypeCount());
-        requestLayout();
     }
 
     @Override
@@ -1106,6 +1101,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         listPadding.bottom = mSelectionBottomPadding + mPaddingBottom;
     }
 
+    /**
+     * Subclasses should NOT override this method but
+     *  {@link #layoutChildren()} instead.
+     */
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
@@ -1121,17 +1120,22 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     protected boolean setFrame(int left, int top, int right, int bottom) {
         final boolean changed = super.setFrame(left, top, right, bottom);
 
-        // Reposition the popup when the frame has changed. This includes
-        // translating the widget, not just changing its dimension. The
-        // filter popup needs to follow the widget.
-        if (mFiltered && changed && getWindowVisibility() == View.VISIBLE && mPopup != null &&
-                mPopup.isShowing()) {
-            positionPopup();
+        if (changed) {
+            // Reposition the popup when the frame has changed. This includes
+            // translating the widget, not just changing its dimension. The
+            // filter popup needs to follow the widget.
+            final boolean visible = getWindowVisibility() == View.VISIBLE;
+            if (mFiltered && visible && mPopup != null && mPopup.isShowing()) {
+                positionPopup();
+            }
         }
 
         return changed;
     }
 
+    /**
+     * Subclasses must override this method to layout their children.
+     */
     protected void layoutChildren() {
     }
 
@@ -1334,6 +1338,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mDataChanged = true;
             rememberSyncState();
         }
+
         if (mFastScroller != null) {
             mFastScroller.onSizeChanged(w, h, oldw, oldh);
         }
@@ -1504,7 +1509,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             System.arraycopy(state, enabledPos + 1, state, enabledPos,
                     state.length - enabledPos - 1);
         }
-        
+
         return state;
     }
 
@@ -1520,6 +1525,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         final ViewTreeObserver treeObserver = getViewTreeObserver();
         if (treeObserver != null) {
             treeObserver.addOnTouchModeChangeListener(this);
+            if (mTextFilterEnabled && mPopup != null && !mGlobalLayoutListenerAddedFilter) {
+                treeObserver.addOnGlobalLayoutListener(this);
+            }
         }
     }
 
@@ -1530,6 +1538,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         final ViewTreeObserver treeObserver = getViewTreeObserver();
         if (treeObserver != null) {
             treeObserver.removeOnTouchModeChangeListener(this);
+            if (mTextFilterEnabled && mPopup != null) {
+                treeObserver.removeGlobalOnLayoutListener(this);
+                mGlobalLayoutListenerAddedFilter = false;
+            }
         }
     }
 
@@ -1596,16 +1608,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     private class WindowRunnnable {
         private int mOriginalAttachCount;
-        
+
         public void rememberWindowAttachCount() {
             mOriginalAttachCount = getWindowAttachCount();
         }
-        
+
         public boolean sameWindow() {
             return hasWindowFocus() && getWindowAttachCount() == mOriginalAttachCount;
         }
     }
-    
+
     private class PerformClick extends WindowRunnnable implements Runnable {
         View mChild;
         int mClickMotionPosition;
@@ -1632,7 +1644,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final long longPressId = mAdapter.getItemId(mMotionPosition);
 
                 boolean handled = false;
-                if (sameWindow() && !mDataChanged) { 
+                if (sameWindow() && !mDataChanged) {
                     handled = performLongPress(child, longPressPosition, longPressId);
                 }
                 if (handled) {
@@ -1646,7 +1658,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
     }
-    
+
     private class CheckForKeyLongPress extends WindowRunnnable implements Runnable {
         public void run() {
             if (isPressed() && mSelectedPosition >= 0) {
@@ -1822,7 +1834,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             mTouchMode = TOUCH_MODE_DONE_WAITING;
                         }
                     } else {
-                        mTouchMode = TOUCH_MODE_DONE_WAITING;                        
+                        mTouchMode = TOUCH_MODE_DONE_WAITING;
                     }
                 }
             }
@@ -1877,13 +1889,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        
         if (mFastScroller != null) {
             boolean intercepted = mFastScroller.onTouchEvent(ev);
             if (intercepted) {
                 return true;
-            }            
+            }
         }
+
         final int action = ev.getAction();
         final int x = (int) ev.getX();
         final int y = (int) ev.getY();
@@ -1920,6 +1932,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     // User clicked on whitespace, or stopped a fling. It is a scroll.
                     createScrollingCache();
                     mTouchMode = TOUCH_MODE_SCROLL;
+                    mMotionCorrection = 0;
                     motionPosition = findMotionRow(y);
                     reportScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                 }
@@ -2050,12 +2063,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 break;
             case TOUCH_MODE_SCROLL:
                 final VelocityTracker velocityTracker = mVelocityTracker;
-                velocityTracker.computeCurrentVelocity(1000);
-                int initialVelocity = (int)velocityTracker.getYVelocity();
-
-                if ((Math.abs(initialVelocity) >
-                        ViewConfiguration.get(mContext).getScaledMinimumFlingVelocity()) &&
-                        (getChildCount() > 0)) {
+                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                final int initialVelocity = (int) velocityTracker.getYVelocity();
+                if (Math.abs(initialVelocity) > mMinimumVelocity && (getChildCount() > 0)) {
                     if (mFlingRunnable == null) {
                         mFlingRunnable = new FlingRunnable();
                     }
@@ -2068,10 +2078,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             setPressed(false);
-            
+
             // Need to redraw since we probably aren't drawing the selector anymore
             invalidate();
-            
+
             final Handler handler = getHandler();
             if (handler != null) {
                 handler.removeCallbacks(mPendingCheckForLongPress);
@@ -2115,7 +2125,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         return true;
     }
-    
+
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
@@ -2130,14 +2140,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         int x = (int) ev.getX();
         int y = (int) ev.getY();
         View v;
-        
+
         if (mFastScroller != null) {
             boolean intercepted = mFastScroller.onInterceptTouchEvent(ev);
             if (intercepted) {
                 return true;
             }
         }
-        
+
         switch (action) {
         case MotionEvent.ACTION_DOWN: {
             int motionPosition = findMotionRow(y);
@@ -2310,6 +2320,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             if (more) {
+                invalidate();
                 mLastFlingY = y;
                 post(this);
             } else {
@@ -2333,16 +2344,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void clearScrollingCache() {
-        if (mCachingStarted) {
-            setChildrenDrawnWithCacheEnabled(false);
-            if ((mPersistentDrawingCache & PERSISTENT_SCROLLING_CACHE) == 0) {
-                setChildrenDrawingCacheEnabled(false);
-            }
-            if (!isAlwaysDrawnWithCacheEnabled()) {
-                invalidate();
-            }
-            mCachingStarted = false;
+        if (mClearScrollingCache == null) {
+            mClearScrollingCache = new Runnable() {
+                public void run() {
+                    if (mCachingStarted) {
+                        mCachingStarted = false;
+                        setChildrenDrawnWithCacheEnabled(false);
+                        if ((mPersistentDrawingCache & PERSISTENT_SCROLLING_CACHE) == 0) {
+                            setChildrenDrawingCacheEnabled(false);
+                        }
+                        if (!isAlwaysDrawnWithCacheEnabled()) {
+                            invalidate();
+                        }
+                    }
+                }
+            };
         }
+        post(mClearScrollingCache);
     }
 
     /**
@@ -2776,7 +2794,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Removes the filter window
      */
-    void dismissPopup() {
+    private void dismissPopup() {
         if (mPopup != null) {
             mPopup.dismiss();
         }
@@ -2799,7 +2817,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
         final int[] xy = new int[2];
         getLocationOnScreen(xy);
-        // TODO: The 20 below should come from the theme and be expressed in dip
+        // TODO: The 20 below should come from the theme
         // TODO: And the gravity should be defined in the theme as well
         final int bottomGap = screenHeight - xy[1] - getHeight() + (int) (mDensityScale * 20);
         if (!mPopup.isShowing()) {
@@ -2979,7 +2997,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         return null;
     }
-    
+
     /**
      * For filtering we proxy an input connection to an internal text editor,
      * and this allows the proxying to happen.
@@ -2988,7 +3006,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public boolean checkInputConnectionProxy(View view) {
         return view == mTextFilter;
     }
-    
+
     /**
      * Creates the window for the text filter and populates it with an EditText field;
      *
@@ -3018,6 +3036,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             p.setBackgroundDrawable(null);
             mPopup = p;
             getViewTreeObserver().addOnGlobalLayoutListener(this);
+            mGlobalLayoutListenerAddedFilter = true;
         }
         if (animateEntrance) {
             mPopup.setAnimationStyle(com.android.internal.R.style.Animation_TypingFilter);
@@ -3191,7 +3210,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // Reclaim views on screen
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
-            AbsListView.LayoutParams lp = (AbsListView.LayoutParams)child.getLayoutParams();
+            AbsListView.LayoutParams lp = (AbsListView.LayoutParams) child.getLayoutParams();
             // Don't reclaim header or footer views, or views that should be ignored
             if (lp != null && mRecycler.shouldRecycleViewType(lp.viewType)) {
                 views.add(child);
@@ -3203,6 +3222,63 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         mRecycler.reclaimScrapViews(views);
         removeAllViewsInLayout();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected boolean onConsistencyCheck(int consistency) {
+        boolean result = super.onConsistencyCheck(consistency);
+
+        final boolean checkLayout = (consistency & ViewDebug.CONSISTENCY_LAYOUT) != 0;
+
+        if (checkLayout) {
+            // The active recycler must be empty
+            final View[] activeViews = mRecycler.mActiveViews;
+            int count = activeViews.length;
+            for (int i = 0; i < count; i++) {
+                if (activeViews[i] != null) {
+                    result = false;
+                    android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
+                            "AbsListView " + this + " has a view in its active recycler: " +
+                                    activeViews[i]);
+                }
+            }
+
+            // All views in the recycler must NOT be on screen and must NOT have a parent
+            final ArrayList<View> scrap = mRecycler.mCurrentScrap;
+            if (!checkScrap(scrap)) result = false;
+            final ArrayList<View>[] scraps = mRecycler.mScrapViews;
+            count = scraps.length;
+            for (int i = 0; i < count; i++) {
+                if (!checkScrap(scraps[i])) result = false;
+            }
+        }
+
+        return result;
+    }
+
+    private boolean checkScrap(ArrayList<View> scrap) {
+        if (scrap == null) return true;
+        boolean result = true;
+
+        final int count = scrap.size();
+        for (int i = 0; i < count; i++) {
+            final View view = scrap.get(i);
+            if (view.getParent() != null) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG, "AbsListView " + this +
+                        " has a view in its scrap heap still attached to a parent: " + view);
+            }
+            if (indexOfChild(view) >= 0) {
+                result = false;
+                android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG, "AbsListView " + this +
+                        " has a view in its scrap heap that is also a direct child: " + view);
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -3323,7 +3399,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mCurrentScrap = scrapViews[0];
             mScrapViews = scrapViews;
         }
-        
+
         public boolean shouldRecycleViewType(int viewType) {
             return viewType >= 0;
         }

@@ -28,6 +28,7 @@ package android.webkit.gears;
 import android.content.Context;
 import android.telephony.CellLocation;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.gsm.GsmCellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -46,11 +47,15 @@ public final class AndroidRadioDataProvider extends PhoneStateListener {
   private static final int RADIO_TYPE_UNKNOWN = 0;
   private static final int RADIO_TYPE_GSM = 1;
   private static final int RADIO_TYPE_WCDMA = 2;
+  private static final int RADIO_TYPE_CDMA = 3;
+  private static final int RADIO_TYPE_EVDO = 4;
+  private static final int RADIO_TYPE_1xRTT = 5;
 
   /** Simple container for radio data */
   public static final class RadioData {
     public int cellId = -1;
     public int locationAreaCode = -1;
+    // TODO: use new SignalStrength instead of asu
     public int signalStrength = -1;
     public int mobileCountryCode = -1;
     public int mobileNetworkCode = -1;
@@ -102,12 +107,21 @@ public final class AndroidRadioDataProvider extends PhoneStateListener {
       }
 
       // Finally get the radio type.
+      //TODO We have to edit the parameter for getNetworkType regarding CDMA
       int type = telephonyManager.getNetworkType();
       if (type == TelephonyManager.NETWORK_TYPE_UMTS) {
         radioData.radioType = RADIO_TYPE_WCDMA;
       } else if (type == TelephonyManager.NETWORK_TYPE_GPRS
                  || type == TelephonyManager.NETWORK_TYPE_EDGE) {
         radioData.radioType = RADIO_TYPE_GSM;
+      } else if (type == TelephonyManager.NETWORK_TYPE_CDMA) {
+          radioData.radioType = RADIO_TYPE_CDMA;
+      } else if (type == TelephonyManager.NETWORK_TYPE_EVDO_0) {
+          radioData.radioType = RADIO_TYPE_EVDO;
+      } else if (type == TelephonyManager.NETWORK_TYPE_EVDO_A) {
+          radioData.radioType = RADIO_TYPE_EVDO;
+      } else if (type == TelephonyManager.NETWORK_TYPE_1xRTT) {
+          radioData.radioType = RADIO_TYPE_1xRTT;
       }
 
       // Print out what we got.
@@ -167,6 +181,7 @@ public final class AndroidRadioDataProvider extends PhoneStateListener {
   private CellLocation cellLocation = null;
 
   /** The last known signal strength */
+  // TODO: use new SignalStrength instead of asu
   private int signalStrength = -1;
 
   /** The last known serviceState */
@@ -195,7 +210,7 @@ public final class AndroidRadioDataProvider extends PhoneStateListener {
     // Register for cell id, signal strength and service state changed
     // notifications.
     telephonyManager.listen(this, PhoneStateListener.LISTEN_CELL_LOCATION
-        | PhoneStateListener.LISTEN_SIGNAL_STRENGTH
+        | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
         | PhoneStateListener.LISTEN_SERVICE_STATE);
   }
 
@@ -214,8 +229,9 @@ public final class AndroidRadioDataProvider extends PhoneStateListener {
   }
 
   @Override
-  public void onSignalStrengthChanged(int asu) {
-    signalStrength = asu;
+  public void onSignalStrengthsChanged(SignalStrength ss) {
+    int gsmSignalStrength = ss.getGsmSignalStrength();
+    signalStrength = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
     notifyListeners();
   }
 

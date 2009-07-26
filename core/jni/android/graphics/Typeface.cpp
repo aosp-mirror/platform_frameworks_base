@@ -133,6 +133,14 @@ static SkTypeface* Typeface_createFromAsset(JNIEnv* env, jobject,
     return SkTypeface::CreateFromStream(new AssetStream(asset, true));
 }
 
+static SkTypeface* Typeface_createFromFile(JNIEnv* env, jobject, jstring jpath) {
+    NPE_CHECK_RETURN_ZERO(env, jpath);
+
+    AutoJavaStringToUTF8 str(env, jpath);
+
+    return SkTypeface::CreateFromFile(str.c_str());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gTypefaceMethods[] = {
@@ -140,9 +148,10 @@ static JNINativeMethod gTypefaceMethods[] = {
     { "nativeCreateFromTypeface", "(II)I", (void*)Typeface_createFromTypeface },
     { "nativeUnref",              "(I)V",  (void*)Typeface_unref },
     { "nativeGetStyle",           "(I)I",  (void*)Typeface_getStyle },
-    { "nativeCreateFromAsset",
-                        "(Landroid/content/res/AssetManager;Ljava/lang/String;)I",
-                                            (void*)Typeface_createFromAsset }
+    { "nativeCreateFromAsset",    "(Landroid/content/res/AssetManager;Ljava/lang/String;)I",
+                                           (void*)Typeface_createFromAsset },
+    { "nativeCreateFromFile",     "(Ljava/lang/String;)I",
+                                           (void*)Typeface_createFromFile }
 };
 
 int register_android_graphics_Typeface(JNIEnv* env);
@@ -153,4 +162,3 @@ int register_android_graphics_Typeface(JNIEnv* env)
                                                        gTypefaceMethods,
                                                        SK_ARRAY_COUNT(gTypefaceMethods));
 }
-

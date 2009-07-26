@@ -36,6 +36,8 @@ class TaskRecord {
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
 
+    String stringName;      // caching of toString() result.
+    
     TaskRecord(int _taskId, ActivityInfo info, Intent _intent,
             boolean _clearOnBackground) {
         taskId = _taskId;
@@ -53,6 +55,8 @@ class TaskRecord {
     }
     
     void setIntent(Intent _intent, ActivityInfo info) {
+        stringName = null;
+        
         if (info.targetActivity == null) {
             intent = _intent;
             realActivity = _intent != null ? _intent.getComponent() : null;
@@ -82,23 +86,63 @@ class TaskRecord {
     }
     
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
-        pw.println(prefix + "clearOnBackground=" + clearOnBackground
-              + " numActivities=" + numActivities
-              + " rootWasReset=" + rootWasReset);
-        pw.println(prefix + "affinity=" + affinity);
-        pw.println(prefix + "intent=" + intent);
-        pw.println(prefix + "affinityIntent=" + affinityIntent);
-        pw.println(prefix + "origActivity=" + origActivity);
-        pw.println(prefix + "lastActiveTime=" + lastActiveTime
-                +" (inactive for " + (getInactiveDuration()/1000) + "s)");
+        if (clearOnBackground || numActivities != 0 || rootWasReset) {
+            pw.print(prefix); pw.print("clearOnBackground="); pw.print(clearOnBackground);
+                    pw.print(" numActivities="); pw.print(numActivities);
+                    pw.print(" rootWasReset="); pw.println(rootWasReset);
+        }
+        if (affinity != null) {
+            pw.print(prefix); pw.print("affinity="); pw.println(affinity);
+        }
+        if (intent != null) {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append(prefix); sb.append("intent={");
+            intent.toShortString(sb, true, false);
+            sb.append('}');
+            pw.println(sb.toString());
+        }
+        if (affinityIntent != null) {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append(prefix); sb.append("affinityIntent={");
+            affinityIntent.toShortString(sb, true, false);
+            sb.append('}');
+            pw.println(sb.toString());
+        }
+        if (origActivity != null) {
+            pw.print(prefix); pw.print("origActivity=");
+            pw.println(origActivity.flattenToShortString());
+        }
+        if (realActivity != null) {
+            pw.print(prefix); pw.print("realActivity=");
+            pw.println(realActivity.flattenToShortString());
+        }
+        pw.print(prefix); pw.print("lastActiveTime="); pw.print(lastActiveTime);
+                pw.print(" (inactive for ");
+                pw.print((getInactiveDuration()/1000)); pw.println("s)");
     }
 
     public String toString() {
-        return "Task{" + taskId + " "
-                + (affinity != null ? affinity
-                        : (intent != null ? intent.getComponent().flattenToShortString()
-                                : affinityIntent != null ? affinityIntent.getComponent().flattenToShortString() : "??"))
-                + "}";
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("TaskRecord{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(" #");
+        sb.append(taskId);
+        if (affinity != null) {
+            sb.append(" A ");
+            sb.append(affinity);
+        } else if (intent != null) {
+            sb.append(" I ");
+            sb.append(intent.getComponent().flattenToShortString());
+        } else if (affinityIntent != null) {
+            sb.append(" aI ");
+            sb.append(affinityIntent.getComponent().flattenToShortString());
+        } else {
+            sb.append(" ??");
+        }
+        sb.append('}');
+        return stringName = sb.toString();
     }
 }

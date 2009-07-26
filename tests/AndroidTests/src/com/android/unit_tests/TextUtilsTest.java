@@ -276,6 +276,7 @@ public class TextUtilsTest extends TestCase {
         Spannable s3 = new SpannableString(s1);
         s3.setSpan(new StyleSpan(0), 5, 10, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         TextPaint p = new TextPaint();
+        p.setFlags(p.getFlags() & ~p.DEV_KERN_TEXT_FLAG);
 
         for (int i = 0; i < 100; i++) {
             for (int j = 0; j < 3; j++) {

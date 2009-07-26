@@ -38,12 +38,13 @@ static void lightVertex(ogles_context_t* c, vertex_t* v);
 static void lightVertexMaterial(ogles_context_t* c, vertex_t* v);
 
 static inline void vscale3(GLfixed* d, const GLfixed* m, GLfixed s);
-static inline void vsub3w(GLfixed* d, const GLfixed* a, const GLfixed* b);
 
 static __attribute__((noinline))
 void vnorm3(GLfixed* d, const GLfixed* a);
 
 static inline void vsa3(GLfixed* d,
+    const GLfixed* m, GLfixed s, const GLfixed* a);
+static inline void vss3(GLfixed* d,
     const GLfixed* m, GLfixed s, const GLfixed* a);
 static inline void vmla3(GLfixed* d,
     const GLfixed* m0, const GLfixed* m1, const GLfixed* a);
@@ -151,18 +152,10 @@ void vsa3(GLfixed* d, const GLfixed* m, GLfixed s, const GLfixed* a) {
 }
 
 static inline
-void vsub3w(GLfixed* d, const GLfixed* a, const GLfixed* b) {
-    const GLfixed wa = a[3];
-    const GLfixed wb = b[3];
-    if (ggl_likely(wa == wb)) {
-        d[0] = a[0] - b[0];
-        d[1] = a[1] - b[1];
-        d[2] = a[2] - b[2];
-    } else {
-        d[0] = gglMulSubx(a[0], wb, gglMulx(b[0], wa));
-        d[1] = gglMulSubx(a[1], wb, gglMulx(b[1], wa));
-        d[2] = gglMulSubx(a[2], wb, gglMulx(b[2], wa));
-    }
+void vss3(GLfixed* d, const GLfixed* m, GLfixed s, const GLfixed* a) {
+    d[0] = gglMulSubx(m[0], s, a[0]);
+    d[1] = gglMulSubx(m[1], s, a[1]);
+    d[2] = gglMulSubx(m[2], s, a[2]);
 }
 
 static inline
@@ -227,7 +220,7 @@ static inline void validate_light_mvi(ogles_context_t* c)
         const int i = 31 - gglClz(en);
         en &= ~(1<<i);
         light_t& l = c->lighting.lights[i];
-        c->transforms.mvui.point3(&c->transforms.mvui,
+        c->transforms.mvui.point4(&c->transforms.mvui,
                 &l.objPosition, &l.position);
         vnorm3(l.normalizedObjPosition.v, l.objPosition.v);
     }
@@ -318,6 +311,11 @@ void lightVertexMaterial(ogles_context_t* c, vertex_t* v)
         vmul3(l.implicitAmbient.v,  material.ambient.v,  l.ambient.v);
         vmul3(l.implicitDiffuse.v,  material.diffuse.v,  l.diffuse.v);
         vmul3(l.implicitSpecular.v, material.specular.v, l.specular.v);
+        // this is just a flag to tell if we have a specular component
+        l.implicitSpecular.v[3] =
+                l.implicitSpecular.r |
+                l.implicitSpecular.g |
+                l.implicitSpecular.b;
     }
     // emission and ambient for the whole scene
     vmla3(  c->lighting.implicitSceneEmissionAndAmbient.v,
@@ -343,7 +341,11 @@ void lightVertex(ogles_context_t* c, vertex_t* v)
         vec4_t n;
         c->arrays.normal.fetch(c, n.v,
             c->arrays.normal.element(v->index & vertex_cache_t::INDEX_MASK));
-        if (c->transforms.rescaleNormals == GL_NORMALIZE)
+
+        // TODO: right now we handle GL_RESCALE_NORMALS as if ti were
+        // GL_NORMALIZE. We could optimize this by  scaling mvui 
+        // appropriately instead.
+        if (c->transforms.rescaleNormals)
             vnorm3(n.v, n.v);
 
         const material_t& material = c->lighting.front;
@@ -360,7 +362,8 @@ void lightVertex(ogles_context_t* c, vertex_t* v)
 
             // compute vertex-to-light vector
             if (ggl_unlikely(l.position.w)) {
-                vsub3w(d.v, l.objPosition.v, v->obj.v);
+                // lightPos/1.0 - vertex/vertex.w == lightPos*vertex.w - vertex
+                vss3(d.v, l.objPosition.v, v->obj.w, v->obj.v);
                 sqDist = dot3(d.v, d.v);
                 vscale3(d.v, d.v, gglSqrtRecipx(sqDist));
             } else {

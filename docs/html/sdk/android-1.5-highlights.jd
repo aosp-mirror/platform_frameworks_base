@@ -1,0 +1,208 @@
+page.title=Android 1.5 Platform Highlights
+@jd:body
+
+<p>
+<em>April 2009</em>
+</p>
+
+
+<p>The Android 1.5 platform introduces many new features for users and developers. 
+The list below provides an overview of the changes. </p>
+
+<ul>
+<li><a href="#ui">User Interface Refinements</a>
+<li><a href="#perf">Performance Improvements</a>
+<li><a href="#features">New Features</a>
+<li><a href="#apis">New APIs and Manifest Elements</a>
+</ul>
+
+<h2 id="ui">User Interface Refinements</h2>
+<ul>
+    <li>System-wide:
+      <ul>
+        <li>Refinement of all core UI elements</li>
+        <li>Animated window transitions (off by default)</li>
+        <li>Accelerometer-based application rotations</li>
+      </ul>
+   </li>
+    <li>UI polish for:
+      <ul>
+        <li>In-call experience</li>
+        <li>Contacts, Call log, and Favorites</li>
+        <li>SMS &amp; MMS</li>
+        <li>Browser</li>
+        <li>Gmail</li>
+        <li>Calendar</li>
+        <li>Email</li>
+        <li>Camera &amp; Gallery</li>
+        <li>Application management</li>
+      </ul>
+   </li>
+</ul>
+
+<h2 id="perf">Performance Improvements</h2>
+
+<ul>
+<li>Faster Camera start-up and image capture</li>
+<li>Much faster acquisition of GPS location (powered by SUPL AGPS)</li>
+<li>Smoother page scrolling in Browser</li>
+<li>Speedier GMail conversation list scrolling</li>
+</ul>
+
+<h2 id="features">New Features</h2>
+
+<ul>
+  <li>On-screen soft keyboard
+  <ul>
+    <li>Works in both portrait and landscape orientation</li>
+    <li>Support for user installation of 3rd party keyboards</li>
+    <li>User dictionary for custom words</li>
+  </ul>
+</li>
+
+<li>Home screen
+  <ul>
+     <li>Widgets
+     <ul>
+       <li>Bundled home screen widgets include: analog clock, calendar, 
+           music player, picture frame, and search</li>
+     </ul></li>
+     <li>Live folders</li>
+  </ul>
+</li>
+
+<li>Camera &amp; Gallery
+  <ul>
+  <li>Video recording</li>
+  <li>Video playback (MPEG-4 &amp; 3GP formats)</li>
+  </ul>
+</li>
+
+<li>Bluetooth&nbsp;
+  <ul>
+    <li>Stereo Bluetooth support (A2DP and AVCRP profiles)</li>
+    <li>Auto-pairing</li>
+    <li>Improved handsfree experience</li>
+  </ul>
+</li>
+
+<li>Browser
+  <ul>
+    <li>Updated with latest Webkit browser &amp; Squirrelfish Javascript engines</li>
+    <li>Copy 'n paste in browser</li>
+    <li>Search within a page</li>
+    <li>User-selectable text-encoding</li>
+    <li>UI changes include:
+      <ul>
+        <li>Unified Go and Search box</li>
+        <li>Tabbed bookmarks/history/most-visited screen</li>
+      </ul>
+    </li>
+  </ul>
+</li>
+
+<li>Contacts
+  <ul>
+    <li>Shows user picture for Favorites</li>
+    <li>Specific date/time stamp for events in call log</li>
+    <li>One-touch access to a contact card from call log event</li>
+  </ul>
+</li>
+
+<li>System
+<ul>
+  <li>New Linux kernel (version 2.6.27)</li>
+  <li>SD card filesystem auto-checking and repair</li>
+  <li>SIM Application Toolkit 1.0 </li>
+</ul>
+</li>
+
+<li>Google applications (not available in the Android 1.5 System Image that is
+included in the Android SDK)
+  <ul>
+    <li>View Google Talk friends' status in Contacts, SMS, MMS, GMail, and 
+        Email applications</li>
+    <li>Batch actions such as archive, delete, and label on Gmail messages</li>
+    <li>Upload videos to Youtube</li>
+    <li>Upload photos on Picasa</li>
+  </ul>
+</li>
+</ul>
+
+<h2 id="apis">New APIs and Manifest Elements</h2>
+
+<ul>
+<li>UI framework
+  <ul>
+    <li>Framework for easier background/UI thread interaction</li>
+    <li>New {@link android.widget.SlidingDrawer SlidingDrawer} widget</li>
+    <li>New {@link android.widget.HorizontalScrollView HorizontalScrollview} widget</li>
+  </ul>
+</li>
+
+<li>AppWidget framework
+  <ul>
+    <li>APIs for creating secure home screen {@link android.appwidget
+AppWidgets}. For information about how to use AppWidgets, see the Developer's
+Guide <a href="{@docRoot}guide/topics/appwidgets/index.html">AppWidgets</a>
+documentation. Also see <a
+href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-widgets-and.html">
+Introducing home screen widgets and the AppWidget
+framework</a> on the Android Developer's Blog.</li>
+    <li>APIs for populating {@link android.provider.LiveFolders Live Folders}
+        with custom content.</li>
+  </ul>
+</li>
+
+<li>Media framework
+  <ul>
+    <li>Raw audio recording and playback APIs</li>
+    <li>Interactive MIDI playback engine</li>
+    <li>{@link android.media.MediaRecorder Video Recording APIs} for developers (3GP format).</li>
+    <li>Video and photo sharing Intents</li>
+    <li>Media search Intent</li>
+  </ul>
+</li>
+
+<li>Input Method framework 
+   <ul>
+    <li>{@link android.inputmethodservice.InputMethodService Input Method
+        Service} framework</li>
+    <li>Text-prediction engine</li>
+    <li>Ability to provide downloadable IMEs to users</li>
+  </ul>
+</li>
+
+<li>Application-defined hardware requirements
+   <p>Applications can now use a new element in their manifest files, <a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-
+configuration&gt;</a> to indicate to the Android system what hardware features
+they require in order to function properly. For example, an application might
+use the element to specify that it requires a physical keyboard or a particular
+navigation device, such as a trackball. Prior to installing the application, the
+Android system checks the attributes defined for the
+<code>&lt;uses-configuration&gt;</code> element and allows the installation to
+continue only if the required hardware is present.</p>
+</li>
+
+<li>Speech recognition framework
+    <ul>
+    <li>Support for using speech recognition libraries via Intent. See {@link
+android.speech.RecognizerIntent RecognizerIntent}.</li>
+  </ul>
+</li>
+
+<li>Miscellaneous API additions
+  <ul>
+    <li>LocationManager - Applications can get location change updates via
+        Intent</li>
+    <li>WebView - Touch start/end/move/cancel DOM event support</li>
+    <li>Redesigned {@link android.hardware.SensorManager Sensor Manager
+        APIs}</li>
+    <li>GLSurfaceView - convenience framework for creating OpenGL
+        applications</li>
+    <li>Broadcast Intent for app update install succeeded - for smoother app
+        upgrade experience</li>
+  </ul>
+</li>
+</ul>

@@ -16,7 +16,6 @@
 
 package android.webkit;
 
-import android.util.Config;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -138,7 +137,7 @@ public class WebBackForwardList implements Cloneable, Serializable {
         // when removing the first item, we can assert that the index is 0.
         // This lets us change the current index without having to query the
         // native BackForwardList.
-        if (Config.DEBUG && (index != 0)) {
+        if (WebView.DEBUG && (index != 0)) {
             throw new AssertionError();
         }
         final WebHistoryItem h = mArray.remove(index);

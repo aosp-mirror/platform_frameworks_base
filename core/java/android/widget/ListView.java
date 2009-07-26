@@ -20,6 +20,8 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.PixelFormat;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Parcel;
@@ -34,6 +36,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.SoundEffectConstants;
+import android.view.accessibility.AccessibilityEvent;
 
 import com.google.android.collect.Lists;
 import com.android.internal.R;
@@ -113,7 +116,11 @@ public class ListView extends AbsListView {
 
     Drawable mDivider;
     int mDividerHeight;
+
+    private boolean mIsCacheColorOpaque;
+    private boolean mDividerIsOpaque;
     private boolean mClipDivider;
+
     private boolean mHeaderDividersEnabled;
     private boolean mFooterDividersEnabled;
 
@@ -127,6 +134,7 @@ public class ListView extends AbsListView {
 
     // used for temporary calculations.
     private final Rect mTempRect = new Rect();
+    private Paint mDividerPaint;
 
     // the single allocated result per list view; kinda cheesey but avoids
     // allocating these thingies too often.
@@ -166,6 +174,8 @@ public class ListView extends AbsListView {
             setDividerHeight(dividerHeight);
         }
 
+        setChoiceMode(a.getInt(R.styleable.ListView_choiceMode, CHOICE_MODE_NONE));
+        
         mHeaderDividersEnabled = a.getBoolean(R.styleable.ListView_headerDividersEnabled, true);
         mFooterDividersEnabled = a.getBoolean(R.styleable.ListView_footerDividersEnabled, true);
 
@@ -460,8 +470,28 @@ public class ListView extends AbsListView {
      */
     @Override
     void resetList() {
+        // The parent's resetList() will remove all views from the layout so we need to
+        // cleanup the state of our footers and headers
+        clearRecycledState(mHeaderViewInfos);
+        clearRecycledState(mFooterViewInfos);
+
         super.resetList();
+
         mLayoutMode = LAYOUT_NORMAL;
+    }
+
+    private void clearRecycledState(ArrayList<FixedViewInfo> infos) {
+        if (infos != null) {
+            final int count = infos.size();
+
+            for (int i = 0; i < count; i++) {
+                final View child = infos.get(i).view;
+                final LayoutParams p = (LayoutParams) child.getLayoutParams();
+                if (p != null) {
+                    p.recycledHeaderFooter = false;
+                }
+            }
+        }
     }
 
     /**
@@ -1394,6 +1424,11 @@ public class ListView extends AbsListView {
                 resetList();
                 invokeOnItemScrollListener();
                 return;
+            } else if (mItemCount != mAdapter.getCount()) {
+                throw new IllegalStateException("The content of the adapter has changed but "
+                        + "ListView did not receive a notification. Make sure the content of "
+                        + "your adapter is not modified from a background thread, but only "
+                        + "from the UI thread.");
             }
 
             setSelectedPositionInt(mNextSelectedPosition);
@@ -1813,6 +1848,39 @@ public class ListView extends AbsListView {
             }
             return position;
         }
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        boolean populated = super.dispatchPopulateAccessibilityEvent(event);
+
+        // If the item count is less than 15 then subtract disabled items from the count and
+        // position. Otherwise ignore disabled items.
+        if (!populated) {
+            int itemCount = 0;
+            int currentItemIndex = getSelectedItemPosition();
+
+            ListAdapter adapter = getAdapter();
+            if (adapter != null) {
+                final int count = adapter.getCount();
+                if (count < 15) {
+                    for (int i = 0; i < count; i++) {
+                        if (adapter.isEnabled(i)) {
+                            itemCount++;
+                        } else if (i <= currentItemIndex) {
+                            currentItemIndex--;
+                        }
+                    }
+                } else {
+                    itemCount = count;
+                }
+            }
+
+            event.setItemCount(itemCount);
+            event.setCurrentItemIndex(currentItemIndex);
+        }
+
+        return populated;
     }
 
     /**
@@ -2751,6 +2819,28 @@ public class ListView extends AbsListView {
         return mItemsCanFocus;
     }
 
+    /**
+     * @hide Pending API council approval.
+     */
+    @Override
+    public boolean isOpaque() {
+        return (mCachingStarted && mIsCacheColorOpaque && mDividerIsOpaque &&
+                hasOpaqueScrollbars()) || super.isOpaque();
+    }
+
+    @Override
+    public void setCacheColorHint(int color) {
+        final boolean opaque = (color >>> 24) == 0xFF;
+        mIsCacheColorOpaque = opaque;
+        if (opaque) {
+            if (mDividerPaint == null) {
+                mDividerPaint = new Paint();
+            }
+            mDividerPaint.setColor(color);
+        }
+        super.setCacheColorHint(color);
+    }
+
     @Override
     protected void dispatchDraw(Canvas canvas) {
         // Draw the dividers
@@ -2770,6 +2860,17 @@ public class ListView extends AbsListView {
             final int first = mFirstPosition;
             final boolean areAllItemsSelectable = mAreAllItemsSelectable;
             final ListAdapter adapter = mAdapter;
+            // If the list is opaque *and* the background is not, we want to
+            // fill a rect where the dividers would be for non-selectable items
+            // If the list is opaque and the background is also opaque, we don't
+            // need to draw anything since the background will do it for us
+            final boolean fillForMissingDividers = isOpaque() && !super.isOpaque();
+
+            if (fillForMissingDividers && mDividerPaint == null && mIsCacheColorOpaque) {
+                mDividerPaint = new Paint();
+                mDividerPaint.setColor(getCacheColorHint());
+            }
+            final Paint paint = mDividerPaint;
 
             if (!mStackFromBottom) {
                 int bottom;
@@ -2781,12 +2882,18 @@ public class ListView extends AbsListView {
                         View child = getChildAt(i);
                         bottom = child.getBottom();
                         // Don't draw dividers next to items that are not enabled
-                        if (bottom < listBottom && (areAllItemsSelectable ||
-                                (adapter.isEnabled(first + i) && (i == count - 1 ||
-                                        adapter.isEnabled(first + i + 1))))) {
-                            bounds.top = bottom;
-                            bounds.bottom = bottom + dividerHeight;
-                            drawDivider(canvas, bounds, i);
+                        if (bottom < listBottom) {
+                            if ((areAllItemsSelectable ||
+                                    (adapter.isEnabled(first + i) && (i == count - 1 ||
+                                            adapter.isEnabled(first + i + 1))))) {
+                                bounds.top = bottom;
+                                bounds.bottom = bottom + dividerHeight;
+                                drawDivider(canvas, bounds, i);
+                            } else if (fillForMissingDividers) {
+                                bounds.top = bottom;
+                                bounds.bottom = bottom + dividerHeight;
+                                canvas.drawRect(bounds, paint);
+                            }
                         }
                     }
                 }
@@ -2800,16 +2907,22 @@ public class ListView extends AbsListView {
                         View child = getChildAt(i);
                         top = child.getTop();
                         // Don't draw dividers next to items that are not enabled
-                        if (top > listTop && (areAllItemsSelectable ||
-                                (adapter.isEnabled(first + i) && (i == count - 1 ||
-                                        adapter.isEnabled(first + i + 1))))) {
-                            bounds.top = top - dividerHeight;
-                            bounds.bottom = top;
-                            // Give the method the child ABOVE the divider, so we
-                            // subtract one from our child
-                            // position. Give -1 when there is no child above the
-                            // divider.
-                            drawDivider(canvas, bounds, i - 1);
+                        if (top > listTop) {
+                            if ((areAllItemsSelectable ||
+                                    (adapter.isEnabled(first + i) && (i == count - 1 ||
+                                            adapter.isEnabled(first + i + 1))))) {
+                                bounds.top = top - dividerHeight;
+                                bounds.bottom = top;
+                                // Give the method the child ABOVE the divider, so we
+                                // subtract one from our child
+                                // position. Give -1 when there is no child above the
+                                // divider.
+                                drawDivider(canvas, bounds, i - 1);
+                            } else if (fillForMissingDividers) {
+                                bounds.top = top - dividerHeight;
+                                bounds.bottom = top;
+                                canvas.drawRect(bounds, paint);
+                            }
                         }
                     }
                 }
@@ -2872,6 +2985,7 @@ public class ListView extends AbsListView {
             mClipDivider = false;
         }
         mDivider = divider;
+        mDividerIsOpaque = divider == null || divider.getOpacity() == PixelFormat.OPAQUE;
         requestLayoutIfNecessary();
     }
 
@@ -3150,9 +3264,13 @@ public class ListView extends AbsListView {
         if (mChoiceMode == CHOICE_MODE_MULTIPLE) {
             mCheckStates.put(position, value);
         } else {
-            boolean oldValue = mCheckStates.get(position, false);
+            // Clear the old value: if something was selected and value == false
+            // then it is unselected
             mCheckStates.clear();
-            if (!oldValue) {
+            // If value == true, select the appropriate position
+            // this may end up selecting the value we just cleared but this way
+            // we don't have to first to a get(position)
+            if (value) {
                 mCheckStates.put(position, true);
             }
         }
@@ -3215,6 +3333,29 @@ public class ListView extends AbsListView {
             return mCheckStates;
         }
         return null;
+    }
+
+    /**
+     * Returns the set of checked items ids. The result is only valid if
+     * the choice mode has not been set to {@link #CHOICE_MODE_SINGLE}.
+     *
+     * @return A new array which contains the id of each checked item in the list.
+     */
+    public long[] getCheckItemIds() {
+        if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null && mAdapter != null) {
+            final SparseBooleanArray states = mCheckStates;
+            final int count = states.size();
+            final long[] ids = new long[count];
+            final ListAdapter adapter = mAdapter;
+
+            for (int i = 0; i < count; i++) {
+                ids[i]= adapter.getItemId(states.keyAt(i));
+            }
+
+            return ids;
+        }
+
+        return new long[0];
     }
 
     /**

@@ -102,6 +102,36 @@ static void Region_translate(JNIEnv* env, jobject region, int x, int y, jobject 
         rgn->translate(x, y);
 }
 
+// Scale the rectangle by given scale and set the reuslt to the dst.
+static void scale_rect(SkIRect* dst, const SkIRect& src, float scale) {
+   dst->fLeft = (int)::roundf(src.fLeft * scale);
+   dst->fTop = (int)::roundf(src.fTop * scale);
+   dst->fRight = (int)::roundf(src.fRight * scale);
+   dst->fBottom = (int)::roundf(src.fBottom * scale);
+}
+
+// Scale the region by given scale and set the reuslt to the dst.
+// dest and src can be the same region instance.
+static void scale_rgn(SkRegion* dst, const SkRegion& src, float scale) {
+   SkRegion tmp;
+   SkRegion::Iterator iter(src);
+
+   for (; !iter.done(); iter.next()) {
+       SkIRect r;
+       scale_rect(&r, iter.rect(), scale);
+       tmp.op(r, SkRegion::kUnion_Op);
+   }
+   dst->swap(tmp);
+}
+
+static void Region_scale(JNIEnv* env, jobject region, jfloat scale, jobject dst) {
+    SkRegion* rgn = GetSkRegion(env, region);
+    if (dst)
+        scale_rgn(GetSkRegion(env, dst), *rgn, scale);
+    else
+        scale_rgn(rgn, *rgn, scale);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "Parcel.h"
@@ -135,6 +165,13 @@ static jboolean Region_writeToParcel(JNIEnv* env, jobject clazz, const SkRegion*
     region->flatten(p->writeInplace(size));
 
     return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static jboolean Region_equals(JNIEnv* env, jobject clazz, const SkRegion *r1, const SkRegion* r2)
+{
+  return (jboolean) (*r1 == *r2);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -206,10 +243,12 @@ static JNINativeMethod gRegionMethods[] = {
     { "quickContains",          "(IIII)Z",                          (void*)Region_quickContains     },
     { "quickReject",            "(IIII)Z",                          (void*)Region_quickRejectIIII   },
     { "quickReject",            "(Landroid/graphics/Region;)Z",     (void*)Region_quickRejectRgn    },
+    { "scale",                  "(FLandroid/graphics/Region;)V",    (void*)Region_scale             },
     { "translate",              "(IILandroid/graphics/Region;)V",   (void*)Region_translate         },
     // parceling methods
     { "nativeCreateFromParcel", "(Landroid/os/Parcel;)I",           (void*)Region_createFromParcel  },
-    { "nativeWriteToParcel",    "(ILandroid/os/Parcel;)Z",          (void*)Region_writeToParcel     }
+    { "nativeWriteToParcel",    "(ILandroid/os/Parcel;)Z",          (void*)Region_writeToParcel     },
+    { "nativeEquals",           "(II)Z",                            (void*)Region_equals            },
 };
 
 int register_android_graphics_Region(JNIEnv* env);

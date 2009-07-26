@@ -24,7 +24,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Path;
 import com.android.internal.util.ArrayUtils;
-import android.util.Config;
 
 import junit.framework.Assert;
 import android.text.style.*;
@@ -39,6 +38,8 @@ import android.view.KeyEvent;
  * For text that will not change, use a {@link StaticLayout}.
  */
 public abstract class Layout {
+    private static final boolean DEBUG = false;
+
     /* package */ static final EmojiFactory EMOJI_FACTORY =
         EmojiFactory.newAvailableInstance();
     /* package */ static final int MIN_EMOJI, MAX_EMOJI;
@@ -330,7 +331,7 @@ public abstract class Layout {
             boolean hasTab = getLineContainsTab(i);
             if (directions == DIRS_ALL_LEFT_TO_RIGHT &&
                     !spannedText && !hasTab) {
-                if (Config.DEBUG) {
+                if (DEBUG) {
                     Assert.assertTrue(dir == DIR_LEFT_TO_RIGHT);
                     Assert.assertNotNull(c);
                 }
@@ -797,7 +798,7 @@ public abstract class Layout {
     }
     
     private int getLineVisibleEnd(int line, int start, int end) {
-        if (Config.DEBUG) {
+        if (DEBUG) {
             Assert.assertTrue(getLineStart(line) == start && getLineStart(line+1) == end);
         }
 
@@ -1340,7 +1341,7 @@ public abstract class Layout {
         char[] buf;
         if (!hasTabs) {
             if (directions == DIRS_ALL_LEFT_TO_RIGHT) {
-                if (Config.DEBUG) {
+                if (DEBUG) {
                     Assert.assertTrue(DIR_LEFT_TO_RIGHT == dir);
                 }
                 Styled.drawText(canvas, text, start, end, dir, false, x, top, y, bottom, paint, workPaint, false);

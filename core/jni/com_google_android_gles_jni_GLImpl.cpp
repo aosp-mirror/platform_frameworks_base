@@ -22,11 +22,20 @@
 
 #include <assert.h>
 #include <GLES/gl.h>
+#include <GLES/glext.h>
 
-#include <private/opengles/gl_context.h>
-
-#define _NUM_COMPRESSED_TEXTURE_FORMATS \
-        (::android::OGLES_NUM_COMPRESSED_TEXTURE_FORMATS)
+/* special calls implemented in Android's GLES wrapper used to more
+ * efficiently bound-check passed arrays */
+extern "C" {
+GL_API void GL_APIENTRY glColorPointerBounds(GLint size, GLenum type, GLsizei stride,
+        const GLvoid *ptr, GLsizei count);
+GL_API void GL_APIENTRY glNormalPointerBounds(GLenum type, GLsizei stride,
+        const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glTexCoordPointerBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glVertexPointerBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
+}
 
 static int initialized = 0;
 
@@ -36,16 +45,18 @@ static jclass OOMEClass;
 static jclass UOEClass;
 static jclass IAEClass;
 static jclass AIOOBEClass;
+static jclass G11ImplClass;
 static jmethodID getBasePointerID;
 static jmethodID getBaseArrayID;
 static jmethodID getBaseArrayOffsetID;
+static jmethodID allowIndirectBuffersID;
 static jfieldID positionID;
 static jfieldID limitID;
 static jfieldID elementSizeShiftID;
 
 /* Cache method IDs each time the class is loaded. */
 
-void
+static void
 nativeClassInitBuffer(JNIEnv *_env)
 {
     jclass nioAccessClassLocal = _env->FindClass("java/nio/NIOAccess");
@@ -54,19 +65,22 @@ nativeClassInitBuffer(JNIEnv *_env)
     jclass bufferClassLocal = _env->FindClass("java/nio/Buffer");
     bufferClass = (jclass) _env->NewGlobalRef(bufferClassLocal);
 
+    jclass g11impClassLocal = _env->FindClass("com/google/android/gles_jni/GLImpl");
+    G11ImplClass = (jclass) _env->NewGlobalRef(g11impClassLocal);
+
     getBasePointerID = _env->GetStaticMethodID(nioAccessClass,
             "getBasePointer", "(Ljava/nio/Buffer;)J");
     getBaseArrayID = _env->GetStaticMethodID(nioAccessClass,
             "getBaseArray", "(Ljava/nio/Buffer;)Ljava/lang/Object;");
     getBaseArrayOffsetID = _env->GetStaticMethodID(nioAccessClass,
             "getBaseArrayOffset", "(Ljava/nio/Buffer;)I");
-
+    allowIndirectBuffersID = _env->GetStaticMethodID(g11impClassLocal,
+            "allowIndirectBuffers", "(Ljava/lang/String;)Z");
     positionID = _env->GetFieldID(bufferClass, "position", "I");
     limitID = _env->GetFieldID(bufferClass, "limit", "I");
     elementSizeShiftID =
         _env->GetFieldID(bufferClass, "_elementSizeShift", "I");
 }
-
 
 static void
 nativeClassInit(JNIEnv *_env, jclass glImplClass)
@@ -111,6 +125,9 @@ getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining)
     
     *array = (jarray) _env->CallStaticObjectMethod(nioAccessClass,
             getBaseArrayID, buffer);
+    if (*array == NULL) {
+        return (void*) NULL;
+    }
     offset = _env->CallStaticIntMethod(nioAccessClass,
             getBaseArrayOffsetID, buffer);
     data = _env->GetPrimitiveArrayCritical(*array, (jboolean *) 0);
@@ -118,12 +135,57 @@ getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining)
     return (void *) ((char *) data + offset);
 }
 
-
 static void
 releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit)
 {
     _env->ReleasePrimitiveArrayCritical(array, data,
 					   commit ? 0 : JNI_ABORT);
+}
+
+extern "C" {
+extern char*  __progname;
+}
+
+static bool
+allowIndirectBuffers(JNIEnv *_env) {
+    static jint sIndirectBufferCompatability;
+    if (sIndirectBufferCompatability == 0) {
+        jobject appName = _env->NewStringUTF(::__progname);
+        sIndirectBufferCompatability = _env->CallStaticBooleanMethod(G11ImplClass, allowIndirectBuffersID, appName) ? 2 : 1;
+    }
+    return sIndirectBufferCompatability == 2;
+}
+
+static void *
+getDirectBufferPointer(JNIEnv *_env, jobject buffer) {
+    if (!buffer) {
+        return NULL;
+    }
+    void* buf = _env->GetDirectBufferAddress(buffer);
+    if (buf) {
+        jint position = _env->GetIntField(buffer, positionID);
+        jint elementSizeShift = _env->GetIntField(buffer, elementSizeShiftID);
+        buf = ((char*) buf) + (position << elementSizeShift);
+    } else {
+        if (allowIndirectBuffers(_env)) {
+            jarray array = 0;
+            jint remaining;
+            buf = getPointer(_env, buffer, &array, &remaining);
+            if (array) {
+                releasePointer(_env, array, buf, 0);
+            }
+        } else {
+            _env->ThrowNew(IAEClass, "Must use a native order direct Buffer");
+        }
+    }
+    return buf;
+}
+
+static int
+getNumCompressedTextureFormats() {
+    int numCompressedTextureFormats = 0;
+    glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &numCompressedTextureFormats);
+    return numCompressedTextureFormats;
 }
 
 // --------------------------------------------------------------------------
@@ -290,7 +352,12 @@ android_glColorPointerBounds__IIILjava_nio_Buffer_2I
     jint _remaining;
     GLvoid *pointer = (GLvoid *) 0;
 
-    pointer = (GLvoid *)getPointer(_env, pointer_buf, &_array, &_remaining);
+    if (pointer_buf) {
+        pointer = (GLvoid *) getDirectBufferPointer(_env, pointer_buf);
+        if ( ! pointer ) {
+            return;
+        }
+    }
     glColorPointerBounds(
         (GLint)size,
         (GLenum)type,
@@ -298,9 +365,6 @@ android_glColorPointerBounds__IIILjava_nio_Buffer_2I
         (GLvoid *)pointer,
         (GLsizei)remaining
     );
-    if (_array) {
-        releasePointer(_env, _array, pointer, JNI_FALSE);
-    }
 }
 
 /* void glCompressedTexImage2D ( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data ) */
@@ -1022,6 +1086,12 @@ android_glGetIntegerv__I_3II
 #if defined(GL_IMPLEMENTATION_COLOR_READ_TYPE_OES)
         case GL_IMPLEMENTATION_COLOR_READ_TYPE_OES:
 #endif // defined(GL_IMPLEMENTATION_COLOR_READ_TYPE_OES)
+#if defined(GL_LIGHT_MODEL_COLOR_CONTROL)
+        case GL_LIGHT_MODEL_COLOR_CONTROL:
+#endif // defined(GL_LIGHT_MODEL_COLOR_CONTROL)
+#if defined(GL_LIGHT_MODEL_LOCAL_VIEWER)
+        case GL_LIGHT_MODEL_LOCAL_VIEWER:
+#endif // defined(GL_LIGHT_MODEL_LOCAL_VIEWER)
 #if defined(GL_LIGHT_MODEL_TWO_SIDE)
         case GL_LIGHT_MODEL_TWO_SIDE:
 #endif // defined(GL_LIGHT_MODEL_TWO_SIDE)
@@ -1236,6 +1306,12 @@ android_glGetIntegerv__I_3II
 #if defined(GL_COLOR_WRITEMASK)
         case GL_COLOR_WRITEMASK:
 #endif // defined(GL_COLOR_WRITEMASK)
+#if defined(GL_FOG_COLOR)
+        case GL_FOG_COLOR:
+#endif // defined(GL_FOG_COLOR)
+#if defined(GL_LIGHT_MODEL_AMBIENT)
+        case GL_LIGHT_MODEL_AMBIENT:
+#endif // defined(GL_LIGHT_MODEL_AMBIENT)
 #if defined(GL_SCISSOR_BOX)
         case GL_SCISSOR_BOX:
 #endif // defined(GL_SCISSOR_BOX)
@@ -1267,13 +1343,7 @@ android_glGetIntegerv__I_3II
 #if defined(GL_COMPRESSED_TEXTURE_FORMATS)
         case GL_COMPRESSED_TEXTURE_FORMATS:
 #endif // defined(GL_COMPRESSED_TEXTURE_FORMATS)
-#if defined(GL_FOG_COLOR)
-        case GL_FOG_COLOR:
-#endif // defined(GL_FOG_COLOR)
-#if defined(GL_LIGHT_MODEL_AMBIENT)
-        case GL_LIGHT_MODEL_AMBIENT:
-#endif // defined(GL_LIGHT_MODEL_AMBIENT)
-            _needed = _NUM_COMPRESSED_TEXTURE_FORMATS;
+            _needed = getNumCompressedTextureFormats();
             break;
         default:
             _needed = 0;
@@ -1378,6 +1448,12 @@ android_glGetIntegerv__ILjava_nio_IntBuffer_2
 #if defined(GL_IMPLEMENTATION_COLOR_READ_TYPE_OES)
         case GL_IMPLEMENTATION_COLOR_READ_TYPE_OES:
 #endif // defined(GL_IMPLEMENTATION_COLOR_READ_TYPE_OES)
+#if defined(GL_LIGHT_MODEL_COLOR_CONTROL)
+        case GL_LIGHT_MODEL_COLOR_CONTROL:
+#endif // defined(GL_LIGHT_MODEL_COLOR_CONTROL)
+#if defined(GL_LIGHT_MODEL_LOCAL_VIEWER)
+        case GL_LIGHT_MODEL_LOCAL_VIEWER:
+#endif // defined(GL_LIGHT_MODEL_LOCAL_VIEWER)
 #if defined(GL_LIGHT_MODEL_TWO_SIDE)
         case GL_LIGHT_MODEL_TWO_SIDE:
 #endif // defined(GL_LIGHT_MODEL_TWO_SIDE)
@@ -1592,6 +1668,12 @@ android_glGetIntegerv__ILjava_nio_IntBuffer_2
 #if defined(GL_COLOR_WRITEMASK)
         case GL_COLOR_WRITEMASK:
 #endif // defined(GL_COLOR_WRITEMASK)
+#if defined(GL_FOG_COLOR)
+        case GL_FOG_COLOR:
+#endif // defined(GL_FOG_COLOR)
+#if defined(GL_LIGHT_MODEL_AMBIENT)
+        case GL_LIGHT_MODEL_AMBIENT:
+#endif // defined(GL_LIGHT_MODEL_AMBIENT)
 #if defined(GL_SCISSOR_BOX)
         case GL_SCISSOR_BOX:
 #endif // defined(GL_SCISSOR_BOX)
@@ -1623,13 +1705,7 @@ android_glGetIntegerv__ILjava_nio_IntBuffer_2
 #if defined(GL_COMPRESSED_TEXTURE_FORMATS)
         case GL_COMPRESSED_TEXTURE_FORMATS:
 #endif // defined(GL_COMPRESSED_TEXTURE_FORMATS)
-#if defined(GL_FOG_COLOR)
-        case GL_FOG_COLOR:
-#endif // defined(GL_FOG_COLOR)
-#if defined(GL_LIGHT_MODEL_AMBIENT)
-        case GL_LIGHT_MODEL_AMBIENT:
-#endif // defined(GL_LIGHT_MODEL_AMBIENT)
-            _needed = _NUM_COMPRESSED_TEXTURE_FORMATS;
+            _needed = getNumCompressedTextureFormats();
             break;
         default:
             _needed = 0;
@@ -1654,6 +1730,7 @@ exit:
 #include <string.h>
 
 /* const GLubyte * glGetString ( GLenum name ) */
+static
 jstring
 android_glGetString
   (JNIEnv *_env, jobject _this, jint name) {
@@ -2748,16 +2825,18 @@ android_glNormalPointerBounds__IILjava_nio_Buffer_2I
     jint _remaining;
     GLvoid *pointer = (GLvoid *) 0;
 
-    pointer = (GLvoid *)getPointer(_env, pointer_buf, &_array, &_remaining);
+    if (pointer_buf) {
+        pointer = (GLvoid *) getDirectBufferPointer(_env, pointer_buf);
+        if ( ! pointer ) {
+            return;
+        }
+    }
     glNormalPointerBounds(
         (GLenum)type,
         (GLsizei)stride,
         (GLvoid *)pointer,
         (GLsizei)remaining
     );
-    if (_array) {
-        releasePointer(_env, _array, pointer, JNI_FALSE);
-    }
 }
 
 /* void glOrthof ( GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar ) */
@@ -3000,7 +3079,12 @@ android_glTexCoordPointerBounds__IIILjava_nio_Buffer_2I
     jint _remaining;
     GLvoid *pointer = (GLvoid *) 0;
 
-    pointer = (GLvoid *)getPointer(_env, pointer_buf, &_array, &_remaining);
+    if (pointer_buf) {
+        pointer = (GLvoid *) getDirectBufferPointer(_env, pointer_buf);
+        if ( ! pointer ) {
+            return;
+        }
+    }
     glTexCoordPointerBounds(
         (GLint)size,
         (GLenum)type,
@@ -3008,9 +3092,6 @@ android_glTexCoordPointerBounds__IIILjava_nio_Buffer_2I
         (GLvoid *)pointer,
         (GLsizei)remaining
     );
-    if (_array) {
-        releasePointer(_env, _array, pointer, JNI_FALSE);
-    }
 }
 
 /* void glTexEnvf ( GLenum target, GLenum pname, GLfloat param ) */
@@ -3355,7 +3436,12 @@ android_glVertexPointerBounds__IIILjava_nio_Buffer_2I
     jint _remaining;
     GLvoid *pointer = (GLvoid *) 0;
 
-    pointer = (GLvoid *)getPointer(_env, pointer_buf, &_array, &_remaining);
+    if (pointer_buf) {
+        pointer = (GLvoid *) getDirectBufferPointer(_env, pointer_buf);
+        if ( ! pointer ) {
+            return;
+        }
+    }
     glVertexPointerBounds(
         (GLint)size,
         (GLenum)type,
@@ -3363,9 +3449,6 @@ android_glVertexPointerBounds__IIILjava_nio_Buffer_2I
         (GLvoid *)pointer,
         (GLsizei)remaining
     );
-    if (_array) {
-        releasePointer(_env, _array, pointer, JNI_FALSE);
-    }
 }
 
 /* void glViewport ( GLint x, GLint y, GLsizei width, GLsizei height ) */

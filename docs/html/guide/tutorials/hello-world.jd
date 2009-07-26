@@ -1,6 +1,21 @@
 page.title=Hello, World
 @jd:body
 
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#avd">Create an AVD</a></li>
+      <li><a href="#create">Create the Project</a></li>
+      <li><a href="#ui">Construct the UI</a></li>
+      <li><a href="#run">Run the Code</a></li>
+      <li><a href="#upgrading">Upgrade the UI to an XML Layout</a></li>
+      <li><a href="#debugging">Debug Your Project</a></li>
+      <li><a href="#noeclipse">Creating the Project Without Eclipse</a></li>
+    </ol>
+  </div>
+</div>
+
 <p>As a developer, you know that the first impression
 of a development framework is how easy it is to write "Hello,
 World." Well, on Android, it's pretty easy. 
@@ -14,61 +29,68 @@ You can then return to this tutorial and ignore anything about Eclipse.</p>
 
 <p>Before you start, you should already have the very latest SDK installed, and if you're using
 Eclipse, you should have installed the ADT plugin as well. If you have not installed these, see 
-<a href="{@docRoot}sdk/1.1_r1/installing.html">Installing the Android SDK</a> and return
+<a href="{@docRoot}sdk/{@sdkCurrent}/installing.html">Installing the Android SDK</a> and return
 here when you've completed the installation.</p>
 
 <h2 id="avd">Create an AVD</h2>
 
-<p class="note"><strong>Note:</strong> If you're developing with an Android SDK older
-than the one provided for Android 1.5, you can skip this step and continue with
-<a href="#create">Create the Project</a>.</p>
+<div class="sidebox-wrapper">
+  <div class="sidebox-inner">
+    <p>To learn more about how to use AVDs and the options 
+       available to you, refer to the 
+       <a href="{@docRoot}guide/developing/tools/avd.html">Android 
+       Virtual Devices</a> document.</p>
+  </div>
+</div>
 
-<p>In this tutorial, you will run your applicion in the Android Emulator.
+<p>In this tutorial, you will run your application in the Android Emulator.
 Before you can launch the emulator, you must create an 
 Android Virtual Device (AVD). An AVD defines the system image and
 device settings used by the emulator.</p>
 
-<p>To create an AVD, use the <code>android</code> tool provided in the Android SDK.
+<p>To create an AVD, use the "android" tool provided in the Android SDK.
 Open a command prompt or terminal, navigate to the 
-<code>/tools</code> directory in the SDK package and execute:
+<code>tools/</code> directory in the SDK package and execute:
 <pre>
-android create avd --target 1 --name myavd
+android create avd --target 2 --name my_avd
 </pre>
 
-<p>The tool now asks if you would like to create a custom hardware profile, say
-<code>no</code>. That's it. You now have an AVD and can use it to run the Emulator.</p>
+<p>The tool now asks if you would like to create a custom hardware profile.
+For the time being, press Return to skip it ("no" is the default response). 
+That's it. This configures an AVD named "my_avd" that uses the Android 1.5
+platform. The AVD is now ready for use in the emulator.</p>
 
-<p>In the above command, the <code>target</code> option is required 
-and specifies the target platform for the emulator. (A target defines the system image,
-API level and supported skins. To view all available targets, execute:
-<code>android list target</code>.) The <code>name</code> option is also required
-and defines the name for the new AVD. For more information about <code>android</code>, 
-see the <a href="{@docRoot}guide/developing/tools/android.html">Android Tool</a>
-documentation.</p>
+<p>In the above command, the <code>--target</code> option is required 
+and specifies the deployment target to run on the emulator.
+The <code>--name</code> option is also required and defines the 
+name for the new AVD.</p>
 
-<h2 id="create">Create the Project</h2>
+
+<h2 id="create">Create a New Android Project</h2>
+
+<p>After you've created an AVD, the next step is to start a new
+Android project in Eclipse.</p>
 
 <ol>
-    <li><strong>Open a new Android Project.</strong>
-        <p>From Eclipse, select the <strong>File &gt; New &gt; Project</strong> menu item. If the Android
-            Plugin for Eclipse has been successfully installed, the resulting dialog
-            should have a folder labeled "Android" which should contain a single entry:
-            "Android Project". (After you create one or more Android projects, an entry for 
-            "Android XML File" will also be available.)</p>
-        <p>Selected "Android Project" and click <strong>Next</strong>.</p>
-            
-            <a href="images/hello_world_0.png"><img src="images/hello_world_0.png" style="height:230px" alt="" /></a>
-
+    <li>From Eclipse, select <strong>File &gt; New &gt; Project</strong>. 
+      <p>If the ADT
+      Plugin for Eclipse has been successfully installed, the resulting dialog
+      should have a folder labeled "Android" which should contain
+      "Android Project". (After you create one or more Android projects, an entry for 
+      "Android XML File" will also be available.)</p>
     </li>
 
-    <li><strong>Fill out the project details.</strong>
-        <p>The next screen allows you to enter the relevant details for your project:</p>
+    <li>Select "Android Project" and click <strong>Next</strong>.<br/>
+      <a href="images/hello_world_0.png"><img src="images/hello_world_0.png" style="height:230px" alt="" /></a>
+    </li>
+
+    <li>Fill in the project details with the following values:
         <ul>
           <li><em>Project name:</em> HelloAndroid</li>
           <li><em>Application name:</em> Hello, Android</li>
           <li><em>Package name:</em> com.example.helloandroid (or your own private namespace)</li>
           <li><em>Create Activity:</em> HelloAndroid</li>
-          <li><em>Min SDK Version:</em> 3</li>
+          <li><em>Min SDK Version:</em> 2</li>
         </ul>
         <p>Click <strong>Finish</strong>.</p>
 
@@ -102,25 +124,34 @@ documentation.</p>
                 chooses, but it doesn't need to. As the checkbox suggests, this is optional, but an
                 Activity is almost always used as the basis for an application.</dd>
             <dt><em>Min SDK Version</em></dt>
-                <dd>This value specifies the API Level required by your application. With each new
+                <dd>This value specifies the minimum API Level required by your application. If the API Level
+                entered here matches the API Level provided by one of the available targets, 
+                then that Build Target will be automatically selected (in this case, entering 
+                "2" as the API Level will select the Android 1.1 target). With each new
                 version of the Android system image and Android SDK, there have likely been 
                 additions or changes made to the APIs. When this occurs, a new API Level is assigned
                 to the system image to regulate which applications are allowed to be run. If an
-                application requires an API Level that is higher than the level supported by the device,
-                then the application is not allowed to be installed. Because the "Hello World" 
-                application uses APIs that have not changed since the first release, you can safely
-                declare API Level "1" for the Min SDK Version, which is supported by all Android 
-                devices.</dd>
+                application requires an API Level that is <em>higher</em> than the level supported 
+                by the device, then the application will not be installed.</dd>
         </dl>
       
         <p><em>Other fields</em>: The checkbox for "Use default location" allows you to change 
-        the location on disk where the project's files will be generated and stored. "Target"
-        is the platform target for your application.</p>
+        the location on disk where the project's files will be generated and stored. "Build Target"
+        is the platform target that your application will be compiled against 
+        (this should be selected automatically, based on your Min SDK Version).</p>
 
+        <p class="note">Notice that the "Build Target" you've selected uses the Android 1.1
+        platform. This means that your application will be compiled against the Android 1.1 
+        platform library. If you recall, the AVD created above runs on the Android 1.5 platform.
+        These don't have to match; Android applications are forward-compatible, so an application
+        built against the 1.1 platform library will run normally on the 1.5 platform. The reverse
+        is not true.</p>
     </li>
+</ol>
 
-<li><strong>View the generated Activity.</strong>
-<p>Open the HelloAndroid.java file, located inside <em>HelloAndroid > src > 
+<p>Your Android project is now ready. It should be visible in the Package
+Explorer on the left.
+Open the <code>HelloAndroid.java</code> file, located inside <em>HelloAndroid > src > 
 com.example.helloandroid</em>). It should look like this:</p>
 
 <pre>
@@ -147,8 +178,6 @@ it is where you should perform all initialization and UI setup. An activity is n
 have a user interface, but usually will.</p>
 
 <p>Now let's modify some code! </p>
-</li>
-</ol>
 
 
 <h2 id="ui">Construct the UI</h2>
@@ -191,10 +220,10 @@ on. The Activity class inherits from Context, and because your
 HelloAndroid class is a subclass of Activity, it is also a Context. So, you can
 pass <code>this</code> as your Context reference to the TextView.</p>
 
-<p>Next, define the text content with 
+<p>Next, you define the text content with 
 {@link android.widget.TextView setText(CharSequence) setText()}.</p>
 
-<p>Finally, pass the TextView to
+<p>Finally, you pass the TextView to
 {@link android.app.Activity#setContentView(View) setContentView()} in order to
 display it as the content for the Activity UI. If your Activity doesn't
 call this method, then no UI is present and the system will display a blank
@@ -204,42 +233,39 @@ screen.</p>
 to see it running.</p>
 
 
-<h2 id="run">Run the Code</h2>
+<h2 id="run">Run the Application</h2>
 
-<p>The Eclipse plugin makes it very easy to run your applications.
-Select <strong>Run > Run Configurations</strong> (in Eclipse 3.3, 
-<strong>Run &gt; Open Run Dialog</strong>).</p>
+<p>The Eclipse plugin makes it very easy to run your applications:</p>
 
-<p>Select the "Android Application" entry, and click the icon in the
-top left corner (the one depicting a sheet of paper with a plus symbol)
-or double-click on "Android Application." You should
-have a new launcher entry named "New_configuration".</p>
+<ol>
+  <li>Select <strong>Run > Run</strong>.</li>
+  <li>Select "Android Application".</li>
+</ol>
 
-  <a href="images/hello_world_3.png"><img src="images/hello_world_3.png" style="height:230px" alt="" /></a>
+<div class="sidebox-wrapper">
+  <div class="sidebox-inner">
+    <p>To learn more about creating and editing run configurations in Eclipse, refer to
+    <a href="{@docRoot}guide/developing/eclipse-adt.html#RunConfig">Developing In Eclipse, 
+    with ADT</a>.</p>
+  </div>
+</div>
 
-<p>Change the name to something meaningful like "Android Activity." Then pick
-click the <strong>Browse</strong> button and select your HelloAndroid project. The
-plugin will automatically scan your project for Activity subclasses and add
-each one it finds to the drop-down list under "Launch Action." Because the
-HelloAndroid project only has one Activity, it will be the default Activity.
-Leave "Launch Default Activity" selected.</p>
-
-<p>Click the <strong>Apply</strong>, then <strong>Run</strong>. The Android Emulator 
-will start and once it's booted up your application will appear. You should now
-see something like this:</p>
+<p>The Eclipse ADT will automatically create a new run configuration for your project
+and the Android Emulator will automatically launch. Once the emulator is booted up,
+your application will appear after a moment. You should now see something like this:</p>
 
   <a href="images/hello_world_5.png"><img src="images/hello_world_5.png" style="height:230px" alt="" /></a>
 
 <p>The "Hello, Android" you see in the grey bar is actually the application title. The Eclipse plugin
-creates this automatically (the string is defined in the /res/values/strings.xml file and referenced
-by your AndroidManifest.xml file). The text below the title is the actual text that you have 
+creates this automatically (the string is defined in the <code>res/values/strings.xml</code> file and referenced
+by your <code>AndroidManifest.xml</code> file). The text below the title is the actual text that you have 
 created in the TextView object.</p>
 
-<p>That covers the basic "Hello World" tutorial, but you should continue reading for some more
+<p>That concludes the basic "Hello World" tutorial, but you should continue reading for some more
 valuable information about developing Android applications.</p>
 
 
-<h2 id="upgrading">Upgrading the UI to an XML Layout</h2>
+<h2 id="upgrading">Upgrade the UI to an XML Layout</h2>
 
 <p>The "Hello, World" example you just completed uses what is called a "programmatic"
 UI layout. This means that you constructed and built your application's UI
@@ -326,7 +352,7 @@ In this case, it's the only View so you want it to take up the entire screen, wh
 </table>
 
 
-<p>These XML layout files belong in the <em>res/layout/</em> directory of your project. The "res" is
+<p>These XML layout files belong in the <code>res/layout/</code> directory of your project. The "res" is
 short for "resources" and the directory contains all the non-code assets that
 your application requires. In addition to layout files, resources also include assets
 such as images, sounds, and localized strings.</p>
@@ -348,7 +374,7 @@ existing application to use an XML layout.</p>
 
 <ol>
   <li>In the Eclipse Package Explorer, expand the
-<em>/res/layout/</em> folder and open <em>main.xml</em> (once opened, you might need to click 
+<code>/res/layout/</code> folder and open <code>main.xml</code> (once opened, you might need to click 
 the "main.xml" tab at the bottom of the window to see the XML source). Replace the contents with
 the following XML:
 
@@ -360,7 +386,7 @@ the following XML:
 <p>Save the file.</p>
 </li>
 
-<li>Inside the <em>/res/values</em> folder, open <em>strings.xml</em>.
+<li>Inside the <code>res/values/</code> folder, open <code>strings.xml</code>.
 This is where you should save all default text strings for your user interface. If you're using Eclipse, then
 ADT will have started you with two strings, <em>hello</em> and <em>app_name</em>. 
 Revise <em>hello</em> to something else. Perhaps "Hello, Android! I am a string resource!"
@@ -398,7 +424,7 @@ suggestions. You'll find that it helps in a lot of situations.</p>
 <p>Instead of passing <code>setContentView()</code> a View object, you give it a reference 
 to the layout resource.
 The resource is identified as <code>R.layout.main</code>, which is actually a compiled object representation of
-the layout defined in <em>/res/layout/main.xml</em>. The Eclipse plugin automatically creates this reference for
+the layout defined in <code>/res/layout/main.xml</code>. The Eclipse plugin automatically creates this reference for
 you inside the project's R.java class. If you're not using Eclipse, then the R.java class will be generated for you
 when you run Ant to build the application. (More about the R class in a moment.)</p>
 </li>
@@ -423,7 +449,7 @@ introduction page for an overview of the <em>Dev Guide</em> documentation.</p>
 
 <div class="special">
 <h3>R class</h3>
-<p>In Eclipse, open the file named R.java (in the /gen [Generated Java Files] folder). 
+<p>In Eclipse, open the file named <code>R.java</code> (in the <code>gen/</code> [Generated Java Files] folder). 
 It should look something like this:</p>
 
 <pre>
@@ -445,7 +471,7 @@ public final class R {
 }
 </pre>
 
-<p>A project's R.java file is an index into all the resources defined in the
+<p>A project's <code>R.java</code> file is an index into all the resources defined in the
 file. You use this class in your source code as a sort of short-hand
 way to refer to resources you've included in your project. This is
 particularly powerful with the code-completion features of IDEs like Eclipse 
@@ -456,13 +482,13 @@ you're looking for.</p>
 For now, notice the inner class named "layout", and its
 member field "main". The Eclipse plugin noticed the XML
 layout file named main.xml and generated a class for it here.  As you add other
-resources to your project (such as strings in the <em>res/values/string.xml</em> file or drawables inside
-the <em>res/drawable/</em> direcory) you'll see R.java change to keep up.</p>
+resources to your project (such as strings in the <code>res/values/string.xml</code> file or drawables inside
+the <code>res/drawable/</code> direcory) you'll see <code>R.java</code> change to keep up.</p>
 <p>When not using Eclipse, this class file will be generated for you at build time (with the Ant tool).</p>
 <p><em>You should never edit this file by hand.</em></p>
 </div>
 
-<h2 id="debugging">Debugging Your Project</h2>
+<h2 id="debugging">Debug Your Project</h2>
 
 <p>The Android Plugin for Eclipse also has excellent integration with the Eclipse
 debugger. To demonstrate this, introduce a bug into
@@ -515,9 +541,9 @@ just as you would for any other application.</p>
   Thus, it's possible to
   wrap those tools with another tool, such as an 'ant' build file.</p>
   
-  <p>The Android SDK includes a toolk named "android" that can be
+  <p>The Android SDK includes a tool named "android" that can be
   used to create all the source code and directory stubs for your project, as well
-  as an ant-compatible build.xml file. This allows you to build your project
+  as an ant-compatible <code>build.xml</code> file. This allows you to build your project
   from the command line, or integrate it with the IDE of your choice.</p>
   
   <p>For example, to create a HelloAndroid project similar to the one created
@@ -527,18 +553,12 @@ just as you would for any other application.</p>
 android create project \
     --package com.android.helloandroid \
     --activity HelloAndroid \ 
-    --target 1 \
-    --path <em>&lt;path-for-your-project></em>/HelloAndroid \
-    --mode activity
+    --target 2 \
+    --path <em>&lt;path-to-your-project></em>/HelloAndroid 
 </pre>
 
   <p>This creates the required folders and files for the project at the location 
   defined by the <em>path</em>.</p>
   
-  <p>To build the project, you'd then run the command <code>ant</code>. When that command
-  successfully completes, you'll be left with a file named HelloAndroid.apk under
-  the "bi"' directory. That .apk file is an Android Package, and can be
-  installed and run in your emulator using the 'adb' tool.</p>
-  
-  <p>For more information on how to use these tools, please read 
+  <p>For more information on how to use the SDK tools to create and build projects, please read 
 <a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>.</p>

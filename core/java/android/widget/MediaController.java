@@ -444,27 +444,55 @@ public class MediaController extends FrameLayout {
         updatePausePlay();
     }
 
+    // There are two scenarios that can trigger the seekbar listener to trigger:
+    //
+    // The first is the user using the touchpad to adjust the posititon of the
+    // seekbar's thumb. In this case onStartTrackingTouch is called followed by
+    // a number of onProgressChanged notifications, concluded by onStopTrackingTouch.
+    // We're setting the field "mDragging" to true for the duration of the dragging
+    // session to avoid jumps in the position in case of ongoing playback.
+    //
+    // The second scenario involves the user operating the scroll ball, in this
+    // case there WON'T BE onStartTrackingTouch/onStopTrackingTouch notifications,
+    // we will simply apply the updated position without suspending regular updates.
     private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
-        long duration;
         public void onStartTrackingTouch(SeekBar bar) {
             show(3600000);
-            duration = mPlayer.getDuration();
+
+            mDragging = true;
+
+            // By removing these pending progress messages we make sure
+            // that a) we won't update the progress while the user adjusts
+            // the seekbar and b) once the user is done dragging the thumb
+            // we will post one of these messages to the queue again and
+            // this ensures that there will be exactly one message queued up.
+            mHandler.removeMessages(SHOW_PROGRESS);
         }
-        public void onProgressChanged(SeekBar bar, int progress, boolean fromtouch) {
-            if (fromtouch) {
-                mDragging = true;
-                duration = mPlayer.getDuration();
-                long newposition = (duration * progress) / 1000L;
-                mPlayer.seekTo( (int) newposition);
-                if (mCurrentTime != null)
-                    mCurrentTime.setText(stringForTime( (int) newposition));
+
+        public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
+            if (!fromuser) {
+                // We're not interested in programmatically generated changes to
+                // the progress bar's position.
+                return;
             }
+
+            long duration = mPlayer.getDuration();
+            long newposition = (duration * progress) / 1000L;
+            mPlayer.seekTo( (int) newposition);
+            if (mCurrentTime != null)
+                mCurrentTime.setText(stringForTime( (int) newposition));
         }
+
         public void onStopTrackingTouch(SeekBar bar) {
             mDragging = false;
             setProgress();
             updatePausePlay();
             show(sDefaultTimeout);
+
+            // Ensure that progress is properly updated in the future,
+            // the call to show() does not guarantee this because it is a
+            // no-op if we are already showing.
+            mHandler.sendEmptyMessage(SHOW_PROGRESS);
         }
     };
 

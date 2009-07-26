@@ -20,6 +20,9 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.HARDWARE_TEST" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESSIBILITY_EVENT_VIEW_TYPES" />
+    <uses-permission android:name="android.permission.ACCESSIBILITY_EVENT_TRANSITION_TYPES" />
+    <uses-permission android:name="android.permission.ACCESSIBILITY_EVENT_NOTIFICATION_TYPES" />
 
     <application android:theme="@style/Theme">
         <uses-library android:name="android.test.runner" />
@@ -939,13 +942,19 @@
             </intent-filter>
         </activity>
         
-        <activity android:name="android.widget.AutoCompleteTextViewSimple" 
+        <activity android:name="android.widget.AutoCompleteTextViewSimple"
                   android:label="AutoCompleteTextViewSimple">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
             </intent-filter>
         </activity>
+
+        <service android:name=".accessibility.AccessibilityTestService">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+        </service>
 
     </application>
 

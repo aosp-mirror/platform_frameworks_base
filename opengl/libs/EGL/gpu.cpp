@@ -53,7 +53,7 @@ namespace android {
 static Mutex                            gRegionsLock;
 static request_gpu_t                    gRegions;
 static sp<ISurfaceComposer>             gSurfaceManager;
-ISurfaceComposer*                       GLES_localSurfaceManager = 0;
+GL_API ISurfaceComposer*                GLES_localSurfaceManager = 0;
 
 extern egl_connection_t gEGLImpl[2];
 
@@ -115,6 +115,11 @@ request_gpu_t* gpu_acquire(void* user)
     status_t err = server->requestGPU(gRevokerCallback, &info);
     if (err != NO_ERROR) {
         LOGD("requestGPU returned %d", err);
+        return 0;
+    }
+
+    if (info.regs == 0) {
+        LOGD("requestGPU() failed");
         return 0;
     }
 

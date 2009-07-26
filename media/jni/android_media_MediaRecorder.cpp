@@ -41,7 +41,7 @@ using namespace android;
 // ----------------------------------------------------------------------------
 
 // helper function to extract a native Camera object from a Camera Java object
-extern sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, struct camera_context_t** context);
+extern sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, struct JNICameraContext** context);
 
 struct fields_t {
     jfieldID    context;
@@ -150,6 +150,11 @@ static sp<MediaRecorder> setMediaRecorder(JNIEnv* env, jobject thiz, const sp<Me
 
 static void android_media_MediaRecorder_setCamera(JNIEnv* env, jobject thiz, jobject camera)
 {
+    // we should not pass a null camera to get_native_camera() call.
+    if (camera == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", "camera object is a NULL pointer");
+        return;
+    }
     sp<Camera> c = get_native_camera(env, camera, NULL);
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setCamera(c->remote()),
@@ -160,7 +165,7 @@ static void
 android_media_MediaRecorder_setVideoSource(JNIEnv *env, jobject thiz, jint vs)
 {
     LOGV("setVideoSource(%d)", vs);
-    if (vs < VIDEO_SOURCE_DEFAULT || vs > VIDEO_SOURCE_CAMERA) {
+    if (vs < VIDEO_SOURCE_DEFAULT || vs >= VIDEO_SOURCE_LIST_END) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid video source");
         return;
     }
@@ -172,10 +177,11 @@ static void
 android_media_MediaRecorder_setAudioSource(JNIEnv *env, jobject thiz, jint as)
 {
     LOGV("setAudioSource(%d)", as);
-    if (as < AUDIO_SOURCE_DEFAULT || as > AUDIO_SOURCE_MIC) {
+    if (as < AUDIO_SOURCE_DEFAULT || as >= AUDIO_SOURCE_LIST_END) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid audio source");
         return;
     }
+
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setAudioSource(as), "java/lang/RuntimeException", "setAudioSource failed.");
 }
@@ -196,7 +202,7 @@ static void
 android_media_MediaRecorder_setVideoEncoder(JNIEnv *env, jobject thiz, jint ve)
 {
     LOGV("setVideoEncoder(%d)", ve);
-    if (ve < VIDEO_ENCODER_DEFAULT || ve > VIDEO_ENCODER_MPEG_4_SP) {
+    if (ve < VIDEO_ENCODER_DEFAULT || ve >= VIDEO_ENCODER_LIST_END) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid video encoder");
         return;
     }
@@ -208,12 +214,35 @@ static void
 android_media_MediaRecorder_setAudioEncoder(JNIEnv *env, jobject thiz, jint ae)
 {
     LOGV("setAudioEncoder(%d)", ae);
-    if (ae < AUDIO_ENCODER_DEFAULT || ae > AUDIO_ENCODER_AMR_NB) {
+    if (ae < AUDIO_ENCODER_DEFAULT || ae >= AUDIO_ENCODER_LIST_END) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid audio encoder");
         return;
     }
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     process_media_recorder_call(env, mr->setAudioEncoder(ae), "java/lang/RuntimeException", "setAudioEncoder failed.");
+}
+
+static void
+android_media_MediaRecorder_setParameters(JNIEnv *env, jobject thiz, jstring params)
+{
+    LOGV("setParameters()");
+    if (params == NULL)
+    {
+        LOGE("Invalid or empty params string.  This parameter will be ignored.");
+        return;
+    }
+
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+
+    const char* params8 = env->GetStringUTFChars(params, NULL);
+    if (params8 == NULL)
+    {
+        LOGE("Failed to covert jstring to String8.  This parameter will be ignored.");
+        return;
+    }
+
+    process_media_recorder_call(env, mr->setParameters(String8(params8)), "java/lang/RuntimeException", "setParameter failed.");
+    env->ReleaseStringUTFChars(params,params8);
 }
 
 static void
@@ -379,6 +408,7 @@ static JNINativeMethod gMethods[] = {
     {"setOutputFormat",      "(I)V",                            (void *)android_media_MediaRecorder_setOutputFormat},
     {"setVideoEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setVideoEncoder},
     {"setAudioEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setAudioEncoder},
+    {"setParameters",        "(Ljava/lang/String;)V",           (void *)android_media_MediaRecorder_setParameters},
     {"_setOutputFile",       "(Ljava/io/FileDescriptor;JJ)V",   (void *)android_media_MediaRecorder_setOutputFileFD},
     {"setVideoSize",         "(II)V",                           (void *)android_media_MediaRecorder_setVideoSize},
     {"setVideoFrameRate",    "(I)V",                            (void *)android_media_MediaRecorder_setVideoFrameRate},

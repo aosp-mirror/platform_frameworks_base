@@ -16,12 +16,14 @@
 
 package android.app;
 
-import android.app.ActivityManager.MemoryInfo;
 import android.content.ComponentName;
 import android.content.ContentProviderNative;
 import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IIntentSender;
+import android.content.IIntentReceiver;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.ProviderInfo;
@@ -34,7 +36,6 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ParcelFileDescriptor;
-import android.text.TextUtils;
 import android.os.Bundle;
 
 import java.util.List;
@@ -46,9 +47,30 @@ import java.util.List;
  * {@hide}
  */
 public interface IActivityManager extends IInterface {
+    /**
+     * Returned by startActivity() if the start request was canceled because
+     * app switches are temporarily canceled to ensure the user's last request
+     * (such as pressing home) is performed.
+     */
+    public static final int START_SWITCHES_CANCELED = 4;
+    /**
+     * Returned by startActivity() if an activity wasn't really started, but
+     * the given Intent was given to the existing top activity.
+     */
     public static final int START_DELIVERED_TO_TOP = 3;
+    /**
+     * Returned by startActivity() if an activity wasn't really started, but
+     * a task was simply brought to the foreground.
+     */
     public static final int START_TASK_TO_FRONT = 2;
+    /**
+     * Returned by startActivity() if the caller asked that the Intent not
+     * be executed if it is the recipient, and that is indeed the case.
+     */
     public static final int START_RETURN_INTENT_TO_CALLER = 1;
+    /**
+     * Activity was started successfully as normal.
+     */
     public static final int START_SUCCESS = 0;
     public static final int START_INTENT_NOT_RESOLVED = -1;
     public static final int START_CLASS_NOT_FOUND = -2;
@@ -129,6 +151,11 @@ public interface IActivityManager extends IInterface {
     /* oneway */
     public void serviceDoneExecuting(IBinder token) throws RemoteException;
     public IBinder peekService(Intent service, String resolvedType) throws RemoteException;
+    
+    public boolean bindBackupAgent(ApplicationInfo appInfo, int backupRestoreMode)
+            throws RemoteException;
+    public void backupAgentCreated(String packageName, IBinder agent) throws RemoteException;
+    public void unbindBackupAgent(ApplicationInfo appInfo) throws RemoteException;
     
     public boolean startInstrumentation(ComponentName className, String profileFile,
             int flags, Bundle arguments, IInstrumentationWatcher watcher)
@@ -223,7 +250,12 @@ public interface IActivityManager extends IInterface {
     
     // Turn on/off profiling in a particular process.
     public boolean profileControl(String process, boolean start,
-            String path) throws RemoteException;
+            String path, ParcelFileDescriptor fd) throws RemoteException;
+    
+    public boolean shutdown(int timeout) throws RemoteException;
+    
+    public void stopAppSwitches() throws RemoteException;
+    public void resumeAppSwitches() throws RemoteException;
     
     /*
      * Private non-Binder interfaces
@@ -370,4 +402,10 @@ public interface IActivityManager extends IInterface {
     int GET_DEVICE_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+83;
     int PEEK_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+84;
     int PROFILE_CONTROL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+85;
+    int SHUTDOWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+86;
+    int STOP_APP_SWITCHES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+87;
+    int RESUME_APP_SWITCHES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+88;
+    int START_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+89;
+    int BACKUP_AGENT_CREATED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+90;
+    int UNBIND_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+91;
 }

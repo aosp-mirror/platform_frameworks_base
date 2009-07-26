@@ -49,6 +49,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     private Drawable mBottomLeftStrip;
     private Drawable mBottomRightStrip;
     private boolean mStripMoved;
+    private Drawable mDividerDrawable;
+    private boolean mDrawBottomStrips = true;
 
     public TabWidget(Context context) {
         this(context, null);
@@ -87,9 +89,68 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         setOnFocusChangeListener(this);
     }
 
+    /**
+     * Returns the tab indicator view at the given index.
+     *
+     * @param index the zero-based index of the tab indicator view to return
+     * @return the tab indicator view at the given index
+     */
+    public View getChildTabViewAt(int index) {
+        // If we are using dividers, then instead of tab views at 0, 1, 2, ...
+        // we have tab views at 0, 2, 4, ...
+        if (mDividerDrawable != null) {
+            index *= 2;
+        }
+        return getChildAt(index);
+    }
+
+    /**
+     * Returns the number of tab indicator views.
+     * @return the number of tab indicator views.
+     */
+    public int getTabCount() {
+        int children = getChildCount();
+
+        // If we have dividers, then we will always have an odd number of
+        // children: 1, 3, 5, ... and we want to convert that sequence to
+        // this: 1, 2, 3, ...
+        if (mDividerDrawable != null) {
+            children = (children + 1) / 2;
+        }
+        return children;
+    }
+
+    /**
+     * Sets the drawable to use as a divider between the tab indicators.
+     * @param drawable the divider drawable
+     */
+    public void setDividerDrawable(Drawable drawable) {
+        mDividerDrawable = drawable;
+    }
+
+    /**
+     * Sets the drawable to use as a divider between the tab indicators.
+     * @param resId the resource identifier of the drawable to use as a
+     * divider.
+     */
+    public void setDividerDrawable(int resId) {
+        mDividerDrawable = mContext.getResources().getDrawable(resId);
+    }
+
+    /**
+     * Controls whether the bottom strips on the tab indicators are drawn or
+     * not.  The default is to draw them.  If the user specifies a custom
+     * view for the tab indicators, then the TabHost class calls this method
+     * to disable drawing of the bottom strips.
+     * @param drawBottomStrips true if the bottom strips should be drawn.
+     */
+    void setDrawBottomStrips(boolean drawBottomStrips) {
+        mDrawBottomStrips = drawBottomStrips;
+    }
+
     @Override
     public void childDrawableStateChanged(View child) {
-        if (child == getChildAt(mSelectedTab)) {
+        if (child == getChildTabViewAt(mSelectedTab)) {
             // To make sure that the bottom strip is redrawn
             invalidate();
         }
@@ -100,7 +161,14 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     public void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
 
-        View selectedChild = getChildAt(mSelectedTab);
+        // If the user specified a custom view for the tab indicators, then
+        // do not draw the bottom strips.
+        if (!mDrawBottomStrips) {
+            // Skip drawing the bottom strips.
+            return;
+        }
+
+        View selectedChild = getChildTabViewAt(mSelectedTab);
         
         mBottomLeftStrip.setState(selectedChild.getDrawableState());
         mBottomRightStrip.setState(selectedChild.getDrawableState());
@@ -157,13 +225,13 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      *  @see #focusCurrentTab
      */
     public void setCurrentTab(int index) {
-        if (index < 0 || index >= getChildCount()) {
+        if (index < 0 || index >= getTabCount()) {
             return;
         }
 
-        getChildAt(mSelectedTab).setSelected(false);
+        getChildTabViewAt(mSelectedTab).setSelected(false);
         mSelectedTab = index;
-        getChildAt(mSelectedTab).setSelected(true);
+        getChildTabViewAt(mSelectedTab).setSelected(true);
         mStripMoved = true;
     }
     
@@ -189,17 +257,17 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         
         // change the focus if applicable.
         if (oldTab != index) {
-            getChildAt(index).requestFocus();
+            getChildTabViewAt(index).requestFocus();
         }
     }
     
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
-        int count = getChildCount();
+        int count = getTabCount();
         
-        for (int i=0; i<count; i++) {
-            View child = getChildAt(i);
+        for (int i = 0; i < count; i++) {
+            View child = getChildTabViewAt(i);
             child.setEnabled(enabled);
         }
     }
@@ -218,16 +286,25 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         child.setFocusable(true);
         child.setClickable(true);
 
+        // If we have dividers between the tabs and we already have at least one
+        // tab, then add a divider before adding the next tab.
+        if (mDividerDrawable != null && getTabCount() > 0) {
+            View divider = new View(mContext);
+            final LinearLayout.LayoutParams lp = new LayoutParams(
+                    mDividerDrawable.getIntrinsicWidth(),
+                    mDividerDrawable.getIntrinsicHeight());
+            lp.setMargins(0, 0, 0, 0);
+            divider.setLayoutParams(lp);
+            divider.setBackgroundDrawable(mDividerDrawable);
+            super.addView(divider);
+        }
         super.addView(child);
 
         // TODO: detect this via geometry with a tabwidget listener rather
         // than potentially interfere with the view's listener
-        child.setOnClickListener(new TabClickListener(getChildCount() - 1));
+        child.setOnClickListener(new TabClickListener(getTabCount() - 1));
         child.setOnFocusChangeListener(this);
     }
-
-
-
 
     /**
      * Provides a way for {@link TabHost} to be notified that the user clicked on a tab indicator.
@@ -238,14 +315,15 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
 
     public void onFocusChange(View v, boolean hasFocus) {
         if (v == this && hasFocus) {
-            getChildAt(mSelectedTab).requestFocus();
+            getChildTabViewAt(mSelectedTab).requestFocus();
             return;
         }
         
         if (hasFocus) {
             int i = 0;
-            while (i < getChildCount()) {
-                if (getChildAt(i) == v) {
+            int numTabs = getTabCount();
+            while (i < numTabs) {
+                if (getChildTabViewAt(i) == v) {
                     setCurrentTab(i);
                     mSelectionChangedListener.onTabSelectionChanged(i, false);
                     break;

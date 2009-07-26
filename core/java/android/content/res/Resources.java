@@ -22,6 +22,7 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.pm.ApplicationInfo;
 import android.graphics.Movie;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
@@ -32,6 +33,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
+import android.util.LongSparseArray;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,17 +58,19 @@ public class Resources {
     // Information about preloaded resources.  Note that they are not
     // protected by a lock, because while preloading in zygote we are all
     // single-threaded, and after that these are immutable.
-    private static final SparseArray<Drawable.ConstantState> mPreloadedDrawables
-            = new SparseArray<Drawable.ConstantState>();
+    private static final LongSparseArray<Drawable.ConstantState> sPreloadedDrawables
+            = new LongSparseArray<Drawable.ConstantState>();
     private static final SparseArray<ColorStateList> mPreloadedColorStateLists
             = new SparseArray<ColorStateList>();
     private static boolean mPreloaded;
 
+    private final LongSparseArray<Drawable.ConstantState> mPreloadedDrawables;
+
     /*package*/ final TypedValue mTmpValue = new TypedValue();
 
     // These are protected by the mTmpValue lock.
-    private final SparseArray<WeakReference<Drawable.ConstantState> > mDrawableCache
-            = new SparseArray<WeakReference<Drawable.ConstantState> >();
+    private final LongSparseArray<WeakReference<Drawable.ConstantState> > mDrawableCache
+            = new LongSparseArray<WeakReference<Drawable.ConstantState> >();
     private final SparseArray<WeakReference<ColorStateList> > mColorStateListCache
             = new SparseArray<WeakReference<ColorStateList> >();
     private boolean mPreloading;
@@ -81,6 +85,24 @@ public class Resources {
     private final Configuration mConfiguration = new Configuration();
     /*package*/ final DisplayMetrics mMetrics = new DisplayMetrics();
     PluralRules mPluralRule;
+    
+    private final CompatibilityInfo mCompatibilityInfo;
+
+    private static final LongSparseArray<Object> EMPTY_ARRAY = new LongSparseArray<Object>() {
+        @Override
+        public void put(long k, Object o) {
+            throw new UnsupportedOperationException();
+        }
+        @Override
+        public void append(long k, Object o) {
+            throw new UnsupportedOperationException();
+        }
+    };
+
+    @SuppressWarnings("unchecked")
+    private static <T> LongSparseArray<T> emptySparseArray() {
+        return (LongSparseArray<T>) EMPTY_ARRAY;
+    }
 
     /**
      * This exception is thrown by the resource APIs when a requested resource
@@ -107,11 +129,60 @@ public class Resources {
      */
     public Resources(AssetManager assets, DisplayMetrics metrics,
             Configuration config) {
+        this(assets, metrics, config, (ApplicationInfo) null);
+    }
+
+    /**
+     * Creates a new Resources object with ApplicationInfo.
+     * 
+     * @param assets Previously created AssetManager. 
+     * @param metrics Current display metrics to consider when 
+     *                selecting/computing resource values.
+     * @param config Desired device configuration to consider when 
+     *               selecting/computing resource values (optional).
+     * @param appInfo this resource's application info.
+     * @hide
+     */
+    public Resources(AssetManager assets, DisplayMetrics metrics,
+            Configuration config, ApplicationInfo appInfo) {
         mAssets = assets;
         mConfiguration.setToDefaults();
         mMetrics.setToDefaults();
+        if (appInfo != null) {
+            mCompatibilityInfo = new CompatibilityInfo(appInfo);
+            if (DEBUG_CONFIG) {
+                Log.d(TAG, "compatibility for " + appInfo.packageName + " : " + mCompatibilityInfo);
+            }
+        } else {
+            mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
+        }
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
+        if (mCompatibilityInfo.isScalingRequired()) {
+            mPreloadedDrawables = emptySparseArray();
+        } else {
+            mPreloadedDrawables = sPreloadedDrawables;
+        }
+    }
+
+    /**
+     * Creates a new resources that uses the given compatibility info. Used to create
+     * a context for widgets using the container's compatibility info.
+     * {@see ApplicationContext#createPackageCotnext}.
+     * @hide
+     */
+    public Resources(AssetManager assets, DisplayMetrics metrics,
+            Configuration config, CompatibilityInfo info) {
+        mAssets = assets;
+        mMetrics.setToDefaults();
+        mCompatibilityInfo = info;
+        updateConfiguration(config, metrics);
+        assets.ensureStringBlocks();
+        if (mCompatibilityInfo.isScalingRequired()) {
+            mPreloadedDrawables = emptySparseArray();
+        } else {
+            mPreloadedDrawables = sPreloadedDrawables;
+        }
     }
 
     /**
@@ -1203,7 +1274,7 @@ public class Resources {
 
         return array;
     }
-    
+
     /**
      * Store the newly updated configuration.
      */
@@ -1216,8 +1287,11 @@ public class Resources {
             }
             if (metrics != null) {
                 mMetrics.setTo(metrics);
+                mMetrics.updateMetrics(mCompatibilityInfo,
+                        mConfiguration.orientation, mConfiguration.screenLayout);
             }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
+
             String locale = null;
             if (mConfiguration.locale != null) {
                 locale = mConfiguration.locale.getLanguage();
@@ -1246,7 +1320,7 @@ public class Resources {
                     mConfiguration.touchscreen,
                     (int)(mMetrics.density*160), mConfiguration.keyboard,
                     keyboardHidden, mConfiguration.navigation, width, height,
-                    sSdkVersion);
+                    mConfiguration.screenLayout, sSdkVersion);
             int N = mDrawableCache.size();
             if (DEBUG_CONFIG) {
                 Log.d(TAG, "Cleaning up drawables config changes: 0x"
@@ -1261,14 +1335,14 @@ public class Resources {
                                 configChanges, cs.getChangingConfigurations())) {
                             if (DEBUG_CONFIG) {
                                 Log.d(TAG, "FLUSHING #0x"
-                                        + Integer.toHexString(mDrawableCache.keyAt(i))
+                                        + Long.toHexString(mDrawableCache.keyAt(i))
                                         + " / " + cs + " with changes: 0x"
                                         + Integer.toHexString(cs.getChangingConfigurations()));
                             }
                             mDrawableCache.setValueAt(i, null);
                         } else if (DEBUG_CONFIG) {
                             Log.d(TAG, "(Keeping #0x"
-                                    + Integer.toHexString(mDrawableCache.keyAt(i))
+                                    + Long.toHexString(mDrawableCache.keyAt(i))
                                     + " / " + cs + " with changes: 0x"
                                     + Integer.toHexString(cs.getChangingConfigurations())
                                     + ")");
@@ -1319,6 +1393,17 @@ public class Resources {
      */
     public Configuration getConfiguration() {
         return mConfiguration;
+    }
+    
+    /**
+     * Return the compatibility mode information for the application.
+     * The returned object should be treated as read-only.
+     * 
+     * @return compatibility info. null if the app does not require compatibility mode.
+     * @hide
+     */
+    public CompatibilityInfo getCompatibilityInfo() {
+        return mCompatibilityInfo;
     }
 
     /**
@@ -1588,7 +1673,7 @@ public class Resources {
             }
         }
 
-        final int key = (value.assetCookie << 24) | value.data;
+        final long key = (((long) value.assetCookie) << 32) | value.data;
         Drawable dr = getCachedDrawable(key);
 
         if (dr != null) {
@@ -1653,7 +1738,7 @@ public class Resources {
             cs = dr.getConstantState();
             if (cs != null) {
                 if (mPreloading) {
-                    mPreloadedDrawables.put(key, cs);
+                    sPreloadedDrawables.put(key, cs);
                 } else {
                     synchronized (mTmpValue) {
                         //Log.i(TAG, "Saving cached drawable @ #" +
@@ -1668,7 +1753,7 @@ public class Resources {
         return dr;
     }
 
-    private Drawable getCachedDrawable(int key) {
+    private Drawable getCachedDrawable(long key) {
         synchronized (mTmpValue) {
             WeakReference<Drawable.ConstantState> wr = mDrawableCache.get(key);
             if (wr != null) {   // we have the key
@@ -1883,6 +1968,7 @@ public class Resources {
         mMetrics.setToDefaults();
         updateConfiguration(null, null);
         mAssets.ensureStringBlocks();
+        mPreloadedDrawables = sPreloadedDrawables;
+        mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
     }
 }
-

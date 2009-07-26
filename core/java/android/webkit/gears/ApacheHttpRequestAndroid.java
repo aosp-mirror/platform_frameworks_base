@@ -29,7 +29,6 @@ import android.net.http.Headers;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Config;
 import android.util.Log;
 import android.webkit.CacheManager;
 import android.webkit.CacheManager.CacheResult;
@@ -88,6 +87,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class ApacheHttpRequestAndroid {
     /** Debug logging tag. */
     private static final String LOG_TAG = "Gears-J";
+    /** Flag for guarding Log.v() calls. */
+    private static final boolean LOGV_ENABLED = false;
     /** HTTP response header line endings are CR-LF style. */
     private static final String HTTP_LINE_ENDING = "\r\n";
     /** Safe MIME type to use whenever it isn't specified. */
@@ -173,18 +174,18 @@ public final class ApacheHttpRequestAndroid {
         public void run() {
             boolean problem = false;
             try {
-                if (Config.LOGV) {
+                if (LOGV_ENABLED) {
                     Log.i(LOG_TAG, "REQUEST : " + mMethod.getRequestLine());
                 }
                 mResponse = mClient.execute(mMethod);
                 if (mResponse != null) {
-                    if (Config.LOGV) {
+                    if (LOGV_ENABLED) {
                         Log.i(LOG_TAG, "response (status line): "
                               + mResponse.getStatusLine());
                     }
                     mResponseLine = "" + mResponse.getStatusLine();
                 } else {
-                    if (Config.LOGV) {
+                    if (LOGV_ENABLED) {
                         Log.i(LOG_TAG, "problem, response == null");
                     }
                     problem = true;
@@ -198,7 +199,7 @@ public final class ApacheHttpRequestAndroid {
             }
 
             if (!problem) {
-                if (Config.LOGV) {
+                if (LOGV_ENABLED) {
                     Log.i(LOG_TAG, "Request complete ("
                           + mMethod.getRequestLine() + ")");
                 }
@@ -206,7 +207,7 @@ public final class ApacheHttpRequestAndroid {
                 mConnectionFailedLock.lock();
                 mConnectionFailed = true;
                 mConnectionFailedLock.unlock();
-                if (Config.LOGV) {
+                if (LOGV_ENABLED) {
                     Log.i(LOG_TAG, "Request FAILED ("
                           + mMethod.getRequestLine() + ")");
                 }
@@ -233,7 +234,7 @@ public final class ApacheHttpRequestAndroid {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    if (Config.LOGV) {
+                    if (LOGV_ENABLED) {
                         Log.i(LOG_TAG, "InterruptedException while putting " +
                             "a DataPacket in the Buffer: " + e);
                     }
@@ -248,7 +249,7 @@ public final class ApacheHttpRequestAndroid {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    if (Config.LOGV) {
+                    if (LOGV_ENABLED) {
                       Log.i(LOG_TAG, "InterruptedException while getting " +
                           "a DataPacket in the Buffer: " + e);
                     }
@@ -271,7 +272,7 @@ public final class ApacheHttpRequestAndroid {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    if (Config.LOGV) {
+                    if (LOGV_ENABLED) {
                         Log.i(LOG_TAG, "InterruptedException while waiting " +
                             "until a DataPacket is consumed: " + e);
                     }
@@ -285,7 +286,7 @@ public final class ApacheHttpRequestAndroid {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    if (Config.LOGV) {
+                    if (LOGV_ENABLED) {
                         Log.i(LOG_TAG, "InterruptedException while indicating "
                               + "that the DataPacket has been consumed: " + e);
                     }
@@ -373,14 +374,14 @@ public final class ApacheHttpRequestAndroid {
                 mSignal.packetConsumed();
                 mConnectionFailedLock.lock();
                 if (mConnectionFailed) {
-                    if (Config.LOGV) {
+                    if (LOGV_ENABLED) {
                         Log.i(LOG_TAG, "stopping loop on error");
                     }
                     finished = true;
                 }
                 mConnectionFailedLock.unlock();
             }
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "flushing the outputstream...");
             }
             mOutputStream.flush();
@@ -399,7 +400,7 @@ public final class ApacheHttpRequestAndroid {
         private void write(DataPacket packet) {
             try {
                 if (mOutputStream == null) {
-                    if (Config.LOGV) {
+                    if (LOGV_ENABLED) {
                         Log.i(LOG_TAG, "NO OUTPUT STREAM !!!");
                     }
                     return;
@@ -407,7 +408,7 @@ public final class ApacheHttpRequestAndroid {
                 mOutputStream.write(packet.getBytes(), 0, packet.getLength());
                 mOutputStream.flush();
             } catch (IOException e) {
-                if (Config.LOGV) {
+                if (LOGV_ENABLED) {
                     Log.i(LOG_TAG, "exc: " + e);
                 }
                 mConnectionFailedLock.lock();
@@ -423,7 +424,7 @@ public final class ApacheHttpRequestAndroid {
                     mStreamingReady.await();
                 }
             } catch (InterruptedException e) {
-                if (Config.LOGV) {
+                if (LOGV_ENABLED) {
                     Log.i(LOG_TAG, "InterruptedException in "
                           + "StreamEntity::isReady() : ", e);
                 }
@@ -468,7 +469,7 @@ public final class ApacheHttpRequestAndroid {
      *                  False on failure.
      */
     public synchronized boolean open(String method, String url) {
-        if (Config.LOGV) {
+        if (LOGV_ENABLED) {
             Log.i(LOG_TAG, "open " + method + " " + url);
         }
         // Create the client
@@ -502,7 +503,7 @@ public final class ApacheHttpRequestAndroid {
         } else if ("DELETE".equalsIgnoreCase(method)) {
             mMethod = new HttpDelete(url);
         } else {
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "Method " + method + " not supported");
             }
             return false;
@@ -549,7 +550,7 @@ public final class ApacheHttpRequestAndroid {
      * (unless already finished)
      */
     private void waitUntilConnectionFinished() {
-        if (Config.LOGV) {
+        if (LOGV_ENABLED) {
             Log.i(LOG_TAG, "waitUntilConnectionFinished("
                   + mConnectionFinished + ")");
         }
@@ -558,11 +559,11 @@ public final class ApacheHttpRequestAndroid {
                 try {
                     mHttpThread.join();
                     mConnectionFinished = true;
-                    if (Config.LOGV) {
+                    if (LOGV_ENABLED) {
                         Log.i(LOG_TAG, "http thread joined");
                     }
                 } catch (InterruptedException e) {
-                    if (Config.LOGV) {
+                    if (LOGV_ENABLED) {
                         Log.i(LOG_TAG, "interrupted: " + e);
                     }
                 }
@@ -596,7 +597,7 @@ public final class ApacheHttpRequestAndroid {
         Header[] headers = mResponse.getAllHeaders();
         for (int i = 0; i < headers.length; i++) {
             Header header = headers[i];
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "header " + header.getName()
                       + " -> " + header.getValue());
             }
@@ -615,7 +616,7 @@ public final class ApacheHttpRequestAndroid {
      */
     public synchronized void setRequestHeader(String name, String value) {
         String[] mapValue = { name, value };
-        if (Config.LOGV) {
+        if (LOGV_ENABLED) {
             Log.i(LOG_TAG, "setRequestHeader: " + name + " => " + value);
         }
         if (name.equalsIgnoreCase(KEY_CONTENT_LENGTH)) {
@@ -647,7 +648,7 @@ public final class ApacheHttpRequestAndroid {
         while (it.hasNext()) {
             // Set the key case-sensitive.
             String[] entry = it.next();
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "apply header " + entry[HEADERS_MAP_INDEX_KEY] +
                     " => " + entry[HEADERS_MAP_INDEX_VALUE]);
             }
@@ -671,7 +672,7 @@ public final class ApacheHttpRequestAndroid {
                 return null;
             }
         } else {
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "getResponseHeader() called but "
                       + "response not received");
             }
@@ -687,7 +688,7 @@ public final class ApacheHttpRequestAndroid {
      */
     public synchronized String getAllResponseHeaders() {
         if (mResponseHeaders == null) {
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "getAllResponseHeaders() called but "
                       + "response not received");
             }
@@ -715,7 +716,7 @@ public final class ApacheHttpRequestAndroid {
      * @param value The associated value.
      */
     private void setResponseHeader(String name, String value) {
-        if (Config.LOGV) {
+        if (LOGV_ENABLED) {
             Log.i(LOG_TAG, "Set response header " + name + ": " + value);
         }
         String mapValue[] = { name, value };
@@ -766,7 +767,7 @@ public final class ApacheHttpRequestAndroid {
         UrlInterceptHandlerGears.ServiceResponse serviceResponse =
             handler.getServiceResponse(url, mRequestHeaders);
         if (serviceResponse == null) {
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "No response in LocalServer");
             }
             return false;
@@ -776,7 +777,7 @@ public final class ApacheHttpRequestAndroid {
         mBodyInputStream = serviceResponse.getInputStream();
         mResponseLine = serviceResponse.getStatusLine();
         mResponseHeaders = serviceResponse.getResponseHeaders();
-        if (Config.LOGV) {
+        if (LOGV_ENABLED) {
             Log.i(LOG_TAG, "Got response from LocalServer: " + mResponseLine);
         }
         return true;
@@ -803,19 +804,19 @@ public final class ApacheHttpRequestAndroid {
         CacheResult mCacheResult =
             CacheManager.getCacheFile(url, cacheRequestHeaders);
         if (mCacheResult == null) {
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "No CacheResult for " + url);
             }
             return false;
         }
-        if (Config.LOGV) {
+        if (LOGV_ENABLED) {
             Log.i(LOG_TAG, "Got CacheResult from browser cache");
         }
         // Check for expiry. -1 is "never", otherwise milliseconds since 1970.
         // Can be compared to System.currentTimeMillis().
         long expires = mCacheResult.getExpires();
         if (expires >= 0 && System.currentTimeMillis() >= expires) {
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "CacheResult expired "
                     + (System.currentTimeMillis() - expires)
                     + " milliseconds ago");
@@ -827,7 +828,7 @@ public final class ApacheHttpRequestAndroid {
         mBodyInputStream = mCacheResult.getInputStream();
         if (mBodyInputStream == null) {
             // Cache result may have gone away.
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "No mBodyInputStream for CacheResult " + url);
             }
             return false;
@@ -855,7 +856,7 @@ public final class ApacheHttpRequestAndroid {
         }
         // Synthesize the response line.
         mResponseLine = "HTTP/1.1 " + statusCode + " " + statusMessage;
-        if (Config.LOGV) {
+        if (LOGV_ENABLED) {
             Log.i(LOG_TAG, "Synthesized " + mResponseLine);
         }
         // Synthesize the returned headers from cache.
@@ -914,7 +915,7 @@ public final class ApacheHttpRequestAndroid {
      */
     public synchronized boolean createCacheResult(
         String url, int responseCode, String mimeType, String encoding) {
-        if (Config.LOGV) {
+        if (LOGV_ENABLED) {
             Log.i(LOG_TAG, "Making cache entry for " + url);
         }
         // Take the headers and parse them into a format needed by
@@ -935,14 +936,14 @@ public final class ApacheHttpRequestAndroid {
         mCacheResult = CacheManager.createCacheFile(
             url, responseCode, cacheHeaders, mimeType, true);
         if (mCacheResult != null) {
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "Saving into cache");
             }
             mCacheResult.setEncoding(encoding);
             mCacheResultUrl = url;
             return true;
         } else {
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "Couldn't create mCacheResult");
             }
             return false;
@@ -960,7 +961,7 @@ public final class ApacheHttpRequestAndroid {
      */
     public synchronized boolean appendCacheResult(byte[] data, int bytes) {
         if (mCacheResult == null) {
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "appendCacheResult() called without a "
                       + "CacheResult initialized");
             }
@@ -969,7 +970,7 @@ public final class ApacheHttpRequestAndroid {
         try {
             mCacheResult.getOutputStream().write(data, 0, bytes);
         } catch (IOException ex) {
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "Got IOException writing cache data: " + ex);
             }
             return false;
@@ -984,14 +985,14 @@ public final class ApacheHttpRequestAndroid {
      */
     public synchronized boolean saveCacheResult() {
         if (mCacheResult == null || mCacheResultUrl == null) {
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "Tried to save cache result but "
                       + "createCacheResult not called");
             }
             return false;
         }
 
-        if (Config.LOGV) {
+        if (LOGV_ENABLED) {
             Log.i(LOG_TAG, "Saving cache result");
         }
         CacheManager.saveCacheFile(mCacheResultUrl, mCacheResult);
@@ -1006,7 +1007,7 @@ public final class ApacheHttpRequestAndroid {
      * ability to receive a null packet for sendPostData().
      */
     public synchronized void abort() {
-        if (Config.LOGV) {
+        if (LOGV_ENABLED) {
             Log.i(LOG_TAG, "ABORT CALLED");
         }
         if (mMethod != null) {
@@ -1019,7 +1020,7 @@ public final class ApacheHttpRequestAndroid {
      * thread to complete.
      */
     public synchronized void interrupt() {
-        if (Config.LOGV) {
+        if (LOGV_ENABLED) {
             Log.i(LOG_TAG, "INTERRUPT CALLED");
         }
         mConnectionFailedLock.lock();
@@ -1053,7 +1054,7 @@ public final class ApacheHttpRequestAndroid {
                     mBodyInputStream = entity.getContent();
                 }
             } catch (IOException inputException) {
-                if (Config.LOGV) {
+                if (LOGV_ENABLED) {
                     Log.i(LOG_TAG, "Failed to connect InputStream: "
                           + inputException);
                 }
@@ -1062,7 +1063,7 @@ public final class ApacheHttpRequestAndroid {
             }
             if (mBodyInputStream == null) {
                 // No error stream either. Treat as a 0 byte response.
-                if (Config.LOGV) {
+                if (LOGV_ENABLED) {
                     Log.i(LOG_TAG, "No InputStream");
                 }
                 return 0; // EOF.
@@ -1081,7 +1082,7 @@ public final class ApacheHttpRequestAndroid {
             }
         } catch (IOException e) {
             // An abort() interrupts us by calling close() on our stream.
-            if (Config.LOGV) {
+            if (LOGV_ENABLED) {
                 Log.i(LOG_TAG, "Got IOException in mBodyInputStream.read(): ", e);
             }
             ret = -1;

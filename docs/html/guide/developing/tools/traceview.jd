@@ -1,23 +1,32 @@
 page.title=Traceview: A Graphical Log Viewer
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>In this document</h2>
+<ol>
+    <li><a href="#creatingtracefiles">Creating Trace Files</a></li>
+    <li><a href="#copyingfiles">Copying Trace Files to a Host Machine</a></li>
+    <li><a href="#runningtraceview">Viewing Trace Files in Traceview</a>
+            <ol>
+		<li><a href="#timelinepanel">Timeline Panel</a></li>
+        	<li><a href="#profilepanel">Profile Panel</a></li>
+	    </ol></li>
+    <li><a href="#format">Traceview File Format</a>
+            <ol>
+		<li><a href="#datafileformat">Data File Format</a></li>
+        	<li><a href="#keyfileformat">Key File Format</a></li>
+	    </ol></li>
+    <li><a href="#knownissues">Traceview Known Issues</a></li>
+    <li><a href="#dmtracedump">Using dmtracedump</a></li>
+</ol>
+</div>
+</div>
+
 <p>Traceview is a graphical viewer for execution logs
-saved by your application. The sections below describe how to use the program. </p>
-
-<h2>Contents</h2>
-
-<dl>
-    <dt><a href="#creatingtracefiles">Creating Trace Files</a></dt>
-    <dt><a href="#copyingfiles">Copying Trace Files to a Host Machine</a></dt>
-    <dt><a href="#runningtraceview">Viewing Trace Files in Traceview</a></dt>
-            <dd><a href="#timelinepanel">Timeline Panel</a></dd>
-        	<dd><a href="#profilepanel">Profile Panel</a></dd>
-    <dt><a href="#format">Traceview File Format</a></dd>
-        	<dd><a href="#datafileformat">Data File Format</a><dd>
-        	<dd><a href="#keyfileformat">Key File Format</a></dd>
-	<dt><a href="#knownissues">Traceview Known Issues</a></dd>
-    <dt><a href="#dmtracedump">Using dmtracedump</a></dt>
-</dl>
+saved by your application. Traceview can help you debug your application and 
+profile its performance. The sections below describe how to use the program. </p>
 
 <a name="creatingtracefiles"></a>
 
@@ -63,10 +72,10 @@ have made the code faster or slower. </p>
 
 <p>When using the Android emulator, you must create an SD card image upon which
 the trace files will be written. For example, from the <code>/tools</code> directory, you 
-can create an SD card image and mount it when launching the emulator like so:</p>
+can create an SD card image named "imgcd" and mount it when launching the emulator like so:</p>
 <pre>
-<b>$</b> mksdcard 1024M ./imgcd 
-<b>$</b> emulator -sdcard ./img
+<b>$</b> mksdcard 1024M ./imgcd
+<b>$</b> emulator -sdcard ./imgcd
 </pre>
 <p>For more information, read about the 
 <a href="{@docRoot}guide/developing/tools/othertools.html#mksdcard">mksdcard tool</a>.</p>

@@ -464,7 +464,7 @@ two intent filters to the activity:
             &lt;/intent-filter&gt;
             &lt;intent-filter . . . &gt;
                 &lt;action android:name="com.example.project.BOUNCE" /&gt;
-                &lt;data android:type="image/jpeg" /&gt;
+                &lt;data android:mimeType="image/jpeg" /&gt;
                 &lt;category android:name="android.intent.category.DEFAULT" /&gt;
             &lt;/intent-filter&gt;
         &lt;/activity&gt;

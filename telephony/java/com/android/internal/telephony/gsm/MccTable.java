@@ -62,11 +62,11 @@ public final class MccTable
     entryForMcc(int mcc)
     {
         int index;
-        
+
         MccEntry m;
 
         m = new MccEntry(mcc, null, 0);
-        
+
         index = Collections.binarySearch(table, m);
 
         if (index < 0) {
@@ -154,7 +154,7 @@ public final class MccTable
 
         /*
          * The table below is built from two resources:
-         * 
+         *
          * 1) ITU "Mobile Network Code (MNC) for the international
          *   identification plan for mobile terminals and mobile users"
          *   which is available as an annex to the ITU operational bulletin
@@ -167,9 +167,9 @@ public final class MccTable
          *
          * FIXME(mkf) this should be stored in a more efficient representation
          */
-        
+
 		table.add(new MccEntry(202,"gr",2));	//Greece
-		table.add(new MccEntry(204,"nl",2,"Europe/Amsterdam"));	//Netherlands (Kingdom of the)
+		table.add(new MccEntry(204,"nl",2,"Europe/Amsterdam","nl"));	//Netherlands (Kingdom of the)
 		table.add(new MccEntry(206,"be",2));	//Belgium
 		table.add(new MccEntry(208,"fr",2,"Europe/Paris","fr"));	//France
 		table.add(new MccEntry(212,"mc",2));	//Monaco (Principality of)
@@ -182,8 +182,8 @@ public final class MccTable
 		table.add(new MccEntry(222,"it",2,"Europe/Rome","it"));	//Italy
 		table.add(new MccEntry(225,"va",2,"Europe/Rome","it"));	//Vatican City State
 		table.add(new MccEntry(226,"ro",2));	//Romania
-		table.add(new MccEntry(228,"ch",2,"Europe/Zurich","en"));	//Switzerland (Confederation of)
-		table.add(new MccEntry(230,"cz",2,"Europe/Prague"));	//Czech Republic
+		table.add(new MccEntry(228,"ch",2,"Europe/Zurich","de"));	//Switzerland (Confederation of)
+		table.add(new MccEntry(230,"cz",2,"Europe/Prague","cs"));	//Czech Republic
 		table.add(new MccEntry(231,"sk",2));	//Slovak Republic
 		table.add(new MccEntry(232,"at",2,"Europe/Vienna","de"));	//Austria
 		table.add(new MccEntry(234,"gb",2,"Europe/London","en"));	//United Kingdom of Great Britain and Northern Ireland

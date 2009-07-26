@@ -49,7 +49,7 @@ public class JFunc {
     public String getClassName() {
         return className;
     }
-    
+
     public boolean hasBufferArg() {
         return hasBufferArg;
     }
@@ -104,36 +104,42 @@ public class JFunc {
     }
 
     public static JFunc convert(CFunc cfunc, boolean useArray) {
-        JFunc jfunc = new JFunc(cfunc);
-        jfunc.setName(cfunc.getName());
-        jfunc.setType(JType.convert(cfunc.getType(), false));
-	
-        int numArgs = cfunc.getNumArgs();
-        int numOffsets = 0;
-        for (int i = 0; i < numArgs; i++) {
-            CType cArgType = cfunc.getArgType(i);
-            if (cArgType.isTypedPointer() && useArray) {
-                ++numOffsets;
-            }
-        }
+        try {
+            JFunc jfunc = new JFunc(cfunc);
+            jfunc.setName(cfunc.getName());
+            jfunc.setType(JType.convert(cfunc.getType(), false));
 
-        for (int i = 0; i < numArgs; i++) {
-            String cArgName = cfunc.getArgName(i);
-            CType cArgType = cfunc.getArgType(i);
-
-            jfunc.addArgument(cArgName, JType.convert(cArgType, useArray), i);
-            if (cArgType.isTypedPointer() && useArray) {
-                if (numOffsets > 1) {
-                    jfunc.addArgument(cArgName + "Offset", new JType("int"), i);
-                } else {
-                    jfunc.addArgument("offset", new JType("int"), i);
+            int numArgs = cfunc.getNumArgs();
+            int numOffsets = 0;
+            for (int i = 0; i < numArgs; i++) {
+                CType cArgType = cfunc.getArgType(i);
+                if (cArgType.isTypedPointer() && useArray) {
+                    ++numOffsets;
                 }
             }
-        }
 
-        return jfunc;
+            for (int i = 0; i < numArgs; i++) {
+                String cArgName = cfunc.getArgName(i);
+                CType cArgType = cfunc.getArgType(i);
+
+                jfunc.addArgument(cArgName, JType.convert(cArgType, useArray), i);
+                if (cArgType.isTypedPointer() && useArray) {
+                    if (numOffsets > 1) {
+                        jfunc.addArgument(cArgName + "Offset", new JType("int"), i);
+                    } else {
+                        jfunc.addArgument("offset", new JType("int"), i);
+                    }
+                }
+            }
+
+            return jfunc;
+        } catch (RuntimeException e) {
+            System.err.println("Failed to convert function " + cfunc);
+            throw e;
+        }
     }
 
+    @Override
     public String toString() {
         String s =  "Function " + fname + " returns " + ftype + ": ";
         for (int i = 0; i < argNames.size(); i++) {

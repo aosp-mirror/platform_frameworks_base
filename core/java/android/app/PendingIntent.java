@@ -18,6 +18,9 @@ package android.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.Handler;
@@ -105,7 +108,7 @@ public final class PendingIntent implements Parcelable {
         public CanceledException(Exception cause) {
             super(cause);
         }
-    };
+    }
 
     /**
      * Callback interface for discovering when a send operation has
@@ -268,6 +271,21 @@ public final class PendingIntent implements Parcelable {
         } catch (RemoteException e) {
         }
         return null;
+    }
+
+    private class IntentSenderWrapper extends IntentSender {
+        protected IntentSenderWrapper(IIntentSender target) {
+            super(target);
+        }
+    }
+    /**
+     * Retrieve a IntentSender object that wraps the existing sender of the PendingIntent
+     *
+     * @return Returns a IntentSender object that wraps the sender of PendingIntent
+     *
+     */
+    public IntentSender getIntentSender() {
+        return new IntentSenderWrapper(mTarget);
     }
 
     /**
@@ -440,9 +458,13 @@ public final class PendingIntent implements Parcelable {
 
     @Override
     public String toString() {
-        return "PendingIntent{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " target " + (mTarget != null ? mTarget.asBinder() : null) + "}";
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("PendingIntent{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(": ");
+        sb.append(mTarget != null ? mTarget.asBinder() : null);
+        sb.append('}');
+        return sb.toString();
     }
     
     public int describeContents() {

@@ -18,7 +18,7 @@
 */
 -->
 <resources>
-	<drawable name="screen_background_light">#ffffffff</drawable>
+	<drawable name="screen_background_light">#fff9f9f9</drawable>
 	<drawable name="screen_background_dark">#ff1a1a1a</drawable>
     <drawable name="status_bar_closed_default_background">#ff000000</drawable>
     <drawable name="status_bar_opened_default_background">#ff000000</drawable>
@@ -37,7 +37,7 @@
     <color name="dim_foreground_dark_inverse">#323232</color>
     <color name="dim_foreground_dark_inverse_disabled">#80323232</color>
     <color name="hint_foreground_dark">#808080</color>
-    <color name="background_light">#ffffffff</color>
+    <color name="background_light">#fff9f9f9</color>
     <color name="bright_foreground_light">#ff000000</color>
     <color name="bright_foreground_light_inverse">#ffffffff</color>
     <color name="bright_foreground_light_disabled">#80000000</color>
@@ -58,7 +58,7 @@
     <drawable name="editbox_dropdown_dark_frame">@drawable/editbox_dropdown_background_dark</drawable>
     <drawable name="editbox_dropdown_light_frame">@drawable/editbox_dropdown_background</drawable>
     
-    <drawable name="input_method_fullscreen_background">#ffffffff</drawable>
+    <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
     
     <!-- For date picker widget -->
     <drawable name="selected_day_background">#ff0092f4</drawable>
@@ -73,5 +73,9 @@
     <color name="perms_normal_grp_color">#eeeeee</color>
     <color name="perms_normal_perm_color">#c0c0c0</color>
     
+    <!-- For search-related UIs -->
+    <color name="search_url_text">#7fa87f</color>
+    <color name="search_widget_corpus_item_background">@android:color/lighter_gray</color>
+
 </resources>
 

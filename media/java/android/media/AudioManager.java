@@ -39,11 +39,6 @@ public class AudioManager {
     private final Context mContext;
     private final Handler mHandler;
 
-    // used to listen for updates to the sound effects settings so we don't
-    // poll it for every UI sound
-    private ContentObserver mContentObserver;
-
-
     private static String TAG = "AudioManager";
     private static boolean DEBUG = false;
     private static boolean localLOGV = DEBUG || android.util.Config.LOGV;
@@ -642,7 +637,9 @@ public class AudioManager {
      *           <var>false</var> to turn it off
      */
     public void setSpeakerphoneOn(boolean on){
-        setRouting(MODE_IN_CALL, on ? ROUTE_SPEAKER : ROUTE_EARPIECE, ROUTE_ALL);
+        // Temporary fix for issue #1713090 until audio routing is refactored in eclair release.
+        // MODE_INVALID indicates to AudioService that setRouting() was initiated by AudioManager
+        setRoutingP(MODE_INVALID, on ? ROUTE_SPEAKER: 0, ROUTE_SPEAKER);
     }
 
     /**
@@ -651,7 +648,7 @@ public class AudioManager {
      * @return true if speakerphone is on, false if it's off
      */
     public boolean isSpeakerphoneOn() {
-        return (getRouting(MODE_IN_CALL) & ROUTE_SPEAKER) == 0 ? false : true;
+        return (getRoutingP(MODE_IN_CALL) & ROUTE_SPEAKER) == 0 ? false : true;
      }
 
     /**
@@ -661,14 +658,9 @@ public class AudioManager {
      *           headset; <var>false</var> to route audio to/from phone earpiece
      */
     public void setBluetoothScoOn(boolean on){
-        // Don't disable A2DP when turning off SCO.
-        // A2DP does not affect in-call routing.
-        setRouting(MODE_RINGTONE,
-               on ? ROUTE_BLUETOOTH_SCO: ROUTE_SPEAKER, ROUTE_ALL & ~ROUTE_BLUETOOTH_A2DP);
-        setRouting(MODE_NORMAL,
-                on ? ROUTE_BLUETOOTH_SCO: ROUTE_SPEAKER, ROUTE_ALL & ~ROUTE_BLUETOOTH_A2DP);
-        setRouting(MODE_IN_CALL,
-                on ? ROUTE_BLUETOOTH_SCO: ROUTE_EARPIECE, ROUTE_ALL);
+        // Temporary fix for issue #1713090 until audio routing is refactored in eclair release.
+        // MODE_INVALID indicates to AudioService that setRouting() was initiated by AudioManager
+        setRoutingP(MODE_INVALID, on ? ROUTE_BLUETOOTH_SCO: 0, ROUTE_BLUETOOTH_SCO);
     }
 
     /**
@@ -678,7 +670,7 @@ public class AudioManager {
      *         false if otherwise
      */
     public boolean isBluetoothScoOn() {
-        return (getRouting(MODE_IN_CALL) & ROUTE_BLUETOOTH_SCO) == 0 ? false : true;
+        return (getRoutingP(MODE_IN_CALL) & ROUTE_BLUETOOTH_SCO) == 0 ? false : true;
     }
 
     /**
@@ -688,12 +680,9 @@ public class AudioManager {
      *           headset; <var>false</var> disable A2DP audio
      */
     public void setBluetoothA2dpOn(boolean on){
-        // the audio flinger chooses A2DP as a higher priority,
-        // so there is no need to disable other routes.
-        setRouting(MODE_RINGTONE,
-               on ? ROUTE_BLUETOOTH_A2DP: 0, ROUTE_BLUETOOTH_A2DP);
-        setRouting(MODE_NORMAL,
-                on ? ROUTE_BLUETOOTH_A2DP: 0, ROUTE_BLUETOOTH_A2DP);
+        // Temporary fix for issue #1713090 until audio routing is refactored in eclair release.
+        // MODE_INVALID indicates to AudioService that setRouting() was initiated by AudioManager
+        setRoutingP(MODE_INVALID, on ? ROUTE_BLUETOOTH_A2DP: 0, ROUTE_BLUETOOTH_A2DP);
     }
 
     /**
@@ -703,7 +692,7 @@ public class AudioManager {
      *         false if otherwise
      */
     public boolean isBluetoothA2dpOn() {
-        return (getRouting(MODE_NORMAL) & ROUTE_BLUETOOTH_A2DP) == 0 ? false : true;
+        return (getRoutingP(MODE_NORMAL) & ROUTE_BLUETOOTH_A2DP) == 0 ? false : true;
     }
 
     /**
@@ -714,14 +703,9 @@ public class AudioManager {
      * @hide
      */
     public void setWiredHeadsetOn(boolean on){
-        // A2DP has higher priority than wired headset, so headset connect/disconnect events
-        // should not affect A2DP routing
-        setRouting(MODE_NORMAL,
-                on ? ROUTE_HEADSET : ROUTE_SPEAKER, ROUTE_ALL & ~ROUTE_BLUETOOTH_A2DP);
-        setRouting(MODE_RINGTONE,
-                on ? ROUTE_HEADSET | ROUTE_SPEAKER : ROUTE_SPEAKER, ROUTE_ALL & ~ROUTE_BLUETOOTH_A2DP);
-        setRouting(MODE_IN_CALL,
-                on ? ROUTE_HEADSET : ROUTE_EARPIECE, ROUTE_ALL);
+        // Temporary fix for issue #1713090 until audio routing is refactored in eclair release.
+        // MODE_INVALID indicates to AudioService that setRouting() was initiated by AudioManager
+        setRoutingP(MODE_INVALID, on ? ROUTE_HEADSET: 0, ROUTE_HEADSET);
     }
 
     /**
@@ -732,7 +716,7 @@ public class AudioManager {
      * @hide
      */
     public boolean isWiredHeadsetOn() {
-        return (getRouting(MODE_NORMAL) & ROUTE_HEADSET) == 0 ? false : true;
+        return (getRoutingP(MODE_NORMAL) & ROUTE_HEADSET) == 0 ? false : true;
     }
 
     /**
@@ -860,7 +844,11 @@ public class AudioManager {
      *               more of ROUTE_xxx types. Set bits indicate that route should be on
      * @param mask   bit vector of routes to change, created from one or more of
      * ROUTE_xxx types. Unset bits indicate the route should be left unchanged
+     *
+     * @deprecated   Do not set audio routing directly, use setSpeakerphoneOn(),
+     * setBluetoothScoOn(), setBluetoothA2dpOn() and setWiredHeadsetOn() methods instead.
      */
+
     public void setRouting(int mode, int routes, int mask) {
         IAudioService service = getService();
         try {
@@ -876,7 +864,10 @@ public class AudioManager {
      * @param mode audio mode to get route (e.g., MODE_RINGTONE)
      * @return an audio route bit vector that can be compared with ROUTE_xxx
      * bits
+     * @deprecated   Do not query audio routing directly, use isSpeakerphoneOn(),
+     * isBluetoothScoOn(), isBluetoothA2dpOn() and isWiredHeadsetOn() methods instead.
      */
+    @Deprecated
     public int getRouting(int mode) {
         IAudioService service = getService();
         try {
@@ -1076,4 +1067,31 @@ public class AudioManager {
       * {@hide}
       */
      private IBinder mICallBack = new Binder();
+
+     /**
+      * {@hide}
+      */
+     private void setRoutingP(int mode, int routes, int mask) {
+         IAudioService service = getService();
+         try {
+             service.setRouting(mode, routes, mask);
+         } catch (RemoteException e) {
+             Log.e(TAG, "Dead object in setRouting", e);
+         }
+     }
+
+
+     /**
+      * {@hide}
+      */
+     private int getRoutingP(int mode) {
+         IAudioService service = getService();
+         try {
+             return service.getRouting(mode);
+         } catch (RemoteException e) {
+             Log.e(TAG, "Dead object in getRouting", e);
+             return -1;
+         }
+     }
+
 }

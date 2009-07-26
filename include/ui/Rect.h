@@ -33,23 +33,16 @@ public:
     // we don't provide copy-ctor and operator= on purpose
     // because we want the compiler generated versions
 
-    inline Rect()
-    {
+    inline Rect() {
     }
-
     inline Rect(int w, int h)
-        : left(0), top(0), right(w), bottom(h)
-    {
+        : left(0), top(0), right(w), bottom(h) {
     }
-
     inline Rect(int l, int t, int r, int b)
-        : left(l), top(t), right(r), bottom(b)
-    {
+        : left(l), top(t), right(r), bottom(b) {
     }
-
     inline Rect(const Point& lt, const Point& rb) 
-        : left(lt.x), top(lt.y), right(rb.x), bottom(rb.y)
-    {
+        : left(lt.x), top(lt.y), right(rb.x), bottom(rb.y) {
     }
 
     void makeInvalid();
@@ -78,21 +71,22 @@ public:
         return bottom-top;
     }
 
-    // returns left-top Point non-const reference, can be assigned
-    inline Point& leftTop() {
-        return reinterpret_cast<Point&>(left);
+    void setLeftTop(const Point& lt) {
+        left = lt.x;
+        top  = lt.y;
     }
-    // returns right bottom non-const reference, can be assigned
-    inline Point& rightBottom() {
-        return reinterpret_cast<Point&>(right);
+
+    void setRightBottom(const Point& rb) {
+        right = rb.x;
+        bottom  = rb.y;
     }
     
     // the following 4 functions return the 4 corners of the rect as Point
-    inline const Point& leftTop() const {
-        return reinterpret_cast<const Point&>(left);
+    Point leftTop() const {
+        return Point(left, top);
     }
-    inline const Point& rightBottom() const {
-        return reinterpret_cast<const Point&>(right);
+    Point rightBottom() const {
+        return Point(right, bottom);
     }
     Point rightTop() const {
         return Point(right, top);
@@ -133,8 +127,8 @@ public:
     Rect& operator -= (const Point& rhs) {
         return offsetBy(-rhs.x, -rhs.y);
     }
-    Rect operator + (const Point& rhs) const;
-    Rect operator - (const Point& rhs) const;
+    const Rect operator + (const Point& rhs) const;
+    const Rect operator - (const Point& rhs) const;
 
     void translate(int dx, int dy) { // legacy, don't use.
         offsetBy(dx, dy);

@@ -60,25 +60,19 @@ public abstract class LauncherActivity extends ListActivity {
      * An item in the list
      */
     public static class ListItem {
+        public ResolveInfo resolveInfo;
         public CharSequence label;
-        //public CharSequence description;
         public Drawable icon;
         public String packageName;
         public String className;
         public Bundle extras;
         
         ListItem(PackageManager pm, ResolveInfo resolveInfo, IconResizer resizer) {
+            this.resolveInfo = resolveInfo;
             label = resolveInfo.loadLabel(pm);
             if (label == null && resolveInfo.activityInfo != null) {
                 label = resolveInfo.activityInfo.name;
             }
-            
-            /*
-            if (resolveInfo.activityInfo != null &&
-                    resolveInfo.activityInfo.applicationInfo != null) {
-                description = resolveInfo.activityInfo.applicationInfo.loadDescription(pm);
-            }
-            */
             
             icon = resizer.createIconThumbnail(resolveInfo.loadIcon(pm));
             packageName = resolveInfo.activityInfo.applicationInfo.packageName;
@@ -120,6 +114,14 @@ public abstract class LauncherActivity extends ListActivity {
                 intent.putExtras(item.extras);
             }
             return intent;
+        }
+
+        public ListItem itemForPosition(int position) {
+            if (mActivitiesList == null) {
+                return null;
+            }
+
+            return mActivitiesList.get(position);
         }
 
         public int getCount() {
@@ -351,6 +353,16 @@ public abstract class LauncherActivity extends ListActivity {
     protected Intent intentForPosition(int position) {
         ActivityAdapter adapter = (ActivityAdapter) mAdapter;
         return adapter.intentForPosition(position);
+    }
+    
+    /**
+     * Return the {@link ListItem} for a specific position in our
+     * {@link android.widget.ListView}.
+     * @param position The item to return
+     */
+    protected ListItem itemForPosition(int position) {
+        ActivityAdapter adapter = (ActivityAdapter) mAdapter;
+        return adapter.itemForPosition(position);
     }
     
     /**

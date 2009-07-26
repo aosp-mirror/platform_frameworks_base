@@ -147,7 +147,8 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
     @Override
     public boolean onCreate() {
         if (isTemporary()) throw new IllegalStateException("onCreate() called for temp provider");
-        mOpenHelper = new AbstractSyncableContentProvider.DatabaseHelper(getContext(), mDatabaseName);
+        mOpenHelper = new AbstractSyncableContentProvider.DatabaseHelper(getContext(),
+                mDatabaseName);
         mSyncState = new SyncStateContentProviderHelper(mOpenHelper);
 
         AccountMonitorListener listener = new AccountMonitorListener() {
@@ -235,76 +236,147 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
         return Collections.emptyList();
     }
 
+    /**
+     * <p>
+     * Call mOpenHelper.getWritableDatabase() and mDb.beginTransaction().
+     * {@link #endTransaction} MUST be called after calling this method.
+     * Those methods should be used like this:
+     * </p>
+     *
+     * <pre class="prettyprint">
+     * boolean successful = false;
+     * beginTransaction();
+     * try {
+     *     // Do something related to mDb
+     *     successful = true;
+     *     return ret;
+     * } finally {
+     *     endTransaction(successful);
+     * }
+     * </pre>
+     *
+     * @hide This method is dangerous from the view of database manipulation, though using
+     * this makes batch insertion/update/delete much faster.
+     */
+    public final void beginTransaction() {
+        mDb = mOpenHelper.getWritableDatabase();
+        mDb.beginTransaction();
+    }
+
+    /**
+     * <p>
+     * Call mDb.endTransaction(). If successful is true, try to call
+     * mDb.setTransactionSuccessful() before calling mDb.endTransaction().
+     * This method MUST be used with {@link #beginTransaction()}.
+     * </p>
+     *
+     * @hide This method is dangerous from the view of database manipulation, though using
+     * this makes batch insertion/update/delete much faster.
+     */
+    public final void endTransaction(boolean successful) {
+        try {
+            if (successful) {
+                // setTransactionSuccessful() must be called just once during opening the
+                // transaction.
+                mDb.setTransactionSuccessful();
+            }
+        } finally {
+            mDb.endTransaction();
+        }
+    }
+
     @Override
-    public final int update(final Uri url, final ContentValues values,
+    public final int update(final Uri uri, final ContentValues values,
             final String selection, final String[] selectionArgs) {
-        mDb = mOpenHelper.getWritableDatabase();
-        mDb.beginTransaction();
+        boolean successful = false;
+        beginTransaction();
         try {
-            if (isTemporary() && mSyncState.matches(url)) {
-                int numRows = mSyncState.asContentProvider().update(
-                        url, values, selection, selectionArgs);
-                mDb.setTransactionSuccessful();
-                return numRows;
-            }
-
-            int result = updateInternal(url, values, selection, selectionArgs);
-            mDb.setTransactionSuccessful();
-
-            if (!isTemporary() && result > 0) {
-                getContext().getContentResolver().notifyChange(url, null /* observer */,
-                        changeRequiresLocalSync(url));
-            }
-
-            return result;
+            int ret = nonTransactionalUpdate(uri, values, selection, selectionArgs);
+            successful = true;
+            return  ret;
         } finally {
-            mDb.endTransaction();
+            endTransaction(successful);
         }
     }
 
+    /**
+     * @hide
+     */
+    public final int nonTransactionalUpdate(final Uri uri, final ContentValues values,
+            final String selection, final String[] selectionArgs) {
+        if (isTemporary() && mSyncState.matches(uri)) {
+            int numRows = mSyncState.asContentProvider().update(
+                    uri, values, selection, selectionArgs);
+            return numRows;
+        }
+
+        int result = updateInternal(uri, values, selection, selectionArgs);
+        if (!isTemporary() && result > 0) {
+            getContext().getContentResolver().notifyChange(uri, null /* observer */,
+                    changeRequiresLocalSync(uri));
+        }
+
+        return result;
+    }
+
     @Override
-    public final int delete(final Uri url, final String selection,
+    public final int delete(final Uri uri, final String selection,
             final String[] selectionArgs) {
-        mDb = mOpenHelper.getWritableDatabase();
-        mDb.beginTransaction();
+        boolean successful = false;
+        beginTransaction();
         try {
-            if (isTemporary() && mSyncState.matches(url)) {
-                int numRows = mSyncState.asContentProvider().delete(url, selection, selectionArgs);
-                mDb.setTransactionSuccessful();
-                return numRows;
-            }
-            int result = deleteInternal(url, selection, selectionArgs);
-            mDb.setTransactionSuccessful();
-            if (!isTemporary() && result > 0) {
-                getContext().getContentResolver().notifyChange(url, null /* observer */,
-                        changeRequiresLocalSync(url));
-            }
-            return result;
+            int ret = nonTransactionalDelete(uri, selection, selectionArgs);
+            successful = true;
+            return ret;
         } finally {
-            mDb.endTransaction();
+            endTransaction(successful);
         }
     }
 
-    @Override
-    public final Uri insert(final Uri url, final ContentValues values) {
-        mDb = mOpenHelper.getWritableDatabase();
-        mDb.beginTransaction();
-        try {
-            if (isTemporary() && mSyncState.matches(url)) {
-                Uri result = mSyncState.asContentProvider().insert(url, values);
-                mDb.setTransactionSuccessful();
-                return result;
-            }
-            Uri result = insertInternal(url, values);
-            mDb.setTransactionSuccessful();
-            if (!isTemporary() && result != null) {
-                getContext().getContentResolver().notifyChange(url, null /* observer */,
-                        changeRequiresLocalSync(url));
-            }
-            return result;
-        } finally {
-            mDb.endTransaction();
+    /**
+     * @hide
+     */
+    public final int nonTransactionalDelete(final Uri uri, final String selection,
+            final String[] selectionArgs) {
+        if (isTemporary() && mSyncState.matches(uri)) {
+            int numRows = mSyncState.asContentProvider().delete(uri, selection, selectionArgs);
+            return numRows;
         }
+        int result = deleteInternal(uri, selection, selectionArgs);
+        if (!isTemporary() && result > 0) {
+            getContext().getContentResolver().notifyChange(uri, null /* observer */,
+                    changeRequiresLocalSync(uri));
+        }
+        return result;
+    }
+
+    @Override
+    public final Uri insert(final Uri uri, final ContentValues values) {
+        boolean successful = false;
+        beginTransaction();
+        try {
+            Uri ret = nonTransactionalInsert(uri, values);
+            successful = true;
+            return ret;
+        } finally {
+            endTransaction(successful);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public final Uri nonTransactionalInsert(final Uri uri, final ContentValues values) {
+        if (isTemporary() && mSyncState.matches(uri)) {
+            Uri result = mSyncState.asContentProvider().insert(uri, values);
+            return result;
+        }
+        Uri result = insertInternal(uri, values);
+        if (!isTemporary() && result != null) {
+            getContext().getContentResolver().notifyChange(uri, null /* observer */,
+                    changeRequiresLocalSync(uri));
+        }
+        return result;
     }
 
     @Override

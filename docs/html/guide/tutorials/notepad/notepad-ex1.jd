@@ -44,11 +44,13 @@ selections. </em></li>
       In the New Android Project dialog, select <strong>Create project from existing source</strong>.</li>
     <li>
       Click <strong>Browse</strong> and navigate to where you copied the <code>NotepadCodeLab</code> 
-      (downloaded during <a href="{@docRoot}guide/tutorials/notepad/index.html#preparing">setup</a>). Select 
-      <code>Notepadv1</code> and click <strong>Choose</strong>.</li>
+      (downloaded during <a href="{@docRoot}guide/tutorials/notepad/index.html#preparing">setup</a>) 
+      and select <code>Notepadv1</code>.</li>
     <li>
-      You should see <code>Notepadv1</code> in the <em>Project name</em> and also see the <em>Location</em>
-      filled in with the path you selected.</li>
+      The Project Name and other properties should be automatically filled for you. 
+      You must select the Build Target&mdash;we recommend selecting a target with the 
+      lowest platform version available. Also add an integer to the Min SDK Version field 
+      that matches the API Level of the selected Build Target.</li>
     <li>
       Click <strong>Finish</strong>. The <code>Notepadv1</code> project should open and be 
       visible in your Eclipse package explorer.</li>

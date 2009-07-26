@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import java.io.PrintWriter;
+
 
 /**
  * The Matrix class holds a 3x3 matrix for transforming coordinates.
@@ -539,17 +541,49 @@ public class Matrix {
     }
 
     public String toString() {
-        return "Matrix{" + toShortString() + "}";
+        StringBuilder sb = new StringBuilder(64);
+        sb.append("Matrix{");
+        toShortString(sb);
+        sb.append('}');
+        return sb.toString();
                 
     }
 
     public String toShortString() {
+        StringBuilder sb = new StringBuilder(64);
+        toShortString(sb);
+        return sb.toString();
+    }
+
+    /**
+     * @hide
+     */
+    public void toShortString(StringBuilder sb) {
         float[] values = new float[9];
         getValues(values);
-        return "[" +
-                values[0] + ", " + values[1] + ", " + values[2] + "][" +
-                values[3] + ", " + values[4] + ", " + values[5] + "][" +
-                values[6] + ", " + values[7] + ", " + values[8] + "]";
+        sb.append('[');
+        sb.append(values[0]); sb.append(", "); sb.append(values[1]); sb.append(", ");
+        sb.append(values[2]); sb.append("][");
+        sb.append(values[3]); sb.append(", "); sb.append(values[4]); sb.append(", ");
+        sb.append(values[5]); sb.append("][");
+        sb.append(values[6]); sb.append(", "); sb.append(values[7]); sb.append(", ");
+        sb.append(values[8]); sb.append(']');
+    }
+
+    /**
+     * Print short string, to optimize dumping.
+     * @hide
+     */
+    public void printShortString(PrintWriter pw) {
+        float[] values = new float[9];
+        getValues(values);
+        pw.print('[');
+        pw.print(values[0]); pw.print(", "); pw.print(values[1]); pw.print(", ");
+                pw.print(values[2]); pw.print("][");
+        pw.print(values[3]); pw.print(", "); pw.print(values[4]); pw.print(", ");
+                pw.print(values[5]); pw.print("][");
+        pw.print(values[6]); pw.print(", "); pw.print(values[7]); pw.print(", ");
+                pw.print(values[8]); pw.print(']');
                 
     }
 

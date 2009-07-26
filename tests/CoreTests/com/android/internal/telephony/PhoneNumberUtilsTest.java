@@ -93,6 +93,13 @@ public class PhoneNumberUtilsTest extends TestCase {
             assertEquals(b[i], bRet[i]);
         }
 
+        bRet = PhoneNumberUtils.networkPortionToCalledPartyBCDWithLength("+17005550020");
+        assertEquals(8, bRet.length);
+        assertEquals(bRet[0], 7);
+        for (int i = 1; i < 8; i++) {
+            assertEquals(b[i - 1], bRet[i]);
+        }
+
         bRet = PhoneNumberUtils.networkPortionToCalledPartyBCD("7005550020");
         assertEquals("7005550020",
             PhoneNumberUtils.calledPartyBCDToString(bRet, 0, bRet.length));

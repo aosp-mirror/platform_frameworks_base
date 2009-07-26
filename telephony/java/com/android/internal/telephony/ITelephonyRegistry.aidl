@@ -19,6 +19,7 @@ package com.android.internal.telephony;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import com.android.internal.telephony.IPhoneStateListener;
 
 interface ITelephonyRegistry {
@@ -26,7 +27,7 @@ interface ITelephonyRegistry {
 
     void notifyCallState(int state, String incomingNumber);
     void notifyServiceState(in ServiceState state);
-    void notifySignalStrength(int signalStrengthASU);
+    void notifySignalStrength(in SignalStrength signalStrength);
     void notifyMessageWaitingChanged(boolean mwi);
     void notifyCallForwardingChanged(boolean cfi);
     void notifyDataActivity(int state);

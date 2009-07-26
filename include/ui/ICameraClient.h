@@ -29,13 +29,8 @@ class ICameraClient: public IInterface
 public:
     DECLARE_META_INTERFACE(CameraClient);
 
-    virtual void            shutterCallback() = 0;
-    virtual void            rawCallback(const sp<IMemory>& picture) = 0;
-    virtual void            jpegCallback(const sp<IMemory>& picture) = 0;
-    virtual void            previewCallback(const sp<IMemory>& frame) = 0;
-    virtual void            errorCallback(status_t error) = 0;
-    virtual void            autoFocusCallback(bool focused) = 0;
-    virtual void            recordingCallback(const sp<IMemory>& frame) = 0;
+    virtual void            notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2) = 0;
+    virtual void            dataCallback(int32_t msgType, const sp<IMemory>& data) = 0;
 
 };
 

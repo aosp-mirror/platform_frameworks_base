@@ -17,7 +17,7 @@
 package com.android.internal.telephony.gsm.stk;
 
 import com.android.internal.telephony.gsm.SIMFileHandler;
-import com.android.internal.telephony.gsm.SimUtils;
+import com.android.internal.telephony.IccUtils;
 
 import android.os.Handler;
 import android.os.HandlerState;
@@ -142,7 +142,7 @@ class RilMessageDecoder extends HandlerStateMachine {
         case StkService.MSG_ID_REFRESH:
             byte[] rawData = null;
             try {
-                rawData = SimUtils.hexStringToBytes((String) rilMsg.mData);
+                rawData = IccUtils.hexStringToBytes((String) rilMsg.mData);
             } catch (Exception e) {
                 // zombie messages are dropped
                 StkLog.d(this, "decodeMessageParams dropping zombie messages");

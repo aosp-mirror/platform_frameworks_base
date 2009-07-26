@@ -16,12 +16,11 @@
 
 package android.content.pm;
 
-
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -166,6 +165,20 @@ public abstract class PackageManager {
     public static final int GET_CONFIGURATIONS = 0x00004000;
 
     /**
+     * {@link ApplicationInfo} flag: return the
+     * {@link ApplicationInfo#supportsDensities} that the package supports.
+     */
+    public static final int GET_SUPPORTS_DENSITIES    = 0x00008000;
+
+    /**
+     * Resolution and querying flag: if set, only filters that support the
+     * {@link android.content.Intent#CATEGORY_DEFAULT} will be considered for
+     * matching.  This is a synonym for including the CATEGORY_DEFAULT in your
+     * supplied Intent.
+     */
+    public static final int MATCH_DEFAULT_ONLY   = 0x00010000;
+
+    /**
      * Permission check result: this is returned by {@link #checkPermission}
      * if the permission has been granted to the given package.
      */
@@ -213,14 +226,6 @@ public abstract class PackageManager {
      */
     public static final int SIGNATURE_UNKNOWN_PACKAGE = -4;
 
-    /**
-     * Resolution and querying flag: if set, only filters that support the
-     * {@link android.content.Intent#CATEGORY_DEFAULT} will be considered for
-     * matching.  This is a synonym for including the CATEGORY_DEFAULT in your
-     * supplied Intent.
-     */
-    public static final int MATCH_DEFAULT_ONLY   = 0x00010000;
-
     public static final int COMPONENT_ENABLED_STATE_DEFAULT = 0;
     public static final int COMPONENT_ENABLED_STATE_ENABLED = 1;
     public static final int COMPONENT_ENABLED_STATE_DISABLED = 2;
@@ -229,14 +234,24 @@ public abstract class PackageManager {
      * Flag parameter for {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} to
      * indicate that this package should be installed as forward locked, i.e. only the app itself
      * should have access to it's code and non-resource assets.
+     * @hide
      */
-    public static final int FORWARD_LOCK_PACKAGE = 0x00000001;
+    public static final int INSTALL_FORWARD_LOCK = 0x00000001;
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that you want to replace an already
-     * installed package, if one exists
+     * installed package, if one exists.
+     * @hide
      */
-    public static final int REPLACE_EXISTING_PACKAGE = 0x00000002;
+    public static final int INSTALL_REPLACE_EXISTING = 0x00000002;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that you want to 
+     * allow test packages (those that have set android:testOnly in their
+     * manifest) to be installed.
+     * @hide
+     */
+    public static final int INSTALL_ALLOW_TEST = 0x00000004;
 
     /**
      * Flag parameter for
@@ -249,6 +264,7 @@ public abstract class PackageManager {
     /**
      * Installation return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} on success.
+     * @hide
      */
     public static final int INSTALL_SUCCEEDED = 1;
 
@@ -256,6 +272,7 @@ public abstract class PackageManager {
      * Installation return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if the package is
      * already installed.
+     * @hide
      */
     public static final int INSTALL_FAILED_ALREADY_EXISTS = -1;
 
@@ -263,6 +280,7 @@ public abstract class PackageManager {
      * Installation return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if the package archive
      * file is invalid.
+     * @hide
      */
     public static final int INSTALL_FAILED_INVALID_APK = -2;
 
@@ -270,13 +288,15 @@ public abstract class PackageManager {
      * Installation return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if the URI passed in
      * is invalid.
+     * @hide
      */
     public static final int INSTALL_FAILED_INVALID_URI = -3;
 
     /**
      * Installation return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if the package manager
-     * service found that the device didn't have enough storage space to install the app
+     * service found that the device didn't have enough storage space to install the app.
+     * @hide
      */
     public static final int INSTALL_FAILED_INSUFFICIENT_STORAGE = -4;
 
@@ -284,6 +304,7 @@ public abstract class PackageManager {
      * Installation return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if a
      * package is already installed with the same name.
+     * @hide
      */
     public static final int INSTALL_FAILED_DUPLICATE_PACKAGE = -5;
 
@@ -291,6 +312,7 @@ public abstract class PackageManager {
      * Installation return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
      * the requested shared user does not exist.
+     * @hide
      */
     public static final int INSTALL_FAILED_NO_SHARED_USER = -6;
 
@@ -299,6 +321,7 @@ public abstract class PackageManager {
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
      * a previously installed package of the same name has a different signature
      * than the new package (and the old package's data was not removed).
+     * @hide
      */
     public static final int INSTALL_FAILED_UPDATE_INCOMPATIBLE = -7;
 
@@ -307,6 +330,7 @@ public abstract class PackageManager {
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
      * the new package is requested a shared user which is already installed on the
      * device and does not have matching signature.
+     * @hide
      */
     public static final int INSTALL_FAILED_SHARED_USER_INCOMPATIBLE = -8;
 
@@ -314,6 +338,7 @@ public abstract class PackageManager {
      * Installation return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
      * the new package uses a shared library that is not available.
+     * @hide
      */
     public static final int INSTALL_FAILED_MISSING_SHARED_LIBRARY = -9;
 
@@ -321,6 +346,7 @@ public abstract class PackageManager {
      * Installation return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
      * the new package uses a shared library that is not available.
+     * @hide
      */
     public static final int INSTALL_FAILED_REPLACE_COULDNT_DELETE = -10;
 
@@ -329,6 +355,7 @@ public abstract class PackageManager {
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
      * the new package failed while optimizing and validating its dex files,
      * either because there was not enough storage or the validation failed.
+     * @hide
      */
     public static final int INSTALL_FAILED_DEXOPT = -11;
 
@@ -337,6 +364,7 @@ public abstract class PackageManager {
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
      * the new package failed because the current SDK version is older than
      * that required by the package.
+     * @hide
      */
     public static final int INSTALL_FAILED_OLDER_SDK = -12;
 
@@ -345,14 +373,44 @@ public abstract class PackageManager {
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
      * the new package failed because it contains a content provider with the
      * same authority as a provider already installed in the system.
+     * @hide
      */
     public static final int INSTALL_FAILED_CONFLICTING_PROVIDER = -13;
+
+    /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the new package failed because the current SDK version is newer than
+     * that required by the package.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_NEWER_SDK = -14;
+
+    /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the new package failed because it has specified that it is a test-only
+     * package and the caller has not supplied the {@link #INSTALL_ALLOW_TEST}
+     * flag.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_TEST_ONLY = -15;
+
+    /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the package being installed contains native code, but none that is
+     * compatible with the the device's CPU_ABI.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_CPU_ABI_INCOMPATIBLE = -16;
 
     /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser was given a path that is not a file, or does not end with the expected
      * '.apk' extension.
+     * @hide
      */
     public static final int INSTALL_PARSE_FAILED_NOT_APK = -100;
 
@@ -360,6 +418,7 @@ public abstract class PackageManager {
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser was unable to retrieve the AndroidManifest.xml file.
+     * @hide
      */
     public static final int INSTALL_PARSE_FAILED_BAD_MANIFEST = -101;
 
@@ -367,6 +426,7 @@ public abstract class PackageManager {
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser encountered an unexpected exception.
+     * @hide
      */
     public static final int INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION = -102;
 
@@ -374,6 +434,7 @@ public abstract class PackageManager {
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser did not find any certificates in the .apk.
+     * @hide
      */
     public static final int INSTALL_PARSE_FAILED_NO_CERTIFICATES = -103;
 
@@ -381,6 +442,7 @@ public abstract class PackageManager {
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser found inconsistent certificates on the files in the .apk.
+     * @hide
      */
     public static final int INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES = -104;
 
@@ -389,6 +451,7 @@ public abstract class PackageManager {
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser encountered a CertificateEncodingException in one of the
      * files in the .apk.
+     * @hide
      */
     public static final int INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING = -105;
 
@@ -396,6 +459,7 @@ public abstract class PackageManager {
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser encountered a bad or missing package name in the manifest.
+     * @hide
      */
     public static final int INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME = -106;
 
@@ -403,6 +467,7 @@ public abstract class PackageManager {
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser encountered a bad shared user id name in the manifest.
+     * @hide
      */
     public static final int INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID = -107;
 
@@ -410,6 +475,7 @@ public abstract class PackageManager {
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser encountered some structural problem in the manifest.
+     * @hide
      */
     public static final int INSTALL_PARSE_FAILED_MANIFEST_MALFORMED = -108;
 
@@ -418,6 +484,7 @@ public abstract class PackageManager {
      * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
      * if the parser did not find any actionable tags (instrumentation or application)
      * in the manifest.
+     * @hide
      */
     public static final int INSTALL_PARSE_FAILED_MANIFEST_EMPTY = -109;
 
@@ -504,9 +571,8 @@ public abstract class PackageManager {
      * launch the main activity in the package, or null if the package does
      * not contain such an activity.
      */
-    public abstract Intent getLaunchIntentForPackage(String packageName)
-            throws NameNotFoundException;
-    
+    public abstract Intent getLaunchIntentForPackage(String packageName);
+
     /**
      * Return an array of all of the secondary group-ids that have been
      * assigned to a package.
@@ -1324,6 +1390,8 @@ public abstract class PackageManager {
     }
 
     /**
+     * @hide
+     * 
      * Install a package. Since this may take a little while, the result will
      * be posted back to the given observer.  An installation will fail if the calling context
      * lacks the {@link android.Manifest.permission#INSTALL_PACKAGES} permission, if the
@@ -1335,13 +1403,14 @@ public abstract class PackageManager {
      * @param observer An observer callback to get notified when the package installation is
      * complete. {@link IPackageInstallObserver#packageInstalled(String, int)} will be
      * called when that happens.  observer may be null to indicate that no callback is desired.
-     * @param flags - possible values: {@link #FORWARD_LOCK_PACKAGE},
-     * {@link #REPLACE_EXISTING_PACKAGE}
-     *
-     * @see #installPackage(android.net.Uri)
+     * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
+     * {@link #INSTALL_REPLACE_EXISTING}, {@link #INSTALL_ALLOW_TEST}.
+     * @param installerPackageName Optional package name of the application that is performing the
+     * installation. This identifies which market the package came from.
      */
     public abstract void installPackage(
-            Uri packageURI, IPackageInstallObserver observer, int flags);
+            Uri packageURI, IPackageInstallObserver observer, int flags,
+            String installerPackageName);
 
     /**
      * Attempts to delete a package.  Since this may take a little while, the result will
@@ -1360,6 +1429,17 @@ public abstract class PackageManager {
      */
     public abstract void deletePackage(
             String packageName, IPackageDeleteObserver observer, int flags);
+
+    /**
+     * Retrieve the package name of the application that installed a package. This identifies
+     * which market the package came from.
+     * 
+     * @param packageName The name of the package to query
+     *
+     * @hide
+     */
+    public abstract String getInstallerPackageName(String packageName);
+    
     /**
      * Attempts to clear the user data directory of an application.
      * Since this may take a little while, the result will
@@ -1418,7 +1498,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract void freeStorageAndNotify(long freeStorageSize, IPackageDataObserver observer);
-    
+
     /**
      * Free storage by deleting LRU sorted list of cache files across
      * all applications. If the currently available free storage
@@ -1436,13 +1516,13 @@ public abstract class PackageManager {
      * and the current free storage is YY,
      * if XX is less than YY, just return. if not free XX-YY number
      * of bytes if possible.
-     * @param opFinishedIntent PendingIntent call back used to
+     * @param pi IntentSender call back used to
      * notify when the operation is completed.May be null
      * to indicate that no call back is desired.
      * 
      * @hide
      */
-    public abstract void freeStorage(long freeStorageSize, PendingIntent opFinishedIntent);
+    public abstract void freeStorage(long freeStorageSize, IntentSender pi);
 
     /**
      * Retrieve the size information for a package.
@@ -1463,17 +1543,6 @@ public abstract class PackageManager {
      */
     public abstract void getPackageSizeInfo(String packageName,
             IPackageStatsObserver observer);
-
-    /**
-     * Install a package.
-     *
-     * @param packageURI The location of the package file to install
-     *
-     * @see #installPackage(android.net.Uri, IPackageInstallObserver, int)
-     */
-    public void installPackage(Uri packageURI) {
-        installPackage(packageURI, null, 0);
-    }
 
     /**
      * Add a new package to the list of preferred packages.  This new package
@@ -1540,6 +1609,26 @@ public abstract class PackageManager {
      * preferred.
      */
     public abstract void addPreferredActivity(IntentFilter filter, int match,
+            ComponentName[] set, ComponentName activity);
+
+    /**
+     * Replaces an existing preferred activity mapping to the system, and if that were not present
+     * adds a new preferred activity.  This will be used
+     * to automatically select the given activity component when
+     * {@link Context#startActivity(Intent) Context.startActivity()} finds
+     * multiple matching activities and also matches the given filter.
+     *
+     * @param filter The set of intents under which this activity will be
+     * made preferred.
+     * @param match The IntentFilter match category that this preference
+     * applies to.
+     * @param set The set of activities that the user was picking from when
+     * this preference was made.
+     * @param activity The component name of the activity that is to be
+     * preferred.
+     * @hide
+     */
+    public abstract void replacePreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity);
 
     /**

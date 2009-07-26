@@ -26,10 +26,7 @@ ES API. However, it may not be identical, so watch out for deviations.</p>
 <li>In your View's onDraw() method, get a handle to a GL object, and use its methods to perform GL operations.</li>
 </ol>
 
-<p>For an example of this usage model (based on the classic GL ColorCube),
-see
-<a href="{@docRoot}guide/samples/ApiDemos/src/com/example/android/apis/graphics/GLSurfaceView.html">com.android.samples.graphics.GLSurfaceView.java</a>
-in the ApiDemos sample code project. A slightly more sophisticated version showing how to use
+<p>For an example of this usage model (based on the classic GL ColorCube), showing how to use
 it with threads can be found in 
 <a href="{@docRoot}guide/samples/ApiDemos/src/com/example/android/apis/graphics/GLSurfaceViewActivity.html">com.android.samples.graphics.GLSurfaceViewActivity.java</a>.
 </p>

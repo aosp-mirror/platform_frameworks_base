@@ -537,6 +537,15 @@ public final class Pm {
         case PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER:
             s = "INSTALL_FAILED_CONFLICTING_PROVIDER";
             break;
+        case PackageManager.INSTALL_FAILED_NEWER_SDK:
+            s = "INSTALL_FAILED_NEWER_SDK";
+            break;
+        case PackageManager.INSTALL_FAILED_TEST_ONLY:
+            s = "INSTALL_FAILED_TEST_ONLY";
+            break;
+        case PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE:
+            s = "INSTALL_FAILED_CPU_ABI_INCOMPATIBLE";
+            break;
         case PackageManager.INSTALL_PARSE_FAILED_NOT_APK:
             s = "INSTALL_PARSE_FAILED_NOT_APK";
             break;
@@ -576,13 +585,23 @@ public final class Pm {
     
     private void runInstall() {
         int installFlags = 0;
+        String installerPackageName = null;
 
         String opt;
         while ((opt=nextOption()) != null) {
             if (opt.equals("-l")) {
-                installFlags |= PackageManager.FORWARD_LOCK_PACKAGE;
+                installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
             } else if (opt.equals("-r")) {
-                installFlags |= PackageManager.REPLACE_EXISTING_PACKAGE;
+                installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+            } else if (opt.equals("-i")) {
+                installerPackageName = nextOptionData();
+                if (installerPackageName == null) {
+                    System.err.println("Error: no value specified for -i");
+                    showUsage();
+                    return;
+                }
+            } else if (opt.equals("-t")) {
+                installFlags |= PackageManager.INSTALL_ALLOW_TEST;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -600,7 +619,8 @@ public final class Pm {
 
         PackageInstallObserver obs = new PackageInstallObserver();
         try {
-            mPm.installPackage(Uri.fromFile(new File(apkFilePath)), obs, installFlags);
+            mPm.installPackage(Uri.fromFile(new File(apkFilePath)), obs, installFlags,
+                    installerPackageName);
             
             synchronized (obs) {
                 while (!obs.finished) {
@@ -809,37 +829,39 @@ public final class Pm {
         System.err.println("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
         System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");        
         System.err.println("       pm path PACKAGE");
-        System.err.println("       pm install [-l] [-r] PATH");
+        System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable PACKAGE_OR_COMPONENT");
         System.err.println("");
-        System.err.println("The list packages command prints all packages.  Use");
-        System.err.println("the -f option to see their associated file.");
+        System.err.println("The list packages command prints all packages.  Options:");
+        System.err.println("  -f: see their associated file.");
         System.err.println("");
         System.err.println("The list permission-groups command prints all known");
         System.err.println("permission groups.");
         System.err.println("");
         System.err.println("The list permissions command prints all known");
-        System.err.println("permissions, optionally only those in GROUP.  Use");
-        System.err.println("the -g option to organize by group.  Use");
-        System.err.println("the -f option to print all information.  Use");
-        System.err.println("the -s option for a short summary.  Use");
-        System.err.println("the -d option to only list dangerous permissions.  Use");
-        System.err.println("the -u option to list only the permissions users will see.");
+        System.err.println("permissions, optionally only those in GROUP.  Options:");
+        System.err.println("  -g: organize by group.");
+        System.err.println("  -f: print all information.");
+        System.err.println("  -s: short summary.");
+        System.err.println("  -d: only list dangerous permissions.");
+        System.err.println("  -u: list only the permissions users will see.");
         System.err.println("");
         System.err.println("The list instrumentation command prints all instrumentations,");
-        System.err.println("or only those that target a specified package.  Use the -f option");
-        System.err.println("to see their associated file.");
+        System.err.println("or only those that target a specified package.  Options:");
+        System.err.println("  -f: see their associated file.");
         System.err.println("");
         System.err.println("The path command prints the path to the .apk of a package.");
         System.err.println("");
-        System.err.println("The install command installs a package to the system.  Use");
-        System.err.println("the -l option to install the package with FORWARD_LOCK. Use");
-        System.err.println("the -r option to reinstall an exisiting app, keeping its data.");
+        System.err.println("The install command installs a package to the system.  Options:");
+        System.err.println("  -l: install the package with FORWARD_LOCK.");
+        System.err.println("  -r: reinstall an exisiting app, keeping its data.");
+        System.err.println("  -t: allow test .apks to be installed.");
+        System.err.println("  -i: specify the installer package name.");
         System.err.println("");
-        System.err.println("The uninstall command removes a package from the system. Use");
-        System.err.println("the -k option to keep the data and cache directories around");
+        System.err.println("The uninstall command removes a package from the system. Options:");
+        System.err.println("  -k: keep the data and cache directories around.");
         System.err.println("after the package removal.");
         System.err.println("");
         System.err.println("The enable and disable commands change the enabled state of");

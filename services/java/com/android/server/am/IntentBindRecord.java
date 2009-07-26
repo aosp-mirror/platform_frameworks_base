@@ -45,22 +45,30 @@ class IntentBindRecord {
     /** Set when the service's onUnbind() has asked to be told about new clients. */
     boolean doRebind;
     
+    String stringName;      // caching of toString
+    
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
-        pw.println(prefix + "service=" + service);
-        pw.println(prefix + "intent=" + intent.getIntent());
-        pw.println(prefix + "binder=" + binder
-                + " requested=" + requested
-                + " received=" + received
-                + " hasBound=" + hasBound
-                + " doRebind=" + doRebind);
+        pw.print(prefix); pw.print("service="); pw.println(service);
+        dumpInService(pw, prefix);
+    }
+
+    void dumpInService(PrintWriter pw, String prefix) {
+        pw.print(prefix); pw.print("intent={");
+                pw.print(intent.getIntent().toShortString(true, false));
+                pw.println('}');
+        pw.print(prefix); pw.print("binder="); pw.println(binder);
+        pw.print(prefix); pw.print("requested="); pw.print(requested);
+                pw.print(" received="); pw.print(received);
+                pw.print(" hasBound="); pw.print(hasBound);
+                pw.print(" doRebind="); pw.println(doRebind);
         if (apps.size() > 0) {
-            pw.println(prefix + "Application Bindings:");
             Iterator<AppBindRecord> it = apps.values().iterator();
             while (it.hasNext()) {
                 AppBindRecord a = it.next();
-                pw.println(prefix + "Client " + a.client);
-                a.dump(pw, prefix + "  ");
+                pw.print(prefix); pw.print("* Client AppBindRecord{");
+                        pw.print(Integer.toHexString(System.identityHashCode(a)));
+                        pw.print(' '); pw.print(a.client); pw.println('}');
+                a.dumpInIntentBind(pw, prefix + "  ");
             }
         }
     }
@@ -71,9 +79,19 @@ class IntentBindRecord {
     }
 
     public String toString() {
-        return "IntentBindRecord{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + service.name.toShortString()
-            + ":" + intent + "}";
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("IntentBindRecord{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        sb.append(service.shortName);
+        sb.append(':');
+        if (intent != null) {
+            intent.getIntent().toShortString(sb, false, false);
+        }
+        sb.append('}');
+        return stringName = sb.toString();
     }
 }

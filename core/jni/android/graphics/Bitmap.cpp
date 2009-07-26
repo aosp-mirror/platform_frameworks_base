@@ -28,7 +28,7 @@ typedef void (*FromColorProc)(void* dst, const SkColor src[], int width,
 static void FromColor_D32(void* dst, const SkColor src[], int width,
                           int, int) {
     SkPMColor* d = (SkPMColor*)dst;
-    
+
     for (int i = 0; i < width; i++) {
         *d++ = SkPreMultiplyColor(*src++);
     }
@@ -37,7 +37,7 @@ static void FromColor_D32(void* dst, const SkColor src[], int width,
 static void FromColor_D565(void* dst, const SkColor src[], int width,
                            int x, int y) {
     uint16_t* d = (uint16_t*)dst;
-    
+
     DITHER_565_SCAN(y);
     for (int stop = x + width; x < stop; x++) {
         SkColor c = *src++;
@@ -49,7 +49,7 @@ static void FromColor_D565(void* dst, const SkColor src[], int width,
 static void FromColor_D4444(void* dst, const SkColor src[], int width,
                             int x, int y) {
     SkPMColor16* d = (SkPMColor16*)dst;
-    
+
     DITHER_4444_SCAN(y);
     for (int stop = x + width; x < stop; x++) {
         SkPMColor c = SkPreMultiplyColor(*src++);
@@ -80,14 +80,14 @@ bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors,
     SkAutoLockPixels alp(dstBitmap);
     void* dst = dstBitmap.getPixels();
     FromColorProc proc = ChooseFromColorProc(dstBitmap.config());
-    
+
     if (NULL == dst || NULL == proc) {
         return false;
     }
-    
+
     const jint* array = env->GetIntArrayElements(srcColors, NULL);
     const SkColor* src = (const SkColor*)array + srcOffset;
-    
+
     // reset to to actual choice from caller
     dst = dstBitmap.getAddr(x, y);
     // now copy/convert each scanline
@@ -96,7 +96,7 @@ bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors,
         src += srcStride;
         dst = (char*)dst + dstBitmap.rowBytes();
     }
-    
+
     env->ReleaseIntArrayElements(srcColors, const_cast<jint*>(array),
                                  JNI_ABORT);
     return true;
@@ -212,7 +212,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
         doThrowIAE(env, "width and height must be > 0");
         return NULL;
     }
-    
+
     if (NULL != jColors) {
         size_t n = env->GetArrayLength(jColors);
         if (n < SkAbs32(stride) * (size_t)height) {
@@ -222,7 +222,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     }
 
     SkBitmap bitmap;
-    
+
     bitmap.setConfig(config, width, height);
     if (!GraphicsJNI::setJavaPixelRef(env, &bitmap, NULL)) {
         return NULL;
@@ -232,7 +232,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
         GraphicsJNI::SetPixels(env, jColors, offset, stride,
                                0, 0, width, height, bitmap);
     }
-    
+
     return GraphicsJNI::createBitmap(env, new SkBitmap(bitmap), isMutable,
                                      NULL);
 }
@@ -245,7 +245,7 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, const SkBitmap* src,
     if (!src->copyTo(&result, dstConfig, &allocator)) {
         return NULL;
     }
-    
+
     return GraphicsJNI::createBitmap(env, new SkBitmap(result), isMutable,
                                      NULL);
 }
@@ -324,15 +324,15 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
         SkDebugf("-------- unparcel parcel is NULL\n");
         return NULL;
     }
-    
+
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
-    
+
     const bool              isMutable = p->readInt32() != 0;
     const SkBitmap::Config  config = (SkBitmap::Config)p->readInt32();
     const int               width = p->readInt32();
     const int               height = p->readInt32();
     const int               rowBytes = p->readInt32();
-    
+
     if (SkBitmap::kARGB_8888_Config != config &&
             SkBitmap::kRGB_565_Config != config &&
             SkBitmap::kARGB_4444_Config != config &&
@@ -355,7 +355,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
             ctable = new SkColorTable(src, count);
         }
     }
-    
+
     if (!GraphicsJNI::setJavaPixelRef(env, bitmap, ctable)) {
         ctable->safeUnref();
         delete bitmap;
@@ -368,7 +368,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     bitmap->lockPixels();
     memcpy(bitmap->getPixels(), p->readInplace(size), size);
     bitmap->unlockPixels();
-    
+
     return GraphicsJNI::createBitmap(env, bitmap, isMutable, NULL);
 }
 
@@ -381,7 +381,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     }
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
-    
+
     p->writeInt32(isMutable);
     p->writeInt32(bitmap->config());
     p->writeInt32(bitmap->width());
@@ -413,7 +413,7 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
                                    jintArray offsetXY) {
     SkIPoint  offset;
     SkBitmap* dst = new SkBitmap;
-    
+
     src->extractAlpha(dst, paint, &offset);
     if (offsetXY != 0 && env->GetArrayLength(offsetXY) >= 2) {
         int* array = env->GetIntArrayElements(offsetXY, NULL);
@@ -421,7 +421,7 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
         array[1] = offset.fY;
         env->ReleaseIntArrayElements(offsetXY, array, 0);
     }
-    
+
     return GraphicsJNI::createBitmap(env, dst, true, NULL);
 }
 
@@ -439,7 +439,7 @@ static int Bitmap_getPixel(JNIEnv* env, jobject, const SkBitmap* bitmap,
     if (NULL == src) {
         return 0;
     }
-    
+
     SkColor dst[1];
     proc(dst, src, 1, bitmap->getColorTable());
     return dst[0];
@@ -449,7 +449,7 @@ static void Bitmap_getPixels(JNIEnv* env, jobject, const SkBitmap* bitmap,
                              jintArray pixelArray, int offset, int stride,
                              int x, int y, int width, int height) {
     SkAutoLockPixels alp(*bitmap);
-    
+
     ToColorProc proc = ChooseToColorProc(*bitmap);
     if (NULL == proc) {
         return;
@@ -498,7 +498,7 @@ static void Bitmap_copyPixelsToBuffer(JNIEnv* env, jobject,
                                       const SkBitmap* bitmap, jobject jbuffer) {
     SkAutoLockPixels alp(*bitmap);
     const void* src = bitmap->getPixels();
-    
+
     if (NULL != src) {
         android::AutoBufferPointer abp(env, jbuffer, JNI_TRUE);
 
@@ -511,12 +511,17 @@ static void Bitmap_copyPixelsFromBuffer(JNIEnv* env, jobject,
                                     const SkBitmap* bitmap, jobject jbuffer) {
     SkAutoLockPixels alp(*bitmap);
     void* dst = bitmap->getPixels();
-    
+
     if (NULL != dst) {
         android::AutoBufferPointer abp(env, jbuffer, JNI_FALSE);
         // the java side has already checked that buffer is large enough
         memcpy(dst, abp.pointer(), bitmap->getSize());
     }
+}
+
+static void Bitmap_prepareToDraw(JNIEnv* env, jobject, SkBitmap* bitmap) {
+    bitmap->lockPixels();
+    bitmap->unlockPixels();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -552,7 +557,8 @@ static JNINativeMethod gBitmapMethods[] = {
     {   "nativeCopyPixelsToBuffer", "(ILjava/nio/Buffer;)V",
                                             (void*)Bitmap_copyPixelsToBuffer },
     {   "nativeCopyPixelsFromBuffer", "(ILjava/nio/Buffer;)V",
-                                            (void*)Bitmap_copyPixelsFromBuffer }
+                                            (void*)Bitmap_copyPixelsFromBuffer },
+    {   "nativePrepareToDraw",      "(I)V", (void*)Bitmap_prepareToDraw }
 };
 
 #define kClassPathName  "android/graphics/Bitmap"

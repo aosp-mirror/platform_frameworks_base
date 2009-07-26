@@ -34,7 +34,7 @@ public class SuppServiceNotification {
     public int type;
     /** TS 27.007 7.17 "number" (MT only) */
     public String number;
-    
+
     static public final int MO_CODE_UNCONDITIONAL_CF_ACTIVE     = 0;
     static public final int MO_CODE_SOME_CF_ACTIVE              = 1;
     static public final int MO_CODE_CALL_FORWARDED              = 2;
@@ -44,7 +44,7 @@ public class SuppServiceNotification {
     static public final int MO_CODE_INCOMING_CALLS_BARRED       = 6;
     static public final int MO_CODE_CLIR_SUPPRESSION_REJECTED   = 7;
     static public final int MO_CODE_CALL_DEFLECTED              = 8;
-    
+
     static public final int MT_CODE_FORWARDED_CALL              = 0;
     static public final int MT_CODE_CUG_CALL                    = 1;
     static public final int MT_CODE_CALL_ON_HOLD                = 2;

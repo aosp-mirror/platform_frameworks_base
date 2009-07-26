@@ -108,7 +108,7 @@ status_t Layer::setBuffers( Client* client,
     // we always force a 4-byte aligned bpr.
     uint32_t alignment = 1;
 
-    if (flags & ISurfaceComposer::eGPU) {
+    if ((flags & ISurfaceComposer::eGPU) && (mFlinger->getGPU() != 0)) {
         // FIXME: this value should come from the h/w
         alignment = 8; 
         // FIXME: this is msm7201A specific, as its GPU only supports

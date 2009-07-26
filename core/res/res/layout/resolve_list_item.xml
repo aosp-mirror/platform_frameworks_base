@@ -23,7 +23,7 @@
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:layout_height="wrap_content"
     android:layout_width="fill_parent"
-    android:paddingLeft="14dip"
+    android:paddingLeft="10dip"
     android:paddingRight="15dip">
 
     <!-- Activity icon when presenting dialog -->
@@ -42,13 +42,13 @@
             android:textAppearance="?android:attr/textAppearanceLargeInverse"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="6dip" />
+            android:paddingLeft="10dip" />
         <!-- Extended activity info to distinguish between duplicate activity names -->
         <TextView android:id="@android:id/text2"
             android:textAppearance="?android:attr/textAppearanceMediumInverse"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="6dip" />
+            android:paddingLeft="10dip" />
     </LinearLayout>
 </LinearLayout>
 

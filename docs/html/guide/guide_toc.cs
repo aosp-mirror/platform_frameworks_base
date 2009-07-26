@@ -19,11 +19,13 @@
           <ul>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/declaring-layout.html">Declaring Layout</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/menus.html">Creating Menus</a></li>
-            <li><a href="<?cs var:toroot ?>guide/topics/ui/layout-objects.html">Common Layout Objects</a></li>
-            <li><a href="<?cs var:toroot ?>guide/topics/ui/binding.html">Binding to Data with AdapterView</a></li>
+            <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">Creating Dialogs</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/ui-events.html">Handling UI Events</a></li>
+            <li><a href="<?cs var:toroot ?>guide/topics/ui/notifiers/index.html">Notifying the User</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/themes.html">Applying Styles and Themes</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/custom-components.html">Building Custom Components</a></li>
+            <li><a href="<?cs var:toroot ?>guide/topics/ui/binding.html">Binding to Data with AdapterView</a></li>
+            <li><a href="<?cs var:toroot ?>guide/topics/ui/layout-objects.html">Common Layout Objects</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/ui/how-android-draws.html">How Android Draws Views</a></li>
           </ul>
       </li>
@@ -37,7 +39,6 @@
       <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">Intents and Intent Filters</a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/data/data-storage.html">Data Storage</a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">Content Providers</a></li>
-<!--  <li><a style="color:gray;">Notifications</a></li> -->
       <li><a href="<?cs var:toroot ?>guide/topics/security/security.html">Security and Permissions</a></li>
 <!--  <li><a style="color:gray;">Processes and Threads</a></li> -->
 <!--  <li><a style="color:gray;">Interprocess Communication</a></li> -->
@@ -61,6 +62,7 @@
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/service-element.html">&lt;service&gt;</a></li>
+            <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></li>
             <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></li>
@@ -84,7 +86,7 @@
             <li><a style="color:gray;">Accelerometer</a></li>
           </ul>
       </li> -->
-      <li><a href="<?cs var:toroot ?>guide/topics/location/index.html">Location</a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/location/index.html">Location and Maps</a></li>
 <!--    <li class="toggle-list">
         <div><a style="color:gray;">Wireless Controls</a></div>
           <ul>
@@ -93,6 +95,7 @@
           </ul>
       </li> -->
 <!--  <li><a style="color:gray;">Localization</a></li>  -->
+      <li><a href="<?cs var:toroot ?>guide/topics/appwidgets/index.html">App Widgets</a></li>
     </ul>
 </li>
 
@@ -100,7 +103,6 @@
     <ul>
       <!--       <li><a style="color:gray;">Developing for Android</a></li>
       signing, upgrading, selecting a package name, select device profile, touch, trackball, dpad available, etc. -->
-
       <li><a href="<?cs var:toroot ?>guide/developing/eclipse-adt.html">In Eclipse, with ADT</a></li>
       <li><a href="<?cs var:toroot ?>guide/developing/other-ide.html">In Other IDEs</a></li>
       <li><a href="<?cs var:toroot ?>guide/developing/device.html">On a Device</a></li>
@@ -110,9 +112,10 @@
           <ul>
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/aapt.html">aapt</a></li>
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html">adb</a></li>
-			<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#activitycreator">activitycreator</a></li>
+			<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#android">android</a></li>
 <!--			<li><a href="<?cs var:toroot ?>guide/developing/tools/adt.html">ADT Plugin</a></li>-->
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/aidl.html" >aidl</a></li>
+			<li><a href="<?cs var:toroot ?>guide/developing/tools/avd.html" >AVDs</a></li>
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/ddms.html" >ddms</a></li>
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#dx">dx</a></li>
 			<li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html">Draw 9-Patch</a></li>
@@ -140,6 +143,14 @@
 
 <li><h2>Best Practices</h2>
     <ul>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">UI Guidelines</a></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/icon_design.html">Icon Design</a></li>
+            <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/widget_design.html">App Widget Design</a></li>
+            <li><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/activity_task_design.html">Activity and Task Design</a></li>
+          </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/performance.html">Designing for Performance</a></li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/responsiveness.html">Designing for Responsiveness</a></li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/seamlessness.html">Designing for Seamlessness</a></li>

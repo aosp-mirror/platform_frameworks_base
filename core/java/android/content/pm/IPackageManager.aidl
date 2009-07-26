@@ -34,7 +34,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
-import android.app.PendingIntent;
+import android.content.IntentSender;
 
 /**
  *  See {@link PackageManager} for documentation on most of the APIs
@@ -139,8 +139,11 @@ interface IPackageManager {
      * @param observer a callback to use to notify when the package installation in finished.
      * @param flags - possible values: {@link #FORWARD_LOCK_PACKAGE},
      * {@link #REPLACE_EXISITING_PACKAGE}
+     * @param installerPackageName Optional package name of the application that is performing the
+     * installation. This identifies which market the package came from.
      */
-    void installPackage(in Uri packageURI, IPackageInstallObserver observer, int flags);
+    void installPackage(in Uri packageURI, IPackageInstallObserver observer, int flags,
+            in String installerPackageName);
 
     /**
      * Delete a package.
@@ -151,6 +154,8 @@ interface IPackageManager {
      */
     void deletePackage(in String packageName, IPackageDeleteObserver observer, int flags);
 
+    String getInstallerPackageName(in String packageName);
+
     void addPackageToPreferred(String packageName);
     
     void removePackageFromPreferred(String packageName);
@@ -159,7 +164,12 @@ interface IPackageManager {
 
     void addPreferredActivity(in IntentFilter filter, int match,
             in ComponentName[] set, in ComponentName activity);
+
+    void replacePreferredActivity(in IntentFilter filter, int match,
+            in ComponentName[] set, in ComponentName activity);
+
     void clearPackagePreferredActivities(String packageName);
+
     int getPreferredActivities(out List<IntentFilter> outFilters,
             out List<ComponentName> outActivities, String packageName);
     
@@ -224,12 +234,12 @@ interface IPackageManager {
      * and the current free storage is YY,
      * if XX is less than YY, just return. if not free XX-YY number
      * of bytes if possible.
-     * @param opFinishedIntent PendingIntent call back used to
+     * @param pi IntentSender call back used to
      * notify when the operation is completed.May be null
      * to indicate that no call back is desired.
      */
      void freeStorage(in long freeStorageSize,
-             in PendingIntent opFinishedIntent);
+             in IntentSender pi);
      
     /**
      * Delete all the cache files in an applications cache directory
@@ -266,4 +276,11 @@ interface IPackageManager {
     boolean isSafeMode();
     void systemReady();
     boolean hasSystemUidErrors();
+    
+    /**
+     * Ask the package manager to perform dex-opt (if needed) on the given
+     * package, if it already hasn't done mode.  Only does this if running
+     * in the special development "no pre-dexopt" mode.
+     */
+    boolean performDexOpt(String packageName);
 }

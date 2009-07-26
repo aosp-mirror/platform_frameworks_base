@@ -170,21 +170,25 @@ public class MediaMetadataTest extends AndroidTestCase {
         validateMetatData(non_mp3_test_file.WAV.ordinal(), MediaNames.META_DATA_OTHERS);
     }
     
+    @Suppress
     @MediumTest
     public static void testWma9_Metadata() throws Exception {
         validateMetatData(non_mp3_test_file.WMA9.ordinal(), MediaNames.META_DATA_OTHERS);
     }
     
+    @Suppress
     @MediumTest
     public static void testWma10_Metadata() throws Exception {
         validateMetatData(non_mp3_test_file.WMA10.ordinal(), MediaNames.META_DATA_OTHERS);
     }
     
+    @Suppress
     @MediumTest
     public static void testWmv9_Metadata() throws Exception {
         validateMetatData(non_mp3_test_file.WMV9.ordinal(), MediaNames.META_DATA_OTHERS);
     }
     
+    @Suppress
     @MediumTest
     public static void testWmv10_Metadata() throws Exception {
         validateMetatData(non_mp3_test_file.WMV7.ordinal(), MediaNames.META_DATA_OTHERS);

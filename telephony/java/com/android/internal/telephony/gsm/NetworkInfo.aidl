@@ -16,11 +16,11 @@
 
 package com.android.internal.telephony.gsm;
 
-/** 
+/**
  * Used to indicate that the NetworkInfo object is parcelable to aidl.
  * This is a simple effort to make NetworkInfo parcelable rather than
  * trying to make the conventional containing object (AsyncResult),
- * implement parcelable.  This functionality is needed for the 
+ * implement parcelable.  This functionality is needed for the
  * NetworkQueryService to fix 1128695
  */
 parcelable NetworkInfo;

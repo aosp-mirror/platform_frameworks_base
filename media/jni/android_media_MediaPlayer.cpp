@@ -125,8 +125,8 @@ static sp<MediaPlayer> setMediaPlayer(JNIEnv* env, jobject thiz, const sp<MediaP
     return old;
 }
 
-// If exception is NULL and opStatus is not OK, this method sends an error 
-// event to the client application; otherwise, if exception is not NULL and 
+// If exception is NULL and opStatus is not OK, this method sends an error
+// event to the client application; otherwise, if exception is not NULL and
 // opStatus is not OK, this method throws the given exception to the client
 // application.
 static void process_media_player_call(JNIEnv *env, jobject thiz, status_t opStatus, const char* exception, const char *message)
@@ -198,6 +198,27 @@ android_media_MediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fil
     process_media_player_call( env, thiz, mp->setDataSource(fd, offset, length), "java/io/IOException", "setDataSourceFD failed." );
 }
 
+static void setVideoSurface(const sp<MediaPlayer>& mp, JNIEnv *env, jobject thiz)
+{
+    jobject surface = env->GetObjectField(thiz, fields.surface);
+    if (surface != NULL) {
+        const sp<Surface>& native_surface = get_surface(env, surface);
+        LOGV("prepare: surface=%p (id=%d)",
+             native_surface.get(), native_surface->ID());
+        mp->setVideoSurface(native_surface);
+    }
+}
+
+static void
+android_media_MediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+    setVideoSurface(mp, env, thiz);
+}
 
 static void
 android_media_MediaPlayer_prepare(JNIEnv *env, jobject thiz)
@@ -207,13 +228,7 @@ android_media_MediaPlayer_prepare(JNIEnv *env, jobject thiz)
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    jobject surface = env->GetObjectField(thiz, fields.surface);
-    if (surface != NULL) {
-        const sp<Surface>& native_surface = get_surface(env, surface);
-        LOGV("prepare: surface=%p (id=%d)", 
-             native_surface.get(), native_surface->ID());
-        mp->setVideoSurface(native_surface);
-    }
+    setVideoSurface(mp, env, thiz);
     process_media_player_call( env, thiz, mp->prepare(), "java/io/IOException", "Prepare failed." );
 }
 
@@ -228,7 +243,7 @@ android_media_MediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
     jobject surface = env->GetObjectField(thiz, fields.surface);
     if (surface != NULL) {
         const sp<Surface>& native_surface = get_surface(env, surface);
-        LOGV("prepareAsync: surface=%p (id=%d)", 
+        LOGV("prepareAsync: surface=%p (id=%d)",
              native_surface.get(), native_surface->ID());
         mp->setVideoSurface(native_surface);
     }
@@ -256,7 +271,7 @@ android_media_MediaPlayer_stop(JNIEnv *env, jobject thiz)
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    process_media_player_call( env, thiz, mp->stop(), NULL, NULL );    
+    process_media_player_call( env, thiz, mp->stop(), NULL, NULL );
 }
 
 static void
@@ -469,6 +484,7 @@ android_media_MediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 static JNINativeMethod gMethods[] = {
     {"setDataSource",       "(Ljava/lang/String;)V",            (void *)android_media_MediaPlayer_setDataSource},
     {"setDataSource",       "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
+    {"_setVideoSurface",    "()V",                              (void *)android_media_MediaPlayer_setVideoSurface},
     {"prepare",             "()V",                              (void *)android_media_MediaPlayer_prepare},
     {"prepareAsync",        "()V",                              (void *)android_media_MediaPlayer_prepareAsync},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer_start},

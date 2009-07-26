@@ -21,14 +21,13 @@ import android.os.Message;
 import android.os.Handler;
 import android.telephony.PhoneNumberUtils;
 import com.android.internal.telephony.ATParseEx;
-import com.android.internal.telephony.gsm.DriverCall;
+import com.android.internal.telephony.DriverCall;
 import java.util.List;
 import java.util.ArrayList;
 
 import android.util.Log;
 
-class CallInfo
-{
+class CallInfo {
     enum State {
         ACTIVE(0),
         HOLDING(1),
@@ -38,7 +37,7 @@ class CallInfo
         WAITING(5);    // MT call only
 
         State (int value) {this.value = value;}
-        
+
         private final int value;
         public int value() {return value;};
     };
@@ -49,8 +48,7 @@ class CallInfo
     String number;
     int TOA;
 
-    CallInfo (boolean isMT, State state, boolean isMpty, String number)
-    {
+    CallInfo (boolean isMT, State state, boolean isMpty, String number) {
         this.isMT = isMT;
         this.state = state;
         this.isMpty = isMpty;
@@ -64,21 +62,18 @@ class CallInfo
     }
 
     static CallInfo
-    createOutgoingCall(String number)
-    {
+    createOutgoingCall(String number) {
         return new CallInfo (false, State.DIALING, false, number);
     }
 
     static CallInfo
-    createIncomingCall(String number)
-    {
+    createIncomingCall(String number) {
         return new CallInfo (true, State.INCOMING, false, number);
     }
 
     String
-    toCLCCLine(int index)
-    {
-        return 
+    toCLCCLine(int index) {
+        return
             "+CLCC: "
             + index + "," + (isMT ? "1" : "0") +","
             + state.value() + ",0," + (isMpty ? "1" : "0")
@@ -86,9 +81,8 @@ class CallInfo
     }
 
     DriverCall
-    toDriverCall(int index)
-    {
-        DriverCall ret; 
+    toDriverCall(int index) {
+        DriverCall ret;
 
         ret = new DriverCall();
 
@@ -112,43 +106,37 @@ class CallInfo
 
 
     boolean
-    isActiveOrHeld()
-    {
+    isActiveOrHeld() {
         return state == State.ACTIVE || state == State.HOLDING;
     }
 
     boolean
-    isConnecting()
-    {
+    isConnecting() {
         return state == State.DIALING || state == State.ALERTING;
     }
 
     boolean
-    isRinging()
-    {
+    isRinging() {
         return state == State.INCOMING || state == State.WAITING;
     }
 
 }
 
-class InvalidStateEx extends Exception
-{
-    InvalidStateEx()
-    {
+class InvalidStateEx extends Exception {
+    InvalidStateEx() {
 
     }
 }
 
 
-class SimulatedGsmCallState extends Handler
-{
+class SimulatedGsmCallState extends Handler {
     //***** Instance Variables
 
     CallInfo calls[] = new CallInfo[MAX_CALLS];
 
     private boolean autoProgressConnecting = true;
     private boolean nextDialFailImmediately;
-    
+
 
     //***** Event Constants
 
@@ -168,8 +156,7 @@ class SimulatedGsmCallState extends Handler
     }
 
     public void
-    handleMessage(Message msg)
-    {
+    handleMessage(Message msg) {
         synchronized(this) { switch (msg.what) {
             // PLEASE REMEMBER
             // calls may have hung up by the time delayed events happen
@@ -181,15 +168,13 @@ class SimulatedGsmCallState extends Handler
     }
 
     //***** Public Methods
-   
-    
-    /** 
-     * Start the simulated phone ringing 
+
+    /**
+     * Start the simulated phone ringing
      * true if succeeded, false if failed
      */
     public boolean
-    triggerRing(String number)
-    {
+    triggerRing(String number) {
         synchronized (this) {
             int empty = -1;
             boolean isCallWaiting = false;
@@ -200,7 +185,7 @@ class SimulatedGsmCallState extends Handler
 
                 if (call == null && empty < 0) {
                     empty = i;
-                } else if (call != null 
+                } else if (call != null
                     && (call.state == CallInfo.State.INCOMING
                         || call.state == CallInfo.State.WAITING)
                 ) {
@@ -223,15 +208,14 @@ class SimulatedGsmCallState extends Handler
             if (isCallWaiting) {
                 calls[empty].state = CallInfo.State.WAITING;
             }
-            
+
         }
         return true;
     }
 
     /** If a call is DIALING or ALERTING, progress it to the next state */
     public void
-    progressConnectingCallState()
-    {
+    progressConnectingCallState() {
         synchronized (this)  {
             for (int i = 0 ; i < calls.length ; i++) {
                 CallInfo call = calls[i];
@@ -241,11 +225,11 @@ class SimulatedGsmCallState extends Handler
 
                     if (autoProgressConnecting) {
                         sendMessageDelayed(
-                                obtainMessage(EVENT_PROGRESS_CALL_STATE, call), 
+                                obtainMessage(EVENT_PROGRESS_CALL_STATE, call),
                                 CONNECTING_PAUSE_MSEC);
                     }
                     break;
-                } else if (call != null 
+                } else if (call != null
                         && call.state == CallInfo.State.ALERTING
                 ) {
                     call.state = CallInfo.State.ACTIVE;
@@ -257,13 +241,12 @@ class SimulatedGsmCallState extends Handler
 
     /** If a call is DIALING or ALERTING, progress it all the way to ACTIVE */
     public void
-    progressConnectingToActive()
-    {
+    progressConnectingToActive() {
         synchronized (this)  {
             for (int i = 0 ; i < calls.length ; i++) {
                 CallInfo call = calls[i];
 
-                if (call != null && (call.state == CallInfo.State.DIALING 
+                if (call != null && (call.state == CallInfo.State.DIALING
                     || call.state == CallInfo.State.ALERTING)
                 ) {
                     call.state = CallInfo.State.ACTIVE;
@@ -277,24 +260,21 @@ class SimulatedGsmCallState extends Handler
      *  default to true
      */
     public void
-    setAutoProgressConnectingCall(boolean b)
-    {        
+    setAutoProgressConnectingCall(boolean b) {
         autoProgressConnecting = b;
     }
-    
+
     public void
-    setNextDialFailImmediately(boolean b)
-    {
+    setNextDialFailImmediately(boolean b) {
         nextDialFailImmediately = b;
     }
 
-    /** 
+    /**
      * hangup ringing, dialing, or active calls
      * returns true if call was hung up, false if not
      */
     public boolean
-    triggerHangupForeground()
-    {
+    triggerHangupForeground() {
         synchronized (this) {
             boolean found;
 
@@ -303,7 +283,7 @@ class SimulatedGsmCallState extends Handler
             for (int i = 0 ; i < calls.length ; i++) {
                 CallInfo call = calls[i];
 
-                if (call != null 
+                if (call != null
                     && (call.state == CallInfo.State.INCOMING
                         || call.state == CallInfo.State.WAITING)
                 ) {
@@ -315,7 +295,7 @@ class SimulatedGsmCallState extends Handler
             for (int i = 0 ; i < calls.length ; i++) {
                 CallInfo call = calls[i];
 
-                if (call != null 
+                if (call != null
                     && (call.state == CallInfo.State.DIALING
                         || call.state == CallInfo.State.ACTIVE
                         || call.state == CallInfo.State.ALERTING)
@@ -328,13 +308,12 @@ class SimulatedGsmCallState extends Handler
         }
     }
 
-    /** 
+    /**
      * hangup holding calls
      * returns true if call was hung up, false if not
      */
     public boolean
-    triggerHangupBackground()
-    {
+    triggerHangupBackground() {
         synchronized (this) {
             boolean found = false;
 
@@ -351,13 +330,12 @@ class SimulatedGsmCallState extends Handler
         }
     }
 
-    /** 
+    /**
      * hangup all
      * returns true if call was hung up, false if not
      */
     public boolean
-    triggerHangupAll()
-    {
+    triggerHangupAll() {
         synchronized(this) {
             boolean found = false;
 
@@ -376,13 +354,12 @@ class SimulatedGsmCallState extends Handler
     }
 
     public boolean
-    onAnswer()
-    {
+    onAnswer() {
         synchronized (this) {
             for (int i = 0 ; i < calls.length ; i++) {
                 CallInfo call = calls[i];
 
-                if (call != null 
+                if (call != null
                     && (call.state == CallInfo.State.INCOMING
                         || call.state == CallInfo.State.WAITING)
                 ) {
@@ -395,8 +372,7 @@ class SimulatedGsmCallState extends Handler
     }
 
     public boolean
-    onHangup()
-    {
+    onHangup() {
         boolean found = false;
 
         for (int i = 0 ; i < calls.length ; i++) {
@@ -412,8 +388,7 @@ class SimulatedGsmCallState extends Handler
     }
 
     public boolean
-    onChld(char c0, char c1)
-    {
+    onChld(char c0, char c1) {
         boolean ret;
         int callIndex = 0;
 
@@ -424,7 +399,7 @@ class SimulatedGsmCallState extends Handler
                 return false;
             }
         }
-        
+
         switch (c0) {
             case '0':
                 ret = releaseHeldOrUDUB();
@@ -467,7 +442,7 @@ class SimulatedGsmCallState extends Handler
 
         return ret;
     }
-    
+
     public boolean
     releaseHeldOrUDUB() {
         boolean found = false;
@@ -499,8 +474,7 @@ class SimulatedGsmCallState extends Handler
 
 
     public boolean
-    releaseActiveAcceptHeldOrWaiting()
-    {
+    releaseActiveAcceptHeldOrWaiting() {
         boolean foundHeld = false;
         boolean foundActive = false;
 
@@ -519,8 +493,8 @@ class SimulatedGsmCallState extends Handler
             for (int i = 0 ; i < calls.length ; i++) {
                 CallInfo c = calls[i];
 
-                if (c != null 
-                        && (c.state == CallInfo.State.DIALING 
+                if (c != null
+                        && (c.state == CallInfo.State.DIALING
                             || c.state == CallInfo.State.ALERTING)
                 ) {
                     calls[i] = null;
@@ -555,10 +529,9 @@ class SimulatedGsmCallState extends Handler
     }
 
     public boolean
-    switchActiveAndHeldOrWaiting()
-    {
+    switchActiveAndHeldOrWaiting() {
         boolean hasHeld = false;
-        
+
         // first, are there held calls?
         for (int i = 0 ; i < calls.length ; i++) {
             CallInfo c = calls[i];
@@ -589,8 +562,7 @@ class SimulatedGsmCallState extends Handler
 
 
     public boolean
-    separateCall(int index)
-    {
+    separateCall(int index) {
         try {
             CallInfo c;
 
@@ -623,7 +595,7 @@ class SimulatedGsmCallState extends Handler
             }
 
             return true;
-        } catch (InvalidStateEx ex) { 
+        } catch (InvalidStateEx ex) {
             return false;
         }
     }
@@ -631,8 +603,7 @@ class SimulatedGsmCallState extends Handler
 
 
     public boolean
-    conference() 
-    {
+    conference() {
         int countCalls = 0;
 
         // if there's connecting calls, we can't do this yet
@@ -641,7 +612,7 @@ class SimulatedGsmCallState extends Handler
 
             if (c != null) {
                 countCalls++;
-        
+
                 if (c.isConnecting()) {
                     return false;
                 }
@@ -653,7 +624,7 @@ class SimulatedGsmCallState extends Handler
             if (c != null) {
                 c.state = CallInfo.State.ACTIVE;
                 if (countCalls > 0) {
-                    c.isMpty = true; 
+                    c.isMpty = true;
                 }
             }
         }
@@ -662,8 +633,7 @@ class SimulatedGsmCallState extends Handler
     }
 
     public boolean
-    explicitCallTransfer()
-    {
+    explicitCallTransfer() {
         int countCalls = 0;
 
         // if there's connecting calls, we can't do this yet
@@ -684,18 +654,17 @@ class SimulatedGsmCallState extends Handler
     }
 
     public boolean
-    onDial(String address)
-    {
+    onDial(String address) {
         CallInfo call;
         int freeSlot = -1;
 
         Log.d("GSM", "SC> dial '" + address + "'");
-    
+
         if (nextDialFailImmediately) {
             nextDialFailImmediately = false;
 
             Log.d("GSM", "SC< dial fail (per request)");
-            return false;            
+            return false;
         }
 
         String phNum = PhoneNumberUtils.extractNetworkPortion(address);
@@ -727,15 +696,15 @@ class SimulatedGsmCallState extends Handler
             if (freeSlot < 0 && calls[i] == null) {
                 freeSlot = i;
             }
-            
+
             if (calls[i] != null && !calls[i].isActiveOrHeld()) {
-                // Can't make outgoing calls when there is a ringing or 
+                // Can't make outgoing calls when there is a ringing or
                 // connecting outgoing call
                 Log.d("GSM", "SC< dial fail (invalid call state)");
                 return false;
             } else if (calls[i] != null && calls[i].state == CallInfo.State.ACTIVE) {
                 // All active calls behome held
-                calls[i].state = CallInfo.State.HOLDING;            
+                calls[i].state = CallInfo.State.HOLDING;
             }
         }
 
@@ -748,7 +717,7 @@ class SimulatedGsmCallState extends Handler
 
         if (autoProgressConnecting) {
             sendMessageDelayed(
-                    obtainMessage(EVENT_PROGRESS_CALL_STATE, calls[freeSlot]), 
+                    obtainMessage(EVENT_PROGRESS_CALL_STATE, calls[freeSlot]),
                     CONNECTING_PAUSE_MSEC);
         }
 
@@ -758,8 +727,7 @@ class SimulatedGsmCallState extends Handler
     }
 
     public List<DriverCall>
-    getDriverCalls()
-    {
+    getDriverCalls() {
         ArrayList<DriverCall> ret = new ArrayList<DriverCall>(calls.length);
 
         for (int i = 0 ; i < calls.length ; i++) {
@@ -779,8 +747,7 @@ class SimulatedGsmCallState extends Handler
     }
 
     public List<String>
-    getClccLines()
-    {
+    getClccLines() {
         ArrayList<String> ret = new ArrayList<String>(calls.length);
 
         for (int i = 0 ; i < calls.length ; i++) {
@@ -795,8 +762,7 @@ class SimulatedGsmCallState extends Handler
     }
 
     private int
-    countActiveLines() throws InvalidStateEx
-    {
+    countActiveLines() throws InvalidStateEx {
         boolean hasMpty = false;
         boolean hasHeld = false;
         boolean hasActive = false;
@@ -810,7 +776,7 @@ class SimulatedGsmCallState extends Handler
             if (call != null) {
                 if (!hasMpty && call.isMpty) {
                     mptyIsHeld = call.state == CallInfo.State.HOLDING;
-                } else if (call.isMpty && mptyIsHeld 
+                } else if (call.isMpty && mptyIsHeld
                     && call.state == CallInfo.State.ACTIVE
                 ) {
                     Log.e("ModelInterpreter", "Invalid state");

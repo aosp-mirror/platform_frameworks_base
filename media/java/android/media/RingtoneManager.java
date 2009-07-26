@@ -176,17 +176,20 @@ public class RingtoneManager {
     
     private static final String[] INTERNAL_COLUMNS = new String[] {
         MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,
-        "\"" + MediaStore.Audio.Media.INTERNAL_CONTENT_URI + "\""
+        "\"" + MediaStore.Audio.Media.INTERNAL_CONTENT_URI + "\"",
+        MediaStore.Audio.Media.TITLE_KEY
     };
 
     private static final String[] DRM_COLUMNS = new String[] {
         DrmStore.Audio._ID, DrmStore.Audio.TITLE,
-        "\"" + DrmStore.Audio.CONTENT_URI + "\""
+        "\"" + DrmStore.Audio.CONTENT_URI + "\"",
+        DrmStore.Audio.TITLE + " AS " + MediaStore.Audio.Media.TITLE_KEY
     };
 
     private static final String[] MEDIA_COLUMNS = new String[] {
         MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,
-        "\"" + MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "\""
+        "\"" + MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "\"",
+        MediaStore.Audio.Media.TITLE_KEY
     };
     
     /**
@@ -361,7 +364,7 @@ public class RingtoneManager {
         final Cursor mediaCursor = getMediaRingtones();
              
         return mCursor = new SortCursor(new Cursor[] { internalCursor, drmCursor, mediaCursor },
-                MediaStore.MediaColumns.TITLE);
+                MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
     }
 
     /**

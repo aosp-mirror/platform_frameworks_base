@@ -18,6 +18,8 @@ package android.graphics;
 
 import android.content.res.AssetManager;
 
+import java.io.File;
+
 /**
  * The Typeface class specifies the typeface and intrinsic style of a font.
  * This is used in the paint, along with optionally Paint settings like
@@ -118,7 +120,27 @@ public class Typeface {
     public static Typeface createFromAsset(AssetManager mgr, String path) {
         return new Typeface(nativeCreateFromAsset(mgr, path));
     }
-    
+
+    /**
+     * Create a new typeface from the specified font file.
+     *
+     * @param path The path to the font data. 
+     * @return The new typeface.
+     */
+    public static Typeface createFromFile(File path) {
+        return new Typeface(nativeCreateFromFile(path.getAbsolutePath()));
+    }
+
+    /**
+     * Create a new typeface from the specified font file.
+     *
+     * @param path The full path to the font data. 
+     * @return The new typeface.
+     */
+    public static Typeface createFromFile(String path) {
+        return new Typeface(nativeCreateFromFile(path));
+    }
+
     // don't allow clients to call this directly
     private Typeface(int ni) {
         native_instance = ni;
@@ -140,14 +162,14 @@ public class Typeface {
     }
 
     protected void finalize() throws Throwable {
+        super.finalize();
         nativeUnref(native_instance);
     }
 
     private static native int  nativeCreate(String familyName, int style);
-    private static native int  nativeCreateFromTypeface(int native_instance,
-                                                        int style);
+    private static native int  nativeCreateFromTypeface(int native_instance, int style); 
     private static native void nativeUnref(int native_instance);
     private static native int  nativeGetStyle(int native_instance);
-    private static native int  nativeCreateFromAsset(AssetManager mgr,
-                                                     String path);
+    private static native int  nativeCreateFromAsset(AssetManager mgr, String path);
+    private static native int nativeCreateFromFile(String path);
 }

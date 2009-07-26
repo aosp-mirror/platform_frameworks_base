@@ -32,22 +32,24 @@ import android.util.Log;
  * It allows to stream PCM audio buffers to the audio hardware for playback. This is
  * achieved by "pushing" the data to the AudioTrack object using one of the
  *  {@link #write(byte[], int, int)} and {@link #write(short[], int, int)} methods.
- * <p>An AudioTrack instance can operate under two modes: static of streaming.<br>
- * The Streaming mode consists in continuously writing data to the AudioTrack, using one
- * of the write() methods. These are blocking and return when the data has been transferred
- * from the Java layer to the native layer, and is queued for playback. The streaming mode
+ *  
+ * <p>An AudioTrack instance can operate under two modes: static or streaming.<br>
+ * In Streaming mode, the application writes a continuous stream of data to the AudioTrack, using
+ * one of the write() methods. These are blocking and return when the data has been transferred
+ * from the Java layer to the native layer and queued for playback. The streaming mode
  *  is most useful when playing blocks of audio data that for instance are:
  * <ul>
  *   <li>too big to fit in memory because of the duration of the sound to play,</li>
  *   <li>too big to fit in memory because of the characteristics of the audio data
  *         (high sampling rate, bits per sample ...)</li>
- *   <li>chosen, received or generated as the audio keeps playing.</li>
+ *   <li>received or generated while previously queued audio is playing.</li>
  * </ul>
  * The static mode is to be chosen when dealing with short sounds that fit in memory and
- * that need to be played with the smallest latency possible. Static mode AudioTrack instances can
- * play the sound without the need to transfer the audio data from Java to the audio hardware
+ * that need to be played with the smallest latency possible. AudioTrack instances in static mode
+ * can play the sound without the need to transfer the audio data from Java to native layer
  * each time the sound is to be played. The static mode will therefore be preferred for UI and
  * game sounds that are played often, and with the smallest overhead possible.
+ * 
  * <p>Upon creation, an AudioTrack object initializes its associated audio buffer.
  * The size of this buffer, specified during the construction, determines how long an AudioTrack
  * can play before running out of data.<br>
@@ -66,11 +68,11 @@ public class AudioTrack
     /** Maximum value for a channel volume */
     private static final float VOLUME_MAX = 1.0f;
 
-    /** state of an AudioTrack this is stopped */
+    /** indicates AudioTrack state is stopped */
     public static final int PLAYSTATE_STOPPED = 1;  // matches SL_PLAYSTATE_STOPPED
-    /** state of an AudioTrack this is paused */
+    /** indicates AudioTrack state is paused */
     public static final int PLAYSTATE_PAUSED  = 2;  // matches SL_PLAYSTATE_PAUSED
-    /** state of an AudioTrack this is playing */
+    /** indicates AudioTrack state is playing */
     public static final int PLAYSTATE_PLAYING = 3;  // matches SL_PLAYSTATE_PLAYING
 
     /**
@@ -85,7 +87,7 @@ public class AudioTrack
     public static final int MODE_STREAM = 1;
 
     /**
-     * State of an AudioTrack that was not successfully initialized upon creation
+     * State of an AudioTrack that was not successfully initialized upon creation.
      */
     public static final int STATE_UNINITIALIZED = 0;
     /**
@@ -126,11 +128,11 @@ public class AudioTrack
     // Events:
     // to keep in sync with frameworks/base/include/media/AudioTrack.h
     /**
-     * Event id for when the playback head has reached a previously set marker.
+     * Event id denotes when playback head has reached a previously set marker.
      */
     private static final int NATIVE_EVENT_MARKER  = 3;
     /**
-     * Event id for when the previously set update period has passed during playback.
+     * Event id denotes when previously set update period has elapsed during playback.
      */
     private static final int NATIVE_EVENT_NEW_POS = 4;
 
@@ -141,11 +143,11 @@ public class AudioTrack
     // Member variables
     //--------------------
     /**
-     * Indicates the state of the AudioTrack instance
+     * Indicates the state of the AudioTrack instance.
      */
     private int mState = STATE_UNINITIALIZED;
     /**
-     * Indicates the play state of the AudioTrack instance
+     * Indicates the play state of the AudioTrack instance.
      */
     private int mPlayState = PLAYSTATE_STOPPED;
     /**
@@ -159,7 +161,7 @@ public class AudioTrack
      */
     private OnPlaybackPositionUpdateListener mPositionListener = null;
     /**
-     * Lock to protect event listener updates against event notifications
+     * Lock to protect event listener updates against event notifications.
      */
     private final Object mPositionListenerLock = new Object();
     /**
@@ -167,11 +169,11 @@ public class AudioTrack
      */
     private int mNativeBufferSizeInBytes = 0;
     /**
-     * Handler for marker events coming from the native code
+     * Handler for marker events coming from the native code.
      */
     private NativeEventHandlerDelegate mEventHandlerDelegate = null;
     /**
-     * Looper associated with the thread that creates the AudioTrack instance
+     * Looper associated with the thread that creates the AudioTrack instance.
      */
     private Looper mInitializationLooper = null;
     /**
@@ -179,7 +181,7 @@ public class AudioTrack
      */
     private int mSampleRate = 22050;
     /**
-     * The number of input audio channels (1 is mono, 2 is stereo)
+     * The number of input audio channels (1 is mono, 2 is stereo).
      */
     private int mChannelCount = 1;
     /**
@@ -194,7 +196,7 @@ public class AudioTrack
      */
     private int mDataLoadMode = MODE_STREAM;
     /**
-     * The current audio channel configuration
+     * The current audio channel configuration.
      */
     private int mChannelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
     /**
@@ -209,7 +211,7 @@ public class AudioTrack
     // Used exclusively by native code
     //--------------------
     /**
-     * Accessed by native methods: provides access to C++ AudioTrack object
+     * Accessed by native methods: provides access to C++ AudioTrack object.
      */
     @SuppressWarnings("unused")
     private int mNativeTrackInJavaObj;
@@ -227,17 +229,14 @@ public class AudioTrack
     /**
      * Class constructor.
      * @param streamType the type of the audio stream. See
-
      *   {@link AudioManager#STREAM_VOICE_CALL}, {@link AudioManager#STREAM_SYSTEM},
      *   {@link AudioManager#STREAM_RING}, {@link AudioManager#STREAM_MUSIC} and
      *   {@link AudioManager#STREAM_ALARM}
      * @param sampleRateInHz the sample rate expressed in Hertz. Examples of rates are (but
      *   not limited to) 44100, 22050 and 11025.
      * @param channelConfig describes the configuration of the audio channels.
-
      *   See {@link AudioFormat#CHANNEL_CONFIGURATION_MONO} and
      *   {@link AudioFormat#CHANNEL_CONFIGURATION_STEREO}
-
      * @param audioFormat the format in which the audio data is represented.
      *   See {@link AudioFormat#ENCODING_PCM_16BIT} and
      *   {@link AudioFormat#ENCODING_PCM_8BIT}
@@ -245,6 +244,9 @@ public class AudioTrack
      *   from for playback. If using the AudioTrack in streaming mode, you can write data into
      *   this buffer in smaller chunks than this size. If using the AudioTrack in static mode,
      *   this is the maximum size of the sound that will be played for this instance.
+     *   See {@link #getMinBufferSize(int, int, int)} to determine the minimum required buffer size
+     *   for the successful creation of an AudioTrack instance in streaming mode. Using values
+     *   smaller than getMinBufferSize() will result in an initialization failure.
      * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}
      * @throws java.lang.IllegalArgumentException
      */
@@ -423,8 +425,7 @@ public class AudioTrack
     }
     
     /**
-     * Returns the current playback rate in Hz. Note that this rate may differ from one set using
-     * {@link #setPlaybackRate(int)} as the value effectively set is implementation-dependent.
+     * Returns the current playback rate in Hz.
      */
     public int getPlaybackRate() {
         return native_get_playback_rate();
@@ -470,6 +471,9 @@ public class AudioTrack
      * AudioTrack instance has been created to check if it was initialized
      * properly. This ensures that the appropriate hardware resources have been
      * acquired.
+     * @see #STATE_INITIALIZED
+     * @see #STATE_NO_STATIC_DATA
+     * @see #STATE_UNINITIALIZED
      */
     public int getState() {
         return mState;
@@ -486,28 +490,28 @@ public class AudioTrack
     }
 
     /**
-     *  Returns the native frame count used by the hardware
+     *  Returns the native frame count used by the hardware.
      */
     protected int getNativeFrameCount() {
         return native_get_native_frame_count();
     }
 
     /**
-     * @return marker position in frames
+     * Returns marker position expressed in frames.
      */
     public int getNotificationMarkerPosition() {
         return native_get_marker_pos();
     }
 
     /**
-     * @return update period in frames
+     * Returns the notification update period expressed in frames.
      */
     public int getPositionNotificationPeriod() {
         return native_get_pos_update_period();
     }
 
     /**
-     * @return playback head position in frames
+     * Returns the playback head position expressed in frames
      */
     public int getPlaybackHeadPosition() {
         return native_get_position();
@@ -522,7 +526,9 @@ public class AudioTrack
     
     /**
      * Returns the minimum buffer size required for the successful creation of an AudioTrack
-     * object to be created in the {@link #MODE_STREAM} mode.
+     * object to be created in the {@link #MODE_STREAM} mode. Note that this size doesn't
+     * guarantee a smooth playback under load, and higher values should be chosen according to
+     * the expected frequency at which the buffer will be refilled with additional data to play. 
      * @param sampleRateInHz the sample rate expressed in Hertz.
      * @param channelConfig describes the configuration of the audio channels. 
      *   See {@link AudioFormat#CHANNEL_CONFIGURATION_MONO} and
@@ -533,7 +539,7 @@ public class AudioTrack
      * @return {@link #ERROR_BAD_VALUE} if an invalid parameter was passed,
      *   or {@link #ERROR} if the implementation was unable to query the hardware for its output 
      *     properties, 
-     *   or the minimum buffer size expressed  in number of bytes.
+     *   or the minimum buffer size expressed in bytes.
      */
     static public int getMinBufferSize(int sampleRateInHz, int channelConfig, int audioFormat) {
         int channelCount = 0;
@@ -577,13 +583,22 @@ public class AudioTrack
     /**
      * Sets the listener the AudioTrack notifies when a previously set marker is reached or
      * for each periodic playback head position update.
+     * Notifications will be received in the same thread as the one in which the AudioTrack
+     * instance was created.
      * @param listener
      */
     public void setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener listener) {
         setPlaybackPositionUpdateListener(listener, null);
     }
     
-
+    /**
+     * Sets the listener the AudioTrack notifies when a previously set marker is reached or
+     * for each periodic playback head position update.
+     * Use this method to receive AudioTrack events in the Handler associated with another
+     * thread than the one in which you created the AudioTrack instance.
+     * @param listener
+     * @param handler the Handler that will receive the event notification messages.
+     */
     public void setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener listener, 
                                                     Handler handler) {
         synchronized (mPositionListenerLock) {
@@ -635,11 +650,10 @@ public class AudioTrack
      * Sets the playback sample rate for this track. This sets the sampling rate at which
      * the audio data will be consumed and played back, not the original sampling rate of the
      * content. Setting it to half the sample rate of the content will cause the playback to
-     * last twice as long, but will also result result in a negative pitch shift.
-     * The current implementation supports a maximum sample rate of twice the hardware output
-     * sample rate (see {@link #getNativeOutputSampleRate(int)}). Use {@link #getSampleRate()} to
-     * check the rate actually used in hardware after potential clamping.
-     * @param sampleRateInHz
+     * last twice as long, but will also result in a negative pitch shift.
+     * The valid sample rate range if from 1Hz to twice the value returned by
+     * {@link #getNativeOutputSampleRate(int)}.
+     * @param sampleRateInHz the sample rate expressed in Hz
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
      */
@@ -650,13 +664,12 @@ public class AudioTrack
         if (sampleRateInHz <= 0) {
             return ERROR_BAD_VALUE;
         }
-        native_set_playback_rate(sampleRateInHz);
-        return SUCCESS;
+        return native_set_playback_rate(sampleRateInHz);
     }
 
 
     /**
-     *
+     * Sets the position of the notification marker.
      * @param markerInFrames marker in frames
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *  {@link #ERROR_INVALID_OPERATION}
@@ -670,7 +683,8 @@ public class AudioTrack
 
 
     /**
-     * @param periodInFrames update period in frames
+     * Sets the period for the periodic notification event.
+     * @param periodInFrames update period expressed in frames
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_INVALID_OPERATION}
      */
     public int setPositionNotificationPeriod(int periodInFrames) {
@@ -683,7 +697,7 @@ public class AudioTrack
 
     /**
      * Sets the playback head position. The track must be stopped for the position to be changed.
-     * @param positionInFrames playback head position in frames
+     * @param positionInFrames playback head position expressed in frames
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
      */
@@ -699,8 +713,8 @@ public class AudioTrack
 
     /**
      * Sets the loop points and the loop count. The loop can be infinite.
-     * @param startInFrames loop start marker in frames
-     * @param endInFrames loop end marker in frames
+     * @param startInFrames loop start marker expressed in frames
+     * @param endInFrames loop end marker expressed in frames
      * @param loopCount the number of times the loop is looped.
      *    A value of -1 means infinite looping.
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
@@ -797,7 +811,8 @@ public class AudioTrack
     /**
      * Writes the audio data to the audio hardware for playback.
      * @param audioData the array that holds the data to play.
-     * @param offsetInBytes the offset in audioData where the data to play starts.
+     * @param offsetInBytes the offset expressed in bytes in audioData where the data to play 
+     *    starts.
      * @param sizeInBytes the number of bytes to read in audioData after the offset.
      * @return the number of bytes that were written or {@link #ERROR_INVALID_OPERATION}
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
@@ -827,7 +842,8 @@ public class AudioTrack
     /**
      * Writes the audio data to the audio hardware for playback.
      * @param audioData the array that holds the data to play.
-     * @param offsetInShorts the offset in audioData where the data to play starts.
+     * @param offsetInShorts the offset expressed in shorts in audioData where the data to play
+     *     starts.
      * @param sizeInShorts the number of bytes to read in audioData after the offset.
      * @return the number of shorts that were written or {@link #ERROR_INVALID_OPERATION}
       *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
@@ -1008,8 +1024,8 @@ public class AudioTrack
 
     private native final void native_setVolume(float leftVolume, float rightVolume);
 
-    private native final void native_set_playback_rate(int sampleRateInHz);
-    private native final int  native_get_playback_rate();
+    private native final int native_set_playback_rate(int sampleRateInHz);
+    private native final int native_get_playback_rate();
 
     private native final int native_set_marker_pos(int marker);
     private native final int native_get_marker_pos();

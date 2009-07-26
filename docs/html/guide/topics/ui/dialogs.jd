@@ -1,0 +1,650 @@
+page.title=Creating Dialogs
+parent.title=User Interface
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Key classes</h2>
+    <ol>
+      <li>{@link android.app.Dialog}</li>
+    </ol>
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#ShowingADialog">Showing a Dialog</a></li>
+      <li><a href="#DismissingADialog">Dismissing a Dialog</a></li>
+      <li><a href="#AlertDialog">Creating an AlertDialog</a>
+        <ol>
+          <li><a href="#AddingButtons">Adding buttons</a></li>
+          <li><a href="#AddingAList">Adding a list</a></li>
+        </ol>
+      </li>
+      <li><a href="#ProgressDialog">Creating a ProgressDialog</a>
+        <ol>
+          <li><a href="#ShowingAProgressBar">Showing a progress bar</a></li>
+        </ol>
+      </li>
+      <li><a href="#CustomDialog">Creating a Custom Dialog</a></li>
+    </ol>
+  </div>
+</div>
+
+<p>A dialog is usually a small window that appears in front of the current Activity.
+The underlying Activity loses focus and the dialog accepts all user interaction. 
+Dialogs are normally used
+for notifications and short activities that directly relate to the application in progress.</p>
+
+<p>The Android API supports the following types of {@link android.app.Dialog} objects:</p>
+<dl>
+  <dt>{@link android.app.AlertDialog}</dt>
+  <dd>A dialog that can manage zero, one, two, or three buttons, and/or a list of
+    selectable items that can include checkboxes or radio buttons. The AlertDialog 
+    is capable of constructing most dialog user interfaces and is the suggested dialog type.
+    See <a href="#AlertDialog">Creating an AlertDialog</a> below.</dd>
+  <dt>{@link android.app.ProgressDialog}</dt>
+  <dd>A dialog that displays a progress wheel or progress bar. Because it's an extension of
+    the AlertDialog, it also supports buttons.
+    See <a href="#ProgressDialog">Creating a ProgressDialog</a> below.</dd>
+  <dt>{@link android.app.DatePickerDialog}</dt>
+  <dd>A dialog that allows the user to select a date. See the 
+    <a href="{@docRoot}guide/tutorials/views/hello-datepicker.html">Hello DatePicker</a> tutorial.</dd>
+  <dt>{@link android.app.TimePickerDialog}</dt>
+  <dd>A dialog that allows the user to select a time. See the 
+    <a href="{@docRoot}guide/tutorials/views/hello-timepicker.html">Hello TimePicker</a> tutorial.</dd>
+</dl>
+
+<p>If you would like to customize your own dialog, you can extend the
+base {@link android.app.Dialog} object or any of the subclasses listed above and define a new layout.
+See the section on <a href="#CustomDialog">Creating a Custom Dialog</a> below.</p>
+
+
+<h2 id="ShowingADialog">Showing a Dialog</h2>
+
+<p>A dialog is always created and displayed as a part of an {@link android.app.Activity}. 
+You should normally create dialogs from within your Activity's
+{@link android.app.Activity#onCreateDialog(int)} callback method. 
+When you use this callback, the Android system automatically manages the state of 
+each dialog and hooks them to the Activity, effectively making it the "owner" of each dialog.
+As such, each dialog inherits certain properties from the Activity. For example, when a dialog
+is open, the Menu key reveals the options menu defined for the Activity and the volume
+keys modify the audio stream used by the Activity.</p>
+
+<p class="note"><strong>Note:</strong> If you decide to create a dialog outside of the 
+<code>onCreateDialog()</code> method, it will not be attached to an Activity. You can, however,
+attach it to an Activity with {@link android.app.Dialog#setOwnerActivity(Activity)}.</p>
+
+<p>When you want to show a dialog, call 
+{@link android.app.Activity#showDialog(int)} and pass it an integer that uniquely identifies the 
+dialog that you want to display.</p>
+
+<p>When a dialog is requested for the first time, Android calls 
+{@link android.app.Activity#onCreateDialog(int)} from your Activity, which is
+where you should instantiate the {@link android.app.Dialog}. This callback method
+is passed the same ID that you passed to {@link android.app.Activity#showDialog(int)}. 
+After you create the Dialog, return the object at the end of the method.</p>
+
+<p>Before the dialog is displayed, Android also calls the optional callback method
+{@link android.app.Activity#onPrepareDialog(int,Dialog)}. Define this method if you want to change
+any properties of the dialog each time it is opened. This method is called
+every time a dialog is opened, whereas {@link android.app.Activity#onCreateDialog(int)} is only
+called the very first time a dialog is opened. If you don't define 
+{@link android.app.Activity#onPrepareDialog(int,Dialog) onPrepareDialog()}, then the dialog will 
+remain the same as it was the previous time it was opened. This method is also passed the dialog's
+ID, along with the Dialog object you created in {@link android.app.Activity#onCreateDialog(int)
+onCreateDialog()}.</p>
+
+<p>The best way to define the {@link android.app.Activity#onCreateDialog(int)} and 
+{@link android.app.Activity#onPrepareDialog(int,Dialog)} callback methods is with a 
+<em>switch</em> statement that checks the <var>id</var> parameter that's passed into the method. 
+Each <em>case</em> should check for a unique dialog ID and then create and define the respective Dialog.
+For example, imagine a game that uses two different dialogs: one to indicate that the game
+has paused and another to indicate that the game is over. First, define an integer ID for
+each dialog:</p>
+<pre>
+static final int DIALOG_PAUSED_ID = 0;
+static final int DIALOG_GAMEOVER_ID = 1;
+</pre>
+
+<p>Then, define the {@link android.app.Activity#onCreateDialog(int)} callback with a 
+switch case for each ID:</p>
+<pre>
+protected Dialog onCreateDialog(int id) {
+    Dialog dialog;
+    switch(id) {
+    case DIALOG_PAUSED_ID:
+        // do the work to define the pause Dialog
+        break;
+    case DIALOG_GAMEOVER_ID:
+        // do the work to define the game over Dialog
+        break;
+    default:
+        dialog = null;
+    }
+    return dialog;
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> In this example, there's no code inside
+the case statements because the procedure for defining your Dialog is outside the scope
+of this section. See the section below about <a href="#AlertDialog">Creating an AlertDialog</a>,
+offers code suitable for this example.</p>
+
+<p>When it's time to show one of the dialogs, call {@link android.app.Activity#showDialog(int)}
+with the ID of a dialog:</p>
+<pre>
+showDialog(DIALOG_PAUSED_ID);
+</pre>
+
+
+<h2 id="DismissingADialog">Dismissing a Dialog</h2>
+
+<p>When you're ready to close your dialog, you can dismiss it by calling
+{@link android.app.Dialog#dismiss()} on the Dialog object.
+If necessary, you can also call {@link android.app.Activity#dismissDialog(int)} from the
+Activity, which effectively calls {@link android.app.Dialog#dismiss()} on the 
+Dialog for you.</p>
+
+<p>If you are using {@link android.app.Activity#onCreateDialog(int)} to manage the state
+of your dialogs (as discussed in the previous section), then every time your dialog is
+dismissed, the state of the Dialog
+object is retained by the Activity. If you decide that you will no longer need this object or 
+it's important that the state is cleared, then you should call
+{@link android.app.Activity#removeDialog(int)}. This will remove any internal references
+to the object and if the dialog is showing, it will dismiss it.</p>
+
+<h3>Using dismiss listeners</h3>
+
+<p>If you'd like your applcation to perform some procedures the moment that a dialog is dismissed, 
+then you should attach an on-dismiss listener to your Dialog.</p>
+
+<p>First define the {@link android.content.DialogInterface.OnDismissListener} interface.
+This interface has just one method,
+{@link android.content.DialogInterface.OnDismissListener#onDismiss(DialogInterface)}, which
+will be called when the dialog is dismissed.
+Then simply pass your OnDismissListener implementation to 
+{@link android.app.Dialog#setOnDismissListener(DialogInterface.OnDismissListener)
+setOnDismissListener()}.</p>
+
+<p>However, note that dialogs can also be "cancelled." This is a special case that indicates
+the dialog was explicitly cancelled by the user. This will occur if the user presses the 
+"back" button to close the dialog, or if the dialog explicitly calls {@link android.app.Dialog#cancel()}
+(perhaps from a "Cancel" button in the dialog). When a dialog is cancelled,
+the OnDismissListener will still be notified, but if you'd like to be informed that the dialog
+was explicitly cancelled (and not dismissed normally), then you should register 
+an {@link android.content.DialogInterface.OnCancelListener} with
+{@link android.app.Dialog#setOnCancelListener(DialogInterface.OnCancelListener)
+setOnCancelListener()}.</p>
+
+
+<h2 id="AlertDialog">Creating an AlertDialog</h2>
+
+<p>An {@link android.app.AlertDialog} is an extension of the {@link android.app.Dialog}
+class. It is capable of constructing most dialog user interfaces and is the suggested dialog type.
+You should use it for dialogs that use any of the following features:</p>
+<ul>
+  <li>A title</li>
+  <li>A text message</li>
+  <li>One, two, or three buttons</li>
+  <li>A list of selectable items (with optional checkboxes or radio buttons)</li>
+</ul>
+
+<p>To create an AlertDialog, use the {@link android.app.AlertDialog.Builder} subclass.
+Get a Builder with {@link android.app.AlertDialog.Builder#AlertDialog.Builder(Context)} and
+then use the class's public methods to define all of the
+AlertDialog properties. After you're done with the Builder, retrieve the 
+AlertDialog object with {@link android.app.AlertDialog.Builder#create()}.</p>
+
+<p>The following topics show how to define various properties of the AlertDialog using the
+AlertDialog.Builder class. If you use any of the following sample code inside your 
+{@link android.app.Activity#onCreateDialog(int) onCreateDialog()} callback method, 
+you can return the resulting Dialog object to display the dialog.</p>
+
+
+<h3 id="AddingButtons">Adding buttons</h3>
+
+<img src="{@docRoot}images/dialog_buttons.png" alt="" style="float:right" />
+
+<p>To create an AlertDialog with side-by-side buttons like the one shown in the screenshot to the right,
+use the <code>set...Button()</code> methods:</p>
+
+<pre>
+AlertDialog.Builder builder = new AlertDialog.Builder(this);
+builder.setMessage("Are you sure you want to exit?")
+       .setCancelable(false)
+       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+           public void onClick(DialogInterface dialog, int id) {
+                MyActivity.this.finish();
+           }
+       })
+       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+           public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+           }
+       });
+AlertDialog alert = builder.create();
+</pre>
+
+<p>First, add a message for the dialog with 
+{@link android.app.AlertDialog.Builder#setMessage(CharSequence)}. Then, begin
+method-chaining and set the dialog
+to be <em>not cancelable</em> (so the user cannot close the dialog with the back button)
+with {@link android.app.AlertDialog.Builder#setCancelable(boolean)}. For each button, 
+use one of the <code>set...Button()</code> methods, such as
+{@link android.app.AlertDialog.Builder#setPositiveButton(CharSequence,DialogInterface.OnClickListener)
+setPositiveButton()}, that accepts the name for the button and a 
+{@link android.content.DialogInterface.OnClickListener} that defines the action to take 
+when the user selects the button.</p>
+
+<p class="note"><strong>Note:</strong> You can only add one of each button type to the
+AlertDialog. That is, you cannot have more than one "positive" button. This limits the number
+of possible buttons to three: positive, neutral, and negative. These names are technically irrelevant to the
+actual functionality of your buttons, but should help you keep track of which one does what.</p>
+
+
+<h3 id="AddingAList">Adding a list</h3>
+
+<img src="{@docRoot}images/dialog_list.png" alt="" style="float:right" />
+
+<p>To create an AlertDialog with a list of selectable items like the one shown to the right, 
+use the <code>setItems()</code> method:</p>
+
+<pre>
+final CharSequence[] items = {"Red", "Green", "Blue"};
+
+AlertDialog.Builder builder = new AlertDialog.Builder(this);
+builder.setTitle("Pick a color");
+builder.setItems(items, new DialogInterface.OnClickListener() {
+    public void onClick(DialogInterface dialog, int item) {
+        Toast.makeText(getApplicationContext(), items[item], Toast.LENGTH_SHORT).show();
+    }
+});
+AlertDialog alert = builder.create();
+</pre>
+
+<p>First, add a title to the dialog with 
+{@link android.app.AlertDialog.Builder#setTitle(CharSequence)}. 
+Then, add a list of selectable items with
+{@link android.app.AlertDialog.Builder#setItems(CharSequence[],DialogInterface.OnClickListener)
+setItems()}, which accepts the array of items to display and a 
+{@link android.content.DialogInterface.OnClickListener} that defines the action to take 
+when the user selects an item.</p>
+
+
+<h4>Adding checkboxes and radio buttons</h4>
+
+<img src="{@docRoot}images/dialog_singlechoicelist.png" alt="" style="float:right" />
+
+<p>To create a list of multiple-choice items (checkboxes) or 
+single-choice items (radio buttons) inside the dialog, use the
+{@link android.app.AlertDialog.Builder#setMultiChoiceItems(Cursor,String,String,
+DialogInterface.OnMultiChoiceClickListener) setMultiChoiceItems()} and 
+{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+setSingleChoiceItems()} methods, respectively.
+If you create one of these selectable lists in the
+{@link android.app.Activity#onCreateDialog(int) onCreateDialog()} callback method,
+Android manages the state of the list for you. As long as the Activity is active, 
+the dialog remembers the items that were previously selected, but when the user exits the
+Activity, the selection is lost.
+
+<p class="note"><strong>Note:</strong> To save the selection when the user leaves or
+pauses the Activity, you must properly save and restore the setting throughout
+the <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Activity Lifecycle</a>. 
+To permanently save the selections, even when the Activity process is completely shutdown, 
+you need to save the settings
+with one of the <a href="{@docRoot}guide/topics/data/data-storage.html">Data
+Storage</a> techniques.</p>
+
+<p>To create an AlertDialog with a list of single-choice items like the one shown to the right,
+use the same code from the previous example, but replace the <code>setItems()</code> method with
+{@link android.app.AlertDialog.Builder#setSingleChoiceItems(int,int,DialogInterface.OnClickListener) 
+setSingleChoiceItems()}:</p>
+
+<pre>
+final CharSequence[] items = {"Red", "Green", "Blue"};
+
+AlertDialog.Builder builder = new AlertDialog.Builder(this);
+builder.setTitle("Pick a color");
+builder.setSingleChoiceItems(items, -1, new DialogInterface.OnClickListener() {
+    public void onClick(DialogInterface dialog, int item) {
+        Toast.makeText(getApplicationContext(), items[item], Toast.LENGTH_SHORT).show();
+    }
+});
+AlertDialog alert = builder.create();
+</pre>
+
+<p>The second parameter in the
+{@link android.app.AlertDialog.Builder#setSingleChoiceItems(CharSequence[],int,DialogInterface.OnClickListener)
+setSingleChoiceItems()} method is an integer value for the <var>checkedItem</var>, which indicates the 
+zero-based list position of the default selected item. Use "-1" to indicate that no item should be 
+selected by default.</p>
+
+
+<h2 id="ProgressDialog">Creating a ProgressDialog</h2>
+
+<img src="{@docRoot}images/dialog_progress_spinning.png" alt="" style="float:right" />
+
+<p>A {@link android.app.ProgressDialog} is an extension of the {@link android.app.AlertDialog}
+class that can display a progress animation in the form of a spinning wheel, for a task with
+progress that's undefined, or a progress bar, for a task that has a defined progression.
+The dialog can also provide buttons, such as one to cancel a download.</p>
+
+<p>Opening a progress dialog can be as simple as calling 
+{@link android.app.ProgressDialog#show(Context,CharSequence,CharSequence)
+ProgressDialog.show()}. For example, the progress dialog shown to the right can be 
+easily achieved without managing the dialog through the 
+{@link android.app.Activity#onCreateDialog(int)} callback,
+as shown here:</p>
+
+<pre>
+ProgressDialog dialog = ProgressDialog.show(MyActivity.this, "", 
+                        "Loading. Please wait...", true);
+</pre>
+
+<p>The first parameter is the application {@link android.content.Context}, 
+the second is a title for the dialog (left empty), the third is the message, 
+and the last parameter is whether the progress
+is indeterminate (this is only relevant when creating a progress bar, which is
+discussed in the next section).
+</p>
+
+<p>The default style of a progress dialog is the spinning wheel.
+If you want to create a progress bar that shows the loading progress with granularity,
+some more code is required, as discussed in the next section.</p>
+
+
+<h3 id="ShowingAProgressBar">Showing a progress bar</h3>
+
+<img src="/images/dialog_progress_bar.png" alt="" style="float:right" />
+
+<p>To show the progression with an animated progress bar:</p>
+
+<ol>
+  <li>Initialize the 
+    ProgressDialog with the class constructor, 
+    {@link android.app.ProgressDialog#ProgressDialog(Context)}.</li>
+  <li>Set the progress style to "STYLE_HORIZONTAL" with 
+    {@link android.app.ProgressDialog#setProgressStyle(int)} and 
+    set any other properties, such as the message.</li>
+  <li>When you're ready to show the dialog, call 
+    {@link android.app.Dialog#show()} or return the ProgressDialog from the  
+    {@link android.app.Activity#onCreateDialog(int)} callback.</li>
+  <li>You can increment the amount of progress displayed
+    in the bar by calling either {@link android.app.ProgressDialog#setProgress(int)} with a value for 
+    the total percentage completed so far or {@link android.app.ProgressDialog#incrementProgressBy(int)}
+    with an incremental value to add to the total percentage completed so far.</li>
+</ol>
+
+<p>For example, your setup might look like this:</p>
+<pre>
+ProgressDialog progressDialog;
+progressDialog = new ProgressDialog(mContext);
+progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+progressDialog.setMessage("Loading...");
+progressDialog.setCancelable(false);
+</pre>
+
+<p>The setup is simple. Most of the code needed to create a progress dialog is actually 
+involved in the process that updates it. You might find that it's
+necessary to create a second thread in your application for this work and then report the progress
+back to the Activity's UI thread with a {@link android.os.Handler} object. 
+If you're not familiar with using additional 
+threads with a Handler, see the example Activity below that uses a second thread to
+increment a progress dialog managed by the Activity.</p>
+
+<script type="text/javascript">
+function toggleDiv(link) {
+  var toggleable = $(link).parent();
+  if (toggleable.hasClass("closed")) {
+    $(".toggleme", toggleable).slideDown("fast");
+    toggleable.removeClass("closed");
+    toggleable.addClass("open");
+    $(".toggle-img", toggleable).attr("title", "hide").attr("src", "/assets/images/triangle-opened.png");
+  } else {
+    $(".toggleme", toggleable).slideUp("fast");
+    toggleable.removeClass("open");
+    toggleable.addClass("closed");
+    $(".toggle-img", toggleable).attr("title", "show").attr("src", "/assets/images/triangle-closed.png");
+  }
+  return false;
+}
+</script>
+<style>
+.toggleme {
+  padding:0 0 1px 0;
+}
+.toggleable a {
+  text-decoration:none;
+}
+.toggleable.closed .toggleme {
+  display:none;
+}
+#jd-content .toggle-img {
+  margin:0;
+}
+</style>
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="/assets/images/triangle-closed.png" class="toggle-img" />
+        <strong>Example ProgressDialog with a second thread</strong></a>
+  <div class="toggleme">
+        <p>This example uses a second thread to track the progress of a process (which actually just
+counts up to 100). The thread sends a {@link android.os.Message} back to the main
+Activity through a {@link android.os.Handler} each time progress is made. The main Activity then updates the 
+ProgressDialog.</p>
+
+<pre>
+package com.example.progressdialog;
+
+import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+
+public class NotificationTest extends Activity {
+    static final int PROGRESS_DIALOG = 0;
+    Button button;
+    ProgressThread progressThread;
+    ProgressDialog progressDialog;
+   
+    /** Called when the activity is first created. */
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // Setup the button that starts the progress dialog
+        button = (Button) findViewById(R.id.progressDialog);
+        button.setOnClickListener(new OnClickListener(){
+            public void onClick(View v) {
+                showDialog(PROGRESS_DIALOG);
+            }
+        }); 
+    }
+   
+    protected Dialog onCreateDialog(int id) {
+        switch(id) {
+        case PROGRESS_DIALOG:
+            progressDialog = new ProgressDialog(NotificationTest.this);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialog.setMessage("Loading...");
+            progressThread = new ProgressThread(handler);
+            progressThread.start();
+            return progressDialog;
+        default:
+            return null;
+        }
+    }
+
+    // Define the Handler that receives messages from the thread and update the progress
+    final Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            int total = msg.getData().getInt("total");
+            progressDialog.setProgress(total);
+            if (total >= 100){
+                dismissDialog(PROGRESS_DIALOG);
+                progressThread.setState(ProgressThread.STATE_DONE);
+            }
+        }
+    };
+
+    /** Nested class that performs progress calculations (counting) */
+    private class ProgressThread extends Thread {
+        Handler mHandler;
+        final static int STATE_DONE = 0;
+        final static int STATE_RUNNING = 1;
+        int mState;
+        int total;
+       
+        ProgressThread(Handler h) {
+            mHandler = h;
+        }
+       
+        public void run() {
+            mState = STATE_RUNNING;   
+            total = 0;
+            while (mState == STATE_RUNNING) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Log.e("ERROR", "Thread Interrupted");
+                }
+                Message msg = mHandler.obtainMessage();
+                Bundle b = new Bundle();
+                b.putInt("total", total);
+                msg.setData(b);
+                mHandler.sendMessage(msg);
+                total++;
+            }
+        }
+        
+        /* sets the current state for the thread,
+         * used to stop the thread */
+        public void setState(int state) {
+            mState = state;
+        }
+    }
+}
+</pre>
+  </div> <!-- end toggleme -->
+</div> <!-- end toggleable -->
+
+
+
+<h2 id="CustomDialog">Creating a Custom Dialog</h2>
+
+<img src="{@docRoot}images/dialog_custom.png" alt="" style="float:right" />
+
+<p>If you want a customized design for a dialog, you can create your own layout
+for the dialog window with layout and widget elements.
+After you've defined your layout, pass the root View object or
+layout resource ID to {@link android.app.Dialog#setContentView(View)}.</p>
+
+<p>For example, to create the dialog shown to the right:</p>
+
+<ol>
+  <li>Create an XML layout saved as <code>custom_dialog.xml</code>:
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/layout_root"
+              android:orientation="horizontal"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:padding="10dp"
+              >
+    &lt;ImageView android:id="@+id/image"
+               android:layout_width="wrap_content"
+               android:layout_height="fill_parent"
+               android:layout_marginRight="10dp"
+               />
+    &lt;TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="fill_parent"
+              android:textColor="#FFF"
+              />
+&lt;/LinearLayout>
+</pre>
+
+    <p>This XML defines an {@link android.widget.ImageView} and a {@link android.widget.TextView}
+    inside a {@link android.widget.LinearLayout}.</p>
+  <li>Set the above layout as the dialog's content view and define the content 
+    for the ImageView and TextView elements:</p>
+<pre>
+Context mContext = getApplicationContext();
+Dialog dialog = new Dialog(mContext);
+
+dialog.setContentView(R.layout.custom_dialog);
+dialog.setTitle("Custom Dialog");
+
+TextView text = (TextView) dialog.findViewById(R.id.text);
+text.setText("Hello, this is a custom dialog!");
+ImageView image = (ImageView) dialog.findViewById(R.id.image);
+image.setImageResource(R.drawable.android);
+</pre>
+
+    <p>After you instantiate the Dialog, set your custom layout as the dialog's content view with 
+    {@link android.app.Dialog#setContentView(int)}, passing it the layout resource ID.
+    Now that the Dialog has a defined layout, you can capture View objects from the layout with
+    {@link android.app.Dialog#findViewById(int)} and modify their content.</p>
+  </li>
+
+  <li>That's it. You can now show the dialog as described in 
+    <a href="#ShowingADialog">Showing A Dialog</a>.</li>
+</ol>
+
+<p>A dialog made with the base Dialog class must have a title. If you don't call
+{@link android.app.Dialog#setTitle(CharSequence) setTitle()}, then the space used for the title
+remains empty, but still visible. If you don't want
+a title at all, then you should create your custom dialog using the
+{@link android.app.AlertDialog} class. However, because an AlertDialog is created easiest with 
+the {@link android.app.AlertDialog.Builder} class, you do not have access to the 
+{@link android.app.Dialog#setContentView(int)} method used above. Instead, you must use 
+{@link android.app.AlertDialog.Builder#setView(View)}. This method accepts a {@link android.view.View} object,
+so you need to inflate the layout's root View object from
+XML.</p>
+
+<p>To inflate the XML layout, retrieve the {@link android.view.LayoutInflater} with 
+{@link android.app.Activity#getLayoutInflater()} 
+(or {@link android.content.Context#getSystemService(String) getSystemService()}),
+and then call
+{@link android.view.LayoutInflater#inflate(int, ViewGroup)}, where the first parameter
+is the layout resource ID and the second is the ID of the root View. At this point, you can use
+the inflated layout to find View objects in the layout and define the content for the
+ImageView and TextView elements. Then instantiate the AlertDialog.Builder and set the
+inflated layout for the dialog with {@link android.app.AlertDialog.Builder#setView(View)}.</p>
+
+<p>Here's an example, creating a custom layout in an AlertDialog:</p>
+
+<pre>
+AlertDialog.Builder builder;
+AlertDialog alertDialog;
+
+Context mContext = getApplicationContext();
+LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER);
+View layout = inflater.inflate(R.layout.custom_dialog,
+                               (ViewGroup) findViewById(R.id.layout_root));
+
+TextView text = (TextView) layout.findViewById(R.id.text);
+text.setText("Hello, this is a custom dialog!");
+ImageView image = (ImageView) layout.findViewById(R.id.image);
+image.setImageResource(R.drawable.android);
+
+builder = new AlertDialog.Builder(mContext);
+builder.setView(layout);
+alertDialog = builder.create();
+</pre>
+
+<p>Using an AlertDialog for your custom layout lets you
+take advantage of built-in AlertDialog features like managed buttons,
+selectable lists, a title, an icon and so on.</p>
+
+<p>For more information, refer to the reference documentation for the 
+{@link android.app.Dialog} and {@link android.app.AlertDialog.Builder} 
+classes.</p>
+
+
+

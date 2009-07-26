@@ -18,6 +18,5 @@ page.onlyfortemplate=codesite
 
 <p>To run these samples, you should <a
 href="{@docRoot}guide/developing/eclipse-adt.html#creatingaproject">import them into
-Eclipse</a> or <a href="{@docRoot}guide/developing/other-ide.html">use
-activitycreator.py</a>, as described in the <a
-href="{@docRoot}sdk/1.1_r1/installing.html">Installing the SDK</a>.</p>
+Eclipse</a> or build them with Ant, as described in 
+<a href="{@docRoot}guide/developing/other-ide.html#Building">Developing in Other IDEs</a>.</p>

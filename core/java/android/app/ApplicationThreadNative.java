@@ -18,6 +18,7 @@ package android.app;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IIntentReceiver;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProviderInfo;
@@ -25,6 +26,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -230,11 +232,13 @@ public abstract class ApplicationThreadNative extends Binder
             IBinder binder = data.readStrongBinder();
             IInstrumentationWatcher testWatcher = IInstrumentationWatcher.Stub.asInterface(binder);
             int testMode = data.readInt();
+            boolean restrictedBackupMode = (data.readInt() != 0);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
             HashMap<String, IBinder> services = data.readHashMap(null);
             bindApplication(packageName, info,
                             providers, testName, profileName,
-                            testArgs, testWatcher, testMode, config, services);
+                            testArgs, testWatcher, testMode, restrictedBackupMode,
+                            config, services);
             return true;
         }
         
@@ -328,7 +332,34 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             boolean start = data.readInt() != 0;
             String path = data.readString();
-            profilerControl(start, path);
+            ParcelFileDescriptor fd = data.readInt() != 0
+                    ? data.readFileDescriptor() : null;
+            profilerControl(start, path, fd);
+            return true;
+        }
+        
+        case SET_SCHEDULING_GROUP_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            int group = data.readInt();
+            setSchedulingGroup(group);
+            return true;
+        }
+
+        case SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            ApplicationInfo appInfo = ApplicationInfo.CREATOR.createFromParcel(data);
+            int backupMode = data.readInt();
+            scheduleCreateBackupAgent(appInfo, backupMode);
+            return true;
+        }
+
+        case SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            ApplicationInfo appInfo = ApplicationInfo.CREATOR.createFromParcel(data);
+            scheduleDestroyBackupAgent(appInfo);
             return true;
         }
         }
@@ -484,6 +515,24 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
+    public final void scheduleCreateBackupAgent(ApplicationInfo app, int backupMode)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        app.writeToParcel(data, 0);
+        data.writeInt(backupMode);
+        mRemote.transact(SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION, data, null, 0);
+        data.recycle();
+    }
+
+    public final void scheduleDestroyBackupAgent(ApplicationInfo app) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        app.writeToParcel(data, 0);
+        mRemote.transact(SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION, data, null, 0);
+        data.recycle();
+    }
+    
     public final void scheduleCreateService(IBinder token, ServiceInfo info)
             throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -543,7 +592,8 @@ class ApplicationThreadProxy implements IApplicationThread {
     public final void bindApplication(String packageName, ApplicationInfo info,
             List<ProviderInfo> providers, ComponentName testName,
             String profileName, Bundle testArgs, IInstrumentationWatcher testWatcher, int debugMode,
-            Configuration config, Map<String, IBinder> services) throws RemoteException {
+            boolean restrictedBackupMode, Configuration config,
+            Map<String, IBinder> services) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeString(packageName);
@@ -559,6 +609,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeBundle(testArgs);
         data.writeStrongInterface(testWatcher);
         data.writeInt(debugMode);
+        data.writeInt(restrictedBackupMode ? 1 : 0);
         config.writeToParcel(data, 0);
         data.writeMap(services);
         mRemote.transact(BIND_APPLICATION_TRANSACTION, data, null,
@@ -663,12 +714,28 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
     
-    public void profilerControl(boolean start, String path) throws RemoteException {
+    public void profilerControl(boolean start, String path,
+            ParcelFileDescriptor fd) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeInt(start ? 1 : 0);
         data.writeString(path);
+        if (fd != null) {
+            data.writeInt(1);
+            fd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        } else {
+            data.writeInt(0);
+        }
         mRemote.transact(PROFILER_CONTROL_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+    
+    public void setSchedulingGroup(int group) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeInt(group);
+        mRemote.transact(SET_SCHEDULING_GROUP_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }

@@ -33,7 +33,7 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
     private static final boolean DBG = true;
     private ITelephonyRegistry mRegistry;
 
-    /*package*/ 
+    /*package*/
     DefaultPhoneNotifier() {
         mRegistry = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
                     "telephony.registry"));
@@ -62,7 +62,7 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
 
     public void notifySignalStrength(Phone sender) {
         try {
-            mRegistry.notifySignalStrength(sender.getSignalStrengthASU());
+            mRegistry.notifySignalStrength(sender.getSignalStrength());
         } catch (RemoteException ex) {
             // system process is dead
         }
@@ -94,7 +94,7 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
 
     public void notifyDataConnection(Phone sender, String reason) {
         try {
-            mRegistry.notifyDataConnection(convertDataState(sender.getDataConnectionState()), 
+            mRegistry.notifyDataConnection(convertDataState(sender.getDataConnectionState()),
                     sender.isDataConnectivityPossible(), reason, sender.getActiveApn(),
                     sender.getInterfaceName(null));
         } catch (RemoteException ex) {
@@ -119,7 +119,7 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
             // system process is dead
         }
     }
-    
+
     private void log(String s) {
         Log.d(LOG_TAG, "[PhoneNotifier] " + s);
     }
@@ -200,6 +200,8 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
                 return TelephonyManager.DATA_ACTIVITY_OUT;
             case DATAINANDOUT:
                 return TelephonyManager.DATA_ACTIVITY_INOUT;
+            case DORMANT:
+                return TelephonyManager.DATA_ACTIVITY_DORMANT;
             default:
                 return TelephonyManager.DATA_ACTIVITY_NONE;
         }
@@ -217,6 +219,8 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
                 return Phone.DataActivityState.DATAOUT;
             case TelephonyManager.DATA_ACTIVITY_INOUT:
                 return Phone.DataActivityState.DATAINANDOUT;
+            case TelephonyManager.DATA_ACTIVITY_DORMANT:
+                return Phone.DataActivityState.DORMANT;
             default:
                 return Phone.DataActivityState.NONE;
         }

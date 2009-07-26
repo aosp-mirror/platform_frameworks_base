@@ -18,8 +18,10 @@ package android.location;
 
 import android.app.PendingIntent;
 import android.location.Address;
+import android.location.IGeocodeProvider;
 import android.location.IGpsStatusListener;
 import android.location.ILocationListener;
+import android.location.ILocationProvider;
 import android.location.Location;
 import android.os.Bundle;
 
@@ -33,8 +35,6 @@ interface ILocationManager
     List getAllProviders();
     List getProviders(boolean enabledOnly);
 
-    void updateProviders();
-
     void requestLocationUpdates(String provider, long minTime, float minDistance,
         in ILocationListener listener);
     void requestLocationUpdatesPI(String provider, long minTime, float minDistance,
@@ -44,7 +44,10 @@ interface ILocationManager
 
     boolean addGpsStatusListener(IGpsStatusListener listener);
     void removeGpsStatusListener(IGpsStatusListener listener);
-    
+
+    // for reporting callback completion
+    void locationCallbackFinished(ILocationListener listener);
+
     boolean sendExtraCommand(String provider, String command, inout Bundle extras);
 
     void addProximityAlert(double latitude, double longitude, float distance,
@@ -55,6 +58,9 @@ interface ILocationManager
     boolean isProviderEnabled(String provider);
 
     Location getLastKnownLocation(String provider);
+
+    /* used by location providers to tell the location manager when it has a new location */
+    void reportLocation(in Location location);
 
     String getFromLocation(double latitude, double longitude, int maxResults,
         String language, String country, String variant, String appName, out List<Address> addrs);
@@ -73,4 +79,8 @@ interface ILocationManager
     void clearTestProviderEnabled(String provider);
     void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime);
     void clearTestProviderStatus(String provider);
+
+    /* for installing external Location Providers */
+    void installLocationProvider(String name, ILocationProvider provider);
+    void installGeocodeProvider(IGeocodeProvider provider);
 }

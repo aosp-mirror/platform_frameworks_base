@@ -81,6 +81,12 @@ public class Touch {
 
         switch (event.getAction()) {
         case MotionEvent.ACTION_DOWN:
+            ds = buffer.getSpans(0, buffer.length(), DragState.class);
+
+            for (int i = 0; i < ds.length; i++) {
+                buffer.removeSpan(ds[i]);
+            }
+
             buffer.setSpan(new DragState(event.getX(), event.getY(),
                             widget.getScrollX(), widget.getScrollY()),
                     0, 0, Spannable.SPAN_MARK_MARK);

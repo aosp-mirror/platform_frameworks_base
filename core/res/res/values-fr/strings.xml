@@ -21,39 +21,40 @@
     <string name="gigabyteShort">"Go"</string>
     <string name="terabyteShort">"To"</string>
     <string name="petabyteShort">"Po"</string>
+    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g> <xliff:g id="unit" example="KB">%2$s</xliff:g></string>
     <string name="untitled">"&lt;sans titre&gt;"</string>
     <string name="ellipsis">"…"</string>
     <string name="emptyPhoneNumber">"(Aucun numéro de téléphone)"</string>
     <string name="unknownName">"(Inconnu)"</string>
     <string name="defaultVoiceMailAlphaTag">"Messagerie vocale"</string>
     <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
-    <string name="mmiError">"Problème de connexion ou code IHM non valide."</string>
+    <string name="mmiError">"Problème de connexion ou code MMI non valide."</string>
     <string name="serviceEnabled">"Le service a été activé."</string>
     <string name="serviceEnabledFor">"Ce service a été activé pour :"</string>
     <string name="serviceDisabled">"Ce service a été désactivé."</string>
     <string name="serviceRegistered">"Enregistrement réussi."</string>
     <string name="serviceErased">"Effacement réussi."</string>
     <string name="passwordIncorrect">"Le mot de passe est incorrect."</string>
-    <string name="mmiComplete">"IHM terminée."</string>
+    <string name="mmiComplete">"MMI terminé."</string>
     <string name="badPin">"L\'ancien code PIN saisi est incorrect."</string>
-    <string name="badPuk">"La clé PUK saisie est incorrecte."</string>
+    <string name="badPuk">"Le code PUK saisi est incorrect."</string>
     <string name="mismatchPin">"Les codes PIN saisis ne correspondent pas."</string>
     <string name="invalidPin">"Le code PIN doit compter de 4 à 8 chiffres."</string>
-    <string name="needPuk">"Votre carte SIM est verrouillée par clé PUK. Saisissez la clé PUK pour la déverrouiller."</string>
-    <string name="needPuk2">"Saisissez la clé PUK2 pour débloquer la carte SIM."</string>
-    <string name="ClipMmi">"Numéro de l\'appelant (entrant)"</string>
-    <string name="ClirMmi">"Numéro de l\'appelant (sortant)"</string>
+    <string name="needPuk">"Votre carte SIM est verrouillée par code PUK. Saisissez le code PUK pour la déverrouiller."</string>
+    <string name="needPuk2">"Saisissez le code PUK2 pour débloquer la carte SIM."</string>
+    <string name="ClipMmi">"Identifiant d\'appelant entrant"</string>
+    <string name="ClirMmi">"Identifiant d\'appelant sortant"</string>
     <string name="CfMmi">"Transfert d\'appel"</string>
     <string name="CwMmi">"Appel en attente"</string>
     <string name="BaMmi">"Interdiction d\'appel"</string>
     <string name="PwdMmi">"Modification du mot de passe"</string>
     <string name="PinMmi">"Modification du code PIN"</string>
-    <string name="CLIRDefaultOnNextCallOn">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : restreint"</string>
-    <string name="CLIRDefaultOnNextCallOff">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : non restreint"</string>
-    <string name="CLIRDefaultOffNextCallOn">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : restreint"</string>
-    <string name="CLIRDefaultOffNextCallOff">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : non restreint"</string>
+    <string name="CLIRDefaultOnNextCallOn">"Par défaut, les identifiants d\'appelant sont restreints. Appel suivant : restreint"</string>
+    <string name="CLIRDefaultOnNextCallOff">"Par défaut, les identifiants d\'appelant sont restreints. Appel suivant : non restreint"</string>
+    <string name="CLIRDefaultOffNextCallOn">"Par défaut, les identifiants d\'appelant ne sont pas restreints. Appel suivant : restreint"</string>
+    <string name="CLIRDefaultOffNextCallOff">"Par défaut, les identifiants d\'appelant ne sont pas restreints. Appel suivant : non restreint"</string>
     <string name="serviceNotProvisioned">"Ce service n\'est pas pris en charge."</string>
-    <string name="CLIRPermanent">"Le paramètre Numéro de l\'appelant ne peut pas être modifié."</string>
+    <string name="CLIRPermanent">"Le paramètre Identifiant d\'appelant ne peut pas être modifié."</string>
     <string name="RestrictedChangedTitle">"L\'accès limité a été modifié."</string>
     <string name="RestrictedOnData">"Le service de données est bloqué."</string>
     <string name="RestrictedOnEmergency">"Le service d\'appel d\'urgence est bloqué."</string>
@@ -161,14 +162,10 @@
     <string name="permdesc_changeConfiguration">"Permet à une application de modifier la configuration actuelle (par ex. : la taille de la police générale ou des paramètres régionaux)."</string>
     <string name="permlab_restartPackages">"Démarrage d\'autres applications"</string>
     <string name="permdesc_restartPackages">"Permet à une application de forcer le lancement d\'autres applications."</string>
-    <string name="permlab_setProcessForeground">"Non-possibilité d\'interruption"</string>
-    <string name="permdesc_setProcessForeground">"Permet à une application d\'exécuter tout processus au premier plan afin qu\'il ne puisse pas être interrompu. Les applications normales ne devraient jamais nécessiter cette fonctionnalité."</string>
     <string name="permlab_forceBack">"Fermeture forcée de l\'application"</string>
     <string name="permdesc_forceBack">"Permet à une application de forcer une autre application exécutée au premier plan à se fermer et à passer en arrière-plan. Les applications normales ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_dump">"Vérification de l\'état interne du système"</string>
     <string name="permdesc_dump">"Permet à l\'application de récupérer l\'état interne du système. Des applications malveillantes peuvent obtenir de nombreuses informations personnelles et sécurisées auxquelles elles ne devraient pas avoir accès."</string>
-    <string name="permlab_addSystemService">"Éditer des services à faible niveau"</string>
-    <string name="permdesc_addSystemService">"Permet à l\'application de publier ses propres services de système de niveau inférieur. Des applications malveillantes peuvent prendre le contrôle du système et subtiliser ou endommager ses données."</string>
     <string name="permlab_runSetActivityWatcher">"Contrôle du lancement des applications"</string>
     <string name="permdesc_runSetActivityWatcher">"Permet à une application de suivre et de contrôler la façon dont le système lance des activités. Des applications malveillantes peuvent entièrement déstabiliser le système. Cette autorisation est uniquement nécessaire au développement et non pour l\'utilisation normale du téléphone."</string>
     <string name="permlab_broadcastPackageRemoved">"Envoyer une diffusion sans paquet"</string>
@@ -181,8 +178,6 @@
     <string name="permdesc_setProcessLimit">"Permet à une application de contrôler le nombre de processus maximal exécutés en même temps. Les applications normales n\'ont jamais recours à cette fonctionnalité."</string>
     <string name="permlab_setAlwaysFinish">"Fermeture de toutes les applications en tâche de fond"</string>
     <string name="permdesc_setAlwaysFinish">"Permet à une application de vérifier si des activités sont systématiquement interrompues lorsqu\'elles sont placées en tâche de fond. Cette fonctionnalité n\'est jamais utilisée par les applications normales."</string>
-    <string name="permlab_fotaUpdate">"Installation des mises à jour du système"</string>
-    <string name="permdesc_fotaUpdate">"Permet à une application de recevoir des notifications sur des mises à jour système en cours et de lancer leur installation. Des applications malveillantes peuvent utiliser cette fonctionnalité pour endommager le système avec des mises à jour non autorisées ou interférer avec le processus de mise à jour."</string>
     <string name="permlab_batteryStats">"Modification des statistiques de la batterie"</string>
     <string name="permdesc_batteryStats">"Autoriser la modification des statistiques de la batterie. Les applications normales n\'utilisent pas cette fonctionnalité."</string>
     <string name="permlab_internalSystemWindow">"Affichage de fenêtres non autorisées"</string>
@@ -247,12 +242,12 @@
     <string name="permdesc_readCalendar">"Permet à une application de lire tous les événements de l\'agenda enregistrés sur votre téléphone. Des applications malveillantes peuvent utiliser cette fonctionnalité pour envoyer les événements de votre agenda à d\'autres personnes."</string>
     <string name="permlab_writeCalendar">"Écriture des données de l\'agenda"</string>
     <string name="permdesc_writeCalendar">"Permet à une application de modifier les événements de l\'agenda enregistrés sur votre téléphone. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier les données de votre agenda."</string>
-    <string name="permlab_accessMockLocation">"Création de sources de positionnement fictives à des fins de test"</string>
-    <string name="permdesc_accessMockLocation">"Permet de créer des sources de positionnement fictives à des fins de test. Des applications malveillantes peuvent utiliser cette fonctionnalité pour remplacer la position géographique et/ou l\'état fournis par des sources réelles comme le GPS ou les fournisseurs d\'accès."</string>
+    <string name="permlab_accessMockLocation">"Création de sources géographiques fictives à des fins de test"</string>
+    <string name="permdesc_accessMockLocation">"Permet de créer des sources de position géographique fictives à des fins de test. Des applications malveillantes peuvent utiliser cette fonctionnalité pour remplacer la position géographique et/ou l\'état fournis par des sources réelles comme le GPS ou les fournisseurs d\'accès."</string>
     <string name="permlab_accessLocationExtraCommands">"Accès aux commandes de fournisseur de position géographique supplémentaires"</string>
     <string name="permdesc_accessLocationExtraCommands">"Permet d\'accéder à des commandes de fournisseur de position géographique supplémentaires. Des applications malveillantes peuvent utiliser cette fonctionnalité pour interférer avec l\'utilisation du GPS ou d\'autres sources de positionnement géographique."</string>
     <string name="permlab_accessFineLocation">"Localisation OK (GPS)"</string>
-    <string name="permdesc_accessFineLocation">"Permet d\'accéder à des sources de positionnement précises comme le Global Positioning System (GPS) sur le téléphone, lorsque ces services sont disponibles. Des applications malveillantes peuvent utiliser cette fonctionnalité pour déterminer l\'endroit où vous vous trouvez et augmenter la consommation de la batterie de votre téléphone."</string>
+    <string name="permdesc_accessFineLocation">"Permet d\'accéder à des sources de positionnement géographique précises comme le Global Positioning System (GPS) sur le téléphone, lorsque ces services sont disponibles. Des applications malveillantes peuvent utiliser cette fonctionnalité pour déterminer l\'endroit où vous vous trouvez et augmenter la consommation de la batterie de votre téléphone."</string>
     <string name="permlab_accessCoarseLocation">"Position géo. approximative (selon le réseau)"</string>
     <string name="permdesc_accessCoarseLocation">"Accès à des sources de positionnement approximatif (par ex. des bases de données de réseaux mobiles) pour déterminer la position géographique du téléphone, lorsque cette option est disponible. Des applications malveillantes peuvent utiliser cette fonctionnalité pour déterminer approximativement l\'endroit où vous vous trouvez."</string>
     <string name="permlab_accessSurfaceFlinger">"Accès à SurfaceFlinger"</string>
@@ -284,13 +279,13 @@
     <string name="permlab_callPrivileged">"Appel direct de tout numéro de téléphone"</string>
     <string name="permdesc_callPrivileged">"Permet à une application d\'appeler tout numéro de téléphone (y compris les numéros d\'urgence) sans votre intervention. Des applications malveillantes peuvent passer des appels non nécessaires ou illégitimes à des services d\'urgence."</string>
     <string name="permlab_locationUpdates">"Contrôle des notifications de mise à jour de position géo."</string>
-    <string name="permdesc_locationUpdates">"Permet l\'activation/la désactivation des notifications de mises à jour de la position géographique provenant du signal radio. Les applications normales n\'utilisent pas cette fonctionnalité."</string>
+    <string name="permdesc_locationUpdates">"Permet l\'activation/la désactivation des notifications de mises à jour de la position géographique provenant de la radio. Les applications normales n\'utilisent pas cette fonctionnalité."</string>
     <string name="permlab_checkinProperties">"Accès aux propriétés d\'enregistrement"</string>
     <string name="permdesc_checkinProperties">"Permet un accès en lecture/écriture à des propriétés envoyées par le service d\'inscription. Les applications normales n\'utilisent pas cette fonctionnalité."</string>
     <string name="permlab_bindGadget">"choisir les widgets"</string>
     <string name="permdesc_bindGadget">"Permet à l\'application de signaler au système quels widgets peuvent être utilisés par quelle application. Grâce à cette autorisation, les applications peuvent accorder l\'accès à des données personnelles à d\'autres applications. Cette option n\'est pas utilisée par les applications standard."</string>
     <string name="permlab_modifyPhoneState">"Modification de l\'état du téléphone"</string>
-    <string name="permdesc_modifyPhoneState">"Permet à une application de contrôler les fonctionnalités téléphoniques de l\'appareil. Une application bénéficiant de cette autorisation peut changer de réseau, éteindre et allumer le signal radio du téléphone, etc., sans vous en avertir."</string>
+    <string name="permdesc_modifyPhoneState">"Permet à une application de contrôler les fonctionnalités téléphoniques de l\'appareil. Une application bénéficiant de cette autorisation peut changer de réseau, éteindre et allumer la radio du téléphone, etc., sans vous en avertir."</string>
     <string name="permlab_readPhoneState">"Lecture de l\'état du téléphone"</string>
     <string name="permdesc_readPhoneState">"Permet à l\'application d\'accéder aux fonctionnalités d\'appel du téléphone. L\'application peut alors déterminer le numéro de téléphone de l\'appareil, savoir si un appel est en cours, identifier le numéro appelé, etc."</string>
     <string name="permlab_wakeLock">"Arrêt du mode veille sur le téléphone"</string>
@@ -300,9 +295,9 @@
     <string name="permlab_factoryTest">"Exécution en mode Test d\'usine"</string>
     <string name="permdesc_factoryTest">"Permet d\'exécuter en tant que test fabricant de faible niveau en autorisant l\'accès au matériel du téléphone. Cette fonctionnalité est uniquement disponible lorsque le téléphone est en mode de test fabricant."</string>
     <string name="permlab_setWallpaper">"Configuration du fond d\'écran"</string>
-    <string name="permdesc_setWallpaper">"Permet à une application de définir le fond d\'écran du système."</string>
+    <string name="permdesc_setWallpaper">"Permet à une application de définir l\'arrière-plan du système."</string>
     <string name="permlab_setWallpaperHints">"Sélection de la la taille du fond d\'écran"</string>
-    <string name="permdesc_setWallpaperHints">"Permet à une application de définir la taille du fond d\'écran."</string>
+    <string name="permdesc_setWallpaperHints">"Permet à une application de définir la taille d\'arrière-plan du système."</string>
     <string name="permlab_masterClear">"Réinitialisation du système à ses paramètres d\'usine"</string>
     <string name="permdesc_masterClear">"Permet à une application de réinitialiser entièrement le système afin de rétablir ses valeurs d\'usine et d\'effacer toutes les données, configurations et applications installées."</string>
     <string name="permlab_setTimeZone">"Sélection du fuseau horaire"</string>
@@ -345,7 +340,7 @@
     <string name="permdesc_writeDictionary">"Permet à une application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
   <string-array name="phoneTypes">
     <item>"Domicile"</item>
-    <item>"Portable"</item>
+    <item>"Mobile"</item>
     <item>"Bureau"</item>
     <item>"Télécopie bureau"</item>
     <item>"Télécopie domicile"</item>
@@ -394,7 +389,7 @@
     <string name="lockscreen_screen_locked">"Écran verrouillé"</string>
     <string name="lockscreen_instructions_when_pattern_enabled">"Appuyez sur \"Menu\" pour débloquer le téléphone ou appeler un numéro d\'urgence"</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"Appuyez sur \"Menu\" pour déverrouiller le téléphone."</string>
-    <string name="lockscreen_pattern_instructions">"Dessinez un schéma pour déverrouiller le téléphone"</string>
+    <string name="lockscreen_pattern_instructions">"Dessinez un motif pour déverrouiller le téléphone"</string>
     <string name="lockscreen_emergency_call">"Appel d\'urgence"</string>
     <string name="lockscreen_pattern_correct">"Combinaison correcte !"</string>
     <string name="lockscreen_pattern_wrong">"Désolé. Merci de réessayer."</string>
@@ -404,23 +399,20 @@
     <string name="lockscreen_missing_sim_message">"Aucune carte SIM n\'est insérée dans le téléphone."</string>
     <string name="lockscreen_missing_sim_instructions">"Insérez une carte SIM."</string>
     <string name="lockscreen_network_locked_message">"Réseau verrouillé"</string>
-    <string name="lockscreen_sim_puk_locked_message">"La carte SIM est verrouillée par clé PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message">"La carte SIM est verrouillée par code PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions">"Veuillez consulter le guide d\'utilisation ou contacter l\'assistance clientèle."</string>
-    <string name="lockscreen_sim_locked_message">"La carte SIM est verrouillée."</string>
+    <string name="lockscreen_sim_locked_message">"Téléphone verrouillé"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Déblocage de la carte SIM..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message">"Vous avez mal reproduit le schéma de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin">"Vous avez mal saisi le schéma de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> tentatives supplémentaires, vous devrez débloquer votre téléphone à l\'aide de votre identifiant Google."\n\n"Merci de réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message">"Vous avez mal reproduit le motif de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin">"Vous avez mal saisi le motif de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> tentatives supplémentaires, vous devrez débloquer votre téléphone à l\'aide de votre identifiant Google."\n\n"Merci de réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown">"Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes."</string>
-    <string name="lockscreen_forgot_pattern_button_text">"Schéma oublié ?"</string>
-    <string name="lockscreen_glogin_too_many_attempts">"Trop de tentatives !"</string>
+    <string name="lockscreen_forgot_pattern_button_text">"Motif oublié ?"</string>
+    <string name="lockscreen_glogin_too_many_attempts">"Trop de tentatives de motif !"</string>
     <string name="lockscreen_glogin_instructions">"Pour déverrouiller le téléphone, connectez-vous à l\'aide de votre compte Google."</string>
     <string name="lockscreen_glogin_username_hint">"Nom d\'utilisateur (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint">"Mot de passe"</string>
     <string name="lockscreen_glogin_submit_button">"Se connecter"</string>
     <string name="lockscreen_glogin_invalid_input">"Nom d\'utilisateur ou mot de passe incorrect."</string>
-    <string name="status_bar_time_format">"<xliff:g id="HOUR">h</xliff:g>:<xliff:g id="MINUTE">mm</xliff:g> <xliff:g id="AMPM">AA</xliff:g>"</string>
-    <string name="hour_minute_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_minute_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button">"Effacer les notifications"</string>
@@ -452,9 +444,6 @@
     <string name="menu_enter_shortcut_label">"entrée"</string>
     <string name="menu_delete_shortcut_label">"supprimer"</string>
     <string name="search_go">"Rechercher"</string>
-    <string name="today">"Aujourd\'hui"</string>
-    <string name="yesterday">"Hier"</string>
-    <string name="tomorrow">"Demain"</string>
     <string name="oneMonthDurationPast">"Il y a 1 mois"</string>
     <string name="beforeOneMonthDurationPast">"Il y a plus d\'un mois"</string>
   <plurals name="num_seconds_ago">
@@ -528,21 +517,14 @@
     <string name="days">"jours"</string>
     <string name="hour">"heure"</string>
     <string name="hours">"heures"</string>
-    <string name="minute">"mn"</string>
-    <string name="minutes">"mn"</string>
+    <string name="minute">"min"</string>
+    <string name="minutes">"min"</string>
     <string name="second">"s"</string>
     <string name="seconds">"s"</string>
     <string name="week">"semaine"</string>
     <string name="weeks">"semaines"</string>
     <string name="year">"année"</string>
     <string name="years">"années"</string>
-    <string name="sunday">"dimanche"</string>
-    <string name="monday">"lundi"</string>
-    <string name="tuesday">"mardi"</string>
-    <string name="wednesday">"mercredi"</string>
-    <string name="thursday">"jeudi"</string>
-    <string name="friday">"vendredi"</string>
-    <string name="saturday">"samedi"</string>
     <string name="every_weekday">"Tous les jours ouvrés (lun.- ven.)"</string>
     <string name="daily">"Tous les jours"</string>
     <string name="weekly">"Toutes les semaines le <xliff:g id="DAY">%s</xliff:g>"</string>
@@ -552,137 +534,15 @@
     <string name="VideoView_error_text_invalid_progressive_playback">"Désolé, cette vidéo ne peut être lue sur cet appareil."</string>
     <string name="VideoView_error_text_unknown">"Désolé, impossible de lire cette vidéo."</string>
     <string name="VideoView_error_button">"OK"</string>
-    <string name="am">"AM"</string>
-    <string name="pm">"PM"</string>
-    <string name="numeric_date">"<xliff:g id="DAY">%d</xliff:g>/<xliff:g id="MONTH">%m</xliff:g>/<xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="wday1_date1_time1_wday2_date2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g> <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
-    <string name="wday1_date1_wday2_date2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%4$s</xliff:g>, <xliff:g id="DATE2">%5$s</xliff:g>"</string>
-    <string name="date1_time1_date2_time2">"<xliff:g id="DATE1">%2$s</xliff:g>, <xliff:g id="TIME1">%3$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>, <xliff:g id="TIME2">%6$s</xliff:g>"</string>
-    <string name="date1_date2">"<xliff:g id="DATE1">%2$s</xliff:g> – <xliff:g id="DATE2">%5$s</xliff:g>"</string>
-    <string name="time1_time2">"<xliff:g id="TIME1">%1$s</xliff:g> – <xliff:g id="TIME2">%2$s</xliff:g>"</string>
-    <string name="time_wday_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <string name="wday_date">"<xliff:g id="WEEKDAY">%2$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <string name="time_date">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="DATE">%3$s</xliff:g>"</string>
-    <string name="date_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="time_wday">"<xliff:g id="TIME_RANGE">%1$s</xliff:g>, <xliff:g id="WEEKDAY">%2$s</xliff:g>"</string>
-    <string name="full_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="full_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_month_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="medium_date_day_first" format="date">"<xliff:g id="DAY">d</xliff:g>' '<xliff:g id="MONTH">MMM</xliff:g>' '<xliff:g id="YEAR">yyyy</xliff:g>"</string>
-    <string name="twelve_hour_time_format" format="date">"<xliff:g id="HOUR">h</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>' '<xliff:g id="AMPM">a</xliff:g>"</string>
-    <string name="twenty_four_hour_time_format" format="date">"<xliff:g id="HOUR">HH</xliff:g>':'<xliff:g id="MINUTE">mm</xliff:g>"</string>
     <string name="noon">"midi"</string>
     <string name="Noon">"Midi"</string>
     <string name="midnight">"minuit"</string>
     <string name="Midnight">"Minuit"</string>
-    <string name="month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g>"</string>
     <!-- no translation found for month (7026169712234774086) -->
     <skip />
-    <string name="month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="month_year">"<xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="time_of_day">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g>"</string>
-    <string name="date_and_time">"<xliff:g id="HOUR">%H</xliff:g>:<xliff:g id="MINUTE">%M</xliff:g>:<xliff:g id="SECOND">%S</xliff:g> <xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%B</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="same_year_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
-    <string name="same_year_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR">%9$s</xliff:g>"</string>
-    <string name="same_year_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_year_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>"</string>
-    <string name="numeric_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="numeric_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="numeric_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g>/<xliff:g id="MONTH1">%2$s</xliff:g>/<xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g>/<xliff:g id="MONTH2">%7$s</xliff:g>/<xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_md1_md2">"<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_wday2_md2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>"</string>
-    <string name="same_month_mdy1_mdy2">"<xliff:g id="DAY1">%3$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_wday2_mdy2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>"</string>
-    <string name="same_month_md1_time1_md2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_md1_time1_wday2_md2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g>, <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g>, <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_mdy1_time1_mdy2_time2">"<xliff:g id="DAY1">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="DAY2">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="same_month_wday1_mdy1_time1_wday2_mdy2_time2">"<xliff:g id="WEEKDAY1">%1$s</xliff:g> <xliff:g id="DAY1_0">%3$s</xliff:g> <xliff:g id="MONTH1">%2$s</xliff:g> <xliff:g id="YEAR1">%4$s</xliff:g>, <xliff:g id="TIME1">%5$s</xliff:g> – <xliff:g id="WEEKDAY2">%6$s</xliff:g> <xliff:g id="DAY2_1">%8$s</xliff:g> <xliff:g id="MONTH2">%7$s</xliff:g> <xliff:g id="YEAR2">%9$s</xliff:g>, <xliff:g id="TIME2">%10$s</xliff:g>"</string>
-    <string name="abbrev_month_day_year">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="abbrev_month_year">"<xliff:g id="MONTH">%b</xliff:g> <xliff:g id="YEAR">%Y</xliff:g>"</string>
-    <string name="abbrev_month_day">"<xliff:g id="DAY">%-d</xliff:g> <xliff:g id="MONTH">%b</xliff:g>"</string>
     <!-- no translation found for abbrev_month (3131032032850777433) -->
     <skip />
-    <string name="day_of_week_long_sunday">"dimanche"</string>
-    <string name="day_of_week_long_monday">"lundi"</string>
-    <string name="day_of_week_long_tuesday">"mardi"</string>
-    <string name="day_of_week_long_wednesday">"mercredi"</string>
-    <string name="day_of_week_long_thursday">"jeudi"</string>
-    <string name="day_of_week_long_friday">"vendredi"</string>
-    <string name="day_of_week_long_saturday">"samedi"</string>
-    <string name="day_of_week_medium_sunday">"Dim"</string>
-    <string name="day_of_week_medium_monday">"Lun"</string>
-    <string name="day_of_week_medium_tuesday">"Mar"</string>
-    <string name="day_of_week_medium_wednesday">"Mer"</string>
-    <string name="day_of_week_medium_thursday">"Jeu"</string>
-    <string name="day_of_week_medium_friday">"Ven"</string>
-    <string name="day_of_week_medium_saturday">"Sam"</string>
-    <string name="day_of_week_short_sunday">"Dim"</string>
-    <string name="day_of_week_short_monday">"Lun"</string>
-    <string name="day_of_week_short_tuesday">"Mar"</string>
-    <string name="day_of_week_short_wednesday">"Mer"</string>
-    <string name="day_of_week_short_thursday">"Jeu"</string>
-    <string name="day_of_week_short_friday">"Ven"</string>
-    <string name="day_of_week_short_saturday">"Sam"</string>
-    <string name="day_of_week_shorter_sunday">"Dim"</string>
-    <string name="day_of_week_shorter_monday">"Lun"</string>
-    <string name="day_of_week_shorter_tuesday">"Mar"</string>
-    <string name="day_of_week_shorter_wednesday">"Mer"</string>
-    <string name="day_of_week_shorter_thursday">"Jeu"</string>
-    <string name="day_of_week_shorter_friday">"Ven"</string>
-    <string name="day_of_week_shorter_saturday">"sam."</string>
-    <string name="day_of_week_shortest_sunday">"Dim"</string>
-    <string name="day_of_week_shortest_monday">"Lun"</string>
-    <string name="day_of_week_shortest_tuesday">"Mar"</string>
-    <string name="day_of_week_shortest_wednesday">"Mer"</string>
-    <string name="day_of_week_shortest_thursday">"Jeu"</string>
-    <string name="day_of_week_shortest_friday">"Ven"</string>
-    <string name="day_of_week_shortest_saturday">"Sam"</string>
-    <string name="month_long_january">"janvier"</string>
-    <string name="month_long_february">"février"</string>
-    <string name="month_long_march">"mars"</string>
-    <string name="month_long_april">"avril"</string>
-    <string name="month_long_may">"mai"</string>
-    <string name="month_long_june">"juin"</string>
-    <string name="month_long_july">"juillet"</string>
-    <string name="month_long_august">"août"</string>
-    <string name="month_long_september">"septembre"</string>
-    <string name="month_long_october">"octobre"</string>
-    <string name="month_long_november">"novembre"</string>
-    <string name="month_long_december">"décembre"</string>
-    <string name="month_medium_january">"janv."</string>
-    <string name="month_medium_february">"févr."</string>
-    <string name="month_medium_march">"mars"</string>
-    <string name="month_medium_april">"avr."</string>
-    <string name="month_medium_may">"mai"</string>
-    <string name="month_medium_june">"juin"</string>
-    <string name="month_medium_july">"juil."</string>
-    <string name="month_medium_august">"août"</string>
-    <string name="month_medium_september">"sept."</string>
-    <string name="month_medium_october">"oct."</string>
-    <string name="month_medium_november">"nov."</string>
-    <string name="month_medium_december">"déc."</string>
-    <string name="month_shortest_january">"jan."</string>
-    <string name="month_shortest_february">"Ven"</string>
-    <string name="month_shortest_march">"mars"</string>
-    <string name="month_shortest_april">"avr."</string>
-    <string name="month_shortest_may">"mai"</string>
-    <string name="month_shortest_june">"juin"</string>
-    <string name="month_shortest_july">"juil."</string>
-    <string name="month_shortest_august">"août"</string>
-    <string name="month_shortest_september">"sept."</string>
-    <string name="month_shortest_october">"oct."</string>
-    <string name="month_shortest_november">"nov."</string>
-    <string name="month_shortest_december">"déc."</string>
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"Tout sélectionner"</string>
@@ -757,7 +617,7 @@
     <string name="perms_show_all"><b>"Tout afficher"</b></string>
     <string name="googlewebcontenthelper_loading">"Chargement..."</string>
     <string name="usb_storage_title">"Connecté à l\'aide d\'un câble USB"</string>
-    <string name="usb_storage_message">"Vous avez connecté votre téléphone à votre ordinateur à l\'aide d\'un câble USB. Sélectionnez Monter pour copier des fichiers de votre ordinateur vers votre carte SD, ou inversement."</string>
+    <string name="usb_storage_message">"Vous avez connecté votre téléphone à votre ordinateur à l\'aide d\'un câble USB. Sélectionnez Monter pour copier des fichiers depuis votre ordinateur vers votre carte SD ou inversement."</string>
     <string name="usb_storage_button_mount">"Monter"</string>
     <string name="usb_storage_button_unmount">"Ne pas monter"</string>
     <string name="usb_storage_error_message">"Un problème est survenu lors de l\'utilisation de votre carte SD en tant que périphérique de stockage USB."</string>
@@ -798,7 +658,7 @@
     <string name="ime_action_search">"Rechercher"</string>
     <string name="ime_action_send">"Envoyer"</string>
     <string name="ime_action_next">"Suivant"</string>
-    <string name="ime_action_done">"OK"</string>
+    <string name="ime_action_done">"Terminé"</string>
     <string name="ime_action_default">"Exécuter"</string>
     <string name="dial_number_using">"Composer le numéro"\n"en utilisant <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using">"Ajouter un contact"\n"en utilisant <xliff:g id="NUMBER">%s</xliff:g>"</string>

@@ -97,6 +97,9 @@ class ServerThread extends Thread {
 
         // Critical services...
         try {
+            Log.i(TAG, "Starting Entropy Service.");
+            ServiceManager.addService("entropy", new EntropyService());
+
             Log.i(TAG, "Starting Power Manager.");
             power = new PowerManagerService();
             ServiceManager.addService(Context.POWER_SERVICE, power);
@@ -228,6 +231,14 @@ class ServerThread extends Thread {
             }
 
             try {
+              Log.i(TAG, "Starting Accessibility Manager.");
+              ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
+                      new AccessibilityManagerService(context));
+            } catch (Throwable e) {
+              Log.e(TAG, "Failure starting Accessibility Manager", e);
+            }
+
+            try {
                 Log.i(TAG, "Starting Notification Manager.");
                 ServiceManager.addService(Context.NOTIFICATION_SERVICE,
                         new NotificationManagerService(context, statusBar, hardware));
@@ -303,6 +314,13 @@ class ServerThread extends Thread {
                 headset = new HeadsetObserver(context);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting HeadsetObserver", e);
+            }
+
+            try {
+                Log.i(TAG, "Starting Backup Service");
+                ServiceManager.addService(Context.BACKUP_SERVICE, new BackupManagerService(context));
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure starting Backup Service", e);
             }
 
             try {

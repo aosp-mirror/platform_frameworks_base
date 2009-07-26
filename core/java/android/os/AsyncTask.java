@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * whose result is published on the UI thread. An asynchronous task is defined by 3 generic
  * types, called <code>Params</code>, <code>Progress</code> and <code>Result</code>,
  * and 4 steps, called <code>begin</code>, <code>doInBackground</code>,
- * <code>processProgress<code> and <code>end</code>.</p>
+ * <code>processProgress</code> and <code>end</code>.</p>
  *
  * <h2>Usage</h2>
  * <p>AsyncTask must be subclassed to be used. The subclass will override at least
@@ -85,7 +85,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>Not all types are always used by am asynchronous task. To mark a type as unused,
  * simply use the type {@link Void}:</p>
  * <pre>
- * private class MyTask extends AsyncTask<Void, Void, Void) { ... }
+ * private class MyTask extends AsyncTask&lt;Void, Void, Void&gt; { ... }
  * </pre>
  *
  * <h2>The 4 steps</h2>
@@ -127,12 +127,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AsyncTask<Params, Progress, Result> {
     private static final String LOG_TAG = "AsyncTask";
 
-    private static final int CORE_POOL_SIZE = 1;
-    private static final int MAXIMUM_POOL_SIZE = 10;
+    private static final int CORE_POOL_SIZE = 5;
+    private static final int MAXIMUM_POOL_SIZE = 128;
     private static final int KEEP_ALIVE = 10;
 
     private static final BlockingQueue<Runnable> sWorkQueue =
-            new LinkedBlockingQueue<Runnable>(MAXIMUM_POOL_SIZE);
+            new LinkedBlockingQueue<Runnable>(10);
 
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);

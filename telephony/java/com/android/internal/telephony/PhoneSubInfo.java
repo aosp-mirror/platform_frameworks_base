@@ -1,10 +1,25 @@
+/*
+ * Copyright (C) 2007 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.internal.telephony;
 
 import android.content.Context;
-import android.os.ServiceManager;
-import com.android.internal.telephony.*;
+import android.util.Log;
 
 public class PhoneSubInfo extends IPhoneSubInfo.Stub {
+    static final String LOG_TAG = "PHONE";
     private Phone mPhone;
     private Context mContext;
     private static final String READ_PHONE_STATE =
@@ -13,10 +28,17 @@ public class PhoneSubInfo extends IPhoneSubInfo.Stub {
     public PhoneSubInfo(Phone phone) {
         mPhone = phone;
         mContext = phone.getContext();
-        ServiceManager.addService("iphonesubinfo", this);
     }
+
+    public void dispose() {
+    }
+
+    protected void finalize() {
+        Log.d(LOG_TAG, "PhoneSubInfo finalized");
+    }
+
     /**
-     * Retrieves the unique device ID, e.g., IMEI for GSM phones.
+     * Retrieves the unique device ID, e.g., IMEI for GSM phones and MEID for CDMA phones.
      */
     public String getDeviceId() {
         mContext.enforceCallingOrSelfPermission(READ_PHONE_STATE, "Requires READ_PHONE_STATE");
@@ -41,11 +63,11 @@ public class PhoneSubInfo extends IPhoneSubInfo.Stub {
     }
 
     /**
-     * Retrieves the serial number of the SIM, if applicable.
+     * Retrieves the serial number of the ICC, if applicable.
      */
-    public String getSimSerialNumber() {
+    public String getIccSerialNumber() {
         mContext.enforceCallingOrSelfPermission(READ_PHONE_STATE, "Requires READ_PHONE_STATE");
-        return mPhone.getSimSerialNumber();
+        return mPhone.getIccSerialNumber();
     }
 
     /**

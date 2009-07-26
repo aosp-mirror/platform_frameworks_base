@@ -1255,47 +1255,71 @@ public class IntentFilter implements Parcelable {
     }
 
     public void dump(Printer du, String prefix) {
+        StringBuilder sb = new StringBuilder(256);
         if (mActions.size() > 0) {
             Iterator<String> it = mActions.iterator();
             while (it.hasNext()) {
-               du.println(prefix + "Action: \"" + it.next() + "\"");
+                sb.setLength(0);
+                sb.append(prefix); sb.append("Action: \"");
+                        sb.append(it.next()); sb.append("\"");
+                du.println(sb.toString());
             }
         }
         if (mCategories != null) {
             Iterator<String> it = mCategories.iterator();
             while (it.hasNext()) {
-                du.println(prefix + "Category: \"" + it.next() + "\"");
+                sb.setLength(0);
+                sb.append(prefix); sb.append("Category: \"");
+                        sb.append(it.next()); sb.append("\"");
+                du.println(sb.toString());
             }
         }
         if (mDataSchemes != null) {
             Iterator<String> it = mDataSchemes.iterator();
             while (it.hasNext()) {
-                du.println(prefix + "Data Scheme: \"" + it.next() + "\"");
+                sb.setLength(0);
+                sb.append(prefix); sb.append("Scheme: \"");
+                        sb.append(it.next()); sb.append("\"");
+                du.println(sb.toString());
             }
         }
         if (mDataAuthorities != null) {
             Iterator<AuthorityEntry> it = mDataAuthorities.iterator();
             while (it.hasNext()) {
                 AuthorityEntry ae = it.next();
-                du.println(prefix + "Data Authority: \"" + ae.mHost + "\":"
-                        + ae.mPort + (ae.mWild ? " WILD" : ""));
+                sb.setLength(0);
+                sb.append(prefix); sb.append("Authority: \"");
+                        sb.append(ae.mHost); sb.append("\": ");
+                        sb.append(ae.mPort);
+                if (ae.mWild) sb.append(" WILD");
+                du.println(sb.toString());
             }
         }
         if (mDataPaths != null) {
             Iterator<PatternMatcher> it = mDataPaths.iterator();
             while (it.hasNext()) {
                 PatternMatcher pe = it.next();
-                du.println(prefix + "Data Path: \"" + pe + "\"");
+                sb.setLength(0);
+                sb.append(prefix); sb.append("Path: \"");
+                        sb.append(pe); sb.append("\"");
+                du.println(sb.toString());
             }
         }
         if (mDataTypes != null) {
             Iterator<String> it = mDataTypes.iterator();
             while (it.hasNext()) {
-                du.println(prefix + "Data Type: \"" + it.next() + "\"");
+                sb.setLength(0);
+                sb.append(prefix); sb.append("Type: \"");
+                        sb.append(it.next()); sb.append("\"");
+                du.println(sb.toString());
             }
         }
-        du.println(prefix + "mPriority=" + mPriority
-                + ", mHasPartialTypes=" + mHasPartialTypes);
+        if (mPriority != 0 || mHasPartialTypes) {
+            sb.setLength(0);
+            sb.append(prefix); sb.append("mPriority="); sb.append(mPriority);
+                    sb.append(", mHasPartialTypes="); sb.append(mHasPartialTypes);
+            du.println(sb.toString());
+        }
     }
 
     public static final Parcelable.Creator<IntentFilter> CREATOR

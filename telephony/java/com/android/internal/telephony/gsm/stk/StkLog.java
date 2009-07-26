@@ -30,7 +30,7 @@ public abstract class StkLog {
         Log.d("STK", className.substring(className.lastIndexOf('.') + 1) + ": "
                 + msg);
     }
-    
+
     public static void d(String caller, String msg) {
         if (!DEBUG) {
             return;

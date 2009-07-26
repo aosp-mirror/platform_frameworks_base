@@ -30,6 +30,9 @@ import junit.framework.Assert;
  */
 final public class Proxy {
 
+    // Set to true to enable extra debugging.
+    static final private boolean DEBUG = false;
+
     static final public String PROXY_CHANGE_ACTION =
         "android.intent.action.PROXY_CHANGE";
 
@@ -49,7 +52,7 @@ final public class Proxy {
         if (host != null) {
             int i = host.indexOf(':');
             if (i == -1) {
-                if (android.util.Config.DEBUG) {
+                if (DEBUG) {
                     Assert.assertTrue(host.length() == 0);
                 }
                 return null;
@@ -73,12 +76,12 @@ final public class Proxy {
         if (host != null) {
             int i = host.indexOf(':');
             if (i == -1) {
-                if (android.util.Config.DEBUG) {
+                if (DEBUG) {
                     Assert.assertTrue(host.length() == 0);
                 }
                 return -1;
             }
-            if (android.util.Config.DEBUG) {
+            if (DEBUG) {
                 Assert.assertTrue(i < host.length());
             }
             return Integer.parseInt(host.substring(i+1));

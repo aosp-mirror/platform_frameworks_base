@@ -1,0 +1,684 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="byteShort">"B"</string>
+    <string name="kilobyteShort">"KB"</string>
+    <string name="megabyteShort">"MB"</string>
+    <string name="gigabyteShort">"GB"</string>
+    <string name="terabyteShort">"TB"</string>
+    <string name="petabyteShort">"PB"</string>
+    <string name="untitled">"&lt;sin título&gt;"</string>
+    <string name="ellipsis">"…"</string>
+    <string name="emptyPhoneNumber">"(No hay número de teléfono)"</string>
+    <string name="unknownName">"(Desconocida)"</string>
+    <string name="defaultVoiceMailAlphaTag">"Correo de voz"</string>
+    <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
+    <string name="mmiError">"Problema de conexión o código incorrecto de MMI."</string>
+    <string name="serviceEnabled">"Se ha activado el servicio."</string>
+    <string name="serviceEnabledFor">"Se activó el servicio para:"</string>
+    <string name="serviceDisabled">"Se ha desactivado el servicio."</string>
+    <string name="serviceRegistered">"El registro se ha realizado correctamente."</string>
+    <string name="serviceErased">"Se ha borrado correctamente."</string>
+    <string name="passwordIncorrect">"Contraseña incorrecta."</string>
+    <string name="mmiComplete">"MMI completa."</string>
+    <string name="badPin">"El PIN anterior que escribiste no es correcto."</string>
+    <string name="badPuk">"La PUK que escribiste no es correcta."</string>
+    <string name="mismatchPin">"Los PIN que has ingresado no coinciden."</string>
+    <string name="invalidPin">"Escribir un PIN que contenga entre 4 y 8 números."</string>
+    <string name="needPuk">"Tu tarjeta SIM está bloqueada con PUK. Escribe el código PUK para desbloquearla."</string>
+    <string name="needPuk2">"Escribir PUK2 para desbloquear la tarjeta SIM."</string>
+    <string name="ClipMmi">"Identificador de llamadas entrantes"</string>
+    <string name="ClirMmi">"Identificador de llamadas salientes"</string>
+    <string name="CfMmi">"Desvío de llamadas"</string>
+    <string name="CwMmi">"Llamada en espera"</string>
+    <string name="BaMmi">"Restricción de llamadas"</string>
+    <string name="PwdMmi">"Cambio de contraseña"</string>
+    <string name="PinMmi">"Cambio de PIN"</string>
+    <!-- no translation found for CnipMmi (3110534680557857162) -->
+    <skip />
+    <!-- no translation found for CnirMmi (3062102121430548731) -->
+    <skip />
+    <!-- no translation found for ThreeWCMmi (9051047170321190368) -->
+    <skip />
+    <!-- no translation found for RuacMmi (7827887459138308886) -->
+    <skip />
+    <!-- no translation found for CndMmi (3116446237081575808) -->
+    <skip />
+    <!-- no translation found for DndMmi (1265478932418334331) -->
+    <skip />
+    <string name="CLIRDefaultOnNextCallOn">"El Identificador de llamadas está predeterminado en restringido. Llamada siguiente: restringida"</string>
+    <string name="CLIRDefaultOnNextCallOff">"El Identificador de llamadas está predeterminado en restringido. Llamada siguiente: no restringido"</string>
+    <string name="CLIRDefaultOffNextCallOn">"El Identificador de llamadas está predeterminado en no restringido. Llamada siguiente: restringida"</string>
+    <string name="CLIRDefaultOffNextCallOff">"El Identificador de llamadas está predeterminado en no restringido. Llamada siguiente: no restringido"</string>
+    <string name="serviceNotProvisioned">"Servicio no suministrado."</string>
+    <string name="CLIRPermanent">"La configuración del identificador de llamadas no se puede cambiar."</string>
+    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
+    <skip />
+    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
+    <skip />
+    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
+    <skip />
+    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
+    <skip />
+    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
+    <skip />
+    <string name="serviceClassVoice">"Voz"</string>
+    <string name="serviceClassData">"Datos"</string>
+    <string name="serviceClassFAX">"FAX"</string>
+    <string name="serviceClassSMS">"SMS"</string>
+    <string name="serviceClassDataAsync">"Datos asíncronos"</string>
+    <string name="serviceClassDataSync">"Sincronización"</string>
+    <string name="serviceClassPacket">"Paquete"</string>
+    <string name="serviceClassPAD">"PAD"</string>
+    <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no se ha remitido"</string>
+    <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> después de <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
+    <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no se ha remitido"</string>
+    <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no se ha remitido"</string>
+    <string name="httpErrorOk">"Aceptar"</string>
+    <string name="httpError">"La página web contiene un error."</string>
+    <string name="httpErrorLookup">"No se ha podido encontrar la URL."</string>
+    <string name="httpErrorUnsupportedAuthScheme">"No se admite el programa de autenticación del sitio."</string>
+    <string name="httpErrorAuth">"La autenticación no se ha realizado correctamente."</string>
+    <string name="httpErrorProxyAuth">"La autenticación a través del servidor proxy no se ha realizado correctamente."</string>
+    <string name="httpErrorConnect">"La conexión al servidor no se ha realizado correctamente."</string>
+    <string name="httpErrorIO">"El servidor no envía comunicaciones. Vuelve a intentarlo más tarde."</string>
+    <string name="httpErrorTimeout">"Se ha agotado el tiempo de espera para la conexión al servidor."</string>
+    <string name="httpErrorRedirectLoop">"La página contiene demasiados redireccionamientos de servidor."</string>
+    <string name="httpErrorUnsupportedScheme">"No se admite el protocolo."</string>
+    <string name="httpErrorFailedSslHandshake">"No se ha podido establecer una conexión segura."</string>
+    <string name="httpErrorBadUrl">"No se ha podido abrir la página debido a que la URL es incorrecta."</string>
+    <string name="httpErrorFile">"No se ha podido acceder al archivo."</string>
+    <string name="httpErrorFileNotFound">"No se ha encontrado el archivo solicitado."</string>
+    <string name="httpErrorTooManyRequests">"Se están procesando demasiadas solicitudes. Vuelve a intentarlo más tarde."</string>
+    <string name="contentServiceSync">"Sincronización"</string>
+    <string name="contentServiceSyncNotificationTitle">"Sincronización"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc">"Demasiadas eliminaciones de <xliff:g id="CONTENT_TYPE">%s</xliff:g>"</string>
+    <string name="low_memory">"¡El espacio de almacenamiento está completo! Elimina algunos archivos para liberar espacio."</string>
+    <string name="me">"Yo"</string>
+    <string name="power_dialog">"Opciones de teléfono"</string>
+    <string name="silent_mode">"Modo silencioso"</string>
+    <string name="turn_on_radio">"Encender el teléfono inalámbrico"</string>
+    <string name="turn_off_radio">"Apagar el teléfono inalámbrico"</string>
+    <string name="screen_lock">"Bloqueo de pantalla"</string>
+    <string name="power_off">"Apagar"</string>
+    <string name="shutdown_progress">"Apagando…"</string>
+    <string name="shutdown_confirm">"Tu teléfono se apagará."</string>
+    <string name="no_recent_tasks">"No hay aplicaciones recientes."</string>
+    <string name="global_actions">"Opciones de teléfono"</string>
+    <string name="global_action_lock">"Bloqueo de pantalla"</string>
+    <string name="global_action_power_off">"Apagar"</string>
+    <string name="global_action_toggle_silent_mode">"Modo silencioso"</string>
+    <string name="global_action_silent_mode_on_status">"El sonido está Apagado"</string>
+    <string name="global_action_silent_mode_off_status">"El sonido está Encendido"</string>
+    <string name="global_actions_toggle_airplane_mode">"Modo avión"</string>
+    <string name="global_actions_airplane_mode_on_status">"El modo avión está Encendido"</string>
+    <string name="global_actions_airplane_mode_off_status">"El modo avión está Apagado"</string>
+    <string name="safeMode">"Modo seguro"</string>
+    <string name="android_system_label">"Sistema Androide"</string>
+    <string name="permgrouplab_costMoney">"Servicios que te cuestan dinero"</string>
+    <string name="permgroupdesc_costMoney">"Admite aplicaciones que realizan actividades que te pueden costar dinero."</string>
+    <string name="permgrouplab_messages">"Tus mensajes"</string>
+    <string name="permgroupdesc_messages">"Lee y escribe tu SMS, mensaje de correo electrónico y otros mensajes."</string>
+    <string name="permgrouplab_personalInfo">"Tu información personal"</string>
+    <string name="permgroupdesc_personalInfo">"Acceso directo a tus contactos y calendario guardado en el teléfono."</string>
+    <string name="permgrouplab_location">"Tu ubicación"</string>
+    <string name="permgroupdesc_location">"Controla tu ubicación física"</string>
+    <string name="permgrouplab_network">"Comunicación de red"</string>
+    <string name="permgroupdesc_network">"Admite aplicaciones que acceden a varias funciones de red."</string>
+    <string name="permgrouplab_accounts">"Tus cuentas de Google"</string>
+    <string name="permgroupdesc_accounts">"Acceder a las cuentas disponibles de Google."</string>
+    <string name="permgrouplab_hardwareControls">"Controles de hardware"</string>
+    <string name="permgroupdesc_hardwareControls">"Acceso directo al hardware en el teléfono."</string>
+    <string name="permgrouplab_phoneCalls">"Llamadas telefónicas"</string>
+    <string name="permgroupdesc_phoneCalls">"Controlar, grabar y procesar llamadas telefónicas."</string>
+    <string name="permgrouplab_systemTools">"Herramientas del sistema"</string>
+    <string name="permgroupdesc_systemTools">"Acceso y control de nivel más bajo del sistema."</string>
+    <string name="permgrouplab_developmentTools">"Herramientas de desarrollo"</string>
+    <string name="permgroupdesc_developmentTools">"Las funciones sólo son necesarias para los desarrolladores de aplicaciones."</string>
+    <string name="permlab_statusBar">"desactivar o modificar la barra de estado"</string>
+    <string name="permdesc_statusBar">"Admite que la aplicación desactive la barra de estado, o agregue y elimine íconos del sistema."</string>
+    <string name="permlab_expandStatusBar">"expandir o reducir la barra de estado"</string>
+    <string name="permdesc_expandStatusBar">"Admite que la aplicación expanda o reduzca la barra de estado."</string>
+    <string name="permlab_processOutgoingCalls">"interceptar llamadas salientes"</string>
+    <string name="permdesc_processOutgoingCalls">"Admite que la aplicación procese las llamadas salientes y cambie el número que se debe marcar. Las aplicaciones maliciosas pueden controlar, redireccionar o prevenir llamadas salientes."</string>
+    <string name="permlab_receiveSms">"recibir SMS"</string>
+    <string name="permdesc_receiveSms">"Admite que la aplicación reciba y procese mensajes SMS. Es posible que las aplicaciones maliciosas controlen tus mensajes o los eliminen sin mostrártelos."</string>
+    <string name="permlab_receiveMms">"recibir MMS"</string>
+    <string name="permdesc_receiveMms">"Admite que la aplicación reciba y procese mensajes MMS. Es posible que las aplicaciones maliciosas controlen tus mensajes o los eliminen sin mostrártelos."</string>
+    <string name="permlab_sendSms">"enviar mensajes SMS"</string>
+    <string name="permdesc_sendSms">"Admite que la aplicación envíe mensajes SMS. Las aplicaciones maliciosas te pueden costar dinero si envías mensajes sin su confirmación."</string>
+    <string name="permlab_readSms">"leer SMS o MMS"</string>
+    <string name="permdesc_readSms">"Admite que la aplicación lea los mensajes SMS almacenados en tu teléfono o tarjeta SIM. Las aplicaciones maliciosas pueden leer tus mensajes confidenciales."</string>
+    <string name="permlab_writeSms">"editar SMS o MMS"</string>
+    <string name="permdesc_writeSms">"Admite que la aplicación escriba a los mensajes SMS almacenados en tu teléfono o tarjeta SIM. Las aplicaciones maliciosas pueden borrar tus mensajes."</string>
+    <string name="permlab_receiveWapPush">"recibir WAP"</string>
+    <string name="permdesc_receiveWapPush">"Admite que la aplicación reciba y procese mensajes WAP. Es posible que las aplicaciones maliciosas controlen tus mensajes o los eliminen sin mostrártelos."</string>
+    <string name="permlab_getTasks">"recuperar aplicaciones en ejecución"</string>
+    <string name="permdesc_getTasks">"Admite que la aplicación recupere información sobre tareas en ejecución actuales y recientes. Puede permitir que las aplicaciones maliciosas descubran información privada sobre otras aplicaciones."</string>
+    <string name="permlab_reorderTasks">"reorganizar aplicaciones en ejecución"</string>
+    <string name="permdesc_reorderTasks">"Admite una aplicación que mueve tareas hacia el frente y el fondo. Las aplicaciones maliciosas pueden provocar su propio movimiento hacia el frente sin tu control."</string>
+    <string name="permlab_setDebugApp">"activar la depuración de la aplicación"</string>
+    <string name="permdesc_setDebugApp">"Admite una aplicación que activa la depuración en otra aplicación. Las aplicaciones maliciosas pueden utilizarlo para suprimir otras aplicaciones."</string>
+    <string name="permlab_changeConfiguration">"cambiar tu configuración de la interfaz de usuario"</string>
+    <string name="permdesc_changeConfiguration">"Admite una aplicación para cambiar la configuración actual, como el tamaño de fuente local o general."</string>
+    <string name="permlab_restartPackages">"reiniciar otras aplicaciones"</string>
+    <string name="permdesc_restartPackages">"Admite una aplicación que reinicia otras aplicaciones por la fuerza."</string>
+    <string name="permlab_forceBack">"provocar que la aplicación se acerque"</string>
+    <string name="permdesc_forceBack">"Admite una aplicación que provoca que cualquier actividad del fondo se acerque y vuelva a alejarse. Se debe evitar utilizarlo en aplicaciones normales."</string>
+    <string name="permlab_dump">"recuperar el estado interno del sistema"</string>
+    <string name="permdesc_dump">"Admite que la aplicación recupere el estado interno del sistema. Las aplicaciones maliciosas pueden recuperar una gran variedad de información privada y segura que normalmente nunca necesitaría."</string>
+    <string name="permlab_runSetActivityWatcher">"verificar y controlar todos los lanzamientos de actividades"</string>
+    <string name="permdesc_runSetActivityWatcher">"Admite una aplicación que verifica y controla el lanzamiento de actividades por parte del sistema. Las aplicaciones maliciosas pueden comprometer totalmente al sistema. Este permiso sólo es necesario para el desarrollo, nunca para el uso normal del teléfono."</string>
+    <string name="permlab_broadcastPackageRemoved">"enviar emisión de paquete eliminado"</string>
+    <string name="permdesc_broadcastPackageRemoved">"Admite una aplicación que emite una notificación acerca de que se ha eliminado un paquete de aplicación. Las aplicaciones maliciosas pueden utilizarlo para suprimir cualquier otra aplicación en ejecución."</string>
+    <string name="permlab_broadcastSmsReceived">"enviar emisiones de SMS recibidos"</string>
+    <string name="permdesc_broadcastSmsReceived">"Admite una aplicación que envía una notificación acerca de que se ha recibido un mensaje SMS. Las aplicaciones maliciosas pueden utilizarlo para falsificar los mensajes SMS entrantes."</string>
+    <string name="permlab_broadcastWapPush">"enviar emisiones WAP-PUSH-recibido"</string>
+    <string name="permdesc_broadcastWapPush">"Admite una aplicación que emite una notificación acerca de que se ha recibido un mensaje WAP PUSH. Las aplicaciones maliciosas pueden utilizarlo para falsificar la recepción de mensajes MMS o para reemplazar silenciosamente el contenido de cualquier página web con variantes maliciosas."</string>
+    <string name="permlab_setProcessLimit">"limitar la cantidad de procesos en ejecución"</string>
+    <string name="permdesc_setProcessLimit">"Admite una aplicación que controla la cantidad máxima de procesos que se ejecutarán. No se utiliza nunca en aplicaciones normales."</string>
+    <string name="permlab_setAlwaysFinish">"cerrar todas las aplicaciones del fondo"</string>
+    <string name="permdesc_setAlwaysFinish">"Admite una aplicación que controla si las actividades siempre finalizan cuando van al fondo. No se utiliza nunca en aplicaciones normales."</string>
+    <string name="permlab_batteryStats">"modificar la estadística de la batería"</string>
+    <string name="permdesc_batteryStats">"Admite la modificación de estadísticas recopiladas sobre la batería. Las aplicaciones normales no deben utilizarlo."</string>
+    <string name="permlab_internalSystemWindow">"mostrar ventanas no autorizadas"</string>
+    <string name="permdesc_internalSystemWindow">"Permite la creación de ventanas que la interfaz interna del usuario del sistema pretenda utilizar. Las aplicaciones normales no deben utilizarlo."</string>
+    <string name="permlab_systemAlertWindow">"mostrar alertas a nivel del sistema"</string>
+    <string name="permdesc_systemAlertWindow">"Admite una aplicación que muestra ventanas de alerta del sistema. Las aplicaciones maliciosas pueden tomar el control de toda la pantalla del teléfono."</string>
+    <string name="permlab_setAnimationScale">"modificar la velocidad de la animación global"</string>
+    <string name="permdesc_setAnimationScale">"Admite una aplicación que cambia la velocidad de animación global (animaciones más rápidas o más lentas) en cualquier momento."</string>
+    <string name="permlab_manageAppTokens">"administrar tokens de aplicación"</string>
+    <string name="permdesc_manageAppTokens">"Admite que las aplicaciones creen y administren sus propios tokens y desvíen su curva normal de llenado del espacio. Se debe evitar utilizarlo en aplicaciones normales."</string>
+    <string name="permlab_injectEvents">"presionar teclas y botones de control"</string>
+    <string name="permdesc_injectEvents">"Admite una aplicación que ofrece sus propios eventos de entrada (presionar teclas, etc.) a otras aplicaciones. Las aplicaciones maliciosas pueden utilizarlo para tomar el control del teléfono."</string>
+    <string name="permlab_readInputState">"grabar tu tipo y las medidas que tomes"</string>
+    <string name="permdesc_readInputState">"Admite que las aplicaciones observen las teclas que presionas, incluso al interactuar con otra aplicación (como el ingreso de una contraseña). Se debe evitar utilizarlo en aplicaciones normales."</string>
+    <string name="permlab_bindInputMethod">"vincular a un método de entrada"</string>
+    <string name="permdesc_bindInputMethod">"Permite al propietario vincularse a la interfaz de nivel superior de un método de entrada. Se debe evitar utilizarlo en aplicaciones normales."</string>
+    <string name="permlab_setOrientation">"cambiar la orientación de la pantalla"</string>
+    <string name="permdesc_setOrientation">"Admite una aplicación que cambia la rotación de la pantalla en cualquier momento. Se debe evitar utilizarlo en aplicaciones normales."</string>
+    <string name="permlab_signalPersistentProcesses">"enviar señales de Linux a las aplicaciones"</string>
+    <string name="permdesc_signalPersistentProcesses">"Admite que la aplicación solicite el envío de la señal suministrada a todos los procesos continuos."</string>
+    <string name="permlab_persistentActivity">"hacer que siempre se ejecute la aplicación"</string>
+    <string name="permdesc_persistentActivity">"Admite una aplicación que hace continuas sus propias partes, de modo que el sistema no puede utilizarla para otras aplicaciones."</string>
+    <string name="permlab_deletePackages">"eliminar aplicaciones"</string>
+    <string name="permdesc_deletePackages">"Admite una aplicación que borra paquetes Android. Las aplicaciones maliciosas pueden utilizarlo para eliminar aplicaciones importantes."</string>
+    <string name="permlab_clearAppUserData">"eliminar los datos de otras aplicaciones"</string>
+    <string name="permdesc_clearAppUserData">"Admite una aplicación que borra los datos del usuario."</string>
+    <string name="permlab_deleteCacheFiles">"eliminar las memorias caché de otras aplicaciones"</string>
+    <string name="permdesc_deleteCacheFiles">"Admite una aplicación que borra archivos de memoria caché."</string>
+    <string name="permlab_getPackageSize">"medir el espacio de almacenamiento de la aplicación"</string>
+    <string name="permdesc_getPackageSize">"Admite una aplicación que recupera su código, datos y tamaños de memoria caché"</string>
+    <string name="permlab_installPackages">"instalar aplicaciones directamente"</string>
+    <string name="permdesc_installPackages">"Admite una aplicación que instala paquetes de Android nuevos o actualizados. Las aplicaciones maliciosas pueden utilizarlo para agregar aplicaciones nuevas con permisos arbitrariamente potentes."</string>
+    <string name="permlab_clearAppCache">"eliminar todos los datos de memoria caché de la aplicación"</string>
+    <string name="permdesc_clearAppCache">"Admite una aplicación que libera espacio de almacenamiento en el teléfono al eliminar archivos del directorio de memoria caché de la aplicación. En general, el acceso es muy restringido para el proceso del sistema."</string>
+    <string name="permlab_readLogs">"leer archivos de registro del sistema"</string>
+    <string name="permdesc_readLogs">"Admite una aplicación que lee diversos archivos de registro del sistema. Esto le permite descubrir información general sobre lo que haces con el teléfono, pero no debe contener información personal ni privada."</string>
+    <string name="permlab_diagnostic">"leer y escribir a recursos dentro del grupo de diagnóstico"</string>
+    <string name="permdesc_diagnostic">"Admite una aplicación que lee y escribe a cualquier recurso dentro del grupo de diagnóstico; por ejemplo, archivos con /dev. Esto puede afectar potencialmente la estabilidad y la seguridad del sistema. Debe utilizarlo SÓLO el fabricante o el operador en los diagnósticos específicos del hardware."</string>
+    <string name="permlab_changeComponentState">"activar o desactivar componentes de la aplicación"</string>
+    <string name="permdesc_changeComponentState">"Admite una aplicación que cambia si se debe activar o no un componente de otra aplicación. Las aplicaciones maliciosas pueden utilizarlo para desactivar funciones importantes del teléfono. Se debe tener cuidado con el permiso, ya que es posible que los componentes de la aplicación alcancen un estado inservible, imperfecto e inestable."</string>
+    <string name="permlab_setPreferredApplications">"establecer aplicaciones preferidas"</string>
+    <string name="permdesc_setPreferredApplications">"Admite una aplicación que modifica tus aplicaciones preferidas. Puede admitir aplicaciones maliciosas que cambien silenciosamente las aplicaciones que se ejecutan e imiten tus aplicaciones existentes para recopilar tus datos privados."</string>
+    <string name="permlab_writeSettings">"modificar la configuración global del sistema"</string>
+    <string name="permdesc_writeSettings">"Admite una aplicación que modifica los datos de configuración del sistema. Las aplicaciones maliciosas pueden corromper la configuración de tu sistema."</string>
+    <string name="permlab_writeSecureSettings">"modificar la configuración segura del sistema"</string>
+    <string name="permdesc_writeSecureSettings">"Admite una aplicación que modifica los datos de la configuración segura de los sistemas. Las aplicaciones normales no deben utilizarlo."</string>
+    <string name="permlab_writeGservices">"modificar el mapa de servicios de Google"</string>
+    <string name="permdesc_writeGservices">"Admite una aplicación que modifica el mapa de servicios de Google. Las aplicaciones normales no deben utilizarlo."</string>
+    <string name="permlab_receiveBootCompleted">"iniciar automáticamente durante la inicialización"</string>
+    <string name="permdesc_receiveBootCompleted">"Admite una aplicación que se inicia cuando el sistema haya finalizado la inicialización. Esto puede ocasionar que se demore más tiempo en inicializar el teléfono y que la aplicación retarde el funcionamiento total del teléfono al estar en ejecución constante."</string>
+    <string name="permlab_broadcastSticky">"enviar emisiones pegajosas"</string>
+    <string name="permdesc_broadcastSticky">"Admite una aplicación que envía emisiones pegajosas, las cuales permanecen luego de que finaliza la emisión. Las aplicaciones maliciosas pueden hacer lento e inestable al teléfono, ya que ocasiona que utilice demasiada memoria."</string>
+    <string name="permlab_readContacts">"leer datos de contacto"</string>
+    <string name="permdesc_readContacts">"Admite una aplicación que lee todos los datos de (direcciones) de contactos almacenados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para enviar tus eventos de calendario a otras personas."</string>
+    <string name="permlab_writeContacts">"escribir datos de contacto"</string>
+    <string name="permdesc_writeContacts">"Admite una aplicación que modifica los datos de (dirección de) contacto guardados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para borrar o modificar los datos de contacto."</string>
+    <string name="permlab_writeOwnerData">"escribir datos del propietario"</string>
+    <string name="permdesc_writeOwnerData">"Admite una aplicación que modifica los datos del propietario del teléfono guardados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para borrar o modificar los datos del propietario."</string>
+    <string name="permlab_readOwnerData">"leer datos del propietario"</string>
+    <string name="permdesc_readOwnerData">"Admite una aplicación que lee los datos del propietario del teléfono guardados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para leer los datos del propietario del teléfono."</string>
+    <string name="permlab_readCalendar">"leer datos de calendario"</string>
+    <string name="permdesc_readCalendar">"Admite una aplicación que lee todos los eventos de calendario almacenados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para enviar tus eventos de calendario a otras personas."</string>
+    <string name="permlab_writeCalendar">"escribir datos de calendario"</string>
+    <string name="permdesc_writeCalendar">"Admite una aplicación que modifica los eventos de calendario guardados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para borrar o modificar tus datos de calendario."</string>
+    <string name="permlab_accessMockLocation">"crear fuentes de ubicación de prueba"</string>
+    <string name="permdesc_accessMockLocation">"Crea fuentes de ubicación de prueba. Las aplicaciones maliciosas pueden utilizarlo para invalidar la ubicación o el estado que arrojen las fuentes de ubicación real, como GPS o proveedores de red."</string>
+    <string name="permlab_accessLocationExtraCommands">"acceder a comandos adicionales del proveedor del lugar"</string>
+    <string name="permdesc_accessLocationExtraCommands">"Accede a comandos adicionales del proveedor del lugar. Las aplicaciones maliciosas pueden utilizarlo para interferir en la operación del GPS u otras fuentes de ubicación."</string>
+    <string name="permlab_accessFineLocation">"ubicación precisa (GPS)"</string>
+    <string name="permdesc_accessFineLocation">"Accede a las fuentes de ubicación precisa, como el Sistema de posicionamiento global en el teléfono, si está disponible. Las aplicaciones maliciosas pueden utilizarlo para determinar donde te encuentras y puede consumir energía adicional de la batería."</string>
+    <string name="permlab_accessCoarseLocation">"ubicación aproximada (basada en la red)"</string>
+    <string name="permdesc_accessCoarseLocation">"Accede a las fuentes de ubicación aproximada, como la base de datos de la red de celulares, para determinar una ubicación telefónica aproximada, si está disponible. Las aplicaciones maliciosas pueden utilizarlo para determinar aproximadamente donde te encuentras."</string>
+    <string name="permlab_accessSurfaceFlinger">"acceder a SurfaceFlinger"</string>
+    <string name="permdesc_accessSurfaceFlinger">"Admite que la aplicación utilice funciones de bajo nivel de SurfaceFlinger."</string>
+    <string name="permlab_readFrameBuffer">"leer el búfer de tramas"</string>
+    <string name="permdesc_readFrameBuffer">"Admite que la aplicación que se utilizará lea el contenido del búfer de tramas."</string>
+    <string name="permlab_modifyAudioSettings">"cambiar tu configuración de audio"</string>
+    <string name="permdesc_modifyAudioSettings">"Admite que la aplicación modifique la configuración global de audio, como el volumen y el enrutamiento."</string>
+    <string name="permlab_recordAudio">"grabar audio"</string>
+    <string name="permdesc_recordAudio">"Admite que la aplicación acceda a la ruta de grabación de audio."</string>
+    <string name="permlab_camera">"tomar fotografías"</string>
+    <string name="permdesc_camera">"Admite una aplicación que toma fotografías con la cámara. Esto permite que la aplicación en cualquier momento recopile imágenes que esté viendo la cámara."</string>
+    <string name="permlab_brick">"desactivar teléfono de manera permanente"</string>
+    <string name="permdesc_brick">"Admite que la aplicación desactive todo el teléfono de manera permanente. Esto es muy peligroso."</string>
+    <string name="permlab_reboot">"provocar el reinicio del teléfono"</string>
+    <string name="permdesc_reboot">"Admite que la aplicación provoque que el teléfono se reinicie."</string>
+    <string name="permlab_mount_unmount_filesystems">"montar y desmontar filesystems"</string>
+    <string name="permdesc_mount_unmount_filesystems">"Admite que la aplicación monte y desmonte filesystems para obtener almacenamiento extraíble."</string>
+    <string name="permlab_mount_format_filesystems">"espacio de almacenamiento externo del formato"</string>
+    <string name="permdesc_mount_format_filesystems">"Admite que la aplicación formatee el espacio de almacenamiento extraíble."</string>
+    <string name="permlab_vibrate">"vibrador de control"</string>
+    <string name="permdesc_vibrate">"Admite que la aplicación controle el vibrador."</string>
+    <string name="permlab_flashlight">"controlar linterna"</string>
+    <string name="permdesc_flashlight">"Admite que la aplicación controle la linterna."</string>
+    <string name="permlab_hardware_test">"probar el hardware"</string>
+    <string name="permdesc_hardware_test">"Admite que la aplicación controle diversos periféricos con el fin de probar el hardware."</string>
+    <string name="permlab_callPhone">"llamar directamente a números de teléfono"</string>
+    <string name="permdesc_callPhone">"Admite que la aplicación llame a ciertos números de teléfono sin tu permiso. Las aplicaciones maliciosas pueden ocasionar llamadas imprevistas en tu factura telefónica. Ten en cuenta que esto no admite que la aplicación llame a los números de emergencia."</string>
+    <string name="permlab_callPrivileged">"llamar directamente a cualquier número de teléfono"</string>
+    <string name="permdesc_callPrivileged">"Admite que la aplicación llame a cualquier número de teléfono, incluidos los números de emergencia, sin tu intervención. Las aplicaciones maliciosas pueden realizar llamadas innecesarias e ilegales a los servicios de emergencia."</string>
+    <string name="permlab_locationUpdates">"controlar las notificaciones de actualización de ubicación"</string>
+    <string name="permdesc_locationUpdates">"Permite activar y desactivar las notificaciones de actualización de ubicación de la radio. Las aplicaciones normales no deben utilizarlo."</string>
+    <string name="permlab_checkinProperties">"acceder a las propiedades de protección"</string>
+    <string name="permdesc_checkinProperties">"Admite el acceso de lectura y escritura a las propiedades subidas por el servicio de protección. Las aplicaciones normales no deben utilizarlo."</string>
+    <string name="permlab_bindGadget">"elegir controles"</string>
+    <string name="permdesc_bindGadget">"Admite que la aplicación indique al sistema cuáles controles puede utilizar cada aplicación. Con este permiso, las aplicaciones pueden brindar acceso a los datos personales a otras aplicaciones. Las aplicaciones normales no deben utilizarlo."</string>
+    <string name="permlab_modifyPhoneState">"modificar el estado del teléfono"</string>
+    <string name="permdesc_modifyPhoneState">"Admite que la aplicación controle las funciones telefónicas del dispositivo. Una aplicación con este permiso puede cambiar las redes, encender y apagar la radio del teléfono y funciones similares sin notificarte en ningún momento."</string>
+    <string name="permlab_readPhoneState">"leer estado del teléfono"</string>
+    <string name="permdesc_readPhoneState">"Admite que la aplicación acceda a las funciones telefónicas del dispositivo. Una aplicación con este permiso puede determinar el número de este teléfono, si una llamada está activa, el número al cual está conectado esa llamada y funciones similares."</string>
+    <string name="permlab_wakeLock">"evitar que el teléfono entre en estado de inactividad"</string>
+    <string name="permdesc_wakeLock">"Admite una aplicación que evita que el teléfono entre en estado de inactividad."</string>
+    <string name="permlab_devicePower">"apagar o encender el teléfono"</string>
+    <string name="permdesc_devicePower">"Admite que la aplicación encienda o apague el teléfono."</string>
+    <string name="permlab_factoryTest">"ejecutar en el modo de prueba de fábrica"</string>
+    <string name="permdesc_factoryTest">"Se ejecuta como una prueba de fábrica de bajo nivel que permite un acceso completo al hardware del teléfono. Sólo disponible cuando un teléfono se ejecuta en el modo de prueba de fábrica."</string>
+    <string name="permlab_setWallpaper">"establecer papel tapiz"</string>
+    <string name="permdesc_setWallpaper">"Admite que la aplicación establezca el papel tapiz del sistema."</string>
+    <string name="permlab_setWallpaperHints">"establecer sugerencias de tamaño del papel tapiz"</string>
+    <string name="permdesc_setWallpaperHints">"Admite que la aplicación establezca las sugerencias de tamaño del papel tapiz del sistema."</string>
+    <string name="permlab_masterClear">"restablecer el sistema a las configuraciones predeterminadas de fábrica"</string>
+    <string name="permdesc_masterClear">"Admite una aplicación que restablece el sistema completamente con su configuración de fábrica, y borra todos los datos, las configuraciones y las aplicaciones instaladas."</string>
+    <string name="permlab_setTimeZone">"establecer zona horaria"</string>
+    <string name="permdesc_setTimeZone">"Admite una aplicación que cambia la zona horaria del teléfono."</string>
+    <string name="permlab_getAccounts">"descubrir cuentas conocidas"</string>
+    <string name="permdesc_getAccounts">"Admite una aplicación que obtiene la lista de cuentas conocidas del teléfono."</string>
+    <string name="permlab_accessNetworkState">"ver estado de la red"</string>
+    <string name="permdesc_accessNetworkState">"Admite una aplicación que ve el estado de todas las redes."</string>
+    <string name="permlab_createNetworkSockets">"acceso total a Internet"</string>
+    <string name="permdesc_createNetworkSockets">"Admite una aplicación que crea conectores de red."</string>
+    <string name="permlab_writeApnSettings">"escribir configuración del Nombre del punto de acceso"</string>
+    <string name="permdesc_writeApnSettings">"Admite una aplicación que modifica la configuración de APN, como el proxy y el puerto de cualquier APN."</string>
+    <string name="permlab_changeNetworkState">"cambiar la conectividad de la red"</string>
+    <string name="permdesc_changeNetworkState">"Admite una aplicación que cambia la conectividad de red del estado."</string>
+    <string name="permlab_changeBackgroundDataSetting">"cambiar la configuración del uso de datos del fondo"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Admite una aplicación que cambia la configuración del uso de datos del fondo."</string>
+    <string name="permlab_accessWifiState">"ver el estado de Wi-Fi"</string>
+    <string name="permdesc_accessWifiState">"Admite una aplicación que observa la información sobre el estado de Wi-Fi."</string>
+    <string name="permlab_changeWifiState">"cambiar el estado de Wi-Fi"</string>
+    <string name="permdesc_changeWifiState">"Admite una aplicación que se conecta y desconecta de los puntos de acceso de Wi-Fi y que hace cambios en las redes de Wi-Fi configuradas."</string>
+    <string name="permlab_bluetoothAdmin">"administración de bluetooth"</string>
+    <string name="permdesc_bluetoothAdmin">"Admite una aplicación que configura el teléfono Bluetooth local y descubre y se vincula con dispositivos remotos."</string>
+    <string name="permlab_bluetooth">"crear conexiones de Bluetooth"</string>
+    <string name="permdesc_bluetooth">"Admite una aplicación que ve la configuración del teléfono Bluetooth local, y realiza y acepta conexiones con dispositivos vinculados."</string>
+    <string name="permlab_disableKeyguard">"desactivar el bloqueo"</string>
+    <string name="permdesc_disableKeyguard">"Admite una aplicación que desactiva el bloqueo y cualquier seguridad con contraseña relacionada. Un ejemplo legítimo de esto es el bloqueo desactivado por el teléfono cuando recibe una llamada telefónica entrante, y luego la reactivación del bloqueo cuando finaliza la llamada."</string>
+    <string name="permlab_readSyncSettings">"leer la configuración de sincronización"</string>
+    <string name="permdesc_readSyncSettings">"Admite una aplicación que lee la configuración de sincronización, como si está activada la sincronización para los Contactos."</string>
+    <string name="permlab_writeSyncSettings">"escribir configuración de sincronización"</string>
+    <string name="permdesc_writeSyncSettings">"Admite una aplicación que modifica la configuración de sincronización, como si está activada la sincronización para los Contactos."</string>
+    <string name="permlab_readSyncStats">"leer estadística de sincronización"</string>
+    <string name="permdesc_readSyncStats">"Admite una aplicación que lee la estadística de sincronización; por ejemplo, el historial de sincronizaciones que se han producido."</string>
+    <string name="permlab_subscribedFeedsRead">"leer canales suscritos"</string>
+    <string name="permdesc_subscribedFeedsRead">"Admite una aplicación que obtiene detalles sobre los canales actualmente sincronizados."</string>
+    <string name="permlab_subscribedFeedsWrite">"escribir canales suscritos"</string>
+    <string name="permdesc_subscribedFeedsWrite">"Admite una aplicación que modifica tus canales actualmente sincronizados, lo cual podría permitir que una aplicación maliciosa también lo haga."</string>
+    <string name="permlab_readDictionary">"leer diccionario definido por el usuario"</string>
+    <string name="permdesc_readDictionary">"Admite una aplicación para leer palabras, nombres y frases privadas que posiblemente el usuario haya almacenado en el diccionario del usuario."</string>
+    <string name="permlab_writeDictionary">"escribir al diccionario definido por el usuario"</string>
+    <string name="permdesc_writeDictionary">"Admite una aplicación que escribe palabras nuevas en el diccionario del usuario."</string>
+  <string-array name="phoneTypes">
+    <item>"Página principal"</item>
+    <item>"Celular"</item>
+    <item>"Trabajo"</item>
+    <item>"Fax laboral"</item>
+    <item>"Fax residencial"</item>
+    <item>"Localizador"</item>
+    <item>"Otros"</item>
+    <item>"Personalización"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>"Página principal"</item>
+    <item>"Trabajo"</item>
+    <item>"Otros"</item>
+    <item>"Personalización"</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item>"Página principal"</item>
+    <item>"Trabajo"</item>
+    <item>"Otros"</item>
+    <item>"Personalización"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item>"Página principal"</item>
+    <item>"Trabajo"</item>
+    <item>"Otros"</item>
+    <item>"Personalización"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item>"Trabajo"</item>
+    <item>"Otros"</item>
+    <item>"Personalización"</item>
+  </string-array>
+  <string-array name="imProtocols">
+    <item>"AIM"</item>
+    <item>"Windows Live"</item>
+    <item>"Yahoo"</item>
+    <item>"Skype"</item>
+    <item>"QQ"</item>
+    <item>"Google Talk"</item>
+    <item>"ICQ"</item>
+    <item>"Jabber"</item>
+  </string-array>
+    <string name="keyguard_password_enter_pin_code">"Ingresar el código de PIN"</string>
+    <string name="keyguard_password_wrong_pin_code">"¡Código de PIN incorrecto!"</string>
+    <string name="keyguard_label_text">"Para desbloquear, presiona el menú y luego 0."</string>
+    <string name="emergency_call_dialog_number_for_display">"Número de emergencia"</string>
+    <string name="lockscreen_carrier_default">"(Sin servicio)"</string>
+    <string name="lockscreen_screen_locked">"Pantalla bloqueada."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Presiona el Menú para desbloquear o realizar una llamada de emergencia."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Presionar Menú para desbloquear."</string>
+    <string name="lockscreen_pattern_instructions">"Extraer el patrón para desbloquear"</string>
+    <string name="lockscreen_emergency_call">"Llamada de emergencia"</string>
+    <string name="lockscreen_pattern_correct">"Correcto"</string>
+    <string name="lockscreen_pattern_wrong">"Lo sentimos, vuelve a intentarlo"</string>
+    <string name="lockscreen_plugged_in">"Cargando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_low_battery">"Conecta tu cargador."</string>
+    <string name="lockscreen_missing_sim_message_short">"No hay tarjeta SIM."</string>
+    <string name="lockscreen_missing_sim_message">"No hay tarjeta SIM en el teléfono."</string>
+    <string name="lockscreen_missing_sim_instructions">"Inserta una tarjeta SIM."</string>
+    <string name="lockscreen_network_locked_message">"Red bloqueada"</string>
+    <string name="lockscreen_sim_puk_locked_message">"La tarjeta SIM está bloqueada con PUK."</string>
+    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
+    <skip />
+    <string name="lockscreen_sim_locked_message">"La tarjeta SIM está bloqueada."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message">"Desbloqueando tarjeta SIM…"</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message">"Has extraído incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. "\n\n"Vuelve a intentarlo en <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin">"Has extraído incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. Luego de <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos, se te solicitará que desbloquees tu teléfono al iniciar sesión en Google. "\n\n" Vuelve a intentarlo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown">"Vuelve a intentarlo en <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
+    <string name="lockscreen_forgot_pattern_button_text">"¿Olvidaste el patrón?"</string>
+    <string name="lockscreen_glogin_too_many_attempts">"Demasiados intentos de patrón."</string>
+    <string name="lockscreen_glogin_instructions">"Para desbloquear, regístrate en tu cuenta de Google"</string>
+    <string name="lockscreen_glogin_username_hint">"Nombre de usuario (correo electrónico)"</string>
+    <string name="lockscreen_glogin_password_hint">"Contraseña"</string>
+    <string name="lockscreen_glogin_submit_button">"Inicia sesión"</string>
+    <string name="lockscreen_glogin_invalid_input">"Nombre de usuario o contraseña incorrecta."</string>
+    <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <string name="status_bar_clear_all_button">"Borrar notificaciones"</string>
+    <string name="status_bar_no_notifications_title">"No hay notificaciones"</string>
+    <string name="status_bar_ongoing_events_title">"Continuo"</string>
+    <string name="status_bar_latest_events_title">"Notificaciones"</string>
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="battery_status_charging">"Cargando..."</string>
+    <string name="battery_low_title">"Conecta el cargador"</string>
+    <string name="battery_low_subtitle">"Hay poca batería:"</string>
+    <string name="battery_low_percent_format">"menos de <xliff:g id="NUMBER">%d%%</xliff:g> restante."</string>
+    <string name="factorytest_failed">"Error en la prueba de fábrica"</string>
+    <string name="factorytest_not_system">"La acción FACTORY_TEST se admite solamente en paquetes instalados en /system/app."</string>
+    <string name="factorytest_no_action">"No se ha encontrado ningún paquete que proporcione la acción FACTORY_TEST ."</string>
+    <string name="factorytest_reboot">"Reiniciar"</string>
+    <string name="js_dialog_title">"La página en \"<xliff:g id="TITLE">%s</xliff:g>\" dice:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"¿Deseas salir de esta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Selecciona Aceptar para continuar o Cancelar para permanecer en la página actual."</string>
+    <string name="save_password_label">"Confirmar"</string>
+    <string name="save_password_message">"¿Quieres recordar esta contraseña en el navegador?"</string>
+    <string name="save_password_notnow">"Ahora no."</string>
+    <string name="save_password_remember">"Recuerda"</string>
+    <string name="save_password_never">"Nunca"</string>
+    <string name="open_permission_deny">"No dispones de permiso para abrir esta página."</string>
+    <string name="text_copied">"Texto copiado en el portapapeles."</string>
+    <string name="more_item_label">"Más"</string>
+    <string name="prepend_shortcut_label">"Menú+"</string>
+    <string name="menu_space_shortcut_label">"espacio"</string>
+    <string name="menu_enter_shortcut_label">"ingresar"</string>
+    <string name="menu_delete_shortcut_label">"borrar"</string>
+    <string name="search_go">"Buscar"</string>
+    <string name="oneMonthDurationPast">"hace 1 mes"</string>
+    <string name="beforeOneMonthDurationPast">"Anterior a 1 mes atrás"</string>
+  <plurals name="num_seconds_ago">
+    <item quantity="one">"hace 1 segundo"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> segundos"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one">"hace 1 minuto"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> minutos"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one">"hace 1 hora"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
+  </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one">"ayer"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> días"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one">"en 1 segundo"</item>
+    <item quantity="other">"en <xliff:g id="COUNT">%d</xliff:g> segundos"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one">"en 1 minuto"</item>
+    <item quantity="other">"en <xliff:g id="COUNT">%d</xliff:g> minutos"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one">"en 1 hora"</item>
+    <item quantity="other">"en <xliff:g id="COUNT">%d</xliff:g> horas"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one">"mañana"</item>
+    <item quantity="other">"en <xliff:g id="COUNT">%d</xliff:g> días"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"hace 1 segundo"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> segundos"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"hace 1 min"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> minutos"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"hace 1 hora"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"ayer"</item>
+    <item quantity="other">"hace <xliff:g id="COUNT">%d</xliff:g> días"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"en 1 segundo"</item>
+    <item quantity="other">"en <xliff:g id="COUNT">%d</xliff:g> segundos"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"en 1 minuto"</item>
+    <item quantity="other">"en <xliff:g id="COUNT">%d</xliff:g> minutos"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"en 1 hora"</item>
+    <item quantity="other">"en <xliff:g id="COUNT">%d</xliff:g> horas"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"mañana"</item>
+    <item quantity="other">"en <xliff:g id="COUNT">%d</xliff:g> días"</item>
+  </plurals>
+    <string name="preposition_for_date">"en %s"</string>
+    <string name="preposition_for_time">"en %s"</string>
+    <string name="preposition_for_year">"en %s"</string>
+    <string name="day">"día"</string>
+    <string name="days">"días"</string>
+    <string name="hour">"hora"</string>
+    <string name="hours">"horas"</string>
+    <string name="minute">"min"</string>
+    <string name="minutes">"mins"</string>
+    <string name="second">"segundo"</string>
+    <string name="seconds">"segundos"</string>
+    <string name="week">"semana"</string>
+    <string name="weeks">"semanas"</string>
+    <string name="year">"año"</string>
+    <string name="years">"años"</string>
+    <string name="every_weekday">"Los días de semana (lunes a viernes)"</string>
+    <string name="daily">"Diariamente"</string>
+    <string name="weekly">"Semanalmente el día <xliff:g id="DAY">%s</xliff:g>"</string>
+    <string name="monthly">"Mensual"</string>
+    <string name="yearly">"Anual"</string>
+    <string name="VideoView_error_title">"No se puede reproducir el video"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback">"Lo sentimos, este video no es válido para las transmisiones a este dispositivo."</string>
+    <string name="VideoView_error_text_unknown">"Lo sentimos, no se puede reproducir este video."</string>
+    <string name="VideoView_error_button">"Aceptar"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="noon">"mediodía"</string>
+    <string name="Noon">"Mediodía"</string>
+    <string name="midnight">"medianoche"</string>
+    <string name="Midnight">"Medianoche"</string>
+    <!-- no translation found for month (7026169712234774086) -->
+    <skip />
+    <!-- no translation found for abbrev_month (3131032032850777433) -->
+    <skip />
+    <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
+    <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
+    <string name="selectAll">"Seleccionar todos"</string>
+    <string name="selectText">"Seleccionar texto"</string>
+    <string name="stopSelectingText">"Detener la selección de texto"</string>
+    <string name="cut">"Cortar"</string>
+    <string name="cutAll">"Cortar llamada"</string>
+    <string name="copy">"Copiar"</string>
+    <string name="copyAll">"Copiar todo"</string>
+    <string name="paste">"Pegar"</string>
+    <string name="copyUrl">"Copiar URL"</string>
+    <string name="inputMethod">"Método de entrada"</string>
+    <string name="addToDictionary">"Agregar \"%s\" al diccionario"</string>
+    <string name="editTextMenuTitle">"Editar texto"</string>
+    <string name="low_internal_storage_view_title">"Poco espacio de almacenamiento"</string>
+    <string name="low_internal_storage_view_text">"Hay poco espacio de almacenamiento en el teléfono."</string>
+    <string name="ok">"Aceptar"</string>
+    <string name="cancel">"Cancelar"</string>
+    <string name="yes">"Aceptar"</string>
+    <string name="no">"Cancelar"</string>
+    <string name="dialog_alert_title">"Atención"</string>
+    <string name="capital_on">"Encendido"</string>
+    <string name="capital_off">"APAGADO"</string>
+    <string name="whichApplication">"Completar la acción mediante"</string>
+    <string name="alwaysUse">"Utilizar de manera predeterminada en esta acción."</string>
+    <string name="clearDefaultHintMsg">"Borrar la predeterminación en Configuración de la página principal &gt; Aplicaciones &gt; Administrar aplicaciones."</string>
+    <string name="chooseActivity">"Seleccionar una acción"</string>
+    <string name="noApplications">"Ninguna aplicación puede realizar esta acción."</string>
+    <string name="aerr_title">"¡Lo sentimos!"</string>
+    <string name="aerr_application">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) se ha detenido de forma imprevista. Vuelve a intentarlo."</string>
+    <string name="aerr_process">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> se ha detenido de forma imprevista. Vuelve a intentarlo."</string>
+    <string name="anr_title">"¡Lo sentimos!"</string>
+    <string name="anr_activity_application">"La actividad <xliff:g id="ACTIVITY">%1$s</xliff:g> (en la aplicación <xliff:g id="APPLICATION">%2$s</xliff:g>) no responde."</string>
+    <string name="anr_activity_process">"La actividad <xliff:g id="ACTIVITY">%1$s</xliff:g> (en proceso <xliff:g id="PROCESS">%2$s</xliff:g>) no responde."</string>
+    <string name="anr_application_process">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (en proceso <xliff:g id="PROCESS">%2$s</xliff:g>) no responde."</string>
+    <string name="anr_process">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> no responde."</string>
+    <string name="force_close">"Provocar acercamiento"</string>
+    <string name="wait">"Espera"</string>
+    <string name="debug">"Depurar"</string>
+    <string name="sendText">"Selecciona una acción para el texto"</string>
+    <string name="volume_ringtone">"Volumen del timbre"</string>
+    <string name="volume_music">"Volumen de los medios"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"Reproduciendo a través de Bluetooth"</string>
+    <string name="volume_call">"Volumen de llamadas entrantes"</string>
+    <string name="volume_bluetooth_call">"Volumen en llamada de Bluetooth"</string>
+    <string name="volume_alarm">"Volumen de la alarma"</string>
+    <string name="volume_notification">"Volumen de notificación"</string>
+    <string name="volume_unknown">"Volumen"</string>
+    <string name="ringtone_default">"Tono de llamada predeterminado"</string>
+    <string name="ringtone_default_with_actual">"Tono de llamada predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_silent">"Silencioso"</string>
+    <string name="ringtone_picker_title">"Tonos de llamada"</string>
+    <string name="ringtone_unknown">"Tono de llamada desconocido"</string>
+  <plurals name="wifi_available">
+    <item quantity="one">"Red disponible de Wi-Fi"</item>
+    <item quantity="other">"redes disponibles de Wi-Fi"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one">"Abrir red disponible de Wi-Fi"</item>
+    <item quantity="other">"Abrir redes disponibles de Wi-Fi"</item>
+  </plurals>
+    <string name="select_character">"Insertar caracteres"</string>
+    <string name="sms_control_default_app_name">"Aplicación desconocida"</string>
+    <string name="sms_control_title">"Enviando mensajes SMS"</string>
+    <string name="sms_control_message">"Se envía una gran cantidad de mensajes SMS. Selecciona \"Aceptar\" para continuar o \"Cancelar\" para detener el envío."</string>
+    <string name="sms_control_yes">"Aceptar"</string>
+    <string name="sms_control_no">"Cancelar"</string>
+    <string name="date_time_set">"Establecer"</string>
+    <string name="default_permission_group">"Predeterminado"</string>
+    <string name="no_permissions">"No se requieren permisos"</string>
+    <string name="perms_hide"><b>"Ocultar"</b></string>
+    <string name="perms_show_all"><b>"Mostrar todos"</b></string>
+    <string name="googlewebcontenthelper_loading">"Cargando…"</string>
+    <string name="usb_storage_title">"conectado al USB"</string>
+    <string name="usb_storage_message">"Has conectado tu teléfono a tu computadora a través de USB. Selecciona \"Montar\" si deseas copiar archivos entre tu computadora y la tarjeta SD de tu teléfono."</string>
+    <string name="usb_storage_button_mount">"Montar"</string>
+    <string name="usb_storage_button_unmount">"No montar"</string>
+    <string name="usb_storage_error_message">"Hay un problema para utilizar tu tarjeta SD en el almacenamiento USB."</string>
+    <string name="usb_storage_notification_title">"conectado al USB"</string>
+    <string name="usb_storage_notification_message">"Seleccionar para copiar archivos desde o hacia tu computadora."</string>
+    <string name="usb_storage_stop_notification_title">"Apagar el almacenamiento USB"</string>
+    <string name="usb_storage_stop_notification_message">"Seleccionar para desactivar el almacenamiento USB."</string>
+    <string name="usb_storage_stop_title">"Apagar el almacenamiento USB"</string>
+    <string name="usb_storage_stop_message">"Antes de desactivar el almacenamiento USB, asegúrate de haberlo desmontado en el servidor USB al seleccionar \"Desactivar\"."</string>
+    <string name="usb_storage_stop_button_mount">"Apagar"</string>
+    <string name="usb_storage_stop_button_unmount">"Cancelar"</string>
+    <string name="usb_storage_stop_error_message">"Se ha producido un problema al desactivar el almacenamiento USB. Verifica para asegurarte de haber desmontado el servidor USB, luego vuelve a intentarlo."</string>
+    <string name="extmedia_format_title">"Formatear tarjeta SD"</string>
+    <string name="extmedia_format_message">"¿Estás seguro de que quieres formatear la tarjeta SD? Se perderán todos los datos de tu tarjeta."</string>
+    <string name="extmedia_format_button_format">"Formato"</string>
+    <string name="select_input_method">"Seleccionar método de entrada"</string>
+    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><u>"candidatos"</u></string>
+    <string name="ext_media_checking_notification_title">"Preparación de la tarjeta SD"</string>
+    <string name="ext_media_checking_notification_message">"Verificando errores"</string>
+    <string name="ext_media_nofs_notification_title">"Tarjeta SD vacía"</string>
+    <string name="ext_media_nofs_notification_message">"La tarjeta SD está vacía o utiliza un filesystem no admitido."</string>
+    <string name="ext_media_unmountable_notification_title">"Tarjeta SD dañada"</string>
+    <string name="ext_media_unmountable_notification_message">"La tarjeta SD está dañada. Es posible que debas reformatear tu tarjeta."</string>
+    <string name="ext_media_badremoval_notification_title">"Tarjeta SD extraída de forma imprevista"</string>
+    <string name="ext_media_badremoval_notification_message">"Desmontar la tarjeta SD antes de extraerla para evitar la pérdida de datos."</string>
+    <string name="ext_media_safe_unmount_notification_title">"Tarjeta SD fácil de extraer"</string>
+    <string name="ext_media_safe_unmount_notification_message">"La tarjeta SD ahora se puede extraer de manera segura."</string>
+    <string name="ext_media_nomedia_notification_title">"Tarjeta SD extraída"</string>
+    <string name="ext_media_nomedia_notification_message">"Se ha extraído la SD. Inserta una nueva tarjeta SD para aumentar el espacio de almacenamiento de tu dispositivo."</string>
+    <string name="activity_list_empty">"No se encontraron actividades coincidentes"</string>
+    <string name="permlab_pkgUsageStats">"actualizar la estadística de uso de los componentes"</string>
+    <string name="permdesc_pkgUsageStats">"Permite la modificación de estadísticas recopiladas sobre el uso de componentes. Las aplicaciones normales no deben utilizarlo."</string>
+    <string name="tutorial_double_tap_to_zoom_message_short">"Presiona dos veces para obtener el control del zoom"</string>
+    <string name="gadget_host_error_inflating">"Error al aumentar el control"</string>
+    <string name="ime_action_go">"Ir"</string>
+    <string name="ime_action_search">"Buscar"</string>
+    <string name="ime_action_send">"Enviar"</string>
+    <string name="ime_action_next">"Siguiente"</string>
+    <string name="ime_action_done">"Finalizado"</string>
+    <string name="ime_action_default">"Ejecutar"</string>
+    <!-- no translation found for dial_number_using (5789176425167573586) -->
+    <skip />
+    <!-- no translation found for create_contact_using (4947405226788104538) -->
+    <skip />
+</resources>

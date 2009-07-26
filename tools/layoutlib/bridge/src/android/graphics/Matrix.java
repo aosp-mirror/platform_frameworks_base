@@ -24,8 +24,8 @@ import java.awt.geom.AffineTransform;
  */
 public class Matrix extends _Original_Matrix {
 
-    float mValues[] = new float[9]; 
-    
+    float mValues[] = new float[9];
+
     /**
      * Create an identity matrix
      */
@@ -40,7 +40,7 @@ public class Matrix extends _Original_Matrix {
     public Matrix(Matrix src) {
         set(src);
     }
-    
+
     /**
      * Creates a Matrix object from the float array. The array becomes the internal storage
      * of the object.
@@ -50,14 +50,14 @@ public class Matrix extends _Original_Matrix {
         assert data.length != 9;
         mValues = data;
     }
-    
+
     @Override
     public void finalize() throws Throwable {
         // pass
     }
-    
+
     //---------- Custom Methods
-    
+
     /**
      * Adds the given transformation to the current Matrix
      * <p/>This in effect does this = this*matrix
@@ -65,17 +65,17 @@ public class Matrix extends _Original_Matrix {
      */
     private void addTransform(float[] matrix) {
         float[] tmp = new float[9];
-        
-        // first row 
+
+        // first row
         tmp[0] = matrix[0] * mValues[0] + matrix[1] * mValues[3] + matrix[2] * mValues[6];
         tmp[1] = matrix[0] * mValues[1] + matrix[1] * mValues[4] + matrix[2] * mValues[7];
         tmp[2] = matrix[0] * mValues[2] + matrix[1] * mValues[5] + matrix[2] * mValues[8];
-        
+
         // 2nd row
         tmp[3] = matrix[3] * mValues[0] + matrix[4] * mValues[3] + matrix[5] * mValues[6];
         tmp[4] = matrix[3] * mValues[1] + matrix[4] * mValues[4] + matrix[5] * mValues[7];
         tmp[5] = matrix[3] * mValues[2] + matrix[4] * mValues[5] + matrix[5] * mValues[8];
-        
+
         // 3rd row
         tmp[6] = matrix[6] * mValues[0] + matrix[7] * mValues[3] + matrix[8] * mValues[6];
         tmp[7] = matrix[6] * mValues[1] + matrix[7] * mValues[4] + matrix[8] * mValues[7];
@@ -84,16 +84,16 @@ public class Matrix extends _Original_Matrix {
         // copy the result over to mValues
         mValues = tmp;
     }
-    
+
     public AffineTransform getTransform() {
         return new AffineTransform(mValues[0], mValues[1], mValues[2],
                 mValues[3], mValues[4], mValues[5]);
     }
-    
+
     public boolean hasPerspective() {
         return (mValues[6] != 0 || mValues[7] != 0 || mValues[8] != 1);
     }
-    
+
     //----------
 
     /**
@@ -109,7 +109,7 @@ public class Matrix extends _Original_Matrix {
                 }
             }
         }
-        
+
         return true;
     }
 
@@ -122,7 +122,7 @@ public class Matrix extends _Original_Matrix {
     public boolean rectStaysRect() {
         return (computeTypeMask() & kRectStaysRect_Mask) != 0;
     }
-    
+
     /**
      * (deep) copy the src matrix into this matrix. If src is null, reset this
      * matrix to the identity matrix.
@@ -151,10 +151,10 @@ public class Matrix extends _Original_Matrix {
                     return false;
                 }
             }
-            
+
             return true;
         }
-        
+
         return false;
     }
 
@@ -179,7 +179,7 @@ public class Matrix extends _Original_Matrix {
         mValues[5] = dy;
         mValues[6] = 0;
         mValues[7] = 0;
-        mValues[7] = 1;
+        mValues[8] = 1;
     }
 
     /**
@@ -200,7 +200,7 @@ public class Matrix extends _Original_Matrix {
         mValues[5] = -py;
         mValues[6] = 0;
         mValues[7] = 0;
-        mValues[7] = 1;
+        mValues[8] = 1;
 
         // scale
         addTransform(new float[] { sx, 0, 0, 0, sy, 0, 0, 0, 1 });
@@ -219,7 +219,7 @@ public class Matrix extends _Original_Matrix {
         mValues[5] = 0;
         mValues[6] = 0;
         mValues[7] = 0;
-        mValues[7] = 1;
+        mValues[8] = 1;
     }
 
     /**
@@ -240,13 +240,13 @@ public class Matrix extends _Original_Matrix {
         mValues[5] = -py;
         mValues[6] = 0;
         mValues[7] = 0;
-        mValues[7] = 1;
+        mValues[8] = 1;
 
         // scale
         double rad = Math.toRadians(degrees);
         float cos = (float)Math.cos(rad);
         float sin = (float)Math.sin(rad);
-        addTransform(new float[] { cos, -sin, 0, sin, cos, 0, 0, 0, 1 }); 
+        addTransform(new float[] { cos, -sin, 0, sin, cos, 0, 0, 0, 1 });
         // translate back the pivot
         addTransform(new float[] { 1, 0, px, 0, 1, py, 0, 0, 1 });
     }
@@ -268,7 +268,7 @@ public class Matrix extends _Original_Matrix {
         mValues[5] = 0;
         mValues[6] = 0;
         mValues[7] = 0;
-        mValues[7] = 1;
+        mValues[8] = 1;
     }
 
     /**
@@ -289,10 +289,10 @@ public class Matrix extends _Original_Matrix {
         mValues[5] = -py;
         mValues[6] = 0;
         mValues[7] = 0;
-        mValues[7] = 1;
+        mValues[8] = 1;
 
         // scale
-        addTransform(new float[] { cosValue, -sinValue, 0, sinValue, cosValue, 0, 0, 0, 1 }); 
+        addTransform(new float[] { cosValue, -sinValue, 0, sinValue, cosValue, 0, 0, 0, 1 });
         // translate back the pivot
         addTransform(new float[] { 1, 0, px, 0, 1, py, 0, 0, 1 });
     }
@@ -308,7 +308,7 @@ public class Matrix extends _Original_Matrix {
         mValues[5] = 0;
         mValues[6] = 0;
         mValues[7] = 0;
-        mValues[7] = 1;
+        mValues[8] = 1;
     }
 
     /**
@@ -329,7 +329,7 @@ public class Matrix extends _Original_Matrix {
         mValues[5] = -py;
         mValues[6] = 0;
         mValues[7] = 0;
-        mValues[7] = 1;
+        mValues[8] = 1;
 
         // scale
         addTransform(new float[] { 1, kx, 0, ky, 1, 0, 0, 0, 1 });
@@ -348,7 +348,7 @@ public class Matrix extends _Original_Matrix {
         mValues[5] = 0;
         mValues[6] = 0;
         mValues[7] = 0;
-        mValues[7] = 1;
+        mValues[8] = 1;
     }
 
     /**
@@ -366,10 +366,10 @@ public class Matrix extends _Original_Matrix {
             tmp.addTransform(a.mValues);
             set(tmp);
         }
-        
+
         return true;
     }
-    
+
     @Override
     public boolean setConcat(_Original_Matrix a, _Original_Matrix b) {
         throw new UnsupportedOperationException("CALL TO PARENT FORBIDDEN");
@@ -384,7 +384,7 @@ public class Matrix extends _Original_Matrix {
         // create a matrix that will be multiply by this
         Matrix m = new Matrix(new float[] { 1, 0, dx, 0, 1, dy, 0, 0, 1 });
         m.addTransform(this.mValues);
-        
+
         System.arraycopy(m.mValues, 0, mValues, 0, 9);
         return true;
     }
@@ -399,7 +399,7 @@ public class Matrix extends _Original_Matrix {
         m.setScale(sx, sy, px, py);
         m.addTransform(mValues);
         set(m);
-        
+
         return true;
     }
 
@@ -413,7 +413,7 @@ public class Matrix extends _Original_Matrix {
         m.setScale(sx, sy);
         m.addTransform(mValues);
         set(m);
-        
+
         return true;
     }
 
@@ -427,7 +427,7 @@ public class Matrix extends _Original_Matrix {
         m.setRotate(degrees, px, py);
         m.addTransform(mValues);
         set(m);
-        
+
         return true;
     }
 
@@ -441,7 +441,7 @@ public class Matrix extends _Original_Matrix {
         m.setRotate(degrees);
         m.addTransform(mValues);
         set(m);
-        
+
         return true;
     }
 
@@ -455,7 +455,7 @@ public class Matrix extends _Original_Matrix {
         m.setSkew(kx, ky, px, py);
         m.addTransform(mValues);
         set(m);
-        
+
         return true;
     }
 
@@ -469,7 +469,7 @@ public class Matrix extends _Original_Matrix {
         m.setSkew(kx, ky);
         m.addTransform(mValues);
         set(m);
-        
+
         return true;
     }
 
@@ -481,10 +481,10 @@ public class Matrix extends _Original_Matrix {
         Matrix m = new Matrix(other);
         other.addTransform(mValues);
         set(m);
-        
+
         return true;
     }
-    
+
     @Override
     public boolean preConcat(_Original_Matrix other) {
         throw new UnsupportedOperationException("CALL TO PARENT FORBIDDEN");
@@ -513,7 +513,7 @@ public class Matrix extends _Original_Matrix {
         addTransform(new float[] { sx, 0, 0, 0, sy, 0, 0, 0, 1 });
         // translate back the pivot
         addTransform(new float[] { 1, 0, px, 0, 1, py, 0, 0, 1 });
-        
+
         return true;
     }
 
@@ -540,10 +540,10 @@ public class Matrix extends _Original_Matrix {
         double rad = Math.toRadians(degrees);
         float cos = (float)Math.cos(rad);
         float sin = (float)Math.sin(rad);
-        addTransform(new float[] { cos, -sin, 0, sin, cos, 0, 0, 0, 1 }); 
+        addTransform(new float[] { cos, -sin, 0, sin, cos, 0, 0, 0, 1 });
         // translate back the pivot
         addTransform(new float[] { 1, 0, px, 0, 1, py, 0, 0, 1 });
-        
+
         return true;
     }
 
@@ -557,7 +557,7 @@ public class Matrix extends _Original_Matrix {
         float cos = (float)Math.cos(rad);
         float sin = (float)Math.sin(rad);
         addTransform(new float[] { cos, -sin, 0, sin, cos, 0, 0, 0, 1 });
-        
+
         return true;
     }
 
@@ -574,7 +574,7 @@ public class Matrix extends _Original_Matrix {
         addTransform(new float[] { 1, kx, 0, ky, 1, 0, 0, 0, 1 });
         // translate back the pivot
         addTransform(new float[] { 1, 0, px, 0, 1, py, 0, 0, 1 });
-        
+
         return true;
     }
 
@@ -585,7 +585,7 @@ public class Matrix extends _Original_Matrix {
     @Override
     public boolean postSkew(float kx, float ky) {
         addTransform(new float[] { 1, kx, 0, ky, 1, 0, 0, 0, 1 });
-        
+
         return true;
     }
 
@@ -595,7 +595,7 @@ public class Matrix extends _Original_Matrix {
      */
     public boolean postConcat(Matrix other) {
         addTransform(other.mValues);
-        
+
         return true;
     }
 
@@ -603,7 +603,7 @@ public class Matrix extends _Original_Matrix {
     public boolean postConcat(_Original_Matrix other) {
         throw new UnsupportedOperationException("CALL TO PARENT FORBIDDEN");
     }
-    
+
     /** Controlls how the src rect should align into the dst rect for
         setRectToRect().
     */
@@ -634,7 +634,7 @@ public class Matrix extends _Original_Matrix {
          */
         END     (3);
 
-        // the native values must match those in SkMatrix.h 
+        // the native values must match those in SkMatrix.h
         ScaleToFit(int nativeInt) {
             this.nativeInt = nativeInt;
         }
@@ -655,7 +655,7 @@ public class Matrix extends _Original_Matrix {
         if (dst == null || src == null) {
             throw new NullPointerException();
         }
-        
+
         if (src.isEmpty()) {
             reset();
             return false;
@@ -689,7 +689,7 @@ public class Matrix extends _Original_Matrix {
                 } else {
                     diff = dst.height() - src.height() * sy;
                 }
-                
+
                 if (stf == ScaleToFit.CENTER) {
                     diff = diff / 2;
                 }
@@ -712,12 +712,12 @@ public class Matrix extends _Original_Matrix {
         mValues[8] = 1;
         return true;
     }
-    
+
     @Override
     public boolean setRectToRect(RectF src, RectF dst, _Original_Matrix.ScaleToFit stf) {
         throw new UnsupportedOperationException("CALL TO PARENT FORBIDDEN");
     }
-    
+
     /**
      * Set the matrix such that the specified src points would map to the
      * specified dst points. The "points" are represented as an array of floats,
@@ -749,7 +749,7 @@ public class Matrix extends _Original_Matrix {
     public boolean invert(Matrix inverse) {
         throw new UnsupportedOperationException("STUB NEEDED");
     }
-    
+
     @Override
     public boolean invert(_Original_Matrix inverse) {
         throw new UnsupportedOperationException("CALL TO PARENT FORBIDDEN");
@@ -772,7 +772,7 @@ public class Matrix extends _Original_Matrix {
         checkPointArrays(src, srcIndex, dst, dstIndex, pointCount);
         throw new UnsupportedOperationException("STUB NEEDED");
     }
-    
+
     /**
     * Apply this matrix to the array of 2D vectors specified by src, and write
      * the transformed vectors into the array of vectors specified by dst. The
@@ -790,7 +790,7 @@ public class Matrix extends _Original_Matrix {
         checkPointArrays(src, srcIndex, dst, dstIndex, vectorCount);
         throw new UnsupportedOperationException("STUB NEEDED");
     }
-    
+
     /**
      * Apply this matrix to the array of 2D points specified by src, and write
      * the transformed points into the array of points specified by dst. The
@@ -883,7 +883,7 @@ public class Matrix extends _Original_Matrix {
     public float mapRadius(float radius) {
         throw new UnsupportedOperationException("STUB NEEDED");
     }
-    
+
     /** Copy 9 values from the matrix into the array.
     */
     @Override
@@ -907,7 +907,7 @@ public class Matrix extends _Original_Matrix {
         }
         System.arraycopy(values, 0, mValues, 0, mValues.length);
     }
-    
+
     @SuppressWarnings("unused")
     private final static int kIdentity_Mask      = 0;
     private final static int kTranslate_Mask     = 0x01;  //!< set if the matrix has translation
@@ -917,7 +917,7 @@ public class Matrix extends _Original_Matrix {
     private final static int kRectStaysRect_Mask = 0x10;
     @SuppressWarnings("unused")
     private final static int kUnknown_Mask       = 0x80;
-    
+
     @SuppressWarnings("unused")
     private final static int kAllMasks           = kTranslate_Mask |
                                                      kScale_Mask |
@@ -942,43 +942,43 @@ public class Matrix extends _Original_Matrix {
         if (mValues[6] != 0. || mValues[7] != 0. || mValues[8] != 1.) {
             mask |= kPerspective_Mask;
         }
-        
+
         if (mValues[2] != 0. || mValues[5] != 0.) {
             mask |= kTranslate_Mask;
         }
-    
+
         float m00 = mValues[0];
         float m01 = mValues[1];
         float m10 = mValues[3];
         float m11 = mValues[4];
-        
+
         if (m01 != 0. || m10 != 0.) {
             mask |= kAffine_Mask;
         }
-    
+
         if (m00 != 1. || m11 != 1.) {
             mask |= kScale_Mask;
         }
-        
+
         if ((mask & kPerspective_Mask) == 0) {
             // map non-zero to 1
             int im00 = m00 != 0 ? 1 : 0;
             int im01 = m01 != 0 ? 1 : 0;
             int im10 = m10 != 0 ? 1 : 0;
             int im11 = m11 != 0 ? 1 : 0;
-            
+
             // record if the (p)rimary and (s)econdary diagonals are all 0 or
             // all non-zero (answer is 0 or 1)
             int dp0 = (im00 | im11) ^ 1;  // true if both are 0
             int dp1 = im00 & im11;        // true if both are 1
             int ds0 = (im01 | im10) ^ 1;  // true if both are 0
             int ds1 = im01 & im10;        // true if both are 1
-            
+
             // return 1 if primary is 1 and secondary is 0 or
             // primary is 0 and secondary is 1
             mask |= ((dp0 & ds1) | (dp1 & ds0)) << kRectStaysRect_Shift;
         }
-    
+
         return mask;
     }
 }

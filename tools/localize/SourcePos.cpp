@@ -1,6 +1,7 @@
 #include "SourcePos.h"
 
 #include <stdarg.h>
+#include <cstdio>
 #include <set>
 #include <cstdio>
 

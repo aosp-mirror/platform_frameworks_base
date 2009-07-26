@@ -22,7 +22,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 /**
- * A conveience class to aid in implementing an AppWidget provider.
+ * A convenience class to aid in implementing an AppWidget provider.
  * Everything you can do with AppWidgetProvider, you can do with a regular {@link BroadcastReceiver}.
  * AppWidgetProvider merely parses the relevant fields out of the Intent that is received in
  * {@link #onReceive(Context,Intent) onReceive(Context,Intent)}, and calls hook methods
@@ -30,11 +30,9 @@ import android.os.Bundle;
  *
  * <p>Extend this class and override one or more of the {@link #onUpdate}, {@link #onDeleted},
  * {@link #onEnabled} or {@link #onDisabled} methods to implement your own AppWidget functionality.
- *
- * <h3>Sample Code</h3>
- * For an example of how to write a AppWidget provider, see the
- * <a href="{@toroot}reference/android/appwidget/package-descr.html#providers">android.appwidget
- * package overview</a>.
+ * </p>
+ * <p>For an example of how to write a AppWidget provider, see the
+ * <a href="{@docRoot}guide/topics/appwidgets/index.html#Providers">AppWidgets</a> documentation.</p>
  */
 public class AppWidgetProvider extends BroadcastReceiver {
     /**

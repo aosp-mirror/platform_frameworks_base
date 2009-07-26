@@ -1,37 +1,67 @@
-page.title=Older Releases
+page.title=Other SDK Releases
 @jd:body
 
-<div class="special">
-  <strong>NOTICE:</strong>
-  <p>The SDKs listed on this page are "early-look" versions that were released in
+<p>This page provides a full list of older, obsolete SDK releases, including
+non-current versions of active releases and "early look" versions that were
+released before Android 1.0. The list is provided for informational purposes
+only.</p>
+
+<p>If you are just getting started developing on Android, make sure that you
+are using the <a href="{@docRoot}sdk/{@sdkCurrent}/index.html">most current SDK available</a>,
+to ensure that your applications will be compatible with the latest
+Android-powered devices.</p>
+
+<h2>Obsolete Releases</h2>
+
+<p>The table below lists Android SDK releases that have been superceded by an
+active release and that are now obsolete. If you are using one of these
+releases, please upgrade to the <a href="{@docRoot}sdk/index.html">current SDK
+release</a>.</p>
+
+ <table>
+  <tr>
+     <th>Release</td>
+     <th>Platform(s)</th>
+     <th>Date</td>
+     <th>Description</td>
+   </tr>
+   <tr>
+     <td><a href="{@docRoot}sdk/1.5_r1/index.html">Android 1.5 SDK, Release 1</a></td>
+     <td style="text-align:center;">Android 1.5<br>Android 1.1</td>
+     <td><em>April 2009</em></td>
+     <td>Replaced by Android 1.5 SDK, Release 2. <em><a href="RELEASENOTES.html#1.5_r1">Release notes</a></em></td>
+   </tr>
+   <tr class="alt">
+     <td><a href="{@docRoot}sdk/1.0_r1/index.html">Android 1.0 SDK, Release 1</a></td>
+     <td style="text-align:center;">Android 1.0</td>
+     <td><em>September 2008</em></td>
+     <td>Replaced by Android 1.0 SDK, Release 2. <em><a href="RELEASENOTES.html#1.0_r1">Release notes</a></em></td>
+   </tr>
+ </table>
+
+ <h2>Non-Compatible  Releases</h2>
+
+<!-- <div class="special"> -->
+<p>The SDKs listed below are "early-look" versions that were released in
   the year preceding the full release of Android 1.0 in September 2008. Because
   these early-look SDKs were released before the Android 1.0 API specification was
   finalized, they do not provide a compliant Android execution environment.
   Consequently, applications that you develop in these SDKs will not be able to
   run on any Android-powered devices.</p>
 
-  <p>If you have an older application that you built in one of the early-look SDKs,
-  you must migrate it to the Android
-  1.0 SDK (or later release) before you will be able to deploy it to
-  an Android-powered device. To help with this migration, each SDK package below
-  provides information about API changes from the previous version. You can find
-  the migration information in the documentation included in each SDK package.</p>
+<p>If you have an older application that you built in one of the early-look
+SDKs, you must migrate it to the Android 1.0 SDK (or later release) before you
+will be able to deploy it to an Android-powered device. To help with this
+migration, each SDK package below provides information about API changes from
+the previous version. You can find the migration information in the
+documentation included in each SDK package.</p>
+<!-- </div> -->
 
-  <p>If you are just getting started developing on Android, do not use one of these early-look
-  SDKs. Instead, develop using the most <a href="{@docRoot}sdk/index.html">current
-  SDK release</a> available, to ensure that your applications will be compatible
-  with Android-powered devices.</p>
-</div>
-
-
-
-
- <h2>Android 0.9 SDK beta</h2>
- <p><em>August 18, 2008 - <a href="OLD_RELEASENOTES.html#0.9_beta">Release Notes</a></em></p>
+<h4>Android SDK m5-rc15</h4>
+<p><em>August 18, 2008 - <a href="OLD_RELEASENOTES.html#0.9_beta">Release Notes</a></em></p>
  <table>
    <tr>
-     <th>Platform</th>
-     <th>Package</th>
+     <th colspan="2">Package</th>
      <th>Size</th>
      <th>MD5 Checksum</th>
    </tr>
@@ -58,15 +88,11 @@ page.title=Older Releases
    </tr>
  </table>
 
-
-
-
-<h2>Version m5-rc15</h2>
+<h4>Version m5-rc15</h4>
  <p><em>March 3, 2008 - <a href="OLD_RELEASENOTES.html#m5-rc15">Release Notes</a></em></p>
  <table>
    <tr>
-     <th>Platform</th>
-     <th>Package</th>
+     <th colspan="2">Package</th>
      <th>Size</th>
      <th>MD5 Checksum</th>
    </tr>
@@ -93,15 +119,11 @@ page.title=Older Releases
    </tr>
  </table>
 
-
-
-
- <h2>Version m5-rc14</h2>
+ <h4>Version m5-rc14</h4>
  <p><em>February 12, 2008 - <a href="OLD_RELEASENOTES.html#m5-rc14">Release Notes</a></em></p>
  <table>
    <tr>
-     <th>Platform</th>
-     <th>Package</th>
+     <th colspan="2">Package</th>
      <th>Size</th>
      <th>MD5 Checksum</th>
    </tr>
@@ -131,12 +153,11 @@ page.title=Older Releases
 
 
 
- <h2>Version m3-rc37a</h2>
+ <h4>Version m3-rc37a</h4>
  <p><em>December 14, 2007 - <a href="OLD_RELEASENOTES.html#m3-rc37a">Release Notes</a></em></p>
  <table>
    <tr>
-     <th>Platform</th>
-     <th>Package</th>
+     <th colspan="2">Package</th>
      <th>Size</th>
      <th>MD5 Checksum</th>
    </tr>
@@ -166,12 +187,11 @@ page.title=Older Releases
 
 
 
- <h2>Version m3-rc22a</h2>
+ <h4>Version m3-rc22a</h4>
  <p><em>November 16, 2007 - <a href="OLD_RELEASENOTES.html#m3-rc22a">Release Notes</a></em></p>
  <table>
    <tr>
-     <th>Platform</th>
-     <th>Package</th>
+     <th colspan="2">Package</th>
      <th>Size</th>
      <th>MD5 Checksum</th>
    </tr>
@@ -201,12 +221,11 @@ page.title=Older Releases
 
 
 
- <h2>Version m3-rc20a</h2>
+ <h4>Version m3-rc20a</h4>
  <p><em>November 12, 2007 - <a href="OLD_RELEASENOTES.html#m3-rc20a">Release Notes</a></em></p>
  <table>
    <tr>
-     <th>Platform</th>
-     <th>Package</th>
+     <th colspan="2">Package</th>
      <th>Size</th>
      <th>MD5 Checksum</th>
    </tr>

@@ -21,14 +21,11 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
-import android.content.pm.ResolveInfo;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
@@ -38,96 +35,62 @@ import android.util.Xml;
 import android.view.inputmethod.EditorInfo;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public final class SearchableInfo implements Parcelable {
 
     // general debugging support
-    final static String LOG_TAG = "SearchableInfo";
-    
-    // set this flag to 1 to prevent any apps from providing suggestions
-    final static int DBG_INHIBIT_SUGGESTIONS = 0;
+    private static final boolean DBG = false;
+    private static final String LOG_TAG = "SearchableInfo";
 
-    // static strings used for XML lookups, etc.
+    // static strings used for XML lookups.
     // TODO how should these be documented for the developer, in a more structured way than 
     // the current long wordy javadoc in SearchManager.java ?
-    private static final String MD_LABEL_DEFAULT_SEARCHABLE = "android.app.default_searchable";
     private static final String MD_LABEL_SEARCHABLE = "android.app.searchable";
-    private static final String MD_SEARCHABLE_SYSTEM_SEARCH = "*";
     private static final String MD_XML_ELEMENT_SEARCHABLE = "searchable";
     private static final String MD_XML_ELEMENT_SEARCHABLE_ACTION_KEY = "actionkey";
-
-    // class maintenance and general shared data
-    private static HashMap<ComponentName, SearchableInfo> sSearchablesMap = null;
-    private static ArrayList<SearchableInfo> sSearchablesList = null;
-    private static SearchableInfo sDefaultSearchable = null;
+    
+    // flags in the searchMode attribute
+    private static final int SEARCH_MODE_BADGE_LABEL = 0x04;
+    private static final int SEARCH_MODE_BADGE_ICON = 0x08;
+    private static final int SEARCH_MODE_QUERY_REWRITE_FROM_DATA = 0x10;
+    private static final int SEARCH_MODE_QUERY_REWRITE_FROM_TEXT = 0x20;
     
     // true member variables - what we know about the searchability
-    // TO-DO replace public with getters
-    public boolean mSearchable = false;
-    private int mLabelId = 0;
-    public ComponentName mSearchActivity = null;
-    private int mHintId = 0;
-    private int mSearchMode = 0;
-    public boolean mBadgeLabel = false;
-    public boolean mBadgeIcon = false;
-    public boolean mQueryRewriteFromData = false;
-    public boolean mQueryRewriteFromText = false;
-    private int mIconId = 0;
-    private int mSearchButtonText = 0;
-    private int mSearchInputType = 0;
-    private int mSearchImeOptions = 0;
-    private String mSuggestAuthority = null;
-    private String mSuggestPath = null;
-    private String mSuggestSelection = null;
-    private String mSuggestIntentAction = null;
-    private String mSuggestIntentData = null;
-    private ActionKeyInfo mActionKeyList = null;
-    private String mSuggestProviderPackage = null;
-    private Context mCacheActivityContext = null;   // use during setup only - don't hold memory!
+    private final int mLabelId;
+    private final ComponentName mSearchActivity;
+    private final int mHintId;
+    private final int mSearchMode;
+    private final int mIconId;
+    private final int mSearchButtonText;
+    private final int mSearchInputType;
+    private final int mSearchImeOptions;
+    private final boolean mIncludeInGlobalSearch;
+    private final boolean mQueryAfterZeroResults;
+    private final String mSettingsDescription;
+    private final String mSuggestAuthority;
+    private final String mSuggestPath;
+    private final String mSuggestSelection;
+    private final String mSuggestIntentAction;
+    private final String mSuggestIntentData;
+    private final int mSuggestThreshold;
+    // Maps key codes to action key information. auto-boxing is not so bad here,
+    // since keycodes for the hard keys are < 127. For such values, Integer.valueOf()
+    // uses shared Integer objects.
+    // This is not final, to allow lazy initialization.
+    private HashMap<Integer,ActionKeyInfo> mActionKeys = null;
+    private final String mSuggestProviderPackage;
     
     // Flag values for Searchable_voiceSearchMode
     private static int VOICE_SEARCH_SHOW_BUTTON = 1;
     private static int VOICE_SEARCH_LAUNCH_WEB_SEARCH = 2;
     private static int VOICE_SEARCH_LAUNCH_RECOGNIZER = 4;
-    private int mVoiceSearchMode = 0;
-    private int mVoiceLanguageModeId;       // voiceLanguageModel
-    private int mVoicePromptTextId;         // voicePromptText
-    private int mVoiceLanguageId;           // voiceLanguage
-    private int mVoiceMaxResults;           // voiceMaxResults
-    
-    /**
-     * Set the default searchable activity (when none is specified).
-     */
-    public static void setDefaultSearchable(Context context, 
-                                            ComponentName activity) {
-        synchronized (SearchableInfo.class) {
-            SearchableInfo si = null;
-            if (activity != null) {
-                si = getSearchableInfo(context, activity);
-                if (si != null) {
-                    // move to front of list
-                    sSearchablesList.remove(si);
-                    sSearchablesList.add(0, si);
-                }
-            }
-            sDefaultSearchable = si;
-        }
-    }
-    
-    /**
-     * Provides the system-default search activity, which you can use
-     * whenever getSearchableInfo() returns null;
-     * 
-     * @return Returns the system-default search activity, null if never defined
-     */
-    public static SearchableInfo getDefaultSearchable() {
-        synchronized (SearchableInfo.class) {
-            return sDefaultSearchable;
-        }
-    }
+    private final int mVoiceSearchMode;
+    private final int mVoiceLanguageModeId;       // voiceLanguageModel
+    private final int mVoicePromptTextId;         // voicePromptText
+    private final int mVoiceLanguageId;           // voiceLanguage
+    private final int mVoiceMaxResults;           // voiceMaxResults
+
     
     /**
      * Retrieve the authority for obtaining search suggestions.
@@ -137,7 +100,50 @@ public final class SearchableInfo implements Parcelable {
     public String getSuggestAuthority() {
         return mSuggestAuthority;
     }
+
+    /**
+     * Gets the component name of the searchable activity.
+     */
+    public ComponentName getSearchActivity() {
+        return mSearchActivity;
+    }
+
+    /**
+     * Checks whether the badge should be a text label.
+     */
+    public boolean useBadgeLabel() {
+        return 0 != (mSearchMode & SEARCH_MODE_BADGE_LABEL);
+    }
+
+    /**
+     * Checks whether the badge should be an icon.
+     */
+    public boolean useBadgeIcon() {
+        return (0 != (mSearchMode & SEARCH_MODE_BADGE_ICON)) && (mIconId != 0);
+    }
+
+    /**
+     * Checks whether the text in the query field should come from the suggestion intent data.
+     */
+    public boolean shouldRewriteQueryFromData() {
+        return 0 != (mSearchMode & SEARCH_MODE_QUERY_REWRITE_FROM_DATA);
+    }
+
+    /**
+     * Checks whether the text in the query field should come from the suggestion title.
+     */
+    public boolean shouldRewriteQueryFromText() {
+        return 0 != (mSearchMode & SEARCH_MODE_QUERY_REWRITE_FROM_TEXT);
+    }
     
+    /**
+     * Gets the description to use for this source in system search settings, or null if
+     * none has been specified.
+     */
+    public String getSettingsDescription() {
+        return mSettingsDescription;
+    }
+
     /**
      * Retrieve the path for obtaining search suggestions.
      * 
@@ -184,6 +190,16 @@ public final class SearchableInfo implements Parcelable {
     }
     
     /**
+     * Gets the suggestion threshold for use with these suggestions. 
+     * 
+     * @return The value of the <code>searchSuggestThreshold</code> attribute, 
+     *         or 0 if the attribute is not set.
+     */
+    public int getSuggestThreshold() {
+        return mSuggestThreshold;
+    }
+    
+    /**
      * Get the context for the searchable activity.  
      * 
      * This is fairly expensive so do it on the original scan, or when an app is
@@ -193,9 +209,16 @@ public final class SearchableInfo implements Parcelable {
      * @return Returns a context related to the searchable activity
      */
     public Context getActivityContext(Context context) {
+        return createActivityContext(context, mSearchActivity);
+    }
+    
+    /**
+     * Creates a context for another activity.
+     */
+    private static Context createActivityContext(Context context, ComponentName activity) {
         Context theirContext = null;
         try {
-            theirContext = context.createPackageContext(mSearchActivity.getPackageName(), 0);
+            theirContext = context.createPackageContext(activity.getPackageName(), 0);
         } catch (PackageManager.NameNotFoundException e) {
             // unexpected, but we deal with this by null-checking theirContext
         } catch (java.lang.SecurityException e) {
@@ -234,309 +257,124 @@ public final class SearchableInfo implements Parcelable {
     }
     
     /**
-     * Factory.  Look up, or construct, based on the activity.
-     * 
-     * The activities fall into three cases, based on meta-data found in 
-     * the manifest entry:
-     * <ol>
-     * <li>The activity itself implements search.  This is indicated by the
-     * presence of a "android.app.searchable" meta-data attribute.
-     * The value is a reference to an XML file containing search information.</li>
-     * <li>A related activity implements search.  This is indicated by the
-     * presence of a "android.app.default_searchable" meta-data attribute.
-     * The value is a string naming the activity implementing search.  In this
-     * case the factory will "redirect" and return the searchable data.</li>
-     * <li>No searchability data is provided.  We return null here and other
-     * code will insert the "default" (e.g. contacts) search.
-     * 
-     * TODO: cache the result in the map, and check the map first.
-     * TODO: it might make sense to implement the searchable reference as
-     * an application meta-data entry.  This way we don't have to pepper each
-     * and every activity.
-     * TODO: can we skip the constructor step if it's a non-searchable?
-     * TODO: does it make sense to plug the default into a slot here for 
-     * automatic return?  Probably not, but it's one way to do it.
-     *
-     * @param activity The name of the current activity, or null if the 
-     * activity does not define any explicit searchable metadata.
-     */
-    public static SearchableInfo getSearchableInfo(Context context, 
-                                                   ComponentName activity) {
-        // Step 1.  Is the result already hashed?  (case 1)
-        SearchableInfo result;
-        synchronized (SearchableInfo.class) {
-            result = sSearchablesMap.get(activity);
-            if (result != null) return result;
-        }
-        
-        // Step 2.  See if the current activity references a searchable.
-        // Note:  Conceptually, this could be a while(true) loop, but there's
-        // no point in implementing reference chaining here and risking a loop.  
-        // References must point directly to searchable activities.
-       
-        ActivityInfo ai = null;
-        XmlPullParser xml = null;
-        try {
-            ai = context.getPackageManager().
-                       getActivityInfo(activity, PackageManager.GET_META_DATA );
-            String refActivityName = null;
-            
-            // First look for activity-specific reference
-            Bundle md = ai.metaData;
-            if (md != null) {
-                refActivityName = md.getString(MD_LABEL_DEFAULT_SEARCHABLE);
-            }
-            // If not found, try for app-wide reference
-            if (refActivityName == null) {
-                md = ai.applicationInfo.metaData;
-                if (md != null) {
-                    refActivityName = md.getString(MD_LABEL_DEFAULT_SEARCHABLE);
-                }
-            }
-            
-            // Irrespective of source, if a reference was found, follow it.
-            if (refActivityName != null)
-            {
-                // An app or activity can declare that we should simply launch 
-                // "system default search" if search is invoked.
-                if (refActivityName.equals(MD_SEARCHABLE_SYSTEM_SEARCH)) {
-                    return getDefaultSearchable();
-                }
-                String pkg = activity.getPackageName();
-                ComponentName referredActivity;
-                if (refActivityName.charAt(0) == '.') {
-                    referredActivity = new ComponentName(pkg, pkg + refActivityName);
-                } else {
-                    referredActivity = new ComponentName(pkg, refActivityName);
-                }
-
-                // Now try the referred activity, and if found, cache
-                // it against the original name so we can skip the check
-                synchronized (SearchableInfo.class) {
-                    result = sSearchablesMap.get(referredActivity);
-                    if (result != null) {
-                        sSearchablesMap.put(activity, result);
-                        return result;
-                    }
-                }
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            // case 3: no metadata
-        }
- 
-        // Step 3.  None found. Return null.
-        return null;
-        
-    }
-    
-    /**
-     * Super-factory.  Builds an entire list (suitable for display) of 
-     * activities that are searchable, by iterating the entire set of 
-     * ACTION_SEARCH intents.  
-     * 
-     * Also clears the hash of all activities -> searches which will
-     * refill as the user clicks "search".
-     * 
-     * This should only be done at startup and again if we know that the
-     * list has changed.
-     * 
-     * TODO: every activity that provides a ACTION_SEARCH intent should
-     * also provide searchability meta-data.  There are a bunch of checks here
-     * that, if data is not found, silently skip to the next activity.  This
-     * won't help a developer trying to figure out why their activity isn't
-     * showing up in the list, but an exception here is too rough.  I would
-     * like to find a better notification mechanism.
-     * 
-     * TODO: sort the list somehow?  UI choice.
-     * 
-     * @param context a context we can use during this work
-     */
-    public static void buildSearchableList(Context context) {
-        
-        // create empty hash & list
-        HashMap<ComponentName, SearchableInfo> newSearchablesMap 
-                                = new HashMap<ComponentName, SearchableInfo>();
-        ArrayList<SearchableInfo> newSearchablesList
-                                = new ArrayList<SearchableInfo>();
-
-        // use intent resolver to generate list of ACTION_SEARCH receivers
-        final PackageManager pm = context.getPackageManager();
-        List<ResolveInfo> infoList;
-        final Intent intent = new Intent(Intent.ACTION_SEARCH);
-        infoList = pm.queryIntentActivities(intent, PackageManager.GET_META_DATA);
-        
-        // analyze each one, generate a Searchables record, and record
-        if (infoList != null) {
-            int count = infoList.size();
-            for (int ii = 0; ii < count; ii++) {
-                // for each component, try to find metadata
-                ResolveInfo info = infoList.get(ii);
-                ActivityInfo ai = info.activityInfo;
-                XmlResourceParser xml = ai.loadXmlMetaData(context.getPackageManager(), 
-                                                       MD_LABEL_SEARCHABLE);
-                if (xml == null) {
-                    continue;
-                }
-                ComponentName cName = new ComponentName(
-                        info.activityInfo.packageName, 
-                        info.activityInfo.name);
-                
-                SearchableInfo searchable = getActivityMetaData(context, xml, cName);
-                xml.close();
-                
-                if (searchable != null) {
-                    // no need to keep the context any longer.  setup time is over.
-                    searchable.mCacheActivityContext  = null;
-                    
-                    newSearchablesList.add(searchable);
-                    newSearchablesMap.put(cName, searchable);
-                }
-            }
-        }
-        
-        // record the final values as a coherent pair
-        synchronized (SearchableInfo.class) {
-            sSearchablesList = newSearchablesList;
-            sSearchablesMap = newSearchablesMap;
-        }
-    }
-    
-    /**
      * Constructor
      * 
      * Given a ComponentName, get the searchability info
      * and build a local copy of it.  Use the factory, not this.
      * 
-     * @param context runtime context
+     * @param activityContext runtime context for the activity that the searchable info is about.
      * @param attr The attribute set we found in the XML file, contains the values that are used to
      * construct the object.
      * @param cName The component name of the searchable activity
+     * @throws IllegalArgumentException if the searchability info is invalid or insufficient
      */
-    private SearchableInfo(Context context, AttributeSet attr, final ComponentName cName) {
-        // initialize as an "unsearchable" object
-        mSearchable = false;
+    private SearchableInfo(Context activityContext, AttributeSet attr, final ComponentName cName) {
         mSearchActivity = cName;
         
-        // to access another activity's resources, I need its context.
-        // BE SURE to release the cache sometime after construction - it's a large object to hold
-        mCacheActivityContext = getActivityContext(context);
-        if (mCacheActivityContext != null) {
-            TypedArray a = mCacheActivityContext.obtainStyledAttributes(attr,
-                    com.android.internal.R.styleable.Searchable);
-            mSearchMode = a.getInt(com.android.internal.R.styleable.Searchable_searchMode, 0);
-            mLabelId = a.getResourceId(com.android.internal.R.styleable.Searchable_label, 0);
-            mHintId = a.getResourceId(com.android.internal.R.styleable.Searchable_hint, 0);
-            mIconId = a.getResourceId(com.android.internal.R.styleable.Searchable_icon, 0);
-            mSearchButtonText = a.getResourceId(
-                    com.android.internal.R.styleable.Searchable_searchButtonText, 0);
-            mSearchInputType = a.getInt(com.android.internal.R.styleable.Searchable_inputType, 
-                    InputType.TYPE_CLASS_TEXT |
-                    InputType.TYPE_TEXT_VARIATION_NORMAL);
-            mSearchImeOptions = a.getInt(com.android.internal.R.styleable.Searchable_imeOptions, 
-                    EditorInfo.IME_ACTION_SEARCH);
+        TypedArray a = activityContext.obtainStyledAttributes(attr,
+                com.android.internal.R.styleable.Searchable);
+        mSearchMode = a.getInt(com.android.internal.R.styleable.Searchable_searchMode, 0);
+        mLabelId = a.getResourceId(com.android.internal.R.styleable.Searchable_label, 0);
+        mHintId = a.getResourceId(com.android.internal.R.styleable.Searchable_hint, 0);
+        mIconId = a.getResourceId(com.android.internal.R.styleable.Searchable_icon, 0);
+        mSearchButtonText = a.getResourceId(
+                com.android.internal.R.styleable.Searchable_searchButtonText, 0);
+        mSearchInputType = a.getInt(com.android.internal.R.styleable.Searchable_inputType, 
+                InputType.TYPE_CLASS_TEXT |
+                InputType.TYPE_TEXT_VARIATION_NORMAL);
+        mSearchImeOptions = a.getInt(com.android.internal.R.styleable.Searchable_imeOptions, 
+                EditorInfo.IME_ACTION_SEARCH);
+        mIncludeInGlobalSearch = a.getBoolean(
+                com.android.internal.R.styleable.Searchable_includeInGlobalSearch, false);
+        mQueryAfterZeroResults = a.getBoolean(
+                com.android.internal.R.styleable.Searchable_queryAfterZeroResults, false);
 
-            setSearchModeFlags();
-            if (DBG_INHIBIT_SUGGESTIONS == 0) {
-                mSuggestAuthority = a.getString(
-                        com.android.internal.R.styleable.Searchable_searchSuggestAuthority);
-                mSuggestPath = a.getString(
-                        com.android.internal.R.styleable.Searchable_searchSuggestPath);
-                mSuggestSelection = a.getString(
-                        com.android.internal.R.styleable.Searchable_searchSuggestSelection);
-                mSuggestIntentAction = a.getString(
-                        com.android.internal.R.styleable.Searchable_searchSuggestIntentAction);
-                mSuggestIntentData = a.getString(
-                        com.android.internal.R.styleable.Searchable_searchSuggestIntentData);
-            }
-            mVoiceSearchMode = 
-                a.getInt(com.android.internal.R.styleable.Searchable_voiceSearchMode, 0);
-            // TODO this didn't work - came back zero from YouTube
-            mVoiceLanguageModeId = 
-                a.getResourceId(com.android.internal.R.styleable.Searchable_voiceLanguageModel, 0);
-            mVoicePromptTextId = 
-                a.getResourceId(com.android.internal.R.styleable.Searchable_voicePromptText, 0);
-            mVoiceLanguageId = 
-                a.getResourceId(com.android.internal.R.styleable.Searchable_voiceLanguage, 0);
-            mVoiceMaxResults = 
-                a.getInt(com.android.internal.R.styleable.Searchable_voiceMaxResults, 0);
+        mSettingsDescription = a.getString(
+                com.android.internal.R.styleable.Searchable_searchSettingsDescription);
+        mSuggestAuthority = a.getString(
+                com.android.internal.R.styleable.Searchable_searchSuggestAuthority);
+        mSuggestPath = a.getString(
+                com.android.internal.R.styleable.Searchable_searchSuggestPath);
+        mSuggestSelection = a.getString(
+                com.android.internal.R.styleable.Searchable_searchSuggestSelection);
+        mSuggestIntentAction = a.getString(
+                com.android.internal.R.styleable.Searchable_searchSuggestIntentAction);
+        mSuggestIntentData = a.getString(
+                com.android.internal.R.styleable.Searchable_searchSuggestIntentData);
+        mSuggestThreshold = a.getInt(
+                com.android.internal.R.styleable.Searchable_searchSuggestThreshold, 0);
 
-            a.recycle();
+        mVoiceSearchMode = 
+            a.getInt(com.android.internal.R.styleable.Searchable_voiceSearchMode, 0);
+        // TODO this didn't work - came back zero from YouTube
+        mVoiceLanguageModeId = 
+            a.getResourceId(com.android.internal.R.styleable.Searchable_voiceLanguageModel, 0);
+        mVoicePromptTextId = 
+            a.getResourceId(com.android.internal.R.styleable.Searchable_voicePromptText, 0);
+        mVoiceLanguageId = 
+            a.getResourceId(com.android.internal.R.styleable.Searchable_voiceLanguage, 0);
+        mVoiceMaxResults = 
+            a.getInt(com.android.internal.R.styleable.Searchable_voiceMaxResults, 0);
 
-            // get package info for suggestions provider (if any)
-            if (mSuggestAuthority != null) {
-                ProviderInfo pi =
-                    context.getPackageManager().resolveContentProvider(mSuggestAuthority,
-                            0);
-                if (pi != null) {
-                    mSuggestProviderPackage = pi.packageName;
-                }
+        a.recycle();
+
+        // get package info for suggestions provider (if any)
+        String suggestProviderPackage = null;
+        if (mSuggestAuthority != null) {
+            PackageManager pm = activityContext.getPackageManager();
+            ProviderInfo pi = pm.resolveContentProvider(mSuggestAuthority, 0);
+            if (pi != null) {
+                suggestProviderPackage = pi.packageName;
             }
         }
+        mSuggestProviderPackage = suggestProviderPackage;
 
         // for now, implement some form of rules - minimal data
-        if (mLabelId != 0) {
-            mSearchable = true;
-        } else {
-            // Provide some help for developers instead of just silently discarding
-            Log.w(LOG_TAG, "Insufficient metadata to configure searchability for " + 
-                    cName.flattenToShortString());
+        if (mLabelId == 0) {
+            throw new IllegalArgumentException("Search label must be a resource reference.");
         }
-    }
-
-    /**
-     * Convert searchmode to flags.
-     */
-    private void setSearchModeFlags() {
-        mBadgeLabel = (0 != (mSearchMode & 4));
-        mBadgeIcon = (0 != (mSearchMode & 8)) && (mIconId != 0);
-        mQueryRewriteFromData = (0 != (mSearchMode & 0x10));
-        mQueryRewriteFromText = (0 != (mSearchMode & 0x20));
     }
     
     /**
      * Private class used to hold the "action key" configuration
      */
-    public class ActionKeyInfo implements Parcelable {
+    public static class ActionKeyInfo implements Parcelable {
         
-        public int mKeyCode = 0;
-        public String mQueryActionMsg;
-        public String mSuggestActionMsg;
-        public String mSuggestActionMsgColumn;
-        private ActionKeyInfo mNext;
+        private final int mKeyCode;
+        private final String mQueryActionMsg;
+        private final String mSuggestActionMsg;
+        private final String mSuggestActionMsgColumn;
         
         /**
          * Create one object using attributeset as input data.
-         * @param context runtime context
+         * @param activityContext runtime context of the activity that the action key information
+         *        is about.
          * @param attr The attribute set we found in the XML file, contains the values that are used to
          * construct the object.
-         * @param next We'll build these up using a simple linked list (since there are usually
-         * just zero or one).
+         * @throws IllegalArgumentException if the action key configuration is invalid
          */
-        public ActionKeyInfo(Context context, AttributeSet attr, ActionKeyInfo next) {
-            TypedArray a = mCacheActivityContext.obtainStyledAttributes(attr,
+        public ActionKeyInfo(Context activityContext, AttributeSet attr) {
+            TypedArray a = activityContext.obtainStyledAttributes(attr,
                     com.android.internal.R.styleable.SearchableActionKey);
 
             mKeyCode = a.getInt(
                     com.android.internal.R.styleable.SearchableActionKey_keycode, 0);
             mQueryActionMsg = a.getString(
                     com.android.internal.R.styleable.SearchableActionKey_queryActionMsg);
-            if (DBG_INHIBIT_SUGGESTIONS == 0) {
-                mSuggestActionMsg = a.getString(
-                        com.android.internal.R.styleable.SearchableActionKey_suggestActionMsg);
-                mSuggestActionMsgColumn = a.getString(
-                        com.android.internal.R.styleable.SearchableActionKey_suggestActionMsgColumn);
-            }
+            mSuggestActionMsg = a.getString(
+                    com.android.internal.R.styleable.SearchableActionKey_suggestActionMsg);
+            mSuggestActionMsgColumn = a.getString(
+                    com.android.internal.R.styleable.SearchableActionKey_suggestActionMsgColumn);
             a.recycle();
 
-            // initialize any other fields
-            mNext = next;
-
-            // sanity check.  must have at least one action message, or invalidate the object.
-            if ((mQueryActionMsg == null) && 
+            // sanity check.
+            if (mKeyCode == 0) {
+                throw new IllegalArgumentException("No keycode.");
+            } else if ((mQueryActionMsg == null) && 
                     (mSuggestActionMsg == null) && 
                     (mSuggestActionMsgColumn == null)) {
-                mKeyCode = 0;
-            }           
+                throw new IllegalArgumentException("No message information.");
+            }
         }
 
         /**
@@ -545,14 +383,28 @@ public final class SearchableInfo implements Parcelable {
          *
          * @param in The Parcel containing the previously written ActionKeyInfo,
          * positioned at the location in the buffer where it was written.
-         * @param next The value to place in mNext, creating a linked list
          */
-        public ActionKeyInfo(Parcel in, ActionKeyInfo next) {
+        public ActionKeyInfo(Parcel in) {
             mKeyCode = in.readInt();
             mQueryActionMsg = in.readString();
             mSuggestActionMsg = in.readString();
             mSuggestActionMsgColumn = in.readString();
-            mNext = next;
+        }
+
+        public int getKeyCode() {
+            return mKeyCode;
+        }
+
+        public String getQueryActionMsg() {
+            return mQueryActionMsg;
+        }
+
+        public String getSuggestActionMsg() {
+            return mSuggestActionMsg;
+        }
+
+        public String getSuggestActionMsgColumn() {
+            return mSuggestActionMsgColumn;
         }
 
         public int describeContents() {
@@ -574,20 +426,50 @@ public final class SearchableInfo implements Parcelable {
      * @return Returns the ActionKeyInfo record, or null if none defined
      */
     public ActionKeyInfo findActionKey(int keyCode) {
-        ActionKeyInfo info = mActionKeyList;
-        while (info != null) {
-            if (info.mKeyCode == keyCode) {
-                return info;
-            }
-            info = info.mNext;
+        if (mActionKeys == null) {
+            return null;
         }
-        return null;
+        return mActionKeys.get(keyCode);
+    }
+
+    private void addActionKey(ActionKeyInfo keyInfo) {
+        if (mActionKeys == null) {
+            mActionKeys = new HashMap<Integer,ActionKeyInfo>();
+        }
+        mActionKeys.put(keyInfo.getKeyCode(), keyInfo);
+    }
+
+    public static SearchableInfo getActivityMetaData(Context context, ActivityInfo activityInfo) {
+        // for each component, try to find metadata
+        XmlResourceParser xml = 
+                activityInfo.loadXmlMetaData(context.getPackageManager(), MD_LABEL_SEARCHABLE);
+        if (xml == null) {
+            return null;
+        }
+        ComponentName cName = new ComponentName(activityInfo.packageName, activityInfo.name);
+        
+        SearchableInfo searchable = getActivityMetaData(context, xml, cName);
+        xml.close();
+        
+        if (DBG) {
+            if (searchable != null) {
+                Log.d(LOG_TAG, "Checked " + activityInfo.name
+                        + ",label=" + searchable.getLabelId()
+                        + ",icon=" + searchable.getIconId()
+                        + ",suggestAuthority=" + searchable.getSuggestAuthority()
+                        + ",target=" + searchable.getSearchActivity().getClassName()
+                        + ",global=" + searchable.shouldIncludeInGlobalSearch()
+                        + ",settingsDescription=" + searchable.getSettingsDescription()
+                        + ",threshold=" + searchable.getSuggestThreshold());
+            } else {
+                Log.d(LOG_TAG, "Checked " + activityInfo.name + ", no searchable meta-data");
+            }
+        }
+        return searchable;
     }
     
     /**
      * Get the metadata for a given activity
-     * 
-     * TODO: clean up where we return null vs. where we throw exceptions.
      * 
      * @param context runtime context
      * @param xml XML parser for reading attributes
@@ -598,6 +480,7 @@ public final class SearchableInfo implements Parcelable {
     private static SearchableInfo getActivityMetaData(Context context, XmlPullParser xml,
             final ComponentName cName)  {
         SearchableInfo result = null;
+        Context activityContext = createActivityContext(context, cName);
         
         // in order to use the attributes mechanism, we have to walk the parser
         // forward through the file until it's reading the tag of interest.
@@ -608,9 +491,11 @@ public final class SearchableInfo implements Parcelable {
                     if (xml.getName().equals(MD_XML_ELEMENT_SEARCHABLE)) {
                         AttributeSet attr = Xml.asAttributeSet(xml);
                         if (attr != null) {
-                            result = new SearchableInfo(context, attr, cName);
-                            // if the constructor returned a bad object, exit now.
-                            if (! result.mSearchable) {
+                            try {
+                                result = new SearchableInfo(activityContext, attr, cName);
+                            } catch (IllegalArgumentException ex) {
+                                Log.w(LOG_TAG, "Invalid searchable metadata for " +
+                                        cName.flattenToShortString() + ": " + ex.getMessage());
                                 return null;
                             }
                         }
@@ -621,11 +506,12 @@ public final class SearchableInfo implements Parcelable {
                         }
                         AttributeSet attr = Xml.asAttributeSet(xml);
                         if (attr != null) {
-                            ActionKeyInfo keyInfo = result.new ActionKeyInfo(context, attr, 
-                                    result.mActionKeyList);
-                            // only add to list if it is was useable
-                            if (keyInfo.mKeyCode != 0) {
-                                result.mActionKeyList = keyInfo;
+                            try {
+                                result.addActionKey(new ActionKeyInfo(activityContext, attr));
+                            } catch (IllegalArgumentException ex) {
+                                Log.w(LOG_TAG, "Invalid action key for " +
+                                        cName.flattenToShortString() + ": " + ex.getMessage());
+                                return null;
                             }
                         }
                     }
@@ -633,13 +519,16 @@ public final class SearchableInfo implements Parcelable {
                 tagType = xml.next();
             }
         } catch (XmlPullParserException e) {
-            throw new RuntimeException(e);
+            Log.w(LOG_TAG, "Reading searchable metadata for " + cName.flattenToShortString(), e);
+            return null;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            Log.w(LOG_TAG, "Reading searchable metadata for " + cName.flattenToShortString(), e);
+            return null;
         }
+        
         return result;
     }
-    
+
     /**
      * Return the "label" (user-visible name) of this searchable context.  This must be 
      * accessed using the target (searchable) Activity's resources, not simply the context of the
@@ -757,15 +646,26 @@ public final class SearchableInfo implements Parcelable {
     }
     
     /**
-     * Return the list of searchable activities, for use in the drop-down.
+     * Checks whether the searchable is exported.
+     *
+     * @return The value of the <code>exported</code> attribute,
+     *         or <code>false</code> if the attribute is not set.
      */
-    public static ArrayList<SearchableInfo> getSearchablesList() {
-        synchronized (SearchableInfo.class) {
-            ArrayList<SearchableInfo> result = new ArrayList<SearchableInfo>(sSearchablesList);
-            return result;
-        }
+    public boolean shouldIncludeInGlobalSearch() {
+        return mIncludeInGlobalSearch;
     }
-    
+
+    /**
+     * Checks whether this searchable activity should be invoked after a query returned zero
+     * results.
+     *
+     * @return The value of the <code>queryAfterZeroResults</code> attribute,
+     *         or <code>false</code> if the attribute is not set.
+     */
+    public boolean queryAfterZeroResults() {
+        return mQueryAfterZeroResults;
+    }
+
     /**
      * Support for parcelable and aidl operations.
      */
@@ -788,7 +688,6 @@ public final class SearchableInfo implements Parcelable {
      * positioned at the location in the buffer where it was written.
      */
     public SearchableInfo(Parcel in) {
-        mSearchable = in.readInt() != 0;
         mLabelId = in.readInt();
         mSearchActivity = ComponentName.readFromParcel(in);
         mHintId = in.readInt();
@@ -797,20 +696,21 @@ public final class SearchableInfo implements Parcelable {
         mSearchButtonText = in.readInt();
         mSearchInputType = in.readInt();
         mSearchImeOptions = in.readInt();
-        setSearchModeFlags();
-
+        mIncludeInGlobalSearch = in.readInt() != 0;
+        mQueryAfterZeroResults = in.readInt() != 0;
+        
+        mSettingsDescription = in.readString();
         mSuggestAuthority = in.readString();
         mSuggestPath = in.readString();
         mSuggestSelection = in.readString();
         mSuggestIntentAction = in.readString();
         mSuggestIntentData = in.readString();
+        mSuggestThreshold = in.readInt();
 
-        mActionKeyList = null;
-        int count = in.readInt();
-        while (count-- > 0) {
-            mActionKeyList = new ActionKeyInfo(in, mActionKeyList);
+        for (int count = in.readInt(); count > 0; count--) {
+            addActionKey(new ActionKeyInfo(in));
         }
-        
+
         mSuggestProviderPackage = in.readString();
         
         mVoiceSearchMode = in.readInt();
@@ -825,7 +725,6 @@ public final class SearchableInfo implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mSearchable ? 1 : 0);
         dest.writeInt(mLabelId);
         mSearchActivity.writeToParcel(dest, flags);
         dest.writeInt(mHintId);
@@ -834,27 +733,26 @@ public final class SearchableInfo implements Parcelable {
         dest.writeInt(mSearchButtonText);
         dest.writeInt(mSearchInputType);
         dest.writeInt(mSearchImeOptions);
+        dest.writeInt(mIncludeInGlobalSearch ? 1 : 0);
+        dest.writeInt(mQueryAfterZeroResults ? 1 : 0);
         
+        dest.writeString(mSettingsDescription);
         dest.writeString(mSuggestAuthority);
         dest.writeString(mSuggestPath);
         dest.writeString(mSuggestSelection);
         dest.writeString(mSuggestIntentAction);
         dest.writeString(mSuggestIntentData);
+        dest.writeInt(mSuggestThreshold);
 
-        // This is usually a very short linked list so we'll just pre-count it
-        ActionKeyInfo nextKeyInfo = mActionKeyList;
-        int count = 0;
-        while (nextKeyInfo != null) {
-            ++count;
-            nextKeyInfo = nextKeyInfo.mNext;
+        if (mActionKeys == null) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(mActionKeys.size());
+            for (ActionKeyInfo actionKey : mActionKeys.values()) {
+                actionKey.writeToParcel(dest, flags);
+            }
         }
-        dest.writeInt(count);
-        // Now write count of 'em
-        nextKeyInfo = mActionKeyList;
-        while (count-- > 0) {
-            nextKeyInfo.writeToParcel(dest, flags);
-        }
-        
+
         dest.writeString(mSuggestProviderPackage);
 
         dest.writeInt(mVoiceSearchMode);

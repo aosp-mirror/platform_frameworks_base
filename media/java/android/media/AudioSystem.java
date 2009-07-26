@@ -200,7 +200,7 @@ public class AudioSystem
          * param error   error code:
          * - AUDIO_STATUS_OK
          * - AUDIO_STATUS_SERVER_DIED
-         * - UDIO_STATUS_ERROR
+         * - AUDIO_STATUS_ERROR
          */
         void onError(int error);
     };

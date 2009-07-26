@@ -132,10 +132,13 @@ public final class Checkin {
             BROWSER_SNAP_CENTER,
             BROWSER_TEXT_SIZE_CHANGE,
             BROWSER_ZOOM_OVERVIEW,
+
             CRASHES_REPORTED,
             CRASHES_TRUNCATED,
             ELAPSED_REALTIME_SEC,
             ELAPSED_UPTIME_SEC,
+            HTTP_REQUEST,
+            HTTP_REUSED,
             HTTP_STATUS,
             PHONE_GSM_REGISTERED,
             PHONE_GPRS_ATTEMPTED,
@@ -181,6 +184,9 @@ public final class Checkin {
             MARKET_REASON_PARSE_MANIFEST_EMPTY,
             MARKET_REASON_UNKNOWN,
             MARKET_STALE_INSTALL_ATTEMPT,
+            PHONE_CDMA_REGISTERED,
+            PHONE_CDMA_DATA_ATTEMPTED,
+            PHONE_CDMA_DATA_CONNECTED,
         }
     }
 

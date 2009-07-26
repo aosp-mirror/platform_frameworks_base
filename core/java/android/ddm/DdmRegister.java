@@ -50,6 +50,7 @@ public class DdmRegister {
         DdmHandleThread.register();
         DdmHandleHeap.register();
         DdmHandleNativeHeap.register();
+        DdmHandleProfiling.register();
         DdmHandleExit.register();
 
         DdmServer.registrationComplete();

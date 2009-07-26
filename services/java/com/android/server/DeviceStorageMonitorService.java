@@ -74,7 +74,7 @@ class DeviceStorageMonitorService extends Binder {
     private boolean mLowMemFlag=false;
     private Context mContext;
     private ContentResolver mContentResolver;
-    int mBlkSize;
+    long mBlkSize;
     long mTotalMemory;
     StatFs mFileStats;
     private static final String DATA_PATH="/data";
@@ -251,7 +251,7 @@ class DeviceStorageMonitorService extends Binder {
         //initialize block size
         mBlkSize = mFileStats.getBlockSize();
         //initialize total storage on device
-        mTotalMemory = (mFileStats.getBlockCount()*mBlkSize)/100;
+        mTotalMemory = ((long)mFileStats.getBlockCount()*mBlkSize)/100L;
         mStorageLowIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_LOW);
         mStorageOkIntent = new Intent(Intent.ACTION_DEVICE_STORAGE_OK);
         checkMemory(true);

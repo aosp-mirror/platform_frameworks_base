@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import android.content.IntentFilter;
 import android.util.PrintWriterPrinter;
+import android.util.Printer;
 
 import java.io.PrintWriter;
 
@@ -33,19 +34,25 @@ class BroadcastFilter extends IntentFilter {
         requiredPermission = _requiredPermission;
     }
     
-    public void dumpLocal(PrintWriter pw, String prefix) {
-        super.dump(new PrintWriterPrinter(pw), prefix);
-    }
-    
     public void dump(PrintWriter pw, String prefix) {
-        dumpLocal(pw, prefix);
-        pw.println(prefix + "requiredPermission=" + requiredPermission);
+        dumpInReceiverList(pw, new PrintWriterPrinter(pw), prefix);
         receiverList.dumpLocal(pw, prefix);
     }
     
+    public void dumpInReceiverList(PrintWriter pw, Printer pr, String prefix) {
+        super.dump(pr, prefix);
+        if (requiredPermission != null) {
+            pw.print(prefix); pw.print("requiredPermission="); pw.println(requiredPermission);
+        }
+    }
+    
     public String toString() {
-        return "BroadcastFilter{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + receiverList + "}";
+        StringBuilder sb = new StringBuilder();
+        sb.append("BroadcastFilter{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        sb.append(receiverList);
+        sb.append('}');
+        return sb.toString();
     }
 }

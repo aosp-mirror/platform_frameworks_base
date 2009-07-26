@@ -26,6 +26,8 @@ import android.os.Message;
 import android.util.Config;
 import android.util.Log;
 
+import com.android.internal.location.DummyLocationProvider;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -100,9 +102,6 @@ public class LocationManager {
      * when a location change is broadcast using a PendingIntent.
      */
     public static final String KEY_LOCATION_CHANGED = "location";
-
-    /** @hide -- does this belong here? */
-    public static final String PROVIDER_DIR = "/data/location";
 
     /** @hide */
     public static final String SYSTEM_DIR = "/data/system/location";
@@ -193,6 +192,11 @@ public class LocationManager {
                 case TYPE_PROVIDER_DISABLED:
                     mListener.onProviderDisabled((String) msg.obj);
                     break;
+            }
+            try {
+                mService.locationCallbackFinished(this);
+            } catch (RemoteException e) {
+                Log.e(TAG, "locationCallbackFinished: RemoteException", e);
             }
         }
     }
@@ -310,20 +314,6 @@ public class LocationManager {
             }
         }
         return goodProviders;
-    }
-
-    /**
-     * Propagates the enabled/disabled state of the providers from the system
-     * settings to the providers themselves.
-     *
-     * {@hide}
-     */
-    public void updateProviders() {
-        try {
-            mService.updateProviders();
-        } catch (RemoteException ex) {
-            Log.e(TAG, "updateProviders: RemoteException", ex);
-        }
     }
 
     /**
@@ -1263,6 +1253,66 @@ public class LocationManager {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in sendExtraCommand: ", e);
             return false;
+        }
+    }
+
+    /**
+     * Installs a location provider.
+     *
+     * @param name of the location provider
+     * @param provider Binder interface for the location provider
+     *
+     * @return true if the command succeeds.
+     *
+     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
+     *
+     * {@hide}
+     */
+    public boolean installLocationProvider(String name, ILocationProvider provider) {
+        try {
+            mService.installLocationProvider(name, provider);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in installLocationProvider: ", e);
+            return false;
+        }
+    }
+
+    /**
+     * Installs a geocoder server.
+     *
+     * @param provider Binder interface for the geocoder provider
+     *
+     * @return true if the command succeeds.
+     *
+     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
+     *
+     * {@hide}
+     */
+    public boolean installGeocodeProvider(IGeocodeProvider provider) {
+        try {
+            mService.installGeocodeProvider(provider);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setGeocodeProvider: ", e);
+            return false;
+        }
+    }
+
+    /**
+     * Used by location providers to report new locations.
+     *
+     * @param location new Location to report
+     *
+     * Requires the android.permission.INSTALL_LOCATION_PROVIDER permission.
+     *
+     * {@hide}
+     */
+    public void reportLocation(Location location) {
+        try {
+            mService.reportLocation(location);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in reportLocation: ", e);
         }
     }
 }

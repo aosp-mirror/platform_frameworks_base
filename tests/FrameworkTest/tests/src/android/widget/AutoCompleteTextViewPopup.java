@@ -18,6 +18,7 @@ package android.widget;
 
 import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.FlakyTest;
 import android.test.suitebuilder.annotation.MediumTest;
 
 /**
@@ -146,5 +147,58 @@ public class AutoCompleteTextViewPopup
 
         // now try moving "down" - nothing should happen since there's no longer an adapter
         sendKeys("DPAD_DOWN");
+    }
+    
+    /** Test the show/hide behavior of the drop-down. */
+    @FlakyTest(tolerance=5)
+    @MediumTest
+    public void testPopupShow() throws Throwable {
+        AutoCompleteTextViewSimple theActivity = getActivity();
+        final AutoCompleteTextView textView = theActivity.getTextView();
+        final Instrumentation instrumentation = getInstrumentation();
+        
+        // Drop-down should not be showing when no text has been entered
+        assertFalse("isPopupShowing() on start", textView.isPopupShowing());
+        
+        // focus and type
+        textView.requestFocus();
+        instrumentation.waitForIdleSync();
+        sendKeys("A");
+        
+        // Drop-down should now be visible
+        assertTrue("isPopupShowing() after typing", textView.isPopupShowing());
+        
+        // Clear the text
+        runTestOnUiThread(new Runnable() {
+            public void run() {
+                textView.setText("");
+            }
+        });
+        instrumentation.waitForIdleSync();
+        
+        // Drop-down should be hidden when text is cleared
+        assertFalse("isPopupShowing() after text cleared", textView.isPopupShowing());
+        
+        // Set the text, without filtering
+        runTestOnUiThread(new Runnable() {
+            public void run() {
+                textView.setText("a", false);
+            }
+        });
+        instrumentation.waitForIdleSync();
+        
+        // Drop-down should still be hidden
+        assertFalse("isPopupShowing() after setText(\"a\", false)", textView.isPopupShowing());
+        
+        // Set the text, now with filtering
+        runTestOnUiThread(new Runnable() {
+            public void run() {
+                textView.setText("a");
+            }
+        });
+        instrumentation.waitForIdleSync();
+        
+        // Drop-down should show up after setText() with filtering 
+        assertTrue("isPopupShowing() after text set", textView.isPopupShowing());
     }
 }

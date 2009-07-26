@@ -21,6 +21,7 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Config;
@@ -34,7 +35,7 @@ import java.util.ArrayList;
 /**
  * {@hide}
  */
-public final class ContentService extends ContentServiceNative {
+public final class ContentService extends IContentService.Stub {
     private static final String TAG = "ContentService";
     private Context mContext;
     private boolean mFactoryTest;
@@ -70,6 +71,21 @@ public final class ContentService extends ContentServiceNative {
             }
         } finally {
             restoreCallingIdentity(identityToken);
+        }
+    }
+
+    @Override
+    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+            throws RemoteException {
+        try {
+            return super.onTransact(code, data, reply, flags);
+        } catch (RuntimeException e) {
+            // The content service only throws security exceptions, so let's
+            // log all others.
+            if (!(e instanceof SecurityException)) {
+                Log.e(TAG, "Content Service Crash", e);
+            }
+            throw e;
         }
     }
 
@@ -204,9 +220,158 @@ public final class ContentService extends ContentServiceNative {
         }
     }
 
+    public boolean getSyncProviderAutomatically(String providerName) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
+                "no permission to read the sync settings");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                return syncManager.getSyncStorageEngine().getSyncProviderAutomatically(
+                        null, providerName);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+        return false;
+    }
+
+    public void setSyncProviderAutomatically(String providerName, boolean sync) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
+                "no permission to write the sync settings");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                syncManager.getSyncStorageEngine().setSyncProviderAutomatically(
+                        null, providerName, sync);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    public boolean getListenForNetworkTickles() {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
+                "no permission to read the sync settings");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                return syncManager.getSyncStorageEngine().getListenForNetworkTickles();
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+        return false;
+    }
+    
+    public void setListenForNetworkTickles(boolean flag) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
+                "no permission to write the sync settings");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                syncManager.getSyncStorageEngine().setListenForNetworkTickles(flag);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    public boolean isSyncActive(String account, String authority) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
+                "no permission to read the sync stats");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                return syncManager.getSyncStorageEngine().isSyncActive(
+                        account, authority);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+        return false;
+    }
+    
+    public ActiveSyncInfo getActiveSync() {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
+                "no permission to read the sync stats");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                return syncManager.getSyncStorageEngine().getActiveSync();
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+        return null;
+    }
+    
+    public SyncStatusInfo getStatusByAuthority(String authority) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
+                "no permission to read the sync stats");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                return syncManager.getSyncStorageEngine().getStatusByAuthority(
+                        authority);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+        return null;
+    }
+    
+    public boolean isAuthorityPending(String account, String authority) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
+                "no permission to read the sync stats");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                return syncManager.getSyncStorageEngine().isAuthorityPending(
+                        account, authority);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+        return false;
+    }
+    
+    public void addStatusChangeListener(int mask, ISyncStatusObserver callback) {
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                syncManager.getSyncStorageEngine().addStatusChangeListener(
+                        mask, callback);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+    
+    public void removeStatusChangeListener(ISyncStatusObserver callback) {
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                syncManager.getSyncStorageEngine().removeStatusChangeListener(
+                        callback);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+    
     public static IContentService main(Context context, boolean factoryTest) {
         ContentService service = new ContentService(context, factoryTest);
-        ServiceManager.addService("content", service);
+        ServiceManager.addService(ContentResolver.CONTENT_SERVICE_NAME, service);
         return service;
     }
 

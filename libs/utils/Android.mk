@@ -116,7 +116,9 @@ LOCAL_SRC_FILES:= \
 	ProcessState.cpp \
 	IPermissionController.cpp \
 	IServiceManager.cpp \
-	Unicode.cpp
+	Unicode.cpp \
+    BackupData.cpp \
+	BackupHelpers.cpp
 
 ifeq ($(TARGET_SIMULATOR),true)
 LOCAL_SRC_FILES += $(hostSources)

@@ -18,12 +18,10 @@ package android.test;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.ContentValues;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.SystemClock;
-import android.provider.Sync;
 import android.net.Uri;
-import java.util.Map;
 
 /**
  * If you would like to test sync a single provider with an
@@ -75,11 +73,11 @@ public class SyncBaseInstrumentation extends InstrumentationTestCase {
     }
 
     protected void cancelSyncsandDisableAutoSync() {
-        Sync.Settings.QueryMap mSyncSettings =
-                new Sync.Settings.QueryMap(mContentResolver, true, null);
-        mSyncSettings.setListenForNetworkTickles(false);
+        try {
+            ContentResolver.getContentService().setListenForNetworkTickles(false);
+        } catch (RemoteException e) {
+        }
         mContentResolver.cancelSync(null);
-        mSyncSettings.close();
     }
 
     /**
@@ -88,34 +86,11 @@ public class SyncBaseInstrumentation extends InstrumentationTestCase {
      * @return
      */
     private boolean isSyncActive(String account, String authority) {
-        Sync.Pending.QueryMap pendingQueryMap = null;
-        Sync.Active.QueryMap activeQueryMap = null;
         try {
-            pendingQueryMap = new Sync.Pending.QueryMap(mContentResolver, false, null);
-            activeQueryMap = new Sync.Active.QueryMap(mContentResolver, false, null);
-
-            if (pendingQueryMap.isPending(account, authority)) {
-                return true;
-            }
-            if (isActiveInActiveQueryMap(activeQueryMap, account, authority)) {
-                return true;
-            }
+            return ContentResolver.getContentService().isSyncActive(account,
+                    authority);
+        } catch (RemoteException e) {
             return false;
-        } finally {
-            activeQueryMap.close();
-            pendingQueryMap.close();
         }
-    }
-
-    private boolean isActiveInActiveQueryMap(Sync.Active.QueryMap activemap, String account,
-                                             String authority) {
-        Map<String, ContentValues> rows = activemap.getRows();
-        for (ContentValues values : rows.values()) {
-            if (values.getAsString("account").equals(account)
-                    && values.getAsString("authority").equals(authority)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

@@ -582,11 +582,14 @@ const void* _FileAsset::ensureAlignment(FileMap* map)
     if ((((size_t)data)&0x3) == 0) {
         // We can return this directly if it is aligned on a word
         // boundary.
+        LOGV("Returning aligned FileAsset %p (%s).", this,
+                getAssetSource());
         return data;
     }
     // If not aligned on a word boundary, then we need to copy it into
     // our own buffer.
-    LOGV("Copying FileAsset %p to buffer size %d to make it aligned.", this, (int)mLength);
+    LOGV("Copying FileAsset %p (%s) to buffer size %d to make it aligned.", this,
+            getAssetSource(), (int)mLength);
     unsigned char* buf = new unsigned char[mLength];
     if (buf == NULL) {
         LOGE("alloc of %ld bytes failed\n", (long) mLength);

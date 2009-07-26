@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.PrintWriterPrinter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -55,6 +56,8 @@ class ProcessRecord implements Watchdog.PssRequestor {
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
     int curAdj;                 // Current OOM adjustment for this process
     int setAdj;                 // Last set OOM adjustment for this process
+    int curSchedGroup;          // Currently desired scheduling class
+    int setSchedGroup;          // Last set to background scheduling class
     boolean isForeground;       // Is this app running the foreground UI?
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean foregroundServices; // Running any services that are foreground?
@@ -62,6 +65,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
     int adjSeq;                 // Sequence id for identifying repeated trav
     ComponentName instrumentationClass;// class installed to instrument app
+    ApplicationInfo instrumentationInfo; // the application being instrumented
     String instrumentationProfileFile; // where to save profiling
     IInstrumentationWatcher instrumentationWatcher; // who is waiting
     Bundle instrumentationArguments;// as given to us
@@ -98,44 +102,99 @@ class ProcessRecord implements Watchdog.PssRequestor {
     boolean waitedForDebugger;  // has process show wait for debugger dialog?
     Dialog waitDialog;          // current wait for debugger dialog
     
+    String stringName;          // caching of toString() result.
+    
     // These reports are generated & stored when an app gets into an error condition.
     // They will be "null" when all is OK.
     ActivityManager.ProcessErrorStateInfo crashingReport;
     ActivityManager.ProcessErrorStateInfo notRespondingReport;
 
+    // Who will be notified of the error. This is usually an activity in the
+    // app that installed the package.
+    ComponentName errorReportReceiver;
+
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
-        pw.println(prefix + "class=" + info.className);
-        pw.println(prefix+"manageSpaceActivityName="+info.manageSpaceActivityName);
-        pw.println(prefix + "dir=" + info.sourceDir + " publicDir=" + info.publicSourceDir 
-              + " data=" + info.dataDir);
-        pw.println(prefix + "packageList=" + pkgList);
-        pw.println(prefix + "instrumentationClass=" + instrumentationClass
-              + " instrumentationProfileFile=" + instrumentationProfileFile);
-        pw.println(prefix + "instrumentationArguments=" + instrumentationArguments);
-        pw.println(prefix + "thread=" + thread + " curReceiver=" + curReceiver);
-        pw.println(prefix + "pid=" + pid + " starting=" + starting
-                + " lastPss=" + lastPss);
-        pw.println(prefix + "maxAdj=" + maxAdj + " hiddenAdj=" + hiddenAdj
-                + " curRawAdj=" + curRawAdj + " setRawAdj=" + setRawAdj
-                + " curAdj=" + curAdj + " setAdj=" + setAdj);
-        pw.println(prefix + "isForeground=" + isForeground
-                + " setIsForeground=" + setIsForeground
-                + " foregroundServices=" + foregroundServices
-                + " forcingToForeground=" + forcingToForeground);
-        pw.println(prefix + "persistent=" + persistent + " removed=" + removed
-                + " persistentActivities=" + persistentActivities);
-        pw.println(prefix + "debugging=" + debugging
-                + " crashing=" + crashing + " " + crashDialog
-                + " notResponding=" + notResponding + " " + anrDialog
-                + " bad=" + bad);
-        pw.println(prefix + "activities=" + activities);
-        pw.println(prefix + "services=" + services);
-        pw.println(prefix + "executingServices=" + executingServices);
-        pw.println(prefix + "connections=" + connections);
-        pw.println(prefix + "pubProviders=" + pubProviders);
-        pw.println(prefix + "conProviders=" + conProviders);
-        pw.println(prefix + "receivers=" + receivers);
+        if (info.className != null) {
+            pw.print(prefix); pw.print("class="); pw.println(info.className);
+        }
+        if (info.manageSpaceActivityName != null) {
+            pw.print(prefix); pw.print("manageSpaceActivityName=");
+            pw.println(info.manageSpaceActivityName);
+        }
+        pw.print(prefix); pw.print("dir="); pw.print(info.sourceDir);
+                pw.print(" publicDir="); pw.print(info.publicSourceDir);
+                pw.print(" data="); pw.println(info.dataDir);
+        pw.print(prefix); pw.print("packageList="); pw.println(pkgList);
+        if (instrumentationClass != null || instrumentationProfileFile != null
+                || instrumentationArguments != null) {
+            pw.print(prefix); pw.print("instrumentationClass=");
+                    pw.print(instrumentationClass);
+                    pw.print(" instrumentationProfileFile=");
+                    pw.println(instrumentationProfileFile);
+            pw.print(prefix); pw.print("instrumentationArguments=");
+                    pw.println(instrumentationArguments);
+            pw.print(prefix); pw.print("instrumentationInfo=");
+                    pw.println(instrumentationInfo);
+            if (instrumentationInfo != null) {
+                instrumentationInfo.dump(new PrintWriterPrinter(pw), prefix + "  ");
+            }
+        }
+        pw.print(prefix); pw.print("thread="); pw.print(thread);
+                pw.print(" curReceiver="); pw.println(curReceiver);
+        pw.print(prefix); pw.print("pid="); pw.print(pid); pw.print(" starting=");
+                pw.print(starting); pw.print(" lastPss="); pw.println(lastPss);
+        pw.print(prefix); pw.print("oom: max="); pw.print(maxAdj);
+                pw.print(" hidden="); pw.print(hiddenAdj);
+                pw.print(" curRaw="); pw.print(curRawAdj);
+                pw.print(" setRaw="); pw.print(setRawAdj);
+                pw.print(" cur="); pw.print(curAdj);
+                pw.print(" set="); pw.println(setAdj);
+        pw.print(prefix); pw.print("curSchedGroup="); pw.print(curSchedGroup);
+                pw.print(" setSchedGroup="); pw.println(setSchedGroup);
+        pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
+                pw.print(" setIsForeground="); pw.print(setIsForeground);
+                pw.print(" foregroundServices="); pw.print(foregroundServices);
+                pw.print(" forcingToForeground="); pw.println(forcingToForeground);
+        pw.print(prefix); pw.print("persistent="); pw.print(persistent);
+                pw.print(" removed="); pw.print(removed);
+                pw.print(" persistentActivities="); pw.println(persistentActivities);
+        if (debugging || crashing || crashDialog != null || notResponding
+                || anrDialog != null || bad) {
+            pw.print(prefix); pw.print("debugging="); pw.print(debugging);
+                    pw.print(" crashing="); pw.print(crashing);
+                    pw.print(" "); pw.print(crashDialog);
+                    pw.print(" notResponding="); pw.print(notResponding);
+                    pw.print(" " ); pw.print(anrDialog);
+                    pw.print(" bad="); pw.print(bad);
+
+                    // crashing or notResponding is always set before errorReportReceiver
+                    if (errorReportReceiver != null) {
+                        pw.print(" errorReportReceiver=");
+                        pw.print(errorReportReceiver.flattenToShortString());
+                    }
+                    pw.println();
+        }
+        if (activities.size() > 0) {
+            pw.print(prefix); pw.print("activities="); pw.println(activities);
+        }
+        if (services.size() > 0) {
+            pw.print(prefix); pw.print("services="); pw.println(services);
+        }
+        if (executingServices.size() > 0) {
+            pw.print(prefix); pw.print("executingServices="); pw.println(executingServices);
+        }
+        if (connections.size() > 0) {
+            pw.print(prefix); pw.print("connections="); pw.println(connections);
+        }
+        if (pubProviders.size() > 0) {
+            pw.print(prefix); pw.print("pubProviders="); pw.println(pubProviders);
+        }
+        if (conProviders.size() > 0) {
+            pw.print(prefix); pw.print("conProviders="); pw.println(conProviders);
+        }
+        if (receivers.size() > 0) {
+            pw.print(prefix); pw.print("receivers="); pw.println(receivers);
+        }
     }
     
     ProcessRecord(BatteryStatsImpl.Uid.Proc _batteryStats, IApplicationThread _thread,
@@ -154,6 +213,11 @@ class ProcessRecord implements Watchdog.PssRequestor {
         persistentActivities = 0;
     }
 
+    public void setPid(int _pid) {
+        pid = _pid;
+        stringName = null;
+    }
+    
     /**
      * This method returns true if any of the activities within the process record are interesting
      * to the user. See HistoryRecord.isInterestingToUserLocked()
@@ -188,9 +252,20 @@ class ProcessRecord implements Watchdog.PssRequestor {
     }
     
     public String toString() {
-        return "ProcessRecord{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + pid + ":" + processName + "/" + info.uid + "}";
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("ProcessRecord{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        sb.append(pid);
+        sb.append(':');
+        sb.append(processName);
+        sb.append('/');
+        sb.append(info.uid);
+        sb.append('}');
+        return stringName = sb.toString();
     }
     
     /*

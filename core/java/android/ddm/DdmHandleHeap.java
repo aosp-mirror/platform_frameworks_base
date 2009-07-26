@@ -20,17 +20,20 @@ import org.apache.harmony.dalvik.ddmc.Chunk;
 import org.apache.harmony.dalvik.ddmc.ChunkHandler;
 import org.apache.harmony.dalvik.ddmc.DdmServer;
 import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
+import android.os.Debug;
 import android.util.Config;
 import android.util.Log;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * Handle thread-related traffic.
+ * Handle native and virtual heap requests.
  */
 public class DdmHandleHeap extends ChunkHandler {
 
     public static final int CHUNK_HPIF = type("HPIF");
     public static final int CHUNK_HPSG = type("HPSG");
+    public static final int CHUNK_HPDU = type("HPDU");
     public static final int CHUNK_NHSG = type("NHSG");
     public static final int CHUNK_HPGC = type("HPGC");
     public static final int CHUNK_REAE = type("REAE");
@@ -49,6 +52,7 @@ public class DdmHandleHeap extends ChunkHandler {
     public static void register() {
         DdmServer.registerHandler(CHUNK_HPIF, mInstance);
         DdmServer.registerHandler(CHUNK_HPSG, mInstance);
+        DdmServer.registerHandler(CHUNK_HPDU, mInstance);
         DdmServer.registerHandler(CHUNK_NHSG, mInstance);
         DdmServer.registerHandler(CHUNK_HPGC, mInstance);
         DdmServer.registerHandler(CHUNK_REAE, mInstance);
@@ -80,6 +84,8 @@ public class DdmHandleHeap extends ChunkHandler {
             return handleHPIF(request);
         } else if (type == CHUNK_HPSG) {
             return handleHPSGNHSG(request, false);
+        } else if (type == CHUNK_HPDU) {
+            return handleHPDU(request);
         } else if (type == CHUNK_NHSG) {
             return handleHPSGNHSG(request, true);
         } else if (type == CHUNK_HPGC) {
@@ -97,7 +103,7 @@ public class DdmHandleHeap extends ChunkHandler {
     }
 
     /*
-     * Handle a "HeaP InFo request".
+     * Handle a "HeaP InFo" request.
      */
     private Chunk handleHPIF(Chunk request) {
         ByteBuffer in = wrapChunk(request);
@@ -134,6 +140,40 @@ public class DdmHandleHeap extends ChunkHandler {
             //       right away, initiate a GC.
             return null;        // empty response
         }
+    }
+
+    /*
+     * Handle a "HeaP DUmp" request.
+     *
+     * This currently just returns a result code.  We could pull up
+     * the entire contents of the file and return them, but hprof dump
+     * files can be a few megabytes.
+     */
+    private Chunk handleHPDU(Chunk request) {
+        ByteBuffer in = wrapChunk(request);
+        byte result;
+
+        /* get the filename for the output file */
+        int len = in.getInt();
+        String fileName = getString(in, len);
+        if (Config.LOGD)
+            Log.d("ddm-heap", "Heap dump: file='" + fileName + "'");
+
+        try {
+            Debug.dumpHprofData(fileName);
+            result = 0;
+        } catch (UnsupportedOperationException uoe) {
+            Log.w("ddm-heap", "hprof dumps not supported in this VM");
+            result = -1;
+        } catch (IOException ioe) {
+            result = -1;
+        } catch (RuntimeException ioe) {
+            result = -1;
+        }
+
+        /* create a non-empty reply so the handler fires on completion */
+        byte[] reply = { result };
+        return new Chunk(CHUNK_HPDU, reply, 0, reply.length);
     }
 
     /*

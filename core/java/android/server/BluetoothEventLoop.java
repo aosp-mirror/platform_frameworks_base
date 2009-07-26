@@ -111,57 +111,27 @@ class BluetoothEventLoop {
         return mPasskeyAgentRequestData;
     }
 
-    private synchronized boolean waitForAndDispatchEvent(int timeout_ms) {
-        return waitForAndDispatchEventNative(timeout_ms);
-    }
-    private native boolean waitForAndDispatchEventNative(int timeout_ms);
+    private native void startEventLoopNative();
+    private native void stopEventLoopNative();
+    private native boolean isEventLoopRunningNative();
 
-    /* package */ synchronized void start() {
+    /* package */ void start() {
 
-        if (mThread != null) {
-            // Already running.
-            return;
-        }
-        mThread = new Thread("Bluetooth Event Loop") {
-                @Override
-                public void run() {
-                    try {
-                        if (setUpEventLoopNative()) {
-                            mStarted = true;
-                            while (!mInterrupted) {
-                                waitForAndDispatchEvent(0);
-                                sleep(500);
-                            }
-                        }
-                        // tear down even in the error case to clean
-                        // up anything we started to setup
-                        tearDownEventLoopNative();
-                    } catch (InterruptedException e) { }
-                    if (DBG) log("Event Loop thread finished");
-                    mThread = null;
-                }
-            };
-        if (DBG) log("Starting Event Loop thread");
-        mInterrupted = false;
-        mThread.start();
-    }
-    private native boolean setUpEventLoopNative();
-    private native void tearDownEventLoopNative();
-
-    public synchronized void stop() {
-        if (mThread != null) {
-            mInterrupted = true;
-            try {
-                mThread.join();
-                mThread = null;
-            } catch (InterruptedException e) {
-                Log.i(TAG, "Interrupted waiting for Event Loop thread to join");
-            }
+        if (!isEventLoopRunningNative()) {
+            if (DBG) log("Starting Event Loop thread");
+            startEventLoopNative();
         }
     }
 
-    public synchronized boolean isEventLoopRunning() {
-        return mThread != null && mStarted;
+    public void stop() {
+        if (isEventLoopRunningNative()) {
+            if (DBG) log("Stopping Event Loop thread");
+            stopEventLoopNative();
+        }
+    }
+
+    public boolean isEventLoopRunning() {
+        return isEventLoopRunningNative();
     }
 
     /*package*/ void onModeChanged(String bluezMode) {

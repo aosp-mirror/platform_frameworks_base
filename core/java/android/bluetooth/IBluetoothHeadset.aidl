@@ -31,4 +31,5 @@ interface IBluetoothHeadset {
     boolean stopVoiceRecognition();
     boolean setPriority(in String address, int priority);
     int getPriority(in String address);
+    int getBatteryUsageHint();
 }

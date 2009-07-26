@@ -16,17 +16,18 @@
 
 package com.android.server.am;
 
-import com.android.internal.app.IBatteryStats;
-import com.android.internal.os.BatteryStatsImpl;
-
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
-import android.util.PrintWriterPrinter;
+import android.util.Log;
+
+import com.android.internal.app.IBatteryStats;
+import com.android.internal.os.BatteryStatsImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -48,6 +49,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void publish(Context context) {
         mContext = context;
         ServiceManager.addService("batteryinfo", asBinder());
+    }
+    
+    public void shutdown() {
+        Log.w("BatteryStats", "Writing battery stats before shutdown...");
+        synchronized (mStats) {
+            mStats.writeLocked();
+        }
     }
     
     public static IBatteryStats getService() {
@@ -171,10 +179,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
     
-    public void notePhoneSignalStrength(int asu) {
+    public void notePhoneSignalStrength(SignalStrength signalStrength) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.notePhoneSignalStrengthLocked(asu);
+            mStats.notePhoneSignalStrengthLocked(signalStrength);
         }
     }
     
@@ -184,7 +192,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             mStats.notePhoneDataConnectionStateLocked(dataType, hasData);
         }
     }
-    
+
+    public void noteAirplaneMode(boolean airplaneMode) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteAirplaneModeLocked(airplaneMode);
+        }
+    }
+
     public void noteWifiOn(int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -196,6 +211,34 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteWifiOffLocked(uid);
+        }
+    }
+
+    public void noteStartAudio(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteAudioOnLocked(uid);
+        }
+    }
+
+    public void noteStopAudio(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteAudioOffLocked(uid);
+        }
+    }
+
+    public void noteStartVideo(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteVideoOnLocked(uid);
+        }
+    }
+
+    public void noteStopVideo(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteVideoOffLocked(uid);
         }
     }
 
@@ -255,6 +298,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
+    public void noteWifiMulticastEnabled(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiMulticastEnabledLocked(uid);
+        }
+    }
+
+    public void noteWifiMulticastDisabled(int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteWifiMulticastDisabledLocked(uid);
+        }
+    }
+
     public boolean isOnBattery() {
         return mStats.isOnBattery();
     }
@@ -262,6 +319,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void setOnBattery(boolean onBattery, int level) {
         enforceCallingPermission();
         mStats.setOnBattery(onBattery, level);
+    }
+    
+    public void recordCurrentLevel(int level) {
+        enforceCallingPermission();
+        mStats.recordCurrentLevel(level);
     }
     
     public long getAwakeTimeBattery() {
@@ -290,14 +352,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             boolean isCheckin = false;
             if (args != null) {
                 for (String arg : args) {
-                    if ("-c".equals(arg)) {
+                    if ("--checkin".equals(arg)) {
                         isCheckin = true;
                         break;
                     }
                 }
             }
             if (isCheckin) mStats.dumpCheckinLocked(pw, args);
-            else mStats.dumpLocked(new PrintWriterPrinter(pw));
+            else mStats.dumpLocked(pw);
         }
     }
 }

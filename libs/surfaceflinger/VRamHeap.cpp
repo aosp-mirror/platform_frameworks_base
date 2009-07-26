@@ -35,6 +35,8 @@
 #include <utils/MemoryHeapPmem.h>
 #include <utils/MemoryHeapBase.h>
 
+#include <EGL/eglnatives.h>
+
 #include "GPUHardware/GPUHardware.h"
 #include "SurfaceFlinger.h"
 #include "VRamHeap.h"
@@ -98,7 +100,7 @@ sp<MemoryDealer> SurfaceHeapManager::createHeap(
         }
     }
 
-    if (flags & ISurfaceComposer::eGPU) {
+    if ((flags & ISurfaceComposer::eGPU) && (mFlinger->getGPU() != 0)) {
         // FIXME: this is msm7201A specific, where gpu surfaces may not be secure
         if (!(flags & ISurfaceComposer::eSecure)) {
             // if GPU doesn't work, we try eHardware

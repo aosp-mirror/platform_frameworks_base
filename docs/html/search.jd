@@ -2,7 +2,7 @@ page.title=Search Results
 @jd:body
 
 <script src="http://www.google.com/jsapi" type="text/javascript"></script>
-<script src="/assets/jquery-history.js" type="text/javascript"></script>
+<script src="{@docRoot}assets/jquery-history.js" type="text/javascript"></script>
 <script type="text/javascript">
       google.load('search', '1');
 

@@ -92,7 +92,6 @@ AudioTrack::~AudioTrack()
         // Otherwise the callback thread will never exit.
         stop();
         if (mAudioTrackThread != 0) {
-            mCblk->cv.signal();
             mAudioTrackThread->requestExitAndWait();
             mAudioTrackThread.clear();
         }
@@ -117,7 +116,7 @@ status_t AudioTrack::set(
 
     LOGV_IF(sharedBuffer != 0, "sharedBuffer: %p, size: %d", sharedBuffer->pointer(), sharedBuffer->size());
 
-    if (mAudioFlinger != 0) {
+    if (mAudioTrack != 0) {
         LOGE("Track already in use");
         return INVALID_OPERATION;
     }
@@ -228,7 +227,6 @@ status_t AudioTrack::set(
 
     mStatus = NO_ERROR;
 
-    mAudioFlinger = audioFlinger;
     mAudioTrack = track;
     mCblkMemory = cblk;
     mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
@@ -245,7 +243,6 @@ status_t AudioTrack::set(
     mCblk->volume[0] = mCblk->volume[1] = 0x1000;
     mVolume[LEFT] = 1.0f;
     mVolume[RIGHT] = 1.0f;
-    mSampleRate = sampleRate;
     mStreamType = streamType;
     mFormat = format;
     mChannelCount = channelCount;
@@ -256,7 +253,7 @@ status_t AudioTrack::set(
     mNotificationFrames = notificationFrames;
     mRemainingFrames = notificationFrames;
     mUserData = user;
-    mLatency = afLatency + (1000*mFrameCount) / mSampleRate;
+    mLatency = afLatency + (1000*mFrameCount) / sampleRate;
     mLoopCount = 0;
     mMarkerPosition = 0;
     mMarkerReached = false;
@@ -281,11 +278,6 @@ uint32_t AudioTrack::latency() const
 int AudioTrack::streamType() const
 {
     return mStreamType;
-}
-
-uint32_t AudioTrack::sampleRate() const
-{
-    return mSampleRate;
 }
 
 int AudioTrack::format() const
@@ -357,6 +349,7 @@ void AudioTrack::stop()
     }
 
     if (android_atomic_and(~1, &mActive) == 1) {
+        mCblk->cv.signal();
         mAudioTrack->stop();
         // Cancel loops (If we are in the middle of a loop, playback
         // would not stop until loopCount reaches 0).
@@ -439,24 +432,23 @@ void AudioTrack::getVolume(float* left, float* right)
     *right = mVolume[RIGHT];
 }
 
-void AudioTrack::setSampleRate(int rate)
+status_t AudioTrack::setSampleRate(int rate)
 {
     int afSamplingRate;
 
     if (AudioSystem::getOutputSamplingRate(&afSamplingRate, mStreamType) != NO_ERROR) {
-        return;
+        return NO_INIT;
     }
     // Resampler implementation limits input sampling rate to 2 x output sampling rate.
-    if (rate <= 0) rate = 1;
-    if (rate > afSamplingRate*2) rate = afSamplingRate*2;
-    if (rate > MAX_SAMPLE_RATE) rate = MAX_SAMPLE_RATE;
+    if (rate <= 0 || rate > afSamplingRate*2 ) return BAD_VALUE;
 
-    mCblk->sampleRate = (uint16_t)rate;
+    mCblk->sampleRate = rate;
+    return NO_ERROR;
 }
 
 uint32_t AudioTrack::getSampleRate()
 {
-    return uint32_t(mCblk->sampleRate);
+    return mCblk->sampleRate;
 }
 
 status_t AudioTrack::setLoop(uint32_t loopStart, uint32_t loopEnd, int loopCount)
@@ -596,6 +588,7 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
     status_t result;
     audio_track_cblk_t* cblk = mCblk;
     uint32_t framesReq = audioBuffer->frameCount;
+    uint32_t waitTimeMs = (waitCount < 0) ? cblk->bufferTimeoutMs : WAIT_PERIOD_MS;
 
     audioBuffer->frameCount  = 0;
     audioBuffer->size = 0;
@@ -614,9 +607,9 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
             if (UNLIKELY(!waitCount))
                 return WOULD_BLOCK;
             timeout = 0;
-            result = cblk->cv.waitRelative(cblk->lock, milliseconds(WAIT_PERIOD_MS));
+            result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
             if (__builtin_expect(result!=NO_ERROR, false)) { 
-                cblk->waitTimeMs += WAIT_PERIOD_MS;
+                cblk->waitTimeMs += waitTimeMs;
                 if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
                     // timing out when a loop has been set and we have already written upto loop end
                     // is a normal condition: no need to wake AudioFlinger up.
@@ -798,7 +791,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         status_t err = obtainBuffer(&audioBuffer, 1);
         if (err < NO_ERROR) {
             if (err != TIMED_OUT) {
-                LOGE("Error obtaining an audio buffer, giving up.");
+                LOGE_IF(err != status_t(NO_MORE_BUFFERS), "Error obtaining an audio buffer, giving up.");
                 return false;
             }
             break;
@@ -866,7 +859,7 @@ status_t AudioTrack::dump(int fd, const Vector<String16>& args) const
     result.append(buffer);
     snprintf(buffer, 255, "  format(%d), channel count(%d), frame count(%d)\n", mFormat, mChannelCount, mFrameCount);
     result.append(buffer);
-    snprintf(buffer, 255, "  sample rate(%d), status(%d), muted(%d)\n", mSampleRate, mStatus, mMuted);
+    snprintf(buffer, 255, "  sample rate(%d), status(%d), muted(%d)\n", (mCblk == 0) ? 0 : mCblk->sampleRate, mStatus, mMuted);
     result.append(buffer);
     snprintf(buffer, 255, "  active(%d), latency (%d)\n", mActive, mLatency);
     result.append(buffer);

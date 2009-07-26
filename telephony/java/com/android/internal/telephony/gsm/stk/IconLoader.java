@@ -30,9 +30,9 @@ import android.util.Log;
 import java.util.HashMap;
 
 /**
- * Class for loading icons from the SIM card. Has two states: single, for loading 
+ * Class for loading icons from the SIM card. Has two states: single, for loading
  * one icon. Multi, for loading icons list.
- * 
+ *
  */
 class IconLoader extends Handler {
     // members
@@ -51,13 +51,13 @@ class IconLoader extends Handler {
 
     private static IconLoader sLoader = null;
 
-    // Loader state values. 
+    // Loader state values.
     private static final int STATE_SINGLE_ICON = 1;
     private static final int STATE_MULTI_ICONS = 2;
 
-    // Finished loading single record from a linear-fixed EF-IMG. 
+    // Finished loading single record from a linear-fixed EF-IMG.
     private static final int EVENT_READ_EF_IMG_RECOED_DONE  = 1;
-    // Finished loading single icon from a Transparent DF-Graphics. 
+    // Finished loading single icon from a Transparent DF-Graphics.
     private static final int EVENT_READ_ICON_DONE           = 2;
     // Finished loading single colour icon lookup table.
     private static final int EVENT_READ_CLUT_DONE           = 3;
@@ -170,10 +170,10 @@ class IconLoader extends Handler {
     }
 
     /**
-     * Handles Image descriptor parsing and required processing. This is the 
+     * Handles Image descriptor parsing and required processing. This is the
      * first step required to handle retrieving icons from the SIM.
-     * 
-     * @param data byte [] containing Image Instance descriptor as defined in 
+     *
+     * @param data byte [] containing Image Instance descriptor as defined in
      * TS 51.011.
      */
     private boolean handleImageDescriptor(byte[] rawData) {
@@ -232,7 +232,7 @@ class IconLoader extends Handler {
      * @param data The raw data
      * @param length The length of image body
      * @return The bitmap
-     */    
+     */
     public static Bitmap parseToBnW(byte[] data, int length){
         int valueIndex = 0;
         int width = data[valueIndex++] & 0xFF;
@@ -264,7 +264,7 @@ class IconLoader extends Handler {
      * 0 is black
      * 1 is white
      * @param bit to decode
-     * @return RGB color  
+     * @return RGB color
      */
     private static int bitToBnW(int bit){
         if(bit == 1){
@@ -276,11 +276,11 @@ class IconLoader extends Handler {
 
     /**
      * a TS 131.102 image instance of code scheme '11' into color Bitmap
-     * 
+     *
      * @param data The raw data
      * @param length the length of image body
      * @param transparency with or without transparency
-     * @param clut coulor lookup table 
+     * @param clut coulor lookup table
      * @return The color bitmap
      */
     public static Bitmap parseToRGB(byte[] data, int length,
@@ -321,9 +321,9 @@ class IconLoader extends Handler {
         return Bitmap.createBitmap(pixels, width, height,
                 Bitmap.Config.ARGB_8888);
     }
-    
+
     /**
-     * Calculate bit mask for a given number of bits. The mask should enable to 
+     * Calculate bit mask for a given number of bits. The mask should enable to
      * make a bitwise and to the given number of bits.
      * @param numOfBits number of bits to calculate mask for.
      * @return bit mask

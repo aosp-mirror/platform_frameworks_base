@@ -106,7 +106,7 @@ public class DialerKeyListener extends NumberKeyListener
      */
     public static final char[] CHARACTERS = new char[] {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '#', '*',
-            '+', '-', '(', ')', ',', '/', 'N', '.', ' '
+            '+', '-', '(', ')', ',', '/', 'N', '.', ' ', ';'
         };
 
     private static DialerKeyListener sInstance;

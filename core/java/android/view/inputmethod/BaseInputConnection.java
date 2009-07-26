@@ -297,6 +297,10 @@ public class BaseInputConnection implements InputConnection {
             b = tmp;
         }
 
+        if (a <= 0) {
+            return "";
+        }
+        
         if (length > a) {
             length = a;
         }
@@ -336,10 +340,19 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * The default implementation does nothing.
+     * The default implementation turns this into the enter key.
      */
     public boolean performEditorAction(int actionCode) {
-        return false;
+        long eventTime = SystemClock.uptimeMillis();
+        sendKeyEvent(new KeyEvent(eventTime, eventTime,
+                KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER, 0, 0, 0, 0,
+                KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE
+                | KeyEvent.FLAG_EDITOR_ACTION));
+        sendKeyEvent(new KeyEvent(SystemClock.uptimeMillis(), eventTime,
+                KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER, 0, 0, 0, 0,
+                KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE
+                | KeyEvent.FLAG_EDITOR_ACTION));
+        return true;
     }
 
     /**
@@ -488,12 +501,12 @@ public class BaseInputConnection implements InputConnection {
         } else {
             a = Selection.getSelectionStart(content);
             b = Selection.getSelectionEnd(content);
-            if (a >=0 && b>= 0 && a != b) {
-                if (b < a) {
-                    int tmp = a;
-                    a = b;
-                    b = tmp;
-                }
+            if (a < 0) a = 0;
+            if (b < 0) b = 0;
+            if (b < a) {
+                int tmp = a;
+                a = b;
+                b = tmp;
             }
         }
 

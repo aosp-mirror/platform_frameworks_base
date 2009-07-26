@@ -38,6 +38,12 @@ public class Build {
     /** The name of the underlying board, like "goldfish". */
     public static final String BOARD = getString("ro.product.board");
 
+    /** The name of the instruction set (CPU type + ABI convention) of native code. */
+    public static final String CPU_ABI = getString("ro.product.cpu.abi");
+
+    /** The manufacturer of the product/hardware. */
+    public static final String MANUFACTURER = getString("ro.product.manufacturer");
+
     /** The brand (e.g., carrier) the software is customized for, if any. */
     public static final String BRAND = getString("ro.product.brand");
 
@@ -59,11 +65,66 @@ public class Build {
         public static final String RELEASE = getString("ro.build.version.release");
 
         /**
-         * The user-visible SDK version of the framework. It is an integer starting at 1.
+         * The user-visible SDK version of the framework in its raw String
+         * representation; use {@link #SDK_INT} instead.
+         * 
+         * @deprecated Use {@link #SDK_INT} to easily get this as an integer.
          */
         public static final String SDK = getString("ro.build.version.sdk");
+
+        /**
+         * The user-visible SDK version of the framework; its possible
+         * values are defined in {@link Build.VERSION_CODES}.
+         */
+        public static final int SDK_INT = SystemProperties.getInt(
+                "ro.build.version.sdk", 0);
+
+        /**
+         * The current development codename, or the string "REL" if this is
+         * a release build.
+         */
+        public static final String CODENAME = getString("ro.build.version.codename");
     }
 
+    /**
+     * Enumeration of the currently known SDK version codes.  These are the
+     * values that can be found in {@link VERSION#SDK}.  Version numbers
+     * increment monotonically with each official platform release.
+     */
+    public static class VERSION_CODES {
+        /**
+         * Magic version number for a current development build, which has
+         * not yet turned into an official release.
+         */
+        public static final int CUR_DEVELOPMENT = 10000;
+        
+        /**
+         * October 2008: The original, first, version of Android.  Yay!
+         */
+        public static final int BASE = 1;
+        /**
+         * February 2009: First Android update, officially called 1.1.
+         */
+        public static final int BASE_1_1 = 2;
+        /**
+         * May 2009: Android 1.5.
+         */
+        public static final int CUPCAKE = 3;
+        /**
+         * Current work on "Donut" development branch.
+         * 
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li> They must explicitly request the
+         * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission to be
+         * able to modify the contents of the SD card.  (Apps targeting
+         * earlier versions will always request the permission.)
+         * </ul>
+         */
+        public static final int DONUT = CUR_DEVELOPMENT;
+    }
+    
     /** The type of build, like "user" or "eng". */
     public static final String TYPE = getString("ro.build.type");
 

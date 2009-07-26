@@ -23,17 +23,15 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 
-import com.android.internal.telephony.gsm.CommandsInterface;
-import com.android.internal.telephony.gsm.GsmSimCard;
+import com.android.internal.telephony.IccUtils;
+import com.android.internal.telephony.CommandsInterface;
+import com.android.internal.telephony.gsm.SimCard;
 import com.android.internal.telephony.gsm.SIMFileHandler;
 import com.android.internal.telephony.gsm.SIMRecords;
-import com.android.internal.telephony.gsm.SimUtils;
 
 import android.util.Config;
 
 import java.io.ByteArrayOutputStream;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Enumeration for representing the tag value of COMPREHENSION-TLV objects. If
@@ -115,10 +113,12 @@ class RilMessage {
  */
 public class StkService extends Handler implements AppInterface {
 
+    // Class members
+    private static SIMRecords mSimRecords;
+
     // Service members.
     private static StkService sInstance;
     private CommandsInterface mCmdIf;
-    private SIMRecords mSimRecords;
     private Context mContext;
     private StkCmdMessage mCurrntCmd = null;
     private StkCmdMessage mMenuCmd = null;
@@ -147,7 +147,7 @@ public class StkService extends Handler implements AppInterface {
 
     /* Intentionally private for singleton */
     private StkService(CommandsInterface ci, SIMRecords sr, Context context,
-            SIMFileHandler fh, GsmSimCard sc) {
+            SIMFileHandler fh, SimCard sc) {
         if (ci == null || sr == null || context == null || fh == null
                 || sc == null) {
             throw new NullPointerException(
@@ -170,6 +170,23 @@ public class StkService extends Handler implements AppInterface {
 
         // Register for SIM ready event.
         mSimRecords.registerForRecordsLoaded(this, MSG_ID_SIM_LOADED, null);
+
+        mCmdIf.reportStkServiceIsRunning(null);
+        StkLog.d(this, "StkService: is running");
+    }
+
+    public void dispose() {
+        mSimRecords.unregisterForRecordsLoaded(this);
+        mCmdIf.unSetOnStkSessionEnd(this);
+        mCmdIf.unSetOnStkProactiveCmd(this);
+        mCmdIf.unSetOnStkEvent(this);
+        mCmdIf.unSetOnStkCallSetUp(this);
+
+        this.removeCallbacksAndMessages(null);
+    }
+
+    protected void finalize() {
+        StkLog.d(this, "Service finalized");
     }
 
     private void handleRilMsg(RilMessage rilMsg) {
@@ -334,7 +351,7 @@ public class StkService extends Handler implements AppInterface {
         }
 
         byte[] rawData = buf.toByteArray();
-        String hexString = SimUtils.bytesToHexString(rawData);
+        String hexString = IccUtils.bytesToHexString(rawData);
         if (Config.LOGD) {
             StkLog.d(this, "TERMINAL RESPONSE: " + hexString);
         }
@@ -380,7 +397,7 @@ public class StkService extends Handler implements AppInterface {
         int len = rawData.length - 2; // minus (tag + length)
         rawData[1] = (byte) len;
 
-        String hexString = SimUtils.bytesToHexString(rawData);
+        String hexString = IccUtils.bytesToHexString(rawData);
 
         mCmdIf.sendEnvelope(hexString, null);
     }
@@ -423,13 +440,13 @@ public class StkService extends Handler implements AppInterface {
         int len = rawData.length - 2; // minus (tag + length)
         rawData[1] = (byte) len;
 
-        String hexString = SimUtils.bytesToHexString(rawData);
+        String hexString = IccUtils.bytesToHexString(rawData);
 
         mCmdIf.sendEnvelope(hexString, null);
     }
 
     /**
-     * Used for instantiating the Service from the GsmPhone constructor.
+     * Used for instantiating/updating the Service from the GsmPhone constructor.
      *
      * @param ci CommandsInterface object
      * @param sr SIMRecords object
@@ -439,7 +456,7 @@ public class StkService extends Handler implements AppInterface {
      * @return The only Service object in the system
      */
     public static StkService getInstance(CommandsInterface ci, SIMRecords sr,
-            Context context, SIMFileHandler fh, GsmSimCard sc) {
+            Context context, SIMFileHandler fh, SimCard sc) {
         if (sInstance == null) {
             if (ci == null || sr == null || context == null || fh == null
                     || sc == null) {
@@ -448,6 +465,17 @@ public class StkService extends Handler implements AppInterface {
             HandlerThread thread = new HandlerThread("Stk Telephony service");
             thread.start();
             sInstance = new StkService(ci, sr, context, fh, sc);
+            StkLog.d(sInstance, "NEW sInstance");
+        } else if ((sr != null) && (mSimRecords != sr)) {
+            StkLog.d(sInstance, String.format(
+                    "Reinitialize the Service with SIMRecords sr=0x%x.", sr));
+            mSimRecords = sr;
+
+            // re-Register for SIM ready event.
+            mSimRecords.registerForRecordsLoaded(sInstance, MSG_ID_SIM_LOADED, null);
+            StkLog.d(sInstance, "sr changed reinitialize and return current sInstance");
+        } else {
+            StkLog.d(sInstance, "Return current sInstance");
         }
         return sInstance;
     }
@@ -528,15 +556,15 @@ public class StkService extends Handler implements AppInterface {
     }
 
     private void handleCmdResponse(StkResponseMessage resMsg) {
-        // Make sure the response details match the last valid command. An invalid 
+        // Make sure the response details match the last valid command. An invalid
         // response is a one that doesn't have a corresponding proactive command
-        // and sending it can "confuse" the baseband/ril. 
-        // One reason for out of order responses can be UI glitches. For example, 
-        // if the application launch an activity, and that activity is stored  
+        // and sending it can "confuse" the baseband/ril.
+        // One reason for out of order responses can be UI glitches. For example,
+        // if the application launch an activity, and that activity is stored
         // by the framework inside the history stack. That activity will be
-        // available for relaunch using the latest application dialog 
-        // (long press on the home button). Relaunching that activity can send 
-        // the same command's result again to the StkService and can cause it to  
+        // available for relaunch using the latest application dialog
+        // (long press on the home button). Relaunching that activity can send
+        // the same command's result again to the StkService and can cause it to
         // get out of sync with the SIM.
         if (!validateResponse(resMsg)) {
             return;
@@ -589,7 +617,7 @@ public class StkService extends Handler implements AppInterface {
                 mCmdIf.handleCallSetupRequestFromSim(resMsg.usersConfirm, null);
                 // No need to send terminal response for SET UP CALL. The user's
                 // confirmation result is send back using a dedicated ril message
-                // invoked by the CommandInterface call above. 
+                // invoked by the CommandInterface call above.
                 mCurrntCmd = null;
                 return;
             }

@@ -19,7 +19,7 @@ package com.android.server;
 import android.content.Context;
 import android.hardware.ISensorService;
 import android.os.Binder;
-import android.os.ParcelFileDescriptor;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.util.Config;
@@ -101,7 +101,7 @@ class SensorService extends ISensorService.Stub {
         _sensors_control_init();
     }
     
-    public ParcelFileDescriptor getDataChanel() throws RemoteException {
+    public Bundle getDataChannel() throws RemoteException {
         return _sensors_control_open();
     }
     
@@ -190,7 +190,7 @@ class SensorService extends ISensorService.Stub {
     ArrayList<Listener> mListeners = new ArrayList<Listener>();
 
     private static native int _sensors_control_init();
-    private static native ParcelFileDescriptor _sensors_control_open();
+    private static native Bundle _sensors_control_open();
     private static native boolean _sensors_control_activate(int sensor, boolean activate);
     private static native int _sensors_control_set_delay(int ms);
     private static native int _sensors_control_wake();

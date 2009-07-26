@@ -16,13 +16,13 @@
 
 package com.android.internal.telephony;
 
-import com.android.internal.telephony.gsm.AdnRecordTest;
+import com.android.internal.telephony.AdnRecordTest;
 import com.android.internal.telephony.gsm.GSMPhoneTest;
-import com.android.internal.telephony.gsm.GsmAlphabetTest;
-import com.android.internal.telephony.gsm.SMSDispatcherTest;
-import com.android.internal.telephony.gsm.SimPhoneBookTest;
-import com.android.internal.telephony.gsm.SimSmsTest;
-import com.android.internal.telephony.gsm.SimUtilsTest;
+import com.android.internal.telephony.GsmAlphabetTest;
+import com.android.internal.telephony.SMSDispatcherTest;
+import com.android.internal.telephony.SimPhoneBookTest;
+import com.android.internal.telephony.SimSmsTest;
+import com.android.internal.telephony.SimUtilsTest;
 
 import junit.framework.TestSuite;
 

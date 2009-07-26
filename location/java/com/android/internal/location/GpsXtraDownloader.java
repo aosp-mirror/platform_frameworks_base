@@ -70,11 +70,11 @@ public class GpsXtraDownloader {
             if (server1 != null) mXtraServers[count++] = server1;
             if (server2 != null) mXtraServers[count++] = server2;
             if (server3 != null) mXtraServers[count++] = server3;
-        }
-        
-        // randomize first server
-        Random random = new Random();
-        mNextServerIndex = random.nextInt(count);
+
+            // randomize first server
+            Random random = new Random();
+            mNextServerIndex = random.nextInt(count);
+        }       
     }
 
     byte[] downloadXtraData() {

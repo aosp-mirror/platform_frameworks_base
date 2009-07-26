@@ -8,7 +8,7 @@ update site</a> in Eclipse, you can download the ADT zip file and install it
 from your computer (archived site) instead. 
 </p>
 <p>
-If you go with this method, in order to update the plugin, you will need to 
+If you use this approach, in order to update the plugin, you will need to 
 download the latest version from this page, uninstall the old version from 
 Eclipse, then install the new version. For more details on the procedure, 
 see Troubleshooting ADT Installation in the 
@@ -16,50 +16,60 @@ see Troubleshooting ADT Installation in the
 page</a>.
 </p>
 <p>
-<table>
+<table class="download">
   <tr>
-    <th>Version</th>
-    <th>File</th>
-    <th>Date</th>
-    <th>Compatible SDK Versions</th>
+    <th><nobr>ADT Version</nobr></th>
+    <th>Package</th>
+    <th>Size</th>
+    <th>Md5 Checksum</th>
     <th>Notes</th>
   </tr>
 
   <tr>
-     <td style="background-color:#ffcccc;">0.8.0</td>
-     <td style="background-color:#ffcccc;"><a href="http://dl-ssl.google.com/android/ADT-0.8.0.zip">ADT-0.8.0.zip</a></td>
-     <td style="background-color:#ffcccc;">23&nbsp;September&nbsp;2008</td>
-     <td style="background-color:#ffcccc;">Android&nbsp;1.1&nbsp;SDK,&nbsp;Release&nbsp;1<br />Android&nbsp;1.0&nbsp;SDK,&nbsp;Release&nbsp;1<br /></td>
-     <td style="background-color:#ffcccc;">Required for users of Android 1.1 SDK, Release&nbsp;1 and Android&nbsp;1.0&nbsp;SDK,&nbsp;Release&nbsp;1<br /> </td>
+     <td>0.9.1</td>
+     <td><a href="http://dl-ssl.google.com/android/ADT-0.9.1.zip">ADT-0.9.1.zip</a></td>
+     <td><nobr>2916093 bytes</nobr></td>
+     <td><nobr>e7b2ab40414ac98</nobr></td>
+     <td><nobr>Required for users of Android 1.5 SDK (and later releases). Updated from 0.9.0. <em><nobr>6 May 2009</nobr></em></td>
   </tr>
+  <tr class="alt-color">
+     <td>0.8.0</td>
+     <td><a href="http://dl-ssl.google.com/android/ADT-0.8.0.zip">ADT-0.8.0.zip</a></td>
+     <td colspan="2"><nobr>&nbsp;</nobr></td>
+     <td><nobr>Required for users of Android 1.1 SDK and Android 1.0 SDK. <em><nobr>23 Sep 2008</nobr></em></td>
+  </tr>
+</table>
+
+
+<h4>Older Versions of ADT</h4>
+
+<p>The table below lists older versions of the ADT Plugin that are no longer supported. If you are developing applications that are intended to be deployable to Android-powered devices, make sure that you upgrade to the most current SDK release available and use the most current version of the ADT Plugin, as listed in the section above.</p>
+
+<p>If you are not sure what version of ADT is installed in your Eclipse environment, open Eclipse and from the main menu select <strong>Help</strong> &gt; <strong>About Eclipse</strong> &gt; <strong>Features Details</strong>. Locate "com.android.ide.eclipse.adt" in the
+Feature ID column and look at its version number.</p>
+
+<table>
+  <tr>
+    <th><nobr>ADT Version</nobr></th>
+    <th>Notes</th>
+  </tr>
+
   <tr>
      <td>0.7.1</td>
-     <td><a href="http://dl-ssl.google.com/android/ADT-0.7.1.zip">ADT-0.7.1.zip</a></td>
-     <td>18 Aug 2008</td>
-     <td>Android 0.9 SDK beta</td>
      <td>Required for users of Android 0.9 SDK beta. As of this version, <b>Eclipse 3.2 is no longer supported.</b>
-     Please upgrade to Eclipse Ganymede (3.4) or Europa (3.3) if you are still using 3.2. </td>
+     Please upgrade to Eclipse Ganymede (3.4) or Europa (3.3) if you are still using 3.2. <em><nobr>18 Aug 2008</nobr></em></td>
   </tr>
   <tr>
      <td>0.4.0</td>
-     <td><a href="http://dl-ssl.google.com/android/ADT-0.4.0.zip">ADT-0.4.0.zip</a></td>
-     <td>12 Feb 2008</td>
-     <td>m5-rc14</td>
-     <td>Required if you are using the M5 SDK. See the SDK Release Notes for details on changes and enhancements in this version.</td>
+     <td>Required if you are using the M5 SDK. See the SDK Release Notes for details on changes and enhancements in this version. <em><nobr>12 Feb 2008</nobr></em></td>
   </tr>
   <tr>
      <td>0.3.3</td>
-     <td><a href="http://dl-ssl.google.com/android/ADT-0.3.3.zip">ADT-0.3.3.zip</a></td>
-     <td>14 Dec 2007</td>
-     <td>m3-rc37</td>
-     <td>Some significant enhancements (see SDK Release Notes).</td>
+     <td>Some significant enhancements (see m3-rc37 SDK Release Notes). <em><nobr>14 Dec 2007</nobr></em></td>
   </tr>
   <tr>
      <td>0.3.1</td>
-     <td><a href="http://dl-ssl.google.com/android/ADT-0.3.1.zip">ADT-0.3.1.zip</a></td>
-     <td>21 Nov 2007</td>
-     <td>m3-rc20, m3-rc22</td>
-     <td>Initial Release.</td>
+     <td>Initial Release. Required for Android m3-rc20 SDK and Android m3-rc22 SDK.<em><nobr>21 Nov 2007</nobr></em></td>
   </tr>
 </table>
 </p>

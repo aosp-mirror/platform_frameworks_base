@@ -314,7 +314,7 @@ status_t CameraHardwareStub::dump(int fd, const Vector<String16>& args) const
     String8 result;
     AutoMutex lock(&mLock);
     if (mFakeCamera != 0) {
-        mFakeCamera->dump(fd, args);
+        mFakeCamera->dump(fd);
         mParameters.dump(fd, args);
         snprintf(buffer, 255, " preview frame(%d), size (%d), running(%s)\n", mCurrentPreviewFrame, mPreviewFrameSize, mPreviewRunning?"true": "false");
         result.append(buffer);

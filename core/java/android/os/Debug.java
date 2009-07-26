@@ -16,10 +16,25 @@
 
 package android.os;
 
+import com.android.internal.util.TypedProperties;
+
+import android.util.Config;
+import android.util.Log;
+
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import org.apache.harmony.dalvik.ddmc.Chunk;
 import org.apache.harmony.dalvik.ddmc.ChunkHandler;
@@ -361,6 +376,28 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
             pathName = pathName + DEFAULT_TRACE_EXTENSION;
 
         VMDebug.startMethodTracing(pathName, bufferSize, flags);
+    }
+
+    /**
+     * Like startMethodTracing(String, int, int), but taking an already-opened
+     * FileDescriptor in which the trace is written.  The file name is also
+     * supplied simply for logging.  Makes a dup of the file descriptor.
+     * 
+     * Not exposed in the SDK unless we are really comfortable with supporting
+     * this and find it would be useful.
+     * @hide
+     */
+    public static void startMethodTracing(String traceName, FileDescriptor fd,
+        int bufferSize, int flags) {
+        VMDebug.startMethodTracing(traceName, fd, bufferSize, flags);
+    }
+
+    /**
+     * Determine whether method tracing is currently active.
+     * @hide
+     */
+    public static boolean isMethodTracingActive() {
+        return VMDebug.isMethodTracingActive();
     }
 
     /**
@@ -713,5 +750,232 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
             count += mCounts[Opcodes.OP_INVOKE_SUPER_QUICK_RANGE];
             return count;
         }
-    };
+    }
+
+
+    /**
+     * A Map of typed debug properties.
+     */
+    private static final TypedProperties debugProperties;
+
+    /*
+     * Load the debug properties from the standard files into debugProperties.
+     */
+    static {
+        if (Config.DEBUG) {
+            final String TAG = "DebugProperties";
+            final String[] files = { "/system/debug.prop", "/debug.prop", "/data/debug.prop" };
+            final TypedProperties tp = new TypedProperties();
+
+            // Read the properties from each of the files, if present.
+            for (String file : files) {
+                Reader r;
+                try {
+                    r = new FileReader(file);
+                } catch (FileNotFoundException ex) {
+                    // It's ok if a file is missing.
+                    continue;
+                }
+
+                try {
+                    tp.load(r);
+                } catch (Exception ex) {
+                    throw new RuntimeException("Problem loading " + file, ex);
+                } finally {
+                    try {
+                        r.close();
+                    } catch (IOException ex) {
+                        // Ignore this error.
+                    }
+                }
+            }
+
+            debugProperties = tp.isEmpty() ? null : tp;
+        } else {
+            debugProperties = null;
+        }
+    }
+
+
+    /**
+     * Returns true if the type of the field matches the specified class.
+     * Handles the case where the class is, e.g., java.lang.Boolean, but
+     * the field is of the primitive "boolean" type.  Also handles all of
+     * the java.lang.Number subclasses.
+     */
+    private static boolean fieldTypeMatches(Field field, Class<?> cl) {
+        Class<?> fieldClass = field.getType();
+        if (fieldClass == cl) {
+            return true;
+        }
+        Field primitiveTypeField;
+        try {
+            /* All of the classes we care about (Boolean, Integer, etc.)
+             * have a Class field called "TYPE" that points to the corresponding
+             * primitive class.
+             */
+            primitiveTypeField = cl.getField("TYPE");
+        } catch (NoSuchFieldException ex) {
+            return false;
+        }
+        try {
+            return fieldClass == (Class<?>) primitiveTypeField.get(null);
+        } catch (IllegalAccessException ex) {
+            return false;
+        }
+    }
+
+
+    /**
+     * Looks up the property that corresponds to the field, and sets the field's value
+     * if the types match.
+     */
+    private static void modifyFieldIfSet(final Field field, final TypedProperties properties,
+                                         final String propertyName) {
+        if (field.getType() == java.lang.String.class) {
+            int stringInfo = properties.getStringInfo(propertyName);
+            switch (stringInfo) {
+                case TypedProperties.STRING_SET:
+                    // Handle as usual below.
+                    break;
+                case TypedProperties.STRING_NULL:
+                    try {
+                        field.set(null, null);  // null object for static fields; null string
+                    } catch (IllegalAccessException ex) {
+                        throw new IllegalArgumentException(
+                            "Cannot set field for " + propertyName, ex);
+                    }
+                    return;
+                case TypedProperties.STRING_NOT_SET:
+                    return;
+                case TypedProperties.STRING_TYPE_MISMATCH:
+                    throw new IllegalArgumentException(
+                        "Type of " + propertyName + " " +
+                        " does not match field type (" + field.getType() + ")");
+                default:
+                    throw new IllegalStateException(
+                        "Unexpected getStringInfo(" + propertyName + ") return value " +
+                        stringInfo);
+            }
+        }
+        Object value = properties.get(propertyName);
+        if (value != null) {
+            if (!fieldTypeMatches(field, value.getClass())) {
+                throw new IllegalArgumentException(
+                    "Type of " + propertyName + " (" + value.getClass() + ") " +
+                    " does not match field type (" + field.getType() + ")");
+            }
+            try {
+                field.set(null, value);  // null object for static fields
+            } catch (IllegalAccessException ex) {
+                throw new IllegalArgumentException(
+                    "Cannot set field for " + propertyName, ex);
+            }
+        }
+    }
+
+
+    /**
+     * Equivalent to <code>setFieldsOn(cl, false)</code>.
+     *
+     * @see #setFieldsOn(Class, boolean)
+     *
+     * @hide
+     */
+    public static void setFieldsOn(Class<?> cl) {
+        setFieldsOn(cl, false);
+    }
+
+    /**
+     * Reflectively sets static fields of a class based on internal debugging
+     * properties.  This method is a no-op if android.util.Config.DEBUG is
+     * false.
+     * <p>
+     * <strong>NOTE TO APPLICATION DEVELOPERS</strong>: Config.DEBUG will
+     * always be false in release builds.  This API is typically only useful
+     * for platform developers.
+     * </p>
+     * Class setup: define a class whose only fields are non-final, static
+     * primitive types (except for "char") or Strings.  In a static block
+     * after the field definitions/initializations, pass the class to
+     * this method, Debug.setFieldsOn(). Example:
+     * <pre>
+     * package com.example;
+     *
+     * import android.os.Debug;
+     *
+     * public class MyDebugVars {
+     *    public static String s = "a string";
+     *    public static String s2 = "second string";
+     *    public static String ns = null;
+     *    public static boolean b = false;
+     *    public static int i = 5;
+     *    @Debug.DebugProperty
+     *    public static float f = 0.1f;
+     *    @@Debug.DebugProperty
+     *    public static double d = 0.5d;
+     *
+     *    // This MUST appear AFTER all fields are defined and initialized!
+     *    static {
+     *        // Sets all the fields
+     *        Debug.setFieldsOn(MyDebugVars.class);
+     * 
+     *        // Sets only the fields annotated with @Debug.DebugProperty
+     *        // Debug.setFieldsOn(MyDebugVars.class, true);
+     *    }
+     * }
+     * </pre>
+     * setFieldsOn() may override the value of any field in the class based
+     * on internal properties that are fixed at boot time.
+     * <p>
+     * These properties are only set during platform debugging, and are not
+     * meant to be used as a general-purpose properties store.
+     *
+     * {@hide}
+     *
+     * @param cl The class to (possibly) modify
+     * @param partial If false, sets all static fields, otherwise, only set
+     *        fields with the {@link android.os.Debug.DebugProperty}
+     *        annotation
+     * @throws IllegalArgumentException if any fields are final or non-static,
+     *         or if the type of the field does not match the type of
+     *         the internal debugging property value.
+     */
+    public static void setFieldsOn(Class<?> cl, boolean partial) {
+        if (Config.DEBUG) {
+            if (debugProperties != null) {
+                /* Only look for fields declared directly by the class,
+                 * so we don't mysteriously change static fields in superclasses.
+                 */
+                for (Field field : cl.getDeclaredFields()) {
+                    if (!partial || field.getAnnotation(DebugProperty.class) != null) {
+                        final String propertyName = cl.getName() + "." + field.getName();
+                        boolean isStatic = Modifier.isStatic(field.getModifiers());
+                        boolean isFinal = Modifier.isFinal(field.getModifiers());
+
+                        if (!isStatic || isFinal) {
+                            throw new IllegalArgumentException(propertyName +
+                                " must be static and non-final");
+                        }
+                        modifyFieldIfSet(field, debugProperties, propertyName);
+                    }
+                }
+            }
+        } else {
+            Log.w("android.os.Debug",
+                  "setFieldsOn(" + (cl == null ? "null" : cl.getName()) +
+                  ") called in non-DEBUG build");
+        }
+    }
+
+    /**
+     * Annotation to put on fields you want to set with
+     * {@link Debug#setFieldsOn(Class, boolean)}.
+     *
+     * @hide
+     */
+    @Target({ ElementType.FIELD })
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface DebugProperty {
+    }
 }

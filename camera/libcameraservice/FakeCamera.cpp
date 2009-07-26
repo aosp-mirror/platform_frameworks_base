@@ -1,11 +1,38 @@
+/*
+**
+** Copyright 2008, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License"); 
+** you may not use this file except in compliance with the License. 
+** You may obtain a copy of the License at 
+**
+**     http://www.apache.org/licenses/LICENSE-2.0 
+**
+** Unless required by applicable law or agreed to in writing, software 
+** distributed under the License is distributed on an "AS IS" BASIS, 
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+** See the License for the specific language governing permissions and 
+** limitations under the License.
+*/
+
 #define LOG_TAG "FakeCamera"
 #include <utils/Log.h>
 
 #include <string.h>
 #include <stdlib.h>
+#include <utils/String8.h>
+
 #include "FakeCamera.h"
 
+
 namespace android {
+
+// TODO: All this rgb to yuv should probably be in a util class.
+
+// TODO: I think something is wrong in this class because the shadow is kBlue
+// and the square color should alternate between kRed and kGreen. However on the
+// emulator screen these are all shades of gray. Y seems ok but the U and V are
+// probably not.
 
 static int tables_initialized = 0;
 uint8_t *gYTable, *gCbTable, *gCrTable;
@@ -389,7 +416,7 @@ void FakeCamera::drawCheckerboard(uint16_t *dst, int size)
 }
 
 
-status_t FakeCamera::dump(int fd, const Vector<String16>& args)
+void FakeCamera::dump(int fd) const
 {
     const size_t SIZE = 256;
     char buffer[SIZE];
@@ -397,7 +424,6 @@ status_t FakeCamera::dump(int fd, const Vector<String16>& args)
     snprintf(buffer, 255, " width x height (%d x %d), counter (%d), check x-y coordinate(%d, %d)\n", mWidth, mHeight, mCounter, mCheckX, mCheckY);
     result.append(buffer);
     ::write(fd, result.string(), result.size());
-    return NO_ERROR;
 }
 
 

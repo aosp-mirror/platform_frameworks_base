@@ -74,7 +74,19 @@ import android.media.AudioManager;
               break;
           }
       }
-      
+
+      for (type = ToneGenerator.TONE_SUP_INTERCEPT;
+      type <= ToneGenerator.TONE_SUP_PIP; type++) {
+          if (toneGen.startTone(type)) {
+              Thread.sleep(5000);
+              toneGen.stopTone();
+              Thread.sleep(200);
+          } else {
+              result = false;
+              break;
+          }
+      }
+
       toneGen.release();
       return result;
     }

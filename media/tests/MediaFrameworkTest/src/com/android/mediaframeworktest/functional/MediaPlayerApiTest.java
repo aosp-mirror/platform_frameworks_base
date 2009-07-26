@@ -26,6 +26,8 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.Suppress;
 
+import java.io.File;
+
 /**
  * Junit / Instrumentation test case for the media player api
  
@@ -118,7 +120,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean currentPosition = CodecTest.getCurrentPosition(MediaNames.MIDI);  
       assertTrue("MIDI GetCurrentPosition", currentPosition);  
     }
-   
+    
     @LargeTest
     public void testWMA9GetCurrentPosition() throws Exception {
       boolean currentPosition = CodecTest.getCurrentPosition(MediaNames.WMA9);  
@@ -303,7 +305,8 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean isEnd = CodecTest.seekToEnd(MediaNames.MIDI);  
       assertTrue("MIDI seekToEnd", isEnd);  
     }
-    
+
+    @Suppress
     @LargeTest
     public void testWMA9SeekToEnd() throws Exception {
       boolean isEnd = CodecTest.seekToEnd(MediaNames.WMA9);  
@@ -379,7 +382,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_H264_AMR);
       assertTrue("H264AMR SeekTo", isSeek);         
     }
-    
+   
     @LargeTest
     public void testVideoWMVSeekTo() throws Exception {
       boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_WMV);
@@ -401,7 +404,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     //Play a mid file which the duration is around 210 seconds
     @LargeTest
     public void testMidiResources() throws Exception {
-      boolean midiResources = CodecTest.resourcesPlayback(MediaFrameworkTest.midiafd,180000);
+      boolean midiResources = CodecTest.resourcesPlayback(MediaFrameworkTest.midiafd,16000);
       assertTrue("Play midi from resources", midiResources);         
     }
     
@@ -413,7 +416,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @MediumTest
     public void testPrepareAsyncReset() throws Exception {
-      boolean isReset = CodecTest.prepareAsyncReset(MediaNames.STREAM_LARGE_MP3);
+      boolean isReset = CodecTest.prepareAsyncReset(MediaNames.STREAM_MP3);
       assertTrue("PrepareAsync Reset", isReset);         
     }
     
@@ -432,15 +435,46 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     @LargeTest
     public void testLocalMp3PrepareAsyncCallback() throws Exception {
         boolean onPrepareSuccess = 
-            CodecTest.prepareAsyncCallback(MediaNames.VIDEO_H263_AMR);
+            CodecTest.prepareAsyncCallback(MediaNames.VIDEO_H263_AMR, false);
         assertTrue("LocalMp3prepareAsyncCallback", onPrepareSuccess);
     }
     
     @LargeTest
     public void testStreamPrepareAsyncCallback() throws Exception {
         boolean onPrepareSuccess = 
-            CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k);
+            CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k, false);
         assertTrue("StreamH264PrepareAsyncCallback", onPrepareSuccess);
     }
-}
+    
+    @LargeTest
+    public void testStreamPrepareAsyncCallbackReset() throws Exception {
+        boolean onPrepareSuccess = 
+            CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k, true);
+        assertTrue("StreamH264PrepareAsyncCallback", onPrepareSuccess);
+    }
 
+    //Provide a tool to play all kinds of media files in a directory
+    @Suppress
+    @LargeTest
+    public void testMediaSamples() throws Exception {
+        // load directory files
+        boolean onCompleteSuccess = false;
+        File dir = new File(MediaNames.MEDIA_SAMPLE_POOL);
+        String[] children = dir.list();
+        if (children == null) {
+            Log.v("MediaPlayerApiTest:testMediaSamples", "dir is empty");
+            return;
+        } else {
+            for (int i = 0; i < children.length; i++) {
+                //Get filename of directory
+                String filename = children[i];
+                Log.v("MediaPlayerApiTest",
+                    "testMediaSamples: file to be played: "
+                    + dir + "/" + filename);
+                onCompleteSuccess =
+                    CodecTest.playMediaSamples(dir + "/" + filename);
+                assertTrue("testMediaSamples", onCompleteSuccess);
+            }
+       }
+    }
+}

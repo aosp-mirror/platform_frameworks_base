@@ -16,37 +16,41 @@
 
 package android.telephony;
 
-import com.android.internal.telephony.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 
+import com.android.internal.telephony.IPhoneSubInfo;
+import com.android.internal.telephony.ITelephony;
+import com.android.internal.telephony.ITelephonyRegistry;
+import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneFactory;
+import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.TelephonyProperties;
+
+import java.util.List;
 
 /**
  * Provides access to information about the telephony services on
  * the device. Applications can use the methods in this class to
  * determine telephony services and states, as well as to access some
- * types of subscriber information. Applications can also register 
- * a listener to receive notification of telephony state changes. 
+ * types of subscriber information. Applications can also register
+ * a listener to receive notification of telephony state changes.
  * <p>
  * You do not instantiate this class directly; instead, you retrieve
- * a reference to an instance through 
+ * a reference to an instance through
  * {@link android.content.Context#getSystemService
  * Context.getSystemService(Context.TELEPHONY_SERVICE)}.
  * <p>
  * Note that acess to some telephony information is
- * permission-protected. Your application cannot access the protected 
- * information unless it has the appropriate permissions declared in 
- * its manifest file. Where permissions apply, they are noted in the  
- * the methods through which you access the protected information. 
+ * permission-protected. Your application cannot access the protected
+ * information unless it has the appropriate permissions declared in
+ * its manifest file. Where permissions apply, they are noted in the
+ * the methods through which you access the protected information.
  */
 public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
@@ -154,10 +158,10 @@ public class TelephonyManager {
     //
 
     /**
-     * Returns the software version number for the device, for example, 
+     * Returns the software version number for the device, for example,
      * the IMEI/SV for GSM phones.
      *
-     * <p>Requires Permission: 
+     * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getDeviceSoftwareVersion() {
@@ -169,10 +173,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the unique device ID, for example,the IMEI for GSM
+     * Returns the unique device ID, for example, the IMEI for GSM and the MEID for CDMA
      * phones.
      *
-     * <p>Requires Permission: 
+     * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getDeviceId() {
@@ -186,8 +190,9 @@ public class TelephonyManager {
     /**
      * Returns the current location of the device.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#ACCESS_COARSE_LOCATION
-     * ACCESS_COARSE_LOCATION}.
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_FINE_LOCATION}.
      */
     public CellLocation getCellLocation() {
         try {
@@ -202,7 +207,7 @@ public class TelephonyManager {
      * Enables location update notifications.  {@link PhoneStateListener#onCellLocationChanged
      * PhoneStateListener.onCellLocationChanged} will be called on location updates.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#CONTROL_LOCATION_UPDATES 
+     * <p>Requires Permission: {@link android.Manifest.permission#CONTROL_LOCATION_UPDATES
      * CONTROL_LOCATION_UPDATES}
      *
      * @hide
@@ -232,10 +237,10 @@ public class TelephonyManager {
 
     /**
      * Returns the neighboring cell information of the device.
-     * 
+     *
      * @return List of NeighboringCellInfo or null if info unavailable.
-     * 
-     * <p>Requires Permission: 
+     *
+     * <p>Requires Permission:
      * (@link android.Manifest.permission#ACCESS_COARSE_UPDATES}
      */
     public List<NeighboringCellInfo> getNeighboringCellInfo() {
@@ -244,37 +249,77 @@ public class TelephonyManager {
        } catch (RemoteException ex) {
        }
        return null;
-       
+
     }
-    
+
     /**
      * No phone module
+     *
      */
     public static final int PHONE_TYPE_NONE = 0;
 
     /**
      * GSM phone
      */
-    public static final int PHONE_TYPE_GSM = 1;
+    public static final int PHONE_TYPE_GSM = RILConstants.GSM_PHONE;
 
     /**
-     * Returns a constant indicating the device phone type. 
-     * 
+     * CDMA phone
+     * @hide
+     */
+    public static final int PHONE_TYPE_CDMA = RILConstants.CDMA_PHONE;
+
+    /**
+     * Returns a constant indicating the device phone type.
+     *
      * @see #PHONE_TYPE_NONE
      * @see #PHONE_TYPE_GSM
+     * @see #PHONE_TYPE_CDMA
      */
     public int getPhoneType() {
-        // in the future, we should really check this
-        return PHONE_TYPE_GSM;
+        try{
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if(telephony.getActivePhoneType() == RILConstants.CDMA_PHONE) {
+                    return PHONE_TYPE_CDMA;
+                } else {
+                    return PHONE_TYPE_GSM;
+                }
+            } else {
+                // This can happen when the ITelephony interface is not up yet.
+                return getPhoneTypeFromProperty();
+            }
+        } catch(RemoteException ex){
+            // This shouldn't happen in the normal case, as a backup we
+            // read from the system property.
+            return getPhoneTypeFromProperty();
+        }
     }
 
+
+    private int getPhoneTypeFromProperty() {
+        int type =
+            SystemProperties.getInt(TelephonyProperties.CURRENT_ACTIVE_PHONE,
+                    getPhoneTypeFromNetworkType());
+        return type;
+    }
+
+    private int getPhoneTypeFromNetworkType() {
+        // When the system property CURRENT_ACTIVE_PHONE, has not been set,
+        // use the system property for default network type.
+        // This is a fail safe, and can only happen at first boot.
+        int mode = SystemProperties.getInt("ro.telephony.default_network", -1);
+        if (mode == -1)
+            return PHONE_TYPE_NONE;
+        return PhoneFactory.getPhoneType(mode);
+    }
     //
-    // 
+    //
     // Current Network
     //
     //
 
-    /** 
+    /**
      * Returns the alphabetic name of current registered operator.
      * <p>
      * Availability: Only when user is registered to a network
@@ -283,7 +328,7 @@ public class TelephonyManager {
         return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ALPHA);
     }
 
-    /** 
+    /**
      * Returns the numeric name (MCC+MNC) of current registered operator.
      * <p>
      * Availability: Only when user is registered to a network
@@ -292,7 +337,7 @@ public class TelephonyManager {
         return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC);
     }
 
-    /**  
+    /**
      * Returns true if the device is considered roaming on the current
      * network, for GSM purposes.
      * <p>
@@ -302,7 +347,7 @@ public class TelephonyManager {
         return "true".equals(SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ISROAMING));
     }
 
-    /** 
+    /**
      * Returns the ISO country code equivilent of the current registered
      * operator's MCC (Mobile Country Code).
      * <p>
@@ -320,9 +365,20 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_EDGE = 2;
     /** Current network is UMTS */
     public static final int NETWORK_TYPE_UMTS = 3;
+    /** Current network is CDMA: Either IS95A or IS95B*/
+    /** @hide */
+    public static final int NETWORK_TYPE_CDMA = 4;
+    /** Current network is EVDO revision 0 or revision A*/
+    /** @hide */
+    public static final int NETWORK_TYPE_EVDO_0 = 5;
+    /** @hide */
+    public static final int NETWORK_TYPE_EVDO_A = 6;
+    /** Current network is 1xRTT*/
+    /** @hide */
+    public static final int NETWORK_TYPE_1xRTT = 7;
 
     /**
-     * Returns a constant indicating the radio technology (network type) 
+     * Returns a constant indicating the radio technology (network type)
      * currently in use on the device.
      * @return the network type
      *
@@ -330,6 +386,10 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_GPRS
      * @see #NETWORK_TYPE_EDGE
      * @see #NETWORK_TYPE_UMTS
+     * @see #NETWORK_TYPE_CDMA
+     * @see #NETWORK_TYPE_EVDO_0
+     * @see #NETWORK_TYPE_EVDO_A
+     * @see #NETWORK_TYPE_1xRTT
      */
     public int getNetworkType() {
         String prop = SystemProperties.get(TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE);
@@ -342,6 +402,18 @@ public class TelephonyManager {
         else if ("UMTS".equals(prop)) {
             return NETWORK_TYPE_UMTS;
         }
+        else if ("CDMA".equals(prop)) {
+            return NETWORK_TYPE_CDMA;
+                }
+        else if ("CDMA - EvDo rev. 0".equals(prop)) {
+            return NETWORK_TYPE_EVDO_0;
+            }
+        else if ("CDMA - EvDo rev. A".equals(prop)) {
+            return NETWORK_TYPE_EVDO_A;
+            }
+        else if ("CDMA - 1xRTT".equals(prop)) {
+            return NETWORK_TYPE_1xRTT;
+            }
         else {
             return NETWORK_TYPE_UNKNOWN;
         }
@@ -362,6 +434,14 @@ public class TelephonyManager {
                 return "EDGE";
             case NETWORK_TYPE_UMTS:
                 return "UMTS";
+            case NETWORK_TYPE_CDMA:
+                return "CDMA";
+            case NETWORK_TYPE_EVDO_0:
+                return "CDMA - EvDo rev. 0";
+            case NETWORK_TYPE_EVDO_A:
+                return "CDMA - EvDo rev. A";
+            case NETWORK_TYPE_1xRTT:
+                return "CDMA - 1xRTT";
             default:
                 return "UNKNOWN";
         }
@@ -375,7 +455,7 @@ public class TelephonyManager {
 
     /** SIM card state: Unknown. Signifies that the SIM is in transition
      *  between states. For example, when the user inputs the SIM pin
-     *  under PIN_REQUIRED state, a query for sim status returns 
+     *  under PIN_REQUIRED state, a query for sim status returns
      *  this state before turning to SIM_STATE_READY. */
     public static final int SIM_STATE_UNKNOWN = 0;
     /** SIM card state: no SIM card is available in the device */
@@ -388,11 +468,11 @@ public class TelephonyManager {
     public static final int SIM_STATE_NETWORK_LOCKED = 4;
     /** SIM card state: Ready */
     public static final int SIM_STATE_READY = 5;
-    
-    /** 
-     * Returns a constant indicating the state of the 
+
+    /**
+     * Returns a constant indicating the state of the
      * device SIM card.
-     * 
+     *
      * @see #SIM_STATE_UNKNOWN
      * @see #SIM_STATE_ABSENT
      * @see #SIM_STATE_PIN_REQUIRED
@@ -422,7 +502,7 @@ public class TelephonyManager {
         }
     }
 
-    /** 
+    /**
      * Returns the MCC+MNC (mobile country code + mobile network code) of the
      * provider of the SIM. 5 or 6 decimal digits.
      * <p>
@@ -431,36 +511,36 @@ public class TelephonyManager {
      * @see #getSimState
      */
     public String getSimOperator() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_SIM_OPERATOR_NUMERIC);
+        return SystemProperties.get(TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC);
     }
 
-    /** 
-     * Returns the Service Provider Name (SPN). 
+    /**
+     * Returns the Service Provider Name (SPN).
      * <p>
      * Availability: SIM state must be {@link #SIM_STATE_READY}
      *
      * @see #getSimState
      */
     public String getSimOperatorName() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_SIM_OPERATOR_ALPHA);
+        return SystemProperties.get(TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA);
     }
 
-    /** 
+    /**
      * Returns the ISO country code equivalent for the SIM provider's country code.
      */
     public String getSimCountryIso() {
-        return SystemProperties.get(TelephonyProperties.PROPERTY_SIM_OPERATOR_ISO_COUNTRY);
+        return SystemProperties.get(TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY);
     }
 
     /**
      * Returns the serial number of the SIM, if applicable.
      * <p>
-     * Requires Permission: 
+     * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getSimSerialNumber() {
         try {
-            return getSubscriberInfo().getSimSerialNumber();
+            return getSubscriberInfo().getIccSerialNumber();
         } catch (RemoteException ex) {
         }
         return null;
@@ -475,7 +555,7 @@ public class TelephonyManager {
     /**
      * Returns the unique subscriber ID, for example, the IMSI for a GSM phone.
      * <p>
-     * Requires Permission: 
+     * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getSubscriberId() {
@@ -487,10 +567,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the phone number string for line 1, for example, the MSISDN 
+     * Returns the phone number string for line 1, for example, the MSISDN
      * for a GSM phone.
      * <p>
-     * Requires Permission: 
+     * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getLine1Number() {
@@ -502,9 +582,9 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the alphabetic identifier associated with the line 1 number. 
+     * Returns the alphabetic identifier associated with the line 1 number.
      * <p>
-     * Requires Permission: 
+     * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * @hide
      * nobody seems to call this.
@@ -520,7 +600,7 @@ public class TelephonyManager {
     /**
      * Returns the voice mail number.
      * <p>
-     * Requires Permission: 
+     * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getVoiceMailNumber() {
@@ -532,10 +612,25 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns the voice mail count.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * @hide
+     */
+    public int getVoiceMessageCount() {
+        try {
+            return getITelephony().getVoiceMessageCount();
+        } catch (RemoteException ex) {
+        }
+        return 0;
+    }
+
+    /**
      * Retrieves the alphabetic identifier associated with the voice
      * mail number.
      * <p>
-     * Requires Permission: 
+     * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getVoiceMailAlphaTag() {
@@ -555,10 +650,10 @@ public class TelephonyManager {
     /** Device call state: No activity. */
     public static final int CALL_STATE_IDLE = 0;
     /** Device call state: Ringing. A new call arrived and is
-     *  ringing or waiting. In the latter case, another call is 
+     *  ringing or waiting. In the latter case, another call is
      *  already active. */
     public static final int CALL_STATE_RINGING = 1;
-    /** Device call state: Off-hook. At least one call exists 
+    /** Device call state: Off-hook. At least one call exists
       * that is dialing, active, or on hold, and no calls are ringing
       * or waiting. */
     public static final int CALL_STATE_OFFHOOK = 2;
@@ -572,7 +667,10 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return CALL_STATE_IDLE;
-        }
+        } catch (NullPointerException ex) {
+          // the phone process is restarting.
+          return CALL_STATE_IDLE;
+      }
     }
 
     /** Data connection activity: No traffic. */
@@ -584,6 +682,11 @@ public class TelephonyManager {
     /** Data connection activity: Currently both sending and receiving
      *  IP PPP traffic. */
     public static final int DATA_ACTIVITY_INOUT = DATA_ACTIVITY_IN | DATA_ACTIVITY_OUT;
+    /**
+     * Data connection is active, but physical link is down
+     * @hide
+     */
+    public static final int DATA_ACTIVITY_DORMANT = 0x00000004;
 
     /**
      * Returns a constant indicating the type of activity on a data connection
@@ -593,6 +696,7 @@ public class TelephonyManager {
      * @see #DATA_ACTIVITY_IN
      * @see #DATA_ACTIVITY_OUT
      * @see #DATA_ACTIVITY_INOUT
+     * @see #DATA_ACTIVITY_DORMANT
      */
     public int getDataActivity() {
         try {
@@ -600,7 +704,10 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return DATA_ACTIVITY_NONE;
-        }
+        } catch (NullPointerException ex) {
+          // the phone process is restarting.
+          return DATA_ACTIVITY_NONE;
+      }
     }
 
     /** Data connection state: Disconnected. IP traffic not available. */
@@ -609,13 +716,13 @@ public class TelephonyManager {
     public static final int DATA_CONNECTING     = 1;
     /** Data connection state: Connected. IP traffic should be available. */
     public static final int DATA_CONNECTED      = 2;
-    /** Data connection state: Suspended. The connection is up, but IP 
-     * traffic is temporarily unavailable. For example, in a 2G network, 
+    /** Data connection state: Suspended. The connection is up, but IP
+     * traffic is temporarily unavailable. For example, in a 2G network,
      * data activity may be suspended when a voice call arrives. */
     public static final int DATA_SUSPENDED      = 3;
 
     /**
-     * Returns a constant indicating the current data connection state 
+     * Returns a constant indicating the current data connection state
      * (cellular).
      *
      * @see #DATA_DISCONNECTED
@@ -643,26 +750,26 @@ public class TelephonyManager {
     //
 
     /**
-     * Registers a listener object to receive notification of changes 
-     * in specified telephony states. 
+     * Registers a listener object to receive notification of changes
+     * in specified telephony states.
      * <p>
      * To register a listener, pass a {@link PhoneStateListener}
-     * and specify at least one telephony state of interest in 
-     * the events argument. 
-     * 
+     * and specify at least one telephony state of interest in
+     * the events argument.
+     *
      * At registration, and when a specified telephony state
-     * changes, the telephony manager invokes the appropriate 
-     * callback method on the listener object and passes the 
+     * changes, the telephony manager invokes the appropriate
+     * callback method on the listener object and passes the
      * current (udpated) values.
      * <p>
      * To unregister a listener, pass the listener object and set the
-     * events argument to 
+     * events argument to
      * {@link PhoneStateListener#LISTEN_NONE LISTEN_NONE} (0).
-     * 
+     *
      * @param listener The {@link PhoneStateListener} object to register
      *                 (or unregister)
      * @param events The telephony state(s) of interest to the listener,
-     *               as a bitwise-OR combination of {@link PhoneStateListener} 
+     *               as a bitwise-OR combination of {@link PhoneStateListener}
      *               LISTEN_ flags.
      */
     public void listen(PhoneStateListener listener, int events) {
@@ -672,6 +779,50 @@ public class TelephonyManager {
             mRegistry.listen(pkgForDebug, listener.callback, events, notifyNow);
         } catch (RemoteException ex) {
             // system process dead
+        }
+    }
+
+    /**
+     * Returns the CDMA ERI icon index to display
+     *
+     * @hide
+     */
+    public int getCdmaEriIconIndex() {
+        try {
+            return getITelephony().getCdmaEriIconIndex();
+        } catch (RemoteException ex) {
+            // the phone process is restarting.
+            return -1;
+        }
+    }
+
+    /**
+     * Returns the CDMA ERI icon mode,
+     * 0 - ON
+     * 1 - FLASHING
+     *
+     * @hide
+     */
+    public int getCdmaEriIconMode() {
+        try {
+            return getITelephony().getCdmaEriIconMode();
+        } catch (RemoteException ex) {
+            // the phone process is restarting.
+            return -1;
+        }
+    }
+
+    /**
+     * Returns the CDMA ERI text,
+     *
+     * @hide
+     */
+    public String getCdmaEriText() {
+        try {
+            return getITelephony().getCdmaEriText();
+        } catch (RemoteException ex) {
+            // the phone process is restarting.
+            return null;
         }
     }
 }

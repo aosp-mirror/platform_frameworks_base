@@ -70,8 +70,8 @@ and each View is responsible for drawing itself.
     enclose its content (plus padding).</li>
    </ul>
   <p>There are subclasses of LayoutParams for different subclasses of ViewGroup.
-   For example, AbsoluteLayout has its own subclass of LayoutParams which adds
-   an X and Y value.
+   For example, RelativeLayout has its own subclass of LayoutParams, which includes
+   the ability to center child Views horizontally and vertically.
    </p>
    
    <p>

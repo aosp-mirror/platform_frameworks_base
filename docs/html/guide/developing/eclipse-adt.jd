@@ -1,193 +1,393 @@
-page.title=In Eclipse, with ADT
+page.title=Developing In Eclipse, with ADT
 @jd:body
 
-<p>The Android Development Tools (ADT) plugin for Eclipse adds powerful extensions to the Eclipse integrated development environment. It allows you to create and debug Android applications easier and faster. If you use Eclipse, the ADT plugin gives you an incredible boost in developing Android applications:</p>
+<div id="qv-wrapper">
+  <div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#CreatingAProject">Creating an Android Project</a></li>
+    <li><a href="#Running">Running Your Application</a>
+      <ol>
+        <li><a href="#CreatingAnAvd">Creating an AVD</a></li>
+        <li><a href="#RunningAnApplication">Running an application</a></li>
+      </ol>
+    </li>
+    <li><a href="#RunConfig">Creating a Custom Run Configuration</a></li>
+    <li><a href="#Signing">Setting Up Application Signing</a></li>
+    <li><a href="#Tips">Eclipse Tips</a></li>
+  </div>
+</div>
+
+
+<p>The Android Development Tools (ADT) plugin for Eclipse adds powerful extensions to the Eclipse 
+integrated development environment. It allows you to create and debug Android applications easier 
+and faster. If you use Eclipse, the ADT plugin gives you an incredible boost in developing Android 
+applications:</p>
 
 <ul>
-  <li>It gives you access to other Android development tools from inside the Eclipse IDE. For example, ADT lets you access the many capabilities of the DDMS tool: take screenshots, manage port-forwarding, set breakpoints, and view thread and process informationd irectly from Eclipse.</li>
-  <li>It provides a New Project Wizard, which helps you quickly create and set up all of the basic files you'll need for a new Android application.</li>
+  <li>It gives you access to other Android development tools from inside the Eclipse IDE. For 
+example, ADT lets you access the many capabilities of the DDMS tool: take screenshots, manage 
+port-forwarding, set breakpoints, and view thread and process informationd irectly from Eclipse.</li>
+  <li>It provides a New Project Wizard, which helps you quickly create and set up all of the 
+basic files you'll need for a new Android application.</li>
   <li>It automates and simplifies the process of building your Android application.</li>
-  <li>It provides an Android code editor that helps you write valid XML for your Android manifest and resource files.</li>
+  <li>It provides an Android code editor that helps you write valid XML for your Android 
+manifest and resource files.</li>
+  <li>It will even export your project into a signed APK, which can be distributed to users.</li>
 </ul>
 
-<p>To begin developing Android applications in the Eclipse IDE with ADT, you first need to download the Eclipse IDE and then download and install the ADT plugin. To do so, follow the steps given in <a href="{@docRoot}sdk/1.1_r1/installing.html#installingplugin">Installing the ADT Plugin</a>, in the installation documentation included with your SDK package. </p>
+<p>To begin developing Android applications in the Eclipse IDE with ADT, you first need to 
+download the Eclipse IDE and then download and install the ADT plugin. To do so, follow the 
+steps given in <a href="{@docRoot}sdk/{@sdkCurrent}/installing.html#installingplugin">Installing 
+the ADT Plugin</a>.</p>
 
-<p>Once you've installed the ADT plugin, you begin by creating an Android 
-project and then set up a launch configuration. After that, you can write, run, and debug 
-your application.  </p>
+<p>If you are already developing applications using a version of ADT earlier than 0.9, make
+sure to upgrade to the latest version before continuing. See the guide to
+<a href="{@docRoot}sdk/{@sdkCurrent}/upgrading.html#UpdateAdt">Updating Your Eclipse ADT Plugin</a>.</p>
 
-<p>The sections below provide instructions assuming that you have installed the ADT plugin 
-in your Eclipse environment. If you haven't installed the ADT plugin, you should do that 
-before using the instructions below. </p>
+<p class="note"><strong>Note:</strong> This guide assumes you are using the latest version of
+the ADT plugin. While most of the information covered also applies to previous 
+versions, if you are using an older version, you may want to consult this document from
+the set of documentation included in your SDK package (instead of the online version).</p>
 
-<a name="creatingaproject" id="creatingaproject"></a>
 
-<h2>Creating an Android Project</h2>
+<h2  id="CreatingAProject">Creating an Android Project</h2>
 
-<p>The ADT plugin provides a New Project Wizard that you can use to quickly create an 
-Eclipse project for new or existing code. To create the project, follow these steps:</p>
-
-<a name="existingcode"></a>
+<p>The ADT plugin provides a New Project Wizard that you can use to quickly create a new
+Android project (or a project from existing code). To create a new project:</p>
 
 <ol>
-    <li>Select <strong>File</strong> &gt; <strong>New</strong> &gt; <strong>Project</strong></li>
-    <li>Select <strong>Android</strong> &gt; <strong>Android Project</strong>, and press <strong>Next</strong></li>
-    <li>Select the contents for the project:
-		<ul>
-			<li>Select <strong>Create new project in workspace</strong> to start a project for new code. 
-			<p>Enter the project name, the base package name, the name of a single Activity class to create as a stub .java file, and a name to use for your application.</p></li>
-			<li>Select <strong>Create project from existing source</strong> to start a project from existing code. Use this option if you want to build and run any of the sample applications included with the SDK. The sample applications are located in the samples/ directory in the SDK. 
-                        <p>Browse to the directory containing the existing source code and click OK. If the directory contains a valid Android manifest file, the ADT plugin fills in the package, activity, and application names for you.</p>
-                        </li>
-                </ul>
-    </li>
-    <li>Press <strong>Finish</strong>.</li>
-</ol>
-
-<p>The ADT plugin creates the these folders and
-        files for you as appropriate for the type of project:</p>
-
+  <li>Select <strong>File</strong> &gt; <strong>New</strong> &gt; <strong>Project</strong>.</li>
+  <li>Select <strong>Android</strong> &gt; <strong>Android Project</strong>, and click
+    <strong>Next</strong>.</li>
+  <li>Select the contents for the project:
+    <ul>
+      <li>Enter a <em>Project Name</em>. This will be the name of the folder where your
+        project is created.</li>
+      <li>Under Contents, select <strong>Create new project in workspace</strong>.
+        Select your project workspace location.</li>
+      <li>Under Target, select an Android target to be used as the project's Build Target. 
+        The Build Target
+        specifies which Android platform you'd like your application built against.
+        <p>Unless you know that you'll be using new APIs introduced in the latest SDK, you should
+        select a target with the lowest platform version possible, such as Android 1.1.</p>
+        <p class="note"><strong>Note:</strong> You can change your the Build Target for your 
+        project at any time: Right-click the project in the Package Explorer, select
+        <strong>Properties</strong>, select <strong>Android</strong> and then check 
+        the desired Project Target.</p>
+      </li>
+      <li>Under Properties, fill in all necessary fields.
         <ul>
-            <li>src/&nbsp;&nbsp;&nbsp;A
-                folder that includes your stub .java Activity file.</li>
-            <li>res/&nbsp;&nbsp;&nbsp;A folder for your
-                resources.</li>
-            <li>AndroidManifest.xml&nbsp;&nbsp;&nbsp;The
-                manifest for your project.   </li>
+          <li>Enter an <em>Application name</em>. This is the human-readable title for your 
+            application &mdash; the name that will appear on the Android device.</li>
+          <li>Enter a <em>Package name</em>. This is the package namespace (following the same rules
+            as for packages in the Java programming language) where all your source code
+            will reside.</li>
+          <li>Select <em>Create Activity</em> (optional, of course, but common) and enter a name
+            for your main Activity class.</li>
+          <li>Enter a <em>Min SDK Version</em>. This is an integer that indicates
+            the minimum API Level required to properly run your application. 
+            Entering this here automatically sets the <code>minSdkVersion</code> attribute in the 
+            <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a>
+            of your Android Manifest file. If you're unsure of the appropriate API Level to use,
+            copy the API Level listed for the Build Target you selected in the Target tab.</li>
         </ul>
-
+      </li>
+    </ul>
+  </li>
+  <li>Click <strong>Finish</strong>.</li>
 </ol>
 
-<a name="launchconfig" id="launchconfig"></a>
+<p class="note"><strong>Tip:</strong>
+You can also start the New Project Wizard from the <em>New</em> icon in the toolbar.</p>
 
-<h2>Creating a Launch Configuration </h2>
+<p>Once you complete the New Project Wizard, ADT creates the following 
+folders and files in your new project:</p>
+  <dl>
+    <dt><code>src/</code></dt>
+      <dd>Includes your stub Activity Java file. All other Java files for your application
+      go here.</dd>
+    <dt><code><em>&lt;Android Version&gt;</em>/</code> (e.g., <code>Android 1.1/</code>)</dt>
+      <dd>Includes the <code>android.jar</code> file that your application will build against. 
+      This is determined by the build target that you have chosen in the <em>New Project
+      Wizard</em>.</dd>
+    <dt><code>gen/</code></dt>
+      <dd>This contains the Java files generated by ADT, such as your <code>R.java</code> file
+      and interfaces created from AIDL files.</dd>
+    <dt><code>assets/</code></dt>
+      <dd>This is empty. You can use it to store raw asset files. See 
+      <a href="{@docRoot}guide/topics/resources/index.html">Resources and Assets</a>.</dd>
+    <dt><code>res/</code></dt>
+      <dd>A folder for your application resources, such as drawable files, layout files, string
+      values, etc. See 
+      <a href="{@docRoot}guide/topics/resources/index.html">Resources and Assets</a>.</dd>
+    <dt><code>AndroidManifest.xml</code></dt>
+      <dd>The Android Manifest for your project. See 
+      <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">The AndroidManifest.xml 
+      File</a>.</dd>
+    <dt><code>default.properties</code></dt>
+      <dd>This file contains project settings, such as the build target. This files is integral
+      to the project, as such, it should be maintained in a Source Revision Control system. 
+      It should never be edited manually &mdash; to edit project properties, 
+      right-click the project folder and select "Properties".</dd>
+  </dl>
 
-<p>Before you can run and debug your application in Eclipse, you must create a launch configuration for it. A launch configuration specifies the project to launch, the Activity to start, the emulator options to use, and so on. </p>
 
-<p>To create a launch configuration for the application, follow these steps as appropriate for your Eclipse version:</p>
+<h2 id="Running">Running Your Application</h2>
+
+<p><em>Wait!</em> Before you can run your application on the Android Emulator, 
+you <strong>must</strong> create an Android Virtual Device (AVD). 
+An AVD is a configuration that specifies the Android platform to be used on the emulator.
+You can read more in the <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual
+Devices</a> document, but if you just want to get started, follow the simple guide below to
+create an AVD.</p>
+
+<p>If you will be running your applications only on actual device hardware, you do not 
+need an AVD &mdash; see 
+<a href="{@docRoot}guide/developing/device.html">Developing On a Device</a> for information
+on running your applicaiton.</p>
+
+<h3 id="CreatingAnAvd">Creating an AVD</h3>
+
+<p>To avoid some explanation that's beyond the scope of this document, here's the 
+basic procedure to create an AVD:</p>
 
 <ol>
+  <li>Open a command-line (e.g.,"Command Prompt" application on Windows, or "Terminal"
+  on Mac/Linux) and navigate to your SDK package's 
+  <code>tools/</code> directory.</li>
+  <li>First, you need to select a Deployment Target. To view available targets, execute:
+    <pre>android list targets</pre>
+    <p>This will output a list of available Android targets, such as:</p>
+<pre>
+id:1
+    Name: Android 1.1
+    Type: platform
+    API level: 2
+    Skins: HVGA (default), HVGA-L, HVGA-P, QVGA-L, QVGA-P
+id:2
+    Name: Android 1.5
+    Type: platform
+    API level: 3
+    Skins: HVGA (default), HVGA-L, HVGA-P, QVGA-L, QVGA-P
+</pre>
+    <p>Find the target that matches the Android platform upon which you'd like
+    to run your application. Note the integer value of the <code>id</code> &mdash;
+    you'll use this in the next step.</p>
+  </li>
+  <li>Create a new AVD using your selected Deployment Target. Execute:
+    <pre>android create avd --name <em>&lt;your_avd_name&gt;</em> --target <em>&lt;targetID&gt;</em></pre>
+  <li>Next, you'll be asked whether you'd like to create a custom hardware profile.
+  If you respond "yes," you'll be presented with a series of prompts to define various aspects of the
+  device hardware (leave entries blank to use default values, which are shown in brackets). Otherwise,
+  press return to use all default values ("no" is the default).</li>
+  </li>
+</ol>
 
-    <li>Open the launch configuration manager.
-         <ul>
-            <li>In Eclipse 3.3 (Europa), select <strong>Run </strong>&gt; 
-              <strong>Open Run Dialog... </strong>or <strong>Run </strong>&gt; 
-              <strong>Open Debug Dialog... </strong>as appropriate.
-            </li>
-            <li>In Eclipse 3.4 (Ganymede), select <strong>Run </strong>&gt; 
-              <strong>Run Configurations... </strong>or <strong>Run </strong>&gt; 
-              <strong>Debug Configurations... </strong>as appropriate.
-            </li>
-        </ul>
-    </li>
-    <li>In the project type list on the left, locate the <strong> Android Application</strong> item and double-click it (or right-click &gt; <strong>New</strong>), to create a new launch configuration.</li>
-    <li>Enter a name for your configuration.</li>
-    <li>On the Android tab, browse for the project and Activity to start.</li>
-    <li>On the Target tab, set the desired screen and network properties, as well as any other <a href="{@docRoot}guide/developing/tools/emulator.html#startup-options">emulator startup options</a>.</li>
-    <li>You can set additional options on the Common tab as desired.</li>
-	<li>Press <strong>Apply</strong> to save the launch configuration, or press <strong>Run</strong> or <strong>Debug</strong> (as appropriate).</li>
+<p>That's it; your AVD is ready. In the next section, you'll see how the AVD is used
+when launching your application on an emulator.</p>
 
+<p>To learn more about creating and managing AVDs, please read the 
+<a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>
+documentation.</p>
+
+
+<h3 id="RunningYourApplication">Running your application</h3>
+
+<p class="note"><strong>Note:</strong> Before you can run your application, be sure that
+you have created an AVD with a target that satisfies your application's Build Target. 
+If an AVD cannot be found that meets the requirements of your Build Target, you will see
+a console error telling you so and the launch will be aborted.</p>
+
+<p>To run (or debug) your application, select <strong>Run</strong> &gt; <strong>Run</strong> (or 
+<strong>Run</strong> &gt; <strong>Debug</strong>) from the Eclipse main menu. The ADT plugin
+will automatically create a default launch configuration for the project.</p>
+
+<p>When you choose to run or debug your application, Eclipse will perform the following:</p>
+
+<ol>
+  <li>Compile the project (if there have been changes since the last build).</li>
+  <li>Create a default launch configuration (if one does not already exist for the project).</li>
+  <li>Install and start the application on an emulator or device (based on the Deployment Target
+    defined by the run configuration).
+    <p>By default, Android application run configurations use an "automatic target" mode for 
+    selecting a device target. For information on how automatic target mode selects a 
+    deployment target, see <a href="#AutoAndManualTargetModes">Automatic and manual 
+    target modes</a> below.</p>
+  </li>
+</ol>
+
+<p>If debugging, the application will start in the "Waiting For Debugger" mode. Once the 
+debugger is attached, Eclipse will open the Debug perspective.</p>
+
+<p>To set or change the launch configuration used for your project, use the launch configuration manager. 
+See <a href="#launchconfig">Creating a Launch Configuration</a> for information.</p>
+
+
+<h2 id="RunConfig">Creating a Run Configuration</h2>
+
+<p>The run configuration specifies the project to run, the Activity 
+to start, the emulator options to use, and so on. When you first run a project
+as an <em>Android Application</em>, ADT will automatically create a run configuration.
+The default run configuration will
+launch the default project Activity and use automatic target mode for device selection 
+(with no preferred AVD). If the default setting don't suit your project, you can 
+customize the launch configuration or even create a new.</p>
+
+<p>To create or modify a launch configuration, follow these steps as appropriate 
+for your Eclipse version:</p>
+
+<ol>
+  <li>Open the run configuration manager.
+        <ul>
+          <li>In Eclipse 3.3 (Europa), select <strong>Run</strong> &gt; 
+            <strong>Open Run Dialog</strong> (or <strong>Open Debug Dialog</strong>)
+          </li>
+          <li>In Eclipse 3.4 (Ganymede), select <strong>Run </strong>&gt; 
+            <strong>Run Configurations</strong> (or
+            <strong>Debug Configurations</strong>)
+          </li>
+      </ul>
+  </li>
+  <li>Expand the <strong>Android Application</strong> item and create a new
+  configuration or open an existing one.
+    <ul>
+      <li>To create a new configuration:
+        <ol>
+          <li>Select <strong>Android Application</strong> and click the <em>New launch configuration</em>
+          icon above the list (or, right-click  <strong>Android Application</strong> and click 
+          <strong>New</strong>).</li>
+          <li>Enter a Name for your configuration.</li>
+          <li>In the Android tab, browse and select the project you'd like to run with the
+          configuration.</li>
+        </ol>
+      <li>To open an existing configuration, select the configuration name from the list
+      nested below <strong>Android Application</strong>.</li>
+    </ul>
+  </li>
+  <li>Adjust your desired launch configuration settings.
+    <p>In the Target tab, consider whether you'd like to use Manual or Automatic mode
+    when selecting an AVD to run your application.
+    See the following section on <a href=#AutoAndManualModes">Automatic and manual target 
+    modes</a>).</p>
+  </li>
 </ol>
 
 
-<h2 id="sign_in_adt">Setting Up Application Signing</h2>
+<h3 id="AutoAndManualTargetModes">Automatic and manual target modes</h3>
 
-<p>As you begin developing Android applications, you should understand that all
+<p>By default, a run configuration uses the <strong>automatic</strong> target mode in order to select
+an AVD. In this mode, ADT will select an AVD for the application in the following manner:</p>
+
+<ol>
+  <li>If there's a device or emulator already running and its AVD configuration
+  meets the requirements of the application's build target, the application is installed
+  and run upon it.</li>
+  <li>If there's more than one device or emulator running, each of which meets the requirements
+  of the build target, a "device chooser" is shown to let you select which device to use.</li>
+  <li>If there are no devices or emulators running that meet the requirements of the build target, 
+  ADT looks at the available AVDs. If one meets the requirements of the build target,
+  the AVD is used to launch a new emulator, upon which the application is installed and run.</li>
+  <li>If all else fails, the application will not be run and you will see a console error warning
+  you that there is no existing AVD that meets the build target requirements.</li>
+</ol>
+
+<p>However, if a "preferred AVD" is selected in the run configuration, then the application 
+will <em>always</em> be deployed to that AVD. If it's not already running, then a new emulator
+will be launched.</p>
+
+<p>If your run configuration uses <strong>manual</strong> mode, then the "device chooser" 
+is presented every time that your application is run, so that you can select which AVD to use.</p>
+
+
+<h2 id="Signing">Signing your Applications</h2>
+
+<p>As you begin developing Android applications, understand that all
 Android applications must be digitally signed before the system will install
-them on the emulator or an actual device. </p>
+them on an emulator or an actual device. There are two ways to do this:
+with a debug key (for immediate testing on an emulator or development device)
+or with a private key (for application distribution).</p>
 
 <p>The ADT plugin helps you get started quickly by signing your .apk files with
-a debug key, prior to installing them on the emulator. This means that you can
-compile your application and install it on the emulator without having to
-generate your own private key. However, please note that if you intend to
-publish your application, you <em>must</em> sign the application with your own
-private key, rather than the debug key generated by the SDK tools. </p>
+a debug key, prior to installing them on an emulator or development device. This means that you can
+quickly run your application from Eclipse without having to
+generate your own private key. No specific action on your part is needed, 
+provided ADT has access to Keytool.However, please note that if you intend
+to publish your application, you <strong>must</strong> sign the application with your
+own private key, rather than the debug key generated by the SDK tools.</p>
 
-<p>To sign your applications, the ADT plugin requires the Keytool utility
-included in the JDK. To set up your development environment for
-signing, you need to make sure that Keytool is available on your
-machine that the ADT plugin knows how to find it. </p>
-
-<p>In most cases, you can tell the SDK build tools how to find Keytool by making
-sure that your JAVA_HOME environment variable is set and that it references a 
-suitable JDK. Alternatively, you can add the JDK version of Keytool to your 
-PATH variable.</p>
-
-<p>If you are developing on a version of Linux that originally came with Gnu
-Compiler for Java, make sure that the system is using the JDK version of
-Keytool, rather than the gcj version. If keytool is already in your PATH, it
-might be pointing to a symlink at /usr/bin/keytool. In this case, check the
-symlink target to make sure that it points to the keytool in the JDK.</p>
-
-<p>In all cases, please read and understand <a
-href="{@docRoot}guide/publishing/app-signing.html">Signing Your
-Applications</a>, which provides an overview of application signing on Android
-and what it means to you as an Android application developer. </p>
+<p>Please read <a href="{@docRoot}guide/publishing/app-signing.html">Signing Your
+Applications</a>, which provides a thorough guide to application signing on Android
+and what it means to you as an Android application developer. The document also includes
+a guide to exporting and signing your application with the ADT's Export Wizard.</p>
 
 
-<a name="installingrunningdebugging" id="installingrunningdebugging"></a>
+<h2 id="Tips">Eclipse Tips </h2>
 
-<h2>Running and Debugging an Application</h2>
+<h3 id="arbitraryexpressions">Executing arbitrary Java expressions in Eclipse</h3>
 
-<p>Once you've set up the project and launch configuration for your application, you can run or debug it as described below.</p>
+<p>You can execute arbitrary code when paused at a breakpoint in Eclipse. For example,
+    when in a function with a String argument called &quot;zip&quot;, you can get
+    information about packages and call class methods. You can also invoke arbitrary
+    static methods: for example, entering <code>android.os.Debug.startMethodTracing()</code> will
+    start dmTrace. </p>
+<p>Open a code execution window, select <strong>Window</strong>&gt;<strong>Show
+        View</strong>&gt;<strong>Display</strong> from the main menu to open the
+        Display window, a simple text editor. Type your expression, highlight the
+        text, and click the 'J' icon (or CTRL + SHIFT + D) to run your
+        code. The code runs in the context of the selected thread, which must be
+        stopped at a breakpoint or single-step point. (If you suspend the thread
+        manually, you have to single-step once; this doesn't work if the thread is
+        in Object.wait().)</p>
+<p>If you are currently paused on a breakpoint, you can simply highlight and execute
+    a piece of source code by pressing CTRL + SHIFT + D. </p>
+<p>You can highlight a block of text within the same scope by pressing ALT +SHIFT
+    + UP ARROW to select larger and larger enclosing blocks, or DOWN ARROW to select
+    smaller blocks. </p>
+<p>Here are a few sample inputs and responses in Eclipse using the Display window.</p>
 
-From the Eclipse main menu, select <strong>Run</strong> &gt; <strong>Run</strong> or <strong>Run</strong> &gt; <strong>Debug</strong> as appropriate, to run or debug the active launch configuration. </li>
+<table width="100%" border="1">
+    <tr>
+        <th scope="col">Input</th>
+        <th scope="col">Response</th>
+    </tr>
+    <tr>
+        <td><code>zip</code></td>
+        <td><code>(java.lang.String) 
+        /work/device/out/linux-x86-debug/android/app/android_sdk.zip</code></td>
+    </tr>
+    <tr>
+        <td><code>zip.endsWith(&quot;.zip&quot;)</code></td>
+        <td><code>(boolean) true</code></td>
+    </tr>
+    <tr>
+        <td><code>zip.endsWith(&quot;.jar&quot;)</code></td>
+        <td><code>(boolean) false</code></td>
+    </tr>
+</table>
+<p>You can also execute arbitrary code when not debugging by using a scrapbook page.
+    Search the Eclipse documentation for &quot;scrapbook&quot;.</p>
 
-<p>Note that the active launch configuration is the one most recently selected in the Run configuration manager. It does not necessarily correspond to the application that is selected in the Eclipse Navigation pane (if any).</p>
 
-<p>To set or change the active launch configuration, use the launch configuration manager. See <a href="#launchconfig">Creating a Launch Configuration</a> for information about how to access the launch configuration manager.</strong>.</p>
+<h3>Running DDMS Manually</h3>
 
-<p>Running or debugging the application triggers these actions:</p>
-<ul><li>Starts the emulator, if it is not already running. </li>
-                    <li>Compiles the project, if there have been changes since the last build, and installs the application on the emulator. </li>
-                    <li><strong>Run</strong> starts the application. </li>
-            		<li><strong>Debug</strong> starts the application in "Wait for debugger" mode, then opens the Debug perspective and attaches the Eclipse Java debugger to the application.</li>
-
-        </ul>
+<p>Although the recommended way to debug is to use the ADT plugin, you can manually run 
+DDMS and configure Eclipse to debug on port 8700. (<strong>Note: </strong>Be sure that you 
+have first started <a href="{@docRoot}guide/developing/tools/ddms.html">DDMS</a>). </p>
 
 
-<h2 id="tips">Eclipse Tips </h2>
-	<h3>Executing arbitrary Java expressions in Eclipse<a name="arbitraryexpressions" id="arbitraryexpressions"></a></h3>
-	<p>You can execute arbitrary code when paused at a breakpoint in Eclipse. For example,
-	    when in a function with a String argument called &quot;zip&quot;, you can get
-	    information about packages and call class methods. You can also invoke arbitrary
-	    static methods: for example, entering <code>android.os.Debug.startMethodTracing()</code> will
-	    start dmTrace. </p>
-	<p>Open a code execution window, select <strong>Window</strong>&gt;<strong>Show
-	        View</strong>&gt;<strong>Display</strong> from the main menu to open the
-	        Display window, a simple text editor. Type your expression, highlight the
-	        text, and click the 'J' icon (or CTRL + SHIFT + D) to run your
-	        code. The code runs in the context of the selected thread, which must be
-	        stopped at a breakpoint or single-step point. (If you suspend the thread
-	        manually, you have to single-step once; this doesn't work if the thread is
-	        in Object.wait().)</p>
-	<p>If you are currently paused on a breakpoint, you can simply highlight and execute
-	    a piece of source code by pressing CTRL + SHIFT + D. </p>
-	<p>You can highlight a block of text within the same scope by pressing ALT +SHIFT
-	    + UP ARROW to select larger and larger enclosing blocks, or DOWN ARROW to select
-	    smaller blocks. </p>
-	<p>Here are a few sample inputs and responses in Eclipse using the Display window.</p>
-	<table width="100%" border="1">
-	    <tr>
-	        <th scope="col">Input</th>
-	        <th scope="col">Response</th>
-	    </tr>
-	    <tr>
-	        <td><code>zip</code></td>
-	        <td><code>(java.lang.String) /work/device/out/linux-x86-debug/android/app/android_sdk.zip</code></td>
-	    </tr>
-	    <tr>
-	        <td><code>zip.endsWith(&quot;.zip&quot;)</code></td>
-	        <td><code>(boolean) true</code></td>
-	    </tr>
-	    <tr>
-	        <td><code>zip.endsWith(&quot;.jar&quot;)</code></td>
-	        <td><code>(boolean) false</code></td>
-	    </tr>
-	</table>
-	<p>You can also execute arbitrary code when not debugging by using a scrapbook page.
-	    Search the Eclipse documentation for &quot;scrapbook&quot;.</p>
-	
-		<h3>Running DDMS Manually</h3>
+<!-- TODO: clean this up and expand it to cover more wizards and features
+<h3>ADT Wizards</h3>
 
-		<p>Although the recommended way to debug is to use the ADT plugin, you can manually run DDMS and configure Eclipse to debug on port 8700. (<strong>Note: </strong>Be sure that you have first started <a href="{@docRoot}guide/developing/tools/ddms.html">DDMS</a>). </p>
+<p>Notice that the "New Android Project" wizard has been expanded to use the multi-platform
+capabilities of the new SDK.</p>
+
+<p>There is now a "New XML File" wizard that lets you create skeleton XML resource
+files for your Android projects. This makes it easier to create a new layout, a new menu, a
+new strings file, etc.</p>
+
+<p>Both wizards are available via <strong>File > New</strong> and new icons in the main
+Eclipse toolbar (located to the left of the Debug and Run icons). 
+If you do not see the new icons, you may need to select <strong>Window > Reset
+Perspective</strong> from the Java perspective.</p>
+-->

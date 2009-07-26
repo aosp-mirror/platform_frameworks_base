@@ -47,8 +47,10 @@ public abstract class LocationProvider {
      * consist only of the characters [a-zA-Z0-9].
      *
      * @throws IllegalArgumentException if name contains an illegal character
+     *
+     * {@hide}
      */
-    LocationProvider(String name) {
+    public LocationProvider(String name) {
         if (name.matches(BAD_CHARS_REGEX)) {
             throw new IllegalArgumentException("name " + name +
                 " contains an illegal character");

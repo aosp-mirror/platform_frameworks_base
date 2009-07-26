@@ -30,8 +30,29 @@ import android.util.Log;
 
 /**
  * JetPlayer provides access to JET content playback and control.
- * <p>
- * Use <code>JetPlayer.getJetPlayer()</code> to get an instance of this class.
+ * 
+ * <p>Please refer to the JET Creator User Manual for a presentation of the JET interactive
+ * music concept and how to use the JetCreator tool to create content to be player by JetPlayer.
+ * 
+ * <p>Use of the JetPlayer class is based around the playback of a number of JET segments
+ * sequentially added to a playback FIFO queue. The rendering of the MIDI content stored in each
+ * segment can be dynamically affected by two mechanisms:
+ * <ul>
+ * <li>tracks in a segment can be muted or unmuted at any moment, individually or through
+ *    a mask (to change the mute state of multiple tracks at once)</li>
+ * <li>parts of tracks in a segment can be played at predefined points in the segment, in order
+ *    to maintain synchronization with the other tracks in the segment. This is achieved through
+ *    the notion of "clips", which can be triggered at any time, but that will play only at the
+ *    right time, as authored in the corresponding JET file.</li>
+ * </ul>
+ * As a result of the rendering and playback of the JET segments, the user of the JetPlayer instance
+ * can receive notifications from the JET engine relative to:
+ * <ul>
+ * <li>the playback state,</li>
+ * <li>the number of segments left to play in the queue,</li>
+ * <li>application controller events (CC80-83) to mark points in the MIDI segments.</li>
+ * </ul>
+ *  Use {@link #getJetPlayer()} to construct a JetPlayer instance. JetPlayer is a singleton class.
  * 
  */
 public class JetPlayer
@@ -40,7 +61,7 @@ public class JetPlayer
     // Constants
     //------------------------
     /**
-     * The maximum number of simultaneous tracks. Use __link #getMaxTracks()} to
+     * The maximum number of simultaneous tracks. Use {@link #getMaxTracks()} to
      * access this value.
      */
     private static int MAXTRACKS = 32;
@@ -107,6 +128,10 @@ public class JetPlayer
     //--------------------------------------------
     // Constructor, finalize
     //------------------------
+    /**
+     * Factory method for the JetPlayer class.
+     * @return the singleton JetPlayer instance
+     */
     public static JetPlayer getJetPlayer() {
         if (singletonRef == null) {
             singletonRef = new JetPlayer();
@@ -114,7 +139,9 @@ public class JetPlayer
         return singletonRef;
     }
     
-    
+    /**
+     * Cloning a JetPlayer instance is not supported. Calling clone() will generate an exception.
+     */
     public Object clone() throws CloneNotSupportedException {
         // JetPlayer is a singleton class,
         // so you can't clone a JetPlayer instance
@@ -149,6 +176,11 @@ public class JetPlayer
     }
     
     
+    /**
+     * Stops the current JET playback, and releases all associated native resources.
+     * The object can no longer be used and the reference should be set to null
+     * after a call to release().
+     */
     public void release() {
         native_release();
     }
@@ -158,7 +190,7 @@ public class JetPlayer
     // Getters
     //------------------------
     /**
-     * Returns the maximum number of simultaneous MIDI tracks supported by the Jet player
+     * Returns the maximum number of simultaneous MIDI tracks supported by JetPlayer
      */
     public static int getMaxTracks() {
         return JetPlayer.MAXTRACKS;
@@ -168,11 +200,21 @@ public class JetPlayer
     //--------------------------------------------
     // Jet functionality
     //------------------------
+    /**
+     * Loads a .jet file from a given path.
+     * @param path the path to the .jet file, for instance "/sdcard/mygame/music.jet".
+     * @return true if loading the .jet file was successful, false if loading failed.
+     */
     public boolean loadJetFile(String path) {
         return native_loadJetFromFile(path);
     }
     
     
+    /**
+     * Loads a .jet file from an asset file descriptor.
+     * @param afd the asset file descriptor.
+     * @return true if loading the .jet file was successful, false if loading failed.
+     */
     public boolean loadJetFile(AssetFileDescriptor afd) {
         long len = afd.getLength();
         if (len < 0) {
@@ -182,22 +224,54 @@ public class JetPlayer
                 afd.getFileDescriptor(), afd.getStartOffset(), len);
     }
     
-    
+    /**
+     * Closes the resource containing the JET content.
+     * @return true if successfully closed, false otherwise.
+     */
     public boolean closeJetFile() {
         return native_closeJetFile();
     }
     
     
+    /**
+     * Starts playing the JET segment queue.
+     * @return true if rendering and playback is successfully started, false otherwise.
+     */
     public boolean play() {
         return native_playJet();
     }
     
     
+    /**
+     * Pauses the playback of the JET segment queue.
+     * @return true if rendering and playback is successfully paused, false otherwise.
+     */
     public boolean pause() {
         return native_pauseJet();
     }
     
     
+    /**
+     * Queues the specified segment in the JET queue.
+     * @param segmentNum the identifier of the segment.
+     * @param libNum the index of the sound bank associated with the segment. Use -1 to indicate
+     *    that no sound bank (DLS file) is associated with this segment, in which case JET will use
+     *    the General MIDI library.
+     * @param repeatCount the number of times the segment will be repeated. 0 means the segment will
+     *    only play once. -1 means the segment will repeat indefinitely.
+     * @param transpose the amount of pitch transposition. Set to 0 for normal playback. 
+     *    Range is -12 to +12.
+     * @param muteFlags a bitmask to specify which MIDI tracks will be muted during playback. Bit 0
+     *    affects track 0, bit 1 affects track 1 etc.
+     * @param userID a value specified by the application that uniquely identifies the segment. 
+     *    this value is received in the
+     *    {@link OnJetEventListener#onJetUserIdUpdate(JetPlayer, int, int)} event listener method.
+     *    Normally, the application will keep a byte value that is incremented each time a new
+     *    segment is queued up. This can be used to look up any special characteristics of that
+     *    track including trigger clips and mute flags.
+     * @return true if the segment was successfully queued, false if the queue is full or if the
+     *    parameters are invalid.
+     */
     public boolean queueJetSegment(int segmentNum, int libNum, int repeatCount,
         int transpose, int muteFlags, byte userID) {
         return native_queueJetSegment(segmentNum, libNum, repeatCount, 
@@ -205,6 +279,28 @@ public class JetPlayer
     }
     
     
+    /**
+     * Queues the specified segment in the JET queue.
+     * @param segmentNum the identifier of the segment.
+     * @param libNum the index of the soundbank associated with the segment. Use -1 to indicate that
+     *    no sound bank (DLS file) is associated with this segment, in which case JET will use
+     *    the General MIDI library.
+     * @param repeatCount the number of times the segment will be repeated. 0 means the segment will
+     *    only play once. -1 means the segment will repeat indefinitely.
+     * @param transpose the amount of pitch transposition. Set to 0 for normal playback. 
+     *    Range is -12 to +12.
+     * @param muteArray an array of booleans to specify which MIDI tracks will be muted during
+     *    playback. The value at index 0 affects track 0, value at index 1 affects track 1 etc. 
+     *    The length of the array must be {@link #getMaxTracks()} for the call to succeed.
+     * @param userID a value specified by the application that uniquely identifies the segment. 
+     *    this value is received in the
+     *    {@link OnJetEventListener#onJetUserIdUpdate(JetPlayer, int, int)} event listener method.
+     *    Normally, the application will keep a byte value that is incremented each time a new
+     *    segment is queued up. This can be used to look up any special characteristics of that
+     *    track including trigger clips and mute flags.
+     * @return true if the segment was successfully queued, false if the queue is full or if the
+     *    parameters are invalid.
+     */
     public boolean queueJetSegmentMuteArray(int segmentNum, int libNum, int repeatCount,
             int transpose, boolean[] muteArray, byte userID) {
         if (muteArray.length != JetPlayer.getMaxTracks()) {
@@ -215,11 +311,32 @@ public class JetPlayer
     }
     
     
+    /**
+     * Modifies the mute flags.
+     * @param muteFlags a bitmask to specify which MIDI tracks are muted. Bit 0 affects track 0,
+     *    bit 1 affects track 1 etc.
+     * @param sync if false, the new mute flags will be applied as soon as possible by the JET
+     *    render and playback engine. If true, the mute flags will be updated at the start of the
+     *    next segment. If the segment is repeated, the flags will take effect the next time 
+     *    segment is repeated.
+     * @return true if the mute flags were successfully updated, false otherwise.
+     */
     public boolean setMuteFlags(int muteFlags, boolean sync) {
         return native_setMuteFlags(muteFlags, sync);
     }
     
     
+    /**
+     * Modifies the mute flags for the current active segment.
+     * @param muteArray an array of booleans to specify which MIDI tracks are muted. The value at
+     *    index 0 affects track 0, value at index 1 affects track 1 etc. 
+     *    The length of the array must be {@link #getMaxTracks()} for the call to succeed.
+     * @param sync if false, the new mute flags will be applied as soon as possible by the JET
+     *    render and playback engine. If true, the mute flags will be updated at the start of the
+     *    next segment. If the segment is repeated, the flags will take effect the next time 
+     *    segment is repeated.
+     * @return true if the mute flags were successfully updated, false otherwise.
+     */
     public boolean setMuteArray(boolean[] muteArray, boolean sync) {
         if(muteArray.length != JetPlayer.getMaxTracks())
             return false;
@@ -227,16 +344,41 @@ public class JetPlayer
     }
     
     
+    /**
+     * Mutes or unmutes a single track.
+     * @param trackId the index of the track to mute.
+     * @param muteFlag set to true to mute, false to unmute.
+     * @param sync if false, the new mute flags will be applied as soon as possible by the JET
+     *    render and playback engine. If true, the mute flag will be updated at the start of the
+     *    next segment. If the segment is repeated, the flag will take effect the next time 
+     *    segment is repeated.
+     * @return true if the mute flag was successfully updated, false otherwise.
+     */
     public boolean setMuteFlag(int trackId, boolean muteFlag, boolean sync) {
         return native_setMuteFlag(trackId, muteFlag, sync);
     }
     
     
+    /**
+     * Schedules the playback of a clip.
+     * This will automatically update the mute flags in sync with the JET Clip Marker (controller 
+     * 103). The parameter clipID must be in the range of 0-63. After the call to triggerClip, when
+     * JET next encounters a controller event 103 with bits 0-5 of the value equal to clipID and 
+     * bit 6 set to 1, it will automatically unmute the track containing the controller event.
+     * When JET encounters the complementary controller event 103 with bits 0-5 of the value equal
+     * to clipID and bit 6 set to 0, it will mute the track again.
+     * @param clipId the identifier of the clip to trigger.
+     * @return true if the clip was successfully triggered, false otherwise.
+     */
     public boolean triggerClip(int clipId) {
         return native_triggerClip(clipId);
     }
     
     
+    /**
+     * Empties the segment queue, and clears all clips that are scheduled for playback.
+     * @return true if the queue was successfully cleared, false otherwise.
+     */
     public boolean clearQueue() {
         return native_clearQueue();
     }
@@ -302,10 +444,25 @@ public class JetPlayer
     //--------------------------------------------
     // Jet event listener
     //------------------------
+    /**
+     * Sets the listener JetPlayer notifies when a JET event is generated by the rendering and
+     * playback engine.
+     * Notifications will be received in the same thread as the one in which the JetPlayer
+     * instance was created.
+     * @param listener
+     */
     public void setEventListener(OnJetEventListener listener) {
         setEventListener(listener, null);
     }
     
+    /**
+     * Sets the listener JetPlayer notifies when a JET event is generated by the rendering and
+     * playback engine.
+     * Use this method to receive JET events in the Handler associated with another
+     * thread than the one in which you created the JetPlayer instance.
+     * @param listener
+     * @param handler the Handler that will receive the event notification messages.
+     */
     public void setEventListener(OnJetEventListener listener, Handler handler) {
         synchronized(mEventListenerLock) {
             
@@ -343,7 +500,7 @@ public class JetPlayer
         void onJetEvent(JetPlayer player,
                 short segment, byte track, byte channel, byte controller, byte value);
         /**
-         * Callback for when JET's currently playing segment userID is updated.
+         * Callback for when JET's currently playing segment's userID is updated.
          * 
          * @param player the JET player the status update is coming from
          * @param userId the ID of the currently playing segment
@@ -363,7 +520,7 @@ public class JetPlayer
          * Callback for when JET pause state is updated.
          * 
          * @param player the JET player the status update is coming from
-         * @param paused indicates whether JET is paused or not
+         * @param paused indicates whether JET is paused (1) or not (0)
          */
         void onJetPauseUpdate(JetPlayer player, int paused);
     }

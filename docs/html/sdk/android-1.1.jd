@@ -35,17 +35,17 @@ system to correctly determine whether an application is compatible with
 the system, prior to installing the application. </p>
 
 <p>Applications indicate the lowest system API Level that they are compatible with by adding
-a value to the <code>minSdkVersion</code> attribute.
+a value to the <code>android:minSdkVersion</code> attribute.
 The value of the attribute is an integer corresponding to an API Level 
 identifier. Prior to installing an application, the system checks the value of 
-<code>minSdkVersion</code> and allows the install only
+<code>android:minSdkVersion</code> and allows the install only
 if the referenced integer is less than or equal to the API Level integer stored
 in the system itself. </p>
 
 <p>If you use the Android 1.1 system image to build an application
 compatible with Android-powered devices running the Android 1.1
 platform, you <strong style="color:red">must</strong> set the
-<code>minSdkVersion</code> attribute to "2" in order to specify that your application
+<code>android:minSdkVersion</code> attribute to "2" in order to specify that your application
 is compatible only with devices using the Android 1.1 (or greater) system image.
 </p>
 
@@ -68,14 +68,14 @@ your application will function properly on their devices, especially if
 it uses <a href="#apichange">APIs introduced in Android 1.1</a>. </p>
 
 <p>If your application uses APIs introduced in Android 1.1 but does not
-declare <code>&lt;uses-sdk minSdkVersion="2" /&gt;</code>, then it will
+declare <code>&lt;uses-sdk android:minSdkVersion="2" /&gt;</code>, then it will
 run properly on Android 1.1 devices but <em>not</em> on Android 1.0
 devices. In the latter case, the application will crash at runtime when
 it tries to use the Android 1.1 APIs.</p>
 
 <p>If your application does not use any new APIs introduced in Android
 1.1, you can indicate Android 1.0 compatibility by removing
-<code>minSdkVersion</code> or setting the attribute to "1". However,
+<code>android:minSdkVersion</code> or setting the attribute to "1". However,
 before publishing your application, you must make sure to compile your
 application against the Android 1.0 system image (available in the
 Android 1.0 SDK), to ensure that it builds and functions properly for

@@ -39,9 +39,9 @@ interface IPhoneSubInfo {
     String getSubscriberId();
 
     /**
-     * Retrieves the serial number of the SIM, if applicable.
+     * Retrieves the serial number of the ICC, if applicable.
      */
-    String getSimSerialNumber();
+    String getIccSerialNumber();
 
     /**
      * Retrieves the phone number string for line 1.
@@ -53,13 +53,13 @@ interface IPhoneSubInfo {
      */
     String getLine1AlphaTag();
 
-	/**
-	 * Retrieves the voice mail number.
-	 */
+    /**
+     * Retrieves the voice mail number.
+     */
     String getVoiceMailNumber();
 
-	/**
-	 * Retrieves the alpha identifier associated with the voice mail number.
-	 */
+    /**
+     * Retrieves the alpha identifier associated with the voice mail number.
+     */
     String getVoiceMailAlphaTag();
 }

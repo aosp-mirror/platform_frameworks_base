@@ -18,7 +18,9 @@ package android.hardware;
 
 import android.content.Context;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
@@ -43,7 +45,7 @@ import java.util.List;
  * class by calling {@link android.content.Context#getSystemService(java.lang.String)
  * Context.getSystemService()} with an argument of {@link android.content.Context#SENSOR_SERVICE}.
  */
-public class SensorManager extends IRotationWatcher.Stub
+public class SensorManager
 {
     private static final String TAG = "SensorManager";
     private static final float[] mTempMatrix = new float[16];
@@ -280,8 +282,8 @@ public class SensorManager extends IRotationWatcher.Stub
         void startLocked(ISensorService service) {
             try {
                 if (mThread == null) {
-                    ParcelFileDescriptor fd = service.getDataChanel();
-                    mThread = new Thread(new SensorThreadRunnable(fd),
+                    Bundle dataChannel = service.getDataChannel();
+                    mThread = new Thread(new SensorThreadRunnable(dataChannel),
                             SensorThread.class.getName());
                     mThread.start();
                 }
@@ -291,10 +293,52 @@ public class SensorManager extends IRotationWatcher.Stub
         }
 
         private class SensorThreadRunnable implements Runnable {
-            private ParcelFileDescriptor mSensorDataFd;
-            SensorThreadRunnable(ParcelFileDescriptor fd) {
-                mSensorDataFd = fd;
+            private Bundle mDataChannel;
+            SensorThreadRunnable(Bundle dataChannel) {
+                mDataChannel = dataChannel;
             }
+
+            private boolean open() {
+                if (mDataChannel == null) {
+                    Log.e(TAG, "mDataChannel == NULL, exiting");
+                    synchronized (sListeners) {
+                        mThread = null;
+                    }
+                    return false;
+                }
+
+                // this thread is guaranteed to be unique
+                Parcelable[] pfds = mDataChannel.getParcelableArray("fds");
+                FileDescriptor[] fds;
+                if (pfds != null) {
+                    int length = pfds.length;
+                    fds = new FileDescriptor[length];
+                    for (int i = 0; i < length; i++) {
+                        ParcelFileDescriptor pfd = (ParcelFileDescriptor)pfds[i];
+                        fds[i] = pfd.getFileDescriptor();
+                    }
+                } else {
+                    fds = null;
+                }
+                int[] ints = mDataChannel.getIntArray("ints");
+                sensors_data_open(fds, ints);
+                if (pfds != null) {
+                    try {
+                        // close our copies of the file descriptors,
+                        // since we are just passing these to the JNI code and not using them here.
+                        for (int i = pfds.length - 1; i >= 0; i--) {
+                            ParcelFileDescriptor pfd = (ParcelFileDescriptor)pfds[i];
+                            pfd.close();
+                        }
+                    } catch (IOException e) {
+                        // *shrug*
+                        Log.e(TAG, "IOException: ", e);
+                    }
+                }
+                mDataChannel = null;
+                return true;
+            }
+
             public void run() {
                 //Log.d(TAG, "entering main sensor thread");
                 final float[] values = new float[3];
@@ -302,23 +346,9 @@ public class SensorManager extends IRotationWatcher.Stub
                 final long timestamp[] = new long[1];
                 Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);
 
-                if (mSensorDataFd == null) {
-                    Log.e(TAG, "mSensorDataFd == NULL, exiting");
-                    synchronized (sListeners) {
-                        mThread = null;
-                    }
+                if (!open()) {
                     return;
                 }
-                // this thread is guaranteed to be unique
-                sensors_data_open(mSensorDataFd.getFileDescriptor());
-                try {
-                    mSensorDataFd.close();
-                } catch (IOException e) {
-                    // *shrug*
-                    Log.e(TAG, "IOException: ", e);
-                }
-                mSensorDataFd = null;
-
 
                 while (true) {
                     // wait for an event
@@ -475,7 +505,13 @@ public class SensorManager extends IRotationWatcher.Stub
                     // if it's null we're running in the system process
                     // which won't get the rotated values
                     try {
-                        sRotation = sWindowManager.watchRotation(this);
+                        sRotation = sWindowManager.watchRotation(
+                            new IRotationWatcher.Stub() {
+                                public void onRotationChanged(int rotation) {
+                                    SensorManager.this.onRotationChanged(rotation);
+                                }
+                            }
+                        );
                     } catch (RemoteException e) {
                     }
                 }
@@ -1386,7 +1422,7 @@ public class SensorManager extends IRotationWatcher.Stub
             }
         }
     }
-
+    
     class LmsFilter {
         private static final int SENSORS_RATE_MS = 20;
         private static final int COUNT = 12;
@@ -1454,7 +1490,7 @@ public class SensorManager extends IRotationWatcher.Stub
         }
     }
 
-
+    
     private static native void nativeClassInit();
 
     private static native int sensors_module_init();
@@ -1463,7 +1499,7 @@ public class SensorManager extends IRotationWatcher.Stub
     // Used within this module from outside SensorManager, don't make private
     static native int sensors_data_init();
     static native int sensors_data_uninit();
-    static native int sensors_data_open(FileDescriptor fd);
+    static native int sensors_data_open(FileDescriptor[] fds, int[] ints);
     static native int sensors_data_close();
     static native int sensors_data_poll(float[] values, int[] status, long[] timestamp);
 }

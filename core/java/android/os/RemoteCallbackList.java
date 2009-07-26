@@ -49,22 +49,32 @@ import java.util.HashMap;
 public class RemoteCallbackList<E extends IInterface> {
     /*package*/ HashMap<IBinder, Callback> mCallbacks
             = new HashMap<IBinder, Callback>();
-    private IInterface[] mActiveBroadcast;
+    private Object[] mActiveBroadcast;
     private boolean mKilled = false;
     
     private final class Callback implements IBinder.DeathRecipient {
         final E mCallback;
+        final Object mCookie;
         
-        Callback(E callback) {
+        Callback(E callback, Object cookie) {
             mCallback = callback;
+            mCookie = cookie;
         }
         
         public void binderDied() {
             synchronized (mCallbacks) {
                 mCallbacks.remove(mCallback.asBinder());
             }
-            onCallbackDied(mCallback);
+            onCallbackDied(mCallback, mCookie);
         }
+    }
+    
+    /**
+     * Simple version of {@link RemoteCallbackList#register(E, Object)}
+     * that does not take a cookie object.
+     */
+    public boolean register(E callback) {
+        return register(callback, null);
     }
     
     /**
@@ -81,6 +91,8 @@ public class RemoteCallbackList<E extends IInterface> {
      * Most services will want to check for null before calling this with
      * an object given from a client, so that clients can't crash the
      * service with bad data.
+     * @param cookie Optional additional data to be associated with this
+     * callback.
      * 
      * @return Returns true if the callback was successfully added to the list.
      * Returns false if it was not added, either because {@link #kill} had
@@ -90,14 +102,14 @@ public class RemoteCallbackList<E extends IInterface> {
      * @see #kill
      * @see #onCallbackDied
      */
-    public boolean register(E callback) {
+    public boolean register(E callback, Object cookie) {
         synchronized (mCallbacks) {
             if (mKilled) {
                 return false;
             }
             IBinder binder = callback.asBinder();
             try {
-                Callback cb = new Callback(callback);
+                Callback cb = new Callback(callback, cookie);
                 binder.linkToDeath(cb, 0);
                 mCallbacks.put(binder, cb);
                 return true;
@@ -154,17 +166,28 @@ public class RemoteCallbackList<E extends IInterface> {
     }
     
     /**
+     * Old version of {@link #onCallbackDied(E, Object)} that
+     * does not provide a cookie.
+     */
+    public void onCallbackDied(E callback) {
+    }
+    
+    /**
      * Called when the process hosting a callback in the list has gone away.
-     * The default implementation does nothing.
+     * The default implementation calls {@link #onCallbackDied(E)}
+     * for backwards compatibility.
      * 
      * @param callback The callback whose process has died.  Note that, since
      * its process has died, you can not make any calls on to this interface.
      * You can, however, retrieve its IBinder and compare it with another
      * IBinder to see if it is the same object.
+     * @param cookie The cookie object original provided to
+     * {@link #register(E, Object)}.
      * 
      * @see #register
      */
-    public void onCallbackDied(E callback) {
+    public void onCallbackDied(E callback, Object cookie) {
+        onCallbackDied(callback);
     }
     
     /**
@@ -203,13 +226,13 @@ public class RemoteCallbackList<E extends IInterface> {
             if (N <= 0) {
                 return 0;
             }
-            IInterface[] active = mActiveBroadcast;
+            Object[] active = mActiveBroadcast;
             if (active == null || active.length < N) {
-                mActiveBroadcast = active = new IInterface[N];
+                mActiveBroadcast = active = new Object[N];
             }
             int i=0;
             for (Callback cb : mCallbacks.values()) {
-                active[i++] = cb.mCallback;
+                active[i++] = cb;
             }
             return i;
         }
@@ -237,7 +260,17 @@ public class RemoteCallbackList<E extends IInterface> {
      * @see #beginBroadcast
      */
     public E getBroadcastItem(int index) {
-        return (E)mActiveBroadcast[index];
+        return ((Callback)mActiveBroadcast[index]).mCallback;
+    }
+    
+    /**
+     * Retrieve the cookie associated with the item
+     * returned by {@link #getBroadcastItem(int)}.
+     * 
+     * @see #getBroadcastItem
+     */
+    public Object getBroadcastCookie(int index) {
+        return ((Callback)mActiveBroadcast[index]).mCookie;
     }
     
     /**
@@ -248,7 +281,7 @@ public class RemoteCallbackList<E extends IInterface> {
      * @see #beginBroadcast
      */
     public void finishBroadcast() {
-        IInterface[] active = mActiveBroadcast;
+        Object[] active = mActiveBroadcast;
         if (active != null) {
             final int N = active.length;
             for (int i=0; i<N; i++) {

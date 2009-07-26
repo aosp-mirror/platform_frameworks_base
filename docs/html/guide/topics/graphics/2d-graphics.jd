@@ -10,8 +10,8 @@ parent.link=index.html
     <ol>
       <li><a href="#drawables">Drawables</a>
         <ol>
-          <li><a href="#drawable-images">Creating from resource images</a></li>
-          <li><a href="#drawable-xml">Creating from resource XML</a></li>
+          <li><a href="#drawables-from-images">Creating from resource images</a></li>
+          <li><a href="#drawables-from-xml">Creating from resource XML</a></li>
         </ol>
       </li>
       <li><a href="#shape-drawable">ShapeDrawable</a></li>
@@ -59,6 +59,15 @@ From there, you can reference it from your code or your XML layout.
 Either way, it is referred using a resource ID, which is the file name without the file type
 extension (E.g., <code>my_image.png</code> is referenced as <var>my_image</var>).</p>
 
+<p class="note"><strong>Note:</strong> Image resources placed in <code>res/drawable/</code> may be 
+automatically optimized with lossless image compression by the 
+<a href="{@docRoot}guide/developing/tools/aapt.html">aapt</a> tool. For example, a true-color PNG that does
+not require more than 256 colors may be converted to an 8-bit PNG with a color palette. This 
+will result in an image of equal quality but which requires less memory. So be aware that the
+image binaries placed in this directory can change during the build. If you plan on reading
+an image as a bit stream in order to convert it to a bitmap, put your images in the <code>res/raw/</code>
+folder instead, where they will not be optimized.</p>
+
 <h4>Example code</h4>
 <p>The following code snippet demonstrates how to build an {@link android.widget.ImageView} that uses an image
 from drawable resources and add it to the layout.</p>
@@ -90,7 +99,7 @@ Resources res = mContext.getResources();
 Drawable myImage = res.getDrawable(R.drawable.my_image);
 </pre>
 
-<p class="caution"><strong>Caution:</strong> Each unique resource in your project can maintain only one
+<p class="warning"><strong>Note:</strong> Each unique resource in your project can maintain only one
 state, no matter how many different objects you may instantiate for it. For example, if you instantiate two
 Drawable objects from the same image resource, then change a property (such as the alpha) for one of the 
 Drawables, then it will also affect the other. So when dealing with multiple instances of an image resource, 

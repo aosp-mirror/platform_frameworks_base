@@ -187,6 +187,13 @@ AaptGroupEntry::parseNamePart(const String8& part, int* axis, uint32_t* value)
         return 0;
     }
 
+    // screen layout
+    if (getScreenLayoutName(part.string(), &config)) {
+        *axis = AXIS_SCREENLAYOUT;
+        *value = config.screenLayout;
+        return 0;
+    }
+
     // version
     if (getVersionName(part.string(), &config)) {
         *axis = AXIS_VERSION;
@@ -202,7 +209,7 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
 {
     Vector<String8> parts;
 
-    String8 mcc, mnc, loc, orient, den, touch, key, keysHidden, nav, size, vers;
+    String8 mcc, mnc, loc, orient, den, touch, key, keysHidden, nav, size, layout, vers;
 
     const char *p = dir;
     const char *q;
@@ -378,6 +385,18 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
         //printf("not screen size: %s\n", part.string());
     }
 
+    if (getScreenLayoutName(part.string())) {
+        layout = part;
+
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index];
+    } else {
+        //printf("not screen layout: %s\n", part.string());
+    }
+
     if (getVersionName(part.string())) {
         vers = part;
 
@@ -404,6 +423,7 @@ success:
     this->keyboard = key;
     this->navigation = nav;
     this->screenSize = size;
+    this->screenLayout = layout;
     this->version = vers;
 
     // what is this anyway?
@@ -434,6 +454,8 @@ AaptGroupEntry::toString() const
     s += navigation;
     s += ",";
     s += screenSize;
+    s += ",";
+    s += screenLayout;
     s += ",";
     s += version;
     return s;
@@ -482,6 +504,10 @@ AaptGroupEntry::toDirName(const String8& resType) const
     if (this->screenSize != "") {
         s += "-";
         s += screenSize;
+    }
+    if (this->screenLayout != "") {
+        s += "-";
+        s += screenLayout;
     }
     if (this->version != "") {
         s += "-";
@@ -786,6 +812,26 @@ bool AaptGroupEntry::getScreenSizeName(const char* name,
     return true;
 }
 
+bool AaptGroupEntry::getScreenLayoutName(const char* name,
+                                     ResTable_config* out)
+{
+    if (strcmp(name, kWildcardName) == 0) {
+        if (out) out->screenLayout = out->SCREENLAYOUT_ANY;
+        return true;
+    } else if (strcmp(name, "smallscreen") == 0) {
+        if (out) out->screenLayout = out->SCREENLAYOUT_SMALL;
+        return true;
+    } else if (strcmp(name, "normalscreen") == 0) {
+        if (out) out->screenLayout = out->SCREENLAYOUT_NORMAL;
+        return true;
+    } else if (strcmp(name, "largescreen") == 0) {
+        if (out) out->screenLayout = out->SCREENLAYOUT_LARGE;
+        return true;
+    }
+
+    return false;
+}
+
 bool AaptGroupEntry::getVersionName(const char* name,
                                     ResTable_config* out)
 {
@@ -828,6 +874,7 @@ int AaptGroupEntry::compare(const AaptGroupEntry& o) const
     if (v == 0) v = keyboard.compare(o.keyboard);
     if (v == 0) v = navigation.compare(o.navigation);
     if (v == 0) v = screenSize.compare(o.screenSize);
+    if (v == 0) v = screenLayout.compare(o.screenLayout);
     if (v == 0) v = version.compare(o.version);
     return v;
 }
@@ -846,6 +893,7 @@ ResTable_config AaptGroupEntry::toParams() const
     getKeyboardName(keyboard.string(), &params);
     getNavigationName(navigation.string(), &params);
     getScreenSizeName(screenSize.string(), &params);
+    getScreenLayoutName(screenLayout.string(), &params);
     getVersionName(version.string(), &params);
     return params;
 }

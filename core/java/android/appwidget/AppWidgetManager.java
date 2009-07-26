@@ -21,7 +21,9 @@ import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.widget.RemoteViews;
 
 import com.android.internal.appwidget.IAppWidgetService;
@@ -187,6 +189,8 @@ public class AppWidgetManager {
     
     Context mContext;
 
+    private DisplayMetrics mDisplayMetrics;
+
     /**
      * Get the AppWidgetManager instance to use for the supplied {@link android.content.Context
      * Context} object.
@@ -213,6 +217,7 @@ public class AppWidgetManager {
 
     private AppWidgetManager(Context context) {
         mContext = context;
+        mDisplayMetrics = context.getResources().getDisplayMetrics();
     }
 
     /**
@@ -292,7 +297,15 @@ public class AppWidgetManager {
      */
     public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) {
         try {
-            return sService.getAppWidgetInfo(appWidgetId);
+            AppWidgetProviderInfo info = sService.getAppWidgetInfo(appWidgetId);
+            if (info != null) {
+                // Converting complex to dp.
+                info.minWidth = 
+                        TypedValue.complexToDimensionPixelSize(info.minWidth, mDisplayMetrics);
+                info.minHeight =
+                        TypedValue.complexToDimensionPixelSize(info.minHeight, mDisplayMetrics);
+            }
+            return info;
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);

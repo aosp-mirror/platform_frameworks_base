@@ -46,8 +46,9 @@ jfieldID get_field(JNIEnv *env, jclass clazz, const char *member,
 }
 
 typedef struct {
-    void (*user_cb)(DBusMessage *, void *);
+    void (*user_cb)(DBusMessage *, void *, void *);
     void *user;
+    void *nat;
     JNIEnv *env;
 } dbus_async_call_t;
 
@@ -63,7 +64,7 @@ void dbus_func_args_async_callback(DBusPendingCall *call, void *data) {
     if (msg) {
         if (req->user_cb) {
             // The user may not deref the message object.
-            req->user_cb(msg, req->user);
+            req->user_cb(msg, req->user, req->nat);
         }
         dbus_message_unref(msg);
     }
@@ -74,11 +75,14 @@ void dbus_func_args_async_callback(DBusPendingCall *call, void *data) {
     free(req);
 }
 
-dbus_bool_t dbus_func_args_async_valist(JNIEnv *env,
+static dbus_bool_t dbus_func_args_async_valist(JNIEnv *env,
                                         DBusConnection *conn,
                                         int timeout_ms,
-                                        void (*user_cb)(DBusMessage *, void *),
+                                        void (*user_cb)(DBusMessage *,
+                                                        void *,
+                                                        void*),
                                         void *user,
+                                        void *nat,
                                         const char *path,
                                         const char *ifc,
                                         const char *func,
@@ -111,6 +115,7 @@ dbus_bool_t dbus_func_args_async_valist(JNIEnv *env,
         pending->env = env;
         pending->user_cb = user_cb;
         pending->user = user;
+        pending->nat = nat;
         //pending->method = msg;
 
         reply = dbus_connection_send_with_reply(conn, msg,
@@ -132,8 +137,9 @@ done:
 dbus_bool_t dbus_func_args_async(JNIEnv *env,
                                  DBusConnection *conn,
                                  int timeout_ms,
-                                 void (*reply)(DBusMessage *, void *),
+                                 void (*reply)(DBusMessage *, void *, void*),
                                  void *user,
+                                 void *nat,
                                  const char *path,
                                  const char *ifc,
                                  const char *func,
@@ -144,7 +150,7 @@ dbus_bool_t dbus_func_args_async(JNIEnv *env,
     va_start(lst, first_arg_type);
     ret = dbus_func_args_async_valist(env, conn,
                                       timeout_ms,
-                                      reply, user,
+                                      reply, user, nat,
                                       path, ifc, func,
                                       first_arg_type, lst);
     va_end(lst);

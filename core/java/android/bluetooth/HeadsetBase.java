@@ -40,6 +40,8 @@ public class HeadsetBase {
     public static final int DIRECTION_INCOMING = 1;
     public static final int DIRECTION_OUTGOING = 2;
 
+    private static int sAtInputCount = 0;  /* TODO: Consider not using a static variable */
+
     private final BluetoothDevice mBluetooth;
     private final String mAddress;
     private final int mRfcommChannel;
@@ -108,6 +110,14 @@ public class HeadsetBase {
     protected void handleInput(String input) {
         acquireWakeLock();
         long timestamp;
+
+        synchronized(HeadsetBase.class) {
+            if (sAtInputCount == Integer.MAX_VALUE) {
+                sAtInputCount = 0;
+            } else {
+                sAtInputCount++;
+            }
+        }
 
         if (DBG) timestamp = System.currentTimeMillis();
         AtCommandResult result = mAtParser.process(input);
@@ -279,7 +289,11 @@ public class HeadsetBase {
         }
     }
 
-    private void log(String msg) {
+    public static int getAtInputCount() {
+        return sAtInputCount;
+    }
+
+    private static void log(String msg) {
         Log.d(TAG, msg);
     }
 }

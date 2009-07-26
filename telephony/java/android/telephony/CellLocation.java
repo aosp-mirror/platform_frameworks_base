@@ -19,8 +19,14 @@ package android.telephony;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
+import android.provider.Settings;
+
+
+import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
 import com.android.internal.telephony.ITelephony;
+import com.android.internal.telephony.RILConstants;
 
 /**
  * Abstract class that represents the location of the device.  Currently the only
@@ -56,7 +62,14 @@ public abstract class CellLocation {
      * @hide
      */
     public static CellLocation newFromBundle(Bundle bundle) {
-        return new GsmCellLocation(bundle);
+        // TelephonyManager.getDefault().getPhoneType() handles the case when
+        // ITelephony interface is not up yet.
+        int type = TelephonyManager.getDefault().getPhoneType();
+        if (type == RILConstants.CDMA_PHONE) {
+            return new CdmaCellLocation(bundle);
+        } else {
+            return new GsmCellLocation(bundle);
+        }
     }
 
     /**
@@ -66,8 +79,16 @@ public abstract class CellLocation {
 
     /**
      * Return a new CellLocation object representing an unknown location.
+     *
      */
     public static CellLocation getEmpty() {
-        return new GsmCellLocation();
+        // TelephonyManager.getDefault().getPhoneType() handles the case when
+        // ITelephony interface is not up yet.
+        int type = TelephonyManager.getDefault().getPhoneType();
+        if (type == RILConstants.CDMA_PHONE) {
+            return new CdmaCellLocation();
+        } else {
+            return new GsmCellLocation();
+        }
     }
 }

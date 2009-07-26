@@ -139,7 +139,7 @@ public:
     // record interface
     virtual sp<IAudioRecord> openRecord(
                                 pid_t pid,
-                                int streamType,
+                                int inputSource,
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
@@ -232,7 +232,6 @@ private:
 
                                 TrackBase(const sp<MixerThread>& mixerThread,
                                         const sp<Client>& client,
-                                        int streamType,
                                         uint32_t sampleRate,
                                         int format,
                                         int channelCount,
@@ -258,10 +257,6 @@ private:
 
             audio_track_cblk_t* cblk() const {
                 return mCblk;
-            }
-
-            int type() const {
-                return mStreamType;
             }
 
             int format() const {
@@ -293,7 +288,6 @@ private:
             sp<Client>          mClient;
             sp<IMemory>         mCblkMemory;
             audio_track_cblk_t* mCblk;
-            int                 mStreamType;
             void*               mBuffer;
             void*               mBufferEnd;
             uint32_t            mFrameCount;
@@ -327,6 +321,11 @@ private:
                     void        destroy();
                     void        mute(bool);
                     void        setVolume(float left, float right);
+
+                    int type() const {
+                        return mStreamType;
+                    }
+
 
         protected:
             friend class MixerThread;
@@ -364,6 +363,7 @@ private:
             int8_t              mRetryCount;
             sp<IMemory>         mSharedBuffer;
             bool                mResetDone;
+            int                 mStreamType;
         };  // end of Track
 
         // record track
@@ -371,7 +371,7 @@ private:
         public:
                                 RecordTrack(const sp<MixerThread>& mixerThread,
                                         const sp<Client>& client,
-                                        int streamType,
+                                        int inputSource,
                                         uint32_t sampleRate,
                                         int format,
                                         int channelCount,
@@ -385,6 +385,8 @@ private:
                     bool        overflow() { bool tmp = mOverflow; mOverflow = false; return tmp; }
                     bool        setOverflow() { bool tmp = mOverflow; mOverflow = true; return tmp; }
 
+                    int         inputSource() const { return mInputSource; }
+
         private:
             friend class AudioFlinger;
             friend class AudioFlinger::RecordHandle;
@@ -397,6 +399,7 @@ private:
             virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer);
 
             bool                mOverflow;
+            int                 mInputSource;
         };
 
         // playback track
@@ -501,7 +504,6 @@ private:
         MixerThread& operator = (const MixerThread&);
   
         status_t    addTrack_l(const sp<Track>& track);
-        void        removeTrack_l(wp<Track> track, int name);
         void        destroyTrack_l(const sp<Track>& track);
         int         getTrackName_l();
         void        deleteTrackName_l(int name);

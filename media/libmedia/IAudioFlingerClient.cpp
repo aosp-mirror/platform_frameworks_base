@@ -43,7 +43,7 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlingerClient::getInterfaceDescriptor());
         data.writeInt32((int)enabled);
-        remote()->transact(AUDIO_OUTPUT_CHANGED, data, &reply);
+        remote()->transact(AUDIO_OUTPUT_CHANGED, data, &reply, IBinder::FLAG_ONEWAY);
     }
 };
 

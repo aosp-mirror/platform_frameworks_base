@@ -26,12 +26,13 @@ import android.os.Debug;
 import java.nio.ByteBuffer;
 
 /**
- * Handle a HELO chunk.
+ * Handle "hello" messages and feature discovery.
  */
 public class DdmHandleHello extends ChunkHandler {
 
     public static final int CHUNK_HELO = type("HELO");
     public static final int CHUNK_WAIT = type("WAIT");
+    public static final int CHUNK_FEAT = type("FEAT");
 
     private static DdmHandleHello mInstance = new DdmHandleHello();
 
@@ -44,6 +45,7 @@ public class DdmHandleHello extends ChunkHandler {
      */
     public static void register() {
         DdmServer.registerHandler(CHUNK_HELO, mInstance);
+        DdmServer.registerHandler(CHUNK_FEAT, mInstance);
     }
 
     /**
@@ -73,12 +75,27 @@ public class DdmHandleHello extends ChunkHandler {
     }
 
     /**
-     * Handle a chunk of data.  We're only registered for "HELO".
+     * Handle a chunk of data.
      */
     public Chunk handleChunk(Chunk request) {
         if (Config.LOGV)
-            Log.v("ddm-hello", "Handling " + name(request.type) + " chunk");
+            Log.v("ddm-heap", "Handling " + name(request.type) + " chunk");
+        int type = request.type;
 
+        if (type == CHUNK_HELO) {
+            return handleHELO(request);
+        } else if (type == CHUNK_FEAT) {
+            return handleFEAT(request);
+        } else {
+            throw new RuntimeException("Unknown packet "
+                + ChunkHandler.name(type));
+        }
+    }
+
+    /*
+     * Handle introductory packet.
+     */
+    private Chunk handleHELO(Chunk request) {
         if (false)
             return createFailChunk(123, "This is a test");
 
@@ -123,6 +140,34 @@ public class DdmHandleHello extends ChunkHandler {
             sendWAIT(0);
 
         return reply;
+    }
+
+    /*
+     * Handle request for list of supported features.
+     */
+    private Chunk handleFEAT(Chunk request) {
+        // TODO: query the VM to ensure that support for these features
+        // is actually compiled in
+        final String[] features = {
+            "hprof-heap-dump", "method-trace-profiling"
+        };
+
+        if (Config.LOGD)
+            Log.d("ddm-heap", "Got feature list request");
+
+        int size = 4 + 4 * features.length;
+        for (int i = features.length-1; i >= 0; i--)
+            size += features[i].length() * 2;
+
+        ByteBuffer out = ByteBuffer.allocate(size);
+        out.order(ChunkHandler.CHUNK_ORDER);
+        out.putInt(features.length);
+        for (int i = features.length-1; i >= 0; i--) {
+            out.putInt(features[i].length());
+            putString(out, features[i]);
+        }
+
+        return new Chunk(CHUNK_FEAT, out);
     }
 
     /**

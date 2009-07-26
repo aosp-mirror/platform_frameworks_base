@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.UEventObserver;
 import android.util.Log;
 import android.media.AudioManager;
@@ -33,20 +35,25 @@ import java.io.FileNotFoundException;
  */
 class HeadsetObserver extends UEventObserver {
     private static final String TAG = HeadsetObserver.class.getSimpleName();
+    private static final boolean LOG = false;
 
     private static final String HEADSET_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/h2w";
     private static final String HEADSET_STATE_PATH = "/sys/class/switch/h2w/state";
     private static final String HEADSET_NAME_PATH = "/sys/class/switch/h2w/name";
-
-    private Context mContext;
 
     private int mHeadsetState;
     private String mHeadsetName;
     private boolean mAudioRouteNeedsUpdate;
     private AudioManager mAudioManager;
 
+    private final Context mContext;
+    private final WakeLock mWakeLock;  // held while there is a pending route change
+
     public HeadsetObserver(Context context) {
         mContext = context;
+        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "HeadsetObserver");
+        mWakeLock.setReferenceCounted(false);
 
         startObserving(HEADSET_UEVENT_MATCH);
 
@@ -55,7 +62,7 @@ class HeadsetObserver extends UEventObserver {
 
     @Override
     public void onUEvent(UEventObserver.UEvent event) {
-        Log.v(TAG, "Headset UEVENT: " + event.toString());
+        if (LOG) Log.v(TAG, "Headset UEVENT: " + event.toString());
 
         try {
             update(event.get("SWITCH_NAME"), Integer.parseInt(event.get("SWITCH_STATE")));
@@ -103,6 +110,7 @@ class HeadsetObserver extends UEventObserver {
                 // immediate, so delay the route change by 1000ms.
                 // This could be improved once the audio sub-system provides an
                 // interface to clear the audio pipeline.
+                mWakeLock.acquire();
                 mHandler.sendEmptyMessageDelayed(0, 1000);
             } else {
                 updateAudioRoute();
@@ -138,7 +146,8 @@ class HeadsetObserver extends UEventObserver {
         @Override
         public void handleMessage(Message msg) {
             updateAudioRoute();
+            mWakeLock.release();
         }
-    };        
+    };
 
 }

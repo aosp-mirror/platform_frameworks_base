@@ -1,0 +1,49 @@
+page.title=User Interface Guidelines
+@jd:body
+
+
+<img src="{@docRoot}assets/images/uiguidelines1.png" alt="" align="right">
+
+
+<p>The Android UI team has begun developing guidelines for the interaction and
+visual design of Android applications. Look here for articles that describe
+these guidelines as we release them.</p>
+
+ <dl>
+  <dt><a href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Icon
+Design Guidelines</a> and <a
+href="{@docRoot}shareables/icon_templates-v1.0.zip">Android Icon Templates Pack
+&raquo; </a></dt>
+  <dd>Your applications need a wide variety of icons, from a launcher icon to
+icons in menus, dialogs, tabs, the status bar, and lists. The Icon Guidelines
+describe each kind of icon in detail, with specifications for the size, color,
+shading, and other details for making all your icons fit in the Android system.
+The Icon Templates Pack is an archive of Photoshop and Illustrator templates and
+filters that make it much simpler to create conforming icons.</dd>
+</dl>
+ <dl>
+  <dt><a href="{@docRoot}guide/practices/ui_guidelines/widget_design.html">Widget Design Guidelines</a> </dt>
+  <dd>A widget displays an application's most important or timely information
+at a glance, on a user's Home screen. These design guidelines describe how to
+design widgets that fit with others on the Home screen. They include links to
+graphics files and templates that will make your designer's life easier.</dd>
+</dl>
+ <dl>
+  <dt><a href="{@docRoot}guide/practices/ui_guidelines/activity_task_design.html">Activity and Task Design Guidelines</a> </dt>
+  <dd>Activities are the basic, independent building blocks of applications.
+      As you design your application's UI and feature set, you are free to
+      re-use activities from other applications as if they were yours,
+      to enrich and extend your application.   These guidelines
+      describe how activities work, illustrates them with examples, and
+      describes important underlying principles and mechanisms, such as
+      multitasking, activity reuse, intents, the activity stack, and 
+      tasks. It covers this all from a high-level design perspective.
+</dd>
+</dl>
+
+
+
+
+
+
+

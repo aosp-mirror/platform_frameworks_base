@@ -538,7 +538,8 @@ import java.util.ArrayList;
      * removing the password input type.
      */
     public void setSingleLine(boolean single) {
-        int inputType = EditorInfo.TYPE_CLASS_TEXT;
+        int inputType = EditorInfo.TYPE_CLASS_TEXT
+                | EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
         if (!single) {
             inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
                     | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES

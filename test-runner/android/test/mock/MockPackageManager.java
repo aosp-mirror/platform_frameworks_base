@@ -16,10 +16,10 @@
 
 package android.test.mock;
 
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDeleteObserver;
@@ -57,11 +57,10 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
-    public Intent getLaunchIntentForPackage(String packageName)
-            throws NameNotFoundException {
+    public Intent getLaunchIntentForPackage(String packageName) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public int[] getPackageGids(String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException();
@@ -284,9 +283,20 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @hide - to match hiding in superclass
+     */
     @Override
     public void installPackage(Uri packageURI, IPackageInstallObserver observer,
-            int flags) {
+            int flags, String installerPackageName) {
+        throw new UnsupportedOperationException();
+    }
+    
+    /**
+     * @hide - to match hiding in superclass
+     */
+    @Override
+    public String getInstallerPackageName(String packageName) {
         throw new UnsupportedOperationException();
     }
 
@@ -316,13 +326,13 @@ public class MockPackageManager extends PackageManager {
             long idealStorageSize, IPackageDataObserver observer) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @hide - to match hiding in superclass
      */
     @Override
     public void freeStorage(
-            long idealStorageSize, PendingIntent onFinishedIntent) {
+            long idealStorageSize, IntentSender pi) {
         throw new UnsupportedOperationException();
     }
 
@@ -377,6 +387,16 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
     
+    /**
+     * @hide - to match hiding in superclass
+     */
+    @Override
+    public void replacePreferredActivity(IntentFilter filter,
+            int match, ComponentName[] set, ComponentName activity) {
+        throw new UnsupportedOperationException();
+    }
+
+
     @Override
     public void clearPackagePreferredActivities(String packageName) {
         throw new UnsupportedOperationException();
@@ -387,11 +407,6 @@ public class MockPackageManager extends PackageManager {
      */
     @Override
     public void getPackageSizeInfo(String packageName, IPackageStatsObserver observer) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void installPackage(Uri packageURI) {
         throw new UnsupportedOperationException();
     }
 

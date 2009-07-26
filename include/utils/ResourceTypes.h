@@ -71,7 +71,7 @@ namespace android {
  * The relative sizes of the stretchy segments indicates the relative
  * amount of stretchiness of the regions bordered by the segments.  For
  * example, regions 3, 7 and 11 above will take up more horizontal space
- * than regions 1, 5 and 9 since the horizonal segment associated with
+ * than regions 1, 5 and 9 since the horizontal segment associated with
  * the first set of regions is larger than the other set of regions.  The
  * ratios of the amount of horizontal (or vertical) space taken by any
  * two stretchable slices is exactly the ratio of their corresponding
@@ -87,7 +87,7 @@ namespace android {
  * the leftmost slices always start at x=0 and the rightmost slices
  * always end at the end of the image. So, for example, the regions 0,
  * 4 and 8 (which are fixed along the X axis) start at x value 0 and
- * go to xDiv[0] amd slices 2, 6 and 10 start at xDiv[1] and end at
+ * go to xDiv[0] and slices 2, 6 and 10 start at xDiv[1] and end at
  * xDiv[2].
  *
  * The array pointed to by the colors field lists contains hints for
@@ -626,25 +626,25 @@ public:
     event_code_t next();
 
     // These are available for all nodes:
-    const int32_t getCommentID() const;
+    int32_t getCommentID() const;
     const uint16_t* getComment(size_t* outLen) const;
-    const uint32_t getLineNumber() const;
+    uint32_t getLineNumber() const;
     
     // This is available for TEXT:
-    const int32_t getTextID() const;
+    int32_t getTextID() const;
     const uint16_t* getText(size_t* outLen) const;
     ssize_t getTextValue(Res_value* outValue) const;
     
     // These are available for START_NAMESPACE and END_NAMESPACE:
-    const int32_t getNamespacePrefixID() const;
+    int32_t getNamespacePrefixID() const;
     const uint16_t* getNamespacePrefix(size_t* outLen) const;
-    const int32_t getNamespaceUriID() const;
+    int32_t getNamespaceUriID() const;
     const uint16_t* getNamespaceUri(size_t* outLen) const;
     
     // These are available for START_TAG and END_TAG:
-    const int32_t getElementNamespaceID() const;
+    int32_t getElementNamespaceID() const;
     const uint16_t* getElementNamespace(size_t* outLen) const;
-    const int32_t getElementNameID() const;
+    int32_t getElementNameID() const;
     const uint16_t* getElementName(size_t* outLen) const;
     
     // Remaining methods are for retrieving information about attributes
@@ -653,14 +653,14 @@ public:
     size_t getAttributeCount() const;
     
     // Returns -1 if no namespace, -2 if idx out of range.
-    const int32_t getAttributeNamespaceID(size_t idx) const;
+    int32_t getAttributeNamespaceID(size_t idx) const;
     const uint16_t* getAttributeNamespace(size_t idx, size_t* outLen) const;
     
-    const int32_t getAttributeNameID(size_t idx) const;
+    int32_t getAttributeNameID(size_t idx) const;
     const uint16_t* getAttributeName(size_t idx, size_t* outLen) const;
-    const uint32_t getAttributeNameResID(size_t idx) const;
+    uint32_t getAttributeNameResID(size_t idx) const;
     
-    const int32_t getAttributeValueStringID(size_t idx) const;
+    int32_t getAttributeValueStringID(size_t idx) const;
     const uint16_t* getAttributeStringValue(size_t idx, size_t* outLen) const;
     
     int32_t getAttributeDataType(size_t idx) const;
@@ -866,7 +866,7 @@ struct ResTable_config
             uint8_t keyboard;
             uint8_t navigation;
             uint8_t inputFlags;
-            uint8_t pad0;
+            uint8_t inputPad0;
         };
         uint32_t input;
     };
@@ -903,6 +903,23 @@ struct ResTable_config
             uint16_t minorVersion;
         };
         uint32_t version;
+    };
+    
+    enum {
+        SCREENLAYOUT_ANY  = 0x0000,
+        SCREENLAYOUT_SMALL = 0x0001,
+        SCREENLAYOUT_NORMAL = 0x0002,
+        SCREENLAYOUT_LARGE = 0x0003,
+    };
+    
+    union {
+        struct {
+            uint8_t screenLayout;
+            uint8_t screenConfigPad0;
+            uint8_t screenConfigPad1;
+            uint8_t screenConfigPad2;
+        };
+        uint32_t screenConfig;
     };
     
     inline void copyFromDeviceNoSwap(const ResTable_config& o) {
@@ -950,6 +967,8 @@ struct ResTable_config
         diff = (int32_t)(screenSize - o.screenSize);
         if (diff != 0) return diff;
         diff = (int32_t)(version - o.version);
+        if (diff != 0) return diff;
+        diff = (int32_t)(screenLayout - o.screenLayout);
         return (int)diff;
     }
     
@@ -967,7 +986,8 @@ struct ResTable_config
         CONFIG_ORIENTATION = 0x0080,
         CONFIG_DENSITY = 0x0100,
         CONFIG_SCREEN_SIZE = 0x0200,
-        CONFIG_VERSION = 0x0400
+        CONFIG_VERSION = 0x0400,
+        CONFIG_SCREEN_LAYOUT = 0x0800
     };
     
     // Compare two configuration, returning CONFIG_* flags set for each value
@@ -985,122 +1005,242 @@ struct ResTable_config
         if (navigation != o.navigation) diffs |= CONFIG_NAVIGATION;
         if (screenSize != o.screenSize) diffs |= CONFIG_SCREEN_SIZE;
         if (version != o.version) diffs |= CONFIG_VERSION;
+        if (screenLayout != o.screenLayout) diffs |= CONFIG_SCREEN_LAYOUT;
         return diffs;
     }
     
-    // Return true if 'this' is more specific than 'o'.  Optionally, if
-    // 'requested' is null, then they will also be compared against the
-    // requested configuration and true will only be returned if 'this'
-    // is a better candidate than 'o' for the configuration.  This assumes that
-    // match() has already been used to remove any configurations that don't
-    // match the requested configuration at all; if they are not first filtered,
-    // non-matching results can be considered better than matching ones.
+    // Return true if 'this' is more specific than 'o'.
     inline bool
-    isBetterThan(const ResTable_config& o, const ResTable_config* requested = NULL) const {
+    isMoreSpecificThan(const ResTable_config& o) const {
         // The order of the following tests defines the importance of one
         // configuration parameter over another.  Those tests first are more
         // important, trumping any values in those following them.
-        if (imsi != 0 && (!requested || requested->imsi != 0)) {
-            if (mcc != 0 && (!requested || requested->mcc != 0)) {
-                if (o.mcc == 0) {
-                    return true;
-                }
+        if (imsi || o.imsi) {
+            if (mcc != o.mcc) {
+                if (!mcc) return false;
+                if (!o.mcc) return true;
             }
-            if (mnc != 0 && (!requested || requested->mnc != 0)) {
-                if (o.mnc == 0) {
-                    return true;
-                }
-            }
-        }
-        if (locale != 0 && (!requested || requested->locale != 0)) {
-            if (language[0] != 0 && (!requested || requested->language[0] != 0)) {
-                if (o.language[0] == 0) {
-                    return true;
-                }
-            }
-            if (country[0] != 0 && (!requested || requested->country[0] != 0)) {
-                if (o.country[0] == 0) {
-                    return true;
-                }
+
+            if (mnc != o.mnc) {
+                if (!mnc) return false;
+                if (!o.mnc) return true;
             }
         }
-        if (screenType != 0 && (!requested || requested->screenType != 0)) {
-            if (orientation != 0 && (!requested || requested->orientation != 0)) {
-                if (o.orientation == 0) {
-                    return true;
-                }
+
+        if (locale || o.locale) {
+            if (language[0] != o.language[0]) {
+                if (!language[0]) return false;
+                if (!o.language[0]) return true;
             }
-            if (density != 0 && (!requested || requested->density != 0)) {
-                if (o.density == 0) {
-                    return true;
-                }
-            }
-            if (touchscreen != 0 && (!requested || requested->touchscreen != 0)) {
-                if (o.touchscreen == 0) {
-                    return true;
-                }
+
+            if (country[0] != o.country[0]) {
+                if (!country[0]) return false;
+                if (!o.country[0]) return true;
             }
         }
-        if (input != 0 && (!requested || requested->input != 0)) {
-            const int keysHidden = inputFlags&MASK_KEYSHIDDEN;
-            const int reqKeysHidden = requested
-                    ? requested->inputFlags&MASK_KEYSHIDDEN : 0;
-            if (keysHidden != 0 && reqKeysHidden != 0) {
-                const int oKeysHidden = o.inputFlags&MASK_KEYSHIDDEN;
-                //LOGI("isBetterThan keysHidden: cur=%d, given=%d, config=%d\n",
-                //        keysHidden, oKeysHidden, reqKeysHidden);
-                if (oKeysHidden == 0) {
-                    //LOGI("Better because 0!");
-                    return true;
-                }
-                // For compatibility, we count KEYSHIDDEN_NO as being
-                // the same as KEYSHIDDEN_SOFT.  Here we disambiguate these
-                // may making an exact match more specific.
-                if (keysHidden == reqKeysHidden && oKeysHidden != reqKeysHidden) {
-                    // The current configuration is an exact match, and
-                    // the given one is not, so the current one is better.
-                    //LOGI("Better because other not same!");
-                    return true;
-                }
+
+        if (screenType || o.screenType) {
+            if (orientation != o.orientation) {
+                if (!orientation) return false;
+                if (!o.orientation) return true;
             }
-            if (keyboard != 0 && (!requested || requested->keyboard != 0)) {
-                if (o.keyboard == 0) {
-                    return true;
-                }
-            }
-            if (navigation != 0 && (!requested || requested->navigation != 0)) {
-                if (o.navigation == 0) {
-                    return true;
-                }
+
+            // density is never 'more specific'
+            // as the default just equals 160
+
+            if (touchscreen != o.touchscreen) {
+                if (!touchscreen) return false;
+                if (!o.touchscreen) return true;
             }
         }
-        if (screenSize != 0 && (!requested || requested->screenSize != 0)) {
-            if (screenWidth != 0 && (!requested || requested->screenWidth != 0)) {
-                if (o.screenWidth == 0) {
-                    return true;
-                }
+
+        if (input || o.input) {
+            if (inputFlags != o.inputFlags) {
+                if (!(inputFlags & MASK_KEYSHIDDEN)) return false;
+                if (!(o.inputFlags & MASK_KEYSHIDDEN)) return true;
             }
-            if (screenHeight != 0 && (!requested || requested->screenHeight != 0)) {
-                if (o.screenHeight == 0) {
-                    return true;
-                }
+
+            if (keyboard != o.keyboard) {
+                if (!keyboard) return false;
+                if (!o.keyboard) return true;
+            }
+
+            if (navigation != o.navigation) {
+                if (!navigation) return false;
+                if (!o.navigation) return true;
             }
         }
-        if (version != 0 && (!requested || requested->version != 0)) {
-            if (sdkVersion != 0 && (!requested || requested->sdkVersion != 0)) {
-                if (o.sdkVersion == 0) {
-                    return true;
-                }
+
+        if (screenSize || o.screenSize) {
+            if (screenWidth != o.screenWidth) {
+                if (!screenWidth) return false;
+                if (!o.screenWidth) return true;
             }
-            if (minorVersion != 0 && (!requested || requested->minorVersion != 0)) {
-                if (o.minorVersion == 0) {
-                    return true;
-                }
+
+            if (screenHeight != o.screenHeight) {
+                if (!screenHeight) return false;
+                if (!o.screenHeight) return true;
+            }
+        }
+
+        if (screenConfig || o.screenConfig) {
+            if (screenLayout != o.screenLayout) {
+                if (!screenLayout) return false;
+                if (!o.screenLayout) return true;
+            }
+        }
+
+        if (version || o.version) {
+            if (sdkVersion != o.sdkVersion) {
+                if (!sdkVersion) return false;
+                if (!o.sdkVersion) return true;
+            }
+
+            if (minorVersion != o.minorVersion) {
+                if (!minorVersion) return false;
+                if (!o.minorVersion) return true;
             }
         }
         return false;
     }
-    
+
+    // Return true if 'this' is a better match than 'o' for the 'requested'
+    // configuration.  This assumes that match() has already been used to
+    // remove any configurations that don't match the requested configuration
+    // at all; if they are not first filtered, non-matching results can be
+    // considered better than matching ones.
+    // The general rule per attribute: if the request cares about an attribute
+    // (it normally does), if the two (this and o) are equal it's a tie.  If
+    // they are not equal then one must be generic because only generic and
+    // '==requested' will pass the match() call.  So if this is not generic,
+    // it wins.  If this IS generic, o wins (return false).
+    inline bool
+    isBetterThan(const ResTable_config& o,
+            const ResTable_config* requested) const {
+        if (requested) {
+            if (imsi || o.imsi) {
+                if ((mcc != o.mcc) && requested->mcc) {
+                    return (mcc);
+                }
+
+                if ((mnc != o.mnc) && requested->mnc) {
+                    return (mnc);
+                }
+            }
+
+            if (locale || o.locale) {
+                if ((language[0] != o.language[0]) && requested->language[0]) {
+                    return (language[0]);
+                }
+
+                if ((country[0] != o.country[0]) && requested->country[0]) {
+                    return (country[0]);
+                }
+            }
+
+            if (screenType || o.screenType) {
+                if ((orientation != o.orientation) && requested->orientation) {
+                    return (orientation);
+                }
+
+                if (density != o.density) {
+                    // density is tough.  Any density is potentially useful
+                    // because the system will scale it.  Scaling down
+                    // is generally better than scaling up.
+                    // Default density counts as 160dpi (the system default)
+                    // TODO - remove 160 constants
+                    int h = (density?density:160);
+                    int l = (o.density?o.density:160);
+                    bool bImBigger = true;
+                    if (l > h) {
+                        int t = h;
+                        h = l;
+                        l = t;
+                        bImBigger = false;
+                    }
+ 
+                    int reqValue = (requested->density?requested->density:160);
+                    if (reqValue >= h) {
+                        // requested value higher than both l and h, give h
+                        return bImBigger;
+                    }
+                    if (l >= reqValue) {
+                        // requested value lower than both l and h, give l
+                        return !bImBigger;
+                    }
+                    // saying that scaling down is 2x better than up
+                    if (((2 * l) - reqValue) * h > reqValue * reqValue) {
+                        return !bImBigger;
+                    } else { 
+                        return bImBigger;
+                    }
+                }
+
+                if ((touchscreen != o.touchscreen) && requested->touchscreen) {
+                    return (touchscreen);
+                }
+            }
+
+            if (input || o.input) {
+                const int keysHidden = inputFlags & MASK_KEYSHIDDEN;
+                const int oKeysHidden = o.inputFlags & MASK_KEYSHIDDEN;
+                if (keysHidden != oKeysHidden) {
+                    const int reqKeysHidden =
+                            requested->inputFlags & MASK_KEYSHIDDEN;
+                    if (reqKeysHidden) {
+
+                        if (!keysHidden) return false;
+                        if (!oKeysHidden) return true;
+                        // For compatibility, we count KEYSHIDDEN_NO as being
+                        // the same as KEYSHIDDEN_SOFT.  Here we disambiguate
+                        // these by making an exact match more specific.
+                        if (reqKeysHidden == keysHidden) return true;
+                        if (reqKeysHidden == oKeysHidden) return false;
+                    }
+                }
+
+                if ((keyboard != o.keyboard) && requested->keyboard) {
+                    return (keyboard);
+                }
+
+                if ((navigation != o.navigation) && requested->navigation) {
+                    return (navigation);
+                }
+            }
+
+            if (screenSize || o.screenSize) {
+                if ((screenWidth != o.screenWidth) && requested->screenWidth) {
+                    return (screenWidth);
+                }
+
+                if ((screenHeight != o.screenHeight) &&
+                        requested->screenHeight) {
+                    return (screenHeight);
+                }
+            }
+
+            if (screenConfig || o.screenConfig) {
+                if ((screenLayout != o.screenLayout) && requested->screenLayout) {
+                    return (screenLayout);
+                }
+            }
+
+            if (version || o.version) {
+                if ((sdkVersion != o.sdkVersion) && requested->sdkVersion) {
+                    return (sdkVersion);
+                }
+
+                if ((minorVersion != o.minorVersion) &&
+                        requested->minorVersion) {
+                    return (minorVersion);
+                }
+            }
+
+            return false;
+        }
+        return isMoreSpecificThan(o);
+    }
+
     // Return true if 'this' can be considered a match for the parameters in 
     // 'settings'.
     // Note this is asymetric.  A default piece of data will match every request
@@ -1137,8 +1277,7 @@ struct ResTable_config
                 && orientation != settings.orientation) {
                 return false;
             }
-            // Density not taken into account, always match, no matter what
-            // density is specified for the resource
+            // density always matches - we can scale it.  See isBetterThan
             if (settings.touchscreen != 0 && touchscreen != 0
                 && touchscreen != settings.touchscreen) {
                 return false;
@@ -1177,6 +1316,12 @@ struct ResTable_config
                 return false;
             }
         }
+        if (screenConfig != 0) {
+            if (settings.screenLayout != 0 && screenLayout != 0
+                && screenLayout != settings.screenLayout) {
+                return false;
+            }
+        }
         if (version != 0) {
             if (settings.sdkVersion != 0 && sdkVersion != 0
                 && sdkVersion != settings.sdkVersion) {
@@ -1205,13 +1350,13 @@ struct ResTable_config
 
     String8 toString() const {
         char buf[200];
-        sprintf(buf, "imsi=%d/%d lang=%c%c reg=%c%c orient=0x%02x touch=0x%02x dens=0x%02x "
-                "kbd=0x%02x nav=0x%02x input=0x%02x screenW=0x%04x screenH=0x%04x vers=%d.%d",
+        sprintf(buf, "imsi=%d/%d lang=%c%c reg=%c%c orient=%d touch=%d dens=%d "
+                "kbd=%d nav=%d input=%d scrnW=%d scrnH=%d layout=%d vers=%d.%d",
                 mcc, mnc,
                 language[0] ? language[0] : '-', language[1] ? language[1] : '-',
                 country[0] ? country[0] : '-', country[1] ? country[1] : '-',
                 orientation, touchscreen, density, keyboard, navigation, inputFlags,
-                screenWidth, screenHeight, sdkVersion, minorVersion);
+                screenWidth, screenHeight, screenLayout, sdkVersion, minorVersion);
         return String8(buf);
     }
 };
@@ -1296,7 +1441,7 @@ struct ResTable_type
  * This is the beginning of information about an entry in the resource
  * table.  It holds the reference to the name of this entry, and is
  * immediately followed by one of:
- *   * A Res_value structures, if FLAG_COMPLEX is -not- set.
+ *   * A Res_value structure, if FLAG_COMPLEX is -not- set.
  *   * An array of ResTable_map structures, if FLAG_COMPLEX is set.
  *     These supply a set of name/value mappings of data.
  */
@@ -1435,6 +1580,7 @@ public:
                  bool copyData=false);
     status_t add(Asset* asset, void* cookie,
                  bool copyData=false);
+    status_t add(ResTable* src);
 
     status_t getError() const;
 
@@ -1676,7 +1822,7 @@ public:
     void getLocales(Vector<String8>* locales) const;
 
 #ifndef HAVE_ANDROID_OS
-    void print() const;
+    void print(bool inclValues) const;
 #endif
 
 private:
@@ -1698,6 +1844,8 @@ private:
     status_t parsePackage(
         const ResTable_package* const pkg, const Header* const header);
 
+    void print_value(const Package* pkg, const Res_value& value) const;
+    
     mutable Mutex               mLock;
 
     status_t                    mError;

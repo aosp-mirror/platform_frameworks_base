@@ -66,6 +66,7 @@ class HistoryRecord extends IApplicationToken.Stub {
     int theme;              // resource identifier of activity's theme.
     TaskRecord task;        // the task this is in.
     long startTime;         // when we starting launching this activity
+    long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     Configuration configuration; // configuration activity was last running in
     HistoryRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
@@ -85,6 +86,7 @@ class HistoryRecord extends IApplicationToken.Stub {
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
     boolean haveState;      // have we gotten the last activity state?
     boolean stopped;        // is activity pause finished?
+    boolean delayedResume;  // not yet resumed because of stopped app switches?
     boolean finishing;      // activity in pending finish list?
     boolean configDestroy;  // need to destroy due to config change?
     int configChangeFlags;  // which config values have changed
@@ -100,46 +102,75 @@ class HistoryRecord extends IApplicationToken.Stub {
     boolean hasBeenLaunched;// has this activity ever been launched?
     boolean frozenBeforeDestroy;// has been frozen but not yet destroyed.
 
+    String stringName;      // for caching of toString().
+    
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
-        pw.println(prefix + "packageName=" + packageName
-              + " processName=" + processName);
-        pw.println(prefix + "launchedFromUid=" + launchedFromUid
-                + " app=" + app);
-        pw.println(prefix + intent);
-        pw.println(prefix + "frontOfTask=" + frontOfTask + " task=" + task);
-        pw.println(prefix + "taskAffinity=" + taskAffinity);
-        pw.println(prefix + "realActivity=" + realActivity);
-        pw.println(prefix + "dir=" + baseDir + " res=" + resDir + " data=" + dataDir);
-        pw.println(prefix + "labelRes=0x" + Integer.toHexString(labelRes)
-                + " icon=0x" + Integer.toHexString(icon)
-                + " theme=0x" + Integer.toHexString(theme));
-        pw.println(prefix + "stateNotNeeded=" + stateNotNeeded
-                + " componentSpecified=" + componentSpecified
-                + " isHomeActivity=" + isHomeActivity);
-        pw.println(prefix + "configuration=" + configuration);
-        pw.println(prefix + "resultTo=" + resultTo
-              + " resultWho=" + resultWho + " resultCode=" + requestCode);
-        pw.println(prefix + "results=" + results);
-        pw.println(prefix + "pendingResults=" + pendingResults);
-        pw.println(prefix + "readUriPermissions=" + readUriPermissions);
-        pw.println(prefix + "writeUriPermissions=" + writeUriPermissions);
-        pw.println(prefix + "launchFailed=" + launchFailed
-              + " haveState=" + haveState + " icicle=" + icicle);
-        pw.println(prefix + "state=" + state
-              + " stopped=" + stopped + " finishing=" + finishing);
-        pw.println(prefix + "keysPaused=" + keysPaused
-              + " inHistory=" + inHistory + " persistent=" + persistent
-              + " launchMode=" + launchMode);
-        pw.println(prefix + "fullscreen=" + fullscreen
-              + " visible=" + visible
-              + " frozenBeforeDestroy=" + frozenBeforeDestroy
-              + " thumbnailNeeded=" + thumbnailNeeded + " idle=" + idle);
-        pw.println(prefix + "waitingVisible=" + waitingVisible
-              + " nowVisible=" + nowVisible);
-        pw.println(prefix + "configDestroy=" + configDestroy
-                + " configChangeFlags=" + Integer.toHexString(configChangeFlags));
-        pw.println(prefix + "connections=" + connections);
+        pw.print(prefix); pw.print("packageName="); pw.print(packageName);
+                pw.print(" processName="); pw.println(processName);
+        pw.print(prefix); pw.print("launchedFromUid="); pw.print(launchedFromUid);
+                pw.print(" app="); pw.println(app);
+        pw.print(prefix); pw.println(intent);
+        pw.print(prefix); pw.print("frontOfTask="); pw.print(frontOfTask);
+                pw.print(" task="); pw.println(task);
+        pw.print(prefix); pw.print("taskAffinity="); pw.println(taskAffinity);
+        pw.print(prefix); pw.print("realActivity=");
+                pw.println(realActivity.flattenToShortString());
+        pw.print(prefix); pw.print("base="); pw.print(baseDir);
+                if (!resDir.equals(baseDir)) pw.print(" res="); pw.print(resDir);
+                pw.print(" data="); pw.println(dataDir);
+        pw.print(prefix); pw.print("labelRes=0x");
+                pw.print(Integer.toHexString(labelRes));
+                pw.print(" icon=0x"); pw.print(Integer.toHexString(icon));
+                pw.print(" theme=0x"); pw.println(Integer.toHexString(theme));
+        pw.print(prefix); pw.print("stateNotNeeded="); pw.print(stateNotNeeded);
+                pw.print(" componentSpecified="); pw.print(componentSpecified);
+                pw.print(" isHomeActivity="); pw.println(isHomeActivity);
+        pw.print(prefix); pw.print("configuration="); pw.println(configuration);
+        if (resultTo != null || resultWho != null) {
+            pw.print(prefix); pw.print("resultTo="); pw.print(resultTo);
+                    pw.print(" resultWho="); pw.print(resultWho);
+                    pw.print(" resultCode="); pw.println(requestCode);
+        }
+        if (results != null) {
+            pw.print(prefix); pw.print("results="); pw.println(results);
+        }
+        if (pendingResults != null) {
+            pw.print(prefix); pw.print("pendingResults="); pw.println(pendingResults);
+        }
+        if (readUriPermissions != null) {
+            pw.print(prefix); pw.print("readUriPermissions="); pw.println(readUriPermissions);
+        }
+        if (writeUriPermissions != null) {
+            pw.print(prefix); pw.print("writeUriPermissions="); pw.println(writeUriPermissions);
+        }
+        pw.print(prefix); pw.print("launchFailed="); pw.print(launchFailed);
+                pw.print(" haveState="); pw.print(haveState);
+                pw.print(" icicle="); pw.println(icicle);
+        pw.print(prefix); pw.print("state="); pw.print(state);
+                pw.print(" stopped="); pw.print(stopped);
+                pw.print(" delayedResume="); pw.print(delayedResume);
+                pw.print(" finishing="); pw.println(finishing);
+        pw.print(prefix); pw.print("keysPaused="); pw.print(keysPaused);
+                pw.print(" inHistory="); pw.print(inHistory);
+                pw.print(" persistent="); pw.print(persistent);
+                pw.print(" launchMode="); pw.println(launchMode);
+        pw.print(prefix); pw.print("fullscreen="); pw.print(fullscreen);
+                pw.print(" visible="); pw.print(visible);
+                pw.print(" frozenBeforeDestroy="); pw.print(frozenBeforeDestroy);
+                pw.print(" thumbnailNeeded="); pw.print(thumbnailNeeded);
+                pw.print(" idle="); pw.println(idle);
+        if (waitingVisible || nowVisible) {
+            pw.print(prefix); pw.print("waitingVisible="); pw.print(waitingVisible);
+                    pw.print(" nowVisible="); pw.println(nowVisible);
+        }
+        if (configDestroy || configChangeFlags != 0) {
+            pw.print(prefix); pw.print("configDestroy="); pw.print(configDestroy);
+                    pw.print(" configChangeFlags=");
+                    pw.println(Integer.toHexString(configChangeFlags));
+        }
+        if (connections != null) {
+            pw.print(prefix); pw.print("connections="); pw.println(connections);
+        }
     }
 
     HistoryRecord(ActivityManagerService _service, ProcessRecord _caller,
@@ -163,6 +194,7 @@ class HistoryRecord extends IApplicationToken.Stub {
         launchFailed = false;
         haveState = false;
         stopped = false;
+        delayedResume = false;
         finishing = false;
         configDestroy = false;
         keysPaused = false;
@@ -335,15 +367,31 @@ class HistoryRecord extends IApplicationToken.Stub {
     
     public void windowsVisible() {
         synchronized(service) {
-            if (ActivityManagerService.SHOW_ACTIVITY_START_TIME
-                    && startTime != 0) {
-                long time = SystemClock.uptimeMillis() - startTime;
-                EventLog.writeEvent(ActivityManagerService.LOG_ACTIVITY_LAUNCH_TIME,
-                        System.identityHashCode(this), shortComponentName, time);
-                Log.i(ActivityManagerService.TAG, "Displayed activity "
-                        + shortComponentName
-                        + ": " + time + " ms");
+            if (startTime != 0) {
+                final long curTime = SystemClock.uptimeMillis();
+                final long thisTime = curTime - startTime;
+                final long totalTime = service.mInitialStartTime != 0
+                        ? (curTime - service.mInitialStartTime) : thisTime;
+                if (ActivityManagerService.SHOW_ACTIVITY_START_TIME) {
+                    EventLog.writeEvent(ActivityManagerService.LOG_ACTIVITY_LAUNCH_TIME,
+                            System.identityHashCode(this), shortComponentName,
+                            thisTime, totalTime);
+                    StringBuilder sb = service.mStringBuilder;
+                    sb.setLength(0);
+                    sb.append("Displayed activity ");
+                    sb.append(shortComponentName);
+                    sb.append(": ");
+                    sb.append(thisTime);
+                    sb.append(" ms (total ");
+                    sb.append(totalTime);
+                    sb.append(" ms)");
+                    Log.i(ActivityManagerService.TAG, sb.toString());
+                }
+                if (totalTime > 0) {
+                    service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
+                }
                 startTime = 0;
+                service.mInitialStartTime = 0;
             }
             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                     ActivityManagerService.TAG, "windowsVisible(): " + this);
@@ -415,6 +463,12 @@ class HistoryRecord extends IApplicationToken.Stub {
                     return false;
                 }
                 
+                if (service.mDidDexOpt) {
+                    // Give more time since we were dexopting.
+                    service.mDidDexOpt = false;
+                    return false;
+                }
+                
                 if (r.app.instrumentationClass == null) { 
                     service.appNotRespondingLocked(r.app, r, "keyDispatchingTimedOut");
                 } else {
@@ -453,8 +507,15 @@ class HistoryRecord extends IApplicationToken.Stub {
     
     
     public String toString() {
-        return "HistoryRecord{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + intent.getComponent().toShortString() + "}";
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("HistoryRecord{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        sb.append(intent.getComponent().flattenToShortString());
+        sb.append('}');
+        return stringName = sb.toString();
     }
 }

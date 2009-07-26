@@ -18,9 +18,21 @@
 #ifndef ANDROID_HARDWARE_FAKECAMERA_H
 #define ANDROID_HARDWARE_FAKECAMERA_H
 
-#include <ui/CameraHardwareInterface.h>
+#include <sys/types.h>
+#include <stdint.h>
 
 namespace android {
+
+/*
+ * FakeCamera is used in the CameraHardwareStub to provide a fake video feed
+ * when the system does not have a camera in hardware.
+ * The fake video is a moving black and white checkerboard background with a
+ * bouncing gray square in the foreground.
+ * This class is not thread-safe.
+ *
+ * TODO: Since the major methods provides a raw/uncompressed video feed, rename
+ * this class to RawVideoSource.
+ */
 
 class FakeCamera {
 public:
@@ -28,11 +40,15 @@ public:
     ~FakeCamera();
 
     void setSize(int width, int height);
-    void getNextFrameAsRgb565(uint16_t *buffer);
     void getNextFrameAsYuv422(uint8_t *buffer);
-    status_t dump(int fd, const Vector<String16>& args);
+    // Write to the fd a string representing the current state.
+    void dump(int fd) const;
 
 private:
+    // TODO: remove the uint16_t buffer param everywhere since it is a field of
+    // this class.
+    void getNextFrameAsRgb565(uint16_t *buffer);
+
     void drawSquare(uint16_t *buffer, int x, int y, int size, int color, int shadow);
     void drawCheckerboard(uint16_t *buffer, int size);
 

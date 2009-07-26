@@ -1,6 +1,8 @@
 #define LOG_TAG "BitmapFactory"
 
 #include "SkImageDecoder.h"
+#include "SkImageRef_ashmem.h"
+#include "SkImageRef_GlobalPool.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
 #include "GraphicsJNI.h"
@@ -19,9 +21,12 @@ static jfieldID gOptions_justBoundsFieldID;
 static jfieldID gOptions_sampleSizeFieldID;
 static jfieldID gOptions_configFieldID;
 static jfieldID gOptions_ditherFieldID;
+static jfieldID gOptions_purgeableFieldID;
+static jfieldID gOptions_shareableFieldID;
 static jfieldID gOptions_widthFieldID;
 static jfieldID gOptions_heightFieldID;
 static jfieldID gOptions_mimeFieldID;
+static jfieldID gOptions_mCancelID;
 
 static jclass gFileDescriptor_class;
 static jfieldID gFileDescriptor_descriptor;
@@ -31,8 +36,6 @@ static jfieldID gFileDescriptor_descriptor;
 #else
     #define TRACE_BITMAP(code)
 #endif
-
-//#define MIN_SIZE_TO_USE_MMAP    (4*1024)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -204,12 +207,16 @@ class AssetStreamAdaptor : public SkStream {
 public:
     AssetStreamAdaptor(Asset* a) : fAsset(a) {}
     
-	virtual bool rewind() {
+    virtual bool rewind() {
         off_t pos = fAsset->seek(0, SEEK_SET);
-        return pos != (off_t)-1;
+        if (pos == (off_t)-1) {
+            SkDebugf("----- fAsset->seek(rewind) failed\n");
+            return false;
+        }
+        return true;
     }
     
-	virtual size_t read(void* buffer, size_t size) {
+    virtual size_t read(void* buffer, size_t size) {
         ssize_t amount;
         
         if (NULL == buffer) {
@@ -221,15 +228,20 @@ public:
 
             off_t oldOffset = fAsset->seek(0, SEEK_CUR);
             if (-1 == oldOffset) {
+                SkDebugf("---- fAsset->seek(oldOffset) failed\n");
                 return 0;
             }
             off_t newOffset = fAsset->seek(size, SEEK_CUR);
             if (-1 == newOffset) {
+                SkDebugf("---- fAsset->seek(%d) failed\n", size);
                 return 0;
             }
             amount = newOffset - oldOffset;
         } else {
             amount = fAsset->read(buffer, size);
+            if (amount <= 0) {
+                SkDebugf("---- fAsset->read(%d) returned %d\n", size, amount);
+            }
         }
         
         if (amount < 0) {
@@ -278,13 +290,46 @@ static jstring getMimeTypeString(JNIEnv* env, SkImageDecoder::Format format) {
     return jstr;
 }
 
-static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
-                        jobject options) {
+static bool optionsPurgeable(JNIEnv* env, jobject options) {
+    return options != NULL &&
+            env->GetBooleanField(options, gOptions_purgeableFieldID);
+}
 
+static bool optionsShareable(JNIEnv* env, jobject options) {
+    return options != NULL &&
+            env->GetBooleanField(options, gOptions_shareableFieldID);
+}
+
+static jobject nullObjectReturn(const char msg[]) {
+    if (msg) {
+        SkDebugf("--- %s\n", msg);
+    }
+    return NULL;
+}
+
+static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStream* stream,
+                                   int sampleSize) {
+    SkPixelRef* pr;
+    // only use ashmem for large images, since mmaps come at a price
+    if (bitmap->getSize() >= 32 * 1024) {
+        pr = new SkImageRef_ashmem(stream, bitmap->config(), sampleSize);
+    } else {
+        pr = new SkImageRef_GlobalPool(stream, bitmap->config(), sampleSize);
+    }
+    bitmap->setPixelRef(pr)->unref();
+    return pr;
+}
+
+// since we "may" create a purgeable imageref, we require the stream be ref'able
+// i.e. dynamically allocated, since its lifetime may exceed the current stack
+// frame.
+static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
+                        jobject options, bool allowPurgeable) {
     int sampleSize = 1;
     SkImageDecoder::Mode mode = SkImageDecoder::kDecodePixels_Mode;
     SkBitmap::Config prefConfig = SkBitmap::kNo_Config;
     bool doDither = true;
+    bool isPurgeable = allowPurgeable && optionsPurgeable(env, options);
     
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
@@ -303,14 +348,14 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
 
     SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
     if (NULL == decoder) {
-        return NULL;
+        return nullObjectReturn("SkImageDecoder::Factory returned null");
     }
     
     decoder->setSampleSize(sampleSize);
     decoder->setDitherImage(doDither);
 
     NinePatchPeeker     peeker;
-    JavaPixelAllocator  allocator(env);
+    JavaPixelAllocator  javaAllocator(env);
     SkBitmap*           bitmap = new SkBitmap;
     Res_png_9patch      dummy9Patch;
 
@@ -318,14 +363,27 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     SkAutoTDelete<SkBitmap>         adb(bitmap);
 
     decoder->setPeeker(&peeker);
-    decoder->setAllocator(&allocator);
-    
+    if (!isPurgeable) {
+        decoder->setAllocator(&javaAllocator);
+    }
+
     AutoDecoderCancel   adc(options, decoder);
 
-    if (!decoder->decode(stream, bitmap, prefConfig, mode)) {
-        return NULL;
+    // To fix the race condition in case "requestCancelDecode"
+    // happens earlier than AutoDecoderCancel object is added
+    // to the gAutoDecoderCancelMutex linked list.
+    if (NULL != options && env->GetBooleanField(options, gOptions_mCancelID)) {
+        return nullObjectReturn("gOptions_mCancelID");;
     }
-    
+
+    SkImageDecoder::Mode decodeMode = mode;
+    if (isPurgeable) {
+        decodeMode = SkImageDecoder::kDecodeBounds_Mode;
+    }
+    if (!decoder->decode(stream, bitmap, prefConfig, decodeMode)) {
+        return nullObjectReturn("decoder->decode returned false");
+    }
+
     // update options (if any)
     if (NULL != options) {
         env->SetIntField(options, gOptions_widthFieldID, bitmap->width());
@@ -336,7 +394,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         env->SetObjectField(options, gOptions_mimeFieldID,
                             getMimeTypeString(env, decoder->getFormat()));
     }
-    
+
     // if we're in justBounds mode, return now (skip the java bitmap)
     if (SkImageDecoder::kDecodeBounds_Mode == mode) {
         return NULL;
@@ -347,12 +405,12 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         size_t ninePatchArraySize = peeker.fPatch->serializedSize();
         ninePatchChunk = env->NewByteArray(ninePatchArraySize);
         if (NULL == ninePatchChunk) {
-            return NULL;
+            return nullObjectReturn("ninePatchChunk == null");
         }
         jbyte* array = (jbyte*)env->GetPrimitiveArrayCritical(ninePatchChunk,
                                                               NULL);
         if (NULL == array) {
-            return NULL;
+            return nullObjectReturn("primitive array == null");
         }
         peeker.fPatch->serialize(array);
         env->ReleasePrimitiveArrayCritical(ninePatchChunk, array, 0);
@@ -372,12 +430,18 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
             GraphicsJNI::set_jrect(env, padding, -1, -1, -1, -1);
         }
     }
-    
-    // promise we will never change our pixels (great for sharing and pictures)
-    SkPixelRef* ref = bitmap->pixelRef();
-    SkASSERT(ref);
-    ref->setImmutable();
 
+    SkPixelRef* pr;
+    if (isPurgeable) {
+        pr = installPixelRef(bitmap, stream, sampleSize);
+    } else {
+        // if we get here, we're in kDecodePixels_Mode and will therefore
+        // already have a pixelref installed.
+        pr = bitmap->pixelRef();
+    }
+    // promise we will never change our pixels (great for sharing and pictures)
+    pr->setImmutable();
+    // now create the java bitmap
     return GraphicsJNI::createBitmap(env, bitmap, false, ninePatchChunk);
 }
 
@@ -390,7 +454,8 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz,
     SkStream* stream = CreateJavaInputStreamAdaptor(env, is, storage);
 
     if (stream) {
-        bitmap = doDecode(env, stream, padding, options);
+        // for now we don't allow purgeable with java inputstreams
+        bitmap = doDecode(env, stream, padding, options, false);
         stream->unref();
     }
     return bitmap;
@@ -431,52 +496,99 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz,
 
     jint descriptor = env->GetIntField(fileDescriptor,
                                        gFileDescriptor_descriptor);
-    
-#ifdef MIN_SIZE_TO_USE_MMAP
-    // First try to use mmap
-    size_t size = getFDSize(descriptor);
-    if (size >= MIN_SIZE_TO_USE_MMAP) {
-        void* addr = mmap(NULL, size, PROT_READ, MAP_PRIVATE, descriptor, 0);
-//        SkDebugf("-------- mmap returned %p %d\n", addr, size);
-        if (MAP_FAILED != addr) {
-            SkMemoryStream strm(addr, size);
-            jobject obj = doDecode(env, &strm, padding, bitmapFactoryOptions);
-            munmap(addr, size);
-            return obj;
+
+    bool isPurgeable = optionsPurgeable(env, bitmapFactoryOptions);
+    bool isShareable = optionsShareable(env, bitmapFactoryOptions);
+    bool weOwnTheFD = false;
+    if (isPurgeable && isShareable) {
+        int newFD = ::dup(descriptor);
+        if (-1 != newFD) {
+            weOwnTheFD = true;
+            descriptor = newFD;
         }
     }
-#endif
 
-    // we pass false for closeWhenDone, since the caller owns the descriptor    
-    SkFDStream file(descriptor, false);
-    if (!file.isValid()) {
+    SkFDStream* stream = new SkFDStream(descriptor, weOwnTheFD);
+    SkAutoUnref aur(stream);
+    if (!stream->isValid()) {
         return NULL;
     }
-    
-    /* Restore our offset when we leave, so the caller doesn't have to.
-       This is a real feature, so we can be called more than once with the
-       same descriptor.
+
+    /* Restore our offset when we leave, so we can be called more than once
+       with the same descriptor. This is only required if we didn't dup the
+       file descriptor, but it is OK to do it all the time.
     */
     AutoFDSeek as(descriptor);
 
-    return doDecode(env, &file, padding, bitmapFactoryOptions);
+    /* Allow purgeable iff we own the FD, i.e., in the puregeable and
+       shareable case.
+    */
+    return doDecode(env, stream, padding, bitmapFactoryOptions, weOwnTheFD);
+}
+
+/*  make a deep copy of the asset, and return it as a stream, or NULL if there
+    was an error.
+ */
+static SkStream* copyAssetToStream(Asset* asset) {
+    // if we could "ref/reopen" the asset, we may not need to copy it here
+    off_t size = asset->seek(0, SEEK_SET);
+    if ((off_t)-1 == size) {
+        SkDebugf("---- copyAsset: asset rewind failed\n");
+        return NULL;
+    }
+
+    size = asset->getLength();
+    if (size <= 0) {
+        SkDebugf("---- copyAsset: asset->getLength() returned %d\n", size);
+        return NULL;
+    }
+
+    SkStream* stream = new SkMemoryStream(size);
+    void* data = const_cast<void*>(stream->getMemoryBase());
+    off_t len = asset->read(data, size);
+    if (len != size) {
+        SkDebugf("---- copyAsset: asset->read(%d) returned %d\n", size, len);
+        delete stream;
+        stream = NULL;
+    }
+    return stream;
 }
 
 static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz,
                                  jint native_asset,    // Asset
                                  jobject padding,       // Rect
                                  jobject options) { // BitmapFactory$Options
-    AssetStreamAdaptor  mystream((Asset*)native_asset);
+    SkStream* stream;
+    Asset* asset = reinterpret_cast<Asset*>(native_asset);
 
-    return doDecode(env, &mystream, padding, options);
+    if (optionsPurgeable(env, options)) {
+        // if we could "ref/reopen" the asset, we may not need to copy it here
+        // and we could assume optionsShareable, since assets are always RO
+        stream = copyAssetToStream(asset);
+        if (NULL == stream) {
+            return NULL;
+        }
+    } else {
+        // since we know we'll be done with the asset when we return, we can
+        // just use a simple wrapper
+        stream = new AssetStreamAdaptor(asset);
+    }
+    SkAutoUnref aur(stream);
+    return doDecode(env, stream, padding, options, true);
 }
 
 static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
                                      int offset, int length, jobject options) {
-    AutoJavaByteArray   ar(env, byteArray);
-    SkMemoryStream  stream(ar.ptr() + offset, length);
-
-    return doDecode(env, &stream, NULL, options);
+    /*  If optionsShareable() we could decide to just wrap the java array and
+        share it, but that means adding a globalref to the java array object
+        and managing its lifetime. For now we just always copy the array's data
+        if optionsPurgeable().
+     */
+    AutoJavaByteArray ar(env, byteArray);
+    SkStream* stream = new SkMemoryStream(ar.ptr() + offset, length,
+                                          optionsPurgeable(env, options));
+    SkAutoUnref aur(stream);
+    return doDecode(env, stream, NULL, options, true);
 }
 
 static void nativeRequestCancel(JNIEnv*, jobject joptions) {
@@ -585,9 +697,12 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_configFieldID = getFieldIDCheck(env, gOptions_class, "inPreferredConfig",
             "Landroid/graphics/Bitmap$Config;");
     gOptions_ditherFieldID = getFieldIDCheck(env, gOptions_class, "inDither", "Z");
+    gOptions_purgeableFieldID = getFieldIDCheck(env, gOptions_class, "inPurgeable", "Z");
+    gOptions_shareableFieldID = getFieldIDCheck(env, gOptions_class, "inInputShareable", "Z");
     gOptions_widthFieldID = getFieldIDCheck(env, gOptions_class, "outWidth", "I");
     gOptions_heightFieldID = getFieldIDCheck(env, gOptions_class, "outHeight", "I");
     gOptions_mimeFieldID = getFieldIDCheck(env, gOptions_class, "outMimeType", "Ljava/lang/String;");
+    gOptions_mCancelID = getFieldIDCheck(env, gOptions_class, "mCancel", "Z");
 
     gFileDescriptor_class = make_globalref(env, "java/io/FileDescriptor");
     gFileDescriptor_descriptor = getFieldIDCheck(env, gFileDescriptor_class, "descriptor", "I");

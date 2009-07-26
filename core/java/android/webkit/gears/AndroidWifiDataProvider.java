@@ -33,7 +33,6 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Config;
 import android.util.Log;
 import android.webkit.WebView;
 import java.util.List;
@@ -47,6 +46,11 @@ public final class AndroidWifiDataProvider extends BroadcastReceiver {
    * Logging tag
    */
   private static final String TAG = "Gears-J-WifiProvider";
+  /**
+   * Flag for guarding Log.v() calls.
+   * Set to true to enable extra debug logging.
+   */
+  private static final boolean LOGV_ENABLED = false;
   /**
    * Our Wifi manager instance.
    */
@@ -104,7 +108,7 @@ public final class AndroidWifiDataProvider extends BroadcastReceiver {
    */
   public void shutdown() {
     mContext.unregisterReceiver(this);
-    if (Config.LOGV) {
+    if (LOGV_ENABLED) {
       Log.v(TAG, "Wifi provider closed.");
     }
   }
@@ -118,7 +122,7 @@ public final class AndroidWifiDataProvider extends BroadcastReceiver {
   public void onReceive(Context context, Intent intent) {
     if (intent.getAction().equals(
             mWifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-      if (Config.LOGV) {
+      if (LOGV_ENABLED) {
         Log.v(TAG, "Wifi scan resulst available");
       }
       onUpdateAvailable(mWifiManager.getScanResults(), mNativeObject);

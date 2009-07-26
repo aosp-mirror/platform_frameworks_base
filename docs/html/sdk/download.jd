@@ -3,7 +3,7 @@ hide_license_footer=true
 
 @jd:body
 
-<script language="javascript">
+<script type="text/javascript">
   function verify() {
     document.getElementById('download-button').disabled = !document.getElementById('checkbox').checked;
   }
@@ -68,7 +68,7 @@ The License Agreement constitutes a contract between you and Google with respect
   <p>If you want to re-read the license agreement, it's available to you in the <em>SDK</em> tab.</p>
 </div>
 
-<script language="javascript">
+<script type="text/javascript">
   var loc = window.location.href;
   var filename = loc.substring(loc.indexOf('=')+1,loc.length);
   version = filename.substring(filename.indexOf('.')-1,filename.lastIndexOf('.'));

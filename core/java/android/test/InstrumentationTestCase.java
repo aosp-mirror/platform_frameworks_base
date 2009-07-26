@@ -62,6 +62,10 @@ public class InstrumentationTestCase extends TestCase {
      *  action = {@link Intent#ACTION_MAIN}
      *  extras = null, unless a custom bundle is provided here
      * All other fields are null or empty.
+     * 
+     * <p><b>NOTE:</b> The parameter <i>pkg</i> must refer to the package identifier of the
+     * package hosting the activity to be launched, which is specified in the AndroidManifest.xml
+     * file.  This is not necessarily the same as the java package name.
      *
      * @param pkg The package hosting the activity to be launched.
      * @param activityCls The activity class to launch.
@@ -82,6 +86,11 @@ public class InstrumentationTestCase extends TestCase {
 
     /**
      * Utility method for launching an activity with a specific Intent.
+     * 
+     * <p><b>NOTE:</b> The parameter <i>pkg</i> must refer to the package identifier of the
+     * package hosting the activity to be launched, which is specified in the AndroidManifest.xml
+     * file.  This is not necessarily the same as the java package name.
+     *
      * @param pkg The package hosting the activity to be launched.
      * @param activityCls The activity class to launch.
      * @param intent The intent to launch with
@@ -232,7 +241,13 @@ public class InstrumentationTestCase extends TestCase {
                 try {
                     final Field keyCodeField = KeyEvent.class.getField("KEYCODE_" + key);
                     final int keyCode = keyCodeField.getInt(null);
-                    instrumentation.sendKeyDownUpSync(keyCode);
+                    try {
+                        instrumentation.sendKeyDownUpSync(keyCode);
+                    } catch (SecurityException e) {
+                        // Ignore security exceptions that are now thrown
+                        // when trying to send to another app, to retain
+                        // compatibility with existing tests.
+                    }
                 } catch (NoSuchFieldException e) {
                     Log.w("ActivityTestCase", "Unknown keycode: KEYCODE_" + key);
                     break;
@@ -257,7 +272,13 @@ public class InstrumentationTestCase extends TestCase {
         final Instrumentation instrumentation = getInstrumentation();
 
         for (int i = 0; i < count; i++) {
-            instrumentation.sendKeyDownUpSync(keys[i]);
+            try {
+                instrumentation.sendKeyDownUpSync(keys[i]);
+            } catch (SecurityException e) {
+                // Ignore security exceptions that are now thrown
+                // when trying to send to another app, to retain
+                // compatibility with existing tests.
+            }
         }
 
         instrumentation.waitForIdleSync();
@@ -283,7 +304,13 @@ public class InstrumentationTestCase extends TestCase {
             final int keyCount = keys[i];
             final int keyCode = keys[i + 1];
             for (int j = 0; j < keyCount; j++) {
-                instrumentation.sendKeyDownUpSync(keyCode);
+                try {
+                    instrumentation.sendKeyDownUpSync(keyCode);
+                } catch (SecurityException e) {
+                    // Ignore security exceptions that are now thrown
+                    // when trying to send to another app, to retain
+                    // compatibility with existing tests.
+                }
             }
         }
 

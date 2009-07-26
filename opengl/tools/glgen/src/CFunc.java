@@ -80,6 +80,7 @@ public class CFunc {
         return hasTypedPointerArg;
     }
 
+    @Override
     public String toString() {
         String s =  "Function " + fname + " returns " + ftype + ": ";
         for (int i = 0; i < argNames.size(); i++) {
@@ -109,13 +110,13 @@ public class CFunc {
             ftype.setIsPointer(true);
             fname = tokens[i++];
         }
-	
+
         cfunc.setName(fname);
         cfunc.setType(ftype);
-	
+
         while (i < tokens.length) {
             String tok = tokens[i++];
-	    
+
             if (tok.equals("(")) {
                 continue;
             }
@@ -124,10 +125,10 @@ public class CFunc {
             }
 
             CType argType = new CType();
-	    
+
             String argTypeName = tok;
             String argName = "";
-	    
+
             if (argTypeName.equals("const")) {
                 argType.setIsConst(true);
                 argTypeName = tokens[i++];
@@ -137,7 +138,7 @@ public class CFunc {
             if (argTypeName.equals("void")) {
                 break;
             }
-	    
+
             argName = tokens[i++];
             if (argName.startsWith("*")) {
                 argType.setIsPointer(true);
@@ -146,7 +147,7 @@ public class CFunc {
             if (argName.endsWith(",")) {
                 argName = argName.substring(0, argName.length() - 1);
             }
-	    
+
             cfunc.addArgument(argName, argType);
         }
 

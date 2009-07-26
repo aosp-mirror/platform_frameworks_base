@@ -20,7 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Represents the neighboring cell information, including 
+ * Represents the neighboring cell information, including
  * Received Signal Strength and Cell ID location.
  */
 public class NeighboringCellInfo implements Parcelable
@@ -52,7 +52,7 @@ public class NeighboringCellInfo implements Parcelable
         mRssi = rssi;
         mCid = cid;
     }
-    
+
     /**
      * Initialize the object from a parcel.
      */
@@ -60,12 +60,12 @@ public class NeighboringCellInfo implements Parcelable
         mRssi = in.readInt();
         mCid = in.readInt();
     }
-    
+
     /**
-     * @return received signal strength in "asu", ranging from 0 - 31, 
+     * @return received signal strength in "asu", ranging from 0 - 31,
      * or UNKNOWN_RSSI if unknown
      *
-     * For GSM, dBm = -113 + 2*asu, 
+     * For GSM, dBm = -113 + 2*asu,
      * 0 means "-113 dBm or less" and 31 means "-51 dBm or greater"
      */
     public int getRssi() {
@@ -95,7 +95,7 @@ public class NeighboringCellInfo implements Parcelable
 
     @Override
     public String toString() {
-        return "["+ ((mCid == UNKNOWN_CID) ? "/" : Integer.toHexString(mCid)) 
+        return "["+ ((mCid == UNKNOWN_CID) ? "/" : Integer.toHexString(mCid))
         + " at " + ((mRssi == UNKNOWN_RSSI)? "/" : mRssi) + "]";
     }
 
@@ -105,7 +105,7 @@ public class NeighboringCellInfo implements Parcelable
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mRssi);
-        dest.writeInt(mCid);        
+        dest.writeInt(mCid);
     }
 
     public static final Parcelable.Creator<NeighboringCellInfo> CREATOR

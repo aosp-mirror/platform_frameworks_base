@@ -1,6 +1,6 @@
 #include <cstdio>
 #include "merge_res_and_xliff.h"
-
+#include <stdio.h>
 
 int
 merge_test()

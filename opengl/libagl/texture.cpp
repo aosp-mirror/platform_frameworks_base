@@ -900,7 +900,7 @@ void glTexParameteriv(
         memcpy(textureObject->crop_rect, params, 4*sizeof(GLint));
         break;
     default:
-        ogles_error(c, GL_INVALID_ENUM);
+        texParameterx(target, pname, GLfixed(params[0]), c);
         return;
     }
 }
@@ -917,6 +917,13 @@ void glTexParameterx(
 {
     ogles_context_t* c = ogles_context_t::get();
     texParameterx(target, pname, param, c);
+}
+
+void glTexParameteri(
+        GLenum target, GLenum pname, GLint param)
+{
+    ogles_context_t* c = ogles_context_t::get();
+    texParameterx(target, pname, GLfixed(param), c);
 }
 
 // ----------------------------------------------------------------------------

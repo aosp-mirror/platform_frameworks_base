@@ -496,8 +496,10 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     }
 
     public void acquireWakeLock(int flags, IBinder lock, String tag) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
         int uid = Binder.getCallingUid();
+        if (uid != Process.myUid()) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
+        }
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mLocks) {
@@ -554,14 +556,14 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             // by the current state so we never turn it more on than
             // it already is.
             if ((wl.flags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0) {
-                reactivateWakeLocksLocked();
+                int oldWakeLockState = mWakeLockState;
+                mWakeLockState = mLocks.reactivateScreenLocksLocked();
                 if (mSpew) {
                     Log.d(TAG, "wakeup here mUserState=0x" + Integer.toHexString(mUserState)
-                            + " mLocks.gatherState()=0x"
-                            + Integer.toHexString(mLocks.gatherState())
-                            + " mWakeLockState=0x" + Integer.toHexString(mWakeLockState));
+                            + " mWakeLockState=0x"
+                            + Integer.toHexString(mWakeLockState)
+                            + " previous wakeLockState=0x" + Integer.toHexString(oldWakeLockState));
                 }
-                mWakeLockState = mLocks.gatherState();
             } else {
                 if (mSpew) {
                     Log.d(TAG, "here mUserState=0x" + Integer.toHexString(mUserState)
@@ -598,7 +600,10 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     }
 
     public void releaseWakeLock(IBinder lock) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
+        int uid = Binder.getCallingUid();
+        if (uid != Process.myUid()) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
+        }
 
         synchronized (mLocks) {
             releaseWakeLockLocked(lock, false);
@@ -649,17 +654,6 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 // Ignore
             } finally {
                 Binder.restoreCallingIdentity(origId);
-            }
-        }
-    }
-
-    private void reactivateWakeLocksLocked()
-    {
-        int N = mLocks.size();
-        for (int i=0; i<N; i++) {
-            WakeLock wl = mLocks.get(i);
-            if (isScreenLock(wl.flags)) {
-                mLocks.get(i).activated = true;
             }
         }
     }
@@ -715,7 +709,10 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     p.awakeOnSet = true;
                 }
             } else {
-                mPokeLocks.remove(token);
+                PokeLock rLock = mPokeLocks.remove(token);
+                if (rLock != null) {
+                    token.unlinkToDeath(rLock, 0);
+                }
             }
 
             int oldPokey = mPokey;
@@ -1752,8 +1749,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                         Binder.restoreCallingIdentity(ident);
                     }
                     
-                    reactivateWakeLocksLocked();
-                    mWakeLockState = mLocks.gatherState();
+                    mWakeLockState = mLocks.reactivateScreenLocksLocked();
                     setPowerState(mUserState | mWakeLockState, noChangeLights, true);
                     setTimeoutLocked(time, SCREEN_BRIGHT);
                 }
@@ -1940,6 +1936,20 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     if (isScreenLock(wl.flags)) {
                         result |= wl.minState;
                     }
+                }
+            }
+            return result;
+        }
+        
+        int reactivateScreenLocksLocked()
+        {
+            int result = 0;
+            int N = this.size();
+            for (int i=0; i<N; i++) {
+                WakeLock wl = this.get(i);
+                if (isScreenLock(wl.flags)) {
+                    wl.activated = true;
+                    result |= wl.minState;
                 }
             }
             return result;

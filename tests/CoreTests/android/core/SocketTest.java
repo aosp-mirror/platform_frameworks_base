@@ -178,29 +178,35 @@ public class SocketTest extends TestCase {
         SocketChannel.open();
     }
 
-    // Regression test for issue 1018016, connecting ignored a set timeout.
-    @LargeTest
-    public void testSocketSetSOTimeout() throws IOException {
-        Socket sock = new Socket();
-        int timeout = 5000;
-        long start = System.currentTimeMillis();
-        try {
-            sock.connect(new InetSocketAddress(NON_EXISTING_ADDRESS, 80), timeout);
-        } catch (SocketTimeoutException e) {
-            // expected
-            long delay = System.currentTimeMillis() - start;
-            if (Math.abs(delay - timeout) > 1000) {
-                fail("timeout was not accurate. expected: " + timeout
-                        + " actual: " + delay + " miliseconds.");
-            }
-        } finally {
-            try {
-                sock.close();
-            } catch (IOException ioe) {
-                // ignore
-            }
-        }
-    }
+// Regression test for issue 1018016, connecting ignored a set timeout.
+//
+// Disabled because test behaves differently depending on networking
+// environment. It works fine in the emulator and one the device with
+// WLAN, but when 3G comes into play, the possible existence of a
+// proxy makes it fail.
+//
+//    @LargeTest
+//    public void testSocketSetSOTimeout() throws IOException {
+//        Socket sock = new Socket();
+//        int timeout = 5000;
+//        long start = System.currentTimeMillis();
+//        try {
+//            sock.connect(new InetSocketAddress(NON_EXISTING_ADDRESS, 80), timeout);
+//        } catch (SocketTimeoutException e) {
+//            // expected
+//            long delay = System.currentTimeMillis() - start;
+//            if (Math.abs(delay - timeout) > 1000) {
+//                fail("timeout was not accurate. expected: " + timeout
+//                        + " actual: " + delay + " miliseconds.");
+//            }
+//        } finally {
+//            try {
+//                sock.close();
+//            } catch (IOException ioe) {
+//                // ignore
+//            }
+//        }
+//    }
     
     /**
      * Regression test for 1062928: Dotted IP addresses (e.g., 192.168.100.1)

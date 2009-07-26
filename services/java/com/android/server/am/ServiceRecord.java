@@ -77,41 +77,49 @@ class ServiceRecord extends Binder {
     long restartTime;       // time of last restart.
     long nextRestartTime;   // time when restartDelay will expire.
 
+    String stringName;      // caching of toString
+    
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + this);
-        pw.println(prefix + "intent=" + intent.getIntent());
-        pw.println(prefix + "packageName=" + packageName);
-        pw.println(prefix + "processName=" + processName);
-        pw.println(prefix + "permission=" + permission);
-        pw.println(prefix + "baseDir=" + baseDir+ " resDir=" + resDir + " dataDir=" + dataDir);
-        pw.println(prefix + "app=" + app);
-        pw.println(prefix + "isForeground=" + isForeground
-                + " lastActivity=" + lastActivity);
-        pw.println(prefix + "startRequested=" + startRequested
-              + " startId=" + lastStartId
-              + " executeNesting=" + executeNesting
-              + " executingStart=" + executingStart
-              + " crashCount=" + crashCount);
-        pw.println(prefix + "totalRestartCount=" + totalRestartCount
-                + " restartCount=" + restartCount
-                + " restartDelay=" + restartDelay
-                + " restartTime=" + restartTime
-                + " nextRestartTime=" + nextRestartTime);
+        pw.print(prefix); pw.print("intent={");
+                pw.print(intent.getIntent().toShortString(true, false));
+                pw.println('}');
+        pw.print(prefix); pw.print("packageName="); pw.println(packageName);
+        pw.print(prefix); pw.print("processName="); pw.println(processName);
+        if (permission != null) {
+            pw.print(prefix); pw.print("permission="); pw.println(permission);
+        }
+        pw.print(prefix); pw.print("baseDir="); pw.print(baseDir);
+                if (!resDir.equals(baseDir)) pw.print(" resDir="); pw.print(resDir);
+                pw.print(" dataDir="); pw.println(dataDir);
+        pw.print(prefix); pw.print("app="); pw.println(app);
+        pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
+                pw.print(" lastActivity="); pw.println(lastActivity);
+        pw.print(prefix); pw.print("startRequested="); pw.print(startRequested);
+                pw.print(" startId="); pw.print(lastStartId);
+                pw.print(" executeNesting="); pw.print(executeNesting);
+                pw.print(" executingStart="); pw.print(executingStart);
+                pw.print(" crashCount="); pw.println(crashCount);
+        pw.print(prefix); pw.print("totalRestartCount="); pw.print(totalRestartCount);
+                pw.print(" restartCount="); pw.print(restartCount);
+                pw.print(" restartDelay="); pw.print(restartDelay);
+                pw.print(" restartTime="); pw.print(restartTime);
+                pw.print(" nextRestartTime="); pw.println(nextRestartTime);
         if (bindings.size() > 0) {
-            pw.println(prefix + "Bindings:");
             Iterator<IntentBindRecord> it = bindings.values().iterator();
             while (it.hasNext()) {
                 IntentBindRecord b = it.next();
-                pw.println(prefix + "Binding " + b);
-                b.dump(pw, prefix + "  ");
+                pw.print(prefix); pw.print("* IntentBindRecord{");
+                        pw.print(Integer.toHexString(System.identityHashCode(b)));
+                        pw.println("}:");
+                b.dumpInService(pw, prefix + "  ");
             }
         }
         if (connections.size() > 0) {
-            pw.println(prefix + "All Connections:");
+            pw.print(prefix); pw.println("All Connections:");
             Iterator<ConnectionRecord> it = connections.values().iterator();
             while (it.hasNext()) {
                 ConnectionRecord c = it.next();
-                pw.println(prefix + "  " + c);
+                pw.print(prefix); pw.print("  "); pw.println(c);
             }
         }
     }
@@ -159,8 +167,13 @@ class ServiceRecord extends Binder {
     }
     
     public String toString() {
-        return "ServiceRecord{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + shortName + "}";
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("ServiceRecord{")
+            .append(Integer.toHexString(System.identityHashCode(this)))
+            .append(' ').append(shortName).append('}');
+        return stringName = sb.toString();
     }
 }

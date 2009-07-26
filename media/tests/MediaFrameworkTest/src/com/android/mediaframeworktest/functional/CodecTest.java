@@ -32,8 +32,14 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.io.FileOutputStream;
+import java.util.Random;
 /**
  * Junit / Instrumentation test case for the media player api
  
@@ -43,13 +49,16 @@ public class CodecTest {
     private static MediaPlayer mMediaPlayer;
     private MediaPlayer.OnPreparedListener mOnPreparedListener;
     
-    private static int WAIT_FOR_COMMAND_TO_COMPLETE = 10000;  //10 seconds max.
+    private static int WAIT_FOR_COMMAND_TO_COMPLETE = 60000;  //1 min max.
     private static boolean mInitialized = false;
+    private static boolean mPrepareReset = false;
     private static Looper mLooper = null;
     private static final Object lock = new Object();
     private static final Object prepareDone = new Object();
+    private static final Object videoSizeChanged = new Object();
+    private static final Object onCompletion = new Object();
     private static boolean onPrepareSuccess = false;
-    
+    private static boolean onCompleteSuccess = false;
 
     public static String printCpuInfo(){      
         String cm = "dumpsys cpuinfo";
@@ -76,7 +85,9 @@ public class CodecTest {
         try{
             mp.setDataSource(filePath);
             mp.prepare(); 
-        }catch (Exception e){}
+        }catch (Exception e){
+            Log.v(TAG, e.toString());
+        }
         int duration = mp.getDuration();
         Log.v(TAG, "Duration " + duration);
         mp.release();
@@ -227,28 +238,84 @@ public class CodecTest {
         mp.pause();
         mp.release();
     }
+    
+    static MediaPlayer.OnVideoSizeChangedListener mOnVideoSizeChangedListener =
+        new MediaPlayer.OnVideoSizeChangedListener() {
+            public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                synchronized (videoSizeChanged) {
+                    Log.v(TAG, "sizechanged notification received ...");
+                    videoSizeChanged.notify();
+                }
+            }
+    };
 
+    //Register the videoSizeChanged listener
     public static int videoHeight(String filePath) throws Exception {
         Log.v(TAG, "videoHeight - " + filePath);
-        int videoHeight = 0;
-        MediaPlayer mp = new MediaPlayer();
-        mp.setDataSource(filePath);
-        mp.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
-        mp.prepare();
-        videoHeight = mp.getVideoHeight();
-        mp.release();
+        int videoHeight = 0;    
+        synchronized (lock) {
+            initializeMessageLooper();
+            try {
+                lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+            } catch(Exception e) {
+                Log.v(TAG, "looper was interrupted.");
+                return 0;
+            }
+        }
+        try {
+            mMediaPlayer.setDataSource(filePath);
+            mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
+            mMediaPlayer.setOnVideoSizeChangedListener(mOnVideoSizeChangedListener);
+            synchronized (videoSizeChanged) {
+                try {
+                    mMediaPlayer.prepare();
+                    mMediaPlayer.start();
+                    videoSizeChanged.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                } catch (Exception e) {
+                    Log.v(TAG, "wait was interrupted");
+                }
+            }
+            videoHeight = mMediaPlayer.getVideoHeight();
+            terminateMessageLooper();
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+        
         return videoHeight;
     }
 
+    //Register the videoSizeChanged listener
     public static int videoWidth(String filePath) throws Exception {
         Log.v(TAG, "videoWidth - " + filePath);
         int videoWidth = 0;
-        MediaPlayer mp = new MediaPlayer();
-        mp.setDataSource(filePath);
-        mp.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
-        mp.prepare();
-        videoWidth = mp.getVideoWidth();
-        mp.release();
+
+        synchronized (lock) {
+            initializeMessageLooper();
+            try {
+                lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+            } catch(Exception e) {
+                Log.v(TAG, "looper was interrupted.");
+                return 0;
+            }
+        }
+        try {
+            mMediaPlayer.setDataSource(filePath);
+            mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
+            mMediaPlayer.setOnVideoSizeChangedListener(mOnVideoSizeChangedListener);
+            synchronized (videoSizeChanged) {
+                try {
+                    mMediaPlayer.prepare();
+                    mMediaPlayer.start();
+                    videoSizeChanged.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                } catch (Exception e) {
+                    Log.v(TAG, "wait was interrupted");
+                }
+            }
+            videoWidth = mMediaPlayer.getVideoWidth();
+            terminateMessageLooper();
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }        
         return videoWidth;
     }
 
@@ -469,7 +536,6 @@ public class CodecTest {
 
             //Verify the thumbnail 
             Bitmap goldenBitmap = mBitmapFactory.decodeFile(goldenPath);
-
             outputWidth = outThumbnail.getWidth();
             outputHeight = outThumbnail.getHeight();
             goldenHeight = goldenBitmap.getHeight();
@@ -479,15 +545,18 @@ public class CodecTest {
             if ((outputWidth != goldenWidth) || (outputHeight != goldenHeight))
                 return false;
 
-            //Check one line of pixel
-            int x = goldenHeight/2;
-            for (int j=0; j<goldenWidth; j++){
-                if (goldenBitmap.getPixel(x, j) != outThumbnail.getPixel(x, j)){
+            // Check half line of pixel
+            int x = goldenHeight / 2;
+            for (int j = 1; j < goldenWidth / 2; j++) {
+                if (goldenBitmap.getPixel(x, j) != outThumbnail.getPixel(x, j)) {
                     Log.v(TAG, "pixel = " + goldenBitmap.getPixel(x, j));
-                    return false;    
+                    return false;
                 }
-            }
-        }catch (Exception e){}
+           }
+        }catch (Exception e){
+            Log.v(TAG, e.toString());
+            return false;
+        }
         return true;
     }
 
@@ -622,6 +691,10 @@ public class CodecTest {
     static MediaPlayer.OnPreparedListener mPreparedListener = new MediaPlayer.OnPreparedListener() {
         public void onPrepared(MediaPlayer mp) {
             synchronized (prepareDone) {
+                if(mPrepareReset){
+                    Log.v(TAG, "call Reset");
+                    mMediaPlayer.reset();
+                }
                 Log.v(TAG, "notify the prepare callback");
                 prepareDone.notify();
                 onPrepareSuccess = true;
@@ -629,13 +702,15 @@ public class CodecTest {
         }
     };
    
-    public static boolean prepareAsyncCallback(String filePath) throws Exception {
-        int videoWidth = 0;
-        int videoHeight = 0;
-        boolean checkVideoDimension = false;
+    public static boolean prepareAsyncCallback(String filePath, boolean reset) throws Exception {
+        //Added the PrepareReset flag which allow us to switch to different
+        //test case.
+        if (reset){
+            mPrepareReset = true;
+        }
         
-        initializeMessageLooper();
         synchronized (lock) {
+            initializeMessageLooper();
             try {
                 lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
             } catch(Exception e) {
@@ -651,22 +726,85 @@ public class CodecTest {
             synchronized (prepareDone) {
                 try {
                     prepareDone.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
-                    Log.v(TAG, "setPreview done");
                 } catch (Exception e) {
                     Log.v(TAG, "wait was interrupted.");
                 }
-            }
-            videoWidth = mMediaPlayer.getVideoWidth();
-            videoHeight = mMediaPlayer.getVideoHeight();
-            
+            }         
             terminateMessageLooper();
         }catch (Exception e){
             Log.v(TAG,e.getMessage());
         }      
        return onPrepareSuccess;
     }
-    
-    
-    
-}
 
+    static MediaPlayer.OnCompletionListener mCompletionListener = new MediaPlayer.OnCompletionListener() {
+        public void onCompletion(MediaPlayer mp) {
+            synchronized (onCompletion) {
+                Log.v(TAG, "notify the completion callback");
+                onCompletion.notify();
+                onCompleteSuccess = true;
+            }
+        }
+    };
+
+    // For each media file, forward twice and backward once, then play to the end
+    public static boolean playMediaSamples(String filePath) throws Exception {
+        int duration = 0;
+        int curPosition = 0;
+        int nextPosition = 0;
+        int waittime = 0;
+        Random r = new Random();
+        initializeMessageLooper();
+        synchronized (lock) {
+            try {
+                lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+            } catch(Exception e) {
+                Log.v(TAG, "looper was interrupted.");
+                return false;
+            }
+        }
+        try {
+            mMediaPlayer.setOnCompletionListener(mCompletionListener);
+            Log.v(TAG, "playMediaSamples: sample file name " + filePath);
+            mMediaPlayer.setDataSource(filePath);
+            mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
+            mMediaPlayer.prepare();
+            duration = mMediaPlayer.getDuration();
+            Log.v(TAG, "playMediaSamples: duration = " + duration);
+            // start to play
+            mMediaPlayer.start();
+            // randomly play for time within (0, duration/3)
+            Thread.sleep(r.nextInt(duration/3));
+            mMediaPlayer.pause();
+            Log.v(TAG, "playMediaSamples: current position after pause: "
+                        + mMediaPlayer.getCurrentPosition());
+            // seek to position (0, 2/3*duration)
+            nextPosition = mMediaPlayer.getCurrentPosition() + r.nextInt(duration/3);
+            mMediaPlayer.seekTo(nextPosition);
+            Log.v(TAG, "playMediaSamples: current position after the first seek:"
+                        + mMediaPlayer.getCurrentPosition());
+            // play for another short time
+            mMediaPlayer.start();
+            Thread.sleep(r.nextInt(duration/6));
+            Log.v(TAG, "playMediaSamples: position after the second play:"
+                        + mMediaPlayer.getCurrentPosition());
+            // seek to a random position (0, duration)
+            mMediaPlayer.seekTo(r.nextInt(duration));
+            Log.v(TAG, "playMediaSamples: current position after the second seek:"
+                        + mMediaPlayer.getCurrentPosition());
+            waittime = duration - mMediaPlayer.getCurrentPosition();
+            synchronized(onCompletion){
+                try {
+                    onCompletion.wait(waittime + 30000);
+                }catch (Exception e) {
+                    Log.v(TAG, "playMediaSamples are interrupted");
+                    return false;
+                }
+            }
+            terminateMessageLooper();
+        }catch (Exception e) {
+            Log.v(TAG, "playMediaSamples:" + e.getMessage());
+        }
+        return onCompleteSuccess;
+    }
+}

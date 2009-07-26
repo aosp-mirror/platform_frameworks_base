@@ -8,23 +8,29 @@ applications on the Android platform. The most important of these are the Androi
 Emulator and the Android Development Tools plugin for Eclipse, but the SDK also 
 includes a variety of other tools for debugging, packaging, and installing your 
 applications on the emulator. </p>
-
-<dl>
-    <dt><a href="emulator.html">Android Emulator</a></dt>
-    <dd>A virtual mobile device that runs on your computer. You use the emulator to design, 
-    debug, and test your applications in an actual Android run-time environment. </dd>
     
+ <dl>
   <dt><a href="adt.html">Android Development Tools Plugin</a> (for the Eclipse IDE)</dt>
           <dd>The ADT plugin adds powerful extensions to the Eclipse integrated environment, 
           making creating and debugging your Android applications easier and faster. If you 
           use Eclipse, the ADT plugin gives you an incredible boost in developing Android 
           applications.</dd>
+  <dt><a href="emulator.html">Android Emulator</a></dt>
+    <dd>A QEMU-based device-emulation tool that you can use to design, 
+    debug, and test your applications in an actual Android run-time environment. </dd>
 
-	  <dt><a href="hierarchy-viewer.html">Hierarchy Viewer</a></dt>
-	    <dd>The Hierarchy Viewer tool allows you to debug and optimize your user interface.
-	    It provides a visual representation of your layout's hierarchy of Views and a magnified inspector
-	    of the current display with a pixel grid, so you can get your layout just right.
-	    </dd>
+  <dt><a href="avd.html">Android Virtual Devices (AVDs)</a></dt>
+    <dd>Virtual device configurations that you create, to model device
+        characteristics in the Android Emulator. In each configuration, you can
+        specify the Android platform to run, the hardware options, and the
+        emulator skin to use. Each AVD functions as an independent device with 
+        it's own storage for user data, SD card, and so on. </dd>
+
+ <dt><a href="hierarchy-viewer.html">Hierarchy Viewer</a></dt>
+    <dd>The Hierarchy Viewer tool allows you to debug and optimize your user interface.
+        It provides a visual representation of your layout's hierarchy of Views and a magnified inspector
+        of the current display with a pixel grid, so you can get your layout just right.
+    </dd>
 
 	  <dt><a href="draw9patch.html">Draw 9-patch</a></dt>
 	    <dd>The Draw 9-patch tool allows you to easily create a 
@@ -79,10 +85,9 @@ applications on the emulator. </p>
       level events.  You can use the Monkey to stress-test applications that you are developing,
       in a random yet repeatable manner.</dd>
 
-  <dt><a  href="othertools.html#activitycreator">activitycreator</a></dt>
-            <dd>A script that generates <a
+  <dt><a  href="othertools.html#android">android</a></dt>
+            <dd>A script that lets you manage AVDs and generate <a
                         href="http://ant.apache.org/" title="Ant">Ant</a> build files that 
-                        you can use to compile your Android applications. If you are developing 
-                        on Eclipse with the ADT plugin, you won't need to use this script. </dd>
+                        you can use to compile your Android applications. </dd>
 </dl>
 

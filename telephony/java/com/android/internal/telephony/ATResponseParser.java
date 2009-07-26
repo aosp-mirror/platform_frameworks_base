@@ -34,7 +34,7 @@ public class ATResponseParser
     {
         this.line = line;
     }
-    
+
     public boolean
     nextBoolean()
     {
@@ -147,7 +147,7 @@ public class ATResponseParser
         }
     }
 
- 
+
     /** Throws ATParseEx if whitespace extends to the end of string */
     private char
     skipWhiteSpace (char c)

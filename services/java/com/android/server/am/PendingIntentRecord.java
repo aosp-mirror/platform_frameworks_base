@@ -17,8 +17,8 @@
 package com.android.server.am;
 
 import android.app.IActivityManager;
-import android.app.IIntentSender;
-import android.app.IIntentReceiver;
+import android.content.IIntentSender;
+import android.content.IIntentReceiver;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Binder;
@@ -36,6 +36,8 @@ class PendingIntentRecord extends IIntentSender.Stub {
     boolean sent = false;
     boolean canceled = false;
 
+    String stringName;
+    
     final static class Key {
         final int type;
         final String packageName;
@@ -142,7 +144,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
         
         public String toString() {
             return "Key{" + typeName() + " pkg=" + packageName
-                + " intent=" + requestIntent + " flags=0x"
+                + " intent=" + requestIntent.toShortString(true, false) + " flags=0x"
                 + Integer.toHexString(flags) + "}";
         }
         
@@ -260,19 +262,38 @@ class PendingIntentRecord extends IIntentSender.Stub {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "packageName=" + key.packageName
-                + " type=" + key.typeName()
-                + " flags=0x" + Integer.toHexString(key.flags));
-        pw.println(prefix + "activity=" + key.activity + " who=" + key.who);
-        pw.println(prefix + "requestCode=" + key.requestCode
-                + " requestResolvedType=" + key.requestResolvedType);
-        pw.println(prefix + "requestIntent=" + key.requestIntent);
-        pw.println(prefix + "sent=" + sent + " canceled=" + canceled);
+        pw.print(prefix); pw.print("uid="); pw.print(uid);
+                pw.print(" packageName="); pw.print(key.packageName);
+                pw.print(" type="); pw.print(key.typeName());
+                pw.print(" flags=0x"); pw.println(Integer.toHexString(key.flags));
+        if (key.activity != null || key.who != null) {
+            pw.print(prefix); pw.print("activity="); pw.print(key.activity);
+                    pw.print(" who="); pw.println(key.who);
+        }
+        if (key.requestCode != 0 || key.requestResolvedType != null) {
+            pw.print(prefix); pw.print("requestCode="); pw.print(key.requestCode);
+                    pw.print(" requestResolvedType="); pw.println(key.requestResolvedType);
+        }
+        pw.print(prefix); pw.print("requestIntent=");
+                pw.println(key.requestIntent.toShortString(true, true));
+        if (sent || canceled) {
+            pw.print(prefix); pw.print("sent="); pw.print(sent);
+                    pw.print(" canceled="); pw.println(canceled);
+        }
     }
 
     public String toString() {
-        return "IntentSenderRecord{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + key.packageName + " " + key.typeName() + "}";
+        if (stringName != null) {
+            return stringName;
+        }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("PendingIntentRecord{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
+        sb.append(key.packageName);
+        sb.append(' ');
+        sb.append(key.typeName());
+        sb.append('}');
+        return stringName = sb.toString();
     }
 }

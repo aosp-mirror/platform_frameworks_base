@@ -26,6 +26,7 @@ import android.location.LocationManager;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 /**
@@ -37,9 +38,11 @@ import android.util.Log;
  *  adb shell am instrument -e class android.location.LocationManagerProximityTest \
  *     -w android.core/android.test.InstrumentationTestRunner
  *     
- * This test requires that the "Allow mock locations" setting be enabled     
+ * This test requires that the "Allow mock locations" setting be enabled.
+ * To ensure reliable results, all location providers should be disabled.
  * 
  */
+@Suppress
 @MediumTest
 public class LocationManagerProximityTest extends AndroidTestCase {
 
@@ -52,11 +55,7 @@ public class LocationManagerProximityTest extends AndroidTestCase {
 
     private static final String LOG_TAG = "LocationProximityTest";
 
-    // use network provider as mock location provider, because:
-    //  - proximity alert is hardcoded to listen to only network or gps
-    //  - 'network' provider is not installed in emulator, so can mock it 
-    //    using test provider APIs
-    private static final String PROVIDER_NAME = LocationManager.NETWORK_PROVIDER;
+    private static final String PROVIDER_NAME = "test";
 
     @Override
     protected void setUp() throws Exception {
@@ -84,6 +83,7 @@ public class LocationManagerProximityTest extends AndroidTestCase {
                 false, // upportsBearing,
                 Criteria.POWER_MEDIUM, // powerRequirement
                 Criteria.ACCURACY_FINE); // accuracy
+        mLocationManager.setTestProviderEnabled(PROVIDER_NAME, true);
     }
 
     @Override

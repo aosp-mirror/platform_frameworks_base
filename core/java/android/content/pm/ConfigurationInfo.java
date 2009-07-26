@@ -22,7 +22,7 @@ import android.os.Parcelable;
 /**
  * Information you can retrieve about hardware configuration preferences
  * declared by an application. This corresponds to information collected from the
- * AndroidManifest.xml's &lt;uses-configuration&gt; tags.
+ * AndroidManifest.xml's &lt;uses-configuration&gt; and the   &lt;uses-feature&gt;tags.
  */
 public class ConfigurationInfo implements Parcelable {    
     /**
@@ -70,6 +70,16 @@ public class ConfigurationInfo implements Parcelable {
      */
     public int reqInputFeatures = 0;
 
+    /**
+     * Default value for {@link #reqGlEsVersion};
+     */
+    public static final int GL_ES_VERSION_UNDEFINED = 0;
+    /**
+     * The GLES version used by an application. The upper order 16 bits represent the
+     * major version and the lower order 16 bits the minor version.
+     */
+    public int reqGlEsVersion;
+
     public ConfigurationInfo() {
     }
 
@@ -78,6 +88,7 @@ public class ConfigurationInfo implements Parcelable {
         reqKeyboardType = orig.reqKeyboardType;
         reqNavigation = orig.reqNavigation;
         reqInputFeatures = orig.reqInputFeatures;
+        reqGlEsVersion = orig.reqGlEsVersion;
     }
 
     public String toString() {
@@ -86,7 +97,8 @@ public class ConfigurationInfo implements Parcelable {
             + ", touchscreen = " + reqTouchScreen + "}"
             + ", inputMethod = " + reqKeyboardType + "}"
             + ", navigation = " + reqNavigation + "}"
-            + ", reqInputFeatures = " + reqInputFeatures + "}";
+            + ", reqInputFeatures = " + reqInputFeatures + "}"
+            + ", reqGlEsVersion = " + reqGlEsVersion + "}";
     }
 
     public int describeContents() {
@@ -98,6 +110,7 @@ public class ConfigurationInfo implements Parcelable {
         dest.writeInt(reqKeyboardType);
         dest.writeInt(reqNavigation);
         dest.writeInt(reqInputFeatures);
+        dest.writeInt(reqGlEsVersion);
     }
 
     public static final Creator<ConfigurationInfo> CREATOR =
@@ -115,5 +128,18 @@ public class ConfigurationInfo implements Parcelable {
         reqKeyboardType = source.readInt();
         reqNavigation = source.readInt();
         reqInputFeatures = source.readInt();
+        reqGlEsVersion = source.readInt();
+    }
+
+    /**
+     * This method extracts the major and minor version of reqGLEsVersion attribute
+     * and returns it as a string. Say reqGlEsVersion value of 0x00010002 is returned
+     * as 1.2
+     * @return String representation of the reqGlEsVersion attribute
+     */
+    public String getGlEsVersion() {
+        int major = ((reqGlEsVersion & 0xffff0000) >> 16);
+        int minor = reqGlEsVersion & 0x0000ffff;
+        return String.valueOf(major)+"."+String.valueOf(minor);
     }
 }

@@ -248,8 +248,8 @@ public class AlphabetIndexer extends DataSetObserver implements SectionIndexer {
     public int getSectionForPosition(int position) {
         int savedCursorPos = mDataCursor.getPosition();
         mDataCursor.moveToPosition(position);
-        mDataCursor.moveToPosition(savedCursorPos);
         String curName = mDataCursor.getString(mColumnIndex);
+        mDataCursor.moveToPosition(savedCursorPos);
         // Linear search, as there are only a few items in the section index
         // Could speed this up later if it actually gets used.
         for (int i = 0; i < mAlphabetLength; i++) {

@@ -18,6 +18,7 @@
 
 #include "android_bluetooth_common.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "cutils/sockets.h"
 #include "JNIHelp.h"
 #include "jni.h"
 #include "utils/Log.h"
@@ -65,12 +66,13 @@ static jmethodID method_onRestartRequired;
 
 typedef event_loop_native_data_t native_data_t;
 
-// Only valid during waitForAndDispatchEventNative()
-native_data_t *event_loop_nat;
-
 static inline native_data_t * get_native_data(JNIEnv *env, jobject object) {
     return (native_data_t *)(env->GetIntField(object,
                                                  field_mNativeData));
+}
+
+native_data_t *get_EventLoop_native_data(JNIEnv *env, jobject object) {
+    return get_native_data(env, object);
 }
 
 #endif
@@ -115,6 +117,10 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
         LOGE("%s: out of memory!", __FUNCTION__);
         return;
     }
+    memset(nat, 0, sizeof(native_data_t));
+
+    pthread_mutex_init(&(nat->thread_mutex), NULL);
+
     env->SetIntField(object, field_mNativeData, (jint)nat);
 
     {
@@ -126,6 +132,7 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
             LOGE("%s: Could not get onto the system bus!", __FUNCTION__);
             dbus_error_free(&err);
         }
+        dbus_connection_set_exit_on_disconnect(nat->conn, FALSE);
     }
 #endif
 }
@@ -135,6 +142,9 @@ static void cleanupNativeDataNative(JNIEnv* env, jobject object) {
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat =
             (native_data_t *)env->GetIntField(object, field_mNativeData);
+
+    pthread_mutex_destroy(&(nat->thread_mutex));
+
     if (nat) {
         free(nat);
     }
@@ -151,13 +161,24 @@ static DBusHandlerResult agent_event_filter(DBusConnection *conn,
 static const DBusObjectPathVTable agent_vtable = {
     NULL, agent_event_filter, NULL, NULL, NULL, NULL
 };
-#endif
 
-static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
-#ifdef HAVE_BLUETOOTH
+static unsigned int unix_events_to_dbus_flags(short events) {
+    return (events & DBUS_WATCH_READABLE ? POLLIN : 0) |
+           (events & DBUS_WATCH_WRITABLE ? POLLOUT : 0) |
+           (events & DBUS_WATCH_ERROR ? POLLERR : 0) |
+           (events & DBUS_WATCH_HANGUP ? POLLHUP : 0);
+}
+
+static short dbus_flags_to_unix_events(unsigned int flags) {
+    return (flags & POLLIN ? DBUS_WATCH_READABLE : 0) |
+           (flags & POLLOUT ? DBUS_WATCH_WRITABLE : 0) |
+           (flags & POLLERR ? DBUS_WATCH_ERROR : 0) |
+           (flags & POLLHUP ? DBUS_WATCH_HANGUP : 0);
+}
+
+static jboolean setUpEventLoop(native_data_t *nat) {
     LOGV(__FUNCTION__);
     dbus_threads_init_default();
-    native_data_t *nat = get_native_data(env, object);
     DBusError err;
     dbus_error_init(&err);
 
@@ -207,7 +228,7 @@ static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
         // Add an object handler for passkey agent method calls
         const char *path = "/android/bluetooth/Agent";
         if (!dbus_connection_register_object_path(nat->conn, path,
-                &agent_vtable, NULL)) {
+                &agent_vtable, nat)) {
             LOGE("%s: Can't register object path %s for agent!",
                  __FUNCTION__, path);
             return JNI_FALSE;
@@ -217,7 +238,7 @@ static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
         // trying for 10 seconds.
         int attempt;
         for (attempt = 0; attempt < 1000; attempt++) {
-            DBusMessage *reply = dbus_func_args_error(env, nat->conn, &err,
+            DBusMessage *reply = dbus_func_args_error(NULL, nat->conn, &err,
                     BLUEZ_DBUS_BASE_PATH,
                     "org.bluez.Security", "RegisterDefaultPasskeyAgent",
                     DBUS_TYPE_STRING, &path,
@@ -245,7 +266,7 @@ static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
         }
 
         // Now register the Auth agent
-        DBusMessage *reply = dbus_func_args_error(env, nat->conn, &err,
+        DBusMessage *reply = dbus_func_args_error(NULL, nat->conn, &err,
                 BLUEZ_DBUS_BASE_PATH,
                 "org.bluez.Security", "RegisterDefaultAuthorizationAgent",
                 DBUS_TYPE_STRING, &path,
@@ -259,14 +280,11 @@ static jboolean setUpEventLoopNative(JNIEnv *env, jobject object) {
         return JNI_TRUE;
     }
 
-#endif
     return JNI_FALSE;
 }
 
-static void tearDownEventLoopNative(JNIEnv *env, jobject object) {
+static void tearDownEventLoop(native_data_t *nat) {
     LOGV(__FUNCTION__);
-#ifdef HAVE_BLUETOOTH
-    native_data_t *nat = get_native_data(env, object);
     if (nat != NULL && nat->conn != NULL) {
 
         DBusError err;
@@ -274,14 +292,14 @@ static void tearDownEventLoopNative(JNIEnv *env, jobject object) {
 
         const char *path = "/android/bluetooth/Agent";
         DBusMessage *reply =
-            dbus_func_args(env, nat->conn, BLUEZ_DBUS_BASE_PATH,
+            dbus_func_args(NULL, nat->conn, BLUEZ_DBUS_BASE_PATH,
                     "org.bluez.Security", "UnregisterDefaultPasskeyAgent",
                     DBUS_TYPE_STRING, &path,
                     DBUS_TYPE_INVALID);
         if (reply) dbus_message_unref(reply);
 
         reply =
-            dbus_func_args(env, nat->conn, BLUEZ_DBUS_BASE_PATH,
+            dbus_func_args(NULL, nat->conn, BLUEZ_DBUS_BASE_PATH,
                     "org.bluez.Security", "UnregisterDefaultAuthorizationAgent",
                     DBUS_TYPE_STRING, &path,
                     DBUS_TYPE_INVALID);
@@ -322,7 +340,305 @@ static void tearDownEventLoopNative(JNIEnv *env, jobject object) {
 
         dbus_connection_remove_filter(nat->conn, event_filter, nat);
     }
-#endif
+}
+
+
+#define EVENT_LOOP_EXIT 1
+#define EVENT_LOOP_ADD  2
+#define EVENT_LOOP_REMOVE 3
+
+dbus_bool_t dbusAddWatch(DBusWatch *watch, void *data) {
+    native_data_t *nat = (native_data_t *)data;
+
+    if (dbus_watch_get_enabled(watch)) {
+        // note that we can't just send the watch and inspect it later
+        // because we may get a removeWatch call before this data is reacted
+        // to by our eventloop and remove this watch..  reading the add first
+        // and then inspecting the recently deceased watch would be bad.
+        char control = EVENT_LOOP_ADD;
+        write(nat->controlFdW, &control, sizeof(char));
+
+        int fd = dbus_watch_get_fd(watch);
+        write(nat->controlFdW, &fd, sizeof(int));
+
+        unsigned int flags = dbus_watch_get_flags(watch);
+        write(nat->controlFdW, &flags, sizeof(unsigned int));
+
+        write(nat->controlFdW, &watch, sizeof(DBusWatch*));
+    }
+    return true;
+}
+
+void dbusRemoveWatch(DBusWatch *watch, void *data) {
+    native_data_t *nat = (native_data_t *)data;
+
+    char control = EVENT_LOOP_REMOVE;
+    write(nat->controlFdW, &control, sizeof(char));
+
+    int fd = dbus_watch_get_fd(watch);
+    write(nat->controlFdW, &fd, sizeof(int));
+
+    unsigned int flags = dbus_watch_get_flags(watch);
+    write(nat->controlFdW, &flags, sizeof(unsigned int));
+}
+
+void dbusToggleWatch(DBusWatch *watch, void *data) {
+    if (dbus_watch_get_enabled(watch)) {
+        dbusAddWatch(watch, data);
+    } else {
+        dbusRemoveWatch(watch, data);
+    }
+}
+
+static void handleWatchAdd(native_data_t *nat) {
+    DBusWatch *watch;
+    int newFD;
+    unsigned int flags;
+
+    read(nat->controlFdR, &newFD, sizeof(int));
+    read(nat->controlFdR, &flags, sizeof(unsigned int));
+    read(nat->controlFdR, &watch, sizeof(DBusWatch *));
+    short events = dbus_flags_to_unix_events(flags);
+
+    for (int y = 0; y<nat->pollMemberCount; y++) {
+        if ((nat->pollData[y].fd == newFD) &&
+                (nat->pollData[y].events == events)) {
+            LOGV("DBusWatch duplicate add");
+            return;
+        }
+    }
+    if (nat->pollMemberCount == nat->pollDataSize) {
+        LOGV("Bluetooth EventLoop poll struct growing");
+        struct pollfd *temp = (struct pollfd *)malloc(
+                sizeof(struct pollfd) * (nat->pollMemberCount+1));
+        if (!temp) {
+            return;
+        }
+        memcpy(temp, nat->pollData, sizeof(struct pollfd) *
+                nat->pollMemberCount);
+        free(nat->pollData);
+        nat->pollData = temp;
+        DBusWatch **temp2 = (DBusWatch **)malloc(sizeof(DBusWatch *) *
+                (nat->pollMemberCount+1));
+        if (!temp2) {
+            return;
+        }
+        memcpy(temp2, nat->watchData, sizeof(DBusWatch *) *
+                nat->pollMemberCount);
+        free(nat->watchData);
+        nat->watchData = temp2;
+        nat->pollDataSize++;
+    }
+    nat->pollData[nat->pollMemberCount].fd = newFD;
+    nat->pollData[nat->pollMemberCount].revents = 0;
+    nat->pollData[nat->pollMemberCount].events = events;
+    nat->watchData[nat->pollMemberCount] = watch;
+    nat->pollMemberCount++;
+}
+
+static void handleWatchRemove(native_data_t *nat) {
+    int removeFD;
+    unsigned int flags;
+
+    read(nat->controlFdR, &removeFD, sizeof(int));
+    read(nat->controlFdR, &flags, sizeof(unsigned int));
+    short events = dbus_flags_to_unix_events(flags);
+
+    for (int y = 0; y < nat->pollMemberCount; y++) {
+        if ((nat->pollData[y].fd == removeFD) &&
+                (nat->pollData[y].events == events)) {
+            int newCount = --nat->pollMemberCount;
+            // copy the last live member over this one
+            nat->pollData[y].fd = nat->pollData[newCount].fd;
+            nat->pollData[y].events = nat->pollData[newCount].events;
+            nat->pollData[y].revents = nat->pollData[newCount].revents;
+            nat->watchData[y] = nat->watchData[newCount];
+            return;
+        }
+    }
+    LOGW("WatchRemove given with unknown watch");
+}
+
+static void *eventLoopMain(void *ptr) {
+    native_data_t *nat = (native_data_t *)ptr;
+    JNIEnv *env;
+
+    JavaVMAttachArgs args;
+    char name[] = "BT EventLoop";
+    args.version = nat->envVer;
+    args.name = name;
+    args.group = NULL;
+
+    nat->vm->AttachCurrentThread(&env, &args);
+
+    dbus_connection_set_watch_functions(nat->conn, dbusAddWatch,
+            dbusRemoveWatch, dbusToggleWatch, ptr, NULL);
+
+    while (1) {
+        for (int i = 0; i < nat->pollMemberCount; i++) {
+            if (!nat->pollData[i].revents) {
+                continue;
+            }
+            if (nat->pollData[i].fd == nat->controlFdR) {
+                char data;
+                while (recv(nat->controlFdR, &data, sizeof(char), MSG_DONTWAIT)
+                        != -1) {
+                    switch (data) {
+                    case EVENT_LOOP_EXIT:
+                    {
+                        dbus_connection_set_watch_functions(nat->conn,
+                                NULL, NULL, NULL, NULL, NULL);
+                        tearDownEventLoop(nat);
+                        nat->vm->DetachCurrentThread();
+                        shutdown(nat->controlFdR,SHUT_RDWR);
+                        return NULL;
+                    }
+                    case EVENT_LOOP_ADD:
+                    {
+                        handleWatchAdd(nat);
+                        break;
+                    }
+                    case EVENT_LOOP_REMOVE:
+                    {
+                        handleWatchRemove(nat);
+                        break;
+                    }
+                    }
+                }
+            } else {
+                short events = nat->pollData[i].revents;
+                unsigned int flags = unix_events_to_dbus_flags(events);
+                dbus_watch_handle(nat->watchData[i], flags);
+                nat->pollData[i].revents = 0;
+                // can only do one - it may have caused a 'remove'
+                break;
+            }
+        }
+        while (dbus_connection_dispatch(nat->conn) == 
+                DBUS_DISPATCH_DATA_REMAINS) {
+        }
+
+        poll(nat->pollData, nat->pollMemberCount, -1);
+    }
+}
+#endif // HAVE_BLUETOOTH
+
+static jboolean startEventLoopNative(JNIEnv *env, jobject object) {
+    jboolean result = JNI_FALSE;
+#ifdef HAVE_BLUETOOTH
+    event_loop_native_data_t *nat = get_native_data(env, object);
+
+    pthread_mutex_lock(&(nat->thread_mutex));
+
+    if (nat->pollData) {
+        LOGW("trying to start EventLoop a second time!");
+        pthread_mutex_unlock( &(nat->thread_mutex) );
+        return JNI_FALSE;
+    }
+
+    nat->pollData = (struct pollfd *)malloc(sizeof(struct pollfd) *
+            DEFAULT_INITIAL_POLLFD_COUNT);
+    if (!nat->pollData) {
+        LOGE("out of memory error starting EventLoop!");
+        goto done;
+    }
+
+    nat->watchData = (DBusWatch **)malloc(sizeof(DBusWatch *) *
+            DEFAULT_INITIAL_POLLFD_COUNT);
+    if (!nat->watchData) {
+        LOGE("out of memory error starting EventLoop!");
+        goto done;
+    }
+
+    memset(nat->pollData, 0, sizeof(struct pollfd) *
+            DEFAULT_INITIAL_POLLFD_COUNT);
+    memset(nat->watchData, 0, sizeof(DBusWatch *) *
+            DEFAULT_INITIAL_POLLFD_COUNT);
+    nat->pollDataSize = DEFAULT_INITIAL_POLLFD_COUNT;
+    nat->pollMemberCount = 1;
+
+    if (socketpair(AF_LOCAL, SOCK_STREAM, 0, &(nat->controlFdR))) {
+        LOGE("Error getting BT control socket");
+        goto done;
+    }
+    nat->pollData[0].fd = nat->controlFdR;
+    nat->pollData[0].events = POLLIN;
+
+    env->GetJavaVM( &(nat->vm) );
+    nat->envVer = env->GetVersion();
+
+    nat->me = env->NewGlobalRef(object);
+
+    if (setUpEventLoop(nat) != JNI_TRUE) {
+        LOGE("failure setting up Event Loop!");
+        goto done;
+    }
+
+    pthread_create(&(nat->thread), NULL, eventLoopMain, nat);
+    result = JNI_TRUE;
+
+done:
+    if (JNI_FALSE == result) {
+        if (nat->controlFdW || nat->controlFdR) {
+            shutdown(nat->controlFdW, SHUT_RDWR);
+            nat->controlFdW = 0;
+            nat->controlFdR = 0;
+        }
+        if (nat->me) env->DeleteGlobalRef(nat->me);
+        nat->me = NULL;
+        if (nat->pollData) free(nat->pollData);
+        nat->pollData = NULL;
+        if (nat->watchData) free(nat->watchData);
+        nat->watchData = NULL;
+        nat->pollDataSize = 0;
+        nat->pollMemberCount = 0;
+    }
+
+    pthread_mutex_unlock(&(nat->thread_mutex));
+#endif // HAVE_BLUETOOTH
+    return result;
+}
+
+static void stopEventLoopNative(JNIEnv *env, jobject object) {
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+
+    pthread_mutex_lock(&(nat->thread_mutex));
+    if (nat->pollData) {
+        char data = EVENT_LOOP_EXIT;
+        ssize_t t = write(nat->controlFdW, &data, sizeof(char));
+        void *ret;
+        pthread_join(nat->thread, &ret);
+
+        env->DeleteGlobalRef(nat->me);
+        nat->me = NULL;
+        free(nat->pollData);
+        nat->pollData = NULL;
+        free(nat->watchData);
+        nat->watchData = NULL;
+        nat->pollDataSize = 0;
+        nat->pollMemberCount = 0;
+        shutdown(nat->controlFdW, SHUT_RDWR);
+        nat->controlFdW = 0;
+        nat->controlFdR = 0;
+    }
+    pthread_mutex_unlock(&(nat->thread_mutex));
+#endif // HAVE_BLUETOOTH
+}
+
+static jboolean isEventLoopRunningNative(JNIEnv *env, jobject object) {
+    jboolean result = JNI_FALSE;
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+
+    pthread_mutex_lock(&(nat->thread_mutex));
+    if (nat->pollData) {
+        result = JNI_TRUE;
+    }
+    pthread_mutex_unlock(&(nat->thread_mutex));
+
+#endif // HAVE_BLUETOOTH
+    return result;
 }
 
 #ifdef HAVE_BLUETOOTH
@@ -338,7 +654,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
     dbus_error_init(&err);
 
     nat = (native_data_t *)data;
-    env = nat->env;
+    nat->vm->GetEnv((void**)&env, nat->envVer);
     if (dbus_message_get_type(msg) != DBUS_MESSAGE_TYPE_SIGNAL) {
         LOGV("%s: not interested (not a signal).", __FUNCTION__);
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
@@ -556,11 +872,9 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
 // Called by dbus during WaitForAndDispatchEventNative()
 static DBusHandlerResult agent_event_filter(DBusConnection *conn,
                                             DBusMessage *msg, void *data) {
-    native_data_t *nat = event_loop_nat;
+    native_data_t *nat = (native_data_t *)data;
     JNIEnv *env;
-
-
-    env = nat->env;
+    nat->vm->GetEnv((void**)&env, nat->envVer);
     if (dbus_message_get_type(msg) != DBUS_MESSAGE_TYPE_METHOD_CALL) {
         LOGV("%s: not interested (not a method call).", __FUNCTION__);
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
@@ -730,27 +1044,6 @@ static DBusHandlerResult agent_event_filter(DBusConnection *conn,
 }
 #endif
 
-static jboolean waitForAndDispatchEventNative(JNIEnv *env, jobject object,
-                                               jint timeout_ms) {
-#ifdef HAVE_BLUETOOTH
-    //LOGV("%s: %8d (pid %d tid %d)",__FUNCTION__, time(NULL), getpid(), gettid()); // too chatty
-    native_data_t *nat = get_native_data(env, object);
-    if (nat != NULL && nat->conn != NULL) {
-        jboolean ret;
-        nat->me = object;
-        nat->env = env;
-        event_loop_nat = nat;
-        ret = dbus_connection_read_write_dispatch_greedy(nat->conn,
-                                                         timeout_ms) == TRUE ?
-              JNI_TRUE : JNI_FALSE;
-        event_loop_nat = NULL;
-        nat->me = NULL;
-        nat->env = NULL;
-        return ret;
-    }
-#endif
-    return JNI_FALSE;
-}
 
 #ifdef HAVE_BLUETOOTH
 //TODO: Unify result codes in a header
@@ -761,13 +1054,16 @@ static jboolean waitForAndDispatchEventNative(JNIEnv *env, jobject object,
 #define BOND_RESULT_AUTH_CANCELED 3
 #define BOND_RESULT_REMOTE_DEVICE_DOWN 4
 #define BOND_RESULT_DISCOVERY_IN_PROGRESS 5
-void onCreateBondingResult(DBusMessage *msg, void *user) {
+
+void onCreateBondingResult(DBusMessage *msg, void *user, void *n) {
     LOGV(__FUNCTION__);
 
+    native_data_t *nat = (native_data_t *)n;
     const char *address = (const char *)user;
     DBusError err;
     dbus_error_init(&err);
-    JNIEnv *env = event_loop_nat->env;
+    JNIEnv *env;
+    nat->vm->GetEnv((void**)&env, nat->envVer);
 
     LOGV("... address = %s", address);
 
@@ -809,7 +1105,7 @@ void onCreateBondingResult(DBusMessage *msg, void *user) {
         }
     }
 
-    env->CallVoidMethod(event_loop_nat->me,
+    env->CallVoidMethod(nat->me,
                         method_onCreateBondingResult,
                         env->NewStringUTF(address),
                         result);
@@ -818,13 +1114,17 @@ done:
     free(user);
 }
 
-void onGetRemoteServiceChannelResult(DBusMessage *msg, void *user) {
+void onGetRemoteServiceChannelResult(DBusMessage *msg, void *user, void *n) {
     LOGV(__FUNCTION__);
 
     const char *address = (const char *) user;
+    native_data_t *nat = (native_data_t *) n;
+
     DBusError err;
     dbus_error_init(&err);
-    JNIEnv *env = event_loop_nat->env;
+    JNIEnv *env;
+    nat->vm->GetEnv((void**)&env, nat->envVer);
+
     jint channel = -2;
 
     LOGV("... address = %s", address);
@@ -839,7 +1139,7 @@ void onGetRemoteServiceChannelResult(DBusMessage *msg, void *user) {
     }
 
 done:
-    env->CallVoidMethod(event_loop_nat->me,
+    env->CallVoidMethod(nat->me,
                         method_onGetRemoteServiceChannelResult,
                         env->NewStringUTF(address),
                         channel);
@@ -852,9 +1152,9 @@ static JNINativeMethod sMethods[] = {
     {"classInitNative", "()V", (void *)classInitNative},
     {"initializeNativeDataNative", "()V", (void *)initializeNativeDataNative},
     {"cleanupNativeDataNative", "()V", (void *)cleanupNativeDataNative},
-    {"setUpEventLoopNative", "()Z", (void *)setUpEventLoopNative},
-    {"tearDownEventLoopNative", "()V", (void *)tearDownEventLoopNative},
-    {"waitForAndDispatchEventNative", "(I)Z", (void *)waitForAndDispatchEventNative}
+    {"startEventLoopNative", "()V", (void *)startEventLoopNative},
+    {"stopEventLoopNative", "()V", (void *)stopEventLoopNative},
+    {"isEventLoopRunningNative", "()Z", (void *)isEventLoopRunningNative}
 };
 
 int register_android_server_BluetoothEventLoop(JNIEnv *env) {

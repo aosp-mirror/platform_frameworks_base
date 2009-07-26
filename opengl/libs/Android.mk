@@ -23,6 +23,8 @@ else
     LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
 endif
 
+LOCAL_CFLAGS += -fvisibility=hidden
+
 include $(BUILD_SHARED_LIBRARY)
 
 
@@ -35,10 +37,9 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= 	\
 	GLES_CM/gl.cpp.arm 		\
-	GLES_CM/gl_logger.cpp 	\
 #
 
-LOCAL_SHARED_LIBRARIES += libcutils libutils libui libEGL
+LOCAL_SHARED_LIBRARIES += libcutils libEGL
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libGLESv1_CM
 
@@ -49,5 +50,7 @@ else
     # we need to access the Bionic private header <bionic_tls.h>
     LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
 endif
+
+LOCAL_CFLAGS += -fvisibility=hidden
 
 include $(BUILD_SHARED_LIBRARY)

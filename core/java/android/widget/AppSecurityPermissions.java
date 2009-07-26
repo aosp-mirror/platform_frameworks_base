@@ -124,25 +124,25 @@ public class AppSecurityPermissions  implements View.OnClickListener {
         if(pkg == null) {
             return;
         }
-        // Extract shared user permissions if any
+        // Get requested permissions
+        if (pkg.requestedPermissions != null) {
+            ArrayList<String> strList = pkg.requestedPermissions;
+            int size = strList.size();
+            if (size > 0) {
+                extractPerms(strList.toArray(new String[size]), permSet);
+            }
+        }
+        // Get permissions related to  shared user if any
         if(pkg.mSharedUserId != null) {
             int sharedUid;
             try {
                 sharedUid = mPm.getUidForSharedUser(pkg.mSharedUserId);
+                getAllUsedPermissions(sharedUid, permSet);
             } catch (NameNotFoundException e) {
                 Log.w(TAG, "Could'nt retrieve shared user id for:"+pkg.packageName);
-                return;
             }
-            getAllUsedPermissions(sharedUid, permSet);
-        } else {
-            ArrayList<String> strList = pkg.requestedPermissions;
-            int size;
-            if((strList == null) || ((size = strList.size()) == 0)) {
-                return;
-            }
-            // Extract permissions defined in current package
-            extractPerms(strList.toArray(new String[size]), permSet);
         }
+        // Retrieve list of permissions
         for(PermissionInfo tmpInfo : permSet) {
             mPermsList.add(tmpInfo);
         }
@@ -176,14 +176,9 @@ public class AppSecurityPermissions  implements View.OnClickListener {
             Log.w(TAG, "Could'nt retrieve permissions for package:"+packageName);
             return;
         }
-        if(pkgInfo == null) {
-            return;
+        if ((pkgInfo != null) && (pkgInfo.requestedPermissions != null)) {
+            extractPerms(pkgInfo.requestedPermissions, permSet);
         }
-        String strList[] = pkgInfo.requestedPermissions;
-        if(strList == null) {
-            return;
-        }
-        extractPerms(strList, permSet);
     }
     
     private void extractPerms(String strList[], Set<PermissionInfo> permSet) {

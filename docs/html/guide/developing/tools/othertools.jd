@@ -3,15 +3,31 @@ page.title=Other Tools
 
 <p>The sections below describe other tools that you can use when building Android applications. </p>
 
-<p>All of the tools are included in the Android SDK and are accessible from the <code>tools/</code> directory.</p>
+<p>All of the tools are included in the Android SDK and are accessible from the <code>&lt;sdk&gt;/tools/</code> directory.</p>
 
 <h2>Contents</h2>
 
 <dl>
+    <dt><a href="#android">android</a></dd>
     <dt><a href="#mksdcard">mksdcard</a></dt>
     <dt><a href="#dx">dx</a></dt>
-    <dt><a href="#activitycreator">activitycreator</a></dd>
 </dl>
+
+<a name="activitycreator"></a>
+<h2 id="android">android</h2>
+
+<p>The android tool is a script that lets you create and manage Android Virtual Devices (AVDs) and, if you are developing using Ant, generate template Android projects to help you get started quickly. </p>
+
+<p>For information about how to use the android tool to manage AVDs, see <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>. </p>
+
+<p>For information about how to use the android tool to create or update a project, see <a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>. </p>
+
+<p>Note that if you are developing in Eclipse with the ADT plugin, you will use the android tool to manage the AVDs you create, but you will not use the android tool for creating a project. The ADT plugin provides a New Project Wizard that helps you set up an Android project in Eclipse. </p>
+
+<p>If you are developing in Ant, you will use the android tool to manage your AVDs, and you can also use it to create or update a project. </p>
+
+<p class="note">Note: The android tool replaces the activitycreator tool provided in previous SDK releases.</p>
+
 
 <a name="mksdcard"></a>
 
@@ -21,7 +37,7 @@ page.title=Other Tools
 
 <pre>mksdcard [-l label] &lt;size&gt;[K|M] &lt;file&gt;</pre>
 
-</p>The table below lists the available options/arguments</p>
+<p>The table below lists the available options/arguments</p>
 
 <table>
 <tr>
@@ -57,48 +73,6 @@ You can also specify size in kilobytes or megabytes, by appending a "K" or "M" t
 
 <p>The dx tool lets you generate Android bytecode from .class files. The tool converts target files and/or directories to Dalvik executable format (.dex) files, so that they can run in the Android environment. It can also dump the class files in a human-readable format and run a target unit test. You can get the usage and options for this tool by using <code>dx --help</code>.</p>
 
-<a name="activitycreator"></a>
 
-<h2>activitycreator</h2>
-
-<p>If you aren't using the Eclipse IDE and ADT plugin, you can use the the activitycreator script to get started with a new application. When you run the script, it creates the structure of a minimal Android application that you can build on and extend to meet your needs. </p>
-
-<p>For Linux and Mac, the SDK provides <code>activitycreator</code>, a shell script, and for Windows <code>activitycreator.bat</code>, a batch script that runs an executable. Regardless of platform, the usage for the script is the same:</p>
-
-<pre>activitycreator [--out &lt;folder&gt;] [--ide intellij] your.package.name.ActivityName</pre>
-
-<table>
-<tr>
-	<th>Option</th>
-	<th>Description</th>
-</tr>
-
-<tr>
-	<td><code>--out &lt;folder&gt;</code></td>
-	<td>Specifies where to create the files/folders. </td>
-</tr>
-
-<tr>
-	<td><code>--ide intellij</code></td>
-	<td>Creates project files for IntelliJ</td>
-</tr>
-
-</table>
-
-
-<p>When run, the script creates these files: </p>
-
- <ul>
-	<li>AndroidManifest.xml -- The application manifest file.</li>
-	<li>build.xml -- An Ant script to build/package the application.</li>
-	<li>res -- The resource directory.</li>
-	<li>src -- The source directory.</li>
-	<li>src/your/package/name/ActivityName.java -- The Activity class. </li>
-	<li>bin -- The output folder for the compiled .apk (when built by Ant).</li>
-</ul>
-
-<p>When you are ready, you can use Ant to <a href="{@docRoot}guide/developing/other-ide.html#antbuild">build the project</a> so that you can run it on the emulator.</p>
-
-<p>If you are using Eclipse with the ADT plugin, you do not need to use activitycreator. You can use the New Project Wizard, provided by the ADT plugin, instead. </p>
 
 

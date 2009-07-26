@@ -19,8 +19,13 @@ LOCAL_SRC_FILES:= \
 	ActivityManager.cpp \
 	AndroidRuntime.cpp \
 	CursorWindow.cpp \
+	Time.cpp \
 	com_google_android_gles_jni_EGLImpl.cpp \
 	com_google_android_gles_jni_GLImpl.cpp.arm \
+	android_opengl_GLES10.cpp \
+	android_opengl_GLES10Ext.cpp \
+	android_opengl_GLES11.cpp \
+	android_opengl_GLES11Ext.cpp \
 	android_database_CursorWindow.cpp \
 	android_database_SQLiteDebug.cpp \
 	android_database_SQLiteDatabase.cpp \
@@ -111,7 +116,11 @@ LOCAL_SRC_FILES:= \
 	android_ddm_DdmHandleNativeHeap.cpp \
 	android_location_GpsLocationProvider.cpp \
 	com_android_internal_os_ZygoteInit.cpp \
-	com_android_internal_graphics_NativeUtils.cpp
+	com_android_internal_graphics_NativeUtils.cpp \
+	android_backup_BackupDataInput.cpp \
+	android_backup_BackupDataOutput.cpp \
+	android_backup_FileBackupHelperBase.cpp \
+	android_backup_BackupHelperDispatcher.cpp
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE) \
@@ -124,6 +133,7 @@ LOCAL_C_INCLUDES += \
 	external/skia/include/core \
 	external/skia/include/effects \
 	external/skia/include/images \
+	external/skia/src/ports \
 	external/skia/include/utils \
 	external/sqlite/dist \
 	external/sqlite/android \
@@ -157,8 +167,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libicui18n \
 	libicudata \
 	libmedia \
-	libwpa_client \
-	libemoji
+	libwpa_client
 
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
 LOCAL_C_INCLUDES += \

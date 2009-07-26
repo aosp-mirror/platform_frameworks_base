@@ -1534,14 +1534,14 @@ public class GridView extends AbsListView {
             case FOCUS_LEFT:
                 if (selectedPosition > startOfRowPos) {
                     mLayoutMode = LAYOUT_MOVE_SELECTION;
-                    setSelectionInt(selectedPosition - 1);
+                    setSelectionInt(Math.max(0, selectedPosition - 1));
                     moved = true;
                 }
                 break;
             case FOCUS_RIGHT:
                 if (selectedPosition < endOfRowPos) {
                     mLayoutMode = LAYOUT_MOVE_SELECTION;
-                    setSelectionInt(selectedPosition + 1);
+                    setSelectionInt(Math.min(selectedPosition + 1, mItemCount - 1));
                     moved = true;
                 }
                 break;

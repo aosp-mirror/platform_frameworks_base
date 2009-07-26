@@ -17,7 +17,6 @@
 package android.webkit;
 
 import android.content.Context;
-import android.util.Config;
 import android.util.Log;
 import android.webkit.CookieManager.Cookie;
 
@@ -171,7 +170,7 @@ public final class CookieSyncManager extends WebSyncManager {
     }
 
     protected void syncFromRamToFlash() {
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "CookieSyncManager::syncFromRamToFlash STARTS");
         }
 
@@ -188,7 +187,7 @@ public final class CookieSyncManager extends WebSyncManager {
                 CookieManager.getInstance().deleteLRUDomain();
         syncFromRamToFlash(lruList);
 
-        if (Config.LOGV) {
+        if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG, "CookieSyncManager::syncFromRamToFlash DONE");
         }
     }

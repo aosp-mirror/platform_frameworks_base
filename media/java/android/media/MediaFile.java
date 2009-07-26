@@ -31,7 +31,7 @@ import java.util.Iterator;
  */
 public class MediaFile {
     // comma separated list of all file extensions supported by the media scanner
-    public static String sFileExtensions;
+    public final static String sFileExtensions;
 
     // Audio file types
     public static final int FILE_TYPE_MP3     = 1;
@@ -93,7 +93,7 @@ public class MediaFile {
             = new HashMap<String, Integer>();            
     static void addFileType(String extension, int fileType, String mimeType) {
         sFileTypeMap.put(extension, new MediaFileType(fileType, mimeType));
-        sMimeTypeMap.put(mimeType, new Integer(fileType));
+        sMimeTypeMap.put(mimeType, Integer.valueOf(fileType));
     }
     static {
         addFileType("MP3", FILE_TYPE_MP3, "audio/mpeg");

@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import android.net.Uri;
 import android.net.ParseException;
 import android.net.WebAddress;
-import android.util.Config;
 import android.util.Log;
 
 public final class URLUtil {
@@ -62,7 +61,7 @@ public final class URLUtil {
             webAddress = new WebAddress(inUrl);
         } catch (ParseException ex) {
 
-            if (Config.LOGV) {
+            if (WebView.LOGV_ENABLED) {
                 Log.v(LOGTAG, "smartUrlFilter: failed to parse url = " + inUrl);
             }
             return retVal;

@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.os.Bundle;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 
 oneway interface IPhoneStateListener {
     void onServiceStateChanged(in ServiceState serviceState);
@@ -30,5 +31,6 @@ oneway interface IPhoneStateListener {
     void onCallStateChanged(int state, String incomingNumber);
     void onDataConnectionStateChanged(int state);
     void onDataActivity(int direction);
+    void onSignalStrengthsChanged(in SignalStrength signalStrength);
 }
 

@@ -8,8 +8,6 @@ import android.widget.LinearLayout;
 
 
 public class IconMerger extends LinearLayout {
-    private static final boolean SPEW = false;
-
     StatusBarService service;
     StatusBarIcon moreIcon;
 
@@ -29,7 +27,7 @@ public class IconMerger extends LinearLayout {
         int fitRight = -1;
         for (i=N-1; i>=0; i--) {
             final View child = getChildAt(i);
-            if (child != null && child.getVisibility() != GONE) {
+            if (child.getVisibility() != GONE) {
                 fitRight = child.getRight();
                 break;
             }
@@ -45,7 +43,7 @@ public class IconMerger extends LinearLayout {
                 moreView = child;
                 startIndex = i+1;
             }
-            else if (child != null && child.getVisibility() != GONE) {
+            else if (child.getVisibility() != GONE) {
                 fitLeft = child.getLeft();
                 break;
             }
@@ -71,7 +69,7 @@ public class IconMerger extends LinearLayout {
         int number = 0;
         for (i=startIndex; i<N; i++) {
             final View child = getChildAt(i);
-            if (child != null && child.getVisibility() != GONE) {
+            if (child.getVisibility() != GONE) {
                 int childLeft = child.getLeft();
                 int childRight = child.getRight();
                 if (childLeft < breakingPoint) {

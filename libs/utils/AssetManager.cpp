@@ -395,21 +395,41 @@ const ResTable* AssetManager::getResTable(bool required) const
     const size_t N = mAssetPaths.size();
     for (size_t i=0; i<N; i++) {
         Asset* ass = NULL;
+        ResTable* sharedRes = NULL;
         bool shared = true;
         const asset_path& ap = mAssetPaths.itemAt(i);
         LOGV("Looking for resource asset in '%s'\n", ap.path.string());
         if (ap.type != kFileTypeDirectory) {
-            ass = const_cast<AssetManager*>(this)->
-                mZipSet.getZipResourceTable(ap.path);
-            if (ass == NULL) {
-                LOGV("loading resource table %s\n", ap.path.string());
+            if (i == 0) {
+                // The first item is typically the framework resources,
+                // which we want to avoid parsing every time.
+                sharedRes = const_cast<AssetManager*>(this)->
+                    mZipSet.getZipResourceTable(ap.path);
+            }
+            if (sharedRes == NULL) {
                 ass = const_cast<AssetManager*>(this)->
-                    openNonAssetInPathLocked("resources.arsc",
-                                             Asset::ACCESS_BUFFER,
-                                             ap);
-                if (ass != NULL && ass != kExcludedAsset) {
+                    mZipSet.getZipResourceTableAsset(ap.path);
+                if (ass == NULL) {
+                    LOGV("loading resource table %s\n", ap.path.string());
                     ass = const_cast<AssetManager*>(this)->
-                        mZipSet.setZipResourceTable(ap.path, ass);
+                        openNonAssetInPathLocked("resources.arsc",
+                                                 Asset::ACCESS_BUFFER,
+                                                 ap);
+                    if (ass != NULL && ass != kExcludedAsset) {
+                        ass = const_cast<AssetManager*>(this)->
+                            mZipSet.setZipResourceTableAsset(ap.path, ass);
+                    }
+                }
+                
+                if (i == 0 && ass != NULL) {
+                    // If this is the first resource table in the asset
+                    // manager, then we are going to cache it so that we
+                    // can quickly copy it out for others.
+                    LOGV("Creating shared resources for %s", ap.path.string());
+                    sharedRes = new ResTable();
+                    sharedRes->add(ass, (void*)(i+1), false);
+                    sharedRes = const_cast<AssetManager*>(this)->
+                        mZipSet.setZipResourceTable(ap.path, sharedRes);
                 }
             }
         } else {
@@ -420,13 +440,19 @@ const ResTable* AssetManager::getResTable(bool required) const
                                          ap);
             shared = false;
         }
-        if (ass != NULL && ass != kExcludedAsset) {
+        if ((ass != NULL || sharedRes != NULL) && ass != kExcludedAsset) {
             if (rt == NULL) {
                 mResources = rt = new ResTable();
                 updateResourceParamsLocked();
             }
             LOGV("Installing resource asset %p in to table %p\n", ass, mResources);
-            rt->add(ass, (void*)(i+1), !shared);
+            if (sharedRes != NULL) {
+                LOGV("Copying existing resources for %s", ap.path.string());
+                rt->add(sharedRes);
+            } else {
+                LOGV("Parsing resources for %s", ap.path.string());
+                rt->add(ass, (void*)(i+1), !shared);
+            }
 
             if (!shared) {
                 delete ass;
@@ -901,6 +927,60 @@ AssetDir* AssetManager::openDir(const char* dirName)
 }
 
 /*
+ * Open a directory in the non-asset namespace.
+ *
+ * An "asset directory" is simply the combination of all files in all
+ * locations, with ".gz" stripped for loose files.  With app, locale, and
+ * vendor defined, we have 8 directories and 2 Zip archives to scan.
+ *
+ * Pass in "" for the root dir.
+ */
+AssetDir* AssetManager::openNonAssetDir(void* cookie, const char* dirName)
+{
+    AutoMutex _l(mLock);
+
+    AssetDir* pDir = NULL;
+    SortedVector<AssetDir::FileInfo>* pMergedInfo = NULL;
+
+    LOG_FATAL_IF(mAssetPaths.size() == 0, "No assets added to AssetManager");
+    assert(dirName != NULL);
+
+    //printf("+++ openDir(%s) in '%s'\n", dirName, (const char*) mAssetBase);
+
+    if (mCacheMode != CACHE_OFF && !mCacheValid)
+        loadFileNameCacheLocked();
+
+    pDir = new AssetDir;
+
+    pMergedInfo = new SortedVector<AssetDir::FileInfo>;
+
+    const size_t which = ((size_t)cookie)-1;
+
+    if (which < mAssetPaths.size()) {
+        const asset_path& ap = mAssetPaths.itemAt(which);
+        if (ap.type == kFileTypeRegular) {
+            LOGV("Adding directory %s from zip %s", dirName, ap.path.string());
+            scanAndMergeZipLocked(pMergedInfo, ap, NULL, dirName);
+        } else {
+            LOGV("Adding directory %s from dir %s", dirName, ap.path.string());
+            scanAndMergeDirLocked(pMergedInfo, ap, NULL, dirName);
+        }
+    }
+
+#if 0
+    printf("FILE LIST:\n");
+    for (i = 0; i < (size_t) pMergedInfo->size(); i++) {
+        printf(" %d: (%d) '%s'\n", i,
+            pMergedInfo->itemAt(i).getFileType(),
+            (const char*) pMergedInfo->itemAt(i).getFileName());
+    }
+#endif
+
+    pDir->setFileList(pMergedInfo);
+    return pDir;
+}
+
+/*
  * Scan the contents of the specified directory and merge them into the
  * "pMergedInfo" vector, removing previous entries if we find "exclude"
  * directives.
@@ -1143,6 +1223,7 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
             LOGE("ARGH: name too long?\n");
             continue;
         }
+        //printf("Comparing %s in %s?\n", nameBuf, dirName.string());
         if (dirNameLen == 0 ||
             (strncmp(nameBuf, dirName.string(), dirNameLen) == 0 &&
              nameBuf[dirNameLen] == '/'))
@@ -1165,7 +1246,7 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
                     createZipSourceNameLocked(zipName, dirName, info.getFileName()));
 
                 contents.add(info);
-                //printf("FOUND: file '%s'\n", (const char*) info.mFileName);
+                //printf("FOUND: file '%s'\n", info.getFileName().string());
             } else {
                 /* this is a subdir; add it if we don't already have it*/
                 String8 subdirName(cp, nextSlash - cp);
@@ -1181,7 +1262,7 @@ bool AssetManager::scanAndMergeZipLocked(SortedVector<AssetDir::FileInfo>* pMerg
                     dirs.add(subdirName);
                 }
 
-                //printf("FOUND: dir '%s'\n", (const char*) subdirName);
+                //printf("FOUND: dir '%s'\n", subdirName.string());
             }
         }
     }
@@ -1455,7 +1536,8 @@ Mutex AssetManager::SharedZip::gLock;
 DefaultKeyedVector<String8, wp<AssetManager::SharedZip> > AssetManager::SharedZip::gOpen;
 
 AssetManager::SharedZip::SharedZip(const String8& path, time_t modWhen)
-    : mPath(path), mZipFile(NULL), mModWhen(modWhen), mResourceTableAsset(NULL)
+    : mPath(path), mZipFile(NULL), mModWhen(modWhen),
+      mResourceTableAsset(NULL), mResourceTable(NULL)
 {
     //LOGI("Creating SharedZip %p %s\n", this, (const char*)mPath);
     mZipFile = new ZipFileRO;
@@ -1508,6 +1590,25 @@ Asset* AssetManager::SharedZip::setResourceTableAsset(Asset* asset)
     return mResourceTableAsset;
 }
 
+ResTable* AssetManager::SharedZip::getResourceTable()
+{
+    LOGV("Getting from SharedZip %p resource table %p\n", this, mResourceTable);
+    return mResourceTable;
+}
+
+ResTable* AssetManager::SharedZip::setResourceTable(ResTable* res)
+{
+    {
+        AutoMutex _l(gLock);
+        if (mResourceTable == NULL) {
+            mResourceTable = res;
+            return res;
+        }
+    }
+    delete res;
+    return mResourceTable;
+}
+
 bool AssetManager::SharedZip::isUpToDate()
 {
     time_t modWhen = getFileModDate(mPath.string());
@@ -1517,6 +1618,9 @@ bool AssetManager::SharedZip::isUpToDate()
 AssetManager::SharedZip::~SharedZip()
 {
     //LOGI("Destroying SharedZip %p %s\n", this, (const char*)mPath);
+    if (mResourceTable != NULL) {
+        delete mResourceTable;
+    }
     if (mResourceTableAsset != NULL) {
         delete mResourceTableAsset;
     }
@@ -1572,7 +1676,7 @@ ZipFileRO* AssetManager::ZipSet::getZip(const String8& path)
     return zip->getZip();
 }
 
-Asset* AssetManager::ZipSet::getZipResourceTable(const String8& path)
+Asset* AssetManager::ZipSet::getZipResourceTableAsset(const String8& path)
 {
     int idx = getIndex(path);
     sp<SharedZip> zip = mZipFile[idx];
@@ -1583,13 +1687,33 @@ Asset* AssetManager::ZipSet::getZipResourceTable(const String8& path)
     return zip->getResourceTableAsset();
 }
 
-Asset* AssetManager::ZipSet::setZipResourceTable(const String8& path,
+Asset* AssetManager::ZipSet::setZipResourceTableAsset(const String8& path,
                                                  Asset* asset)
 {
     int idx = getIndex(path);
     sp<SharedZip> zip = mZipFile[idx];
     // doesn't make sense to call before previously accessing.
     return zip->setResourceTableAsset(asset);
+}
+
+ResTable* AssetManager::ZipSet::getZipResourceTable(const String8& path)
+{
+    int idx = getIndex(path);
+    sp<SharedZip> zip = mZipFile[idx];
+    if (zip == NULL) {
+        zip = SharedZip::get(path);
+        mZipFile.editItemAt(idx) = zip;
+    }
+    return zip->getResourceTable();
+}
+
+ResTable* AssetManager::ZipSet::setZipResourceTable(const String8& path,
+                                                    ResTable* res)
+{
+    int idx = getIndex(path);
+    sp<SharedZip> zip = mZipFile[idx];
+    // doesn't make sense to call before previously accessing.
+    return zip->setResourceTable(res);
 }
 
 /*

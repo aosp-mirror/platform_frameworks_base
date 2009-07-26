@@ -12,7 +12,7 @@ parent.link=index.html
   from one Activity/Service to another?</a></li>
   <li><a href="#4">How can I check if an Activity is already
   running before starting it?</a></li>
-  <li><a href="#5">If an Activity starts a remote service,is
+  <li><a href="#5">If an Activity starts a remote service, is
   there any way for the Service to pass a message back to the Activity?</a></li>
   <li><a href="#6">How to avoid getting the Application not
   responding dialog?</a></li>
@@ -20,7 +20,6 @@ parent.link=index.html
   added or removed?</a></li>
 </ul>
 
-<!-- ------------------------------------------------------------------ -->
 
 <a name="1" id="1"></a>
 
@@ -32,7 +31,7 @@ default. If needed, you can declare an <code>android:process</code> attribute
 in your manifest file, to explicitly place a component (Activity/Service) in
 another process.</p>
 
-<!-- ------------------------------------------------------------------ -->
+
 
 <a name="2" id="2"></a>
 
@@ -47,7 +46,7 @@ separate pool of transaction threads in each process to dispatch all
 incoming IPC calls. The developer should create separate threads for any
 long-running code, to avoid blocking the main UI thread.</p>
 
-<!-- ------------------------------------------------------------------ -->
+
 
 <a name="3" id="3"></a>
 
@@ -128,7 +127,7 @@ the <a href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a>
 for further details on how to use these components.</p>
 
 
-<!-- ------------------------------------------------------------------ -->
+
 
 <a name="4" id="4"></a>
 
@@ -140,7 +139,7 @@ or to bring the activity stack to the front if is already running in the
 background&mdash; is the to use the NEW_TASK_LAUNCH flag in the startActivity()
 call.</p>
 
-<!-- ------------------------------------------------------------------ -->
+
 
 <a name="5" id="5"></a>
 
@@ -156,7 +155,7 @@ messages.</p>
 <p>The sample code for remote service callbacks is given in <a
 href="{@docRoot}guide/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.html">ApiDemos/RemoteService</a></p>
 
-<!-- ------------------------------------------------------------------ -->
+
 
 <a name="6" id="6"></a>
 
@@ -166,7 +165,7 @@ href="{@docRoot}guide/samples/ApiDemos/src/com/example/android/apis/app/RemoteSe
 document.</p>
 
 
-<!-- ------------------------------------------------------------------ -->
+
 
 <a name="7" id="7"></a>
 
@@ -194,5 +193,5 @@ removed.
 
 </p>
 
-<!-- ------------------------------------------------------------------ -->
+
 

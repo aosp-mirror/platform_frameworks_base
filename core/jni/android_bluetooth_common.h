@@ -24,7 +24,9 @@
 #include "utils/Log.h"
 
 #include <errno.h>
+#include <pthread.h>
 #include <stdint.h>
+#include <sys/poll.h>
 
 #ifdef HAVE_BLUETOOTH
 #include <dbus/dbus.h>
@@ -45,6 +47,9 @@ namespace android {
 
 #define BTADDR_SIZE 18   // size of BT address character array (including null)
 
+// size of the dbus event loops pollfd structure, hopefully never to be grown
+#define DEFAULT_INITIAL_POLLFD_COUNT 8
+
 jfieldID get_field(JNIEnv *env,
                    jclass clazz,
                    const char *member,
@@ -63,29 +68,33 @@ jfieldID get_field(JNIEnv *env,
 
 struct event_loop_native_data_t {
     DBusConnection *conn;
-    /* These variables are set in waitForAndDispatchEventNative() and are
-       valid only within the scope of this function.  At any other time, they
-       are NULL. */
-    jobject me;
-    JNIEnv *env;
-};
 
-dbus_bool_t dbus_func_args_async_valist(JNIEnv *env,
-                                        DBusConnection *conn,
-                                        int timeout_ms,
-                                        void (*reply)(DBusMessage *, void *),
-                                        void *user,
-                                        const char *path,
-                                        const char *ifc,
-                                        const char *func,
-                                        int first_arg_type,
-                                        va_list args);
+    /* protects the thread */
+    pthread_mutex_t thread_mutex;
+    pthread_t thread;
+    /* our comms socket */
+    /* mem for the list of sockets to listen to */
+    struct pollfd *pollData;
+    int pollMemberCount;
+    int pollDataSize;
+    /* mem for matching set of dbus watch ptrs */
+    DBusWatch **watchData;
+    /* pair of sockets for event loop control, Reader and Writer */
+    int controlFdR;
+    int controlFdW;
+    /* our vm and env Version for future env generation */
+    JavaVM *vm;
+    int envVer;
+    /* reference to our java self */
+    jobject me;
+};
 
 dbus_bool_t dbus_func_args_async(JNIEnv *env,
                                  DBusConnection *conn,
                                  int timeout_ms,
-                                 void (*reply)(DBusMessage *, void *),
+                                 void (*reply)(DBusMessage *, void *, void *),
                                  void *user,
+                                 void *nat,
                                  const char *path,
                                  const char *ifc,
                                  const char *func,

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Title for the VPN Services activity. -->
+    <string name="app_label">VPN Services</string>
+
+    <string name="vpn_notification_title_connected">%s VPN connected</string>
+    <string name="vpn_notification_title_disconnected">%s VPN disconnected</string>
+    <string name="vpn_notification_hint_disconnected">Touch to reconnect to a VPN.</string>
+</resources>
+

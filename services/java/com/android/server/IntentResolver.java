@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -89,11 +90,11 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
         }
     }
 
-    void dumpMap(Printer out, String prefix, Map<String, ArrayList<F>> map) {
+    void dumpMap(PrintWriter out, String prefix, Map<String, ArrayList<F>> map) {
         String eprefix = prefix + "  ";
         String fprefix = prefix + "    ";
         for (Map.Entry<String, ArrayList<F>> e : map.entrySet()) {
-            out.println(eprefix + e.getKey() + ":");
+            out.print(eprefix); out.print(e.getKey()); out.println(":");
             ArrayList<F> a = e.getValue();
             final int N = a.size();
             for (int i=0; i<N; i++) {
@@ -102,24 +103,25 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
         }
     }
 
-    public void dump(Printer out, String prefix) {
-        out.println(prefix + "Full MIME Types:");
-        dumpMap(out, prefix+"  ", mTypeToFilter);
-        out.println(prefix);
-        out.println(prefix + "Base MIME Types:");
-        dumpMap(out, prefix+"  ", mBaseTypeToFilter);
-        out.println(prefix);
-        out.println(prefix + "Wild MIME Types:");
-        dumpMap(out, prefix+"  ", mWildTypeToFilter);
-        out.println(prefix);
-        out.println(prefix + "Schemes:");
-        dumpMap(out, prefix+"  ", mSchemeToFilter);
-        out.println(prefix);
-        out.println(prefix + "Non-Data Actions:");
-        dumpMap(out, prefix+"  ", mActionToFilter);
-        out.println(prefix);
-        out.println(prefix + "MIME Typed Actions:");
-        dumpMap(out, prefix+"  ", mTypedActionToFilter);
+    public void dump(PrintWriter out, String prefix) {
+        String innerPrefix = prefix + "  ";
+        out.print(prefix); out.println("Full MIME Types:");
+        dumpMap(out, innerPrefix, mTypeToFilter);
+        out.println(" ");
+        out.print(prefix); out.println("Base MIME Types:");
+        dumpMap(out, innerPrefix, mBaseTypeToFilter);
+        out.println(" ");
+        out.print(prefix); out.println("Wild MIME Types:");
+        dumpMap(out, innerPrefix, mWildTypeToFilter);
+        out.println(" ");
+        out.print(prefix); out.println("Schemes:");
+        dumpMap(out, innerPrefix, mSchemeToFilter);
+        out.println(" ");
+        out.print(prefix); out.println("Non-Data Actions:");
+        dumpMap(out, innerPrefix, mActionToFilter);
+        out.println(" ");
+        out.print(prefix); out.println("MIME Typed Actions:");
+        dumpMap(out, innerPrefix, mTypedActionToFilter);
     }
 
     private class IteratorWrapper implements Iterator<F> {
@@ -161,8 +163,24 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
         return Collections.unmodifiableSet(mFilters);
     }
 
-    public List<R> queryIntent(ContentResolver resolver, Intent intent,
-            String resolvedType, boolean defaultOnly) {
+    public List<R> queryIntentFromList(Intent intent, String resolvedType, 
+            boolean defaultOnly, ArrayList<ArrayList<F>> listCut) {
+        ArrayList<R> resultList = new ArrayList<R>();
+
+        final boolean debug = localLOGV ||
+                ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
+
+        final String scheme = intent.getScheme();
+        int N = listCut.size();
+        for (int i = 0; i < N; ++i) {
+            buildResolveList(intent, debug, defaultOnly,
+                             resolvedType, scheme, listCut.get(i), resultList);
+        }
+        sortResults(resultList);
+        return resultList;
+    }
+
+    public List<R> queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
         String scheme = intent.getScheme();
 
         ArrayList<R> finalList = new ArrayList<R>();
@@ -275,8 +293,8 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
         Collections.sort(results, mResolvePrioritySorter);
     }
 
-    protected void dumpFilter(Printer out, String prefix, F filter) {
-        out.println(prefix + filter);
+    protected void dumpFilter(PrintWriter out, String prefix, F filter) {
+        out.print(prefix); out.println(filter);
     }
 
     private final int register_mime_types(F filter, String prefix) {

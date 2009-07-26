@@ -50,5 +50,8 @@
         <item quantity="other">Some dogs</item>
     </plurals>
     
+    <string name="searchable_label">SearchManager Test</string>
+    <string name="searchable_hint">A search hint</string>
+    
 <!--    <string name="layout_six_text_text">F</string> -->
 </resources>

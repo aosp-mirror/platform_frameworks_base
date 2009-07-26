@@ -29,16 +29,17 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
-import android.content.pm.PackageItemInfo;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.util.Xml;
 import android.widget.RemoteViews;
 
@@ -55,7 +56,6 @@ import java.util.HashSet;
 
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.appwidget.IAppWidgetHost;
-import com.android.internal.util.XmlUtils;
 import com.android.internal.util.FastXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -78,7 +78,7 @@ class AppWidgetService extends IAppWidgetService.Stub
     static class Provider {
         int uid;
         AppWidgetProviderInfo info;
-        ArrayList<AppWidgetId> instances = new ArrayList();
+        ArrayList<AppWidgetId> instances = new ArrayList<AppWidgetId>();
         PendingIntent broadcast;
         boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
         
@@ -89,7 +89,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         int uid;
         int hostId;
         String packageName;
-        ArrayList<AppWidgetId> instances = new ArrayList();
+        ArrayList<AppWidgetId> instances = new ArrayList<AppWidgetId>();
         IAppWidgetHost callbacks;
         boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
         
@@ -106,10 +106,10 @@ class AppWidgetService extends IAppWidgetService.Stub
     Context mContext;
     PackageManager mPackageManager;
     AlarmManager mAlarmManager;
-    ArrayList<Provider> mInstalledProviders = new ArrayList();
+    ArrayList<Provider> mInstalledProviders = new ArrayList<Provider>();
     int mNextAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID + 1;
-    ArrayList<AppWidgetId> mAppWidgetIds = new ArrayList();
-    ArrayList<Host> mHosts = new ArrayList();
+    final ArrayList<AppWidgetId> mAppWidgetIds = new ArrayList<AppWidgetId>();
+    ArrayList<Host> mHosts = new ArrayList<Host>();
     boolean mSafeMode;
 
     AppWidgetService(Context context) {
@@ -151,34 +151,57 @@ class AppWidgetService extends IAppWidgetService.Stub
 
         synchronized (mAppWidgetIds) {
             int N = mInstalledProviders.size();
-            pw.println("Providers: (size=" + N + ")");
+            pw.println("Providers:");
             for (int i=0; i<N; i++) {
                 Provider p = mInstalledProviders.get(i);
                 AppWidgetProviderInfo info = p.info;
-                pw.println("  [" + i + "] provder=" + info.provider
-                        + " min=(" + info.minWidth + "x" + info.minHeight + ")"
-                        + " updatePeriodMillis=" + info.updatePeriodMillis
-                        + " initialLayout=" + info.initialLayout + " zombie=" + p.zombie);
+                pw.print("  ["); pw.print(i); pw.print("] provider ");
+                        pw.print(info.provider.flattenToShortString());
+                        pw.println(':');
+                pw.print("    min=("); pw.print(info.minWidth);
+                        pw.print("x"); pw.print(info.minHeight);
+                        pw.print(") updatePeriodMillis=");
+                        pw.print(info.updatePeriodMillis);
+                        pw.print(" initialLayout=#");
+                        pw.print(Integer.toHexString(info.initialLayout));
+                        pw.print(" zombie="); pw.println(p.zombie);
             }
 
             N = mAppWidgetIds.size();
-            pw.println("AppWidgetIds: (size=" + N + ")");
+            pw.println(" ");
+            pw.println("AppWidgetIds:");
             for (int i=0; i<N; i++) {
                 AppWidgetId id = mAppWidgetIds.get(i);
-                pw.println("  [" + i + "] appWidgetId=" + id.appWidgetId
-                        + " host=" + id.host.hostId + "/" + id.host.packageName + " provider="
-                        + (id.provider == null ? "null" : id.provider.info.provider)
-                        + " host.callbacks=" + (id.host != null ? id.host.callbacks : "(no host)")
-                        + " views=" + id.views);
+                pw.print("  ["); pw.print(i); pw.print("] id=");
+                        pw.println(id.appWidgetId);
+                pw.print("    hostId=");
+                        pw.print(id.host.hostId); pw.print(' ');
+                        pw.print(id.host.packageName); pw.print('/');
+                        pw.println(id.host.uid);
+                if (id.provider != null) {
+                    pw.print("    provider=");
+                            pw.println(id.provider.info.provider.flattenToShortString());
+                }
+                if (id.host != null) {
+                    pw.print("    host.callbacks="); pw.println(id.host.callbacks);
+                }
+                if (id.views != null) {
+                    pw.print("    views="); pw.println(id.views);
+                }
             }
 
             N = mHosts.size();
-            pw.println("Hosts: (size=" + N + ")");
+            pw.println(" ");
+            pw.println("Hosts:");
             for (int i=0; i<N; i++) {
                 Host host = mHosts.get(i);
-                pw.println("  [" + i + "] packageName=" + host.packageName + " uid=" + host.uid
-                        + " hostId=" + host.hostId + " callbacks=" + host.callbacks
-                        + " instances.size=" + host.instances.size() + " zombie=" + host.zombie);
+                pw.print("  ["); pw.print(i); pw.print("] hostId=");
+                        pw.print(host.hostId); pw.print(' ');
+                        pw.print(host.packageName); pw.print('/');
+                        pw.print(host.uid); pw.println(':');
+                pw.print("    callbacks="); pw.println(host.callbacks);
+                pw.print("    instances.size="); pw.print(host.instances.size());
+                        pw.print(" zombie="); pw.println(host.zombie);
             }
         }
     }
@@ -360,7 +383,7 @@ class AppWidgetService extends IAppWidgetService.Stub
     public List<AppWidgetProviderInfo> getInstalledProviders() {
         synchronized (mAppWidgetIds) {
             final int N = mInstalledProviders.size();
-            ArrayList<AppWidgetProviderInfo> result = new ArrayList(N);
+            ArrayList<AppWidgetProviderInfo> result = new ArrayList<AppWidgetProviderInfo>(N);
             for (int i=0; i<N; i++) {
                 Provider p = mInstalledProviders.get(i);
                 if (!p.zombie) {
@@ -595,7 +618,6 @@ class AppWidgetService extends IAppWidgetService.Stub
             // rely on the fact that we've already set it and that
             // PendingIntent.getBroadcast will update the extras.
             boolean alreadyRegistered = p.broadcast != null;
-            int instancesSize = p.instances.size();
             Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
             intent.setComponent(p.info.provider);
@@ -671,10 +693,16 @@ class AppWidgetService extends IAppWidgetService.Stub
 
             TypedArray sa = mContext.getResources().obtainAttributes(attrs,
                     com.android.internal.R.styleable.AppWidgetProviderInfo);
-            info.minWidth = sa.getDimensionPixelSize(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_minWidth, 0);
-            info.minHeight = sa.getDimensionPixelSize(
-                    com.android.internal.R.styleable.AppWidgetProviderInfo_minHeight, 0);
+            
+            // These dimensions has to be resolved in the application's context.
+            // We simply send back the raw complex data, which will be
+            // converted to dp in {@link AppWidgetManager#getAppWidgetInfo}.
+            TypedValue value = sa.peekValue(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_minWidth);
+            info.minWidth = value != null ? value.data : 0; 
+            value = sa.peekValue(com.android.internal.R.styleable.AppWidgetProviderInfo_minHeight);
+            info.minHeight = value != null ? value.data : 0;
+                    
             info.updatePeriodMillis = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_updatePeriodMillis, 0);
             info.initialLayout = sa.getResourceId(
@@ -716,7 +744,7 @@ class AppWidgetService extends IAppWidgetService.Stub
             throw new IllegalArgumentException("packageName and uid don't match packageName="
                     + packageName);
         }
-        if (callingUid != packageUid) {
+        if (callingUid != packageUid && Process.supportsProcesses()) {
             throw new IllegalArgumentException("packageName and uid don't match packageName="
                     + packageName);
         }
@@ -749,10 +777,12 @@ class AppWidgetService extends IAppWidgetService.Stub
         if (real.exists()) {
             readStateFromFileLocked(real);
             if (temp.exists()) {
+                //noinspection ResultOfMethodCallIgnored
                 temp.delete();
             }
         } else if (temp.exists()) {
             readStateFromFileLocked(temp);
+            //noinspection ResultOfMethodCallIgnored
             temp.renameTo(real);
         }
     }
@@ -768,18 +798,23 @@ class AppWidgetService extends IAppWidgetService.Stub
             // use the temporary one until it's fully written, create an empty file
             // for real, which will we'll shortly delete.
             try {
+                //noinspection ResultOfMethodCallIgnored
                 real.createNewFile();
             } catch (IOException e) {
+                // Ignore
             }
         }
 
         if (temp.exists()) {
+            //noinspection ResultOfMethodCallIgnored
             temp.delete();
         }
 
         writeStateToFileLocked(temp);
 
+        //noinspection ResultOfMethodCallIgnored
         real.delete();
+        //noinspection ResultOfMethodCallIgnored
         temp.renameTo(real);
     }
 
@@ -842,8 +877,10 @@ class AppWidgetService extends IAppWidgetService.Stub
                     stream.close();
                 }
             } catch (IOException ex) {
+                // Ignore
             }
             if (file.exists()) {
+                //noinspection ResultOfMethodCallIgnored
                 file.delete();
             }
         }
@@ -861,7 +898,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
             int type;
             int providerIndex = 0;
-            HashMap<Integer,Provider> loadedProviders = new HashMap();
+            HashMap<Integer,Provider> loadedProviders = new HashMap<Integer, Provider>();
             do {
                 type = parser.next();
                 if (type == XmlPullParser.START_TAG) {
@@ -962,6 +999,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                 stream.close();
             }
         } catch (IOException e) {
+            // Ignore
         }
 
         if (success) {
@@ -1057,7 +1095,7 @@ class AppWidgetService extends IAppWidgetService.Stub
     // TODO: If there's a better way of matching an intent filter against the
     // packages for a given package, use that.
     void updateProvidersForPackageLocked(String pkgName) {
-        HashSet<String> keep = new HashSet();
+        HashSet<String> keep = new HashSet<String>();
         Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         List<ResolveInfo> broadcastReceivers = mPackageManager.queryBroadcastReceivers(intent,
                 PackageManager.GET_META_DATA);
@@ -1079,7 +1117,6 @@ class AppWidgetService extends IAppWidgetService.Stub
                     if (parsed != null) {
                         keep.add(ai.name);
                         // Use the new AppWidgetProviderInfo.
-                        AppWidgetProviderInfo oldInfo = p.info;
                         p.info = parsed.info;
                         // If it's enabled
                         final int M = p.instances.size();

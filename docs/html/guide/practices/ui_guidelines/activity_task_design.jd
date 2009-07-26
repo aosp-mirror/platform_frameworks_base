@@ -1,0 +1,1238 @@
+page.title=Activity and Task Design Guidelines
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Activity and task design quickview</h2>
+
+<ul>
+<li>Activities are the main building blocks of Android applications. </li>
+<li>In addition to writing your own activities, you are free to re-use activities from many other applications through intents.</li>
+<li>You can enable activities in your application to be started from intents in other applications.</li>
+<li>In nearly all cases, the activity stack just works as expected.</li>
+    In a couple of cases you might need to ensure the right thing happens by setting a string or flag.</li>
+</ul>
+
+<h2>In this document</h2>
+
+<ol>
+  <li><a href=#applications_activities>Applications, Activities, Activity Stack and Tasks</a>
+  </li>
+  <li><a href=#tour>A Tour of Activities and Tasks
+    <ol>
+      <li><a href=#starting_an_activity_from_home>Starting an Activity from Home</a></li>
+      <li><a href=#navigating_away_from_an_activity>Navigating Away from an Activity</a></li>
+      <li><a href=#reusing_an_activity>Re-using an Activity</a></li>
+      <li><a href=#replacing_an_activity>Replacing an Activity</a></li>
+      <li><a href=#multitasking>Multitasking</a></li>
+      <li><a href=#launching_from_two_entry_points>Launching from Two Entry Points</a></li>
+      <li><a href=#intents>Intents</a></li>
+      <li><a href=#switching_between_tasks>Switching Between Tasks</a></li>
+    </ol>
+  </li>
+  <li><a href=#tips>Design Tips
+    <ol>
+      <li><a href=#activity_not_reused_tip>Don't specify intent filters in an activity that won't be re-used</a></li>
+      <!-- <li><a href=#others_to_reuse_tip>Don't define your own URI schemes</a></li> -->
+      <li><a href=#reusing_tip>Handle case where no activity matches</a></li>
+      <li><a href=#activity_launching_tip>Consider how to launch your activities</a></li>
+      <li><a href=#activities_added_to_task_tip>Allow activities to add to current task</a></li>
+      <li><a href=#notifications_get_back_tip>Notifications should let user easily get back</li>
+      <li><a href=#use_notification_tip>Use the notification system</a></li>
+      <li><a href=#taking_over_back_key>Don't take over BACK key unless you absolutely need to</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+  <li><a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+  This document describes core principles of the Android application
+  framework, from a high-level, user-centric perspective useful to
+  interaction and application designers as well as application
+  developers.
+</p>
+
+<p>
+  It illustrates activities and tasks with examples, and describes some
+  of their underlying principles and mechanisms, such as navigation,
+  multitasking, activity re-use, intents, and the activity stack. 
+  The document also highlights design decisions that are available to you
+  and what control they give you over the UI of your application.
+</p>
+
+<p>
+  This document draws examples from several Android applications,
+  including default applications (such as Dialer) and Google
+  applications (such as Maps).  You can try out the examples yourself in
+  the Android emulator or on an Android-powered device. If you are using
+  a device, note that your device may not offer all of the example
+  applications used in this document.
+</p>
+
+<p>
+  Be sure to look at the <a href="#design_tips">Design Tips</a> section
+  for guidelines, tips, and things to avoid. This document is a
+  complement to <a href={@docRoot}guide/topics/fundamentals.html
+  title="Application Fundamentals">Application Fundamentals</a>, 
+  which covers the underlying mechanics for programmers.
+</p>
+
+<h2 id="applications_activities">Applications, Activities, Activity Stack and Tasks</h2>
+
+<p>
+  Four fundamental concepts in the Android system that are helpful for you to understand are:
+</p>
+
+<ul>
+  <li>Applications
+  <li>Activities
+  <li>Activity Stack
+  <li>Tasks
+</ul>
+
+<h3 id=applications>Applications</h3>
+
+<p>
+  An Android <em>application</em> typically consists of one or more
+  related, loosely bound activities <!--(and possibly 
+  <a href=#services_broadcast_receivers title="other components">other
+  components</a>)--> for the user to interact with, typically bundled up
+  in a single file (with an .apk suffix). Android ships with a rich set
+  of applications that may include email, calendar, browser, maps, text
+  messaging, contacts, camera, dialer, music player, settings and
+  others.
+</p>
+
+<p>
+  Android has an application launcher available at the Home screen,
+  typically in a sliding drawer which displays applications as icons,
+  which the user can pick to start an application.
+</p>
+
+
+<h3 id=activities>Activities</h3>
+
+<p>
+  <em>Activities</em> are the main building blocks of Android
+  applications. When you create an application, you can assemble it from
+  activities that you create and from activities you re-use from other
+  applications. These activities are bound at runtime, so that newly
+  installed applications can take advantage of already installed
+  activities.  Once assembled, activities work together to form a
+  cohesive user interface. An activity has a distinct visual user
+  interface designed around a single, well-bounded purpose, such as
+  viewing, editing, dialing the phone, taking a photo, searching,
+  sending data, starting a voice command, or performing some other type
+  of user action. Any application that presents anything on the display
+  must have at least one activity responsible for that display.
+</p>
+
+<p>
+  When using an Android device, as the user moves through the user
+  interface they start activities one after the other, totally oblivious
+  to the underlying behavior &mdash; to them the experience should be
+  seamless, activity after activity, <a href="#tasks">task</a> after
+  task.
+</p>
+  
+<p>
+  An activity handles a particular type of content (data) and accepts a
+  set of related user actions. In general, each activity has a 
+  <a href={@docRoot}guide/topics/fundamentals.html#actlife
+  title=lifecycle>lifecycle</a> that is independent of the other
+  activities in its application or task &mdash; each activity is
+  launched (started) independently, and the user or system can start,
+  run, pause, resume, stop and restart it as needed. Because of this
+  independence, activities can be re-used and replaced by other
+  activities in a variety of ways.
+</p>
+
+<p>
+  The Dialer application is an example of an application that consists
+  basically of four activities: dialer, contacts list, view contact, and
+  new contact, as shown in the following screenshots:
+</p>
+
+      <table style="border: none;">
+        <tbody>
+        <tr>
+          <td style="border: none !important;">
+            <img src={@docRoot}images/activity_task_design/ContactsDialer.png>
+            <div style=TEXT-ALIGN:center>
+              Dialer
+            </div>
+          </td>
+          <td style="border: none !important;">
+            <img src={@docRoot}images/activity_task_design/ContactsList.png>
+            <div style=TEXT-ALIGN:center>
+              Contacts
+            </div>
+          </td>
+          <td style="border: none !important;">
+            <img src={@docRoot}images/activity_task_design/ContactView.png>
+            <div style=TEXT-ALIGN:center>
+              View Contact
+            </div>
+          </td>
+          <td style="border: none !important;">
+            <img src={@docRoot}images/activity_task_design/ContactNew.png>
+            <div style=TEXT-ALIGN:center>
+               New Contact
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+<p>
+  Here are other examples of applications and the activities they might contain:
+</p>
+
+    <ul>
+      <li>
+        Email - activities to view folders, view list of messages,
+        view a message, compose a message, and set up an account
+      </li>
+      <li>
+        Calendar - activities to view day, view week, view month, view
+        agenda, edit an event, edit preferences, and view an alert
+      </li>
+      <li>
+        Camera - activities for running the camera, viewing the list
+        of pictures, viewing a picture, cropping a picture, running
+        the camcorder, viewing the list of movies, and viewing a movie
+      </li>
+      <li>
+        Game - one activity to play the game, typically another for setup
+      </li>
+      <li>
+        Maps - one activity to view a location on a map, a second for lists
+        (such as turn list or friend list), and a third for details
+        (friend location, status, photo)
+      </li>
+    </ul>
+
+
+<p>
+  An activity is the most prominent of four <em>components</em> of an
+  application. The other components are service, content provider and
+  broadcast receiver. For more details on activities, see Activity in
+  <a href={@docRoot}guide/topics/fundamentals.html#appcomp
+  title="Application Components">Application Components</a>.
+</p>
+
+
+<h3 id="activity_stack">Activity Stack</h3>
+
+<p>
+  As the user moves from activity to activity, across applications, the
+  Android system keeps a linear navigation history of activities the
+  user has visited. This is the <em>activity stack</em>, also known as the
+  back stack. In general, when a user starts a new activity, it is added
+  to the activity stack, so that pressing BACK displays the previous
+  activity on the stack. However, the user cannot use the BACK key to go
+  back further than the last visit to Home. The adding of an activity to
+  the current stack happens whether or not that activity begins a new 
+  <a href=#tasks title=task>task</a> (as long as that task was started
+  without going Home), so going back can let the user go back to
+  activities in previous tasks. The user can get to tasks earlier than
+  the most recent Home by selecting its root activity from the
+  application launcher, a shortcut, or the "Recent tasks" screen.
+</p>
+
+<p>
+  Activities are the only things that can be added to the activity stack
+  &mdash; views, windows, menus, and dialogs cannot. That is, when
+  designing the navigation, if you have screen A and you want the user
+  to be able go to a subsequent screen B and then use the BACK key to go
+  back to screen A, then the screen A needs to be implemented as an
+  activity. The one exception to this rule is if your application 
+  <a href=#taking_over_back_key title="takes control of the BACK key"
+  takes control of the BACK key</a> and manages the navigation itself.
+</p>
+
+
+
+<h3 id=tasks>Tasks</h3>
+
+<p>
+  A <em>task</em> is the sequence of activities the user follows to
+  accomplish an objective, regardless of which applications the
+  activities belong to. Until a new task is explicitly specified (see
+  "Interrupting the Task"), all activities the user starts are
+  considered to be part of the current task. It's notable that these
+  activities can be in any application &mdash; that is, all in the same
+  application or in different ones. That is, a task that starts out in
+  contacts can continue, by choosing an email address, to an email
+  activity and then, by attaching a file, to a picture gallery to pick
+  from. Contacts, email and picture gallery are all separate
+  applications.
+</p>
+
+<p>
+  The activity that starts a task is called the <em>root activity</em>.
+  It is often, but not necessarily, started from the application
+  launcher, Home screen shortcut or "Recent tasks" switcher (a long
+  press on Home on some devices). The user can return to a task by
+  choosing the icon for its root activity the same way they started the
+  task. Once inside a task, the BACK key goes to previous activities in
+  that task. The activity stack is made up of one or more tasks.
+</p>
+
+<p>
+  Here are some examples of tasks:
+</p>
+
+    <ul>
+      <li>
+        Send a text message with an attachment
+      </li>
+      <li>
+        View a YouTube video and share it by email with someone else 
+      </li>
+    </ul>
+
+<p>
+  <b>Interrupting the Task</b> - An important property of a task is that
+  the user can interrupt what they're doing (their task) to perform a
+  different task, then are able to return to where they left off to
+  complete the original task. The idea is that users can run multiple
+  tasks simultaneously and switch between them. There are two primary
+  ways to jump off to that other task &mdash; in both cases the user
+  should be able to return to where they were before the interruption:
+</p>
+
+
+  <ul>
+    <li>
+      User is interrupted by a notification – a notification appears and the user wants to act on it
+    </li>
+    <li>
+      User deciding to perform another task – user just presses Home and starts an application
+    </li>
+  </ul>
+
+<p>
+  Of course, there are exceptions to the rules. Beyond the two ways just
+  mentioned, there is a third way to start a task, and that is by
+  starting an activity that defines itself as a new task. Maps and
+  Browser are two applications that do this. For example, choosing an
+  address in an email starts the Maps activity as a new task, and
+  choosing a link in an email starts the Browser activity as a new
+  task. In these cases, the BACK key will return to the previous
+  activity in a different task (Email), because it was not started from
+  Home.
+</p>
+
+
+<h2 id="tour">A Tour of Activities and Tasks</h2>
+
+<p>
+  The following examples illustrate basic principles for applications,
+  activities, the activity stack, the BACK key, tasks and intents.  It
+  shows how the system responds to user actions such as starting
+  activities and switching between tasks.  With most of these examples
+  you can follow along, launching activities on your device as
+  indicated.
+</p>
+
+
+<h3 id=starting_an_activity_from_home>Starting an Activity from Home</h3>
+
+<p>
+  Home is the starting place for most applications. (Some applications
+  can be launched only from other applications.) When the user touches
+  an icon in the application launcher (or a shortcut on the Home
+  screen), the main activity for that application is launched into the
+  foreground where it has user focus. As shown in the following figure,
+  the user action of going Home and touching the Email icon launches the
+  List Messages activity of the Email application. The Home activity
+  remains stopped in the background, ready to restart when called on by
+  the user.
+</p>
+
+<p>
+  <img src={@docRoot}images/activity_task_design/HomeTaskBasics1a.png>
+</p>
+
+<h3 id=navigating_away_from_an_activity>Navigating Away from an Activity with BACK and HOME keys</h3>
+
+<p>
+  An activity can keep or lose its state depending on how the user
+  leaves the activity &mdash; by the HOME or BACK key.
+</p>
+
+<p>
+  By default, pressing the BACK key finishes (destroys) the current
+  activity and displays the previous activity to the user. In the
+  following figure, the user starts email by touching the Email icon in
+  the Home screen, which displays a list of email messages. The user
+  scrolls down the list (changing its initial state). Pressing BACK
+  destroys the List Messages activity and returns to the previous
+  activity, which is Home. If the user re-launches Email, it would
+  re-load the messages and display its initial, non-scrolled state.
+</p>
+
+<p>
+  <img src={@docRoot}images/activity_task_design/HomeTaskBasics1b.png>
+</p>
+
+<p>
+  In the above example, pressing BACK goes to Home because it was the
+  last activity the user was viewing. But if the user had gotten to List
+  Message from some other activity, then pressing BACK would have
+  returned there.
+</p>
+
+<p>
+  By contrast, the next figure shows the user leaving List Messages by
+  pressing HOME instead of BACK &mdash; the List Messages activity is
+  stopped and moved to the background rather than being
+  destroyed. Starting Email again from its icon would simply bring the
+  List Messages activity to the foreground (changing it from stopped to
+  running) in the same scrolled state the user last left it.
+</p>
+
+<p>
+  <img src={@docRoot}images/activity_task_design/HomeTaskBasics1c.png>
+</p>
+
+<p>
+  <b>Exceptions.</b> Some background activities return to their initial
+  screen (they lose any state, such as scrolling) when they are brought
+  to the foreground. This is true for Contacts and Gallery. If the user
+  chooses Home &gt; Contacts then chooses a contact, they are viewing
+  the details of a contact. If they start again by choosing Home &gt;
+  Contacts, they are presented with the initial list of contacts rather
+  than the contact they were last viewing. Contacts is designed this way
+  because this initial screen is the main entry point for the
+  application with four tabs for accessing the full range of features.
+</p>
+
+<p>
+  In addition, not all activities have the behavior that they are
+  destroyed when BACK is pressed. When the user starts playing music in
+  the Music application and then presses BACK, the application overrides
+  the normal back behavior, preventing the player activity from being
+  destroyed, and continues playing music, even though its activity is no
+  longer visible &mdash; as a visual substitute, the Music application
+  places a notification in the status bar so the user still has an easy
+  way to get to the application to stop or control the music. Note that
+  you can write an activity to stop when its screen is no longer
+  visible, or to continue running in the background &mdash; the latter
+  was chosen for the music player.
+</p>
+
+
+<h3 id=reusing_an_activity>Re-using an Activity</h3>
+
+<p>
+  When activity A starts activity B in a different application, activity
+  B is said to be <em>re-used</em>. This use case normally takes place
+  because activity A is lacking a capability and can find it in activity B.
+</p>
+
+<p>
+  <b>Contacts Re-Uses Gallery to Get a Picture</b> - The Contacts
+  activity has a field for a picture of a contact, but the Gallery is
+  normally where pictures are kept. So Contacts can re-use the Gallery
+  activity to get a picture. This is a good example of re-use of the
+  Gallery activity. The following figure illustrates the sequence of
+  activities to do this (up to crop). This is how it's done: The user
+  chooses Contacts, selects the contact for viewing, chooses MENU &gt;
+  Edit contact and touches the picture field, which launches the Gallery
+  activity. The user then chooses the picture they want, crops and saves
+  it. Saving it causes the picture to be inserted into the picture field
+  in the contact.
+</p>
+
+<p>
+  Notice the Gallery returns a picture to the Contacts application that
+  started it. The next example illustrates re-use of an activity that
+  does not return a result. Also notice that the following figure is
+  illustrates the navigation history through the activities, or the
+  activity stack &mdash; the user can back up through each activity all
+  the way to Home.
+</p>
+
+<p>
+  When designing an application, it's good to think about how it can
+  re-use activities in other applications, and how your activities might
+  be re-used by other applications. If you add an activity with the same
+  <a href=#intents title="intent filter">intent filter</a> as an
+  exisiting activity, then the system presents the user with a choice
+  between the activities.
+</p>
+
+<p>
+  <img src={@docRoot}images/activity_task_design/ReusingAnActivity1.png>
+</p>
+
+<p>
+  <b>Gallery Re-Uses Messaging for Sharing a Picture</b> - Sharing is
+  another good example of one application re-using an activity from a
+  different application. As shown in the following figure, the user
+  starts Gallery, picks a picture to view, chooses MENU &gt; Share, and
+  picks "Messaging". This starts the Messaging activity, creates a new
+  message and attaches the original picture to it. The user then fills
+  in the "To" field, writes a short message and sends it. User focus
+  remains in the Messaging program. If the user wants to go back to the
+  Gallery, they must press the BACK key. (The user can back up through
+  each activity all the way to Home.)
+</p>
+
+<p>
+  In contrast to the previous example, this re-use of the Messaging
+  activity does not return anything to the Gallery activity that started it.
+</p>
+
+<p>
+  <img src={@docRoot}images/activity_task_design/ReusingAnActivity2.png>
+</p>
+
+<p>
+  Both of these examples illustrate tasks &mdash; a sequence of
+  activities that accomplish an objective. Each case uses activities
+  from two different applications to get the job done.
+</p>
+
+
+<h3 id=replacing_an_activity>Replacing an Activity</h3>
+
+<p>
+  This is the use case where activity A replaces activity B in a
+  different application. This situation normally happens because
+  activity A is better at doing the job than activity B. In other words,
+  A and B are equivalent enough that A can replace B. This case stands
+  in contrast with re-using an activity, where A and B are quite
+  different activities and supplement each other.
+</p>
+
+<p>
+  In this example, the user has downloaded a replacement for the Phone
+  Ringtone activity, called Rings Extended. Now when they go to
+  Settings, Sound &amp; Display, Phone Ringtone, the system presents
+  them with a choice between the Android System's ringtone activity and
+  the new one. This dialog box has an option to remember their choice
+  "Use by default for this action". When they choose "Rings Extended",
+  that activity loads, replacing the original Android ringtone activity.
+</p>
+
+<p>
+  <img src={@docRoot}images/activity_task_design/ReplacingAnActivity.png>
+</p>
+
+<h3 id=multitasking>Multitasking</h3>
+
+<p>
+  As previously noted, when an activity has been launched, the user can
+  go to Home and launch a second activity without destroying the first
+  activity. This scenario demonstrates launching the Maps application.
+</p>
+
+  <ul>
+    <li>
+      State 1 - The user launches the View Map activity and searches
+      for a map location. Let's say the network is slow, so the map is
+      taking an unusually long taking time to draw.
+    </li>
+  </ul>
+  <ul>
+    <li>
+      State 2 - The user wants to do something else while they're
+      waiting, so they press HOME, which does not interrupt the map's
+      network connection and allows the map to continue loading in the
+      background.
+
+      <p>
+      Note that when you write an activity, you can make it stop or
+      continue running when it is moved to the background (see
+      onStop() in <a href={@docRoot}guide/topics/fundamentals.html#actlife
+      title="Activity Lifecycle">Activity Lifecycle</a>).
+      For activities that download data from the network, it's recommended
+      to let them continue downloading so the user can multi-task.
+      </p>
+
+    </li>
+
+    <li>
+      State 3 - The map activity is now running in the background,
+      with Home in the foreground. The user then launches the Calendar
+      activity, which launches into the foreground, taking user focus,
+      where they view today's calendar (as indicated by the heavy
+      outline).
+    </li>
+  </ul>
+
+<p>
+<img src={@docRoot}images/activity_task_design/HomeTaskBasics1d.png>
+</p>
+      <ul>
+        <li>
+          State 4 - The user presses Home, then Maps to return to the map, which by now has fully loaded.
+        </li>
+      </ul>
+
+<p>
+  <img src={@docRoot}images/activity_task_design/HomeTaskBasics1e.png>
+</p>
+
+<p>
+  The application launcher at Home has launched "View Map" and "Day
+  View" activities into separate <em>tasks</em>, hence the system is
+  multitasking &mdash; running multiple <a href=#tasks
+  title=tasks>tasks</a>.
+</p>
+
+
+<h3 id=launching_from_two_entry_points>Launching from Two Entry Points</h3>
+
+<p>
+  Every application must have at least one entry point &mdash; a way
+  for the user or system to access activities inside the
+  application. Each icon in the application launcher at home
+  represents an entry point. Applications can also from another
+  application. Each activity is a potential entry point into the
+  application.&nbsp;
+</p>
+
+<p>
+  The phone application has two entry points: Contacts and Dialer. A
+  user entering from Contacts can choose a phone number to launch the
+  Dialer. As shown in the following figure, a user could choose the
+  Contacts icon to launch the Contacts activity, then pick a phone
+  number to launch the Dialer activity and dial the phone.
+</p>
+
+<p>
+  Once the user is inside the application, they can access other
+  activities, such as New Contact and Edit Contact, through tabs, menu
+  items, list items, onscreen buttons, or other user interface
+  controls.
+</p>
+
+<p>
+<img src={@docRoot}images/activity_task_design/PhoneActivitiesDiagram.png>
+</p>
+
+<h3 id=intents>Intents</h3>
+
+<p>
+  When the user takes an action on some data, such as touching a
+  mailto:info@example.com link, they are actually initiating an Intent
+  object, or just an <em>intent</em>,  which then gets resolved to a
+  particular component (we consider only activity components here).
+  So, the result of a user touching a mailto: link is an Intent object 
+  that the system tries to match to an activity. If that Intent object was
+  written explicitly naming an activity (an <em>explicit intent</em>),
+  then the system immediately launches that activity in response to the user
+  action. However, if that Intent object was written without naming an
+  activity (an <em>implicit intent</em>), the system compares the Intent
+  object to the <em>intent filters</em> of available activities. If more
+  than one activity can handle the action and data, the system
+  displays an activity chooser for the user to choose from.
+</p>
+
+<p>
+  This example of touching the mailto: link is shown in the following
+  figure. If the device has two email applications set up, when a user
+  touches a mailto: email address on a web page, the result is an
+  Intent object which displays a dialog box with a choice between the
+  two activities to compose an email (Gmail and Email).
+</p>
+
+<p>
+  <img src={@docRoot}images/activity_task_design/IntentsDiagram.png>
+</p>
+
+<p>
+  Here are some examples of Intent objects and the activities they resolve to:
+</p>
+
+  <ul>
+    <li>
+      View the list of contacts - resolves to a contact list viewer activity
+    </li>
+
+    <li>
+      View a particular contact - resolves to a contact viewer activity
+    </li>
+
+    <li>
+      Edit a particular contact - resolves to a contact editor activity
+    </li>
+
+    <li>
+      Send to a particular email - resolves to an email activity
+    </li>
+
+    <li>
+      Dial a phone number - resolves to a phone dialer activity
+    </li>
+
+    <li>
+       View the list of images - resolves to an image list viewer activity
+    </li>
+
+    <li>
+        View a particular image - resolves to an image viewer activity
+    </li>
+
+    <li>
+        Crop a particular image - resolves to an image cropper activity
+    </li>
+  </ul>
+
+<p>
+  Notice that an Intent object specifies two things, an action and data:
+</p>
+
+    <ul>
+      <li>
+        A generic action to be performed. In these examples: view, edit, dial or crop
+      </li>
+
+      <li>
+        The specific data to be acted on. In these examples: the list of contacts, a particular contact, a phone number, the list of images, or a particular image
+      </li>
+    </ul>
+
+    <p>
+      Note that any user action to start an activity from the
+      application launcher at Home is an explicit intent to a specific
+      activity. Likewise, some activities launch private activities
+      within their application as explicit intents so no other activity
+      can access them.
+    </p>
+
+    <p>
+      For more on intents, see {@link android.content.Intent Intent class} and
+      <a href={@docRoot}guide/topics/fundamentals.html#ifilters
+      title="intent filters">intent filters</a>.
+    </p>
+
+
+<h3 id=switching_between_tasks>Switching Between Tasks</h3>
+
+<p>
+  This scenario shows how the user can switch between two tasks. In
+  this example, the user writes a text message, attaches a picture,
+  but before they are done they glance at their calendar. They then
+  return to where they left off, attaching the picture and sending the
+  message.
+</p>
+
+    <ol>
+      <li>
+        <b>Start first task.</b> You want to send a text message and attach a photo. You would choose:
+
+        <p>
+          Home &gt; Messaging &gt; New message &gt; MENU &gt; Attach
+          &gt; Pictures. This last step launches the picture gallery
+          for picking a photo. Notice that picture gallery is an
+          activity in a separate application.
+        </p>
+
+
+        <table>
+          <tbody>
+            <tr>
+            <td valign=top style="border: none !important;">
+              <img src={@docRoot}images/activity_task_design/HomeTaskSwitching1a.png>
+            </td>
+            <td valign=top style="border: none !important;">
+              <img src={@docRoot}images/activity_task_design/HomeTaskSwitching1b.png>
+            </td>
+            <td valign=top style="border: none !important;">
+              <img src={@docRoot}images/activity_task_design/HomeTaskSwitching1c.png>
+            </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          At this point, before you have picked a picture, you decide
+          to stop and glance at your calendar, which is a separate
+          task. Because the current activity has no button to go
+          directly to the Calendar, you need to start from Home.
+        </p>
+
+      </li>
+      <li>
+        <b>Start second task.</b> You choose Home &gt; Calendar to
+        look at a calendar event. Calendar launches from Home as a new
+        task because the application launcher creates a new task for
+        each application it launches.
+
+        <p>
+      <img src={@docRoot}images/activity_task_design/HomeTaskSwitching2.png>
+        </p>
+      </li>
+
+      <li>
+        <b>Switch to first task and complete it.</b> When done looking
+        at the Calendar, you can return to attaching the picture by
+        starting the root activity again for that task: choose Home
+        &gt; Messaging, which takes you not to Messaging, but directly
+        to the Picture gallery, where you left off. You can then pick
+        a photo, which is added to the message, you send the message
+        and you're done with the first task.
+
+      <table>
+        <tbody>
+        <tr>
+
+          <td valign=top style="border: none !important;">
+            <img src={@docRoot}images/activity_task_design/HomeTaskSwitching3a.png>
+          </td>
+
+          <td valign=top style="border: none !important;">
+            <img src={@docRoot}images/activity_task_design/HomeTaskSwitching3b.png>
+          </td>
+
+          <td valign=top style="border: none !important;">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src={@docRoot}images/activity_task_design/HomeTaskSwitching3c.png>
+          </td>
+
+        </tr>
+        </tbody>
+      </table>
+      </li>
+    </ol>
+
+
+<h2 id="tips">Design Tips</h2>
+
+<p>
+  The following are tips and guidelines for application designers and developers.
+</p>
+
+<h3 id=activity_not_reused_tip>When writing an activity that won't be re-used, don't specify intent filters &mdash; use explicit intents</h3>
+
+<p>
+  If you're writing an activity that you don't want other activities
+  to use, be sure not to add any intent filters to that activity. This
+  applies to an activity that will be launched only from the
+  application launcher or from other activities inside your
+  application. Instead, just create intents specifying the explicit
+  component to launch &mdash; that is, explicit intents. In this case,
+  there's just no need for intent filters. Intent filters are
+  published to all other applications, so if you make an intent
+  filter, what you're doing is publishing access to your activity,
+  which means you can cause unintentional security holes.
+</p>
+
+<!--
+<h3 id="others_to_reuse_tip">When writing an activity for others to re-use, don't define your own URI schemes</h3>
+
+<p>
+  If publishing to others, don't define your own URI schemes in an
+  Intent type. Schemes (such as http: and mailto:) are an Internet
+  standard with a universal namespace outside of just Android, so you
+  aren't allowed to just make up your own. Instead, you should just
+  define your own actions. The action namespace is designed to not
+  have conflicts. Typically, your activity has one scheme with many
+  different actions.
+</p>
+
+<p>
+  Example: You want to show the user a bar code for some text. The
+  wrong way to do this is for the intent filter protocol to be
+  &lt;action android:name="android.intent.action.VIEW" /&gt; and
+  &lt;data android:scheme="barcode" /&gt;. Do not do this.
+</p>
+
+<p>
+  Instead you should define &lt;action
+  android:name="com.example.action.SHOW_BARCODE" /&gt; and have the
+  invoker supply the data as an extra field in the Intent object.
+</p>
+
+<p>
+  Be aware this intent filter protocol
+  ("com.example.action.SHOW_BARCODE", in this example) is a public API
+  that you can't change once it's defined. You must support it in the
+  future because others are going to be relying on it. If you want to
+  add new features that are incompatible with the current protocol,
+  just define a new protocol and continue to support the old one.
+</p>
+-->
+
+<h3 id="reusing_tip"> When reusing an activity owned by others, handle the case where no activity matches</h3>
+
+<p>
+  Your applications can re-use activities made available from other
+  applications. In doing so, you cannot presume your intent will always
+  be resolved to a matching external activity &mdash; you must handle the case
+  where no application installed on the device can handle the intent.
+</p>
+
+<p>
+  You can either test that an activity matches the intent, which you can do
+  before starting the activity, or catch an exception if starting the
+  activity fails. Both approaches are descibed in the blog posting
+  <a href="http://android-developers.blogspot.com/2009/01/can-i-use-this-intent.html">Can
+  I use this Intent?</a>.
+</p>
+
+<p>
+  To test whether an intent can be resolved, your code can query the package manager.
+  The blog post provides an example in the isIntentAvailable() helper method.
+  You can perform this test when initializing the user interface.
+  For instance, you could disable the user control that initiates
+  the Intent object, or display a message to the user that lets them go
+  to a location, such as the Market, to download its application.
+  In this way, your code can start the activity (using either startActivity() 
+  or startActivityForResult()) only if the intent has tested to resolve
+  to an activity that is actually present.
+</p>
+
+<h3 id=activity_launching_tip>Consider how you want your activities to be launched or used by other applications</h3>
+
+<p>
+  As a designer or developer, it's up to you to determine how users
+  start your application and the activities in it. As an application
+  is a set of activities, the user can start these activities from
+  Home or from another application.
+</p>
+
+    <ul>
+      <li>
+        <b>Launch your main activity from an icon at Home </b>- If
+        your application can run standalone, it should probably be
+        started by the user touching an icon in <em>application
+        launcher</em> (typically implemented as a sliding drawer on the
+        Home screen), or from a shortcut icon on the Home screen, or
+        from the task switcher.  (The mechanism for this is for the
+        activity to have an 
+        <a href={@docRoot}guide/topics/fundamentals.html#ifilters
+        title="Intent filter">intent filter</a> with action MAIN and
+        category LAUNCHER.)
+      </li>
+    </ul>
+
+    <ul>
+      <li>
+        <b>Launch your activity from within another application</b> -
+        Perhaps your activities are meant for re-use. For example,
+        many applications have data they want to share with other
+        users. Activities that can share data with other users include
+        email, text messaging and uploading to a public website.  <p>
+        If one or more of your activities can be an alternative to an
+        existing activity in another application, you can make it
+        available to users at the point they request that
+        activity.&nbsp;For example, if your activity can send data to
+        others (such as by email, text messaging, or uploading),
+        consider setting up that activity to appear as a choice to the
+        user. To give a specific example, Gallery enables a user to
+        view and share pictures. When the user chooses "Share" from
+        the menus, the system compares the "Share" request (an Intent
+        object) to available activities (by looking at their intent
+        filters) and displays choices to share. In this case, it
+        matches Email, Gmail, Messaging and Picassa. If your activity
+        can send a picture or upload it to a website, all it needs to
+        do is make itself available for sharing (by setting its intent
+        filter).
+        </p>
+<p>
+  Another activity can start your activity either with or without expecting a result back.&nbsp;
+</p>
+      </li>
+
+      <ul>
+        <li>
+          <b>Start an activity expecting a result</b> - This approach
+          is closed loop, where the activity being started must either
+          return a valid result or be canceled. In the previous
+          examples of sharing a photo from a Gallery, the user ends up
+          back in the Gallery after completing the send or upload
+          procedure. These are examples of starting an activity
+          external to the Gallery. (Such an activity is started with
+          {@link
+          android.app.Activity#startActivityForResult(android.content.Intent,
+          int) startActivityForResult()}.)
+        </li>
+
+        <li>
+          <b>Start an activity not expecting a result</b> - This
+          approach is open-ended. An example is choosing an house
+          address in an email message (or web page), where the Maps
+          activity is started to map the location. No result from maps
+          is expected to be returned to the email message; the user
+          can return by pressing the BACK key. (Such an activity is
+          started with {@link
+          android.content.Context#startActivity(android.content.Intent)
+          startActivity()}.)
+        </li>
+      </ul>
+
+      <li>
+        <b>Launch your activity <em>only</em> from within another
+        application</b> - The previous cases of sharing by way of
+        Email, Gmail, Messaging and Picassa (from within Gallery) are
+        all activities that can also be started from icons in the
+        application launcher at Home. In contrast, the activities for
+        cropping a picture and attaching a file cannot be started from
+        Home, because they do not stand alone and require a
+        context.&nbsp;
+      </li>
+
+<p>
+  In fact, not all applications have icons and can be started from
+  Home. Take for example a small app that is infrequently used and
+  replaces existing functionality, that already has a natural entry
+  point inside an existing application. For example, an Android phone
+  typically has a built-in ringtone picker that can be selected from
+  the sound settings of the Settings application. A custom ringtone
+  picker application that you write could be launched by an intent
+  identical to the built-in ringtone picker. At the point where the
+  user chooses "Phone ringtone", they are presented with a dialog
+  letting them choose between "Android System" and your ringtone
+  picker (and letting them save their choice) as shown in the
+  following figure. A ringtone is something you set infrequently, and
+  already has a well-defined starting point, so probably does not need
+  an application icon at Home.
+</p>
+
+<p>
+  <img src={@docRoot}images/activity_task_design/ActivityChooser.png>
+</p>
+
+      <li>
+          <b>Launch two or more main activities within a single
+          application from separate icon at Home</b> - As we have
+          defined it, all the code in a single .apk file is considered
+          to be one <em>application.</em> You can write an application
+          that contains two main activities launchable from Home.
+      </li>
+
+<p>
+  The Camera.apk application is a good example of an application that
+  contains two independent main activities &mdash; Camera and
+  Camcorder &mdash; that each have their own icons in application
+  launcher, that can be launched separately, and so appear to the user
+  as separate applications. They both share use of the same lens, and
+  both store their images (still and moving) in the Gallery.&nbsp;
+</p>
+
+<p>
+  In order for your application to contain two different, independent
+  activities launchable from Home, you must define them to be
+  associated with different tasks. (This means setting the main
+  activity for each task to a different <!--a href=#affinities
+  title=affinity-->task affinity<!--/a--> &mdash; in this case,
+  "com.android.camera" and "com.android.videocamera".)
+</p>
+
+<p>
+  Contacts and Dialer are another example of two main activities
+  launchable from Home that reside in the same application.
+</p>
+
+      <li>
+        <b>Making your application available as a widget</b> - An
+        application can also display a portion of itself as an <a
+        href={@docRoot}guide/topics/appwidgets/index.html title="app
+        widget">app widget</a>, embedded in Home or another
+        application, and receive periodic updates.
+      </li>
+
+    </ul>
+
+
+<h3 id=activities_added_to_task_tip>Allow your activities to be added to the current task</h3>
+
+<p>
+  If your activities can be started from another application, allow
+  them to be added to the current <a href=#tasks title=Tasks>task</a>
+  (or an existing task it has an affinity with). Having activities
+  added to a task enables the user to switch between a task that
+  contains your activities and other tasks. <!--See <a href=#tasks
+  title=Tasks>Tasks</a> for a fuller explanation.--> Exceptions are
+  your activities that have only one instance.&nbsp;
+</p>
+
+<p>
+  For this behavior, your activity should have a <!--a
+  href=launch_modes title="standard or singleTop"-->launch
+  mode<!--/a--> of standard or singleTop rather than singleTask or
+  singleInstance. These modes also enable multiple instances of your
+  activity to be run.
+</p>
+
+    
+<h3 id="notifications_get_back_tip">Notifications should let the user easily get back to the previous activity</h3>
+<p>
+  Applications that are in the background or not running can have
+  services that send out notifications to the user letting them know about
+  events of interest. Two examples are Calendar, which can send out notifications of
+  upcoming events, and Email, which can send out notifications when new
+  messages arrive. One of the user interface guidelines is that when the
+  user is in activity A, gets a notification for activity B and
+  picks that notification, when they press the BACK key, they should
+  go back to activity A.&nbsp;
+</p>
+
+<p>
+  The following scenario shows how the activity stack should work
+  when the user responds to a notification.
+</p>
+
+<ol>
+  <li>
+    User is creating a new event in Calendar. They realize they
+    need to copy part of an email message into this event
+  </li>
+  <li>
+    The user chooses Home &gt; Gmail
+  </li>
+  <li>
+    While in Gmail, they receive a notification from Calendar for an upcoming meeting
+  </li>
+  <li>
+    So they choose that notification, which takes them to a
+    dedicated Calendar activity that displays brief details of the
+    upcoming meeting
+  </li>
+  <li>
+    The user chooses this short notice to view further details
+  </li>
+  <li>
+    When done viewing the event, the user presses the BACK
+    key. They should be taken to Gmail, which is where they were
+    when they took the notification
+  </li>
+</ol>
+
+<p>
+This behavior doesn't necessarily happen by default.
+</p>
+
+<p>
+Notifications generally happen primarily in one of two ways:
+</p>
+
+  <ul>
+    <li>
+      <b>The chosen activity is dedicated for notification only</b> -
+      For example, when the user receives a
+      Calendar notification, choosing that
+      notification starts a special activity that displays a list
+      of upcoming calendar events &mdash; this view is available only
+      from the notification, not through the Calendar's own user
+      interface. After viewing this upcoming event, to ensure that
+      the user pressing the BACK key will return to the activity
+      the user was in when they picked the notification, you would
+      make sure this dedicated activity does not have the same
+      task affinity as the Calendar or any other activity. (You do
+      this by setting task affinity to the empty string, which
+      means it has no affinity to anything.) The explanation for
+      this follows.
+
+      <p>
+      Because of the way tasks work, if the taskAffinity of the
+      dedicated activity is kept as its default, then pressing the
+      BACK key (in step 6, above) would go to Calendar, rather
+      than Gmail. The reason is that, by default, all activities
+      in a given application have the same task
+      affinity. Therefore, the task affinity of the dedicated
+      activity matches the Calendar task, which is already running
+      in step 1. This means in step 4, choosing the notification
+      brings the existing Calendar event (in step 1) forward and
+      starts the dedicated activity on top of it.  This is not
+      what you want to have happen. Setting the dedicated
+      activity's taskAffinity to empty string fixes this.
+      </p>
+    </li>
+
+    <li>
+      <b>The chosen activity is not dedicated, but always comes to
+      the foreground in its initial state</b> - For example, in
+      response to a notification, when the Gmail application comes
+      to the foreground, it always presents the list of conversations.
+      You can ensure this happens by setting a "clear top" flag in the
+      intent that the notification triggers.  This ensures that when the
+      activity is launched, it displays its initial activity, preventing
+      Gmail from coming to the foreground in whatever state the user last
+      happened to be viewing it. (To do this, you put {@link
+      android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP
+      FLAG_ACTIVITY_CLEAR_TOP} in the intent you pass to startActivity()). 
+    </li>
+  </ul>
+
+<p>
+  There are other ways to handle notifications, such as bringing the
+  activity to the foreground, set to display specific data, such as
+  displaying the text message thread for the person who just sent a
+  new text message.
+</p>
+
+<p>
+  A notification always starts an activity as a new task (that is, it
+  puts <font size=1>FLAG_ACTIVITY_NEW_TASK</font> in the intent it
+  passes to startActivity()). This is done because interruptions to a
+  task should not become part of that task.
+</p>
+
+<h3 id=use_notification_tip>Use the notification system &mdash; don't use dialog boxes in place of notifications</h3>
+
+<p>
+  If your background service needs to notify a user, use the standard
+  notification system &mdash; don't use a dialog or toast to notify
+  them. A dialog or toast would immediately take focus and interrupt
+  the user, taking focus away from what they were doing: the user
+  could be in the middle of typing text the moment the dialog appears
+  and could accidentally act on the dialog. Users are used to dealing
+  with notifications and can pull down the notification shade at their
+  convenience to respond to your message.
+</p>
+
+<h3 id=taking_over_back_key>Don't take over the BACK key unless you absolutely need to</h3>
+
+<p>
+  As a user navigates from one activity to the next, the system adds
+  them to the activity stack. This forms a navigation history that is
+  accessible with the BACK key. Most activities are relatively limited
+  in scope, with just one set of data, such as viewing a list of
+  contacts, composing an email, or taking a photo. But what if your
+  application is one big activity with several pages of content and
+  needs finer-grained control of the BACK key? Examples of such Google
+  applications are the Browser, which can have several web pages open
+  at once, and Maps, which can have several layers of geographic data
+  to switch between. Both of these applications take control of the
+  BACK key and maintain their own internal back stacks that operate
+  only when these applications have focus.
+</p>
+
+<p>
+  For example, Maps uses <em>layers</em> to present different
+  information on a map to the user: displaying the location of a
+  search result, displaying locations of friends, and displaying a
+  line for a street path providing direction between points. Maps
+  stores these layers in its own history so the BACK key can return to
+  a previous layer.
+</p>
+
+<p>
+  Similarly, Browser uses <em>browser windows</em> to present different
+  web pages to the user. Each window has its own navigation history,
+  equivalent to tabs in a browser in a desktop operating system (such
+  as Windows, Macintosh or Linux). For example, if you did a Google
+  web search in one window of the Android Browser, clicking on a link
+  in the search results displays a web page in that same window, and
+  then pressing BACK would to the search results page. Pressing
+  BACK goes to a previous window only if the current window was
+  launched from that previous window.  If the user keeps pressing
+  back, they will eventually leave the browser activity and return
+  Home.
+</p>
+

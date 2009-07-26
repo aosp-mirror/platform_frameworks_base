@@ -1,6 +1,25 @@
 page.title=Designing a Remote Interface Using AIDL
 @jd:body
 
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#implementing">Implementing IPC Using AIDL</a>
+    <ol>
+      <li><a href="#aidlsyntax">Create an .aidl File</a></li>
+      <li><a href="#implementtheinterface">Implementing the Interface</a></li>
+      <li><a href="#exposingtheinterface">Exposing Your Interface to Clients</a></li>
+      <li><a href="#parcelable">Pass by value Parameters using Parcelables</a></li>
+    </ol>
+  </li>
+  <li><a href="#calling">Calling an IPC Method</a></li>
+</ol>
+</div>
+</div>
+
+
 <p>Since each application runs in its own process, and you can write a service that
 runs in a different process from your Application's UI, sometimes you need to pass objects
 between processes.  On the Android platform, one process can not normally access the memory
@@ -10,7 +29,7 @@ the operating system can understand, and "marshall" the object across that bound
 <p>The code to do that marshalling is tedious to write, so we provide the AIDL tool to do it
 for you.</p>
 
-<p> AIDL (Android Interface Definition Language) is an <a
+<p>AIDL (Android Interface Definition Language) is an <a
 href="http://en.wikipedia.org/wiki/Interface_description_language">IDL</a>
 language used to generate code that enables two processes on an Android-powered device
 to talk using interprocess communication (IPC). If you have code
@@ -20,12 +39,9 @@ generate code to marshall the parameters.</p>
 <p>The AIDL IPC mechanism
     is interface-based, similar to COM or Corba, but lighter weight. It uses a proxy
     class to pass values between the client and the implementation. </p>
-<p>This page includes the following main topics: </p>
-<ul>
-    <li><a href="#implementing">Implementing  IPC Using AIDL</a></li>
-    <li><a href="#calling">Calling an .aidl (IPC) Class  </a></li>
-</ul>
-<h2>Implementing IPC Using AIDL <a name="implementing"></a></h2>
+
+
+<h2 id="implementing">Implementing IPC Using AIDL</h2>
 <p>Follow these steps to implement an IPC service using AIDL.</p>
 <ol>
     <li><strong><a href="#aidlsyntax">Create your .aidl file</a> </strong>- This
@@ -46,7 +62,8 @@ generate code to marshall the parameters.</p>
         Service.onBind(Intent)} to return an instance of your class that implements your
         interface. </li>
 </ol>
-<h3>Create an .aidl File  <a name="aidlsyntax"></a></h3>
+
+<h3 id="aidlsyntax">Create an .aidl File</h3>
 <p>AIDL is a simple syntax that lets you declare an interface with one or more
     methods, that can take parameters and return values. These parameters and return
     values can be of any type, even other AIDL-generated interfaces.  <em>However, it
@@ -117,7 +134,7 @@ interface IBankAccountService {
     int getCustomerList(in String branch, out String[] customerList);
 }</pre>
 
-<h3>Implementing the Interface <a name="implementtheinterface"></a></h3>
+<h3 id="implementtheinterface">Implementing the Interface</h3>
 <p>AIDL generates an interface file for you with the same name as your .aidl
     file. If you are using the Eclipse plugin, AIDL will automatically be run as part of
     the build process (you don't need to run AIDL first and then build your project).
@@ -152,7 +169,7 @@ private final IRemoteService.Stub mBinder = new IRemoteService.Stub(){
     <li>Only methods are supported; you cannot declare static fields in an AIDL interface.</li>
 </ul>
 
-<h3>Exposing Your Interface to Clients<a name="exposingtheinterface" id="exposingtheinterface"></a></h3>
+<h3 id="exposingtheinterface">Exposing Your Interface to Clients</h3>
 <p>Now that you've got your interface implementation, you need to expose it to clients.
     This is known as &quot;publishing your service.&quot; To publish a service,
     inherit {@link android.app.Service Service} and implement {@link android.app.Service#onBind
@@ -165,8 +182,8 @@ private final IRemoteService.Stub mBinder = new IRemoteService.Stub(){
     exposing_a_service}
 }</pre>
 
-<a name="parcelable"></a>
-<h3>Pass by value Parameters using Parcelables</h3>
+
+<h3 id="parcelable">Pass by value Parameters using Parcelables</h3>
 
 <p>If you have a class that you would like to send from one process to another through
 an AIDL interface, you can do that.  You must ensure that the code for your class is available
@@ -181,25 +198,12 @@ current state of the object and writes it to a parcel.</li>
 value in a parcel into your object.</li>
 <li>Add a static field called <code>CREATOR</code> to your class which is an object implementing
 the {@link android.os.Parcelable.Creator Parcelable.Creator} interface.</li>
-<li>Last but not least:
-<ul>
-<li>If you are developing with Eclipse/ADT, follow these steps:
-<ol type="a">
-<li>In the Package Explorer view, right-click on the project.</li>
-<li>Choose <strong>Android Tools</strong> > <strong>Create Aidl preprocess file
-for Parcelable classes</strong>.</li>
-<li>This will create a file called "project.aidl" in the root of the project.
-The file will be automatically used when compiling an aidl file that uses the
-parcelable classes.</li>
-</ol>
-</li>
-<li>If you are developing with Ant or are using a custom build process, create an aidl file
+<li>Last but not least, create an aidl file
 that declares your parcelable class (as shown below). If you are using a custom build process,
 do not add the aidl file to your build. Similar to a header file in C, the aidl file isn't 
 compiled.</li>
-</ul>
-</li>
-</ul>
+</ol>
+
 <p>AIDL will use these methods and fields in the code it generates to marshall and unmarshall
 your objects.</p>
 <p>Here is an example of how the {@link android.graphics.Rect} class implements the
@@ -269,7 +273,7 @@ values for whatever the caller is trying to do.  See
 <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a> for more
 on how to keep your application secure from malware.</p>
 
-<h2>Calling an IPC Method <a name="calling"></a></h2>
+<h2 id="calling">Calling an IPC Method</h2>
 <p>Here are the steps a calling class should make to call your remote interface: </p>
 <ol>
     <li>Declare a variable of the interface type that your .aidl file defined. </li>

@@ -59,9 +59,15 @@ public final class Formatter {
             result = result / 1024;
         }
         if (result < 100) {
-            return String.format("%.2f%s", result, context.getText(suffix).toString());
+            String value = String.format("%.2f", result);
+            return context.getResources().
+                getString(com.android.internal.R.string.fileSizeSuffix,
+                          value, context.getString(suffix));
         }
-        return String.format("%.0f%s", result, context.getText(suffix).toString());
+        String value = String.format("%.0f", result);
+        return context.getResources().
+            getString(com.android.internal.R.string.fileSizeSuffix,
+                      value, context.getString(suffix));
     }
     
     /**
