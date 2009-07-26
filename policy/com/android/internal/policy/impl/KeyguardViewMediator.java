@@ -16,7 +16,7 @@
 
 package com.android.internal.policy.impl;
 
-import com.android.internal.telephony.SimCard;
+import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LockPatternUtils;
 
 import android.app.AlarmManager;
@@ -40,6 +40,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
+
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -89,7 +90,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     private final static String TAG = "KeyguardViewMediator";
 
-    private static final String DELAYED_KEYGUARD_ACTION = "com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD";
+    private static final String DELAYED_KEYGUARD_ACTION = 
+        "com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD";
 
     // used for handler messages
     private static final int TIMEOUT = 1;
@@ -301,7 +303,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                         0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
                 mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, when,
                         sender);
-                if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = " + mDelayedShowingSequence);
+                if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = " 
+                                 + mDelayedShowingSequence);
             } else {
                 doKeyguard();
             }
@@ -461,8 +464,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             
             // if the setup wizard hasn't run yet, don't show
             final boolean provisioned = mUpdateMonitor.isDeviceProvisioned();
-            final SimCard.State state = mUpdateMonitor.getSimState();
-            final boolean lockedOrMissing = state.isPinLocked() || (state == SimCard.State.ABSENT);
+            final IccCard.State state = mUpdateMonitor.getSimState();
+            final boolean lockedOrMissing = state.isPinLocked() || (state == IccCard.State.ABSENT);
             if (!lockedOrMissing && !provisioned) {
                 if (DEBUG) Log.d(TAG, "doKeyguard: not showing because device isn't provisioned"
                         + " and the sim is not locked or missing");
@@ -576,7 +579,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     }
 
     /** {@inheritDoc} */
-    public void onSimStateChanged(SimCard.State simState) {
+    public void onSimStateChanged(IccCard.State simState) {
         if (DEBUG) Log.d(TAG, "onSimStateChanged: " + simState);
 
         switch (simState) {
@@ -585,7 +588,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 // gone through setup wizard
                 if (!mUpdateMonitor.isDeviceProvisioned()) {
                     if (!isShowing()) {
-                        if (DEBUG) Log.d(TAG, "INTENT_VALUE_SIM_ABSENT and keygaurd isn't showing, we need "
+                        if (DEBUG) Log.d(TAG, "INTENT_VALUE_ICC_ABSENT and keygaurd isn't showing, we need "
                              + "to show the keyguard since the device isn't provisioned yet.");
                         doKeyguard();
                     } else {
@@ -596,7 +599,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             case PIN_REQUIRED:
             case PUK_REQUIRED:
                 if (!isShowing()) {
-                    if (DEBUG) Log.d(TAG, "INTENT_VALUE_SIM_LOCKED and keygaurd isn't showing, we need "
+                    if (DEBUG) Log.d(TAG, "INTENT_VALUE_ICC_LOCKED and keygaurd isn't showing, we need "
                             + "to show the keyguard so the user can enter their sim pin");
                     doKeyguard();
                 } else {
@@ -759,10 +762,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      */
     private Handler mHandler = new Handler() {
         @Override
-        public void handleMessage(Message msg)
-        {
-            switch (msg.what)
-            {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
                 case TIMEOUT:
                     handleTimeout(msg.arg1);
                     return ;
@@ -947,3 +948,5 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         }
     }
 }
+
+

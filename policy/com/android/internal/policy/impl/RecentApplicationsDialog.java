@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -46,22 +47,28 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
     private static final boolean DBG_FORCE_EMPTY_LIST = false;
 
     static private StatusBarManager sStatusBar;
-    
+
     private static final int NUM_BUTTONS = 6;
     private static final int MAX_RECENT_TASKS = NUM_BUTTONS * 2;    // allow for some discards
-    
+
     final View[] mButtons = new View[NUM_BUTTONS];
     View mNoAppsText;
     IntentFilter mBroadcastIntentFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
 
+
+    private int mIconSize;
+
     public RecentApplicationsDialog(Context context) {
         super(context);
+
+        final Resources resources = context.getResources();
+        mIconSize = (int) resources.getDimension(android.R.dimen.app_icon_size);
     }
 
     /**
      * We create the recent applications dialog just once, and it stays around (hidden)
      * until activated by the user.
-     * 
+     *
      * @see PhoneWindowManager#showRecentAppsDialog
      */
     @Override
@@ -81,7 +88,8 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
                 WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
         theWindow.setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        
+        theWindow.setTitle("Recents");
+
         setContentView(com.android.internal.R.layout.recent_apps_dialog);
 
         mButtons[0] = findViewById(com.android.internal.R.id.button1);
@@ -91,7 +99,7 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         mButtons[4] = findViewById(com.android.internal.R.id.button5);
         mButtons[5] = findViewById(com.android.internal.R.id.button6);
         mNoAppsText = findViewById(com.android.internal.R.id.no_applications_message);
-        
+
         for (View b : mButtons) {
             b.setOnClickListener(this);
         }
@@ -101,7 +109,7 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
      * Handler for user clicks.  If a button was clicked, launch the corresponding activity.
      */
     public void onClick(View v) {
-        
+
         for (View b : mButtons) {
             if (b == v) {
                 // prepare a launch intent and send it
@@ -134,7 +142,7 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
     @Override
     public void onStop() {
         super.onStop();
-        
+
         // dump extra memory we're hanging on to
         for (View b : mButtons) {
             setButtonAppearance(b, null, null);
@@ -148,23 +156,23 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         // stop receiving broadcasts
         getContext().unregisterReceiver(mBroadcastReceiver);
      }
-    
+
     /**
      * Reload the 6 buttons with recent activities
      */
     private void reloadButtons() {
-        
+
         final Context context = getContext();
         final PackageManager pm = context.getPackageManager();
-        final ActivityManager am = (ActivityManager) 
+        final ActivityManager am = (ActivityManager)
                                         context.getSystemService(Context.ACTIVITY_SERVICE);
-        final List<ActivityManager.RecentTaskInfo> recentTasks = 
+        final List<ActivityManager.RecentTaskInfo> recentTasks =
                                         am.getRecentTasks(MAX_RECENT_TASKS, 0);
-        
+
         ResolveInfo homeInfo = pm.resolveActivity(
                 new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME),
                 0);
-        
+
         // Performance note:  Our android performance guide says to prefer Iterator when
         // using a List class, but because we know that getRecentTasks() always returns
         // an ArrayList<>, we'll use a simple index instead.
@@ -172,15 +180,15 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         int numTasks = recentTasks.size();
         for (int i = 0; i < numTasks && (button < NUM_BUTTONS); ++i) {
             final ActivityManager.RecentTaskInfo info = recentTasks.get(i);
-            
+
             // for debug purposes only, disallow first result to create empty lists
             if (DBG_FORCE_EMPTY_LIST && (i == 0)) continue;
-            
+
             Intent intent = new Intent(info.baseIntent);
             if (info.origActivity != null) {
                 intent.setComponent(info.origActivity);
             }
-            
+
             // Skip the current home activity.
             if (homeInfo != null) {
                 if (homeInfo.activityInfo.packageName.equals(
@@ -190,7 +198,7 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
                     continue;
                 }
             }
-            
+
             intent.setFlags((intent.getFlags()&~Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
             final ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
@@ -210,35 +218,32 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
                 }
             }
         }
-        
+
         // handle the case of "no icons to show"
         mNoAppsText.setVisibility((button == 0) ? View.VISIBLE : View.GONE);
-        
+
         // hide the rest
         for ( ; button < NUM_BUTTONS; ++button) {
             mButtons[button].setVisibility(View.GONE);
         }
     }
-    
+
     /**
      * Adjust appearance of each icon-button
      */
     private void setButtonAppearance(View theButton, final String theTitle, final Drawable icon) {
-        TextView tv = (TextView) theButton.findViewById(com.android.internal.R.id.label);
+        TextView tv = (TextView) theButton;
         tv.setText(theTitle);
-        ImageView iv = (ImageView) theButton.findViewById(com.android.internal.R.id.icon);
-        iv.setImageDrawable(icon);
+        if (icon != null) {
+            icon.setBounds(0, 0, mIconSize, mIconSize);
+        }
+        tv.setCompoundDrawables(null, icon, null, null);
     }
 
     /**
      * This is the listener for the ACTION_CLOSE_SYSTEM_DIALOGS intent.  It's an indication that
      * we should close ourselves immediately, in order to allow a higher-priority UI to take over
      * (e.g. phone call received).
-     * 
-     * TODO: This is a really heavyweight solution for something that should be so simple.
-     * For example, we already have a handler, in our superclass, why aren't we sharing that?
-     * I think we need to investigate simplifying this entire methodology, or perhaps boosting 
-     * it up into the Dialog class.
      */
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override

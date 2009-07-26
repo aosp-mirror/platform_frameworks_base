@@ -132,8 +132,8 @@ public abstract class KeyguardViewBase extends FrameLayout {
     }
 
     /**
-     * Allows the media keys to work when the keygaurd is showing.
-     * The media keys should be of no interest to the actualy keygaurd view(s),
+     * Allows the media keys to work when the keyguard is showing.
+     * The media keys should be of no interest to the actual keyguard view(s),
      * so intercepting them here should not be of any harm.
      * @param event The key event
      * @return whether the event was consumed as a media key.

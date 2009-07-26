@@ -47,6 +47,7 @@ import com.android.internal.telephony.ITelephony;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
@@ -65,10 +66,12 @@ import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -129,8 +132,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // things in here CAN NOT take focus, but are shown on top of everything else.
     static final int SYSTEM_OVERLAY_LAYER = 14;
 
+    static final int APPLICATION_MEDIA_SUBLAYER = -2;
+    static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
     static final int APPLICATION_PANEL_SUBLAYER = 1;
-    static final int APPLICATION_MEDIA_SUBLAYER = -1;
     static final int APPLICATION_SUB_PANEL_SUBLAYER = 2;
 
     static final float SLIDE_TOUCH_EVENT_SIZE_LIMIT = 0.6f;
@@ -157,7 +161,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     boolean mSafeMode;
     WindowState mStatusBar = null;
-    WindowState mSearchBar = null;
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
     GlobalActions mGlobalActions;
@@ -197,6 +200,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     WindowState mTopFullscreenOpaqueWindowState;
     boolean mForceStatusBar;
+    boolean mHideKeyguard;
     boolean mHomePressed;
     Intent mHomeIntent;
     boolean mSearchKeyPressed;
@@ -207,6 +211,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int DEFAULT_ENDCALL_BEHAVIOR = ENDCALL_SLEEPS;
     int mEndcallBehavior;
     
+    int mLandscapeRotation = -1;
+    int mPortraitRotation = -1;
+
     // Nothing to see here, move along...
     int mFancyRotationAnimation;
 
@@ -214,8 +221,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManager.WakeLock mBroadcastWakeLock;
 
     class SettingsObserver extends ContentObserver {
-        private ContentQueryMap mSettings;
-
         SettingsObserver(Handler handler) {
             super(handler);
         }
@@ -285,6 +290,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mFancyRotationAnimation);
             } catch (RemoteException e) {
                 // Ignore
+
             }
         }                                      
     }
@@ -446,6 +452,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public int checkAddPermission(WindowManager.LayoutParams attrs) {
         int type = attrs.type;
+        
         if (type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
                 || type > WindowManager.LayoutParams.LAST_SYSTEM_WINDOW) {
             return WindowManagerImpl.ADD_OKAY;
@@ -572,6 +579,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return APPLICATION_PANEL_SUBLAYER;
         case TYPE_APPLICATION_MEDIA:
             return APPLICATION_MEDIA_SUBLAYER;
+        case TYPE_APPLICATION_MEDIA_OVERLAY:
+            return APPLICATION_MEDIA_OVERLAY_SUBLAYER;
         case TYPE_APPLICATION_SUB_PANEL:
             return APPLICATION_SUB_PANEL_SUBLAYER;
         }
@@ -695,7 +704,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Currently enforces that three window types are singletons:
      * <ul>
      * <li>STATUS_BAR_TYPE</li>
-     * <li>SEARCH_BAR_TYPE</li>
      * <li>KEYGUARD_TYPE</li>
      * </ul>
      * 
@@ -712,12 +720,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mStatusBar = win;
                 break;
-            case TYPE_SEARCH_BAR:
-                if (mSearchBar != null) {
-                    return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
-                }
-                mSearchBar = win;
-                break;
             case TYPE_KEYGUARD:
                 if (mKeyguard != null) {
                     return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
@@ -732,9 +734,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void removeWindowLw(WindowState win) {
         if (mStatusBar == win) {
             mStatusBar = null;
-        }
-        else if (mSearchBar == win) {
-            mSearchBar = null;
         }
         else if (mKeyguard == win) {
             mKeyguard = null;
@@ -951,6 +950,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mKeyguardMediator.verifyUnlock(new OnKeyguardExitResult() {
                 public void onKeyguardExitResult(boolean success) {
                     if (success) {
+                        try {
+                            ActivityManagerNative.getDefault().stopAppSwitches();
+                        } catch (RemoteException e) {
+                        }
                         mContext.startActivity(mHomeIntent);
                         sendCloseSystemWindows();
                     }
@@ -958,6 +961,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             });
         } else {
             // no keyguard stuff to worry about, just launch home!
+            try {
+                ActivityManagerNative.getDefault().stopAppSwitches();
+            } catch (RemoteException e) {
+            }
             mContext.startActivity(mHomeIntent);
             sendCloseSystemWindows();
         }
@@ -987,6 +994,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mTopFullscreenOpaqueWindowState = null;
         mForceStatusBar = false;
+        mHideKeyguard = false;
         
         // decide where the status bar goes ahead of time
         if (mStatusBar != null) {
@@ -1194,6 +1202,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Fullscreen window: " + win);
                 mTopFullscreenOpaqueWindowState = win;
             }
+            if ((attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
+                // TODO Add a check for the window to be full screen
+                if (localLOGV) Log.i(TAG, "Setting mHideKeyguard to true by win " + win);
+                mHideKeyguard = true;
+            }
         }
         
         // Dock windows carve out the bottom of the screen, so normal windows
@@ -1241,6 +1254,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
                     changed |= mStatusBar.showLw(true);
                 }
+            }
+        }
+        // Hide the key guard if a visible window explicitly specifies that it wants to be displayed
+        // when the screen is locked
+        if (mKeyguard != null) {
+            if (localLOGV) Log.i(TAG, "finishLayoutLw::mHideKeyguard="+mHideKeyguard);
+            if (mHideKeyguard) {
+                changed |= mKeyguard.hideLw(true);
+            } else {
+                changed |= mKeyguard.showLw(true);
             }
         }
         
@@ -1694,14 +1717,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     public int rotationForOrientationLw(int orientation, int lastRotation,
             boolean displayEnabled) {
+
+        if (mPortraitRotation < 0) {
+            // Initialize the rotation angles for each orientation once.
+            Display d = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
+                    .getDefaultDisplay();
+            if (d.getWidth() > d.getHeight()) {
+                mPortraitRotation = Surface.ROTATION_90;
+                mLandscapeRotation = Surface.ROTATION_0;
+            } else {
+                mPortraitRotation = Surface.ROTATION_0;
+                mLandscapeRotation = Surface.ROTATION_90;
+            }
+        }
+
         synchronized (mLock) {
             switch (orientation) {
                 case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
                     //always return landscape if orientation set to landscape
-                    return Surface.ROTATION_90;
+                    return mLandscapeRotation;
                 case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
                     //always return portrait if orientation set to portrait
-                    return Surface.ROTATION_0;
+                    return mPortraitRotation;
             }
             // case for nosensor meaning ignore sensor and consider only lid
             // or orientation sensor disabled
@@ -1782,11 +1819,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean goHome() {
         if (false) {
             // This code always brings home to the front.
+            try {
+                ActivityManagerNative.getDefault().stopAppSwitches();
+            } catch (RemoteException e) {
+            }
             mContext.startActivity(mHomeIntent);
         } else {
             // This code brings home to the front or, if it is already
             // at the front, puts the device to sleep.
             try {
+                ActivityManagerNative.getDefault().stopAppSwitches();
                 int result = ActivityManagerNative.getDefault()
                         .startActivity(null, mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
@@ -1831,3 +1873,4 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 }
+
