@@ -922,7 +922,7 @@ public final class ContactsContract {
              * <p>
              * Type: TEXT
              */
-            public static final String NEIGHBOHOOD = "data8";
+            public static final String NEIGHBORHOOD = "data8";
 
             /**
              * Can be city, village, town, borough, etc. This is the postal town
@@ -950,7 +950,7 @@ public final class ContactsContract {
             public static final String REGION = "data11";
 
             /**
-             * StructuredPostal code. Usually country-wide, but sometimes specific to the
+             * Postal code. Usually country-wide, but sometimes specific to the
              * city (e.g. "2" in "Dublin 2, Ireland" addresses).
              * <p>
              * Type: TEXT
