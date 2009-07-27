@@ -48,6 +48,13 @@ static JMetricsID gFontMetrics_fieldID;
 static jclass   gFontMetricsInt_class;
 static JMetricsID gFontMetricsInt_fieldID;
 
+static void defaultSettingsForAndroid(SkPaint* paint) {
+    // looks best we decided
+    paint->setHinting(SkPaint::kSlight_Hinting);
+    // utf16 is required for java
+    paint->setTextEncoding(SkPaint::kUTF16_TextEncoding);
+}
+
 class SkPaintGlue {
 public:
 
@@ -57,8 +64,7 @@ public:
 
     static SkPaint* init(JNIEnv* env, jobject clazz) {
         SkPaint* obj = new SkPaint();
-        // utf16 is required for java
-        obj->setTextEncoding(SkPaint::kUTF16_TextEncoding);
+        defaultSettingsForAndroid(obj);
         return obj;
     }
 
@@ -69,8 +75,7 @@ public:
  
     static void reset(JNIEnv* env, jobject clazz, SkPaint* obj) {
         obj->reset();
-        // utf16 is required for java
-        obj->setTextEncoding(SkPaint::kUTF16_TextEncoding);
+        defaultSettingsForAndroid(obj);
     }
  
     static void assign(JNIEnv* env, jobject clazz, SkPaint* dst, const SkPaint* src) {
