@@ -109,7 +109,9 @@ public class TtsService extends Service implements OnCompletionListener {
             mFilename = file;
         }
     }
-
+    // If the speech queue is locked for more than 5 seconds, something has gone
+    // very wrong with processSpeechQueue.
+    private static final int SPEECHQUEUELOCK_TIMEOUT = 5000;
     private static final int MAX_SPEECH_ITEM_CHAR_LENGTH = 4000;
     private static final int MAX_FILENAME_LENGTH = 250;
     // TODO use the TTS stream type when available
@@ -389,9 +391,8 @@ public class TtsService extends Service implements OnCompletionListener {
         int result = TextToSpeech.TTS_ERROR;
         boolean speechQueueAvailable = false;
         try{
-            // If the queue is locked for more than 1 second,
-            // something has gone very wrong with processSpeechQueue.
-            speechQueueAvailable = speechQueueLock.tryLock(1000, TimeUnit.MILLISECONDS);
+            speechQueueAvailable =
+                    speechQueueLock.tryLock(SPEECHQUEUELOCK_TIMEOUT, TimeUnit.MILLISECONDS);
             if (speechQueueAvailable) {
                 Log.i("TtsService", "Stopping");
                 for (int i = mSpeechQueue.size() - 1; i > -1; i--){
@@ -439,9 +440,8 @@ public class TtsService extends Service implements OnCompletionListener {
         int result = TextToSpeech.TTS_ERROR;
         boolean speechQueueAvailable = false;
         try{
-            // If the queue is locked for more than 1 second,
-            // something has gone very wrong with processSpeechQueue.
-            speechQueueAvailable = speechQueueLock.tryLock(1000, TimeUnit.MILLISECONDS);
+            speechQueueAvailable =
+                    speechQueueLock.tryLock(SPEECHQUEUELOCK_TIMEOUT, TimeUnit.MILLISECONDS);
             if (speechQueueAvailable) {
                 for (int i = mSpeechQueue.size() - 1; i > -1; i--){
                     if (mSpeechQueue.get(i).mType != SpeechItem.TEXT_TO_FILE){
@@ -752,8 +752,10 @@ public class TtsService extends Service implements OnCompletionListener {
     private void processSpeechQueue() {
         boolean speechQueueAvailable = false;
         try {
-            speechQueueAvailable = speechQueueLock.tryLock();
+            speechQueueAvailable =
+                    speechQueueLock.tryLock(SPEECHQUEUELOCK_TIMEOUT, TimeUnit.MILLISECONDS);
             if (!speechQueueAvailable) {
+                Log.e("TtsService", "processSpeechQueue - Speech queue is unavailable.");
                 return;
             }
             if (mSpeechQueue.size() < 1) {
@@ -822,6 +824,9 @@ public class TtsService extends Service implements OnCompletionListener {
             if (mSpeechQueue.size() > 0) {
                 mSpeechQueue.remove(0);
             }
+        } catch (InterruptedException e) {
+          Log.e("TtsService", "TTS processSpeechQueue: tryLock interrupted");
+          e.printStackTrace();
         } finally {
             // This check is needed because finally will always run; even if the
             // method returns somewhere in the try block.
