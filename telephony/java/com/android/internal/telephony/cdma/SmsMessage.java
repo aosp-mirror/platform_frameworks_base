@@ -584,38 +584,6 @@ public class SmsMessage extends SmsMessageBase {
         }
     }
 
-    private static CdmaSmsAddress parseCdmaSmsAddr(String addrStr) {
-        // see C.S0015-B, v2.0, 3.4.3.3
-        CdmaSmsAddress addr = new CdmaSmsAddress();
-        addr.digitMode = CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF;
-        try {
-            addr.origBytes = addrStr.getBytes("UTF-8");
-            for (int index = 0; index < addr.origBytes.length; index++) {
-                if (addr.origBytes[index] >= '0' && addr.origBytes[index] <= '9') {
-                    if (addr.origBytes[index] == '0') {
-                        addr.origBytes[index] = 10;
-                    } else {
-                        addr.origBytes[index] -= '0';
-                    }
-                } else if (addr.origBytes[index] == '*') {
-                    addr.origBytes[index] = 11;
-                } else if (addr.origBytes[index] == '#') {
-                    addr.origBytes[index] = 12;
-                } else {
-                    return null;
-                }
-            }
-        } catch  (java.io.UnsupportedEncodingException ex) {
-            Log.e(LOG_TAG, "CDMA address parsing failed: " + ex);
-            return null;
-        }
-        addr.numberOfDigits = (byte)addr.origBytes.length;
-        addr.numberMode = CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK;
-        addr.numberPlan = CdmaSmsAddress.NUMBERING_PLAN_ISDN_TELEPHONY;
-        addr.ton = CdmaSmsAddress.TON_UNKNOWN;
-        return addr;
-    }
-
     /**
      * Set the nextMessageId to a random value between 0 and 65536
      * See C.S0015-B, v2.0, 4.3.1.5
@@ -642,7 +610,13 @@ public class SmsMessage extends SmsMessageBase {
          * TODO(cleanup): give this function a more meaningful name.
          */
 
-        CdmaSmsAddress destAddr = parseCdmaSmsAddr(destAddrStr);
+        /**
+         * TODO(cleanup): Make returning null from the getSubmitPdu
+         * variations meaningful -- clean up the error feedback
+         * mechanism, and avoid null pointer exceptions.
+         */
+
+        CdmaSmsAddress destAddr = CdmaSmsAddress.parse(destAddrStr);
         if (destAddr == null) return null;
 
         BearerData bearerData = new BearerData();

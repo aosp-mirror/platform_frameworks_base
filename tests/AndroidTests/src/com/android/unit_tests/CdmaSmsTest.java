@@ -38,6 +38,67 @@ public class CdmaSmsTest extends AndroidTestCase {
     private final static String LOG_TAG = "CDMA";
 
     @SmallTest
+    public void testCdmaSmsAddrParsing() throws Exception {
+        CdmaSmsAddress addr = CdmaSmsAddress.parse("6502531000");
+        assertEquals(addr.ton, CdmaSmsAddress.TON_UNKNOWN);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 10);
+        assertEquals(addr.origBytes.length, 10);
+        byte[] data = {6, 5, 10, 2, 5, 3, 1, 10, 10, 10};
+        for (int i = 0; i < data.length; i++) {
+            assertEquals(addr.origBytes[i], data[i]);
+        }
+        addr = CdmaSmsAddress.parse("(650) 253-1000");
+        assertEquals(addr.ton, CdmaSmsAddress.TON_UNKNOWN);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 10);
+        assertEquals(addr.origBytes.length, 10);
+        byte[] data2 = {6, 5, 10, 2, 5, 3, 1, 10, 10, 10};
+        for (int i = 0; i < data2.length; i++) {
+            assertEquals(addr.origBytes[i], data2[i]);
+        }
+        addr = CdmaSmsAddress.parse("(+886) 917 222 555");
+        assertEquals(addr.ton, CdmaSmsAddress.TON_INTERNATIONAL_OR_IP);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 12);
+        assertEquals(addr.origBytes.length, 12);
+        byte[] data3 = {8, 8, 6, 9, 1, 7, 2, 2, 2, 5, 5, 5};
+        for (int i = 0; i < data3.length; i++) {
+            assertEquals(addr.origBytes[i], data3[i]);
+        }
+        addr = CdmaSmsAddress.parse("(650) *253-1000 #600");
+        byte[] data4 = {6, 5, 10, 11, 2, 5, 3, 1, 10, 10, 10, 12, 6, 10, 10};
+        for (int i = 0; i < data4.length; i++) {
+            assertEquals(addr.origBytes[i], data4[i]);
+        }
+        String input = "x@y.com,a@b.com";
+        addr = CdmaSmsAddress.parse(input);
+        assertEquals(addr.ton, CdmaSmsAddress.TON_NATIONAL_OR_EMAIL);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 15);
+        assertEquals(addr.origBytes.length, 15);
+        assertEquals(new String(addr.origBytes), input);
+        addr = CdmaSmsAddress.parse("foo bar");
+        assertEquals(addr.ton, CdmaSmsAddress.TON_UNKNOWN);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 6);
+        assertEquals(addr.origBytes.length, 6);
+        assertEquals(new String(addr.origBytes), "foobar");
+        addr = CdmaSmsAddress.parse("f\noo\tb   a\rr");
+        assertEquals(new String(addr.origBytes), "foobar");
+        assertEquals(CdmaSmsAddress.parse("f\u0000oo bar"), null);
+        assertEquals(CdmaSmsAddress.parse("f\u0007oo bar"), null);
+        assertEquals(CdmaSmsAddress.parse("f\u0080oo bar"), null);
+        assertEquals(CdmaSmsAddress.parse("f\u1ECFboo\u001fbar"), null);
+        assertEquals(CdmaSmsAddress.parse("f\u0080oo bar"), null);
+    }
+
+    @SmallTest
     public void testUserData7bitGsm() throws Exception {
         String pdu = "00031040900112488ea794e074d69e1b7392c270326cde9e98";
         BearerData bearerData = BearerData.decode(HexDump.hexStringToByteArray(pdu));

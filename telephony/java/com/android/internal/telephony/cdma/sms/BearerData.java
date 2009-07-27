@@ -624,6 +624,12 @@ public final class BearerData {
         return rawData;
     }
 
+    /*
+     * TODO(cleanup): CdmaSmsAddress encoding should make use of
+     * CdmaSmsAddress.parse provided that DTMF encoding is unified,
+     * and the difference in 4bit vs 8bit is resolved.
+     */
+
     private static void encodeCdmaSmsAddress(CdmaSmsAddress addr) throws CodingException {
         if (addr.digitMode == CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR) {
             try {
