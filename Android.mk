@@ -444,7 +444,8 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		$(web_docs_sample_code_flags) \
 		-toroot / \
-		-hdf android.whichdoc online
+		-hdf android.whichdoc online \
+		-hdf template.showLanguageMenu true
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
