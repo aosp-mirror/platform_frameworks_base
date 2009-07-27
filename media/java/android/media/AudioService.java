@@ -680,31 +680,28 @@ public class AudioService extends IAudioService.Stub {
         for (int streamType = 0; streamType < numStreamTypes; streamType++) {
             VolumeStreamState streamState = mStreamStates[streamType];
 
-            // there is no volume setting for STREAM_BLUETOOTH_SCO
-            if (streamType != AudioSystem.STREAM_BLUETOOTH_SCO) {
-                String settingName = System.VOLUME_SETTINGS[streamType];
-                String lastAudibleSettingName = settingName + System.APPEND_FOR_LAST_AUDIBLE;
-                int index = Settings.System.getInt(mContentResolver,
-                                               settingName,
-                                               AudioManager.DEFAULT_STREAM_VOLUME[streamType]);
-                if (STREAM_VOLUME_ALIAS[streamType] != streamType) {
-                    index = rescaleIndex(index * 10, STREAM_VOLUME_ALIAS[streamType], streamType);
-                } else {
-                    index *= 10;
-                }
-                streamState.mIndex = streamState.getValidIndex(index);
-
-                index = (index + 5) / 10;
-                index = Settings.System.getInt(mContentResolver,
-                                                lastAudibleSettingName,
-                                                (index > 0) ? index : AudioManager.DEFAULT_STREAM_VOLUME[streamType]);
-                if (STREAM_VOLUME_ALIAS[streamType] != streamType) {
-                    index = rescaleIndex(index * 10, STREAM_VOLUME_ALIAS[streamType], streamType);
-                } else {
-                    index *= 10;
-                }
-                streamState.mLastAudibleIndex = streamState.getValidIndex(index);
+            String settingName = System.VOLUME_SETTINGS[STREAM_VOLUME_ALIAS[streamType]];
+            String lastAudibleSettingName = settingName + System.APPEND_FOR_LAST_AUDIBLE;
+            int index = Settings.System.getInt(mContentResolver,
+                                           settingName,
+                                           AudioManager.DEFAULT_STREAM_VOLUME[streamType]);
+            if (STREAM_VOLUME_ALIAS[streamType] != streamType) {
+                index = rescaleIndex(index * 10, STREAM_VOLUME_ALIAS[streamType], streamType);
+            } else {
+                index *= 10;
             }
+            streamState.mIndex = streamState.getValidIndex(index);
+
+            index = (index + 5) / 10;
+            index = Settings.System.getInt(mContentResolver,
+                                            lastAudibleSettingName,
+                                            (index > 0) ? index : AudioManager.DEFAULT_STREAM_VOLUME[streamType]);
+            if (STREAM_VOLUME_ALIAS[streamType] != streamType) {
+                index = rescaleIndex(index * 10, STREAM_VOLUME_ALIAS[streamType], streamType);
+            } else {
+                index *= 10;
+            }
+            streamState.mLastAudibleIndex = streamState.getValidIndex(index);
 
             // unmute stream that whas muted but is not affect by mute anymore
             if (streamState.muteCount() != 0 && !isStreamAffectedByMute(streamType)) {
