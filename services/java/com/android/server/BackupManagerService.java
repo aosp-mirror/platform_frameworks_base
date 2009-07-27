@@ -201,7 +201,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 Settings.Secure.BACKUP_ENABLED, 0) != 0;
         // !!! TODO: mProvisioned needs to default to 0, not 1.
         mProvisioned = Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.BACKUP_PROVISIONED, 1) != 0;
+                Settings.Secure.BACKUP_PROVISIONED, 0) != 0;
         mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
         mDataDir = Environment.getDownloadCacheDirectory();
 
