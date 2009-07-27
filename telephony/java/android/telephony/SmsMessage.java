@@ -278,8 +278,8 @@ public class SmsMessage {
     public static int[] calculateLength(CharSequence msgBody, boolean use7bitOnly) {
         int activePhone = TelephonyManager.getDefault().getPhoneType();
         TextEncodingDetails ted = (PHONE_TYPE_CDMA == activePhone) ?
-            com.android.internal.telephony.gsm.SmsMessage.calculateLength(msgBody, use7bitOnly) :
-            com.android.internal.telephony.cdma.SmsMessage.calculateLength(msgBody, use7bitOnly);
+            com.android.internal.telephony.cdma.SmsMessage.calculateLength(msgBody, use7bitOnly) :
+            com.android.internal.telephony.gsm.SmsMessage.calculateLength(msgBody, use7bitOnly);
         int ret[] = new int[4];
         ret[0] = ted.msgCount;
         ret[1] = ted.codeUnitCount;
@@ -299,8 +299,8 @@ public class SmsMessage {
     public static ArrayList<String> fragmentText(String text) {
         int activePhone = TelephonyManager.getDefault().getPhoneType();
         TextEncodingDetails ted = (PHONE_TYPE_CDMA == activePhone) ?
-            com.android.internal.telephony.gsm.SmsMessage.calculateLength(text, false) :
-            com.android.internal.telephony.cdma.SmsMessage.calculateLength(text, false);
+            com.android.internal.telephony.cdma.SmsMessage.calculateLength(text, false) :
+            com.android.internal.telephony.gsm.SmsMessage.calculateLength(text, false);
 
         // TODO(cleanup): The code here could be rolled into the logic
         // below cleanly if these MAX_* constants were defined more
@@ -321,11 +321,8 @@ public class SmsMessage {
         while (pos < textLen) {
             int nextPos = 0;  // Counts code units.
             if (ted.codeUnitSize == ENCODING_7BIT) {
-                if (PHONE_TYPE_CDMA == activePhone) {
-                    nextPos = pos + Math.min(limit, textLen - pos);
-                } else {
-                    nextPos = GsmAlphabet.findGsmSeptetLimitIndex(text, pos, limit);
-                }
+                // For multi-segment messages, CDMA 7bit equals GSM 7bit encoding (EMS mode).
+                nextPos = GsmAlphabet.findGsmSeptetLimitIndex(text, pos, limit);
             } else {  // Assume unicode.
                 nextPos = pos + Math.min(limit / 2, textLen - pos);
             }
