@@ -1215,13 +1215,6 @@ public class SearchManager
                 = "DialogCursorProtocol.POST_REFRESH.displayNotify";
 
         /**
-         * Just before closing the cursor.
-         */
-        public final static int PRE_CLOSE = 1;
-        public final static String PRE_CLOSE_SEND_MAX_DISPLAY_POS
-                = "DialogCursorProtocol.PRE_CLOSE.sendDisplayPosition";
-
-        /**
          * When a position has been clicked.
          */
         public final static int CLICK = 2;
