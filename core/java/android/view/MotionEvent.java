@@ -509,7 +509,7 @@ public final class MotionEvent implements Parcelable {
         ev.mYPrecision = o.mYPrecision;
         
         final int NT = ev.mNumSamples = o.mNumSamples;
-        if (ev.mTimeSamples.length < NT) {
+        if (ev.mTimeSamples.length >= NT) {
             System.arraycopy(o.mTimeSamples, 0, ev.mTimeSamples, 0, NT);
         } else {
             ev.mTimeSamples = (long[])o.mTimeSamples.clone();
