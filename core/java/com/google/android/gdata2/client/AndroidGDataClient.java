@@ -464,7 +464,7 @@ public class AndroidGDataClient implements GDataClient {
                                    GDataSerializer entry)
         throws HttpException, IOException {
         HttpEntity entity = createEntityForEntry(entry, GDataSerializer.FORMAT_UPDATE);
-        final String method = entry.doesSupportPartial() ? "PATCH" : "PUT";
+        final String method = entry.getSupportsPartial() ? "PATCH" : "PUT";
         InputStream in = createAndExecuteMethod(
                 new PostRequestCreator(method, entity),
                 editUri,
