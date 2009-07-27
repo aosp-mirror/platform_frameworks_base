@@ -18,18 +18,11 @@
 */
 -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
-    <ImageView android:id="@+id/zoom_fit_page" 
-        android:background="@android:drawable/btn_browser_zoom_fit_page"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
-        android:layout_marginLeft="7dip"
-        />
     <ImageView android:id="@+id/zoom_page_overview" 
         android:background="@android:drawable/btn_browser_zoom_page_overview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:layout_marginRight="7dip"
+        android:layout_gravity="bottom|left"
+        android:layout_marginLeft="7dip"
         />
 </merge>
