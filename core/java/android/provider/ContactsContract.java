@@ -315,7 +315,7 @@ public final class ContactsContract {
 
     }
 
-    private interface ContactsColumns {
+    private interface RawContactsColumns {
         /**
          * A reference to the {@link Aggregates#_ID} that this data belongs to.
          * <P>Type: INTEGER</P>
@@ -323,7 +323,7 @@ public final class ContactsContract {
         public static final String AGGREGATE_ID = "aggregate_id";
 
         /**
-         * Flag indicating that this {@link Contacts} entry and its children has
+         * Flag indicating that this {@link RawContacts} entry and its children has
          * been restricted to specific platform apps.
          * <P>Type: INTEGER (boolean)</P>
          *
@@ -339,14 +339,17 @@ public final class ContactsContract {
     }
 
     /**
-     * Constants for the contacts table, which contains the base contact information.
+     * Constants for the raw_contacts table, which contains the base contact
+     * information per sync source. Sync adapters and contact management apps
+     * are the primary consumers of this API.
      */
-    public static final class Contacts implements BaseColumns, ContactsColumns, SyncColumns,
-            ContactOptionsColumns {
+    // TODO make final as soon as renaming is complete
+    public static /*final*/ class RawContacts implements BaseColumns, RawContactsColumns,
+            SyncColumns, ContactOptionsColumns {
         /**
          * This utility class cannot be instantiated
          */
-        private Contacts() {
+        private RawContacts() {
         }
 
         /**
@@ -409,6 +412,13 @@ public final class ContactsContract {
              */
             public static final String CONTENT_DIRECTORY = "data";
         }
+    }
+
+    /**
+     * TODO remove as soon as full renaming is complete.
+     */
+    @Deprecated
+    public static final class Contacts extends RawContacts {
     }
 
     private interface DataColumns {
