@@ -25,7 +25,7 @@ import java.io.IOException;
  * connection.
  */
 class L2tpIpsecPskService extends VpnService<L2tpIpsecPskProfile> {
-    private static final String IPSEC_DAEMON = "racoon";
+    private static final String IPSEC = "racoon";
 
     @Override
     protected void connect(String serverIp, String username, String password)
@@ -33,9 +33,9 @@ class L2tpIpsecPskService extends VpnService<L2tpIpsecPskProfile> {
         L2tpIpsecPskProfile p = getProfile();
 
         // IPSEC
-        AndroidServiceProxy ipsecService = startService(IPSEC_DAEMON);
-        ipsecService.sendCommand(serverIp, L2tpService.L2TP_PORT,
-                p.getPresharedKey());
+        DaemonProxy ipsec = startDaemon(IPSEC);
+        ipsec.sendCommand(serverIp, L2tpService.L2TP_PORT, p.getPresharedKey());
+        ipsec.closeControlSocket();
 
         sleep(2000); // 2 seconds
 

@@ -24,7 +24,7 @@ import java.util.Arrays;
  * A helper class for sending commands to the MTP daemon (mtpd).
  */
 class MtpdHelper {
-    private static final String MTPD_SERVICE = "mtpd";
+    private static final String MTPD = "mtpd";
     private static final String VPN_LINKNAME = "vpn";
     private static final String PPP_ARGS_SEPARATOR = "";
 
@@ -37,7 +37,7 @@ class MtpdHelper {
         args.add(PPP_ARGS_SEPARATOR);
         addPppArguments(vpnService, args, serverIp, username, password);
 
-        AndroidServiceProxy mtpd = vpnService.startService(MTPD_SERVICE);
+        DaemonProxy mtpd = vpnService.startDaemon(MTPD);
         mtpd.sendCommand(args.toArray(new String[args.size()]));
     }
 
