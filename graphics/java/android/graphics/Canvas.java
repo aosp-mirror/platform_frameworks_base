@@ -49,7 +49,7 @@ public class Canvas {
     private DrawFilter  mDrawFilter;
 
     // Package-scoped for quick access.
-    /*package*/ int mDensity = DisplayMetrics.DENSITY_DEFAULT;
+    /*package*/ int mDensity = Bitmap.DENSITY_NONE;
     
     // Used by native code
     @SuppressWarnings({"UnusedDeclaration"})
@@ -57,7 +57,9 @@ public class Canvas {
 
     /**
      * Construct an empty raster canvas. Use setBitmap() to specify a bitmap to
-     * draw into.
+     * draw into.  The initial target density is {@link Bitmap#DENSITY_NONE};
+     * this will typically be replaced when a target bitmap is set for the
+     * canvas.
      */
     public Canvas() {
         // 0 means no native bitmap
@@ -67,6 +69,9 @@ public class Canvas {
     /**
      * Construct a canvas with the specified bitmap to draw into. The bitmap
      * must be mutable.
+     * 
+     * <p>The initial target density of the canvas is the same as the given
+     * bitmap's density.
      *
      * @param bitmap Specifies a mutable bitmap for the canvas to draw into.
      */
@@ -78,9 +83,7 @@ public class Canvas {
         throwIfRecycled(bitmap);
         mNativeCanvas = initRaster(bitmap.ni());
         mBitmap = bitmap;
-        final int density = bitmap.mDensity;
-        mDensity = density == Bitmap.DENSITY_NONE
-                ? DisplayMetrics.DENSITY_DEFAULT : density;
+        mDensity = bitmap.mDensity;
     }
     
     /*package*/ Canvas(int nativeCanvas) {
@@ -88,6 +91,7 @@ public class Canvas {
             throw new IllegalStateException();
         }
         mNativeCanvas = nativeCanvas;
+        mDensity = Bitmap.getDefaultDensity();
     }
     
     /**
@@ -96,10 +100,14 @@ public class Canvas {
      * be supported in this mode (e.g. some GL implementations may not support
      * antialiasing or certain effects like ColorMatrix or certain Xfermodes).
      * However, no exception will be thrown in those cases.
+     * 
+     * <p>The initial target density of the canvas is the same as the initial
+     * density of bitmaps as per {@link Bitmap#getDensity() Bitmap.getDensity()}.
      */
     public Canvas(GL gl) {
         mNativeCanvas = initGL();
         mGL = gl;
+        mDensity = Bitmap.getDefaultDensity();
     }
     
     /**
@@ -120,9 +128,13 @@ public class Canvas {
     }
         
     /**
-     * Specify a bitmap for the canvas to draw into.
+     * Specify a bitmap for the canvas to draw into.  As a side-effect, also
+     * updates the canvas's target density to match that of the bitmap.
      *
      * @param bitmap Specifies a mutable bitmap for the canvas to draw into.
+     * 
+     * @see #setDensity(int)
+     * @see #getDensity()
      */
     public void setBitmap(Bitmap bitmap) {
         if (!bitmap.isMutable()) {
@@ -135,9 +147,7 @@ public class Canvas {
 
         native_setBitmap(mNativeCanvas, bitmap.ni());
         mBitmap = bitmap;
-        final int density = bitmap.mDensity;
-        mDensity = density == Bitmap.DENSITY_NONE
-                ? DisplayMetrics.DENSITY_DEFAULT : density;
+        mDensity = bitmap.mDensity;
     }
     
     /**
@@ -176,12 +186,12 @@ public class Canvas {
     public native int getHeight();
 
     /**
-     * <p>Returns the density for this Canvas' backing bitmap.</p>
+     * <p>Returns the target density of the canvas.  The default density is
+     * derived from the density of its backing bitmap, or
+     * {@link Bitmap#DENSITY_NONE} if there is not one.</p>
      *
-     * <p>The default density scale is {@link Bitmap#DENSITY_NONE}.</p>
-     *
-     * @return A scaling factor of the default density (160dpi) or
-     *        {@link Bitmap#DENSITY_NONE} if the scaling factor is unknown.
+     * @return Returns the current target density of the canvas, which is used
+     * to determine the scaling factor when drawing a bitmap into it.
      *
      * @see #setDensity(int)
      * @see Bitmap#getDensity() 
@@ -191,10 +201,13 @@ public class Canvas {
     }
 
     /**
-     * <p>Specifies the density for this Canvas' backing bitmap.
+     * <p>Specifies the density for this Canvas' backing bitmap.  This modifies
+     * the target density of the canvas itself, as well as the density of its
+     * backing bitmap via {@link Bitmap#setDensity(int) Bitmap.setDensity(int)}.
      *
-     * @param density The density scaling factor to use with this bitmap or
-     *        {@link Bitmap#DENSITY_NONE} if the factor is unknown.
+     * @param density The new target density of the canvas, which is used
+     * to determine the scaling factor when drawing a bitmap into it.  Use
+     * {@link Bitmap#DENSITY_NONE} to disable bitmap scaling.
      *
      * @see #getDensity()
      * @see Bitmap#setDensity(int) 
