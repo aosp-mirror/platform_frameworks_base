@@ -561,9 +561,8 @@ public class RequestQueue implements RequestFeeder {
 
         if (mNetworkConnected && mPending.containsKey(host)) {
             LinkedList<Request> reqList = mPending.get(host);
-            if (!reqList.isEmpty()) {
-                ret = reqList.removeFirst();
-            } else {
+            ret = reqList.removeFirst();
+            if (reqList.isEmpty()) {
                 mPending.remove(host);
             }
         }
@@ -624,9 +623,8 @@ public class RequestQueue implements RequestFeeder {
         if (iter.hasNext()) {
             Map.Entry<HttpHost, LinkedList<Request>> entry = iter.next();
             LinkedList<Request> reqList = entry.getValue();
-            if (!reqList.isEmpty()) {
-                ret = reqList.removeFirst();
-            } else {
+            ret = reqList.removeFirst();
+            if (reqList.isEmpty()) {
                 requestQueue.remove(entry.getKey());
             }
         }
