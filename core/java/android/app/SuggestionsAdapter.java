@@ -274,7 +274,9 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         final Bundle request = new Bundle(1);
         request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.CLICK);
         request.putInt(DialogCursorProtocol.CLICK_SEND_POSITION, position);
+        request.putInt(DialogCursorProtocol.CLICK_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
         final Bundle response = cursor.respond(request);
+        mMaxDisplayed = -1;
         mListItemToSelect = response.getInt(
                 DialogCursorProtocol.CLICK_RECEIVE_SELECTED_POS, SuggestionsAdapter.NONE);
     }

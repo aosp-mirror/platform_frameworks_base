@@ -1227,6 +1227,8 @@ public class SearchManager
         public final static int CLICK = 2;
         public final static String CLICK_SEND_POSITION
                 = "DialogCursorProtocol.CLICK.sendPosition";
+        public final static String CLICK_SEND_MAX_DISPLAY_POS
+                = "DialogCursorProtocol.CLICK.sendDisplayPosition";
         public final static String CLICK_RECEIVE_SELECTED_POS
                 = "DialogCursorProtocol.CLICK.receiveSelectedPosition";
 
