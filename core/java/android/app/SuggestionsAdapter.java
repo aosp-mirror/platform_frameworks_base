@@ -194,10 +194,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     public void changeCursor(Cursor c) {
         if (DBG) Log.d(LOG_TAG, "changeCursor(" + c + ")");
 
-        if (mCursor != null) {
-            callCursorPreClose(mCursor);
-        }
-
         try {
             super.changeCursor(c);
             if (c != null) {
@@ -211,22 +207,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         } catch (Exception e) {
             Log.e(LOG_TAG, "error changing cursor and caching columns", e);
         }
-    }
-
-    /**
-     * Handle sending and receiving information associated with
-     * {@link DialogCursorProtocol#PRE_CLOSE}.
-     *
-     * @param cursor The cursor to call.
-     */
-    private void callCursorPreClose(Cursor cursor) {
-        if (!mGlobalSearchMode) return;
-        final Bundle request = new Bundle();
-        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.PRE_CLOSE);
-        request.putInt(DialogCursorProtocol.PRE_CLOSE_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
-        final Bundle response = cursor.respond(request);
-
-        mMaxDisplayed = -1;
     }
 
     @Override
