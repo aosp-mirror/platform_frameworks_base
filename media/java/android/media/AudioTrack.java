@@ -181,9 +181,14 @@ public class AudioTrack
      */
     private int mSampleRate = 22050;
     /**
-     * The number of input audio channels (1 is mono, 2 is stereo).
+     * The number of audio output channels (1 is mono, 2 is stereo).
      */
     private int mChannelCount = 1;
+    /**
+     * The audio channel mask.
+     */
+    private int mChannels = AudioFormat.CHANNEL_OUT_MONO;
+
     /**
      * The type of the audio stream to play. See
      *   {@link AudioManager#STREAM_VOICE_CALL}, {@link AudioManager#STREAM_SYSTEM},
@@ -266,7 +271,7 @@ public class AudioTrack
 
         // native initialization
         int initResult = native_setup(new WeakReference<AudioTrack>(this),
-                mStreamType, mSampleRate, mChannelCount, mAudioFormat,
+                mStreamType, mSampleRate, mChannels, mAudioFormat,
                 mNativeBufferSizeInBytes, mDataLoadMode);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
@@ -286,6 +291,7 @@ public class AudioTrack
     // postconditions:
     //    mStreamType is valid
     //    mChannelCount is valid
+    //    mChannels is valid
     //    mAudioFormat is valid
     //    mSampleRate is valid
     //    mDataLoadMode is valid
@@ -316,19 +322,24 @@ public class AudioTrack
 
         //--------------
         // channel config
+        mChannelConfiguration = channelConfig;
+
         switch (channelConfig) {
-        case AudioFormat.CHANNEL_OUT_DEFAULT:
+        case AudioFormat.CHANNEL_OUT_DEFAULT: //AudioFormat.CHANNEL_CONFIGURATION_DEFAULT
         case AudioFormat.CHANNEL_OUT_MONO:
+        case AudioFormat.CHANNEL_CONFIGURATION_MONO:
             mChannelCount = 1;
-            mChannelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
+            mChannels = AudioFormat.CHANNEL_OUT_MONO;
             break;
         case AudioFormat.CHANNEL_OUT_STEREO:
+        case AudioFormat.CHANNEL_CONFIGURATION_STEREO:
             mChannelCount = 2;
-            mChannelConfiguration = AudioFormat.CHANNEL_OUT_STEREO;
+            mChannels = AudioFormat.CHANNEL_OUT_STEREO;
             break;
         default:
             mChannelCount = 0;
-            mChannelConfiguration = AudioFormat.CHANNEL_INVALID;
+            mChannels = AudioFormat.CHANNEL_INVALID;
+            mChannelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_INVALID;
             throw(new IllegalArgumentException("Unsupported channel configuration."));
         }
 
@@ -546,9 +557,11 @@ public class AudioTrack
         int channelCount = 0;
         switch(channelConfig) {
         case AudioFormat.CHANNEL_OUT_MONO:
+        case AudioFormat.CHANNEL_CONFIGURATION_MONO:
             channelCount = 1;
             break;
         case AudioFormat.CHANNEL_OUT_STEREO:
+        case AudioFormat.CHANNEL_CONFIGURATION_STEREO:
             channelCount = 2;
             break;
         default:

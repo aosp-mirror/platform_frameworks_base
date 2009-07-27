@@ -133,6 +133,10 @@ public class AudioRecord
      */
     private int mChannelCount = 1;
     /**
+     * The audio channel mask
+     */
+    private int mChannels = AudioFormat.CHANNEL_IN_MONO;
+    /**
      * The current audio channel configuration
      */
     private int mChannelConfiguration = AudioFormat.CHANNEL_IN_MONO;
@@ -224,7 +228,7 @@ public class AudioRecord
         //TODO: update native initialization when information about hardware init failure
         //      due to capture device already open is available.
         int initResult = native_setup( new WeakReference<AudioRecord>(this), 
-                mRecordSource, mSampleRate, mChannelCount, mAudioFormat, mNativeBufferSizeInBytes);
+                mRecordSource, mSampleRate, mChannels, mAudioFormat, mNativeBufferSizeInBytes);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing native AudioRecord object.");
             return; // with mState == STATE_UNINITIALIZED
@@ -239,6 +243,7 @@ public class AudioRecord
     // postconditions:
     //    mRecordSource is valid
     //    mChannelCount is valid
+    //    mChannels is valid
     //    mAudioFormat is valid
     //    mSampleRate is valid
     private void audioParamCheck(int audioSource, int sampleRateInHz, 
@@ -264,20 +269,25 @@ public class AudioRecord
 
         //--------------
         // channel config
+        mChannelConfiguration = channelConfig;
+
         switch (channelConfig) {
-        case AudioFormat.CHANNEL_IN_DEFAULT:
+        case AudioFormat.CHANNEL_IN_DEFAULT: // AudioFormat.CHANNEL_CONFIGURATION_DEFAULT
         case AudioFormat.CHANNEL_IN_MONO:
+        case AudioFormat.CHANNEL_CONFIGURATION_MONO:
             mChannelCount = 1;
-            mChannelConfiguration = AudioFormat.CHANNEL_IN_MONO;
+            mChannels = AudioFormat.CHANNEL_IN_MONO;
             break;
         case AudioFormat.CHANNEL_IN_STEREO:
+        case AudioFormat.CHANNEL_CONFIGURATION_STEREO:
             mChannelCount = 2;
-            mChannelConfiguration = AudioFormat.CHANNEL_IN_STEREO;
+            mChannels = AudioFormat.CHANNEL_IN_STEREO;
             break;
         default:
             mChannelCount = 0;
-        mChannelConfiguration = AudioFormat.CHANNEL_INVALID;
-        throw (new IllegalArgumentException("Unsupported channel configuration."));
+            mChannels = AudioFormat.CHANNEL_INVALID;
+            mChannelConfiguration = AudioFormat.CHANNEL_INVALID;
+            throw (new IllegalArgumentException("Unsupported channel configuration."));
         }
 
         //--------------
@@ -438,11 +448,13 @@ public class AudioRecord
     static public int getMinBufferSize(int sampleRateInHz, int channelConfig, int audioFormat) {
         int channelCount = 0;
         switch(channelConfig) {
-        case AudioFormat.CHANNEL_IN_DEFAULT:
+        case AudioFormat.CHANNEL_IN_DEFAULT: // AudioFormat.CHANNEL_CONFIGURATION_DEFAULT
         case AudioFormat.CHANNEL_IN_MONO:
+        case AudioFormat.CHANNEL_CONFIGURATION_MONO:
             channelCount = 1;
             break;
         case AudioFormat.CHANNEL_IN_STEREO:
+        case AudioFormat.CHANNEL_CONFIGURATION_STEREO:
             channelCount = 2;
             break;
         case AudioFormat.CHANNEL_INVALID:
