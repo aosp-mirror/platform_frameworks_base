@@ -545,7 +545,6 @@ public class WebView extends AbsoluteLayout
 
     private ZoomButtonsController mZoomButtonsController; 
     private ImageView mZoomOverviewButton;
-    private ImageView mZoomFitPageButton;
 
     // These keep track of the center point of the zoom.  They are used to
     // determine the point around which we should zoom.
@@ -617,6 +616,16 @@ public class WebView extends AbsoluteLayout
         // Create the buttons controller
         mZoomButtonsController = new ZoomButtonsController(this);
         mZoomButtonsController.setOnZoomListener(mZoomListener);
+        // ZoomButtonsController positions the buttons at the bottom, but in
+        // the middle.  Change their layout parameters so they appear on the
+        // right.
+        View controls = mZoomButtonsController.getZoomControls();
+        ViewGroup.LayoutParams params = controls.getLayoutParams();
+        if (params instanceof FrameLayout.LayoutParams) {
+            FrameLayout.LayoutParams frameParams = (FrameLayout.LayoutParams)
+                    params;
+            frameParams.gravity = Gravity.RIGHT;
+        }
 
         // Create the accessory buttons
         LayoutInflater inflater =
@@ -636,15 +645,6 @@ public class WebView extends AbsoluteLayout
                     }
                 }
             });
-        mZoomFitPageButton =
-                (ImageView) container.findViewById(com.android.internal.R.id.zoom_fit_page);
-        mZoomFitPageButton.setOnClickListener(
-            new View.OnClickListener() {
-                public void onClick(View v) {
-                    zoomWithPreview(mDefaultScale);
-                    updateZoomButtonsEnabled();
-                }
-            });
     }
 
     private void updateZoomButtonsEnabled() {
@@ -654,17 +654,14 @@ public class WebView extends AbsoluteLayout
             // Hide the zoom in and out buttons, as well as the fit to page
             // button, if the page cannot zoom
             mZoomButtonsController.getZoomControls().setVisibility(View.GONE);
-            mZoomFitPageButton.setVisibility(View.GONE);
         } else {
             // Bring back the hidden zoom controls.
             mZoomButtonsController.getZoomControls()
                     .setVisibility(View.VISIBLE);
-            mZoomFitPageButton.setVisibility(View.VISIBLE);
             // Set each one individually, as a page may be able to zoom in
             // or out.
             mZoomButtonsController.setZoomInEnabled(canZoomIn);
             mZoomButtonsController.setZoomOutEnabled(canZoomOut);
-            mZoomFitPageButton.setEnabled(mActualScale != mDefaultScale);
         }
         mZoomOverviewButton.setVisibility(canZoomScrollOut() ? View.VISIBLE:
                 View.GONE);
