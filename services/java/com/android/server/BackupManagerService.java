@@ -46,6 +46,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -90,6 +92,20 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int MSG_RUN_FULL_BACKUP = 2;
     private static final int MSG_RUN_RESTORE = 3;
     private static final int MSG_RUN_CLEAR = 4;
+
+    // Event tags -- see system/core/logcat/event-log-tags
+    private static final int BACKUP_DATA_CHANGED_EVENT = 2820;
+    private static final int BACKUP_START_EVENT = 2821;
+    private static final int BACKUP_TRANSPORT_FAILURE_EVENT = 2822;
+    private static final int BACKUP_AGENT_FAILURE_EVENT = 2823;
+    private static final int BACKUP_PACKAGE_EVENT = 2824;
+    private static final int BACKUP_SUCCESS_EVENT = 2825;
+
+    private static final int RESTORE_START_EVENT = 2830;
+    private static final int RESTORE_TRANSPORT_FAILURE_EVENT = 2831;
+    private static final int RESTORE_AGENT_FAILURE_EVENT = 2832;
+    private static final int RESTORE_PACKAGE_EVENT = 2833;
+    private static final int RESTORE_SUCCESS_EVENT = 2834;
 
     // Timeout interval for deciding that a bind or clear-data has taken too long
     static final long TIMEOUT_INTERVAL = 10 * 1000;
@@ -820,43 +836,49 @@ class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void run() {
+            long startRealtime = SystemClock.elapsedRealtime();
             if (DEBUG) Log.v(TAG, "Beginning backup of " + mQueue.size() + " targets");
 
             // Backups run at background priority
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-            // The package manager doesn't have a proper <application> etc, but since
-            // it's running here in the system process we can just set up its agent
-            // directly and use a synthetic BackupRequest.  We always run this pass
-            // because it's cheap and this way we guarantee that we don't get out of
-            // step even if we're selecting among various transports at run time.
-            PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
-                    mPackageManager, allAgentPackages());
-            BackupRequest pmRequest = new BackupRequest(new ApplicationInfo(), false);
-            pmRequest.appInfo.packageName = PACKAGE_MANAGER_SENTINEL;
-            processOneBackup(pmRequest,
-                    IBackupAgent.Stub.asInterface(pmAgent.onBind()),
-                    mTransport);
-
-            // Now run all the backups in our queue
-            doQueuedBackups(mTransport);
-
-            // Finally, tear down the transport
             try {
-                if (!mTransport.finishBackup()) {
-                    // STOPSHIP TODO: handle errors
-                    Log.e(TAG, "Backup failure in finishBackup()");
+                EventLog.writeEvent(BACKUP_START_EVENT, mTransport.transportDirName());
+
+                // The package manager doesn't have a proper <application> etc, but since
+                // it's running here in the system process we can just set up its agent
+                // directly and use a synthetic BackupRequest.  We always run this pass
+                // because it's cheap and this way we guarantee that we don't get out of
+                // step even if we're selecting among various transports at run time.
+                PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
+                        mPackageManager, allAgentPackages());
+                BackupRequest pmRequest = new BackupRequest(new ApplicationInfo(), false);
+                pmRequest.appInfo.packageName = PACKAGE_MANAGER_SENTINEL;
+                processOneBackup(pmRequest,
+                        IBackupAgent.Stub.asInterface(pmAgent.onBind()), mTransport);
+
+                // Now run all the backups in our queue
+                int count = mQueue.size();
+                doQueuedBackups(mTransport);
+
+                // Finally, tear down the transport
+                if (mTransport.finishBackup()) {
+                    int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
+                    EventLog.writeEvent(BACKUP_SUCCESS_EVENT, count, millis);
+                } else {
+                    EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, "");
+                    Log.e(TAG, "Transport error in finishBackup()");
                 }
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error in finishBackup()", e);
-            }
 
-            if (!mJournal.delete()) {
-                Log.e(TAG, "Unable to remove backup journal file " + mJournal.getAbsolutePath());
+                if (!mJournal.delete()) {
+                    Log.e(TAG, "Unable to remove backup journal file " + mJournal);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in backup thread", e);
+            } finally {
+                // Only once we're entirely finished do we release the wakelock
+                mWakelock.release();
             }
-
-            // Only once we're entirely finished do we release the wakelock
-            mWakelock.release();
         }
 
         private void doQueuedBackups(IBackupTransport transport) {
@@ -882,19 +904,27 @@ class BackupManagerService extends IBackupManager.Stub {
                     Log.v(TAG, "bind/backup threw");
                     e.printStackTrace();
                 }
-
             }
         }
 
         void processOneBackup(BackupRequest request, IBackupAgent agent, IBackupTransport transport) {
             final String packageName = request.appInfo.packageName;
-            Log.d(TAG, "processOneBackup doBackup() on " + packageName);
+            if (DEBUG) Log.d(TAG, "processOneBackup doBackup() on " + packageName);
 
+            // !!! TODO: get the state file dir from the transport
+            File savedStateName = new File(mStateDir, packageName);
+            File backupDataName = new File(mDataDir, packageName + ".data");
+            File newStateName = new File(mStateDir, packageName + ".new");
+
+            ParcelFileDescriptor savedState = null;
+            ParcelFileDescriptor backupData = null;
+            ParcelFileDescriptor newState = null;
+
+            PackageInfo packInfo;
             try {
                 // Look up the package info & signatures.  This is first so that if it
                 // throws an exception, there's no file setup yet that would need to
                 // be unraveled.
-                PackageInfo packInfo;
                 if (packageName.equals(PACKAGE_MANAGER_SENTINEL)) {
                     // The metadata 'package' is synthetic
                     packInfo = new PackageInfo();
@@ -904,69 +934,65 @@ class BackupManagerService extends IBackupManager.Stub {
                         PackageManager.GET_SIGNATURES);
                 }
 
-                // !!! TODO: get the state file dir from the transport
-                File savedStateName = new File(mStateDir, packageName);
-                File backupDataName = new File(mDataDir, packageName + ".data");
-                File newStateName = new File(mStateDir, packageName + ".new");
-
                 // In a full backup, we pass a null ParcelFileDescriptor as
                 // the saved-state "file"
-                ParcelFileDescriptor savedState = (request.fullBackup) ? null
-                        : ParcelFileDescriptor.open(savedStateName,
+                if (!request.fullBackup) {
+                    savedState = ParcelFileDescriptor.open(savedStateName,
                             ParcelFileDescriptor.MODE_READ_ONLY |
-                            ParcelFileDescriptor.MODE_CREATE);
+                            ParcelFileDescriptor.MODE_CREATE);  // Make an empty file if necessary
+                }
 
-                backupDataName.delete();
-                ParcelFileDescriptor backupData =
-                        ParcelFileDescriptor.open(backupDataName,
-                                ParcelFileDescriptor.MODE_READ_WRITE |
-                                ParcelFileDescriptor.MODE_CREATE);
+                backupData = ParcelFileDescriptor.open(backupDataName,
+                        ParcelFileDescriptor.MODE_READ_WRITE |
+                        ParcelFileDescriptor.MODE_CREATE |
+                        ParcelFileDescriptor.MODE_TRUNCATE);
 
-                newStateName.delete();
-                ParcelFileDescriptor newState =
-                        ParcelFileDescriptor.open(newStateName,
-                                ParcelFileDescriptor.MODE_READ_WRITE |
-                                ParcelFileDescriptor.MODE_CREATE);
+                newState = ParcelFileDescriptor.open(newStateName,
+                        ParcelFileDescriptor.MODE_READ_WRITE |
+                        ParcelFileDescriptor.MODE_CREATE |
+                        ParcelFileDescriptor.MODE_TRUNCATE);
 
                 // Run the target's backup pass
-                boolean success = false;
-                try {
-                    agent.doBackup(savedState, backupData, newState);
-                    logBackupComplete(packageName);
-                    success = true;
-                } finally {
-                    if (savedState != null) {
-                        savedState.close();
-                    }
-                    backupData.close();
-                    newState.close();
-                }
-
-                // Now propagate the newly-backed-up data to the transport
-                if (success) {
-                    if (DEBUG) Log.v(TAG, "doBackup() success");
-                    if (backupDataName.length() > 0) {
-                        backupData =
-                            ParcelFileDescriptor.open(backupDataName,
-                                    ParcelFileDescriptor.MODE_READ_ONLY);
-                        if (!transport.performBackup(packInfo, backupData)) {
-                            // STOPSHIP TODO: handle errors
-                            Log.e(TAG, "Backup failure in performBackup()");
-                        }
-                    } else {
-                        if (DEBUG) {
-                            Log.i(TAG, "no backup data written; not calling transport");
-                        }
-                    }
-
-                    // After successful transport, delete the now-stale data
-                    // and juggle the files so that next time we supply the agent
-                    // with the new state file it just created.
-                    backupDataName.delete();
-                    newStateName.renameTo(savedStateName);
-                }
+                agent.doBackup(savedState, backupData, newState);
+                logBackupComplete(packageName);
+                if (DEBUG) Log.v(TAG, "doBackup() success");
             } catch (Exception e) {
                 Log.e(TAG, "Error backing up " + packageName, e);
+                EventLog.writeEvent(BACKUP_AGENT_FAILURE_EVENT, packageName, e.toString());
+                backupDataName.delete();
+                newStateName.delete();
+                return;
+            } finally {
+                try { if (savedState != null) savedState.close(); } catch (IOException e) {}
+                try { if (backupData != null) backupData.close(); } catch (IOException e) {}
+                try { if (newState != null) newState.close(); } catch (IOException e) {}
+                savedState = backupData = newState = null;
+            }
+
+            // Now propagate the newly-backed-up data to the transport
+            try {
+                int size = (int) backupDataName.length();
+                if (size > 0) {
+                    backupData = ParcelFileDescriptor.open(backupDataName,
+                            ParcelFileDescriptor.MODE_READ_ONLY);
+
+                    if (!transport.performBackup(packInfo, backupData)) throw new Exception();
+                } else {
+                    if (DEBUG) Log.i(TAG, "no backup data written; not calling transport");
+                }
+
+                // After successful transport, delete the now-stale data
+                // and juggle the files so that next time we supply the agent
+                // with the new state file it just created.
+                backupDataName.delete();
+                newStateName.renameTo(savedStateName);
+                EventLog.writeEvent(BACKUP_PACKAGE_EVENT, packageName, size);
+            } catch (Exception e) {
+                Log.e(TAG, "Transport error backing up " + packageName, e);
+                EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, packageName);
+                return;
+            } finally {
+                try { if (backupData != null) backupData.close(); } catch (IOException e) {}
             }
         }
     }
@@ -1012,7 +1038,6 @@ class BackupManagerService extends IBackupManager.Stub {
         private IBackupTransport mTransport;
         private IRestoreObserver mObserver;
         private long mToken;
-        private RestoreSet mImage;
         private File mStateDir;
 
         class RestoreRequest {
@@ -1042,6 +1067,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void run() {
+            long startRealtime = SystemClock.elapsedRealtime();
             if (DEBUG) Log.v(TAG, "Beginning restore process mTransport=" + mTransport
                     + " mObserver=" + mObserver + " mToken=" + mToken);
             /**
@@ -1049,7 +1075,7 @@ class BackupManagerService extends IBackupManager.Stub {
              *
              * 1. get the restore set description for our identity
              * 2. for each app in the restore set:
-             *    3.a. if it's restorable on this device, add it to the restore queue
+             *    2.a. if it's restorable on this device, add it to the restore queue
              * 3. for each app in the restore queue:
              *    3.a. clear the app data
              *    3.b. get the restore data for the app from the transport
@@ -1057,25 +1083,18 @@ class BackupManagerService extends IBackupManager.Stub {
              *    3.d. agent.doRestore() with the data from the server
              *    3.e. unbind the agent [and kill the app?]
              * 4. shut down the transport
+             *
+             * On errors, we try our best to recover and move on to the next
+             * application, but if necessary we abort the whole operation --
+             * the user is waiting, after al.
              */
 
             int error = -1; // assume error
 
             // build the set of apps to restore
             try {
-                RestoreSet[] images = mTransport.getAvailableRestoreSets();
-                if (images == null) {
-                    // STOPSHIP TODO: Handle the failure somehow?
-                    Log.e(TAG, "Error getting restore sets");
-                    return;
-                }
-
-                if (images.length == 0) {
-                    Log.i(TAG, "No restore sets available");
-                    return;
-                }
-
-                mImage = images[0];
+                // TODO: Log this before getAvailableRestoreSets, somehow
+                EventLog.writeEvent(RESTORE_START_EVENT, mTransport.transportDirName());
 
                 // Get the list of all packages which have backup enabled.
                 // (Include the Package Manager metadata pseudo-package first.)
@@ -1100,22 +1119,26 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 if (!mTransport.startRestore(mToken, restorePackages.toArray(new PackageInfo[0]))) {
-                    // STOPSHIP TODO: Handle the failure somehow?
                     Log.e(TAG, "Error starting restore operation");
+                    EventLog.writeEvent(RESTORE_TRANSPORT_FAILURE_EVENT);
                     return;
                 }
 
                 String packageName = mTransport.nextRestorePackage();
                 if (packageName == null) {
-                    // STOPSHIP TODO: Handle the failure somehow?
                     Log.e(TAG, "Error getting first restore package");
+                    EventLog.writeEvent(RESTORE_TRANSPORT_FAILURE_EVENT);
                     return;
                 } else if (packageName.equals("")) {
                     Log.i(TAG, "No restore data available");
+                    int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
+                    EventLog.writeEvent(RESTORE_SUCCESS_EVENT, 0, millis);
                     return;
                 } else if (!packageName.equals(PACKAGE_MANAGER_SENTINEL)) {
                     Log.e(TAG, "Expected restore data for \"" + PACKAGE_MANAGER_SENTINEL
                           + "\", found only \"" + packageName + "\"");
+                    EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, PACKAGE_MANAGER_SENTINEL,
+                            "Package manager data missing");
                     return;
                 }
 
@@ -1128,23 +1151,25 @@ class BackupManagerService extends IBackupManager.Stub {
                 // signature/version verification etc, so we simply do not proceed with
                 // the restore operation.
                 if (!pmAgent.hasMetadata()) {
-                    Log.i(TAG, "No restore metadata available, so not restoring settings");
+                    Log.e(TAG, "No restore metadata available, so not restoring settings");
+                    EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, PACKAGE_MANAGER_SENTINEL,
+                            "Package manager restore metadata missing");
                     return;
                 }
 
                 int count = 0;
                 for (;;) {
                     packageName = mTransport.nextRestorePackage();
+
                     if (packageName == null) {
-                        // STOPSHIP TODO: Handle the failure somehow?
                         Log.e(TAG, "Error getting next restore package");
+                        EventLog.writeEvent(RESTORE_TRANSPORT_FAILURE_EVENT);
                         return;
                     } else if (packageName.equals("")) {
                         break;
                     }
 
                     if (mObserver != null) {
-                        ++count;
                         try {
                             mObserver.onUpdate(count);
                         } catch (RemoteException e) {
@@ -1156,21 +1181,34 @@ class BackupManagerService extends IBackupManager.Stub {
                     Metadata metaInfo = pmAgent.getRestoredMetadata(packageName);
                     if (metaInfo == null) {
                         Log.e(TAG, "Missing metadata for " + packageName);
+                        EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName,
+                                "Package metadata missing");
                         continue;
                     }
 
-                    int flags = PackageManager.GET_SIGNATURES;
-                    PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName, flags);
+                    PackageInfo packageInfo;
+                    try {
+                        int flags = PackageManager.GET_SIGNATURES;
+                        packageInfo = mPackageManager.getPackageInfo(packageName, flags);
+                    } catch (NameNotFoundException e) {
+                        Log.e(TAG, "Invalid package restoring data", e);
+                        EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName,
+                                "Package missing on device");
+                        continue;
+                    }
+
                     if (metaInfo.versionCode > packageInfo.versionCode) {
-                        Log.w(TAG, "Package " + packageName
-                                + " restore version [" + metaInfo.versionCode
-                                + "] is too new for installed version ["
-                                + packageInfo.versionCode + "]");
+                        String message = "Version " + metaInfo.versionCode
+                                + " > installed version " + packageInfo.versionCode;
+                        Log.w(TAG, "Package " + packageName + ": " + message);
+                        EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName, message);
                         continue;
                     }
 
                     if (!signaturesMatch(metaInfo.signatures, packageInfo.signatures)) {
                         Log.w(TAG, "Signature mismatch restoring " + packageName);
+                        EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName,
+                                "Signature mismatch");
                         continue;
                     }
 
@@ -1186,11 +1224,14 @@ class BackupManagerService extends IBackupManager.Stub {
                             IApplicationThread.BACKUP_MODE_RESTORE);
                     if (agent == null) {
                         Log.w(TAG, "Can't find backup agent for " + packageName);
+                        EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName,
+                                "Restore agent missing");
                         continue;
                     }
 
                     try {
                         processOneRestore(packageInfo, metaInfo.versionCode, agent);
+                        ++count;
                     } finally {
                         // unbind even on timeout or failure, just in case
                         mActivityManager.unbindBackupAgent(packageInfo.applicationInfo);
@@ -1199,20 +1240,18 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 // if we get this far, report success to the observer
                 error = 0;
-            } catch (NameNotFoundException e) {
-                // STOPSHIP TODO: Handle the failure somehow?
-                Log.e(TAG, "Invalid paackage restoring data", e);
-            } catch (RemoteException e) {
-                // STOPSHIP TODO: Handle the failure somehow?
-                Log.e(TAG, "Error restoring data", e);
+                int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
+                EventLog.writeEvent(RESTORE_SUCCESS_EVENT, count, millis);
+            } catch (Exception e) {
+                Log.e(TAG, "Error in restore thread", e);
             } finally {
+                if (DEBUG) Log.d(TAG, "finishing restore mObserver=" + mObserver);
+
                 try {
                     mTransport.finishRestore();
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error finishing restore", e);
                 }
-
-                Log.d(TAG, "finishing restore mObserver=" + mObserver);
 
                 if (mObserver != null) {
                     try {
@@ -1232,57 +1271,58 @@ class BackupManagerService extends IBackupManager.Stub {
             // !!! TODO: actually run the restore through mTransport
             final String packageName = app.packageName;
 
-            Log.d(TAG, "processOneRestore packageName=" + packageName);
+            if (DEBUG) Log.d(TAG, "processOneRestore packageName=" + packageName);
 
             // !!! TODO: get the dirs from the transport
             File backupDataName = new File(mDataDir, packageName + ".restore");
-            backupDataName.delete();
-            try {
-                ParcelFileDescriptor backupData =
-                    ParcelFileDescriptor.open(backupDataName,
-                            ParcelFileDescriptor.MODE_READ_WRITE |
-                            ParcelFileDescriptor.MODE_CREATE);
+            File newStateName = new File(mStateDir, packageName + ".new");
+            File savedStateName = new File(mStateDir, packageName);
 
+            ParcelFileDescriptor backupData = null;
+            ParcelFileDescriptor newState = null;
+
+            try {
                 // Run the transport's restore pass
-                // Run the target's backup pass
-                try {
-                    if (!mTransport.getRestoreData(backupData)) {
-                        // STOPSHIP TODO: Handle this error somehow?
-                        Log.e(TAG, "Error getting restore data for " + packageName);
-                        return;
-                    }
-                } finally {
-                    backupData.close();
+                backupData = ParcelFileDescriptor.open(backupDataName,
+                            ParcelFileDescriptor.MODE_READ_WRITE |
+                            ParcelFileDescriptor.MODE_CREATE |
+                            ParcelFileDescriptor.MODE_TRUNCATE);
+
+                if (!mTransport.getRestoreData(backupData)) {
+                    Log.e(TAG, "Error getting restore data for " + packageName);
+                    EventLog.writeEvent(RESTORE_TRANSPORT_FAILURE_EVENT);
+                    return;
                 }
 
                 // Okay, we have the data.  Now have the agent do the restore.
-                File newStateName = new File(mStateDir, packageName + ".new");
-                ParcelFileDescriptor newState =
-                    ParcelFileDescriptor.open(newStateName,
-                            ParcelFileDescriptor.MODE_READ_WRITE |
-                            ParcelFileDescriptor.MODE_CREATE);
-
+                backupData.close();
                 backupData = ParcelFileDescriptor.open(backupDataName,
                             ParcelFileDescriptor.MODE_READ_ONLY);
 
-                try {
-                    agent.doRestore(backupData, appVersionCode, newState);
-                } finally {
-                    newState.close();
-                    backupData.close();
-                }
+                newState = ParcelFileDescriptor.open(newStateName,
+                            ParcelFileDescriptor.MODE_READ_WRITE |
+                            ParcelFileDescriptor.MODE_CREATE |
+                            ParcelFileDescriptor.MODE_TRUNCATE);
+
+                agent.doRestore(backupData, appVersionCode, newState);
 
                 // if everything went okay, remember the recorded state now
-                File savedStateName = new File(mStateDir, packageName);
                 newStateName.renameTo(savedStateName);
+                int size = (int) backupDataName.length();
+                EventLog.writeEvent(RESTORE_PACKAGE_EVENT, packageName, size);
             } catch (Exception e) {
+                Log.e(TAG, "Error restoring data for " + packageName, e);
+                EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName, e.toString());
+
                 // If the agent fails restore, it might have put the app's data
                 // into an incoherent state.  For consistency we wipe its data
                 // again in this case before propagating the exception
-                Log.e(TAG, "Error restoring data for " + packageName, e);
                 clearApplicationDataSynchronous(packageName);
             } finally {
                 backupDataName.delete();
+                try { if (backupData != null) backupData.close(); } catch (IOException e) {}
+                try { if (newState != null) newState.close(); } catch (IOException e) {}
+                backupData = newState = null;
             }
         }
     }
@@ -1328,6 +1368,7 @@ class BackupManagerService extends IBackupManager.Stub {
         // Record that we need a backup pass for the caller.  Since multiple callers
         // may share a uid, we need to note all candidates within that uid and schedule
         // a backup pass for each of them.
+        EventLog.writeEvent(BACKUP_DATA_CHANGED_EVENT, packageName);
 
         // If the caller does not hold the BACKUP permission, it can only request a
         // backup of its own data.
@@ -1635,6 +1676,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     Log.w(TAG, "Null transport getting restore sets");
                 } else if (mRestoreSets == null) { // valid transport; do the one-time fetch
                     mRestoreSets = mRestoreTransport.getAvailableRestoreSets();
+                    if (mRestoreSets == null) EventLog.writeEvent(RESTORE_TRANSPORT_FAILURE_EVENT);
                 }
                 return mRestoreSets;
             }
