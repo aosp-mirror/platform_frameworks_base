@@ -336,6 +336,18 @@ public final class ContactsContract {
          * <P>Type: INTEGER</P>
          */
         public static final String AGGREGATION_MODE = "aggregation_mode";
+
+        /**
+         * The "deleted" flag: "0" by default, "1" if the row has been marked
+         * for deletion. When {@link android.content.ContentResolver#delete} is
+         * called on a contact, it is marked for deletion and removed from its
+         * aggregate. The sync adaptor deletes the contact on the server and
+         * then calls ContactResolver.delete once more, this time passing the
+         * {@link android.provider.ContactsContract.Contacts#DELETE_PERMANENTLY}
+         * query parameter to finalize the data removal.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DELETED = "deleted";
     }
 
     /**
@@ -378,6 +390,14 @@ public final class ContactsContract {
          * person.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/person";
+
+        /**
+         * Query parameter that can be passed with the {@link #CONTENT_URI} URI
+         * to the {@link android.content.ContentResolver#delete} method to
+         * indicate that the raw contact can be deleted physically, rather than
+         * merely marked as deleted.
+         */
+        public static final String DELETE_PERMANENTLY = "delete_permanently";
 
         /**
          * Aggregation mode: aggregate asynchronously.
