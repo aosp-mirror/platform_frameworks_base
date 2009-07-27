@@ -23,14 +23,11 @@ import android.app.ISearchManager;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.server.search.SearchableInfo;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.util.AndroidRuntimeException;
 
 /**
  * To launch this test from the command line:
@@ -98,22 +95,6 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
                 ServiceManager.getService(Context.SEARCH_SERVICE));
     }
 
-    // Checks that the search UI is visible.
-    private void assertSearchVisible() {
-        SearchManager searchManager = (SearchManager)
-                mContext.getSystemService(Context.SEARCH_SERVICE);
-        assertTrue("SearchManager thinks search UI isn't visible when it should be",
-                searchManager.isVisible());
-    }
-
-    // Checks that the search UI is not visible.
-    private void assertSearchNotVisible() {
-        SearchManager searchManager = (SearchManager)
-                mContext.getSystemService(Context.SEARCH_SERVICE);
-        assertFalse("SearchManager thinks search UI is visible when it shouldn't be",
-                searchManager.isVisible());
-    }
-
     /**
      * The goal of this test is to confirm that we can obtain
      * a search manager interface.
@@ -157,57 +138,34 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
     }
 
     /**
-     * Tests that rapid calls to start-stop-start doesn't cause problems.
-     */
-    @MediumTest
-    public void testSearchManagerFastInvocations() throws Exception {
-         SearchManager searchManager = (SearchManager)
-                 mContext.getSystemService(Context.SEARCH_SERVICE);
-         assertNotNull(searchManager);
-         assertSearchNotVisible();
-
-         searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
-         assertSearchVisible();
-         searchManager.stopSearch();
-         searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
-         searchManager.stopSearch();
-         assertSearchNotVisible();
-    }
-
-    /**
-     * Tests that startSearch() is idempotent.
+     * Tests that startSearch() can be called multiple times without stopSearch()
+     * in between.
      */
     @MediumTest
     public void testStartSearchIdempotent() throws Exception {
          SearchManager searchManager = (SearchManager)
                  mContext.getSystemService(Context.SEARCH_SERVICE);
          assertNotNull(searchManager);
-         assertSearchNotVisible();
 
          searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
          searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
-         assertSearchVisible();
          searchManager.stopSearch();
-         assertSearchNotVisible();
     }
 
     /**
-     * Tests that stopSearch() is idempotent and can be called when the search UI is not visible.
+     * Tests that stopSearch() can be called when the search UI is not visible and can be
+     * called multiple times without startSearch() in between.
      */
     @MediumTest
     public void testStopSearchIdempotent() throws Exception {
          SearchManager searchManager = (SearchManager)
                  mContext.getSystemService(Context.SEARCH_SERVICE);
          assertNotNull(searchManager);
-         assertSearchNotVisible();
          searchManager.stopSearch();
-         assertSearchNotVisible();
 
          searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
-         assertSearchVisible();
          searchManager.stopSearch();
          searchManager.stopSearch();
-         assertSearchNotVisible();
     }
 
     /**
@@ -219,28 +177,19 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
         SearchManager searchManager = (SearchManager)
                 mContext.getSystemService(Context.SEARCH_SERVICE);
         assertNotNull(searchManager);
-        assertSearchNotVisible();
 
         // These tests should simply run to completion w/o exceptions
         searchManager.startSearch(null, false, SEARCHABLE_ACTIVITY, null, false);
-        assertSearchVisible();
         searchManager.stopSearch();
-        assertSearchNotVisible();
 
         searchManager.startSearch("", false, SEARCHABLE_ACTIVITY, null, false);
-        assertSearchVisible();
         searchManager.stopSearch();
-        assertSearchNotVisible();
 
         searchManager.startSearch("test search string", false, SEARCHABLE_ACTIVITY, null, false);
-        assertSearchVisible();
         searchManager.stopSearch();
-        assertSearchNotVisible();
 
         searchManager.startSearch("test search string", true, SEARCHABLE_ACTIVITY, null, false);
-        assertSearchVisible();
         searchManager.stopSearch();
-        assertSearchNotVisible();
     }
 
 }
