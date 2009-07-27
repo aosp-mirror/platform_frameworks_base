@@ -340,10 +340,10 @@ public final class ContactsContract {
         /**
          * The "deleted" flag: "0" by default, "1" if the row has been marked
          * for deletion. When {@link android.content.ContentResolver#delete} is
-         * called on a contact, it is marked for deletion and removed from its
-         * aggregate. The sync adaptor deletes the contact on the server and
+         * called on a raw contact, it is marked for deletion and removed from its
+         * aggregate. The sync adaptor deletes the raw contact on the server and
          * then calls ContactResolver.delete once more, this time passing the
-         * {@link android.provider.ContactsContract.Contacts#DELETE_PERMANENTLY}
+         * {@link android.provider.ContactsContract.RawContacts#DELETE_PERMANENTLY}
          * query parameter to finalize the data removal.
          * <P>Type: INTEGER</P>
          */
@@ -367,7 +367,7 @@ public final class ContactsContract {
         /**
          * The content:// style URI for this table
          */
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "contacts");
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "raw_contacts");
 
         /**
          * The content:// style URL for filtering people by email address. The
@@ -405,19 +405,19 @@ public final class ContactsContract {
         public static final int AGGREGATION_MODE_DEFAULT = 0;
 
         /**
-         * Aggregation mode: aggregate at the time the contact is inserted/updated.
+         * Aggregation mode: aggregate at the time the raw contact is inserted/updated.
          */
         public static final int AGGREGATION_MODE_IMMEDITATE = 1;
 
         /**
-         * Aggregation mode: never aggregate this contact (note that the contact will not
+         * Aggregation mode: never aggregate this raw contact (note that the raw contact will not
          * have a corresponding Aggregate and therefore will not be included in Aggregates
          * query results.)
          */
         public static final int AGGREGATION_MODE_DISABLED = 2;
 
         /**
-         * A sub-directory of a single contact that contains all of their {@link Data} rows.
+         * A sub-directory of a single raw contact that contains all of their {@link Data} rows.
          * To access this directory append
          */
         public static final class Data implements BaseColumns, DataColumns {
@@ -455,10 +455,13 @@ public final class ContactsContract {
         public static final String MIMETYPE = "mimetype";
 
         /**
-         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID}
+         * A reference to the {@link android.provider.ContactsContract.RawContacts#_ID}
          * that this data belongs to.
          */
-        public static final String CONTACT_ID = "contact_id";
+        public static final String RAW_CONTACT_ID = "raw_contact_id";
+
+        @Deprecated
+        public static final String CONTACT_ID = RAW_CONTACT_ID;
 
         /**
          * Whether this is the primary entry of its kind for the contact it belongs to
@@ -514,7 +517,7 @@ public final class ContactsContract {
     }
 
     /**
-     * Constants for the data table, which contains data points tied to a contact.
+     * Constants for the data table, which contains data points tied to a raw contact.
      * For example, a phone number or email address. Each row in this table contains a type
      * definition and some generic columns. Each data type can define the meaning for each of
      * the generic columns.
@@ -539,7 +542,7 @@ public final class ContactsContract {
     /**
      * A table that represents the result of looking up a phone number, for
      * example for caller ID. The table joins that data row for the phone number
-     * with the contact that owns the number. To perform a lookup you must
+     * with the raw contact that owns the number. To perform a lookup you must
      * append the number you want to find to {@link #CONTENT_FILTER_URI}.
      */
     public static final class PhoneLookup implements BaseColumns, DataColumns, AggregatesColumns {
@@ -573,11 +576,14 @@ public final class ContactsContract {
         public static final String _ID = "presence_id";
 
         /**
-         * Reference to the {@link android.provider.ContactsContract.Contacts#_ID} this presence
+         * Reference to the {@link android.provider.ContactsContract.RawContacts#_ID} this presence
          * references.
          * <P>Type: INTEGER</P>
          */
-        public static final String CONTACT_ID = "contact_id";
+        public static final String RAW_CONTACT_ID = "raw_contact_id";
+
+        @Deprecated
+        public static final String CONTACT_ID = RAW_CONTACT_ID;
 
         /**
          * Reference to the {@link Data#_ID} entry that owns this presence.
@@ -694,9 +700,12 @@ public final class ContactsContract {
             public static final String MIMETYPE = "mimetype";
 
             /**
-             * The {@link Contacts#_ID} that this data belongs to.
+             * The {@link RawContacts#_ID} that this data belongs to.
              */
-            public static final String CONTACT_ID = "contact_id";
+            public static final String RAW_CONTACT_ID = "raw_contact_id";
+
+            @Deprecated
+            public static final String CONTACT_ID = RAW_CONTACT_ID;
         }
 
         /**
@@ -835,7 +844,7 @@ public final class ContactsContract {
             /**
              * The content:// style URI for all data records of the
              * {@link Phone#CONTENT_ITEM_TYPE} MIME type, combined with the
-             * associated contact and aggregate data.
+             * associated raw contact and aggregate data.
              */
             public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
                     "phones");
@@ -843,7 +852,7 @@ public final class ContactsContract {
             /**
              * The content:// style URI for filtering data records of the
              * {@link Phone#CONTENT_ITEM_TYPE} MIME type, combined with the
-             * associated contact and aggregate data. The filter argument should
+             * associated raw contact and aggregate data. The filter argument should
              * be passed as an additional path segment after this URI.
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
@@ -1090,7 +1099,7 @@ public final class ContactsContract {
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/photo";
 
             /**
-             * Thumbnail photo of the contact. This is the raw bytes of an image
+             * Thumbnail photo of the raw contact. This is the raw bytes of an image
              * that could be inflated using {@link BitmapFactory}.
              * <p>
              * Type: BLOB
@@ -1296,12 +1305,12 @@ public final class ContactsContract {
         public static final int TYPE_AUTOMATIC = 0;
 
         /**
-         * Makes sure that the specified contact is included in the specified aggregate.
+         * Makes sure that the specified raw contact is included in the specified aggregate.
          */
         public static final int TYPE_KEEP_IN = 1;
 
         /**
-         * Makes sure that the specified contact is NOT included in the specified aggregate.
+         * Makes sure that the specified raw contact is NOT included in the specified aggregate.
          */
         public static final int TYPE_KEEP_OUT = 2;
 
@@ -1311,10 +1320,13 @@ public final class ContactsContract {
         public static final String AGGREGATE_ID = "aggregate_id";
 
         /**
-         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of the
-         * contact that the rule applies to.
+         * A reference to the {@link android.provider.ContactsContract.RawContacts#_ID} of the
+         * raw contact that the rule applies to.
          */
-        public static final String CONTACT_ID = "contact_id";
+        public static final String RAW_CONTACT_ID = "raw_contact_id";
+
+        @Deprecated
+        public static final String CONTACT_ID = RAW_CONTACT_ID;
     }
 
     /**
