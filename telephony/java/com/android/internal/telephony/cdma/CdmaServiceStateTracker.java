@@ -121,8 +121,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     private int curSpnRule = 0;
 
     private String mMdn;
-    private int mHomeSystemId;
-    private int mHomeNetworkId;
+    private int mHomeSystemId[] = null;
+    private int mHomeNetworkId[] = null;
     private String mMin;
     private String mPrlVersion;
 
@@ -398,23 +398,31 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 String cdmaSubscription[] = (String[])ar.result;
                 if (cdmaSubscription != null && cdmaSubscription.length >= 5) {
                     mMdn = cdmaSubscription[0];
-                    // TODO: Only grabbing the first SID/NID for now.
                     if (cdmaSubscription[1] != null) {
                         String[] sid = cdmaSubscription[1].split(",");
-                        try {
-                            mHomeSystemId = sid.length > 0 ? Integer.parseInt(sid[0]) : 0;
-                        } catch (NumberFormatException e) {
-                            mHomeSystemId = 0;
+                        mHomeSystemId = new int[sid.length];
+                        for (int i = 0; i < sid.length; i++) {
+                            try {
+                                mHomeSystemId[i] = Integer.parseInt(sid[i]);
+                            } catch (NumberFormatException ex) {
+                                Log.e(LOG_TAG, "error parsing system id: ", ex);
+                            }
                         }
                     }
+                    Log.d(LOG_TAG,"GET_CDMA_SUBSCRIPTION SID=" + cdmaSubscription[1] );
+
                     if (cdmaSubscription[2] != null) {
                         String[] nid = cdmaSubscription[2].split(",");
-                        try {
-                            mHomeNetworkId = nid.length > 0 ? Integer.parseInt(nid[0]) : 0;
-                        } catch (NumberFormatException e) {
-                            mHomeNetworkId = 0;
+                        mHomeNetworkId = new int[nid.length];
+                        for (int i = 0; i < nid.length; i++) {
+                            try {
+                                mHomeNetworkId[i] = Integer.parseInt(nid[i]);
+                            } catch (NumberFormatException ex) {
+                                Log.e(LOG_TAG, "error parsing network id: ", ex);
+                            }
                         }
                     }
+                    Log.d(LOG_TAG,"GET_CDMA_SUBSCRIPTION NID=" + cdmaSubscription[2] );
                     mMin = cdmaSubscription[3];
                     mPrlVersion = cdmaSubscription[4];
                     Log.d(LOG_TAG,"GET_CDMA_SUBSCRIPTION MDN=" + mMdn);
@@ -712,7 +720,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
         if (pollingContext[0] == 0) {
             boolean namMatch = false;
-            if ((mHomeSystemId != 0) && (mHomeSystemId == newSS.getSystemId()) ) {
+            if (!isSidsAllZeros() && isHomeSid(newSS.getSystemId())) {
                 namMatch = true;
             }
 
@@ -724,33 +732,43 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             }
 
             // Setting SS CdmaRoamingIndicator and CdmaDefaultRoamingIndicator
-            // TODO(Teleca): Validate this is correct.
-            if (mIsInPrl) {
-                if (namMatch && (mRoamingIndicator <= 2)) {
-                        // System is acquired, prl match, nam match and mRoamingIndicator <= 2
-                        newSS.setCdmaRoamingIndicator(EriInfo.ROAMING_INDICATOR_OFF);
-                } else {
-                    // System is acquired, prl match, no nam match  or mRoamingIndicator > 2
-                    newSS.setCdmaRoamingIndicator(mRoamingIndicator);
-                }
-            } else {
-                if (mRegistrationState == 5) {
-                    // System is acquired but prl not loaded or no prl match
+            newSS.setCdmaDefaultRoamingIndicator(mDefaultRoamingIndicator);
+            newSS.setCdmaRoamingIndicator(mRoamingIndicator);
+            boolean isPrlLoaded = true;
+            if (TextUtils.isEmpty(mPrlVersion)) {
+                isPrlLoaded = false;
+            }
+            if (!isPrlLoaded) {
+                newSS.setCdmaRoamingIndicator(EriInfo.ROAMING_INDICATOR_FLASH);
+            } else if (!isSidsAllZeros()) {
+                if (!namMatch && !mIsInPrl) {
+                    // Use default
+                    newSS.setCdmaRoamingIndicator(mDefaultRoamingIndicator);
+                } else if (namMatch && !mIsInPrl) {
                     newSS.setCdmaRoamingIndicator(EriInfo.ROAMING_INDICATOR_FLASH);
+                } else if (!namMatch && mIsInPrl) {
+                    // Use the one from PRL/ERI
+                    newSS.setCdmaRoamingIndicator(mRoamingIndicator);
                 } else {
-                    // Use the default indicator
+                    // It means namMatch && mIsInPrl
+                    if ((mRoamingIndicator <= 2)) {
+                        newSS.setCdmaRoamingIndicator(EriInfo.ROAMING_INDICATOR_OFF);
+                    } else {
+                        // Use the one from PRL/ERI
+                        newSS.setCdmaRoamingIndicator(mRoamingIndicator);
+                    }
                 }
             }
 
-            newSS.setCdmaDefaultRoamingIndicator(mDefaultRoamingIndicator);
 
             // NOTE: Some operator may require to override the mCdmaRoaming (set by the modem)
             // depending on the mRoamingIndicator.
 
             if (DBG) {
                 log("Set CDMA Roaming Indicator to: " + newSS.getCdmaRoamingIndicator()
-                    + ". mCdmaRoaming = " + mCdmaRoaming + ",  namMatch = " + namMatch
-                    + ", mIsInPrl = " + mIsInPrl + ", mRoamingIndicator = " + mRoamingIndicator
+                    + ". mCdmaRoaming = " + mCdmaRoaming + ", isPrlLoaded = " + isPrlLoaded
+                    + ". namMatch = " + namMatch + " , mIsInPrl = " + mIsInPrl
+                    + ", mRoamingIndicator = " + mRoamingIndicator
                     + ", mDefaultRoamingIndicator= " + mDefaultRoamingIndicator);
             }
             pollStateDone();
@@ -1456,6 +1474,31 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             setAndBroadcastNetworkSetTime(mSavedTime
                     + (SystemClock.elapsedRealtime() - mSavedAtTime));
         }
+    }
+
+    private boolean isSidsAllZeros() {
+        if (mHomeSystemId != null) {
+            for (int i=0; i < mHomeSystemId.length; i++) {
+                if (mHomeSystemId[i] != 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check whether a specified system ID that matches one of the home system IDs.
+     */
+    private boolean isHomeSid(int sid) {
+        if (mHomeSystemId != null) {
+            for (int i=0; i < mHomeSystemId.length; i++) {
+                if (sid == mHomeSystemId[i]) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
