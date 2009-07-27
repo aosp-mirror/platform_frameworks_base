@@ -209,7 +209,7 @@
 
     <!-- Allows an application to read (but not write) the user's
         browsing history and bookmarks. -->
-    <permission android:name="android.permission.READ_HISTORY_BOOKMARKS"
+    <permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:label="@string/permlab_readHistoryBookmarks"
         android:description="@string/permdesc_readHistoryBookmarks"
@@ -217,7 +217,7 @@
 
     <!-- Allows an application to write (but not read) the user's
         browsing history and bookmarks. -->
-    <permission android:name="android.permission.WRITE_HISTORY_BOOKMARKS"
+    <permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:label="@string/permlab_writeHistoryBookmarks"
         android:description="@string/permdesc_writeHistoryBookmarks"
