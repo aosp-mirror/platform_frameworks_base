@@ -800,7 +800,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             
             if (!event.isSystem() && 
                     (keyCode != KeyEvent.KEYCODE_DPAD_UP) &&
-                    (keyCode != KeyEvent.KEYCODE_DPAD_DOWN) &&
                     (keyCode != KeyEvent.KEYCODE_DPAD_LEFT) &&
                     (keyCode != KeyEvent.KEYCODE_DPAD_RIGHT) &&
                     (keyCode != KeyEvent.KEYCODE_DPAD_CENTER)) {
