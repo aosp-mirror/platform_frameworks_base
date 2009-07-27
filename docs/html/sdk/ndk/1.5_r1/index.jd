@@ -1,32 +1,35 @@
 ndk=true
 ndk.version=1.5
 ndk.rel.id=1
-ndk.date=May 2009
+ndk.date=June 2009
 
 ndk.win_download=android-ndk-1.5_r1-windows.zip
-ndk.win_bytes=22450814
-ndk.win_checksum=7b7836f705ec7e66225794edda34000f
+ndk.win_bytes=22500667
+ndk.win_checksum=e5c53915903d8b81f3e2ea422e2e2717
 
 ndk.mac_download=android-ndk-1.5_r1-darwin-x86.zip
-ndk.mac_bytes=17165450
-ndk.mac_checksum=214ccfd704c0307609fbabeb7bf86acc
+ndk.mac_bytes=17215303
+ndk.mac_checksum=1931f0e182798a4c98924fd87380b5b8
 
 ndk.linux_download=android-ndk-1.5_r1-linux-x86.zip
-ndk.linux_bytes=15976032
-ndk.linux_checksum=808fd4d6a7e45f76d546ba04ab9ef060
-
-ndk.linux_64_download=android-ndk-1.5_r1-linux-x86_64.zip
-ndk.linux_64_bytes=18112300
-ndk.linux_64_checksum=f8664c187b3ae077bcfe2b44294d0758
+ndk.linux_bytes=16025885
+ndk.linux_checksum=80a4e14704ca84c21bf1824cb25fbd8b
 
 page.title=Android 1.5 NDK, Release 1
 @jd:body
 
-<h2>What is the NDK?</h2>
+<h2 id="overview">What is the Android NDK?</h2>
 
-<p>The Android 1.5 NDK provides tools that allow Android application developers
-to embed and deploy native code within their Android applications. It
-provides:</p>
+<p>The Android NDK provides tools that allow Android application developers
+to embed components that make use of native code in their Android applications.
+</p>
+
+<p>Android applications run in the Dalvik virtual machine. The NDK allows 
+developers to implement parts of their applications using native-code languages 
+such as C and C++. This can provide benefits to certain classes of applications, 
+in the form of reuse of existing code and in some cases increased speed.</p>
+
+<p>The NDK provides:</p>
 
 <ul>
 <li>A set of tools and build files used to generate native code libraries from C
@@ -35,18 +38,21 @@ and C++ sources</li>
 files (.apks) that can be deployed on Android devices</li>
 <li>A set of native system headers and libraries that will be supported in all
 future versions of the Android platform, starting from Android 1.5 </li>
+<li>Documentation, samples, and tutorials</li>
 </ul>
 
-<p>This release of the NDK release supports the ARMv5TE machine instruction set
-and provides stable headers for libc (the C library), libm (the Math library)
-and the JNI interface.</p>
+<p>This release of the NDK supports the ARMv5TE machine instruction set
+and provides stable headers for libc (the C library), libm (the Math library), 
+the JNI interface, and other libraries.</p>
 
-<p>Using the NDK may not be relevant for all Android applications. As a
-developer, you will need to balance its benefits (faster execution) and its
-drawbacks (no portability, JNI overhead, no access to system libraries, and
-difficult debugging). Typical good candidates for the NDK are CPU-intensive
-operations that don't allocate too much memory, such as signal processing,
-physics simulation, custom bytecode/instruction interpreters, and so on.</p>
+<p>The NDK will not benefit most applications. As a developer, you will need 
+to balance its benefits against its drawbacks; notably, using native code does 
+not result in an automatic performance increase, but does always increase 
+application complexity. Typical good candidates for the NDK are self-contained,
+CPU-intensive operations that don't allocate much memory, such as signal processing,
+physics simulation, and so on. Simply re-coding a method to run in C usually does 
+not result in a large performance increase. The NDK can, however, can be 
+an effective way to reuse a large corpus of existing C/C++ code.</p>
 
 <p>Please note that the NDK <em>does not</em> enable you to develop native-only
 applications. Android's primary runtime remains the Dalvik virtual machine.</p>
@@ -64,8 +70,11 @@ guaranteed to be supported in all later releases of the platform:</p>
 
 <ul>
 <li>libc (C library) headers</li>
-<li>libm (Math library) headers</li>
+<li>libm (math library) headers</li>
 <li>JNI interface headers</li>
+<li>libz (Zlib compression) headers</li>
+<li>liblog (Android logging) header</li>
+<li>A Minimal set of headers for C++ support</li>
 </ul>
 
 <p>The NDK also provides a build system that lets you work efficiently with your
@@ -97,6 +106,22 @@ usage</li>
 defines the native sources you want to compile</li>
 <li>APPLICATION-MK.TXT &mdash; describes the use of the Application.mk file,
 which describes the native sources required by your Android application</li>
+<li>HOWTO.TXT &mdash; information about common tasks associated with NDK 
+development.</li>
+<li>SYSTEM-ISSUES.TXT &mdash; known issues in the Android system images 
+that you should be aware of, if you are developing using the NDK. </li>
+<li>STABLE-APIS.TXT &mdash; a complete list of the stable APIs exposed
+by headers in the NDK.</li>
+</ul>
+
+<p>Additionally, the package includes detailed information about the "bionic"
+C library provided with the Android platform that you should be aware of, if you
+are developing using the NDK. You can find the documentation in the 
+<code>&lt;ndk&gt;/docs/system/libc/</code> directory:</p>
+
+<ul>
+<li>OVERVIEW.TXT &mdash; provides an overview of the "bionic" C library and the 
+features it offers.</li>
 </ul>
 
 <h4>Sample applications</h4>
@@ -142,13 +167,14 @@ required.</li>
   <li>For all development platforms, GNU Make 3.81 or later is required. Earlier
 versions of GNU Make might work but have not been tested.</li>
   <li>For Windows, a recent release of <a
-href="http://www.cygwin.com">Cygwin</a> is required.</li>
+href="http://www.cygwin.com">Cygwin</a>, including both the gmake and gcc 
+packages, is required. </li>
 </ul>
 
 <h4>Android platform compatibility</h4>
 <ul>
   <li>The native libraries created by the Android NDK can only be used on
-devices running the Android 1.5 platform version or later. This is due to subtle
+devices running the Android 1.5 platform version or later. This is due to 
 toolchain and ABI related changes that make the native libraries incompatible
 with 1.0 and 1.1 system images.</li>
   <li>For this reason, you should use native libraries produced with the NDK in
