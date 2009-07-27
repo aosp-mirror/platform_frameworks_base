@@ -1,0 +1,507 @@
+page.title=Menu Design Guidelines
+@jd:body
+	
+<div id="qv-wrapper">
+<div id="qv">
+			
+<h2>Menu design quickview</h2>
+
+<ul>
+  <li>An Options menu is for any commands that are global to the current activity. </li>
+  <li>A Context menu is for any commands that apply to the current selection. </li>
+  <li>Place the most frequently used operations first. </li>
+  <li>Put only the most important commands fixed on the screen. </li>
+  <li>The commands on the Context menu that appears when you touch &amp; hold on an item should be duplicated on the activity you get to by a normal press on that item.
+</ul>
+
+
+<h2>In this document</h2>
+
+<ol>
+  <li><a href=#tour_of_the_menus>Tour of the Menus</a>
+	<ol>
+       <li style="padding-top: 4px;"><a href=#options_menu>Options Menu</a></li>
+       <li style="padding-top: 4px;"><a href=#context_menu>Context Menu</a></li>
+       <li style="padding-top: 4px;"><a href=#comparison_of_options_and_context_menus>Comparison of Options &amp; Context Menus</a></li>
+       <li style="padding-top: 4px;"><a href=#commands_fixed>Commands Fixed in an Activity Screen</a></li>
+	</ol>
+  </li>
+  <li><a href=#guidelines>Guidelines</a>
+	<ol>
+       <li style="padding-top: 4px;"><a href=#separate_commands>Separate specific from global commands</a></li>
+       <li style="padding-top: 4px;"><a href=#most_frequently_used>Place most frequently used first</a></li>
+       <li style="padding-top: 4px;"><a href=#dont_put_commands>Don't put commands <em>only</em> in a Context menu</li>
+       <li style="padding-top: 4px;"><a href=#first_in_context_menu>First command in Context menu should be most intuitive</li>
+       <li style="padding-top: 4px;"><a href=#selecting_content_item>Selecting an item should perform most intuitive operation</a></li>
+       <li style="padding-top: 4px;"><a href=#context_menu_should_identify>A Context menu should identify the selected item</li>
+       <li style="padding-top: 4px;"><a href=#most_important_commands>Put only most important commands fixed on the screen</a></li>
+       <li style="padding-top: 4px;"><a href=#short_names>Use short names in Options icon menu</a></li>
+       <li style="padding-top: 4px;"><a href=#a_dialog_should_not_have_an_options_menu>A dialog should not have Options menu</a></li>
+       <li style="padding-top: 4px;"><a href=#do_not_substitute_message>If no Options menu, don't display message</a></li>
+       <li style="padding-top: 4px;"><a href=#dim_hide_menu_items>Dim or hide menu items not available</a></li>
+	</ol>
+  </li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+  <li><a href="http://android-developers.blogspot.com/2008/12/touch-mode.html">Touch mode</a></li>
+  <li><a href="{@docRoot}guide/practices/ui_guidelines/activity_task_design.html">Activity and Task Design</a></li>
+</ol>
+
+</div>
+</div>       
+
+<p>
+  A menu holds a set of commands (user actions) that are normally hidden, and
+  are accessible by a button, key, or gesture.  Menu commands provide a means
+  for performing operations and for navigating to other parts of your 
+  application or other applications.  Menus are useful for freeing screen space,
+  as an alternative to placing functionality and navigation, in buttons or other
+  user controls in the content area of your application. 
+</p>
+
+<p>
+  The Android system provides two types of menus you can use to provide
+  functionality or navigation. Between them, you should be able to organize
+  the functionality and navigation for your application.  Briefly:
+  <ul>
+    <li>The <em>Options menu</em> contains primary functionality that applies
+        globally to the current activity or starts a related activity. 
+        It is typically invoked by a user pressing a hard button, often labeled MENU.</li>
+    <li>The <em>Context menu</em> contains secondary functionality for the currently
+        selected item.  It is typically invoked by a user's touch &amp; hold
+        on an item.  Like on the Options menu, the operation can run either
+        in the current or another activity.</li>
+  </ul>
+</p>
+
+<p>
+  All but the simplest applications have menus.  The system automatically
+  lays the menus out and provides standard ways for users to access them.  
+  In this sense, they are familiar and dependable ways for users to access
+  functionality across all applications.  All menus are panels that "float"
+  on top of the activity screen and are smaller than full screen, so that the
+  application is still visible around its edges.  This is a visual reminder 
+  that a menu is an intermediary operation that disappears once it's used.
+</p>
+
+<p>
+  Let's start out with a quick tour of the menus.
+</p>
+
+<h2 id="tour_of_the_menus">Tour of the Menus</h2>
+
+<blockquote>
+  <b>NOTE</b> - Your menus and screens might not look like those shown in this document;
+  they may vary from one version of Android or device to another.
+</blockquote>
+
+<h3 id="options_menu">Options Menu</h3>
+
+<p>
+  The Options menu contains commands that apply globally across the current
+  activity, or can start another activity. They do not apply to a selected
+  item in the content (a <a href="#context_menu">Context menu</a> does that).  
+</p>
+
+<p>
+  On most devices, a user presses the MENU button to access the Options menu, 
+  as shown in the screenshot below.  To close the menu, the user presses 
+  MENU again, or presses the BACK button. 
+  In fact, to cancel out of any menu, press the BACK button.  (Pressing the MENU
+  button or touching outside the menu also works.)  Note that how to invoke this
+  menu may be different on different devices.
+</p>
+
+<p>
+  Each
+  <a href="{@docRoot}guide/practices/ui_guidelines/activity_task_design.html#activities">activity</a>
+  activity has its own set of operations and therefore its own Options menu.
+  An application with multiple activities would have a different Options menu 
+  for each activity. 
+</p>
+
+<p>
+  For example, in the message list view of an email program, the Options menu
+  might let you search the messages, compose a new message, refresh the list, 
+  or change the email settings.  The compose view of an email program would 
+  have a different Options menu, such as adding a CC field, attaching a file, 
+  or discarding the message.
+</p>
+
+<p id="options_icon_expanded_menus">
+  In order to handle a large number of menu items, the Options menu
+  progressively discloses them in two steps:
+</p>
+
+<ul>
+  <li>
+    <b>Options icon menu</b> - The first press of the MENU button displays a
+    non-scrollable grid of icons at the bottom of the screen.  (On the G1
+    phone, up to 6 buttons typically appear.)
+  </li>
+  <li>
+    <b>Options expanded menu</b> - If the activity has more menu items than will
+    fit on the icon menu, then the last icon is labeled "More" &mdash; selecting it
+    displays a list that can contain any number of menu items and will scroll 
+    as necessary.
+  </li>
+</ul>
+
+<img src={@docRoot}images/menu_design/MenuDiagram.png>
+
+<p>
+  On some versions of Android, the user can display keyboard shortcuts in the
+  icon menu by long pressing the MENU button &mdash; the text in the icon menu
+  alternates between the command names and their keyboard shortcuts (if any).
+</p>
+
+<h3 id="context_menu">Context Menu</h3>
+
+<p>
+  A Context menu is similar to a right-click context menu in a desktop
+  operating system.  It is normally a shortcut that duplicates commands
+  found elsewhere.
+</p>
+
+<p>
+  A user can touch &amp; hold on content on the screen to
+  access a Context menu (if one exists), as shown in the screenshot below. 
+  A Context menu is a list of menu items (commands) that can operate
+  on the selected content.  The command can either be part of the current
+  activity, or the system can pass the selected content along to 
+  an operation in another activity (by way of an 
+  <a href="{@docRoot}guide/practices/ui_guidelines/activity_task_design.html#intents">intent</a>).
+</p>
+
+<p>
+  For example, in an email message list, a user can touch &amp; hold on
+  an email message to open a Context menu containing commands to read,
+  archive, or delete the message. 
+</p>
+
+<p id="location">
+  A user can also touch &amp; hold a <em>location</em> on the screen to
+  access a Context menu.  An example is when the user does touch &amp; hold
+  on a blank spot on the Home screen, a Context menu appears; selecting
+  an item from that menu inserts an icon at that location.
+</p>
+
+<img src={@docRoot}images/menu_design/ContextMenuDiagram.png>
+
+<h4 id="context_menu_shortcut">Context Menu is a Shortcut</h4>
+
+<p>
+  In the above example, if the user performs touch &amp; hold on the contact
+  "Obi Wan Kenobi", a Context menu opens.  The commands provided in
+  this Context menu are the complete set of actions that can be performed
+  on this contact. 
+</p>
+
+<p>
+  A normal touch on an item in the content activates the most intuitive
+  command for that selection &mdash; in this case, "View contact".
+  We recommend that the most intuitive command also be listed as the
+  first item in the Context menu.  In this example, selecting the contact
+  "Obi Wan Kenobi" runs the same command "View contact" that is listed
+  at the top of the Context menu.
+</p>
+
+<p>
+  Also note, as shown in the following screenshot, the Context menu and the
+  next screen both hold the same complete set of commands that can be performed
+  on this contact.  The Context menu displays the commands in a list, 
+  while the "View contact" activity splits them into various items in the
+  Options menu, icon buttons and list items.
+</p>
+
+<p>
+  Because of this duplication, using the Context menu is considered a <em>shortcut</em>
+  for going to the next screen and performing the operation there.  Context menus
+  are less discoverable than either buttons fixed on-screen or the Options menu.
+  Many users never discover or use Context menus.  It is for this reason that, for
+  the most part, any command on a Context menu should also appear on the most
+  intuitive operation's screen.  As the next section explains, text operations,
+  such as "Select text" might appear only on a Context menu.  Also, rich
+  applications, such as browsers, which themselves can contain web applications,
+  may have commands on Context menus that are not available elsewhere.
+</p>
+
+<img src={@docRoot}images/menu_design/ContextMenuViewContactDiagram.png>
+
+<h4>Text Commands in Context Menu</h4>
+
+<p>
+  Text links and text fields in the content both have system-provided operations 
+  that are common across all applications: operations such as "Select all", "Select text",
+  "Copy all", and "Add to dictionary".  If the text field is editable, it also 
+  has  other operations, such as "Cut all" and "Input Method", and if text 
+  is also on the clipboard, it has "Paste".  The system automatically inserts
+  the appropriate menu items into the Context menu of text links and text
+  fields, as shown in the following screenshot.
+</p>
+
+<img src={@docRoot}images/menu_design/TextFieldContextMenuDiagram.png>
+
+
+<h3 id="comparison_of_options_and_context_menus">Comparison of Options and Context Menus</h3>
+
+<p>
+	An Options menu holds commands that are global to the activity while a
+	Context menu holds commands that apply only to an item in the content.
+    As shown in these diagrams, the user navigates to the menu, then
+    touches a menu item to perform an action or open a dialog.
+</p>
+
+<img src={@docRoot}images/menu_design/TaskFlowDiagram.png>
+
+<p>
+  For more technical information on menus, see
+  <a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a>.
+</p>
+
+<h3 id="commands_fixed">Commands Fixed in an Activity Screen</h4>
+
+<p>
+  Commands can also be fixed directly on screen, typically in
+  text buttons, graphic buttons, or list items.  This placement is by far the most
+  discoverable location for commands &mdash; a user can immediately see the command
+  without having to first press a button.  This increased visibility needs to be
+  weighed against the space such user controls take up, or the sense that they
+  might clutter the visual design.
+</p>
+
+<h2 id="guidelines">Guidelines</h2>
+
+<p>
+  Selecting the right kind of menu to present, and using menus
+  consistently, are critical factors in good application design. The following
+  guidelines should assist user experience designers and application developers
+  toward this end.
+</p>
+
+<h3 id="separate_commands">Separate selection-specific commands from global commands</h3>
+
+<p>
+  Put any commands that are global to the current activity in the Options menu
+  or place them fixed in an activity screen; put commands that apply to the
+  current selection in the Context menu.  (In any case, the command
+  could either run as part of this activity or start another activity.)
+</p>
+
+<p>
+  You can determine in which menu to place a command by what it operates on:
+  If the command acts on selected content (or a particular
+  <a href="#location">location</a>) on the screen, put the command in the
+  Context menu for that content.  If the command acts on no specific content
+  or location, put it in the Options menu.  This separation of commands
+  is enforced by the system in the following way.  When you press the MENU
+  button to display the Options menu, the selected content becomes unselected,
+  and so cannot be operated on.  For an explanation
+  of why the content becomes unselected, see the article on
+  <a href="http://android-developers.blogspot.com/2008/12/touch-mode.html">Touch mode</a>.
+</p>
+
+<p>
+  An example of a selection-specific Context menu is when a user performs a
+  touch &amp; hold on a person's name in a list view of a contacts application.
+  The Context menu would typically contain commands "View contact", "Call contact",
+  and "Edit contact".  
+</p>
+
+<h3 id="most_frequently_used">Place the most frequently used operations first</h3>
+
+<p>
+  Because of limited screen height, some menus may be scrollable, so it's
+  important to place the most important commands so they can be viewed without
+  scrolling.  In the case of the Options menu, place the most frequently used
+  operation on its <a href="#options_icon_expanded_menus">icon menu</a>;
+  the user will have to select "More" to see the rest.
+  It's also useful to place similar commands in the same location &mdash;
+  for example, the Search icon might always be the first icon in the Options
+  menu across several activities that offer search.
+</p>
+
+<p>
+  In a Context menu, the most intuitive command should be first, followed
+  by commands in order of decreasing use, with the least used command at the bottom.
+</p>
+
+<h3 id="dont_put_commands">Don't put commands <em>only</em> in a Context menu</h3>
+<p>
+  If a user can fully access your application without using Context menus, 
+  then it's designed properly!  In general, if part of your application is inaccessible
+  without using Context menus, then you need to duplicate those commands elsewhere.
+</p>
+
+<p>
+  Before opening a Context menu, it has no visual representation that identifies
+  its presence (whereas the Options menu has the MENU button), and so is not
+  particularly discoverable. 
+  Therefore, in general, a Context menu should <em>duplicate</em> commands 
+  found in the corresponding activity screen.  For example, while it's useful to
+  let the user call a phone number from a Context menu invoked by touch
+  &amp; hold on a name in a list of contacts, that operation should <em>also</em>
+  be available by the user touching the phone number itself when viewing contact details.
+  See <a href="#context_menu_shortcut">shortcut</a> for an illustration of this example.
+</p>
+
+<h3 id="first_in_context_menu">The first command in a Context menu should be the selection's most intuitive command</h3>
+
+<p>
+  As described under <a href="#context_menu_shortcut">shortcut</a>,
+  touching on an item in the content should activate the same command as touching
+  the first item in the Context menu.  Both cases should be the most intuitive
+  operation for that item.  
+</p>
+
+<h3 id="selecting_content_item">Selecting an item in the content should perform the most intuitive operation</h3>
+
+<p>
+  In your application, when the user touches any actionable text (such as a link
+  or list item) or image (such as a photo icon), execute the operation most
+  likely to be desired by the user.
+</p>
+
+<p>
+  Some examples of primary operations:
+</p>
+
+<ul>
+    <li>Selecting an image executes "View image"</li>
+    <li>Selecting a media icon or filename executes "Play"</li>
+    <li>Selecting a URL link executes "Open link"</li>
+    <li>Selecting an address executes "Go to address" (in a maps application)</li>
+</ul>
+
+<p>
+  Note that selecting the same item in different contexts might invoke
+  different operations:
+</p>
+
+<ul>
+    <li>In a contact application, selecting a contact executes "View details"</li>
+    <li>In an IM application, selecting a contact executes "Start chat"</li>
+    <li>In an Email application, when adding a recipient to the "To" field
+        through the contact book, selecting a contact executes "Add to recipient
+        list"</li>
+</ul>
+
+
+<h3 id="context_menu_should_identify">A Context menu should identify the selected item</h3>
+
+<p>
+  When a user does touch &amp; hold on an item, the Context menu should 
+  contain the name of the selected item.  Therefore, 
+  when creating a Context menu, be sure to include a title and the name of the
+  selected item so that it's clear to the user what the context is.  
+  For example, if a user selects a contact "Joan of Arc", put that name in the
+  title of the Context menu (using
+  {@link android.view.ContextMenu#setHeaderTitle(java.lang.CharSequence) setHeaderTitle}). 
+  Likewise, a command to edit the contact should be called "Edit contact",
+  not just "Edit".
+</p>
+
+
+<h3 id="most_important_commands">Put only the most important commands fixed on the screen</h3>
+
+<p>
+  By putting commands in menus, you free up the screen to hold more content. 
+  On the other hand, fixing commands in the content area of an activity
+  makes them more prominent and easy to use.
+</p>
+
+<p>
+  Here are a number of important reasons to place commands fixed on the activity screen:
+</p>
+
+  <ul>
+    <li>
+      To give a command the highest prominence, ensuring the command is obvious and won't be overlooked.<br>
+      Example: A "Buy" button in a store application.
+    </li>
+    <li> 
+      When quick access to the command is important and going to the menu would be
+      tedious or slow.<br>
+      Example: Next/Previous buttons or Zoom In/Out buttons in an image viewing application.
+    </li>
+    <li>
+      When in the middle of an operation that needs to be completed.<br>
+      Example: Save/Discard buttons in an image crop activity.
+    </li>
+    <li>
+      Dialogs and wizards.<br>
+      Example: OK/Cancel buttons
+    </li>
+    <li>
+      For direct manipulation.<br>
+      Example: Dragging an icon in the Home screen to the trash
+    </li>
+  </ul>
+
+<h3 id="short_names">Use short names in the Options icon menu</h3>
+
+<p>
+  If a text label in the <a href="#options_icon_expanded_menus">Options icon menu</a>
+  is too long, the system truncates it in the middle.  Thus, "Create Notification"
+  is truncated to something like "Create…ication". You have no control over
+  this truncation, so the best bet is to keep the text short.  In some versions of Android,
+  when the icon is highlighted by a navigation key (such as a trackball), the
+  entire descriptive text may be shown as a marquee, where the words are
+  readable as they scroll by.  <!--For more information, see the Text Guidelines
+  [update link].-->
+</p>
+
+<h3 id="a_dialog_should_not_have_an_options_menu">A dialog should not have an Options menu</h3>
+
+<p>
+  When a dialog is displayed, pressing the MENU button should do nothing.  This also holds true
+  for activities that look like dialogs.  A dialog box is recognizable by being
+  smaller than full-screen, having zero to three buttons, is non-scrollable, and 
+  possibly a list of selectable items that can include checkboxes or radio buttons.
+  <!--For examples of dialogs, see Text Guidelines.-->
+</p>
+
+<p>
+  The rationale behind not having a menu is that when a dialog is displayed, the user is in
+  the middle of a procedure and should not be allowed to start a new global task
+  (which is what the Option menu provides).
+</p>
+
+<h3 id="do_not_substitute_message">If an activity has no Options menu, do not display a message</h3>
+
+<p>
+  When the user presses the MENU button, if there is no Options menu, the system
+  currently does nothing.  We recommend you do not perform any action (such as
+  displaying a message).  It's a better user experience for this behavior to be
+  consistent across applications.
+</p>
+
+
+
+<h3 id="dim_hide_menu_items">Dim or hide menu items that are not available in the current context</h3>
+
+<p>
+  Sometimes a menu item's action cannot be performed &mdash; for example,
+  the "Forward" button in a browser cannot work until after the "Back" 
+  button has been pressed. We recommend:
+</p>
+
+<ul>
+  <li> 	
+    <b>In Options menu</b> - disable the menu item, which dims the text and icon,
+    turning it gray.  This applies to menu items in both the icon menu and the
+    "More" menu.  It would be disorienting for the icon menu to change from 6
+    items to 5 items, and we treat the "More" menu the same way.
+  </li>
+  <li>
+    <b>In Context menu</b> - hide the menu item.  This makes the menu shorter so the
+    user sees only available choices (which also reduces any scrolling).
+  </li>
+</ul>
+
+</body>
+</html>
+
