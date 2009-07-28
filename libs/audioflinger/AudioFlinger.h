@@ -73,14 +73,14 @@ public:
                                 int frameCount,
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
-                                void *output,
+                                int output,
                                 status_t *status);
 
-    virtual     uint32_t    sampleRate(void *output) const;
-    virtual     int         channelCount(void *output) const;
-    virtual     int         format(void *output) const;
-    virtual     size_t      frameCount(void *output) const;
-    virtual     uint32_t    latency(void *output) const;
+    virtual     uint32_t    sampleRate(int output) const;
+    virtual     int         channelCount(int output) const;
+    virtual     int         format(int output) const;
+    virtual     size_t      frameCount(int output) const;
+    virtual     uint32_t    latency(int output) const;
 
     virtual     status_t    setMasterVolume(float value);
     virtual     status_t    setMasterMute(bool muted);
@@ -88,10 +88,10 @@ public:
     virtual     float       masterVolume() const;
     virtual     bool        masterMute() const;
 
-    virtual     status_t    setStreamVolume(int stream, float value, void *output);
+    virtual     status_t    setStreamVolume(int stream, float value, int output);
     virtual     status_t    setStreamMute(int stream, bool muted);
 
-    virtual     float       streamVolume(int stream, void *output) const;
+    virtual     float       streamVolume(int stream, int output) const;
     virtual     bool        streamMute(int stream) const;
 
     virtual     status_t    setMode(int mode);
@@ -101,37 +101,37 @@ public:
 
     virtual     bool        isMusicActive() const;
 
-    virtual     status_t    setParameters(void *ioHandle, const String8& keyValuePairs);
-    virtual     String8     getParameters(void *ioHandle, const String8& keys);
+    virtual     status_t    setParameters(int ioHandle, const String8& keyValuePairs);
+    virtual     String8     getParameters(int ioHandle, const String8& keys);
 
     virtual     void        registerClient(const sp<IAudioFlingerClient>& client);
 
     virtual     size_t      getInputBufferSize(uint32_t sampleRate, int format, int channelCount);
 
-    virtual void *openOutput(uint32_t *pDevices,
+    virtual int openOutput(uint32_t *pDevices,
                                     uint32_t *pSamplingRate,
                                     uint32_t *pFormat,
                                     uint32_t *pChannels,
                                     uint32_t *pLatencyMs,
                                     uint32_t flags);
 
-    virtual void *openDuplicateOutput(void *output1, void *output2);
+    virtual int openDuplicateOutput(int output1, int output2);
 
-    virtual status_t closeOutput(void *output);
+    virtual status_t closeOutput(int output);
 
-    virtual status_t suspendOutput(void *output);
+    virtual status_t suspendOutput(int output);
 
-    virtual status_t restoreOutput(void *output);
+    virtual status_t restoreOutput(int output);
 
-    virtual void *openInput(uint32_t *pDevices,
+    virtual int openInput(uint32_t *pDevices,
                             uint32_t *pSamplingRate,
                             uint32_t *pFormat,
                             uint32_t *pChannels,
                             uint32_t acoustics);
 
-    virtual status_t closeInput(void *input);
+    virtual status_t closeInput(int input);
 
-    virtual status_t setStreamOutput(uint32_t stream, void *output);
+    virtual status_t setStreamOutput(uint32_t stream, int output);
 
     // IBinder::DeathRecipient
     virtual     void        binderDied(const wp<IBinder>& who);
@@ -158,7 +158,7 @@ public:
     // record interface
     virtual sp<IAudioRecord> openRecord(
                                 pid_t pid,
-                                void *input,
+                                int input,
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
@@ -171,8 +171,6 @@ public:
                                 const Parcel& data,
                                 Parcel* reply,
                                 uint32_t flags);
-
-    void audioConfigChanged(int event, void *param1, void *param2);
 
 private:
                             AudioFlinger();
@@ -615,10 +613,11 @@ private:
         SortedVector < sp<OutputTrack> >  mOutputTracks;
     };
 
-              PlaybackThread *checkPlaybackThread_l(void *output) const;
-              MixerThread *checkMixerThread_l(void *output) const;
-              RecordThread *checkRecordThread_l(void *input) const;
+              PlaybackThread *checkPlaybackThread_l(int output) const;
+              MixerThread *checkMixerThread_l(int output) const;
+              RecordThread *checkRecordThread_l(int input) const;
               float streamVolumeInternal(int stream) const { return mStreamTypes[stream].volume; }
+              void audioConfigChanged(int event, const sp<ThreadBase>& thread, void *param2);
 
     friend class AudioBuffer;
 
@@ -744,14 +743,15 @@ private:
     mutable     int                                 mHardwareStatus;
 
 
-                SortedVector< sp<PlaybackThread> >  mPlaybackThreads;
+                DefaultKeyedVector< int, sp<PlaybackThread> >  mPlaybackThreads;
                 PlaybackThread::stream_type_t       mStreamTypes[AudioSystem::NUM_STREAM_TYPES];
                 float                               mMasterVolume;
                 bool                                mMasterMute;
 
-                SortedVector< sp<RecordThread> >    mRecordThreads;
+                DefaultKeyedVector< int, sp<RecordThread> >    mRecordThreads;
 
                 SortedVector< sp<IBinder> >         mNotificationClients;
+                int                                 mNextThreadId;
 };
 
 // ----------------------------------------------------------------------------

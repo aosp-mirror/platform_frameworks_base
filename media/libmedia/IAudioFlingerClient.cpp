@@ -39,12 +39,12 @@ public:
     {
     }
 
-    void ioConfigChanged(int event, void *param1, void *param2)
+    void ioConfigChanged(int event, int ioHandle, void *param2)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlingerClient::getInterfaceDescriptor());
         data.writeInt32(event);
-        data.write(&param1, sizeof(void *));
+        data.writeInt32(ioHandle);
         if (event == AudioSystem::STREAM_CONFIG_CHANGED) {
             uint32_t stream = *(uint32_t *)param2;
             LOGV("ioConfigChanged stream %d", stream);
@@ -72,11 +72,10 @@ status_t BnAudioFlingerClient::onTransact(
     case IO_CONFIG_CHANGED: {
             CHECK_INTERFACE(IAudioFlingerClient, data, reply);
             int event = data.readInt32();
-            void *param1;
+            int ioHandle = data.readInt32();
             void *param2 = 0;
             AudioSystem::OutputDescriptor desc;
             uint32_t stream;
-            data.read(&param1, sizeof(void *));
             if (event == AudioSystem::STREAM_CONFIG_CHANGED) {
                 stream = data.readInt32();
                 param2 = &stream;
@@ -89,7 +88,7 @@ status_t BnAudioFlingerClient::onTransact(
                 desc.latency = data.readInt32();
                 param2 = &desc;
             }
-            ioConfigChanged(event, param1, param2);
+            ioConfigChanged(event, ioHandle, param2);
             return NO_ERROR;
         } break;
         default:

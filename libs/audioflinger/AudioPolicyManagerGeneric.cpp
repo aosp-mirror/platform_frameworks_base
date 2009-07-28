@@ -224,7 +224,7 @@ audio_io_handle_t AudioPolicyManagerGeneric::getOutput(AudioSystem::stream_type 
     if ((flags & AudioSystem::OUTPUT_FLAG_DIRECT) ||
         (format != 0 && !AudioSystem::isLinearPCM(format)) ||
         (channels != 0 && channels != AudioSystem::CHANNEL_OUT_MONO && channels != AudioSystem::CHANNEL_OUT_STEREO)) {
-        return NULL;
+        return 0;
     }
 
     return mHardwareOutput;
@@ -232,10 +232,10 @@ audio_io_handle_t AudioPolicyManagerGeneric::getOutput(AudioSystem::stream_type 
 
 status_t AudioPolicyManagerGeneric::startOutput(audio_io_handle_t output, AudioSystem::stream_type stream)
 {
-    LOGV("startOutput() output %p, stream %d", output, stream);
+    LOGV("startOutput() output %d, stream %d", output, stream);
     ssize_t index = mOutputs.indexOfKey(output);
     if (index < 0) {
-        LOGW("startOutput() unknow output %p", output);
+        LOGW("startOutput() unknow output %d", output);
         return BAD_VALUE;
     }
 
@@ -253,10 +253,10 @@ status_t AudioPolicyManagerGeneric::startOutput(audio_io_handle_t output, AudioS
 
 status_t AudioPolicyManagerGeneric::stopOutput(audio_io_handle_t output, AudioSystem::stream_type stream)
 {
-    LOGV("stopOutput() output %p, stream %d", output, stream);
+    LOGV("stopOutput() output %d, stream %d", output, stream);
     ssize_t index = mOutputs.indexOfKey(output);
     if (index < 0) {
-        LOGW("stopOutput() unknow output %p", output);
+        LOGW("stopOutput() unknow output %d", output);
         return BAD_VALUE;
     }
 
@@ -272,17 +272,17 @@ status_t AudioPolicyManagerGeneric::stopOutput(audio_io_handle_t output, AudioSy
         outputDesc->changeRefCount(stream, -1);
         return NO_ERROR;
     } else {
-        LOGW("stopOutput() refcount is already 0 for output %p", output);
+        LOGW("stopOutput() refcount is already 0 for output %d", output);
         return INVALID_OPERATION;
     }
 }
 
 void AudioPolicyManagerGeneric::releaseOutput(audio_io_handle_t output)
 {
-    LOGV("releaseOutput() %p", output);
+    LOGV("releaseOutput() %d", output);
     ssize_t index = mOutputs.indexOfKey(output);
     if (index < 0) {
-        LOGW("releaseOutput() releasing unknown output %p", output);
+        LOGW("releaseOutput() releasing unknown output %d", output);
         return;
     }
 
@@ -332,7 +332,7 @@ audio_io_handle_t AudioPolicyManagerGeneric::getInput(int inputSource,
                 samplingRate, format, channels);
         mpClientInterface->closeInput(input);
         delete inputDesc;
-        return NULL;
+        return 0;
     }
     mInputs.add(input, inputDesc);
     return input;
@@ -340,10 +340,10 @@ audio_io_handle_t AudioPolicyManagerGeneric::getInput(int inputSource,
 
 status_t AudioPolicyManagerGeneric::startInput(audio_io_handle_t input)
 {
-    LOGV("startInput() input %p", input);
+    LOGV("startInput() input %d", input);
     ssize_t index = mInputs.indexOfKey(input);
     if (index < 0) {
-        LOGW("startInput() unknow input %p", input);
+        LOGW("startInput() unknow input %d", input);
         return BAD_VALUE;
     }
     AudioInputDescriptor *inputDesc = mInputs.valueAt(index);
@@ -355,7 +355,7 @@ status_t AudioPolicyManagerGeneric::startInput(audio_io_handle_t input)
         // refuse 2 active AudioRecord clients at the same time
         for (size_t i = 0; i < mInputs.size(); i++) {
             if (mInputs.valueAt(i)->mRefCount > 0) {
-                LOGW("startInput() input %p, other input %p already started", input, mInputs.keyAt(i));
+                LOGW("startInput() input %d, other input %d already started", input, mInputs.keyAt(i));
                 return INVALID_OPERATION;
             }
         }
@@ -367,16 +367,16 @@ status_t AudioPolicyManagerGeneric::startInput(audio_io_handle_t input)
 
 status_t AudioPolicyManagerGeneric::stopInput(audio_io_handle_t input)
 {
-    LOGV("stopInput() input %p", input);
+    LOGV("stopInput() input %d", input);
     ssize_t index = mInputs.indexOfKey(input);
     if (index < 0) {
-        LOGW("stopInput() unknow input %p", input);
+        LOGW("stopInput() unknow input %d", input);
         return BAD_VALUE;
     }
     AudioInputDescriptor *inputDesc = mInputs.valueAt(index);
 
     if (inputDesc->mRefCount == 0) {
-        LOGW("stopInput() input %p already stopped", input);
+        LOGW("stopInput() input %d already stopped", input);
         return INVALID_OPERATION;
     } else {
         inputDesc->mRefCount = 0;
@@ -386,10 +386,10 @@ status_t AudioPolicyManagerGeneric::stopInput(audio_io_handle_t input)
 
 void AudioPolicyManagerGeneric::releaseInput(audio_io_handle_t input)
 {
-    LOGV("releaseInput() %p", input);
+    LOGV("releaseInput() %d", input);
     ssize_t index = mInputs.indexOfKey(input);
     if (index < 0) {
-        LOGW("releaseInput() releasing unknown input %p", input);
+        LOGW("releaseInput() releasing unknown input %d", input);
         return;
     }
     mpClientInterface->closeInput(input);
@@ -438,7 +438,7 @@ status_t AudioPolicyManagerGeneric::setStreamVolumeIndex(AudioSystem::stream_typ
 
         float volume = computeVolume((int)stream, index, device);
 
-        LOGV("setStreamVolume() for output %p stream %d, volume %f", mOutputs.keyAt(i), stream, volume);
+        LOGV("setStreamVolume() for output %d stream %d, volume %f", mOutputs.keyAt(i), stream, volume);
         mpClientInterface->setStreamVolume(stream, volume, mOutputs.keyAt(i));
     }
     return NO_ERROR;
@@ -657,7 +657,7 @@ float AudioPolicyManagerGeneric::computeVolume(int stream, int index, uint32_t d
 
 void AudioPolicyManagerGeneric::setStreamMute(int stream, bool on, audio_io_handle_t output)
 {
-    LOGV("setStreamMute() stream %d, mute %d, output %p", stream, on, output);
+    LOGV("setStreamMute() stream %d, mute %d, output %d", stream, on, output);
 
     StreamDescriptor &streamDesc = mStreams[stream];
 

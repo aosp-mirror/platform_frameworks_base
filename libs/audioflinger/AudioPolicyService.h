@@ -136,8 +136,8 @@ private:
                     void        exit();
                     void        startToneCommand(int type = 0, int stream = 0);
                     void        stopToneCommand();
-                    status_t    volumeCommand(int stream, float volume, void *output);
-                    status_t    parametersCommand(void *ioHandle, const String8& keyValuePairs);
+                    status_t    volumeCommand(int stream, float volume, int output);
+                    status_t    parametersCommand(int ioHandle, const String8& keyValuePairs);
 
     private:
         // descriptor for requested tone playback event
@@ -157,11 +157,11 @@ private:
         public:
             int mStream;
             float mVolume;
-            void *mIO;
+            int mIO;
         };
         class ParametersData {
         public:
-            void *mIO;
+            int mIO;
             String8 mKeyValuePairs;
         };
 

@@ -134,16 +134,14 @@ public:
         data.writeInt32(channels);
         data.writeInt32(static_cast <uint32_t>(flags));
         remote()->transact(GET_OUTPUT, data, &reply);
-        audio_io_handle_t output;
-        reply.read(&output, sizeof(audio_io_handle_t));
-        return output;
+        return static_cast <audio_io_handle_t> (reply.readInt32());
     }
 
     virtual status_t startOutput(audio_io_handle_t output, AudioSystem::stream_type stream)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
-        data.write(&output, sizeof(audio_io_handle_t));
+        data.writeInt32(output);
         data.writeInt32(stream);
         remote()->transact(START_OUTPUT, data, &reply);
         return static_cast <status_t> (reply.readInt32());
@@ -153,7 +151,7 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
-        data.write(&output, sizeof(audio_io_handle_t));
+        data.writeInt32(output);
         data.writeInt32(stream);
         remote()->transact(STOP_OUTPUT, data, &reply);
         return static_cast <status_t> (reply.readInt32());
@@ -163,7 +161,7 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
-        data.write(&output, sizeof(audio_io_handle_t));
+        data.writeInt32(output);
         remote()->transact(RELEASE_OUTPUT, data, &reply);
     }
 
@@ -182,16 +180,14 @@ public:
         data.writeInt32(channels);
         data.writeInt32(static_cast <uint32_t>(acoustics));
         remote()->transact(GET_INPUT, data, &reply);
-        audio_io_handle_t input;
-        reply.read(&input, sizeof(audio_io_handle_t));
-        return input;
+        return static_cast <audio_io_handle_t> (reply.readInt32());
     }
 
     virtual status_t startInput(audio_io_handle_t input)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
-        data.write(&input, sizeof(audio_io_handle_t));
+        data.writeInt32(input);
         remote()->transact(START_INPUT, data, &reply);
         return static_cast <status_t> (reply.readInt32());
     }
@@ -200,7 +196,7 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
-        data.write(&input, sizeof(audio_io_handle_t));
+        data.writeInt32(input);
         remote()->transact(STOP_INPUT, data, &reply);
         return static_cast <status_t> (reply.readInt32());
     }
@@ -209,7 +205,7 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
-        data.write(&input, sizeof(audio_io_handle_t));
+        data.writeInt32(input);
         remote()->transact(RELEASE_INPUT, data, &reply);
     }
 
@@ -316,14 +312,13 @@ status_t BnAudioPolicyService::onTransact(
                                                  format,
                                                  channels,
                                                  flags);
-            reply->write(&output, sizeof(audio_io_handle_t));
+            reply->writeInt32(static_cast <int>(output));
             return NO_ERROR;
         } break;
 
         case START_OUTPUT: {
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
-            audio_io_handle_t output;
-            data.read(&output, sizeof(audio_io_handle_t));
+            audio_io_handle_t output = static_cast <audio_io_handle_t>(data.readInt32());
             uint32_t stream = data.readInt32();
             reply->writeInt32(static_cast <uint32_t>(startOutput(output, (AudioSystem::stream_type)stream)));
             return NO_ERROR;
@@ -331,8 +326,7 @@ status_t BnAudioPolicyService::onTransact(
 
         case STOP_OUTPUT: {
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
-            audio_io_handle_t output;
-            data.read(&output, sizeof(audio_io_handle_t));
+            audio_io_handle_t output = static_cast <audio_io_handle_t>(data.readInt32());
             uint32_t stream = data.readInt32();
             reply->writeInt32(static_cast <uint32_t>(stopOutput(output, (AudioSystem::stream_type)stream)));
             return NO_ERROR;
@@ -340,8 +334,7 @@ status_t BnAudioPolicyService::onTransact(
 
         case RELEASE_OUTPUT: {
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
-            audio_io_handle_t output;
-            data.read(&output, sizeof(audio_io_handle_t));
+            audio_io_handle_t output = static_cast <audio_io_handle_t>(data.readInt32());
             releaseOutput(output);
             return NO_ERROR;
         } break;
@@ -358,30 +351,27 @@ status_t BnAudioPolicyService::onTransact(
                                                format,
                                                channels,
                                                acoustics);
-            reply->write(&input, sizeof(audio_io_handle_t));
+            reply->writeInt32(static_cast <int>(input));
             return NO_ERROR;
         } break;
 
         case START_INPUT: {
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
-            audio_io_handle_t input;
-            data.read(&input, sizeof(audio_io_handle_t));
+            audio_io_handle_t input = static_cast <audio_io_handle_t>(data.readInt32());
             reply->writeInt32(static_cast <uint32_t>(startInput(input)));
             return NO_ERROR;
         } break;
 
         case STOP_INPUT: {
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
-            audio_io_handle_t input;
-            data.read(&input, sizeof(audio_io_handle_t));
+            audio_io_handle_t input = static_cast <audio_io_handle_t>(data.readInt32());
             reply->writeInt32(static_cast <uint32_t>(stopInput(input)));
             return NO_ERROR;
         } break;
 
         case RELEASE_INPUT: {
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
-            audio_io_handle_t input;
-            data.read(&input, sizeof(audio_io_handle_t));
+            audio_io_handle_t input = static_cast <audio_io_handle_t>(data.readInt32());
             releaseInput(input);
             return NO_ERROR;
         } break;

@@ -50,12 +50,12 @@ public:
                                 int frameCount,
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
-                                void *output,
+                                int output,
                                 status_t *status) = 0;
 
     virtual sp<IAudioRecord> openRecord(
                                 pid_t pid,
-                                void *input,
+                                int input,
                                 uint32_t sampleRate,
                                 int format,
                                 int channelCount,
@@ -66,11 +66,11 @@ public:
     /* query the audio hardware state. This state never changes,
      * and therefore can be cached.
      */
-    virtual     uint32_t    sampleRate(void *output) const = 0;
-    virtual     int         channelCount(void *output) const = 0;
-    virtual     int         format(void *output) const = 0;
-    virtual     size_t      frameCount(void *output) const = 0;
-    virtual     uint32_t    latency(void *output) const = 0;
+    virtual     uint32_t    sampleRate(int output) const = 0;
+    virtual     int         channelCount(int output) const = 0;
+    virtual     int         format(int output) const = 0;
+    virtual     size_t      frameCount(int output) const = 0;
+    virtual     uint32_t    latency(int output) const = 0;
 
     /* set/get the audio hardware state. This will probably be used by
      * the preference panel, mostly.
@@ -84,10 +84,10 @@ public:
     /* set/get stream type state. This will probably be used by
      * the preference panel, mostly.
      */
-    virtual     status_t    setStreamVolume(int stream, float value, void *output) = 0;
+    virtual     status_t    setStreamVolume(int stream, float value, int output) = 0;
     virtual     status_t    setStreamMute(int stream, bool muted) = 0;
 
-    virtual     float       streamVolume(int stream, void *output) const = 0;
+    virtual     float       streamVolume(int stream, int output) const = 0;
     virtual     bool        streamMute(int stream) const = 0;
 
     // set audio mode
@@ -100,8 +100,8 @@ public:
     // is a music stream active?
     virtual     bool        isMusicActive() const = 0;
 
-    virtual     status_t    setParameters(void *ioHandle, const String8& keyValuePairs) = 0;
-    virtual     String8     getParameters(void *ioHandle, const String8& keys) = 0;
+    virtual     status_t    setParameters(int ioHandle, const String8& keyValuePairs) = 0;
+    virtual     String8     getParameters(int ioHandle, const String8& keys) = 0;
     
     // register a current process for audio output change notifications
     virtual void registerClient(const sp<IAudioFlingerClient>& client) = 0;
@@ -109,25 +109,25 @@ public:
     // retrieve the audio recording buffer size
     virtual size_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount) = 0;
 
-    virtual void *openOutput(uint32_t *pDevices,
+    virtual int openOutput(uint32_t *pDevices,
                                     uint32_t *pSamplingRate,
                                     uint32_t *pFormat,
                                     uint32_t *pChannels,
                                     uint32_t *pLatencyMs,
                                     uint32_t flags) = 0;
-    virtual void *openDuplicateOutput(void *output1, void *output2) = 0;
-    virtual status_t closeOutput(void *output) = 0;
-    virtual status_t suspendOutput(void *output) = 0;
-    virtual status_t restoreOutput(void *output) = 0;
+    virtual int openDuplicateOutput(int output1, int output2) = 0;
+    virtual status_t closeOutput(int output) = 0;
+    virtual status_t suspendOutput(int output) = 0;
+    virtual status_t restoreOutput(int output) = 0;
 
-    virtual void *openInput(uint32_t *pDevices,
+    virtual int openInput(uint32_t *pDevices,
                                     uint32_t *pSamplingRate,
                                     uint32_t *pFormat,
                                     uint32_t *pChannels,
                                     uint32_t acoustics) = 0;
-    virtual status_t closeInput(void *input) = 0;
+    virtual status_t closeInput(int input) = 0;
 
-    virtual status_t setStreamOutput(uint32_t stream, void *output) = 0;
+    virtual status_t setStreamOutput(uint32_t stream, int output) = 0;
 };
 
 

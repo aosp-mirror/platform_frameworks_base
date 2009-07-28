@@ -125,7 +125,7 @@ status_t AudioSystem::getMasterMute(bool* mute)
     return NO_ERROR;
 }
 
-status_t AudioSystem::setStreamVolume(int stream, float value, void *output)
+status_t AudioSystem::setStreamVolume(int stream, float value, int output)
 {
     if (uint32_t(stream) >= NUM_STREAM_TYPES) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
@@ -143,7 +143,7 @@ status_t AudioSystem::setStreamMute(int stream, bool mute)
     return NO_ERROR;
 }
 
-status_t AudioSystem::getStreamVolume(int stream, float* volume, void *output)
+status_t AudioSystem::getStreamVolume(int stream, float* volume, int output)
 {
     if (uint32_t(stream) >= NUM_STREAM_TYPES) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
@@ -234,7 +234,7 @@ status_t AudioSystem::getOutputSamplingRate(int* samplingRate, int streamType)
     gLock.lock();
     outputDesc = AudioSystem::gOutputs.valueFor(output);
     if (outputDesc == 0) {
-        LOGV("getOutputSamplingRate() no output descriptor for output %p in gOutputs", output);
+        LOGV("getOutputSamplingRate() no output descriptor for output %d in gOutputs", output);
         gLock.unlock();
         const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
         if (af == 0) return PERMISSION_DENIED;
@@ -245,7 +245,7 @@ status_t AudioSystem::getOutputSamplingRate(int* samplingRate, int streamType)
         gLock.unlock();
     }
 
-    LOGV("getOutputSamplingRate() streamType %d, output %p, sampling rate %d", streamType, output, *samplingRate);
+    LOGV("getOutputSamplingRate() streamType %d, output %d, sampling rate %d", streamType, output, *samplingRate);
 
     return NO_ERROR;
 }
@@ -276,7 +276,7 @@ status_t AudioSystem::getOutputFrameCount(int* frameCount, int streamType)
         gLock.unlock();
     }
 
-    LOGV("getOutputFrameCount() streamType %d, output %p, frameCount %d", streamType, output, *frameCount);
+    LOGV("getOutputFrameCount() streamType %d, output %d, frameCount %d", streamType, output, *frameCount);
 
     return NO_ERROR;
 }
@@ -307,7 +307,7 @@ status_t AudioSystem::getOutputLatency(uint32_t* latency, int streamType)
         gLock.unlock();
     }
 
-    LOGV("getOutputLatency() streamType %d, output %p, latency %d", streamType, output, *latency);
+    LOGV("getOutputLatency() streamType %d, output %d, latency %d", streamType, output, *latency);
 
     return NO_ERROR;
 }
@@ -348,13 +348,12 @@ void AudioSystem::AudioFlingerClient::binderDied(const wp<IBinder>& who) {
     LOGW("AudioFlinger server died!");
 }
 
-void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, void *param1, void *param2) {
+void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, int ioHandle, void *param2) {
     LOGV("ioConfigChanged() event %d", event);
-    audio_io_handle_t ioHandle = (audio_io_handle_t)param1;
     OutputDescriptor *desc;
     uint32_t stream;
 
-    if (param1 == 0) return;
+    if (ioHandle == 0) return;
 
     Mutex::Autolock _l(AudioSystem::gLock);
 
@@ -362,14 +361,14 @@ void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, void *param1, v
     case STREAM_CONFIG_CHANGED:
         if (param2 == 0) break;
         stream = *(uint32_t *)param2;
-        LOGV("ioConfigChanged() STREAM_CONFIG_CHANGED stream %d, output %p", stream, ioHandle);
+        LOGV("ioConfigChanged() STREAM_CONFIG_CHANGED stream %d, output %d", stream, ioHandle);
         if (gStreamOutputMap.indexOfKey(stream) >= 0) {
             gStreamOutputMap.replaceValueFor(stream, ioHandle);
         }
         break;
     case OUTPUT_OPENED: {
         if (gOutputs.indexOfKey(ioHandle) >= 0) {
-            LOGV("ioConfigChanged() opening already existing output! %p", ioHandle);
+            LOGV("ioConfigChanged() opening already existing output! %d", ioHandle);
             break;
         }
         if (param2 == 0) break;
@@ -382,10 +381,10 @@ void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, void *param1, v
         } break;
     case OUTPUT_CLOSED: {
         if (gOutputs.indexOfKey(ioHandle) < 0) {
-            LOGW("ioConfigChanged() closing unknow output! %p", ioHandle);
+            LOGW("ioConfigChanged() closing unknow output! %d", ioHandle);
             break;
         }
-        LOGV("ioConfigChanged() output %p closed", ioHandle);
+        LOGV("ioConfigChanged() output %d closed", ioHandle);
 
         gOutputs.removeItem(ioHandle);
         for (int i = gStreamOutputMap.size() - 1; i >= 0 ; i--) {
@@ -398,13 +397,13 @@ void AudioSystem::AudioFlingerClient::ioConfigChanged(int event, void *param1, v
     case OUTPUT_CONFIG_CHANGED: {
         int index = gOutputs.indexOfKey(ioHandle);
         if (index < 0) {
-            LOGW("ioConfigChanged() modifying unknow output! %p", ioHandle);
+            LOGW("ioConfigChanged() modifying unknow output! %d", ioHandle);
             break;
         }
         if (param2 == 0) break;
         desc = (OutputDescriptor *)param2;
 
-        LOGV("ioConfigChanged() new config for output %p samplingRate %d, format %d channels %d frameCount %d latency %d",
+        LOGV("ioConfigChanged() new config for output %d samplingRate %d, format %d channels %d frameCount %d latency %d",
                 ioHandle, desc->samplingRate, desc->format,
                 desc->channels, desc->frameCount, desc->latency);
         OutputDescriptor *outputDesc = gOutputs.valueAt(index);
@@ -524,15 +523,15 @@ audio_io_handle_t AudioSystem::getOutput(stream_type stream,
                                     uint32_t channels,
                                     output_flags flags)
 {
-    audio_io_handle_t output = NULL;
+    audio_io_handle_t output = 0;
     if ((flags & AudioSystem::OUTPUT_FLAG_DIRECT) == 0) {
         Mutex::Autolock _l(gLock);
         output = AudioSystem::gStreamOutputMap.valueFor(stream);
-        LOGV_IF((output != NULL), "getOutput() read %p from cache for stream %d", output, stream);
+        LOGV_IF((output != 0), "getOutput() read %d from cache for stream %d", output, stream);
     }
-    if (output == NULL) {
+    if (output == 0) {
         const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
-        if (aps == 0) return NULL;
+        if (aps == 0) return 0;
         output = aps->getOutput(stream, samplingRate, format, channels, flags);
         if ((flags & AudioSystem::OUTPUT_FLAG_DIRECT) == 0) {
             Mutex::Autolock _l(gLock);
@@ -570,7 +569,7 @@ audio_io_handle_t AudioSystem::getInput(int inputSource,
                                     audio_in_acoustics acoustics)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
-    if (aps == 0) return NULL;
+    if (aps == 0) return 0;
     return aps->getInput(inputSource, samplingRate, format, channels, acoustics);
 }
 

@@ -24,7 +24,7 @@
 namespace android {
 
 typedef void (*audio_error_callback)(status_t err);
-typedef void * audio_io_handle_t;
+typedef int audio_io_handle_t;
 
 class IAudioPolicyService;
 class String8;
@@ -184,8 +184,8 @@ public:
     static status_t getMasterMute(bool* mute);
 
     // set/get stream volume on specified output
-    static status_t setStreamVolume(int stream, float value, void *output);
-    static status_t getStreamVolume(int stream, float* volume, void *output);
+    static status_t setStreamVolume(int stream, float value, int output);
+    static status_t getStreamVolume(int stream, float* volume, int output);
 
     // mute/unmute stream
     static status_t setStreamMute(int stream, bool mute);
@@ -383,7 +383,7 @@ private:
 
         // indicate a change in the configuration of an output or input: keeps the cached
         // values for output/input parameters upto date in client process
-        virtual void ioConfigChanged(int event, void *param1, void *param2);
+        virtual void ioConfigChanged(int event, int ioHandle, void *param2);
     };
 
     class AudioPolicyServiceClient: public IBinder::DeathRecipient
