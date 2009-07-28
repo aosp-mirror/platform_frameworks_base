@@ -244,7 +244,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
         return success;
     }
-    
+
+    private boolean isInRealAppSearch() {
+        return !mGlobalSearchMode
+                && (mPreviousComponents == null || mPreviousComponents.isEmpty());
+    }
+
     /**
      * Called in response to a press of the hard search button in
      * {@link #onKeyDown(int, KeyEvent)}, this method toggles between in-app
@@ -535,7 +540,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // we dismiss the entire dialog instead
         mSearchAutoComplete.setDropDownDismissedOnCompletion(false);
 
-        if (mGlobalSearchMode) {
+        if (!isInRealAppSearch()) {
             mSearchAutoComplete.setDropDownAlwaysVisible(true);  // fill space until results come in
         } else {
             mSearchAutoComplete.setDropDownAlwaysVisible(false);
@@ -1259,10 +1264,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 launchGlobalSearchIntent(intent);
             } else {
                 getContext().startActivity(intent);
-                // in global search mode, SearchDialogWrapper#performActivityResuming
+                // If the search switches to a different activity,
+                // SearchDialogWrapper#performActivityResuming
                 // will handle hiding the dialog when the next activity starts, but for
-                // in-app search, we still need to dismiss the dialog.
-                dismiss();
+                // real in-app search, we still need to dismiss the dialog.
+                if (isInRealAppSearch()) {
+                    dismiss();
+                }
             }
         } catch (RuntimeException ex) {
             Log.e(LOG_TAG, "Failed launch activity: " + intent, ex);
@@ -1401,13 +1409,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return;
         }
         if (DBG) Log.d(LOG_TAG, "Switching to " + componentName);
-        
-        ComponentName previous = mLaunchComponent;
+
+        pushPreviousComponent(mLaunchComponent);
         if (!show(componentName, mAppSearchData, false)) {
             Log.w(LOG_TAG, "Failed to switch to source " + componentName);
+            popPreviousComponent();
             return;
         }
-        pushPreviousComponent(previous);
 
         String query = intent.getStringExtra(SearchManager.QUERY);
         setUserQuery(query);
