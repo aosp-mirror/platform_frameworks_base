@@ -114,12 +114,14 @@ public class PowerManager
     private static final int WAKE_BIT_SCREEN_DIM = 4;
     private static final int WAKE_BIT_SCREEN_BRIGHT = 8;
     private static final int WAKE_BIT_KEYBOARD_BRIGHT = 16;
+    private static final int WAKE_BIT_PROXIMITY_SCREEN_OFF = 32;
     
     private static final int LOCK_MASK = WAKE_BIT_CPU_STRONG
                                         | WAKE_BIT_CPU_WEAK
                                         | WAKE_BIT_SCREEN_DIM
                                         | WAKE_BIT_SCREEN_BRIGHT
-                                        | WAKE_BIT_KEYBOARD_BRIGHT;
+                                        | WAKE_BIT_KEYBOARD_BRIGHT
+                                        | WAKE_BIT_PROXIMITY_SCREEN_OFF;
 
     /**
      * Wake lock that ensures that the CPU is running.  The screen might
@@ -145,6 +147,16 @@ public class PowerManager
      * the keyboard backlight will be allowed to go off.
      */
     public static final int SCREEN_DIM_WAKE_LOCK = WAKE_BIT_CPU_WEAK | WAKE_BIT_SCREEN_DIM;
+
+    /**
+     * Wake lock that turns the screen off when the proximity sensor activates.
+     * Since not all devices have proximity sensors, use
+     * {@link #getSupportedWakeLockFlags() getSupportedWakeLockFlags()} to determine if
+     * this wake lock mode is supported.
+     *
+     * {@hide}
+     */
+    public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = WAKE_BIT_PROXIMITY_SCREEN_OFF;
 
     /**
      * Normally wake locks don't actually wake the device, they just cause
@@ -196,6 +208,7 @@ public class PowerManager
             case SCREEN_DIM_WAKE_LOCK:
             case SCREEN_BRIGHT_WAKE_LOCK:
             case FULL_WAKE_LOCK:
+            case PROXIMITY_SCREEN_OFF_WAKE_LOCK:
                 break;
             default:
                 throw new IllegalArgumentException();
@@ -365,7 +378,33 @@ public class PowerManager
         } catch (RemoteException e) {
         }
     }
-    
+
+   /**
+     * Returns the set of flags for {@link #newWakeLock(int, String) newWakeLock()}
+     * that are supported on the device.
+     * For example, to test to see if the {@link #PROXIMITY_SCREEN_OFF_WAKE_LOCK}
+     * is supported:
+     *
+     * {@samplecode
+     * PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+     * int supportedFlags = pm.getSupportedWakeLockFlags();
+     *  boolean proximitySupported = ((supportedFlags & PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)
+     *                                  == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK);
+     * }
+     *
+     * @return the set of supported WakeLock flags.
+     *
+     * {@hide}
+     */
+    public int getSupportedWakeLockFlags()
+    {
+        try {
+            return mService.getSupportedWakeLockFlags();
+        } catch (RemoteException e) {
+            return 0;
+        }
+    }
+
     private PowerManager()
     {
     }

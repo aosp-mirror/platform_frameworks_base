@@ -29,6 +29,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
@@ -58,7 +62,8 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
-class PowerManagerService extends IPowerManager.Stub implements LocalPowerManager, Watchdog.Monitor {
+class PowerManagerService extends IPowerManager.Stub
+        implements LocalPowerManager,Watchdog.Monitor, SensorEventListener {
 
     private static final String TAG = "PowerManagerService";
     static final String PARTIAL_NAME = "PowerManagerService";
@@ -72,7 +77,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private static final int LOCK_MASK = PowerManager.PARTIAL_WAKE_LOCK
                                         | PowerManager.SCREEN_DIM_WAKE_LOCK
                                         | PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-                                        | PowerManager.FULL_WAKE_LOCK;
+                                        | PowerManager.FULL_WAKE_LOCK
+                                        | PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK;
 
     //                       time since last state:               time since last event:
     // The short keylight delay comes from Gservices; this is the default.
@@ -138,6 +144,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private int[] mBroadcastQueue = new int[] { -1, -1, -1 };
     private int[] mBroadcastWhy = new int[3];
     private int mPartialCount = 0;
+    private int mProximityCount = 0;
     private int mPowerState;
     private boolean mOffBecauseOfUser;
     private int mUserState;
@@ -175,6 +182,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private IActivityManager mActivityService;
     private IBatteryStats mBatteryStats;
     private BatteryService mBatteryService;
+    private SensorManager mSensorManager;
+    private Sensor mProximitySensor;
     private boolean mDimScreen = true;
     private long mNextTimeout;
     private volatile int mPokey = 0;
@@ -536,6 +545,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     wl.minState = SCREEN_DIM;
                     break;
                 case PowerManager.PARTIAL_WAKE_LOCK:
+                case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
                     break;
                 default:
                     // just log and bail.  we're in the server, so don't
@@ -583,6 +593,11 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 }
             }
             Power.acquireWakeLock(Power.PARTIAL_WAKE_LOCK,PARTIAL_NAME);
+        } else if ((flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK) {
+            mProximityCount++;
+            if (mProximityCount == 1) {
+                enableProximityLockLocked();
+            }
         }
         if (newlock) {
             acquireUid = wl.uid;
@@ -638,6 +653,11 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             if (mPartialCount == 0) {
                 if (LOG_PARTIAL_WL) EventLog.writeEvent(LOG_POWER_PARTIAL_WAKE_STATE, 0, wl.tag);
                 Power.releaseWakeLock(PARTIAL_NAME);
+            }
+        } else if ((wl.flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK) {
+            mProximityCount--;
+            if (mProximityCount == 0) {
+                disableProximityLockLocked();
             }
         }
         // Unlink the lock from the binder.
@@ -1995,5 +2015,48 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
     public void monitor() {
         synchronized (mLocks) { }
+    }
+
+    public int getSupportedWakeLockFlags() {
+        int result = PowerManager.PARTIAL_WAKE_LOCK
+                   | PowerManager.FULL_WAKE_LOCK
+                   | PowerManager.SCREEN_DIM_WAKE_LOCK;
+
+        // call getSensorManager() to make sure mProximitySensor is initialized
+        getSensorManager();
+        if (mProximitySensor != null) {
+            result |= PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK;
+        }
+
+        return result;
+    }
+
+    private SensorManager getSensorManager() {
+        if (mSensorManager == null) {
+            mSensorManager = new SensorManager(mHandlerThread.getLooper());
+            mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        }
+        return mSensorManager;
+    }
+
+    private void enableProximityLockLocked() {
+        mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    private void disableProximityLockLocked() {
+        mSensorManager.unregisterListener(this);
+    }
+
+    public void onSensorChanged(SensorEvent event) {
+        long milliseconds = event.timestamp / 1000000;
+        if (event.values[0] == 0.0) {
+            goToSleep(milliseconds);
+        } else {
+            userActivity(milliseconds, false);
+        }
+    }
+
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // ignore
     }
 }
