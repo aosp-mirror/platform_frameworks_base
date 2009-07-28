@@ -1467,6 +1467,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     public synchronized boolean restart() {
         if (mRunState == RUN_STATE_STOPPED) {
             mRunState = RUN_STATE_STARTING;
+            resetInterface(true);
             return WifiNative.startDriverCommand();
         } else if (mRunState == RUN_STATE_STOPPING) {
             mRunState = RUN_STATE_STARTING;
