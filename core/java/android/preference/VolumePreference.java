@@ -28,6 +28,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.provider.Settings.System;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -36,7 +37,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
  * @hide
  */
 public class VolumePreference extends SeekBarPreference implements 
-        PreferenceManager.OnActivityStopListener {
+        PreferenceManager.OnActivityStopListener, View.OnKeyListener {
 
     private static final String TAG = "VolumePreference";
     
@@ -66,6 +67,30 @@ public class VolumePreference extends SeekBarPreference implements
         mSeekBarVolumizer = new SeekBarVolumizer(getContext(), seekBar, mStreamType);
         
         getPreferenceManager().registerOnActivityStopListener(this);
+
+        // grab focus and key events so that pressing the volume buttons in the
+        // dialog doesn't also show the normal volume adjust toast.
+        view.setOnKeyListener(this);
+        view.setFocusableInTouchMode(true);
+        view.requestFocus();
+    }
+
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        boolean isdown = (event.getAction() == KeyEvent.ACTION_DOWN);
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                if (isdown) {
+                    mSeekBarVolumizer.changeVolumeBy(-1);
+                }
+                return true;
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                if (isdown) {
+                    mSeekBarVolumizer.changeVolumeBy(1);
+                }
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -158,7 +183,9 @@ public class VolumePreference extends SeekBarPreference implements
             }
 
             mRingtone = RingtoneManager.getRingtone(mContext, defaultUri);
-            mRingtone.setStreamType(mStreamType);
+            if (mRingtone != null) {
+                mRingtone.setStreamType(mStreamType);
+            }
         }
         
         public void stop() {
@@ -215,5 +242,12 @@ public class VolumePreference extends SeekBarPreference implements
             return mSeekBar;
         }
         
+        public void changeVolumeBy(int amount) {
+            mSeekBar.incrementProgressBy(amount);
+            if (mRingtone != null && !mRingtone.isPlaying()) {
+                sample();
+            }
+            postSetVolume(mSeekBar.getProgress());
+        }
     }
 }

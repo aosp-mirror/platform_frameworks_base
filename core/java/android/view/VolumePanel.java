@@ -23,7 +23,9 @@ import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.AudioService;
 import android.media.AudioSystem;
+import android.media.RingtoneManager;
 import android.media.ToneGenerator;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -44,7 +46,7 @@ import android.widget.Toast;
 public class VolumePanel extends Handler
 {
     private static final String TAG = "VolumePanel";
-    private static boolean LOGD = false || Config.LOGD;
+    private static boolean LOGD = false;
 
     /**
      * The delay before playing a sound. This small period exists so the user
@@ -86,6 +88,7 @@ public class VolumePanel extends Handler
     protected Context mContext;
     private AudioManager mAudioManager;
     protected AudioService mAudioService;
+    private boolean mRingIsSilent;
 
     private final Toast mToast;
     private final View mView;
@@ -138,7 +141,7 @@ public class VolumePanel extends Handler
             onShowVolumeChanged(streamType, flags);
         }
 
-        if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0) {
+        if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0 && ! mRingIsSilent) {
             removeMessages(MSG_PLAY_SOUND);
             sendMessageDelayed(obtainMessage(MSG_PLAY_SOUND, streamType, flags), PLAY_SOUND_DELAY);
         }
@@ -157,6 +160,7 @@ public class VolumePanel extends Handler
         int index = mAudioService.getStreamVolume(streamType);
         int message = UNKNOWN_VOLUME_TEXT;
         int additionalMessage = 0;
+        mRingIsSilent = false;
 
         if (LOGD) {
             Log.d(TAG, "onShowVolumeChanged(streamType: " + streamType
@@ -169,8 +173,15 @@ public class VolumePanel extends Handler
         switch (streamType) {
 
             case AudioManager.STREAM_RING: {
+                setRingerIcon();
                 message = RINGTONE_VOLUME_TEXT;
-                setRingerIcon(index);
+                Uri ringuri = RingtoneManager.getActualDefaultRingtoneUri(
+                        mContext, RingtoneManager.TYPE_RINGTONE);
+                if (ringuri == null) {
+                    additionalMessage =
+                        com.android.internal.R.string.volume_music_hint_silent_ringtone_selected;
+                    mRingIsSilent = true;
+                }
                 break;
             }
 
@@ -208,6 +219,13 @@ public class VolumePanel extends Handler
             case AudioManager.STREAM_NOTIFICATION: {
                 message = NOTIFICATION_VOLUME_TEXT;
                 setSmallIcon(index);
+                Uri ringuri = RingtoneManager.getActualDefaultRingtoneUri(
+                        mContext, RingtoneManager.TYPE_NOTIFICATION);
+                if (ringuri == null) {
+                    additionalMessage =
+                        com.android.internal.R.string.volume_music_hint_silent_ringtone_selected;
+                    mRingIsSilent = true;
+                }
                 break;
             }
 
@@ -254,7 +272,6 @@ public class VolumePanel extends Handler
                 mAudioService.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)) {
             sendMessageDelayed(obtainMessage(MSG_VIBRATE), VIBRATE_DELAY);
         }
-
     }
 
     protected void onPlaySound(int streamType, int flags) {
@@ -337,17 +354,15 @@ public class VolumePanel extends Handler
     /**
      * Makes the ringer icon visible with an icon that is chosen
      * based on the current ringer mode.
-     *
-     * @param index
      */
-    private void setRingerIcon(int index) {
+    private void setRingerIcon() {
         mSmallStreamIcon.setVisibility(View.GONE);
         mLargeStreamIcon.setVisibility(View.VISIBLE);
 
         int ringerMode = mAudioService.getRingerMode();
         int icon;
 
-        if (LOGD) Log.d(TAG, "setRingerIcon(index: " + index+ "), ringerMode: " + ringerMode);
+        if (LOGD) Log.d(TAG, "setRingerIcon(), ringerMode: " + ringerMode);
 
         if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
             icon = com.android.internal.R.drawable.ic_volume_off;
