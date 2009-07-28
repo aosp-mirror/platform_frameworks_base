@@ -285,6 +285,33 @@ final class WebViewCore {
     }
 
     /**
+     * Shows a prompt to ask the user to set the Geolocation permission state
+     * for the given origin.
+     * @param origin The origin for which Geolocation permissions are
+     *     requested.
+     */
+    protected void geolocationPermissionsShowPrompt(String origin) {
+        mCallbackProxy.onGeolocationPermissionsShowPrompt(origin,
+                new GeolocationPermissions.Callback() {
+          public void invoke(String origin, boolean allow, boolean remember) {
+            GeolocationPermissionsData data = new GeolocationPermissionsData();
+            data.mOrigin = origin;
+            data.mAllow = allow;
+            data.mRemember = remember;
+            // Marshall to WebCore thread.
+            sendMessage(EventHub.GEOLOCATION_PERMISSIONS_PROVIDE, data);
+          }
+        });
+    }
+
+    /**
+     * Hides the Geolocation permissions prompt.
+     */
+    protected void geolocationPermissionsHidePrompt() {
+        mCallbackProxy.onGeolocationPermissionsHidePrompt();
+    }
+
+    /**
      * Invoke a javascript confirm dialog.
      * @param message The message displayed in the dialog.
      * @return True if the user confirmed or false if the user cancelled.
@@ -465,6 +492,16 @@ final class WebViewCore {
 
     private native void nativeUpdatePluginState(int framePtr, int nodePtr, int state);
 
+    /**
+     * Provide WebCore with a Geolocation permission state for the specified
+     * origin.
+     * @param origin The origin for which Geolocation permissions are provided.
+     * @param allow Whether Geolocation permissions are allowed.
+     * @param remember Whether this decision should be remembered beyond the
+     *     life of the current page.
+     */
+    private native void nativeGeolocationPermissionsProvide(String origin, boolean allow, boolean remember);
+
     // EventHub for processing messages
     private final EventHub mEventHub;
     // WebCore thread handler
@@ -608,6 +645,12 @@ final class WebViewCore {
         int mState;
     }
 
+    static class GeolocationPermissionsData {
+        String mOrigin;
+        boolean mAllow;
+        boolean mRemember;
+    }
+
         static final String[] HandlerDebugString = {
             "SCROLL_TEXT_INPUT", // = 99
             "LOAD_URL", // = 100;
@@ -733,6 +776,8 @@ final class WebViewCore {
         static final int DUMP_NAVTREE = 172;
 
         static final int SET_JS_FLAGS = 173;
+        // Geolocation
+        static final int GEOLOCATION_PERMISSIONS_PROVIDE = 180;
 
         // private message ids
         private static final int DESTROY =     200;
@@ -1119,6 +1164,12 @@ final class WebViewCore {
 
                         case SET_JS_FLAGS:
                             nativeSetJsFlags((String)msg.obj);
+
+                        case GEOLOCATION_PERMISSIONS_PROVIDE:
+                            GeolocationPermissionsData data =
+                                    (GeolocationPermissionsData) msg.obj;
+                            nativeGeolocationPermissionsProvide(data.mOrigin,
+                                    data.mAllow, data.mRemember);
                             break;
 
                         case SYNC_SCROLL:

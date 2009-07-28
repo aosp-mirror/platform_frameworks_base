@@ -31,6 +31,14 @@ import java.util.Set;
  * @hide
  */
 public final class GeolocationPermissions {
+    /**
+     * Callback interface used by the browser to report a Geolocation permission
+     * state set by the user in response to a permissions prompt.
+     */
+    public interface Callback {
+        public void invoke(String origin, boolean allow, boolean remember);
+    };
+
     // Log tag
     private static final String TAG = "geolocationPermissions";
 

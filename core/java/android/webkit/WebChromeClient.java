@@ -227,6 +227,20 @@ public class WebChromeClient {
     }
 
     /**
+     * Instructs the client to show a prompt to ask the user to set the
+     * Geolocation permission state for the specified origin.
+     * @hide pending API council approval.
+     */
+    public void onGeolocationPermissionsShowPrompt(String origin,
+            GeolocationPermissions.Callback callback) {}
+
+    /**
+     * Instructs the client to hide the Geolocation permissions prompt.
+     * @hide pending API council approval.
+     */
+    public void onGeolocationPermissionsHidePrompt() {}
+
+    /**
      * Tell the client that a JavaScript execution timeout has occured. And the
      * client may decide whether or not to interrupt the execution. If the
      * client returns true, the JavaScript will be interrupted. If the client
@@ -249,6 +263,5 @@ public class WebChromeClient {
      * @param sourceID The name of the source file that caused the error.
      * @hide pending API council.
      */
-    public void addMessageToConsole(String message, int lineNumber, String sourceID) {
-    }
+    public void addMessageToConsole(String message, int lineNumber, String sourceID) {}
 }

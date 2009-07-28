@@ -72,39 +72,41 @@ class CallbackProxy extends Handler {
     private final Context mContext;
 
     // Message Ids
-    private static final int PAGE_STARTED              = 100;
-    private static final int RECEIVED_ICON             = 101;
-    private static final int RECEIVED_TITLE            = 102;
-    private static final int OVERRIDE_URL              = 103;
-    private static final int AUTH_REQUEST              = 104;
-    private static final int SSL_ERROR                 = 105;
-    private static final int PROGRESS                  = 106;
-    private static final int UPDATE_VISITED            = 107;
-    private static final int LOAD_RESOURCE             = 108;
-    private static final int CREATE_WINDOW             = 109;
-    private static final int CLOSE_WINDOW              = 110;
-    private static final int SAVE_PASSWORD             = 111;
-    private static final int JS_ALERT                  = 112;
-    private static final int JS_CONFIRM                = 113;
-    private static final int JS_PROMPT                 = 114;
-    private static final int JS_UNLOAD                 = 115;
-    private static final int ASYNC_KEYEVENTS           = 116;
-    private static final int TOO_MANY_REDIRECTS        = 117;
-    private static final int DOWNLOAD_FILE             = 118;
-    private static final int REPORT_ERROR              = 119;
-    private static final int RESEND_POST_DATA          = 120;
-    private static final int PAGE_FINISHED             = 121;
-    private static final int REQUEST_FOCUS             = 122;
-    private static final int SCALE_CHANGED             = 123;
-    private static final int RECEIVED_CERTIFICATE      = 124;
-    private static final int SWITCH_OUT_HISTORY        = 125;
-    private static final int EXCEEDED_DATABASE_QUOTA   = 126;
-    private static final int REACHED_APPCACHE_MAXSIZE  = 127;
-    private static final int JS_TIMEOUT                = 128;
-    private static final int ADD_MESSAGE_TO_CONSOLE    = 129;
+    private static final int PAGE_STARTED                        = 100;
+    private static final int RECEIVED_ICON                       = 101;
+    private static final int RECEIVED_TITLE                      = 102;
+    private static final int OVERRIDE_URL                        = 103;
+    private static final int AUTH_REQUEST                        = 104;
+    private static final int SSL_ERROR                           = 105;
+    private static final int PROGRESS                            = 106;
+    private static final int UPDATE_VISITED                      = 107;
+    private static final int LOAD_RESOURCE                       = 108;
+    private static final int CREATE_WINDOW                       = 109;
+    private static final int CLOSE_WINDOW                        = 110;
+    private static final int SAVE_PASSWORD                       = 111;
+    private static final int JS_ALERT                            = 112;
+    private static final int JS_CONFIRM                          = 113;
+    private static final int JS_PROMPT                           = 114;
+    private static final int JS_UNLOAD                           = 115;
+    private static final int ASYNC_KEYEVENTS                     = 116;
+    private static final int TOO_MANY_REDIRECTS                  = 117;
+    private static final int DOWNLOAD_FILE                       = 118;
+    private static final int REPORT_ERROR                        = 119;
+    private static final int RESEND_POST_DATA                    = 120;
+    private static final int PAGE_FINISHED                       = 121;
+    private static final int REQUEST_FOCUS                       = 122;
+    private static final int SCALE_CHANGED                       = 123;
+    private static final int RECEIVED_CERTIFICATE                = 124;
+    private static final int SWITCH_OUT_HISTORY                  = 125;
+    private static final int EXCEEDED_DATABASE_QUOTA             = 126;
+    private static final int REACHED_APPCACHE_MAXSIZE            = 127;
+    private static final int JS_TIMEOUT                          = 128;
+    private static final int ADD_MESSAGE_TO_CONSOLE              = 129;
+    private static final int GEOLOCATION_PERMISSIONS_SHOW_PROMPT = 130;
+    private static final int GEOLOCATION_PERMISSIONS_HIDE_PROMPT = 131;
 
     // Message triggered by the client to resume execution
-    private static final int NOTIFY                    = 200;
+    private static final int NOTIFY                              = 200;
 
     // Result transportation object for returning results across thread
     // boundaries.
@@ -435,6 +437,25 @@ class CallbackProxy extends Handler {
 
                     mWebChromeClient.onReachedMaxAppCacheSize(spaceNeeded,
                             totalUsedQuota, quotaUpdater);
+                }
+                break;
+
+            case GEOLOCATION_PERMISSIONS_SHOW_PROMPT:
+                if (mWebChromeClient != null) {
+                    HashMap<String, Object> map =
+                            (HashMap<String, Object>) msg.obj;
+                    String origin = (String) map.get("origin");
+                    GeolocationPermissions.Callback callback =
+                            (GeolocationPermissions.Callback)
+                            map.get("callback");
+                    mWebChromeClient.onGeolocationPermissionsShowPrompt(origin,
+                            callback);
+                }
+                break;
+
+            case GEOLOCATION_PERMISSIONS_HIDE_PROMPT:
+                if (mWebChromeClient != null) {
+                    mWebChromeClient.onGeolocationPermissionsHidePrompt();
                 }
                 break;
 
@@ -1189,6 +1210,44 @@ class CallbackProxy extends Handler {
         map.put("quotaUpdater", quotaUpdater);
         msg.obj = map;
         sendMessage(msg);
+    }
+
+    /**
+     * Called by WebViewCore to instruct the browser to display a prompt to ask
+     * the user to set the Geolocation permission state for the given origin.
+     * @param origin The origin requesting Geolocation permsissions.
+     * @param callback The callback to call once a permission state has been
+     *     obtained.
+     * @hide pending API council review.
+     */
+    public void onGeolocationPermissionsShowPrompt(String origin,
+            GeolocationPermissions.Callback callback) {
+        if (mWebChromeClient == null) {
+            return;
+        }
+
+        Message showMessage =
+                obtainMessage(GEOLOCATION_PERMISSIONS_SHOW_PROMPT);
+        HashMap<String, Object> map = new HashMap();
+        map.put("origin", origin);
+        map.put("callback", callback);
+        showMessage.obj = map;
+        sendMessage(showMessage);
+    }
+
+    /**
+     * Called by WebViewCore to instruct the browser to hide the Geolocation
+     * permissions prompt.
+     * origin.
+     * @hide pending API council review.
+     */
+    public void onGeolocationPermissionsHidePrompt() {
+        if (mWebChromeClient == null) {
+            return;
+        }
+
+        Message hideMessage = obtainMessage(GEOLOCATION_PERMISSIONS_HIDE_PROMPT);
+        sendMessage(hideMessage);
     }
 
     /**
