@@ -3634,7 +3634,7 @@ public final class ActivityThread {
                 Locale.setDefault(config.locale);
             }
 
-            Resources.updateSystemConfiguration(config, null);
+            Resources.updateSystemConfiguration(config, dm);
 
             ApplicationContext.ApplicationPackageManager.configurationChanged();
             //Log.i(TAG, "Configuration changed in " + currentPackageName());
