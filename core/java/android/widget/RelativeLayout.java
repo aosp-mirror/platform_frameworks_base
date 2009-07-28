@@ -432,7 +432,7 @@ public class RelativeLayout extends ViewGroup {
             width = resolveSize(width, widthMeasureSpec);
 
             if (offsetHorizontalAxis) {
-                    for (int i = 0; i < count; i++) {
+                for (int i = 0; i < count; i++) {
                     View child = getChildAt(i);
                     if (child.getVisibility() != GONE) {
                         LayoutParams params = (LayoutParams) child.getLayoutParams();
@@ -486,10 +486,14 @@ public class RelativeLayout extends ViewGroup {
                     View child = getChildAt(i);
                     if (child.getVisibility() != GONE && child != ignore) {
                         LayoutParams params = (LayoutParams) child.getLayoutParams();
-                        params.mLeft += horizontalOffset;
-                        params.mRight += horizontalOffset;
-                        params.mTop += verticalOffset;
-                        params.mBottom += verticalOffset;
+                        if (horizontalGravity) {
+                            params.mLeft += horizontalOffset;
+                            params.mRight += horizontalOffset;
+                        }
+                        if (verticalGravity) {
+                            params.mTop += verticalOffset;
+                            params.mBottom += verticalOffset;
+                        }
                     }
                 }
             }
