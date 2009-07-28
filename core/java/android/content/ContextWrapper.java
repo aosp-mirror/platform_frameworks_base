@@ -135,6 +135,7 @@ public class ContextWrapper extends Context {
         return mBase.getPackageCodePath();
     }
 
+    /** @hide */
     @Override
     public File getSharedPrefsFile(String name) {
         return mBase.getSharedPrefsFile(name);

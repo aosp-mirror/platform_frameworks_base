@@ -110,6 +110,7 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
     @Override
     public File getSharedPrefsFile(String name) {
         throw new UnsupportedOperationException();

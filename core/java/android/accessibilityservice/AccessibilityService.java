@@ -163,6 +163,10 @@ public abstract class AccessibilityService extends Service {
         }
     }
 
+    /**
+     * Implement to return the implementation of the internal accessibility
+     * service interface.  Subclasses should not override.
+     */
     @Override
     public final IBinder onBind(Intent intent) {
         return new IEventListenerWrapper(this);

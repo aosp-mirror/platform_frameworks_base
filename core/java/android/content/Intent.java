@@ -2390,7 +2390,7 @@ public class Intent implements Parcelable {
     /**
      * Create an intent from a URI.  This URI may encode the action,
      * category, and other intent fields, if it was returned by
-     * {@link #toUri}..  If the Intent was not generate by toUri(), its data
+     * {@link #toUri}.  If the Intent was not generate by toUri(), its data
      * will be the entire URI and its action will be ACTION_VIEW.
      *
      * <p>The URI given here must not be relative -- that is, it must include
