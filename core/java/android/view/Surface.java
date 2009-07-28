@@ -107,8 +107,14 @@ public class Surface implements Parcelable {
     public static final int SURFACE_HIDDEN    = 0x01;
     
     /** Freeze the surface. Equivalent to calling freeze() */ 
+    public static final int SURFACE_FROZEN     = 0x02;
+
+    /**
+     * @deprecated use {@link #SURFACE_FROZEN} instead.
+     */
+    @Deprecated
     public static final int SURACE_FROZEN     = 0x02;
-    
+
     /** Enable dithering when compositing this surface */
     public static final int SURFACE_DITHER    = 0x04;
 
