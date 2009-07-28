@@ -53,10 +53,11 @@ struct fields_t {
     int       STREAM_MUSIC;          //...  stream type constants
     int       STREAM_ALARM;          //...  stream type constants
     int       STREAM_NOTIFICATION;   //...  stream type constants
-    int       STREAM_BLUETOOTH_SCO;   //...  stream type constants
+    int       STREAM_BLUETOOTH_SCO;  //...  stream type constants
+    int       STREAM_DTMF;           //...  stream type constants
     int       MODE_STREAM;           //...  memory mode
     int       MODE_STATIC;           //...  memory mode
-    jfieldID  nativeTrackInJavaObj; // stores in Java the native AudioTrack object
+    jfieldID  nativeTrackInJavaObj;  // stores in Java the native AudioTrack object
     jfieldID  jniData;      // stores in Java additional resources used by the native AudioTrack
 };
 static fields_t javaAudioTrackFields;
@@ -203,6 +204,8 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         atStreamType = AudioSystem::NOTIFICATION;
     } else if (streamType == javaAudioTrackFields.STREAM_BLUETOOTH_SCO) {
         atStreamType = AudioSystem::BLUETOOTH_SCO;
+    } else if (streamType == javaAudioTrackFields.STREAM_DTMF) {
+        atStreamType = AudioSystem::DTMF;
     } else {
         LOGE("Error creating AudioTrack: unknown stream type.");
         return AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE;
@@ -727,6 +730,8 @@ static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobjec
         nativeStreamType = AudioSystem::NOTIFICATION;
     } else if (javaStreamType == javaAudioTrackFields.STREAM_BLUETOOTH_SCO) {
         nativeStreamType = AudioSystem::BLUETOOTH_SCO;
+    } else if (javaStreamType == javaAudioTrackFields.STREAM_DTMF) {
+        nativeStreamType = AudioSystem::DTMF;
     } else {
         nativeStreamType = AudioSystem::DEFAULT;
     }
@@ -822,6 +827,7 @@ static JNINativeMethod gMethods[] = {
 #define JAVA_CONST_STREAM_ALARM_NAME                    "STREAM_ALARM"
 #define JAVA_CONST_STREAM_NOTIFICATION_NAME             "STREAM_NOTIFICATION"
 #define JAVA_CONST_STREAM_BLUETOOTH_SCO_NAME            "STREAM_BLUETOOTH_SCO"
+#define JAVA_CONST_STREAM_DTMF_NAME                     "STREAM_DTMF"
 #define JAVA_CONST_MODE_STREAM_NAME                     "MODE_STREAM"
 #define JAVA_CONST_MODE_STATIC_NAME                     "MODE_STATIC"
 #define JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME            "mNativeTrackInJavaObj"
@@ -943,8 +949,10 @@ int register_android_media_AudioTrack(JNIEnv *env)
                JAVA_CONST_STREAM_NOTIFICATION_NAME, &(javaAudioTrackFields.STREAM_NOTIFICATION))
           || !android_media_getIntConstantFromClass(env, audioManagerClass,
                JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_BLUETOOTH_SCO_NAME,
-               &(javaAudioTrackFields.STREAM_BLUETOOTH_SCO))) {
+               JAVA_CONST_STREAM_BLUETOOTH_SCO_NAME, &(javaAudioTrackFields.STREAM_BLUETOOTH_SCO))
+          || !android_media_getIntConstantFromClass(env, audioManagerClass,
+               JAVA_AUDIOMANAGER_CLASS_NAME,
+               JAVA_CONST_STREAM_DTMF_NAME, &(javaAudioTrackFields.STREAM_DTMF))) {
        // error log performed in android_media_getIntConstantFromClass()
        return -1;
     }
