@@ -198,15 +198,32 @@ public class WebChromeClient {
     * @param databaseIdentifier The identifier of the database that caused the
     *     quota overflow.
     * @param currentQuota The current quota for the origin.
+    * @param totalUsedQuota is the sum of all origins' quota.
     * @param quotaUpdater A callback to inform the WebCore thread that a new
     *     quota is available. This callback must always be executed at some
     *     point to ensure that the sleeping WebCore thread is woken up.
     */
     public void onExceededDatabaseQuota(String url, String databaseIdentifier,
-        long currentQuota, WebStorage.QuotaUpdater quotaUpdater) {
+        long currentQuota, long totalUsedQuota,
+        WebStorage.QuotaUpdater quotaUpdater) {
         // This default implementation passes the current quota back to WebCore.
         // WebCore will interpret this that new quota was declined.
         quotaUpdater.updateQuota(currentQuota);
+    }
+
+   /**
+    * Tell the client that the Application Cache has exceeded its max size.
+    * @param spaceNeeded is the amount of disk space that would be needed
+    * in order for the last appcache operation to succeed.
+    * @param totalUsedQuota is the sum of all origins' quota.
+    * @param quotaUpdater A callback to inform the WebCore thread that a new
+    * app cache size is available. This callback must always be executed at
+    * some point to ensure that the sleeping WebCore thread is woken up.
+    * @hide pending API council approval.
+    */
+    public void onReachedMaxAppCacheSize(long spaceNeeded, long totalUsedQuota,
+            WebStorage.QuotaUpdater quotaUpdater) {
+        quotaUpdater.updateQuota(0);
     }
 
     /**

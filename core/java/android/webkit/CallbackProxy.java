@@ -99,8 +99,9 @@ class CallbackProxy extends Handler {
     private static final int RECEIVED_CERTIFICATE      = 124;
     private static final int SWITCH_OUT_HISTORY        = 125;
     private static final int EXCEEDED_DATABASE_QUOTA   = 126;
-    private static final int JS_TIMEOUT                = 127;
-    private static final int ADD_MESSAGE_TO_CONSOLE    = 128;
+    private static final int REACHED_APPCACHE_MAXSIZE  = 127;
+    private static final int JS_TIMEOUT                = 128;
+    private static final int ADD_MESSAGE_TO_CONSOLE    = 129;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                    = 200;
@@ -410,11 +411,30 @@ class CallbackProxy extends Handler {
                     String url = (String) map.get("url");
                     long currentQuota =
                             ((Long) map.get("currentQuota")).longValue();
+                    long totalUsedQuota =
+                            ((Long) map.get("totalUsedQuota")).longValue();
                     WebStorage.QuotaUpdater quotaUpdater =
                         (WebStorage.QuotaUpdater) map.get("quotaUpdater");
 
                     mWebChromeClient.onExceededDatabaseQuota(url,
-                            databaseIdentifier, currentQuota, quotaUpdater);
+                            databaseIdentifier, currentQuota, totalUsedQuota,
+                            quotaUpdater);
+                }
+                break;
+
+            case REACHED_APPCACHE_MAXSIZE:
+                if (mWebChromeClient != null) {
+                    HashMap<String, Object> map =
+                            (HashMap<String, Object>) msg.obj;
+                    long spaceNeeded =
+                            ((Long) map.get("spaceNeeded")).longValue();
+                    long totalUsedQuota =
+                        ((Long) map.get("totalUsedQuota")).longValue();
+                    WebStorage.QuotaUpdater quotaUpdater =
+                        (WebStorage.QuotaUpdater) map.get("quotaUpdater");
+
+                    mWebChromeClient.onReachedMaxAppCacheSize(spaceNeeded,
+                            totalUsedQuota, quotaUpdater);
                 }
                 break;
 
@@ -1120,13 +1140,14 @@ class CallbackProxy extends Handler {
      * @param databaseIdentifier The identifier of the database that the
      *     transaction that caused the overflow was running on.
      * @param currentQuota The current quota the origin is allowed.
+     * @param totalUsedQuota is the sum of all origins' quota.
      * @param quotaUpdater An instance of a class encapsulating a callback
      *     to WebViewCore to run when the decision to allow or deny more
      *     quota has been made.
      */
     public void onExceededDatabaseQuota(
             String url, String databaseIdentifier, long currentQuota,
-            WebStorage.QuotaUpdater quotaUpdater) {
+            long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater) {
         if (mWebChromeClient == null) {
             quotaUpdater.updateQuota(currentQuota);
             return;
@@ -1137,9 +1158,37 @@ class CallbackProxy extends Handler {
         map.put("databaseIdentifier", databaseIdentifier);
         map.put("url", url);
         map.put("currentQuota", currentQuota);
+        map.put("totalUsedQuota", totalUsedQuota);
         map.put("quotaUpdater", quotaUpdater);
         exceededQuota.obj = map;
         sendMessage(exceededQuota);
+    }
+
+    /**
+     * Called by WebViewCore to inform the Java side that the appcache has
+     * exceeded its max size.
+     * @param spaceNeeded is the amount of disk space that would be needed
+     * in order for the last appcache operation to succeed.
+     * @param totalUsedQuota is the sum of all origins' quota.
+     * @param quotaUpdater An instance of a class encapsulating a callback
+     * to WebViewCore to run when the decision to allow or deny a bigger
+     * app cache size has been made.
+     * @hide pending API council approval.
+     */
+    public void onReachedMaxAppCacheSize(long spaceNeeded,
+            long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater) {
+        if (mWebChromeClient == null) {
+            quotaUpdater.updateQuota(0);
+            return;
+        }
+
+        Message msg = obtainMessage(REACHED_APPCACHE_MAXSIZE);
+        HashMap<String, Object> map = new HashMap();
+        map.put("spaceNeeded", spaceNeeded);
+        map.put("totalUsedQuota", totalUsedQuota);
+        map.put("quotaUpdater", quotaUpdater);
+        msg.obj = map;
+        sendMessage(msg);
     }
 
     /**

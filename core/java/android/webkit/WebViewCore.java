@@ -36,6 +36,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import junit.framework.Assert;
 
@@ -247,7 +248,7 @@ final class WebViewCore {
     }
 
     /**
-     * Notify the user that the origin has exceeded it's database quota.
+     * Notify the browser that the origin has exceeded it's database quota.
      * @param url The URL that caused the overflow.
      * @param databaseIdentifier The identifier of the database.
      * @param currentQuota The current quota for the origin.
@@ -260,11 +261,25 @@ final class WebViewCore {
         // awaken the sleeping webcore thread when a decision from the
         // client to allow or deny quota is available.
         mCallbackProxy.onExceededDatabaseQuota(url, databaseIdentifier,
-                currentQuota, new WebStorage.QuotaUpdater() {
+                currentQuota, getUsedQuota(), new WebStorage.QuotaUpdater() {
                                   public void updateQuota(long quota) {
-                                      nativeSetDatabaseQuota(quota);
+                                      nativeSetNewStorageLimit(quota);
                                   }
                               });
+    }
+
+    /**
+     * Notify the browser that the appcache has exceeded its max size.
+     * @param spaceNeeded is the amount of disk space that would be needed
+     * in order for the last appcache operation to succeed.
+     */
+    protected void reachedMaxAppCacheSize(long spaceNeeded) {
+        mCallbackProxy.onReachedMaxAppCacheSize(spaceNeeded, getUsedQuota(),
+                new WebStorage.QuotaUpdater() {
+                    public void updateQuota(long quota) {
+                        nativeSetNewStorageLimit(quota);
+                    }
+                });
     }
 
     /**
@@ -440,11 +455,11 @@ final class WebViewCore {
 
     /*
      * Inform webcore that the user has decided whether to allow or deny new
-     * quota for the current origin and that the main thread should wake up
-     * now.
-     * @param quota The new quota.
+     * quota for the current origin or more space for the app cache, and that
+     * the main thread should wake up now.
+     * @param limit Is the new quota for an origin or new app cache max size.
      */
-    private native void nativeSetDatabaseQuota(long quota);
+    private native void nativeSetNewStorageLimit(long limit);
 
     private native void nativeUpdatePluginState(int framePtr, int nodePtr, int state);
 
@@ -1393,6 +1408,21 @@ final class WebViewCore {
             Message.obtain(mWebView.mPrivateHandler,
                     WebView.UPDATE_TEXT_ENTRY_MSG_ID).sendToTarget();
         }
+    }
+
+    // Utility method for exceededDatabaseQuota and reachedMaxAppCacheSize
+    // callbacks. Computes the sum of database quota for all origins.
+    private long getUsedQuota() {
+        WebStorage webStorage = WebStorage.getInstance();
+        Set<String> origins = webStorage.getOrigins();
+        if (origins == null) {
+            return 0;
+        }
+        long usedQuota = 0;
+        for (String origin : origins) {
+            usedQuota += webStorage.getQuotaForOrigin(origin);
+        }
+        return usedQuota;
     }
 
     // Used to avoid posting more than one draw message.

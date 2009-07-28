@@ -55,7 +55,8 @@ public final class WebStorage {
     // that we protect via a lock and update in syncValues().
     // This is needed to transfer this data across threads.
     private static Lock mLock = new ReentrantLock();
-    private static Condition mCacheUpdated = mLock.newCondition();
+    private static Condition mUpdateCondition = mLock.newCondition();
+    private static boolean mUpdateAvailable;
 
     // Message ids
     static final int UPDATE = 0;
@@ -133,8 +134,11 @@ public final class WebStorage {
         Set ret = null;
         mLock.lock();
         try {
+            mUpdateAvailable = false;
             update();
-            mCacheUpdated.await();
+            while (!mUpdateAvailable) {
+                mUpdateCondition.await();
+            }
             ret = mOrigins;
         } catch (InterruptedException e) {
             Log.e(TAG, "Exception while waiting on the updated origins", e);
@@ -155,8 +159,11 @@ public final class WebStorage {
         }
         mLock.lock();
         try {
+            mUpdateAvailable = false;
             update();
-            mCacheUpdated.await();
+            while (!mUpdateAvailable) {
+                mUpdateCondition.await();
+            }
             Long usage = mUsages.get(origin);
             if (usage != null) {
                 ret = usage.longValue();
@@ -180,8 +187,11 @@ public final class WebStorage {
         }
         mLock.lock();
         try {
+            mUpdateAvailable = false;
             update();
-            mCacheUpdated.await();
+            while (!mUpdateAvailable) {
+                mUpdateCondition.await();
+            }
             Long quota = mQuotas.get(origin);
             if (quota != null) {
                 ret = quota.longValue();
@@ -286,7 +296,8 @@ public final class WebStorage {
             mQuotas.put(origin, new Long(nativeGetQuotaForOrigin(origin)));
             mUsages.put(origin, new Long(nativeGetUsageForOrigin(origin)));
         }
-        mCacheUpdated.signal();
+        mUpdateAvailable = true;
+        mUpdateCondition.signal();
         mLock.unlock();
     }
 
