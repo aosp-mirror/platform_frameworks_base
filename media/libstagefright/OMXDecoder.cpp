@@ -154,6 +154,10 @@ OMXDecoder *OMXDecoder::Create(
     if (!strncmp(codec, "OMX.qcom.video.", 15)) {
         quirks |= kRequiresLoadedToIdleAfterAllocation;
     }
+    if (!strcmp(codec, "OMX.TI.AAC.decode")
+        || !strcmp(codec, "OMX.TI.MP3.decode")) {
+        quirks |= kMeasuresTimeInMilliseconds;
+    }
 
     OMXDecoder *decoder = new OMXDecoder(client, node, mime, codec, quirks);
 
@@ -1497,7 +1501,11 @@ void OMXDecoder::onRealEmptyBufferDone(IOMX::buffer_id buffer) {
     OMX_TICKS timestamp = 0;
 
     if (success) {
-        timestamp = ((OMX_S64)units * 1000000) / scale;
+        if (mQuirks & kMeasuresTimeInMilliseconds) {
+            timestamp = ((OMX_S64)units * 1000) / scale;
+        } else {
+            timestamp = ((OMX_S64)units * 1000000) / scale;
+        }
     }
 
     input_buffer->release();
@@ -1523,9 +1531,16 @@ void OMXDecoder::onRealFillBufferDone(const omx_message &msg) {
 
     media_buffer->meta_data()->clear();
 
-    media_buffer->meta_data()->setInt32(
-            kKeyTimeUnits,
-            (msg.u.extended_buffer_data.timestamp + 500) / 1000);
+    if (mQuirks & kMeasuresTimeInMilliseconds) {
+        media_buffer->meta_data()->setInt32(
+                kKeyTimeUnits,
+                msg.u.extended_buffer_data.timestamp);
+    } else {
+        media_buffer->meta_data()->setInt32(
+                kKeyTimeUnits,
+                (msg.u.extended_buffer_data.timestamp + 500) / 1000);
+    }
+
     media_buffer->meta_data()->setInt32(kKeyTimeScale, 1000);
 
     if (msg.u.extended_buffer_data.flags & OMX_BUFFERFLAG_SYNCFRAME) {

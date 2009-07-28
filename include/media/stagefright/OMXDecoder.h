@@ -83,7 +83,8 @@ private:
         kDoesntProperlyFlushAllPortsAtOnce   = 8,
         kRequiresAllocateBufferOnInputPorts  = 16,
         kRequiresAllocateBufferOnOutputPorts = 32,
-        kRequiresLoadedToIdleAfterAllocation = 64
+        kRequiresLoadedToIdleAfterAllocation = 64,
+        kMeasuresTimeInMilliseconds          = 128,
     };
 
     OMXClient *mClient;
