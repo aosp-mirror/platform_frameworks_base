@@ -16,6 +16,8 @@
 
 #define LOG_TAG "BootAnimation"
 
+#include <cutils/properties.h>
+
 #include <utils/IPCThreadState.h>
 #include <utils/ProcessState.h>
 #include <utils/IServiceManager.h>
@@ -41,12 +43,20 @@ int main(int argc, char** argv)
     setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_DISPLAY);
 #endif
 
-    sp<ProcessState> proc(ProcessState::self());
-    ProcessState::self()->startThreadPool();
+    char value[PROPERTY_VALUE_MAX];
+    property_get("debug.sf.nobootanimation", value, "0");
+    int noBootAnimation = atoi(value);
+    LOGI_IF(noBootAnimation,  "boot animation disabled");
+    if (!noBootAnimation) {
 
-    // create the boot animation object
-    sp<BootAnimation> boot = new BootAnimation();
+        sp<ProcessState> proc(ProcessState::self());
+        ProcessState::self()->startThreadPool();
 
-    IPCThreadState::self()->joinThreadPool();
+        // create the boot animation object
+        sp<BootAnimation> boot = new BootAnimation();
+
+        IPCThreadState::self()->joinThreadPool();
+
+    }
     return 0;
 }
