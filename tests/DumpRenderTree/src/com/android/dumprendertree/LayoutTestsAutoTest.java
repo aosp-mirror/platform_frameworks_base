@@ -16,6 +16,9 @@
 
 package com.android.dumprendertree;
 
+import com.android.dumprendertree.forwarder.AdbUtils;
+import com.android.dumprendertree.forwarder.ForwardServer;
+
 import android.app.Instrumentation;
 import android.content.Intent;
 import android.os.Bundle;
@@ -42,7 +45,7 @@ class MyTestRecorder {
     private BufferedOutputStream mBufferedOutputFailedStream;
     private BufferedOutputStream mBufferedOutputNoresultStream;
     private BufferedOutputStream mBufferedOutputTimedoutStream;
-    
+
     public void passed(String layout_file) {
         try {
             mBufferedOutputPassedStream.write(layout_file.getBytes());
@@ -52,7 +55,7 @@ class MyTestRecorder {
             e.printStackTrace();
         }
     }
-    
+
     public void failed(String layout_file) {
         try {
             mBufferedOutputFailedStream.write(layout_file.getBytes());
@@ -62,7 +65,7 @@ class MyTestRecorder {
             e.printStackTrace();
         }
     }
-    
+
     public void noresult(String layout_file) {
         try {
             mBufferedOutputNoresultStream.write(layout_file.getBytes());
@@ -72,7 +75,7 @@ class MyTestRecorder {
             e.printStackTrace();
         }
     }
-    
+
     public void timedout(String url) {
         try {
             mBufferedOutputTimedoutStream.write(url.getBytes());
@@ -82,14 +85,14 @@ class MyTestRecorder {
             e.printStackTrace();
         }
     }
-    
+
     public MyTestRecorder(boolean resume) {
         try {
             File resultsPassedFile = new File("/sdcard/layout_tests_passed.txt");
             File resultsFailedFile = new File("/sdcard/layout_tests_failed.txt");
             File noExpectedResultFile = new File("/sdcard/layout_tests_nontext.txt");
             File resultTimedoutFile = new File("/sdcard/layout_tests_timedout.txt");
-          
+
             mBufferedOutputPassedStream =
                 new BufferedOutputStream(new FileOutputStream(resultsPassedFile, resume));
             mBufferedOutputFailedStream =
@@ -102,7 +105,7 @@ class MyTestRecorder {
             e.printStackTrace();
         }
     }
-    
+
     public void close() {
         try {
             mBufferedOutputPassedStream.close();
@@ -120,7 +123,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
 
     private static final String LOGTAG = "LayoutTests";
     static final int DEFAULT_TIMEOUT_IN_MILLIS = 5000;
-    
+
     static final String LAYOUT_TESTS_ROOT = "/sdcard/android/layout_tests/";
     static final String LAYOUT_TESTS_RESULT_DIR = "/sdcard/android/layout_tests_results/";
     static final String ANDROID_EXPECTED_RESULT_DIR = "/sdcard/android/expected_results/";
@@ -139,14 +142,35 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     static final String LAYOUT_RESULTS_CRASHED_RESULT_FILE = "results/layout_tests_crashed.txt";
     static final String LAYOUT_TESTS_RUNNER = "run_layout_tests.py";
 
+    static final String HTTP_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/";
+    static final String HTTPS_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/ssl/";
+    static final String HTTP_LOCAL_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/local/";
+    static final String HTTP_MEDIA_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/media/";
+    static final String HTTP_WML_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/wml/";
+
+
+    private ForwardServer fs8000, fs8080, fs8443;
+
     private MyTestRecorder mResultRecorder;
     private Vector<String> mTestList;
     private boolean mRebaselineResults;
     private String mTestPathPrefix;
     private boolean mFinished;
-    
+
     public LayoutTestsAutoTest() {
       super("com.android.dumprendertree", TestShellActivity.class);
+
+      int addr = -1;
+      try {
+          addr = AdbUtils.resolve("android-browser-test.mtv.corp.google.com");
+      } catch (IOException ioe) {
+          Log.e(LOGTAG, "failed to resolve server address.", ioe);
+      }
+      if(addr != -1) {
+          fs8000 = new ForwardServer(8000, addr, 8000);
+          fs8080 = new ForwardServer(8080, addr, 8080);
+          fs8443 = new ForwardServer(8443, addr, 8443);
+      }
     }
 
     // This function writes the result of the layout test to
@@ -157,7 +181,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
       bundle.putBoolean(file, result);
       inst.sendStatus(0, bundle);
     }
-    
+
     private void getTestList() {
         // Read test list.
         try {
@@ -174,7 +198,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             Log.e(LOGTAG, "Error while reading test list : " + e.getMessage());
         }
     }
-  
+
     private void resumeTestList() {
         // read out the test name it stoped last time.
         try {
@@ -189,7 +213,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             Log.e(LOGTAG, "Error reading " + TEST_STATUS_FILE);
         }
     }
-  
+
     private void clearTestStatus() {
         // Delete TEST_STATUS_FILE
         try {
@@ -208,13 +232,13 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         // Write actual results to result directory.
         return shortName.replaceFirst(LAYOUT_TESTS_ROOT, LAYOUT_TESTS_RESULT_DIR) + "-result.txt";
     }
-    
+
     private String getExpectedResultFile(String test) {
         int pos = test.lastIndexOf('.');
         if(pos == -1)
             return null;
         String shortName = test.substring(0, pos);
-        return shortName + "-expected.txt";          
+        return shortName + "-expected.txt";
     }
 
     private String getAndroidExpectedResultFile(String expectedResultFile) {
@@ -224,7 +248,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     // Wrap up
     private void failedCase(String file) {
         Log.w("Layout test: ", file + " failed");
-        mResultRecorder.failed(file);    
+        mResultRecorder.failed(file);
     }
 
     private void passedCase(String file) {
@@ -236,7 +260,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         Log.v("Layout test:", file + " no expected result");
         mResultRecorder.noresult(file);
     }
-     
+
     private void processResult(String testFile, String actualResultFile, String expectedResultFile) {
         Log.v(LOGTAG, "  Processing result: " + testFile);
 
@@ -257,13 +281,13 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
                         break;
                     }
                 }
-                
+
                 if (passing) {
                     passedCase(testFile);
                 } else {
                     failedCase(testFile);
                 }
-                
+
                 fe.close();
                 fr.close();
             } catch (FileNotFoundException ex) {
@@ -278,7 +302,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             noresultCase(testFile);
         }
     }
-    
+
     private void runTestAndWaitUntilDone(TestShellActivity activity, String test, int timeout) {
         activity.setCallback(new TestShellCallback() {
             public void finished() {
@@ -287,7 +311,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
                     LayoutTestsAutoTest.this.notifyAll();
                 }
             }
-            
+
             public void timedOut(String url) {
             }
         });
@@ -306,16 +330,16 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
 
             resultFile = getAndroidExpectedResultFile(expectedResultFile);
         }
-        
+
         mFinished = false;
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setClass(activity, TestShellActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        intent.putExtra(TestShellActivity.TEST_URL, "file://" + test);
+        intent.putExtra(TestShellActivity.TEST_URL, getTestUrl(test));
         intent.putExtra(TestShellActivity.RESULT_FILE, resultFile);
         intent.putExtra(TestShellActivity.TIMEOUT_IN_MILLIS, timeout);
         activity.startActivity(intent);
-      
+
         // Wait until done.
         synchronized (this) {
             while(!mFinished){
@@ -324,18 +348,18 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
                 } catch (InterruptedException e) { }
             }
         }
-        
+
         if (!mRebaselineResults) {
             String expectedResultFile = getExpectedResultFile(test);
             File f = new File(expectedResultFile);
             if (!f.exists()) {
                 expectedResultFile = getAndroidExpectedResultFile(expectedResultFile);
             }
-            
+
             processResult(test, resultFile, expectedResultFile);
         }
-    } 
-    
+    }
+
     // Invokes running of layout tests
     // and waits till it has finished running.
     public void executeLayoutTests(boolean resume) {
@@ -348,28 +372,28 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         }
 
         this.mTestList = new Vector<String>();
-      
+
         // Read settings
         try {
             this.mTestPathPrefix =
                 (new File(LAYOUT_TESTS_ROOT + runner.mTestPath)).getCanonicalPath();
-        } catch (IOException e) {  
+        } catch (IOException e) {
             Log.e(LOGTAG, "Cannot find test path prefix: " + e.getMessage());
             return;
         }
-        
+
         this.mRebaselineResults = runner.mRebaseline;
-        
+
         int timeout = runner.mTimeoutInMillis;
         if (timeout <= 0) {
             timeout = DEFAULT_TIMEOUT_IN_MILLIS;
         }
-          
+
         this.mResultRecorder = new MyTestRecorder(resume);
-          
+
         if (!resume)
             clearTestStatus();
-          
+
         getTestList();
         if (resume)
             resumeTestList();
@@ -377,6 +401,15 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         TestShellActivity activity = (TestShellActivity) getActivity();
 
         // Run tests.
+        int addr = -1;
+        try{
+            addr = AdbUtils.resolve("android-browser-test.mtv.corp.google.com");
+        } catch (IOException ioe) {
+            Log.w(LOGTAG, "error while resolving test host name", ioe);
+        }
+        if(addr == -1) {
+            Log.w(LOGTAG, "failed to resolve test host. http tests will fail.");
+        }
         for (int i = 0; i < mTestList.size(); i++) {
             String s = mTestList.elementAt(i);
             FsUtils.updateTestStatus(TEST_STATUS_FILE, s);
@@ -385,10 +418,48 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         }
 
         FsUtils.updateTestStatus(TEST_STATUS_FILE, "#DONE");
-        
+        if(fs8000 != null)
+            fs8000.stop();
+        if(fs8080 != null)
+            fs8080.stop();
+        if(fs8443 != null)
+            fs8443.stop();
+
         activity.finish();
     }
 
+    private void startForwardServerIfNeeded() {
+        try {
+            if(fs8000 != null)
+                fs8000.start();
+            if(fs8080 != null)
+                fs8080.start();
+            if(fs8443 != null)
+                fs8443.start();
+        } catch (IOException ioe) {
+            Log.w(LOGTAG, "failed to start forwarder. http tests will fail.", ioe);
+        }
+    }
+
+    private String getTestUrl(String path) {
+        String url = null;
+        if (!path.startsWith(HTTP_TESTS_PREFIX)) {
+            url = "file://" + path;
+        } else {
+            startForwardServerIfNeeded();
+            if (path.startsWith(HTTPS_TESTS_PREFIX)) {
+                // still cut the URL after "http/tests/"
+                url = "https://127.0.0.1:8443/" + path.substring(HTTP_TESTS_PREFIX.length());
+            } else if (!path.startsWith(HTTP_LOCAL_TESTS_PREFIX)
+                    && !path.startsWith(HTTP_MEDIA_TESTS_PREFIX)
+                    && !path.startsWith(HTTP_WML_TESTS_PREFIX)) {
+                url = "http://127.0.0.1:8000/" + path.substring(HTTP_TESTS_PREFIX.length());
+            } else {
+                url = "file://" + path;
+            }
+        }
+        return url;
+    }
 
     private String getTestPath() {
         LayoutTestsAutoRunner runner = (LayoutTestsAutoRunner) getInstrumentation();
@@ -403,10 +474,10 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
             Log.e("LayoutTestsAutoTest", "Cannot get cannonical path " + e.getMessage());
         }
         Log.v("LayoutTestsAutoTest", " Test path : " + test_path);
-        
+
         return test_path;
     }
-    
+
     public void generateTestList() {
         try {
             File tests_list = new File(LAYOUT_TESTS_LIST_FILE);
@@ -431,7 +502,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         executeLayoutTests(false);
     }
 
