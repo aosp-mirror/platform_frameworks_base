@@ -209,8 +209,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private void onClickImpl() {
         // If the dropdown is showing, bring it back in front of the soft
         // keyboard when the user touches the text field.
-        if (mPopup.isShowing() &&
-                mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED) {
+        if (mPopup.isShowing() && isInputMethodNotNeeded()) {
             ensureImeVisible();
         }
     }
@@ -1089,6 +1088,13 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     /**
+     * @hide internal used only here and SearchDialog
+     */
+    public boolean isInputMethodNotNeeded() {
+        return mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED;
+    }
+
+    /**
      * <p>Displays the drop down on screen.</p>
      */
     public void showDropDown() {
@@ -1097,7 +1103,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         int widthSpec = 0;
         int heightSpec = 0;
 
-        boolean noInputMethod = mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED;
+        boolean noInputMethod = isInputMethodNotNeeded();
 
         if (mPopup.isShowing()) {
             if (mDropDownWidth == ViewGroup.LayoutParams.FILL_PARENT) {
