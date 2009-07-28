@@ -187,16 +187,16 @@ public class RolloRS {
 
 
             b = BitmapFactory.decodeResource(mRes, R.raw.browser, opts);
-            mIcons[0] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[0] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
 
             b = BitmapFactory.decodeResource(mRes, R.raw.market, opts);
-            mIcons[1] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[1] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
 
             b = BitmapFactory.decodeResource(mRes, R.raw.photos, opts);
-            mIcons[2] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[2] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
 
             b = BitmapFactory.decodeResource(mRes, R.raw.settings, opts);
-            mIcons[3] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[3] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
 
 /*
             b = BitmapFactory.decodeResource(mRes, R.raw.assasins_creed, opts);
@@ -342,8 +342,8 @@ public class RolloRS {
     }
 
     private void makeTextBitmap() {
-        //Bitmap.createBitmap(width, height, Bitmap.Config);
-        //new Canvas(theBitmap);
+        //Bitmap b = Bitmap.createBitmap(128, 64, Bitmap.Config);
+        //Canvas c = new Canvas(b);
         //canvas.drawText();
     }
 
