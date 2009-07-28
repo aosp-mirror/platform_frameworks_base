@@ -51,6 +51,7 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -667,7 +668,40 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
         mVoiceButton.setVisibility(visibility);
     }
-    
+
+    /*
+     * Menu.
+     */
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Show search settings menu item if anyone handles the intent for it
+        Intent settingsIntent = new Intent(SearchManager.INTENT_ACTION_SEARCH_SETTINGS);
+        settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PackageManager pm = getContext().getPackageManager();
+        ActivityInfo activityInfo = settingsIntent.resolveActivityInfo(pm, 0);
+        if (activityInfo != null) {
+            settingsIntent.setClassName(activityInfo.applicationInfo.packageName,
+                    activityInfo.name);
+            CharSequence label = activityInfo.loadLabel(getContext().getPackageManager());
+            menu.add(Menu.NONE, Menu.NONE, Menu.NONE, label)
+                    .setIcon(android.R.drawable.ic_menu_preferences)
+                    .setAlphabeticShortcut('P')
+                    .setIntent(settingsIntent);
+            return true;
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+        // The menu shows up above the IME, regardless of whether it is in front
+        // of the drop-down or not. This looks weird when there is no IME, so
+        // we make sure it is visible.
+        mSearchAutoComplete.ensureImeVisible();
+        return super.onMenuOpened(featureId, menu);
+    }
+
     /**
      * Listeners of various types
      */
