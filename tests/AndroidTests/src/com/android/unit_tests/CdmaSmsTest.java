@@ -637,6 +637,16 @@ public class CdmaSmsTest extends AndroidTestCase {
         BearerData bd4 = BearerData.decode(HexDump.hexStringToByteArray(pdu4));
         assertEquals(bd4.alert, 3);
         assertEquals(bd4.userData.payloadStr, "Test Alert 3");
+        String pdu5 = "00031000000126114F4CBCFA20DB979F3C39F2A0C9976" +
+            "69ED979794187665E5D1028EFA7A6840E1062D3D39A900C028000";
+        BearerData bd5 = BearerData.decode(HexDump.hexStringToByteArray(pdu5));
+        assertEquals(bd5.alert, BearerData.ALERT_MEDIUM_PRIO);
+        assertEquals(bd5.userData.payloadStr, "test message delivery alert (with 8 bits)");
+        String pdu6 = "00031000000126114F4CBCFA20DB979F3C39F2A0C9976" +
+            "69ED979794187665E5D1028EFA7A6840C1062D3D39A900C00";
+        BearerData bd6 = BearerData.decode(HexDump.hexStringToByteArray(pdu6));
+        assertEquals(bd6.userData.payloadStr, "test message delivery alert (with 0 bits)");
+        assertEquals(bd6.alertIndicatorSet, false);
     }
 
     @SmallTest
