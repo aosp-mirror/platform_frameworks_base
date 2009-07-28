@@ -1709,6 +1709,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 if (mSearchDialog.backToPreviousComponent()) {
                     return true;
                 }
+                // If the drop-down obscures the keyboard, the user wouldn't see anything
+                // happening when pressing back, so we dismiss the entire dialog instead.
+                if (isInputMethodNotNeeded()) {
+                    mSearchDialog.cancel();
+                    return true;
+                }
                 return false; // will dismiss soft keyboard if necessary
             }
             return false;
