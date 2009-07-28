@@ -96,7 +96,8 @@ final class WebViewCore {
 
     private boolean mViewportUserScalable = true;
 
-    private int mRestoredScale = WebView.DEFAULT_SCALE_PERCENT;
+    private int mRestoredScale = 0;
+    private int mRestoredScreenWidthScale = 0;
     private int mRestoredX = 0;
     private int mRestoredY = 0;
 
@@ -1340,9 +1341,8 @@ final class WebViewCore {
             Log.w(LOGTAG, "skip viewSizeChanged as w is 0");
             return;
         }
-        if (mSettings.getUseWideViewPort()
-                && (w < mViewportWidth || mViewportWidth == -1)) {
-            int width = mViewportWidth;
+        if (mSettings.getUseWideViewPort()) {
+            int width;
             if (mViewportWidth == -1) {
                 if (mSettings.getLayoutAlgorithm() ==
                         WebSettings.LayoutAlgorithm.NORMAL) {
@@ -1362,9 +1362,15 @@ final class WebViewCore {
                      */
                     width = Math.max(w, nativeGetContentMinPrefWidth());
                 }
+            } else {
+                width = Math.max(w, mViewportWidth);
             }
-            nativeSetSize(width, Math.round((float) width * h / w), w, scale,
-                    w, h);
+            // while in zoom overview mode, the text are wrapped to the screen
+            // width matching mWebView.mLastScale. So that we don't trigger
+            // re-flow while toggling between overview mode and normal mode.
+            nativeSetSize(width, Math.round((float) width * h / w),
+                    Math.round(mWebView.mInZoomOverview ? w * scale
+                            / mWebView.mLastScale : w), scale, w, h);
         } else {
             nativeSetSize(w, h, w, scale, w, h);
         }
@@ -1409,6 +1415,7 @@ final class WebViewCore {
         public Region mInvalRegion;
         public Point mViewPoint;
         public Point mWidthHeight;
+        public int mMinPrefWidth;
     }
 
     private void webkitDraw() {
@@ -1424,6 +1431,9 @@ final class WebViewCore {
             // Send the native view size that was used during the most recent
             // layout.
             draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
+            if (WebView.ENABLE_DOUBLETAP_ZOOM && mSettings.getUseWideViewPort()) {
+                draw.mMinPrefWidth = nativeGetContentMinPrefWidth();
+            }
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
             Message.obtain(mWebView.mPrivateHandler,
                     WebView.NEW_PICTURE_MSG_ID, draw).sendToTarget();
@@ -1734,9 +1744,10 @@ final class WebViewCore {
 
             if (mRestoredScale > 0) {
                 Message.obtain(mWebView.mPrivateHandler,
-                        WebView.DID_FIRST_LAYOUT_MSG_ID, mRestoredScale, 0,
+                        WebView.DID_FIRST_LAYOUT_MSG_ID,
+                        mRestoredScreenWidthScale > 0 ?
+                        -mRestoredScreenWidthScale : mRestoredScale, 0,
                         scaleLimit).sendToTarget();
-                mRestoredScale = 0;
             } else {
                 // if standardLoad is true, use mViewportInitialScale, otherwise
                 // pass -1 to the WebView to indicate no change of the scale.
@@ -1764,8 +1775,8 @@ final class WebViewCore {
                 }
             }
 
-            // reset restored offset
-            mRestoredX = mRestoredY = 0;
+            // reset restored offset, scale
+            mRestoredX = mRestoredY = mRestoredScale = mRestoredScreenWidthScale = 0;
         }
     }
 
@@ -1773,6 +1784,17 @@ final class WebViewCore {
     private void restoreScale(int scale) {
         if (mBrowserFrame.firstLayoutDone() == false) {
             mRestoredScale = scale;
+        }
+    }
+
+    // called by JNI
+    private void restoreScreenWidthScale(int scale) {
+        if (!WebView.ENABLE_DOUBLETAP_ZOOM || !mSettings.getUseWideViewPort()) {
+            return;
+        }
+
+        if (mBrowserFrame.firstLayoutDone() == false) {
+            mRestoredScreenWidthScale = scale;
         }
     }
 
