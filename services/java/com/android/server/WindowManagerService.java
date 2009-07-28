@@ -8231,7 +8231,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         // This has changed the visibility of windows, so perform
                         // a new layout to get them all up-to-date.
                         mLayoutNeeded = true;
-                        moveInputMethodWindowsIfNeededLocked(true);
+                        if (!moveInputMethodWindowsIfNeededLocked(true)) {
+                            assignLayersLocked();
+                        }
                         performLayoutLockedInner();
                         updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES);
 
