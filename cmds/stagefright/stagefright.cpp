@@ -102,6 +102,7 @@ static int64_t getNowUs() {
 int main(int argc, char **argv) {
     android::ProcessState::self()->startThreadPool();
 
+    bool audioOnly = false;
     if (argc > 1 && !strcmp(argv[1], "--list")) {
         sp<IServiceManager> sm = defaultServiceManager();
         sp<IBinder> binder = sm->getService(String16("media.player"));
@@ -121,6 +122,10 @@ int main(int argc, char **argv) {
         }
 
         return 0;
+    } else if (argc > 1 && !strcmp(argv[1], "--audio")) {
+        audioOnly = true;
+        ++argv;
+        --argc;
     }
 
 #if 0
@@ -149,7 +154,11 @@ int main(int argc, char **argv) {
         const char *mime;
         meta->findCString(kKeyMIMEType, &mime);
 
-        if (!strncasecmp(mime, "video/", 6)) {
+        if (audioOnly && !strncasecmp(mime, "audio/", 6)) {
+            break;
+        }
+
+        if (!audioOnly && !strncasecmp(mime, "video/", 6)) {
             break;
         }
     }

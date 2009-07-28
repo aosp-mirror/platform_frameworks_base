@@ -87,7 +87,10 @@ void AudioPlayer::start() {
     } else {
         mAudioTrack = new AudioTrack(
                 AudioSystem::MUSIC, mSampleRate, AudioSystem::PCM_16_BIT,
-                numChannels, 8192, 0, &AudioCallback, this, 0);
+                (numChannels == 2)
+                    ? AudioSystem::CHANNEL_OUT_STEREO
+                    : AudioSystem::CHANNEL_OUT_MONO,
+                8192, 0, &AudioCallback, this, 0);
 
         assert(mAudioTrack->initCheck() == OK);
 
@@ -217,8 +220,10 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
 
             Mutex::Autolock autoLock(mLock);
             mPositionTimeMediaUs = (int64_t)units * 1000000 / scale;
+
             mPositionTimeRealUs =
-                ((mNumFramesPlayed + size_done / 4) * 1000000) / mSampleRate; // XXX
+                ((mNumFramesPlayed + size_done / mFrameSize) * 1000000)
+                    / mSampleRate;
         }
 
         if (mInputBuffer->range_length() == 0) {

@@ -26,6 +26,7 @@ LOCAL_SRC_FILES:=                 \
         SurfaceRenderer.cpp       \
         TimeSource.cpp            \
         TimedEventQueue.cpp       \
+        TIHardwareRenderer.cpp    \
         Utils.cpp                 \
         AudioPlayer.cpp           \
         ESDS.cpp                  \

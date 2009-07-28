@@ -73,6 +73,8 @@ private:
 
     bool mNeedsNALFraming;
 
+    uint8_t *mSrcBuffer;
+
     MPEG4Source(const MPEG4Source &);
     MPEG4Source &operator=(const MPEG4Source &);
 };
@@ -743,7 +745,8 @@ MPEG4Source::MPEG4Source(
       mBuffer(NULL),
       mBufferOffset(0),
       mBufferSizeRemaining(0),
-      mNeedsNALFraming(false) {
+      mNeedsNALFraming(false),
+      mSrcBuffer(NULL) {
     const char *mime;
     bool success = mFormat->findCString(kKeyMIMEType, &mime);
     assert(success);
@@ -777,8 +780,13 @@ status_t MPEG4Source::start(MetaData *params) {
     status_t err = mSampleTable->getMaxSampleSize(&max_size);
     assert(err == OK);
 
-    // Add padding for de-framing of AVC content just in case.
-    mGroup->add_buffer(new MediaBuffer(max_size + 2));
+    // Assume that a given buffer only contains at most 10 fragments,
+    // each fragment originally prefixed with a 2 byte length will
+    // have a 4 byte header (0x00 0x00 0x00 0x01) after conversion,
+    // and thus will grow by 2 bytes per fragment.
+    mGroup->add_buffer(new MediaBuffer(max_size + 10 * 2));
+
+    mSrcBuffer = new uint8_t[max_size];
 
     mStarted = true;
 
@@ -792,6 +800,9 @@ status_t MPEG4Source::stop() {
         mBuffer->release();
         mBuffer = NULL;
     }
+
+    delete[] mSrcBuffer;
+    mSrcBuffer = NULL;
 
     delete mGroup;
     mGroup = NULL;
@@ -832,33 +843,31 @@ status_t MPEG4Source::read(
         // fall through
     }
 
-    if (mBuffer == NULL) {
-        off_t offset;
-        size_t size;
-        status_t err = mSampleTable->getSampleOffsetAndSize(
-                mCurrentSampleIndex, &offset, &size);
+    off_t offset;
+    size_t size;
+    status_t err = mSampleTable->getSampleOffsetAndSize(
+            mCurrentSampleIndex, &offset, &size);
 
-        if (err != OK) {
-            return err;
-        }
+    if (err != OK) {
+        return err;
+    }
 
-        uint32_t dts;
-        err = mSampleTable->getDecodingTime(mCurrentSampleIndex, &dts);
+    uint32_t dts;
+    err = mSampleTable->getDecodingTime(mCurrentSampleIndex, &dts);
 
-        if (err != OK) {
-            return err;
-        }
+    if (err != OK) {
+        return err;
+    }
 
-        err = mGroup->acquire_buffer(&mBuffer);
-        if (err != OK) {
-            assert(mBuffer == NULL);
-            return err;
-        }
+    err = mGroup->acquire_buffer(&mBuffer);
+    if (err != OK) {
+        assert(mBuffer == NULL);
+        return err;
+    }
 
-        assert(mBuffer->size() + 2 >= size);
-
+    if (!mIsAVC || !mNeedsNALFraming) {
         ssize_t num_bytes_read =
-            mDataSource->read_at(offset, (uint8_t *)mBuffer->data() + 2, size);
+            mDataSource->read_at(offset, (uint8_t *)mBuffer->data(), size);
 
         if (num_bytes_read < (ssize_t)size) {
             mBuffer->release();
@@ -867,49 +876,61 @@ status_t MPEG4Source::read(
             return err;
         }
 
-        mBuffer->set_range(2, size);
+        mBuffer->set_range(0, size);
         mBuffer->meta_data()->clear();
         mBuffer->meta_data()->setInt32(kKeyTimeUnits, dts);
         mBuffer->meta_data()->setInt32(kKeyTimeScale, mTimescale);
-
         ++mCurrentSampleIndex;
 
-        mBufferOffset = 2;
-        mBufferSizeRemaining = size;
-    }
-
-    if (!mIsAVC) {
         *out = mBuffer;
         mBuffer = NULL;
 
         return OK;
     }
 
-    uint8_t *data = (uint8_t *)mBuffer->data() + mBufferOffset;
-    assert(mBufferSizeRemaining >= 2);
+    ssize_t num_bytes_read =
+        mDataSource->read_at(offset, mSrcBuffer, size);
 
-    size_t nal_length = (data[0] << 8) | data[1];
-    assert(mBufferSizeRemaining >= 2 + nal_length);
-
-    if (mNeedsNALFraming) {
-        // Insert marker.
-        data[-2] = data[-1] = data[0] = 0;
-        data[1] = 1;
-
-        mBuffer->set_range(mBufferOffset - 2, nal_length + 4);
-    } else {
-        mBuffer->set_range(mBufferOffset + 2, nal_length);
-    }
-
-    mBufferOffset += nal_length + 2;
-    mBufferSizeRemaining -= nal_length + 2;
-
-    if (mBufferSizeRemaining > 0) {
-        *out = mBuffer->clone();
-    } else {
-        *out = mBuffer;
+    if (num_bytes_read < (ssize_t)size) {
+        mBuffer->release();
         mBuffer = NULL;
+
+        return err;
     }
+
+    uint8_t *dstData = (uint8_t *)mBuffer->data();
+    size_t srcOffset = 0;
+    size_t dstOffset = 0;
+    while (srcOffset < size) {
+        assert(srcOffset + 1 < size);
+        size_t nalLength =
+            (mSrcBuffer[srcOffset] << 8) | mSrcBuffer[srcOffset + 1];
+        assert(srcOffset + 1 + nalLength < size);
+        srcOffset += 2;
+
+        if (nalLength == 0) {
+            continue;
+        }
+
+        assert(dstOffset + 4 <= mBuffer->size());
+
+        dstData[dstOffset++] = 0;
+        dstData[dstOffset++] = 0;
+        dstData[dstOffset++] = 0;
+        dstData[dstOffset++] = 1;
+        memcpy(&dstData[dstOffset], &mSrcBuffer[srcOffset], nalLength);
+        srcOffset += nalLength;
+        dstOffset += nalLength;
+    }
+
+    mBuffer->set_range(0, dstOffset);
+    mBuffer->meta_data()->clear();
+    mBuffer->meta_data()->setInt32(kKeyTimeUnits, dts);
+    mBuffer->meta_data()->setInt32(kKeyTimeScale, mTimescale);
+    ++mCurrentSampleIndex;
+
+    *out = mBuffer;
+    mBuffer = NULL;
 
     return OK;
 }
