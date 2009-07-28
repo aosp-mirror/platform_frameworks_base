@@ -273,11 +273,6 @@ public final class PendingIntent implements Parcelable {
         return null;
     }
 
-    private class IntentSenderWrapper extends IntentSender {
-        protected IntentSenderWrapper(IIntentSender target) {
-            super(target);
-        }
-    }
     /**
      * Retrieve a IntentSender object that wraps the existing sender of the PendingIntent
      *
@@ -285,7 +280,7 @@ public final class PendingIntent implements Parcelable {
      *
      */
     public IntentSender getIntentSender() {
-        return new IntentSenderWrapper(mTarget);
+        return new IntentSender(mTarget);
     }
 
     /**
