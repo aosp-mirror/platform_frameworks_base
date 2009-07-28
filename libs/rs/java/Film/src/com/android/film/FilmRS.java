@@ -25,6 +25,7 @@ import android.renderscript.Matrix;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -38,6 +39,12 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 public class FilmRS {
+    private final int POS_TRANSLATE = 0;
+    private final int POS_ROTATE = 1;
+    private final int POS_FOCUS = 2;
+
+    private final int STATE_TRIANGLE_OFFSET_COUNT = 0;
+    private final int STATE_LAST_FOCUS = 1;
 
     public FilmRS() {
     }
@@ -56,11 +63,11 @@ public class FilmRS {
         if (x > 270) {
             x = 270;
         }
-    
+
         float anim = ((float)x-50) / 270.f;
-        mBufferPos[0] = 2f * anim + 0.5f;   // translation
-        mBufferPos[1] = (anim * 40);  // rotation
-        mBufferPos[2] = ((float)y) / 16.f - 8;  // focusPos
+        mBufferPos[POS_TRANSLATE] = 2f * anim + 0.5f;   // translation
+        mBufferPos[POS_ROTATE] = (anim * 40);  // rotation
+        mBufferPos[POS_FOCUS] = ((float)y) / 16.f - 8;  // focusPos
         mAllocPos.data(mBufferPos);
     }
 
@@ -80,15 +87,19 @@ public class FilmRS {
     private RenderScript.ProgramVertex mPVImages;
     private ProgramVertexAlloc mPVA;
 
-    private RenderScript.Allocation mAllocEnv;
+    private RenderScript.Allocation mImages[];
+    private RenderScript.Allocation mAllocIDs;
     private RenderScript.Allocation mAllocPos;
     private RenderScript.Allocation mAllocState;
     private RenderScript.Allocation mAllocPV;
     private RenderScript.TriangleMesh mMesh;
     private RenderScript.Light mLight;
 
-    private float[] mBufferPos;
-    private float[] mBufferPV;
+    private FilmStripMesh mFSM;
+
+    private int[] mBufferIDs;
+    private float[] mBufferPos = new float[3];
+    private int[] mBufferState;
 
     private void initSamplers() {
         mRS.samplerBegin();
@@ -112,7 +123,7 @@ public class FilmRS {
         mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.EQUAL);
         mRS.programFragmentStoreDitherEnable(false);
         mRS.programFragmentStoreDepthMask(false);
-        mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.ONE, 
+        mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.ONE,
                                           RenderScript.BlendDstFunc.ONE);
         mPFSImages = mRS.programFragmentStoreCreate();
         mPFSImages.setName("PFSImages");
@@ -148,7 +159,75 @@ public class FilmRS {
     }
 
 
-    int mParams[] = new int[10];
+    private void loadImages() {
+        mBufferIDs = new int[13];
+        mImages = new RenderScript.Allocation[13];
+        mAllocIDs = mRS.allocationCreatePredefSized(
+            RenderScript.ElementPredefined.USER_FLOAT,
+            mBufferIDs.length);
+
+        Bitmap b;
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inScaled = false;
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p01, opts);
+        mImages[0] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p02, opts);
+        mImages[1] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p03, opts);
+        mImages[2] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p04, opts);
+        mImages[3] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p05, opts);
+        mImages[4] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p06, opts);
+        mImages[5] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p07, opts);
+        mImages[6] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p08, opts);
+        mImages[7] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p09, opts);
+        mImages[8] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p10, opts);
+        mImages[9] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p11, opts);
+        mImages[10] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p12, opts);
+        mImages[11] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p13, opts);
+        mImages[12] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+
+        for(int ct=0; ct < mImages.length; ct++) {
+            mImages[ct].uploadToTexture(1);
+            mBufferIDs[ct] = mImages[ct].getID();
+        }
+        mAllocIDs.data(mBufferIDs);
+    }
+
+    private void initState()
+    {
+        mBufferState = new int[10];
+        mAllocState = mRS.allocationCreatePredefSized(
+            RenderScript.ElementPredefined.USER_FLOAT,
+            mBufferState.length);
+
+        mBufferState[STATE_TRIANGLE_OFFSET_COUNT] = mFSM.mTriangleOffsetsCount;
+        mBufferState[STATE_LAST_FOCUS] = -1;
+
+        mAllocState.data(mBufferState);
+    }
 
     private void initRS() {
         mElementVertex = mRS.elementGetPredefined(
@@ -157,8 +236,8 @@ public class FilmRS {
             RenderScript.ElementPredefined.INDEX_16);
 
         mRS.triangleMeshBegin(mElementVertex, mElementIndex);
-        FilmStripMesh fsm = new FilmStripMesh();
-        fsm.init(mRS);
+        mFSM = new FilmStripMesh();
+        mFSM.init(mRS);
         mMesh = mRS.triangleMeshCreate();
         mMesh.setName("mesh");
 
@@ -176,10 +255,12 @@ public class FilmRS {
         mRS.scriptCSetRoot(true);
         mScriptStrip = mRS.scriptCCreate();
 
-        mBufferPos = new float[3];
         mAllocPos = mRS.allocationCreatePredefSized(
-            RenderScript.ElementPredefined.USER_FLOAT, 
+            RenderScript.ElementPredefined.USER_FLOAT,
             mBufferPos.length);
+
+        loadImages();
+        initState();
 
         mPVA = new ProgramVertexAlloc(mRS);
         mPVBackground.bindAllocation(0, mPVA.mAlloc);
@@ -187,8 +268,9 @@ public class FilmRS {
         mPVA.setupProjectionNormalized(320, 480);
 
 
+        mScriptStrip.bindAllocation(mAllocIDs, 0);
         mScriptStrip.bindAllocation(mAllocPos, 1);
-       //mScriptStrip.bindAllocation(gStateAlloc, 2);
+        mScriptStrip.bindAllocation(mAllocState, 2);
         mScriptStrip.bindAllocation(mPVA.mAlloc, 3);
 
 

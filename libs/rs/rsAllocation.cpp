@@ -301,14 +301,18 @@ static ElementConverter_t pickConverter(RsElementPredefined dstFmt, RsElementPre
         return elementConverter_cpy_32;
     }
 
-    LOGE("pickConverter, unsuported combo");
+    LOGE("pickConverter, unsuported combo, src %i,  dst %i", srcFmt, dstFmt);
     return 0;
 }
 
 
 RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h, RsElementPredefined dstFmt, RsElementPredefined srcFmt,  bool genMips, const void *data)
 {
-    rsi_TypeBegin(rsc, rsi_ElementGetPredefined(rsc, RS_ELEMENT_RGB_565));
+    rsAssert(!(w & (w-1)));
+    rsAssert(!(h & (h-1)));
+
+    //LOGE("rsi_AllocationCreateFromBitmap %i %i %i %i %i", w, h, dstFmt, srcFmt, genMips);
+    rsi_TypeBegin(rsc, rsi_ElementGetPredefined(rsc, dstFmt));
     rsi_TypeAdd(rsc, RS_DIMENSION_X, w);
     rsi_TypeAdd(rsc, RS_DIMENSION_Y, h);
     if (genMips) {
@@ -339,6 +343,42 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
 
     return texAlloc;
 }
+
+static uint32_t fmtToBits(RsElementPredefined fmt)
+{
+    return 16;
+}
+
+RsAllocation rsi_AllocationCreateFromBitmapBoxed(Context *rsc, uint32_t w, uint32_t h, RsElementPredefined dstFmt, RsElementPredefined srcFmt, bool genMips, const void *data)
+{
+    uint32_t w2 = rsHigherPow2(w);
+    uint32_t h2 = rsHigherPow2(h);
+
+    if ((w2 == w) && (h2 == h)) {
+        return rsi_AllocationCreateFromBitmap(rsc, w, h, dstFmt, srcFmt, genMips, data);
+    }
+
+    uint32_t bpp = fmtToBits(srcFmt) >> 3;
+    size_t size = w2 * h2 * bpp;
+    uint8_t *tmp = static_cast<uint8_t *>(malloc(size));
+    memset(tmp, 0, size);
+
+    const uint8_t * src = static_cast<const uint8_t *>(data);
+    for (uint32_t y = 0; y < h; y++) {
+        uint8_t * ydst = &tmp[y + ((h2 - h) >> 1)];
+        memcpy(&ydst[(w2 - w) >> 1], src, w * bpp);
+        src += h * bpp;
+    }
+
+    RsAllocation ret = rsi_AllocationCreateFromBitmap(rsc, w2, h2, dstFmt, srcFmt, genMips, tmp);
+    free(tmp);
+    return ret;
+
+
+
+
+}
+
 
 RsAllocation rsi_AllocationCreateFromFile(Context *rsc, const char *file, bool genMips)
 {

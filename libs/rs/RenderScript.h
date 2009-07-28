@@ -146,26 +146,26 @@ enum RsDepthFunc {
 };
 
 enum RsBlendSrcFunc {
-    RS_BLEND_SRC_ZERO, 
-    RS_BLEND_SRC_ONE, 
-    RS_BLEND_SRC_DST_COLOR, 
-    RS_BLEND_SRC_ONE_MINUS_DST_COLOR, 
-    RS_BLEND_SRC_SRC_ALPHA, 
-    RS_BLEND_SRC_ONE_MINUS_SRC_ALPHA, 
-    RS_BLEND_SRC_DST_ALPHA, 
-    RS_BLEND_SRC_ONE_MINUS_DST_ALPHA, 
-    RS_BLEND_SRC_SRC_ALPHA_SATURATE
+    RS_BLEND_SRC_ZERO,                  // 0
+    RS_BLEND_SRC_ONE,                   // 1
+    RS_BLEND_SRC_DST_COLOR,             // 2
+    RS_BLEND_SRC_ONE_MINUS_DST_COLOR,   // 3
+    RS_BLEND_SRC_SRC_ALPHA,             // 4
+    RS_BLEND_SRC_ONE_MINUS_SRC_ALPHA,   // 5
+    RS_BLEND_SRC_DST_ALPHA,             // 6
+    RS_BLEND_SRC_ONE_MINUS_DST_ALPHA,   // 7
+    RS_BLEND_SRC_SRC_ALPHA_SATURATE     // 8
 };
 
 enum RsBlendDstFunc {
-    RS_BLEND_DST_ZERO, 
-    RS_BLEND_DST_ONE, 
-    RS_BLEND_DST_SRC_COLOR, 
-    RS_BLEND_DST_ONE_MINUS_SRC_COLOR, 
-    RS_BLEND_DST_SRC_ALPHA, 
-    RS_BLEND_DST_ONE_MINUS_SRC_ALPHA, 
-    RS_BLEND_DST_DST_ALPHA, 
-    RS_BLEND_DST_ONE_MINUS_DST_ALPHA
+    RS_BLEND_DST_ZERO,                  // 0
+    RS_BLEND_DST_ONE,                   // 1
+    RS_BLEND_DST_SRC_COLOR,             // 2
+    RS_BLEND_DST_ONE_MINUS_SRC_COLOR,   // 3
+    RS_BLEND_DST_SRC_ALPHA,             // 4
+    RS_BLEND_DST_ONE_MINUS_SRC_ALPHA,   // 5
+    RS_BLEND_DST_DST_ALPHA,             // 6
+    RS_BLEND_DST_ONE_MINUS_DST_ALPHA    // 7
 };
 
 enum RsTexEnvMode {

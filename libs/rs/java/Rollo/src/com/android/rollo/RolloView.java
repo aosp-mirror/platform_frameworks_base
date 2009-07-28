@@ -76,7 +76,7 @@ public class RolloView extends RSSurfaceView {
     float mOldColumn;
     float mZoom = 1;
 
-    int mIconCount = 38;
+    int mIconCount = 29;
     int mRows = 4;
     int mColumns = (mIconCount + mRows - 1) / mRows;
 
@@ -101,7 +101,7 @@ public class RolloView extends RSSurfaceView {
 
     void computeSelection(float x, float y)
     {
-        float col = mColumn + (x - 0.5f) * 3;
+        float col = mColumn + (x - 0.5f) * 4 + 1;
         int iCol = (int)(col + 0.25f);
 
         float row = (y / 0.8f) * mRows;
@@ -158,13 +158,14 @@ public class RolloView extends RSSurfaceView {
                     mZoom = zoom;
                     mFlingX = nx;
                     mRender.setZoom(zoom);
-                } else {
-                    if(mControlMode && (mZoom < 1.01f)) {
+                    if(mZoom < 1.01f) {
                         computeSelection(nx, ny);
                     }
+                } else {
                     mControlMode = false;
                     mColumn = mOldColumn;
                     mRender.setZoom(1.f);
+                    mRender.setSelected(-1);
                 }
             } else {
                 // Do something with corners here....

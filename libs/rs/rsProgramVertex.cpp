@@ -55,8 +55,6 @@ void ProgramVertex::setupGL()
         glLoadIdentity();
     }
 
-
-    LOGE("lights %i ", mLightCount);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     if (mLightCount) {
@@ -102,6 +100,25 @@ void ProgramVertex::addLight(const Light *l)
         mLightCount++;
     }
 }
+
+void ProgramVertex::setProjectionMatrix(const rsc_Matrix *m) const
+{
+    float *f = static_cast<float *>(mConstants[0]->getPtr());
+    memcpy(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET], m, sizeof(rsc_Matrix));
+}
+
+void ProgramVertex::setModelviewMatrix(const rsc_Matrix *m) const
+{
+    float *f = static_cast<float *>(mConstants[0]->getPtr());
+    memcpy(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET], m, sizeof(rsc_Matrix));
+}
+
+void ProgramVertex::setTextureMatrix(const rsc_Matrix *m) const
+{
+    float *f = static_cast<float *>(mConstants[0]->getPtr());
+    memcpy(&f[RS_PROGRAM_VERTEX_TEXTURE_OFFSET], m, sizeof(rsc_Matrix));
+}
+
 
 
 ProgramVertexState::ProgramVertexState()

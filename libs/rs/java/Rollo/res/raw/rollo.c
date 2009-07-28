@@ -51,7 +51,7 @@ int main(void* con, int ft, int launchID)
 
     float touchCut = 1.f;
     if (loadI32(0, STATE_TOUCH)) {
-        touchCut = 5.f;
+        touchCut = 4.f;
     }
 
 
@@ -60,14 +60,17 @@ int main(void* con, int ft, int launchID)
     storeF(2, SCRATCH_ZOOM, zoom);
 
     float targetRot = loadI32(0, STATE_FIRST_VISIBLE) / 180.0f * 3.14f;
-    float rot = filter(loadF(2, SCRATCH_ROT), targetRot, 0.1f * touchCut);
-    storeF(2, SCRATCH_ROT, rot);
+    float drawRot = filter(loadF(2, SCRATCH_ROT), targetRot, 0.1f * touchCut);
+    storeF(2, SCRATCH_ROT, drawRot);
 
-    float diam = 8.f;// + curve * 2.f;
+    float diam = 10.f;
     float scale = 1.0f / zoom;
 
-    rot = rot * scale;
-    float rotStep = 20.0f / 180.0f * 3.14f * scale;
+    // Bug makes 1.0f alpha fail.
+    color(1.0f, 1.0f, 1.0f, 0.99f);
+
+    float rot = drawRot * scale;
+    float rotStep = 16.0f / 180.0f * 3.14f * scale;
     rowCount = 4;
     int index = 0;
     int iconCount = loadI32(0, STATE_COUNT);
@@ -82,24 +85,55 @@ int main(void* con, int ft, int launchID)
 
         int y;
         for (y = rowCount -1; (y >= 0) && iconCount; y--) {
-            float ty1 = ((y * 3.0f) - 4.5f) * scale;
+            float ty1 = ((y * 3.5f) - 6.f) * scale;
             float ty2 = ty1 + scale * 2.f;
-            bindTexture(NAMED_PF, 0, loadI32(1, y));
-            color(1.0f, 1.0f, 1.0f, 1.0f);
-            if (done && (index != selectedID)) {
-                color(0.4f, 0.4f, 0.4f, 1.0f);
-            }
+            bindTexture(NAMED_PF, 0, loadI32(1, index));
+            //if (done && (index != selectedID)) {
+                //color(0.4f, 0.4f, 0.4f, 1.0f);
+            //}
             drawQuad(tx1, ty1, tz1,
                      tx2, ty1, tz2,
                      tx2, ty2, tz2,
                      tx1, ty2, tz1);
+
             iconCount--;
             index++;
         }
         rot = rot + rotStep;
     }
 
-    return 0;
+    // Draw the selected icon
+    color(1.0f, 1.0f, 1.0f, 0.9f);
+    rot = drawRot * scale;
+    index = 0;
+    iconCount = loadI32(0, STATE_COUNT);
+    while (iconCount) {
+        int y;
+        for (y = rowCount -1; (y >= 0) && iconCount; y--) {
+            if (index == selectedID) {
+
+                float tmpSin = sinf(rot) * scale;
+                float tmpCos = cosf(rot) * scale;
+                float tx1 = tmpSin * diam * 0.9f - tmpCos * 2.f;
+                float tx2 = tx1 + (tmpCos * 4.f);
+                float tz1 = tmpCos * diam * 0.9f + tmpSin * 2.f;
+                float tz2 = tz1 - (tmpSin * 4.f);
+
+                float ty1 = ((y * 3.5f) - 5.f) * scale;
+                float ty2 = ty1 + scale * 4.f;
+                bindTexture(NAMED_PF, 0, loadI32(1, index));
+                drawQuad(tx1, ty1, tz1,
+                         tx2, ty1, tz2,
+                         tx2, ty2, tz2,
+                         tx1, ty2, tz1);
+            }
+            iconCount--;
+            index++;
+        }
+        rot = rot + rotStep;
+    }
+
+    return 1;
 }
 
 

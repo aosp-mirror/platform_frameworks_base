@@ -135,7 +135,6 @@ static float SC_randf(float max)
 
 
 
-
 //////////////////////////////////////////////////////////////////////////////
 // Matrix routines
 //////////////////////////////////////////////////////////////////////////////
@@ -257,6 +256,24 @@ static void SC_bindProgramVertex(RsProgramVertex pv)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// VP
+//////////////////////////////////////////////////////////////////////////////
+
+static void SC_vpLoadModelMatrix(const rsc_Matrix *m)
+{
+    GET_TLS();
+    rsc->getVertex()->setModelviewMatrix(m);
+}
+
+static void SC_vpLoadTextureMatrix(const rsc_Matrix *m)
+{
+    GET_TLS();
+    rsc->getVertex()->setTextureMatrix(m);
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
 // Drawing
 //////////////////////////////////////////////////////////////////////////////
 
@@ -343,20 +360,12 @@ static void SC_drawQuad(float x1, float y1, float z1,
 //
 //////////////////////////////////////////////////////////////////////////////
 
-extern "C" const void * loadVp(uint32_t bank, uint32_t offset)
-{
-    GET_TLS();
-    return &static_cast<const uint8_t *>(sc->mSlots[bank]->getPtr())[offset];
-}
-
-
-
 static void SC_color(float r, float g, float b, float a)
 {
     glColor4f(r, g, b, a);
 }
 
-
+/*
 extern "C" void materialDiffuse(float r, float g, float b, float a)
 {
     float v[] = {r, g, b, a};
@@ -369,34 +378,17 @@ extern "C" void materialSpecular(float r, float g, float b, float a)
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, v);
 }
 
-extern "C" void lightPosition(float x, float y, float z, float w)
-{
-    float v[] = {x, y, z, w};
-    glLightfv(GL_LIGHT0, GL_POSITION, v);
-}
-
 extern "C" void materialShininess(float s)
 {
     glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &s);
 }
+*/
 
-extern "C" void uploadToTexture(RsAllocation va, uint32_t baseMipLevel)
+static void SC_uploadToTexture(RsAllocation va, uint32_t baseMipLevel)
 {
     GET_TLS();
     rsi_AllocationUploadToTexture(rsc, va, baseMipLevel);
 }
-
-extern "C" void enable(uint32_t p)
-{
-    glEnable(p);
-}
-
-extern "C" void disable(uint32_t p)
-{
-    glDisable(p);
-}
-
-
 
 static void SC_ClearColor(float r, float g, float b, float a)
 {
@@ -406,6 +398,16 @@ static void SC_ClearColor(float r, float g, float b, float a)
     sc->mEnviroment.mClearColor[1] = g;
     sc->mEnviroment.mClearColor[2] = b;
     sc->mEnviroment.mClearColor[3] = a;
+}
+
+static void SC_debugF(const char *s, float f)
+{
+    LOGE("%s %f", s, f);
+}
+
+static void SC_debugI32(const char *s, int32_t i)
+{
+    LOGE("%s %i", s, i);
 }
 
 
@@ -444,6 +446,10 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "float", "(float)" },
     { "randf", (void *)&SC_randf,
         "float", "(float)" },
+    { "floorf", (void *)&floorf,
+        "float", "(float)" },
+    { "ceilf", (void *)&ceilf,
+        "float", "(float)" },
 
     // matrix
     { "matrixLoadIdentity", (void *)&SC_matrixLoadIdentity,
@@ -481,6 +487,14 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "bindTexture", (void *)&SC_bindTexture,
         "void", "(int, int, int)" },
 
+    // vp
+    { "vpLoadModelMatrix", (void *)&SC_bindProgramFragment,
+        "void", "(void *)" },
+    { "vpLoadTextureMatrix", (void *)&SC_bindProgramFragmentStore,
+        "void", "(void *)" },
+
+
+
     // drawing
     { "drawQuad", (void *)&SC_drawQuad,
         "void", "(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
@@ -495,9 +509,18 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     // misc
     { "pfClearColor", (void *)&SC_ClearColor,
         "void", "(float, float, float, float)" },
-
     { "color", (void *)&SC_color,
         "void", "(float, float, float, float)" },
+
+    { "uploadToTexture", (void *)&SC_uploadToTexture,
+        "void", "(int, int)" },
+
+
+    { "debugF", (void *)&SC_debugF,
+        "void", "(void *, float)" },
+    { "debugI32", (void *)&SC_debugI32,
+        "void", "(void *, int)" },
+
 
     { NULL, NULL, NULL, NULL }
 };

@@ -83,6 +83,7 @@ public:
 
     const ProgramFragment * getFragment() {return mFragment.get();}
     const ProgramFragmentStore * getFragmentStore() {return mFragmentStore.get();}
+    const ProgramVertex * getVertex() {return mVertex.get();}
 
     void setupCheck();
 

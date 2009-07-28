@@ -41,6 +41,10 @@ public:
     void setTextureMatrixEnable(bool e) {mTextureMatrixEnable = e;}
     void addLight(const Light *);
 
+    void setProjectionMatrix(const rsc_Matrix *) const;
+    void setModelviewMatrix(const rsc_Matrix *) const;
+    void setTextureMatrix(const rsc_Matrix *) const;
+
 protected:
     bool mDirty;
     uint32_t mLightCount;
