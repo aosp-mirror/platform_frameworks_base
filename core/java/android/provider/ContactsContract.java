@@ -113,7 +113,7 @@ public final class ContactsContract {
         public static final String SEND_TO_VOICEMAIL = "send_to_voicemail";
     }
 
-    private interface AggregatesColumns {
+    private interface ContactsColumns {
         /**
          * The display name for the contact.
          * <P>Type: TEXT</P>
@@ -140,7 +140,7 @@ public final class ContactsContract {
 
         /**
          * Lookup value that reflects the {@link Groups#GROUP_VISIBLE} state of
-         * any {@link GroupMembership} for this aggregate.
+         * any {@link GroupMembership} for this contact.
          */
         public static final String IN_VISIBLE_GROUP = "in_visible_group";
 
@@ -171,32 +171,33 @@ public final class ContactsContract {
 
 
     /**
-     * Constants for the aggregates table, which contains a record per group
-     * of contact representing the same person.
+     * Constants for the contacts table, which contains a record per group
+     * of raw contact representing the same person.
      */
-    public static final class Aggregates implements BaseColumns, AggregatesColumns,
+    // TODO make final once renaming is complete
+    public static /*final*/ class Contacts implements BaseColumns, ContactsColumns,
             ContactOptionsColumns {
         /**
          * This utility class cannot be instantiated
          */
-        private Aggregates()  {}
+        private Contacts()  {}
 
         /**
          * The content:// style URI for this table
          */
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "aggregates");
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "contacts");
 
         /**
          * The content:// style URI for this table joined with useful data from
          * {@link Data}.
          */
         public static final Uri CONTENT_SUMMARY_URI = Uri.withAppendedPath(AUTHORITY_URI,
-                "aggregates_summary");
+                "contacts_summary");
 
         /**
          * The content:// style URI used for "type-to-filter" functionality on the
          * {@link #CONTENT_SUMMARY_URI} URI. The filter string will be used to match
-         * various parts of the aggregate name. The filter argument should be passed
+         * various parts of the contact name. The filter argument should be passed
          * as an additional path segment after this URI.
          */
         public static final Uri CONTENT_SUMMARY_FILTER_URI = Uri.withAppendedPath(
@@ -204,8 +205,8 @@ public final class ContactsContract {
 
         /**
          * The content:// style URI for this table joined with useful data from
-         * {@link Data}, filtered to include only starred aggregates
-         * and the most frequently contacted aggregates.
+         * {@link Data}, filtered to include only starred contacts
+         * and the most frequently contacted contacts.
          */
         public static final Uri CONTENT_SUMMARY_STREQUENT_URI = Uri.withAppendedPath(
                 CONTENT_SUMMARY_URI, "strequent");
@@ -213,7 +214,7 @@ public final class ContactsContract {
         /**
          * The content:// style URI used for "type-to-filter" functionality on the
          * {@link #CONTENT_SUMMARY_STREQUENT_URI} URI. The filter string will be used to match
-         * various parts of the aggregate name. The filter argument should be passed
+         * various parts of the contact name. The filter argument should be passed
          * as an additional path segment after this URI.
          */
         public static final Uri CONTENT_SUMMARY_STREQUENT_FILTER_URI = Uri.withAppendedPath(
@@ -225,16 +226,16 @@ public final class ContactsContract {
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/person_aggregate";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
          * person.
          */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/person_aggregate";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact";
 
         /**
-         * A sub-directory of a single contact aggregate that contains all of their
+         * A sub-directory of a single contact that contains all of the constituent raw contact
          * {@link Data} rows.
          */
         public static final class Data implements BaseColumns, DataColumns {
@@ -251,10 +252,10 @@ public final class ContactsContract {
 
         /**
          * A sub-directory of a single contact aggregate that contains all aggregation suggestions
-         * (other aggregates).  The aggregation suggestions are computed based on approximate
-         * data matches with this aggregate.
+         * (other contacts).  The aggregation suggestions are computed based on approximate
+         * data matches with this contact.
          */
-        public static final class AggregationSuggestions implements BaseColumns, AggregatesColumns {
+        public static final class AggregationSuggestions implements BaseColumns, ContactsColumns {
             /**
              * No public constructor since this is a utility class
              */
@@ -274,6 +275,9 @@ public final class ContactsContract {
             public static final String MAX_SUGGESTIONS = "max_suggestions";
         }
     }
+
+    @Deprecated
+    public static final class Aggregates extends Contacts {}
 
     /**
      * Columns that appear when each row of a table belongs to a specific
@@ -317,10 +321,11 @@ public final class ContactsContract {
 
     private interface RawContactsColumns {
         /**
-         * A reference to the {@link Aggregates#_ID} that this data belongs to.
+         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} that this
+         * data belongs to.
          * <P>Type: INTEGER</P>
          */
-        public static final String AGGREGATE_ID = "aggregate_id";
+        public static final String CONTACT_ID = "contact_id";
 
         /**
          * Flag indicating that this {@link RawContacts} entry and its children has
@@ -341,10 +346,9 @@ public final class ContactsContract {
          * The "deleted" flag: "0" by default, "1" if the row has been marked
          * for deletion. When {@link android.content.ContentResolver#delete} is
          * called on a raw contact, it is marked for deletion and removed from its
-         * aggregate. The sync adaptor deletes the raw contact on the server and
+         * aggregate contact. The sync adaptor deletes the raw contact on the server and
          * then calls ContactResolver.delete once more, this time passing the
-         * {@link android.provider.ContactsContract.RawContacts#DELETE_PERMANENTLY}
-         * query parameter to finalize the data removal.
+         * {@link RawContacts#DELETE_PERMANENTLY} query parameter to finalize the data removal.
          * <P>Type: INTEGER</P>
          */
         public static final String DELETED = "deleted";
@@ -355,8 +359,7 @@ public final class ContactsContract {
      * information per sync source. Sync adapters and contact management apps
      * are the primary consumers of this API.
      */
-    // TODO make final as soon as renaming is complete
-    public static /*final*/ class RawContacts implements BaseColumns, RawContactsColumns,
+    public static final class RawContacts implements BaseColumns, RawContactsColumns,
             SyncColumns, ContactOptionsColumns {
         /**
          * This utility class cannot be instantiated
@@ -383,13 +386,13 @@ public final class ContactsContract {
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/person";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/raw_contact";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
          * person.
          */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/person";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/raw_contact";
 
         /**
          * Query parameter that can be passed with the {@link #CONTENT_URI} URI
@@ -434,13 +437,6 @@ public final class ContactsContract {
         }
     }
 
-    /**
-     * TODO remove as soon as full renaming is complete.
-     */
-    @Deprecated
-    public static final class Contacts extends RawContacts {
-    }
-
     private interface DataColumns {
         /**
          * The package name to use when creating {@link Resources} objects for
@@ -455,23 +451,21 @@ public final class ContactsContract {
         public static final String MIMETYPE = "mimetype";
 
         /**
-         * A reference to the {@link android.provider.ContactsContract.RawContacts#_ID}
+         * A reference to the {@link RawContacts#_ID}
          * that this data belongs to.
          */
         public static final String RAW_CONTACT_ID = "raw_contact_id";
 
-        @Deprecated
-        public static final String CONTACT_ID = RAW_CONTACT_ID;
-
         /**
-         * Whether this is the primary entry of its kind for the contact it belongs to
+         * Whether this is the primary entry of its kind for the raw contact it belongs to
          * <P>Type: INTEGER (if set, non-0 means true)</P>
          */
         public static final String IS_PRIMARY = "is_primary";
 
         /**
-         * Whether this is the primary entry of its kind for the aggregate it belongs to. Any data
-         * record that is "super primary" must also be "primary".
+         * Whether this is the primary entry of its kind for the aggregate
+         * contact it belongs to. Any data record that is "super primary" must
+         * also be "primary".
          * <P>Type: INTEGER (if set, non-0 means true)</P>
          */
         public static final String IS_SUPER_PRIMARY = "is_super_primary";
@@ -545,7 +539,7 @@ public final class ContactsContract {
      * with the raw contact that owns the number. To perform a lookup you must
      * append the number you want to find to {@link #CONTENT_FILTER_URI}.
      */
-    public static final class PhoneLookup implements BaseColumns, DataColumns, AggregatesColumns {
+    public static final class PhoneLookup implements BaseColumns, DataColumns, ContactsColumns {
         /**
          * This utility class cannot be instantiated
          */
@@ -565,7 +559,7 @@ public final class ContactsContract {
 
     /**
      * Additional data mixed in with {@link Im.CommonPresenceColumns} to link
-     * back to specific {@link ContactsContract.Aggregates#_ID} entries.
+     * back to specific {@link ContactsContract.Contacts#_ID} entries.
      */
     private interface PresenceColumns {
 
@@ -576,14 +570,10 @@ public final class ContactsContract {
         public static final String _ID = "presence_id";
 
         /**
-         * Reference to the {@link android.provider.ContactsContract.RawContacts#_ID} this presence
-         * references.
+         * Reference to the {@link RawContacts#_ID} this presence references.
          * <P>Type: INTEGER</P>
          */
         public static final String RAW_CONTACT_ID = "raw_contact_id";
-
-        @Deprecated
-        public static final String CONTACT_ID = RAW_CONTACT_ID;
 
         /**
          * Reference to the {@link Data#_ID} entry that owns this presence.
@@ -844,7 +834,7 @@ public final class ContactsContract {
             /**
              * The content:// style URI for all data records of the
              * {@link Phone#CONTENT_ITEM_TYPE} MIME type, combined with the
-             * associated raw contact and aggregate data.
+             * associated raw contact and aggregate contact data.
              */
             public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
                     "phones");
@@ -852,7 +842,7 @@ public final class ContactsContract {
             /**
              * The content:// style URI for filtering data records of the
              * {@link Phone#CONTENT_ITEM_TYPE} MIME type, combined with the
-             * associated raw contact and aggregate data. The filter argument should
+             * associated raw contact and aggregate contact data. The filter argument should
              * be passed as an additional path segment after this URI.
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
@@ -1202,7 +1192,7 @@ public final class ContactsContract {
         public static final String SYSTEM_ID = "system_id";
 
         /**
-         * The total number of {@link Aggregates} that have
+         * The total number of {@link Contacts} that have
          * {@link GroupMembership} in this group. Read-only value that is only
          * present when querying {@link Groups#CONTENT_SUMMARY_URI}.
          * <p>
@@ -1211,7 +1201,7 @@ public final class ContactsContract {
         public static final String SUMMARY_COUNT = "summ_count";
 
         /**
-         * The total number of {@link Aggregates} that have both
+         * The total number of {@link Contacts} that have both
          * {@link GroupMembership} in this group, and also have phone numbers.
          * Read-only value that is only present when querying
          * {@link Groups#CONTENT_SUMMARY_URI}.
@@ -1299,34 +1289,33 @@ public final class ContactsContract {
         public static final String TYPE = "type";
 
         /**
-         * Allows the provider to automatically decide whether the aggregate should include
-         * a particular contact or not.
+         * Allows the provider to automatically decide whether the aggregate
+         * contact should include a particular raw contact or not.
          */
         public static final int TYPE_AUTOMATIC = 0;
 
         /**
-         * Makes sure that the specified raw contact is included in the specified aggregate.
+         * Makes sure that the specified raw contact is included in the
+         * specified aggregate contact.
          */
         public static final int TYPE_KEEP_IN = 1;
 
         /**
-         * Makes sure that the specified raw contact is NOT included in the specified aggregate.
+         * Makes sure that the specified raw contact is NOT included in the
+         * specified aggregate contact.
          */
         public static final int TYPE_KEEP_OUT = 2;
 
         /**
-         * A reference to the {@link Aggregates#_ID} of the aggregate that the rule applies to.
+         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of the
+         * aggregate contact that the rule applies to.
          */
-        public static final String AGGREGATE_ID = "aggregate_id";
+        public static final String CONTACT_ID = "contact_id";
 
         /**
-         * A reference to the {@link android.provider.ContactsContract.RawContacts#_ID} of the
-         * raw contact that the rule applies to.
+         * A reference to the {@link RawContacts#_ID} of the raw contact that the rule applies to.
          */
         public static final String RAW_CONTACT_ID = "raw_contact_id";
-
-        @Deprecated
-        public static final String CONTACT_ID = RAW_CONTACT_ID;
     }
 
     /**
