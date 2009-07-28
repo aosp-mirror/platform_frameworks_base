@@ -26,6 +26,8 @@
 #include <utils/List.h>
 #include <utils/threads.h>
 
+#include <OMX_Video.h>
+
 namespace android {
 
 class OMXMediaBuffer;
@@ -35,10 +37,8 @@ class OMXDecoder : public MediaSource,
                    public MediaBufferObserver {
 public:
     static OMXDecoder *Create(
-            OMXClient *client, const sp<MetaData> &data);
-
-    static OMXDecoder *CreateEncoder(
-            OMXClient *client, const sp<MetaData> &data);
+            OMXClient *client, const sp<MetaData> &data,
+            bool createEncoder = false);
 
     virtual ~OMXDecoder();
 
@@ -68,10 +68,22 @@ private:
     };
 
     enum PortStatus {
-        kPortStatusActive   = 0,
-        kPortStatusDisabled = 1,
-        kPortStatusShutdown = 2,
-        kPortStatusFlushing = 3
+        kPortStatusActive             = 0,
+        kPortStatusDisabled           = 1,
+        kPortStatusShutdown           = 2,
+        kPortStatusFlushing           = 3,
+        kPortStatusFlushingToDisabled = 4,
+        kPortStatusFlushingToShutdown = 5,
+    };
+
+    enum Quirks {
+        kWantsRawNALFrames                   = 1,
+        kDoesntReturnBuffersOnDisable        = 2,
+        kDoesntFlushOnExecutingToIdle        = 4,
+        kDoesntProperlyFlushAllPortsAtOnce   = 8,
+        kRequiresAllocateBufferOnInputPorts  = 16,
+        kRequiresAllocateBufferOnOutputPorts = 32,
+        kRequiresLoadedToIdleAfterAllocation = 64
     };
 
     OMXClient *mClient;
@@ -79,6 +91,8 @@ private:
     IOMX::node_id mNode;
     char *mComponentName;
     bool mIsMP3;
+    bool mIsAVC;
+    uint32_t mQuirks;
 
     MediaSource *mSource;
     sp<MetaData> mOutputFormat;
@@ -116,7 +130,8 @@ private:
     bool mReachedEndOfInput;
 
     OMXDecoder(OMXClient *client, IOMX::node_id node,
-               const char *mime, const char *codec);
+               const char *mime, const char *codec,
+               uint32_t quirks);
 
     void setPortStatus(OMX_U32 port_index, PortStatus status);
     PortStatus getPortStatus(OMX_U32 port_index) const;
@@ -125,7 +140,13 @@ private:
 
     void setAMRFormat();
     void setAACFormat();
-    void setVideoOutputFormat(OMX_U32 width, OMX_U32 height);
+
+    status_t setVideoPortFormatType(
+            OMX_U32 portIndex,
+            OMX_VIDEO_CODINGTYPE compressionFormat,
+            OMX_COLOR_FORMATTYPE colorFormat);
+
+    void setVideoOutputFormat(const char *mime, OMX_U32 width, OMX_U32 height);
     void setup();
     void dumpPortDefinition(OMX_U32 port_index);
 
@@ -144,6 +165,7 @@ private:
 
     void freeInputBuffer(IOMX::buffer_id buffer);
     void freeOutputBuffer(IOMX::buffer_id buffer);
+    void freePortBuffers(OMX_U32 port_index);
 
     void postStart();
     void postEmptyBufferDone(IOMX::buffer_id buffer);

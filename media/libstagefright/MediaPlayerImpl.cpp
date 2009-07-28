@@ -40,6 +40,7 @@
 #include <media/stagefright/SoftwareRenderer.h>
 #include <media/stagefright/SurfaceRenderer.h>
 #include <media/stagefright/TimeSource.h>
+#include <media/stagefright/TIHardwareRenderer.h>
 #include <ui/PixelFormat.h>
 #include <ui/Surface.h>
 
@@ -311,6 +312,9 @@ void MediaPlayerImpl::videoEntry() {
         {
             Mutex::Autolock autoLock(mLock);
             mVideoPosition = pts_us;
+
+            LOGV("now_video = %.2f secs (%lld ms)",
+                 pts_us / 1E6, (pts_us + 500) / 1000);
         }
 
         if (seeking && mAudioPlayer != NULL) {
@@ -344,6 +348,7 @@ void MediaPlayerImpl::displayOrDiscardFrame(
         if (mAudioPlayer != NULL
             && mAudioPlayer->getMediaTimeMapping(&realtime_us, &mediatime_us)) {
             mTimeSourceDeltaUs = realtime_us - mediatime_us;
+            LOGV("mTimeSourceDeltaUs = %.2f secs", mTimeSourceDeltaUs / 1E6);
         }
 
         int64_t now_us = mTimeSource->getRealTimeUs();
@@ -436,6 +441,7 @@ void MediaPlayerImpl::init() {
 }
 
 void MediaPlayerImpl::setAudioSource(MediaSource *source) {
+    LOGI("setAudioSource");
     mAudioSource = source;
 
     sp<MetaData> meta = source->getFormat();
@@ -646,15 +652,26 @@ void MediaPlayerImpl::populateISurface() {
     success = success && meta->findInt32(kKeyHeight, &decodedHeight);
     assert(success);
 
+    static const int OMX_QCOM_COLOR_FormatYVU420SemiPlanar = 0x7FA30C00;
+
     if (mSurface.get() != NULL) {
+        LOGW("Using SurfaceRenderer.");
         mRenderer =
             new SurfaceRenderer(
                     mSurface, mVideoWidth, mVideoHeight,
                     decodedWidth, decodedHeight);
-    } else if (format == OMX_COLOR_FormatYUV420Planar
-        && !strncasecmp(component, "OMX.qcom.video.decoder.", 23)) {
+    } else if (format == OMX_QCOM_COLOR_FormatYVU420SemiPlanar
+        && !strncmp(component, "OMX.qcom.video.decoder.", 23)) {
+        LOGW("Using QComHardwareRenderer.");
         mRenderer =
             new QComHardwareRenderer(
+                    mISurface, mVideoWidth, mVideoHeight,
+                    decodedWidth, decodedHeight);
+    } else if (format == OMX_COLOR_FormatCbYCrY
+            && !strcmp(component, "OMX.TI.Video.Decoder")) {
+        LOGW("Using TIHardwareRenderer.");
+        mRenderer =
+            new TIHardwareRenderer(
                     mISurface, mVideoWidth, mVideoHeight,
                     decodedWidth, decodedHeight);
     } else {

@@ -73,8 +73,6 @@ static bool get_mp3_frame_size(
 
     if (bitrate_index == 0 || bitrate_index == 0x0f) {
         // Disallow "free" bitrate.
-
-        LOGE("We disallow 'free' bitrate for now.");
         return false;
     }
 

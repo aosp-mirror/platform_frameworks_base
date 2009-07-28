@@ -59,6 +59,8 @@
 #include <media/PVPlayer.h>
 #include "TestPlayerStub.h"
 
+//#undef USE_STAGEFRIGHT
+
 #if USE_STAGEFRIGHT
 #include "StagefrightPlayer.h"
 #endif

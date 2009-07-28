@@ -119,7 +119,8 @@ int main(int argc, char **argv) {
     enc_meta->setInt32(kKeyWidth, width);
     enc_meta->setInt32(kKeyHeight, height);
 
-    OMXDecoder *encoder = OMXDecoder::CreateEncoder(&client, enc_meta);
+    OMXDecoder *encoder =
+        OMXDecoder::Create(&client, enc_meta, true /* createEncoder */);
 
     encoder->setSource(decoder);
     // encoder->setSource(meta, new DummySource(width, height));
