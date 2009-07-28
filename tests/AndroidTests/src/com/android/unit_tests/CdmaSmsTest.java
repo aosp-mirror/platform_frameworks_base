@@ -18,9 +18,11 @@ package com.android.unit_tests;
 
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
+import com.android.internal.telephony.cdma.SmsMessage;
 import com.android.internal.telephony.cdma.sms.BearerData;
 import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.cdma.sms.CdmaSmsAddress;
+import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.BitwiseOutputStream;
 import com.android.internal.util.HexDump;
@@ -28,11 +30,11 @@ import com.android.internal.util.HexDump;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import android.util.Log;
+
 import java.util.Iterator;
 
 import java.lang.Integer;
-
-import android.util.Log;
 
 public class CdmaSmsTest extends AndroidTestCase {
     private final static String LOG_TAG = "CDMA";
@@ -151,6 +153,9 @@ public class CdmaSmsTest extends AndroidTestCase {
         userData.payloadStr = "Test \n standard \r SMS";
         revBearerData = BearerData.decode(BearerData.encode(bearerData));
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
     }
 
     @SmallTest
@@ -172,6 +177,21 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(userData.msgEncoding, revBearerData.userData.msgEncoding);
         assertEquals(userData.payloadStr.length(), revBearerData.userData.numFields);
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "1234567";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "12345678901234567890123456789012345678901234567890" +
+                "12345678901234567890123456789012345678901234567890" +
+                "12345678901234567890123456789012345678901234567890" +
+                "1234567890";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "Test \u007f illegal \u0000 SMS chars";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals("Test   illegal   SMS chars", revBearerData.userData.payloadStr);
         userData.payloadStr = "More @ testing\nis great^|^~woohoo";
         revBearerData = BearerData.decode(BearerData.encode(bearerData));
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
@@ -219,6 +239,12 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(false, revBearerData.hasUserDataHeader);
         assertEquals(userData.msgEncoding, revBearerData.userData.msgEncoding);
         assertEquals(userData.payloadStr.length(), revBearerData.userData.numFields);
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "1234567";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
     }
 
@@ -784,4 +810,24 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(bd4.userData.payloadStr, "ABCDEFG");
     }
 
+    @SmallTest
+    public void testUserDataHeaderWithEightCharMsg() throws Exception {
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+        bearerData.messageId = 55;
+        SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+        concatRef.refNumber = 0xEE;
+        concatRef.msgCount = 2;
+        concatRef.seqNumber = 2;
+        concatRef.isEightBits = true;
+        SmsHeader smsHeader = new SmsHeader();
+        smsHeader.concatRef = concatRef;
+        UserData userData = new UserData();
+        userData.payloadStr = "01234567";
+        userData.userDataHeader = smsHeader;
+        bearerData.userData = userData;
+        byte[] encodedSms = BearerData.encode(bearerData);
+        BearerData revBearerData = BearerData.decode(encodedSms);
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+    }
 }

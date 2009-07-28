@@ -183,15 +183,9 @@ public class GsmAlphabet {
         }
 
         int headerBits = (header.length + 1) * 8;
-        int headerSeptets = headerBits / 7;
-        headerSeptets += (headerBits % 7) > 0 ? 1 : 0;
+        int headerSeptets = (headerBits + 6) / 7;
 
-        int sz = data.length();
-        int septetCount;
-        septetCount = countGsmSeptets(data, true) + headerSeptets;
-
-        byte[] ret = stringToGsm7BitPacked(data, 0, septetCount,
-                (headerSeptets*7), true);
+        byte[] ret = stringToGsm7BitPacked(data, headerSeptets, true);
 
         // Paste in the header
         ret[1] = (byte)header.length;
@@ -215,7 +209,7 @@ public class GsmAlphabet {
      */
     public static byte[] stringToGsm7BitPacked(String data)
             throws EncodeException {
-        return stringToGsm7BitPacked(data, 0, -1, 0, true);
+        return stringToGsm7BitPacked(data, 0, true);
     }
 
     /**
@@ -228,58 +222,37 @@ public class GsmAlphabet {
      * septets.
      *
      * @param data the text to convert to septets
-     * @param dataOffset the character offset in data to start the encoding from
-     * @param maxSeptets the maximum number of septets to convert, or -1 for no
-     *  enforced maximum.
-     * @param startingBitOffset the number of padding bits to put before
-     *  the start of the first septet at the begining of the array
+     * @param startingSeptetOffset the number of padding septets to put before
+     *  the character data at the begining of the array
      * @param throwException If true, throws EncodeException on invalid char.
      *   If false, replaces unencodable char with GSM alphabet space char.
      *
      * @throws EncodeException if String is too large to encode
      */
-    public static byte[] stringToGsm7BitPacked(String data, int dataOffset,
-            int maxSeptets, int startingBitOffset, boolean throwException)
-            throws EncodeException {
-
-        int sz = data.length();
-        int septetCount;
-        if (maxSeptets == -1) {
-            septetCount = countGsmSeptets(data, true);
-        } else {
-            septetCount = maxSeptets;
+    public static byte[] stringToGsm7BitPacked(String data, int startingSeptetOffset,
+            boolean throwException) throws EncodeException {
+        int dataLen = data.length();
+        int septetCount = countGsmSeptets(data, throwException) + startingSeptetOffset;
+        if (septetCount > 255) {
+            throw new EncodeException("Payload cannot exceed 255 septets");
         }
-
-        if(septetCount > 0xff) {
-            throw new EncodeException("Payload cannot exceed " + Short.MAX_VALUE
-                    + " septets");
-        }
-
-        // Enough for all the septets and the length 2 byte prefix
-        byte[] ret = new byte[1 + (((septetCount * 7) + 7) / 8)];
-
-        int bitOffset = startingBitOffset;
-        int septets = startingBitOffset/7;
-        for (int i = dataOffset; i < sz && septets < septetCount; i++, bitOffset += 7) {
+        int byteCount = ((septetCount * 7) + 7) / 8;
+        byte[] ret = new byte[byteCount + 1];  // Include space for one byte length prefix.
+        for (int i = 0, septets = startingSeptetOffset, bitOffset = startingSeptetOffset * 7;
+                 i < dataLen && septets < septetCount;
+                 i++, bitOffset += 7) {
             char c = data.charAt(i);
-
             int v = GsmAlphabet.charToGsm(c, throwException);
             if (v == GSM_EXTENDED_ESCAPE) {
-                // Lookup the extended char
-                v = GsmAlphabet.charToGsmExtended(c);
-
+                v = GsmAlphabet.charToGsmExtended(c);  // Lookup the extended char.
                 packSmsChar(ret, bitOffset, GSM_EXTENDED_ESCAPE);
                 bitOffset += 7;
                 septets++;
             }
-
             packSmsChar(ret, bitOffset, v);
             septets++;
         }
-
-        // See check for > 0xff above
-        ret[0] = (byte)septets;
-
+        ret[0] = (byte) (septetCount);  // Validated by check above.
         return ret;
     }
 

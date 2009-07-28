@@ -455,53 +455,114 @@ public final class BearerData {
         }
     }
 
-    private static int calcUdhSeptetPadding(int userDataHeaderLen) {
-        int udhBits = userDataHeaderLen * 8;
-        int udhSeptets = (udhBits + 6) / 7;
-        int paddingBits = (udhSeptets * 7) - udhBits;
-        return paddingBits;
+    private static class Gsm7bitCodingResult {
+        int septets;
+        byte[] data;
     }
 
-    private static byte[] encode7bitGsm(String msg, int paddingBits)
+    private static Gsm7bitCodingResult encode7bitGsm(String msg, int septetOffset, boolean force)
         throws CodingException
     {
         try {
             /*
              * TODO(cleanup): It would be nice if GsmAlphabet provided
              * an option to produce just the data without prepending
-             * the length.
+             * the septet count, as this function is really just a
+             * wrapper to strip that off.  Not to mention that the
+             * septet count is generally known prior to invocation of
+             * the encoder.  Note that it cannot be derived from the
+             * resulting array length, since that cannot distinguish
+             * if the last contains either 1 or 8 valid bits.
+             *
+             * TODO(cleanup): The BitwiseXStreams could also be
+             * extended with byte-wise reversed endianness read/write
+             * routines to allow a corresponding implementation of
+             * stringToGsm7BitPacked, and potentially directly support
+             * access to the main bitwise stream from encode/decode.
              */
-            byte []fullData = GsmAlphabet.stringToGsm7BitPacked(msg, 0, -1, paddingBits, true);
-            byte []data = new byte[fullData.length - 1];
-            System.arraycopy(fullData, 1, data, 0, fullData.length - 1);
-            return data;
+            byte[] fullData = GsmAlphabet.stringToGsm7BitPacked(msg, septetOffset, !force);
+            Gsm7bitCodingResult result = new Gsm7bitCodingResult();
+            result.data = new byte[fullData.length - 1];
+            System.arraycopy(fullData, 1, result.data, 0, fullData.length - 1);
+            result.septets = fullData[0];
+            return result;
         } catch (com.android.internal.telephony.EncodeException ex) {
             throw new CodingException("7bit GSM encode failed: " + ex);
+        }
+    }
+
+    private static void encode7bitEms(UserData uData, byte[] udhData, boolean force)
+        throws CodingException
+    {
+        int udhBytes = udhData.length + 1;  // Add length octet.
+        int udhSeptets = ((udhBytes * 8) + 6) / 7;
+        Gsm7bitCodingResult gcr = encode7bitGsm(uData.payloadStr, udhSeptets, force);
+        uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
+        uData.numFields = gcr.septets;
+        uData.payload = gcr.data;
+        uData.payload[0] = (byte)udhData.length;
+        System.arraycopy(udhData, 0, uData.payload, 1, udhData.length);
+    }
+
+    private static void encode16bitEms(UserData uData, byte[] udhData)
+        throws CodingException
+    {
+        byte[] payload = encodeUtf16(uData.payloadStr);
+        int udhBytes = udhData.length + 1;  // Add length octet.
+        int udhCodeUnits = (udhBytes + 1) / 2;
+        int udhPadding = udhBytes % 2;
+        int payloadCodeUnits = payload.length / 2;
+        uData.numFields = udhCodeUnits + payloadCodeUnits;
+        uData.payload = new byte[uData.numFields * 2];
+        uData.payload[0] = (byte)udhData.length;
+        System.arraycopy(udhData, 0, uData.payload, 1, udhData.length);
+        System.arraycopy(payload, 0, uData.payload, udhBytes + udhPadding, payload.length);
+    }
+
+    private static void encodeEmsUserDataPayload(UserData uData)
+        throws CodingException
+    {
+        byte[] headerData = SmsHeader.toByteArray(uData.userDataHeader);
+        if (uData.msgEncodingSet) {
+            if (uData.msgEncoding == UserData.ENCODING_GSM_7BIT_ALPHABET) {
+                encode7bitEms(uData, headerData, true);
+            } else if (uData.msgEncoding == UserData.ENCODING_UNICODE_16) {
+                encode16bitEms(uData, headerData);
+            } else {
+                throw new CodingException("unsupported EMS user data encoding (" +
+                                          uData.msgEncoding + ")");
+            }
+        } else {
+            try {
+                encode7bitEms(uData, headerData, false);
+            } catch (CodingException ex) {
+                encode16bitEms(uData, headerData);
+            }
         }
     }
 
     private static void encodeUserDataPayload(UserData uData)
         throws CodingException
     {
-        // TODO(cleanup): UDH can only occur in EMS mode, meaning
-        // encapsulation of GSM encoding, and so the logic here should
-        // be refactored to more cleanly reflect this constraint.
+        if ((uData.payloadStr == null) && (uData.msgEncoding != UserData.ENCODING_OCTET)) {
+            Log.e(LOG_TAG, "user data with null payloadStr");
+            uData.payloadStr = "";
+        }
 
-        byte[] headerData = null;
-        if (uData.userDataHeader != null) headerData = SmsHeader.toByteArray(uData.userDataHeader);
-        int headerDataLen = (headerData == null) ? 0 : headerData.length + 1;  // + length octet
+        if (uData.userDataHeader != null) {
+            encodeEmsUserDataPayload(uData);
+            return;
+        }
 
-        byte[] payloadData;
-        int codeUnitCount;
         if (uData.msgEncodingSet) {
             if (uData.msgEncoding == UserData.ENCODING_OCTET) {
                 if (uData.payload == null) {
                     Log.e(LOG_TAG, "user data with octet encoding but null payload");
-                    payloadData = new byte[0];
-                    codeUnitCount = 0;
+                    uData.payload = new byte[0];
+                    uData.numFields = 0;
                 } else {
-                    payloadData = uData.payload;
-                    codeUnitCount = uData.payload.length;
+                    uData.payload = uData.payload;
+                    uData.numFields = uData.payload.length;
                 }
             } else {
                 if (uData.payloadStr == null) {
@@ -509,65 +570,48 @@ public final class BearerData {
                     uData.payloadStr = "";
                 }
                 if (uData.msgEncoding == UserData.ENCODING_GSM_7BIT_ALPHABET) {
-                    int paddingBits = calcUdhSeptetPadding(headerDataLen);
-                    payloadData = encode7bitGsm(uData.payloadStr, paddingBits);
-                    codeUnitCount = ((payloadData.length + headerDataLen) * 8) / 7;
+                    Gsm7bitCodingResult gcr = encode7bitGsm(uData.payloadStr, 0, true);
+                    uData.payload = gcr.data;
+                    uData.numFields = gcr.septets;
                 } else if (uData.msgEncoding == UserData.ENCODING_7BIT_ASCII) {
-                    payloadData = encode7bitAscii(uData.payloadStr, true);
-                    codeUnitCount = uData.payloadStr.length();
+                    uData.payload = encode7bitAscii(uData.payloadStr, true);
+                    uData.numFields = uData.payloadStr.length();
                 } else if (uData.msgEncoding == UserData.ENCODING_UNICODE_16) {
-                    payloadData = encodeUtf16(uData.payloadStr);
-                    codeUnitCount = uData.payloadStr.length();
+                    uData.payload = encodeUtf16(uData.payloadStr);
+                    uData.numFields = uData.payloadStr.length();
                 } else {
                     throw new CodingException("unsupported user data encoding (" +
                                               uData.msgEncoding + ")");
                 }
             }
         } else {
-            if (uData.payloadStr == null) {
-                Log.e(LOG_TAG, "user data with null payloadStr");
-                uData.payloadStr = "";
-            }
             try {
-                if (headerData == null) {
-                    payloadData = encode7bitAscii(uData.payloadStr, false);
-                    codeUnitCount = uData.payloadStr.length();
-                    uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
-                } else {
-                    // If there is a header, we are in EMS mode, in
-                    // which case we use GSM encodings.
-                    int paddingBits = calcUdhSeptetPadding(headerDataLen);
-                    payloadData = encode7bitGsm(uData.payloadStr, paddingBits);
-                    codeUnitCount = ((payloadData.length + headerDataLen) * 8) / 7;
-                    uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
-                }
+                uData.payload = encode7bitAscii(uData.payloadStr, false);
+                uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
             } catch (CodingException ex) {
-                payloadData = encodeUtf16(uData.payloadStr);
-                codeUnitCount = uData.payloadStr.length();
+                uData.payload = encodeUtf16(uData.payloadStr);
                 uData.msgEncoding = UserData.ENCODING_UNICODE_16;
             }
+            uData.numFields = uData.payloadStr.length();
             uData.msgEncodingSet = true;
         }
-
-        int totalLength = payloadData.length + headerDataLen;
-        if (totalLength > SmsMessage.MAX_USER_DATA_BYTES) {
-            throw new CodingException("encoded user data too large (" + totalLength +
-                                      " > " + SmsMessage.MAX_USER_DATA_BYTES + " bytes)");
-        }
-
-        uData.numFields = codeUnitCount;
-        uData.payload = new byte[totalLength];
-        if (headerData != null) {
-            uData.payload[0] = (byte)headerData.length;
-            System.arraycopy(headerData, 0, uData.payload, 1, headerData.length);
-        }
-        System.arraycopy(payloadData, 0, uData.payload, headerDataLen, payloadData.length);
     }
 
     private static void encodeUserData(BearerData bData, BitwiseOutputStream outStream)
         throws BitwiseOutputStream.AccessException, CodingException
     {
+        /*
+         * TODO(cleanup): Do we really need to set userData.payload as
+         * a side effect of encoding?  If not, we could avoid data
+         * copies by passing outStream directly.
+         */
         encodeUserDataPayload(bData.userData);
+        if (bData.userData.payload.length > SmsMessage.MAX_USER_DATA_BYTES) {
+            throw new CodingException("encoded user data too large (" +
+                                      bData.userData.payload.length +
+                                      " > " + SmsMessage.MAX_USER_DATA_BYTES + " bytes)");
+        }
+
         /**
          * XXX/TODO: figure out what the right answer is WRT padding bits
          *
@@ -846,6 +890,9 @@ public final class BearerData {
     private static String decodeUtf16(byte[] data, int offset, int numFields)
         throws CodingException
     {
+        // Start reading from the next 16-bit aligned boundry after offset.
+        int padding = offset % 2;
+        numFields -= (offset + padding) / 2;
         try {
             return new String(data, offset, numFields * 2, "utf-16be");
         } catch (java.io.UnsupportedEncodingException ex) {
@@ -889,11 +936,11 @@ public final class BearerData {
     private static String decode7bitGsm(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        int paddingBits = calcUdhSeptetPadding(offset);
-        numFields -= (((offset * 8) + paddingBits) / 7);
-        // TODO: It seems wrong that only Gsm7 bit encodings would
-        // take into account the header in numFields calculations.
-        // This should be verified.
+        // Start reading from the next 7-bit aligned boundry after offset.
+        int offsetBits = offset * 8;
+        int offsetSeptets = (offsetBits + 6) / 7;
+        numFields -= offsetSeptets;
+        int paddingBits = (offsetSeptets * 7) - offsetBits;
         String result = GsmAlphabet.gsm7BitPackedToString(data, offset, numFields, paddingBits);
         if (result == null) {
             throw new CodingException("7bit GSM decoding failed");
