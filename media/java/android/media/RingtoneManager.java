@@ -605,21 +605,6 @@ public class RingtoneManager {
             Log.e(TAG, "Failed to open ringtone " + ringtoneUri);
         }
 
-        // Ringtone doesn't exist, use the fallback ringtone.
-        try {
-            AssetFileDescriptor afd = context.getResources().openRawResourceFd(
-                    com.android.internal.R.raw.fallbackring);
-            if (afd != null) {
-                Ringtone r = new Ringtone(context);
-                r.open(afd);
-                afd.close();
-                return r;
-            }
-        } catch (Exception ex) {
-        }
-        
-        // we should never get here
-        Log.e(TAG, "unable to find a usable ringtone");
         return null;
     }
     
@@ -638,8 +623,8 @@ public class RingtoneManager {
     public static Uri getActualDefaultRingtoneUri(Context context, int type) {
         String setting = getSettingForType(type);
         if (setting == null) return null;
-        final String uriString = Settings.System.getString(context.getContentResolver(), setting); 
-        return uriString != null ? Uri.parse(uriString) : getValidRingtoneUri(context);
+        final String uriString = Settings.System.getString(context.getContentResolver(), setting);
+        return uriString != null ? Uri.parse(uriString) : null;
     }
     
     /**
@@ -655,7 +640,8 @@ public class RingtoneManager {
     public static void setActualDefaultRingtoneUri(Context context, int type, Uri ringtoneUri) {
         String setting = getSettingForType(type);
         if (setting == null) return;
-        Settings.System.putString(context.getContentResolver(), setting, ringtoneUri.toString());
+        Settings.System.putString(context.getContentResolver(), setting,
+                ringtoneUri != null ? ringtoneUri.toString() : null);
     }
     
     private static String getSettingForType(int type) {

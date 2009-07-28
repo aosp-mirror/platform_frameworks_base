@@ -1709,6 +1709,8 @@
     <string name="volume_music">Media volume</string>
     <!-- Hint shown in the volume toast to inform the user that the media audio is playing through Bluetooth. -->
     <string name="volume_music_hint_playing_through_bluetooth">Playing through Bluetooth</string>
+    <!-- Hint shown in the volume toast to inform the user that the current ringtone is the silent ringtone. -->
+    <string name="volume_music_hint_silent_ringtone_selected">Silent ringtone selected</string>
     <!-- Title of the dialog where the user is adjusting the phone call volume -->
     <string name="volume_call">In-call volume</string>
     <!-- Title of the dialog where the user is adjusting the phone call volume when connected on bluetooth-->

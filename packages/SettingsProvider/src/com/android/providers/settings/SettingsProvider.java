@@ -24,9 +24,11 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
@@ -397,12 +399,8 @@ public class SettingsProvider extends ContentProvider {
             
             // Get the current value for the default sound
             Uri soundUri = RingtoneManager.getActualDefaultRingtoneUri(context, ringtoneType);
-            if (soundUri == null) {
-                // Fallback on any valid ringtone Uri
-                soundUri = RingtoneManager.getValidRingtoneUri(context);
-            }
 
-            if (soundUri != null) { 
+            if (soundUri != null) {
                 // Only proxy the openFile call to drm or media providers
                 String authority = soundUri.getAuthority();
                 boolean isDrmAuthority = authority.equals(DrmStore.AUTHORITY);
@@ -425,5 +423,65 @@ public class SettingsProvider extends ContentProvider {
         }
 
         return super.openFile(uri, mode);
+    }
+
+    @Override
+    public AssetFileDescriptor openAssetFile(Uri uri, String mode) throws FileNotFoundException {
+
+        /*
+         * When a client attempts to openFile the default ringtone or
+         * notification setting Uri, we will proxy the call to the current
+         * default ringtone's Uri (if it is in the DRM or media provider).
+         */
+        int ringtoneType = RingtoneManager.getDefaultType(uri);
+        // Above call returns -1 if the Uri doesn't match a default type
+        if (ringtoneType != -1) {
+            Context context = getContext();
+
+            // Get the current value for the default sound
+            Uri soundUri = RingtoneManager.getActualDefaultRingtoneUri(context, ringtoneType);
+
+            if (soundUri != null) {
+                // Only proxy the openFile call to drm or media providers
+                String authority = soundUri.getAuthority();
+                boolean isDrmAuthority = authority.equals(DrmStore.AUTHORITY);
+                if (isDrmAuthority || authority.equals(MediaStore.AUTHORITY)) {
+
+                    if (isDrmAuthority) {
+                        try {
+                            // Check DRM access permission here, since once we
+                            // do the below call the DRM will be checking our
+                            // permission, not our caller's permission
+                            DrmStore.enforceAccessDrmPermission(context);
+                        } catch (SecurityException e) {
+                            throw new FileNotFoundException(e.getMessage());
+                        }
+                    }
+
+                    ParcelFileDescriptor pfd = null;
+                    try {
+                        pfd = context.getContentResolver().openFileDescriptor(soundUri, mode);
+                        return new AssetFileDescriptor(pfd, 0, -1);
+                    } catch (FileNotFoundException ex) {
+                        // fall through and open the fallback ringtone below
+                    }
+                }
+
+                try {
+                    return super.openAssetFile(soundUri, mode);
+                } catch (FileNotFoundException ex) {
+                    // Since a non-null Uri was specified, but couldn't be opened,
+                    // fall back to the built-in ringtone.
+                    return context.getResources().openRawResourceFd(
+                            com.android.internal.R.raw.fallbackring);
+                }
+            }
+            // no need to fall through and have openFile() try again, since we
+            // already know that will fail.
+            throw new FileNotFoundException(); // or return null ?
+        }
+
+        // Note that this will end up calling openFile() above.
+        return super.openAssetFile(uri, mode);
     }
 }
