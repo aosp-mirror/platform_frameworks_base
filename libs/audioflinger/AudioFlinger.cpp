@@ -3443,8 +3443,8 @@ status_t AudioFlinger::setStreamOutput(uint32_t stream, void *output)
             srcThread->getTracks(tracks, activeTracks, stream);
             if (tracks.size()) {
                 dstThread->putTracks(tracks, activeTracks);
-                dstThread->sendConfigEvent(AudioSystem::STREAM_CONFIG_CHANGED, stream);
             }
+            dstThread->sendConfigEvent(AudioSystem::STREAM_CONFIG_CHANGED, stream);
         }
     }
 
