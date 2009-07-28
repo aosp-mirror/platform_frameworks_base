@@ -30,13 +30,17 @@ jstring
 android_security_CertTool_generateCertificateRequest(JNIEnv* env,
                                                      jobject thiz,
                                                      jint bits,
-                                                     jstring subject)
+                                                     jstring jChallenge)
 
 {
+    int ret = -1;
+    jboolean bIsCopy;
     char csr[REPLY_MAX];
-    if (gen_csr(bits, subject, csr) == 0) {
-        return (*env)->NewStringUTF(env, csr);
-    }
+    const char* challenge = (*env)->GetStringUTFChars(env, jChallenge, &bIsCopy);
+
+    ret = gen_csr(bits, challenge , csr);
+    (*env)->ReleaseStringUTFChars(env, jChallenge, challenge);
+    if (ret == 0) return (*env)->NewStringUTF(env, csr);
     return NULL;
 }
 
