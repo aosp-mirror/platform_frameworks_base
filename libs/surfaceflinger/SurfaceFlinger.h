@@ -351,6 +351,7 @@ private:
                 // Can only accessed from the main thread, these members
                 // don't need synchronization
                 Region                      mDirtyRegion;
+                Region                      mDirtyRegionRemovedLayer;
                 Region                      mInvalidRegion;
                 Region                      mWormholeRegion;
                 Client*                     mLastScheduledBroadcast;
