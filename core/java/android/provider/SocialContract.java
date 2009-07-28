@@ -19,7 +19,7 @@ package android.provider;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.provider.ContactsContract.Aggregates;
+import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 
 /**
@@ -165,7 +165,7 @@ public class SocialContract {
 
         /**
          * The {@link Uri} for the latest social activity performed by any
-         * contact aggregated under the specified {@link Aggregates#_ID}. Will
+         * contact aggregated under the specified {@link Contacts#_ID}. Will
          * also join with most-present {@link Presence} for this aggregate.
          */
         public static final Uri CONTENT_AGGREGATE_STATUS_URI =
