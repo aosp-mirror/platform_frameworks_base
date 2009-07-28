@@ -104,6 +104,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private View mDropDownAnchorView;  // view is retrieved lazily from id once needed
     private int mDropDownWidth;
     private int mDropDownHeight;
+    private final Rect mTempRect = new Rect();
 
     private Drawable mDropDownListHighlight;
 
@@ -1309,7 +1310,15 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 getDropDownAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);
 
         if (mDropDownAlwaysVisible) {
-            return maxHeight;
+            // getMaxAvailableHeight() subtracts the padding, so we put it back,
+            // to get the available height for the whole window
+            int padding = 0;
+            Drawable background = mPopup.getBackground();
+            if (background != null) {
+                background.getPadding(mTempRect);
+                padding = mTempRect.top + mTempRect.bottom;
+            }
+            return maxHeight + padding;
         }
 
         return mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
