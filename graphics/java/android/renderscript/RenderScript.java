@@ -96,6 +96,7 @@ public class RenderScript {
     native private int  nAllocationCreatePredefSized(int predef, int count);
     native private int  nAllocationCreateSized(int elem, int count);
     native private int  nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp);
+    native private int  nAllocationCreateFromBitmapBoxed(int dstFmt, boolean genMips, Bitmap bmp);
 
     native private void nAllocationUploadToTexture(int alloc, int baseMioLevel);
     native private void nAllocationDestroy(int alloc);
@@ -529,7 +530,12 @@ public class RenderScript {
     }
 
     public Allocation allocationCreateFromBitmap(Bitmap b, ElementPredefined dstFmt, boolean genMips) {
-        int id = nAllocationCreateFromBitmap(dstFmt.mID, genMips, b); 
+        int id = nAllocationCreateFromBitmap(dstFmt.mID, genMips, b);
+        return new Allocation(id);
+    }
+
+    public Allocation allocationCreateFromBitmapBoxed(Bitmap b, ElementPredefined dstFmt, boolean genMips) {
+        int id = nAllocationCreateFromBitmapBoxed(dstFmt.mID, genMips, b);
         return new Allocation(id);
     }
 

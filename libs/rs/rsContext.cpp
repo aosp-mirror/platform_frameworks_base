@@ -79,8 +79,7 @@ bool Context::runScript(Script *s, uint32_t launchID)
     mFragment.set(frag);
     mVertex.set(vtx);
     mFragmentStore.set(store);
-    return true;
-
+    return ret;
 }
 
 

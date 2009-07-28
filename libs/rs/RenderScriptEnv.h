@@ -30,11 +30,3 @@ typedef struct {
 #define RS_PROGRAM_VERTEX_PROJECTION_OFFSET 16
 #define RS_PROGRAM_VERTEX_TEXTURE_OFFSET 32
 
-//typedef int (*rsc_RunScript)(uint32_t launchIndex, const rsc_FunctionTable *);
-
-
-/* EnableCap */
-#define GL_LIGHTING                       0x0B50
-
-/* LightName */
-#define GL_LIGHT0                         0x4000

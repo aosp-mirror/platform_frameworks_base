@@ -291,6 +291,29 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jint dstFmt, jboolean g
     return 0;
 }
 
+static int
+nAllocationCreateFromBitmapBoxed(JNIEnv *_env, jobject _this, jint dstFmt, jboolean genMips, jobject jbitmap)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    SkBitmap const * nativeBitmap =
+            (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
+    const SkBitmap& bitmap(*nativeBitmap);
+    SkBitmap::Config config = bitmap.getConfig();
+
+    RsElementPredefined e = SkBitmapToPredefined(config);
+
+    if (e != RS_ELEMENT_USER_U8) {
+        bitmap.lockPixels();
+        const int w = bitmap.width();
+        const int h = bitmap.height();
+        const void* ptr = bitmap.getPixels();
+        jint id = (jint)rsAllocationCreateFromBitmapBoxed(w, h, (RsElementPredefined)dstFmt, e, genMips, ptr);
+        bitmap.unlockPixels();
+        return id;
+    }
+    return 0;
+}
+
 
 static void
 nAllocationDestroy(JNIEnv *_env, jobject _this, jint a)
@@ -994,6 +1017,7 @@ static JNINativeMethod methods[] = {
 {"nAllocationCreatePredefSized",   "(II)I",                                (void*)nAllocationCreatePredefSized },
 {"nAllocationCreateSized",         "(II)I",                                (void*)nAllocationCreateSized },
 {"nAllocationCreateFromBitmap",    "(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
+{"nAllocationCreateFromBitmapBoxed","(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmapBoxed },
 {"nAllocationUploadToTexture",     "(II)V",                                (void*)nAllocationUploadToTexture },
 {"nAllocationDestroy",             "(I)V",                                 (void*)nAllocationDestroy },
 {"nAllocationData",                "(I[I)V",                               (void*)nAllocationData_i },
