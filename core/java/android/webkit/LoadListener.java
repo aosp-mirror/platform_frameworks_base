@@ -76,6 +76,7 @@ class LoadListener extends Handler implements EventHandler {
     static {
         sCertificateMimeTypeMap = new HashSet<String>();
         sCertificateMimeTypeMap.add("application/x-x509-ca-cert");
+        sCertificateMimeTypeMap.add("application/x-x509-user-cert");
         sCertificateMimeTypeMap.add("application/x-pkcs12");
     }
 

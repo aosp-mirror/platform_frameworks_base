@@ -140,7 +140,7 @@ public class CertTool {
 
     private void addExtraIntentInfo(Intent intent, String namespace,
             String data) {
-        intent.putExtra(KEY_ITEM + "1", data);
+        intent.putExtra(KEY_ITEM + "1", data.getBytes());
         intent.putExtra(KEY_NAMESPACE + "1", namespace);
     }
 
