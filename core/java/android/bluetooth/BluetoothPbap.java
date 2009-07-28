@@ -16,8 +16,6 @@
 
 package android.bluetooth;
 
-import android.annotation.SdkConstant;
-import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -75,11 +73,11 @@ public class BluetoothPbap {
 
     /** There was an error trying to obtain the state */
     public static final int STATE_ERROR        = -1;
-    /** No headset currently connected */
+    /** No Pce currently connected */
     public static final int STATE_DISCONNECTED = 0;
     /** Connection attempt in progress */
     public static final int STATE_CONNECTING   = 1;
-    /** A headset is currently connected */
+    /** A Pce is currently connected */
     public static final int STATE_CONNECTED    = 2;
 
     public static final int RESULT_FAILURE = 0;
@@ -87,11 +85,9 @@ public class BluetoothPbap {
     /** Connection canceled before completion. */
     public static final int RESULT_CANCELED = 2;
 
-    public static final int PRIORITY_AUTO = 100;
-    public static final int PRIORITY_OFF = 0;
     /**
      * An interface for notifying Bluetooth PCE IPC clients when they have
-     * been connected to the BluetoothHeadset service.
+     * been connected to the BluetoothPbap service.
      */
     public interface ServiceListener {
         /**
@@ -113,7 +109,7 @@ public class BluetoothPbap {
     }
 
     /**
-     * Create a BluetoothHeadset proxy object.
+     * Create a BluetoothPbap proxy object.
      */
     public BluetoothPbap(Context context, ServiceListener l) {
         mContext = context;
@@ -133,7 +129,7 @@ public class BluetoothPbap {
 
     /**
      * Close the connection to the backing service.
-     * Other public functions of BluetoothHeadset will return default error
+     * Other public functions of BluetoothPbap will return default error
      * results once close() has been called. Multiple invocations of close()
      * are ok.
      */
@@ -145,9 +141,9 @@ public class BluetoothPbap {
     }
 
     /**
-     * Get the current state of the Bluetooth Headset service.
+     * Get the current state of the BluetoothPbap service.
      * @return One of the STATE_ return codes, or STATE_ERROR if this proxy
-     *         object is currently not connected to the Headset service.
+     *         object is currently not connected to the Pbap service.
      */
     public int getState() {
         if (DBG) log("getState()");
@@ -159,13 +155,13 @@ public class BluetoothPbap {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) log(Log.getStackTraceString(new Throwable()));
         }
-        return BluetoothHeadset.STATE_ERROR;
+        return BluetoothPbap.STATE_ERROR;
     }
 
     /**
-     * Get the Bluetooth address of the current headset.
+     * Get the Bluetooth address of the current Pce.
      * @return The Bluetooth address, or null if not in connected or connecting
-     *         state, or if this proxy object is not connected to the Headset
+     *         state, or if this proxy object is not connected to the Pbap
      *         service.
      */
     public String getPceAddress() {
@@ -182,9 +178,9 @@ public class BluetoothPbap {
     }
 
     /**
-     * Returns true if the specified headset is connected (does not include
+     * Returns true if the specified Pcs is connected (does not include
      * connecting). Returns false if not connected, or if this proxy object
-     * if not currently connected to the headset service.
+     * if not currently connected to the Pbap service.
      */
     public boolean isConnected(String address) {
         if (DBG) log("isConnected(" + address + ")");
@@ -200,9 +196,9 @@ public class BluetoothPbap {
     }
 
     /**
-     * Disconnects the current headset. Currently this call blocks, it may soon
+     * Disconnects the current Pce. Currently this call blocks, it may soon
      * be made asynchornous. Returns false if this proxy object is
-     * not currently connected to the Headset service.
+     * not currently connected to the Pbap service.
      */
     public boolean disconnectPce() {
         if (DBG) log("disconnectPce()");
