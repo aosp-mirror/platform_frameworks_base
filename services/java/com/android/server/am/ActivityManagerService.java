@@ -4742,7 +4742,30 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Binder.restoreCallingIdentity(callingId);
         }
     }
-    
+
+    /*
+     * The pkg name and uid have to be specified.
+     * @see android.app.IActivityManager#killApplicationWithUid(java.lang.String, int)
+     */
+    public void killApplicationWithUid(String pkg, int uid) {
+        if (pkg == null) {
+            return;
+        }
+        // Make sure the uid is valid.
+        if (uid < 0) {
+            Log.w(TAG, "Invalid uid specified for pkg : " + pkg);
+            return;
+        }
+        int callerUid = Binder.getCallingUid();
+        // Only the system server can kill an application
+        if (callerUid == Process.SYSTEM_UID) {
+            uninstallPackageLocked(pkg, uid, false);
+        } else {
+            throw new SecurityException(callerUid + " cannot kill pkg: " +
+                    pkg);
+        }
+    }
+
     private void restartPackageLocked(final String packageName, int uid) {
         uninstallPackageLocked(packageName, uid, false);
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
