@@ -1057,6 +1057,7 @@ public class CDMAPhone extends PhoneBase {
                         onComplete.sendToTarget();
                     }
                 }
+                break;
 
                 default:{
                     throw new RuntimeException("unexpected event not handled");
