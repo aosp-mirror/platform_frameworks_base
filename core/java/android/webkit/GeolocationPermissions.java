@@ -1,0 +1,194 @@
+/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.webkit;
+
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.Set;
+
+
+/**
+ * Implements the Java side of GeolocationPermissions. Simply marshalls calls
+ * from the UI thread to the WebKit thread.
+ * @hide
+ */
+public final class GeolocationPermissions {
+    // Log tag
+    private static final String TAG = "geolocationPermissions";
+
+    // Global instance
+    private static GeolocationPermissions sInstance;
+
+    private Handler mHandler;
+
+    // Members used to transfer the origins and permissions between threads.
+    private Set<String> mOrigins;
+    private boolean mAllowed;
+    private static Lock mLock = new ReentrantLock();
+    private static boolean mUpdated;
+    private static Condition mUpdatedCondition = mLock.newCondition();
+
+    // Message ids
+    static final int GET_ORIGINS = 0;
+    static final int GET_ALLOWED = 1;
+    static final int CLEAR = 2;
+    static final int CLEAR_ALL = 3;
+
+    /**
+     * Gets the singleton instance of the class.
+     */
+    public static GeolocationPermissions getInstance() {
+      if (sInstance == null) {
+          sInstance = new GeolocationPermissions();
+      }
+      return sInstance;
+    }
+
+    /**
+     * Creates the message handler. Must be called on the WebKit thread.
+     */
+    public void createHandler() {
+        if (mHandler == null) {
+            mHandler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    // Runs on the WebKit thread.
+                    switch (msg.what) {
+                        case GET_ORIGINS:
+                            getOriginsImpl();
+                            break;
+                        case GET_ALLOWED:
+                            getAllowedImpl((String) msg.obj);
+                            break;
+                        case CLEAR:
+                            nativeClear((String) msg.obj);
+                            break;
+                        case CLEAR_ALL:
+                            nativeClearAll();
+                            break;
+                    }
+                }
+            };
+        }
+    }
+
+    /**
+     * Utility function to send a message to our handler.
+     */
+    private void postMessage(Message msg) {
+        assert(mHandler != null);
+        mHandler.sendMessage(msg);
+    }
+
+    /**
+     * Gets the set of origins for which Geolocation permissions are stored.
+     * Note that we represent the origins as strings. These are created using
+     * WebCore::SecurityOrigin::toString(). As long as all 'HTML 5 modules'
+     * (Database, Geolocation etc) do so, it's safe to match up origins for the
+     * purposes of displaying UI.
+     */
+    public Set getOrigins() {
+        // Called on the UI thread.
+        Set origins = null;
+        mLock.lock();
+        try {
+            mUpdated = false;
+            postMessage(Message.obtain(null, GET_ORIGINS));
+            while (!mUpdated) {
+                mUpdatedCondition.await();
+            }
+            origins = mOrigins;
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Exception while waiting for update", e);
+        } finally {
+            mLock.unlock();
+        }
+        return origins;
+    }
+
+    /**
+     * Helper method to get the set of origins.
+     */
+    private void getOriginsImpl() {
+        // Called on the WebKit thread.
+        mLock.lock();
+        mOrigins = nativeGetOrigins();
+        mUpdated = true;
+        mUpdatedCondition.signal();
+        mLock.unlock();
+    }
+
+    /**
+     * Gets the permission state for the specified origin.
+     */
+    public boolean getAllowed(String origin) {
+        // Called on the UI thread.
+        boolean allowed = false;
+        mLock.lock();
+        try {
+            mUpdated = false;
+            postMessage(Message.obtain(null, GET_ALLOWED, origin));
+            while (!mUpdated) {
+                mUpdatedCondition.await();
+            }
+            allowed = mAllowed;
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Exception while waiting for update", e);
+        } finally {
+            mLock.unlock();
+        }
+        return allowed;
+    }
+
+    /**
+     * Helper method to get the permission state.
+     */
+    private void getAllowedImpl(String origin) {
+        // Called on the WebKit thread.
+        mLock.lock();
+        mAllowed = nativeGetAllowed(origin);
+        mUpdated = true;
+        mUpdatedCondition.signal();
+        mLock.unlock();
+    }
+
+    /**
+     * Clears the permission state for the specified origin.
+     */
+    public void clear(String origin) {
+        // Called on the UI thread.
+        postMessage(Message.obtain(null, CLEAR, origin));
+    }
+
+    /**
+     * Clears the permission state for all origins.
+     */
+    public void clearAll() {
+        // Called on the UI thread.
+        postMessage(Message.obtain(null, CLEAR_ALL));
+    }
+
+    // Native functions, run on the WebKit thread.
+    private static native Set nativeGetOrigins();
+    private static native boolean nativeGetAllowed(String origin);
+    private static native void nativeClear(String origin);
+    private static native void nativeClearAll();
+}

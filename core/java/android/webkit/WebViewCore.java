@@ -167,6 +167,8 @@ final class WebViewCore {
         WebIconDatabase.getInstance().createHandler();
         // Create the handler for WebStorage
         WebStorage.getInstance().createHandler();
+        // Create the handler for GeolocationPermissions.
+        GeolocationPermissions.getInstance().createHandler();
         // The transferMessages call will transfer all pending messages to the
         // WebCore thread handler.
         mEventHub.transferMessages();
