@@ -649,10 +649,11 @@ public class AudioManager {
      *           <var>false</var> to turn it off
      */
     public void setSpeakerphoneOn(boolean on){
-        if (on) {
-            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_SPEAKER);
-        } else {
-            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_NONE);
+        IAudioService service = getService();
+        try {
+            service.setSpeakerphoneOn(on);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setSpeakerphoneOn", e);
         }
     }
 
@@ -662,9 +663,11 @@ public class AudioManager {
      * @return true if speakerphone is on, false if it's off
      */
     public boolean isSpeakerphoneOn() {
-        if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION) == AudioSystem.FORCE_SPEAKER) {
-            return true;
-        } else {
+        IAudioService service = getService();
+        try {
+            return service.isSpeakerphoneOn();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isSpeakerphoneOn", e);
             return false;
         }
      }
@@ -676,10 +679,11 @@ public class AudioManager {
      *               <var>false</var> to not use bluetooth SCO for communications
      */
     public void setBluetoothScoOn(boolean on){
-        if (on) {
-            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_BT_SCO);
-        } else {
-            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_NONE);
+        IAudioService service = getService();
+        try {
+            service.setBluetoothScoOn(on);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setBluetoothScoOn", e);
         }
     }
 
@@ -690,9 +694,11 @@ public class AudioManager {
      *         false if otherwise
      */
     public boolean isBluetoothScoOn() {
-        if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION) == AudioSystem.FORCE_BT_SCO) {
-            return true;
-        } else {
+        IAudioService service = getService();
+        try {
+            return service.isBluetoothScoOn();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isBluetoothScoOn", e);
             return false;
         }
     }

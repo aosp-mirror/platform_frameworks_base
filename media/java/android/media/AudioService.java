@@ -47,7 +47,10 @@ import com.android.internal.telephony.ITelephony;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The implementation of the volume manager service.
@@ -210,6 +213,12 @@ public class AudioService extends IAudioService.Stub {
 
     private int mHeadsetState;
 
+    // Devices currently connected
+    private HashMap <Integer, String> mConnectedDevices = new HashMap <Integer, String>();
+
+    // Forced device usage for communications
+    private int mForcedUseForComm;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -220,7 +229,9 @@ public class AudioService extends IAudioService.Stub {
         mContentResolver = context.getContentResolver();
         mVolumePanel = new VolumePanel(context, this);
         mSettingsObserver = new SettingsObserver();
-
+        mMode = AudioSystem.MODE_NORMAL;
+        mHeadsetState = 0;
+        mForcedUseForComm = AudioSystem.FORCE_NONE;
         createAudioSystemThread();
         readPersistedSettings();
         createStreamStates();
@@ -721,6 +732,46 @@ public class AudioService extends IAudioService.Stub {
         setRingerModeInt(getRingerMode(), false);
     }
 
+    /** @see AudioManager#setSpeakerphoneOn() */
+    public void setSpeakerphoneOn(boolean on){
+        if (on) {
+            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_SPEAKER);
+            mForcedUseForComm = AudioSystem.FORCE_SPEAKER;
+        } else {
+            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_NONE);
+            mForcedUseForComm = AudioSystem.FORCE_NONE;
+        }
+    }
+
+    /** @see AudioManager#isSpeakerphoneOn() */
+    public boolean isSpeakerphoneOn() {
+        if (mForcedUseForComm == AudioSystem.FORCE_SPEAKER) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /** @see AudioManager#setBluetoothScoOn() */
+    public void setBluetoothScoOn(boolean on){
+        if (on) {
+            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_BT_SCO);
+            mForcedUseForComm = AudioSystem.FORCE_BT_SCO;
+        } else {
+            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_NONE);
+            mForcedUseForComm = AudioSystem.FORCE_NONE;
+        }
+    }
+
+    /** @see AudioManager#isBluetoothScoOn() */
+    public boolean isBluetoothScoOn() {
+        if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Internal methods
     ///////////////////////////////////////////////////////////////////////////
@@ -1188,16 +1239,33 @@ public class AudioService extends IAudioService.Stub {
                     Log.e(TAG, "Media server died.");
                     // Force creation of new IAudioflinger interface
                     mMediaServerOk = false;
-                    AudioSystem.getMode();
+                    AudioSystem.isMusicActive();
                     break;
 
                 case MSG_MEDIA_SERVER_STARTED:
                     Log.e(TAG, "Media server started.");
+                    // Restore device connection states
+                    Set set = mConnectedDevices.entrySet();
+                    Iterator i = set.iterator();
+                    while(i.hasNext()){
+                        Map.Entry device = (Map.Entry)i.next();
+                        AudioSystem.setDeviceConnectionState(((Integer)device.getKey()).intValue(),
+                                                             AudioSystem.DEVICE_STATE_AVAILABLE,
+                                                             (String)device.getValue());
+                    }
+
+                    // Restore call state
+                    AudioSystem.setPhoneState(mMode);
+
+                    // Restore forced usage for communcations
+                    AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm);
+
                     // Restore stream volumes
                     int numStreamTypes = AudioSystem.getNumStreamTypes();
                     for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
                         int index;
                         VolumeStreamState streamState = mStreamStates[streamType];
+                        AudioSystem.initStreamVolume(streamType, 0, (streamState.mIndexMax + 5) / 10);
                         if (streamState.muteCount() == 0) {
                             index = streamState.mIndex;
                         } else {
@@ -1205,7 +1273,10 @@ public class AudioService extends IAudioService.Stub {
                         }
                         setStreamVolumeIndex(streamType, index);
                     }
-                    setRingerMode(mRingerMode);
+
+                    // Restore ringer mode
+                    setRingerModeInt(getRingerMode(), false);
+
                     mMediaServerOk = true;
                     break;
 
@@ -1276,10 +1347,12 @@ public class AudioService extends IAudioService.Stub {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
                             address);
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
                 } else if (state == BluetoothA2dp.STATE_CONNECTED){
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE,
                                                          address);
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP), address);
                 }
             } else if (action.equals(BluetoothIntent.HEADSET_AUDIO_STATE_CHANGED_ACTION)) {
                 int state = intent.getIntExtra(BluetoothIntent.HEADSET_AUDIO_STATE,
@@ -1289,10 +1362,12 @@ public class AudioService extends IAudioService.Stub {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO,
                                                          AudioSystem.DEVICE_STATE_UNAVAILABLE,
                                                          address);
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO);
                 } else if (state == BluetoothHeadset.AUDIO_STATE_CONNECTED) {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE,
                                                          address);
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO), address);
                 }
             } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
@@ -1301,55 +1376,65 @@ public class AudioService extends IAudioService.Stub {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
                             "");
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADSET);
                 } else if ((state & BIT_HEADSET) != 0 &&
                     (mHeadsetState & BIT_HEADSET) == 0)  {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
                             AudioSystem.DEVICE_STATE_AVAILABLE,
                             "");
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADSET), "");
                 }
                 if ((state & BIT_HEADSET_NO_MIC) == 0 &&
                     (mHeadsetState & BIT_HEADSET_NO_MIC) != 0) {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
                             "");
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
                 } else if ((state & BIT_HEADSET_NO_MIC) != 0 &&
                     (mHeadsetState & BIT_HEADSET_NO_MIC) == 0)  {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
                             AudioSystem.DEVICE_STATE_AVAILABLE,
                             "");
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE), "");
                 }
                 if ((state & BIT_TTY) == 0 &&
                     (mHeadsetState & BIT_TTY) != 0) {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_TTY,
                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
                             "");
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_TTY);
                 } else if ((state & BIT_TTY) != 0 &&
                     (mHeadsetState & BIT_TTY) == 0)  {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_TTY,
                             AudioSystem.DEVICE_STATE_AVAILABLE,
                             "");
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_TTY), "");
                 }
                 if ((state & BIT_FM_HEADSET) == 0 &&
                     (mHeadsetState & BIT_FM_HEADSET) != 0) {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_FM_HEADPHONE,
                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
                             "");
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_FM_HEADPHONE);
                 } else if ((state & BIT_FM_HEADSET) != 0 &&
                     (mHeadsetState & BIT_FM_HEADSET) == 0)  {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_FM_HEADPHONE,
                             AudioSystem.DEVICE_STATE_AVAILABLE,
                             "");
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_FM_HEADPHONE), "");
                 }
                 if ((state & BIT_FM_SPEAKER) == 0 &&
                     (mHeadsetState & BIT_FM_SPEAKER) != 0) {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_FM_SPEAKER,
                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
                             "");
+                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_FM_SPEAKER);
                 } else if ((state & BIT_FM_SPEAKER) != 0 &&
                     (mHeadsetState & BIT_FM_SPEAKER) == 0)  {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_FM_SPEAKER,
                             AudioSystem.DEVICE_STATE_AVAILABLE,
                             "");
+                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_FM_SPEAKER), "");
                 }
                 mHeadsetState = state;
             }
