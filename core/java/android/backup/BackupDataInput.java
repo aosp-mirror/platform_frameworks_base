@@ -97,12 +97,7 @@ public class BackupDataInput {
 
     public void skipEntityData() throws IOException {
         if (mHeaderReady) {
-            int result = skipEntityData_native(mBackupReader);
-            if (result >= 0) {
-                return;
-            } else {
-                throw new IOException("result=0x" + Integer.toHexString(result));
-            }
+            skipEntityData_native(mBackupReader);
         } else {
             throw new IllegalStateException("mHeaderReady=false");
         }

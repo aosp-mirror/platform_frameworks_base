@@ -578,7 +578,7 @@ class ApplicationContext extends Context {
     @Override
     public void setWallpaper(Bitmap bitmap) throws IOException  {
         try {
-            ParcelFileDescriptor fd = getWallpaperService().setWallpaper();
+            ParcelFileDescriptor fd = getWallpaperService().setWallpaper(null);
             if (fd == null) {
                 return;
             }
@@ -598,7 +598,7 @@ class ApplicationContext extends Context {
     @Override
     public void setWallpaper(InputStream data) throws IOException {
         try {
-            ParcelFileDescriptor fd = getWallpaperService().setWallpaper();
+            ParcelFileDescriptor fd = getWallpaperService().setWallpaper(null);
             if (fd == null) {
                 return;
             }
@@ -627,13 +627,16 @@ class ApplicationContext extends Context {
     @Override
     public void clearWallpaper() throws IOException {
         try {
+            Resources resources = getResources();
             /* Set the wallpaper to the default values */
-            ParcelFileDescriptor fd = getWallpaperService().setWallpaper();
+            ParcelFileDescriptor fd = getWallpaperService().setWallpaper(
+                    "res:" + resources.getResourceName(
+                        com.android.internal.R.drawable.default_wallpaper));
             if (fd != null) {
                 FileOutputStream fos = null;
                 try {
                     fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                    setWallpaper(getResources().openRawResource(
+                    setWallpaper(resources.openRawResource(
                             com.android.internal.R.drawable.default_wallpaper),
                             fos);
                 } finally {
