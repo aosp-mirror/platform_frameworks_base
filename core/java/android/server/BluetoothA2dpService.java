@@ -188,10 +188,12 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private boolean isSinkDevice(String address) {
         String uuids[] = mBluetoothService.getRemoteUuids(address);
         UUID uuid;
-        for (String deviceUuid: uuids) {
-            uuid = UUID.fromString(deviceUuid);
-            if (BluetoothUuid.isAudioSink(uuid)) {
-                return true;
+        if (uuids != null) {
+            for (String deviceUuid: uuids) {
+                uuid = UUID.fromString(deviceUuid);
+                if (BluetoothUuid.isAudioSink(uuid)) {
+                    return true;
+                }
             }
         }
         return false;
