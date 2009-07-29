@@ -76,11 +76,10 @@ class WallpaperService extends IWallpaperService.Stub {
             WALLPAPER_DIR.getAbsolutePath(), CREATE | CLOSE_WRITE | DELETE | DELETE_SELF) {
                 @Override
                 public void onEvent(int event, String path) {
+                    if (path == null) {
+                        return;
+                    }
                     synchronized (mLock) {
-                        if (path == null) {
-                            return;
-                        }
-
                         // changing the wallpaper means we'll need to back up the new one
                         long origId = Binder.clearCallingIdentity();
                         BackupManager bm = new BackupManager(mContext);
@@ -104,11 +103,9 @@ class WallpaperService extends IWallpaperService.Stub {
     public WallpaperService(Context context) {
         if (Config.LOGD) Log.d(TAG, "WallpaperService startup");
         mContext = context;
-        if (!WALLPAPER_DIR.exists()) {
-            WALLPAPER_DIR.mkdirs();
-        }
-        mWallpaperObserver.startWatching();
+        WALLPAPER_DIR.mkdirs();
         loadSettingsLocked();
+        mWallpaperObserver.startWatching();
     }
     
     @Override
