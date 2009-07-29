@@ -356,6 +356,15 @@ static void SC_drawQuad(float x1, float y1, float z1,
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
+static void SC_drawRect(float x1, float y1,
+                        float x2, float y2, float z)
+{
+    SC_drawQuad(x1, y2, z,
+                x2, y2, z,
+                x2, y1, z,
+                x1, y1, z);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -442,7 +451,7 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "float", "(float)" },
     { "cosf", (void *)&cosf,
         "float", "(float)" },
-    { "fabs", (void *)&fabs,
+    { "fabsf", (void *)&fabsf,
         "float", "(float)" },
     { "randf", (void *)&SC_randf,
         "float", "(float)" },
@@ -496,6 +505,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
 
 
     // drawing
+    { "drawRect", (void *)&SC_drawRect,
+        "void", "(float x1, float y1, float x2, float y2, float z)" },
     { "drawQuad", (void *)&SC_drawQuad,
         "void", "(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
     { "drawTriangleArray", (void *)&SC_drawTriangleArray,

@@ -90,8 +90,8 @@ public class RolloView extends RSSurfaceView {
         if(c > (mColumns -2)) {
             c = (mColumns -2);
         }
-        if(c < 1) {
-            c = 1;
+        if(c < 0) {
+            c = 0;
         }
         mRender.setPosition(c);
         if(clamp) {
@@ -121,6 +121,9 @@ public class RolloView extends RSSurfaceView {
 
         float nx = ev.getX() / getWidth();
         float ny = ev.getY() / getHeight();
+
+        //Log.e("rs", "width=" + Float.toString(getWidth()));
+        //Log.e("rs", "height=" + Float.toString(getHeight()));
 
         mRender.setTouch(ret);
 

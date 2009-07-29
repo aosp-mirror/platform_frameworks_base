@@ -19,6 +19,7 @@
 #define STATE_COUNT             8
 #define STATE_TOUCH             9
 
+
 float filter(float val, float target, float str)
 {
     float delta = (target - val);
@@ -63,7 +64,7 @@ int main(void* con, int ft, int launchID)
     float drawRot = filter(loadF(2, SCRATCH_ROT), targetRot, 0.1f * touchCut);
     storeF(2, SCRATCH_ROT, drawRot);
 
-    float diam = 10.f;
+    float diam = 8.f;
     float scale = 1.0f / zoom;
 
     // Bug makes 1.0f alpha fail.
@@ -77,6 +78,7 @@ int main(void* con, int ft, int launchID)
     while (iconCount) {
         float tmpSin = sinf(rot);
         float tmpCos = cosf(rot);
+            //debugF("rot", rot);
 
         float tx1 = tmpSin * diam - (tmpCos * scale);
         float tx2 = tx1 + (tmpCos * scale * 2.f);
@@ -85,7 +87,7 @@ int main(void* con, int ft, int launchID)
 
         int y;
         for (y = rowCount -1; (y >= 0) && iconCount; y--) {
-            float ty1 = ((y * 3.5f) - 6.f) * scale;
+            float ty1 = ((y * 3.1f) - 5.f) * scale;
             float ty2 = ty1 + scale * 2.f;
             bindTexture(NAMED_PF, 0, loadI32(1, index));
             //if (done && (index != selectedID)) {
@@ -100,6 +102,51 @@ int main(void* con, int ft, int launchID)
             index++;
         }
         rot = rot + rotStep;
+    }
+
+    if ((zoom < 1.1f) && (zoom > 0.9f)) {
+        bindProgramVertex(NAMED_PVOrtho);
+        bindProgramFragment(NAMED_PFText);
+        bindProgramFragmentStore(NAMED_PFSText);
+
+        rot = drawRot * scale;
+        index = 0;
+        iconCount = loadI32(0, STATE_COUNT);
+        while (iconCount) {
+            int y;
+
+            float tx = 240.f + floorf(sinf(rot) * 430.f) - 64.f + 16.f;
+
+            float alpha = 2.4f - (fabsf(tx - 240.f + 48.f) / 76.f);
+            if (alpha > 0.99f) {
+                alpha = 0.99f;
+            }
+            alpha = alpha * (1.f - (fabsf(zoom - 1.f) * 10.f));
+
+            tx = tx + 0.25f;
+
+            for (y = rowCount -1; (y >= 0) && iconCount; y--) {
+
+                if (alpha > 0) {
+                    color(1.0f, 1.0f, 1.0f, alpha);
+
+                    float ty = 605.f - y * 150.f;
+
+                    ty = ty + 0.25f;
+
+                    bindTexture(NAMED_PFText, 0, loadI32(3, index));
+                    drawRect(tx, ty, tx + 128.f, ty + 32.f, 0.5f);
+                }
+                iconCount--;
+                index++;
+            }
+            rot = rot + rotStep;
+        }
+
+
+        bindProgramVertex(NAMED_PV);
+        bindProgramFragment(NAMED_PF);
+        bindProgramFragmentStore(NAMED_PFS);
     }
 
     // Draw the selected icon
@@ -119,7 +166,7 @@ int main(void* con, int ft, int launchID)
                 float tz1 = tmpCos * diam * 0.9f + tmpSin * 2.f;
                 float tz2 = tz1 - (tmpSin * 4.f);
 
-                float ty1 = ((y * 3.5f) - 5.f) * scale;
+                float ty1 = ((y * 3.1f) - 4.5f) * scale;
                 float ty2 = ty1 + scale * 4.f;
                 bindTexture(NAMED_PF, 0, loadI32(1, index));
                 drawQuad(tx1, ty1, tz1,
