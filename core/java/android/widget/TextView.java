@@ -6916,6 +6916,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
+        boolean hasLetter = false;
+        for (int i = start; i < end; i++) {
+            if (Character.isLetter(mTransformed.charAt(i))) {
+                hasLetter = true;
+                break;
+            }
+        }
+        if (!hasLetter) {
+            return null;
+        }
+
         if (start == end) {
             return null;
         }
