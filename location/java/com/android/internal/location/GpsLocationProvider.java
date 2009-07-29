@@ -197,6 +197,10 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     // properties loaded from PROPERTIES_FILE
     private Properties mProperties;
     private String mNtpServer;
+    private String mSuplServerHost;
+    private int mSuplServerPort;
+    private String mC2KServerHost;
+    private int mC2KServerPort;
 
     private final Context mContext;
     private final ILocationManager mLocationManager;
@@ -348,23 +352,21 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             stream.close();
             mNtpServer = mProperties.getProperty("NTP_SERVER", null);
 
-            String host = mProperties.getProperty("SUPL_HOST");
+            mSuplServerHost = mProperties.getProperty("SUPL_HOST");
             String portString = mProperties.getProperty("SUPL_PORT");
-            if (host != null && portString != null) {
+            if (mSuplServerHost != null && portString != null) {
                 try {
-                    int port = Integer.parseInt(portString);
-                    native_set_agps_server(AGPS_TYPE_SUPL, host, port);
+                    mSuplServerPort = Integer.parseInt(portString);
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
                 }
             }
 
-            host = mProperties.getProperty("C2K_HOST");
+            mC2KServerHost = mProperties.getProperty("C2K_HOST");
             portString = mProperties.getProperty("C2K_PORT");
-            if (host != null && portString != null) {
+            if (mC2KServerHost != null && portString != null) {
                 try {
-                    int port = Integer.parseInt(portString);
-                    native_set_agps_server(AGPS_TYPE_C2K, host, port);
+                    mC2KServerPort = Integer.parseInt(portString);
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse C2K_PORT: " + portString);
                 }
@@ -494,6 +496,13 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         mEnabled = native_init();
 
         if (mEnabled) {
+            if (mSuplServerHost != null) {
+                native_set_agps_server(AGPS_TYPE_SUPL, mSuplServerHost, mSuplServerPort);
+            }
+            if (mC2KServerHost != null) {
+                native_set_agps_server(AGPS_TYPE_C2K, mC2KServerHost, mC2KServerPort);
+            }
+
             // run event listener thread while we are enabled
             mEventThread = new GpsEventThread();
             mEventThread.start();
