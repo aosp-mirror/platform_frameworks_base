@@ -268,15 +268,15 @@ class WallpaperService extends IWallpaperService.Stub {
             } while (type != XmlPullParser.END_DOCUMENT);
             success = true;
         } catch (NullPointerException e) {
-            Log.w(TAG, "failed parsing " + file, e);
+            Log.w(TAG, "failed parsing " + file + " " + e);
         } catch (NumberFormatException e) {
-            Log.w(TAG, "failed parsing " + file, e);
+            Log.w(TAG, "failed parsing " + file + " " + e);
         } catch (XmlPullParserException e) {
-            Log.w(TAG, "failed parsing " + file, e);
+            Log.w(TAG, "failed parsing " + file + " " + e);
         } catch (IOException e) {
-            Log.w(TAG, "failed parsing " + file, e);
+            Log.w(TAG, "failed parsing " + file + " " + e);
         } catch (IndexOutOfBoundsException e) {
-            Log.w(TAG, "failed parsing " + file, e);
+            Log.w(TAG, "failed parsing " + file + " " + e);
         }
         try {
             if (stream != null) {
