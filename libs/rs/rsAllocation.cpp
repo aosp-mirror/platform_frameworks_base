@@ -204,12 +204,12 @@ static void mip565(const Adapter2D &out, const Adapter2D &in)
     uint32_t w = out.getDimX();
     uint32_t h = out.getDimY();
 
-    for (uint32_t y=0; y < w; y++) {
+    for (uint32_t y=0; y < h; y++) {
         uint16_t *oPtr = static_cast<uint16_t *>(out.getElement(0, y));
         const uint16_t *i1 = static_cast<uint16_t *>(in.getElement(0, y*2));
         const uint16_t *i2 = static_cast<uint16_t *>(in.getElement(0, y*2+1));
 
-        for (uint32_t x=0; x < h; x++) {
+        for (uint32_t x=0; x < w; x++) {
             *oPtr = rsBoxFilter565(i1[0], i1[1], i2[0], i2[1]);
             oPtr ++;
             i1 += 2;
@@ -223,21 +223,33 @@ static void mip8888(const Adapter2D &out, const Adapter2D &in)
     uint32_t w = out.getDimX();
     uint32_t h = out.getDimY();
 
-    for (uint32_t y=0; y < w; y++) {
+    for (uint32_t y=0; y < h; y++) {
         uint32_t *oPtr = static_cast<uint32_t *>(out.getElement(0, y));
         const uint32_t *i1 = static_cast<uint32_t *>(in.getElement(0, y*2));
         const uint32_t *i2 = static_cast<uint32_t *>(in.getElement(0, y*2+1));
 
-        for (uint32_t x=0; x < h; x++) {
+        for (uint32_t x=0; x < w; x++) {
             *oPtr = rsBoxFilter8888(i1[0], i1[1], i2[0], i2[1]);
             oPtr ++;
             i1 += 2;
             i2 += 2;
         }
     }
-
 }
 
+static void mip(const Adapter2D &out, const Adapter2D &in)
+{
+    switch(out.getBaseType()->getElement()->getSizeBits()) {
+    case 32:
+        mip8888(out, in);
+        break;
+    case 16:
+        mip565(out, in);
+        break;
+
+    }
+
+}
 
 typedef void (*ElementConverter_t)(void *dst, const void *src, uint32_t count);
 
@@ -337,7 +349,7 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
         for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
             adapt.setLOD(lod);
             adapt2.setLOD(lod + 1);
-            mip565(adapt2, adapt);
+            mip(adapt2, adapt);
         }
     }
 
@@ -482,11 +494,7 @@ RsAllocation rsi_AllocationCreateFromFile(Context *rsc, const char *file, bool g
         for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
             adapt.setLOD(lod);
             adapt2.setLOD(lod + 1);
-            if (use32bpp) {
-                mip8888(adapt2, adapt);
-            } else {
-                mip565(adapt2, adapt);
-            }
+            mip(adapt2, adapt);
         }
     }
 
