@@ -26,10 +26,14 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class ContentProviderOperation implements Parcelable {
-    private final static int TYPE_INSERT = 1;
-    private final static int TYPE_UPDATE = 2;
-    private final static int TYPE_DELETE = 3;
-    private final static int TYPE_COUNT = 4;
+    /** @hide exposed for unit tests */
+    public final static int TYPE_INSERT = 1;
+    /** @hide exposed for unit tests */
+    public final static int TYPE_UPDATE = 2;
+    /** @hide exposed for unit tests */
+    public final static int TYPE_DELETE = 3;
+    /** @hide exposed for unit tests */
+    public final static int TYPE_COUNT = 4;
 
     private final int mType;
     private final Uri mUri;
@@ -65,7 +69,7 @@ public class ContentProviderOperation implements Parcelable {
         mSelectionArgs = source.readInt() != 0 ? source.readStringArray() : null;
         mExpectedCount = source.readInt() != 0 ? source.readInt() : null;
         mValuesBackReferences = source.readInt() != 0
-                
+
                 ? ContentValues.CREATOR.createFromParcel(source)
                 : null;
         mSelectionArgsBackReferences = source.readInt() != 0
@@ -165,6 +169,11 @@ public class ContentProviderOperation implements Parcelable {
 
     public Uri getUri() {
         return mUri;
+    }
+
+    /** @hide exposed for unit tests */
+    public int getType() {
+        return mType;
     }
 
     public boolean isWriteOperation() {
@@ -492,7 +501,7 @@ public class ContentProviderOperation implements Parcelable {
             }
             return this;
         }
-        
+
         /**
          * The selection and arguments to use. An occurrence of '?' in the selection will be
          * replaced with the corresponding occurence of the selection argument. Any of the
