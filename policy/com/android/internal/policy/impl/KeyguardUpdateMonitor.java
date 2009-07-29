@@ -35,7 +35,6 @@ import static android.provider.Telephony.Intents.EXTRA_SHOW_SPN;
 import static android.provider.Telephony.Intents.EXTRA_SPN;
 import static android.provider.Telephony.Intents.SPN_STRINGS_UPDATED_ACTION;
 
-import com.android.internal.app.ShutdownThread;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.TelephonyIntents;
 import android.util.Log;
@@ -294,13 +293,6 @@ public class KeyguardUpdateMonitor {
                 mInfoCallbacks.get(i).onRefreshBatteryInfo(
                         shouldShowBatteryInfo(), pluggedIn, batteryLevel);
             }
-        }
-
-        // shut down gracefully if our battery is critically low and we are not powered
-        if (batteryLevel == 0 &&
-                pluggedInStatus != BATTERY_STATUS_CHARGING &&
-                pluggedInStatus != BATTERY_STATUS_UNKNOWN) {
-            ShutdownThread.shutdown(mContext, false);
         }
     }
 
