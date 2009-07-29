@@ -1655,7 +1655,8 @@ public:
     ssize_t resolveReference(Res_value* inOutValue,
                              ssize_t blockIndex,
                              uint32_t* outLastRef = NULL,
-                             uint32_t* inoutTypeSpecFlags = NULL) const;
+                             uint32_t* inoutTypeSpecFlags = NULL,
+                             ResTable_config* outConfig = NULL) const;
 
     enum {
         TMP_BUFFER_SIZE = 16
@@ -1729,7 +1730,8 @@ public:
          */
         ssize_t resolveAttributeReference(Res_value* inOutValue,
                 ssize_t blockIndex, uint32_t* outLastRef = NULL,
-                uint32_t* inoutTypeSpecFlags = NULL) const;
+                uint32_t* inoutTypeSpecFlags = NULL,
+                ResTable_config* inoutConfig = NULL) const;
 
         void dumpToLog() const;
         

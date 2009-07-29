@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ScrollView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -71,6 +72,9 @@ public class DpiTestActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        final LayoutInflater li = (LayoutInflater)getSystemService(
+                LAYOUT_INFLATER_SERVICE);
+        
         this.setTitle(R.string.act_title);
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -96,6 +100,14 @@ public class DpiTestActivity extends Activity {
         addLabelToRoot(root, "Prescaled resource drawable");
         addChildToRoot(root, layout);
 
+        layout = (LinearLayout)li.inflate(R.layout.image_views, null);
+        addLabelToRoot(root, "Inflated layout");
+        addChildToRoot(root, layout);
+        
+        layout = (LinearLayout)li.inflate(R.layout.styled_image_views, null);
+        addLabelToRoot(root, "Inflated styled layout");
+        addChildToRoot(root, layout);
+        
         layout = new LinearLayout(this);
         addCanvasBitmap(layout, R.drawable.logo120dpi, true);
         addCanvasBitmap(layout, R.drawable.logo160dpi, true);

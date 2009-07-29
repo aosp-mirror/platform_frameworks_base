@@ -1486,7 +1486,7 @@ ssize_t ResTable::Theme::getAttribute(uint32_t resID, Res_value* outValue,
 
 ssize_t ResTable::Theme::resolveAttributeReference(Res_value* inOutValue,
         ssize_t blockIndex, uint32_t* outLastRef,
-        uint32_t* inoutTypeSpecFlags) const
+        uint32_t* inoutTypeSpecFlags, ResTable_config* inoutConfig) const
 {
     //printf("Resolving type=0x%x\n", inOutValue->dataType);
     if (inOutValue->dataType == Res_value::TYPE_ATTRIBUTE) {
@@ -1498,7 +1498,8 @@ ssize_t ResTable::Theme::resolveAttributeReference(Res_value* inOutValue,
             return blockIndex;
         }
     }
-    return mTable.resolveReference(inOutValue, blockIndex, outLastRef);
+    return mTable.resolveReference(inOutValue, blockIndex, outLastRef,
+            inoutTypeSpecFlags, inoutConfig);
 }
 
 void ResTable::Theme::dumpToLog() const
@@ -1891,7 +1892,8 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
 }
 
 ssize_t ResTable::resolveReference(Res_value* value, ssize_t blockIndex,
-        uint32_t* outLastRef, uint32_t* inoutTypeSpecFlags) const
+        uint32_t* outLastRef, uint32_t* inoutTypeSpecFlags,
+        ResTable_config* outConfig) const
 {
     int count=0;
     while (blockIndex >= 0 && value->dataType == value->TYPE_REFERENCE
@@ -1899,7 +1901,8 @@ ssize_t ResTable::resolveReference(Res_value* value, ssize_t blockIndex,
         if (outLastRef) *outLastRef = value->data;
         uint32_t lastRef = value->data;
         uint32_t newFlags = 0;
-        const ssize_t newIndex = getResource(value->data, value, true, &newFlags);
+        const ssize_t newIndex = getResource(value->data, value, true, &newFlags,
+                outConfig);
         //LOGI("Resolving reference d=%p: newIndex=%d, t=0x%02x, d=%p\n",
         //     (void*)lastRef, (int)newIndex, (int)value->dataType, (void*)value->data);
         //printf("Getting reference 0x%08x: newIndex=%d\n", value->data, newIndex);

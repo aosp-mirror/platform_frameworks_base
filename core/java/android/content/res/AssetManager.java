@@ -637,12 +637,13 @@ public final class AssetManager {
      *  mRetData. */
     private native final int loadResourceBagValue(int ident, int bagEntryId, TypedValue outValue,
                                                boolean resolve);
-    /*package*/ static final int STYLE_NUM_ENTRIES = 5;
+    /*package*/ static final int STYLE_NUM_ENTRIES = 6;
     /*package*/ static final int STYLE_TYPE = 0;
     /*package*/ static final int STYLE_DATA = 1;
     /*package*/ static final int STYLE_ASSET_COOKIE = 2;
     /*package*/ static final int STYLE_RESOURCE_ID = 3;
     /*package*/ static final int STYLE_CHANGING_CONFIGURATIONS = 4;
+    /*package*/ static final int STYLE_DENSITY = 5;
     /*package*/ native static final boolean applyStyle(int theme,
             int defStyleAttr, int defStyleRes, int xmlParser,
             int[] inAttrs, int[] outValues, int[] outIndices);
