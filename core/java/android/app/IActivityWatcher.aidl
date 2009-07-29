@@ -23,4 +23,5 @@ package android.app;
  */
 oneway interface IActivityWatcher {
     void activityResuming(int activityId);
+    void closingSystemDialogs(String reason);
 }

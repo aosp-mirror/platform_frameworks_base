@@ -268,7 +268,9 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
 
     public void killApplicationWithUid(String pkg, int uid) throws RemoteException;
-        
+    
+    public void closeSystemDialogs(String reason) throws RemoteException;
+    
     /*
      * Private non-Binder interfaces
      */
@@ -424,4 +426,5 @@ public interface IActivityManager extends IInterface {
     int UNREGISTER_ACTIVITY_WATCHER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+93;
     int START_ACTIVITY_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;
     int KILL_APPLICATION_WITH_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
+    int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
 }
