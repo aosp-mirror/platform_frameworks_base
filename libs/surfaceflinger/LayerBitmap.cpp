@@ -177,22 +177,17 @@ status_t LayerBitmap::setSize(uint32_t w, uint32_t h)
 sp<Buffer> LayerBitmap::allocate()
 {
     Mutex::Autolock _l(mLock);
-    sp<Buffer> buffer(mBuffer);
-    const uint32_t w = mWidth; 
-    const uint32_t h = mHeight;
-    if (buffer!=0 && (w != buffer->getWidth() || h != buffer->getHeight())) {
-        surface_info_t* info = mInfo;
-        buffer = new Buffer(w, h, mFormat, mFlags);
-        status_t err = buffer->initCheck();
-        if (LIKELY(err == NO_ERROR)) {
-            info->flags  = surface_info_t::eBufferDirty;
-            info->status = NO_ERROR;
-        } else {
-            memset(info, 0, sizeof(surface_info_t));
-            info->status = NO_MEMORY;
-        }
-        mBuffer = buffer;
+    surface_info_t* info = mInfo;
+    sp<Buffer> buffer = new Buffer(mWidth, mHeight, mFormat, mFlags);
+    status_t err = buffer->initCheck();
+    if (LIKELY(err == NO_ERROR)) {
+        info->flags  = surface_info_t::eBufferDirty;
+        info->status = NO_ERROR;
+    } else {
+        memset(info, 0, sizeof(surface_info_t));
+        info->status = NO_MEMORY;
     }
+    mBuffer = buffer;
     return buffer;
 }
 
