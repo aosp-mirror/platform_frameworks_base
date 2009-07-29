@@ -60,4 +60,12 @@ interface IAudioService {
     oneway void unloadSoundEffects();
 
     oneway void reloadAudioSettings();
+
+    void setSpeakerphoneOn(boolean on);
+
+    boolean isSpeakerphoneOn();
+
+    void setBluetoothScoOn(boolean on);
+
+    boolean isBluetoothScoOn();
 }
