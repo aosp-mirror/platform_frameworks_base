@@ -880,7 +880,7 @@ public interface CommandsInterface {
      *  ar.userObject contains the orignal value of result.obj
      *  ar.result is null on success and failure
      */
-    void sendBurstDtmf(String dtmfString, Message result);
+    void sendBurstDtmf(String dtmfString, int on, int off, Message result);
 
     /**
      * smscPDU is smsc address in PDU form GSM BCD format prefixed

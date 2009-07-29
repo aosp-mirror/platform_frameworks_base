@@ -825,7 +825,11 @@ struct ResTable_config
     };
     
     enum {
-        DENSITY_ANY = 0
+        DENSITY_DEFAULT = 0,
+        DENSITY_LOW = 120,
+        DENSITY_MEDIUM = 160,
+        DENSITY_HIGH = 240,
+        DENSITY_NONE = 0xffff
     };
     
     union {
@@ -854,7 +858,6 @@ struct ResTable_config
     
     enum {
         MASK_KEYSHIDDEN = 0x0003,
-        SHIFT_KEYSHIDDEN = 0,
         KEYSHIDDEN_ANY = 0x0000,
         KEYSHIDDEN_NO = 0x0001,
         KEYSHIDDEN_YES = 0x0002,
@@ -906,10 +909,18 @@ struct ResTable_config
     };
     
     enum {
-        SCREENLAYOUT_ANY  = 0x0000,
-        SCREENLAYOUT_SMALL = 0x0001,
-        SCREENLAYOUT_NORMAL = 0x0002,
-        SCREENLAYOUT_LARGE = 0x0003,
+        // screenLayout bits for screen size class.
+        MASK_SCREENSIZE = 0x0f,
+        SCREENSIZE_ANY  = 0x00,
+        SCREENSIZE_SMALL = 0x01,
+        SCREENSIZE_NORMAL = 0x02,
+        SCREENSIZE_LARGE = 0x03,
+        
+        // screenLayout bits for wide/long screen variation.
+        MASK_SCREENLONG = 0x30,
+        SCREENLONG_ANY = 0x00,
+        SCREENLONG_NO = 0x10,
+        SCREENLONG_YES = 0x20,
     };
     
     union {
@@ -1039,6 +1050,17 @@ struct ResTable_config
             }
         }
 
+        if (screenConfig || o.screenConfig) {
+            if (((screenLayout^o.screenLayout) & MASK_SCREENSIZE) != 0) {
+                if (!(screenLayout & MASK_SCREENSIZE)) return false;
+                if (!(o.screenLayout & MASK_SCREENSIZE)) return true;
+            }
+            if (((screenLayout^o.screenLayout) & MASK_SCREENLONG) != 0) {
+                if (!(screenLayout & MASK_SCREENLONG)) return false;
+                if (!(o.screenLayout & MASK_SCREENLONG)) return true;
+            }
+        }
+
         if (screenType || o.screenType) {
             if (orientation != o.orientation) {
                 if (!orientation) return false;
@@ -1055,7 +1077,7 @@ struct ResTable_config
         }
 
         if (input || o.input) {
-            if (inputFlags != o.inputFlags) {
+            if (((inputFlags^o.inputFlags) & MASK_KEYSHIDDEN) != 0) {
                 if (!(inputFlags & MASK_KEYSHIDDEN)) return false;
                 if (!(o.inputFlags & MASK_KEYSHIDDEN)) return true;
             }
@@ -1080,13 +1102,6 @@ struct ResTable_config
             if (screenHeight != o.screenHeight) {
                 if (!screenHeight) return false;
                 if (!o.screenHeight) return true;
-            }
-        }
-
-        if (screenConfig || o.screenConfig) {
-            if (screenLayout != o.screenLayout) {
-                if (!screenLayout) return false;
-                if (!o.screenLayout) return true;
             }
         }
 
@@ -1135,6 +1150,17 @@ struct ResTable_config
 
                 if ((country[0] != o.country[0]) && requested->country[0]) {
                     return (country[0]);
+                }
+            }
+
+            if (screenConfig || o.screenConfig) {
+                if (((screenLayout^o.screenLayout) & MASK_SCREENSIZE) != 0
+                        && (requested->screenLayout & MASK_SCREENSIZE)) {
+                    return (screenLayout & MASK_SCREENSIZE);
+                }
+                if (((screenLayout^o.screenLayout) & MASK_SCREENLONG) != 0
+                        && (requested->screenLayout & MASK_SCREENLONG)) {
+                    return (screenLayout & MASK_SCREENLONG);
                 }
             }
 
@@ -1219,12 +1245,6 @@ struct ResTable_config
                 }
             }
 
-            if (screenConfig || o.screenConfig) {
-                if ((screenLayout != o.screenLayout) && requested->screenLayout) {
-                    return (screenLayout);
-                }
-            }
-
             if (version || o.version) {
                 if ((sdkVersion != o.sdkVersion) && requested->sdkVersion) {
                     return (sdkVersion);
@@ -1272,6 +1292,21 @@ struct ResTable_config
                 return false;
             }
         }
+        if (screenConfig != 0) {
+            const int screenSize = screenLayout&MASK_SCREENSIZE;
+            const int setScreenSize = settings.screenLayout&MASK_SCREENSIZE;
+            if (setScreenSize != 0 && screenSize != 0
+                    && screenSize != setScreenSize) {
+                return false;
+            }
+            
+            const int screenLong = screenLayout&MASK_SCREENLONG;
+            const int setScreenLong = settings.screenLayout&MASK_SCREENLONG;
+            if (setScreenLong != 0 && screenLong != 0
+                    && screenLong != setScreenLong) {
+                return false;
+            }
+        }
         if (screenType != 0) {
             if (settings.orientation != 0 && orientation != 0
                 && orientation != settings.orientation) {
@@ -1316,12 +1351,6 @@ struct ResTable_config
                 return false;
             }
         }
-        if (screenConfig != 0) {
-            if (settings.screenLayout != 0 && screenLayout != 0
-                && screenLayout != settings.screenLayout) {
-                return false;
-            }
-        }
         if (version != 0) {
             if (settings.sdkVersion != 0 && sdkVersion != 0
                 && sdkVersion != settings.sdkVersion) {
@@ -1351,12 +1380,14 @@ struct ResTable_config
     String8 toString() const {
         char buf[200];
         sprintf(buf, "imsi=%d/%d lang=%c%c reg=%c%c orient=%d touch=%d dens=%d "
-                "kbd=%d nav=%d input=%d scrnW=%d scrnH=%d layout=%d vers=%d.%d",
+                "kbd=%d nav=%d input=%d scrnW=%d scrnH=%d sz=%d long=%d vers=%d.%d",
                 mcc, mnc,
                 language[0] ? language[0] : '-', language[1] ? language[1] : '-',
                 country[0] ? country[0] : '-', country[1] ? country[1] : '-',
                 orientation, touchscreen, density, keyboard, navigation, inputFlags,
-                screenWidth, screenHeight, screenLayout, sdkVersion, minorVersion);
+                screenWidth, screenHeight,
+                screenLayout&MASK_SCREENSIZE, screenLayout&MASK_SCREENLONG,
+                sdkVersion, minorVersion);
         return String8(buf);
     }
 };

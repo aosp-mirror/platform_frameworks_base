@@ -441,7 +441,7 @@ resources for a fully specified configuration would look like this:</p>
 <pre>
 MyApp/
     res/
-        drawable-en-rUS-port-160dpi-finger-keysexposed-qwerty-dpad-480x320/
+        drawable-en-rUS-large-long-port-mdpi-finger-keysexposed-qwerty-dpad-480x320/
 </pre>
 
 <p>More typically, you will only specify a few specific configuration options. You may drop any of the values from the
@@ -453,7 +453,7 @@ MyApp/
     res/
         drawable-en-rUS-finger/
         drawable-port/
-        drawable-port-160dpi/
+        drawable-port-mdpi/
         drawable-qwerty/
 </pre>
 <p>Table 2 lists the valid folder-name qualifiers, in order of precedence. Qualifiers that are listed higher in the table take precedence over those listed lower, as described in <a href="#best-match">How Android finds the best matching directory</a>. </p>
@@ -465,37 +465,110 @@ MyApp/
     </tr>
     <tr>
       <td>MCC and MNC</td>
-      <td>The mobile country code and mobile network code from the SIM in the device. For example  <code>mcc310-mnc004</code> (U.S., Verizon brand); <code>mcc208-mnc00</code> (France, Orange brand); <code>mcc234-mnc00</code> (U.K., BT brand). <br>
-        <br>
-        If the device uses a radio connection  (GSM phone), the MCC will come from the SIM, and the MNC will come from the  network to which the device is attached. You might sometimes use the MCC alone, for example to include country-specific legal resources in your application. If your application specifies resources for a MCC/MNC  combination, those resources can only be used if both the MCC and the MNC match. </td>
-  </tr>
+      <td>The mobile country code optionally followed by mobile network code
+      from the SIM in the device. For example
+      <code>mcc310</code> (U.S. on any carrier);
+      <code>mcc310-mnc004</code> (U.S., Verizon brand);
+      <code>mcc208-mnc00</code> (France, Orange brand);
+      <code>mcc234-mnc00</code> (U.K., BT brand).
+        <p>
+        If the device uses a radio connection  (GSM phone), the MCC will come
+        from the SIM, and the MNC will come from the  network to which the
+        device is attached. You might sometimes use the MCC alone, for example
+        to include country-specific legal resources in your application. If
+        your application specifies resources for a MCC/MNC  combination, those
+        resources can only be used if both the MCC and the MNC match. </td>
+    </tr>
     <tr>
         <td>Language and region</td>
         <td>The two letter <a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO
-                639-1</a> language code and two letter
+                639-1</a> language code optionally followed by a two letter
                 <a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO
                 3166-1-alpha-2</a> region code (preceded by lowercase &quot;r&quot;). For example 
-                <code>en-rUS</code>, <code>fr-rFR</code>, <code>es-rES</code>. <br>
-                <br>
-          The codes are case-sensitive: The language code is lowercase, and the country code is uppercase. You cannot specify a region alone, but you can specify a language alone, for example <code>en</code>, <code>fr</code>, <code>es</code>. </td>
-  </tr>
+                <code>fr</code>, <code>en-rUS</code>, <code>fr-rFR</code>, <code>es-rES</code>.
+                <p>
+          The codes are <em>not</em> case-sensitive; the r prefix is used to
+          distinguish the region portion.
+          You cannot specify a region alone, but you can specify a language alone,
+          for example <code>en</code>, <code>fr</code>, <code>es</code>. </td>
+    </tr>
+    <tr>
+        <td>Screen dimensions</td>
+        <td><code>small</code>, <code>normal</code>, <code>large</code>
+        <p>
+        Specify that the resource is for a particular class of screen.
+        The meanings of these are:</p>
+        <ul>
+        <li> <b>Normal screens</b> are based on the traditional Android HVGA
+        medium density screen.  A screen is considered to be normal if it is
+        at least this size (independent of density) and not large.  Examples
+        of such screens a WQVGA low density, HVGA medium density, WVGA
+        high density.
+        <li> <b>Small screens</b> are based on the space available on a
+        QVGA low density screen.  Considering a portrait HVGA display, this has
+        the same available width but less height -- it is 3:4 vs. HVGA's
+        2:3 aspect ratio.  Examples are QVGA low density and VGA high
+        density.
+        <li> <b>Large screens</b> are based on the space available on a
+        VGA medium density screen.  Such a screen has significantly more
+        available space in both width and height than an HVGA display.
+        Examples are VGA and WVGA medium density screens.
+        </td>
+    </tr>
+    <tr>
+        <td>Wider/taller screens</td>
+        <td><code>long</code>, <code>notlong</code>
+        <p>
+        Specify that the resource is for a taller/wider than traditional
+        screen.  This is based purely on the aspect ration of the screen:
+        QVGA, HVGA, and VGA are notlong; WQVGA, WVGA, FWVGA are long.  Note
+        that long may mean either wide or tall, depending on the current
+        orientation.
+        </td>
+    </tr>
     <tr>
         <td>Screen orientation</td>
-        <td><code>port</code>, <code>land</code>, <code>square</code> </td>
+        <td><code>port</code>, <code>land</code>, <code>square</code>
+        <p>
+        Specifies that the resource is for a screen that is tall (port)
+        or wide (land); square is not currently used.
+        </td>
     </tr>
     <tr>
         <td>Screen pixel density</td>
-        <td><code>92dpi</code>, <code>108dpi</code>, etc. When Android selects which resource files to use, it handles screen density  differently than the other qualifiers. In step 1 of <a href="#best-match">How Android finds the best matching directory</a> (below),  screen density is always  considered to be a match. In step 4, if the qualifier being considered is screen density, Android will select the best final match at that point, without any need to move on to step 5. </td>
-  </tr>
+        <td><code>ldpi</code>, <code>mdpi</code>, <code>hdpi</code>, <code>nodpi</code>
+        <p>
+         Specifies the screen density the resource is defined for.  The medium
+         density of traditional HVGA screens (mdpi) is defined to be approximately
+         160dpi; low density (ldpi) is 120, and high density (hdpi) is 240.  There
+         is thus a 4:3 scaling factor between each density, so a 9x9 bitmap
+         in ldpi would be 12x12 is mdpi and 16x16 in hdpi.  The special
+         <code>nodpi</code> density can be used with bitmap resources to prevent
+         them from being scaled at load time to match the device density.
+        <p>
+         When Android selects which resource files to use,
+         it handles screen density  differently than the other qualifiers.
+         In step 1 of <a href="#best-match">How Android finds the best
+         matching directory</a> (below), screen density is always considered to
+         be a match. In step 4, if the qualifier being considered is screen
+         density, Android will select the best final match at that point,
+         without any need to move on to step 5.
+         <p>
+         You can also specify explicit densities like <code>92dpi</code>
+         or <code>108dpi</code>, but these are not fully supported by the
+         system so should not be used.
+         </td>
+    </tr>
     <tr>
         <td>Touchscreen type</td>
         <td><code>notouch</code>, <code>stylus</code>, <code>finger</code></td>
     </tr>
     <tr>
         <td>Whether the keyboard is available to the user</td>
-        <td><code>keysexposed</code>, <code>keyshidden</code>, <code>keyssoft</code> <br>
+        <td><code>keysexposed</code>, <code>keyshidden</code>, <code>keyssoft</code>
+        <p>
           If your application has specific resources that should only be used with a soft keyboard, use the <code>keyssoft</code> value. If no <code>keyssoft</code> resources are available (only <code>keysexposed</code> and <code>keyshidden</code>) and the device  shows a soft keyboard,  the system will use <code>keysexposed</code> resources. </td>
-  </tr>
+    </tr>
     <tr>
         <td>Primary text input method</td>
         <td><code>nokeys</code>, <code>qwerty</code>, <code>12key</code> </td>
@@ -508,15 +581,17 @@ MyApp/
     <tr>
         <td>Screen dimensions</td>
         <td><code>320x240</code>, <code>640x480</code>, etc. The larger dimension
-            must be specified first. </td>
+            must be specified first.  This configuration is deprecated and
+            should not be used; use instead screen dimension, wider/taller
+            screens, and screen orientation described above.</td>
     </tr>
     <tr>
       <td>SDK version</td>
       <td>The SDK version supported by the device, for example <code>v3</code>. The Android 1.0 SDK is <code>v1, </code> the 1.1 SDK is <code>v2</code>, and the 1.5 SDK is <code>v3</code>.</td>
-  </tr>
+    </tr>
     <tr>
       <td>(Minor version)</td>
-      <td>(You cannot currently    specify minor version. It is always set to 0.)</td>
+      <td>(You cannot currently specify minor version. It is always set to 0.)</td>
   </tr>
 </table>
 
@@ -536,8 +611,11 @@ resource qualifiers in the table above.</p>
         <li>Incorrect: <code>values-nokeys-mcc460/</code></li>
       </ul>
     </li>
-    <li>Values are case-sensitive. For example, a portrait-specific <code>drawable</code> directory must be named
-    <code>drawable-port</code>, not <code>drawable-PORT</code> or <code>drawable-Port</code>.</li>
+    <li>Values are case-insensitive.  The resource compiler converts folder names
+    to lower case before processing to avoid problems in case-insensitive
+    file systems.  On case-sensitive file systems, you should keep all names
+    lower-case or at least use a consistent case to protect your future
+    sanity when trying to find a resource file.</li>
     <li>Only one value for each qualifier type is supported. For example, if you want to use exactly the same drawable files for Spain and France, you will need two  resource directories, such as <code>drawable-rES/</code> and <code>drawable-rFR/</code>, containing identical files. You cannot 
         have a directory named <code>drawable-rES-rFR/</code>. </li>
     <li>Qualified directories cannot be nested. For example, you cannot have <code>res/drawable/drawable-en</code>. </li>
@@ -546,7 +624,7 @@ resource qualifiers in the table above.</p>
 <h3>How resources are referenced in code</h3>
 <p>All resources will be referenced in code or resource reference syntax by
     their simple, undecorated names. So if a resource were named this:<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>MyApp/res/drawable-port-92dpi/myimage.png</code><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>MyApp/res/drawable-port-mdpi/myimage.png</code><br />
   It would be referenced as this:<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>R.drawable.myimage</code> (code)<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>&#064;drawable/myimage</code> (XML)</p>
@@ -554,11 +632,12 @@ resource qualifiers in the table above.</p>
 <h3 id="best-match">How Android finds the best matching directory </h3>
 
 <p>Android will pick which of the various underlying resource files should be
-used at runtime, depending on the current configuration of the device. The example used here assumes the following device configuration:</p>
+used at runtime, depending on the current configuration of the device.
+The example used here assumes the following device configuration:</p>
 <blockquote>
   <p>Locale = <code>en-GB</code><br>
   Screen orientation = <code>port</code><br>
-  Screen pixel density = <code>108dpi</code><br>
+  Screen pixel density = <code>mdpi</code><br>
     Touchscreen type = <code>notouch</code><br>
     Primary text input method = <code>12key</code><br>
   </p>
@@ -573,9 +652,9 @@ MyApp/res/drawable-en/
 <strike>MyApp/res/drawable-fr-rCA/</strike>
 MyApp/res/drawable-en-port/
 MyApp/res/drawable-en-notouch-12key/
-MyApp/res/drawable-port-92dpi/
+MyApp/res/drawable-port-ldpi/
 MyApp/res/drawable-port-notouch-12key</pre>
-      <strong>Exception: </strong>Screen pixel density is the one qualifier that is not used to eliminate files. Even though the screen density of the device is 108 dpi, <code>drawable-port-92dpi/</code> is not  eliminated from the list, because every screen density is considered to be a 
+      <strong>Exception: </strong>Screen pixel density is the one qualifier that is not used to eliminate files. Even though the screen density of the device is medium dpi, <code>drawable-port-ldpi/</code> is not  eliminated from the list, because every screen density is considered to be a 
         match at this point.</li>
     <li>From <a href="#table2">Table 2</a>, pick the   highest-precedence qualifier that remains in the list. (Start with MCC, then move down through the list.) </li>
   <li>Do any of the available resource directories include this qualifier?  </li>
@@ -588,7 +667,7 @@ MyApp/res/drawable-port-notouch-12key</pre>
 MyApp/res/drawable-en/
 MyApp/res/drawable-en-port/
 MyApp/res/drawable-en-notouch-12key/
-<strike>MyApp/res/drawable-port-92dpi/</strike>
+<strike>MyApp/res/drawable-port-ldpi/</strike>
 <strike>MyApp/res/drawable-port-notouch-12key</strike></pre>
   <strong>Exception:</strong> If the qualifier in question  is screen pixel density, Android will select the option that most closely matches the device, and the selection process will be complete. In general, Android will prefer scaling down a larger original image to scaling  up a smaller original image.<br><br></li>
 
@@ -597,7 +676,11 @@ MyApp/res/drawable-en-notouch-12key/
     <pre><strike>MyApp/res/drawable-en/</strike>
 MyApp/res/drawable-en-port/
 <strike>MyApp/res/drawable-en-notouch-12key/</strike></pre>
-  Only one choice remains, so that's it. When drawables are called for in this example application, the Android system will load resources from the <code>MyApp/res/drawable-en-port/</code> directory.
+  Only one choice remains, so that's it. When drawables are called for in this
+  example application, the Android system will load resources from the
+  <code>MyApp/res/drawable-en-port/</code> directory.  In addition, if the
+  resource being loaded is a bitmap, it will be scaled up so that its supplied
+  low density matches the device's medium density.
 </ol>
 <p class="note"><strong>Tip:</strong> The <em>precedence</em> of the qualifiers is more important than the number of qualifiers that exactly match the device. For example, in step 4 above, the last choice on the list includes three qualifiers that exactly match the device (orientation, touchscreen type, and input method), while <code>drawable-en</code> has only one parameter that matches (language). However, language has a higher precedence, so <code>drawable-port-notouch-12key</code> is out.</p>
 <p>This flowchart summarizes how Android selects resource directories to load.</p>

@@ -95,7 +95,7 @@
     <string name="hour_minute_ampm">%-l:%M %p</string>
     <string name="hour_minute_cap_ampm">%-l:%M %^p</string>
     <string name="twelve_hour_time_format">h:mm a</string>
-    <string name="twenty_four_hour_time_format">H'h'mm</string>
+    <string name="twenty_four_hour_time_format">H\'h\'mm</string>
     <string name="numeric_date">%d/%m/%Y</string>
     <string name="numeric_date_format">dd/MM/yyyy</string>
     <string name="numeric_date_template">"%s/%s/%s"</string>

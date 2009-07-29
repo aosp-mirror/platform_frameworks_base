@@ -143,8 +143,6 @@
     <!-- This is a list of all the libraries available for application
          code to link against. -->
 
-    <library name="android.awt"
-            file="/system/framework/android.awt.jar" />
     <library name="android.test.runner"
             file="/system/framework/android.test.runner.jar" />
     <library name="com.android.im.plugin"

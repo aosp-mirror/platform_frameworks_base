@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="byteShort">"B"</string>
+    <string name="kilobyteShort">"kB"</string>
+    <string name="megabyteShort">"MB"</string>
+    <string name="gigabyteShort">"GB"</string>
+    <string name="terabyteShort">"TB"</string>
+    <string name="petabyteShort">"PB"</string>
+    <!-- no translation found for fileSizeSuffix (7670819340156489359) -->
+    <skip />
+    <string name="untitled">"&lt;utan titel&gt;"</string>
+    <string name="ellipsis">"…"</string>
+    <string name="emptyPhoneNumber">"(Inget telefonnummer)"</string>
+    <string name="unknownName">"(Okänd)"</string>
+    <string name="defaultVoiceMailAlphaTag">"Röstbrevlåda"</string>
+    <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
+    <string name="mmiError">"Anslutningsproblem eller ogiltig MMI-kod."</string>
+    <string name="serviceEnabled">"Tjänsten har aktiverats."</string>
+    <string name="serviceEnabledFor">"Tjänsten har aktiverats för:"</string>
+    <string name="serviceDisabled">"Tjänsten har inaktiverats."</string>
+    <string name="serviceRegistered">"Registreringen slutförd."</string>
+    <string name="serviceErased">"Radering lyckades."</string>
+    <string name="passwordIncorrect">"Fel lösenord."</string>
+    <string name="mmiComplete">"MMI slutförd."</string>
+    <string name="badPin">"Den gamla PIN-koden som du angav är fel."</string>
+    <string name="badPuk">"PUK-koden som du angav är fel."</string>
+    <string name="mismatchPin">"PIN-koderna som du angav matchar inte."</string>
+    <string name="invalidPin">"Ange en PIN-kod som är 4 till 8 siffror."</string>
+    <string name="needPuk">"Ditt SIM-kort är PUK-låst. Ange PUK-koden om du vill låsa upp det."</string>
+    <string name="needPuk2">"Ange PUK2-koden för att häva spärren av SIM-kortet."</string>
+    <string name="ClipMmi">"Nummerpresentatör för inkommande samtal"</string>
+    <string name="ClirMmi">"Nummerpresentatör för utgående samtal"</string>
+    <string name="CfMmi">"Vidarebefordra samtal"</string>
+    <string name="CwMmi">"Samtal väntar"</string>
+    <string name="BaMmi">"Samtalsspärr"</string>
+    <string name="PwdMmi">"Byt lösenord"</string>
+    <string name="PinMmi">"Byt PIN-kod"</string>
+    <!-- no translation found for CnipMmi (3110534680557857162) -->
+    <skip />
+    <!-- no translation found for CnirMmi (3062102121430548731) -->
+    <skip />
+    <!-- no translation found for ThreeWCMmi (9051047170321190368) -->
+    <skip />
+    <!-- no translation found for RuacMmi (7827887459138308886) -->
+    <skip />
+    <!-- no translation found for CndMmi (3116446237081575808) -->
+    <skip />
+    <!-- no translation found for DndMmi (1265478932418334331) -->
+    <skip />
+    <string name="CLIRDefaultOnNextCallOn">"Nummerpresentatören är begränsad som standard. Nästa samtal: Begränsad"</string>
+    <string name="CLIRDefaultOnNextCallOff">"Nummerpresentatörens standardinställning är begränsad. Nästa samtal: Inte begränsad"</string>
+    <string name="CLIRDefaultOffNextCallOn">"Nummerpresentatörens standardinställning är inte begränsad. Nästa samtal: Begränsad"</string>
+    <string name="CLIRDefaultOffNextCallOff">"Nummerpresentatörens standardinställning är inte begränsad. Nästa samtal: Inte begränsad"</string>
+    <string name="serviceNotProvisioned">"Tjänsten är inte etablerad."</string>
+    <string name="CLIRPermanent">"Det går inte att ändra inställningen för nummerpresentatör."</string>
+    <string name="RestrictedChangedTitle">"Begränsad åtkomst har ändrats"</string>
+    <string name="RestrictedOnData">"Datatjänsten är blockerad."</string>
+    <string name="RestrictedOnEmergency">"Räddningstjänsten är blockerad."</string>
+    <string name="RestrictedOnNormal">"Tjänsten röst/SMS är blockerad."</string>
+    <string name="RestrictedOnAll">"Alla röst-/SMS-tjänster har blockerats."</string>
+    <string name="serviceClassVoice">"Röst"</string>
+    <string name="serviceClassData">"Data"</string>
+    <string name="serviceClassFAX">"FAX"</string>
+    <string name="serviceClassSMS">"SMS"</string>
+    <string name="serviceClassDataAsync">"Asynkront"</string>
+    <string name="serviceClassDataSync">"Synkronisera"</string>
+    <string name="serviceClassPacket">"Paket"</string>
+    <string name="serviceClassPAD">"PAD"</string>
+    <!-- no translation found for roamingText0 (7170335472198694945) -->
+    <skip />
+    <!-- no translation found for roamingText1 (5314861519752538922) -->
+    <skip />
+    <!-- no translation found for roamingText2 (8969929049081268115) -->
+    <skip />
+    <!-- no translation found for roamingText3 (5148255027043943317) -->
+    <skip />
+    <!-- no translation found for roamingText4 (8808456682550796530) -->
+    <skip />
+    <!-- no translation found for roamingText5 (7604063252850354350) -->
+    <skip />
+    <!-- no translation found for roamingText6 (2059440825782871513) -->
+    <skip />
+    <!-- no translation found for roamingText7 (7112078724097233605) -->
+    <skip />
+    <!-- no translation found for roamingText8 (5989569778604089291) -->
+    <skip />
+    <!-- no translation found for roamingText9 (7969296811355152491) -->
+    <skip />
+    <!-- no translation found for roamingText10 (3992906999815316417) -->
+    <skip />
+    <!-- no translation found for roamingText11 (4154476854426920970) -->
+    <skip />
+    <!-- no translation found for roamingText12 (1189071119992726320) -->
+    <skip />
+    <!-- no translation found for roamingTextSearching (8360141885972279963) -->
+    <skip />
+    <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Vidarebefordras inte"</string>
+    <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> efter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
+    <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. Vidarebefordras inte"</string>
+    <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Vidarebefordras inte"</string>
+    <!-- no translation found for fcComplete (3118848230966886575) -->
+    <skip />
+    <!-- no translation found for fcError (3327560126588500777) -->
+    <skip />
+    <string name="httpErrorOk">"OK"</string>
+    <string name="httpError">"Webbsidan innehåller ett fel."</string>
+    <string name="httpErrorLookup">"Webbadressen kunde inte hittas."</string>
+    <string name="httpErrorUnsupportedAuthScheme">"Webbplatsens autentiseringsmetod stöds inte."</string>
+    <string name="httpErrorAuth">"Det gick inte att autentisera."</string>
+    <string name="httpErrorProxyAuth">"Det gick inte att autentisera via proxyservern."</string>
+    <string name="httpErrorConnect">"Det gick inte att ansluta till servern."</string>
+    <string name="httpErrorIO">"Servern kommunicerade inte. Försök igen senare."</string>
+    <string name="httpErrorTimeout">"Anslutningen till servern har kopplats ifrån."</string>
+    <string name="httpErrorRedirectLoop">"Sidan innehåller för många serveromdirigeringar."</string>
+    <string name="httpErrorUnsupportedScheme">"Protokollet stöds inte."</string>
+    <string name="httpErrorFailedSslHandshake">"Det gick inte att upprätta en säker anslutning."</string>
+    <string name="httpErrorBadUrl">"Sidan kunde inte öppnas eftersom webbadressen är ogiltig."</string>
+    <string name="httpErrorFile">"Det gick inte att komma åt filen."</string>
+    <string name="httpErrorFileNotFound">"Den begärda filen hittades inte."</string>
+    <string name="httpErrorTooManyRequests">"För många begäranden bearbetas. Försök igen senare."</string>
+    <!-- no translation found for certificateSaved (2832076323378077191) -->
+    <skip />
+    <string name="contentServiceSync">"Synkronisera"</string>
+    <string name="contentServiceSyncNotificationTitle">"Synkronisera"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc">"För många <xliff:g id="CONTENT_TYPE">%s</xliff:g>-borttagningar."</string>
+    <string name="low_memory">"Telefonens lagringsutrymme är fullt! Radera några filer för att frigöra utrymme."</string>
+    <string name="me">"Jag"</string>
+    <string name="power_dialog">"Telefonalternativ"</string>
+    <string name="silent_mode">"Tyst läge"</string>
+    <string name="turn_on_radio">"Aktivera trådlöst"</string>
+    <string name="turn_off_radio">"Inaktivera trådlöst"</string>
+    <string name="screen_lock">"Skärmlås"</string>
+    <string name="power_off">"Stäng av"</string>
+    <string name="shutdown_progress">"Avslutar…"</string>
+    <string name="shutdown_confirm">"Din telefon stängs av."</string>
+    <string name="no_recent_tasks">"Inga nya program."</string>
+    <string name="global_actions">"Telefonalternativ"</string>
+    <string name="global_action_lock">"Skärmlås"</string>
+    <string name="global_action_power_off">"Stäng av"</string>
+    <string name="global_action_toggle_silent_mode">"Tyst läge"</string>
+    <string name="global_action_silent_mode_on_status">"Ljudet är AV"</string>
+    <string name="global_action_silent_mode_off_status">"Ljudet är PÅ"</string>
+    <string name="global_actions_toggle_airplane_mode">"Flygplansläge"</string>
+    <string name="global_actions_airplane_mode_on_status">"Flygplansläge är AKTIVERAT"</string>
+    <string name="global_actions_airplane_mode_off_status">"Flygplansläge är INAKTIVERAT"</string>
+    <string name="safeMode">"Säkert läge"</string>
+    <string name="android_system_label">"Android-system"</string>
+    <string name="permgrouplab_costMoney">"Tjänster som kostar pengar"</string>
+    <string name="permgroupdesc_costMoney">"Tillåter att program gör saker som kostar pengar."</string>
+    <string name="permgrouplab_messages">"Dina meddelanden"</string>
+    <string name="permgroupdesc_messages">"Läs och skriv SMS, e-post och andra meddelanden."</string>
+    <string name="permgrouplab_personalInfo">"Dina personliga uppgifter"</string>
+    <string name="permgroupdesc_personalInfo">"Direktåtkomst till dina kontakter och kalendern som har lagrats på telefonen."</string>
+    <string name="permgrouplab_location">"Din plats"</string>
+    <string name="permgroupdesc_location">"Övervaka din fysiska plats"</string>
+    <string name="permgrouplab_network">"Nätverkskommunikation"</string>
+    <string name="permgroupdesc_network">"Tillåt att program kommer åt olika nätverksfunktioner."</string>
+    <string name="permgrouplab_accounts">"Dina Google-konton"</string>
+    <string name="permgroupdesc_accounts">"Få åtkomst till tillgängliga Google-konton."</string>
+    <string name="permgrouplab_hardwareControls">"Kontroller för maskinvara"</string>
+    <string name="permgroupdesc_hardwareControls">"Direkt åtkomst till maskinvara på handenheten."</string>
+    <string name="permgrouplab_phoneCalls">"Telefonsamtal"</string>
+    <string name="permgroupdesc_phoneCalls">"Övervaka, spela in och bearbeta telefonsamtal"</string>
+    <string name="permgrouplab_systemTools">"Systemverktyg"</string>
+    <string name="permgroupdesc_systemTools">"Åtkomst och kontroll av systemet på lägre nivå."</string>
+    <string name="permgrouplab_developmentTools">"Utvecklingsverktyg"</string>
+    <string name="permgroupdesc_developmentTools">"Funktioner som endast behövs för programutvecklare."</string>
+    <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (9203302214915355774) -->
+    <skip />
+    <string name="permlab_statusBar">"inaktivera eller ändra statusfält"</string>
+    <string name="permdesc_statusBar">"Tillåter att programmet inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
+    <string name="permlab_expandStatusBar">"expandera/komprimera statusfält"</string>
+    <string name="permdesc_expandStatusBar">"Tillåter att program expanderar eller komprimerar statusfältet."</string>
+    <string name="permlab_processOutgoingCalls">"spärra utgående samtal"</string>
+    <string name="permdesc_processOutgoingCalls">"Tillåter att program hanterar utgående samtal och ändrar numret som ska ringas upp. Skadliga program kan övervaka, omdirigera eller förhindra utgående samtal."</string>
+    <string name="permlab_receiveSms">"ta emot SMS"</string>
+    <string name="permdesc_receiveSms">"Tillåter att program tar emot och bearbetar SMS-meddelanden. Skadliga program kan övervaka dina meddelanden eller ta bort dem utan att visa dem för dig."</string>
+    <string name="permlab_receiveMms">"ta emot MMS"</string>
+    <string name="permdesc_receiveMms">"Tillåter att program tar emot och bearbetar MMS-meddelanden. Skadliga program kan övervaka dina meddelanden eller ta bort dem innan du har sett dem."</string>
+    <string name="permlab_sendSms">"skicka SMS"</string>
+    <string name="permdesc_sendSms">"Tillåter att programmet skickar SMS-meddelanden. Skadliga program kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
+    <string name="permlab_readSms">"läsa SMS eller MMS"</string>
+    <string name="permdesc_readSms">"Tillåter att program läser SMS-meddelanden som sparats på din telefon eller SIM-kort. Skadliga program kan läsa dina konfidentiella meddelanden."</string>
+    <string name="permlab_writeSms">"redigera SMS eller MMS"</string>
+    <string name="permdesc_writeSms">"Tillåter att program skriver till SMS-meddelanden som lagrats på din telefon eller SIM-kort. Skadliga program kan radera dina meddelanden."</string>
+    <string name="permlab_receiveWapPush">"ta emot WAP"</string>
+    <string name="permdesc_receiveWapPush">"Tillåter att program tar emot och bearbetar WAP-meddelanden. Skadliga program kan övervaka dina meddelanden eller ta bort dem utan att visa dem för dig."</string>
+    <string name="permlab_getTasks">"hämta program som körs"</string>
+    <string name="permdesc_getTasks">"Tillåter att program hämtar information om uppgifter som körs och har körts. Skadliga program kan upptäcka privat information om andra program."</string>
+    <string name="permlab_reorderTasks">"byt ordning på program som körs"</string>
+    <string name="permdesc_reorderTasks">"Tillåter att ett program flyttar uppgifter till förgrunden eller bakgrunden. Skadliga program kan tvinga sig till förgrunden utan att du kan styra det."</string>
+    <string name="permlab_setDebugApp">"aktivera felsökning av program"</string>
+    <string name="permdesc_setDebugApp">"Tillåter att ett program aktiverar felsökning för ett annat program. Skadliga program kan använda detta för att avsluta andra program."</string>
+    <string name="permlab_changeConfiguration">"ändra dina gränssnittsinställningar"</string>
+    <string name="permdesc_changeConfiguration">"Tillåter att ett program ändrar den aktuella konfigurationen, till exempel språk eller övergripande teckenformat."</string>
+    <string name="permlab_restartPackages">"starta om andra program"</string>
+    <string name="permdesc_restartPackages">"Tillåter att ett program framtvingar omstart av andra program."</string>
+    <string name="permlab_forceBack">"tvinga program att avsluta"</string>
+    <string name="permdesc_forceBack">"Tillåter att ett program tvingar en aktivitet som finns i förgrunden att avsluta och gå tillbaka. Behövs inte för vanliga program."</string>
+    <string name="permlab_dump">"hämta systemets interna status"</string>
+    <string name="permdesc_dump">"Tillåter att ett program hämtar systemets interna status. Skadliga program kan hämta privat och skyddad information som de normalt aldrig ska behöva."</string>
+    <!-- no translation found for permlab_shutdown (7185747824038909016) -->
+    <skip />
+    <!-- no translation found for permdesc_shutdown (7046500838746291775) -->
+    <skip />
+    <!-- no translation found for permlab_stopAppSwitches (4138608610717425573) -->
+    <skip />
+    <!-- no translation found for permdesc_stopAppSwitches (3857886086919033794) -->
+    <skip />
+    <string name="permlab_runSetActivityWatcher">"övervaka och styra alla program som öppnas"</string>
+    <string name="permdesc_runSetActivityWatcher">"Tillåter att ett program övervakar och styr hur systemet startar aktiviteter. Skadliga program kan bryta systemet helt. Den här behörigheten behövs bara för programmering, aldrig för vanlig telefonanvändning."</string>
+    <string name="permlab_broadcastPackageRemoved">"skicka meddelande om borttaget paket"</string>
+    <string name="permdesc_broadcastPackageRemoved">"Tillåter att ett program skickar ett meddelande om att ett programpaket har tagits bort. Skadliga program kan använda detta för att avsluta alla andra program som körs."</string>
+    <string name="permlab_broadcastSmsReceived">"skicka SMS-mottagen sändning"</string>
+    <string name="permdesc_broadcastSmsReceived">"Tillåter att ett program sänder ut en avisering när SMS tas emot. Skadliga program kan använda detta för att förfalska inkommande SMS-meddelanden."</string>
+    <string name="permlab_broadcastWapPush">"skicka WAP-PUSH-mottagen sändning"</string>
+    <string name="permdesc_broadcastWapPush">"Tillåter att ett program skickar ut en avisering när ett WAP PUSH-meddelande tas emot. Skadliga program kan använda detta för att förfalska mottagning av MMS eller för att obemärkt byta ut innehållet på en webbsida mot skadligt innehåll."</string>
+    <string name="permlab_setProcessLimit">"begränsa antalet processer som körs"</string>
+    <string name="permdesc_setProcessLimit">"Tillåter att ett program styr högsta antalet processer som körs. Behövs inte för vanliga program."</string>
+    <string name="permlab_setAlwaysFinish">"gör så att alla bakgrundsprogram stängs"</string>
+    <string name="permdesc_setAlwaysFinish">"Tillåter att ett program bestämmer om aktiviteter alltid är slutförda när de hamnar i bakgrunden. Ska inte behövas för vanliga program."</string>
+    <string name="permlab_batteryStats">"ändra batteristatistik"</string>
+    <string name="permdesc_batteryStats">"Tillåter att samlad batteristatistik ändras. Används inte av vanliga program."</string>
+    <!-- no translation found for permlab_backup (470013022865453920) -->
+    <skip />
+    <!-- no translation found for permdesc_backup (2305432853944929371) -->
+    <skip />
+    <string name="permlab_internalSystemWindow">"visa otillåtna fönster"</string>
+    <string name="permdesc_internalSystemWindow">"Tillåter att fönster skapas och används av det interna systemgränssnittet. Används inte av vanliga program."</string>
+    <string name="permlab_systemAlertWindow">"visa varningar på systemnivå"</string>
+    <string name="permdesc_systemAlertWindow">"Tillåter att ett program visar fönster med systemvarningar. Skadliga program kan överta hela telefonens skärm."</string>
+    <string name="permlab_setAnimationScale">"ändra global animeringshastighet"</string>
+    <string name="permdesc_setAnimationScale">"Tillåter att ett program när som helst ändrar den globala animeringshastigheten (snabbare eller långsammare)."</string>
+    <string name="permlab_manageAppTokens">"hantera programtoken"</string>
+    <string name="permdesc_manageAppTokens">"Tillåter att program skapar och hanterar egna token och förbigår normala Z-beställningar. Behövs inte för vanliga program."</string>
+    <string name="permlab_injectEvents">"trycka på knappar och styrknappar"</string>
+    <string name="permdesc_injectEvents">"Tillåter att ett program levererar egna inmatningshändelser (knapptryckningar, osv.) till andra program. Skadliga program använder detta för att kapa telefonen."</string>
+    <string name="permlab_readInputState">"registrera vad du skriver och vilka åtgärder du vidtar"</string>
+    <string name="permdesc_readInputState">"Tillåter att program övervakar knapparna som du trycker på, till och med när du använder andra program (till exempel när du anger ett lösenord). Ska inte behövas för vanliga program."</string>
+    <string name="permlab_bindInputMethod">"binda till en metod för indata"</string>
+    <string name="permdesc_bindInputMethod">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en inmatningsmetod. Ska inte behövas för vanliga program."</string>
+    <string name="permlab_setOrientation">"ändra bildskärmens rikting"</string>
+    <string name="permdesc_setOrientation">"Tillåter att ett program när som helst ändrar skärmens rotering. Behövs inte för vanliga program."</string>
+    <string name="permlab_signalPersistentProcesses">"skicka Linux-signaler till program"</string>
+    <string name="permdesc_signalPersistentProcesses">"Tillåter att programmet begär att den angivna signalen skickas till alla beständiga processer."</string>
+    <string name="permlab_persistentActivity">"se till att programmet alltid körs"</string>
+    <string name="permdesc_persistentActivity">"Tillåter att ett program gör vissa delar beständiga så att systemet inte kan använda det för andra program."</string>
+    <string name="permlab_deletePackages">"ta bort program"</string>
+    <string name="permdesc_deletePackages">"Tillåter att ett program tar bort Android-paket. Skadliga program kan använda detta för att ta bort viktiga program."</string>
+    <string name="permlab_clearAppUserData">"ta bort de andra programmens uppgifter"</string>
+    <string name="permdesc_clearAppUserData">"Tillåter att ett program tar bort användardata."</string>
+    <string name="permlab_deleteCacheFiles">"ta bort de andra programmens cacheminnen"</string>
+    <string name="permdesc_deleteCacheFiles">"Tillåter att ett program raderar cachefiler."</string>
+    <string name="permlab_getPackageSize">"mäta telefonens lagringsutrymme"</string>
+    <string name="permdesc_getPackageSize">"Tillåter att ett program hämtar kod, data och cachestorlekar"</string>
+    <string name="permlab_installPackages">"installera program direkt"</string>
+    <string name="permdesc_installPackages">"Tillåter att ett program installerar nya eller uppdaterade Android-paket. Skadliga program kan använda detta för att lägga till nya program med godtyckliga och starka behörigheter."</string>
+    <string name="permlab_clearAppCache">"ta bort cacheinformation för alla program"</string>
+    <string name="permdesc_clearAppCache">"Tillåter att ett program frigör lagringsutrymme i telefonen genom att ta bort filer i programmets katalog för cachelagring. Åtkomst är mycket begränsad, vanligtvis till systemprocesser."</string>
+    <string name="permlab_readLogs">"läsa systemets loggfiler"</string>
+    <string name="permdesc_readLogs">"Tillåter att ett program läser från systemets olika loggfiler. Det innebär att programmet kan upptäcka allmän information om vad du gör med telefonen, men den bör inte innehålla personlig eller privat information."</string>
+    <string name="permlab_diagnostic">"läsa/skriva till resurser som ägs av diag"</string>
+    <string name="permdesc_diagnostic">"Tillåter att ett program läser och skriver till en resurs som ägs av diag-gruppen; till exempel filer i /dev. Detta kan eventuellt påverka systemets stabilitet och säkerhet. Detta bör ENDAST används av tillverkaren eller operatören för maskinvaruspecifik diagnostik."</string>
+    <string name="permlab_changeComponentState">"aktivera eller inaktivera programkomponenter"</string>
+    <string name="permdesc_changeComponentState">"Tillåter att ett program ändrar inställningen för om en komponent i ett annat program har aktiverats eller inte. Skadliga program kan använda detta för att inaktivera viktiga telefonfunktioner. Var försiktig med behörigheten, eftersom programkomponenter kan bli oanvändbara, inkonsekventa eller ostabila."</string>
+    <string name="permlab_setPreferredApplications">"ange önskade program"</string>
+    <string name="permdesc_setPreferredApplications">"Tillåter att ett program ändrar dina önskade program. Skadliga program kan utan varning ändra de program som körs och förfalska dina befintliga program så att de samlar privata data från dig."</string>
+    <string name="permlab_writeSettings">"ändra globala systeminställningar"</string>
+    <string name="permdesc_writeSettings">"Tillåter att ett program ändrar systemets inställningar. Skadliga program kan skada systemets konfiguration."</string>
+    <string name="permlab_writeSecureSettings">"ändra skyddade systeminställningar"</string>
+    <string name="permdesc_writeSecureSettings">"Tillåter att ett program ändrar systemets data för skyddade inställningar. Används inte av vanliga program."</string>
+    <string name="permlab_writeGservices">"ändra kartan för Googles tjänster"</string>
+    <string name="permdesc_writeGservices">"Tillåter att ett program ändrar kartan för Google-tjänster. Används inte av vanliga program."</string>
+    <string name="permlab_receiveBootCompleted">"starta automatiskt vid systemstart"</string>
+    <string name="permdesc_receiveBootCompleted">"Tillåter att ett program startar när systemet har startats om. Detta kan innebära att det tar längre tid att starta om telefonen och att telefonen blir långsammare i och med att programmet hela tiden körs i bakgrunden."</string>
+    <string name="permlab_broadcastSticky">"Skicka sticky broadcast"</string>
+    <string name="permdesc_broadcastSticky">"Tillåter att ett program skickar sticky broadcasts, som finns kvar när sändningen är slut. Skadliga program kan göra telefonen seg eller instabil genom att se till att den använder för mycket minne."</string>
+    <string name="permlab_readContacts">"läsa kontaktinformation"</string>
+    <string name="permdesc_readContacts">"Tillåter att ett program läser alla kontaktuppgifter (adresser) som har lagrats på din telefon. Skadliga program kan använda detta för att skicka dina data till andra personer."</string>
+    <string name="permlab_writeContacts">"skriva kontaktuppgifter"</string>
+    <string name="permdesc_writeContacts">"Tillåter att ett program ändrar kontaktuppgifter (adress) som har lagrats på din telefon. Skadliga program kan använda detta för att radera eller ändra kontaktuppgifter."</string>
+    <string name="permlab_writeOwnerData">"skriva ägarinformation"</string>
+    <string name="permdesc_writeOwnerData">"Tillåter att ett program ändrar information om telefonens ägare som har lagrats på din telefon. Skadliga program kan använda detta för att radera eller ändra ägaruppgifter."</string>
+    <string name="permlab_readOwnerData">"läsa information om ägare"</string>
+    <string name="permdesc_readOwnerData">"Tillåter att ett program läser information om telefonens ägare som har lagrats på telefonen. Skadliga program kan använda detta för att läsa telefonens ägaruppgifter."</string>
+    <string name="permlab_readCalendar">"läsa kalenderinformation"</string>
+    <string name="permdesc_readCalendar">"Tillåter att ett program läser alla händelser i kalendern som har lagrats på din telefon. Skadliga program kan använda detta för att skicka din kalender till andra personer."</string>
+    <string name="permlab_writeCalendar">"skriva kalenderdata"</string>
+    <string name="permdesc_writeCalendar">"Tillåter att ett program ändrar kalenderuppgifterna som har lagrats på din telefon. Skadliga program kan använda detta för att radera eller ändra kalenderuppgifter."</string>
+    <string name="permlab_accessMockLocation">"skenplatser för att testa"</string>
+    <string name="permdesc_accessMockLocation">"Skapa skenplatser för att testa. Skadliga program kan använda detta för att åsidosätta platsen och/eller statusen som returneras av riktiga platser, till exempel GPS- eller nätverksleverantörer."</string>
+    <string name="permlab_accessLocationExtraCommands">"få åtkomst till extra kommandon för platsleverantör"</string>
+    <string name="permdesc_accessLocationExtraCommands">"Få åtkomst till extra kommandon för platsleverantörer. Skadliga program kan använda detta för att störa hur GPS eller andra platskällor fungerar."</string>
+    <!-- no translation found for permlab_installLocationProvider (6578101199825193873) -->
+    <skip />
+    <!-- no translation found for permdesc_installLocationProvider (5449175116732002106) -->
+    <skip />
+    <string name="permlab_accessFineLocation">"hitta plats (GPS)"</string>
+    <string name="permdesc_accessFineLocation">"Få åtkomst till detaljerade platskällor som Global Positioning System på telefonen, om det är tillgängligt. Skadliga program kan använda detta för att identifiera var du befinner dig, vilket drar mycket batteri."</string>
+    <string name="permlab_accessCoarseLocation">"grov (nätverksbaserad) plats"</string>
+    <string name="permdesc_accessCoarseLocation">"Få åtkomst till grova platser, till exempel mobilnätverkets databas, för att bestämma ungefärlig plats för en telefon. Skadliga program kan använda detta för att avgöra ungefär var du befinner dig."</string>
+    <string name="permlab_accessSurfaceFlinger">"få åtkomst till SurfaceFlinger"</string>
+    <string name="permdesc_accessSurfaceFlinger">"Tillåter att program använder lågnivåfunktioner i SurfaceFlinger."</string>
+    <string name="permlab_readFrameBuffer">"läsa rambuffert"</string>
+    <string name="permdesc_readFrameBuffer">"Tillåter att program använder innehållet i rambufferten."</string>
+    <string name="permlab_modifyAudioSettings">"ändra dina ljudinställningar"</string>
+    <string name="permdesc_modifyAudioSettings">"Tillåter att ett program ändrar globala ljudinställningar, till exempel volym och routning."</string>
+    <string name="permlab_recordAudio">"spela in ljud"</string>
+    <string name="permdesc_recordAudio">"Tillåter att program får åtkomst till sökvägen för ljudinspelning."</string>
+    <string name="permlab_camera">"ta bilder"</string>
+    <string name="permdesc_camera">"Tillåter att program tar kort med kameran. Då kan programmet när som helst samla bilderna som visas i kameran."</string>
+    <string name="permlab_brick">"inaktivera telefonen permanent"</string>
+    <string name="permdesc_brick">"Tillåter att programmet inaktiverar hela telefonen permanent. Detta är mycket farligt."</string>
+    <string name="permlab_reboot">"tvinga omstart av telefon"</string>
+    <string name="permdesc_reboot">"Tillåter att ett program tvingar telefonen att starta om."</string>
+    <string name="permlab_mount_unmount_filesystems">"montering och demontering av filsystem"</string>
+    <string name="permdesc_mount_unmount_filesystems">"Tillåter att programmet monterar och demonterar filsystem för flyttbara lagringsmedia."</string>
+    <string name="permlab_mount_format_filesystems">"formatera extern lagring"</string>
+    <string name="permdesc_mount_format_filesystems">"Tillåter att programmet formaterar flyttbara lagringsmedia."</string>
+    <string name="permlab_vibrate">"kontrollera vibration"</string>
+    <string name="permdesc_vibrate">"Tillåter att programmet styr vibratorn."</string>
+    <string name="permlab_flashlight">"styra lampa"</string>
+    <string name="permdesc_flashlight">"Tillåter att programmet styr lampan."</string>
+    <string name="permlab_hardware_test">"testa maskinvara"</string>
+    <string name="permdesc_hardware_test">"Tillåter att ett program styr kringutrustning i syfte att testa maskinvara."</string>
+    <string name="permlab_callPhone">"ringa telefonnummer direkt"</string>
+    <string name="permdesc_callPhone">"Tillåter att programmet ringer telefonnummer utan åtgärd från dig. Skadliga program kan orsaka oväntade samtal på din telefonräkning. Observera att programmet inte tillåts att ringa nödsamtal."</string>
+    <string name="permlab_callPrivileged">"ringa telefonnummer direkt"</string>
+    <string name="permdesc_callPrivileged">"Tillåter att programmet ringer ett telefonnummer, inklusive nödnummer, utan att du behöver göra något. Skadliga program kan ringa onödiga och olagliga samtal till räddningtjänsten."</string>
+    <string name="permlab_locationUpdates">"styra meddelanden för platsuppdatering"</string>
+    <string name="permdesc_locationUpdates">"Tillåter aktivering och inaktivering av avisering om platsuppdatering i radion. Används inte av vanliga program."</string>
+    <string name="permlab_checkinProperties">"få åtkomst till incheckningsegenskaper"</string>
+    <string name="permdesc_checkinProperties">"Tillåter läs/skrivåtkomst till egenskaper som läggs upp via incheckningstjänsten. Används inte av vanliga program."</string>
+    <string name="permlab_bindGadget">"välja widgetar"</string>
+    <string name="permdesc_bindGadget">"Tillåter att programmet instruerar systemet vilka widgetar som kan användas av vilket program. Med den här behörigheten kan åtkomst till personliga data beviljas andra program. Används inte av vanliga program."</string>
+    <string name="permlab_modifyPhoneState">"ändra telefonstatus"</string>
+    <string name="permdesc_modifyPhoneState">"Tillåter att programmet styr enhetens telefonfunktioner. Ett program med denna behörighet kan växla nätverk, aktivera och inaktivera telefonens radio och så vidare utan att ens meddela dig."</string>
+    <string name="permlab_readPhoneState">"läsa telefonstatus"</string>
+    <string name="permdesc_readPhoneState">"Tillåter att programmet kommer åt enhetens telefonfunktioner. Ett program som har den här behörigheten kan identifiera telefonens telefonnummer, om ett samtal pågår, numret som samtalet är kopplat till och så vidare."</string>
+    <string name="permlab_wakeLock">"förhindra att telefonen sätts i viloläge"</string>
+    <string name="permdesc_wakeLock">"Tillåter att ett program förhindrar att telefonen går in i viloläge."</string>
+    <string name="permlab_devicePower">"sätta på eller stänga av telefonen"</string>
+    <string name="permdesc_devicePower">"Tillåter att ett program sätter på eller stänger av telefonen."</string>
+    <string name="permlab_factoryTest">"kör i fabrikstestläge"</string>
+    <string name="permdesc_factoryTest">"Köra som ett testläge för tillverkaren på låg nivå. På så sätt får du fullständig åtkomst till telefonens maskinvara. Är endast tillgänglig när telefonen körs i tillverkarens testläge."</string>
+    <string name="permlab_setWallpaper">"ange bakgrund"</string>
+    <string name="permdesc_setWallpaper">"Tillåter att programmet anger systemets bakgrund."</string>
+    <string name="permlab_setWallpaperHints">"ange tips för bakgrundsstorlek"</string>
+    <string name="permdesc_setWallpaperHints">"Tillåter att programmet ger tips om systemets bakgrundsstorlek."</string>
+    <string name="permlab_masterClear">"återställa systemets fabriksinställningar"</string>
+    <string name="permdesc_masterClear">"Tillåter att ett program helt återställer systemets fabriksinställningar. Alla data, inställningar och installerade program raderas."</string>
+    <string name="permlab_setTimeZone">"ange tidszon"</string>
+    <string name="permdesc_setTimeZone">"Tillåter att ett program ändrar telefonens tidszon."</string>
+    <string name="permlab_getAccounts">"upptäcka kända konton"</string>
+    <string name="permdesc_getAccounts">"Tillåter att ett program hämtar en lista över konton som telefonen känner till."</string>
+    <string name="permlab_accessNetworkState">"visa nätverksstatus"</string>
+    <string name="permdesc_accessNetworkState">"Tillåter att ett program ser status för alla nätverk."</string>
+    <string name="permlab_createNetworkSockets">"fullständig Internetåtkomst"</string>
+    <string name="permdesc_createNetworkSockets">"Tillåter att ett program skapar nätverksuttag."</string>
+    <string name="permlab_writeApnSettings">"skriva inställningar för åtkomstpunktens namn"</string>
+    <string name="permdesc_writeApnSettings">"Tillåter att ett program ändrar APN-inställningarna, till exempel Proxy och Port för alla APN."</string>
+    <string name="permlab_changeNetworkState">"ändra nätverksanslutning"</string>
+    <string name="permdesc_changeNetworkState">"Tillåter att ett program ändrar statusens nätverksanslutning."</string>
+    <string name="permlab_changeBackgroundDataSetting">"ändra inställningar för användning av bakgrundsdata"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Tillåter att ett program ändrar inställningen för användning av bakgrundsdata."</string>
+    <string name="permlab_accessWifiState">"visa Wi-Fi-status"</string>
+    <string name="permdesc_accessWifiState">"Tillåter att ett program visar information om statusen för Wi-Fi."</string>
+    <string name="permlab_changeWifiState">"byta Wi-Fi-status"</string>
+    <string name="permdesc_changeWifiState">"Tillåter att ett program ansluter till och kopplar från Wi-Fi-åtkomstpunkter och gör ändringar i konfigurerade Wi-Fi-nätverk."</string>
+    <!-- no translation found for permlab_changeWifiMulticastState (1368253871483254784) -->
+    <skip />
+    <!-- no translation found for permdesc_changeWifiMulticastState (8199464507656067553) -->
+    <skip />
+    <string name="permlab_bluetoothAdmin">"administrera bluetooth"</string>
+    <string name="permdesc_bluetoothAdmin">"Tillåter att ett program konfigurerar den lokala Bluetooth-telefonen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
+    <string name="permlab_bluetooth">"skapa Bluetooth-anslutningar"</string>
+    <string name="permdesc_bluetooth">"Tillåter att ett program ser den lokala Bluetooth-telefonens konfiguration, och skapar och accepterar anslutningar med parkopplade enheter."</string>
+    <string name="permlab_disableKeyguard">"inaktivera tangentlås"</string>
+    <string name="permdesc_disableKeyguard">"Tillåter att ett program inaktiverar tangentlåset och tillhörande lösenordsskydd. Ett exempel på detta är att telefonen inaktiverar tangentlåset vid inkommande samtal och sedan aktiverar det igen när samtalet är avslutat."</string>
+    <string name="permlab_readSyncSettings">"läsa synkroniseringsinställningar"</string>
+    <string name="permdesc_readSyncSettings">"Tillåter att ett program läser synkroniseringsinställningarna, till exempel om synkronisering har aktiverats för kontakter."</string>
+    <string name="permlab_writeSyncSettings">"skriva synkroniseringsinställningar"</string>
+    <string name="permdesc_writeSyncSettings">"Tillåter att ett program ändrar synkroniseringsinställningarna, till exempel om synkronisering har aktiverats för kontakter."</string>
+    <string name="permlab_readSyncStats">"läsa synkroniseringsstatistik"</string>
+    <string name="permdesc_readSyncStats">"Tillåter att ett program läser synkroniseringsstatistiken, t.ex. historiken över synkroniseringar som har inträffat."</string>
+    <string name="permlab_subscribedFeedsRead">"läsa flöden som du prenumererar på"</string>
+    <string name="permdesc_subscribedFeedsRead">"Tillåter att ett program får information om aktuella synkroniserade flöden."</string>
+    <string name="permlab_subscribedFeedsWrite">"skriva flöden som du prenumererar på"</string>
+    <string name="permdesc_subscribedFeedsWrite">"Tillåter att ett program ändrar dina aktuella synkroniserade flöden. Det kan innebära att ett skadligt program kan ändra dina synkroniserade flöden."</string>
+    <string name="permlab_readDictionary">"läsa användardefinierad ordlista"</string>
+    <string name="permdesc_readDictionary">"Tillåt att ett program läser alla privata ord, namn och fraser som användaren lagrar i sin ordlista."</string>
+    <string name="permlab_writeDictionary">"skriva till användardefinierad ordlista"</string>
+    <string name="permdesc_writeDictionary">"Tillåter att ett program skriver in nya ord i användarordlistan."</string>
+    <!-- no translation found for permlab_sdcardWrite (8079403759001777291) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardWrite (6643963204976471878) -->
+    <skip />
+  <string-array name="phoneTypes">
+    <item>"Hem"</item>
+    <item>"Mobil"</item>
+    <item>"Arbete"</item>
+    <item>"Fax, arbete"</item>
+    <item>"Hemfax"</item>
+    <item>"Personsökare"</item>
+    <item>"Övrigt"</item>
+    <item>"Anpassad"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>"Hem"</item>
+    <item>"Arbete"</item>
+    <item>"Övrigt"</item>
+    <item>"Anpassad"</item>
+  </string-array>
+    <string name="mobileEmailTypeName">"Mobil"</string>
+  <string-array name="postalAddressTypes">
+    <item>"Hem"</item>
+    <item>"Arbete"</item>
+    <item>"Övrigt"</item>
+    <item>"Anpassad"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item>"Hem"</item>
+    <item>"Arbete"</item>
+    <item>"Övrigt"</item>
+    <item>"Anpassad"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item>"Arbete"</item>
+    <item>"Övrigt"</item>
+    <item>"Anpassad"</item>
+  </string-array>
+  <string-array name="imProtocols">
+    <item>"AIM"</item>
+    <item>"Windows Live"</item>
+    <item>"Yahoo"</item>
+    <item>"Skype"</item>
+    <item>"QQ"</item>
+    <item>"Google Talk"</item>
+    <item>"ICQ"</item>
+    <item>"Jabber"</item>
+  </string-array>
+    <string name="keyguard_password_enter_pin_code">"Ange PIN-kod"</string>
+    <string name="keyguard_password_wrong_pin_code">"Fel PIN-kod!"</string>
+    <string name="keyguard_label_text">"Tryck på Meny och sedan på 0 om du vill låsa upp."</string>
+    <string name="emergency_call_dialog_number_for_display">"Nödsamtalsnummer"</string>
+    <string name="lockscreen_carrier_default">"(Ingen tjänst)"</string>
+    <string name="lockscreen_screen_locked">"Skärmen har låsts."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Tryck på Meny om du vill låsa upp eller ringa nödsamtal."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Tryck på Meny om du vill låsa upp."</string>
+    <string name="lockscreen_pattern_instructions">"Rita grafiskt lösenord för att låsa upp"</string>
+    <string name="lockscreen_emergency_call">"Nödsamtal"</string>
+    <string name="lockscreen_pattern_correct">"Korrekt!"</string>
+    <string name="lockscreen_pattern_wrong">"Försök igen"</string>
+    <string name="lockscreen_plugged_in">"Laddar (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
+    <skip />
+    <string name="lockscreen_low_battery">"Anslut din laddare."</string>
+    <string name="lockscreen_missing_sim_message_short">"Inget SIM-kort."</string>
+    <string name="lockscreen_missing_sim_message">"Inget SIM-kort i telefonen."</string>
+    <string name="lockscreen_missing_sim_instructions">"Sätt i ett SIM-kort."</string>
+    <string name="lockscreen_network_locked_message">"Nätverk låst"</string>
+    <string name="lockscreen_sim_puk_locked_message">"SIM-kortet är PUK-låst."</string>
+    <string name="lockscreen_sim_puk_locked_instructions">"Se användarhandboken eller kontakta Kundtjänst."</string>
+    <string name="lockscreen_sim_locked_message">"SIM-kortet är låst."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message">"Låser upp SIM-kort…"</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. "\n\n"Försök igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%d</xliff:g> gånger. Efter <xliff:g id="NUMBER_1">%d</xliff:g> försök till kommer du att uppmanas att låsa upp telefonen med din Google-inloggning."\n\n" Försök igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown">"Försök igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_forgot_pattern_button_text">"Glömt ditt grafiska lösenord?"</string>
+    <string name="lockscreen_glogin_too_many_attempts">"För många försök med grafiskt lösenord!"</string>
+    <string name="lockscreen_glogin_instructions">"Logga in med ditt Google-konto om du vill låsa upp"</string>
+    <string name="lockscreen_glogin_username_hint">"Användarnamn (e-post)"</string>
+    <string name="lockscreen_glogin_password_hint">"Lösenord"</string>
+    <string name="lockscreen_glogin_submit_button">"Logga in"</string>
+    <string name="lockscreen_glogin_invalid_input">"Ogiltigt användarnamn eller lösenord."</string>
+    <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
+    <skip />
+    <string name="status_bar_no_notifications_title">"Inga aviseringar"</string>
+    <string name="status_bar_ongoing_events_title">"Pågående"</string>
+    <string name="status_bar_latest_events_title">"Meddelanden"</string>
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="battery_status_charging">"Laddar…"</string>
+    <string name="battery_low_title">"Anslut laddaren"</string>
+    <string name="battery_low_subtitle">"Batteriet håller på att ta slut:"</string>
+    <string name="battery_low_percent_format">"Mindre än <xliff:g id="NUMBER">%d%%</xliff:g> återstår."</string>
+    <!-- no translation found for battery_low_why (7655196144309694753) -->
+    <skip />
+    <string name="factorytest_failed">"Det gick fel vid fabrikstestet"</string>
+    <string name="factorytest_not_system">"Åtgärden FACTORY_TEST stöds endast för paket som har installerats i /system/app."</string>
+    <string name="factorytest_no_action">"Vi hittade inget paket som erbjuder åtgärden FACTORY_TEST."</string>
+    <string name="factorytest_reboot">"Starta om"</string>
+    <string name="js_dialog_title">"På sidan på <xliff:g id="TITLE">%s</xliff:g> står det:"</string>
+    <string name="js_dialog_title_default">"JavaScript"</string>
+    <string name="js_dialog_before_unload">"Vill du lämna den här den här sidan?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tryck på OK om du vill fortsätta eller på Avbryt om du vill vara kvar på den aktuella sidan."</string>
+    <string name="save_password_label">"Bekräfta"</string>
+    <!-- no translation found for permlab_readHistoryBookmarks (1284843728203412135) -->
+    <skip />
+    <!-- no translation found for permdesc_readHistoryBookmarks (4981489815467617191) -->
+    <skip />
+    <!-- no translation found for permlab_writeHistoryBookmarks (9009434109836280374) -->
+    <skip />
+    <!-- no translation found for permdesc_writeHistoryBookmarks (945571990357114950) -->
+    <skip />
+    <string name="save_password_message">"Vill du att webbläsaren ska komma ihåg lösenordet?"</string>
+    <string name="save_password_notnow">"Inte nu"</string>
+    <string name="save_password_remember">"Kom ihåg"</string>
+    <string name="save_password_never">"Aldrig"</string>
+    <string name="open_permission_deny">"Du har inte behörighet att öppna den här sidan."</string>
+    <string name="text_copied">"Text har kopierats till urklipp."</string>
+    <string name="more_item_label">"Mer"</string>
+    <string name="prepend_shortcut_label">"Meny+"</string>
+    <string name="menu_space_shortcut_label">"utrymme"</string>
+    <string name="menu_enter_shortcut_label">"retur"</string>
+    <string name="menu_delete_shortcut_label">"ta bort"</string>
+    <string name="search_go">"Sök"</string>
+    <string name="oneMonthDurationPast">"för 1 månad sedan"</string>
+    <string name="beforeOneMonthDurationPast">"För mer än en månad sedan"</string>
+  <plurals name="num_seconds_ago">
+    <item quantity="one">"för 1 sekund sedan"</item>
+    <item quantity="other">"för <xliff:g id="COUNT">%d</xliff:g> sekunder sedan"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one">"för 1 minut sedan"</item>
+    <item quantity="other">"för <xliff:g id="COUNT">%d</xliff:g> minuter sedan"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one">"för 1 timme sedan"</item>
+    <item quantity="other">"för <xliff:g id="COUNT">%d</xliff:g> timmar sedan"</item>
+  </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one">"igår"</item>
+    <item quantity="other">"för <xliff:g id="COUNT">%d</xliff:g> dagar sedan"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one">"om 1 sekund"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one">"om 1 minut"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> minuter"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one">"om 1 timme"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> timmar"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one">"imorgon"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> dagar"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"för 1 sek sedan"</item>
+    <item quantity="other">"för <xliff:g id="COUNT">%d</xliff:g> sekunder sedan"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"för 1 minut sedan"</item>
+    <item quantity="other">"för <xliff:g id="COUNT">%d</xliff:g> minuter sedan"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"för 1 timme sedan"</item>
+    <item quantity="other">"för <xliff:g id="COUNT">%d</xliff:g> timmar sedan"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"igår"</item>
+    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> dagar sedan"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"om 1 sekund"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> sek"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"om 1 minut"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> minuter"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"om 1 timme"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> timmar"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"imorgon"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> dagar"</item>
+  </plurals>
+    <string name="preposition_for_date">"den %s"</string>
+    <string name="preposition_for_time">"vid %s"</string>
+    <string name="preposition_for_year">"%s"</string>
+    <string name="day">"dag"</string>
+    <string name="days">"dagar"</string>
+    <string name="hour">"timme"</string>
+    <string name="hours">"timmar"</string>
+    <string name="minute">"minut"</string>
+    <string name="minutes">"minuter"</string>
+    <string name="second">"sekunder"</string>
+    <string name="seconds">"sekunder"</string>
+    <string name="week">"vecka"</string>
+    <string name="weeks">"veckor"</string>
+    <string name="year">"år"</string>
+    <string name="years">"år"</string>
+    <string name="every_weekday">"Alla vardagar (mån–fre)"</string>
+    <string name="daily">"Varje dag"</string>
+    <string name="weekly">"Varje vecka på <xliff:g id="DAY">%s</xliff:g>"</string>
+    <string name="monthly">"Varje månad"</string>
+    <string name="yearly">"Varje år"</string>
+    <string name="VideoView_error_title">"Det går inte att spela upp videon"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback">"Videon kan tyvärr inte spelas upp i den här enheten."</string>
+    <string name="VideoView_error_text_unknown">"Det går tyvärr inte att spela upp den här videon."</string>
+    <string name="VideoView_error_button">"OK"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="noon">"eftermiddag"</string>
+    <string name="Noon">"Mitt på dagen"</string>
+    <string name="midnight">"midnatt"</string>
+    <string name="Midnight">"Midnatt"</string>
+    <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
+    <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
+    <string name="selectAll">"Välj alla"</string>
+    <string name="selectText">"Markera text"</string>
+    <string name="stopSelectingText">"Sluta välja text"</string>
+    <string name="cut">"Klipp ut"</string>
+    <string name="cutAll">"Klipp ut alla"</string>
+    <string name="copy">"Kopiera"</string>
+    <string name="copyAll">"Kopiera alla"</string>
+    <string name="paste">"Klistra in"</string>
+    <string name="copyUrl">"Kopiera webbadress"</string>
+    <string name="inputMethod">"Indatametod"</string>
+    <string name="addToDictionary">"Lägg till %s i ordlistan"</string>
+    <string name="editTextMenuTitle">"Redigera text"</string>
+    <string name="low_internal_storage_view_title">"Dåligt med utrymme"</string>
+    <string name="low_internal_storage_view_text">"Telefonens lagringsutrymme håller på att ta slut."</string>
+    <string name="ok">"OK"</string>
+    <string name="cancel">"Avbryt"</string>
+    <string name="yes">"OK"</string>
+    <string name="no">"Avbryt"</string>
+    <string name="dialog_alert_title">"Obs!"</string>
+    <string name="capital_on">"PÅ"</string>
+    <string name="capital_off">"AV"</string>
+    <string name="whichApplication">"Slutför åtgärd genom att använda"</string>
+    <string name="alwaysUse">"Använd som standard för denna åtgärd."</string>
+    <string name="clearDefaultHintMsg">"Rensa standardinställning i Startinställningar &gt; Program &gt; Hantera program."</string>
+    <string name="chooseActivity">"Välj en åtgärd"</string>
+    <string name="noApplications">"Inga program kan utföra den här åtgärden."</string>
+    <string name="aerr_title">"Tyvärr!"</string>
+    <string name="aerr_application">"Processen <xliff:g id="PROCESS">%2$s</xliff:g> för programmet <xliff:g id="APPLICATION">%1$s</xliff:g> stoppades oväntat. Försök igen."</string>
+    <string name="aerr_process">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> avslutades oväntat. Försök igen."</string>
+    <string name="anr_title">"Tyvärr!"</string>
+    <string name="anr_activity_application">"Aktiviteten <xliff:g id="ACTIVITY">%1$s</xliff:g> (i programmet <xliff:g id="APPLICATION">%2$s</xliff:g>) svarar inte."</string>
+    <string name="anr_activity_process">"Aktiviteten <xliff:g id="ACTIVITY">%1$s</xliff:g> (i processen <xliff:g id="PROCESS">%2$s</xliff:g>) svarar inte."</string>
+    <string name="anr_application_process">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (i processen <xliff:g id="PROCESS">%2$s</xliff:g>) svarar inte."</string>
+    <string name="anr_process">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> svarar inte."</string>
+    <string name="force_close">"Tvinga fram en stängning"</string>
+    <!-- no translation found for report (4060218260984795706) -->
+    <skip />
+    <string name="wait">"Vänta"</string>
+    <string name="debug">"Felsökning"</string>
+    <string name="sendText">"Välj en åtgärd för text"</string>
+    <string name="volume_ringtone">"Ringvolym"</string>
+    <string name="volume_music">"Mediavolym"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"Spelar upp genom Bluetooth"</string>
+    <string name="volume_call">"Samtalsvolym"</string>
+    <string name="volume_bluetooth_call">"Samtalsvolym för Bluetooth"</string>
+    <string name="volume_alarm">"Larmvolym"</string>
+    <string name="volume_notification">"Aviseringsvolym"</string>
+    <string name="volume_unknown">"Volym"</string>
+    <string name="ringtone_default">"Standardringsignal"</string>
+    <string name="ringtone_default_with_actual">"Standardringsignal (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_silent">"Tyst"</string>
+    <string name="ringtone_picker_title">"Ringsignaler"</string>
+    <string name="ringtone_unknown">"Okänd ringsignal"</string>
+  <plurals name="wifi_available">
+    <item quantity="one">"Wi-Fi-nätverk är tillgängliga"</item>
+    <item quantity="other">"Wi-Fi-nätverk är tillgängliga"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one">"Öppna Wi-Fi-nätverk är tillgängliga"</item>
+    <item quantity="other">"Öppna Wi-Fi-nätverk är tillgängliga"</item>
+  </plurals>
+    <string name="select_character">"Infoga tecken"</string>
+    <string name="sms_control_default_app_name">"Okänt program"</string>
+    <string name="sms_control_title">"Skickar SMS"</string>
+    <string name="sms_control_message">"Flera SMS-meddelanden skickas. Tryck på OK om du vill fortsätta eller på Avbryt om du vill avsluta sändningen."</string>
+    <string name="sms_control_yes">"OK"</string>
+    <string name="sms_control_no">"Avbryt"</string>
+    <string name="date_time_set">"Ställ in"</string>
+    <string name="default_permission_group">"Standardinställning"</string>
+    <string name="no_permissions">"Inga behörigheter krävs"</string>
+    <string name="perms_hide"><b>"Dölj"</b></string>
+    <string name="perms_show_all"><b>"Visa alla"</b></string>
+    <string name="googlewebcontenthelper_loading">"Läser in…"</string>
+    <string name="usb_storage_title">"USB-ansluten"</string>
+    <string name="usb_storage_message">"Du har anslutit telefonen till datorn via USB. Välj Montera om du vill kopiera filer mellan datorn och telefonens SD-kort."</string>
+    <string name="usb_storage_button_mount">"Montera"</string>
+    <string name="usb_storage_button_unmount">"Montera inte"</string>
+    <string name="usb_storage_error_message">"Det gick inte att använda ditt SD-kort för USB-lagring."</string>
+    <string name="usb_storage_notification_title">"USB-ansluten"</string>
+    <string name="usb_storage_notification_message">"Välj om du vill kopiera filer till/från din dator."</string>
+    <string name="usb_storage_stop_notification_title">"Inaktivera USB-lagring"</string>
+    <string name="usb_storage_stop_notification_message">"Välj om USB-lagring ska inaktiveras."</string>
+    <string name="usb_storage_stop_title">"Inaktivera USB-lagring"</string>
+    <string name="usb_storage_stop_message">"Innan du inaktiverar USB-lagring måste du kontrollera att du har demonterat USB-värden. Välj Inaktivera om du vill inaktivera USB-lagring."</string>
+    <string name="usb_storage_stop_button_mount">"Inaktivera"</string>
+    <string name="usb_storage_stop_button_unmount">"Avbryt"</string>
+    <string name="usb_storage_stop_error_message">"Ett problem uppstod när vi skulle inaktivera USB-lagringsplatsen. Kontrollera att USB-värden har demonterats och försök igen."</string>
+    <string name="extmedia_format_title">"Formatera SD-kort"</string>
+    <string name="extmedia_format_message">"Vill du formatera SD-kortet? Alla data på ditt kort kommer att gå förlorade."</string>
+    <string name="extmedia_format_button_format">"Format"</string>
+    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
+    <skip />
+    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
+    <skip />
+    <string name="select_input_method">"Välj indatametod"</string>
+    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><u>"kandidater"</u></string>
+    <string name="ext_media_checking_notification_title">"Förbereder SD-kort"</string>
+    <!-- no translation found for ext_media_checking_notification_message (8287319882926737053) -->
+    <skip />
+    <string name="ext_media_nofs_notification_title">"Tomt SD-kort"</string>
+    <!-- no translation found for ext_media_nofs_notification_message (3817704088027829380) -->
+    <skip />
+    <string name="ext_media_unmountable_notification_title">"Skadat SD-kort"</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (6902531775948238989) -->
+    <skip />
+    <string name="ext_media_badremoval_notification_title">"SD-kort togs oväntat bort"</string>
+    <string name="ext_media_badremoval_notification_message">"Demontera SD-kort innan borttagning för att undvika dataförlust."</string>
+    <string name="ext_media_safe_unmount_notification_title">"Säkert att ta bort SD-kort"</string>
+    <!-- no translation found for ext_media_safe_unmount_notification_message (568841278138377604) -->
+    <skip />
+    <string name="ext_media_nomedia_notification_title">"Borttaget SD-kort"</string>
+    <!-- no translation found for ext_media_nomedia_notification_message (3870120652983659641) -->
+    <skip />
+    <string name="activity_list_empty">"Inga matchande aktiviteter hittades"</string>
+    <string name="permlab_pkgUsageStats">"uppdatera statistik över användning av komponenter"</string>
+    <string name="permdesc_pkgUsageStats">"Tillåter att samlad komponentstatistik ändras. Används inte av vanliga program."</string>
+    <string name="tutorial_double_tap_to_zoom_message_short">"Peka två gånger för zoomkontroll"</string>
+    <string name="gadget_host_error_inflating">"Fel när widgeten expanderades"</string>
+    <string name="ime_action_go">"Kör"</string>
+    <string name="ime_action_search">"Sök"</string>
+    <string name="ime_action_send">"Skicka"</string>
+    <string name="ime_action_next">"Nästa"</string>
+    <string name="ime_action_done">"Färdig"</string>
+    <string name="ime_action_default">"Utför"</string>
+    <string name="dial_number_using">"Slå nummer "\n"med <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using">"Skapa kontakt"\n"med <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_compound_button_selected (5612776946036285686) -->
+    <skip />
+    <!-- no translation found for accessibility_compound_button_unselected (8864512895673924091) -->
+    <skip />
+</resources>

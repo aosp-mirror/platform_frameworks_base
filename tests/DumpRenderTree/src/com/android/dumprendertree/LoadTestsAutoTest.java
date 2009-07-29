@@ -72,6 +72,11 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         // Run tests
         runTestAndWaitUntilDone(activity, runner.mTestPath, runner.mTimeoutInMillis);
 
+        activity.clearCache();
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+        }
         dumpMemoryInfo();
 
         // Kill activity

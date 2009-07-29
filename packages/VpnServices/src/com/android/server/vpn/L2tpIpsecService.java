@@ -30,11 +30,9 @@ class L2tpIpsecService extends VpnService<L2tpIpsecProfile> {
     @Override
     protected void connect(String serverIp, String username, String password)
             throws IOException {
-        String hostIp = getHostIp();
-
         // IPSEC
         AndroidServiceProxy ipsecService = startService(IPSEC_DAEMON);
-        ipsecService.sendCommand(hostIp, serverIp, L2tpService.L2TP_PORT,
+        ipsecService.sendCommand(serverIp, L2tpService.L2TP_PORT,
                 getUserkeyPath(), getUserCertPath(), getCaCertPath());
 
         sleep(2000); // 2 seconds

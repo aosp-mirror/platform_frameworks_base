@@ -93,8 +93,8 @@ public class SearchablesTest extends AndroidTestCase {
         Context appContext = si.getActivityContext(mContext);
         assertNotNull(appContext);
         MoreAsserts.assertNotEqual(appContext, mContext);
-        assertEquals("Android Search", appContext.getString(si.getHintId()));
-        assertEquals("Google", appContext.getString(si.getLabelId()));
+        assertEquals("Quick Search Box", appContext.getString(si.getHintId()));
+        assertEquals("Quick Search Box", appContext.getString(si.getLabelId()));
     }
     
     /**

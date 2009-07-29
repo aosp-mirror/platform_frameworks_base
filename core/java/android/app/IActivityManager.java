@@ -216,7 +216,7 @@ public interface IActivityManager extends IInterface {
         String packageName, boolean waitForDebugger, boolean persistent)
         throws RemoteException;
     public void setAlwaysFinish(boolean enabled) throws RemoteException;
-    public void setActivityWatcher(IActivityWatcher watcher)
+    public void setActivityController(IActivityController watcher)
         throws RemoteException;
 
     public void enterSafeMode() throws RemoteException;
@@ -257,6 +257,16 @@ public interface IActivityManager extends IInterface {
     public void stopAppSwitches() throws RemoteException;
     public void resumeAppSwitches() throws RemoteException;
     
+    public void registerActivityWatcher(IActivityWatcher watcher)
+            throws RemoteException;
+    public void unregisterActivityWatcher(IActivityWatcher watcher)
+            throws RemoteException;
+
+    public int startActivityInPackage(int uid,
+            Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, boolean onlyIfNeeded)
+            throws RemoteException;
+        
     /*
      * Private non-Binder interfaces
      */
@@ -372,7 +382,7 @@ public interface IActivityManager extends IInterface {
     int CHECK_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+53;
     int GRANT_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+54;
     int REVOKE_URI_PERMISSION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+55;
-    int SET_ACTIVITY_WATCHER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+56;
+    int SET_ACTIVITY_CONTROLLER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+56;
     int SHOW_WAITING_FOR_DEBUGGER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+57;
     int SIGNAL_PERSISTENT_PROCESSES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+58;
     int GET_RECENT_TASKS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+59;
@@ -408,4 +418,7 @@ public interface IActivityManager extends IInterface {
     int START_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+89;
     int BACKUP_AGENT_CREATED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+90;
     int UNBIND_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+91;
+    int REGISTER_ACTIVITY_WATCHER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+92;
+    int UNREGISTER_ACTIVITY_WATCHER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+93;
+    int START_ACTIVITY_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;
 }

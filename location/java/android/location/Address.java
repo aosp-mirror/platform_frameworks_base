@@ -41,7 +41,10 @@ public class Address implements Parcelable {
     private String mAdminArea;
     private String mSubAdminArea;
     private String mLocality;
+    private String mSubLocality;
     private String mThoroughfare;
+    private String mSubThoroughfare;
+    private String mPremises;
     private String mPostalCode;
     private String mCountryCode;
     private String mCountryName;
@@ -175,6 +178,21 @@ public class Address implements Parcelable {
     }
 
     /**
+     * Returns the sub-locality of the address, or null if it is unknown.
+     * For example, this may correspond to the neighborhood of the locality.
+     */
+    public String getSubLocality() {
+        return mSubLocality;
+    }
+
+    /**
+     * Sets the sub-locality of the address to the given String, which may be null.
+     */
+    public void setSubLocality(String sublocality) {
+        mSubLocality = sublocality;
+    }
+
+    /**
      * Returns the thoroughfare name of the address, for example, "1600 Ampitheater Parkway",
      * which may be null
      */
@@ -187,6 +205,35 @@ public class Address implements Parcelable {
      */
     public void setThoroughfare(String thoroughfare) {
         this.mThoroughfare = thoroughfare;
+    }
+
+    /**
+     * Returns the sub-thoroughfare name of the address, which may be null.
+     * This may correspond to the street number of the address.
+     */
+    public String getSubThoroughfare() {
+        return mSubThoroughfare;
+    }
+
+    /**
+     * Sets the sub-thoroughfare name of the address, which may be null.
+     */
+    public void setSubThoroughfare(String subthoroughfare) {
+        this.mSubThoroughfare = subthoroughfare;
+    }
+
+    /**
+     * Returns the premises of the address, or null if it is unknown.
+     */
+    public String getPremises() {
+        return mPremises;
+    }
+
+    /**
+     * Sets the premises of the address to the given String, which may be null.
+     */
+    public void setPremises(String premises) {
+        mPremises = premises;
     }
 
     /**

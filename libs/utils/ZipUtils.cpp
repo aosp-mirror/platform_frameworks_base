@@ -210,7 +210,7 @@ bail:
             LOGV("+++ reading %ld bytes (%ld left)\n",
                 getSize, compRemaining);
 
-            int cc = fread(readBuf, getSize, 1, fp);
+            int cc = fread(readBuf, 1, getSize, fp);
             if (cc != (int) getSize) {
                 LOGD("inflate read failed (%d vs %ld)\n",
                     cc, getSize);
@@ -341,4 +341,3 @@ bail:
 
     return true;
 }
-

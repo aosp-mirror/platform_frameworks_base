@@ -117,5 +117,32 @@ public class Display
     
     private static final Object mStaticInit = new Object();
     private static boolean mInitialized = false;
+
+    /**
+     * Returns a display object which uses the metric's width/height instead.
+     * @hide
+     */
+    public static Display createMetricsBasedDisplay(int displayId, DisplayMetrics metrics) {
+        return new CompatibleDisplay(displayId, metrics);
+    }
+
+    private static class CompatibleDisplay extends Display {
+        private final DisplayMetrics mMetrics;
+
+        private CompatibleDisplay(int displayId, DisplayMetrics metrics) {
+            super(displayId);
+            mMetrics = metrics;
+        }
+
+        @Override
+        public int getWidth() {
+            return mMetrics.widthPixels;
+        }
+
+        @Override
+        public int getHeight() {
+            return mMetrics.heightPixels;
+        }
+    }
 }
 

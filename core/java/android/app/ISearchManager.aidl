@@ -34,10 +34,8 @@ interface ISearchManager {
             in ComponentName launchActivity,
             in Bundle appSearchData,
             boolean globalSearch,
-            ISearchManagerCallback searchManagerCallback);
+            ISearchManagerCallback searchManagerCallback,
+            int ident);
     void stopSearch();
     boolean isVisible();
-    Bundle onSaveInstanceState();
-    void onRestoreInstanceState(in Bundle savedInstanceState);
-    void onConfigurationChanged(in Configuration newConfig);
 }

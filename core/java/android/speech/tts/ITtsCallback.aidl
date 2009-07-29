@@ -23,5 +23,5 @@ package android.speech.tts;
  * {@hide}
  */
 oneway interface ITtsCallback {
-    void markReached(String mark);
+    void utteranceCompleted(String utteranceId);
 }

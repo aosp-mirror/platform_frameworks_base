@@ -21,6 +21,7 @@
     <string name="gigabyteShort">"GB"</string>
     <string name="terabyteShort">"TB"</string>
     <string name="petabyteShort">"PB"</string>
+    <string name="fileSizeSuffix">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled">"&lt;senza nome&gt;"</string>
     <string name="ellipsis">"…"</string>
     <string name="emptyPhoneNumber">"(Nessun numero di telefono)"</string>
@@ -48,6 +49,12 @@
     <string name="BaMmi">"Blocco chiamate"</string>
     <string name="PwdMmi">"Modifica password"</string>
     <string name="PinMmi">"Modifica PIN"</string>
+    <string name="CnipMmi">"Numero chiamante presente"</string>
+    <string name="CnirMmi">"Numero chiamante con restrizioni"</string>
+    <string name="ThreeWCMmi">"Chiamata a tre"</string>
+    <string name="RuacMmi">"Rifiuto di chiamate fastidiose non desiderate"</string>
+    <string name="CndMmi">"Recapito numero chiamante"</string>
+    <string name="DndMmi">"Non disturbare"</string>
     <string name="CLIRDefaultOnNextCallOn">"ID chiamante generalmente limitato. Prossima chiamata: limitato"</string>
     <string name="CLIRDefaultOnNextCallOff">"ID chiamante generalmente limitato. Prossima chiamata: non limitato"</string>
     <string name="CLIRDefaultOffNextCallOn">"ID chiamante generalmente non limitato. Prossima chiamata: limitato"</string>
@@ -67,11 +74,27 @@
     <string name="serviceClassDataSync">"Sinc"</string>
     <string name="serviceClassPacket">"Pacchetto"</string>
     <string name="serviceClassPAD">"PAD"</string>
+    <string name="roamingText0">"Indicatore roaming attivato"</string>
+    <string name="roamingText1">"Indicatore roaming disattivato"</string>
+    <string name="roamingText2">"Indicatore roaming lampeggiante"</string>
+    <string name="roamingText3">"Fuori dal vicinato"</string>
+    <string name="roamingText4">"Fuori dall\'edificio"</string>
+    <string name="roamingText5">"Roaming - Sistema preferito"</string>
+    <string name="roamingText6">"Roaming - Sistema disponibile"</string>
+    <string name="roamingText7">"Roaming - Partner Alliance"</string>
+    <string name="roamingText8">"Roaming - Partner Premium"</string>
+    <string name="roamingText9">"Roaming - Funzionalità servizio completo"</string>
+    <string name="roamingText10">"Roaming - Funzionalità servizio parziale"</string>
+    <string name="roamingText11">"Banner roaming attivato"</string>
+    <string name="roamingText12">"Banner roaming disattivato"</string>
+    <string name="roamingTextSearching">"Ricerca servizio"</string>
     <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: inoltro non effettuato"</string>
     <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> dopo <xliff:g id="TIME_DELAY">{2}</xliff:g> secondi"</string>
     <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: inoltro non effettuato"</string>
     <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: inoltro non effettuato"</string>
+    <string name="fcComplete">"Codice funzione completo."</string>
+    <string name="fcError">"Problema di connessione o codice funzione non valido."</string>
     <string name="httpErrorOk">"OK"</string>
     <string name="httpError">"La pagina web contiene un errore."</string>
     <string name="httpErrorLookup">"Impossibile trovare l\'URL."</string>
@@ -88,6 +111,7 @@
     <string name="httpErrorFile">"Impossibile accedere al file."</string>
     <string name="httpErrorFileNotFound">"Impossibile trovare il file richiesto."</string>
     <string name="httpErrorTooManyRequests">"Troppe richieste in fase di elaborazione. Riprova più tardi."</string>
+    <string name="certificateSaved">"Il certificato viene salvato nell\'archivio chiavi del sistema."</string>
     <string name="contentServiceSync">"Sinc"</string>
     <string name="contentServiceSyncNotificationTitle">"Sincronizzazione"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Troppe eliminazioni di <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
@@ -108,9 +132,9 @@
     <string name="global_action_toggle_silent_mode">"Modalità silenziosa"</string>
     <string name="global_action_silent_mode_on_status">"Audio non attivo"</string>
     <string name="global_action_silent_mode_off_status">"Audio attivo"</string>
-    <string name="global_actions_toggle_airplane_mode">"Modalità in volo"</string>
-    <string name="global_actions_airplane_mode_on_status">"Modalità in volo attiva"</string>
-    <string name="global_actions_airplane_mode_off_status">"Modalità in volo non attiva"</string>
+    <string name="global_actions_toggle_airplane_mode">"Modalità aereo attiva"</string>
+    <string name="global_actions_airplane_mode_on_status">"Modalità aereo attiva"</string>
+    <string name="global_actions_airplane_mode_off_status">"Modalità aereo non attiva"</string>
     <string name="safeMode">"Modalità provvisoria"</string>
     <string name="android_system_label">"Sistema Android"</string>
     <string name="permgrouplab_costMoney">"Servizi che prevedono un costo"</string>
@@ -133,6 +157,8 @@
     <string name="permgroupdesc_systemTools">"Accesso al sistema e controllo di livello inferiore."</string>
     <string name="permgrouplab_developmentTools">"Strumenti di sviluppo"</string>
     <string name="permgroupdesc_developmentTools">"Funzionalità necessarie soltanto agli sviluppatori di applicazioni."</string>
+    <string name="permgrouplab_storage">"Archiviazione"</string>
+    <string name="permgroupdesc_storage">"Accesso alla scheda SD."</string>
     <string name="permlab_statusBar">"disattivare o modificare la barra di stato"</string>
     <string name="permdesc_statusBar">"Consente all\'applicazione di disattivare la barra di stato o di aggiungere e rimuovere icone di sistema."</string>
     <string name="permlab_expandStatusBar">"espansione/compressione barra di stato"</string>
@@ -165,6 +191,10 @@
     <string name="permdesc_forceBack">"Consente a un\'applicazione di forzare la chiusura di attività in primo piano. Non dovrebbe essere mai necessario per le normali applicazioni."</string>
     <string name="permlab_dump">"recupero stato interno del sistema"</string>
     <string name="permdesc_dump">"Consente all\'applicazione di recuperare lo stato interno del sistema. Le applicazioni dannose potrebbero recuperare molte informazioni riservate e protette di cui non dovrebbero avere mai bisogno."</string>
+    <string name="permlab_shutdown">"chiusura parziale"</string>
+    <string name="permdesc_shutdown">"Mette il gestore delle attività in uno stato di chiusura. Non esegue una chiusura completa."</string>
+    <string name="permlab_stopAppSwitches">"impedire commutazione applicazione"</string>
+    <string name="permdesc_stopAppSwitches">"Impedisce all\'utente di passare a un\'altra applicazione."</string>
     <string name="permlab_runSetActivityWatcher">"monitoraggio e controllo avvio applicazioni"</string>
     <string name="permdesc_runSetActivityWatcher">"Consente a un\'applicazione di monitorare e controllare la modalità di avvio delle attività nel sistema. Le applicazioni dannose potrebbero compromettere totalmente il sistema. Questa autorizzazione è necessaria soltanto per lo sviluppo, mai per il normale utilizzo del telefono."</string>
     <string name="permlab_broadcastPackageRemoved">"invio broadcast rimossi dal pacchetto"</string>
@@ -179,6 +209,8 @@
     <string name="permdesc_setAlwaysFinish">"Consente a un\'applicazione di controllare se le attività sono sempre completate quando vengono messe in secondo piano. Mai necessario per le normali applicazioni."</string>
     <string name="permlab_batteryStats">"modifica statistiche batteria"</string>
     <string name="permdesc_batteryStats">"Consente la modifica delle statistiche sulla batteria raccolte. Da non usare per normali applicazioni."</string>
+    <string name="permlab_backup">"controllo del backup di sistema e ripristino"</string>
+    <string name="permdesc_backup">"Consente all\'applicazione di controllare i backup dei sistemi e il meccanismo di ripristino. Da non usare per normali applicazioni."</string>
     <string name="permlab_internalSystemWindow">"visualizzazione finestre non autorizzate"</string>
     <string name="permdesc_internalSystemWindow">"Consente la creazione di finestre destinate all\'uso nell\'interfaccia utente di sistema interna. Da non usare per normali applicazioni."</string>
     <string name="permlab_systemAlertWindow">"visualizzazione avvisi di sistema"</string>
@@ -245,6 +277,8 @@
     <string name="permdesc_accessMockLocation">"Creare fonti di localizzazione fittizie per test. Le applicazioni dannose possono sfruttare questa possibilità per sostituire la posizione e/o lo stato restituito da reali fonti di localizzazione come GPS o provider di rete."</string>
     <string name="permlab_accessLocationExtraCommands">"accesso a comandi aggiuntivi del provider di localizz."</string>
     <string name="permdesc_accessLocationExtraCommands">"Accedere a comandi aggiuntivi del provider di localizzazione. Le applicazioni dannose possono sfruttare questa possibilità per interferire con il funzionamento del GPS o di altre fonti di localizzazione."</string>
+    <string name="permlab_installLocationProvider">"autorizzazione a installare un provider di localizzazione"</string>
+    <string name="permdesc_installLocationProvider">"Creare fonti di localizzazione fittizie per test. Le applicazioni dannose possono sfruttare questa possibilità per sostituire la posizione e/o lo stato restituito da reali fonti di localizzazione come GPS o provider di rete oppure per monitorare e segnalare la tua posizione a una fonte esterna."</string>
     <string name="permlab_accessFineLocation">"localizzazione precisa (GPS)"</string>
     <string name="permdesc_accessFineLocation">"Consente l\'accesso a fonti di localizzazione precisa, come il sistema GPS del telefono, se disponibile. Le applicazioni dannose possono sfruttare questa possibilità per determinare la tua posizione e, nel farlo, far esaurire più in fretta la batteria."</string>
     <string name="permlab_accessCoarseLocation">"localizzazione approssimativa (basata sulla rete)"</string>
@@ -317,6 +351,8 @@
     <string name="permdesc_accessWifiState">"Consente a un\'applicazione di visualizzare le informazioni relative allo stato della connessione Wi-Fi."</string>
     <string name="permlab_changeWifiState">"modifica stato Wi-Fi"</string>
     <string name="permdesc_changeWifiState">"Consente a un\'applicazione di connettersi/disconnettersi da punti di accesso Wi-Fi e di apportare modifiche alle reti Wi-Fi configurate."</string>
+    <string name="permlab_changeWifiMulticastState">"consenti ricezione multicast Wi-Fi"</string>
+    <string name="permdesc_changeWifiMulticastState">"Consente a un\'applicazione di ricevere pacchetti non direttamente indirizzati al tuo dispositivo. Può essere utile durante la ricerca di servizi offerti nelle vicinanze. Consuma di più rispetto alla modalità non multicast."</string>
     <string name="permlab_bluetoothAdmin">"gestione Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin">"Consente a un\'applicazione di configurare il telefono Bluetooth locale e di rilevare e abbinare dispositivi remoti."</string>
     <string name="permlab_bluetooth">"creazione connessioni Bluetooth"</string>
@@ -337,6 +373,8 @@
     <string name="permdesc_readDictionary">"Consente a un\'applicazione di leggere parole, nomi e frasi private che l\'utente potrebbe aver memorizzato nel dizionario utente."</string>
     <string name="permlab_writeDictionary">"scrittura nel dizionario definito dall\'utente"</string>
     <string name="permdesc_writeDictionary">"Consente a un\'applicazione di scrivere nuove parole nel dizionario utente."</string>
+    <string name="permlab_sdcardWrite">"modificare/eliminare i contenuti della scheda SD"</string>
+    <string name="permdesc_sdcardWrite">"Consente a un\'applicazione di scrivere sulla scheda SD."</string>
   <string-array name="phoneTypes">
     <item>"Casa"</item>
     <item>"Cellulare"</item>
@@ -353,6 +391,7 @@
     <item>"Altro"</item>
     <item>"Personalizzato"</item>
   </string-array>
+    <string name="mobileEmailTypeName">"Cellulare"</string>
   <string-array name="postalAddressTypes">
     <item>"Casa"</item>
     <item>"Ufficio"</item>
@@ -393,6 +432,8 @@
     <string name="lockscreen_pattern_correct">"Corretta."</string>
     <string name="lockscreen_pattern_wrong">"Riprova"</string>
     <string name="lockscreen_plugged_in">"In carica (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
+    <skip />
     <string name="lockscreen_low_battery">"Collegare il caricabatterie."</string>
     <string name="lockscreen_missing_sim_message_short">"Nessuna SIM presente."</string>
     <string name="lockscreen_missing_sim_message">"Nessuna SIM presente nel telefono."</string>
@@ -414,7 +455,8 @@
     <string name="lockscreen_glogin_invalid_input">"Password o nome utente non valido."</string>
     <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button">"Cancella notifiche"</string>
+    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
+    <skip />
     <string name="status_bar_no_notifications_title">"Nessuna notifica"</string>
     <string name="status_bar_ongoing_events_title">"In corso"</string>
     <string name="status_bar_latest_events_title">"Notifiche"</string>
@@ -423,6 +465,7 @@
     <string name="battery_low_title">"Collegare il caricabatterie"</string>
     <string name="battery_low_subtitle">"Batteria quasi scarica:"</string>
     <string name="battery_low_percent_format">"energia residua inferiore a <xliff:g id="NUMBER">%d%%</xliff:g>."</string>
+    <string name="battery_low_why">"Perché?"</string>
     <string name="factorytest_failed">"Test di fabbrica non riuscito"</string>
     <string name="factorytest_not_system">"L\'azione FACTORY_TEST è supportata soltanto per i pacchetti installati in /system/app."</string>
     <string name="factorytest_no_action">"Nessun pacchetto trovato che fornisca l\'azione FACTORY_TEST."</string>
@@ -431,6 +474,10 @@
     <string name="js_dialog_title_default">"JavaScript"</string>
     <string name="js_dialog_before_unload">"Uscire da questa pagina?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Seleziona OK per continuare o Annulla per rimanere nella pagina corrente."</string>
     <string name="save_password_label">"Conferma"</string>
+    <string name="permlab_readHistoryBookmarks">"lettura cronologia e segnalibri del browser"</string>
+    <string name="permdesc_readHistoryBookmarks">"Consente all\'applicazione di leggere tutti gli URL visitati e tutti i segnalibri del browser."</string>
+    <string name="permlab_writeHistoryBookmarks">"creazione cronologia e segnalibri del browser"</string>
+    <string name="permdesc_writeHistoryBookmarks">"Consente a un\'applicazione di modificare la cronologia o i segnalibri del browser memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per cancellare o modificare i dati del browser."</string>
     <string name="save_password_message">"Memorizzare la password nel browser?"</string>
     <string name="save_password_notnow">"Non ora"</string>
     <string name="save_password_remember">"Memorizza"</string>
@@ -538,10 +585,6 @@
     <string name="Noon">"Mezzogiorno"</string>
     <string name="midnight">"mezzanotte"</string>
     <string name="Midnight">"Mezzanotte"</string>
-    <!-- no translation found for month (7026169712234774086) -->
-    <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
-    <skip />
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"Seleziona tutto"</string>
@@ -579,9 +622,10 @@
     <string name="anr_application_process">"L\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> (nel processo <xliff:g id="PROCESS">%2$s</xliff:g>) non risponde."</string>
     <string name="anr_process">"Il processo <xliff:g id="PROCESS">%1$s</xliff:g> non risponde."</string>
     <string name="force_close">"Termina"</string>
+    <string name="report">"Segnala"</string>
     <string name="wait">"Attendi"</string>
     <string name="debug">"Debug"</string>
-    <string name="sendText">"Seleziona un\'azione per il testo"</string>
+    <string name="sendText">"Selezione un\'opzione di invio"</string>
     <string name="volume_ringtone">"Volume suoneria"</string>
     <string name="volume_music">"Volume app. multimediali"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Riproduzione tramite Bluetooth"</string>
@@ -632,22 +676,26 @@
     <string name="extmedia_format_title">"Formatta scheda SD"</string>
     <string name="extmedia_format_message">"Formattare la scheda SD? Tutti i dati sulla scheda verranno persi."</string>
     <string name="extmedia_format_button_format">"Formatta"</string>
+    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
+    <skip />
+    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
+    <skip />
     <string name="select_input_method">"Seleziona metodo di inserimento"</string>
     <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style"><u>"candidati"</u></string>
     <string name="ext_media_checking_notification_title">"Preparazione scheda SD"</string>
-    <string name="ext_media_checking_notification_message">"Ricerca errori"</string>
+    <string name="ext_media_checking_notification_message">"Ricerca errori."</string>
     <string name="ext_media_nofs_notification_title">"Scheda SD vuota"</string>
-    <string name="ext_media_nofs_notification_message">"La scheda SD è vuota o utilizza un file system non supportato."</string>
+    <string name="ext_media_nofs_notification_message">"Scheda SD vuota o con filesystem non supportato."</string>
     <string name="ext_media_unmountable_notification_title">"Scheda SD danneggiata"</string>
-    <string name="ext_media_unmountable_notification_message">"La scheda SD è danneggiata. Potrebbe essere necessario riformattarla."</string>
+    <string name="ext_media_unmountable_notification_message">"Scheda SD danneggiata. Potrebbe essere necessario riformattarla."</string>
     <string name="ext_media_badremoval_notification_title">"Rimozione imprevista della scheda SD"</string>
     <string name="ext_media_badremoval_notification_message">"Smonta scheda SD prima della rimozione per evitare la perdita di dati."</string>
     <string name="ext_media_safe_unmount_notification_title">"È possibile rimuovere la scheda SD"</string>
-    <string name="ext_media_safe_unmount_notification_message">"È ora possibile rimuovere la scheda SD in modo sicuro."</string>
+    <string name="ext_media_safe_unmount_notification_message">"Puoi rimuovere la scheda SD in tutta sicurezza."</string>
     <string name="ext_media_nomedia_notification_title">"Scheda SD rimossa"</string>
-    <string name="ext_media_nomedia_notification_message">"Inserisci una nuova scheda SD per aumentare la memoria del dispositivo."</string>
+    <string name="ext_media_nomedia_notification_message">"Scheda SD rimossa. Inseriscine un\'altra."</string>
     <string name="activity_list_empty">"Nessuna attività corrispondente trovata"</string>
     <string name="permlab_pkgUsageStats">"aggiornare le statistiche di utilizzo dei componenti"</string>
     <string name="permdesc_pkgUsageStats">"Consente la modifica delle statistiche di utilizzo dei componenti raccolte. Da non usare per normali applicazioni."</string>
@@ -661,4 +709,6 @@
     <string name="ime_action_default">"Esegui"</string>
     <string name="dial_number_using">"Componi numero"\n"utilizzando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using">"Crea contatto"\n"utilizzando <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="accessibility_compound_button_selected">"selezionato"</string>
+    <string name="accessibility_compound_button_unselected">"non selezionato"</string>
 </resources>

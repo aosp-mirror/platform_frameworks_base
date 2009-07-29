@@ -286,8 +286,8 @@ public final class Bridge implements ILayoutBridge {
         }
 
         return computeLayout(layoutDescription, projectKey,
-                screenWidth, screenHeight, DisplayMetrics.DEFAULT_DENSITY,
-                DisplayMetrics.DEFAULT_DENSITY, DisplayMetrics.DEFAULT_DENSITY,
+                screenWidth, screenHeight, DisplayMetrics.DENSITY_DEFAULT,
+                DisplayMetrics.DENSITY_DEFAULT, DisplayMetrics.DENSITY_DEFAULT,
                 themeName, isProjectTheme,
                 projectResources, frameworkResources, customViewLoader, logger);
     }
@@ -304,8 +304,8 @@ public final class Bridge implements ILayoutBridge {
             Map<String, Map<String, IResourceValue>> frameworkResources,
             IProjectCallback customViewLoader, ILayoutLog logger) {
         return computeLayout(layoutDescription, projectKey,
-                screenWidth, screenHeight, DisplayMetrics.DEFAULT_DENSITY,
-                DisplayMetrics.DEFAULT_DENSITY, DisplayMetrics.DEFAULT_DENSITY,
+                screenWidth, screenHeight, DisplayMetrics.DENSITY_DEFAULT,
+                DisplayMetrics.DENSITY_DEFAULT, DisplayMetrics.DENSITY_DEFAULT,
                 themeName, isProjectTheme,
                 projectResources, frameworkResources, customViewLoader, logger);
     }
@@ -340,7 +340,7 @@ public final class Bridge implements ILayoutBridge {
         try {
             // setup the display Metrics.
             DisplayMetrics metrics = new DisplayMetrics();
-            metrics.density = density / (float) DisplayMetrics.DEFAULT_DENSITY;
+            metrics.density = density / (float) DisplayMetrics.DENSITY_DEFAULT;
             metrics.scaledDensity = metrics.density;
             metrics.widthPixels = screenWidth;
             metrics.heightPixels = screenHeight;

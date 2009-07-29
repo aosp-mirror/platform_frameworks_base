@@ -33,6 +33,8 @@
 #define DEFAULT_TTS_FORMAT      AudioSystem::PCM_16_BIT
 #define DEFAULT_TTS_NB_CHANNELS 1
 #define DEFAULT_TTS_BUFFERSIZE  1024
+// TODO use the TTS stream type when available
+#define DEFAULT_TTS_STREAM_TYPE AudioSystem::MUSIC
 
 #define USAGEMODE_PLAY_IMMEDIATELY 0
 #define USAGEMODE_WRITE_TO_FILE    1
@@ -46,22 +48,28 @@ struct fields_t {
     jmethodID   synthProxyMethodPost;
 };
 
+// structure to hold the data that is used each time the TTS engine has synthesized more data
 struct afterSynthData_t {
     jint jniStorage;
     int  usageMode;
     FILE* outputFile;
+    AudioSystem::stream_type streamType;
 };
 
 // ----------------------------------------------------------------------------
 static fields_t javaTTSFields;
 
+// TODO move to synth member once we have multiple simultaneous engines running
+static Mutex engineMutex;
+
 // ----------------------------------------------------------------------------
 class SynthProxyJniStorage {
     public :
-        //jclass                    tts_class;
         jobject                   tts_ref;
         TtsEngine*                mNativeSynthInterface;
+        void*                     mEngineLibHandle;
         AudioTrack*               mAudioOut;
+        AudioSystem::stream_type  mStreamType;
         uint32_t                  mSampleRate;
         AudioSystem::audio_format mAudFormat;
         int                       mNbChannels;
@@ -69,22 +77,30 @@ class SynthProxyJniStorage {
         size_t                    mBufferSize;
 
         SynthProxyJniStorage() {
-            //tts_class = NULL;
             tts_ref = NULL;
             mNativeSynthInterface = NULL;
+            mEngineLibHandle = NULL;
             mAudioOut = NULL;
+            mStreamType = DEFAULT_TTS_STREAM_TYPE;
             mSampleRate = DEFAULT_TTS_RATE;
             mAudFormat  = DEFAULT_TTS_FORMAT;
             mNbChannels = DEFAULT_TTS_NB_CHANNELS;
             mBufferSize = DEFAULT_TTS_BUFFERSIZE;
             mBuffer = new int8_t[mBufferSize];
+            memset(mBuffer, 0, mBufferSize);
         }
 
         ~SynthProxyJniStorage() {
+            //LOGV("entering ~SynthProxyJniStorage()");
             killAudio();
             if (mNativeSynthInterface) {
                 mNativeSynthInterface->shutdown();
                 mNativeSynthInterface = NULL;
+            }
+            if (mEngineLibHandle) {
+                //LOGE("~SynthProxyJniStorage(): before close library");
+                int res = dlclose(mEngineLibHandle);
+                LOGE_IF( res != 0, "~SynthProxyJniStorage(): dlclose returned %d", res);
             }
             delete mBuffer;
         }
@@ -97,66 +113,66 @@ class SynthProxyJniStorage {
             }
         }
 
-        void createAudioOut(uint32_t rate, AudioSystem::audio_format format,
-                int channel) {
+        void createAudioOut(AudioSystem::stream_type streamType, uint32_t rate,
+                AudioSystem::audio_format format, int channel) {
             mSampleRate = rate;
             mAudFormat  = format;
             mNbChannels = channel;
 
-            // TODO use the TTS stream type
-            int streamType = AudioSystem::MUSIC;
+            mStreamType = streamType;
 
             // retrieve system properties to ensure successful creation of the
             // AudioTrack object for playback
             int afSampleRate;
-            if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
+            if (AudioSystem::getOutputSamplingRate(&afSampleRate, mStreamType) != NO_ERROR) {
                 afSampleRate = 44100;
             }
             int afFrameCount;
-            if (AudioSystem::getOutputFrameCount(&afFrameCount, streamType) != NO_ERROR) {
+            if (AudioSystem::getOutputFrameCount(&afFrameCount, mStreamType) != NO_ERROR) {
                 afFrameCount = 2048;
             }
             uint32_t afLatency;
-            if (AudioSystem::getOutputLatency(&afLatency, streamType) != NO_ERROR) {
+            if (AudioSystem::getOutputLatency(&afLatency, mStreamType) != NO_ERROR) {
                 afLatency = 500;
             }
             uint32_t minBufCount = afLatency / ((1000 * afFrameCount)/afSampleRate);
             if (minBufCount < 2) minBufCount = 2;
             int minFrameCount = (afFrameCount * rate * minBufCount)/afSampleRate;
 
-            mAudioOut = new AudioTrack(streamType, rate, format, channel,
+            mAudioOut = new AudioTrack(mStreamType, rate, format, channel,
                     minFrameCount > 4096 ? minFrameCount : 4096,
                     0, 0, 0, 0); // not using an AudioTrack callback
 
             if (mAudioOut->initCheck() != NO_ERROR) {
-              LOGI("AudioTrack error");
+              LOGE("createAudioOut(): AudioTrack error");
               delete mAudioOut;
               mAudioOut = NULL;
             } else {
               //LOGI("AudioTrack OK");
+              mAudioOut->setVolume(2.0f, 2.0f);
               mAudioOut->start();
-              LOGI("AudioTrack started");
+              LOGV("AudioTrack started");
             }
         }
 };
 
 
 // ----------------------------------------------------------------------------
-void prepAudioTrack(SynthProxyJniStorage* pJniData,
-        uint32_t rate, AudioSystem::audio_format format, int channel)
-{
+void prepAudioTrack(SynthProxyJniStorage* pJniData, AudioSystem::stream_type streamType,
+        uint32_t rate, AudioSystem::audio_format format, int channel) {
     // Don't bother creating a new audiotrack object if the current
-    // object is already set.
+    // object is already initialized with the same audio parameters.
     if ( pJniData->mAudioOut &&
          (rate == pJniData->mSampleRate) &&
          (format == pJniData->mAudFormat) &&
-         (channel == pJniData->mNbChannels) ){
+         (channel == pJniData->mNbChannels) &&
+         (streamType == pJniData->mStreamType) ){
         return;
     }
     if (pJniData->mAudioOut){
         pJniData->killAudio();
     }
-    pJniData->createAudioOut(rate, format, channel);
+    pJniData->createAudioOut(streamType, rate, format, channel);
 }
 
 
@@ -186,9 +202,10 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         }
 
         if (bufferSize > 0) {
-            prepAudioTrack(pJniData, rate, format, channel);
+            prepAudioTrack(pJniData, pForAfter->streamType, rate, format, channel);
             if (pJniData->mAudioOut) {
                 pJniData->mAudioOut->write(wav, bufferSize);
+                memset(wav, 0, bufferSize);
                 //LOGV("AudioTrack wrote: %d bytes", bufferSize);
             } else {
                 LOGE("Can't play, null audiotrack");
@@ -203,6 +220,7 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         }
         if (bufferSize > 0){
             fwrite(wav, 1, bufferSize, pForAfter->outputFile);
+            memset(wav, 0, bufferSize);
         }
     }
     // Future update:
@@ -241,23 +259,25 @@ android_tts_SynthProxy_native_setup(JNIEnv *env, jobject thiz,
     SynthProxyJniStorage* pJniStorage = new SynthProxyJniStorage();
 
     prepAudioTrack(pJniStorage,
-            DEFAULT_TTS_RATE, DEFAULT_TTS_FORMAT, DEFAULT_TTS_NB_CHANNELS);
+            DEFAULT_TTS_STREAM_TYPE, DEFAULT_TTS_RATE, DEFAULT_TTS_FORMAT, DEFAULT_TTS_NB_CHANNELS);
 
     const char *nativeSoLibNativeString =
             env->GetStringUTFChars(nativeSoLib, 0);
 
     void *engine_lib_handle = dlopen(nativeSoLibNativeString,
             RTLD_NOW | RTLD_LOCAL);
-    if (engine_lib_handle==NULL) {
-       LOGI("engine_lib_handle==NULL");
+    if (engine_lib_handle == NULL) {
+       LOGE("android_tts_SynthProxy_native_setup(): engine_lib_handle == NULL");
        // TODO report error so the TTS can't be used
     } else {
         TtsEngine *(*get_TtsEngine)() =
             reinterpret_cast<TtsEngine* (*)()>(dlsym(engine_lib_handle, "getTtsEngine"));
 
         pJniStorage->mNativeSynthInterface = (*get_TtsEngine)();
+        pJniStorage->mEngineLibHandle = engine_lib_handle;
 
         if (pJniStorage->mNativeSynthInterface) {
+            Mutex::Autolock l(engineMutex);
             pJniStorage->mNativeSynthInterface->init(ttsSynthDoneCB);
         }
     }
@@ -276,10 +296,29 @@ android_tts_SynthProxy_native_setup(JNIEnv *env, jobject thiz,
 static void
 android_tts_SynthProxy_native_finalize(JNIEnv *env, jobject thiz, jint jniData)
 {
-    if (jniData) {
-        SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
-        delete pSynthData;
+    //LOGV("entering android_tts_SynthProxy_finalize()");
+    if (jniData == 0) {
+        //LOGE("android_tts_SynthProxy_native_finalize(): invalid JNI data");
+        return;
     }
+
+    Mutex::Autolock l(engineMutex);
+
+    SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
+    env->DeleteGlobalRef(pSynthData->tts_ref);
+    delete pSynthData;
+
+    env->SetIntField(thiz, javaTTSFields.synthProxyFieldJniData, 0);
+}
+
+
+static void
+android_tts_SynthProxy_shutdown(JNIEnv *env, jobject thiz, jint jniData)
+{
+    //LOGV("entering android_tts_SynthProxy_shutdown()");
+
+    // do everything a call to finalize would
+    android_tts_SynthProxy_native_finalize(env, thiz, jniData);
 }
 
 
@@ -320,6 +359,8 @@ android_tts_SynthProxy_setLanguage(JNIEnv *env, jobject thiz, jint jniData,
         LOGE("android_tts_SynthProxy_setLanguage(): invalid JNI data");
         return result;
     }
+
+    Mutex::Autolock l(engineMutex);
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     const char *langNativeString = env->GetStringUTFChars(language, 0);
@@ -380,6 +421,8 @@ android_tts_SynthProxy_setSpeechRate(JNIEnv *env, jobject thiz, jint jniData,
     char buffer [bufSize];
     sprintf(buffer, "%d", speechRate);
 
+    Mutex::Autolock l(engineMutex);
+
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
     LOGI("setting speech rate to %d", speechRate);
 
@@ -401,6 +444,8 @@ android_tts_SynthProxy_setPitch(JNIEnv *env, jobject thiz, jint jniData,
         LOGE("android_tts_SynthProxy_setPitch(): invalid JNI data");
         return result;
     }
+
+    Mutex::Autolock l(engineMutex);
 
     int bufSize = 10;
     char buffer [bufSize];
@@ -433,6 +478,8 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
         LOGE("android_tts_SynthProxy_synthesizeToFile(): invalid engine handle");
         return result;
     }
+
+    Mutex::Autolock l(engineMutex);
 
     // Retrieve audio parameters before writing the file header
     AudioSystem::audio_format encoding = DEFAULT_TTS_FORMAT;
@@ -468,6 +515,7 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
     unsigned int unique_identifier;
 
+    memset(pSynthData->mBuffer, 0, pSynthData->mBufferSize);
     result = pSynthData->mNativeSynthInterface->synthesizeText(textNativeString,
             pSynthData->mBuffer, pSynthData->mBufferSize, (void *)pForAfter);
 
@@ -526,7 +574,7 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
 
 static int
 android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
-        jstring textJavaString)
+        jstring textJavaString, jint javaStreamType)
 {
     int result = TTS_FAILURE;
 
@@ -535,19 +583,22 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
         return result;
     }
 
+    Mutex::Autolock l(engineMutex);
+
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
 
     if (pSynthData->mAudioOut) {
-        pSynthData->mAudioOut->stop();
         pSynthData->mAudioOut->start();
     }
 
     afterSynthData_t* pForAfter = new (afterSynthData_t);
     pForAfter->jniStorage = jniData;
     pForAfter->usageMode  = USAGEMODE_PLAY_IMMEDIATELY;
+    pForAfter->streamType = (AudioSystem::stream_type) javaStreamType;
 
     if (pSynthData->mNativeSynthInterface) {
         const char *textNativeString = env->GetStringUTFChars(textJavaString, 0);
+        memset(pSynthData->mBuffer, 0, pSynthData->mBufferSize);
         result = pSynthData->mNativeSynthInterface->synthesizeText(textNativeString,
                 pSynthData->mBuffer, pSynthData->mBufferSize, (void *)pForAfter);
         env->ReleaseStringUTFChars(textJavaString, textNativeString);
@@ -569,48 +620,14 @@ android_tts_SynthProxy_stop(JNIEnv *env, jobject thiz, jint jniData)
 
     SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
 
-    if (pSynthData->mNativeSynthInterface) {
-        result = pSynthData->mNativeSynthInterface->stop();
-    }
     if (pSynthData->mAudioOut) {
         pSynthData->mAudioOut->stop();
     }
+    if (pSynthData->mNativeSynthInterface) {
+        result = pSynthData->mNativeSynthInterface->stop();
+    }
 
     return result;
-}
-
-
-static void
-android_tts_SynthProxy_shutdown(JNIEnv *env, jobject thiz, jint jniData)
-{
-    if (jniData == 0) {
-        LOGE("android_tts_SynthProxy_shutdown(): invalid JNI data");
-        return;
-    }
-
-    SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
-    if (pSynthData->mNativeSynthInterface) {
-        pSynthData->mNativeSynthInterface->shutdown();
-        pSynthData->mNativeSynthInterface = NULL;
-    }
-}
-
-
-// TODO add buffer format
-static void
-android_tts_SynthProxy_playAudioBuffer(JNIEnv *env, jobject thiz, jint jniData,
-        int bufferPointer, int bufferSize)
-{
-LOGI("android_tts_SynthProxy_playAudioBuffer");
-    if (jniData == 0) {
-        LOGE("android_tts_SynthProxy_playAudioBuffer(): invalid JNI data");
-        return;
-    }
-
-    SynthProxyJniStorage* pSynthData = (SynthProxyJniStorage*)jniData;
-    short* wav = (short*) bufferPointer;
-    pSynthData->mAudioOut->write(wav, bufferSize);
-    //LOGI("AudioTrack wrote: %d bytes", bufferSize);
 }
 
 
@@ -672,7 +689,7 @@ static JNINativeMethod gMethods[] = {
         (void*)android_tts_SynthProxy_stop
     },
     {   "native_speak",
-        "(ILjava/lang/String;)I",
+        "(ILjava/lang/String;I)I",
         (void*)android_tts_SynthProxy_speak
     },
     {   "native_synthesizeToFile",
@@ -698,10 +715,6 @@ static JNINativeMethod gMethods[] = {
     {   "native_setPitch",
         "(II)I",
         (void*)android_tts_SynthProxy_setPitch
-    },
-    {   "native_playAudioBuffer",
-        "(III)V",
-        (void*)android_tts_SynthProxy_playAudioBuffer
     },
     {   "native_getLanguage",
         "(I)[Ljava/lang/String;",

@@ -21,6 +21,8 @@
     <string name="gigabyteShort">"GB"</string>
     <string name="terabyteShort">"TB"</string>
     <string name="petabyteShort">"PB"</string>
+    <!-- no translation found for fileSizeSuffix (7670819340156489359) -->
+    <skip />
     <string name="untitled">"&lt;uten navn&gt;"</string>
     <string name="ellipsis">"…"</string>
     <string name="emptyPhoneNumber">"(Mangler telefonnummer)"</string>
@@ -48,22 +50,29 @@
     <string name="BaMmi">"Samtaleblokkering"</string>
     <string name="PwdMmi">"Passordbytte"</string>
     <string name="PinMmi">"PIN-kode-bytte"</string>
+    <!-- no translation found for CnipMmi (3110534680557857162) -->
+    <skip />
+    <!-- no translation found for CnirMmi (3062102121430548731) -->
+    <skip />
+    <!-- no translation found for ThreeWCMmi (9051047170321190368) -->
+    <skip />
+    <!-- no translation found for RuacMmi (7827887459138308886) -->
+    <skip />
+    <!-- no translation found for CndMmi (3116446237081575808) -->
+    <skip />
+    <!-- no translation found for DndMmi (1265478932418334331) -->
+    <skip />
     <string name="CLIRDefaultOnNextCallOn">"Nummervisning er begrenset som standard. Neste anrop: Begrenset"</string>
     <string name="CLIRDefaultOnNextCallOff">"Nummervisning er begrenset som standard. Neste anrop: Ikke begrenset"</string>
     <string name="CLIRDefaultOffNextCallOn">"Nummervisning er ikke begrenset som standard. Neste anrop: Begrenset"</string>
     <string name="CLIRDefaultOffNextCallOff">"Nummervisning er ikke begrenset som standard. Neste anrop: Ikke begrenset"</string>
     <string name="serviceNotProvisioned">"SIM-kortet er ikke tilrettelagt for tjenesten."</string>
     <string name="CLIRPermanent">"Kunne ikke endre innstilling for nummervisning."</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"Endring i begrenset tilgang"</string>
+    <string name="RestrictedOnData">"Datatjenesten er blokkert."</string>
+    <string name="RestrictedOnEmergency">"Nødtjenesten er blokkert."</string>
+    <string name="RestrictedOnNormal">"Tale- og SMS-tjenesten er blokkert."</string>
+    <string name="RestrictedOnAll">"Alle tale- og SMS-tjenester er blokkert."</string>
     <string name="serviceClassVoice">"Tale"</string>
     <string name="serviceClassData">"Data"</string>
     <string name="serviceClassFAX">"Fax"</string>
@@ -72,11 +81,43 @@
     <string name="serviceClassDataSync">"Synkron"</string>
     <string name="serviceClassPacket">"Pakkedata"</string>
     <string name="serviceClassPAD">"PAD"</string>
+    <!-- no translation found for roamingText0 (7170335472198694945) -->
+    <skip />
+    <!-- no translation found for roamingText1 (5314861519752538922) -->
+    <skip />
+    <!-- no translation found for roamingText2 (8969929049081268115) -->
+    <skip />
+    <!-- no translation found for roamingText3 (5148255027043943317) -->
+    <skip />
+    <!-- no translation found for roamingText4 (8808456682550796530) -->
+    <skip />
+    <!-- no translation found for roamingText5 (7604063252850354350) -->
+    <skip />
+    <!-- no translation found for roamingText6 (2059440825782871513) -->
+    <skip />
+    <!-- no translation found for roamingText7 (7112078724097233605) -->
+    <skip />
+    <!-- no translation found for roamingText8 (5989569778604089291) -->
+    <skip />
+    <!-- no translation found for roamingText9 (7969296811355152491) -->
+    <skip />
+    <!-- no translation found for roamingText10 (3992906999815316417) -->
+    <skip />
+    <!-- no translation found for roamingText11 (4154476854426920970) -->
+    <skip />
+    <!-- no translation found for roamingText12 (1189071119992726320) -->
+    <skip />
+    <!-- no translation found for roamingTextSearching (8360141885972279963) -->
+    <skip />
     <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderekoblet"</string>
     <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> etter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
     <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderekoblet"</string>
     <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke viderekoblet"</string>
+    <!-- no translation found for fcComplete (3118848230966886575) -->
+    <skip />
+    <!-- no translation found for fcError (3327560126588500777) -->
+    <skip />
     <string name="httpErrorOk">"OK"</string>
     <string name="httpError">"Nettsiden inneholder en feil."</string>
     <string name="httpErrorLookup">"Kunne ikke finne adressen."</string>
@@ -93,6 +134,8 @@
     <string name="httpErrorFile">"Kunne ikke åpne filen."</string>
     <string name="httpErrorFileNotFound">"Fant ikke den forespurte filen."</string>
     <string name="httpErrorTooManyRequests">"For mange forespørsler blir behandlet. Prøv igjen senere."</string>
+    <!-- no translation found for certificateSaved (2832076323378077191) -->
+    <skip />
     <string name="contentServiceSync">"Synkronisering"</string>
     <string name="contentServiceSyncNotificationTitle">"Synkronisering"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"For mange slettinger av <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
@@ -138,6 +181,10 @@
     <string name="permgroupdesc_systemTools">"Lavnivå tilgang og kontroll over systemet."</string>
     <string name="permgrouplab_developmentTools">"Utviklingsverktøy"</string>
     <string name="permgroupdesc_developmentTools">"Funksjonalitet kun utviklere trenger."</string>
+    <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (9203302214915355774) -->
+    <skip />
     <string name="permlab_statusBar">"deaktivere eller endre statusfeltet"</string>
     <string name="permdesc_statusBar">"Lar applikasjonen deaktivere statusfeltet, samt legge til og fjerne systemikoner."</string>
     <string name="permlab_expandStatusBar">"utvide/slå sammen statusfeltet"</string>
@@ -170,6 +217,14 @@
     <string name="permdesc_forceBack">"Lar applikasjonen tvinge enhver aktivitet som er i forgrunnen til å lukkes og gå tilbake. Vanlige applikasjoner bør aldri trenge dette."</string>
     <string name="permlab_dump">"hente intern systemtilstand"</string>
     <string name="permdesc_dump">"Lar applikasjonen hente intern tilstand fra systemet. Onsdinnede applikasjoner kan hente et bredt spekter av privat og sikker informasjon som de vanligvis aldri burde ha behov for."</string>
+    <!-- no translation found for permlab_shutdown (7185747824038909016) -->
+    <skip />
+    <!-- no translation found for permdesc_shutdown (7046500838746291775) -->
+    <skip />
+    <!-- no translation found for permlab_stopAppSwitches (4138608610717425573) -->
+    <skip />
+    <!-- no translation found for permdesc_stopAppSwitches (3857886086919033794) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher">"overvåke og kontrollere all applikasjonsoppstart"</string>
     <string name="permdesc_runSetActivityWatcher">"Lar applikasjonen overvåke og kontrollere hvordan systemet starter applikasjoner. Ondsinnede applikasjoner kan ta over systemet helt. Denne rettigheten behøves bare for utvikling, aldri for vanlig bruk av telefonen."</string>
     <string name="permlab_broadcastPackageRemoved">"kringkaste melding om fjernet pakke"</string>
@@ -184,6 +239,10 @@
     <string name="permdesc_setAlwaysFinish">"Lar applikasjonen kontrollere om aktiviteter alltid avsluttes når de sendes til bakgrunnen. Behøves aldri for vanlige applikasjoner."</string>
     <string name="permlab_batteryStats">"endre batteristatistikk"</string>
     <string name="permdesc_batteryStats">"Lar applikasjonen endre på innsamlet batteristatistikk. Ikke ment for vanlige applikasjoner."</string>
+    <!-- no translation found for permlab_backup (470013022865453920) -->
+    <skip />
+    <!-- no translation found for permdesc_backup (2305432853944929371) -->
+    <skip />
     <string name="permlab_internalSystemWindow">"vis uautoriserte vinduer"</string>
     <string name="permdesc_internalSystemWindow">"Tillater at det opprettes vinduer ment for bruk av systemets interne brukergrensesnitt. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_systemAlertWindow">"vise advarsler på systemnivå"</string>
@@ -250,6 +309,10 @@
     <string name="permdesc_accessMockLocation">"Lage falske plassingskilder for testing. Ondsinnede applikasjoner kan bruke dette for å overstyre plasseringen og/eller statusen rapportert av ekte plasseringskilder slik som GPS eller nettverksoperatører."</string>
     <string name="permlab_accessLocationExtraCommands">"få tilgang til ekstra plasseringskommandoer"</string>
     <string name="permdesc_accessLocationExtraCommands">"Få tilgang til ekstra kommandoer for plasseringskilder. Ondsinnede applikasjoner kan bruke dette til å forstyrre GPS eller andre plasseringskilder."</string>
+    <!-- no translation found for permlab_installLocationProvider (6578101199825193873) -->
+    <skip />
+    <!-- no translation found for permdesc_installLocationProvider (5449175116732002106) -->
+    <skip />
     <string name="permlab_accessFineLocation">"nøyaktig (GPS-) plassering"</string>
     <string name="permdesc_accessFineLocation">"Få tilgang til nøyaktige plasseringskilder som Global Positioning System (GPS) på telefonen, når det er tilgjengelig. Ondsinnede applikasjoner kan bruke dette for å finne ut hvor du er, og kan bruke mer batteri."</string>
     <string name="permlab_accessCoarseLocation">"grov (nettverksbasert) plassering"</string>
@@ -322,6 +385,10 @@
     <string name="permdesc_accessWifiState">"Lar applikasjonen få se informasjon om tilstanden til de trådløse nettene."</string>
     <string name="permlab_changeWifiState">"endre tilstand for trådløse nettverk"</string>
     <string name="permdesc_changeWifiState">"Lar applikasjonen koble til og fra trådløse aksesspunkt, og å gjøre endringer i konfigurerte trådløse nettverk."</string>
+    <!-- no translation found for permlab_changeWifiMulticastState (1368253871483254784) -->
+    <skip />
+    <!-- no translation found for permdesc_changeWifiMulticastState (8199464507656067553) -->
+    <skip />
     <string name="permlab_bluetoothAdmin">"Bluetooth-administrasjon"</string>
     <string name="permdesc_bluetoothAdmin">"Lar applikasjonen konfigurere den lokale Bluetooth-telefonen, og å oppdage og pare med andre enheter."</string>
     <string name="permlab_bluetooth">"opprette Bluetooth-tilkoblinger"</string>
@@ -342,6 +409,10 @@
     <string name="permdesc_readDictionary">"Lar applikasjonen lese private ord, navn og uttrykk som brukeren har lagret i den brukerdefinerte ordlisten."</string>
     <string name="permlab_writeDictionary">"skrive til brukerdefinert ordliste"</string>
     <string name="permdesc_writeDictionary">"Lar applikasjonen skrive nye ord til den brukerdefinerte ordlisten."</string>
+    <!-- no translation found for permlab_sdcardWrite (8079403759001777291) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardWrite (6643963204976471878) -->
+    <skip />
   <string-array name="phoneTypes">
     <item>"Hjemme"</item>
     <item>"Mobil"</item>
@@ -358,6 +429,8 @@
     <item>"Annen"</item>
     <item>"Egendefinert…"</item>
   </string-array>
+    <!-- no translation found for mobileEmailTypeName (2858957283716687707) -->
+    <skip />
   <string-array name="postalAddressTypes">
     <item>"Hjemme"</item>
     <item>"Arbeid"</item>
@@ -398,29 +471,31 @@
     <string name="lockscreen_pattern_correct">"Riktig!"</string>
     <string name="lockscreen_pattern_wrong">"Beklager, prøv igjen:"</string>
     <string name="lockscreen_plugged_in">"Lader (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
+    <skip />
     <string name="lockscreen_low_battery">"Koble til en batterilader."</string>
     <string name="lockscreen_missing_sim_message_short">"Mangler SIM-kort."</string>
     <string name="lockscreen_missing_sim_message">"Ikke noe SIM-kort i telefonen."</string>
     <string name="lockscreen_missing_sim_instructions">"Sett inn et SIM-kort."</string>
     <string name="lockscreen_network_locked_message">"Nettverk ikke tillatt"</string>
     <string name="lockscreen_sim_puk_locked_message">"SIM-kortet er PUK-låst."</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"Se manualen eller kontakt kundeservice."</string>
     <string name="lockscreen_sim_locked_message">"SIM-kortet er låst."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Låser opp SIM-kort…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%d</xliff:g> times. "\n\n"Please try again in <xliff:g id="NUMBER_1">%d</xliff:g> seconds."</string>
     <string name="lockscreen_failed_attempts_almost_glogin">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%d</xliff:g> times. After <xliff:g id="NUMBER_1">%d</xliff:g> more unsuccessful attempts, you will be asked to unlock your phone using your Google sign-in."\n\n" Please try again in <xliff:g id="NUMBER_2">%d</xliff:g> seconds."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown">"Prøv igjen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text">"Glemt mønsteret?"</string>
-    <string name="lockscreen_glogin_too_many_attempts">"Too many pattern attempts!"</string>
-    <string name="lockscreen_glogin_instructions">"To unlock,BREAKsign in with your Google account"</string>
-    <string name="lockscreen_glogin_username_hint">"Username (email)"</string>
-    <string name="lockscreen_glogin_password_hint">"Password"</string>
-    <string name="lockscreen_glogin_submit_button">"Sign in"</string>
-    <string name="lockscreen_glogin_invalid_input">"Invalid username or password."</string>
+    <string name="lockscreen_glogin_too_many_attempts">"For mange mønsterforsøk!"</string>
+    <string name="lockscreen_glogin_instructions">"For å låse opp, logg inn med Google-kontoen din"</string>
+    <string name="lockscreen_glogin_username_hint">"Brukernavn (e-post)"</string>
+    <string name="lockscreen_glogin_password_hint">"Passord"</string>
+    <string name="lockscreen_glogin_submit_button">"Logg inn"</string>
+    <string name="lockscreen_glogin_invalid_input">"Ugyldig brukernavn eller passord."</string>
     <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button">"Fjern varslinger"</string>
+    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
+    <skip />
     <string name="status_bar_no_notifications_title">"Ingen varslinger"</string>
     <string name="status_bar_ongoing_events_title">"Aktiviteter"</string>
     <string name="status_bar_latest_events_title">"Varslinger"</string>
@@ -429,6 +504,8 @@
     <string name="battery_low_title">"Koble til en lader"</string>
     <string name="battery_low_subtitle">"Batteriet er nesten tomt:"</string>
     <string name="battery_low_percent_format">"mindre enn <xliff:g id="NUMBER">%d%%</xliff:g> igjen."</string>
+    <!-- no translation found for battery_low_why (7655196144309694753) -->
+    <skip />
     <string name="factorytest_failed">"Factory test failed"</string>
     <string name="factorytest_not_system">"The FACTORY_TEST action is only supported for packages installed in /system/app."</string>
     <string name="factorytest_no_action">"No package was found that provides the FACTORY_TEST action."</string>
@@ -437,6 +514,14 @@
     <string name="js_dialog_title_default">"JavaScript"</string>
     <string name="js_dialog_before_unload">"Naviger bort fra denne siden?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Velg OK for å fortsette, eller Avbryt for å forbli på denne siden."</string>
     <string name="save_password_label">"Bekreft"</string>
+    <!-- no translation found for permlab_readHistoryBookmarks (1284843728203412135) -->
+    <skip />
+    <!-- no translation found for permdesc_readHistoryBookmarks (4981489815467617191) -->
+    <skip />
+    <!-- no translation found for permlab_writeHistoryBookmarks (9009434109836280374) -->
+    <skip />
+    <!-- no translation found for permdesc_writeHistoryBookmarks (945571990357114950) -->
+    <skip />
     <string name="save_password_message">"Ønsker du at nettleseren skal huske dette passordet?"</string>
     <string name="save_password_notnow">"Ikke nå"</string>
     <string name="save_password_remember">"Husk"</string>
@@ -544,14 +629,6 @@
     <string name="Noon">"Middag"</string>
     <string name="midnight">"midnatt"</string>
     <string name="Midnight">"Midnatt"</string>
-    <!-- no translation found for month_day (3693060561170538204) -->
-    <skip />
-    <!-- no translation found for month (7026169712234774086) -->
-    <skip />
-    <!-- no translation found for abbrev_month_day (3156047263406783231) -->
-    <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
-    <skip />
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"Merk alt"</string>
@@ -589,6 +666,8 @@
     <string name="anr_application_process">"Application <xliff:g id="APPLICATION">%1$s</xliff:g> (in process <xliff:g id="PROCESS">%2$s</xliff:g>) is not responding."</string>
     <string name="anr_process">"Process <xliff:g id="PROCESS">%1$s</xliff:g> is not responding."</string>
     <string name="force_close">"Force close"</string>
+    <!-- no translation found for report (4060218260984795706) -->
+    <skip />
     <string name="wait">"Wait"</string>
     <string name="debug">"Debug"</string>
     <string name="sendText">"Select an action for text"</string>
@@ -642,22 +721,31 @@
     <string name="extmedia_format_title">"Formatere minnekort"</string>
     <string name="extmedia_format_message">"Er du sikker på at du ønsker å formatere minnekortet? Alle data på kortet vil gå tapt."</string>
     <string name="extmedia_format_button_format">"Format"</string>
+    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
+    <skip />
+    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
+    <skip />
     <string name="select_input_method">"Velg inndatametode"</string>
     <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="candidates_style">"TAG_FONT"<u>"kandidater"</u>"CLOSE_FONT"</string>
     <string name="ext_media_checking_notification_title">"Forbereder minnekort"</string>
-    <string name="ext_media_checking_notification_message">"Sjekker for feil"</string>
+    <!-- no translation found for ext_media_checking_notification_message (8287319882926737053) -->
+    <skip />
     <string name="ext_media_nofs_notification_title">"Tomt minnekort"</string>
-    <string name="ext_media_nofs_notification_message">"Minnekortet er tomt eller bruker et ustøttet filsystem."</string>
+    <!-- no translation found for ext_media_nofs_notification_message (3817704088027829380) -->
+    <skip />
     <string name="ext_media_unmountable_notification_title">"Skadet minnekort"</string>
-    <string name="ext_media_unmountable_notification_message">"Minnekortet er skadet. Det kan være du må formatere kortet."</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (6902531775948238989) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title">"Minnekortet ble tatt ut uventet"</string>
     <string name="ext_media_badremoval_notification_message">"Avmonter minnekortet før det tas ut, for å unngå datatap."</string>
     <string name="ext_media_safe_unmount_notification_title">"Trygt å ta ut minnekort"</string>
-    <string name="ext_media_safe_unmount_notification_message">"Minnekortet kan nå trygt tas ut."</string>
+    <!-- no translation found for ext_media_safe_unmount_notification_message (568841278138377604) -->
+    <skip />
     <string name="ext_media_nomedia_notification_title">"Minnekortet ble tatt ut"</string>
-    <string name="ext_media_nomedia_notification_message">"Minnekortet ble tatt ut. Sett inn et nytt minnekort for å øke lagringsplassen."</string>
+    <!-- no translation found for ext_media_nomedia_notification_message (3870120652983659641) -->
+    <skip />
     <string name="activity_list_empty">"Fant ingen tilsvarende aktiviteter"</string>
     <string name="permlab_pkgUsageStats">"oppdater statistikk over komponentbruk"</string>
     <string name="permdesc_pkgUsageStats">"Tillater endring av innsamlet data om bruk av komponenter. Ikke ment for vanlige applikasjoner."</string>
@@ -672,5 +760,9 @@
     <!-- no translation found for dial_number_using (5789176425167573586) -->
     <skip />
     <!-- no translation found for create_contact_using (4947405226788104538) -->
+    <skip />
+    <!-- no translation found for accessibility_compound_button_selected (5612776946036285686) -->
+    <skip />
+    <!-- no translation found for accessibility_compound_button_unselected (8864512895673924091) -->
     <skip />
 </resources>

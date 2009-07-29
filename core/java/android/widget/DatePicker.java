@@ -110,6 +110,8 @@ public class DatePicker extends FrameLayout {
                  * subtract by one to ensure our internal state is always 0-11
                  */
                 mMonth = newVal - 1;
+                // Adjust max day of the month
+                adjustMaxDay();
                 if (mOnDateChangedListener != null) {
                     mOnDateChangedListener.onDateChanged(DatePicker.this, mYear, mMonth, mDay);
                 }
@@ -121,9 +123,12 @@ public class DatePicker extends FrameLayout {
         mYearPicker.setOnChangeListener(new OnChangedListener() {
             public void onChanged(NumberPicker picker, int oldVal, int newVal) {
                 mYear = newVal;
+                // Adjust max day for leap years if needed
+                adjustMaxDay();
                 if (mOnDateChangedListener != null) {
                     mOnDateChangedListener.onDateChanged(DatePicker.this, mYear, mMonth, mDay);
                 }
+                updateDaySpinner();
             }
         });
         
@@ -317,5 +322,15 @@ public class DatePicker extends FrameLayout {
 
     public int getDayOfMonth() {
         return mDay;
+    }
+
+    private void adjustMaxDay(){
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, mYear);
+        cal.set(Calendar.MONTH, mMonth);
+        int max = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        if (mDay > max) {
+            mDay = max;
+        }
     }
 }

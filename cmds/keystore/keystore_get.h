@@ -29,7 +29,7 @@
  * is returned. Otherwise it returns the value in dynamically allocated memory
  * and sets the size if the pointer is not NULL. One can release the memory by
  * calling free(). */
-static char *keystore_get(char *key, int *size)
+static char *keystore_get(const char *key, int *size)
 {
     char buffer[MAX_KEY_VALUE_LENGTH];
     char *value;

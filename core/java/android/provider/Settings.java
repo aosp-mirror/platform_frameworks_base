@@ -1328,7 +1328,7 @@ public final class Settings {
          * boolean (1 or 0).
          */
         public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
-        
+
         /**
          * Whether live web suggestions while the user types into search dialogs are
          * enabled. Browsers and other search UIs should respect this, as it allows
@@ -2300,7 +2300,7 @@ public final class Settings {
          * @hide
          */
         public static final String BACKUP_TRANSPORT = "backup_transport";
-        
+
         /**
          * Version for which the setup wizard was last shown.  Bumped for
          * each release when there is new setup information to show.
@@ -2508,9 +2508,15 @@ public final class Settings {
         public static final String CHECKIN_EVENTS = "checkin_events";
 
         /**
-         * Event tags for list of services to upload during checkin.
+         * Comma-separated list of service names to dump and upload during checkin.
          */
         public static final String CHECKIN_DUMPSYS_LIST = "checkin_dumpsys_list";
+
+        /**
+         * Comma-separated list of packages to specify for each service that is
+         * dumped (currently only meaningful for user activity).
+         */
+        public static final String CHECKIN_PACKAGE_LIST = "checkin_package_list";
 
         /**
          * The interval (in seconds) between periodic checkin attempts.
@@ -2690,6 +2696,12 @@ public final class Settings {
          * abandons the operation. Defaults to 20.
          */
         public static final String GMAIL_NUM_RETRY_UPHILL_OP = "gmail_discard_error_uphill_op";
+
+        /**
+         * Controls if the protocol buffer version of the protocol will use a multipart request for
+         * attachment uploads. Value must be an integer where non-zero means true. Defaults to 0.
+         */
+        public static final String GMAIL_USE_MULTIPART_PROTOBUF = "gmail_use_multipart_protobuf";
 
         /**
          * the transcoder URL for mobile devices.
@@ -2952,6 +2964,13 @@ public final class Settings {
          */
         public static final String VENDING_PENDING_DOWNLOAD_RESEND_FREQUENCY_MS =
                 "vending_pd_resend_frequency_ms";
+
+        /**
+         * Frequency in milliseconds at which we should cycle through the promoted applications
+         * on the home screen or the categories page.
+         */
+        public static final String VENDING_PROMO_REFRESH_FREQUENCY_MS =
+                "vending_promo_refresh_freq_ms";
 
         /**
          * URL that points to the legal terms of service to display in Settings.

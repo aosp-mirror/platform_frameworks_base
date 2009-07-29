@@ -799,7 +799,7 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
     EGLint patch_index = -1;
     GLint attr;
     size_t size = 0;
-    while ((attr=attrib_list[size])) {
+    while ((attr=attrib_list[size]) != EGL_NONE) {
         if (attr == EGL_CONFIG_ID)
             patch_index = size;
         size += 2;

@@ -348,7 +348,7 @@ public final class URLUtil {
      * This header provides a filename for content that is going to be
      * downloaded to the file system. We only support the attachment type.
      */
-    private static String parseContentDisposition(String contentDisposition) {
+    static String parseContentDisposition(String contentDisposition) {
         try {
             Matcher m = CONTENT_DISPOSITION_PATTERN.matcher(contentDisposition);
             if (m.find()) {

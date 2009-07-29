@@ -107,8 +107,6 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
     }
 
     // Checks that the search UI is not visible.
-    // This checks both the SearchManager and the SearchManagerService,
-    // since SearchManager keeps a local variable for the visibility.
     private void assertSearchNotVisible() {
         SearchManager searchManager = (SearchManager)
                 mContext.getSystemService(Context.SEARCH_SERVICE);
@@ -243,24 +241,6 @@ public class SearchManagerTest extends ActivityInstrumentationTestCase2<LocalAct
         assertSearchVisible();
         searchManager.stopSearch();
         assertSearchNotVisible();
-    }
-
-    @MediumTest
-    public void testSearchDialogState() throws Exception {
-        SearchManager searchManager = (SearchManager)
-                mContext.getSystemService(Context.SEARCH_SERVICE);
-        assertNotNull(searchManager);
-
-        Bundle searchState;
-
-        // search dialog not visible, so no state should be stored
-        searchState = searchManager.saveSearchDialog();
-        assertNull(searchState);
-
-        searchManager.startSearch("test search string", true, SEARCHABLE_ACTIVITY, null, false);
-        searchState = searchManager.saveSearchDialog();
-        assertNotNull(searchState);
-        searchManager.stopSearch();
     }
 
 }

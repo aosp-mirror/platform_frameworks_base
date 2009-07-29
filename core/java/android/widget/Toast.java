@@ -65,6 +65,7 @@ public class Toast {
      */
     public static final int LENGTH_LONG = 1;
 
+    final Handler mHandler = new Handler();    
     final Context mContext;
     final TN mTN;
     int mDuration;
@@ -84,7 +85,7 @@ public class Toast {
      */
     public Toast(Context context) {
         mContext = context;
-        mTN = new TN(context);
+        mTN = new TN();
         mY = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.toast_y_offset);
     }
@@ -229,7 +230,8 @@ public class Toast {
     public static Toast makeText(Context context, CharSequence text, int duration) {
         Toast result = new Toast(context);
 
-        LayoutInflater inflate = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflate = (LayoutInflater)
+                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflate.inflate(com.android.internal.R.layout.transient_notification, null);
         TextView tv = (TextView)v.findViewById(com.android.internal.R.id.message);
         tv.setText(text);
@@ -286,8 +288,7 @@ public class Toast {
 
     private static INotificationManager sService;
 
-    static private INotificationManager getService()
-    {
+    static private INotificationManager getService() {
         if (sService != null) {
             return sService;
         }
@@ -295,28 +296,42 @@ public class Toast {
         return sService;
     }
 
-    private class TN extends ITransientNotification.Stub
-    {
-        TN(Context context)
-        {
+    private class TN extends ITransientNotification.Stub {
+        final Runnable mShow = new Runnable() {
+            public void run() {
+                handleShow();
+            }
+        };
+
+        final Runnable mHide = new Runnable() {
+            public void run() {
+                handleHide();
+            }
+        };
+
+        private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
+        
+        WindowManagerImpl mWM;
+
+        TN() {
             // XXX This should be changed to use a Dialog, with a Theme.Toast
             // defined that sets up the layout params appropriately.
-            mParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-            mParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-            mParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            final WindowManager.LayoutParams params = mParams;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+            params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                     | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
-            mParams.format = PixelFormat.TRANSLUCENT;
-            mParams.windowAnimations = com.android.internal.R.style.Animation_Toast;
-            mParams.type = WindowManager.LayoutParams.TYPE_TOAST;
-            mParams.setTitle("Toast");
+            params.format = PixelFormat.TRANSLUCENT;
+            params.windowAnimations = com.android.internal.R.style.Animation_Toast;
+            params.type = WindowManager.LayoutParams.TYPE_TOAST;
+            params.setTitle("Toast");
         }
 
         /**
          * schedule handleShow into the right thread
          */
-        public void show()
-        {
+        public void show() {
             if (localLOGV) Log.v(TAG, "SHOW: " + this);
             mHandler.post(mShow);
         }
@@ -324,14 +339,12 @@ public class Toast {
         /**
          * schedule handleHide into the right thread
          */
-        public void hide()
-        {
+        public void hide() {
             if (localLOGV) Log.v(TAG, "HIDE: " + this);
             mHandler.post(mHide);
         }
 
-        public void handleShow()
-        {
+        public void handleShow() {
             if (localLOGV) Log.v(TAG, "HANDLE SHOW: " + this + " mView=" + mView
                     + " mNextView=" + mNextView);
             if (mView != mNextView) {
@@ -361,8 +374,7 @@ public class Toast {
             }
         }
 
-        public void handleHide()
-        {
+        public void handleHide() {
             if (localLOGV) Log.v(TAG, "HANDLE HIDE: " + this + " mView=" + mView);
             if (mView != null) {
                 // note: checking parent() just to make sure the view has
@@ -377,24 +389,5 @@ public class Toast {
                 mView = null;
             }
         }
-
-        Runnable mShow = new Runnable() {
-            public void run() {
-                handleShow();
-            }
-        };
-
-        Runnable mHide = new Runnable() {
-            public void run() {
-                handleHide();
-            }
-        };
-
-        private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
-        
-        WindowManagerImpl mWM;
     }
-
-    final Handler mHandler = new Handler();
 }
-

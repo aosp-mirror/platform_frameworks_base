@@ -68,6 +68,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     private static final String SETTINGS_FILENAME = "appwidgets.xml";
     private static final String SETTINGS_TMP_FILENAME = SETTINGS_FILENAME + ".tmp";
+    private static final int MIN_UPDATE_PERIOD = 30 * 60 * 1000; // 30 minutes
 
     /*
      * When identifying a Host or Provider based on the calling process, use the uid field.
@@ -629,9 +630,12 @@ class AppWidgetService extends IAppWidgetService.Stub
                 Binder.restoreCallingIdentity(token);
             }
             if (!alreadyRegistered) {
+                long period = p.info.updatePeriodMillis;
+                if (period < MIN_UPDATE_PERIOD) {
+                    period = MIN_UPDATE_PERIOD;
+                }
                 mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        SystemClock.elapsedRealtime() + p.info.updatePeriodMillis,
-                        p.info.updatePeriodMillis, p.broadcast);
+                        SystemClock.elapsedRealtime() + period, period, p.broadcast);
             }
         }
     }

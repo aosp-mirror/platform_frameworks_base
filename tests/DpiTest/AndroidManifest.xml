@@ -19,10 +19,15 @@
     <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="3" />
     <supports-screens android:smallScreens="true" />
     <application android:label="DpiTest">
-        <activity android:name="DpiTestActivity" android:label="DpiTest">
+        <activity android:name="DpiTestActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="DpiTestNoCompatActivity" android:label="DpiTestNoCompat">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -19,11 +19,8 @@ package com.android.internal.telephony.cdma;
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.ContentObserver;
-import android.database.SQLException;
-import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
@@ -35,7 +32,6 @@ import android.os.SystemProperties;
 import android.provider.Checkin;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import android.provider.Telephony;
 import android.provider.Telephony.Intents;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -64,6 +60,7 @@ import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERAT
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISROAMING;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_NUMERIC;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -571,7 +568,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                     try {
                         registrationState = Integer.parseInt(states[0]);
                         radioTechnology = Integer.parseInt(states[3]);
-                        baseStationId = Integer.parseInt(states[4], 16);
+                        baseStationId = Integer.parseInt(states[4]);
                         baseStationLatitude = Integer.parseInt(states[5], 16);
                         baseStationLongitude = Integer.parseInt(states[6], 16);
                         cssIndicator = Integer.parseInt(states[7]);
@@ -608,7 +605,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
                 // values are -1 if not available
                 newCellLoc.setCellLocationData(baseStationId, baseStationLatitude,
-                        baseStationLongitude);
+                        baseStationLongitude, systemId, networkId);
 
                 if (reasonForDenial == 0) {
                     mRegistrationDeniedReason = ServiceStateTracker.REGISTRATION_DENIED_GEN;
@@ -634,27 +631,6 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                     } else {
                         newSS.setOperatorName(opNames[0], opNames[1], opNames[2]);
                     }
-
-                    if (!(opNames[2].equals(currentCarrier))) {
-                        // TODO(Moto): jsh asks, "This uses the MCC+MNC of the current registered
-                        // network to set the "current" entry in the APN table. But the correct
-                        // entry should be the MCC+MNC that matches the subscribed operator
-                        // (eg, phone issuer). These can be different when roaming."
-                        try {
-                            // Set the current field of the telephony provider according to
-                            // the CDMA's operator
-                            Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
-                            ContentValues map = new ContentValues();
-                            map.put(Telephony.Carriers.NUMERIC, opNames[2]);
-                            cr.insert(uri, map);
-                            // save current carrier for the next time check
-                            currentCarrier = opNames[2];
-                        } catch (SQLException e) {
-                            Log.e(LOG_TAG, "Can't store current operator", e);
-                        }
-                    } else {
-                        Log.i(LOG_TAG, "current carrier is not changed");
-                    }
                 } else {
                     Log.w(LOG_TAG, "error parsing opNames");
                 }
@@ -665,8 +641,15 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
                 if (cdmaSubscription != null && cdmaSubscription.length >= 4) {
                     mMdn = cdmaSubscription[0];
-                    mHomeSystemId = Integer.parseInt(cdmaSubscription[1], 16);
-                    mHomeNetworkId = Integer.parseInt(cdmaSubscription[2], 16);
+                    // TODO: Only grabbing the first SID/NID for now.
+                    if (cdmaSubscription[1] != null) {
+                        String[] sid = cdmaSubscription[1].split(",");
+                        mHomeSystemId = sid.length > 0 ? Integer.parseInt(sid[0]) : 0;
+                    }
+                    if (cdmaSubscription[2] != null) {
+                        String[] nid = cdmaSubscription[2].split(",");
+                        mHomeNetworkId = nid.length > 0 ? Integer.parseInt(nid[0]) : 0;
+                    }
                     mMin = cdmaSubscription[3];
 
                 } else {
@@ -1437,4 +1420,19 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
          return mMin;
     }
 
+    /**
+     * Returns IMSI as MCC + MNC + MIN
+     */
+    /*package*/ String getImsi() {
+        // TODO(Moto): When RUIM is enabled, IMSI will come from RUIM
+        // not build-time props. Moto will provide implementation
+        // for RUIM-ready case later.
+        String operatorNumeric = SystemProperties.get(PROPERTY_ICC_OPERATOR_NUMERIC, "");
+
+        if (!TextUtils.isEmpty(operatorNumeric) && getCdmaMin() != null) {
+            return (operatorNumeric + getCdmaMin());
+        } else {
+            return null;
+        }
+    }
 }

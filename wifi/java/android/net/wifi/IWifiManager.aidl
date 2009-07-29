@@ -40,7 +40,7 @@ interface IWifiManager
 
     boolean pingSupplicant();
 
-    boolean startScan();
+    boolean startScan(boolean forceActive);
 
     List<ScanResult> getScanResults();
 

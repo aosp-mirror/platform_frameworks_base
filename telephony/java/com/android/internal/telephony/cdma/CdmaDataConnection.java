@@ -21,6 +21,7 @@ import android.util.EventLog;
 import android.util.Log;
 
 import com.android.internal.telephony.CommandException;
+import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataLink;
 import com.android.internal.telephony.RILConstants;
@@ -142,7 +143,8 @@ public class CdmaDataConnection extends DataConnection {
         lastFailTime = -1;
         lastFailCause = FailCause.NONE;
         receivedDisconnectReq = false;
-        phone.mCM.setupDataCall(Integer.toString(RILConstants.CDMA_PHONE), null, null, null,
+        phone.mCM.setupDataCall(Integer.toString(RILConstants.CDMA_PHONE),
+                Integer.toString(RILConstants.DATA_PROFILE_DEFAULT), null, null,
                 null, obtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE));
     }
 

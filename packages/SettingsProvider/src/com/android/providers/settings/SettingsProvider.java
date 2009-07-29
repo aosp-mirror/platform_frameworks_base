@@ -126,11 +126,14 @@ public class SettingsProvider extends ContentProvider {
         // a notification and then using the contract class to get their data,
         // the system property will be updated and they'll get the new data.
 
+        boolean backedUpDataChanged = false;
         String property = null, table = uri.getPathSegments().get(0);
         if (table.equals("system")) {
             property = Settings.System.SYS_PROP_SETTING_VERSION;
+            backedUpDataChanged = true;
         } else if (table.equals("secure")) {
             property = Settings.Secure.SYS_PROP_SETTING_VERSION;
+            backedUpDataChanged = true;
         } else if (table.equals("gservices")) {
             property = Settings.Gservices.SYS_PROP_SETTING_VERSION;
         }
@@ -142,7 +145,9 @@ public class SettingsProvider extends ContentProvider {
         }
 
         // Inform the backup manager about a data change
-        mBackupManager.dataChanged();
+        if (backedUpDataChanged) {
+            mBackupManager.dataChanged();
+        }
         // Now send the notification through the content framework.
 
         String notify = uri.getQueryParameter("notify");

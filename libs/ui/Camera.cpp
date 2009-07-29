@@ -310,6 +310,19 @@ void Camera::dataCallback(int32_t msgType, const sp<IMemory>& dataPtr)
     }
 }
 
+// callback from camera service when timestamped frame is ready
+void Camera::dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr)
+{
+    sp<CameraListener> listener;
+    {
+        Mutex::Autolock _l(mLock);
+        listener = mListener;
+    }
+    if (listener != NULL) {
+        listener->postDataTimestamp(timestamp, msgType, dataPtr);
+    }
+}
+
 void Camera::binderDied(const wp<IBinder>& who) {
     LOGW("ICamera died");
     notifyCallback(CAMERA_MSG_ERROR, CAMERA_ERROR_SERVER_DIED, 0);

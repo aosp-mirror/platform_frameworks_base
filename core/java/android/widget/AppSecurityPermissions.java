@@ -18,6 +18,7 @@ package android.widget;
 
 import com.android.internal.R;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -319,15 +320,14 @@ public class AppSecurityPermissions  implements View.OnClickListener {
             boolean dangerous) {
         View permView = mInflater.inflate(R.layout.app_permission_item, null);
         Drawable icon = dangerous ? mDangerousIcon : mNormalIcon;
-        int grpColor = dangerous ? R.color.perms_dangerous_grp_color :
-            R.color.perms_normal_grp_color;
-        int permColor = dangerous ? R.color.perms_dangerous_perm_color :
-            R.color.perms_normal_perm_color;
 
         TextView permGrpView = (TextView) permView.findViewById(R.id.permission_group);
         TextView permDescView = (TextView) permView.findViewById(R.id.permission_list);
-        permGrpView.setTextColor(mContext.getResources().getColor(grpColor));
-        permDescView.setTextColor(mContext.getResources().getColor(permColor));
+        if (dangerous) {
+            final Resources resources = mContext.getResources();
+            permGrpView.setTextColor(resources.getColor(R.color.perms_dangerous_grp_color));
+            permDescView.setTextColor(resources.getColor(R.color.perms_dangerous_perm_color));
+        }
 
         ImageView imgView = (ImageView)permView.findViewById(R.id.perm_icon);
         imgView.setImageDrawable(icon);

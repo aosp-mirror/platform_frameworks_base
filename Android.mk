@@ -67,10 +67,11 @@ LOCAL_SRC_FILES += \
 	core/java/android/accessibilityservice/IAccessibilityServiceConnection.aidl \
   core/java/android/accessibilityservice/IEventListener.aidl \
 	core/java/android/accounts/IAccountsService.aidl \
+	core/java/android/app/IActivityController.aidl \
 	core/java/android/app/IActivityPendingResult.aidl \
 	core/java/android/app/IActivityWatcher.aidl \
 	core/java/android/app/IAlarmManager.aidl \
-        core/java/android/app/IBackupAgent.aidl \
+	core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/INotificationManager.aidl \
 	core/java/android/app/ISearchManager.aidl \
@@ -88,12 +89,12 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothDevice.aidl \
 	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
-        core/java/android/content/IContentService.aidl \
+	core/java/android/content/IContentService.aidl \
 	core/java/android/content/IIntentReceiver.aidl \
 	core/java/android/content/IIntentSender.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
 	core/java/android/content/ISyncContext.aidl \
-        core/java/android/content/ISyncStatusObserver.aidl \
+	core/java/android/content/ISyncStatusObserver.aidl \
 	core/java/android/content/pm/IPackageDataObserver.aidl \
 	core/java/android/content/pm/IPackageDeleteObserver.aidl \
 	core/java/android/content/pm/IPackageInstallObserver.aidl \

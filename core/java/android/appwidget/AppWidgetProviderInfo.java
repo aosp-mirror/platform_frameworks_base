@@ -57,6 +57,9 @@ public class AppWidgetProviderInfo implements Parcelable {
      *
      * <p>This field corresponds to the <code>android:updatePeriodMillis</code> attribute in
      * the AppWidget meta-data file.
+     *
+     * <p class="note"><b>Note:</b> Updates requested with <code>updatePeriodMillis</code>
+     * will not be delivered more than once every 30 minutes.</p>
      */
     public int updatePeriodMillis;
 

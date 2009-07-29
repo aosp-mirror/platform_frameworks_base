@@ -16,11 +16,25 @@
 
 package com.android.unit_tests;
 
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.text.*;
-import android.text.style.*;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.QuoteSpan;
+import android.text.style.StrikethroughSpan;
+import android.text.style.StyleSpan;
+import android.text.style.SubscriptSpan;
+import android.text.style.SuperscriptSpan;
+import android.text.style.TextAppearanceSpan;
+import android.text.style.TypefaceSpan;
+import android.text.style.URLSpan;
+import android.text.style.UnderlineSpan;
 
 import junit.framework.TestCase;
 
@@ -35,14 +49,54 @@ public class HtmlTest extends TestCase {
 
         s = Html.fromHtml("<font color=\"#00FF00\">something</font>");
         colors = s.getSpans(0, s.length(), ForegroundColorSpan.class);
-        assertEquals(colors[0].getForegroundColor(), 0xFF00FF00);
+        assertEquals(1, colors.length);
+        assertEquals(0xFF00FF00, colors[0].getForegroundColor());
 
         s = Html.fromHtml("<font color=\"navy\">something</font>");
         colors = s.getSpans(0, s.length(), ForegroundColorSpan.class);
-        assertEquals(colors[0].getForegroundColor(), 0xFF000080);
+        assertEquals(1, colors.length);
+        assertEquals(0xFF000080, colors[0].getForegroundColor());
 
         s = Html.fromHtml("<font color=\"gibberish\">something</font>");
         colors = s.getSpans(0, s.length(), ForegroundColorSpan.class);
+        assertEquals(0, colors.length);
+    }
+
+    @MediumTest
+    public void testResourceColor() throws Exception {
+        ColorStateList c =
+                Resources.getSystem().getColorStateList(android.R.color.primary_text_dark);
+        Spanned s;
+        TextAppearanceSpan[] colors;
+
+        s = Html.fromHtml("<font color=\"@android:color/primary_text_dark\">something</font>");
+        colors = s.getSpans(0, s.length(), TextAppearanceSpan.class);
+        assertEquals(1, colors.length);
+        assertEquals(c.toString(), colors[0].getTextColor().toString());
+
+        s = Html.fromHtml("<font color=\"@android:primary_text_dark\">something</font>");
+        colors = s.getSpans(0, s.length(), TextAppearanceSpan.class);
+        assertEquals(1, colors.length);
+        assertEquals(c.toString(), colors[0].getTextColor().toString());
+
+        s = Html.fromHtml("<font color=\"@color/primary_text_dark\">something</font>");
+        colors = s.getSpans(0, s.length(), TextAppearanceSpan.class);
+        assertEquals(1, colors.length);
+        assertEquals(c.toString(), colors[0].getTextColor().toString());
+
+        s = Html.fromHtml("<font color=\"@primary_text_dark\">something</font>");
+        colors = s.getSpans(0, s.length(), TextAppearanceSpan.class);
+        assertEquals(1, colors.length);
+        assertEquals(c.toString(), colors[0].getTextColor().toString());
+
+        s = Html.fromHtml("<font color=\"@" + android.R.color.primary_text_dark
+                + "\">something</font>");
+        colors = s.getSpans(0, s.length(), TextAppearanceSpan.class);
+        assertEquals(1, colors.length);
+        assertEquals(c.toString(), colors[0].getTextColor().toString());
+
+        s = Html.fromHtml("<font color=\"gibberish\">something</font>");
+        colors = s.getSpans(0, s.length(), TextAppearanceSpan.class);
         assertEquals(colors.length, 0);
     }
 

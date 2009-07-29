@@ -40,14 +40,16 @@ public interface TelephonyProperties
 
     //****** Current Network
 
-    /** Alpha name of current registered operator.
-     *  Availability: when registered to a network
+    /** Alpha name of current registered operator.<p>
+     *  Availability: when registered to a network. Result may be unreliable on
+     *  CDMA networks.
      */
     static final String PROPERTY_OPERATOR_ALPHA = "gsm.operator.alpha";
     //TODO: most of these proprieties are generic, substitute gsm. with phone. bug 1856959
 
-    /** Numeric name (MCC+MNC) of current registered operator.
-     *  Availability: when registered to a network
+    /** Numeric name (MCC+MNC) of current registered operator.<p>
+     *  Availability: when registered to a network. Result may be unreliable on
+     *  CDMA networks.
      */
     static final String PROPERTY_OPERATOR_NUMERIC = "gsm.operator.numeric";
 
@@ -64,8 +66,9 @@ public interface TelephonyProperties
     static final String PROPERTY_OPERATOR_ISROAMING = "gsm.operator.isroaming";
 
     /** The ISO country code equivalent of the current registered operator's
-     *  MCC (Mobile Country Code)
-     *  Availability: when registered to a network
+     *  MCC (Mobile Country Code)<p>
+     *  Availability: when registered to a network. Result may be unreliable on
+     *  CDMA networks.
      */
     static final String PROPERTY_OPERATOR_ISO_COUNTRY = "gsm.operator.iso-country";
 

@@ -184,8 +184,6 @@ public class Canvas {
      *
      * @see #setDensityScale(float)
      * @see Bitmap#getDensityScale() 
-     *
-     * @hide pending API council approval
      */
     public float getDensityScale() {
         if (mBitmap != null) {
@@ -205,8 +203,6 @@ public class Canvas {
      *
      * @see #getDensityScale()
      * @see Bitmap#setDensityScale(float) 
-     *
-     * @hide pending API council approval
      */
     public void setDensityScale(float densityScale) {
         if (mBitmap != null) {

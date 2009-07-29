@@ -87,6 +87,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         }
     }
 
+    public void clearCache() {
+      mWebView.clearCache(true);
+    }
+
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);

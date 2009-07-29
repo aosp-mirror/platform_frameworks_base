@@ -134,8 +134,8 @@ public class ActivityManagerPermissionTests extends TestCase {
     @SmallTest
     public void testSET_ACTIVITY_WATCHER() {
         try {
-            mAm.setActivityWatcher(null);
-            fail("IActivityManager.setActivityWatcher did not throw SecurityException as"
+            mAm.setActivityController(null);
+            fail("IActivityManager.setActivityController did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {
             // expected

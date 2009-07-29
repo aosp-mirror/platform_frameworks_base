@@ -92,6 +92,21 @@ public interface DialogInterface {
     }
 
     /**
+     * Interface used to allow the creator of a dialog to run some code when the
+     * dialog is shown.
+     * @hide Pending API council approval
+     */
+    interface OnShowListener {
+        /**
+         * This method will be invoked when the dialog is shown.
+         *
+         * @param dialog The dialog that was shown will be passed into the
+         *            method.
+         */
+        public void onShow(DialogInterface dialog);
+    }
+
+    /**
      * Interface used to allow the creator of a dialog to run some code when an
      * item on the dialog is clicked..
      */

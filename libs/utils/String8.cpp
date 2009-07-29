@@ -25,25 +25,39 @@
 
 #include <ctype.h>
 
-namespace android {
+/*
+ * Functions outside android is below the namespace android, since they use
+ * functions and constants in android namespace.
+ */
 
 // ---------------------------------------------------------------------------
 
-static const uint32_t kByteMask = 0x000000BF;
-static const uint32_t kByteMark = 0x00000080;
+namespace android {
+
+static const char32_t kByteMask = 0x000000BF;
+static const char32_t kByteMark = 0x00000080;
 
 // Surrogates aren't valid for UTF-32 characters, so define some
 // constants that will let us screen them out.
-static const uint32_t kUnicodeSurrogateHighStart  = 0x0000D800;
-static const uint32_t kUnicodeSurrogateHighEnd    = 0x0000DBFF;
-static const uint32_t kUnicodeSurrogateLowStart   = 0x0000DC00;
-static const uint32_t kUnicodeSurrogateLowEnd     = 0x0000DFFF;
-static const uint32_t kUnicodeSurrogateStart      = kUnicodeSurrogateHighStart;
-static const uint32_t kUnicodeSurrogateEnd        = kUnicodeSurrogateLowEnd;
+static const char32_t kUnicodeSurrogateHighStart  = 0x0000D800;
+static const char32_t kUnicodeSurrogateHighEnd    = 0x0000DBFF;
+static const char32_t kUnicodeSurrogateLowStart   = 0x0000DC00;
+static const char32_t kUnicodeSurrogateLowEnd     = 0x0000DFFF;
+static const char32_t kUnicodeSurrogateStart      = kUnicodeSurrogateHighStart;
+static const char32_t kUnicodeSurrogateEnd        = kUnicodeSurrogateLowEnd;
+static const char32_t kUnicodeMaxCodepoint        = 0x0010FFFF;
 
 // Mask used to set appropriate bits in first byte of UTF-8 sequence,
 // indexed by number of bytes in the sequence.
-static const uint32_t kFirstByteMark[] = {
+// 0xxxxxxx
+// -> (00-7f) 7bit. Bit mask for the first byte is 0x00000000
+// 110yyyyx 10xxxxxx
+// -> (c0-df)(80-bf) 11bit. Bit mask is 0x000000C0
+// 1110yyyy 10yxxxxx 10xxxxxx
+// -> (e0-ef)(80-bf)(80-bf) 16bit. Bit mask is 0x000000E0
+// 11110yyy 10yyxxxx 10xxxxxx 10xxxxxx
+// -> (f0-f7)(80-bf)(80-bf)(80-bf) 21bit. Bit mask is 0x000000F0
+static const char32_t kFirstByteMark[] = {
     0x00000000, 0x00000000, 0x000000C0, 0x000000E0, 0x000000F0
 };
 
@@ -52,7 +66,7 @@ static const uint32_t kFirstByteMark[] = {
 #define RES_PATH_SEPARATOR '/'
 
 // Return number of utf8 bytes required for the character.
-static size_t utf32_to_utf8_bytes(uint32_t srcChar)
+static size_t utf32_to_utf8_bytes(char32_t srcChar)
 {
     size_t bytesToWrite;
 
@@ -79,7 +93,7 @@ static size_t utf32_to_utf8_bytes(uint32_t srcChar)
         }
     }
     // Max code point for Unicode is 0x0010FFFF.
-    else if (srcChar < 0x00110000)
+    else if (srcChar <= kUnicodeMaxCodepoint)
     {
         bytesToWrite = 4;
     }
@@ -94,7 +108,7 @@ static size_t utf32_to_utf8_bytes(uint32_t srcChar)
 
 // Write out the source character to <dstP>.
 
-static void utf32_to_utf8(uint8_t* dstP, uint32_t srcChar, size_t bytes)
+static void utf32_to_utf8(uint8_t* dstP, char32_t srcChar, size_t bytes)
 {
     dstP += bytes;
     switch (bytes)
@@ -126,7 +140,7 @@ void initialize_string8()
 	  // Bite me, Darwin!
 		gDarwinIsReallyAnnoying = gDarwinCantLoadAllObjects;
 #endif
-			
+
     SharedBuffer* buf = SharedBuffer::alloc(1);
     char* str = (char*)buf->data();
     *str = 0;
@@ -160,20 +174,20 @@ static char* allocFromUTF8(const char* in, size_t len)
     return getEmptyString();
 }
 
-// Note: not dealing with expanding surrogate pairs.
-static char* allocFromUTF16(const char16_t* in, size_t len)
+template<typename T, typename L>
+static char* allocFromUTF16OrUTF32(const T* in, L len)
 {
     if (len == 0) return getEmptyString();
-    
+
     size_t bytes = 0;
-    const char16_t* end = in+len;
-    const char16_t* p = in;
-    
+    const T* end = in+len;
+    const T* p = in;
+
     while (p < end) {
         bytes += utf32_to_utf8_bytes(*p);
         p++;
     }
-    
+
     SharedBuffer* buf = SharedBuffer::alloc(bytes+1);
     LOG_ASSERT(buf, "Unable to allocate shared buffer");
     if (buf) {
@@ -181,17 +195,28 @@ static char* allocFromUTF16(const char16_t* in, size_t len)
         char* str = (char*)buf->data();
         char* d = str;
         while (p < end) {
-            uint32_t c = *p++;
+            const T c = *p++;
             size_t len = utf32_to_utf8_bytes(c);
             utf32_to_utf8((uint8_t*)d, c, len);
             d += len;
         }
         *d = 0;
-        
+
         return str;
     }
-    
+
     return getEmptyString();
+}
+
+// Note: not dealing with expanding surrogate pairs.
+static char* allocFromUTF16(const char16_t* in, size_t len)
+{
+    return allocFromUTF16OrUTF32<char16_t, size_t>(in, len);
+}
+
+static char* allocFromUTF32(const char32_t* in, size_t len)
+{
+    return allocFromUTF16OrUTF32<char32_t, size_t>(in, len);
 }
 
 // ---------------------------------------------------------------------------
@@ -238,6 +263,16 @@ String8::String8(const char16_t* o, size_t len)
 {
 }
 
+String8::String8(const char32_t* o)
+    : mString(allocFromUTF32(o, strlen32(o)))
+{
+}
+
+String8::String8(const char32_t* o, size_t len)
+    : mString(allocFromUTF32(o, len))
+{
+}
+
 String8::~String8()
 {
     SharedBuffer::bufferFromData(mString)->release();
@@ -274,6 +309,16 @@ status_t String8::setTo(const char16_t* other, size_t len)
 {
     SharedBuffer::bufferFromData(mString)->release();
     mString = allocFromUTF16(other, len);
+    if (mString) return NO_ERROR;
+
+    mString = getEmptyString();
+    return NO_MEMORY;
+}
+
+status_t String8::setTo(const char32_t* other, size_t len)
+{
+    SharedBuffer::bufferFromData(mString)->release();
+    mString = allocFromUTF32(other, len);
     if (mString) return NO_ERROR;
 
     mString = getEmptyString();
@@ -418,6 +463,21 @@ void String8::toUpper(size_t start, size_t length)
     unlockBuffer(len);
 }
 
+size_t String8::getUtf32Length() const
+{
+    return utf32_length(mString, length());
+}
+
+int32_t String8::getUtf32At(size_t index, size_t *next_index) const
+{
+    return utf32_at(mString, length(), index, next_index);
+}
+
+size_t String8::getUtf32(char32_t* dst, size_t dst_len) const
+{
+    return utf8_to_utf32(mString, length(), dst, dst_len);
+}
+
 TextOutput& operator<<(TextOutput& to, const String8& val)
 {
     to << val.string();
@@ -426,7 +486,6 @@ TextOutput& operator<<(TextOutput& to, const String8& val)
 
 // ---------------------------------------------------------------------------
 // Path functions
-
 
 void String8::setPathName(const char* name)
 {
@@ -600,5 +659,192 @@ String8& String8::convertToResPath()
     return *this;
 }
 
-
 }; // namespace android
+
+// ---------------------------------------------------------------------------
+
+size_t strlen32(const char32_t *s)
+{
+  const char32_t *ss = s;
+  while ( *ss )
+    ss++;
+  return ss-s;
+}
+
+size_t strnlen32(const char32_t *s, size_t maxlen)
+{
+  const char32_t *ss = s;
+  while ((maxlen > 0) && *ss) {
+    ss++;
+    maxlen--;
+  }
+  return ss-s;
+}
+
+size_t utf8_length(const char *src)
+{
+    const char *cur = src;
+    size_t ret = 0;
+    while (*cur != '\0') {
+        const char first_char = *cur++;
+        if ((first_char & 0x80) == 0) { // ASCII
+            ret += 1;
+            continue;
+        }
+        // (UTF-8's character must not be like 10xxxxxx,
+        //  but 110xxxxx, 1110xxxx, ... or 1111110x)
+        if ((first_char & 0x40) == 0) {
+            return 0;
+        }
+
+        int32_t mask, to_ignore_mask;
+        size_t num_to_read = 0;
+        char32_t utf32 = 0;
+        for (num_to_read = 1, mask = 0x40, to_ignore_mask = 0x80;
+             num_to_read < 5 && (first_char & mask);
+             num_to_read++, to_ignore_mask |= mask, mask >>= 1) {
+            if ((*cur & 0xC0) != 0x80) { // must be 10xxxxxx
+                return 0;
+            }
+            // 0x3F == 00111111
+            utf32 = (utf32 << 6) + (*cur++ & 0x3F);
+        }
+        // "first_char" must be (110xxxxx - 11110xxx)
+        if (num_to_read == 5) {
+            return 0;
+        }
+        to_ignore_mask |= mask;
+        utf32 |= ((~to_ignore_mask) & first_char) << (6 * (num_to_read - 1));
+        if (utf32 > android::kUnicodeMaxCodepoint) {
+            return 0;
+        }
+
+        ret += num_to_read;
+    }
+    return ret;
+}
+
+size_t utf32_length(const char *src, size_t src_len)
+{
+    if (src == NULL || src_len == 0) {
+        return 0;
+    }
+    size_t ret = 0;
+    const char* cur;
+    const char* end;
+    size_t num_to_skip;
+    for (cur = src, end = src + src_len, num_to_skip = 1;
+         cur < end;
+         cur += num_to_skip, ret++) {
+        const char first_char = *cur;
+        num_to_skip = 1;
+        if ((first_char & 0x80) == 0) {  // ASCII
+            continue;
+        }
+        int32_t mask;
+
+        for (mask = 0x40; (first_char & mask); num_to_skip++, mask >>= 1) {
+        }
+    }
+    return ret;
+}
+
+size_t utf8_length_from_utf32(const char32_t *src, size_t src_len)
+{
+    if (src == NULL || src_len == 0) {
+        return 0;
+    }
+    size_t ret = 0;
+    const char32_t *end = src + src_len;
+    while (src < end) {
+        ret += android::utf32_to_utf8_bytes(*src++);
+    }
+    return ret;
+}
+
+static int32_t utf32_at_internal(const char* cur, size_t *num_read)
+{
+    const char first_char = *cur;
+    if ((first_char & 0x80) == 0) { // ASCII
+        *num_read = 1;
+        return *cur;
+    }
+    cur++;
+    char32_t mask, to_ignore_mask;
+    size_t num_to_read = 0;
+    char32_t utf32 = first_char;
+    for (num_to_read = 1, mask = 0x40, to_ignore_mask = 0xFFFFFF80;
+         (first_char & mask);
+         num_to_read++, to_ignore_mask |= mask, mask >>= 1) {
+        // 0x3F == 00111111
+        utf32 = (utf32 << 6) + (*cur++ & 0x3F);
+    }
+    to_ignore_mask |= mask;
+    utf32 &= ~(to_ignore_mask << (6 * (num_to_read - 1)));
+
+    *num_read = num_to_read;
+    return static_cast<int32_t>(utf32);
+}
+
+int32_t utf32_at(const char *src, size_t src_len,
+                 size_t index, size_t *next_index)
+{
+    if (index >= src_len) {
+        return -1;
+    }
+    size_t dummy_index;
+    if (next_index == NULL) {
+        next_index = &dummy_index;
+    }
+    size_t num_read;
+    int32_t ret = utf32_at_internal(src + index, &num_read);
+    if (ret >= 0) {
+        *next_index = index + num_read;
+    }
+
+    return ret;
+}
+
+size_t utf8_to_utf32(const char* src, size_t src_len,
+                     char32_t* dst, size_t dst_len)
+{
+    if (src == NULL || src_len == 0 || dst == NULL || dst_len == 0) {
+        return 0;
+    }
+
+    const char* cur = src;
+    const char* end = src + src_len;
+    char32_t* cur_utf32 = dst;
+    const char32_t* end_utf32 = dst + dst_len;
+    while (cur_utf32 < end_utf32 && cur < end) {
+        size_t num_read;
+        *cur_utf32++ =
+                static_cast<char32_t>(utf32_at_internal(cur, &num_read));
+        cur += num_read;
+    }
+    if (cur_utf32 < end_utf32) {
+        *cur_utf32 = 0;
+    }
+    return static_cast<size_t>(cur_utf32 - dst);
+}
+
+size_t utf32_to_utf8(const char32_t* src, size_t src_len,
+                     char* dst, size_t dst_len)
+{
+    if (src == NULL || src_len == 0 || dst == NULL || dst_len == 0) {
+        return 0;
+    }
+    const char32_t *cur_utf32 = src;
+    const char32_t *end_utf32 = src + src_len;
+    char *cur = dst;
+    const char *end = dst + dst_len;
+    while (cur_utf32 < end_utf32 && cur < end) {
+        size_t len = android::utf32_to_utf8_bytes(*cur_utf32);
+        android::utf32_to_utf8((uint8_t *)cur, *cur_utf32++, len);
+        cur += len;
+    }
+    if (cur < end) {
+        *cur = '\0';
+    }
+    return cur - dst;
+}

@@ -504,8 +504,7 @@ status_t CameraService::Client::startRecordingMode()
     }
 
     // start recording mode
-    ret = mHardware->startRecording(recordingCallback,
-                                    mCameraService.get());
+    ret = mHardware->startRecording(recordingCallback, mCameraService.get());
     if (ret != NO_ERROR) {
         LOGE("mHardware->startRecording() failed with status %d", ret);
     }
@@ -798,7 +797,7 @@ void CameraService::Client::previewCallback(const sp<IMemory>& mem, void* user)
 }
 
 // recording callback
-void CameraService::Client::recordingCallback(const sp<IMemory>& mem, void* user)
+void CameraService::Client::recordingCallback(nsecs_t timestamp, const sp<IMemory>& mem, void* user)
 {
     LOGV("recordingCallback");
     sp<Client> client = getClientFromCookie(user);
@@ -806,7 +805,7 @@ void CameraService::Client::recordingCallback(const sp<IMemory>& mem, void* user
         return;
     }
     // The strong pointer guarantees the client will exist, but no lock is held.
-    client->postRecordingFrame(mem);
+    client->postRecordingFrame(timestamp, mem);
 }
 
 // take a picture - image is returned in callback
@@ -1072,14 +1071,14 @@ void CameraService::Client::copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, si
     mCameraClient->dataCallback(CAMERA_MSG_PREVIEW_FRAME, frame);
 }
 
-void CameraService::Client::postRecordingFrame(const sp<IMemory>& frame)
+void CameraService::Client::postRecordingFrame(nsecs_t timestamp, const sp<IMemory>& frame)
 {
     LOGV("postRecordingFrame");
     if (frame == 0) {
         LOGW("frame is a null pointer");
         return;
     }
-    mCameraClient->dataCallback(CAMERA_MSG_VIDEO_FRAME, frame);
+    mCameraClient->dataCallbackTimestamp(timestamp, CAMERA_MSG_VIDEO_FRAME, frame);
 }
 
 void CameraService::Client::postPreviewFrame(const sp<IMemory>& mem)

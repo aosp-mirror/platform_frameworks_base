@@ -119,13 +119,15 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             Intent intent = Intent.CREATOR.createFromParcel(data);
             IBinder b = data.readStrongBinder();
+            int ident = data.readInt();
             ActivityInfo info = ActivityInfo.CREATOR.createFromParcel(data);
             Bundle state = data.readBundle();
             List<ResultInfo> ri = data.createTypedArrayList(ResultInfo.CREATOR);
             List<Intent> pi = data.createTypedArrayList(Intent.CREATOR);
             boolean notResumed = data.readInt() != 0;
             boolean isForward = data.readInt() != 0;
-            scheduleLaunchActivity(intent, b, info, state, ri, pi, notResumed, isForward);
+            scheduleLaunchActivity(intent, b, ident, info, state, ri, pi,
+                    notResumed, isForward);
             return true;
         }
         
@@ -442,7 +444,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
-    public final void scheduleLaunchActivity(Intent intent, IBinder token,
+    public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
             ActivityInfo info, Bundle state, List<ResultInfo> pendingResults,
     		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward)
     		throws RemoteException {
@@ -450,6 +452,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInterfaceToken(IApplicationThread.descriptor);
         intent.writeToParcel(data, 0);
         data.writeStrongBinder(token);
+        data.writeInt(ident);
         info.writeToParcel(data, 0);
         data.writeBundle(state);
         data.writeTypedList(pendingResults);

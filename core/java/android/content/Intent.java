@@ -1112,11 +1112,17 @@ public class Intent implements Parcelable {
 
     /**
      * Broadcast Action: Sent after the screen turns off.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
     /**
      * Broadcast Action: Sent after the screen turns on.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SCREEN_ON = "android.intent.action.SCREEN_ON";
@@ -1124,6 +1130,9 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action: Sent when the user is present after device wakes up (e.g when the
      * keyguard is gone).
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_USER_PRESENT= "android.intent.action.USER_PRESENT";
@@ -1134,6 +1143,9 @@ public class Intent implements Parcelable {
      * in manifests, only by exlicitly registering for it with
      * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver()}.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_TIME_TICK = "android.intent.action.TIME_TICK";
@@ -1152,6 +1164,9 @@ public class Intent implements Parcelable {
      * <ul>
      *   <li><em>time-zone</em> - The java.util.TimeZone.getID() value identifying the new time zone.</li>
      * </ul>
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_TIMEZONE_CHANGED = "android.intent.action.TIMEZONE_CHANGED";
@@ -1177,6 +1192,9 @@ public class Intent implements Parcelable {
      * such as installing alarms.  You must hold the
      * {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission
      * in order to receive this broadcast.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED";
@@ -1190,6 +1208,9 @@ public class Intent implements Parcelable {
      * Broadcast Action: Trigger the download and eventual installation
      * of a package.
      * <p>Input: {@link #getData} is the URI of the package file to download.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_INSTALL = "android.intent.action.PACKAGE_INSTALL";
@@ -1203,6 +1224,9 @@ public class Intent implements Parcelable {
      * <li> {@link #EXTRA_REPLACING} is set to true if this is following
      * an {@link #ACTION_PACKAGE_REMOVED} broadcast for the same package.
      * </ul>
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_ADDED = "android.intent.action.PACKAGE_ADDED";
@@ -1214,6 +1238,9 @@ public class Intent implements Parcelable {
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the new package.
      * </ul>
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_REPLACED = "android.intent.action.PACKAGE_REPLACED";
@@ -1229,6 +1256,9 @@ public class Intent implements Parcelable {
      * <li> {@link #EXTRA_REPLACING} is set to true if this will be followed
      * by an {@link #ACTION_PACKAGE_ADDED} broadcast for the same package.
      * </ul>
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_REMOVED = "android.intent.action.PACKAGE_REMOVED";
@@ -1238,6 +1268,9 @@ public class Intent implements Parcelable {
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * </ul>
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_CHANGED = "android.intent.action.PACKAGE_CHANGED";
@@ -1251,6 +1284,9 @@ public class Intent implements Parcelable {
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * </ul>
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_RESTARTED = "android.intent.action.PACKAGE_RESTARTED";
@@ -1263,12 +1299,18 @@ public class Intent implements Parcelable {
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * </ul>
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_DATA_CLEARED = "android.intent.action.PACKAGE_DATA_CLEARED";
     /**
      * Broadcast Action: A user ID has been removed from the system.  The user
      * ID number is stored in the extra data under {@link #EXTRA_UID}.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_UID_REMOVED = "android.intent.action.UID_REMOVED";
@@ -1287,6 +1329,9 @@ public class Intent implements Parcelable {
      * application to make sure it sees the new changes.  Some system code that
      * can not be restarted will need to watch for this action and handle it
      * appropriately.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      *
      * @see android.content.res.Configuration
      */
@@ -1298,15 +1343,21 @@ public class Intent implements Parcelable {
      *
      * <p class="note">
      * You can <em>not</em> receive this through components declared
-     * in manifests, only by exlicitly registering for it with
+     * in manifests, only by explicitly registering for it with
      * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver()}.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BATTERY_CHANGED = "android.intent.action.BATTERY_CHANGED";
     /**
      * Broadcast Action:  Indicates low battery condition on the device.
      * This broadcast corresponds to the "Low battery warning" system dialog.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BATTERY_LOW = "android.intent.action.BATTERY_LOW";
@@ -1314,6 +1365,9 @@ public class Intent implements Parcelable {
      * Broadcast Action:  Indicates the battery is now okay after being low.
      * This will be sent after {@link #ACTION_BATTERY_LOW} once the battery has
      * gone back up to an okay state.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BATTERY_OKAY = "android.intent.action.BATTERY_OKAY";
@@ -1323,6 +1377,9 @@ public class Intent implements Parcelable {
      * Unlike ACTION_BATTERY_CHANGED, applications will be woken for this and so do not have to
      * stay active to receive this notification.  This action can be used to implement actions
      * that wait until power is available to trigger.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_POWER_CONNECTED = "android.intent.action.POWER_CONNECTED";
@@ -1332,6 +1389,9 @@ public class Intent implements Parcelable {
      * Unlike ACTION_BATTERY_CHANGED, applications will be woken for this and so do not have to
      * stay active to receive this notification.  This action can be used to implement actions
      * that wait until power is available to trigger.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_POWER_DISCONNECTED =
@@ -1342,16 +1402,25 @@ public class Intent implements Parcelable {
      * off, not sleeping).  Once the broadcast is complete, the final shutdown
      * will proceed and all unsaved data lost.  Apps will not normally need
      * to handle this, since the forground activity will be paused as well.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";
     /**
      * Broadcast Action:  Indicates low memory condition on the device
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DEVICE_STORAGE_LOW = "android.intent.action.DEVICE_STORAGE_LOW";
     /**
      * Broadcast Action:  Indicates low memory condition on the device no longer exists
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DEVICE_STORAGE_OK = "android.intent.action.DEVICE_STORAGE_OK";
@@ -1516,6 +1585,9 @@ public class Intent implements Parcelable {
      *   then cell radio and possibly other radios such as bluetooth or WiFi may have also been
      *   turned off</li>
      * </ul>
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_AIRPLANE_MODE_CHANGED = "android.intent.action.AIRPLANE_MODE";
@@ -1594,6 +1666,9 @@ public class Intent implements Parcelable {
      * <p>You must hold the
      * {@link android.Manifest.permission#PROCESS_OUTGOING_CALLS}
      * permission to receive this Intent.</p>
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NEW_OUTGOING_CALL =
@@ -1602,14 +1677,54 @@ public class Intent implements Parcelable {
     /**
      * Broadcast Action: Have the device reboot.  This is only for use by
      * system code.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_REBOOT =
             "android.intent.action.REBOOT";
+    /**
+     * Broadcast Action: Triggers the platform Text-To-Speech engine to
+     * start the activity that installs the resource files on the device
+     * that are required for TTS to be operational. Since the installation
+     * of the data can be interrupted or declined by the user, the application
+     * shouldn't expect successful installation upon return from that intent,
+     * and if need be, should check installation status with 
+     * {@link #ACTION_TTS_CHECK_TTS_DATA}.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_TTS_INSTALL_TTS_DATA =
+            "android.intent.action.INSTALL_TTS_DATA";
 
     /**
-     * @hide
-     * TODO: This will be unhidden in a later CL.
+     * Broadcast Action: Starts the activity from the platform Text-To-Speech
+     * engine to verify the proper installation and availability of the
+     * resource files on the system. Upon completion, the activity will
+     * return one of the following codes: 
+     * {@link android.speech.tts.TextToSpeech.Engine#CHECK_VOICE_DATA_PASS},
+     * {@link android.speech.tts.TextToSpeech.Engine#CHECK_VOICE_DATA_FAIL},
+     * {@link android.speech.tts.TextToSpeech.Engine#CHECK_VOICE_DATA_BAD_DATA},
+     * {@link android.speech.tts.TextToSpeech.Engine#CHECK_VOICE_DATA_MISSING_DATA}, or
+     * {@link android.speech.tts.TextToSpeech.Engine#CHECK_VOICE_DATA_MISSING_VOLUME}.
+     * <p> Moreover, the data received in the activity result will contain the following
+     * fields:
+     * <ul>
+     *   <li>{@link android.speech.tts.TextToSpeech.Engine#VOICE_DATA_ROOT_DIRECTORY} which
+     *       indicates the path to the location of the resource files</li>,
+     *   <li>{@link android.speech.tts.TextToSpeech.Engine#VOICE_DATA_FILES} which contains
+     *       the list of all the resource files</li>,
+     *   <li>and {@link android.speech.tts.TextToSpeech.Engine#VOICE_DATA_FILES_INFO} which
+     *       contains, for each resource file, the description of the language covered by
+     *       the file in the xxx-YYY format, where xxx is the 3-letter ISO language code,
+     *       and YYY is the 3-letter ISO country code.</li>
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_TTS_CHECK_TTS_DATA =
+            "android.intent.action.CHECK_TTS_DATA";
+
+    /**
      * Broadcast Action: The TextToSpeech synthesizer has completed processing 
      * all of the text in the speech queue.
      */
@@ -4398,6 +4513,9 @@ public class Intent implements Parcelable {
      * {@link #FILL_IN_DATA}, {@link #FILL_IN_CATEGORIES}, {@link #FILL_IN_PACKAGE},
      * and {@link #FILL_IN_COMPONENT} to override the restriction where the
      * corresponding field will not be replaced if it is already set.
+     *
+     * <p>Note: The component field will only be copied if {@link #FILL_IN_COMPONENT} is explicitly
+     * specified.
      *
      * <p>For example, consider Intent A with {data="foo", categories="bar"}
      * and Intent B with {action="gotit", data-type="some/thing",

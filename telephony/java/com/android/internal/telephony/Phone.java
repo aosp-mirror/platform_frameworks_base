@@ -760,10 +760,12 @@ public interface Phone {
      * back to caller.
      *
      * @param dtmfString is string representing the dialing digit(s) in the active call
+     * @param on the DTMF ON length in milliseconds, or 0 for default
+     * @param off the DTMF OFF length in milliseconds, or 0 for default
      * @param onCompelte is the callback message when the action is processed by BP
      *
      */
-    void sendBurstDtmf(String dtmfString, Message onComplete);
+    void sendBurstDtmf(String dtmfString, int on, int off, Message onComplete);
 
     /**
      * Sets the radio power on/off state (off is sometimes

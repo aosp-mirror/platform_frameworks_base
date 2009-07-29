@@ -161,19 +161,27 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_SUPPORTS_LARGE_SCREENS = 1<<11;
     
     /**
+     * Value for {@link #flags}: true when the application knows how to adjust
+     * its UI for different screen sizes.  Corresponds to
+     * {@link android.R.styleable#AndroidManifestSupportsScreens_resizeable
+     * android:resizeable}.
+     */
+    public static final int FLAG_RESIZEABLE_FOR_SCREENS = 1<<12;
+    
+    /**
      * Value for {@link #flags}: this is false if the application has set
      * its android:allowBackup to false, true otherwise.
      * 
      * {@hide}
      */
-    public static final int FLAG_ALLOW_BACKUP = 1<<12;
+    public static final int FLAG_ALLOW_BACKUP = 1<<13;
     
     /**
      * Indicates that the application supports any densities;
      * {@hide}
      */
     public static final int ANY_DENSITY = -1;
-    private static final int[] ANY_DENSITIES_ARRAY = { ANY_DENSITY };
+    static final int[] ANY_DENSITIES_ARRAY = { ANY_DENSITY };
 
     /**
      * Flags associated with the application.  Any combination of
@@ -183,7 +191,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_ALLOW_CLEAR_USER_DATA}, {@link #FLAG_UPDATED_SYSTEM_APP},
      * {@link #FLAG_TEST_ONLY}, {@link #FLAG_SUPPORTS_SMALL_SCREENS},
      * {@link #FLAG_SUPPORTS_NORMAL_SCREENS},
-     * {@link #FLAG_SUPPORTS_LARGE_SCREENS}.
+     * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_RESIZEABLE_FOR_SCREENS}.
      */
     public int flags = 0;
     
@@ -399,7 +407,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     public void disableCompatibilityMode() {
-        flags |= FLAG_SUPPORTS_LARGE_SCREENS;
+        flags |= (FLAG_SUPPORTS_LARGE_SCREENS | FLAG_SUPPORTS_NORMAL_SCREENS |
+                FLAG_SUPPORTS_SMALL_SCREENS | FLAG_RESIZEABLE_FOR_SCREENS);
         supportsDensities = ANY_DENSITIES_ARRAY;
     }
 }

@@ -67,6 +67,7 @@ public final class SearchableInfo implements Parcelable {
     private final int mSearchImeOptions;
     private final boolean mIncludeInGlobalSearch;
     private final boolean mQueryAfterZeroResults;
+    private final boolean mAutoUrlDetect;
     private final String mSettingsDescription;
     private final String mSuggestAuthority;
     private final String mSuggestPath;
@@ -288,6 +289,8 @@ public final class SearchableInfo implements Parcelable {
                 com.android.internal.R.styleable.Searchable_includeInGlobalSearch, false);
         mQueryAfterZeroResults = a.getBoolean(
                 com.android.internal.R.styleable.Searchable_queryAfterZeroResults, false);
+        mAutoUrlDetect = a.getBoolean(
+                com.android.internal.R.styleable.Searchable_autoUrlDetect, false);
 
         mSettingsDescription = a.getString(
                 com.android.internal.R.styleable.Searchable_searchSettingsDescription);
@@ -439,6 +442,14 @@ public final class SearchableInfo implements Parcelable {
         mActionKeys.put(keyInfo.getKeyCode(), keyInfo);
     }
 
+    /**
+     * Gets search information for the given activity.
+     *
+     * @param context Context to use for reading activity resources.
+     * @param activityInfo Activity to get search information from.
+     * @return Search information about the given activity, or {@code null} if
+     *         the activity has no or invalid searchability meta-data.
+     */
     public static SearchableInfo getActivityMetaData(Context context, ActivityInfo activityInfo) {
         // for each component, try to find metadata
         XmlResourceParser xml = 
@@ -667,6 +678,16 @@ public final class SearchableInfo implements Parcelable {
     }
 
     /**
+     * Checks whether this searchable activity has auto URL detect turned on.
+     *
+     * @return The value of the <code>autoUrlDetect</code> attribute,
+     *         or <code>false</code> if the attribute is not set.
+     */
+    public boolean autoUrlDetect() {
+        return mAutoUrlDetect;
+    }
+
+    /**
      * Support for parcelable and aidl operations.
      */
     public static final Parcelable.Creator<SearchableInfo> CREATOR
@@ -698,6 +719,7 @@ public final class SearchableInfo implements Parcelable {
         mSearchImeOptions = in.readInt();
         mIncludeInGlobalSearch = in.readInt() != 0;
         mQueryAfterZeroResults = in.readInt() != 0;
+        mAutoUrlDetect = in.readInt() != 0;
         
         mSettingsDescription = in.readString();
         mSuggestAuthority = in.readString();
@@ -735,6 +757,7 @@ public final class SearchableInfo implements Parcelable {
         dest.writeInt(mSearchImeOptions);
         dest.writeInt(mIncludeInGlobalSearch ? 1 : 0);
         dest.writeInt(mQueryAfterZeroResults ? 1 : 0);
+        dest.writeInt(mAutoUrlDetect ? 1 : 0);
         
         dest.writeString(mSettingsDescription);
         dest.writeString(mSuggestAuthority);

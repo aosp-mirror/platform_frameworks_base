@@ -18,6 +18,7 @@ package com.android.server.vpn;
 
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.net.vpn.VpnManager;
 import android.os.SystemProperties;
 import android.util.Log;
 
@@ -48,6 +49,9 @@ public class AndroidServiceProxy extends ProcessProxy {
 
     private static final int END_OF_ARGUMENTS = 255;
 
+    private static final int STOP_SERVICE = -1;
+    private static final int AUTH_ERROR_CODE = 51;
+
     private String mServiceName;
     private String mSocketName;
     private LocalSocket mKeepaliveSocket;
@@ -72,14 +76,22 @@ public class AndroidServiceProxy extends ProcessProxy {
 
     @Override
     public synchronized void stop() {
-        if (isRunning()) setResultAndCloseControlSocket(-1);
+        if (isRunning()) {
+            try {
+                setResultAndCloseControlSocket(STOP_SERVICE);
+            } catch (IOException e) {
+                // should not occur
+                throw new RuntimeException(e);
+            }
+        }
+        Log.d(mTag, "-----  Stop: " + mServiceName);
         SystemProperties.set(SVC_STOP_CMD, mServiceName);
     }
 
     /**
      * Sends a command with arguments to the service through the control socket.
      */
-    public void sendCommand(String ...args) throws IOException {
+    public synchronized void sendCommand(String ...args) throws IOException {
         OutputStream out = getControlSocketOutput();
         for (String arg : args) outputString(out, arg);
         out.write(END_OF_ARGUMENTS);
@@ -94,7 +106,14 @@ public class AndroidServiceProxy extends ProcessProxy {
     @Override
     protected void performTask() throws IOException {
         String svc = mServiceName;
-        Log.d(mTag, "+++++  Execute: " + svc);
+        Log.d(mTag, "-----  Stop the daemon just in case: " + mServiceName);
+        SystemProperties.set(SVC_STOP_CMD, mServiceName);
+        if (!blockUntil(SVC_STATE_STOPPED, 5)) {
+            throw new IOException("cannot start service anew: " + svc
+                    + ", it is still running");
+        }
+
+        Log.d(mTag, "+++++  Start: " + svc);
         SystemProperties.set(SVC_START_CMD, svc);
 
         boolean success = blockUntil(SVC_STATE_RUNNING, WAITING_TIME);
@@ -114,30 +133,22 @@ public class AndroidServiceProxy extends ProcessProxy {
                     InputStream in = s.getInputStream();
                     int data = in.read();
                     if (data >= 0) {
-                        Log.d(mTag, "got data from keepalive socket: " + data);
+                        Log.d(mTag, "got data from control socket: " + data);
 
-                        if (data == 0) {
-                            // re-establish the connection:
-                            // synchronized here so that checkSocketResult()
-                            // returns when new mKeepaliveSocket is available for
-                            // next cmd
-                            synchronized (this) {
-                                setResultAndCloseControlSocket((byte) data);
-                                s = mKeepaliveSocket = createServiceSocket();
-                            }
-                        } else {
-                            // keep the socket
-                            setSocketResult(data);
-                        }
+                        setSocketResult(data);
                     } else {
                         // service is gone
                         if (mControlSocketInUse) setSocketResult(-1);
                         break;
                     }
                 }
-                Log.d(mTag, "keepalive connection closed");
+                Log.d(mTag, "control connection closed");
             } catch (IOException e) {
-                Log.d(mTag, "keepalive socket broken: " + e.getMessage());
+                if (e instanceof VpnConnectingError) {
+                    throw e;
+                } else {
+                    Log.d(mTag, "control socket broken: " + e.getMessage());
+                }
             }
 
             // Wait 5 seconds for the service to exit
@@ -179,7 +190,7 @@ public class AndroidServiceProxy extends ProcessProxy {
         }
     }
 
-    private synchronized void checkSocketResult() throws IOException {
+    private void checkSocketResult() throws IOException {
         try {
             // will be notified when the result comes back from service
             if (mSocketResult == null) wait();
@@ -194,14 +205,21 @@ public class AndroidServiceProxy extends ProcessProxy {
         }
     }
 
-    private synchronized void setSocketResult(int result) {
+    private synchronized void setSocketResult(int result)
+            throws VpnConnectingError {
         if (mControlSocketInUse) {
             mSocketResult = result;
             notifyAll();
+        } else if (result > 0) {
+            // error from daemon
+            throw new VpnConnectingError((result == AUTH_ERROR_CODE)
+                    ? VpnManager.VPN_ERROR_AUTH
+                    : VpnManager.VPN_ERROR_CONNECTION_FAILED);
         }
     }
 
-    private void setResultAndCloseControlSocket(int result) {
+    private void setResultAndCloseControlSocket(int result)
+            throws VpnConnectingError {
         setSocketResult(result);
         try {
             mKeepaliveSocket.shutdownInput();

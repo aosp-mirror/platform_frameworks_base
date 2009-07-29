@@ -56,12 +56,11 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
-import android.content.res.CompatibilityInfo;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.HandlerThread;
 import android.os.Parcel;
 import android.os.RemoteException;
@@ -251,6 +250,9 @@ class PackageManagerService extends IPackageManager.Stub {
     final HashMap<String, PackageParser.PermissionGroup> mPermissionGroups =
             new HashMap<String, PackageParser.PermissionGroup>();
 
+    // Broadcast actions that are only available to the system.
+    final HashSet<String> mProtectedBroadcasts = new HashSet<String>();
+    
     boolean mSystemReady;
     boolean mSafeMode;
     boolean mHasSystemUidErrors;
@@ -260,7 +262,6 @@ class PackageManagerService extends IPackageManager.Stub {
     final ResolveInfo mResolveInfo = new ResolveInfo();
     ComponentName mResolveComponentName;
     PackageParser.Package mPlatformPackage;
-    private boolean mCompatibilityModeEnabled = true;
 
     public static final IPackageManager main(Context context, boolean factoryTest) {
         PackageManagerService m = new PackageManagerService(context, factoryTest);
@@ -763,7 +764,7 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
             if (Config.LOGV) Log.v(
-                TAG, "getApplicationInfo " + packageName
+                TAG, "getPackageInfo " + packageName
                 + ": " + p);
             if (p != null) {
                 return generatePackageInfo(p, flags);
@@ -794,7 +795,7 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
             if (Config.LOGV) Log.v(
-                TAG, "getApplicationInfo " + packageName
+                TAG, "getPackageGids" + packageName
                 + ": " + p);
             if (p != null) {
                 final PackageSetting ps = (PackageSetting)p.mExtras;
@@ -892,11 +893,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     + ": " + p);
             if (p != null) {
                 // Note: isEnabledLP() does not apply here - always return info
-                ApplicationInfo appInfo = PackageParser.generateApplicationInfo(p, flags);
-                if (!mCompatibilityModeEnabled) {
-                    appInfo.disableCompatibilityMode();
-                }
-                return appInfo;
+                return PackageParser.generateApplicationInfo(p, flags);
             }
             if ("android".equals(packageName)||"system".equals(packageName)) {
                 return mAndroidApplication;
@@ -1128,6 +1125,12 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    public boolean isProtectedBroadcast(String actionName) {
+        synchronized (mPackages) {
+            return mProtectedBroadcasts.contains(actionName);
+        }
+    }
+    
     public int checkSignatures(String pkg1, String pkg2) {
         synchronized (mPackages) {
             PackageParser.Package p1 = mPackages.get(pkg1);
@@ -2039,8 +2042,9 @@ class PackageManagerService extends IPackageManager.Stub {
                             + suid.userId + "): packages=" + suid.packages);
                 }
             }
-    
-            // Just create the setting, don't add it yet
+
+            // Just create the setting, don't add it yet. For already existing packages
+            // the PkgSetting exists already and doesn't have to be created.
             pkgSetting = mSettings.getPackageLP(pkg, suid, destCodeFile,
                             destResourceFile, pkg.applicationInfo.flags, true, false);
             if (pkgSetting == null) {
@@ -2265,7 +2269,7 @@ class PackageManagerService extends IPackageManager.Stub {
             // Add the new setting to mSettings
             mSettings.insertPackageSettingLP(pkgSetting, pkg.packageName, suid);
             // Add the new setting to mPackages
-            mPackages.put(pkg.applicationInfo.packageName, pkg);          
+            mPackages.put(pkg.applicationInfo.packageName, pkg);
             int N = pkg.providers.size();
             StringBuilder r = null;
             int i;
@@ -2500,6 +2504,13 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (Config.LOGD) Log.d(TAG, "  Instrumentation: " + r);
             }
     
+            if (pkg.protectedBroadcasts != null) {
+                N = pkg.protectedBroadcasts.size();
+                for (i=0; i<N; i++) {
+                    mProtectedBroadcasts.add(pkg.protectedBroadcasts.get(i));
+                }
+            }
+            
             pkgSetting.setTimeStamp(scanFileTime);
         }
         
@@ -4801,11 +4812,12 @@ class PackageManagerService extends IPackageManager.Stub {
         mSystemReady = true;
 
         // Read the compatibilty setting when the system is ready.
-        mCompatibilityModeEnabled = android.provider.Settings.System.getInt(
+        boolean compatibilityModeEnabled = android.provider.Settings.System.getInt(
                 mContext.getContentResolver(),
                 android.provider.Settings.System.COMPATIBILITY_MODE, 1) == 1;
+        PackageParser.setCompatibilityModeEnabled(compatibilityModeEnabled);
         if (DEBUG_SETTINGS) {
-            Log.d(TAG, "compatibility mode:" + mCompatibilityModeEnabled);
+            Log.d(TAG, "compatibility mode:" + compatibilityModeEnabled);
         }
     }
 
@@ -4889,6 +4901,26 @@ class PackageManagerService extends IPackageManager.Stub {
                     pw.print("    resourcePath="); pw.println(ps.resourcePathString);
                     if (ps.pkg != null) {
                         pw.print("    dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
+                        pw.print("    targetSdk="); pw.println(ps.pkg.applicationInfo.targetSdkVersion);
+                        pw.print("    densities="); pw.println(ps.pkg.supportsDensityList);
+                        ArrayList<String> screens = new ArrayList<String>();
+                        if ((ps.pkg.applicationInfo.flags & 
+                                ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS) != 0) {
+                            screens.add("medium");
+                        }
+                        if ((ps.pkg.applicationInfo.flags & 
+                                ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+                            screens.add("large");
+                        }
+                        if ((ps.pkg.applicationInfo.flags & 
+                                ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {
+                            screens.add("small,");
+                        }
+                        if ((ps.pkg.applicationInfo.flags & 
+                                ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
+                            screens.add("resizeable,");
+                        }
+                        pw.print("    supportsScreens="); pw.println(screens);
                     }
                     pw.print("    timeStamp="); pw.println(ps.getTimeStampStr());
                     pw.print("    signatures="); pw.println(ps.signatures);
@@ -5408,10 +5440,10 @@ class PackageManagerService extends IPackageManager.Stub {
      */
     static class PackageSettingBase extends GrantedPermissions {
         final String name;
-        final File codePath;
-        final String codePathString;
-        final File resourcePath;
-        final String resourcePathString;
+        File codePath;
+        String codePathString;
+        File resourcePath;
+        String resourcePathString;
         private long timeStamp;
         private String timeStampString = "0";
         final int versionCode;
@@ -5809,11 +5841,16 @@ class PackageManagerService extends IPackageManager.Stub {
                         // and data partition. Just let the most recent version
                         // take precedence.
                         return p;
-                    } else if ((p.pkg != null) && (p.pkg.applicationInfo != null)) {
+                    } else {
                         // Let the app continue with previous uid if code path changes.
                         reportSettingsProblem(Log.WARN,
                                 "Package " + name + " codePath changed from " + p.codePath
-                                + " to " + codePath + "; Retaining data and using new code");
+                                + " to " + codePath + "; Retaining data and using new code from " +
+                                codePath);
+                        p.codePath = codePath;
+                        p.resourcePath = resourcePath;
+                        p.codePathString = codePath.toString();
+                        p.resourcePathString = resourcePath.toString();
                     }
                 } else if (p.sharedUser != sharedUser) {
                     reportSettingsProblem(Log.WARN,
@@ -5837,6 +5874,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (sharedUser != null) {
                     p.userId = sharedUser.userId;
                 } else if (MULTIPLE_APPLICATION_UIDS) {
+                    // Assign new user id
                     p.userId = newUserIdLP(p);
                 } else {
                     p.userId = FIRST_APPLICATION_UID;

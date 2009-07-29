@@ -463,7 +463,7 @@ private:
         virtual     float       streamVolume(int stream) const;
         virtual     bool        streamMute(int stream) const;
 
-                    bool        isMusicActive() const;
+                    bool        isMusicActive_l() const;
         
                     
                     sp<Track>   createTrack_l(

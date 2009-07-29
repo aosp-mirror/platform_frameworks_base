@@ -2888,6 +2888,14 @@
              attribute.</i> -->
         <attr name="searchSettingsDescription" format="string" />
 
+        <!-- If provided and <code>true</code>, URLs entered in the search dialog while searching
+             within this activity would be detected and treated as URLs (show a 'go' button in the
+             keyboard and invoke the browser directly when user launches the URL instead of passing
+             the URL to the activity). If set to <code>false</code> any URLs entered are treated as
+             normal query text.
+             The default value is <code>false</code>. <i>Optional attribute.</i>. -->
+        <attr name="autoUrlDetect" format="boolean" />
+
     </declare-styleable>
 
     <!-- In order to process special action keys during search, you must define them using

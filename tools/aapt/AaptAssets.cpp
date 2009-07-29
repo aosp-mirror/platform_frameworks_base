@@ -138,6 +138,20 @@ AaptGroupEntry::parseNamePart(const String8& part, int* axis, uint32_t* value)
         return 0;
     }
 
+    // screen layout size
+    if (getScreenLayoutSizeName(part.string(), &config)) {
+        *axis = AXIS_SCREENLAYOUTSIZE;
+        *value = (config.screenLayout&ResTable_config::MASK_SCREENSIZE);
+        return 0;
+    }
+
+    // screen layout long
+    if (getScreenLayoutLongName(part.string(), &config)) {
+        *axis = AXIS_SCREENLAYOUTLONG;
+        *value = (config.screenLayout&ResTable_config::MASK_SCREENLONG);
+        return 0;
+    }
+
     // orientation
     if (getOrientationName(part.string(), &config)) {
         *axis = AXIS_ORIENTATION;
@@ -187,13 +201,6 @@ AaptGroupEntry::parseNamePart(const String8& part, int* axis, uint32_t* value)
         return 0;
     }
 
-    // screen layout
-    if (getScreenLayoutName(part.string(), &config)) {
-        *axis = AXIS_SCREENLAYOUT;
-        *value = config.screenLayout;
-        return 0;
-    }
-
     // version
     if (getVersionName(part.string(), &config)) {
         *axis = AXIS_VERSION;
@@ -209,7 +216,8 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
 {
     Vector<String8> parts;
 
-    String8 mcc, mnc, loc, orient, den, touch, key, keysHidden, nav, size, layout, vers;
+    String8 mcc, mnc, loc, layoutsize, layoutlong, orient, den;
+    String8 touch, key, keysHidden, nav, size, vers;
 
     const char *p = dir;
     const char *q;
@@ -294,6 +302,30 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
         part = parts[index];
     } else {
         //printf("not region: %s\n", part.string());
+    }
+
+    if (getScreenLayoutSizeName(part.string())) {
+        layoutsize = part;
+
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index];
+    } else {
+        //printf("not screen layout size: %s\n", part.string());
+    }
+
+    if (getScreenLayoutLongName(part.string())) {
+        layoutlong = part;
+
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index];
+    } else {
+        //printf("not screen layout long: %s\n", part.string());
     }
 
     // orientation
@@ -385,18 +417,6 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
         //printf("not screen size: %s\n", part.string());
     }
 
-    if (getScreenLayoutName(part.string())) {
-        layout = part;
-
-        index++;
-        if (index == N) {
-            goto success;
-        }
-        part = parts[index];
-    } else {
-        //printf("not screen layout: %s\n", part.string());
-    }
-
     if (getVersionName(part.string())) {
         vers = part;
 
@@ -416,6 +436,8 @@ success:
     this->mcc = mcc;
     this->mnc = mnc;
     this->locale = loc;
+    this->screenLayoutSize = layoutsize;
+    this->screenLayoutLong = layoutlong;
     this->orientation = orient;
     this->density = den;
     this->touchscreen = touch;
@@ -423,7 +445,6 @@ success:
     this->keyboard = key;
     this->navigation = nav;
     this->screenSize = size;
-    this->screenLayout = layout;
     this->version = vers;
 
     // what is this anyway?
@@ -441,6 +462,10 @@ AaptGroupEntry::toString() const
     s += ",";
     s += this->locale;
     s += ",";
+    s += screenLayoutSize;
+    s += ",";
+    s += screenLayoutLong;
+    s += ",";
     s += this->orientation;
     s += ",";
     s += density;
@@ -454,8 +479,6 @@ AaptGroupEntry::toString() const
     s += navigation;
     s += ",";
     s += screenSize;
-    s += ",";
-    s += screenLayout;
     s += ",";
     s += version;
     return s;
@@ -476,6 +499,14 @@ AaptGroupEntry::toDirName(const String8& resType) const
     if (this->locale != "") {
         s += "-";
         s += locale;
+    }
+    if (this->screenLayoutSize != "") {
+        s += "-";
+        s += screenLayoutSize;
+    }
+    if (this->screenLayoutLong != "") {
+        s += "-";
+        s += screenLayoutLong;
     }
     if (this->orientation != "") {
         s += "-";
@@ -504,10 +535,6 @@ AaptGroupEntry::toDirName(const String8& resType) const
     if (this->screenSize != "") {
         s += "-";
         s += screenSize;
-    }
-    if (this->screenLayout != "") {
-        s += "-";
-        s += screenLayout;
     }
     if (this->version != "") {
         s += "-";
@@ -630,6 +657,57 @@ bool AaptGroupEntry::getLocaleName(const char* fileName,
     return false;
 }
 
+bool AaptGroupEntry::getScreenLayoutSizeName(const char* name,
+                                     ResTable_config* out)
+{
+    if (strcmp(name, kWildcardName) == 0) {
+        if (out) out->screenLayout =
+                (out->screenLayout&~ResTable_config::MASK_SCREENSIZE)
+                | ResTable_config::SCREENSIZE_ANY;
+        return true;
+    } else if (strcmp(name, "small") == 0) {
+        if (out) out->screenLayout =
+                (out->screenLayout&~ResTable_config::MASK_SCREENSIZE)
+                | ResTable_config::SCREENSIZE_SMALL;
+        return true;
+    } else if (strcmp(name, "normal") == 0) {
+        if (out) out->screenLayout =
+                (out->screenLayout&~ResTable_config::MASK_SCREENSIZE)
+                | ResTable_config::SCREENSIZE_NORMAL;
+        return true;
+    } else if (strcmp(name, "large") == 0) {
+        if (out) out->screenLayout =
+                (out->screenLayout&~ResTable_config::MASK_SCREENSIZE)
+                | ResTable_config::SCREENSIZE_LARGE;
+        return true;
+    }
+
+    return false;
+}
+
+bool AaptGroupEntry::getScreenLayoutLongName(const char* name,
+                                     ResTable_config* out)
+{
+    if (strcmp(name, kWildcardName) == 0) {
+        if (out) out->screenLayout =
+                (out->screenLayout&~ResTable_config::MASK_SCREENLONG)
+                | ResTable_config::SCREENLONG_ANY;
+        return true;
+    } else if (strcmp(name, "long") == 0) {
+        if (out) out->screenLayout =
+                (out->screenLayout&~ResTable_config::MASK_SCREENLONG)
+                | ResTable_config::SCREENLONG_YES;
+        return true;
+    } else if (strcmp(name, "notlong") == 0) {
+        if (out) out->screenLayout =
+                (out->screenLayout&~ResTable_config::MASK_SCREENLONG)
+                | ResTable_config::SCREENLONG_NO;
+        return true;
+    }
+
+    return false;
+}
+
 bool AaptGroupEntry::getOrientationName(const char* name,
                                         ResTable_config* out)
 {
@@ -654,9 +732,30 @@ bool AaptGroupEntry::getDensityName(const char* name,
                                     ResTable_config* out)
 {
     if (strcmp(name, kWildcardName) == 0) {
-        if (out) out->density = 0;
+        if (out) out->density = ResTable_config::DENSITY_DEFAULT;
         return true;
     }
+    
+    if (strcmp(name, "nodpi") == 0) {
+        if (out) out->density = ResTable_config::DENSITY_NONE;
+        return true;
+    }
+    
+    if (strcmp(name, "ldpi") == 0) {
+        if (out) out->density = ResTable_config::DENSITY_LOW;
+        return true;
+    }
+    
+    if (strcmp(name, "mdpi") == 0) {
+        if (out) out->density = ResTable_config::DENSITY_MEDIUM;
+        return true;
+    }
+    
+    if (strcmp(name, "hdpi") == 0) {
+        if (out) out->density = ResTable_config::DENSITY_HIGH;
+        return true;
+    }
+    
     char* c = (char*)name;
     while (*c >= '0' && *c <= '9') {
         c++;
@@ -812,26 +911,6 @@ bool AaptGroupEntry::getScreenSizeName(const char* name,
     return true;
 }
 
-bool AaptGroupEntry::getScreenLayoutName(const char* name,
-                                     ResTable_config* out)
-{
-    if (strcmp(name, kWildcardName) == 0) {
-        if (out) out->screenLayout = out->SCREENLAYOUT_ANY;
-        return true;
-    } else if (strcmp(name, "smallscreen") == 0) {
-        if (out) out->screenLayout = out->SCREENLAYOUT_SMALL;
-        return true;
-    } else if (strcmp(name, "normalscreen") == 0) {
-        if (out) out->screenLayout = out->SCREENLAYOUT_NORMAL;
-        return true;
-    } else if (strcmp(name, "largescreen") == 0) {
-        if (out) out->screenLayout = out->SCREENLAYOUT_LARGE;
-        return true;
-    }
-
-    return false;
-}
-
 bool AaptGroupEntry::getVersionName(const char* name,
                                     ResTable_config* out)
 {
@@ -867,6 +946,8 @@ int AaptGroupEntry::compare(const AaptGroupEntry& o) const
     if (v == 0) v = mnc.compare(o.mnc);
     if (v == 0) v = locale.compare(o.locale);
     if (v == 0) v = vendor.compare(o.vendor);
+    if (v == 0) v = screenLayoutSize.compare(o.screenLayoutSize);
+    if (v == 0) v = screenLayoutLong.compare(o.screenLayoutLong);
     if (v == 0) v = orientation.compare(o.orientation);
     if (v == 0) v = density.compare(o.density);
     if (v == 0) v = touchscreen.compare(o.touchscreen);
@@ -874,7 +955,6 @@ int AaptGroupEntry::compare(const AaptGroupEntry& o) const
     if (v == 0) v = keyboard.compare(o.keyboard);
     if (v == 0) v = navigation.compare(o.navigation);
     if (v == 0) v = screenSize.compare(o.screenSize);
-    if (v == 0) v = screenLayout.compare(o.screenLayout);
     if (v == 0) v = version.compare(o.version);
     return v;
 }
@@ -886,6 +966,8 @@ ResTable_config AaptGroupEntry::toParams() const
     getMccName(mcc.string(), &params);
     getMncName(mnc.string(), &params);
     getLocaleName(locale.string(), &params);
+    getScreenLayoutSizeName(screenLayoutSize.string(), &params);
+    getScreenLayoutLongName(screenLayoutLong.string(), &params);
     getOrientationName(orientation.string(), &params);
     getDensityName(density.string(), &params);
     getTouchscreenName(touchscreen.string(), &params);
@@ -893,7 +975,6 @@ ResTable_config AaptGroupEntry::toParams() const
     getKeyboardName(keyboard.string(), &params);
     getNavigationName(navigation.string(), &params);
     getScreenSizeName(screenSize.string(), &params);
-    getScreenLayoutName(screenLayout.string(), &params);
     getVersionName(version.string(), &params);
     return params;
 }

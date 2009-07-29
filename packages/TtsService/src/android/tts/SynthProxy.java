@@ -15,6 +15,8 @@
  */
 package android.tts;
 
+import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.util.Log;
 import java.lang.ref.WeakReference;
 
@@ -52,8 +54,13 @@ public class SynthProxy {
     /**
      * Synthesize speech and speak it directly using AudioTrack.
      */
-    public int speak(String text) {
-        return native_speak(mJniData, text);
+    public int speak(String text, int streamType) {
+        if ((streamType > -1) && (streamType < AudioSystem.getNumStreamTypes())) {
+            return native_speak(mJniData, text, streamType);
+        } else {
+            Log.e("SynthProxy", "Trying to speak with invalid stream type " + streamType);
+            return native_speak(mJniData, text, AudioManager.STREAM_MUSIC);
+        }
     }
 
     /**
@@ -99,13 +106,6 @@ public class SynthProxy {
      */
     public final int setPitch(int pitch) {
         return native_setPitch(mJniData, pitch);
-    }
-
-    /**
-     * Plays the given audio buffer.
-     */
-    public void playAudioBuffer(int bufferPointer, int bufferSize) {
-        native_playAudioBuffer(mJniData, bufferPointer, bufferSize);
     }
 
     /**
@@ -156,7 +156,7 @@ public class SynthProxy {
 
     private native final int native_stop(int jniData);
 
-    private native final int native_speak(int jniData, String text);
+    private native final int native_speak(int jniData, String text, int streamType);
 
     private native final int native_synthesizeToFile(int jniData, String text, String filename);
 
@@ -172,9 +172,6 @@ public class SynthProxy {
     private native final int native_setSpeechRate(int jniData, int speechRate);
 
     private native final int native_setPitch(int jniData, int speechRate);
-
-    // TODO add buffer format
-    private native final void native_playAudioBuffer(int jniData, int bufferPointer, int bufferSize);
 
     private native final String[] native_getLanguage(int jniData);
 

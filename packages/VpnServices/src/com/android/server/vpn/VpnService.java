@@ -20,7 +20,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.net.NetworkUtils;
 import android.net.vpn.VpnManager;
 import android.net.vpn.VpnProfile;
 import android.net.vpn.VpnState;
@@ -30,10 +29,8 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -46,9 +43,9 @@ abstract class VpnService<E extends VpnProfile> {
     private static final String DNS2 = "net.dns2";
     private static final String VPN_DNS1 = "vpn.dns1";
     private static final String VPN_DNS2 = "vpn.dns2";
-    private static final String VPN_UP = "vpn.up";
-    private static final String VPN_IS_UP = "1";
-    private static final String VPN_IS_DOWN = "0";
+    private static final String VPN_STATUS = "vpn.status";
+    private static final String VPN_IS_UP = "ok";
+    private static final String VPN_IS_DOWN = "down";
 
     private static final String REMOTE_IP = "net.ipremote";
     private static final String DNS_DOMAIN_SUFFICES = "net.dns.search";
@@ -60,6 +57,7 @@ abstract class VpnService<E extends VpnProfile> {
 
     private VpnState mState = VpnState.IDLE;
     private boolean mInError;
+    private VpnConnectingError mError;
 
     // connection settings
     private String mOriginalDns1;
@@ -67,7 +65,6 @@ abstract class VpnService<E extends VpnProfile> {
     private String mVpnDns1 = "";
     private String mVpnDns2 = "";
     private String mOriginalDomainSuffices;
-    private String mHostIp;
 
     private long mStartTime; // VPN connection start time
 
@@ -106,33 +103,10 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     /**
-     * Returns the host IP for establishing the VPN connection.
-     */
-    protected String getHostIp() throws IOException {
-        if (mHostIp == null) mHostIp = reallyGetHostIp();
-        return mHostIp;
-    }
-
-    /**
      * Returns the IP address of the specified host name.
      */
     protected String getIp(String hostName) throws IOException {
         return InetAddress.getByName(hostName).getHostAddress();
-    }
-
-    /**
-     * Returns the IP address of the default gateway.
-     */
-    protected String getGatewayIp() throws IOException {
-        Enumeration<NetworkInterface> ifces =
-                NetworkInterface.getNetworkInterfaces();
-        for (; ifces.hasMoreElements(); ) {
-            NetworkInterface ni = ifces.nextElement();
-            int gateway = NetworkUtils.getDefaultRoute(ni.getName());
-            if (gateway == 0) continue;
-            return toInetAddress(gateway).getHostAddress();
-        }
-        throw new IOException("Default gateway is not available");
     }
 
     /**
@@ -166,20 +140,28 @@ abstract class VpnService<E extends VpnProfile> {
         return mState;
     }
 
-    synchronized void onConnect(String username, String password)
-            throws IOException {
-        mState = VpnState.CONNECTING;
-        broadcastConnectivity(VpnState.CONNECTING);
+    synchronized boolean onConnect(String username, String password) {
+        try {
+            mState = VpnState.CONNECTING;
+            broadcastConnectivity(VpnState.CONNECTING);
 
-        String serverIp = getIp(getProfile().getServerName());
+            String serverIp = getIp(getProfile().getServerName());
 
-        onBeforeConnect();
-        connect(serverIp, username, password);
-        waitUntilConnectedOrTimedout();
+            onBeforeConnect();
+            connect(serverIp, username, password);
+            waitUntilConnectedOrTimedout();
+            return true;
+        } catch (Throwable e) {
+            Log.e(TAG, "onConnect()", e);
+            mError = newConnectingError(e);
+            onError();
+            return false;
+        }
     }
 
     synchronized void onDisconnect(boolean cleanUpServices) {
         try {
+            Log.d(TAG, "       disconnecting VPN...");
             mState = VpnState.DISCONNECTING;
             broadcastConnectivity(VpnState.DISCONNECTING);
             mNotification.showDisconnect();
@@ -189,7 +171,7 @@ abstract class VpnService<E extends VpnProfile> {
 
             mServiceHelper.stop();
         } catch (Throwable e) {
-            Log.e(TAG, "onError()", e);
+            Log.e(TAG, "onDisconnect()", e);
             onFinalCleanUp();
         }
     }
@@ -214,26 +196,35 @@ abstract class VpnService<E extends VpnProfile> {
 
         SystemProperties.set(VPN_DNS1, "-");
         SystemProperties.set(VPN_DNS2, "-");
-        SystemProperties.set(VPN_UP, VPN_IS_DOWN);
-        Log.d(TAG, "       VPN UP: " + SystemProperties.get(VPN_UP));
+        SystemProperties.set(VPN_STATUS, VPN_IS_DOWN);
+        Log.d(TAG, "       VPN UP: " + SystemProperties.get(VPN_STATUS));
     }
 
     private void waitUntilConnectedOrTimedout() {
-        sleep(2000); // 2 seconds
-        for (int i = 0; i < 60; i++) {
-            if (VPN_IS_UP.equals(SystemProperties.get(VPN_UP))) {
-                onConnected();
-                return;
-            }
-            sleep(500); // 0.5 second
-        }
+        // Run this in the background thread to not block UI
+        new Thread(new Runnable() {
+            public void run() {
+                sleep(2000); // 2 seconds
+                for (int i = 0; i < 60; i++) {
+                    if (VPN_IS_UP.equals(SystemProperties.get(VPN_STATUS))) {
+                        onConnected();
+                        return;
+                    } else if (mState != VpnState.CONNECTING) {
+                        break;
+                    }
+                    sleep(500); // 0.5 second
+                }
 
-        synchronized (this) {
-            if (mState == VpnState.CONNECTING) {
-                Log.d(TAG, "       connecting timed out !!");
-                onError();
+                synchronized (VpnService.this) {
+                    if (mState == VpnState.CONNECTING) {
+                        Log.d(TAG, "       connecting timed out !!");
+                        mError = newConnectingError(
+                                new IOException("Connecting timed out"));
+                        onError();
+                    }
+                }
             }
-        }
+        }).start();
     }
 
     private synchronized void onConnected() {
@@ -262,6 +253,13 @@ abstract class VpnService<E extends VpnProfile> {
 
         // stop the service itself
         mContext.stopSelf();
+    }
+
+    private VpnConnectingError newConnectingError(Throwable e) {
+        return new VpnConnectingError(
+                (e instanceof UnknownHostException)
+                ? VpnManager.VPN_ERROR_UNKNOWN_SERVER
+                : VpnManager.VPN_ERROR_CONNECTION_FAILED);
     }
 
     private synchronized void onOneServiceGone() {
@@ -304,12 +302,12 @@ abstract class VpnService<E extends VpnProfile> {
 
     private void saveVpnDnsProperties() {
         mOriginalDns1 = mOriginalDns2 = "";
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             mVpnDns1 = SystemProperties.get(VPN_DNS1);
             mVpnDns2 = SystemProperties.get(VPN_DNS2);
             if (mOriginalDns1.equals(mVpnDns1)) {
                 Log.d(TAG, "wait for vpn dns to settle in..." + i);
-                sleep(500);
+                sleep(200);
             } else {
                 mOriginalDns1 = SystemProperties.get(DNS1);
                 mOriginalDns2 = SystemProperties.get(DNS2);
@@ -322,7 +320,9 @@ abstract class VpnService<E extends VpnProfile> {
                 return;
             }
         }
-        Log.e(TAG, "saveVpnDnsProperties(): DNS not updated??");
+        Log.d(TAG, "saveVpnDnsProperties(): DNS not updated??");
+        mOriginalDns1 = mVpnDns1 = SystemProperties.get(DNS1);
+        mOriginalDns2 = mVpnDns2 = SystemProperties.get(DNS2);
     }
 
     private void saveAndSetDomainSuffices() {
@@ -340,7 +340,13 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     private void broadcastConnectivity(VpnState s) {
-        new VpnManager(mContext).broadcastConnectivity(mProfile.getName(), s);
+        VpnManager m = new VpnManager(mContext);
+        if ((s == VpnState.IDLE) && (mError != null)) {
+            m.broadcastConnectivity(mProfile.getName(), s,
+                    mError.getErrorCode());
+        } else {
+            m.broadcastConnectivity(mProfile.getName(), s);
+        }
     }
 
     private void startConnectivityMonitor() {
@@ -373,24 +379,9 @@ abstract class VpnService<E extends VpnProfile> {
     private void checkDnsProperties() {
         String dns1 = SystemProperties.get(DNS1);
         if (!mVpnDns1.equals(dns1)) {
-            Log.w(TAG, "   @@ !!!    dns being overridden");
+            Log.w(TAG, "   dns being overridden by: " + dns1);
             onError();
         }
-    }
-
-    private String reallyGetHostIp() throws IOException {
-        Enumeration<NetworkInterface> ifces =
-                NetworkInterface.getNetworkInterfaces();
-        for (; ifces.hasMoreElements(); ) {
-            NetworkInterface ni = ifces.nextElement();
-            int gateway = NetworkUtils.getDefaultRoute(ni.getName());
-            if (gateway == 0) continue;
-            Enumeration<InetAddress> addrs = ni.getInetAddresses();
-            for (; addrs.hasMoreElements(); ) {
-                return addrs.nextElement().getHostAddress();
-            }
-        }
-        throw new IOException("Host IP is not available");
     }
 
     protected void sleep(int ms) {
@@ -440,6 +431,9 @@ abstract class VpnService<E extends VpnProfile> {
         //@Override
         public void error(ProcessProxy p, Throwable e) {
             Log.e(TAG, "service error: " + p.getName(), e);
+            if (e instanceof VpnConnectingError) {
+                mError = (VpnConnectingError) e;
+            }
             commonCallback((AndroidServiceProxy) p);
         }
 
