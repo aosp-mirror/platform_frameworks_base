@@ -193,6 +193,7 @@ BackupDataReader::Status()
         if ((actual) != (expected)) { \
             if ((actual) == 0) { \
                 m_status = EIO; \
+                m_done = true; \
             } else { \
                 m_status = errno; \
             } \
@@ -222,7 +223,7 @@ BackupDataReader::ReadNextHeader(bool* done, int* type)
 
     amt = skip_padding();
     if (amt == EIO) {
-        *done = true;
+        *done = m_done = true;
         return NO_ERROR;
     }
     else if (amt != NO_ERROR) {
@@ -337,6 +338,10 @@ BackupDataReader::ReadEntityData(void* data, size_t size)
     if (amt < 0) {
         m_status = errno;
         return -1;
+    }
+    if (amt == 0) {
+        m_status = EIO;
+        m_done = true;
     }
     m_pos += amt;
     return amt;

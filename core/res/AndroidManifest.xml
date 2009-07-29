@@ -1087,7 +1087,7 @@
                  android:hasCode="false"
                  android:label="@string/android_system_label"
                  android:allowClearUserData="false"
-                 android:backupAgent="com.android.internal.backup.SystemBackupAgent"
+                 android:backupAgent="com.android.server.SystemBackupAgent"
                  android:icon="@drawable/ic_launcher_android">
         <activity android:name="com.android.internal.app.ChooserActivity"
                 android:theme="@style/Theme.Dialog.Alert"

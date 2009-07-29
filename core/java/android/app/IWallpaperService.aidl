@@ -25,7 +25,7 @@ interface IWallpaperService {
     /**
      * Set the wallpaper.
      */
-    ParcelFileDescriptor setWallpaper();
+    ParcelFileDescriptor setWallpaper(String name);
     
     /**
      * Get the wallpaper.
