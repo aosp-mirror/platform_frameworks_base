@@ -46,7 +46,7 @@ static void save_in_store(EVP_PKEY *pkey)
     RSA *rsa = EVP_PKEY_get1_RSA(pkey);
     EVP_PKEY_set1_RSA(newpkey, rsa);
     PKEY_STORE_free(pkey_store[store_index]);
-    pkey_store[store_index].key_len = i2d_RSAPublicKey(rsa, &pkey_store[store_index].public_key);
+    pkey_store[store_index].key_len = i2d_RSA_PUBKEY(rsa, &pkey_store[store_index].public_key);
     pkey_store[store_index++].pkey = newpkey;
     store_index %= KEYGEN_STORE_SIZE;
     RSA_free(rsa);
