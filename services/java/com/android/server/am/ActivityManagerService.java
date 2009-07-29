@@ -4766,6 +4766,34 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public void closeSystemDialogs(String reason) {
+        Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        if (reason != null) {
+            intent.putExtra("reason", reason);
+        }
+        
+        final int uid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (this) {
+            int i = mWatchers.beginBroadcast();
+            while (i > 0) {
+                i--;
+                IActivityWatcher w = mWatchers.getBroadcastItem(i);
+                if (w != null) {
+                    try {
+                        w.closingSystemDialogs(reason);
+                    } catch (RemoteException e) {
+                    }
+                }
+            }
+            mWatchers.finishBroadcast();
+            
+            broadcastIntentLocked(null, null, intent, null,
+                    null, 0, null, null, null, false, false, -1, uid);
+        }
+        Binder.restoreCallingIdentity(origId);
+    }
+    
     private void restartPackageLocked(final String packageName, int uid) {
         uninstallPackageLocked(packageName, uid, false);
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,

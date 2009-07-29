@@ -138,6 +138,11 @@ public class SearchManagerService extends ISearchManager.Stub {
             if (mSearchDialog == null) return;
             mSearchDialog.activityResuming(activityId);
         }
+        public void closingSystemDialogs(String reason) {
+            if (DBG) Log.i("foo", "********************** closing dialogs: " + reason);
+            if (mSearchDialog == null) return;
+            mSearchDialog.closingSystemDialogs(reason);
+        }
     };
     
     /**
