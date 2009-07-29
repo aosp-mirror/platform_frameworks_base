@@ -798,23 +798,34 @@ public final class BearerData {
         return null;
    }
 
-    private static void decodeMessageId(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeMessageId(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 3) {
-            throw new CodingException("MESSAGE_IDENTIFIER subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 3 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.messageType = inStream.read(4);
+            bData.messageId = inStream.read(8) << 8;
+            bData.messageId |= inStream.read(8);
+            bData.hasUserDataHeader = (inStream.read(1) == 1);
+            inStream.skip(3);
         }
-        bData.messageType = inStream.read(4);
-        bData.messageId = inStream.read(8) << 8;
-        bData.messageId |= inStream.read(8);
-        bData.hasUserDataHeader = (inStream.read(1) == 1);
-        inStream.skip(3);
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "MESSAGE_IDENTIFIER decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeUserData(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeUserData(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException
     {
-        int paramBytes = inStream.read(8);
+        int paramBits = inStream.read(8) * 8;
         bData.userData = new UserData();
         bData.userData.msgEncoding = inStream.read(5);
         bData.userData.msgEncodingSet = true;
@@ -827,8 +838,9 @@ public final class BearerData {
         }
         bData.userData.numFields = inStream.read(8);
         consumedBits += 8;
-        int dataBits = (paramBytes * 8) - consumedBits;
+        int dataBits = paramBits - consumedBits;
         bData.userData.payload = inStream.readByteArray(dataBits);
+        return true;
     }
 
     private static String decodeUtf16(byte[] data, int offset, int numFields)
@@ -1081,36 +1093,68 @@ public final class BearerData {
         }
     }
 
-    private static void decodeReplyOption(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeReplyOption(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        int paramBytes = inStream.read(8);
-        if (paramBytes != 1) {
-            throw new CodingException("REPLY_OPTION subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.userAckReq     = (inStream.read(1) == 1);
+            bData.deliveryAckReq = (inStream.read(1) == 1);
+            bData.readAckReq     = (inStream.read(1) == 1);
+            bData.reportReq      = (inStream.read(1) == 1);
+            inStream.skip(4);
         }
-        bData.userAckReq     = (inStream.read(1) == 1);
-        bData.deliveryAckReq = (inStream.read(1) == 1);
-        bData.readAckReq     = (inStream.read(1) == 1);
-        bData.reportReq      = (inStream.read(1) == 1);
-        inStream.skip(4);
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "REPLY_OPTION decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeMsgCount(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeMsgCount(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("NUMBER_OF_MESSAGES subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.numberOfMessages = inStream.read(8);
         }
-        bData.numberOfMessages = inStream.read(8);
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "NUMBER_OF_MESSAGES decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeDepositIndex(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeDepositIndex(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 2) {
-            throw new CodingException("MESSAGE_DEPOSIT_INDEX subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 2 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.depositIndex = (inStream.read(8) << 8) | inStream.read(8);
         }
-        bData.depositIndex = (inStream.read(8) << 8) | inStream.read(8);
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "MESSAGE_DEPOSIT_INDEX decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
     private static String decodeDtmfSmsAddress(byte[] rawData, int numFields)
@@ -1144,10 +1188,10 @@ public final class BearerData {
         }
     }
 
-    private static void decodeCallbackNumber(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeCallbackNumber(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        int paramBytes = inStream.read(8);
+        int paramBits = inStream.read(8) * 8;
         CdmaSmsAddress addr = new CdmaSmsAddress();
         addr.digitMode = inStream.read(1);
         byte fieldBits = 4;
@@ -1160,140 +1204,274 @@ public final class BearerData {
         }
         addr.numberOfDigits = inStream.read(8);
         consumedBits += 8;
-        int remainingBits = (paramBytes * 8) - consumedBits;
+        int remainingBits = paramBits - consumedBits;
         int dataBits = addr.numberOfDigits * fieldBits;
         int paddingBits = remainingBits - dataBits;
         if (remainingBits < dataBits) {
             throw new CodingException("CALLBACK_NUMBER subparam encoding size error (" +
-                                      "remainingBits " + remainingBits + ", dataBits " +
-                                      dataBits + ", paddingBits " + paddingBits + ")");
+                                      "remainingBits + " + remainingBits + ", dataBits + " +
+                                      dataBits + ", paddingBits + " + paddingBits + ")");
         }
         addr.origBytes = inStream.readByteArray(dataBits);
         inStream.skip(paddingBits);
         decodeSmsAddress(addr);
         bData.callbackNumber = addr;
+        return true;
     }
 
-    private static void decodeMsgStatus(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeMsgStatus(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("MESSAGE_STATUS subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.errorClass = inStream.read(2);
+            bData.messageStatus = inStream.read(6);
         }
-        bData.errorClass = inStream.read(2);
-        bData.messageStatus = inStream.read(6);
-        bData.messageStatusSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "MESSAGE_STATUS decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.messageStatusSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeMsgCenterTimeStamp(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeMsgCenterTimeStamp(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 6) {
-            throw new CodingException("MESSAGE_CENTER_TIME_STAMP subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 6 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.msgCenterTimeStamp = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
         }
-        bData.msgCenterTimeStamp = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "MESSAGE_CENTER_TIME_STAMP decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeValidityAbs(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeValidityAbs(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 6) {
-            throw new CodingException("VALIDITY_PERIOD_ABSOLUTE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 6 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.validityPeriodAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
         }
-        bData.validityPeriodAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "VALIDITY_PERIOD_ABSOLUTE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeDeferredDeliveryAbs(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeDeferredDeliveryAbs(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 6) {
-            throw new CodingException("DEFERRED_DELIVERY_TIME_ABSOLUTE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 6 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.deferredDeliveryTimeAbsolute = TimeStamp.fromByteArray(
+                    inStream.readByteArray(6 * 8));
         }
-        bData.deferredDeliveryTimeAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "DEFERRED_DELIVERY_TIME_ABSOLUTE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeValidityRel(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeValidityRel(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("VALIDITY_PERIOD_RELATIVE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.deferredDeliveryTimeRelative = inStream.read(8);
         }
-        bData.deferredDeliveryTimeRelative = inStream.read(8);
-        bData.deferredDeliveryTimeRelativeSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "VALIDITY_PERIOD_RELATIVE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.deferredDeliveryTimeRelativeSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeDeferredDeliveryRel(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeDeferredDeliveryRel(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("DEFERRED_DELIVERY_TIME_RELATIVE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.validityPeriodRelative = inStream.read(8);
         }
-        bData.validityPeriodRelative = inStream.read(8);
-        bData.validityPeriodRelativeSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "DEFERRED_DELIVERY_TIME_RELATIVE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.validityPeriodRelativeSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodePrivacyIndicator(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodePrivacyIndicator(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("PRIVACY_INDICATOR subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.privacy = inStream.read(2);
+            inStream.skip(6);
         }
-        bData.privacy = inStream.read(2);
-        inStream.skip(6);
-        bData.privacyIndicatorSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "PRIVACY_INDICATOR decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.privacyIndicatorSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeLanguageIndicator(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeLanguageIndicator(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("LANGUAGE_INDICATOR subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.language = inStream.read(8);
         }
-        bData.language = inStream.read(8);
-        bData.languageIndicatorSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "LANGUAGE_INDICATOR decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.languageIndicatorSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeDisplayMode(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeDisplayMode(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("DISPLAY_MODE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.displayMode = inStream.read(2);
+            inStream.skip(6);
         }
-        bData.displayMode = inStream.read(2);
-        inStream.skip(6);
-        bData.displayModeSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "DISPLAY_MODE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.displayModeSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodePriorityIndicator(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodePriorityIndicator(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("PRIORITY_INDICATOR subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.priority = inStream.read(2);
+            inStream.skip(6);
         }
-        bData.priority = inStream.read(2);
-        inStream.skip(6);
-        bData.priorityIndicatorSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "PRIORITY_INDICATOR decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.priorityIndicatorSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeMsgDeliveryAlert(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeMsgDeliveryAlert(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("ALERT_ON_MESSAGE_DELIVERY subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.alert = inStream.read(2);
+            inStream.skip(6);
         }
-        bData.alert = inStream.read(2);
-        inStream.skip(6);
-        bData.alertIndicatorSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "ALERT_ON_MESSAGE_DELIVERY decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.alertIndicatorSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeUserResponseCode(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeUserResponseCode(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("USER_REPONSE_CODE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.userResponseCode = inStream.read(8);
         }
-        bData.userResponseCode = inStream.read(8);
-        bData.userResponseCodeSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "USER_REPONSE_CODE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.userResponseCodeSet = decodeSuccess;
+        return decodeSuccess;
     }
 
     /**
@@ -1310,72 +1488,73 @@ public final class BearerData {
             BearerData bData = new BearerData();
             int foundSubparamMask = 0;
             while (inStream.available() > 0) {
+                boolean decodeSuccess = false;
                 int subparamId = inStream.read(8);
                 int subparamIdBit = 1 << subparamId;
                 if ((foundSubparamMask & subparamIdBit) != 0) {
                     throw new CodingException("illegal duplicate subparameter (" +
                                               subparamId + ")");
                 }
-                foundSubparamMask |= subparamIdBit;
                 switch (subparamId) {
                 case SUBPARAM_MESSAGE_IDENTIFIER:
-                    decodeMessageId(bData, inStream);
+                    decodeSuccess = decodeMessageId(bData, inStream);
                     break;
                 case SUBPARAM_USER_DATA:
-                    decodeUserData(bData, inStream);
+                    decodeSuccess = decodeUserData(bData, inStream);
                     break;
                 case SUBPARAM_USER_REPONSE_CODE:
-                    decodeUserResponseCode(bData, inStream);
+                    decodeSuccess = decodeUserResponseCode(bData, inStream);
                     break;
                 case SUBPARAM_REPLY_OPTION:
-                    decodeReplyOption(bData, inStream);
+                    decodeSuccess = decodeReplyOption(bData, inStream);
                     break;
                 case SUBPARAM_NUMBER_OF_MESSAGES:
-                    decodeMsgCount(bData, inStream);
+                    decodeSuccess = decodeMsgCount(bData, inStream);
                     break;
                 case SUBPARAM_CALLBACK_NUMBER:
-                    decodeCallbackNumber(bData, inStream);
+                    decodeSuccess = decodeCallbackNumber(bData, inStream);
                     break;
                 case SUBPARAM_MESSAGE_STATUS:
-                    decodeMsgStatus(bData, inStream);
+                    decodeSuccess = decodeMsgStatus(bData, inStream);
                     break;
                 case SUBPARAM_MESSAGE_CENTER_TIME_STAMP:
-                    decodeMsgCenterTimeStamp(bData, inStream);
+                    decodeSuccess = decodeMsgCenterTimeStamp(bData, inStream);
                     break;
                 case SUBPARAM_VALIDITY_PERIOD_ABSOLUTE:
-                    decodeValidityAbs(bData, inStream);
+                    decodeSuccess = decodeValidityAbs(bData, inStream);
                     break;
                 case SUBPARAM_VALIDITY_PERIOD_RELATIVE:
-                    decodeValidityRel(bData, inStream);
+                    decodeSuccess = decodeValidityRel(bData, inStream);
                     break;
                 case SUBPARAM_DEFERRED_DELIVERY_TIME_ABSOLUTE:
-                    decodeDeferredDeliveryAbs(bData, inStream);
+                    decodeSuccess = decodeDeferredDeliveryAbs(bData, inStream);
                     break;
                 case SUBPARAM_DEFERRED_DELIVERY_TIME_RELATIVE:
-                    decodeDeferredDeliveryRel(bData, inStream);
+                    decodeSuccess = decodeDeferredDeliveryRel(bData, inStream);
                     break;
                 case SUBPARAM_PRIVACY_INDICATOR:
-                    decodePrivacyIndicator(bData, inStream);
+                    decodeSuccess = decodePrivacyIndicator(bData, inStream);
                     break;
                 case SUBPARAM_LANGUAGE_INDICATOR:
-                    decodeLanguageIndicator(bData, inStream);
+                    decodeSuccess = decodeLanguageIndicator(bData, inStream);
                     break;
                 case SUBPARAM_MESSAGE_DISPLAY_MODE:
-                    decodeDisplayMode(bData, inStream);
+                    decodeSuccess = decodeDisplayMode(bData, inStream);
                     break;
                 case SUBPARAM_PRIORITY_INDICATOR:
-                    decodePriorityIndicator(bData, inStream);
+                    decodeSuccess = decodePriorityIndicator(bData, inStream);
                     break;
                 case SUBPARAM_ALERT_ON_MESSAGE_DELIVERY:
-                    decodeMsgDeliveryAlert(bData, inStream);
+                    decodeSuccess = decodeMsgDeliveryAlert(bData, inStream);
                     break;
                 case SUBPARAM_MESSAGE_DEPOSIT_INDEX:
-                    decodeDepositIndex(bData, inStream);
+                    decodeSuccess = decodeDepositIndex(bData, inStream);
                     break;
                 default:
                     throw new CodingException("unsupported bearer data subparameter ("
                                               + subparamId + ")");
                 }
+                if (decodeSuccess) foundSubparamMask |= subparamIdBit;
             }
             if ((foundSubparamMask & (1 << SUBPARAM_MESSAGE_IDENTIFIER)) == 0) {
                 throw new CodingException("missing MESSAGE_IDENTIFIER subparam");
