@@ -32,8 +32,8 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.PackageParser.Component;
 import android.content.res.AssetManager;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
@@ -166,41 +166,50 @@ public final class ActivityThread {
         return metrics;
     }
 
-    Resources getTopLevelResources(String appDir, PackageInfo pkgInfo) {
+    /**
+     * Creates the top level Resources for applications with the given compatibility info.
+     *
+     * @param resDir the resource directory.
+     * @param compInfo the compability info. It will use the default compatibility info when it's
+     * null.
+     */
+    Resources getTopLevelResources(String resDir, CompatibilityInfo compInfo) {
         synchronized (mPackages) {
-            //Log.w(TAG, "getTopLevelResources: " + appDir);
-            WeakReference<Resources> wr = mActiveResources.get(appDir);
+            // Resources is app scale dependent.
+            ResourcesKey key = new ResourcesKey(resDir, compInfo.applicationScale);
+            //Log.w(TAG, "getTopLevelResources: " + resDir);
+            WeakReference<Resources> wr = mActiveResources.get(key);
             Resources r = wr != null ? wr.get() : null;
             if (r != null && r.getAssets().isUpToDate()) {
-                //Log.w(TAG, "Returning cached resources " + r + " " + appDir);
+                //Log.w(TAG, "Returning cached resources " + r + " " + resDir);
                 return r;
             }
 
             //if (r != null) {
             //    Log.w(TAG, "Throwing away out-of-date resources!!!! "
-            //            + r + " " + appDir);
+            //            + r + " " + resDir);
             //}
 
             AssetManager assets = new AssetManager();
-            if (assets.addAssetPath(appDir) == 0) {
+            if (assets.addAssetPath(resDir) == 0) {
                 return null;
             }
-            ApplicationInfo appInfo;
-            try {
-                appInfo = getPackageManager().getApplicationInfo(
-                        pkgInfo.getPackageName(),
-                        PackageManager.GET_SUPPORTS_DENSITIES);
-            } catch (RemoteException e) {
-                throw new AssertionError(e);
-            }
-            //Log.i(TAG, "Resource:" + appDir + ", display metrics=" + metrics);
+
+            //Log.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
             DisplayMetrics metrics = getDisplayMetricsLocked(false);
-            r = new Resources(assets, metrics, getConfiguration(), appInfo);
+            r = new Resources(assets, metrics, getConfiguration(), compInfo);
             //Log.i(TAG, "Created app resources " + r + ": " + r.getConfiguration());
             // XXX need to remove entries when weak references go away
-            mActiveResources.put(appDir, new WeakReference<Resources>(r));
+            mActiveResources.put(key, new WeakReference<Resources>(r));
             return r;
         }
+    }
+
+    /**
+     * Creates the top level resources for the given package.
+     */
+    Resources getTopLevelResources(String resDir, PackageInfo pkgInfo) {
+        return getTopLevelResources(resDir, pkgInfo.mCompatibilityInfo);
     }
 
     final Handler getHandler() {
@@ -223,6 +232,7 @@ public final class ActivityThread {
         private Resources mResources;
         private ClassLoader mClassLoader;
         private Application mApplication;
+        private CompatibilityInfo mCompatibilityInfo;
 
         private final HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>> mReceivers
             = new HashMap<Context, HashMap<BroadcastReceiver, ReceiverDispatcher>>();
@@ -250,6 +260,7 @@ public final class ActivityThread {
             mBaseClassLoader = baseLoader;
             mSecurityViolation = securityViolation;
             mIncludeCode = includeCode;
+            mCompatibilityInfo = new CompatibilityInfo(aInfo);
 
             if (mAppDir == null) {
                 if (mSystemContext == null) {
@@ -283,6 +294,7 @@ public final class ActivityThread {
             mIncludeCode = true;
             mClassLoader = systemContext.getClassLoader();
             mResources = systemContext.getResources();
+            mCompatibilityInfo = new CompatibilityInfo(mApplicationInfo);
         }
 
         public String getPackageName() {
@@ -1077,6 +1089,7 @@ public final class ActivityThread {
 
     private static final class ActivityRecord {
         IBinder token;
+        int ident;
         Intent intent;
         Bundle state;
         Activity activity;
@@ -1286,12 +1299,13 @@ public final class ActivityThread {
 
         // we use token to identify this activity without having to send the
         // activity itself back to the activity manager. (matters more with ipc)
-        public final void scheduleLaunchActivity(Intent intent, IBinder token,
+        public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
                 ActivityInfo info, Bundle state, List<ResultInfo> pendingResults,
                 List<Intent> pendingNewIntents, boolean notResumed, boolean isForward) {
             ActivityRecord r = new ActivityRecord();
 
             r.token = token;
+            r.ident = ident;
             r.intent = intent;
             r.activityInfo = info;
             r.state = state;
@@ -1894,6 +1908,32 @@ public final class ActivityThread {
         }
     }
 
+    private final static class ResourcesKey {
+        final private String mResDir;
+        final private float mScale;
+        final private int mHash;
+        
+        ResourcesKey(String resDir, float scale) {
+            mResDir = resDir;
+            mScale = scale;
+            mHash = mResDir.hashCode() << 2 + (int) (mScale * 2);
+        }
+        
+        @Override
+        public int hashCode() {
+            return mHash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof ResourcesKey)) {
+                return false;
+            }
+            ResourcesKey peer = (ResourcesKey) obj;
+            return mResDir.equals(peer.mResDir) && mScale == peer.mScale;
+        }
+    }
+
     static IPackageManager sPackageManager;
 
     final ApplicationThread mAppThread = new ApplicationThread();
@@ -1939,8 +1979,8 @@ public final class ActivityThread {
         = new HashMap<String, WeakReference<PackageInfo>>();
     Display mDisplay = null;
     DisplayMetrics mDisplayMetrics = null;
-    HashMap<String, WeakReference<Resources> > mActiveResources
-        = new HashMap<String, WeakReference<Resources> >();
+    HashMap<ResourcesKey, WeakReference<Resources> > mActiveResources
+        = new HashMap<ResourcesKey, WeakReference<Resources> >();
 
     // The lock of mProviderMap protects the following variables.
     final HashMap<String, ProviderRecord> mProviderMap
@@ -2158,21 +2198,11 @@ public final class ActivityThread {
     }
     
     public final Activity startActivityNow(Activity parent, String id,
-            Intent intent, IBinder token, Bundle state) {
-        ActivityInfo aInfo = resolveActivityInfo(intent);
-        return startActivityNow(parent, id, intent, aInfo, token, state);
-    }
-    
-    public final Activity startActivityNow(Activity parent, String id,
-            Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state) {
-        return startActivityNow(parent, id, intent, activityInfo, token, state, null);
-    }
-
-    public final Activity startActivityNow(Activity parent, String id,
         Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state,
         Object lastNonConfigurationInstance) {
         ActivityRecord r = new ActivityRecord();
             r.token = token;
+            r.ident = 0;
             r.intent = intent;
             r.state = state;
             r.parent = parent;
@@ -2296,10 +2326,10 @@ public final class ActivityThread {
                 appContext.setOuterContext(activity);
                 CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
                 Configuration config = new Configuration(mConfiguration);
-                activity.attach(appContext, this, getInstrumentation(), r.token, app, 
-                        r.intent, r.activityInfo, title, r.parent, r.embeddedID,
-                        r.lastNonConfigurationInstance, r.lastNonConfigurationChildInstances,
-                        config);
+                activity.attach(appContext, this, getInstrumentation(), r.token,
+                        r.ident, app, r.intent, r.activityInfo, title, r.parent,
+                        r.embeddedID, r.lastNonConfigurationInstance,
+                        r.lastNonConfigurationChildInstances, config);
                 
                 if (customIntent != null) {
                     activity.mIntent = customIntent;
@@ -2545,32 +2575,39 @@ public final class ActivityThread {
             classname = "android.app.FullBackupAgent";
         }
         try {
-            java.lang.ClassLoader cl = packageInfo.getClassLoader();
-            agent = (BackupAgent) cl.loadClass(data.appInfo.backupAgentName).newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to instantiate backup agent "
-                    + data.appInfo.backupAgentName + ": " + e.toString(), e);
-        }
-        
-        // set up the agent's context
-        try {
-            if (DEBUG_BACKUP) Log.v(TAG, "Initializing BackupAgent "
-                    + data.appInfo.backupAgentName);
-            
-            ApplicationContext context = new ApplicationContext();
-            context.init(packageInfo, null, this);
-            context.setOuterContext(agent);
-            agent.attach(context);
-            agent.onCreate();
+            IBinder binder = null;
+            try {
+                java.lang.ClassLoader cl = packageInfo.getClassLoader();
+                agent = (BackupAgent) cl.loadClass(data.appInfo.backupAgentName).newInstance();
+
+                // set up the agent's context
+                if (DEBUG_BACKUP) Log.v(TAG, "Initializing BackupAgent "
+                        + data.appInfo.backupAgentName);
+
+                ApplicationContext context = new ApplicationContext();
+                context.init(packageInfo, null, this);
+                context.setOuterContext(agent);
+                agent.attach(context);
+
+                agent.onCreate();
+                binder = agent.onBind();
+                mBackupAgents.put(packageName, agent);
+            } catch (Exception e) {
+                // If this is during restore, fail silently; otherwise go
+                // ahead and let the user see the crash.
+                Log.e(TAG, "Agent threw during creation: " + e);
+                if (data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE) {
+                    throw e;
+                }
+                // falling through with 'binder' still null
+            }
 
             // tell the OS that we're live now
-            IBinder binder = agent.onBind();
             try {
                 ActivityManagerNative.getDefault().backupAgentCreated(packageName, binder);
             } catch (RemoteException e) {
                 // nothing to do.
             }
-            mBackupAgents.put(packageName, agent);
         } catch (Exception e) {
             throw new RuntimeException("Unable to create BackupAgent "
                     + data.appInfo.backupAgentName + ": " + e.toString(), e);

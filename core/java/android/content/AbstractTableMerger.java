@@ -369,30 +369,33 @@ public abstract class AbstractTableMerger
                 // An existing server item has changed
                 // If serverSyncVersion is null, there is no edit URL;
                 // server won't let this change be written.
-                // Just hold onto it, I guess, in case the server permissions
-                // change later.
-                if (serverSyncVersion != null) {
-                    boolean recordChanged = (localSyncVersion == null) ||
-                            !serverSyncVersion.equals(localSyncVersion);
-                    if (recordChanged) {
-                        if (localSyncDirty) {
-                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                                Log.v(TAG, "remote record " + serverSyncId
-                                        + " conflicts with local _sync_id " + localSyncID
-                                        + ", local _id " + localRowId);
-                            }
-                            conflict = true;
-                        } else {
-                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                                Log.v(TAG,
-                                        "remote record " +
-                                                serverSyncId +
-                                                " updates local _sync_id " +
-                                                localSyncID + ", local _id " +
-                                                localRowId);
-                            }
-                            update = true;
+                boolean recordChanged = (localSyncVersion == null) ||
+                        (serverSyncVersion == null) ||
+                        !serverSyncVersion.equals(localSyncVersion);
+                if (recordChanged) {
+                    if (localSyncDirty) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "remote record " + serverSyncId
+                                    + " conflicts with local _sync_id " + localSyncID
+                                    + ", local _id " + localRowId);
                         }
+                        conflict = true;
+                    } else {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG,
+                                    "remote record " +
+                                            serverSyncId +
+                                            " updates local _sync_id " +
+                                            localSyncID + ", local _id " +
+                                            localRowId);
+                        }
+                        update = true;
+                    }
+                } else {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG,
+                                "Skipping update: localSyncVersion: " + localSyncVersion +
+                                ", serverSyncVersion: " + serverSyncVersion);
                     }
                 }
             } else {

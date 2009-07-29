@@ -27,6 +27,7 @@ namespace android {
 enum {
     NOTIFY_CALLBACK = IBinder::FIRST_CALL_TRANSACTION,
     DATA_CALLBACK,
+    DATA_CALLBACK_TIMESTAMP,
 };
 
 class BpCameraClient: public BpInterface<ICameraClient>
@@ -60,6 +61,17 @@ public:
         remote()->transact(DATA_CALLBACK, data, &reply, IBinder::FLAG_ONEWAY);
     }
 
+    // generic data callback from camera service to app with image data
+    void dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& imageData)
+    {
+        LOGV("dataCallback");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
+        data.writeInt64(timestamp);
+        data.writeInt32(msgType);
+        data.writeStrongBinder(imageData->asBinder());
+        remote()->transact(DATA_CALLBACK_TIMESTAMP, data, &reply, IBinder::FLAG_ONEWAY);
+    }
 };
 
 IMPLEMENT_META_INTERFACE(CameraClient, "android.hardware.ICameraClient");
@@ -86,11 +98,20 @@ status_t BnCameraClient::onTransact(
             return NO_ERROR;
         } break;
         case DATA_CALLBACK: {
-            LOGV("RAW_CALLBACK");
+            LOGV("DATA_CALLBACK");
             CHECK_INTERFACE(ICameraClient, data, reply);
             int32_t msgType = data.readInt32();
             sp<IMemory> imageData = interface_cast<IMemory>(data.readStrongBinder());
             dataCallback(msgType, imageData);
+            return NO_ERROR;
+        } break;
+        case DATA_CALLBACK_TIMESTAMP: {
+            LOGV("DATA_CALLBACK_TIMESTAMP");
+            CHECK_INTERFACE(ICameraClient, data, reply);
+            nsecs_t timestamp = data.readInt64();
+            int32_t msgType = data.readInt32();
+            sp<IMemory> imageData = interface_cast<IMemory>(data.readStrongBinder());
+            dataCallbackTimestamp(timestamp, msgType, imageData);
             return NO_ERROR;
         } break;
         default:

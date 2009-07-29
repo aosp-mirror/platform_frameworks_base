@@ -508,14 +508,14 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#setRingerMode(int) */
     public void setRingerMode(int ringerMode) {
         if (ringerMode != mRingerMode) {
-            setRingerModeInt(ringerMode);
+            setRingerModeInt(ringerMode, true);
 
             // Send sticky broadcast
             broadcastRingerMode();
         }
     }
 
-    private void setRingerModeInt(int ringerMode) {
+    private void setRingerModeInt(int ringerMode, boolean persist) {
         mRingerMode = ringerMode;
 
         // Adjust volumes via posting message
@@ -543,8 +543,10 @@ public class AudioService extends IAudioService.Stub {
         }
         
         // Post a persist ringer mode msg
-        sendMsg(mAudioHandler, MSG_PERSIST_RINGER_MODE, SHARED_MSG,
-                SENDMSG_REPLACE, 0, 0, null, PERSIST_DELAY);
+        if (persist) {
+            sendMsg(mAudioHandler, MSG_PERSIST_RINGER_MODE, SHARED_MSG,
+                    SENDMSG_REPLACE, 0, 0, null, PERSIST_DELAY);
+        }
     }
 
     /** @see AudioManager#shouldVibrate(int) */
@@ -912,6 +914,46 @@ public class AudioService extends IAudioService.Stub {
             }
             mSoundPool = null;
         }
+    }
+
+    /** @see AudioManager#reloadAudioSettings() */
+    public void reloadAudioSettings() {
+        // restore ringer mode, ringer mode affected streams, mute affected streams and vibrate settings
+        readPersistedSettings();
+
+        // restore volume settings
+        int numStreamTypes = AudioSystem.getNumStreamTypes();
+        for (int streamType = 0; streamType < numStreamTypes; streamType++) {
+            VolumeStreamState streamState = mStreamStates[streamType];
+
+            // there is no volume setting for STREAM_BLUETOOTH_SCO
+            if (streamType != AudioSystem.STREAM_BLUETOOTH_SCO) {
+                String settingName = System.VOLUME_SETTINGS[streamType];
+                String lastAudibleSettingName = settingName + System.APPEND_FOR_LAST_AUDIBLE;
+
+                streamState.mIndex = streamState.getValidIndex(Settings.System.getInt(mContentResolver,
+                        settingName,
+                        AudioManager.DEFAULT_STREAM_VOLUME[streamType]));
+                streamState.mLastAudibleIndex = streamState.getValidIndex(Settings.System.getInt(mContentResolver,
+                        lastAudibleSettingName,
+                        streamState.mIndex > 0 ? streamState.mIndex : AudioManager.DEFAULT_STREAM_VOLUME[streamType]));
+            }
+            // unmute stream that whas muted but is not affect by mute anymore
+            if (streamState.muteCount() != 0 && !isStreamAffectedByMute(streamType)) {
+                int size = streamState.mDeathHandlers.size();
+                for (int i = 0; i < size; i++) {
+                    streamState.mDeathHandlers.get(i).mMuteCount = 1;
+                    streamState.mDeathHandlers.get(i).mute(false);
+                }
+            }
+            // apply stream volume
+            if (streamState.muteCount() == 0) {
+                AudioSystem.setVolume(streamType, streamState.mVolumes[streamState.mIndex]);
+            }
+        }
+
+        // apply new ringer mode
+        setRingerModeInt(getRingerMode(), false);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1285,10 +1327,12 @@ public class AudioService extends IAudioService.Stub {
         }
 
         private void persistVolume(VolumeStreamState streamState) {
-            System.putInt(mContentResolver, streamState.mVolumeIndexSettingName,
-                    streamState.mIndex);
-            System.putInt(mContentResolver, streamState.mLastAudibleVolumeIndexSettingName,
-                    streamState.mLastAudibleIndex);
+            if (streamState.mStreamType != AudioManager.STREAM_BLUETOOTH_SCO) {
+                System.putInt(mContentResolver, streamState.mVolumeIndexSettingName,
+                        streamState.mIndex);
+                System.putInt(mContentResolver, streamState.mLastAudibleVolumeIndexSettingName,
+                        streamState.mLastAudibleIndex);
+            }
         }
 
         private void persistRingerMode() {
@@ -1426,7 +1470,7 @@ public class AudioService extends IAudioService.Stub {
              * Ensure all stream types that should be affected by ringer mode
              * are in the proper state.
              */
-            setRingerModeInt(getRingerMode());
+            setRingerModeInt(getRingerMode(), false);
         }
         
     }

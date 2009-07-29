@@ -49,6 +49,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Power;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -88,7 +89,8 @@ class NotificationManagerService extends INotificationManager.Stub
 
     private NotificationRecord mSoundNotification;
     private AsyncPlayer mSound;
-    private int mDisabledNotifications;
+    private boolean mSystemReady;
+    private int mDisabledNotifications = StatusBarManager.DISABLE_NOTIFICATION_ALERTS;
 
     private NotificationRecord mVibrateNotification;
     private Vibrator mVibrator = new Vibrator();
@@ -377,6 +379,11 @@ class NotificationManagerService extends INotificationManager.Stub
         mSettingsObserver.observe();
     }
 
+    void systemReady() {
+        // no beeping until we're basically done booting
+        mSystemReady = true;
+    }
+
     // Toasts
     // ============================================================================
     public void enqueueToast(String pkg, ITransientNotification callback, int duration)
@@ -637,7 +644,7 @@ class NotificationManagerService extends INotificationManager.Stub
                     }
                 }
 
-                sendAccessibilityEventTypeNotificationChangedDoCheck(notification, pkg);
+                sendAccessibilityEvent(notification, pkg);
 
             } else {
                 if (old != null && old.statusBarKey != null) {
@@ -654,7 +661,8 @@ class NotificationManagerService extends INotificationManager.Stub
             // If we're not supposed to beep, vibrate, etc. then don't.
             if (((mDisabledNotifications & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) == 0)
                     && (!(old != null
-                        && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))) {
+                        && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
+                    && mSystemReady) {
                 // sound
                 final boolean useDefaultSound =
                     (notification.defaults & Notification.DEFAULT_SOUND) != 0; 
@@ -721,8 +729,7 @@ class NotificationManagerService extends INotificationManager.Stub
         idOut[0] = id;
     }
 
-    private void sendAccessibilityEventTypeNotificationChangedDoCheck(Notification notification,
-            CharSequence packageName) {
+    private void sendAccessibilityEvent(Notification notification, CharSequence packageName) {
         AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
         if (!manager.isEnabled()) {
             return;
@@ -939,6 +946,9 @@ class NotificationManagerService extends INotificationManager.Stub
     // to accidentally lose.
     private void updateAdbNotification() {
         if (mAdbEnabled && mBatteryPlugged == BatteryManager.BATTERY_PLUGGED_USB) {
+            if ("0".equals(SystemProperties.get("persist.adb.notify"))) {
+                return;
+            }
             if (!mAdbNotificationShown) {
                 NotificationManager notificationManager = (NotificationManager) mContext
                         .getSystemService(Context.NOTIFICATION_SERVICE);

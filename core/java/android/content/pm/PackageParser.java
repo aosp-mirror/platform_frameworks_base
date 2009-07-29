@@ -92,6 +92,8 @@ public class PackageParser {
     private static final Object mSync = new Object();
     private static WeakReference<byte[]> mReadBuffer;
 
+    private static boolean sCompatibilityModeEnabled = true; 
+
     static class ParsePackageItemArgs {
         final Package owner;
         final String[] outError;
@@ -672,6 +674,7 @@ public class PackageParser {
         int supportsSmallScreens = 1;
         int supportsNormalScreens = 1;
         int supportsLargeScreens = 1;
+        int resizeable = 1;
         
         int outerDepth = parser.getDepth();
         while ((type=parser.next()) != parser.END_DOCUMENT
@@ -720,7 +723,7 @@ public class PackageParser {
                 sa.recycle();
 
                 if (name != null && !pkg.requestedPermissions.contains(name)) {
-                    pkg.requestedPermissions.add(name);
+                    pkg.requestedPermissions.add(name.intern());
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -851,21 +854,6 @@ public class PackageParser {
 
                 XmlUtils.skipCurrentTag(parser);
 
-            } else if (tagName.equals("instrumentation")) {
-                if (parseInstrumentation(pkg, res, parser, attrs, outError) == null) {
-                    return null;
-                }
-            } else if (tagName.equals("eat-comment")) {
-                // Just skip this tag
-                XmlUtils.skipCurrentTag(parser);
-                continue;
-            } else if (RIGID_PARSER) {
-                outError[0] = "Bad element under <manifest>: "
-                    + parser.getName();
-                mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-                return null;
-
-
             } else if (tagName.equals("supports-density")) {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestSupportsDensity);
@@ -896,10 +884,50 @@ public class PackageParser {
                 supportsLargeScreens = sa.getInteger(
                         com.android.internal.R.styleable.AndroidManifestSupportsScreens_largeScreens,
                         supportsLargeScreens);
+                resizeable = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_resizeable,
+                        supportsLargeScreens);
 
                 sa.recycle();
                 
                 XmlUtils.skipCurrentTag(parser);
+                
+            } else if (tagName.equals("protected-broadcast")) {
+                sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestProtectedBroadcast);
+
+                String name = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestProtectedBroadcast_name);
+
+                sa.recycle();
+
+                if (name != null && (flags&PARSE_IS_SYSTEM) != 0) {
+                    if (pkg.protectedBroadcasts == null) {
+                        pkg.protectedBroadcasts = new ArrayList<String>();
+                    }
+                    if (!pkg.protectedBroadcasts.contains(name)) {
+                        pkg.protectedBroadcasts.add(name.intern());
+                    }
+                }
+
+                XmlUtils.skipCurrentTag(parser);
+                
+            } else if (tagName.equals("instrumentation")) {
+                if (parseInstrumentation(pkg, res, parser, attrs, outError) == null) {
+                    return null;
+                }
+                
+            } else if (tagName.equals("eat-comment")) {
+                // Just skip this tag
+                XmlUtils.skipCurrentTag(parser);
+                continue;
+                
+            } else if (RIGID_PARSER) {
+                outError[0] = "Bad element under <manifest>: "
+                    + parser.getName();
+                mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                return null;
+
             } else {
                 Log.w(TAG, "Bad element under <manifest>: "
                       + parser.getName());
@@ -945,15 +973,30 @@ public class PackageParser {
                         >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
         }
-        
+        if (resizeable < 0 || (resizeable > 0
+                && pkg.applicationInfo.targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS;
+        }
+        int densities[] = null;
         int size = pkg.supportsDensityList.size();
         if (size > 0) {
-            int densities[] = pkg.supportsDensities = new int[size];
+            densities = pkg.supportsDensities = new int[size];
             List<Integer> densityList = pkg.supportsDensityList;
             for (int i = 0; i < size; i++) {
                 densities[i] = densityList.get(i);
             }
         }
+        /**
+         * TODO: enable this before code freeze. b/1967935
+         * *
+        if ((densities == null || densities.length == 0)
+                && (pkg.applicationInfo.targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+            pkg.supportsDensities = ApplicationInfo.ANY_DENSITIES_ARRAY;
+        }
+         */
+
         return pkg;
     }
 
@@ -1419,7 +1462,7 @@ public class PackageParser {
                 sa.recycle();
 
                 if (lname != null && !owner.usesLibraries.contains(lname)) {
-                    owner.usesLibraries.add(lname);
+                    owner.usesLibraries.add(lname.intern());
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -1908,6 +1951,7 @@ public class PackageParser {
                         outInfo.metaData, outError)) == null) {
                     return false;
                 }
+                
             } else if (parser.getName().equals("grant-uri-permission")) {
                 TypedArray sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestGrantUriPermission);
@@ -1931,7 +1975,7 @@ public class PackageParser {
                 if (str != null) {
                     pa = new PatternMatcher(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
                 }
-
+                
                 sa.recycle();
 
                 if (pa != null) {
@@ -1946,6 +1990,101 @@ public class PackageParser {
                         outInfo.info.uriPermissionPatterns = newp;
                     }
                     outInfo.info.grantUriPermissions = true;
+                } else {
+                    if (!RIGID_PARSER) {
+                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
+                        Log.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>");
+                        XmlUtils.skipCurrentTag(parser);
+                        continue;
+                    }
+                    outError[0] = "No path, pathPrefix, or pathPattern for <path-permission>";
+                    return false;
+                }
+                XmlUtils.skipCurrentTag(parser);
+
+            } else if (parser.getName().equals("path-permission")) {
+                TypedArray sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.AndroidManifestPathPermission);
+
+                PathPermission pa = null;
+
+                String permission = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_permission);
+                String readPermission = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_readPermission);
+                if (readPermission == null) {
+                    readPermission = permission;
+                }
+                String writePermission = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_writePermission);
+                if (writePermission == null) {
+                    writePermission = permission;
+                }
+                
+                boolean havePerm = false;
+                if (readPermission != null) {
+                    readPermission = readPermission.intern();
+                    havePerm = true;
+                }
+                if (writePermission != null) {
+                    writePermission = readPermission.intern();
+                    havePerm = true;
+                }
+
+                if (!havePerm) {
+                    if (!RIGID_PARSER) {
+                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
+                        Log.w(TAG, "No readPermission or writePermssion for <path-permission>");
+                        XmlUtils.skipCurrentTag(parser);
+                        continue;
+                    }
+                    outError[0] = "No readPermission or writePermssion for <path-permission>";
+                    return false;
+                }
+                
+                String path = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_path);
+                if (path != null) {
+                    pa = new PathPermission(path,
+                            PatternMatcher.PATTERN_LITERAL, readPermission, writePermission);
+                }
+
+                path = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_pathPrefix);
+                if (path != null) {
+                    pa = new PathPermission(path,
+                            PatternMatcher.PATTERN_PREFIX, readPermission, writePermission);
+                }
+
+                path = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestPathPermission_pathPattern);
+                if (path != null) {
+                    pa = new PathPermission(path,
+                            PatternMatcher.PATTERN_SIMPLE_GLOB, readPermission, writePermission);
+                }
+
+                sa.recycle();
+
+                if (pa != null) {
+                    if (outInfo.info.pathPermissions == null) {
+                        outInfo.info.pathPermissions = new PathPermission[1];
+                        outInfo.info.pathPermissions[0] = pa;
+                    } else {
+                        final int N = outInfo.info.pathPermissions.length;
+                        PathPermission[] newp = new PathPermission[N+1];
+                        System.arraycopy(outInfo.info.pathPermissions, 0, newp, 0, N);
+                        newp[N] = pa;
+                        outInfo.info.pathPermissions = newp;
+                    }
+                } else {
+                    if (!RIGID_PARSER) {
+                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
+                        Log.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>");
+                        XmlUtils.skipCurrentTag(parser);
+                        continue;
+                    }
+                    outError[0] = "No path, pathPrefix, or pathPattern for <path-permission>";
+                    return false;
                 }
                 XmlUtils.skipCurrentTag(parser);
 
@@ -2104,8 +2243,8 @@ public class PackageParser {
             return null;
         }
 
-        boolean success = true;
-
+        name = name.intern();
+        
         TypedValue v = sa.peekValue(
                 com.android.internal.R.styleable.AndroidManifestMetaData_resource);
         if (v != null && v.resourceId != 0) {
@@ -2118,7 +2257,7 @@ public class PackageParser {
             if (v != null) {
                 if (v.type == TypedValue.TYPE_STRING) {
                     CharSequence cs = v.coerceToString();
-                    data.putString(name, cs != null ? cs.toString() : null);
+                    data.putString(name, cs != null ? cs.toString().intern() : null);
                 } else if (v.type == TypedValue.TYPE_INT_BOOLEAN) {
                     data.putBoolean(name, v.data != 0);
                 } else if (v.type >= TypedValue.TYPE_FIRST_INT
@@ -2299,6 +2438,8 @@ public class PackageParser {
 
         public final ArrayList<String> requestedPermissions = new ArrayList<String>();
 
+        public ArrayList<String> protectedBroadcasts;
+        
         public final ArrayList<String> usesLibraries = new ArrayList<String>();
         public String[] usesLibraryFiles = null;
 
@@ -2499,6 +2640,11 @@ public class PackageParser {
     public static ApplicationInfo generateApplicationInfo(Package p, int flags) {
         if (p == null) return null;
         if (!copyNeeded(flags, p, null)) {
+            // CompatibilityMode is global state. It's safe to modify the instance
+            // of the package.
+            if (!sCompatibilityModeEnabled) {
+                p.applicationInfo.disableCompatibilityMode();
+            }
             return p.applicationInfo;
         }
 
@@ -2512,6 +2658,9 @@ public class PackageParser {
         }
         if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0) {
             ai.supportsDensities = p.supportsDensities;
+        }
+        if (!sCompatibilityModeEnabled) {
+            ai.disableCompatibilityMode();
         }
         return ai;
     }
@@ -2696,5 +2845,12 @@ public class PackageParser {
                 + Integer.toHexString(System.identityHashCode(this))
                 + " " + service.info.name + "}";
         }
+    }
+
+    /**
+     * @hide
+     */
+    public static void setCompatibilityModeEnabled(boolean compatibilityModeEnabled) {
+        sCompatibilityModeEnabled = compatibilityModeEnabled;
     }
 }

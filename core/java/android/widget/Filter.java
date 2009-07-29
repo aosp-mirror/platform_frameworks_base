@@ -46,6 +46,8 @@ public abstract class Filter {
     private Handler mThreadHandler;
     private Handler mResultHandler;
 
+    private Delayer mDelayer;
+
     private final Object mLock = new Object();
 
     /**
@@ -53,6 +55,20 @@ public abstract class Filter {
      */
     public Filter() {
         mResultHandler = new ResultsHandler();
+    }
+
+    /**
+     * Provide an interface that decides how long to delay the message for a given query.  Useful
+     * for heuristics such as posting a delay for the delete key to avoid doing any work while the
+     * user holds down the delete key.
+     *
+     * @param delayer The delayer.
+     * @hide
+     */
+    public void setDelayer(Delayer delayer) {
+        synchronized (mLock) {
+            mDelayer = delayer;
+        }
     }
 
     /**
@@ -85,10 +101,13 @@ public abstract class Filter {
     public final void filter(CharSequence constraint, FilterListener listener) {
         synchronized (mLock) {
             if (mThreadHandler == null) {
-                HandlerThread thread = new HandlerThread(THREAD_NAME);
+                HandlerThread thread = new HandlerThread(
+                        THREAD_NAME, android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 thread.start();
                 mThreadHandler = new RequestHandler(thread.getLooper());
             }
+
+            final long delay = (mDelayer == null) ? 0 : mDelayer.getPostingDelay(constraint);
             
             Message message = mThreadHandler.obtainMessage(FILTER_TOKEN);
     
@@ -101,7 +120,7 @@ public abstract class Filter {
     
             mThreadHandler.removeMessages(FILTER_TOKEN);
             mThreadHandler.removeMessages(FINISH_TOKEN);
-            mThreadHandler.sendMessage(message);
+            mThreadHandler.sendMessageDelayed(message, delay);
         }
     }
 
@@ -287,5 +306,18 @@ public abstract class Filter {
          * <p>The results of the filtering operation.</p>
          */
         FilterResults results;
+    }
+
+    /**
+     * @hide
+     */
+    public interface Delayer {
+
+        /**
+         * @param constraint The constraint passed to {@link Filter#filter(CharSequence)}
+         * @return The delay that should be used for
+         *         {@link Handler#sendMessageDelayed(android.os.Message, long)}
+         */
+        long getPostingDelay(CharSequence constraint);
     }
 }

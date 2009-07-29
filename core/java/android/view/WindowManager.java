@@ -483,11 +483,12 @@ public interface WindowManager extends ViewManager {
          * {@hide} */
         public static final int FLAG_SHOW_WHEN_LOCKED = 0x00080000;
 
-        /** Window flag: special flag to let a window ignore the compatibility scaling.
-         * This is used by SurfaceView to create a window that does not scale the content.
+        /** Window flag: special flag to limit the size of the window to be
+         * original size ([320x480] x density). Used to create window for applications
+         * running under compatibility mode.
          *
          * {@hide} */
-        public static final int FLAG_NO_COMPATIBILITY_SCALING = 0x00100000;
+        public static final int FLAG_COMPATIBLE_WINDOW = 0x00100000;
 
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when
@@ -978,6 +979,9 @@ public interface WindowManager extends ViewManager {
                 sb.append(" or=");
                 sb.append(screenOrientation);
             }
+            if ((flags & FLAG_COMPATIBLE_WINDOW) != 0) {
+                sb.append(" compatible=true");
+            }
             sb.append('}');
             return sb.toString();
         }
@@ -987,13 +991,13 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public void scale(float scale) {
-            x *= scale;
-            y *= scale;
+            x = (int) (x * scale + 0.5f);
+            y = (int) (y * scale + 0.5f);
             if (width > 0) {
-                width *= scale;
+                width = (int) (width * scale + 0.5f);
             }
             if (height > 0) {
-                height *= scale;
+                height = (int) (height * scale + 0.5f);
             }
         }
 

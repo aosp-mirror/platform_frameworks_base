@@ -243,9 +243,11 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
     private void validateCurrentView(CharSequence str) {
         int val = getSelectedPos(str.toString());
         if ((val >= mStart) && (val <= mEnd)) {
-            mPrevious = mCurrent;
-            mCurrent = val;
-            notifyChange();
+            if (mCurrent != val) {
+                mPrevious = mCurrent;
+                mCurrent = val;
+                notifyChange();
+            }
         }
         updateView();
     }

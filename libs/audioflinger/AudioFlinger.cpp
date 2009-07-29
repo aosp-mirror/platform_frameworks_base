@@ -738,12 +738,13 @@ bool AudioFlinger::streamMute(int stream) const
 
 bool AudioFlinger::isMusicActive() const
 {
+    Mutex::Autolock _l(mLock);
  #ifdef WITH_A2DP
      if (isA2dpEnabled()) {
-         return mA2dpMixerThread->isMusicActive();
+         return mA2dpMixerThread->isMusicActive_l();
      }
  #endif
-    return mHardwareMixerThread->isMusicActive();
+    return mHardwareMixerThread->isMusicActive_l();
 }
 
 status_t AudioFlinger::setParameter(const char* key, const char* value)
@@ -1444,7 +1445,8 @@ bool AudioFlinger::MixerThread::streamMute(int stream) const
     return mStreamTypes[stream].mute;
 }
 
-bool AudioFlinger::MixerThread::isMusicActive() const
+// isMusicActive_l() must be called with AudioFlinger::mLock held
+bool AudioFlinger::MixerThread::isMusicActive_l() const
 {
     size_t count = mActiveTracks.size();
     for (size_t i = 0 ; i < count ; ++i) {
@@ -2030,7 +2032,10 @@ void AudioFlinger::MixerThread::OutputTrack::write(int16_t* data, uint32_t frame
     inBuffer.i16 = data;
     
     if (mCblk->user == 0) {
-        if (mOutputMixerThread->isMusicActive()) {
+        mOutputMixerThread->mAudioFlinger->mLock.lock();
+        bool isMusicActive = mOutputMixerThread->isMusicActive_l();
+        mOutputMixerThread->mAudioFlinger->mLock.unlock();
+        if (isMusicActive) {
             mCblk->forceReady = 1;
             LOGV("OutputTrack::start() force ready");
         } else if (mCblk->frameCount > frames){

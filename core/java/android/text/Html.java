@@ -25,6 +25,7 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -40,6 +41,7 @@ import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.SubscriptSpan;
 import android.text.style.SuperscriptSpan;
+import android.text.style.TextAppearanceSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
@@ -49,6 +51,7 @@ import com.android.internal.util.XmlUtils;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.CharBuffer;
+import java.util.HashMap;
 
 /**
  * This class processes HTML strings into displayable styled text.
@@ -633,53 +636,24 @@ class HtmlToSpannedConverter implements ContentHandler {
         if (where != len) {
             Font f = (Font) obj;
 
-            if (f.mColor != null) {
-                int c = -1;
-
-                if (f.mColor.equalsIgnoreCase("aqua")) {
-                    c = 0x00FFFF;
-                } else if (f.mColor.equalsIgnoreCase("black")) {
-                    c = 0x000000;
-                } else if (f.mColor.equalsIgnoreCase("blue")) {
-                    c = 0x0000FF;
-                } else if (f.mColor.equalsIgnoreCase("fuchsia")) {
-                    c = 0xFF00FF;
-                } else if (f.mColor.equalsIgnoreCase("green")) {
-                    c = 0x008000;
-                } else if (f.mColor.equalsIgnoreCase("grey")) {
-                    c = 0x808080;
-                } else if (f.mColor.equalsIgnoreCase("lime")) {
-                    c = 0x00FF00;
-                } else if (f.mColor.equalsIgnoreCase("maroon")) {
-                    c = 0x800000;
-                } else if (f.mColor.equalsIgnoreCase("navy")) {
-                    c = 0x000080;
-                } else if (f.mColor.equalsIgnoreCase("olive")) {
-                    c = 0x808000;
-                } else if (f.mColor.equalsIgnoreCase("purple")) {
-                    c = 0x800080;
-                } else if (f.mColor.equalsIgnoreCase("red")) {
-                    c = 0xFF0000;
-                } else if (f.mColor.equalsIgnoreCase("silver")) {
-                    c = 0xC0C0C0;
-                } else if (f.mColor.equalsIgnoreCase("teal")) {
-                    c = 0x008080;
-                } else if (f.mColor.equalsIgnoreCase("white")) {
-                    c = 0xFFFFFF;
-                } else if (f.mColor.equalsIgnoreCase("yellow")) {
-                    c = 0xFFFF00;
-                } else {
-                    try {
-                        c = XmlUtils.convertValueToInt(f.mColor, -1);
-                    } catch (NumberFormatException nfe) {
-                        // Can't understand the color, so just drop it.
+            if (!TextUtils.isEmpty(f.mColor)) {
+                if (f.mColor.startsWith("@")) {
+                    Resources res = Resources.getSystem();
+                    String name = f.mColor.substring(1);
+                    int colorRes = res.getIdentifier(name, "color", "android");
+                    if (colorRes != 0) {
+                        ColorStateList colors = res.getColorStateList(colorRes);
+                        text.setSpan(new TextAppearanceSpan(null, 0, 0, colors, null),
+                                where, len,
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
-                }
-
-                if (c != -1) {
-                    text.setSpan(new ForegroundColorSpan(c | 0xFF000000),
-                                 where, len,
-                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                } else {
+                    int c = getHtmlColor(f.mColor);
+                    if (c != -1) {
+                        text.setSpan(new ForegroundColorSpan(c | 0xFF000000),
+                                where, len,
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
                 }
             }
 
@@ -843,4 +817,47 @@ class HtmlToSpannedConverter implements ContentHandler {
             mLevel = level;
         }
     }
+
+    private static HashMap<String,Integer> COLORS = buildColorMap();
+
+    private static HashMap<String,Integer> buildColorMap() {
+        HashMap<String,Integer> map = new HashMap<String,Integer>();
+        map.put("aqua", 0x00FFFF);
+        map.put("black", 0x000000);
+        map.put("blue", 0x0000FF);
+        map.put("fuchsia", 0xFF00FF);
+        map.put("green", 0x008000);
+        map.put("grey", 0x808080);
+        map.put("lime", 0x00FF00);
+        map.put("maroon", 0x800000);
+        map.put("navy", 0x000080);
+        map.put("olive", 0x808000);
+        map.put("purple", 0x800080);
+        map.put("red", 0xFF0000);
+        map.put("silver", 0xC0C0C0);
+        map.put("teal", 0x008080);
+        map.put("white", 0xFFFFFF);
+        map.put("yellow", 0xFFFF00);
+        return map;
+    }
+
+    /**
+     * Converts an HTML color (named or numeric) to an integer RGB value.
+     *
+     * @param color Non-null color string.
+     * @return A color value, or {@code -1} if the color string could not be interpreted.
+     */
+    private static int getHtmlColor(String color) {
+        Integer i = COLORS.get(color.toLowerCase());
+        if (i != null) {
+            return i;
+        } else {
+            try {
+                return XmlUtils.convertValueToInt(color, -1);
+            } catch (NumberFormatException nfe) {
+                return -1;
+            }
+        }
+      }
+
 }

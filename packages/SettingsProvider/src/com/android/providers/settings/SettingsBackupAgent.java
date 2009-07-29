@@ -16,12 +16,16 @@
 
 package com.android.providers.settings;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.EOFException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.zip.CRC32;
 
 import android.backup.BackupDataInput;
 import android.backup.BackupDataOutput;
@@ -34,7 +38,9 @@ import android.database.Cursor;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -51,6 +57,13 @@ public class SettingsBackupAgent extends BackupHelperAgent {
     private static final String KEY_SECURE = "secure";
     private static final String KEY_SYNC = "sync_providers";
     private static final String KEY_LOCALE = "locale";
+
+    private static final int STATE_SYSTEM = 0;
+    private static final int STATE_SECURE = 1;
+    private static final int STATE_SYNC   = 2;
+    private static final int STATE_LOCALE = 3;
+    private static final int STATE_WIFI   = 4;
+    private static final int STATE_SIZE   = 5; // The number of state items
 
     private static String[] sortedSystemKeys = null;
     private static String[] sortedSecureKeys = null;
@@ -87,20 +100,22 @@ public class SettingsBackupAgent extends BackupHelperAgent {
         byte[] secureSettingsData = getSecureSettings();
         byte[] syncProviders = mSettingsHelper.getSyncProviders();
         byte[] locale = mSettingsHelper.getLocaleData();
-        
-        data.writeEntityHeader(KEY_SYSTEM, systemSettingsData.length);
-        data.writeEntityData(systemSettingsData, systemSettingsData.length);
+        byte[] wifiData = getFileData(FILE_WIFI_SUPPLICANT);
 
-        data.writeEntityHeader(KEY_SECURE, secureSettingsData.length);
-        data.writeEntityData(secureSettingsData, secureSettingsData.length);
+        long[] stateChecksums = readOldChecksums(oldState);
 
-        data.writeEntityHeader(KEY_SYNC, syncProviders.length);
-        data.writeEntityData(syncProviders, syncProviders.length);
+        stateChecksums[STATE_SYSTEM] =
+                writeIfChanged(stateChecksums[STATE_SYSTEM], KEY_SYSTEM, systemSettingsData, data);
+        stateChecksums[STATE_SECURE] =
+                writeIfChanged(stateChecksums[STATE_SECURE], KEY_SECURE, secureSettingsData, data);
+        stateChecksums[STATE_SYNC] =
+                writeIfChanged(stateChecksums[STATE_SYNC], KEY_SYNC, syncProviders, data);
+        stateChecksums[STATE_LOCALE] =
+                writeIfChanged(stateChecksums[STATE_LOCALE], KEY_LOCALE, locale, data);
+        stateChecksums[STATE_WIFI] =
+                writeIfChanged(stateChecksums[STATE_WIFI], FILE_WIFI_SUPPLICANT, wifiData, data);
 
-        data.writeEntityHeader(KEY_LOCALE, locale.length);
-        data.writeEntityData(locale, locale.length);
-
-        backupFile(FILE_WIFI_SUPPLICANT, data);
+        writeNewChecksums(stateChecksums, newState);
     }
 
     @Override
@@ -115,11 +130,15 @@ public class SettingsBackupAgent extends BackupHelperAgent {
             final int size = data.getDataSize();
             if (KEY_SYSTEM.equals(key)) {
                 restoreSettings(data, Settings.System.CONTENT_URI);
+                mSettingsHelper.applyAudioSettings();
             } else if (KEY_SECURE.equals(key)) {
                 restoreSettings(data, Settings.Secure.CONTENT_URI);
-// TODO: Re-enable WIFI restore when we figure out a solution for the permissions
-//            } else if (FILE_WIFI_SUPPLICANT.equals(key)) {
-//                restoreFile(FILE_WIFI_SUPPLICANT, data);
+            } else if (FILE_WIFI_SUPPLICANT.equals(key)) {
+                restoreFile(FILE_WIFI_SUPPLICANT, data);
+                FileUtils.setPermissions(FILE_WIFI_SUPPLICANT,
+                        FileUtils.S_IRUSR | FileUtils.S_IWUSR |
+                        FileUtils.S_IRGRP | FileUtils.S_IWGRP,
+                        Process.myUid(), Process.WIFI_UID);
             } else if (KEY_SYNC.equals(key)) {
                 mSettingsHelper.setSyncProviders(data);
             } else if (KEY_LOCALE.equals(key)) {
@@ -130,6 +149,49 @@ public class SettingsBackupAgent extends BackupHelperAgent {
                 data.skipEntityData();
             }
         }
+    }
+
+    private long[] readOldChecksums(ParcelFileDescriptor oldState) throws IOException {
+        long[] stateChecksums = new long[STATE_SIZE];
+
+        DataInputStream dataInput = new DataInputStream(
+                new FileInputStream(oldState.getFileDescriptor()));
+        for (int i = 0; i < STATE_SIZE; i++) {
+            try {
+                stateChecksums[i] = dataInput.readLong();
+            } catch (EOFException eof) {
+                break;
+            }
+        }
+        dataInput.close();
+        return stateChecksums;
+    }
+
+    private void writeNewChecksums(long[] checksums, ParcelFileDescriptor newState)
+            throws IOException {
+        DataOutputStream dataOutput = new DataOutputStream(
+                new FileOutputStream(newState.getFileDescriptor()));
+        for (int i = 0; i < STATE_SIZE; i++) {
+            dataOutput.writeLong(checksums[i]);
+        }
+        dataOutput.close();
+    }
+
+    private long writeIfChanged(long oldChecksum, String key, byte[] data,
+            BackupDataOutput output) {
+        CRC32 checkSummer = new CRC32();
+        checkSummer.update(data);
+        long newChecksum = checkSummer.getValue();
+        if (oldChecksum == newChecksum) {
+            return oldChecksum;
+        }
+        try {
+            output.writeEntityHeader(key, data.length);
+            output.writeEntityData(data, data.length);
+        } catch (IOException ioe) {
+            // Bail
+        }
+        return newChecksum;
     }
 
     private byte[] getSystemSettings() {
@@ -248,7 +310,7 @@ public class SettingsBackupAgent extends BackupHelperAgent {
         return result;
     }
 
-    private void backupFile(String filename, BackupDataOutput data) {
+    private byte[] getFileData(String filename) {
         try {
             File file = new File(filename);
             if (file.exists()) {
@@ -260,14 +322,13 @@ public class SettingsBackupAgent extends BackupHelperAgent {
                     got = fis.read(bytes, offset, bytes.length - offset);
                     if (got > 0) offset += got;
                 } while (offset < bytes.length && got > 0);
-                data.writeEntityHeader(filename, bytes.length);
-                data.writeEntityData(bytes, bytes.length);
+                return bytes;
             } else {
-                data.writeEntityHeader(filename, 0);
-                data.writeEntityData(EMPTY_DATA, 0);
+                return EMPTY_DATA;
             }
         } catch (IOException ioe) {
             Log.w(TAG, "Couldn't backup " + filename);
+            return EMPTY_DATA;
         }
     }
 

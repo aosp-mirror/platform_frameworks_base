@@ -31,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.EditorInfo;
@@ -141,6 +142,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
         mPopup = new PopupWindow(context, attrs,
                 com.android.internal.R.attr.autoCompleteTextViewStyle);
+        mPopup.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         TypedArray a =
             context.obtainStyledAttributes(
@@ -208,8 +210,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         if (mDropDownAlwaysVisible
                 && mPopup.isShowing()
                 && mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED) {
-            mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-            showDropDown();
+            ensureImeVisible();
         }
     }
 
@@ -1084,10 +1085,20 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     /**
      * Issues a runnable to show the dropdown as soon as possible.
      *
-     * @hide internal used only by Search Dialog
+     * @hide internal used only by SearchDialog
      */
     public void showDropDownAfterLayout() {
         post(mShowDropDownRunnable);
+    }
+    
+    /**
+     * Ensures that the drop down is not obscuring the IME.
+     * 
+     * @hide internal used only here and SearchDialog
+     */
+    public void ensureImeVisible() {
+        mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+        showDropDown();
     }
 
     /**
@@ -1285,11 +1296,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             }
         }
 
-        // Max height available on the screen for a popup. If this AutoCompleteTextView has
-        // the dropDownAlwaysVisible attribute, and the input method is not currently required,
-        // we then we ask for the height ignoring any bottom decorations like the input method.
-        // Otherwise we respect the input method.
-        boolean ignoreBottomDecorations = mDropDownAlwaysVisible &&
+        // Max height available on the screen for a popup.
+        boolean ignoreBottomDecorations =
                 mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED;
         final int maxHeight = mPopup.getMaxAvailableHeight(
                 getDropDownAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);

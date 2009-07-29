@@ -16,6 +16,7 @@
 
 package com.android.internal.os;
 
+import android.bluetooth.BluetoothHeadset;
 import android.os.BatteryStats;
 import android.os.NetStat;
 import android.os.Parcel;
@@ -128,7 +129,10 @@ public final class BatteryStatsImpl extends BatteryStats {
     
     boolean mBluetoothOn;
     StopwatchTimer mBluetoothOnTimer;
-    
+
+    /** Bluetooth headset object */
+    BluetoothHeadset mBtHeadset;
+
     /**
      * These provide time bases that discount the time the device is plugged
      * in to power.
@@ -159,6 +163,9 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     private long mRadioDataUptime;
     private long mRadioDataStart;
+
+    private int mBluetoothPingCount;
+    private int mBluetoothPingStart = -1;
 
     /*
      * Holds a SamplingTimer associated with each kernel wakelock name being tracked.
@@ -920,14 +927,18 @@ public final class BatteryStatsImpl extends BatteryStats {
         dataTransfer[STATS_UNPLUGGED] = currentBytes;
     }
 
-    private long getCurrentRadioDataUptimeMs() {
+    /**
+     * Radio uptime in microseconds when transferring data. This value is very approximate.
+     * @return
+     */
+    private long getCurrentRadioDataUptime() {
         try {
             File awakeTimeFile = new File("/sys/devices/virtual/net/rmnet0/awake_time_ms");
             if (!awakeTimeFile.exists()) return 0;
             BufferedReader br = new BufferedReader(new FileReader(awakeTimeFile));
             String line = br.readLine();
             br.close();
-            return Long.parseLong(line);
+            return Long.parseLong(line) * 1000;
         } catch (NumberFormatException nfe) {
             // Nothing
         } catch (IOException ioe) {
@@ -936,12 +947,42 @@ public final class BatteryStatsImpl extends BatteryStats {
         return 0;
     }
 
+    /**
+     * @deprecated use getRadioDataUptime
+     */
     public long getRadioDataUptimeMs() {
+        return getRadioDataUptime() / 1000;
+    }
+
+    /**
+     * Returns the duration that the cell radio was up for data transfers. 
+     */
+    public long getRadioDataUptime() {
         if (mRadioDataStart == -1) {
             return mRadioDataUptime;
         } else {
-            return getCurrentRadioDataUptimeMs() - mRadioDataStart;
+            return getCurrentRadioDataUptime() - mRadioDataStart;
         }
+    }
+
+    private int getCurrentBluetoothPingCount() {
+        if (mBtHeadset != null) {
+            return mBtHeadset.getBatteryUsageHint();
+        }
+        return -1;
+    }
+
+    public int getBluetoothPingCount() {
+        if (mBluetoothPingStart == -1) {
+            return mBluetoothPingCount;
+        } else if (mBtHeadset != null) {
+            return getCurrentBluetoothPingCount() - mBluetoothPingStart;
+        }
+        return -1;
+    }
+
+    public void setBtHeadset(BluetoothHeadset headset) {
+        mBtHeadset = headset;
     }
 
     public void doUnplug(long batteryUptime, long batteryRealtime) {
@@ -961,8 +1002,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         doDataUnplug(mTotalDataRx, NetStat.getTotalRxBytes());
         doDataUnplug(mTotalDataTx, NetStat.getTotalTxBytes());
         // Track radio awake time
-        mRadioDataStart = getCurrentRadioDataUptimeMs();
+        mRadioDataStart = getCurrentRadioDataUptime();
         mRadioDataUptime = 0;
+        // Track bt headset ping count
+        mBluetoothPingStart = getCurrentBluetoothPingCount();
+        mBluetoothPingCount = 0;
     }
 
     public void doPlug(long batteryUptime, long batteryRealtime) {
@@ -985,8 +1029,12 @@ public final class BatteryStatsImpl extends BatteryStats {
         doDataPlug(mTotalDataRx, NetStat.getTotalRxBytes());
         doDataPlug(mTotalDataTx, NetStat.getTotalTxBytes());
         // Track radio awake time
-        mRadioDataUptime = getRadioDataUptimeMs();
+        mRadioDataUptime = getRadioDataUptime();
         mRadioDataStart = -1;
+
+        // Track bt headset ping count
+        mBluetoothPingCount = getBluetoothPingCount();
+        mBluetoothPingStart = -1;
     }
 
     public void noteStartGps(int uid) {
@@ -3335,6 +3383,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         mRadioDataUptime = in.readLong();
         mRadioDataStart = -1;
 
+        mBluetoothPingCount = in.readInt();
+        mBluetoothPingStart = -1;
+
         mKernelWakelockStats.clear();
         int NKW = in.readInt();
         for (int ikw = 0; ikw < NKW; ikw++) {
@@ -3415,7 +3466,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeLong(getTotalTcpBytesSent(STATS_UNPLUGGED));
 
         // Write radio uptime for data
-        out.writeLong(getRadioDataUptimeMs());
+        out.writeLong(getRadioDataUptime());
+
+        out.writeInt(getBluetoothPingCount());
 
         out.writeInt(mKernelWakelockStats.size());
         for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {

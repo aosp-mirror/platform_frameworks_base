@@ -1341,21 +1341,8 @@ class ApplicationContext extends Context {
         if (pi != null) {
             ApplicationContext c = new ApplicationContext();
             c.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
-            c.init(pi, null, mMainThread);
+            c.init(pi, null, mMainThread, mResources);
             if (c.mResources != null) {
-                Resources newRes = c.mResources;
-                if (mResources.getCompatibilityInfo().applicationScale !=
-                    newRes.getCompatibilityInfo().applicationScale) {
-                    DisplayMetrics dm = mMainThread.getDisplayMetricsLocked(false);
-                    c.mResources = new Resources(newRes.getAssets(), dm,
-                            newRes.getConfiguration(),
-                            mResources.getCompatibilityInfo().copy());
-                    if (DEBUG) {
-                        Log.d(TAG, "loaded context has different scaling. Using container's" +
-                                " compatiblity info:" + mResources.getDisplayMetrics());
-                    }
-
-                }
                 return c;
             }
         }
@@ -1417,8 +1404,24 @@ class ApplicationContext extends Context {
 
     final void init(ActivityThread.PackageInfo packageInfo,
             IBinder activityToken, ActivityThread mainThread) {
+        init(packageInfo, activityToken, mainThread, null);
+    }
+
+    final void init(ActivityThread.PackageInfo packageInfo,
+                IBinder activityToken, ActivityThread mainThread,
+                Resources container) {
         mPackageInfo = packageInfo;
         mResources = mPackageInfo.getResources(mainThread);
+
+        if (container != null && container.getCompatibilityInfo().applicationScale !=
+            mResources.getCompatibilityInfo().applicationScale) {
+            if (DEBUG) {
+                Log.d(TAG, "loaded context has different scaling. Using container's" +
+                        " compatiblity info:" + container.getDisplayMetrics());
+            }
+            mResources = mainThread.getTopLevelResources(
+                    mPackageInfo.getResDir(), container.getCompatibilityInfo().copy());
+        }
         mMainThread = mainThread;
         mContentResolver = new ApplicationContentResolver(this, mainThread);
 

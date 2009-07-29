@@ -29,15 +29,6 @@
 
 using namespace android;
 
-enum CallbackMessageID {
-    kShutterCallback = 0,
-    kRawCallback = 1,
-    kJpegCallback = 2,
-    kPreviewCallback = 3,
-    kAutoFocusCallback = 4,
-    kErrorCallback = 5
-};
-
 struct fields_t {
     jfieldID    context;
     jfieldID    surface;
@@ -55,6 +46,7 @@ public:
     ~JNICameraContext() { release(); }
     virtual void notify(int32_t msgType, int32_t ext1, int32_t ext2);
     virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr);
+    virtual void postDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
     sp<Camera> getCamera() { Mutex::Autolock _l(mLock); return mCamera; }
     void release();
 
@@ -136,16 +128,13 @@ void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int 
         uint8_t *heapBase = (uint8_t*)heap->base();
 
         if (heapBase != NULL) {
-            uint8_t *data = heapBase + offset;
+            const jbyte* data = reinterpret_cast<const jbyte*>(heapBase + offset);
             obj = env->NewByteArray(size);
             if (obj == NULL) {
                 LOGE("Couldn't allocate byte array for JPEG data");
                 env->ExceptionClear();
             } else {
-                jbyte *bytes = env->GetByteArrayElements(obj, NULL);
-                memcpy(bytes, data, size);
-                env->ReleaseByteArrayElements(obj, bytes, 0);
-
+                env->SetByteArrayRegion(obj, 0, size, data);
             }
         } else {
             LOGE("image heap is NULL");
@@ -182,10 +171,17 @@ void JNICameraContext::postData(int32_t msgType, const sp<IMemory>& dataPtr)
                 mCameraJObjectWeak, msgType, 0, 0, NULL);
         break;
     default:
-        LOGV("dataCallback(%d, %p)", msgType, dataPtr.get());
+        // TODO: Change to LOGV
+        LOGD("dataCallback(%d, %p)", msgType, dataPtr.get());
         copyAndPost(env, dataPtr, msgType);
         break;
     }
+}
+
+void JNICameraContext::postDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr)
+{
+    // TODO: plumb up to Java. For now, just drop the timestamp
+    postData(msgType, dataPtr);
 }
 
 // connect to camera service
@@ -227,6 +223,8 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobj
 // finalizer is invoked later.
 static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
 {
+    // TODO: Change to LOGV
+    LOGD("release camera");
     JNICameraContext* context = NULL;
     sp<Camera> camera;
     {

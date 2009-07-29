@@ -278,10 +278,15 @@ public class ShapeDrawable extends Drawable {
         if (name.equals("padding")) {
             TypedArray a = r.obtainAttributes(attrs,
                     com.android.internal.R.styleable.ShapeDrawablePadding);
-            setPadding(a.getInt(com.android.internal.R.styleable.ShapeDrawablePadding_left, 0),
-                       a.getInt(com.android.internal.R.styleable.ShapeDrawablePadding_top, 0),
-                       a.getInt(com.android.internal.R.styleable.ShapeDrawablePadding_right, 0),
-                       a.getInt(com.android.internal.R.styleable.ShapeDrawablePadding_bottom, 0));
+            setPadding(
+                    a.getDimensionPixelOffset(
+                            com.android.internal.R.styleable.ShapeDrawablePadding_left, 0),
+                    a.getDimensionPixelOffset(
+                            com.android.internal.R.styleable.ShapeDrawablePadding_top, 0),
+                    a.getDimensionPixelOffset(
+                            com.android.internal.R.styleable.ShapeDrawablePadding_right, 0),
+                    a.getDimensionPixelOffset(
+                            com.android.internal.R.styleable.ShapeDrawablePadding_bottom, 0));
             a.recycle();
             return true;
         }

@@ -16,28 +16,31 @@
 
 package android.app;
 
+import android.app.SearchManager.DialogCursorProtocol;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources.NotFoundException;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Canvas;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.server.search.SearchableInfo;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
-
-import static android.app.SearchManager.DialogCursorProtocol;
+import android.widget.Filter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -58,7 +61,8 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private SearchDialog mSearchDialog;
     private SearchableInfo mSearchable;
     private Context mProviderContext;
-    private WeakHashMap<String, Drawable> mOutsideDrawablesCache;
+    private WeakHashMap<String, Drawable.ConstantState> mOutsideDrawablesCache;
+    private SparseArray<Drawable.ConstantState> mBackgroundsCache;
     private boolean mGlobalSearchMode;
 
     // Cached column indexes, updated when the cursor changes.
@@ -87,8 +91,16 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private final Runnable mStartSpinnerRunnable;
     private final Runnable mStopSpinnerRunnable;
 
-    public SuggestionsAdapter(Context context, SearchDialog searchDialog, SearchableInfo searchable,
-            WeakHashMap<String, Drawable> outsideDrawablesCache, boolean globalSearchMode) {
+    /**
+     * The amount of time we delay in the filter when the user presses the delete key.
+     * @see Filter#setDelayer(android.widget.Filter.Delayer).
+     */
+    private static final long DELETE_KEY_POST_DELAY = 500L;
+
+    public SuggestionsAdapter(Context context, SearchDialog searchDialog,
+            SearchableInfo searchable,
+            WeakHashMap<String, Drawable.ConstantState> outsideDrawablesCache,
+            boolean globalSearchMode) {
         super(context,
                 com.android.internal.R.layout.search_dropdown_item_icons_2line,
                 null,   // no initial cursor
@@ -102,6 +114,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         mProviderContext = mSearchable.getProviderContext(mContext, activityContext);
 
         mOutsideDrawablesCache = outsideDrawablesCache;
+        mBackgroundsCache = new SparseArray<Drawable.ConstantState>();
         mGlobalSearchMode = globalSearchMode;
 
         mStartSpinnerRunnable = new Runnable() {
@@ -115,6 +128,18 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 mSearchDialog.setWorking(false);
             }
         };
+
+        // delay 500ms when deleting
+        getFilter().setDelayer(new Filter.Delayer() {
+
+            private int mPreviousLength = 0;
+
+            public long getPostingDelay(CharSequence constraint) {
+                long delay = constraint.length() < mPreviousLength ? DELETE_KEY_POST_DELAY : 0;
+                mPreviousLength = constraint.length();
+                return delay;
+            }
+        });
     }
 
     /**
@@ -252,7 +277,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View v = new SuggestionItemView(context, cursor);
+        View v = super.newView(context, cursor, parent);
         v.setTag(new ChildViewCache(v));
         return v;
     }
@@ -297,13 +322,46 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (mBackgroundColorCol != -1) {
             backgroundColor = cursor.getInt(mBackgroundColorCol);
         }
-        ((SuggestionItemView)view).setColor(backgroundColor);
+        Drawable background = getItemBackground(backgroundColor);
+        view.setBackgroundDrawable(background);
 
         final boolean isHtml = mFormatCol > 0 && "html".equals(cursor.getString(mFormatCol));
         setViewText(cursor, views.mText1, mText1Col, isHtml);
         setViewText(cursor, views.mText2, mText2Col, isHtml);
-        setViewIcon(cursor, views.mIcon1, mIconName1Col);
-        setViewIcon(cursor, views.mIcon2, mIconName2Col);
+
+        if (views.mIcon1 != null) {
+            setViewDrawable(views.mIcon1, getIcon1(cursor));
+        }
+        if (views.mIcon2 != null) {
+            setViewDrawable(views.mIcon2, getIcon2(cursor));
+        }
+    }
+
+    /**
+     * Gets a drawable with no color when selected or pressed, and the given color when
+     * neither selected nor pressed.
+     *
+     * @return A drawable, or {@code null} if the given color is transparent.
+     */
+    private Drawable getItemBackground(int backgroundColor) {
+        if (backgroundColor == 0) {
+            return null;
+        } else {
+            Drawable.ConstantState cachedBg = mBackgroundsCache.get(backgroundColor);
+            if (cachedBg != null) {
+                if (DBG) Log.d(LOG_TAG, "Background cache hit for color " + backgroundColor);
+                return cachedBg.newDrawable();
+            }
+            if (DBG) Log.d(LOG_TAG, "Creating new background for color " + backgroundColor);
+            ColorDrawable transparent = new ColorDrawable(0);
+            ColorDrawable background = new ColorDrawable(backgroundColor);
+            StateListDrawable newBg = new StateListDrawable();
+            newBg.addState(new int[]{android.R.attr.state_selected}, transparent);
+            newBg.addState(new int[]{android.R.attr.state_pressed}, transparent);
+            newBg.addState(new int[]{}, background);
+            mBackgroundsCache.put(backgroundColor, newBg.getConstantState());
+            return newBg;
+        }
     }
 
     private void setViewText(Cursor cursor, TextView v, int textCol, boolean isHtml) {
@@ -313,7 +371,11 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         CharSequence text = null;
         if (textCol >= 0) {
             String str = cursor.getString(textCol);
-            text = (str != null && isHtml) ? Html.fromHtml(str) : str;
+            if (isHtml && looksLikeHtml(str)) {
+                text = Html.fromHtml(str);
+            } else {
+                text = str;
+            }
         }
         // Set the text even if it's null, since we need to clear any previous text.
         v.setText(text);
@@ -325,15 +387,40 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
     }
 
-    private void setViewIcon(Cursor cursor, ImageView v, int iconNameCol) {
-        if (v == null) {
-            return;
+    private static boolean looksLikeHtml(String str) {
+        if (TextUtils.isEmpty(str)) return false;
+        for (int i = str.length() - 1; i >= 0; i--) {
+            char c = str.charAt(i);
+            if (c == '<' || c == '&') return true;
         }
-        if (iconNameCol < 0) {
-            return;
+        return false;
+    }
+
+    private Drawable getIcon1(Cursor cursor) {
+        if (mIconName1Col < 0) {
+            return null;
         }
-        String value = cursor.getString(iconNameCol);
+        String value = cursor.getString(mIconName1Col);
         Drawable drawable = getDrawableFromResourceValue(value);
+        if (drawable != null) {
+            return drawable;
+        }
+        return getDefaultIcon1(cursor);
+    }
+
+    private Drawable getIcon2(Cursor cursor) {
+        if (mIconName2Col < 0) {
+            return null;
+        }
+        String value = cursor.getString(mIconName2Col);
+        return getDrawableFromResourceValue(value);
+    }
+
+    /**
+     * Sets the drawable in an image view, makes sure the view is only visible if there
+     * is a drawable.
+     */
+    private void setViewDrawable(ImageView v, Drawable drawable) {
         // Set the icon even if the drawable is null, since we need to clear any
         // previous icon.
         v.setImageDrawable(drawable);
@@ -437,12 +524,13 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
 
         // First, check the cache.
-        Drawable drawable = mOutsideDrawablesCache.get(drawableId);
-        if (drawable != null) {
+        Drawable.ConstantState cached = mOutsideDrawablesCache.get(drawableId);
+        if (cached != null) {
             if (DBG) Log.d(LOG_TAG, "Found icon in cache: " + drawableId);
-            return drawable;
+            return cached.newDrawable();
         }
 
+        Drawable drawable = null;
         try {
             // Not cached, try using it as a plain resource ID in the provider's context.
             int resourceId = Integer.parseInt(drawableId);
@@ -474,13 +562,97 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             // If we got a drawable for this resource id, then stick it in the
             // map so we don't do this lookup again.
             if (drawable != null) {
-                mOutsideDrawablesCache.put(drawableId, drawable);
+                mOutsideDrawablesCache.put(drawableId, drawable.getConstantState());
             }
-        } catch (NotFoundException nfe) {
+        } catch (Resources.NotFoundException nfe) {
             if (DBG) Log.d(LOG_TAG, "Icon resource not found: " + drawableId);
             // drawable = null;
         }
 
+        return drawable;
+    }
+
+    /**
+     * Gets the left-hand side icon that will be used for the current suggestion
+     * if the suggestion contains an icon column but no icon or a broken icon.
+     *
+     * @param cursor A cursor positioned at the current suggestion.
+     * @return A non-null drawable.
+     */
+    private Drawable getDefaultIcon1(Cursor cursor) {
+        // First check the component that the suggestion is originally from
+        String c = getColumnString(cursor, SearchManager.SUGGEST_COLUMN_INTENT_COMPONENT_NAME);
+        if (c != null) {
+            ComponentName component = ComponentName.unflattenFromString(c);
+            if (component != null) {
+                Drawable drawable = getActivityIconWithCache(component);
+                if (drawable != null) {
+                    return drawable;
+                }
+            } else {
+                Log.w(LOG_TAG, "Bad component name: " + c);
+            }
+        }
+
+        // Then check the component that gave us the suggestion
+        Drawable drawable = getActivityIconWithCache(mSearchable.getSearchActivity());
+        if (drawable != null) {
+            return drawable;
+        }
+
+        // Fall back to a default icon
+        return mContext.getPackageManager().getDefaultActivityIcon();
+    }
+
+    /**
+     * Gets the activity or application icon for an activity.
+     * Uses the local icon cache for fast repeated lookups.
+     *
+     * @param component Name of an activity.
+     * @return A drawable, or {@code null} if neither the activity nor the application
+     *         has an icon set.
+     */
+    private Drawable getActivityIconWithCache(ComponentName component) {
+        // First check the icon cache
+        String componentIconKey = component.flattenToShortString();
+        // Using containsKey() since we also store null values.
+        if (mOutsideDrawablesCache.containsKey(componentIconKey)) {
+            Drawable.ConstantState cached = mOutsideDrawablesCache.get(componentIconKey);
+            return cached == null ? null : cached.newDrawable();
+        }
+        // Then try the activity or application icon
+        Drawable drawable = getActivityIcon(component);
+        // Stick it in the cache so we don't do this lookup again.
+        Drawable.ConstantState toCache = drawable == null ? null : drawable.getConstantState();
+        mOutsideDrawablesCache.put(componentIconKey, toCache);
+        return drawable;
+    }
+
+    /**
+     * Gets the activity or application icon for an activity.
+     *
+     * @param component Name of an activity.
+     * @return A drawable, or {@code null} if neither the acitivy or the application
+     *         have an icon set.
+     */
+    private Drawable getActivityIcon(ComponentName component) {
+        PackageManager pm = mContext.getPackageManager();
+        final ActivityInfo activityInfo;
+        try {
+            activityInfo = pm.getActivityInfo(component, PackageManager.GET_META_DATA);
+        } catch (NameNotFoundException ex) {
+            Log.w(LOG_TAG, ex.toString());
+            return null;
+        }
+        int iconId = activityInfo.getIconResource();
+        if (iconId == 0) return null;
+        String pkg = component.getPackageName();
+        Drawable drawable = pm.getDrawable(pkg, iconId, activityInfo.applicationInfo);
+        if (drawable == null) {
+            Log.w(LOG_TAG, "Invalid icon resource " + iconId + " for "
+                    + component.flattenToShortString());
+            return null;
+        }
         return drawable;
     }
 
@@ -498,71 +670,6 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             return null;
         }
         return cursor.getString(col);
-    }
-
-    /**
-     * A parent viewgroup class which holds the actual suggestion item as a child.
-     *
-     * The sole purpose of this class is to draw the given background color when the item is in
-     * normal state and not draw the background color when it is pressed, so that when pressed the
-     * list view's selection highlight will be displayed properly (if we draw our background it
-     * draws on top of the list view selection highlight).
-     */
-    private class SuggestionItemView extends ViewGroup {
-        private int mBackgroundColor;  // the background color to draw in normal state.
-        private View mView;  // the suggestion item's view.
-
-        protected SuggestionItemView(Context context, Cursor cursor) {
-            // Initialize ourselves
-            super(context);
-            mBackgroundColor = 0;  // transparent by default.
-
-            // For our layout use the default list item height from the current theme.
-            TypedValue lineHeight = new TypedValue();
-            context.getTheme().resolveAttribute(
-                    com.android.internal.R.attr.searchResultListItemHeight, lineHeight, true);
-            DisplayMetrics metrics = new DisplayMetrics();
-            metrics.setToDefaults();
-            AbsListView.LayoutParams layout = new AbsListView.LayoutParams(
-                    AbsListView.LayoutParams.FILL_PARENT,
-                    (int)lineHeight.getDimension(metrics));
-
-            setLayoutParams(layout);
-
-            // Initialize the child view
-            mView = SuggestionsAdapter.super.newView(context, cursor, this);
-            if (mView != null) {
-                addView(mView, layout.width, layout.height);
-                mView.setVisibility(View.VISIBLE);
-            }
-        }
-
-        public void setColor(int backgroundColor) {
-            mBackgroundColor = backgroundColor;
-        }
-
-        @Override
-        public void dispatchDraw(Canvas canvas) {
-            if (mBackgroundColor != 0 && !isPressed() && !isSelected()) {
-                canvas.drawColor(mBackgroundColor);
-            }
-            super.dispatchDraw(canvas);
-        }
-
-        @Override
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            if (mView != null) {
-                mView.measure(widthMeasureSpec, heightMeasureSpec);
-            }
-        }
-
-        @Override
-        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-            if (mView != null) {
-                mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
-            }
-        }
     }
 
 }

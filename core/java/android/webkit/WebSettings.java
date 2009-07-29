@@ -17,13 +17,13 @@
 package android.webkit;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Checkin;
 
 import java.lang.SecurityException;
-import android.content.pm.PackageManager;
 
 import java.util.Locale;
 
@@ -175,6 +175,9 @@ public class WebSettings {
     private boolean         mSupportZoom = true;
     private boolean         mBuiltInZoomControls = false;
     private boolean         mAllowFileAccess = true;
+
+    // The Gears permissions manager. Only in Donut.
+    static GearsPermissionsManager sGearsPermissionsManager;
 
     // Class to handle messages before WebCore is ready.
     private class EventHandler {
@@ -1148,6 +1151,7 @@ public class WebSettings {
         if (WebView.DEBUG) {
             junit.framework.Assert.assertTrue(frame.mNativeFrame != 0);
         }
+        checkGearsPermissions();
         nativeSync(frame.mNativeFrame);
         mSyncPending = false;
         mEventHandler.createHandler();
@@ -1161,6 +1165,23 @@ public class WebSettings {
             return 72;
         }
         return size;
+    }
+
+    private void checkGearsPermissions() {
+        // Did we already check the permissions at startup?
+        if (sGearsPermissionsManager != null) {
+            return;
+        }
+        // Is the pluginsPath sane?
+        String pluginsPath = getPluginsPath();
+        if (pluginsPath == null || pluginsPath.length() == 0) {
+            // We don't yet have a meaningful plugin path, so
+            // we can't do anything about the Gears permissions.
+            return;
+        }
+        sGearsPermissionsManager =
+            new GearsPermissionsManager(mContext, pluginsPath);
+        sGearsPermissionsManager.doCheckAndStartObserver();
     }
 
     /* Post a SYNC message to handle syncing the native settings. */

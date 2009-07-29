@@ -499,4 +499,41 @@ public class UriTest extends TestCase {
 
         assertEquals(uriString, uri.toString());
     }
+
+    public void testEmptyToStringNotNull() {
+        assertNotNull(Uri.EMPTY.toString());
+    }
+
+    @SmallTest
+    public void testParcellingWithoutFragment() {
+        parcelAndUnparcel(Uri.parse("foo:bob%20lee"));
+        parcelAndUnparcel(Uri.fromParts("foo", "bob lee", "fragment"));
+        parcelAndUnparcel(new Uri.Builder()
+            .scheme("http")
+            .authority("crazybob.org")
+            .path("/rss/")
+            .encodedQuery("a=b")
+            .build());
+    }
+
+    public void testGetQueryParameter() {
+        String nestedUrl = "http://crazybob.org/?a=1&b=2";
+        Uri uri = Uri.parse("http://test/").buildUpon()
+                .appendQueryParameter("foo", "bar")
+                .appendQueryParameter("nested", nestedUrl).build();
+        assertEquals(nestedUrl, uri.getQueryParameter("nested"));
+        assertEquals(nestedUrl, uri.getQueryParameters("nested").get(0));
+    }
+
+    public void testGetQueryParameterWorkaround() {
+        // This was a workaround for a bug where getQueryParameter called
+        // getQuery() instead of getEncodedQuery().
+        String nestedUrl = "http://crazybob.org/?a=1&b=2";
+        Uri uri = Uri.parse("http://test/").buildUpon()
+                .appendQueryParameter("foo", "bar")
+                .appendQueryParameter("nested", Uri.encode(nestedUrl)).build();
+        assertEquals(nestedUrl, Uri.decode(uri.getQueryParameter("nested")));
+        assertEquals(nestedUrl,
+                Uri.decode(uri.getQueryParameters("nested").get(0)));
+    }
 }

@@ -322,7 +322,9 @@ public class TelephonyManager {
     /**
      * Returns the alphabetic name of current registered operator.
      * <p>
-     * Availability: Only when user is registered to a network
+     * Availability: Only when user is registered to a network. Result may be
+     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
+     * on a CDMA network).
      */
     public String getNetworkOperatorName() {
         return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ALPHA);
@@ -331,7 +333,9 @@ public class TelephonyManager {
     /**
      * Returns the numeric name (MCC+MNC) of current registered operator.
      * <p>
-     * Availability: Only when user is registered to a network
+     * Availability: Only when user is registered to a network. Result may be
+     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
+     * on a CDMA network).
      */
     public String getNetworkOperator() {
         return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_NUMERIC);
@@ -341,7 +345,7 @@ public class TelephonyManager {
      * Returns true if the device is considered roaming on the current
      * network, for GSM purposes.
      * <p>
-     * Availability: Only when user registered to a network
+     * Availability: Only when user registered to a network.
      */
     public boolean isNetworkRoaming() {
         return "true".equals(SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ISROAMING));
@@ -351,7 +355,9 @@ public class TelephonyManager {
      * Returns the ISO country code equivilent of the current registered
      * operator's MCC (Mobile Country Code).
      * <p>
-     * Availability: Only when user is registered to a network
+     * Availability: Only when user is registered to a network. Result may be
+     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
+     * on a CDMA network).
      */
     public String getNetworkCountryIso() {
         return SystemProperties.get(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY);

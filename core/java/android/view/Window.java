@@ -358,6 +358,8 @@ public abstract class Window {
     private class LocalWindowManager implements WindowManager {
         LocalWindowManager(WindowManager wm) {
             mWindowManager = wm;
+            mDefaultDisplay = mContext.getResources().getDefaultDisplay(
+                    mWindowManager.getDefaultDisplay());
         }
 
         public final void addView(View view, ViewGroup.LayoutParams params) {
@@ -420,10 +422,12 @@ public abstract class Window {
         }
 
         public Display getDefaultDisplay() {
-            return mWindowManager.getDefaultDisplay();
+            return mDefaultDisplay;
         }
         
-        WindowManager mWindowManager;
+        private final WindowManager mWindowManager;
+
+        private final Display mDefaultDisplay;
     }
 
     /**

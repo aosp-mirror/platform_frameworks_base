@@ -34,6 +34,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.LongSparseArray;
+import android.view.Display;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -86,7 +87,8 @@ public class Resources {
     /*package*/ final DisplayMetrics mMetrics = new DisplayMetrics();
     PluralRules mPluralRule;
     
-    private final CompatibilityInfo mCompatibilityInfo;
+    private CompatibilityInfo mCompatibilityInfo;
+    private Display mDefaultDisplay;
 
     private static final LongSparseArray<Object> EMPTY_ARRAY = new LongSparseArray<Object>() {
         @Override
@@ -129,53 +131,30 @@ public class Resources {
      */
     public Resources(AssetManager assets, DisplayMetrics metrics,
             Configuration config) {
-        this(assets, metrics, config, (ApplicationInfo) null);
+        this(assets, metrics, config, (CompatibilityInfo) null);
     }
 
     /**
-     * Creates a new Resources object with ApplicationInfo.
+     * Creates a new Resources object with CompatibilityInfo.
      * 
      * @param assets Previously created AssetManager. 
      * @param metrics Current display metrics to consider when 
      *                selecting/computing resource values.
      * @param config Desired device configuration to consider when 
      *               selecting/computing resource values (optional).
-     * @param appInfo this resource's application info.
+     * @param compInfo this resource's compatibility info. It will use the default compatibility
+     *  info when it's null.
      * @hide
      */
     public Resources(AssetManager assets, DisplayMetrics metrics,
-            Configuration config, ApplicationInfo appInfo) {
+            Configuration config, CompatibilityInfo compInfo) {
         mAssets = assets;
-        mConfiguration.setToDefaults();
         mMetrics.setToDefaults();
-        if (appInfo != null) {
-            mCompatibilityInfo = new CompatibilityInfo(appInfo);
-            if (DEBUG_CONFIG) {
-                Log.d(TAG, "compatibility for " + appInfo.packageName + " : " + mCompatibilityInfo);
-            }
-        } else {
+        if (compInfo == null) {
             mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
-        }
-        updateConfiguration(config, metrics);
-        assets.ensureStringBlocks();
-        if (mCompatibilityInfo.isScalingRequired()) {
-            mPreloadedDrawables = emptySparseArray();
         } else {
-            mPreloadedDrawables = sPreloadedDrawables;
+            mCompatibilityInfo = compInfo;
         }
-    }
-
-    /**
-     * Creates a new resources that uses the given compatibility info. Used to create
-     * a context for widgets using the container's compatibility info.
-     * {@see ApplicationContext#createPackageCotnext}.
-     * @hide
-     */
-    public Resources(AssetManager assets, DisplayMetrics metrics,
-            Configuration config, CompatibilityInfo info) {
-        mAssets = assets;
-        mMetrics.setToDefaults();
-        mCompatibilityInfo = info;
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
         if (mCompatibilityInfo.isScalingRequired()) {
@@ -1407,6 +1386,15 @@ public class Resources {
     }
 
     /**
+     * This is just for testing.
+     * @hide
+     */
+    public void setCompatibilityInfo(CompatibilityInfo ci) {
+        mCompatibilityInfo = ci;
+        updateConfiguration(mConfiguration, mMetrics);
+    }
+    
+    /**
      * Return a resource identifier for the given resource name.  A fully
      * qualified resource name is of the form "package:type/entry".  The first
      * two components (package and type) are optional if defType and
@@ -1936,6 +1924,24 @@ public class Resources {
         throw new NotFoundException(
                 "File " + file + " from xml type " + type + " resource ID #0x"
                 + Integer.toHexString(id));
+    }
+
+    /**
+     * Returns the display adjusted for the Resources' metrics.
+     * @hide
+     */
+    public Display getDefaultDisplay(Display defaultDisplay) {
+        if (mDefaultDisplay == null) {
+            if (!mCompatibilityInfo.isScalingRequired() && mCompatibilityInfo.supportsScreen()) {
+                // the app supports the display. just use the default one.
+                mDefaultDisplay = defaultDisplay;
+            } else {
+                // display needs adjustment.
+                mDefaultDisplay = Display.createMetricsBasedDisplay(
+                        defaultDisplay.getDisplayId(), mMetrics);
+            }
+        }
+        return mDefaultDisplay;
     }
 
     private TypedArray getCachedStyledAttributes(int len) {

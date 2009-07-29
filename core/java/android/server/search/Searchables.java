@@ -17,7 +17,6 @@
 package android.server.search;
 
 import com.android.internal.app.ResolverActivity;
-import com.android.internal.R;
 
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -27,7 +26,6 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -249,7 +247,12 @@ public class Searchables {
             for (int i = 0; i < webSearchInfoList.size(); ++i) {
                 ActivityInfo ai = webSearchInfoList.get(i).activityInfo;
                 ComponentName component = new ComponentName(ai.packageName, ai.name);
-                newSearchablesForWebSearchList.add(newSearchablesMap.get(component));
+                SearchableInfo searchable = newSearchablesMap.get(component);
+                if (searchable == null) {
+                    Log.w(LOG_TAG, "did not find component in searchables: " + component);
+                } else {
+                    newSearchablesForWebSearchList.add(searchable);
+                }
             }
         }
 
@@ -264,7 +267,7 @@ public class Searchables {
         }
 
         // Find the default web search provider.
-        ComponentName webSearchActivity = getPreferredWebSearchActivity();
+        ComponentName webSearchActivity = getPreferredWebSearchActivity(mContext);
         SearchableInfo newDefaultSearchableForWebSearch = null;
         if (webSearchActivity != null) {
             newDefaultSearchableForWebSearch = newSearchablesMap.get(webSearchActivity);
@@ -283,9 +286,6 @@ public class Searchables {
             mDefaultSearchable = newDefaultSearchable;
             mDefaultSearchableForWebSearch = newDefaultSearchableForWebSearch;
         }
-
-        // Inform all listeners that the list of searchables has been updated.
-        mContext.sendBroadcast(new Intent(SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED));
     }
 
     /**
@@ -295,9 +295,10 @@ public class Searchables {
      * @param action Intent action for which this activity is to be set as preferred.
      * @return true if component was detected and set as preferred activity, false if not.
      */
-    private boolean setPreferredActivity(ComponentName component, String action) {
+    private static boolean setPreferredActivity(Context context,
+            ComponentName component, String action) {
         Log.d(LOG_TAG, "Checking component " + component);
-        PackageManager pm = mContext.getPackageManager();
+        PackageManager pm = context.getPackageManager();
         ActivityInfo ai;
         try {
             ai = pm.getActivityInfo(component, 0);
@@ -326,10 +327,10 @@ public class Searchables {
         return true;
     }
 
-    public ComponentName getPreferredWebSearchActivity() {
+    private static ComponentName getPreferredWebSearchActivity(Context context) {
         // Check if we have a preferred web search activity.
         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-        PackageManager pm = mContext.getPackageManager();
+        PackageManager pm = context.getPackageManager();
         ResolveInfo ri = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
 
         if (ri == null || ri.activityInfo.name.equals(ResolverActivity.class.getName())) {
@@ -338,11 +339,11 @@ public class Searchables {
             // The components in the providers array are checked in the order of declaration so the
             // first one has the highest priority. If the component exists in the system it is set
             // as the preferred activity to handle intent action web search.
-            String[] preferredActivities = mContext.getResources().getStringArray(
+            String[] preferredActivities = context.getResources().getStringArray(
                     com.android.internal.R.array.default_web_search_providers);
             for (String componentName : preferredActivities) {
                 ComponentName component = ComponentName.unflattenFromString(componentName);
-                if (setPreferredActivity(component, Intent.ACTION_WEB_SEARCH)) {
+                if (setPreferredActivity(context, component, Intent.ACTION_WEB_SEARCH)) {
                     return component;
                 }
             }
@@ -354,7 +355,8 @@ public class Searchables {
             if (cn.flattenToShortString().equals(GOOGLE_SEARCH_COMPONENT_NAME)) {
                 ComponentName enhancedGoogleSearch = ComponentName.unflattenFromString(
                         ENHANCED_GOOGLE_SEARCH_COMPONENT_NAME);
-                if (setPreferredActivity(enhancedGoogleSearch, Intent.ACTION_WEB_SEARCH)) {
+                if (setPreferredActivity(context, enhancedGoogleSearch,
+                        Intent.ACTION_WEB_SEARCH)) {
                     return enhancedGoogleSearch;
                 }
             }
@@ -397,7 +399,7 @@ public class Searchables {
      * Sets the default searchable activity for web searches.
      */
     public synchronized void setDefaultWebSearch(ComponentName component) {
-        setPreferredActivity(component, Intent.ACTION_WEB_SEARCH);
+        setPreferredActivity(mContext, component, Intent.ACTION_WEB_SEARCH);
         buildSearchableList();
     }
 }

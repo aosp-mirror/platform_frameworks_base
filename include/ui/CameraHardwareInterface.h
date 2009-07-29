@@ -28,7 +28,7 @@ namespace android {
 typedef void (*preview_callback)(const sp<IMemory>& mem, void* user);
 
 /** Callback for startRecord() */
-typedef void (*recording_callback)(const sp<IMemory>& mem, void* user);
+typedef void (*recording_callback)(nsecs_t timestamp, const sp<IMemory>& mem, void* user);
 
 /** Callback for takePicture() */
 typedef void (*shutter_callback)(void* user);

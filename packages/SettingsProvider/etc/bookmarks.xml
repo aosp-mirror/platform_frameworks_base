@@ -53,6 +53,6 @@
         shortcut="s" />
     <bookmark
         package="com.google.android.youtube"
-        class="com.google.android.youtube.HomePage"
+        class="com.google.android.youtube.HomeActivity"
         shortcut="y" />
 </bookmarks>

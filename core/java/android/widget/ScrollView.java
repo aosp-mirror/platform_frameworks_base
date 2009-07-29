@@ -20,8 +20,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Config;
-import android.util.Log;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -54,7 +52,6 @@ import java.util.List;
  */
 public class ScrollView extends FrameLayout {
     static final String TAG = "ScrollView";
-    static final boolean localLOGV = false || Config.LOGV;
     
     static final int ANIMATED_SCROLL_GAP = 250;
 
@@ -287,18 +284,21 @@ public class ScrollView extends FrameLayout {
             return;
         }
 
-        final View child = getChildAt(0);
-        int height = getMeasuredHeight();
-        if (child.getMeasuredHeight() < height) {
-            final FrameLayout.LayoutParams lp = (LayoutParams) child.getLayoutParams();
-
-            int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec, mPaddingLeft
-                    + mPaddingRight, lp.width);
-            height -= mPaddingTop;
-            height -= mPaddingBottom;
-            int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
-
-            child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+        if (getChildCount() > 0) {
+            final View child = getChildAt(0);
+            int height = getMeasuredHeight();
+            if (child.getMeasuredHeight() < height) {
+                final FrameLayout.LayoutParams lp = (LayoutParams) child.getLayoutParams();
+    
+                int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec, mPaddingLeft
+                        + mPaddingRight, lp.width);
+                height -= mPaddingTop;
+                height -= mPaddingBottom;
+                int childHeightMeasureSpec =
+                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+    
+                child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+            }
         }
     }
 
@@ -756,13 +756,14 @@ public class ScrollView extends FrameLayout {
             if (direction == View.FOCUS_UP && getScrollY() < scrollDelta) {
                 scrollDelta = getScrollY();
             } else if (direction == View.FOCUS_DOWN) {
-
-                int daBottom = getChildAt(getChildCount() - 1).getBottom();
-
-                int screenBottom = getScrollY() + getHeight();
-
-                if (daBottom - screenBottom < maxJump) {
-                    scrollDelta = daBottom - screenBottom;
+                if (getChildCount() > 0) {
+                    int daBottom = getChildAt(0).getBottom();
+    
+                    int screenBottom = getScrollY() + getHeight();
+    
+                    if (daBottom - screenBottom < maxJump) {
+                        scrollDelta = daBottom - screenBottom;
+                    }
                 }
             }
             if (scrollDelta == 0) {
@@ -830,16 +831,12 @@ public class ScrollView extends FrameLayout {
     public final void smoothScrollBy(int dx, int dy) {
         long duration = AnimationUtils.currentAnimationTimeMillis() - mLastScroll;
         if (duration > ANIMATED_SCROLL_GAP) {
-            if (localLOGV) Log.v(TAG, "Smooth scroll: mScrollY=" + mScrollY
-                    + " dy=" + dy);
             mScroller.startScroll(mScrollX, mScrollY, dx, dy);
             invalidate();
         } else {
             if (!mScroller.isFinished()) {
                 mScroller.abortAnimation();
             }
-            if (localLOGV) Log.v(TAG, "Immediate scroll: mScrollY=" + mScrollY
-                    + " dy=" + dy);
             scrollBy(dx, dy);
         }
         mLastScroll = AnimationUtils.currentAnimationTimeMillis();
@@ -922,9 +919,6 @@ public class ScrollView extends FrameLayout {
                 View child = getChildAt(0);
                 mScrollX = clamp(x, getWidth() - mPaddingRight - mPaddingLeft, child.getWidth());
                 mScrollY = clamp(y, getHeight() - mPaddingBottom - mPaddingTop, child.getHeight());
-                if (localLOGV) Log.v(TAG, "mScrollY=" + mScrollY + " y=" + y
-                        + " height=" + this.getHeight()
-                        + " child height=" + child.getHeight());
             } else {
                 mScrollX = x;
                 mScrollY = y;
@@ -986,6 +980,7 @@ public class ScrollView extends FrameLayout {
      * @return The scroll delta.
      */
     protected int computeScrollDeltaToGetChildRectOnScreen(Rect rect) {
+        if (getChildCount() == 0) return 0;
 
         int height = getHeight();
         int screenTop = getScrollY();
@@ -1005,9 +1000,6 @@ public class ScrollView extends FrameLayout {
 
         int scrollYDelta = 0;
 
-        if (localLOGV) Log.v(TAG, "child=" + rect.toShortString()
-                + " screenTop=" + screenTop + " screenBottom=" + screenBottom
-                + " height=" + height);
         if (rect.bottom > screenBottom && rect.top > screenTop) {
             // need to move down to get it in view: move down just enough so
             // that the entire rectangle is in view (or at least the first
@@ -1022,10 +1014,8 @@ public class ScrollView extends FrameLayout {
             }
 
             // make sure we aren't scrolling beyond the end of our content
-            int bottom = getChildAt(getChildCount() - 1).getBottom();
+            int bottom = getChildAt(0).getBottom();
             int distanceToBottom = bottom - screenBottom;
-            if (localLOGV) Log.v(TAG, "scrollYDelta=" + scrollYDelta
-                    + " distanceToBottom=" + distanceToBottom);
             scrollYDelta = Math.min(scrollYDelta, distanceToBottom);
 
         } else if (rect.top < screenTop && rect.bottom < screenBottom) {
@@ -1164,26 +1154,28 @@ public class ScrollView extends FrameLayout {
      *                  which means we want to scroll towards the top.
      */
     public void fling(int velocityY) {
-        int height = getHeight() - mPaddingBottom - mPaddingTop;
-        int bottom = getChildAt(0).getHeight();
-
-        mScroller.fling(mScrollX, mScrollY, 0, velocityY, 0, 0, 0, bottom - height);
-
-        final boolean movingDown = velocityY > 0;
-
-        View newFocused =
-                findFocusableViewInMyBounds(movingDown, mScroller.getFinalY(), findFocus());
-        if (newFocused == null) {
-            newFocused = this;
+        if (getChildCount() > 0) {
+            int height = getHeight() - mPaddingBottom - mPaddingTop;
+            int bottom = getChildAt(0).getHeight();
+    
+            mScroller.fling(mScrollX, mScrollY, 0, velocityY, 0, 0, 0, bottom - height);
+    
+            final boolean movingDown = velocityY > 0;
+    
+            View newFocused =
+                    findFocusableViewInMyBounds(movingDown, mScroller.getFinalY(), findFocus());
+            if (newFocused == null) {
+                newFocused = this;
+            }
+    
+            if (newFocused != findFocus()
+                    && newFocused.requestFocus(movingDown ? View.FOCUS_DOWN : View.FOCUS_UP)) {
+                mScrollViewMovedFocus = true;
+                mScrollViewMovedFocus = false;
+            }
+    
+            invalidate();
         }
-
-        if (newFocused != findFocus()
-                && newFocused.requestFocus(movingDown ? View.FOCUS_DOWN : View.FOCUS_UP)) {
-            mScrollViewMovedFocus = true;
-            mScrollViewMovedFocus = false;
-        }
-
-        invalidate();
     }
 
     /**

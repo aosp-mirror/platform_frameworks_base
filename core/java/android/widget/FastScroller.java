@@ -26,6 +26,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 
 /**
@@ -116,17 +117,19 @@ class FastScroller {
         mThumbDrawable.setAlpha(ScrollFade.ALPHA_MAX);
     }
     
-    private void useThumbDrawable(Drawable drawable) {
+    private void useThumbDrawable(Context context, Drawable drawable) {
         mThumbDrawable = drawable;
-        mThumbW = 64; //mCurrentThumb.getIntrinsicWidth();
-        mThumbH = 52; //mCurrentThumb.getIntrinsicHeight();
+        mThumbW = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                64, context.getResources().getDisplayMetrics());
+        mThumbH = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                52, context.getResources().getDisplayMetrics());
         mChangedBounds = true;
     }
 
     private void init(Context context) {
         // Get both the scrollbar states drawables
         final Resources res = context.getResources();
-        useThumbDrawable(res.getDrawable(
+        useThumbDrawable(context, res.getDrawable(
                 com.android.internal.R.drawable.scrollbar_handle_accelerated_anim2));
         
         mOverlayDrawable = res.getDrawable(

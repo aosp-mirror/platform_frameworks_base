@@ -338,6 +338,7 @@ public class SyncStorageEngine extends Handler {
                 }
                 reports.add(mChangeListeners.getBroadcastItem(i));
             }
+            mChangeListeners.finishBroadcast();
         }
         
         if (DEBUG) Log.v(TAG, "reportChange " + which + " to: " + reports);

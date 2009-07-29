@@ -21,6 +21,7 @@
     <string name="gigabyteShort">"GB"</string>
     <string name="terabyteShort">"TB"</string>
     <string name="petabyteShort">"PB"</string>
+    <string name="fileSizeSuffix">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled">"&lt;bez názvu&gt;"</string>
     <string name="ellipsis">"…"</string>
     <string name="emptyPhoneNumber">"(žádné telefonní číslo)"</string>
@@ -48,6 +49,12 @@
     <string name="BaMmi">"Blokování hovorů"</string>
     <string name="PwdMmi">"Změna hesla"</string>
     <string name="PinMmi">"Změna kódu PIN"</string>
+    <string name="CnipMmi">"Volané číslo uvedeno"</string>
+    <string name="CnirMmi">"Volání čísla omezeno"</string>
+    <string name="ThreeWCMmi">"Konference tří účastníků"</string>
+    <string name="RuacMmi">"Odmítnutí nevyžádaných obtěžujících hovorů"</string>
+    <string name="CndMmi">"Doručení volaného čísla"</string>
+    <string name="DndMmi">"Nerušit"</string>
     <string name="CLIRDefaultOnNextCallOn">"Ve výchozím nastavení je identifikace volajícího omezena. Příští hovor: Omezeno"</string>
     <string name="CLIRDefaultOnNextCallOff">"Ve výchozím nastavení je identifikace volajícího omezena. Příští hovor: Neomezeno"</string>
     <string name="CLIRDefaultOffNextCallOn">"Ve výchozím nastavení není identifikace volajícího omezena. Příští hovor: Omezeno"</string>
@@ -67,11 +74,27 @@
     <string name="serviceClassDataSync">"Synchronizace"</string>
     <string name="serviceClassPacket">"Pakety"</string>
     <string name="serviceClassPAD">"PAD"</string>
+    <string name="roamingText0">"Indikátor roamingu svítí"</string>
+    <string name="roamingText1">"Indikátor roamingu nesvítí"</string>
+    <string name="roamingText2">"Indikátor roamingu bliká"</string>
+    <string name="roamingText3">"Není v blízkosti"</string>
+    <string name="roamingText4">"Mimo budovu"</string>
+    <string name="roamingText5">"Roaming – preferovaný systém"</string>
+    <string name="roamingText6">"Roaming – dostupný systém"</string>
+    <string name="roamingText7">"Roaming – alianční partner"</string>
+    <string name="roamingText8">"Roaming – prémiový partner"</string>
+    <string name="roamingText9">"Roaming – úplná funkčnost služby"</string>
+    <string name="roamingText10">"Roaming – částečná funkčnost služby"</string>
+    <string name="roamingText11">"Banner roamingu je zapnutý"</string>
+    <string name="roamingText12">"Banner roamingu je vypnutý"</string>
+    <string name="roamingTextSearching">"Vyhledávání služby"</string>
     <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepřesměrováno"</string>
     <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> po <xliff:g id="TIME_DELAY">{2}</xliff:g> sek."</string>
     <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepřesměrováno"</string>
     <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepřesměrováno"</string>
+    <string name="fcComplete">"Požadavek zadaný pomocí kódu funkce byl úspěšně dokončen."</string>
+    <string name="fcError">"Problém s připojením nebo neplatný kód funkce."</string>
     <string name="httpErrorOk">"OK"</string>
     <string name="httpError">"Webová stránka obsahuje chybu."</string>
     <string name="httpErrorLookup">"Adresu URL nelze najít."</string>
@@ -88,6 +111,7 @@
     <string name="httpErrorFile">"K souboru nelze získat přístup."</string>
     <string name="httpErrorFileNotFound">"Požadovaný soubor nebyl nalezen."</string>
     <string name="httpErrorTooManyRequests">"Je zpracováváno příliš mnoho požadavků. Opakujte akci později."</string>
+    <string name="certificateSaved">"Certifikát je uložen v systémovém úložišti klíčů."</string>
     <string name="contentServiceSync">"Synchronizace"</string>
     <string name="contentServiceSyncNotificationTitle">"Synchronizace"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Příliš mnoho smazaných položek služby <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
@@ -133,6 +157,8 @@
     <string name="permgroupdesc_systemTools">"Nízkoúrovňový přístup a kontrola nad systémem."</string>
     <string name="permgrouplab_developmentTools">"Nástroje pro vývojáře"</string>
     <string name="permgroupdesc_developmentTools">"Funkce pouze pro vývojáře aplikací"</string>
+    <string name="permgrouplab_storage">"Úložiště"</string>
+    <string name="permgroupdesc_storage">"Přístup ke kartě SD."</string>
     <string name="permlab_statusBar">"zakázání či změny stavového řádku"</string>
     <string name="permdesc_statusBar">"Umožňuje aplikaci zakázat stavový řádek nebo přidat či odebrat systémové ikony."</string>
     <string name="permlab_expandStatusBar">"rozbalení a sbalení stavového řádku"</string>
@@ -165,6 +191,10 @@
     <string name="permdesc_forceBack">"Umožňuje aplikaci vynutit zavření a přesunutí libovolné činnosti v popředí na pozadí. Běžné aplikace by toto nastavení neměly nikdy využívat."</string>
     <string name="permlab_dump">"načtení interního stavu systému"</string>
     <string name="permdesc_dump">"Umožňuje aplikaci načíst interní stav systému. Škodlivé aplikace mohou načíst řádu soukromých a zabezpečených informací, které by nikdy neměly potřebovat."</string>
+    <string name="permlab_shutdown">"Částečné vypnutí"</string>
+    <string name="permdesc_shutdown">"Uvede správce činností do vypnutého stavu. Nedojde však k úplnému vypnutí."</string>
+    <string name="permlab_stopAppSwitches">"Zabránit přepínání aplikací"</string>
+    <string name="permdesc_stopAppSwitches">"Zabrání uživateli přepnout na jinou aplikaci."</string>
     <string name="permlab_runSetActivityWatcher">"sledování a řízení spouštění všech aplikací"</string>
     <string name="permdesc_runSetActivityWatcher">"Umožňuje aplikaci sledovat a řídit spouštění činností systémem. Škodlivé aplikace mohou zcela ovládnout systém. Toto oprávnění je zapotřebí pouze pro účely vývoje, nikdy pro běžné použití telefonu."</string>
     <string name="permlab_broadcastPackageRemoved">"odeslání vysílání o odstranění balíčku"</string>
@@ -179,6 +209,8 @@
     <string name="permdesc_setAlwaysFinish">"Umožňuje aplikaci ovládat, zda jsou činnosti vždy dokončeny po přesunutí do pozadí. Běžné aplikace toto nastavení nikdy nevyužívají."</string>
     <string name="permlab_batteryStats">"změna statistických údajů o baterii"</string>
     <string name="permdesc_batteryStats">"Umožňuje změnu shromážděných statistických údajů o baterii. Není určeno pro běžné aplikace."</string>
+    <string name="permlab_backup">"Ovládat zálohování a obnovu systému"</string>
+    <string name="permdesc_backup">"Umožňuje aplikaci ovládat mechanizmus zálohování a obnovy systému. Není určeno k použití v běžných aplikacích."</string>
     <string name="permlab_internalSystemWindow">"zobrazení nepovolených oken"</string>
     <string name="permdesc_internalSystemWindow">"Umožňuje vytvoření oken, která mají být použita interním systémem uživatelského rozhraní. Běžné aplikace toto nastavení nepoužívají."</string>
     <string name="permlab_systemAlertWindow">"zobrazení upozornění systémové úrovně"</string>
@@ -245,6 +277,8 @@
     <string name="permdesc_accessMockLocation">"Vytváří simulované zdroje polohy pro účely testování. Škodlivé aplikace mohou pomocí tohoto nastavení změnit polohu či stav vrácený zdroji skutečné polohy, jako je např. jednotka GPS či poskytovatelé sítě."</string>
     <string name="permlab_accessLocationExtraCommands">"přístup k dalším příkazům poskytovatele polohy"</string>
     <string name="permdesc_accessLocationExtraCommands">"Umožňuje získat přístup k dalším příkazům poskytovatele polohy. Škodlivé aplikace mohou pomocí tohoto nastavení narušit funkci GPS či jiných zdrojů polohy."</string>
+    <string name="permlab_installLocationProvider">"Oprávnění k instalaci poskytovatele polohy"</string>
+    <string name="permdesc_installLocationProvider">"Vytvořit simulace zdrojů polohy pro účely testování. Škodlivé aplikace mohou toto nastavení využít k přepsání polohy nebo stavu vráceného zdroji skutečné polohy, například systémem GPS nebo poskytovateli sítí. Mohou také monitorovat polohu a ohlásit ji externímu zdroji."</string>
     <string name="permlab_accessFineLocation">"upřesnění polohy (GPS)"</string>
     <string name="permdesc_accessFineLocation">"Umožňuje aplikaci přístup ke zdrojům přesné polohy v telefonu, jako je například systém GPS, je-li k dispozici. Škodlivé aplikace mohou pomocí tohoto nastavení zjistit vaši polohu a mohou zvýšit spotřebu baterie."</string>
     <string name="permlab_accessCoarseLocation">"přibližná poloha (pomocí sítě)"</string>
@@ -317,6 +351,8 @@
     <string name="permdesc_accessWifiState">"Umožňuje aplikaci zobrazit informace o stavu připojení WiFi."</string>
     <string name="permlab_changeWifiState">"Změnit stav WiFi"</string>
     <string name="permdesc_changeWifiState">"Umožňuje aplikaci připojit se k přístupovým bodům WiFi či se od nich odpojit a provádět změny nakonfigurovaných sítí WiFi."</string>
+    <string name="permlab_changeWifiMulticastState">"Povolit příjem Wi-Fi Multicast"</string>
+    <string name="permdesc_changeWifiMulticastState">"Povoluje aplikaci přijímat pakety, které nebyly adresovány přímo vašemu zařízení. Pomocí této možnosti můžete objevit služby nabízené ve vaší blízkosti. Spotřeba energie je vyšší než u režimu bez vícesměrového vysílání (multicast)."</string>
     <string name="permlab_bluetoothAdmin">"správa rozhraní Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
     <string name="permlab_bluetooth">"vytvoření připojení Bluetooth"</string>
@@ -337,6 +373,8 @@
     <string name="permdesc_readDictionary">"Umožní aplikaci číst soukromá slova, jména a fráze, která uživatel mohl uložit do svého slovníku."</string>
     <string name="permlab_writeDictionary">"zapisovat do slovníku definovaného uživatelem"</string>
     <string name="permdesc_writeDictionary">"Umožní aplikaci zapisovat nová slova do uživatelského slovníku."</string>
+    <string name="permlab_sdcardWrite">"Změnit/smazat obsah karty SD"</string>
+    <string name="permdesc_sdcardWrite">"Umožní aplikaci zápis na kartu SD."</string>
   <string-array name="phoneTypes">
     <item>"Domů"</item>
     <item>"Mobil"</item>
@@ -353,6 +391,7 @@
     <item>"Ostatní"</item>
     <item>"Vlastní"</item>
   </string-array>
+    <string name="mobileEmailTypeName">"Mobilní"</string>
   <string-array name="postalAddressTypes">
     <item>"Domů"</item>
     <item>"Práce"</item>
@@ -393,6 +432,8 @@
     <string name="lockscreen_pattern_correct">"Správně!"</string>
     <string name="lockscreen_pattern_wrong">"Zkuste to prosím znovu"</string>
     <string name="lockscreen_plugged_in">"Nabíjení (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
+    <skip />
     <string name="lockscreen_low_battery">"Připojte dobíjecí zařízení."</string>
     <string name="lockscreen_missing_sim_message_short">"Není vložena SIM karta."</string>
     <string name="lockscreen_missing_sim_message">"V telefonu není žádná karta SIM."</string>
@@ -414,7 +455,8 @@
     <string name="lockscreen_glogin_invalid_input">"Neplatné uživatelské jméno nebo heslo."</string>
     <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button">"Vymazat oznámení"</string>
+    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
+    <skip />
     <string name="status_bar_no_notifications_title">"Žádná oznámení"</string>
     <string name="status_bar_ongoing_events_title">"Probíhající"</string>
     <string name="status_bar_latest_events_title">"Oznámení"</string>
@@ -423,6 +465,7 @@
     <string name="battery_low_title">"Prosím připojte dobíjecí zařízení"</string>
     <string name="battery_low_subtitle">"Baterie je vybitá:"</string>
     <string name="battery_low_percent_format">"zbývá méně než <xliff:g id="NUMBER">%d%%</xliff:g>."</string>
+    <string name="battery_low_why">"Proč?"</string>
     <string name="factorytest_failed">"Test továrního nastavení se nezdařil"</string>
     <string name="factorytest_not_system">"Test FACTORY_TEST lze provést pouze u balíčků nainstalovaných ve složce /system/app."</string>
     <string name="factorytest_no_action">"Nebyl nalezen žádný balíček umožňující test FACTORY_TEST."</string>
@@ -431,6 +474,10 @@
     <string name="js_dialog_title_default">"JavaScript"</string>
     <string name="js_dialog_before_unload">"Chcete opustit tuto stránku?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Vyberte OK, chcete-li pokračovat, nebo Zrušit, chcete-li na stránce zůstat."</string>
     <string name="save_password_label">"Potvrdit"</string>
+    <string name="permlab_readHistoryBookmarks">"Čtení historie a záložek prohlížeče"</string>
+    <string name="permdesc_readHistoryBookmarks">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky prohlížeče."</string>
+    <string name="permlab_writeHistoryBookmarks">"Zapisovat historii a záložky prohlížeče"</string>
+    <string name="permdesc_writeHistoryBookmarks">"Umožní aplikaci změnit historii či záložky prohlížeče uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit data prohlížeče."</string>
     <string name="save_password_message">"Chcete, aby si prohlížeč zapamatoval toto heslo?"</string>
     <string name="save_password_notnow">"Nyní ne"</string>
     <string name="save_password_remember">"Zapamatovat"</string>
@@ -538,10 +585,6 @@
     <string name="Noon">"Poledne"</string>
     <string name="midnight">"půlnoc"</string>
     <string name="Midnight">"Půlnoc"</string>
-    <!-- no translation found for month (7026169712234774086) -->
-    <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
-    <skip />
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"Vybrat vše"</string>
@@ -579,6 +622,7 @@
     <string name="anr_application_process">"Služba <xliff:g id="APPLICATION">%1$s</xliff:g> (<xliff:g id="PROCESS">%2$s</xliff:g>) nereaguje."</string>
     <string name="anr_process">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> neodpovídá."</string>
     <string name="force_close">"Ukončit aplikaci"</string>
+    <string name="report">"Nahlásit"</string>
     <string name="wait">"Počkat"</string>
     <string name="debug">"Ladit"</string>
     <string name="sendText">"Vyberte činnost s textem"</string>
@@ -632,22 +676,26 @@
     <string name="extmedia_format_title">"Formátovat kartu SD"</string>
     <string name="extmedia_format_message">"Opravdu chcete kartu SD naformátovat? Všechna data na kartě budou ztracena."</string>
     <string name="extmedia_format_button_format">"Formátovat"</string>
+    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
+    <skip />
+    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
+    <skip />
     <string name="select_input_method">"Výběr metody zadávání dat"</string>
     <string name="fast_scroll_alphabet">" AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="fast_scroll_numeric_alphabet">" 0123456789AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="candidates_style"><u>"kandidáti"</u></string>
     <string name="ext_media_checking_notification_title">"Příprava karty SD"</string>
-    <string name="ext_media_checking_notification_message">"Kontrola chyb"</string>
+    <string name="ext_media_checking_notification_message">"Kontrola chyb."</string>
     <string name="ext_media_nofs_notification_title">"Prázdná karta SD"</string>
-    <string name="ext_media_nofs_notification_message">"Karta SD je prázdná nebo používá nepodporovaný systém souborů."</string>
+    <string name="ext_media_nofs_notification_message">"Karta SD je prázdná nebo obsahuje nepodporovaný systém souborů."</string>
     <string name="ext_media_unmountable_notification_title">"Poškozená karta SD"</string>
-    <string name="ext_media_unmountable_notification_message">"Karta SD je poškozena. Pravděpodobně ji bude nutné znovu formátovat."</string>
+    <string name="ext_media_unmountable_notification_message">"Karta SD je poškozená. Bude pravděpodobně nutné ji přeformátovat."</string>
     <string name="ext_media_badremoval_notification_title">"Karta SD byla neočekávaně odebrána"</string>
     <string name="ext_media_badremoval_notification_message">"Chcete-li zabránit ztrátě dat, kartu SD před odebráním odpojte."</string>
     <string name="ext_media_safe_unmount_notification_title">"Kartu SD je možné bezpečně odebrat"</string>
-    <string name="ext_media_safe_unmount_notification_message">"Kartu SD lze nyní bezpečně vyjmout."</string>
+    <string name="ext_media_safe_unmount_notification_message">"Kartu SD lze bezpečně odebrat."</string>
     <string name="ext_media_nomedia_notification_title">"Karta SD byla odstraněna"</string>
-    <string name="ext_media_nomedia_notification_message">"Karta SD byla odebrána. Chcete-li zvětšit úložiště svého zařízení, vložte kartu SD."</string>
+    <string name="ext_media_nomedia_notification_message">"Karta SD byla odebrána. Vložte novou kartu."</string>
     <string name="activity_list_empty">"Nebyly nalezeny žádné odpovídající aktivity."</string>
     <string name="permlab_pkgUsageStats">"aktualizovat statistiku použití součástí"</string>
     <string name="permdesc_pkgUsageStats">"Umožňuje změnu shromážděných statistických údajů o použití součástí. Není určeno pro běžné aplikace."</string>
@@ -661,4 +709,6 @@
     <string name="ime_action_default">"Spustit"</string>
     <string name="dial_number_using">"Vytočit číslo"\n" <xliff:g id="NUMBER">%s</xliff:g>."</string>
     <string name="create_contact_using">"Vytvořit kontakt"\n"pro <xliff:g id="NUMBER">%s</xliff:g>."</string>
+    <string name="accessibility_compound_button_selected">"Zaškrtnuto"</string>
+    <string name="accessibility_compound_button_unselected">"Nezaškrtnuto"</string>
 </resources>

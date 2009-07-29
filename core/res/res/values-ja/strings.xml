@@ -21,6 +21,8 @@
     <string name="gigabyteShort">"GB"</string>
     <string name="terabyteShort">"TB"</string>
     <string name="petabyteShort">"PB"</string>
+    <!-- no translation found for fileSizeSuffix (7670819340156489359) -->
+    <skip />
     <string name="untitled">"&lt;新規&gt;"</string>
     <string name="ellipsis">"..."</string>
     <string name="emptyPhoneNumber">"（電話番号なし）"</string>
@@ -48,6 +50,18 @@
     <string name="BaMmi">"発信制限"</string>
     <string name="PwdMmi">"パスワードの変更"</string>
     <string name="PinMmi">"PINの変更"</string>
+    <!-- no translation found for CnipMmi (3110534680557857162) -->
+    <skip />
+    <!-- no translation found for CnirMmi (3062102121430548731) -->
+    <skip />
+    <!-- no translation found for ThreeWCMmi (9051047170321190368) -->
+    <skip />
+    <!-- no translation found for RuacMmi (7827887459138308886) -->
+    <skip />
+    <!-- no translation found for CndMmi (3116446237081575808) -->
+    <skip />
+    <!-- no translation found for DndMmi (1265478932418334331) -->
+    <skip />
     <string name="CLIRDefaultOnNextCallOn">"既定: 発信者番号非通知、次の発信: 非通知"</string>
     <string name="CLIRDefaultOnNextCallOff">"既定: 発信者番号非通知、次の発信: 通知"</string>
     <string name="CLIRDefaultOffNextCallOn">"既定: 発信者番号通知、次の発信: 非通知"</string>
@@ -67,11 +81,43 @@
     <string name="serviceClassDataSync">"同期"</string>
     <string name="serviceClassPacket">"パケット"</string>
     <string name="serviceClassPAD">"PAD"</string>
+    <!-- no translation found for roamingText0 (7170335472198694945) -->
+    <skip />
+    <!-- no translation found for roamingText1 (5314861519752538922) -->
+    <skip />
+    <!-- no translation found for roamingText2 (8969929049081268115) -->
+    <skip />
+    <!-- no translation found for roamingText3 (5148255027043943317) -->
+    <skip />
+    <!-- no translation found for roamingText4 (8808456682550796530) -->
+    <skip />
+    <!-- no translation found for roamingText5 (7604063252850354350) -->
+    <skip />
+    <!-- no translation found for roamingText6 (2059440825782871513) -->
+    <skip />
+    <!-- no translation found for roamingText7 (7112078724097233605) -->
+    <skip />
+    <!-- no translation found for roamingText8 (5989569778604089291) -->
+    <skip />
+    <!-- no translation found for roamingText9 (7969296811355152491) -->
+    <skip />
+    <!-- no translation found for roamingText10 (3992906999815316417) -->
+    <skip />
+    <!-- no translation found for roamingText11 (4154476854426920970) -->
+    <skip />
+    <!-- no translation found for roamingText12 (1189071119992726320) -->
+    <skip />
+    <!-- no translation found for roamingTextSearching (8360141885972279963) -->
+    <skip />
     <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:転送できません"</string>
     <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:<xliff:g id="DIALING_NUMBER">{1}</xliff:g> (<xliff:g id="TIME_DELAY">{2}</xliff:g>秒後)"</string>
     <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:転送できません"</string>
     <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:転送できません"</string>
+    <!-- no translation found for fcComplete (3118848230966886575) -->
+    <skip />
+    <!-- no translation found for fcError (3327560126588500777) -->
+    <skip />
     <string name="httpErrorOk">"OK"</string>
     <string name="httpError">"ウェブページにエラーがあります。"</string>
     <string name="httpErrorLookup">"URLが見つかりません。"</string>
@@ -88,6 +134,8 @@
     <string name="httpErrorFile">"ファイルにアクセスできませんでした。"</string>
     <string name="httpErrorFileNotFound">"要求されたファイルが見つかりませんでした。"</string>
     <string name="httpErrorTooManyRequests">"処理中のリクエストが多すぎます。しばらくしてからもう一度試してください。"</string>
+    <!-- no translation found for certificateSaved (2832076323378077191) -->
+    <skip />
     <string name="contentServiceSync">"同期"</string>
     <string name="contentServiceSyncNotificationTitle">"同期"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"<xliff:g id="CONTENT_TYPE">%s</xliff:g>での削除が多すぎます。"</string>
@@ -133,6 +181,10 @@
     <string name="permgroupdesc_systemTools">"システムの低レベルのアクセスと制御"</string>
     <string name="permgrouplab_developmentTools">"開発ツール"</string>
     <string name="permgroupdesc_developmentTools">"アプリケーションのデベロッパーにのみ必要な機能です。"</string>
+    <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (9203302214915355774) -->
+    <skip />
     <string name="permlab_statusBar">"ステータスバーの無効化や変更"</string>
     <string name="permdesc_statusBar">"ステータスバーの無効化やシステムアイコンの追加や削除をアプリケーションに許可します。"</string>
     <string name="permlab_expandStatusBar">"ステータスバーの拡大/縮小"</string>
@@ -145,9 +197,9 @@
     <string name="permdesc_receiveMms">"MMSメッセージの受信と処理をアプリケーションに許可します。悪意のあるアプリケーションがメッセージを監視したり、表示せずに削除する恐れがあります。"</string>
     <string name="permlab_sendSms">"SMSメッセージの送信"</string>
     <string name="permdesc_sendSms">"SMSメッセージの送信をアプリケーションに許可します。悪意のあるアプリケーションが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
-    <string name="permlab_readSms">"SMSやMMSの読み取り"</string>
+    <string name="permlab_readSms">"SMSの読み取り"</string>
     <string name="permdesc_readSms">"携帯電話やSIMカードに保存したSMSメッセージの読み取りをアプリケーションに許可します。悪意のあるアプリケーションが機密メッセージを読み取る恐れがあります。"</string>
-    <string name="permlab_writeSms">"SMSやMMSの編集"</string>
+    <string name="permlab_writeSms">"SMSの編集"</string>
     <string name="permdesc_writeSms">"携帯電話やSIMカードに保存したSMSメッセージへの書き込みをアプリケーションに許可します。悪意のあるアプリケーションがメッセージを削除する恐れがあります。"</string>
     <string name="permlab_receiveWapPush">"WAPの受信"</string>
     <string name="permdesc_receiveWapPush">"WAPメッセージの受信と処理をアプリケーションに許可します。悪意のあるアプリケーションがメッセージを監視したり、表示せずに削除する恐れがあります。"</string>
@@ -165,6 +217,14 @@
     <string name="permdesc_forceBack">"フォアグラウンドで実行されている操作を強制終了して戻ることをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_dump">"システムの内部状態の取得"</string>
     <string name="permdesc_dump">"システムの内部状態の取得をアプリケーションに許可します。悪意のあるアプリケーションが、通常は必要としない広範囲にわたる非公開の機密情報を取得する恐れがあります。"</string>
+    <!-- no translation found for permlab_shutdown (7185747824038909016) -->
+    <skip />
+    <!-- no translation found for permdesc_shutdown (7046500838746291775) -->
+    <skip />
+    <!-- no translation found for permlab_stopAppSwitches (4138608610717425573) -->
+    <skip />
+    <!-- no translation found for permdesc_stopAppSwitches (3857886086919033794) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher">"起動中のすべてのアプリケーションの監視と制御"</string>
     <string name="permdesc_runSetActivityWatcher">"システムが起動する操作の監視と制御をアプリケーションに許可します。悪意のあるアプリケーションがシステムを完全に破壊する恐れがあります。この許可は開発にのみ必要で、携帯電話の通常の使用にはまったく必要ありません。"</string>
     <string name="permlab_broadcastPackageRemoved">"パッケージ削除ブロードキャストの送信"</string>
@@ -179,6 +239,10 @@
     <string name="permdesc_setAlwaysFinish">"バックグラウンドになり次第必ず操作を終了させるかどうかの制御をアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_batteryStats">"電池統計情報の変国"</string>
     <string name="permdesc_batteryStats">"収集した電池統計情報の変更を許可します。通常のアプリケーションでは使用しません。"</string>
+    <!-- no translation found for permlab_backup (470013022865453920) -->
+    <skip />
+    <!-- no translation found for permdesc_backup (2305432853944929371) -->
+    <skip />
     <string name="permlab_internalSystemWindow">"未許可のウィンドウの表示"</string>
     <string name="permdesc_internalSystemWindow">"内部システムのユーザーインターフェースで使用するためのウィンドウ作成を許可します。通常のアプリケーションでは使用しません。"</string>
     <string name="permlab_systemAlertWindow">"システムレベルの警告の表示"</string>
@@ -243,8 +307,12 @@
     <string name="permdesc_writeCalendar">"端末に保存したカレンダーの予定の変更をアプリケーションに許可します。悪意のあるアプリケーションが、カレンダーデータを消去/変更する恐れがあります。"</string>
     <string name="permlab_accessMockLocation">"仮の位置情報でテスト"</string>
     <string name="permdesc_accessMockLocation">"テスト用に仮の位置情報源を作成します。これにより悪意のあるアプリケーションが、GPS、ネットワークプロバイダなどから返される本当の位置情報や状況を改ざんする恐れがあります。"</string>
-    <string name="permlab_accessLocationExtraCommands">"位置情報プロバイダのその他のコマンドへのアクセス"</string>
+    <string name="permlab_accessLocationExtraCommands">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands">"位置情報提供元の追加コマンドにアクセスします。悪意のあるアプリケーションがGPSなどの位置提供の動作を妨害する恐れがあります。"</string>
+    <!-- no translation found for permlab_installLocationProvider (6578101199825193873) -->
+    <skip />
+    <!-- no translation found for permdesc_installLocationProvider (5449175116732002106) -->
+    <skip />
     <string name="permlab_accessFineLocation">"精細な位置情報（GPS）"</string>
     <string name="permdesc_accessFineLocation">"GPSなど携帯電話の位置情報にアクセスします（可能な場合）。今いる場所が悪意のあるアプリケーションに検出されたり、バッテリーの消費が増える恐れがあります。"</string>
     <string name="permlab_accessCoarseLocation">"おおよその位置情報（ネットワーク基地局）"</string>
@@ -317,6 +385,10 @@
     <string name="permdesc_accessWifiState">"Wi-Fi状態に関する情報の表示をアプリケーションに許可します。"</string>
     <string name="permlab_changeWifiState">"Wi-Fi状態の変更"</string>
     <string name="permdesc_changeWifiState">"Wi-Fiアクセスポイントへの接続や接続の切断、設定されたWi-Fiネットワークの変更をアプリケーションに許可します。"</string>
+    <!-- no translation found for permlab_changeWifiMulticastState (1368253871483254784) -->
+    <skip />
+    <!-- no translation found for permdesc_changeWifiMulticastState (8199464507656067553) -->
+    <skip />
     <string name="permlab_bluetoothAdmin">"Bluetoothの管理"</string>
     <string name="permdesc_bluetoothAdmin">"このBluetooth端末の設定、およびリモート端末を検出してペアに設定することをアプリケーションに許可します。"</string>
     <string name="permlab_bluetooth">"Bluetooth接続の作成"</string>
@@ -337,6 +409,10 @@
     <string name="permdesc_readDictionary">"アプリケーションがユーザー辞書に登録されている個人的な語句や名前を読み込むことを許可します。"</string>
     <string name="permlab_writeDictionary">"ユーザー定義辞書への書き込み"</string>
     <string name="permdesc_writeDictionary">"アプリケーションがユーザー辞書に新しい語句を書き込むことを許可します。"</string>
+    <!-- no translation found for permlab_sdcardWrite (8079403759001777291) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardWrite (6643963204976471878) -->
+    <skip />
   <string-array name="phoneTypes">
     <item>"自宅"</item>
     <item>"携帯"</item>
@@ -353,6 +429,7 @@
     <item>"その他"</item>
     <item>"カスタム"</item>
   </string-array>
+    <string name="mobileEmailTypeName">"携帯"</string>
   <string-array name="postalAddressTypes">
     <item>"自宅"</item>
     <item>"仕事"</item>
@@ -386,13 +463,15 @@
     <string name="emergency_call_dialog_number_for_display">"緊急通報番号"</string>
     <string name="lockscreen_carrier_default">"(通信サービスなし)"</string>
     <string name="lockscreen_screen_locked">"画面ロック中"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"MENUキーでロック解除（または緊急通報）"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"MENUキーでロック解除(または緊急通報)"</string>
     <string name="lockscreen_instructions_when_pattern_disabled">"MENUキーでロック解除"</string>
     <string name="lockscreen_pattern_instructions">"ロックを解除するパターンを入力"</string>
     <string name="lockscreen_emergency_call">"緊急通報"</string>
     <string name="lockscreen_pattern_correct">"一致しました"</string>
     <string name="lockscreen_pattern_wrong">"やり直してください"</string>
     <string name="lockscreen_plugged_in">"充電中（<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>）"</string>
+    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
+    <skip />
     <string name="lockscreen_low_battery">"充電してください。"</string>
     <string name="lockscreen_missing_sim_message_short">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_message">"SIMカードが挿入されていません"</string>
@@ -414,15 +493,18 @@
     <string name="lockscreen_glogin_invalid_input">"ユーザー名またはパスワードが正しくありません。"</string>
     <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button">"通知を消去"</string>
+    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
+    <skip />
     <string name="status_bar_no_notifications_title">"通知なし"</string>
-    <string name="status_bar_ongoing_events_title">"操作中"</string>
+    <string name="status_bar_ongoing_events_title">"実行中"</string>
     <string name="status_bar_latest_events_title">"通知"</string>
     <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging">"充電中..."</string>
     <string name="battery_low_title">"充電してください"</string>
     <string name="battery_low_subtitle">"電池が残り少なくなっています:"</string>
     <string name="battery_low_percent_format">"残量<xliff:g id="NUMBER">%d%%</xliff:g>以下"</string>
+    <!-- no translation found for battery_low_why (7655196144309694753) -->
+    <skip />
     <string name="factorytest_failed">"出荷時試験が失敗"</string>
     <string name="factorytest_not_system">"FACTORY_TEST操作は、/system/appにインストールされたパッケージのみが対象です。"</string>
     <string name="factorytest_no_action">"FACTORY_TEST操作を行うパッケージは見つかりませんでした。"</string>
@@ -431,6 +513,14 @@
     <string name="js_dialog_title_default">"JavaScript"</string>
     <string name="js_dialog_before_unload">"このページから移動しますか？"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"移動する場合は[OK]、今のページに残る場合は[キャンセル]を選択してください。"</string>
     <string name="save_password_label">"確認"</string>
+    <!-- no translation found for permlab_readHistoryBookmarks (1284843728203412135) -->
+    <skip />
+    <!-- no translation found for permdesc_readHistoryBookmarks (4981489815467617191) -->
+    <skip />
+    <!-- no translation found for permlab_writeHistoryBookmarks (9009434109836280374) -->
+    <skip />
+    <!-- no translation found for permdesc_writeHistoryBookmarks (945571990357114950) -->
+    <skip />
     <string name="save_password_message">"このパスワードをブラウザで保存しますか？"</string>
     <string name="save_password_notnow">"今は保存しない"</string>
     <string name="save_password_remember">"保存"</string>
@@ -538,10 +628,6 @@
     <string name="Noon">"正午"</string>
     <string name="midnight">"午前0時"</string>
     <string name="Midnight">"午前0時"</string>
-    <!-- no translation found for month (7026169712234774086) -->
-    <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
-    <skip />
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"すべて選択"</string>
@@ -579,18 +665,20 @@
     <string name="anr_application_process">"<xliff:g id="APPLICATION">%1$s</xliff:g>（<xliff:g id="PROCESS">%2$s</xliff:g>）は応答していません。"</string>
     <string name="anr_process">"<xliff:g id="PROCESS">%1$s</xliff:g>は応答していません。"</string>
     <string name="force_close">"強制終了"</string>
+    <!-- no translation found for report (4060218260984795706) -->
+    <skip />
     <string name="wait">"待機"</string>
     <string name="debug">"デバッグ"</string>
     <string name="sendText">"アプリケーションを選択"</string>
     <string name="volume_ringtone">"着信音量"</string>
     <string name="volume_music">"メディアの音量"</string>
     <string name="volume_music_hint_playing_through_bluetooth">"Bluetooth経由で再生中です"</string>
-    <string name="volume_call">"着信音量"</string>
+    <string name="volume_call">"通話音量"</string>
     <string name="volume_bluetooth_call">"Bluetooth着信音量"</string>
     <string name="volume_alarm">"アラームの音量"</string>
     <string name="volume_notification">"通知音量"</string>
     <string name="volume_unknown">"音量"</string>
-    <string name="ringtone_default">"デフォルトの着信音"</string>
+    <string name="ringtone_default">"プリセット着信音"</string>
     <string name="ringtone_default_with_actual">"端末の基本着信音（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent">"サイレント"</string>
     <string name="ringtone_picker_title">"着信音"</string>
@@ -632,22 +720,31 @@
     <string name="extmedia_format_title">"SDカードをフォーマット"</string>
     <string name="extmedia_format_message">"SDカードをフォーマットしてもよろしいですか？カード内のすべてのデータが失われます。"</string>
     <string name="extmedia_format_button_format">"フォーマット"</string>
+    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
+    <skip />
+    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
+    <skip />
     <string name="select_input_method">"入力方法の選択"</string>
     <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style"><u>"候補"</u></string>
     <string name="ext_media_checking_notification_title">"SDカードの準備中"</string>
-    <string name="ext_media_checking_notification_message">"エラーを確認中"</string>
+    <!-- no translation found for ext_media_checking_notification_message (8287319882926737053) -->
+    <skip />
     <string name="ext_media_nofs_notification_title">"空のSDカード"</string>
-    <string name="ext_media_nofs_notification_message">"SDカードが空か、サポート対象外のファイルシステムを使用しています。"</string>
+    <!-- no translation found for ext_media_nofs_notification_message (3817704088027829380) -->
+    <skip />
     <string name="ext_media_unmountable_notification_title">"破損したSDカード"</string>
-    <string name="ext_media_unmountable_notification_message">"SDカードが破損しています。カードのフォーマットが必要な可能性があります。"</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (6902531775948238989) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title">"SDカードが予期せず取り外されました"</string>
     <string name="ext_media_badremoval_notification_message">"データの喪失を防ぐためSDカードを取り外す前にマウントを解除してください。"</string>
     <string name="ext_media_safe_unmount_notification_title">"SDカードを安全に取り外しました"</string>
-    <string name="ext_media_safe_unmount_notification_message">"SDカードを安全に取り外せます。"</string>
+    <!-- no translation found for ext_media_safe_unmount_notification_message (568841278138377604) -->
+    <skip />
     <string name="ext_media_nomedia_notification_title">"SDカードが取り外されています"</string>
-    <string name="ext_media_nomedia_notification_message">"SDカードが取り外されました。新しいSDカードを挿入して端末のメモリを増やしてください。"</string>
+    <!-- no translation found for ext_media_nomedia_notification_message (3870120652983659641) -->
+    <skip />
     <string name="activity_list_empty">"一致するアクティビティが見つかりません"</string>
     <string name="permlab_pkgUsageStats">"コンポーネント使用状況に関する統計情報の更新"</string>
     <string name="permdesc_pkgUsageStats">"収集されたコンポーネント使用状況に関する統計情報の変更を許可します。通常のアプリケーションでは使用しません。"</string>
@@ -661,4 +758,8 @@
     <string name="ime_action_default">"実行"</string>
     <string name="dial_number_using">"<xliff:g id="NUMBER">%s</xliff:g>を使って"\n"発信"</string>
     <string name="create_contact_using">"<xliff:g id="NUMBER">%s</xliff:g>を使って"\n"連絡先を新規登録"</string>
+    <!-- no translation found for accessibility_compound_button_selected (5612776946036285686) -->
+    <skip />
+    <!-- no translation found for accessibility_compound_button_unselected (8864512895673924091) -->
+    <skip />
 </resources>

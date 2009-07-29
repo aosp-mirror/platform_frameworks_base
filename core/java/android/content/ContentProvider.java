@@ -17,6 +17,7 @@
 package android.content;
 
 import android.content.pm.PackageManager;
+import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
@@ -29,6 +30,7 @@ import android.database.SQLException;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -65,8 +67,10 @@ import java.io.FileNotFoundException;
  */
 public abstract class ContentProvider implements ComponentCallbacks {
     private Context mContext = null;
+    private int mMyUid;
     private String mReadPermission;
     private String mWritePermission;
+    private PathPermission[] mPathPermissions;
 
     private Transport mTransport = new Transport();
 
@@ -108,24 +112,20 @@ public abstract class ContentProvider implements ComponentCallbacks {
         public IBulkCursor bulkQuery(Uri uri, String[] projection,
                 String selection, String[] selectionArgs, String sortOrder,
                 IContentObserver observer, CursorWindow window) {
-            checkReadPermission(uri);
+            enforceReadPermission(uri);
             Cursor cursor = ContentProvider.this.query(uri, projection,
                     selection, selectionArgs, sortOrder);
             if (cursor == null) {
                 return null;
             }
-            String wperm = getWritePermission();
             return new CursorToBulkCursorAdaptor(cursor, observer,
                     ContentProvider.this.getClass().getName(),
-                    wperm == null ||
-                    getContext().checkCallingOrSelfPermission(getWritePermission())
-                            == PackageManager.PERMISSION_GRANTED,
-                    window);
+                    hasWritePermission(uri), window);
         }
 
         public Cursor query(Uri uri, String[] projection,
                 String selection, String[] selectionArgs, String sortOrder) {
-            checkReadPermission(uri);
+            enforceReadPermission(uri);
             return ContentProvider.this.query(uri, projection, selection,
                     selectionArgs, sortOrder);
         }
@@ -136,55 +136,84 @@ public abstract class ContentProvider implements ComponentCallbacks {
 
 
         public Uri insert(Uri uri, ContentValues initialValues) {
-            checkWritePermission(uri);
+            enforceWritePermission(uri);
             return ContentProvider.this.insert(uri, initialValues);
         }
 
         public int bulkInsert(Uri uri, ContentValues[] initialValues) {
-            checkWritePermission(uri);
+            enforceWritePermission(uri);
             return ContentProvider.this.bulkInsert(uri, initialValues);
         }
 
         public int delete(Uri uri, String selection, String[] selectionArgs) {
-            checkWritePermission(uri);
+            enforceWritePermission(uri);
             return ContentProvider.this.delete(uri, selection, selectionArgs);
         }
 
         public int update(Uri uri, ContentValues values, String selection,
                 String[] selectionArgs) {
-            checkWritePermission(uri);
+            enforceWritePermission(uri);
             return ContentProvider.this.update(uri, values, selection, selectionArgs);
         }
 
         public ParcelFileDescriptor openFile(Uri uri, String mode)
                 throws FileNotFoundException {
-            if (mode != null && mode.startsWith("rw")) checkWritePermission(uri);
-            else checkReadPermission(uri);
+            if (mode != null && mode.startsWith("rw")) enforceWritePermission(uri);
+            else enforceReadPermission(uri);
             return ContentProvider.this.openFile(uri, mode);
         }
 
         public AssetFileDescriptor openAssetFile(Uri uri, String mode)
                 throws FileNotFoundException {
-            if (mode != null && mode.startsWith("rw")) checkWritePermission(uri);
-            else checkReadPermission(uri);
+            if (mode != null && mode.startsWith("rw")) enforceWritePermission(uri);
+            else enforceReadPermission(uri);
             return ContentProvider.this.openAssetFile(uri, mode);
         }
 
         public ISyncAdapter getSyncAdapter() {
-            checkWritePermission(null);
+            enforceWritePermission(null);
             SyncAdapter sa = ContentProvider.this.getSyncAdapter();
             return sa != null ? sa.getISyncAdapter() : null;
         }
 
-        private void checkReadPermission(Uri uri) {
+        private void enforceReadPermission(Uri uri) {
+            final int uid = Binder.getCallingUid();
+            if (uid == mMyUid) {
+                return;
+            }
+            
+            final Context context = getContext();
             final String rperm = getReadPermission();
             final int pid = Binder.getCallingPid();
-            final int uid = Binder.getCallingUid();
-            if (getContext().checkUriPermission(uri, rperm, null, pid, uid,
+            if (rperm == null
+                    || context.checkPermission(rperm, pid, uid)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            
+            PathPermission[] pps = getPathPermissions();
+            if (pps != null) {
+                final String path = uri.getPath();
+                int i = pps.length;
+                while (i > 0) {
+                    i--;
+                    final PathPermission pp = pps[i];
+                    final String pprperm = pp.getReadPermission();
+                    if (pprperm != null && pp.match(path)) {
+                        if (context.checkPermission(pprperm, pid, uid)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            if (context.checkUriPermission(uri, pid, uid,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     == PackageManager.PERMISSION_GRANTED) {
                 return;
             }
+            
             String msg = "Permission Denial: reading "
                     + ContentProvider.this.getClass().getName()
                     + " uri " + uri + " from pid=" + Binder.getCallingPid()
@@ -193,20 +222,57 @@ public abstract class ContentProvider implements ComponentCallbacks {
             throw new SecurityException(msg);
         }
 
-        private void checkWritePermission(Uri uri) {
+        private boolean hasWritePermission(Uri uri) {
+            final int uid = Binder.getCallingUid();
+            if (uid == mMyUid) {
+                return true;
+            }
+            
+            final Context context = getContext();
             final String wperm = getWritePermission();
             final int pid = Binder.getCallingPid();
-            final int uid = Binder.getCallingUid();
-            if (getContext().checkUriPermission(uri, null, wperm, pid, uid,
+            if (wperm == null
+                    || context.checkPermission(wperm, pid, uid)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+            
+            PathPermission[] pps = getPathPermissions();
+            if (pps != null) {
+                final String path = uri.getPath();
+                int i = pps.length;
+                while (i > 0) {
+                    i--;
+                    final PathPermission pp = pps[i];
+                    final String ppwperm = pp.getWritePermission();
+                    if (ppwperm != null && pp.match(path)) {
+                        if (context.checkPermission(ppwperm, pid, uid)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            
+            if (context.checkUriPermission(uri, pid, uid,
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        private void enforceWritePermission(Uri uri) {
+            if (hasWritePermission(uri)) {
                 return;
             }
+            
             String msg = "Permission Denial: writing "
                     + ContentProvider.this.getClass().getName()
                     + " uri " + uri + " from pid=" + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
-                    + " requires " + wperm;
+                    + " requires " + getWritePermission();
             throw new SecurityException(msg);
         }
     }
@@ -263,6 +329,28 @@ public abstract class ContentProvider implements ComponentCallbacks {
      */
     public final String getWritePermission() {
         return mWritePermission;
+    }
+
+    /**
+     * Change the path-based permission required to read and/or write data in
+     * the content provider.  This is normally set for you from its manifest
+     * information when the provider is first created.
+     *
+     * @param permissions Array of path permission descriptions.
+     */
+    protected final void setPathPermissions(PathPermission[] permissions) {
+        mPathPermissions = permissions;
+    }
+
+    /**
+     * Return the path-based permissions required for read and/or write access to
+     * this content provider.  This method can be called from multiple
+     * threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
+     * Processes and Threads</a>.
+     */
+    public final PathPermission[] getPathPermissions() {
+        return mPathPermissions;
     }
 
     /**
@@ -600,9 +688,11 @@ public abstract class ContentProvider implements ComponentCallbacks {
          */
         if (mContext == null) {
             mContext = context;
+            mMyUid = Process.myUid();
             if (info != null) {
                 setReadPermission(info.readPermission);
                 setWritePermission(info.writePermission);
+                setPathPermissions(info.pathPermissions);
             }
             ContentProvider.this.onCreate();
         }

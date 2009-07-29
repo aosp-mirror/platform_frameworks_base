@@ -1063,6 +1063,21 @@ public class AudioManager {
         }
     }
 
+    /**
+     *  @hide
+     *  Reload audio settings. This method is called by Settings backup
+     *  agent when audio settings are restored and causes the AudioService
+     *  to read and apply restored settings.
+     */
+    public void reloadAudioSettings() {
+        IAudioService service = getService();
+        try {
+            service.reloadAudioSettings();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in reloadAudioSettings"+e);
+        }
+    }
+
      /**
       * {@hide}
       */

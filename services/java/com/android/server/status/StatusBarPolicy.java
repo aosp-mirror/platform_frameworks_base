@@ -626,7 +626,9 @@ public class StatusBarPolicy {
                         && mBatteryThreshold > BATTERY_THRESHOLD_WARNING))) {
             // Broadcast the low battery warning
             mSentLowBatteryBroadcast = true;
-            mContext.sendBroadcast(new Intent(Intent.ACTION_BATTERY_LOW));
+            Intent batIntent = new Intent(Intent.ACTION_BATTERY_LOW);
+            batIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            mContext.sendBroadcast(batIntent);
 
             if (SHOW_LOW_BATTERY_WARNING) {
                 if (false) {
@@ -644,7 +646,9 @@ public class StatusBarPolicy {
         } else if (mBatteryThreshold < BATTERY_THRESHOLD_WARNING) {
             if (mSentLowBatteryBroadcast == true) {
                 mSentLowBatteryBroadcast = false;
-                mContext.sendBroadcast(new Intent(Intent.ACTION_BATTERY_OKAY));
+                Intent batIntent = new Intent(Intent.ACTION_BATTERY_OKAY);
+                batIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                mContext.sendBroadcast(batIntent);
             }
             if (SHOW_LOW_BATTERY_WARNING) {
                 if (mLowBatteryDialog != null) {

@@ -21,6 +21,8 @@
     <string name="gigabyteShort">"GB"</string>
     <string name="terabyteShort">"TB"</string>
     <string name="petabyteShort">"PB"</string>
+    <!-- no translation found for fileSizeSuffix (7670819340156489359) -->
+    <skip />
     <string name="untitled">"&lt;sin título&gt;"</string>
     <string name="ellipsis">"…"</string>
     <string name="emptyPhoneNumber">"(No hay número de teléfono)"</string>
@@ -60,22 +62,17 @@
     <skip />
     <!-- no translation found for DndMmi (1265478932418334331) -->
     <skip />
-    <string name="CLIRDefaultOnNextCallOn">"El Identificador de llamadas está predeterminado en restringido. Llamada siguiente: restringida"</string>
+    <string name="CLIRDefaultOnNextCallOn">"El identificador de llamadas está predeterminado en restringido. Llamada siguiente: restringida"</string>
     <string name="CLIRDefaultOnNextCallOff">"El Identificador de llamadas está predeterminado en restringido. Llamada siguiente: no restringido"</string>
-    <string name="CLIRDefaultOffNextCallOn">"El Identificador de llamadas está predeterminado en no restringido. Llamada siguiente: restringida"</string>
+    <string name="CLIRDefaultOffNextCallOn">"El identificador de llamadas está predeterminado en no restringido. Llamada siguiente: restringida"</string>
     <string name="CLIRDefaultOffNextCallOff">"El Identificador de llamadas está predeterminado en no restringido. Llamada siguiente: no restringido"</string>
     <string name="serviceNotProvisioned">"Servicio no suministrado."</string>
     <string name="CLIRPermanent">"La configuración del identificador de llamadas no se puede cambiar."</string>
-    <!-- no translation found for RestrictedChangedTitle (5592189398956187498) -->
-    <skip />
-    <!-- no translation found for RestrictedOnData (8653794784690065540) -->
-    <skip />
-    <!-- no translation found for RestrictedOnEmergency (6581163779072833665) -->
-    <skip />
-    <!-- no translation found for RestrictedOnNormal (2045364908281990708) -->
-    <skip />
-    <!-- no translation found for RestrictedOnAll (4923139582141626159) -->
-    <skip />
+    <string name="RestrictedChangedTitle">"Se ha cambiado el acceso restringido"</string>
+    <string name="RestrictedOnData">"El servicio de datos está bloqueado."</string>
+    <string name="RestrictedOnEmergency">"El servicio de emergencias está bloqueado."</string>
+    <string name="RestrictedOnNormal">"El servicio de voz/SMS está bloqueado."</string>
+    <string name="RestrictedOnAll">"Todos los servicios de voz/SMS están bloqueados."</string>
     <string name="serviceClassVoice">"Voz"</string>
     <string name="serviceClassData">"Datos"</string>
     <string name="serviceClassFAX">"FAX"</string>
@@ -84,11 +81,43 @@
     <string name="serviceClassDataSync">"Sincronización"</string>
     <string name="serviceClassPacket">"Paquete"</string>
     <string name="serviceClassPAD">"PAD"</string>
+    <!-- no translation found for roamingText0 (7170335472198694945) -->
+    <skip />
+    <!-- no translation found for roamingText1 (5314861519752538922) -->
+    <skip />
+    <!-- no translation found for roamingText2 (8969929049081268115) -->
+    <skip />
+    <!-- no translation found for roamingText3 (5148255027043943317) -->
+    <skip />
+    <!-- no translation found for roamingText4 (8808456682550796530) -->
+    <skip />
+    <!-- no translation found for roamingText5 (7604063252850354350) -->
+    <skip />
+    <!-- no translation found for roamingText6 (2059440825782871513) -->
+    <skip />
+    <!-- no translation found for roamingText7 (7112078724097233605) -->
+    <skip />
+    <!-- no translation found for roamingText8 (5989569778604089291) -->
+    <skip />
+    <!-- no translation found for roamingText9 (7969296811355152491) -->
+    <skip />
+    <!-- no translation found for roamingText10 (3992906999815316417) -->
+    <skip />
+    <!-- no translation found for roamingText11 (4154476854426920970) -->
+    <skip />
+    <!-- no translation found for roamingText12 (1189071119992726320) -->
+    <skip />
+    <!-- no translation found for roamingTextSearching (8360141885972279963) -->
+    <skip />
     <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no se ha remitido"</string>
     <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> después de <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
     <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no se ha remitido"</string>
     <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no se ha remitido"</string>
+    <!-- no translation found for fcComplete (3118848230966886575) -->
+    <skip />
+    <!-- no translation found for fcError (3327560126588500777) -->
+    <skip />
     <string name="httpErrorOk">"Aceptar"</string>
     <string name="httpError">"La página web contiene un error."</string>
     <string name="httpErrorLookup">"No se ha podido encontrar la URL."</string>
@@ -105,6 +134,8 @@
     <string name="httpErrorFile">"No se ha podido acceder al archivo."</string>
     <string name="httpErrorFileNotFound">"No se ha encontrado el archivo solicitado."</string>
     <string name="httpErrorTooManyRequests">"Se están procesando demasiadas solicitudes. Vuelve a intentarlo más tarde."</string>
+    <!-- no translation found for certificateSaved (2832076323378077191) -->
+    <skip />
     <string name="contentServiceSync">"Sincronización"</string>
     <string name="contentServiceSyncNotificationTitle">"Sincronización"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Demasiadas eliminaciones de <xliff:g id="CONTENT_TYPE">%s</xliff:g>"</string>
@@ -150,6 +181,10 @@
     <string name="permgroupdesc_systemTools">"Acceso y control de nivel más bajo del sistema."</string>
     <string name="permgrouplab_developmentTools">"Herramientas de desarrollo"</string>
     <string name="permgroupdesc_developmentTools">"Las funciones sólo son necesarias para los desarrolladores de aplicaciones."</string>
+    <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (9203302214915355774) -->
+    <skip />
     <string name="permlab_statusBar">"desactivar o modificar la barra de estado"</string>
     <string name="permdesc_statusBar">"Admite que la aplicación desactive la barra de estado, o agregue y elimine íconos del sistema."</string>
     <string name="permlab_expandStatusBar">"expandir o reducir la barra de estado"</string>
@@ -182,6 +217,14 @@
     <string name="permdesc_forceBack">"Admite una aplicación que provoca que cualquier actividad del fondo se acerque y vuelva a alejarse. Se debe evitar utilizarlo en aplicaciones normales."</string>
     <string name="permlab_dump">"recuperar el estado interno del sistema"</string>
     <string name="permdesc_dump">"Admite que la aplicación recupere el estado interno del sistema. Las aplicaciones maliciosas pueden recuperar una gran variedad de información privada y segura que normalmente nunca necesitaría."</string>
+    <!-- no translation found for permlab_shutdown (7185747824038909016) -->
+    <skip />
+    <!-- no translation found for permdesc_shutdown (7046500838746291775) -->
+    <skip />
+    <!-- no translation found for permlab_stopAppSwitches (4138608610717425573) -->
+    <skip />
+    <!-- no translation found for permdesc_stopAppSwitches (3857886086919033794) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher">"verificar y controlar todos los lanzamientos de actividades"</string>
     <string name="permdesc_runSetActivityWatcher">"Admite una aplicación que verifica y controla el lanzamiento de actividades por parte del sistema. Las aplicaciones maliciosas pueden comprometer totalmente al sistema. Este permiso sólo es necesario para el desarrollo, nunca para el uso normal del teléfono."</string>
     <string name="permlab_broadcastPackageRemoved">"enviar emisión de paquete eliminado"</string>
@@ -196,6 +239,10 @@
     <string name="permdesc_setAlwaysFinish">"Admite una aplicación que controla si las actividades siempre finalizan cuando van al fondo. No se utiliza nunca en aplicaciones normales."</string>
     <string name="permlab_batteryStats">"modificar la estadística de la batería"</string>
     <string name="permdesc_batteryStats">"Admite la modificación de estadísticas recopiladas sobre la batería. Las aplicaciones normales no deben utilizarlo."</string>
+    <!-- no translation found for permlab_backup (470013022865453920) -->
+    <skip />
+    <!-- no translation found for permdesc_backup (2305432853944929371) -->
+    <skip />
     <string name="permlab_internalSystemWindow">"mostrar ventanas no autorizadas"</string>
     <string name="permdesc_internalSystemWindow">"Permite la creación de ventanas que la interfaz interna del usuario del sistema pretenda utilizar. Las aplicaciones normales no deben utilizarlo."</string>
     <string name="permlab_systemAlertWindow">"mostrar alertas a nivel del sistema"</string>
@@ -255,13 +302,17 @@
     <string name="permlab_readOwnerData">"leer datos del propietario"</string>
     <string name="permdesc_readOwnerData">"Admite una aplicación que lee los datos del propietario del teléfono guardados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para leer los datos del propietario del teléfono."</string>
     <string name="permlab_readCalendar">"leer datos de calendario"</string>
-    <string name="permdesc_readCalendar">"Admite una aplicación que lee todos los eventos de calendario almacenados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para enviar tus eventos de calendario a otras personas."</string>
+    <string name="permdesc_readCalendar">"Admite que una aplicación lea todos los eventos de calendario almacenados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para enviar tus eventos de calendario a otras personas."</string>
     <string name="permlab_writeCalendar">"escribir datos de calendario"</string>
     <string name="permdesc_writeCalendar">"Admite una aplicación que modifica los eventos de calendario guardados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para borrar o modificar tus datos de calendario."</string>
     <string name="permlab_accessMockLocation">"crear fuentes de ubicación de prueba"</string>
     <string name="permdesc_accessMockLocation">"Crea fuentes de ubicación de prueba. Las aplicaciones maliciosas pueden utilizarlo para invalidar la ubicación o el estado que arrojen las fuentes de ubicación real, como GPS o proveedores de red."</string>
     <string name="permlab_accessLocationExtraCommands">"acceder a comandos adicionales del proveedor del lugar"</string>
     <string name="permdesc_accessLocationExtraCommands">"Accede a comandos adicionales del proveedor del lugar. Las aplicaciones maliciosas pueden utilizarlo para interferir en la operación del GPS u otras fuentes de ubicación."</string>
+    <!-- no translation found for permlab_installLocationProvider (6578101199825193873) -->
+    <skip />
+    <!-- no translation found for permdesc_installLocationProvider (5449175116732002106) -->
+    <skip />
     <string name="permlab_accessFineLocation">"ubicación precisa (GPS)"</string>
     <string name="permdesc_accessFineLocation">"Accede a las fuentes de ubicación precisa, como el Sistema de posicionamiento global en el teléfono, si está disponible. Las aplicaciones maliciosas pueden utilizarlo para determinar donde te encuentras y puede consumir energía adicional de la batería."</string>
     <string name="permlab_accessCoarseLocation">"ubicación aproximada (basada en la red)"</string>
@@ -269,7 +320,7 @@
     <string name="permlab_accessSurfaceFlinger">"acceder a SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger">"Admite que la aplicación utilice funciones de bajo nivel de SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer">"leer el búfer de tramas"</string>
-    <string name="permdesc_readFrameBuffer">"Admite que la aplicación que se utilizará lea el contenido del búfer de tramas."</string>
+    <string name="permdesc_readFrameBuffer">"Admite que la aplicación que se utilizará lea el contenido del búfer de marco."</string>
     <string name="permlab_modifyAudioSettings">"cambiar tu configuración de audio"</string>
     <string name="permdesc_modifyAudioSettings">"Admite que la aplicación modifique la configuración global de audio, como el volumen y el enrutamiento."</string>
     <string name="permlab_recordAudio">"grabar audio"</string>
@@ -334,6 +385,10 @@
     <string name="permdesc_accessWifiState">"Admite una aplicación que observa la información sobre el estado de Wi-Fi."</string>
     <string name="permlab_changeWifiState">"cambiar el estado de Wi-Fi"</string>
     <string name="permdesc_changeWifiState">"Admite una aplicación que se conecta y desconecta de los puntos de acceso de Wi-Fi y que hace cambios en las redes de Wi-Fi configuradas."</string>
+    <!-- no translation found for permlab_changeWifiMulticastState (1368253871483254784) -->
+    <skip />
+    <!-- no translation found for permdesc_changeWifiMulticastState (8199464507656067553) -->
+    <skip />
     <string name="permlab_bluetoothAdmin">"administración de bluetooth"</string>
     <string name="permdesc_bluetoothAdmin">"Admite una aplicación que configura el teléfono Bluetooth local y descubre y se vincula con dispositivos remotos."</string>
     <string name="permlab_bluetooth">"crear conexiones de Bluetooth"</string>
@@ -354,6 +409,10 @@
     <string name="permdesc_readDictionary">"Admite una aplicación para leer palabras, nombres y frases privadas que posiblemente el usuario haya almacenado en el diccionario del usuario."</string>
     <string name="permlab_writeDictionary">"escribir al diccionario definido por el usuario"</string>
     <string name="permdesc_writeDictionary">"Admite una aplicación que escribe palabras nuevas en el diccionario del usuario."</string>
+    <!-- no translation found for permlab_sdcardWrite (8079403759001777291) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardWrite (6643963204976471878) -->
+    <skip />
   <string-array name="phoneTypes">
     <item>"Página principal"</item>
     <item>"Celular"</item>
@@ -370,6 +429,7 @@
     <item>"Otros"</item>
     <item>"Personalización"</item>
   </string-array>
+    <string name="mobileEmailTypeName">"Celular"</string>
   <string-array name="postalAddressTypes">
     <item>"Página principal"</item>
     <item>"Trabajo"</item>
@@ -410,14 +470,15 @@
     <string name="lockscreen_pattern_correct">"Correcto"</string>
     <string name="lockscreen_pattern_wrong">"Lo sentimos, vuelve a intentarlo"</string>
     <string name="lockscreen_plugged_in">"Cargando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
+    <skip />
     <string name="lockscreen_low_battery">"Conecta tu cargador."</string>
     <string name="lockscreen_missing_sim_message_short">"No hay tarjeta SIM."</string>
     <string name="lockscreen_missing_sim_message">"No hay tarjeta SIM en el teléfono."</string>
     <string name="lockscreen_missing_sim_instructions">"Inserta una tarjeta SIM."</string>
     <string name="lockscreen_network_locked_message">"Red bloqueada"</string>
     <string name="lockscreen_sim_puk_locked_message">"La tarjeta SIM está bloqueada con PUK."</string>
-    <!-- no translation found for lockscreen_sim_puk_locked_instructions (635967534992394321) -->
-    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions">"Consulta la guía del usuario o comunícate con el servicio de atención al cliente."</string>
     <string name="lockscreen_sim_locked_message">"La tarjeta SIM está bloqueada."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message">"Desbloqueando tarjeta SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message">"Has extraído incorrectamente tu patrón de desbloqueo <xliff:g id="NUMBER_0">%d</xliff:g> veces. "\n\n"Vuelve a intentarlo en <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
@@ -432,7 +493,8 @@
     <string name="lockscreen_glogin_invalid_input">"Nombre de usuario o contraseña incorrecta."</string>
     <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <string name="status_bar_clear_all_button">"Borrar notificaciones"</string>
+    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
+    <skip />
     <string name="status_bar_no_notifications_title">"No hay notificaciones"</string>
     <string name="status_bar_ongoing_events_title">"Continuo"</string>
     <string name="status_bar_latest_events_title">"Notificaciones"</string>
@@ -441,6 +503,8 @@
     <string name="battery_low_title">"Conecta el cargador"</string>
     <string name="battery_low_subtitle">"Hay poca batería:"</string>
     <string name="battery_low_percent_format">"menos de <xliff:g id="NUMBER">%d%%</xliff:g> restante."</string>
+    <!-- no translation found for battery_low_why (7655196144309694753) -->
+    <skip />
     <string name="factorytest_failed">"Error en la prueba de fábrica"</string>
     <string name="factorytest_not_system">"La acción FACTORY_TEST se admite solamente en paquetes instalados en /system/app."</string>
     <string name="factorytest_no_action">"No se ha encontrado ningún paquete que proporcione la acción FACTORY_TEST ."</string>
@@ -449,6 +513,14 @@
     <string name="js_dialog_title_default">"JavaScript"</string>
     <string name="js_dialog_before_unload">"¿Deseas salir de esta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Selecciona Aceptar para continuar o Cancelar para permanecer en la página actual."</string>
     <string name="save_password_label">"Confirmar"</string>
+    <!-- no translation found for permlab_readHistoryBookmarks (1284843728203412135) -->
+    <skip />
+    <!-- no translation found for permdesc_readHistoryBookmarks (4981489815467617191) -->
+    <skip />
+    <!-- no translation found for permlab_writeHistoryBookmarks (9009434109836280374) -->
+    <skip />
+    <!-- no translation found for permdesc_writeHistoryBookmarks (945571990357114950) -->
+    <skip />
     <string name="save_password_message">"¿Quieres recordar esta contraseña en el navegador?"</string>
     <string name="save_password_notnow">"Ahora no."</string>
     <string name="save_password_remember">"Recuerda"</string>
@@ -556,10 +628,6 @@
     <string name="Noon">"Mediodía"</string>
     <string name="midnight">"medianoche"</string>
     <string name="Midnight">"Medianoche"</string>
-    <!-- no translation found for month (7026169712234774086) -->
-    <skip />
-    <!-- no translation found for abbrev_month (3131032032850777433) -->
-    <skip />
     <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll">"Seleccionar todos"</string>
@@ -597,6 +665,8 @@
     <string name="anr_application_process">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (en proceso <xliff:g id="PROCESS">%2$s</xliff:g>) no responde."</string>
     <string name="anr_process">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> no responde."</string>
     <string name="force_close">"Provocar acercamiento"</string>
+    <!-- no translation found for report (4060218260984795706) -->
+    <skip />
     <string name="wait">"Espera"</string>
     <string name="debug">"Depurar"</string>
     <string name="sendText">"Selecciona una acción para el texto"</string>
@@ -650,22 +720,31 @@
     <string name="extmedia_format_title">"Formatear tarjeta SD"</string>
     <string name="extmedia_format_message">"¿Estás seguro de que quieres formatear la tarjeta SD? Se perderán todos los datos de tu tarjeta."</string>
     <string name="extmedia_format_button_format">"Formato"</string>
+    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
+    <skip />
+    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
+    <skip />
     <string name="select_input_method">"Seleccionar método de entrada"</string>
     <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style"><u>"candidatos"</u></string>
     <string name="ext_media_checking_notification_title">"Preparación de la tarjeta SD"</string>
-    <string name="ext_media_checking_notification_message">"Verificando errores"</string>
+    <!-- no translation found for ext_media_checking_notification_message (8287319882926737053) -->
+    <skip />
     <string name="ext_media_nofs_notification_title">"Tarjeta SD vacía"</string>
-    <string name="ext_media_nofs_notification_message">"La tarjeta SD está vacía o utiliza un filesystem no admitido."</string>
+    <!-- no translation found for ext_media_nofs_notification_message (3817704088027829380) -->
+    <skip />
     <string name="ext_media_unmountable_notification_title">"Tarjeta SD dañada"</string>
-    <string name="ext_media_unmountable_notification_message">"La tarjeta SD está dañada. Es posible que debas reformatear tu tarjeta."</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (6902531775948238989) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title">"Tarjeta SD extraída de forma imprevista"</string>
     <string name="ext_media_badremoval_notification_message">"Desmontar la tarjeta SD antes de extraerla para evitar la pérdida de datos."</string>
     <string name="ext_media_safe_unmount_notification_title">"Tarjeta SD fácil de extraer"</string>
-    <string name="ext_media_safe_unmount_notification_message">"La tarjeta SD ahora se puede extraer de manera segura."</string>
+    <!-- no translation found for ext_media_safe_unmount_notification_message (568841278138377604) -->
+    <skip />
     <string name="ext_media_nomedia_notification_title">"Tarjeta SD extraída"</string>
-    <string name="ext_media_nomedia_notification_message">"Se ha extraído la SD. Inserta una nueva tarjeta SD para aumentar el espacio de almacenamiento de tu dispositivo."</string>
+    <!-- no translation found for ext_media_nomedia_notification_message (3870120652983659641) -->
+    <skip />
     <string name="activity_list_empty">"No se encontraron actividades coincidentes"</string>
     <string name="permlab_pkgUsageStats">"actualizar la estadística de uso de los componentes"</string>
     <string name="permdesc_pkgUsageStats">"Permite la modificación de estadísticas recopiladas sobre el uso de componentes. Las aplicaciones normales no deben utilizarlo."</string>
@@ -677,8 +756,10 @@
     <string name="ime_action_next">"Siguiente"</string>
     <string name="ime_action_done">"Finalizado"</string>
     <string name="ime_action_default">"Ejecutar"</string>
-    <!-- no translation found for dial_number_using (5789176425167573586) -->
+    <string name="dial_number_using">"Marcar el número"\n"con <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using">"Crear contacto "\n"con <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_compound_button_selected (5612776946036285686) -->
     <skip />
-    <!-- no translation found for create_contact_using (4947405226788104538) -->
+    <!-- no translation found for accessibility_compound_button_unselected (8864512895673924091) -->
     <skip />
 </resources>

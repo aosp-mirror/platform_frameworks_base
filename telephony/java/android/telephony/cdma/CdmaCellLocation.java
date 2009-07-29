@@ -27,6 +27,8 @@ public class CdmaCellLocation extends CellLocation {
     private int mBaseStationId = -1;
     private int mBaseStationLatitude = -1;
     private int mBaseStationLongitude = -1;
+    private int mSystemId = -1;
+    private int mNetworkId = -1;
 
     /**
      * Empty constructor.  Initializes the LAC and CID to -1.
@@ -35,6 +37,8 @@ public class CdmaCellLocation extends CellLocation {
         this.mBaseStationId = -1;
         this.mBaseStationLatitude = -1;
         this.mBaseStationLongitude = -1;
+        this.mSystemId = -1;
+        this.mNetworkId = -1;
     }
 
     /**
@@ -44,6 +48,8 @@ public class CdmaCellLocation extends CellLocation {
         this.mBaseStationId = bundleWithValues.getInt("baseStationId");
         this.mBaseStationLatitude = bundleWithValues.getInt("baseStationLatitude");
         this.mBaseStationLongitude = bundleWithValues.getInt("baseStationLongitude");
+        this.mSystemId = bundleWithValues.getInt("systemId");
+        this.mNetworkId = bundleWithValues.getInt("networkId");
     }
 
     /**
@@ -68,12 +74,28 @@ public class CdmaCellLocation extends CellLocation {
     }
 
     /**
+     * @return cdma system identification number, -1 if unknown
+     */
+    public int getSystemId() {
+        return this.mSystemId;
+    }
+
+    /**
+     * @return cdma network identification number, -1 if unknown
+     */
+    public int getNetworkId() {
+        return this.mNetworkId;
+    }
+
+    /**
      * Invalidate this object.  The cell location data is set to -1.
      */
     public void setStateInvalid() {
         this.mBaseStationId = -1;
         this.mBaseStationLatitude = -1;
         this.mBaseStationLongitude = -1;
+        this.mSystemId = -1;
+        this.mNetworkId = -1;
     }
 
     /**
@@ -87,9 +109,23 @@ public class CdmaCellLocation extends CellLocation {
          this.mBaseStationLongitude = baseStationLongitude; //values[3];
     }
 
+    /**
+     * Set the cell location data.
+     */
+     public void setCellLocationData(int baseStationId, int baseStationLatitude,
+         int baseStationLongitude, int systemId, int networkId) {
+         // The following values have to be written in the correct sequence
+         this.mBaseStationId = baseStationId;
+         this.mBaseStationLatitude = baseStationLatitude;   //values[2];
+         this.mBaseStationLongitude = baseStationLongitude; //values[3];
+         this.mSystemId = systemId;
+         this.mNetworkId = networkId;
+    }
+
     @Override
     public int hashCode() {
-        return this.mBaseStationId ^ this.mBaseStationLatitude ^ this.mBaseStationLongitude;
+        return this.mBaseStationId ^ this.mBaseStationLatitude ^ this.mBaseStationLongitude
+                ^ this.mSystemId ^ this.mNetworkId;
     }
 
     @Override
@@ -108,7 +144,9 @@ public class CdmaCellLocation extends CellLocation {
 
         return (equalsHandlesNulls(this.mBaseStationId, s.mBaseStationId) &&
                 equalsHandlesNulls(this.mBaseStationLatitude, s.mBaseStationLatitude) &&
-                equalsHandlesNulls(this.mBaseStationLongitude, s.mBaseStationLongitude)
+                equalsHandlesNulls(this.mBaseStationLongitude, s.mBaseStationLongitude) &&
+                equalsHandlesNulls(this.mSystemId, s.mSystemId) &&
+                equalsHandlesNulls(this.mNetworkId, s.mNetworkId)
         );
     }
 
@@ -116,7 +154,9 @@ public class CdmaCellLocation extends CellLocation {
     public String toString() {
         return "[" + this.mBaseStationId + ","
                    + this.mBaseStationLatitude + ","
-                   + this.mBaseStationLongitude + "]";
+                   + this.mBaseStationLongitude + ","
+                   + this.mSystemId + ","
+                   + this.mNetworkId + "]";
     }
 
     /**
@@ -139,6 +179,8 @@ public class CdmaCellLocation extends CellLocation {
         bundleToFill.putInt("baseStationId", this.mBaseStationId);
         bundleToFill.putInt("baseStationLatitude", this.mBaseStationLatitude);
         bundleToFill.putInt("baseStationLongitude", this.mBaseStationLongitude);
+        bundleToFill.putInt("systemId", this.mSystemId);
+        bundleToFill.putInt("networkId", this.mNetworkId);
     }
 
 }

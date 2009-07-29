@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="byteShort">"B"</string>
+    <string name="kilobyteShort">"Kb"</string>
+    <string name="megabyteShort">"Mb"</string>
+    <string name="gigabyteShort">"Gb"</string>
+    <string name="terabyteShort">"Tb"</string>
+    <string name="petabyteShort">"Pb"</string>
+    <!-- no translation found for fileSizeSuffix (7670819340156489359) -->
+    <skip />
+    <string name="untitled">"&lt;uden navn&gt;"</string>
+    <string name="ellipsis">"…"</string>
+    <string name="emptyPhoneNumber">"(Intet telefonnummer)"</string>
+    <string name="unknownName">"(Ukendt)"</string>
+    <string name="defaultVoiceMailAlphaTag">"Voicemail"</string>
+    <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
+    <string name="mmiError">"Forbindelsesproblemer eller ugyldigt MMI-nummer."</string>
+    <string name="serviceEnabled">"Tjenesten blev aktiveret."</string>
+    <string name="serviceEnabledFor">"Tjenesten blev aktiveret for:"</string>
+    <string name="serviceDisabled">"Tjenesten er deaktiveret."</string>
+    <string name="serviceRegistered">"Registreringen er afsluttet."</string>
+    <string name="serviceErased">"Sletning afsluttet."</string>
+    <string name="passwordIncorrect">"Forkert adgangskode."</string>
+    <string name="mmiComplete">"MMI-nummer afsluttet."</string>
+    <string name="badPin">"Den gamle PIN-kode, du indtastede, er ikke korrekt."</string>
+    <string name="badPuk">"Den indtastede PUK-kode er ikke korrekt."</string>
+    <string name="mismatchPin">"De indtastede PIN-koder stemmer ikke overens."</string>
+    <string name="invalidPin">"Indtast en PIN-kode på mellem 4 og 8 tal."</string>
+    <string name="needPuk">"Dit SIM-kort er låst med PUK-koden. Indtast PUK-koden for at låse den op."</string>
+    <string name="needPuk2">"Indtast PUK2-koden for at låse op for SIM-kortet."</string>
+    <string name="ClipMmi">"Indgående opkalds-id"</string>
+    <string name="ClirMmi">"Udgående opkalds-id"</string>
+    <string name="CfMmi">"Viderestilling af opkald"</string>
+    <string name="CwMmi">"Ventende opkald"</string>
+    <string name="BaMmi">"Opkaldsspærring"</string>
+    <string name="PwdMmi">"Ændring af adgangskode"</string>
+    <string name="PinMmi">"ændring af PIN-kode"</string>
+    <!-- no translation found for CnipMmi (3110534680557857162) -->
+    <skip />
+    <!-- no translation found for CnirMmi (3062102121430548731) -->
+    <skip />
+    <!-- no translation found for ThreeWCMmi (9051047170321190368) -->
+    <skip />
+    <!-- no translation found for RuacMmi (7827887459138308886) -->
+    <skip />
+    <!-- no translation found for CndMmi (3116446237081575808) -->
+    <skip />
+    <!-- no translation found for DndMmi (1265478932418334331) -->
+    <skip />
+    <string name="CLIRDefaultOnNextCallOn">"Standarder for opkalds-id til begrænset. Næste opkald: Begrænset"</string>
+    <string name="CLIRDefaultOnNextCallOff">"Standarder for opkalds-id til begrænset. Næste opkald: Ikke begrænset"</string>
+    <string name="CLIRDefaultOffNextCallOn">"Standarder for opkalds-id til ikke begrænset. Næste opkald: Begrænset"</string>
+    <string name="CLIRDefaultOffNextCallOff">"Standarder for opkalds-id til ikke begrænset. Næste opkald: Ikke begrænset"</string>
+    <string name="serviceNotProvisioned">"Tjenesten leveres ikke!"</string>
+    <string name="CLIRPermanent">"Indstillingen for opkalds-id kan ikke ændres."</string>
+    <string name="RestrictedChangedTitle">"Begrænset adgang ændret"</string>
+    <string name="RestrictedOnData">"Datatjeneste er blokeret."</string>
+    <string name="RestrictedOnEmergency">"Nødtjeneste er blokeret."</string>
+    <string name="RestrictedOnNormal">"Stemme-/SMS-tjeneste er blokeret."</string>
+    <string name="RestrictedOnAll">"Alle stemme-/SMS-tjenester er blokerede."</string>
+    <string name="serviceClassVoice">"Stemme"</string>
+    <string name="serviceClassData">"Data"</string>
+    <string name="serviceClassFAX">"FAX"</string>
+    <string name="serviceClassSMS">"SMS"</string>
+    <string name="serviceClassDataAsync">"Asynkroniser"</string>
+    <string name="serviceClassDataSync">"Synkroniser"</string>
+    <string name="serviceClassPacket">"Pakke"</string>
+    <string name="serviceClassPAD">"PAD"</string>
+    <!-- no translation found for roamingText0 (7170335472198694945) -->
+    <skip />
+    <!-- no translation found for roamingText1 (5314861519752538922) -->
+    <skip />
+    <!-- no translation found for roamingText2 (8969929049081268115) -->
+    <skip />
+    <!-- no translation found for roamingText3 (5148255027043943317) -->
+    <skip />
+    <!-- no translation found for roamingText4 (8808456682550796530) -->
+    <skip />
+    <!-- no translation found for roamingText5 (7604063252850354350) -->
+    <skip />
+    <!-- no translation found for roamingText6 (2059440825782871513) -->
+    <skip />
+    <!-- no translation found for roamingText7 (7112078724097233605) -->
+    <skip />
+    <!-- no translation found for roamingText8 (5989569778604089291) -->
+    <skip />
+    <!-- no translation found for roamingText9 (7969296811355152491) -->
+    <skip />
+    <!-- no translation found for roamingText10 (3992906999815316417) -->
+    <skip />
+    <!-- no translation found for roamingText11 (4154476854426920970) -->
+    <skip />
+    <!-- no translation found for roamingText12 (1189071119992726320) -->
+    <skip />
+    <!-- no translation found for roamingTextSearching (8360141885972279963) -->
+    <skip />
+    <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke videresendt"</string>
+    <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> efter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
+    <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke videresendt"</string>
+    <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Ikke videresendt"</string>
+    <!-- no translation found for fcComplete (3118848230966886575) -->
+    <skip />
+    <!-- no translation found for fcError (3327560126588500777) -->
+    <skip />
+    <string name="httpErrorOk">"OK"</string>
+    <string name="httpError">"Websiden indeholder en fejl."</string>
+    <string name="httpErrorLookup">"Webadressen kunne ikke findes."</string>
+    <string name="httpErrorUnsupportedAuthScheme">"Planen for webstedsgodkendelse er ikke understøttet."</string>
+    <string name="httpErrorAuth">"Godkendelse mislykkedes."</string>
+    <string name="httpErrorProxyAuth">"Godkendelse via proxyserveren mislykkedes."</string>
+    <string name="httpErrorConnect">"Der kunne ikke oprettes forbindelse til serveren."</string>
+    <string name="httpErrorIO">"Serveren kunne ikke kommunikere. Prøv igen senere."</string>
+    <string name="httpErrorTimeout">"Der opstod timeout for forbindelsen til serveren."</string>
+    <string name="httpErrorRedirectLoop">"Siden indeholder for mange serveromdirigeringer."</string>
+    <string name="httpErrorUnsupportedScheme">"Protokollen understøttes ikke."</string>
+    <string name="httpErrorFailedSslHandshake">"Der kunne ikke etableres en sikker forbindelse."</string>
+    <string name="httpErrorBadUrl">"Siden kunne ikke åbnes, fordi webadressen er ugyldig."</string>
+    <string name="httpErrorFile">"Der kunne ikke oprettes adgang til filen."</string>
+    <string name="httpErrorFileNotFound">"Den anmodede fil blev ikke fundet."</string>
+    <string name="httpErrorTooManyRequests">"Der behandles for mange anmodninger. Prøv igen senere."</string>
+    <!-- no translation found for certificateSaved (2832076323378077191) -->
+    <skip />
+    <string name="contentServiceSync">"Synkroniser"</string>
+    <string name="contentServiceSyncNotificationTitle">"Synkroniser"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc">"For mange <xliff:g id="CONTENT_TYPE">%s</xliff:g> sletninger"</string>
+    <string name="low_memory">"Telefonens lagerplads er fuld. Slet nogle filer for at frigøre plads."</string>
+    <string name="me">"Mig"</string>
+    <string name="power_dialog">"Telefonvalgmuligheder"</string>
+    <string name="silent_mode">"Lydløs"</string>
+    <string name="turn_on_radio">"Slå trådløs til"</string>
+    <string name="turn_off_radio">"Slå trådløs fra"</string>
+    <string name="screen_lock">"Skærmlås"</string>
+    <string name="power_off">"Sluk"</string>
+    <string name="shutdown_progress">"Lukker ned ..."</string>
+    <string name="shutdown_confirm">"Din telefon lukkes ned."</string>
+    <string name="no_recent_tasks">"Der er ingen nye programmer."</string>
+    <string name="global_actions">"Telefonvalgmuligheder"</string>
+    <string name="global_action_lock">"Skærmlås"</string>
+    <string name="global_action_power_off">"Sluk"</string>
+    <string name="global_action_toggle_silent_mode">"Lydløs"</string>
+    <string name="global_action_silent_mode_on_status">"Lyden er FRA"</string>
+    <string name="global_action_silent_mode_off_status">"Lyden er TIL"</string>
+    <string name="global_actions_toggle_airplane_mode">"Flytilstand"</string>
+    <string name="global_actions_airplane_mode_on_status">"Flytilstand er TIL"</string>
+    <string name="global_actions_airplane_mode_off_status">"Flytilstand er FRA"</string>
+    <string name="safeMode">"Sikker tilstand"</string>
+    <string name="android_system_label">"Android-system"</string>
+    <string name="permgrouplab_costMoney">"Tjenester, der koster dig penge"</string>
+    <string name="permgroupdesc_costMoney">"Tillader et program at gøre ting, som kan koste penge."</string>
+    <string name="permgrouplab_messages">"Dine beskeder"</string>
+    <string name="permgroupdesc_messages">"Læs og skriv dine SMS-, e-mail- og andre beskeder."</string>
+    <string name="permgrouplab_personalInfo">"Dine personlige oplysninger"</string>
+    <string name="permgroupdesc_personalInfo">"Få direkte adgang til dine kontaktpersoner og din kalender, der er gemt på telefonen."</string>
+    <string name="permgrouplab_location">"Din placering"</string>
+    <string name="permgroupdesc_location">"Overvåg din fysiske placering"</string>
+    <string name="permgrouplab_network">"Netværkskommunikation"</string>
+    <string name="permgroupdesc_network">"Tillader programmer at få adgang til forskellige netværksfunktioner."</string>
+    <string name="permgrouplab_accounts">"Dine Google-konti"</string>
+    <string name="permgroupdesc_accounts">"Få adgang til tilgængelige Google-konti."</string>
+    <string name="permgrouplab_hardwareControls">"Hardwarekontroller"</string>
+    <string name="permgroupdesc_hardwareControls">"Direkte adgang til hardware på håndsættet."</string>
+    <string name="permgrouplab_phoneCalls">"Telefonopkald"</string>
+    <string name="permgroupdesc_phoneCalls">"Overvåg, registrer og behandl telefonopkald."</string>
+    <string name="permgrouplab_systemTools">"Systemværktøjer"</string>
+    <string name="permgroupdesc_systemTools">"Adgang og kontrol til systemet på lavere niveau."</string>
+    <string name="permgrouplab_developmentTools">"Udviklingsværktøjer"</string>
+    <string name="permgroupdesc_developmentTools">"Funktioner kun til programudviklere."</string>
+    <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (9203302214915355774) -->
+    <skip />
+    <string name="permlab_statusBar">"deaktiver eller rediger statuslinje"</string>
+    <string name="permdesc_statusBar">"Tillader et program at deaktivere statuslinjen eller tilføje eller fjerne systemikoner."</string>
+    <string name="permlab_expandStatusBar">"udvid/skjul statuslinje"</string>
+    <string name="permdesc_expandStatusBar">"Tillader et program at udvide eller skjule statuslinjen."</string>
+    <string name="permlab_processOutgoingCalls">"opfang udgående opkald"</string>
+    <string name="permdesc_processOutgoingCalls">"Tillader et program at behandle udgående opkald og ændre nummeret, der skal ringes til. Ondsindede programmer kan overvåge, omdirigere eller forhindre udgående opkald."</string>
+    <string name="permlab_receiveSms">"modtag SMS"</string>
+    <string name="permdesc_receiveSms">"Tillader et program at modtage og behandle SMS-beskeder. Ondsindede programmer kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
+    <string name="permlab_receiveMms">"modtag MMS"</string>
+    <string name="permdesc_receiveMms">"Tillader et program at modtage og behandle MMS-beskeder. Ondsindede programmer kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
+    <string name="permlab_sendSms">"send SMS-beskeder"</string>
+    <string name="permdesc_sendSms">"Tillader et program at sende SMS-beskeder. Ondsindede programmer kan eventuelt koste dig penge ved at sende beskeder uden din bekræftelse."</string>
+    <string name="permlab_readSms">"læs SMS eller MMS"</string>
+    <string name="permdesc_readSms">"Tillader et program at læse SMS-beskeder, der er gemt på din telefon eller dit SIM-kort. Ondsindede programmer kan eventuelt læse dine fortrolige beskeder."</string>
+    <string name="permlab_writeSms">"rediger SMS eller MMS"</string>
+    <string name="permdesc_writeSms">"Tillader et program at skrive til SMS-beskeder, der er gemt på din telefon eller dit SIM-kort. Ondsindede programmer kan eventuelt slette dine beskeder."</string>
+    <string name="permlab_receiveWapPush">"modtag WAP"</string>
+    <string name="permdesc_receiveWapPush">"Tillader et program at modtage og behandle WAP-beskeder. Ondsindede programmer kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
+    <string name="permlab_getTasks">"hent kørende programmer"</string>
+    <string name="permdesc_getTasks">"Tillader et program at hente oplysninger om nuværende og for nyligt kørende opgaver. Tillader eventuelt ondsindede programmer at finde private oplysninger om andre programmer."</string>
+    <string name="permlab_reorderTasks">"omorganiser kørende programmer"</string>
+    <string name="permdesc_reorderTasks">"Tillader et program at flytte opgaver til forgrunden og baggrunden. Ondsindede programmer kan tvinge dem selv til forgrunden uden din kontrol."</string>
+    <string name="permlab_setDebugApp">"aktiver programfejlretning"</string>
+    <string name="permdesc_setDebugApp">"Tillader et program at slå fejlretning af andet program til. Ondsindede programmer kan bruge dette til at standse andre programmer."</string>
+    <string name="permlab_changeConfiguration">"skift dine UI-indstillinger"</string>
+    <string name="permdesc_changeConfiguration">"Tillader et program at ændre den nuværende konfiguration, som f.eks. den lokale eller overordnede skrifttypestørrelse."</string>
+    <string name="permlab_restartPackages">"genstart andre programmer"</string>
+    <string name="permdesc_restartPackages">"Tillader et program at tvangsgenstarte andre programmer."</string>
+    <string name="permlab_forceBack">"tving programmet til at lukke"</string>
+    <string name="permdesc_forceBack">"Tillader et program at tvinge alle programmer, der er i forgrunden, til at lukke og gå tilbage. Bør aldrig være nødvendigt til normale programmer."</string>
+    <string name="permlab_dump">"hent intern systemtilstand"</string>
+    <string name="permdesc_dump">"Tillader et program at hente systemets interne tilstand. Ondsindede programmer kan hente en række private og sikre oplysninger, som de normalt aldrig bør have brug for."</string>
+    <!-- no translation found for permlab_shutdown (7185747824038909016) -->
+    <skip />
+    <!-- no translation found for permdesc_shutdown (7046500838746291775) -->
+    <skip />
+    <!-- no translation found for permlab_stopAppSwitches (4138608610717425573) -->
+    <skip />
+    <!-- no translation found for permdesc_stopAppSwitches (3857886086919033794) -->
+    <skip />
+    <string name="permlab_runSetActivityWatcher">"overvåg og kontroller start af alle programmer"</string>
+    <string name="permdesc_runSetActivityWatcher">"Tillader et program at overvåge og kontrollere, hvordan systemet starter aktiviteter. Ondsindede programmer kan fuldstændig kompromittere systemet. Denne tilladelse er kun nødvendig til udvikling, aldrig til normal telefonbrug."</string>
+    <string name="permlab_broadcastPackageRemoved">"send udsendelse om fjernet pakke"</string>
+    <string name="permdesc_broadcastPackageRemoved">"Tillader et program at udsende en meddelelse om, at en programpakke er fjernet. Ondsindede programmer kan bruge dette til at afslutte et andet kørende program."</string>
+    <string name="permlab_broadcastSmsReceived">"send SMS-modtaget udsendelse"</string>
+    <string name="permdesc_broadcastSmsReceived">"Tillader et program at udsende en meddelelse om, at der er modtaget en SMS-besked. Ondsindede programmer kan eventuelt bruge dette til at forfalske indgående SMS-beskeder."</string>
+    <string name="permlab_broadcastWapPush">"send WAP-PUSH-modtaget udsendelse"</string>
+    <string name="permdesc_broadcastWapPush">"Tillader et program at udsende en meddelelse om, at der er modtaget en WAP PUSH-besked. Ondsindede programmer kan eventuelt bruge dette til at forfalske modtagelse af MMS-besked eller i det skjulte erstatte indholdet på alle websider med ondsindede varianter."</string>
+    <string name="permlab_setProcessLimit">"begræns antallet af kørende processer"</string>
+    <string name="permdesc_setProcessLimit">"Tillader et program at kontrollere det maksimale antal processer, der kan køre. Er aldrig nødvendigt til normale programmer."</string>
+    <string name="permlab_setAlwaysFinish">"få alle baggrundsprogrammer til at lukke"</string>
+    <string name="permdesc_setAlwaysFinish">"Tillader et program at kontrollere, om aktiviteter altid afsluttes, så snart de går i baggrunden. Aldrig nødvendigt til normale programmer."</string>
+    <string name="permlab_batteryStats">"rediger batteristatistikker"</string>
+    <string name="permdesc_batteryStats">"Tillader ændring af indsamlede batteristatistikker. Ikke til brug for normale programmer."</string>
+    <!-- no translation found for permlab_backup (470013022865453920) -->
+    <skip />
+    <!-- no translation found for permdesc_backup (2305432853944929371) -->
+    <skip />
+    <string name="permlab_internalSystemWindow">"vis uautoriserede vinduer"</string>
+    <string name="permdesc_internalSystemWindow">"Tillader oprettelse af vinduer, der er beregnet til at blive brugt af den interne systembrugergrænseflade. Ikke til brug for normale programmer."</string>
+    <string name="permlab_systemAlertWindow">"vis underretninger på systemniveau"</string>
+    <string name="permdesc_systemAlertWindow">"Tillader et program at vise systemunderretningsvinduer. Ondsindede programmer kan overtage hele telefonens skærm."</string>
+    <string name="permlab_setAnimationScale">"rediger global animationshastighed"</string>
+    <string name="permdesc_setAnimationScale">"Tillader et program at ændre den globale animationshastighed (hurtigere eller langsommere animationer) når som helst."</string>
+    <string name="permlab_manageAppTokens">"administrer programtokens"</string>
+    <string name="permdesc_manageAppTokens">"Tillader programmet at oprette og administrere deres egen tokens og gå uden om deres normale Z-rækkefølge. Bør aldrig være nødvendigt til normale programmer."</string>
+    <string name="permlab_injectEvents">"tryk på taster og kontrolknapper"</string>
+    <string name="permdesc_injectEvents">"Tillader et program at levere sine egne inputbegivenheder (tastetryk osv.) til andre programmer. Ondsindede programmer kan bruge dette til at overtage telefonen."</string>
+    <string name="permlab_readInputState">"registrerer, hvad du indtaster, og hvilke handlinger du foretager dig"</string>
+    <string name="permdesc_readInputState">"Tillader et program at holde øje med de taster, du trykker på, selv når du interagerer med andre programmer (som f.eks. indtastning af adgangskode). Bør aldrig være nødvendigt til normale programmer."</string>
+    <string name="permlab_bindInputMethod">"forpligt til en inputmetode"</string>
+    <string name="permdesc_bindInputMethod">"Tillader brugeren at forpligte sig på en inputmetodes grænseflade på øverste niveau. Bør aldrig være nødvendig til normale programmer."</string>
+    <string name="permlab_setOrientation">"skift skærmretning"</string>
+    <string name="permdesc_setOrientation">"Tillader et program at ændre rotationen af skærmen når som helst. Bør aldrig være nødvendigt til normale programmer."</string>
+    <string name="permlab_signalPersistentProcesses">"send Linux-signaler til programmer"</string>
+    <string name="permdesc_signalPersistentProcesses">"Tillader program at anmode om, at det leverede signal sendes til alle vedholdende processer."</string>
+    <string name="permlab_persistentActivity">"lad altid programmet køre"</string>
+    <string name="permdesc_persistentActivity">"Tillader et program at gøre dele af sig selv vedholdende, så systemet ikke kan bruge det til andre programmer."</string>
+    <string name="permlab_deletePackages">"slet programmer"</string>
+    <string name="permdesc_deletePackages">"Tillader et program at slette Android-pakker. Ondsindede programmer kan bruge dette til at slette vigtige programmer."</string>
+    <string name="permlab_clearAppUserData">"slet andre programmers data"</string>
+    <string name="permdesc_clearAppUserData">"Lader et program rydde brugerdata."</string>
+    <string name="permlab_deleteCacheFiles">"slet andre programmers cacher"</string>
+    <string name="permdesc_deleteCacheFiles">"Tillader et program at slette cachefiler."</string>
+    <string name="permlab_getPackageSize">"måler programmets lagerplads"</string>
+    <string name="permdesc_getPackageSize">"Tillader et program at hente dets kode, data og cachestørrelser"</string>
+    <string name="permlab_installPackages">"installer programmer direkte"</string>
+    <string name="permdesc_installPackages">"Tillader et program at installere nye eller opdaterede Android-pakker. Ondsindede programmer kan bruge dette til at tilføje nye programmer med vilkårlige, effektive tilladelser."</string>
+    <string name="permlab_clearAppCache">"slet alle cachedata for programmet"</string>
+    <string name="permdesc_clearAppCache">"Tillader et program at frigøre plads på telefonen ved at slette filer i programmets cachemappe. Adgang er normalt meget begrænset til systemprocesser."</string>
+    <string name="permlab_readLogs">"læs systemlogfiler"</string>
+    <string name="permdesc_readLogs">"Tillader et program at læse fra systemets forskellige logfiler. Dermed kan generelle oplysninger om, hvad du laver med telefonen, opdages, men logfilerne skulle ikke indeholde personlige eller private oplysninger."</string>
+    <string name="permlab_diagnostic">"læs/skriv til ressourcer ejet af diag"</string>
+    <string name="permdesc_diagnostic">"Tillader et program at læse og skrive til alle ressourcer, der ejes af diag-gruppen, som f.eks. flier i /dev. Dette kan muligvis påvirke systemets stabilitet og sikkerhed. Dette bør KUN bruges til hardwarespecifikke diagnosticeringer foretaget af producent eller udbyder."</string>
+    <string name="permlab_changeComponentState">"aktiver eller deaktiver programkomponenter"</string>
+    <string name="permdesc_changeComponentState">"Tillader et program at ændre, om en komponent fra et andet program er aktiveret eller ej. Ondsindede programmer kan bruge dette til at deaktivere vigtige telefonfunktioner. Denne tilladelse skal anvendes med forsigtighed, da det kan forårsage ubrugelige, inkonsekvente eller ustabile programkomponenter."</string>
+    <string name="permlab_setPreferredApplications">"indstil foretrukne programmer"</string>
+    <string name="permdesc_setPreferredApplications">"Tillader et program at ændre dine foretrukne programmer. Dette kan tillade, at ondsindede programmer ændrer kørende programmer i det skjulte og narrer dine eksisterende programmer til at indsamle personlige data fra dig."</string>
+    <string name="permlab_writeSettings">"rediger globale systemindstillinger"</string>
+    <string name="permdesc_writeSettings">"Tillader et program at ændre systemets indstillingsdata. Ondsindede programmer kan skade systemets konfiguration."</string>
+    <string name="permlab_writeSecureSettings">"rediger sikre systemindstillinger"</string>
+    <string name="permdesc_writeSecureSettings">"Tillader et program at ændre systemernes sikre indstillingsdata. Ikke til brug til almindelige programmer."</string>
+    <string name="permlab_writeGservices">"rediger kortet over Google-tjenester"</string>
+    <string name="permdesc_writeGservices">"Tillader et program at ændre kortet over Google-tjenester. Ikke til brug til normale programmer."</string>
+    <string name="permlab_receiveBootCompleted">"start automatisk ved opstart"</string>
+    <string name="permdesc_receiveBootCompleted">"Tillader et program at starte selv, når systemet er færdig med at starte. Dette kan gøre start af telefonen langsommere og generelt gøre telefonen langsommere ved altid at lade programmet køre."</string>
+    <string name="permlab_broadcastSticky">"send klæbende udsendelse"</string>
+    <string name="permdesc_broadcastSticky">"Tillader et program at sende klæbende udsendelser, der bliver tilbage, efter udsendelsen er slut. Ondsindede programmer kan gøre telefonen langsom eller ustabil ved at få den til at bruge for meget hukommelse."</string>
+    <string name="permlab_readContacts">"læs kontaktpersondata"</string>
+    <string name="permdesc_readContacts">"Tillader et program at læse alle kontaktpersondata (adresse), der er gemt på din telefon. Ondsindede programmer kan bruge dette til at sende dine data til andre mennesker."</string>
+    <string name="permlab_writeContacts">"skriv kontaktpersondata"</string>
+    <string name="permdesc_writeContacts">"Tillader et program at ændre telefonens kontaktpersondata (adresse), der er gemt på din telefon. Ondsindede programmer kan bruge dette til at slette eller ændre kontaktpersondata."</string>
+    <string name="permlab_writeOwnerData">"skriv ejerdata"</string>
+    <string name="permdesc_writeOwnerData">"Tillader et program at ændre telefonens ejerdata, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at slette eller ændre ejerdata."</string>
+    <string name="permlab_readOwnerData">"læs ejerdata"</string>
+    <string name="permdesc_readOwnerData">"Tillader et program at læse telefonens ejerdata, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at læse ejerdata."</string>
+    <string name="permlab_readCalendar">"læs kalenderdata"</string>
+    <string name="permdesc_readCalendar">"Tillader et program at læse alle kalenderbegivenheder, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at sende dine kalenderbegivenheder til andre mennesker."</string>
+    <string name="permlab_writeCalendar">"skriv kalenderdata"</string>
+    <string name="permdesc_writeCalendar">"Tillader et program at ændre telefonens kalenderbegivenheder, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at slette eller ændre kalenderdata."</string>
+    <string name="permlab_accessMockLocation">"imiterede placeringskilder til test"</string>
+    <string name="permdesc_accessMockLocation">"Opret imiterede placeringskilder til testning. Ondsindede programmer kan bruge dette til at tilsidesætte den returnerede placering og/eller status fra rigtige placeringskilder som f.eks. GPS eller netværksudbydere."</string>
+    <string name="permlab_accessLocationExtraCommands">"få adgang til ekstra kommandoer for placeringsudbyder"</string>
+    <string name="permdesc_accessLocationExtraCommands">"Få adgang til ekstra kommandoer fra placeringsudbyder. Ondsindede programmer kan bruge dette til at gribe ind i driften af GPS\'en eller andre placeringskilder."</string>
+    <!-- no translation found for permlab_installLocationProvider (6578101199825193873) -->
+    <skip />
+    <!-- no translation found for permdesc_installLocationProvider (5449175116732002106) -->
+    <skip />
+    <string name="permlab_accessFineLocation">"fin (GPS) placering"</string>
+    <string name="permdesc_accessFineLocation">"Få adgang til gode placeringskilder, som f.eks. Global Positioning System på telefonen, når det er tilgængeligt. Ondsindede programmer kan bruge dette til at finde ud af, hvor du er og kan eventuelt bruge yderligere batterikapacitet."</string>
+    <string name="permlab_accessCoarseLocation">"grov (netværksbaseret) placering"</string>
+    <string name="permdesc_accessCoarseLocation">"Få adgang til grove placeringskilder som f.eks. den mobile netværksdatabase for at finde en omtrentlig placering for telefonen, hvor det er muligt. Ondsindede programmer kan bruge dette til at finde ud af, hvor du omtrent er."</string>
+    <string name="permlab_accessSurfaceFlinger">"få adgang til SurfaceFlinger"</string>
+    <string name="permdesc_accessSurfaceFlinger">"Tillader et program at bruge SurfaceFlinger-funktioner på lavt niveau."</string>
+    <string name="permlab_readFrameBuffer">"læs rammebuffer"</string>
+    <string name="permdesc_readFrameBuffer">"Tillader et program at læse/bruge indholdet fra rammebufferen."</string>
+    <string name="permlab_modifyAudioSettings">"skift dine lydindstillinger"</string>
+    <string name="permdesc_modifyAudioSettings">"Tillader et program at ændre globale lydindstillinger som f.eks. lydstyrke og kanalisering."</string>
+    <string name="permlab_recordAudio">"optag lyd"</string>
+    <string name="permdesc_recordAudio">"Tillader et program at få adgang til lydregistreringsstien."</string>
+    <string name="permlab_camera">"tag billeder"</string>
+    <string name="permdesc_camera">"Tillader programmet at tage billeder med kameraet. Dette tillader programmet til hver en tid at indsamle de billeder, kameraet ser."</string>
+    <string name="permlab_brick">"deaktiver telefonen permanent"</string>
+    <string name="permdesc_brick">"Tillader programmet at deaktivere hele telefonen permanent. Dette er meget farligt."</string>
+    <string name="permlab_reboot">"tving telefon til at genstarte"</string>
+    <string name="permdesc_reboot">"Tillader programmet at tvinge telefonen til at genstarte."</string>
+    <string name="permlab_mount_unmount_filesystems">"monter eller demonter filsystemer"</string>
+    <string name="permdesc_mount_unmount_filesystems">"Tillader programmet at montere eller demontere filsystemer til flytbar lagring."</string>
+    <string name="permlab_mount_format_filesystems">"formater ekstern lagring"</string>
+    <string name="permdesc_mount_format_filesystems">"Tillader et program at formatere flytbar lagring."</string>
+    <string name="permlab_vibrate">"kontroller vibrator"</string>
+    <string name="permdesc_vibrate">"Lader programmet kontrollere vibratoren."</string>
+    <string name="permlab_flashlight">"kontroller lommelygte"</string>
+    <string name="permdesc_flashlight">"Tillader programmet at kontrollere lommelygten."</string>
+    <string name="permlab_hardware_test">"test hardware"</string>
+    <string name="permdesc_hardware_test">"Tillader et program at kontrollere forskellige perifere enheder med det formål at teste hardwaren."</string>
+    <string name="permlab_callPhone">"ring direkte op til telefonnumre"</string>
+    <string name="permdesc_callPhone">"Tillader programmet at ringe til telefonnumre uden din indgriben. Ondsindede programmer kan forårsage uventede opkald på din telefonregning. Vær opmærksom på, at det ikke tillader programmet at ringe til nødnumre."</string>
+    <string name="permlab_callPrivileged">"ring direkte op til alle telefonnumre"</string>
+    <string name="permdesc_callPrivileged">"Tillader programmet at ringe til alle telefonnumre inklusive nødnumre uden din indgriben. Ondsindede programmer kan eventuelt foretage unødvendige og ulovlige opkald til nødtjenester."</string>
+    <string name="permlab_locationUpdates">"kontroller meddelelser om placeringsopdatering"</string>
+    <string name="permdesc_locationUpdates">"Tillader aktivering/deaktivering af placeringsdata fra radioen. Ikke til brug til normale programmer."</string>
+    <string name="permlab_checkinProperties">"egenskaber for adgangskontrol"</string>
+    <string name="permdesc_checkinProperties">"Tillader læse/skrive-adgang til egenskaber, der er uploadet af kontroltjenesten. Ikke til brug til normale programmer."</string>
+    <string name="permlab_bindGadget">"vælg widgets"</string>
+    <string name="permdesc_bindGadget">"Tillader programmet at fortælle systemet, hvilke widgets der kan bruges af hvilke programmer. Med denne tilladelse kan programmer give adgang til personlige data til andre programmer. Ikke til brug til normale programmer."</string>
+    <string name="permlab_modifyPhoneState">"rediger telefontilstand"</string>
+    <string name="permdesc_modifyPhoneState">"Tillader programmet at kontrollere enhedens telefonfunktioner. Et program med denne tilladelse kan skifte netværk, slå telefonens radio til og fra og lignende uden nogensinde at underrette dig."</string>
+    <string name="permlab_readPhoneState">"læs telefontilstand"</string>
+    <string name="permdesc_readPhoneState">"Tillader programmet at få adgang til enhedens telefonfunktioner. Et program med denne tilladelse kan afgøre denne telefons nummer, om et opkald er aktivt, nummeret som opkaldet er forbundet til osv."</string>
+    <string name="permlab_wakeLock">"afhold telefonen fra at gå i dvale"</string>
+    <string name="permdesc_wakeLock">"Tillader et program at forhindre telefonen i at gå i dvale."</string>
+    <string name="permlab_devicePower">"Tænd eller sluk for telefonen"</string>
+    <string name="permdesc_devicePower">"Tillader programmet at slå telefonen til eller fra."</string>
+    <string name="permlab_factoryTest">"kør i fabriksindstillet testtilstand"</string>
+    <string name="permdesc_factoryTest">"Kør som en producenttest på lavt niveau. Giver fuld adgang til telefonens hardware. Kun tilgængeligt når en telefon kører i producenttesttilstand."</string>
+    <string name="permlab_setWallpaper">"angiv tapet"</string>
+    <string name="permdesc_setWallpaper">"Tillader programmet at opsætte systemets tapet."</string>
+    <string name="permlab_setWallpaperHints">"opsæt tip til tapetstørrelse"</string>
+    <string name="permdesc_setWallpaperHints">"Tillader programmet at opsætte størrelsestip for systemets tapet."</string>
+    <string name="permlab_masterClear">"nulstil system til fabriksstandarder"</string>
+    <string name="permdesc_masterClear">"Tillader et program fuldstændig at nulstille systemet til fabriksindstillingerne, slette alle data, konfigurationen og installerede programmer."</string>
+    <string name="permlab_setTimeZone">"indstil tidszone"</string>
+    <string name="permdesc_setTimeZone">"Tillader et program at ændre telefonens tidszone."</string>
+    <string name="permlab_getAccounts">"opdag kendte konti"</string>
+    <string name="permdesc_getAccounts">"Tillader et program at hente listen over konti, der er kendt af telefonen."</string>
+    <string name="permlab_accessNetworkState">"vis netværkstilstand"</string>
+    <string name="permdesc_accessNetworkState">"Tillader et program at vise tilstanden for alle netværk."</string>
+    <string name="permlab_createNetworkSockets">"Fuld internetadgang"</string>
+    <string name="permdesc_createNetworkSockets">"Tillader et program at oprette netværks-sockets."</string>
+    <string name="permlab_writeApnSettings">"skriv indstillinger for adgangspunktnavn"</string>
+    <string name="permdesc_writeApnSettings">"Tillader et program at ændre APN-indstillingerne, som f.eks. enhver APNs Proxy og Port."</string>
+    <string name="permlab_changeNetworkState">"skift netværksforbindelse"</string>
+    <string name="permdesc_changeNetworkState">"Tillader et program at ændre netværksforbindelsens tilstand."</string>
+    <string name="permlab_changeBackgroundDataSetting">"skift brugerindstilling for baggrundsdata"</string>
+    <string name="permdesc_changeBackgroundDataSetting">"Tillader et program at ændre brugerindstillingerne for baggrundsdata."</string>
+    <string name="permlab_accessWifiState">"vis Wi-Fi-tilstand"</string>
+    <string name="permdesc_accessWifiState">"Tillader et program at vise oplysninger om Wi-Fi-tilstanden."</string>
+    <string name="permlab_changeWifiState">"skift Wi-Fi-tilstand"</string>
+    <string name="permdesc_changeWifiState">"Tillader et program at oprette og afbryde forbindelse fra Wi-Fi-adgangspunkter og foretage ændringer til konfigurerede Wi-Fi-netværk."</string>
+    <!-- no translation found for permlab_changeWifiMulticastState (1368253871483254784) -->
+    <skip />
+    <!-- no translation found for permdesc_changeWifiMulticastState (8199464507656067553) -->
+    <skip />
+    <string name="permlab_bluetoothAdmin">"bluetooth-administration"</string>
+    <string name="permdesc_bluetoothAdmin">"Tillader et program at konfigurere den lokale Bluetooth-telefon samt at opdage og parre med fjerne enheder."</string>
+    <string name="permlab_bluetooth">"opret Bluetooth-forbindelser"</string>
+    <string name="permdesc_bluetooth">"Tillader et program at vise konfigurationen af den lokale Bluetooth-telefon samt at oprette og acceptere forbindelse med parrede enheder."</string>
+    <string name="permlab_disableKeyguard">"deaktiver tastaturlås"</string>
+    <string name="permdesc_disableKeyguard">"Tillader et program at deaktivere tastaturlåsen og al associeret adgangskodesikkerhed. Et legitimt eksempel på dette er, at telefonen deaktiverer tastaturlåsen, når der modtages et indgående telefonopkald, og genaktiverer tastaturlåsen, når opkaldet er afsluttet."</string>
+    <string name="permlab_readSyncSettings">"læs synkroniseringsindstillinger"</string>
+    <string name="permdesc_readSyncSettings">"Tillader et program at læse synkroniseringsindstillingerne, som f.eks. om synkronisering er aktiveret for kontaktpersoner."</string>
+    <string name="permlab_writeSyncSettings">"skriv synkroniseringsindstillinger"</string>
+    <string name="permdesc_writeSyncSettings">"Tillader et program at ændre synkroniseringsindstillingerne, som f.eks. om synkronisering er aktiveret for kontaktpersoner."</string>
+    <string name="permlab_readSyncStats">"læs synkroniseringsstatistikker"</string>
+    <string name="permdesc_readSyncStats">"Tillader et program at læse synkroniseringsstatistikkerne, som f.eks. oversigt over forekomne synkroniseringer."</string>
+    <string name="permlab_subscribedFeedsRead">"læs abonnerede feeds"</string>
+    <string name="permdesc_subscribedFeedsRead">"Lader et program få detaljer om de aktuelt synkroniserede feeds."</string>
+    <string name="permlab_subscribedFeedsWrite">"skriv abonnerede feeds"</string>
+    <string name="permdesc_subscribedFeedsWrite">"Tillader et program at ændre dine aktuelle synkroniserede feeds. Dette kan muligvis lade et ondsindet program ændre dine synkroniserede feeds."</string>
+    <string name="permlab_readDictionary">"læs brugerdefineret ordbog"</string>
+    <string name="permdesc_readDictionary">"Tillader et program at læse alle private ord, navne og sætninger, som brugeren eventuelt har gemt i brugerordbogen."</string>
+    <string name="permlab_writeDictionary">"skriv til den brugerdefinerede mappe"</string>
+    <string name="permdesc_writeDictionary">"Tillader et program at skrive nye ord i brugermappen."</string>
+    <!-- no translation found for permlab_sdcardWrite (8079403759001777291) -->
+    <skip />
+    <!-- no translation found for permdesc_sdcardWrite (6643963204976471878) -->
+    <skip />
+  <string-array name="phoneTypes">
+    <item>"Start"</item>
+    <item>"Mobil"</item>
+    <item>"Arbejde"</item>
+    <item>"Arbejdsfax"</item>
+    <item>"Hjemmefax"</item>
+    <item>"Personsøger"</item>
+    <item>"Andet"</item>
+    <item>"Tilpasset"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item>"Start"</item>
+    <item>"Arbejde"</item>
+    <item>"Anden"</item>
+    <item>"Tilpasset"</item>
+  </string-array>
+    <string name="mobileEmailTypeName">"Mobil"</string>
+  <string-array name="postalAddressTypes">
+    <item>"Start"</item>
+    <item>"Arbejde"</item>
+    <item>"Anden"</item>
+    <item>"Tilpasset"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item>"Start"</item>
+    <item>"Arbejde"</item>
+    <item>"Anden"</item>
+    <item>"Tilpasset"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item>"Arbejde"</item>
+    <item>"Anden"</item>
+    <item>"Tilpasset"</item>
+  </string-array>
+  <string-array name="imProtocols">
+    <item>"AIM"</item>
+    <item>"Windows Live"</item>
+    <item>"Yahoo"</item>
+    <item>"Skype"</item>
+    <item>"QQ"</item>
+    <item>"Google Talk"</item>
+    <item>"ICQ"</item>
+    <item>"Jabber"</item>
+  </string-array>
+    <string name="keyguard_password_enter_pin_code">"Indtast PIN-kode"</string>
+    <string name="keyguard_password_wrong_pin_code">"Forkert PIN-kode!"</string>
+    <string name="keyguard_label_text">"Tryk på Menu og dernæst på 0 for at låse op."</string>
+    <string name="emergency_call_dialog_number_for_display">"Nødnummer"</string>
+    <string name="lockscreen_carrier_default">"(Ingen tjeneste)"</string>
+    <string name="lockscreen_screen_locked">"Skærmen er låst."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled">"Tryk på Menu for at låse op eller foretage et nødopkald."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled">"Tryk på Menu for at låse op."</string>
+    <string name="lockscreen_pattern_instructions">"Tegn mønster til at låse op"</string>
+    <string name="lockscreen_emergency_call">"Nødopkald"</string>
+    <string name="lockscreen_pattern_correct">"Rigtigt!"</string>
+    <string name="lockscreen_pattern_wrong">"Beklager! Prøv igen"</string>
+    <string name="lockscreen_plugged_in">"Oplader (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
+    <skip />
+    <string name="lockscreen_low_battery">"Tilslut din oplader."</string>
+    <string name="lockscreen_missing_sim_message_short">"Der er ikke noget SIM-kort."</string>
+    <string name="lockscreen_missing_sim_message">"Der er ikke noget SIM-kort i telefonen."</string>
+    <string name="lockscreen_missing_sim_instructions">"Indsæt et SIM-kort."</string>
+    <string name="lockscreen_network_locked_message">"Netværket er låst"</string>
+    <string name="lockscreen_sim_puk_locked_message">"SIM-kort er låst med PUK-koden."</string>
+    <string name="lockscreen_sim_puk_locked_instructions">"Se brugervejledningen, eller kontakt kundeservice."</string>
+    <string name="lockscreen_sim_locked_message">"SIM-kortet er låst."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message">"Låser SIM-kortet op ..."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message">"Du har tegnet dit mønster til at låse op forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. "\n\n"Prøv igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin">"Du har tegnet dit mønster til at låse op forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> forsøg mere vil du blive bedt om at låse din telefon op ved hjælp af dit Google-login"\n\n" Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown">"Prøv igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
+    <string name="lockscreen_forgot_pattern_button_text">"Har du glemt mønster?"</string>
+    <string name="lockscreen_glogin_too_many_attempts">"For mange mønsterforsøg!"</string>
+    <string name="lockscreen_glogin_instructions">"For at låse op skal du logge ind med din Google-konto"</string>
+    <string name="lockscreen_glogin_username_hint">"Brugernavn (e-mail)"</string>
+    <string name="lockscreen_glogin_password_hint">"Adgangskode"</string>
+    <string name="lockscreen_glogin_submit_button">"Log ind"</string>
+    <string name="lockscreen_glogin_invalid_input">"Ugyldigt brugernavn eller ugyldig adgangskode."</string>
+    <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
+    <skip />
+    <string name="status_bar_no_notifications_title">"Ingen meddelelser"</string>
+    <string name="status_bar_ongoing_events_title">"Løbende"</string>
+    <string name="status_bar_latest_events_title">"Meddelelser"</string>
+    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="battery_status_charging">"Oplader ..."</string>
+    <string name="battery_low_title">"Forbind oplader"</string>
+    <string name="battery_low_subtitle">"Batteriet er ved at blive tomt:"</string>
+    <string name="battery_low_percent_format">"mindre end <xliff:g id="NUMBER">%d%%</xliff:g> tilbage."</string>
+    <!-- no translation found for battery_low_why (7655196144309694753) -->
+    <skip />
+    <string name="factorytest_failed">"Fabrikstest mislykkedes"</string>
+    <string name="factorytest_not_system">"Handlingen FACTORY_TEST understøttes kun af pakker installeret i /system/app."</string>
+    <string name="factorytest_no_action">"Der blev ikke fundet nogen pakke, som leverer handlingen FACTORY_TEST."</string>
+    <string name="factorytest_reboot">"Genstart"</string>
+    <string name="js_dialog_title">"Siden på \'<xliff:g id="TITLE">%s</xliff:g>\' siger:"</string>
+    <string name="js_dialog_title_default">"Javascript"</string>
+    <string name="js_dialog_before_unload">"Naviger væk fra denne side?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n" Vælg OK for at fortsætte eller Annuller for at blive på den aktuelle side."</string>
+    <string name="save_password_label">"Bekræft"</string>
+    <!-- no translation found for permlab_readHistoryBookmarks (1284843728203412135) -->
+    <skip />
+    <!-- no translation found for permdesc_readHistoryBookmarks (4981489815467617191) -->
+    <skip />
+    <!-- no translation found for permlab_writeHistoryBookmarks (9009434109836280374) -->
+    <skip />
+    <!-- no translation found for permdesc_writeHistoryBookmarks (945571990357114950) -->
+    <skip />
+    <string name="save_password_message">"Ønsker du, at browseren skal huske denne adgangskode?"</string>
+    <string name="save_password_notnow">"Ikke nu"</string>
+    <string name="save_password_remember">"Husk"</string>
+    <string name="save_password_never">"Aldrig"</string>
+    <string name="open_permission_deny">"Du har ikke tilladelse til at åbne denne side."</string>
+    <string name="text_copied">"Teksten er kopieret til udklipsholderen."</string>
+    <string name="more_item_label">"Flere"</string>
+    <string name="prepend_shortcut_label">"Menu+"</string>
+    <string name="menu_space_shortcut_label">"plads"</string>
+    <string name="menu_enter_shortcut_label">"indtast"</string>
+    <string name="menu_delete_shortcut_label">"slet"</string>
+    <string name="search_go">"Søg"</string>
+    <string name="oneMonthDurationPast">"For 1 måned siden"</string>
+    <string name="beforeOneMonthDurationPast">"Før for 1 måned siden"</string>
+  <plurals name="num_seconds_ago">
+    <item quantity="one">"For 1 sekund siden"</item>
+    <item quantity="other">"For <xliff:g id="COUNT">%d</xliff:g> sekunder siden"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one">"For 1 minut siden"</item>
+    <item quantity="other">"For <xliff:g id="COUNT">%d</xliff:g> minutter siden"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one">"For 1 time siden"</item>
+    <item quantity="other">"For <xliff:g id="COUNT">%d</xliff:g> timer siden"</item>
+  </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one">"i går"</item>
+    <item quantity="other">"For <xliff:g id="COUNT">%d</xliff:g> dage siden"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one">"om 1 sekund"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one">"om 1 minut"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> minutter"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one">"om 1 time"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> timer"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one">"i morgen"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> dage"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one">"For 1 sek. siden"</item>
+    <item quantity="other">"For <xliff:g id="COUNT">%d</xliff:g> sek. siden"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one">"For 1 min. siden"</item>
+    <item quantity="other">"For <xliff:g id="COUNT">%d</xliff:g> min. siden"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one">"For 1 time siden"</item>
+    <item quantity="other">"For <xliff:g id="COUNT">%d</xliff:g> timer siden"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one">"i går"</item>
+    <item quantity="other">"For <xliff:g id="COUNT">%d</xliff:g> dage siden"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one">"om 1 sek."</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one">"om 1 min."</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> min."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one">"om 1 time"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> timer"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one">"i morgen"</item>
+    <item quantity="other">"om <xliff:g id="COUNT">%d</xliff:g> dage"</item>
+  </plurals>
+    <string name="preposition_for_date">"den %s"</string>
+    <string name="preposition_for_time">"kl. %s"</string>
+    <string name="preposition_for_year">"i %s"</string>
+    <string name="day">"dag"</string>
+    <string name="days">"dage"</string>
+    <string name="hour">"time"</string>
+    <string name="hours">"timer"</string>
+    <string name="minute">"min."</string>
+    <string name="minutes">"min."</string>
+    <string name="second">"sek."</string>
+    <string name="seconds">"sek."</string>
+    <string name="week">"uge"</string>
+    <string name="weeks">"uger"</string>
+    <string name="year">"år"</string>
+    <string name="years">"år"</string>
+    <string name="every_weekday">"Hver ugedag (man.-fre.)"</string>
+    <string name="daily">"Dagligt"</string>
+    <string name="weekly">"Ugentlig hver <xliff:g id="DAY">%s</xliff:g>"</string>
+    <string name="monthly">"Månedligt"</string>
+    <string name="yearly">"Årligt"</string>
+    <string name="VideoView_error_title">"Video kan ikke afspilles"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback">"Beklager! Denne video er ikke gyldig til streaming på denne enhed."</string>
+    <string name="VideoView_error_text_unknown">"Beklager! Denne video kan ikke afspilles."</string>
+    <string name="VideoView_error_button">"OK"</string>
+    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="noon">"middag"</string>
+    <string name="Noon">"Middag"</string>
+    <string name="midnight">"midnat"</string>
+    <string name="Midnight">"Midnat"</string>
+    <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
+    <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
+    <string name="selectAll">"Vælg alle"</string>
+    <string name="selectText">"Vælg tekst"</string>
+    <string name="stopSelectingText">"Stands med at vælge tekst"</string>
+    <string name="cut">"Klip"</string>
+    <string name="cutAll">"Klip alle"</string>
+    <string name="copy">"Kopier"</string>
+    <string name="copyAll">"Kopier alle"</string>
+    <string name="paste">"Indsæt"</string>
+    <string name="copyUrl">"Kopier webadresse"</string>
+    <string name="inputMethod">"Inputmetode"</string>
+    <string name="addToDictionary">"Føj \"%s\" til ordbog"</string>
+    <string name="editTextMenuTitle">"Rediger tekst"</string>
+    <string name="low_internal_storage_view_title">"Der er ikke så meget plads tilbage"</string>
+    <string name="low_internal_storage_view_text">"Der er næsten ikke mere plads på telefonen."</string>
+    <string name="ok">"OK"</string>
+    <string name="cancel">"Annuller"</string>
+    <string name="yes">"OK"</string>
+    <string name="no">"Annuller"</string>
+    <string name="dialog_alert_title">"Bemærk"</string>
+    <string name="capital_on">"TIL"</string>
+    <string name="capital_off">"FRA"</string>
+    <string name="whichApplication">"Afslut handling ved hjælp af"</string>
+    <string name="alwaysUse">"Brug som standard til denne handling."</string>
+    <string name="clearDefaultHintMsg">"Ryd standard i Startindstillinger &gt; Programmer &gt; Administrer programmer."</string>
+    <string name="chooseActivity">"Vælg en handling"</string>
+    <string name="noApplications">"Der er ingen programmer, der kan foretage denne handling."</string>
+    <string name="aerr_title">"Beklager!"</string>
+    <string name="aerr_application">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) er standset uventet. Prøv igen."</string>
+    <string name="aerr_process">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> er standset uventet. Prøv igen."</string>
+    <string name="anr_title">"Beklager!"</string>
+    <string name="anr_activity_application">"Aktivitet <xliff:g id="ACTIVITY">%1$s</xliff:g> (i programmet <xliff:g id="APPLICATION">%2$s</xliff:g>) svarer ikke."</string>
+    <string name="anr_activity_process">"Aktivitet <xliff:g id="ACTIVITY">%1$s</xliff:g> (igangværende <xliff:g id="PROCESS">%2$s</xliff:g>) svarer ikke."</string>
+    <string name="anr_application_process">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (igangværende <xliff:g id="PROCESS">%2$s</xliff:g>) svarer ikke."</string>
+    <string name="anr_process">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> svarer ikke."</string>
+    <string name="force_close">"Tving til at lukke"</string>
+    <!-- no translation found for report (4060218260984795706) -->
+    <skip />
+    <string name="wait">"Vent"</string>
+    <string name="debug">"Fejlretning"</string>
+    <string name="sendText">"Vælg en handling for teksten"</string>
+    <string name="volume_ringtone">"Opkaldslydstyrke"</string>
+    <string name="volume_music">"Medielydstyrke"</string>
+    <string name="volume_music_hint_playing_through_bluetooth">"Spiller gennem Bluetooth"</string>
+    <string name="volume_call">"Opkaldslydstyrke"</string>
+    <string name="volume_bluetooth_call">"Bluetooth-lydstyrke under opkald"</string>
+    <string name="volume_alarm">"Alarmlydstyrke"</string>
+    <string name="volume_notification">"Meddelelseslydstyrke"</string>
+    <string name="volume_unknown">"Lydstyrke"</string>
+    <string name="ringtone_default">"Standardringetone"</string>
+    <string name="ringtone_default_with_actual">"Standardringetone (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_silent">"Lydløs"</string>
+    <string name="ringtone_picker_title">"Ringetoner"</string>
+    <string name="ringtone_unknown">"Ukendt ringetone"</string>
+  <plurals name="wifi_available">
+    <item quantity="one">"Wi-Fi-netværk tilgængeligt"</item>
+    <item quantity="other">"Tilgængelige Wi-Fi-netværk"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one">"Åbent Wi-Fi-netværk tilgængeligt"</item>
+    <item quantity="other">"Der er åbne Wi-Fi-netværk tilgængelige"</item>
+  </plurals>
+    <string name="select_character">"Indsæt tegn"</string>
+    <string name="sms_control_default_app_name">"Ukendt program"</string>
+    <string name="sms_control_title">"Sender SMS-beskeder"</string>
+    <string name="sms_control_message">"Der sendes et stort antal SMS-beskeder. Vælg \"OK\" for at fortsætte eller \"Annuller\" for at stoppe med at sende."</string>
+    <string name="sms_control_yes">"OK"</string>
+    <string name="sms_control_no">"Annuller"</string>
+    <string name="date_time_set">"Indstil"</string>
+    <string name="default_permission_group">"Standard"</string>
+    <string name="no_permissions">"Der kræves ingen tilladelser"</string>
+    <string name="perms_hide"><b>"Skjul"</b></string>
+    <string name="perms_show_all"><b>"Vis alle"</b></string>
+    <string name="googlewebcontenthelper_loading">"Indlæser ..."</string>
+    <string name="usb_storage_title">"USB forbundet"</string>
+    <string name="usb_storage_message">"Du har forbundet din telefon til din computer via USB. Vælg \"Monter\", hvis du ønsker at kopiere filer mellem din computer og din telefons SD-kort."</string>
+    <string name="usb_storage_button_mount">"Monter"</string>
+    <string name="usb_storage_button_unmount">"Indsæt ikke"</string>
+    <string name="usb_storage_error_message">"Der opstod et problem med at bruge dit SD-kort til USB-lagring."</string>
+    <string name="usb_storage_notification_title">"USB forbundet"</string>
+    <string name="usb_storage_notification_message">"Vælg for at kopiere filer til/fra din computer."</string>
+    <string name="usb_storage_stop_notification_title">"Slå USB-lagringen fra"</string>
+    <string name="usb_storage_stop_notification_message">"Vælg for at slå USB-lagring fra."</string>
+    <string name="usb_storage_stop_title">"Slå USB-lagring fra"</string>
+    <string name="usb_storage_stop_message">"Inden du slår USB-lagringen fra, skal du sørge for, at du demonterer USB-værten. Vælg \"Slå fra\" for at slå USB-lagringen fra."</string>
+    <string name="usb_storage_stop_button_mount">"Slå fra"</string>
+    <string name="usb_storage_stop_button_unmount">"Annuller"</string>
+    <string name="usb_storage_stop_error_message">"Der opstod et problem med at slå USB-lagringen fra. Sørg for, at du har demonteret USB-værten, og prøv så igen."</string>
+    <string name="extmedia_format_title">"Formater SD-kort"</string>
+    <string name="extmedia_format_message">"Er du sikker på, du ønsker at formatere SD-kortet? Alle data på kortet mistes."</string>
+    <string name="extmedia_format_button_format">"Formater"</string>
+    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
+    <skip />
+    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
+    <skip />
+    <string name="select_input_method">"Vælg inputmetode"</string>
+    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style"><u>"kandidater"</u></string>
+    <string name="ext_media_checking_notification_title">"Forbereder SD-kort"</string>
+    <!-- no translation found for ext_media_checking_notification_message (8287319882926737053) -->
+    <skip />
+    <string name="ext_media_nofs_notification_title">"Blankt SD-kort"</string>
+    <!-- no translation found for ext_media_nofs_notification_message (3817704088027829380) -->
+    <skip />
+    <string name="ext_media_unmountable_notification_title">"Beskadiget SD-kort"</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (6902531775948238989) -->
+    <skip />
+    <string name="ext_media_badremoval_notification_title">"SD-kort blev uventet fjernet"</string>
+    <string name="ext_media_badremoval_notification_message">"Demonter SD-kortet inden fjernelse for at undgå tab af data."</string>
+    <string name="ext_media_safe_unmount_notification_title">"SD-kortet kan fjernes sikkert"</string>
+    <!-- no translation found for ext_media_safe_unmount_notification_message (568841278138377604) -->
+    <skip />
+    <string name="ext_media_nomedia_notification_title">"SD-kortet er fjernet"</string>
+    <!-- no translation found for ext_media_nomedia_notification_message (3870120652983659641) -->
+    <skip />
+    <string name="activity_list_empty">"Der blev ikke fundet nogen matchende aktiviteter"</string>
+    <string name="permlab_pkgUsageStats">"opdater brugerstatistikker for komponenter"</string>
+    <string name="permdesc_pkgUsageStats">"Tillader ændring af indsamlede brugerstatistikker for komponenter. Ikke til brug til normale programmer."</string>
+    <string name="tutorial_double_tap_to_zoom_message_short">"Tryk to gange for zoomkontrol"</string>
+    <string name="gadget_host_error_inflating">"Der opstod en fejl under forøgelsen af widgeten"</string>
+    <string name="ime_action_go">"Gå"</string>
+    <string name="ime_action_search">"Søg"</string>
+    <string name="ime_action_send">"Send"</string>
+    <string name="ime_action_next">"Næste"</string>
+    <string name="ime_action_done">"Færdig"</string>
+    <string name="ime_action_default">"Udfør"</string>
+    <string name="dial_number_using">"Ring til nummer"\n"ved hjælp af <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using">"Opret kontaktperson"\n"ved hjælp af <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <!-- no translation found for accessibility_compound_button_selected (5612776946036285686) -->
+    <skip />
+    <!-- no translation found for accessibility_compound_button_unselected (8864512895673924091) -->
+    <skip />
+</resources>

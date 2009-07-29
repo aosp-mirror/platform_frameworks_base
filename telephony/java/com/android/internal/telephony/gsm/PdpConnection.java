@@ -22,6 +22,7 @@ import android.util.EventLog;
 import android.util.Log;
 
 import com.android.internal.telephony.CommandException;
+import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataLink;
 import com.android.internal.telephony.Phone;
@@ -83,7 +84,8 @@ public class PdpConnection extends DataConnection {
         lastFailCause = FailCause.NONE;
         receivedDisconnectReq = false;
 
-        phone.mCM.setupDataCall(Integer.toString(RILConstants.GSM_PHONE), null, apn.apn, apn.user,
+        phone.mCM.setupDataCall(Integer.toString(RILConstants.GSM_PHONE),
+                Integer.toString(RILConstants.DATA_PROFILE_DEFAULT), apn.apn, apn.user,
                 apn.password, obtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE));
     }
 

@@ -41,6 +41,13 @@ typedef struct {
     int key_len;
 } PKEY_STORE;
 
+typedef struct {
+    PKCS12  *p12;
+    EVP_PKEY *pkey;
+    X509 *cert;
+    STACK_OF(X509) *certs;
+} PKCS12_KEYSTORE;
+
 #define PKEY_STORE_free(x) { \
     if(x.pkey) EVP_PKEY_free(x.pkey); \
     if(x.public_key) free(x.public_key); \
@@ -49,8 +56,14 @@ typedef struct {
 #define nelem(x) (sizeof (x) / sizeof *(x))
 
 int gen_csr(int bits, const char *organizations, char reply[REPLY_MAX]);
+PKCS12_KEYSTORE *get_pkcs12_keystore_handle(const char *buf, int bufLen,
+                                            const char *passwd);
+int get_pkcs12_certificate(PKCS12_KEYSTORE *p12store, char *buf, int size);
+int get_pkcs12_private_key(PKCS12_KEYSTORE *p12store, char *buf, int size);
+int pop_pkcs12_certs_stack(PKCS12_KEYSTORE *p12store, char *buf, int size);
+void free_pkcs12_keystore(PKCS12_KEYSTORE *p12store);
 int is_pkcs12(const char *buf, int bufLen);
-X509*    parse_cert(const char *buf, int bufLen);
+X509 *parse_cert(const char *buf, int bufLen);
 int get_cert_name(X509 *cert, char *buf, int size);
 int get_issuer_name(X509 *cert, char *buf, int size);
 int is_ca_cert(X509 *cert);

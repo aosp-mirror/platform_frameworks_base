@@ -810,17 +810,25 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 // Now propagate the newly-backed-up data to the transport
                 if (success) {
-                    if (DEBUG) Log.v(TAG, "doBackup() success; calling transport");
-                    backupData =
-                        ParcelFileDescriptor.open(backupDataName, ParcelFileDescriptor.MODE_READ_ONLY);
-                    if (!transport.performBackup(packInfo, backupData)) {
-                        // STOPSHIP TODO: handle errors
-                        Log.e(TAG, "Backup failure in performBackup()");
+                    if (DEBUG) Log.v(TAG, "doBackup() success");
+                    if (backupDataName.length() > 0) {
+                        backupData =
+                            ParcelFileDescriptor.open(backupDataName,
+                                    ParcelFileDescriptor.MODE_READ_ONLY);
+                        if (!transport.performBackup(packInfo, backupData)) {
+                            // STOPSHIP TODO: handle errors
+                            Log.e(TAG, "Backup failure in performBackup()");
+                        }
+                    } else {
+                        if (DEBUG) {
+                            Log.i(TAG, "no backup data written; not calling transport");
+                        }
                     }
 
-                    // !!! TODO: After successful transport, delete the now-stale data
-                    // and juggle the files so that next time the new state is passed
-                    //backupDataName.delete();
+                    // After successful transport, delete the now-stale data
+                    // and juggle the files so that next time we supply the agent
+                    // with the new state file it just created.
+                    backupDataName.delete();
                     newStateName.renameTo(savedStateName);
                 }
             } catch (Exception e) {

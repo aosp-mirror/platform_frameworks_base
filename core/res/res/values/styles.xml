@@ -348,7 +348,8 @@
     </style>
 
     <style name="Widget.TextView.ListSeparator.White">
-        <item name="android:textColor">?textColorSecondaryInverse</item>
+        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:background">@android:drawable/light_header</item>
     </style>
 
     <style name="Widget.EditText">

@@ -720,7 +720,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     public void getFocusedRect(Rect r) {
         View view = getSelectedView();
-        if (view != null) {
+        if (view != null && view.getParent() == this) {
             // the focused rectangle of the selected view offset into the
             // coordinate space of this view.
             view.getFocusedRect(r);

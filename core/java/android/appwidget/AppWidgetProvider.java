@@ -64,11 +64,9 @@ public class AppWidgetProvider extends BroadcastReceiver {
         }
         else if (AppWidgetManager.ACTION_APPWIDGET_DELETED.equals(action)) {
             Bundle extras = intent.getExtras();
-            if (extras != null) {
-                int[] appWidgetIds = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);
-                if (appWidgetIds != null && appWidgetIds.length > 0) {
-                    this.onDeleted(context, appWidgetIds);
-                }
+            if (extras != null && extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_ID)) {
+                final int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);
+                this.onDeleted(context, new int[] { appWidgetId });
             }
         }
         else if (AppWidgetManager.ACTION_APPWIDGET_ENABLED.equals(action)) {

@@ -24,8 +24,10 @@ import static android.os.LocalPowerManager.TOUCH_UP_EVENT;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
+import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -53,6 +55,7 @@ import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -100,6 +103,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
@@ -170,6 +174,11 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
      * value to another, when no window animation is driving it.
      */
     static final int DEFAULT_DIM_DURATION = 200;
+
+    /** Amount of time (in milliseconds) to animate the fade-in-out transition for
+     * compatible windows.
+     */
+    static final int DEFAULT_FADE_IN_OUT_DURATION = 400;
 
     /** Adjustment to time to perform a dim, to make it more dramatic.
      */
@@ -324,12 +333,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     IInputMethodManager mInputMethodManager;
 
     SurfaceSession mFxSession;
-    Surface mDimSurface;
-    boolean mDimShown;
-    float mDimCurrentAlpha;
-    float mDimTargetAlpha;
-    float mDimDeltaPerMs;
-    long mLastDimAnimTime;
+    private DimAnimator mDimAnimator = null;
     Surface mBlurSurface;
     boolean mBlurShown;
 
@@ -416,8 +420,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
     final Rect mTempRect = new Rect();
 
     final Configuration mTempConfiguration = new Configuration();
-    int screenLayout = Configuration.SCREENLAYOUT_UNDEFINED;
-    
+    int mScreenLayout = Configuration.SCREENLAYOUT_SIZE_UNDEFINED;
+
+    // The frame use to limit the size of the app running in compatibility mode.
+    Rect mCompatibleScreenFrame = new Rect();
+    // The surface used to fill the outer rim of the app running in compatibility mode.
+    Surface mBackgroundFillerSurface = null;
+    boolean mBackgroundFillerShown = false;
+
     public static WindowManagerService main(Context context,
             PowerManagerService pm, boolean haveInputMethods) {
         WMThread thr = new WMThread(context, pm, haveInputMethods);
@@ -1847,44 +1857,51 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         // artifacts when we unfreeze the display if some different animation
         // is running.
         if (!mDisplayFrozen) {
-            int animAttr = 0;
-            switch (transit) {
-                case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
-                    animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
-                    break;
-                case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
-                    animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
-                    break;
-                case WindowManagerPolicy.TRANSIT_TASK_OPEN:
-                    animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
-                    break;
-                case WindowManagerPolicy.TRANSIT_TASK_CLOSE:
-                    animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
-                    break;
-                case WindowManagerPolicy.TRANSIT_TASK_TO_FRONT:
-                    animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_taskToFrontEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_taskToFrontExitAnimation;
-                    break;
-                case WindowManagerPolicy.TRANSIT_TASK_TO_BACK:
-                    animAttr = enter
-                            ? com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation
-                            : com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
-                    break;
+            Animation a;
+            if (lp != null && (lp.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
+                a = new FadeInOutAnimation(enter);
+                if (DEBUG_ANIM) Log.v(TAG,
+                        "applying FadeInOutAnimation for a window in compatibility mode");
+            } else {
+                int animAttr = 0;
+                switch (transit) {
+                    case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
+                        animAttr = enter
+                                ? com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
+                        animAttr = enter
+                                ? com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_TASK_OPEN:
+                        animAttr = enter
+                                ? com.android.internal.R.styleable.WindowAnimation_taskOpenEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_taskOpenExitAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_TASK_CLOSE:
+                        animAttr = enter
+                                ? com.android.internal.R.styleable.WindowAnimation_taskCloseEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_taskCloseExitAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_TASK_TO_FRONT:
+                        animAttr = enter
+                                ? com.android.internal.R.styleable.WindowAnimation_taskToFrontEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_taskToFrontExitAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_TASK_TO_BACK:
+                        animAttr = enter
+                                ? com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
+                        break;
+                }
+                a = loadAnimation(lp, animAttr);
+                if (DEBUG_ANIM) Log.v(TAG, "applyAnimation: wtoken=" + wtoken
+                        + " anim=" + a
+                        + " animAttr=0x" + Integer.toHexString(animAttr)
+                        + " transit=" + transit);
             }
-            Animation a = loadAnimation(lp, animAttr);
-            if (DEBUG_ANIM) Log.v(TAG, "applyAnimation: wtoken=" + wtoken
-                    + " anim=" + a
-                    + " animAttr=0x" + Integer.toHexString(animAttr)
-                    + " transit=" + transit);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = new RuntimeException();
@@ -3738,12 +3755,14 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
         config.orientation = orientation;
         
-        if (screenLayout == Configuration.SCREENLAYOUT_UNDEFINED) {
+        DisplayMetrics dm = new DisplayMetrics();
+        mDisplay.getMetrics(dm);
+        CompatibilityInfo.updateCompatibleScreenFrame(dm, orientation, mCompatibleScreenFrame);
+
+        if (mScreenLayout == Configuration.SCREENLAYOUT_SIZE_UNDEFINED) {
             // Note we only do this once because at this point we don't
             // expect the screen to change in this way at runtime, and want
             // to avoid all of this computation for every config change.
-            DisplayMetrics dm = new DisplayMetrics();
-            mDisplay.getMetrics(dm);
             int longSize = dw;
             int shortSize = dh;
             if (longSize < shortSize) {
@@ -3753,23 +3772,42 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             }
             longSize = (int)(longSize/dm.density);
             shortSize = (int)(shortSize/dm.density);
-            
+
             // These semi-magic numbers define our compatibility modes for
             // applications with different screens.  Don't change unless you
             // make sure to test lots and lots of apps!
             if (longSize < 470) {
                 // This is shorter than an HVGA normal density screen (which
                 // is 480 pixels on its long side).
-                screenLayout = Configuration.SCREENLAYOUT_SMALL;
-            } else if (longSize > 490 && shortSize > 330) {
-                // This is larger than an HVGA normal density screen (which
-                // is 480x320 pixels).
-                screenLayout = Configuration.SCREENLAYOUT_LARGE;
+                mScreenLayout = Configuration.SCREENLAYOUT_SIZE_SMALL
+                        | Configuration.SCREENLAYOUT_LONG_NO;
             } else {
-                screenLayout = Configuration.SCREENLAYOUT_NORMAL;
+                // Is this a large screen?
+                if (longSize > 640 && shortSize >= 480) {
+                    // VGA or larger screens at medium density are the point
+                    // at which we consider it to be a large screen.
+                    mScreenLayout = Configuration.SCREENLAYOUT_SIZE_LARGE;
+                } else {
+                    mScreenLayout = Configuration.SCREENLAYOUT_SIZE_NORMAL;
+                    
+                    // If this screen is wider than normal HVGA, or taller
+                    // than FWVGA, then for old apps we want to run in size
+                    // compatibility mode.
+                    if (shortSize > 321 || longSize > 570) {
+                        mScreenLayout |= Configuration.SCREENLAYOUT_COMPAT_NEEDED;
+                    }
+                }
+                
+                // Is this a long screen?
+                if (((longSize*3)/5) >= (shortSize-1)) {
+                    // Anything wider than WVGA (5:3) is considering to be long.
+                    mScreenLayout |= Configuration.SCREENLAYOUT_LONG_YES;
+                } else {
+                    mScreenLayout |= Configuration.SCREENLAYOUT_LONG_NO;
+                }
             }
         }
-        config.screenLayout = screenLayout;
+        config.screenLayout = mScreenLayout;
         
         config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
         config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
@@ -5845,8 +5883,21 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         public void computeFrameLw(Rect pf, Rect df, Rect cf, Rect vf) {
             mHaveFrame = true;
 
-            final int pw = pf.right-pf.left;
-            final int ph = pf.bottom-pf.top;
+            final Rect container = mContainingFrame;
+            container.set(pf);
+
+            final Rect display = mDisplayFrame;
+            display.set(df);
+
+            if ((mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
+                container.intersect(mCompatibleScreenFrame);
+                if ((mAttrs.flags & FLAG_LAYOUT_NO_LIMITS) == 0) {
+                    display.intersect(mCompatibleScreenFrame);
+                }
+            }
+
+            final int pw = container.right - container.left;
+            final int ph = container.bottom - container.top;
 
             int w,h;
             if ((mAttrs.flags & mAttrs.FLAG_SCALED) != 0) {
@@ -5856,12 +5907,6 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 w = mAttrs.width == mAttrs.FILL_PARENT ? pw : mRequestedWidth;
                 h = mAttrs.height== mAttrs.FILL_PARENT ? ph : mRequestedHeight;
             }
-
-            final Rect container = mContainingFrame;
-            container.set(pf);
-
-            final Rect display = mDisplayFrame;
-            display.set(df);
 
             final Rect content = mContentFrame;
             content.set(cf);
@@ -5882,7 +5927,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
             // Now make sure the window fits in the overall display.
             Gravity.applyDisplay(mAttrs.gravity, df, frame);
-
+            
             // Make sure the content and visible frames are inside of the
             // final window frame.
             if (content.left < frame.left) content.left = frame.left;
@@ -6565,24 +6610,45 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                 return false;
             }
             final Rect frame = shownFrame ? mShownFrame : mFrame;
-            if (frame.left <= 0 && frame.top <= 0
-                    && frame.right >= screenWidth
-                    && frame.bottom >= screenHeight) {
-                return true;
+
+            if ((mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
+                return frame.left <= mCompatibleScreenFrame.left &&
+                        frame.top <= mCompatibleScreenFrame.top &&
+                        frame.right >= mCompatibleScreenFrame.right &&
+                        frame.bottom >= mCompatibleScreenFrame.bottom;
+            } else {
+                return frame.left <= 0 && frame.top <= 0
+                        && frame.right >= screenWidth
+                        && frame.bottom >= screenHeight;
             }
-            return false;
         }
 
-        boolean isFullscreenOpaque(int screenWidth, int screenHeight) {
-            if (mAttrs.format != PixelFormat.OPAQUE || mSurface == null
-                    || mAnimation != null || mDrawPending || mCommitDrawPending) {
-                return false;
-            }
-            if (mFrame.left <= 0 && mFrame.top <= 0 &&
-                mFrame.right >= screenWidth && mFrame.bottom >= screenHeight) {
-                return true;
-            }
-            return false;
+        /**
+         * Return true if the window is opaque and fully drawn.
+         */
+        boolean isOpaqueDrawn() {
+            return mAttrs.format == PixelFormat.OPAQUE && mSurface != null
+                    && mAnimation == null && !mDrawPending && !mCommitDrawPending;
+        }
+
+        boolean needsBackgroundFiller(int screenWidth, int screenHeight) {
+            return
+                 // only if the application is requesting compatible window
+                 (mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0 &&
+                 // only if it's visible
+                 mHasDrawn && mViewVisibility == View.VISIBLE &&
+                 // and only if the application fills the compatible screen
+                 mFrame.left <= mCompatibleScreenFrame.left &&
+                 mFrame.top <= mCompatibleScreenFrame.top &&
+                 mFrame.right >= mCompatibleScreenFrame.right &&
+                 mFrame.bottom >= mCompatibleScreenFrame.bottom &&
+                 // and starting window do not need background filler
+                 mAttrs.type != mAttrs.TYPE_APPLICATION_STARTING;
+        }
+
+        boolean isFullscreen(int screenWidth, int screenHeight) {
+            return mFrame.left <= 0 && mFrame.top <= 0 &&
+                mFrame.right >= screenWidth && mFrame.bottom >= screenHeight;
         }
 
         void removeLocked() {
@@ -7190,17 +7256,27 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
 
     public static WindowManager.LayoutParams findAnimations(
             ArrayList<AppWindowToken> order,
-            ArrayList<AppWindowToken> tokenList1,
-            ArrayList<AppWindowToken> tokenList2) {
+            ArrayList<AppWindowToken> openingTokenList1,
+            ArrayList<AppWindowToken> closingTokenList2) {
         // We need to figure out which animation to use...
+
+        // First, check if there is a compatible window in opening/closing
+        // apps, and use it if exists.
         WindowManager.LayoutParams animParams = null;
         int animSrc = 0;
-
+        animParams = findCompatibleWindowParams(openingTokenList1);
+        if (animParams == null) {
+            animParams = findCompatibleWindowParams(closingTokenList2);
+        }
+        if (animParams != null) {
+            return animParams;
+        }
+        
         //Log.i(TAG, "Looking for animations...");
         for (int i=order.size()-1; i>=0; i--) {
             AppWindowToken wtoken = order.get(i);
             //Log.i(TAG, "Token " + wtoken + " with " + wtoken.windows.size() + " windows");
-            if (tokenList1.contains(wtoken) || tokenList2.contains(wtoken)) {
+            if (openingTokenList1.contains(wtoken) || closingTokenList2.contains(wtoken)) {
                 int j = wtoken.windows.size();
                 while (j > 0) {
                     j--;
@@ -7226,6 +7302,21 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         }
 
         return animParams;
+    }
+
+    private static LayoutParams findCompatibleWindowParams(ArrayList<AppWindowToken> tokenList) {
+        for (int appCount = tokenList.size() - 1; appCount >= 0; appCount--) {
+            AppWindowToken wtoken = tokenList.get(appCount);
+            // Just checking one window is sufficient as all windows have the compatible flag 
+            // if the application is in compatibility mode.
+            if (wtoken.windows.size() > 0) {
+                WindowManager.LayoutParams params = wtoken.windows.get(0).mAttrs;
+                if ((params.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
+                    return params;
+                }
+            }
+        }
+        return null;
     }
 
     // -------------------------------------------------------------
@@ -8102,6 +8193,7 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             boolean dimming = false;
             boolean covered = false;
             boolean syswin = false;
+            boolean backgroundFillerShown = false;
 
             for (i=N-1; i>=0; i--) {
                 WindowState w = (WindowState)mWindows.get(i);
@@ -8371,11 +8463,39 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                             syswin = true;
                         }
                     }
-                    if (w.isFullscreenOpaque(dw, dh)) {
+
+                    boolean opaqueDrawn = w.isOpaqueDrawn();
+                    if (opaqueDrawn && w.isFullscreen(dw, dh)) {
                         // This window completely covers everything behind it,
                         // so we want to leave all of them as unblurred (for
                         // performance reasons).
                         obscured = true;
+                    } else if (opaqueDrawn && w.needsBackgroundFiller(dw, dh)) {
+                        if (SHOW_TRANSACTIONS) Log.d(TAG, "showing background filler");
+                        // This window is in compatibility mode, and needs background filler.
+                        obscured = true;
+                        if (mBackgroundFillerSurface == null) {
+                            try {
+                                mBackgroundFillerSurface = new Surface(mFxSession, 0,
+                                        0, dw, dh,
+                                        PixelFormat.OPAQUE,
+                                        Surface.FX_SURFACE_NORMAL);
+                            } catch (Exception e) {
+                                Log.e(TAG, "Exception creating filler surface", e);
+                            }
+                        }
+                        try {
+                            mBackgroundFillerSurface.setPosition(0, 0);
+                            mBackgroundFillerSurface.setSize(dw, dh);
+                            // Using the same layer as Dim because they will never be shown at the
+                            // same time.
+                            mBackgroundFillerSurface.setLayer(w.mAnimLayer - 1);
+                            mBackgroundFillerSurface.show();
+                        } catch (RuntimeException e) {
+                            Log.e(TAG, "Exception showing filler surface");
+                        }
+                        backgroundFillerShown = true;
+                        mBackgroundFillerShown = true;
                     } else if (canBeSeen && !obscured &&
                             (attrFlags&FLAG_BLUR_BEHIND|FLAG_DIM_BEHIND) != 0) {
                         if (localLOGV) Log.v(TAG, "Win " + w
@@ -8386,56 +8506,12 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                             if (!dimming) {
                                 //Log.i(TAG, "DIM BEHIND: " + w);
                                 dimming = true;
-                                mDimShown = true;
-                                if (mDimSurface == null) {
-                                    if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM "
-                                            + mDimSurface + ": CREATE");
-                                    try {
-                                        mDimSurface = new Surface(mFxSession, 0,
-                                                -1, 16, 16,
-                                                PixelFormat.OPAQUE,
-                                                Surface.FX_SURFACE_DIM);
-                                    } catch (Exception e) {
-                                        Log.e(TAG, "Exception creating Dim surface", e);
-                                    }
+                                if (mDimAnimator == null) {
+                                    mDimAnimator = new DimAnimator(mFxSession);
                                 }
-                                if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM "
-                                        + mDimSurface + ": SHOW pos=(0,0) (" +
-                                        dw + "x" + dh + "), layer=" + (w.mAnimLayer-1));
-                                if (mDimSurface != null) {
-                                    try {
-                                        mDimSurface.setPosition(0, 0);
-                                        mDimSurface.setSize(dw, dh);
-                                        mDimSurface.show();
-                                    } catch (RuntimeException e) {
-                                        Log.w(TAG, "Failure showing dim surface", e);
-                                    }
-                                }
+                                mDimAnimator.show(dw, dh);
                             }
-                            mDimSurface.setLayer(w.mAnimLayer-1);
-                            final float target = w.mExiting ? 0 : attrs.dimAmount;
-                            if (mDimTargetAlpha != target) {
-                                // If the desired dim level has changed, then
-                                // start an animation to it.
-                                mLastDimAnimTime = currentTime;
-                                long duration = (w.mAnimating && w.mAnimation != null)
-                                        ? w.mAnimation.computeDurationHint()
-                                        : DEFAULT_DIM_DURATION;
-                                if (target > mDimTargetAlpha) {
-                                    // This is happening behind the activity UI,
-                                    // so we can make it run a little longer to
-                                    // give a stronger impression without disrupting
-                                    // the user.
-                                    duration *= DIM_DURATION_MULTIPLIER;
-                                }
-                                if (duration < 1) {
-                                    // Don't divide by zero
-                                    duration = 1;
-                                }
-                                mDimTargetAlpha = target;
-                                mDimDeltaPerMs = (mDimTargetAlpha-mDimCurrentAlpha)
-                                        / duration;
-                            }
+                            mDimAnimator.updateParameters(w, currentTime);
                         }
                         if ((attrFlags&FLAG_BLUR_BEHIND) != 0) {
                             if (!blurring) {
@@ -8472,59 +8548,19 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     }
                 }
             }
-
-            if (!dimming && mDimShown) {
-                // Time to hide the dim surface...  start fading.
-                if (mDimTargetAlpha != 0) {
-                    mLastDimAnimTime = currentTime;
-                    mDimTargetAlpha = 0;
-                    mDimDeltaPerMs = (-mDimCurrentAlpha) / DEFAULT_DIM_DURATION;
+            
+            if (backgroundFillerShown == false && mBackgroundFillerShown) {
+                mBackgroundFillerShown = false;
+                if (SHOW_TRANSACTIONS) Log.d(TAG, "hiding background filler");
+                try {
+                    mBackgroundFillerSurface.hide();
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "Exception hiding filler surface", e);
                 }
             }
 
-            if (mDimShown && mLastDimAnimTime != 0) {
-                mDimCurrentAlpha += mDimDeltaPerMs
-                        * (currentTime-mLastDimAnimTime);
-                boolean more = true;
-                if (mDisplayFrozen) {
-                    // If the display is frozen, there is no reason to animate.
-                    more = false;
-                } else if (mDimDeltaPerMs > 0) {
-                    if (mDimCurrentAlpha > mDimTargetAlpha) {
-                        more = false;
-                    }
-                } else if (mDimDeltaPerMs < 0) {
-                    if (mDimCurrentAlpha < mDimTargetAlpha) {
-                        more = false;
-                    }
-                } else {
-                    more = false;
-                }
-
-                // Do we need to continue animating?
-                if (more) {
-                    if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM "
-                            + mDimSurface + ": alpha=" + mDimCurrentAlpha);
-                    mLastDimAnimTime = currentTime;
-                    mDimSurface.setAlpha(mDimCurrentAlpha);
-                    animating = true;
-                } else {
-                    mDimCurrentAlpha = mDimTargetAlpha;
-                    mLastDimAnimTime = 0;
-                    if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM "
-                            + mDimSurface + ": final alpha=" + mDimCurrentAlpha);
-                    mDimSurface.setAlpha(mDimCurrentAlpha);
-                    if (!dimming) {
-                        if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM " + mDimSurface
-                                + ": HIDE");
-                        try {
-                            mDimSurface.hide();
-                        } catch (RuntimeException e) {
-                            Log.w(TAG, "Illegal argument exception hiding dim surface");
-                        }
-                        mDimShown = false;
-                    }
-                }
+            if (mDimAnimator != null && mDimAnimator.mDimShown) {
+                animating |= mDimAnimator.updateSurface(dimming, currentTime, mDisplayFrozen);
             }
 
             if (!blurring && mBlurShown) {
@@ -9067,11 +9103,11 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
             pw.print("  mLayoutNeeded="); pw.print(mLayoutNeeded);
                     pw.print(" mBlurShown="); pw.println(mBlurShown);
-            pw.print("  mDimShown="); pw.print(mDimShown);
-                    pw.print(" current="); pw.print(mDimCurrentAlpha);
-                    pw.print(" target="); pw.print(mDimTargetAlpha);
-                    pw.print(" delta="); pw.print(mDimDeltaPerMs);
-                    pw.print(" lastAnimTime="); pw.println(mLastDimAnimTime);
+            if (mDimAnimator != null) {
+                mDimAnimator.printTo(pw);
+            } else {
+                pw.print( "  no DimAnimator ");
+            }
             pw.print("  mInputMethodAnimLayerAdjustment=");
                     pw.println(mInputMethodAnimLayerAdjustment);
             pw.print("  mDisplayFrozen="); pw.print(mDisplayFrozen);
@@ -9111,5 +9147,189 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         synchronized (mWindowMap) { }
         synchronized (mKeyguardDisabled) { }
         synchronized (mKeyWaiter) { }
+    }
+
+    /**
+     * DimAnimator class that controls the dim animation. This holds the surface and
+     * all state used for dim animation. 
+     */
+    private static class DimAnimator {
+        Surface mDimSurface;
+        boolean mDimShown = false;
+        float mDimCurrentAlpha;
+        float mDimTargetAlpha;
+        float mDimDeltaPerMs;
+        long mLastDimAnimTime;
+
+        DimAnimator (SurfaceSession session) {
+            if (mDimSurface == null) {
+                if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM "
+                        + mDimSurface + ": CREATE");
+                try {
+                    mDimSurface = new Surface(session, 0, -1, 16, 16, PixelFormat.OPAQUE,
+                            Surface.FX_SURFACE_DIM);
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception creating Dim surface", e);
+                }
+            }
+        }
+
+        /**
+         * Show the dim surface.
+         */
+        void show(int dw, int dh) {
+            if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM " + mDimSurface + ": SHOW pos=(0,0) (" +
+                    dw + "x" + dh + ")");
+            mDimShown = true;
+            try {
+                mDimSurface.setPosition(0, 0);
+                mDimSurface.setSize(dw, dh);
+                mDimSurface.show();
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Failure showing dim surface", e);
+            }
+        }
+
+        /**
+         * Set's the dim surface's layer and update dim parameters that will be used in
+         * {@link updateSurface} after all windows are examined.
+         */
+        void updateParameters(WindowState w, long currentTime) {
+            mDimSurface.setLayer(w.mAnimLayer-1);
+
+            final float target = w.mExiting ? 0 : w.mAttrs.dimAmount;
+            if (SHOW_TRANSACTIONS) Log.i(TAG, "layer=" + (w.mAnimLayer-1) + ", target=" + target);
+            if (mDimTargetAlpha != target) {
+                // If the desired dim level has changed, then
+                // start an animation to it.
+                mLastDimAnimTime = currentTime;
+                long duration = (w.mAnimating && w.mAnimation != null)
+                        ? w.mAnimation.computeDurationHint()
+                        : DEFAULT_DIM_DURATION;
+                if (target > mDimTargetAlpha) {
+                    // This is happening behind the activity UI,
+                    // so we can make it run a little longer to
+                    // give a stronger impression without disrupting
+                    // the user.
+                    duration *= DIM_DURATION_MULTIPLIER;
+                }
+                if (duration < 1) {
+                    // Don't divide by zero
+                    duration = 1;
+                }
+                mDimTargetAlpha = target;
+                mDimDeltaPerMs = (mDimTargetAlpha-mDimCurrentAlpha) / duration;
+            }
+        }
+            
+        /**
+         * Updating the surface's alpha. Returns true if the animation continues, or returns
+         * false when the animation is finished and the dim surface is hidden.
+         */
+        boolean updateSurface(boolean dimming, long currentTime, boolean displayFrozen) {
+            if (!dimming) {
+                if (mDimTargetAlpha != 0) {
+                    mLastDimAnimTime = currentTime;
+                    mDimTargetAlpha = 0;
+                    mDimDeltaPerMs = (-mDimCurrentAlpha) / DEFAULT_DIM_DURATION;
+                }
+            }
+            
+            boolean animating = false;
+            if (mLastDimAnimTime != 0) {
+                mDimCurrentAlpha += mDimDeltaPerMs
+                        * (currentTime-mLastDimAnimTime);
+                boolean more = true;
+                if (displayFrozen) {
+                    // If the display is frozen, there is no reason to animate.
+                    more = false;
+                } else if (mDimDeltaPerMs > 0) {
+                    if (mDimCurrentAlpha > mDimTargetAlpha) {
+                        more = false;
+                    }
+                } else if (mDimDeltaPerMs < 0) {
+                    if (mDimCurrentAlpha < mDimTargetAlpha) {
+                        more = false;
+                    }
+                } else {
+                    more = false;
+                }
+
+                // Do we need to continue animating?
+                if (more) {
+                    if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM "
+                            + mDimSurface + ": alpha=" + mDimCurrentAlpha);
+                    mLastDimAnimTime = currentTime;
+                    mDimSurface.setAlpha(mDimCurrentAlpha);
+                    animating = true;
+                } else {
+                    mDimCurrentAlpha = mDimTargetAlpha;
+                    mLastDimAnimTime = 0;
+                    if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM "
+                            + mDimSurface + ": final alpha=" + mDimCurrentAlpha);
+                    mDimSurface.setAlpha(mDimCurrentAlpha);
+                    if (!dimming) {
+                        if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM " + mDimSurface
+                                + ": HIDE");
+                        try {
+                            mDimSurface.hide();
+                        } catch (RuntimeException e) {
+                            Log.w(TAG, "Illegal argument exception hiding dim surface");
+                        }
+                        mDimShown = false;
+                    }
+                }
+            }
+            return animating;
+        }
+
+        public void printTo(PrintWriter pw) {
+            pw.print("  mDimShown="); pw.print(mDimShown);
+            pw.print(" current="); pw.print(mDimCurrentAlpha);
+            pw.print(" target="); pw.print(mDimTargetAlpha);
+            pw.print(" delta="); pw.print(mDimDeltaPerMs);
+            pw.print(" lastAnimTime="); pw.println(mLastDimAnimTime);
+        }
+    }
+
+    /**
+     * Animation that fade in after 0.5 interpolate time, or fade out in reverse order.
+     * This is used for opening/closing transition for apps in compatible mode.
+     */
+    private static class FadeInOutAnimation extends Animation {
+        int mWidth;
+        boolean mFadeIn;
+
+        public FadeInOutAnimation(boolean fadeIn) {
+            setInterpolator(new AccelerateInterpolator());
+            setDuration(DEFAULT_FADE_IN_OUT_DURATION);
+            mFadeIn = fadeIn;
+        }
+
+        @Override
+        protected void applyTransformation(float interpolatedTime, Transformation t) {
+            float x = interpolatedTime;
+            if (!mFadeIn) {
+                x = 1.0f - x; // reverse the interpolation for fade out
+            }
+            if (x < 0.5) {
+                // move the window out of the screen.
+                t.getMatrix().setTranslate(mWidth, 0);
+            } else {
+                t.getMatrix().setTranslate(0, 0);// show
+                t.setAlpha((x - 0.5f) * 2);
+            }
+        }
+
+        @Override
+        public void initialize(int width, int height, int parentWidth, int parentHeight) {
+            // width is the screen width {@see AppWindowToken#stepAnimatinoLocked}
+            mWidth = width;
+        }
+
+        @Override
+        public int getZAdjustment() {
+            return Animation.ZORDER_TOP;
+        }
     }
 }

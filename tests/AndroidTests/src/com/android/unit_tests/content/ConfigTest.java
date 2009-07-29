@@ -133,7 +133,7 @@ public class ConfigTest extends AndroidTestCase {
                 case DENSITY:
                     // this is the ratio from the standard
 
-                    mMetrics.density = (((float)value)/((float)DisplayMetrics.DEFAULT_DENSITY));
+                    mMetrics.density = (((float)value)/((float)DisplayMetrics.DENSITY_DEFAULT));
                     break;
                 default:
                     assert(false);

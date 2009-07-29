@@ -71,6 +71,8 @@ interface IPackageManager {
     
     void removePermission(String name);
     
+    boolean isProtectedBroadcast(String actionName);
+    
     int checkSignatures(String pkg1, String pkg2);
     
     String[] getPackagesForUid(int uid);

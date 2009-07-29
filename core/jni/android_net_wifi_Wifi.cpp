@@ -27,6 +27,8 @@
 
 namespace android {
 
+static jboolean sScanModeActive = false;
+
 /*
  * The following remembers the jfieldID's of the fields
  * of the DhcpInfo Java object, so that we don't have
@@ -254,27 +256,29 @@ static jboolean android_net_wifi_reassociateCommand(JNIEnv* env, jobject clazz)
     return doBooleanCommand("REASSOCIATE", "OK");
 }
 
-static jboolean android_net_wifi_scanCommand(JNIEnv* env, jobject clazz)
+static jboolean doSetScanMode(jboolean setActive)
+{
+    return doBooleanCommand((setActive ? "DRIVER SCAN-ACTIVE" : "DRIVER SCAN-PASSIVE"), "OK");
+}
+
+static jboolean android_net_wifi_scanCommand(JNIEnv* env, jobject clazz, jboolean forceActive)
 {
     jboolean result;
+
     // Ignore any error from setting the scan mode.
     // The scan will still work.
-    (void)doBooleanCommand("DRIVER SCAN-ACTIVE", "OK");
+    if (forceActive && !sScanModeActive)
+        doSetScanMode(true);
     result = doBooleanCommand("SCAN", "OK");
-    (void)doBooleanCommand("DRIVER SCAN-PASSIVE", "OK");
+    if (forceActive && !sScanModeActive)
+        doSetScanMode(sScanModeActive);
     return result;
 }
 
 static jboolean android_net_wifi_setScanModeCommand(JNIEnv* env, jobject clazz, jboolean setActive)
 {
-    jboolean result;
-    // Ignore any error from setting the scan mode.
-    // The scan will still work.
-    if (setActive) {
-        return doBooleanCommand("DRIVER SCAN-ACTIVE", "OK");
-    } else {
-        return doBooleanCommand("DRIVER SCAN-PASSIVE", "OK");
-    }
+    sScanModeActive = setActive;
+    return doSetScanMode(setActive);
 }
 
 static jboolean android_net_wifi_startDriverCommand(JNIEnv* env, jobject clazz)
@@ -509,7 +513,7 @@ static JNINativeMethod gWifiMethods[] = {
     { "disconnectCommand", "()Z",  (void *)android_net_wifi_disconnectCommand },
     { "reconnectCommand", "()Z",  (void *)android_net_wifi_reconnectCommand },
     { "reassociateCommand", "()Z",  (void *)android_net_wifi_reassociateCommand },
-    { "scanCommand", "()Z", (void*) android_net_wifi_scanCommand },
+    { "scanCommand", "(Z)Z", (void*) android_net_wifi_scanCommand },
     { "setScanModeCommand", "(Z)Z", (void*) android_net_wifi_setScanModeCommand },
     { "startDriverCommand", "()Z", (void*) android_net_wifi_startDriverCommand },
     { "stopDriverCommand", "()Z", (void*) android_net_wifi_stopDriverCommand },

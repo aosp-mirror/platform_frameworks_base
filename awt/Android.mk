@@ -28,4 +28,4 @@ LOCAL_MODULE:= android.awt
 
 LOCAL_DX_FLAGS := --core-library
 
-include $(BUILD_JAVA_LIBRARY)
+#include $(BUILD_JAVA_LIBRARY)

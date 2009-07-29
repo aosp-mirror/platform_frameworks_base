@@ -192,6 +192,7 @@ public class WifiService extends IWifiManager.Stub {
     WifiService(Context context, WifiStateTracker tracker) {
         mContext = context;
         mWifiStateTracker = tracker;
+        mWifiStateTracker.enableRssiPolling(true);
         mBatteryStats = BatteryStatsService.getService();
         
         /*
@@ -436,7 +437,7 @@ public class WifiService extends IWifiManager.Stub {
      * see {@link android.net.wifi.WifiManager#startScan()}
      * @return {@code true} if the operation succeeds
      */
-    public boolean startScan() {
+    public boolean startScan(boolean forceActive) {
         enforceChangePermission();
         synchronized (mWifiStateTracker) {
             switch (mWifiStateTracker.getSupplicantState()) {
@@ -450,7 +451,7 @@ public class WifiService extends IWifiManager.Stub {
                             WifiStateTracker.SUPPL_SCAN_HANDLING_LIST_ONLY);
                     break;
             }
-            return WifiNative.scanCommand();
+            return WifiNative.scanCommand(forceActive);
         }
     }
 
@@ -1560,9 +1561,11 @@ public class WifiService extends IWifiManager.Stub {
                 mAlarmManager.cancel(mIdleIntent);
                 mDeviceIdle = false;
                 mScreenOff = false;
+                mWifiStateTracker.enableRssiPolling(true);
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 Log.d(TAG, "ACTION_SCREEN_OFF");
                 mScreenOff = true;
+                mWifiStateTracker.enableRssiPolling(false);
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
                  * AND the "stay on while plugged in" setting doesn't match the

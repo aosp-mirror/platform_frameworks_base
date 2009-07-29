@@ -552,10 +552,10 @@ public final class Rect implements Parcelable {
      */
     public void scale(float scale) {
         if (scale != 1.0f) {
-            left *= scale;
-            top *= scale;
-            right *= scale;
-            bottom*= scale;
+            left = (int) (left * scale + 0.5f);
+            top = (int) (top * scale + 0.5f);
+            right = (int) (right * scale + 0.5f);
+            bottom = (int) (bottom * scale + 0.5f);
         }
     }
 }

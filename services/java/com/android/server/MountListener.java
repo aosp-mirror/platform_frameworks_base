@@ -202,6 +202,7 @@ final class MountListener implements Runnable {
             byte[] buffer = new byte[100];
 
             writeCommand(VOLD_CMD_SEND_UMS_STATUS);
+            mountMedia(Environment.getExternalStorageDirectory().getAbsolutePath());
             
             while (true) {
                 int count = inputStream.read(buffer);

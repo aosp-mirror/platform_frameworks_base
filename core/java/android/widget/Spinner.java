@@ -24,7 +24,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.util.AttributeSet;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -40,6 +39,7 @@ import android.view.ViewGroup;
 public class Spinner extends AbsSpinner implements OnClickListener {
     
     private CharSequence mPrompt;
+    private AlertDialog mPopup;
 
     public Spinner(Context context) {
         this(context, null);
@@ -75,6 +75,16 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             return child.getTop() + child.getBaseline();
         } else {
             return -1;
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        
+        if (mPopup != null && mPopup.isShowing()) {
+            mPopup.dismiss();
+            mPopup = null;
         }
     }
 
@@ -244,7 +254,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             if (mPrompt != null) {
                 builder.setTitle(mPrompt);
             }
-            builder.setSingleChoiceItems(adapter, getSelectedItemPosition(), this).show();
+            mPopup = builder.setSingleChoiceItems(adapter, getSelectedItemPosition(), this).show();
         }
 
         return handled;
@@ -253,6 +263,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     public void onClick(DialogInterface dialog, int which) {
         setSelection(which);
         dialog.dismiss();
+        mPopup = null;
     }
 
     /**

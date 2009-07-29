@@ -27,37 +27,37 @@ import android.content.Intent;
  * {@hide}
  */
 interface ITts {
-    int setSpeechRate(in int speechRate);
+    int setSpeechRate(in String callingApp, in int speechRate);
 
-    int setPitch(in int pitch);
+    int setPitch(in String callingApp, in int pitch);
 
-    int speak(in String text, in int queueMode, in String[] params);
+    int speak(in String callingApp, in String text, in int queueMode, in String[] params);
 
     boolean isSpeaking();
 
-    int stop();
+    int stop(in String callingApp);
 
-    void addSpeech(in String text, in String packageName, in int resId);
+    void addSpeech(in String callingApp, in String text, in String packageName, in int resId);
 
-    void addSpeechFile(in String text, in String filename);
+    void addSpeechFile(in String callingApp, in String text, in String filename);
 
     String[] getLanguage();
 
     int isLanguageAvailable(in String language, in String country, in String variant);
 
-    int setLanguage(in String language, in String country, in String variant);
+    int setLanguage(in String callingApp, in String language, in String country, in String variant);
 
-    boolean synthesizeToFile(in String text, in String[] params, in String outputDirectory);
+    boolean synthesizeToFile(in String callingApp, in String text, in String[] params, in String outputDirectory);
 
-    int playEarcon(in String earcon, in int queueMode, in String[] params);
+    int playEarcon(in String callingApp, in String earcon, in int queueMode, in String[] params);
 
-    void addEarcon(in String earcon, in String packageName, in int resId);
+    void addEarcon(in String callingApp, in String earcon, in String packageName, in int resId);
 
-    void addEarconFile(in String earcon, in String filename);
+    void addEarconFile(in String callingApp, in String earcon, in String filename);
 
-    void registerCallback(ITtsCallback cb);
+    int registerCallback(in String callingApp, ITtsCallback cb);
 
-    void unregisterCallback(ITtsCallback cb);
+    int unregisterCallback(in String callingApp, ITtsCallback cb);
 
-    int playSilence(in long duration, in int queueMode, in String[] params);
+    int playSilence(in String callingApp, in long duration, in int queueMode, in String[] params);
 }

@@ -88,7 +88,7 @@ static int mount(const char* path) {
     String16 string(path);
     gMountService->mountMedia(string);
     
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 60; i++) {
         if (isMounted(path)) {
             return 0;
         }
@@ -103,7 +103,7 @@ static int unmount(const char* path) {
     String16 string(path);
     gMountService->unmountMedia(string);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 20; i++) {
         if (!isMounted(path)) {
             return 0;
         }

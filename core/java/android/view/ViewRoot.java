@@ -42,6 +42,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
+import android.content.res.Resources;
 import android.content.Context;
 import android.app.ActivityManagerNative;
 import android.Manifest;
@@ -385,10 +386,15 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (mView == null) {
                 mView = view;
                 mWindowAttributes.copyFrom(attrs);
-
-                CompatibilityInfo compatibilityInfo =
-                        mView.getContext().getResources().getCompatibilityInfo();
+                attrs = mWindowAttributes;
+                Resources resources = mView.getContext().getResources();
+                CompatibilityInfo compatibilityInfo = resources.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator(attrs);
+
+                if (mTranslator != null || !compatibilityInfo.supportsScreen()) {
+                    mSurface.setCompatibleDisplayMetrics(resources.getDisplayMetrics());
+                }
+
                 boolean restore = false;
                 if (attrs != null && mTranslator != null) {
                     restore = true;
@@ -397,11 +403,14 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
                 if (DEBUG_LAYOUT) Log.d(TAG, "WindowLayout in setView:" + attrs);
 
+                if (!compatibilityInfo.supportsScreen()) {
+                    attrs.flags |= WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+                }
+
                 mSoftInputMode = attrs.softInputMode;
                 mWindowAttributesChanged = true;
                 mAttachInfo.mRootView = view;
-                mAttachInfo.mScalingRequired =
-                        mTranslator == null ? false : mTranslator.scalingRequired;
+                mAttachInfo.mScalingRequired = mTranslator == null ? false : true;
                 mAttachInfo.mApplicationScale =
                         mTranslator == null ? 1.0f : mTranslator.applicationScale;
                 if (panelParentView != null) {
@@ -493,8 +502,12 @@ public final class ViewRoot extends Handler implements ViewParent,
     void setLayoutParams(WindowManager.LayoutParams attrs, boolean newView) {
         synchronized (this) {
             int oldSoftInputMode = mWindowAttributes.softInputMode;
+            // preserve compatible window flag if exists.
+            int compatibleWindowFlag =
+                mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
             mWindowAttributes.copyFrom(attrs);
-
+            mWindowAttributes.flags |= compatibleWindowFlag;
+            
             if (newView) {
                 mSoftInputMode = attrs.softInputMode;
                 requestLayout();
@@ -899,7 +912,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             mHeight = frame.height();
 
             if (initialized) {
-                mGlCanvas.setViewport((int) (mWidth * appScale), (int) (mHeight * appScale));
+                mGlCanvas.setViewport((int) (mWidth * appScale + 0.5f),
+                        (int) (mHeight * appScale + 0.5f));
             }
 
             boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
@@ -1229,7 +1243,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         if (fullRedrawNeeded) {
             mAttachInfo.mIgnoreDirtyState = true;
-            dirty.union(0, 0, (int) (mWidth * appScale), (int) (mHeight * appScale));
+            dirty.union(0, 0, (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
         }
 
         if (DEBUG_ORIENTATION || DEBUG_DRAW) {
@@ -1297,7 +1311,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                 if (DEBUG_DRAW) {
                     Context cxt = mView.getContext();
                     Log.i(TAG, "Drawing: package:" + cxt.getPackageName() +
-                            ", metrics=" + mView.getContext().getResources().getDisplayMetrics());
+                            ", metrics=" + cxt.getResources().getDisplayMetrics() +
+                            ", compatibilityInfo=" + cxt.getResources().getCompatibilityInfo());
                 }
                 int saveCount = canvas.save(Canvas.MATRIX_SAVE_FLAG);
                 try {
@@ -1363,6 +1378,15 @@ public final class ViewRoot extends Handler implements ViewParent,
             // is non-null and we just want to scroll to whatever that
             // rectangle is).
             View focus = mRealFocusedView;
+
+            // When in touch mode, focus points to the previously focused view,
+            // which may have been removed from the view hierarchy. The following
+            // line checks whether the view is still in the hierarchy
+            if (focus == null || focus.getParent() == null) {
+                mRealFocusedView = null;
+                return false;
+            }
+
             if (focus != mLastScrolledFocus) {
                 // If the focus has changed, then ignore any requests to scroll
                 // to a rectangle; first we want to make sure the entire focus
@@ -1731,7 +1755,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                             if (mGlCanvas != null) {
                                 float appScale = mAttachInfo.mApplicationScale;
                                 mGlCanvas.setViewport(
-                                        (int) (mWidth * appScale), (int) (mHeight * appScale));
+                                        (int) (mWidth * appScale + 0.5f),
+                                        (int) (mHeight * appScale + 0.5f));
                             }
                         }
                     }
@@ -2376,8 +2401,8 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
         int relayoutResult = sWindowSession.relayout(
                 mWindow, params,
-                (int) (mView.mMeasuredWidth * appScale),
-                (int) (mView.mMeasuredHeight * appScale),
+                (int) (mView.mMeasuredWidth * appScale + 0.5f),
+                (int) (mView.mMeasuredHeight * appScale + 0.5f),
                 viewVisibility, insetsPending, mWinFrame,
                 mPendingContentInsets, mPendingVisibleInsets, mSurface);
         if (restore) {

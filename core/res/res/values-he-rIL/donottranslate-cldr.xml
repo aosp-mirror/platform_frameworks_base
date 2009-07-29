@@ -61,20 +61,20 @@
     <string name="day_of_week_long_friday">יום שישי</string>
     <string name="day_of_week_long_saturday">יום שבת</string>
 
-    <string name="day_of_week_medium_sunday">יום א'</string>
-    <string name="day_of_week_medium_monday">יום ב'</string>
-    <string name="day_of_week_medium_tuesday">יום ג'</string>
-    <string name="day_of_week_medium_wednesday">יום ד'</string>
-    <string name="day_of_week_medium_thursday">יום ה'</string>
-    <string name="day_of_week_medium_friday">יום ו'</string>
+    <string name="day_of_week_medium_sunday">יום א\'</string>
+    <string name="day_of_week_medium_monday">יום ב\'</string>
+    <string name="day_of_week_medium_tuesday">יום ג\'</string>
+    <string name="day_of_week_medium_wednesday">יום ד\'</string>
+    <string name="day_of_week_medium_thursday">יום ה\'</string>
+    <string name="day_of_week_medium_friday">יום ו\'</string>
     <string name="day_of_week_medium_saturday">שבת</string>
 
-    <string name="day_of_week_short_sunday">יום א'</string>
-    <string name="day_of_week_short_monday">יום ב'</string>
-    <string name="day_of_week_short_tuesday">יום ג'</string>
-    <string name="day_of_week_short_wednesday">יום ד'</string>
-    <string name="day_of_week_short_thursday">יום ה'</string>
-    <string name="day_of_week_short_friday">יום ו'</string>
+    <string name="day_of_week_short_sunday">יום א\'</string>
+    <string name="day_of_week_short_monday">יום ב\'</string>
+    <string name="day_of_week_short_tuesday">יום ג\'</string>
+    <string name="day_of_week_short_wednesday">יום ד\'</string>
+    <string name="day_of_week_short_thursday">יום ה\'</string>
+    <string name="day_of_week_short_friday">יום ו\'</string>
     <string name="day_of_week_short_saturday">שבת</string>
 
     <string name="day_of_week_shortest_sunday">א</string>

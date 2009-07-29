@@ -937,7 +937,7 @@ public final class SimulatedCommands extends BaseCommands
      *  ar.userObject contains the orignal value of result.obj
      *  ar.result is null on success and failure
      */
-    public void sendBurstDtmf(String dtmfString, Message result) {
+    public void sendBurstDtmf(String dtmfString, int on, int off, Message result) {
         resultSuccess(result, null);
     }
 

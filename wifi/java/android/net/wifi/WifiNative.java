@@ -51,7 +51,7 @@ public class WifiNative {
 
     public native static boolean pingCommand();
 
-    public native static boolean scanCommand();
+    public native static boolean scanCommand(boolean forceActive);
     
     public native static boolean setScanModeCommand(boolean setActive);
 

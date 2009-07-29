@@ -21,6 +21,38 @@
     package="android" android:sharedUserId="android.uid.system"
     android:sharedUserLabel="@string/android_system_label">
 
+    <!-- ================================================ -->
+    <!-- Special broadcasts that only the system can send -->
+    <!-- ================================================ -->
+    <eat-comment />
+    
+    <protected-broadcast android:name="android.intent.action.SCREEN_OFF" />
+    <protected-broadcast android:name="android.intent.action.SCREEN_ON" />
+    <protected-broadcast android:name="android.intent.action.USER_PRESENT" />
+    <protected-broadcast android:name="android.intent.action.TIME_TICK" />
+    <protected-broadcast android:name="android.intent.action.TIMEZONE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.BOOT_COMPLETED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_INSTALL" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_ADDED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_REPLACED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_REMOVED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_RESTARTED" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
+    <protected-broadcast android:name="android.intent.action.UID_REMOVED" />
+    <protected-broadcast android:name="android.intent.action.CONFIGURATION_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.BATTERY_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.BATTERY_LOW" />
+    <protected-broadcast android:name="android.intent.action.BATTERY_OKAY" />
+    <protected-broadcast android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+    <protected-broadcast android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+    <protected-broadcast android:name="android.intent.action.ACTION_SHUTDOWN" />
+    <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_LOW" />
+    <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_OK" />
+    <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />
+    <protected-broadcast android:name="android.intent.action.NEW_OUTGOING_CALL" />
+    <protected-broadcast android:name="android.intent.action.REBOOT" />
+    
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
@@ -994,6 +1026,29 @@
         android:protectionLevel="signature"
         android:description="@string/permdesc_changeBackgroundDataSetting"
         android:label="@string/permlab_changeBackgroundDataSetting" />
+
+    <!-- This permission can be used on content providers to allow the global
+         search system to access their data.  Typically it used when the
+         provider has some permissions protecting it (which global search
+         would not be expected to hold), and added as a read-only permission
+         to the path in the provider where global search queries are
+         performed.  This permission can not be held by regular applications;
+         it is used by applications to protect themselves from everyone else
+         besides global search. -->
+    <permission android:name="android.permission.GLOBAL_SEARCH"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signatureOrSystem" />
+
+    <!-- Internal permission protecting access to the global search
+         system: ensures that only the system can access the provider
+         to perform queries (since this otherwise provides unrestricted
+         access to a variety of content providers), and to write the
+         search statistics (to keep applications from gaming the source
+         ranking).
+         @hide -->
+    <permission android:name="android.permission.GLOBAL_SEARCH_CONTROL"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature" />
 
     <application android:process="system"
                  android:persistent="true"
