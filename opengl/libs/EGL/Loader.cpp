@@ -149,7 +149,7 @@ void* Loader::open(EGLNativeDisplayType display, int impl, gl_hooks_t* hooks)
             hnd = new driver_t(dso);
         } else {
             // Always load EGL first
-            snprintf(path, PATH_MAX, "lib%s_%s.so", "EGL", tag);
+            snprintf(path, PATH_MAX, format, "EGL", tag);
             dso = load_driver(path, hooks, EGL);
             if (dso) {
                 hnd = new driver_t(dso);
