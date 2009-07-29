@@ -803,7 +803,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     class ClearDataObserver extends IPackageDataObserver.Stub {
         public void onRemoveCompleted(String packageName, boolean succeeded)
-                throws android.os.RemoteException {
+                throws RemoteException {
             synchronized(mClearDataLock) {
                 mClearingData = false;
                 mClearDataLock.notifyAll();
@@ -1666,58 +1666,66 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         // --- Binder interface ---
-        public RestoreSet[] getAvailableRestoreSets() throws android.os.RemoteException {
+        public synchronized RestoreSet[] getAvailableRestoreSets() {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "getAvailableRestoreSets");
 
             try {
-            synchronized(this) {
                 if (mRestoreTransport == null) {
                     Log.w(TAG, "Null transport getting restore sets");
-                } else if (mRestoreSets == null) { // valid transport; do the one-time fetch
+                    return null;
+                }
+                if (mRestoreSets == null) { // valid transport; do the one-time fetch
                     mRestoreSets = mRestoreTransport.getAvailableRestoreSets();
                     if (mRestoreSets == null) EventLog.writeEvent(RESTORE_TRANSPORT_FAILURE_EVENT);
                 }
                 return mRestoreSets;
-            }
-            } catch (RuntimeException e) {
-                Log.d(TAG, "getAvailableRestoreSets exception");
-                e.printStackTrace();
-                throw e;
+            } catch (Exception e) {
+                Log.e(TAG, "Error in getAvailableRestoreSets", e);
+                return null;
             }
         }
 
-        public int performRestore(long token, IRestoreObserver observer)
-                throws android.os.RemoteException {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "performRestore");
+        public synchronized int performRestore(long token, IRestoreObserver observer) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                    "performRestore");
 
-            Log.d(TAG, "performRestore token=" + token + " observer=" + observer);
+            if (DEBUG) Log.d(TAG, "performRestore token=" + token + " observer=" + observer);
 
-            if (mRestoreSets != null) {
-                for (int i = 0; i < mRestoreSets.length; i++) {
-                    if (token == mRestoreSets[i].token) {
-                        mWakelock.acquire();
-                        Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                        msg.obj = new RestoreParams(mRestoreTransport, observer, token);
-                        mBackupHandler.sendMessage(msg);
-                        return 0;
-                    }
+            if (mRestoreTransport == null || mRestoreSets == null) {
+                Log.e(TAG, "Ignoring performRestore() with no restore set");
+                return -1;
+            }
+
+            for (int i = 0; i < mRestoreSets.length; i++) {
+                if (token == mRestoreSets[i].token) {
+                    mWakelock.acquire();
+                    Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
+                    msg.obj = new RestoreParams(mRestoreTransport, observer, token);
+                    mBackupHandler.sendMessage(msg);
+                    return 0;
                 }
-            } else {
-                if (DEBUG) Log.v(TAG, "No current restore set, not doing restore");
             }
             return -1;
         }
 
-        public void endRestoreSession() throws android.os.RemoteException {
+        public synchronized void endRestoreSession() {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "endRestoreSession");
 
-            Log.d(TAG, "endRestoreSession");
+            if (DEBUG) Log.d(TAG, "endRestoreSession");
 
-            mRestoreTransport.finishRestore();
-            mRestoreTransport = null;
-            synchronized(BackupManagerService.this) {
+            synchronized (this) {
+                try {
+                    if (mRestoreTransport != null) mRestoreTransport.finishRestore();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error in finishRestore", e);
+                } finally {
+                    mRestoreTransport = null;
+                }
+            }
+
+            synchronized (BackupManagerService.this) {
                 if (BackupManagerService.this.mActiveRestoreSession == this) {
                     BackupManagerService.this.mActiveRestoreSession = null;
                 } else {

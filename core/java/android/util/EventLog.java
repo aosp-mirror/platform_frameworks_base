@@ -124,10 +124,6 @@ public class EventLog {
                         "A List must have fewer than "
                         + Byte.MAX_VALUE + " items in it.");
             }
-            if (items.length < 1) {
-                throw new IllegalArgumentException(
-                        "A List must have at least one item in it.");
-            }
             for (int i = 0; i < items.length; i++) {
                 final Object item = items[i];
                 if (item == null) {
@@ -223,7 +219,7 @@ public class EventLog {
             case LIST:
                 if (mBuffer.remaining() < 1) return null;
                 int length = mBuffer.get();
-                if (length <= 0) return null;
+                if (length < 0) return null;
                 Object[] array = new Object[length];
                 for (int i = 0; i < length; ++i) {
                     array[i] = decodeObject();
