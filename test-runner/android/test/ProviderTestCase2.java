@@ -3,6 +3,7 @@ package android.test;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.test.mock.MockContext;
 import android.test.mock.MockContentResolver;
 import android.database.DatabaseUtils;
@@ -26,6 +27,14 @@ public abstract class ProviderTestCase2<T extends ContentProvider> extends Andro
     private IsolatedContext mProviderContext;
     private MockContentResolver mResolver;
 
+       private class MockContext2 extends MockContext {
+
+        @Override
+        public Resources getResources() {
+            return getContext().getResources();
+        }
+    }
+
     public ProviderTestCase2(Class<T> providerClass, String providerAuthority) {
         mProviderClass = providerClass;
         mProviderAuthority = providerAuthority;
@@ -47,7 +56,7 @@ public abstract class ProviderTestCase2<T extends ContentProvider> extends Andro
         mResolver = new MockContentResolver();
         final String filenamePrefix = "test.";
         RenamingDelegatingContext targetContextWrapper = new RenamingDelegatingContext(
-                new MockContext(), // The context that most methods are delegated to
+                new MockContext2(), // The context that most methods are delegated to
                 getContext(), // The context that file methods are delegated to
                 filenamePrefix);
         mProviderContext = new IsolatedContext(mResolver, targetContextWrapper);
