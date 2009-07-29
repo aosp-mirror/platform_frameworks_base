@@ -256,7 +256,7 @@ public class TelephonyManager {
      * No phone module
      *
      */
-    public static final int PHONE_TYPE_NONE = 0;
+    public static final int PHONE_TYPE_NONE = RILConstants.NO_PHONE;
 
     /**
      * GSM phone
