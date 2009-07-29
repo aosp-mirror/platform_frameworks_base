@@ -44,6 +44,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import com.android.internal.app.ShutdownThread;
 
 
 /**
@@ -182,6 +183,11 @@ class BatteryService extends Binder {
 
         boolean logOutlier = false;
         long dischargeDuration = 0;
+
+        // shut down gracefully if our battery is critically low and we are not powered
+        if (mBatteryLevel == 0 && isPowered(0xffffffff)) {
+            ShutdownThread.shutdown(mContext, false);
+        }
         
         mBatteryLevelCritical = mBatteryLevel <= CRITICAL_BATTERY_LEVEL;
         if (mAcOnline) {
