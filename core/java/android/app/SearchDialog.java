@@ -1297,6 +1297,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             if (mGlobalSearchMode) {
                 launchGlobalSearchIntent(intent);
             } else {
+                // If the intent was created from a suggestion, it will always have an explicit
+                // component here.
+                Log.i(LOG_TAG, "Starting (as ourselves) " + intent.toURI());
                 getContext().startActivity(intent);
                 // If the search switches to a different activity,
                 // SearchDialogWrapper#performActivityResuming
@@ -1338,7 +1341,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         setBrowserApplicationId(intent);
 
-        if (DBG) Log.d(LOG_TAG, "Launching intent " + intent.toURI() + " as " + packageName);
         startActivityInPackage(intent, packageName);
     }
 
@@ -1379,6 +1381,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             String resultWho = null;
             int requestCode = -1;
             boolean onlyIfNeeded = false;
+            Log.i(LOG_TAG, "Starting (uid " + uid + ", " + packageName + ") " + intent.toURI());
             int result = ActivityManagerNative.getDefault().startActivityInPackage(
                     uid, intent, resolvedType, resultTo, resultWho, requestCode, onlyIfNeeded);
             checkStartActivityResult(result, intent);
