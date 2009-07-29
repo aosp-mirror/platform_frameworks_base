@@ -1085,11 +1085,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(result);
             return true;
         }
+        
         case KILL_APPLICATION_WITH_UID_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String pkg = data.readString();
             int uid = data.readInt();
             killApplicationWithUid(pkg, uid);
+            reply.writeNoException();
+            return true;
+        }
+        
+        case CLOSE_SYSTEM_DIALOGS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String reason = data.readString();
+            closeSystemDialogs(reason);
             reply.writeNoException();
             return true;
         }
@@ -2376,6 +2385,7 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return result;
     }
+    
     public void killApplicationWithUid(String pkg, int uid) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -2383,6 +2393,17 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(pkg);
         data.writeInt(uid);
         mRemote.transact(KILL_APPLICATION_WITH_UID_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    
+    public void closeSystemDialogs(String reason) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(reason);
+        mRemote.transact(CLOSE_SYSTEM_DIALOGS_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
