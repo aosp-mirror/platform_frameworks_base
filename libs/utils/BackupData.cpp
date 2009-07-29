@@ -196,6 +196,7 @@ BackupDataReader::Status()
             } else { \
                 m_status = errno; \
             } \
+            LOGD("CHECK_SIZE failed with at line %d m_status='%s'", __LINE__, strerror(m_status)); \
             return m_status; \
         } \
     } while(0)
@@ -203,6 +204,7 @@ BackupDataReader::Status()
     do { \
         status_t err = skip_padding(); \
         if (err != NO_ERROR) { \
+            LOGD("SKIP_PADDING FAILED at line %d", __LINE__); \
             m_status = err; \
             return err; \
         } \
@@ -218,10 +220,19 @@ BackupDataReader::ReadNextHeader(bool* done, int* type)
 
     int amt;
 
-    // No error checking here, in case we're at the end of the stream.  Just let read() fail.
-    skip_padding();
+    amt = skip_padding();
+    if (amt == EIO) {
+        *done = true;
+        return NO_ERROR;
+    }
+    else if (amt != NO_ERROR) {
+        return amt;
+    }
     amt = read(m_fd, &m_header, sizeof(m_header));
     *done = m_done = (amt == 0);
+    if (*done) {
+        return NO_ERROR;
+    }
     CHECK_SIZE(amt, sizeof(m_header));
     m_pos += sizeof(m_header);
     if (type) {
