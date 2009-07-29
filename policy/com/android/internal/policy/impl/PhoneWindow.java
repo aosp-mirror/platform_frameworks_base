@@ -239,11 +239,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     if (!mKeycodeCameraTimeoutActive) return;
                     mKeycodeCameraTimeoutActive = false;
                     mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                    sendCloseSystemWindows();
                     // Broadcast an intent that the Camera button was longpressed
                     Intent intent = new Intent(Intent.ACTION_CAMERA_BUTTON, null);
                     intent.putExtra(Intent.EXTRA_KEY_EVENT, (KeyEvent) msg.obj);
                     getContext().sendOrderedBroadcast(intent, null);
-                    sendCloseSystemWindows();
                 } break;
                 case MSG_SEARCH_LONG_PRESS_COMPLETE: {
                     if (getKeyguardManager().inKeyguardRestrictedInputMode() ||
