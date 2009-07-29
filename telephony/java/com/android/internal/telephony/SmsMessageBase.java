@@ -372,16 +372,10 @@ public abstract class SmsMessageBase {
          * -or-
          * 2. [x@y][ ]/[body]
          */
-         String[] parts = messageBody.split("( /)|( )", 3);
-         if (parts.length < 2 || parts[0].indexOf('@') == -1) return;
+         String[] parts = messageBody.split("( /)|( )", 2);
+         if (parts.length < 1 || parts[0].indexOf('@') == -1) return;
          emailFrom = parts[0];
-         if (parts.length == 3) {
-             pseudoSubject = parts[1];
-             emailBody = parts[2];
-         } else {
-             pseudoSubject = null;
-             emailBody = parts[1];
-         }
+         emailBody = parts[1];
          isEmail = true;
     }
 
