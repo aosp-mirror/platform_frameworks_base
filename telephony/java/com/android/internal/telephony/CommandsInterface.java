@@ -1225,8 +1225,10 @@ public interface CommandsInterface {
      * Request the device MDN / H_SID / H_NID / MIN.
      * "response" is const char **
      *   [0] is MDN if CDMA subscription is available
-     *   [1] is H_SID (Home SID) in hexadecimal if CDMA subscription is available
-     *   [2] is H_NID (Home NID) in hexadecimal if CDMA subscription is available
+     *   [1] is a comma separated list of H_SID (Home SID) in decimal format
+     *       if CDMA subscription is available
+     *   [2] is a comma separated list of H_NID (Home NID) in decimal format
+     *       if CDMA subscription is available
      *   [3] is MIN (10 digits, MIN2+MIN1) if CDMA subscription is available
      */
     public void getCDMASubscription(Message response);
