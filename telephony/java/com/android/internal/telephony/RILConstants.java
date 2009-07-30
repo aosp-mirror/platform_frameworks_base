@@ -86,14 +86,6 @@ cat include/telephony/ril.h | \
    >>java/android/com.android.internal.telephony/gsm/RILConstants.java
 */
 
-
-    int RIL_SIM_ABSENT = 0;
-    int RIL_SIM_NOT_READY = 1;
-    int RIL_SIM_READY = 2;
-    int RIL_SIM_PIN = 3;
-    int RIL_SIM_PUK = 4;
-    int RIL_SIM_NETWORK_PERSONALIZATION = 5;
-
     /**
      * No restriction at all including voice/SMS/USSD/SS/AV64
      * and packet data.
