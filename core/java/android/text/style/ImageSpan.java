@@ -33,17 +33,34 @@ public class ImageSpan extends DynamicDrawableSpan {
     private Context mContext;
     private String mSource;
 
+    /**
+     * @deprecated Use {@link #ImageSpan(Context, Bitmap)} instead.
+     */
     public ImageSpan(Bitmap b) {
-        this(b, ALIGN_BOTTOM);
+        this(null, b, ALIGN_BOTTOM);
+    }
+
+    /**
+     * @deprecated Use {@link #ImageSpan(Context, Bitmap, int) instead.
+     */
+    public ImageSpan(Bitmap b, int verticalAlignment) {
+        this(null, b, verticalAlignment);
+    }
+
+    public ImageSpan(Context context, Bitmap b) {
+        this(context, b, ALIGN_BOTTOM);
     }
 
     /**
      * @param verticalAlignment one of {@link DynamicDrawableSpan#ALIGN_BOTTOM} or
      * {@link DynamicDrawableSpan#ALIGN_BASELINE}.
      */
-    public ImageSpan(Bitmap b, int verticalAlignment) {
+    public ImageSpan(Context context, Bitmap b, int verticalAlignment) {
         super(verticalAlignment);
-        mDrawable = new BitmapDrawable(mContext.getResources(), b);
+        mContext = context;
+        mDrawable = context != null
+                ? new BitmapDrawable(context.getResources(), b)
+                : new BitmapDrawable(b);
         int width = mDrawable.getIntrinsicWidth();
         int height = mDrawable.getIntrinsicHeight();
         mDrawable.setBounds(0, 0, width > 0 ? width : 0, height > 0 ? height : 0); 
