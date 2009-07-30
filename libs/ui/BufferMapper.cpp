@@ -65,7 +65,7 @@ status_t BufferMapper::lock(buffer_handle_t handle,
 {
     status_t err = mAllocMod->lock(mAllocMod, handle, usage,
             bounds.left, bounds.top, bounds.width(), bounds.height(), vaddr);
-    LOGW_IF(err, "unlock(...) failed %d (%s)", err, strerror(-err));
+    LOGW_IF(err, "lock(...) failed %d (%s)", err, strerror(-err));
     return err;
 }
 
