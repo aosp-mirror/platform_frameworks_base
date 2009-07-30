@@ -270,6 +270,16 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (!mGlobalSearchMode) {
             mStoredComponentName = mLaunchComponent;
             mStoredAppSearchData = mAppSearchData;
+            
+            // If this is the browser, we have a special case to not show the icon to the left
+            // of the text field, for extra space for url entry (this should be reconciled in
+            // Eclair). So special case a second tap of the search button to remove any
+            // already-entered text so that we can be sure to show the "Quick Search Box" hint
+            // text to still make it clear to the user that we've jumped out to global search.
+            //
+            // TODO: When the browser icon issue is reconciled in Eclair, remove this special case.
+            if (isBrowserSearch()) currentSearchText = "";
+            
             return doShow(currentSearchText, false, null, mAppSearchData, true);
         } else {
             if (mStoredComponentName != null) {
@@ -577,7 +587,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
     
     private void updateSearchAppIcon() {
-        if (mGlobalSearchMode) {
+        // In Donut, we special-case the case of the browser to hide the app icon as if it were
+        // global search, for extra space for url entry.
+        //
+        // TODO: Remove this special case once the issue has been reconciled in Eclair. 
+        if (mGlobalSearchMode || isBrowserSearch()) {
             mAppIcon.setImageResource(0);
             mAppIcon.setVisibility(View.GONE);
             mSearchPlate.setPadding(SEARCH_PLATE_LEFT_PADDING_GLOBAL,
@@ -667,6 +681,16 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             }
         }
         mVoiceButton.setVisibility(visibility);
+    }
+    
+    /**
+     * Hack to determine whether this is the browser, so we can remove the browser icon
+     * to the left of the search field, as a special requirement for Donut.
+     * 
+     * TODO: For Eclair, reconcile this with the rest of the global search UI.
+     */
+    private boolean isBrowserSearch() {
+        return mLaunchComponent.flattenToShortString().startsWith("com.android.browser/");
     }
 
     /*
