@@ -194,7 +194,7 @@ public class TtsService extends Service implements OnCompletionListener {
     private boolean isDefaultEnforced() {
         return (android.provider.Settings.Secure.getInt(mResolver,
                     android.provider.Settings.Secure.TTS_USE_DEFAULTS,
-                    TextToSpeech.Engine.FALLBACK_TTS_USE_DEFAULTS)
+                    TextToSpeech.Engine.USE_DEFAULTS)
                 == 1 );
     }
 
@@ -202,7 +202,7 @@ public class TtsService extends Service implements OnCompletionListener {
     private int getDefaultRate() {
         return android.provider.Settings.Secure.getInt(mResolver,
                 android.provider.Settings.Secure.TTS_DEFAULT_RATE,
-                TextToSpeech.Engine.FALLBACK_TTS_DEFAULT_RATE);
+                TextToSpeech.Engine.DEFAULT_RATE);
     }
 
 
@@ -346,7 +346,7 @@ public class TtsService extends Service implements OnCompletionListener {
      */
     private int speak(String callingApp, String text, int queueMode, ArrayList<String> params) {
         Log.v("TtsService", "TTS service received " + text);
-        if (queueMode == TextToSpeech.TTS_QUEUE_FLUSH) {
+        if (queueMode == TextToSpeech.QUEUE_FLUSH) {
             stop(callingApp);
         } else if (queueMode == 2) {
             stopAll(callingApp);
@@ -355,7 +355,7 @@ public class TtsService extends Service implements OnCompletionListener {
         if (!mIsSpeaking) {
             processSpeechQueue();
         }
-        return TextToSpeech.TTS_SUCCESS;
+        return TextToSpeech.SUCCESS;
     }
 
     /**
@@ -372,7 +372,7 @@ public class TtsService extends Service implements OnCompletionListener {
      */
     private int playEarcon(String callingApp, String earcon, int queueMode,
             ArrayList<String> params) {
-        if (queueMode == TextToSpeech.TTS_QUEUE_FLUSH) {
+        if (queueMode == TextToSpeech.QUEUE_FLUSH) {
             stop(callingApp);
         } else if (queueMode == 2) {
             stopAll(callingApp);
@@ -381,14 +381,14 @@ public class TtsService extends Service implements OnCompletionListener {
         if (!mIsSpeaking) {
             processSpeechQueue();
         }
-        return TextToSpeech.TTS_SUCCESS;
+        return TextToSpeech.SUCCESS;
     }
 
     /**
      * Stops all speech output and removes any utterances still in the queue for the calling app.
      */
     private int stop(String callingApp) {
-        int result = TextToSpeech.TTS_ERROR;
+        int result = TextToSpeech.ERROR;
         boolean speechQueueAvailable = false;
         try{
             speechQueueAvailable =
@@ -414,7 +414,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     mIsSpeaking = false;
                     mCurrentSpeechItem = null;
                 } else {
-                    result = TextToSpeech.TTS_SUCCESS;
+                    result = TextToSpeech.SUCCESS;
                 }
                 Log.i("TtsService", "Stopped");
             }
@@ -437,7 +437,7 @@ public class TtsService extends Service implements OnCompletionListener {
      * Stops all speech output and removes any utterances still in the queue globally.
      */
     private int stopAll(String callingApp) {
-        int result = TextToSpeech.TTS_ERROR;
+        int result = TextToSpeech.ERROR;
         boolean speechQueueAvailable = false;
         try{
             speechQueueAvailable =
@@ -463,7 +463,7 @@ public class TtsService extends Service implements OnCompletionListener {
                     mIsSpeaking = false;
                     mCurrentSpeechItem = null;
                 } else {
-                    result = TextToSpeech.TTS_SUCCESS;
+                    result = TextToSpeech.SUCCESS;
                 }
                 Log.i("TtsService", "Stopped all");
             }
@@ -487,7 +487,7 @@ public class TtsService extends Service implements OnCompletionListener {
         if (params != null){
             for (int i = 0; i < params.size() - 1; i = i + 2){
             String param = params.get(i);
-                if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_UTTERANCE_ID)){
+                if (param.equals(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID)){
                     utteranceId = params.get(i+1);
                 }
             }
@@ -500,14 +500,14 @@ public class TtsService extends Service implements OnCompletionListener {
 
     private int playSilence(String callingApp, long duration, int queueMode,
             ArrayList<String> params) {
-        if (queueMode == TextToSpeech.TTS_QUEUE_FLUSH) {
+        if (queueMode == TextToSpeech.QUEUE_FLUSH) {
             stop(callingApp);
         }
         mSpeechQueue.add(new SpeechItem(callingApp, duration, params));
         if (!mIsSpeaking) {
             processSpeechQueue();
         }
-        return TextToSpeech.TTS_SUCCESS;
+        return TextToSpeech.SUCCESS;
     }
 
     private void silence(final SpeechItem speechItem) {
@@ -517,7 +517,7 @@ public class TtsService extends Service implements OnCompletionListener {
                 if (speechItem.mParams != null){
                     for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
                         String param = speechItem.mParams.get(i);
-                        if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_UTTERANCE_ID)){
+                        if (param.equals(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID)){
                             utteranceId = speechItem.mParams.get(i+1);
                         }
                     }
@@ -562,17 +562,17 @@ public class TtsService extends Service implements OnCompletionListener {
                         for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
                             String param = speechItem.mParams.get(i);
                             if (param != null) {
-                                if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)) {
+                                if (param.equals(TextToSpeech.Engine.KEY_PARAM_RATE)) {
                                     speechRate = speechItem.mParams.get(i+1);
-                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_LANGUAGE)){
                                     language = speechItem.mParams.get(i+1);
-                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_COUNTRY)){
                                     country = speechItem.mParams.get(i+1);
-                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_VARIANT)){
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_VARIANT)){
                                     variant = speechItem.mParams.get(i+1);
-                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_UTTERANCE_ID)){
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID)){
                                     utteranceId = speechItem.mParams.get(i+1);
-                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_STREAM)) {
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_STREAM)) {
                                     try {
                                         streamType
                                                 = Integer.parseInt(speechItem.mParams.get(i + 1));
@@ -638,15 +638,15 @@ public class TtsService extends Service implements OnCompletionListener {
                         for (int i = 0; i < speechItem.mParams.size() - 1; i = i + 2){
                             String param = speechItem.mParams.get(i);
                             if (param != null) {
-                                if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_RATE)) {
+                                if (param.equals(TextToSpeech.Engine.KEY_PARAM_RATE)) {
                                     speechRate = speechItem.mParams.get(i+1);
-                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_LANGUAGE)){
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_LANGUAGE)){
                                     language = speechItem.mParams.get(i+1);
-                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_COUNTRY)){
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_COUNTRY)){
                                     country = speechItem.mParams.get(i+1);
-                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_VARIANT)){
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_VARIANT)){
                                     variant = speechItem.mParams.get(i+1);
-                                } else if (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_UTTERANCE_ID)){
+                                } else if (param.equals(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID)){
                                     utteranceId = speechItem.mParams.get(i+1);
                                 }
                             }
@@ -698,7 +698,7 @@ public class TtsService extends Service implements OnCompletionListener {
     }
 
     private void broadcastTtsQueueProcessingCompleted(){
-        Intent i = new Intent(Intent.ACTION_TTS_QUEUE_PROCESSING_COMPLETED);
+        Intent i = new Intent(TextToSpeech.ACTION_TTS_QUEUE_PROCESSING_COMPLETED);
         sendBroadcast(i);
     }
 
@@ -843,7 +843,7 @@ public class TtsService extends Service implements OnCompletionListener {
         }
         for (int i = 0; i < paramList.size() - 1; i = i + 2) {
             String param = paramList.get(i);
-            if ((param != null) && (param.equals(TextToSpeech.Engine.TTS_KEY_PARAM_STREAM))) {
+            if ((param != null) && (param.equals(TextToSpeech.Engine.KEY_PARAM_STREAM))) {
                 try {
                     streamType = Integer.parseInt(paramList.get(i + 1));
                 } catch (NumberFormatException e) {
@@ -910,18 +910,18 @@ public class TtsService extends Service implements OnCompletionListener {
             if (cb != null) {
                 mCallbacks.register(cb);
                 mCallbacksMap.put(packageName, cb);
-                return TextToSpeech.TTS_SUCCESS;
+                return TextToSpeech.SUCCESS;
             }
-            return TextToSpeech.TTS_ERROR;
+            return TextToSpeech.ERROR;
         }
 
         public int unregisterCallback(String packageName, ITtsCallback cb) {
             if (cb != null) {
                 mCallbacksMap.remove(packageName);
                 mCallbacks.unregister(cb);
-                return TextToSpeech.TTS_SUCCESS;
+                return TextToSpeech.SUCCESS;
             }
-            return TextToSpeech.TTS_ERROR;
+            return TextToSpeech.ERROR;
         }
 
         /**
