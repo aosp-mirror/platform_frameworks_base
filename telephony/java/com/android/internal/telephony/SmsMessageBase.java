@@ -118,6 +118,7 @@ public abstract class SmsMessageBase {
         public int codeUnitSize;
     }
 
+    // TODO(): This class is duplicated in SmsMessage.java. Refactor accordingly.
     public static abstract class SubmitPduBase  {
         public byte[] encodedScAddress; // Null if not applicable.
         public byte[] encodedMessage;
