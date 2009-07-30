@@ -93,10 +93,6 @@ enum video_encoder {
     VIDEO_ENCODER_LIST_END // must be the last - used to validate the video encoder type
 };
 
-
-// Maximum frames per second is 24
-#define MEDIA_RECORDER_MAX_FRAME_RATE         24
-
 /*
  * The state machine of the media_recorder uses a set of different state names.
  * The mapping between the media_recorder and the pvauthorengine is shown below:

@@ -276,7 +276,7 @@ static void
 android_media_MediaRecorder_setVideoFrameRate(JNIEnv *env, jobject thiz, jint rate)
 {
     LOGV("setVideoFrameRate(%d)", rate);
-    if (rate <= 0 || rate > MEDIA_RECORDER_MAX_FRAME_RATE) {
+    if (rate <= 0) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "invalid frame rate");
         return;
     }
