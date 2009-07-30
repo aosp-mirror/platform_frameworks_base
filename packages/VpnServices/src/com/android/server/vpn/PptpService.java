@@ -26,11 +26,17 @@ import java.io.IOException;
 class PptpService extends VpnService<PptpProfile> {
     static final String PPTP_DAEMON = "pptp";
     static final String PPTP_PORT = "1723";
+
     @Override
     protected void connect(String serverIp, String username, String password)
             throws IOException {
+        PptpProfile p = getProfile();
         MtpdHelper.sendCommand(this, PPTP_DAEMON, serverIp, PPTP_PORT, null,
-                username, password);
+                username, password, p.isEncryptionEnabled());
     }
 
+    @Override
+    protected void stopPreviouslyRunDaemons() {
+        stopDaemon(MtpdHelper.MTPD);
+    }
 }

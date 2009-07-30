@@ -25,6 +25,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 
 /**
  * Proxy to start, stop and interact with a VPN daemon.
@@ -33,7 +34,10 @@ import java.io.OutputStream;
  * connection with the daemon, to both send commands to the daemon and receive
  * response and connecting error code from the daemon.
  */
-class DaemonProxy {
+class DaemonProxy implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private static final boolean DBG = true;
+
     private static final int WAITING_TIME = 15; // sec
 
     private static final String SVC_STATE_CMD_PREFIX = "init.svc.";
@@ -45,8 +49,8 @@ class DaemonProxy {
     private static final int END_OF_ARGUMENTS = 255;
 
     private String mName;
-    private LocalSocket mControlSocket;
     private String mTag;
+    private transient LocalSocket mControlSocket;
 
     /**
      * Creates a proxy of the specified daemon.
@@ -63,14 +67,8 @@ class DaemonProxy {
 
     void start() throws IOException {
         String svc = mName;
-        Log.d(mTag, "-----  Stop the daemon just in case: " + mName);
-        SystemProperties.set(SVC_STOP_CMD, mName);
-        if (!blockUntil(SVC_STATE_STOPPED, 5)) {
-            throw new IOException("cannot start service anew: " + svc
-                    + ", it is still running");
-        }
 
-        Log.d(mTag, "+++++  Start: " + svc);
+        Log.i(mTag, "Start VPN daemon: " + svc);
         SystemProperties.set(SVC_START_CMD, svc);
 
         if (!blockUntil(SVC_STATE_RUNNING, WAITING_TIME)) {
@@ -103,7 +101,7 @@ class DaemonProxy {
         try {
             mControlSocket.close();
         } catch (IOException e) {
-            Log.e(mTag, "close control socket", e);
+            Log.w(mTag, "close control socket", e);
         } finally {
             mControlSocket = null;
         }
@@ -111,10 +109,10 @@ class DaemonProxy {
 
     void stop() {
         String svc = mName;
-        Log.d(mTag, "-----  Stop: " + svc);
+        Log.i(mTag, "Stop VPN daemon: " + svc);
         SystemProperties.set(SVC_STOP_CMD, svc);
         boolean success = blockUntil(SVC_STATE_STOPPED, 5);
-        Log.d(mTag, "stopping " + svc + ", success? " + success);
+        if (DBG) Log.d(mTag, "stopping " + svc + ", success? " + success);
     }
 
     boolean isStopped() {
@@ -129,7 +127,7 @@ class DaemonProxy {
         if (!blocking && in.available() == 0) return 0;
 
         int data = in.read();
-        Log.d(mTag, "got data from control socket: " + data);
+        Log.i(mTag, "got data from control socket: " + data);
 
         return data;
     }
@@ -146,7 +144,7 @@ class DaemonProxy {
                 s.connect(a);
                 return s;
             } catch (IOException e) {
-                Log.d(mTag, "service not yet listen()ing; try again");
+                if (DBG) Log.d(mTag, "service not yet listen()ing; try again");
                 excp = e;
                 sleep(500);
             }
@@ -173,8 +171,10 @@ class DaemonProxy {
         int n = waitTime * 1000 / sleepTime;
         for (int i = 0; i < n; i++) {
             if (expectedState.equals(SystemProperties.get(cmd))) {
-                Log.d(mTag, mName + " is " + expectedState + " after "
-                        + (i * sleepTime) + " msec");
+                if (DBG) {
+                    Log.d(mTag, mName + " is " + expectedState + " after "
+                            + (i * sleepTime) + " msec");
+                }
                 break;
             }
             sleep(sleepTime);

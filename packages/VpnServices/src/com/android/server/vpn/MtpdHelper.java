@@ -24,26 +24,33 @@ import java.util.Arrays;
  * A helper class for sending commands to the MTP daemon (mtpd).
  */
 class MtpdHelper {
-    private static final String MTPD = "mtpd";
+    static final String MTPD = "mtpd";
     private static final String VPN_LINKNAME = "vpn";
     private static final String PPP_ARGS_SEPARATOR = "";
 
     static void sendCommand(VpnService<?> vpnService, String protocol,
             String serverIp, String port, String secret, String username,
             String password) throws IOException {
+        sendCommand(vpnService, protocol, serverIp, port, secret, username,
+                password, false);
+    }
+
+    static void sendCommand(VpnService<?> vpnService, String protocol,
+            String serverIp, String port, String secret, String username,
+            String password, boolean encryption) throws IOException {
         ArrayList<String> args = new ArrayList<String>();
         args.addAll(Arrays.asList(protocol, serverIp, port));
         if (secret != null) args.add(secret);
         args.add(PPP_ARGS_SEPARATOR);
-        addPppArguments(vpnService, args, serverIp, username, password);
+        addPppArguments(args, serverIp, username, password, encryption);
 
         DaemonProxy mtpd = vpnService.startDaemon(MTPD);
         mtpd.sendCommand(args.toArray(new String[args.size()]));
     }
 
-    private static void addPppArguments(VpnService<?> vpnService,
-            ArrayList<String> args, String serverIp, String username,
-            String password) throws IOException {
+    private static void addPppArguments(ArrayList<String> args, String serverIp,
+            String username, String password, boolean encryption)
+            throws IOException {
         args.addAll(Arrays.asList(
                 "linkname", VPN_LINKNAME,
                 "name", username,
@@ -52,6 +59,9 @@ class MtpdHelper {
                 "idle", "1800",
                 "mtu", "1400",
                 "mru", "1400"));
+        if (encryption) {
+            args.add("+mppe");
+        }
     }
 
     private MtpdHelper() {
