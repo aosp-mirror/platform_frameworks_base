@@ -165,11 +165,11 @@ public class SocialContract {
 
         /**
          * The {@link Uri} for the latest social activity performed by any
-         * contact aggregated under the specified {@link Contacts#_ID}. Will
+         * raw contact aggregated under the specified {@link Contacts#_ID}. Will
          * also join with most-present {@link Presence} for this aggregate.
          */
-        public static final Uri CONTENT_AGGREGATE_STATUS_URI =
-            Uri.withAppendedPath(AUTHORITY_URI, "aggregate_status");
+        public static final Uri CONTENT_CONTACT_STATUS_URI =
+            Uri.withAppendedPath(AUTHORITY_URI, "contact_status");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of social
