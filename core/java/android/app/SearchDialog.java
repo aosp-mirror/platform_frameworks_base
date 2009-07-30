@@ -1238,11 +1238,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // ensure the icons will work for global search
         cv.put(SearchManager.SUGGEST_COLUMN_ICON_1,
                         wrapIconForPackage(
-                                source,
+                                mSearchable.getSuggestPackage(),
                                 getColumnString(c, SearchManager.SUGGEST_COLUMN_ICON_1)));
         cv.put(SearchManager.SUGGEST_COLUMN_ICON_2,
                         wrapIconForPackage(
-                                source,
+                                mSearchable.getSuggestPackage(),
                                 getColumnString(c, SearchManager.SUGGEST_COLUMN_ICON_2)));
 
         // the rest can be passed through directly
@@ -1281,11 +1281,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * Wraps an icon for a particular package.  If the icon is a resource id, it is converted into
      * an android.resource:// URI.
      *
-     * @param source The source of the icon
+     * @param packageName The source of the icon
      * @param icon The icon retrieved from a suggestion column
      * @return An icon string appropriate for the package.
      */
-    private String wrapIconForPackage(ComponentName source, String icon) {
+    private String wrapIconForPackage(String packageName, String icon) {
         if (icon == null || icon.length() == 0 || "0".equals(icon)) {
             // SearchManager specifies that null or zero can be returned to indicate
             // no icon. We also allow empty string.
@@ -1293,7 +1293,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         } else if (!Character.isDigit(icon.charAt(0))){
             return icon;
         } else {
-            String packageName = source.getPackageName();
             return new Uri.Builder()
                     .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
                     .authority(packageName)
