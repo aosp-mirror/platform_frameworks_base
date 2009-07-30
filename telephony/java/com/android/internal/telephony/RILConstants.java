@@ -68,8 +68,9 @@ public interface RILConstants {
     int CDMA_CELL_BROADCAST_SMS_DISABLED = 1;
     int CDMA_CELL_BROADCAST_SMS_ENABLED  = 0;
 
-    int CDMA_PHONE = 0;
+    int NO_PHONE = 0;
     int GSM_PHONE = 1;
+    int CDMA_PHONE = 2;
 
     int CDM_TTY_MODE_DISABLED = 0;
     int CDM_TTY_MODE_ENABLED = 1;
