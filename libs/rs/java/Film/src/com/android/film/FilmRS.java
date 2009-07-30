@@ -163,7 +163,6 @@ public class FilmRS {
         mPVImages.setName("PVImages");
     }
 
-
     private void loadImages() {
         mBufferIDs = new int[13];
         mImages = new RenderScript.Allocation[13];
@@ -171,51 +170,22 @@ public class FilmRS {
             RenderScript.ElementPredefined.USER_FLOAT,
             mBufferIDs.length);
 
-        Bitmap b;
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inScaled = false;
-
         RenderScript.ElementPredefined ie = 
             RenderScript.ElementPredefined.RGB_565;
 
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p01, opts);
-        mImages[0] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p02, opts);
-        mImages[1] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p03, opts);
-        mImages[2] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p04, opts);
-        mImages[3] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p05, opts);
-        mImages[4] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p06, opts);
-        mImages[5] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p07, opts);
-        mImages[6] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p08, opts);
-        mImages[7] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p09, opts);
-        mImages[8] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p10, opts);
-        mImages[9] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p11, opts);
-        mImages[10] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p12, opts);
-        mImages[11] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
-
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p13, opts);
-        mImages[12] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
+        mImages[0] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p01, ie, true);
+        mImages[1] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p02, ie, true);
+        mImages[2] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p03, ie, true);
+        mImages[3] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p04, ie, true);
+        mImages[4] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p05, ie, true);
+        mImages[5] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p06, ie, true);
+        mImages[6] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p07, ie, true);
+        mImages[7] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p08, ie, true);
+        mImages[8] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p09, ie, true);
+        mImages[9] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p10, ie, true);
+        mImages[10] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p11, ie, true);
+        mImages[11] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p12, ie, true);
+        mImages[12] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p13, ie, true);
 
         for(int ct=0; ct < mImages.length; ct++) {
             mImages[ct].uploadToTexture(1);
