@@ -903,6 +903,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                     getContext().startActivity(mVoiceWebSearchIntent);
                 } else if (mSearchable.getVoiceSearchLaunchRecognizer()) {
                     Intent appSearchIntent = createVoiceAppSearchIntent(mVoiceAppSearchIntent);
+                    
+                    // Stop the existing search before starting voice search, or else we'll end
+                    // up showing the search dialog again once we return to the app.
+                    ((SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE)).
+                            stopSearch();
+                    
                     getContext().startActivity(appSearchIntent);
                 }
             } catch (ActivityNotFoundException e) {
