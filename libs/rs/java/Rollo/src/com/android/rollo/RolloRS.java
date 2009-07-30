@@ -249,63 +249,63 @@ public class RolloRS {
             mLabels[3] = makeTextBitmap("settings");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.calendar, opts);
-            mIcons[4] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[4] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[4] = makeTextBitmap("creed");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.g1155, opts);
-            mIcons[5] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[5] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[5] = makeTextBitmap("BOA");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.g2140, opts);
-            mIcons[6] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[6] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[6] = makeTextBitmap("chess");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.maps, opts);
-            mIcons[7] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[7] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[7] = makeTextBitmap("Dictionary");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.path431, opts);
-            mIcons[8] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[8] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[8] = makeTextBitmap("facebook");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.path676, opts);
-            mIcons[9] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[9] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[9] = makeTextBitmap("Flash Light");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.path754, opts);
-            mIcons[10] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[10] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[10] = makeTextBitmap("Flight Control");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.path815, opts);
-            mIcons[11] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[11] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[11] = makeTextBitmap("google earth");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.path1920, opts);
-            mIcons[12] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[12] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[12] = makeTextBitmap("Harry Potter");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.path1927, opts);
-            mIcons[13] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[13] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[13] = makeTextBitmap("Movies");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.path3099, opts);
-            mIcons[14] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[14] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[14] = makeTextBitmap("NY Times");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.path3950, opts);
-            mIcons[15] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[15] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[15] = makeTextBitmap("Pandora");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.path4481, opts);
-            mIcons[16] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[16] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[16] = makeTextBitmap("Public Radio");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.path5168, opts);
-            mIcons[17] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[17] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[17] = makeTextBitmap("Public Radio");
 
             b = BitmapFactory.decodeResource(mRes, R.raw.polygon2408, opts);
-            mIcons[18] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+            mIcons[18] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
             mLabels[18] = makeTextBitmap("Public Radio");
 
             /*
@@ -405,7 +405,6 @@ public class RolloRS {
                 tmp[ct * 32 + 31] = 0;
             }
             mIconPlate.data(tmp);
-            Log.e("xx", "plate");
             mIconPlate.uploadToTexture(0);
             mIconPlate.setName("Plate");
             mPFImages.bindTexture(mIconPlate, 0);
