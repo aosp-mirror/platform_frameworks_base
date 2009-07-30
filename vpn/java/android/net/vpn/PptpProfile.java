@@ -16,6 +16,8 @@
 
 package android.net.vpn;
 
+import android.os.Parcel;
+
 /**
  * The profile for PPTP type of VPN.
  * {@hide}
@@ -38,5 +40,17 @@ public class PptpProfile extends VpnProfile {
 
     public boolean isEncryptionEnabled() {
         return mEncryption;
+    }
+
+    @Override
+    protected void readFromParcel(Parcel in) {
+        super.readFromParcel(in);
+        mEncryption = in.readInt() > 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        super.writeToParcel(parcel, flags);
+        parcel.writeInt(mEncryption ? 1 : 0);
     }
 }
