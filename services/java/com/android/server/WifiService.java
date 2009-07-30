@@ -93,6 +93,9 @@ public class WifiService extends IWifiManager.Stub {
     private boolean mDeviceIdle;
     private int mPluggedType;
 
+    // true if the user enabled Wifi while in airplane mode
+    private boolean mAirplaneModeOverwridden;
+
     private final LockList mLocks = new LockList();
     // some wifi lock statistics
     private int mFullLocksAcquired;
@@ -219,6 +222,8 @@ public class WifiService extends IWifiManager.Stub {
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
+                        // clear our flag indicating the user has overwridden airplane mode
+                        mAirplaneModeOverwridden = false;
                         updateWifiState();
                     }
                 },
@@ -292,6 +297,8 @@ public class WifiService extends IWifiManager.Stub {
         synchronized (mWifiHandler) {
             sWakeLock.acquire();
             mLastEnableUid = Binder.getCallingUid();
+            // set a flag if the user is enabling Wifi while in airplane mode
+            mAirplaneModeOverwridden = (enable && isAirplaneModeOn() && isAirplaneToggleable());
             sendEnableMessage(enable, true, Binder.getCallingUid());
         }
 
@@ -312,7 +319,7 @@ public class WifiService extends IWifiManager.Stub {
         if (mWifiState == eventualWifiState) {
             return true;
         }
-        if (enable && isAirplaneModeOn()) {
+        if (enable && isAirplaneModeOn() && !mAirplaneModeOverwridden) {
             return false;
         }
 
@@ -1495,7 +1502,7 @@ public class WifiService extends IWifiManager.Stub {
 
     private void updateWifiState() {
         boolean wifiEnabled = getPersistedWifiEnabled();
-        boolean airplaneMode = isAirplaneModeOn();
+        boolean airplaneMode = isAirplaneModeOn() && !mAirplaneModeOverwridden;
         boolean lockHeld = mLocks.hasLocks();
         int strongestLockMode;
         boolean wifiShouldBeEnabled = wifiEnabled && !airplaneMode;
@@ -1557,6 +1564,13 @@ public class WifiService extends IWifiManager.Stub {
                 Settings.System.AIRPLANE_MODE_RADIOS);
         return airplaneModeRadios == null
             || airplaneModeRadios.contains(Settings.System.RADIO_WIFI);
+    }
+
+    private boolean isAirplaneToggleable() {
+        String toggleableRadios = Settings.System.getString(mContext.getContentResolver(),
+                Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
+        return toggleableRadios != null
+            && toggleableRadios.contains(Settings.System.RADIO_WIFI);
     }
 
     /**
