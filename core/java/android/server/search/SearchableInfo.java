@@ -103,6 +103,14 @@ public final class SearchableInfo implements Parcelable {
     }
 
     /**
+     * Gets the name of the package where the suggestion provider lives,
+     * or {@code null}.
+     */
+    public String getSuggestPackage() {
+        return mSuggestProviderPackage;
+    }
+
+    /**
      * Gets the component name of the searchable activity.
      */
     public ComponentName getSearchActivity() {
