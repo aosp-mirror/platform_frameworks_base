@@ -497,9 +497,9 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(int, int, int)" },
 
     // vp
-    { "vpLoadModelMatrix", (void *)&SC_bindProgramFragment,
+    { "vpLoadModelMatrix", (void *)&SC_vpLoadModelMatrix,
         "void", "(void *)" },
-    { "vpLoadTextureMatrix", (void *)&SC_bindProgramFragmentStore,
+    { "vpLoadTextureMatrix", (void *)&SC_vpLoadTextureMatrix,
         "void", "(void *)" },
 
 

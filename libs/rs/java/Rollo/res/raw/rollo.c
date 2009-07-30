@@ -80,15 +80,15 @@ int main(void* con, int ft, int launchID)
         float tmpCos = cosf(rot);
             //debugF("rot", rot);
 
-        float tx1 = tmpSin * diam - (tmpCos * scale);
-        float tx2 = tx1 + (tmpCos * scale * 2.f);
-        float tz1 = tmpCos * diam + (tmpSin * scale);
-        float tz2 = tz1 - (tmpSin * scale * 2.f);
+        float tx1 = tmpSin * diam - (tmpCos * scale * 0.9f);
+        float tx2 = tx1 + (tmpCos * scale * 1.8f);
+        float tz1 = tmpCos * diam + (tmpSin * scale * 0.9f);
+        float tz2 = tz1 - (tmpSin * scale * 1.8f);
 
         int y;
         for (y = rowCount -1; (y >= 0) && iconCount; y--) {
             float ty1 = ((y * 3.1f) - 5.f) * scale;
-            float ty2 = ty1 + scale * 2.f;
+            float ty2 = ty1 + scale * 1.8f;
             bindTexture(NAMED_PF, 0, loadI32(1, index));
             //if (done && (index != selectedID)) {
                 //color(0.4f, 0.4f, 0.4f, 1.0f);

@@ -74,7 +74,7 @@ public class FilmView extends RSSurfaceView {
         if (act == ev.ACTION_UP) {
             ret = false;
         }
-        mRender.setFilmStripPosition((int)ev.getX(), (int)ev.getY());
+        mRender.setFilmStripPosition((int)ev.getX(), (int)ev.getY() / 5);
         return ret;
     }
 }
