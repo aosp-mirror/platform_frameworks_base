@@ -1009,6 +1009,8 @@ public final class ContactsContract {
 
             public static final String PROTOCOL = "data5";
 
+            public static final String CUSTOM_PROTOCOL = "data6";
+
             /**
              * The predefined IM protocol types. The protocol can either be non-present, one
              * of these types, or a free-form string. These cases are encoded in the PROTOCOL
@@ -1019,6 +1021,7 @@ public final class ContactsContract {
              * <li>custom:&lt;a string&gt;</li>
              * </ul>
              */
+            public static final int PROTOCOL_CUSTOM = -1;
             public static final int PROTOCOL_AIM = 0;
             public static final int PROTOCOL_MSN = 1;
             public static final int PROTOCOL_YAHOO = 2;
@@ -1027,31 +1030,6 @@ public final class ContactsContract {
             public static final int PROTOCOL_GOOGLE_TALK = 5;
             public static final int PROTOCOL_ICQ = 6;
             public static final int PROTOCOL_JABBER = 7;
-
-            public static String encodePredefinedImProtocol(int protocol) {
-               return "pre:" + protocol;
-            }
-
-            public static String encodeCustomImProtocol(String protocolString) {
-               return "custom:" + protocolString;
-            }
-
-            public static Object decodeImProtocol(String encodedString) {
-               if (encodedString == null) {
-                   return null;
-               }
-
-               if (encodedString.startsWith("pre:")) {
-                   return Integer.parseInt(encodedString.substring(4));
-               }
-
-               if (encodedString.startsWith("custom:")) {
-                   return encodedString.substring(7);
-               }
-
-               throw new IllegalArgumentException(
-                       "the value is not a valid encoded protocol, " + encodedString);
-            }
         }
 
         /**
