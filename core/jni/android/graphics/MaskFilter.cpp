@@ -13,7 +13,7 @@ static void ThrowIAE_IfNull(JNIEnv* env, void* ptr) {
 class SkMaskFilterGlue {
 public:
     static void destructor(JNIEnv* env, jobject, SkMaskFilter* filter) {
-        SkSafeUnref(filter);
+        filter->safeUnref();
     }
 
     static SkMaskFilter* createBlur(JNIEnv* env, jobject, float radius, int blurStyle) {
