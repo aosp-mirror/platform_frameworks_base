@@ -206,11 +206,6 @@ public class WebView extends AbsoluteLayout
 
     static final String LOGTAG = "webview";
 
-    static class ScaleLimitData {
-        int mMinScale;
-        int mMaxScale;
-    }
-
     private static class ExtendedZoomControls extends FrameLayout {
         public ExtendedZoomControls(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -472,7 +467,6 @@ public class WebView extends AbsoluteLayout
     static final int UPDATE_TEXT_ENTRY_MSG_ID           = 15;
     static final int WEBCORE_INITIALIZED_MSG_ID         = 16;
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 17;
-    static final int DID_FIRST_LAYOUT_MSG_ID            = 18;
     static final int MOVE_OUT_OF_PLUGIN                 = 19;
     static final int CLEAR_TEXT_ENTRY                   = 20;
 
@@ -502,7 +496,7 @@ public class WebView extends AbsoluteLayout
         "UPDATE_TEXT_ENTRY_MSG_ID", //       = 15;
         "WEBCORE_INITIALIZED_MSG_ID", //     = 16;
         "UPDATE_TEXTFIELD_TEXT_MSG_ID", //   = 17;
-        "DID_FIRST_LAYOUT_MSG_ID", //        = 18;
+        "18", //        = 18;
         "MOVE_OUT_OF_PLUGIN", //             = 19;
         "CLEAR_TEXT_ENTRY", //               = 20;
         "21", //                             = 21;
@@ -1892,6 +1886,13 @@ public class WebView extends AbsoluteLayout
         r.bottom = viewToContent(r.bottom);
     }
 
+    static class ViewSizeData {
+        int mWidth;
+        int mHeight;
+        int mTextWrapWidth;
+        float mScale;
+    }
+
     /**
      * Compute unzoomed width and height, and if they differ from the last
      * values we sent, send them to webkit (to be used has new viewport)
@@ -1899,7 +1900,8 @@ public class WebView extends AbsoluteLayout
      * @return true if new values were sent
      */
     private boolean sendViewSizeZoom() {
-        int newWidth = Math.round(getViewWidth() * mInvActualScale);
+        int viewWidth = getViewWidth();
+        int newWidth = Math.round(viewWidth * mInvActualScale);
         int newHeight = Math.round(getViewHeight() * mInvActualScale);
         /*
          * Because the native side may have already done a layout before the
@@ -1914,8 +1916,16 @@ public class WebView extends AbsoluteLayout
         }
         // Avoid sending another message if the dimensions have not changed.
         if (newWidth != mLastWidthSent || newHeight != mLastHeightSent) {
-            mWebViewCore.sendMessage(EventHub.VIEW_SIZE_CHANGED,
-                    newWidth, newHeight, new Float(mActualScale));
+            ViewSizeData data = new ViewSizeData();
+            data.mWidth = newWidth;
+            data.mHeight = newHeight;
+            // while in zoom overview mode, the text are wrapped to the screen
+            // width matching mLastScale. So that we don't trigger re-flow while
+            // toggling between overview mode and normal mode.
+            data.mTextWrapWidth = mInZoomOverview ? Math.round(viewWidth
+                    / mLastScale) : newWidth;
+            data.mScale = mActualScale;
+            mWebViewCore.sendMessage(EventHub.VIEW_SIZE_CHANGED, data);
             mLastWidthSent = newWidth;
             mLastHeightSent = newHeight;
             return true;
@@ -3877,11 +3887,6 @@ public class WebView extends AbsoluteLayout
                     if (!mDragFromTextInput) {
                         nativeHideCursor();
                     }
-                    // remove the zoom anchor if there is any
-                    if (mZoomScale != 0) {
-                        mWebViewCore
-                                .sendMessage(EventHub.SET_SNAP_ANCHOR, 0, 0);
-                    }
                     WebSettings settings = getSettings();
                     if (settings.supportZoom() && !mInZoomOverview
                             && settings.getBuiltInZoomControls()
@@ -4982,15 +4987,35 @@ public class WebView extends AbsoluteLayout
                     final WebViewCore.DrawData draw =
                             (WebViewCore.DrawData) msg.obj;
                     final Point viewSize = draw.mViewPoint;
-                    if (mZoomScale > 0) {
-                        // use the same logic in sendViewSizeZoom() to make sure
-                        // the mZoomScale has matched the viewSize so that we
-                        // can clear mZoomScale
-                        if (Math.round(viewWidth / mZoomScale) == viewSize.x) {
-                            mZoomScale = 0;
-                            mWebViewCore.sendMessage(EventHub.SET_SNAP_ANCHOR,
-                                    0, 0);
+                    boolean useWideViewport =
+                            mWebViewCore.getSettings().getUseWideViewPort();
+                    WebViewCore.RestoreState restoreState = draw.mRestoreState;
+                    if (restoreState != null) {
+                        mInZoomOverview = false;
+                        mLastScale = restoreState.mTextWrapScale;
+                        if (restoreState.mMinScale == 0) {
+                            mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+                            mMinZoomScaleFixed = false;
+                        } else {
+                            mMinZoomScale = restoreState.mMinScale;
+                            mMinZoomScaleFixed = true;
                         }
+                        if (restoreState.mMaxScale == 0) {
+                            mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
+                        } else {
+                            mMaxZoomScale = restoreState.mMaxScale;
+                        }
+                        if (useWideViewport && restoreState.mViewScale == 0) {
+                            mInZoomOverview = ENABLE_DOUBLETAP_ZOOM;
+                        }
+                        setNewZoomScale(mLastScale, false);
+                        setContentScrollTo(restoreState.mScrollX,
+                                restoreState.mScrollY);
+                        // As we are on a new page, remove the WebTextView. This
+                        // is necessary for page loads driven by webkit, and in
+                        // particular when the user was on a password field, so
+                        // the WebTextView was visible.
+                        clearTextEntry();
                     }
                     // We update the layout (i.e. request a layout from the
                     // view system) if the last view size that we sent to
@@ -5009,7 +5034,7 @@ public class WebView extends AbsoluteLayout
                     if (mPictureListener != null) {
                         mPictureListener.onNewPicture(WebView.this, capturePicture());
                     }
-                    if (mWebViewCore.getSettings().getUseWideViewPort()) {
+                    if (useWideViewport) {
                         mZoomOverviewWidth = Math.max(draw.mMinPrefWidth,
                                 draw.mViewPoint.x);
                     }
@@ -5056,76 +5081,6 @@ public class WebView extends AbsoluteLayout
                         }
                     }
                     break;
-                case DID_FIRST_LAYOUT_MSG_ID: {
-                    if (mNativeClass == 0) {
-                        break;
-                    }
-                    ScaleLimitData scaleLimit = (ScaleLimitData) msg.obj;
-                    int minScale = scaleLimit.mMinScale;
-                    if (minScale == 0) {
-                        mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
-                        mMinZoomScaleFixed = false;
-                    } else {
-                        mMinZoomScale = (float) (minScale / 100.0);
-                        mMinZoomScaleFixed = true;
-                    }
-                    int maxScale = scaleLimit.mMaxScale;
-                    if (maxScale == 0) {
-                        mMaxZoomScale = DEFAULT_MAX_ZOOM_SCALE;
-                    } else {
-                        mMaxZoomScale = (float) (maxScale / 100.0);
-                    }
-                    // If history Picture is drawn, don't update zoomWidth
-                    if (mDrawHistory) {
-                        break;
-                    }
-                    int width = getViewWidth();
-                    if (width == 0) {
-                        break;
-                    }
-                    final WebSettings settings = mWebViewCore.getSettings();
-                    int initialScale = msg.arg1;
-                    int viewportWidth = msg.arg2;
-                    // start a new page with DEFAULT_SCALE zoom scale.
-                    float scale = mDefaultScale;
-                    mInZoomOverview = false;
-                    if (mInitialScale > 0) {
-                        scale = mInitialScale / 100.0f;
-                    } else  {
-                        if (initialScale == -1) break;
-                        if (settings.getUseWideViewPort()) {
-                            // force viewSizeChanged by setting mLastWidthSent
-                            // to 0
-                            mLastWidthSent = 0;
-                        }
-                        if (initialScale == 0) {
-                            // if viewportWidth is defined and it is smaller
-                            // than the view width, zoom in to fill the view
-                            if (viewportWidth > 0 && viewportWidth < width) {
-                                scale = (float) width / viewportWidth;
-                            } else {
-                                if (settings.getUseWideViewPort()) {
-                                    mInZoomOverview = ENABLE_DOUBLETAP_ZOOM;
-                                }
-                            }
-                        } else if (initialScale < 0) {
-                            // this should only happen when
-                            // ENABLE_DOUBLETAP_ZOOM is true
-                            mInZoomOverview = true;
-                            scale = -initialScale / 100.0f;
-                        } else {
-                            scale = initialScale / 100.0f;
-                        }
-                    }
-                    mLastScale = scale;
-                    setNewZoomScale(scale, false);
-                    // As we are on a new page, remove the WebTextView.  This
-                    // is necessary for page loads driven by webkit, and in
-                    // particular when the user was on a password field, so
-                    // the WebTextView was visible.
-                    clearTextEntry();
-                    break;
-                }
                 case MOVE_OUT_OF_PLUGIN:
                     if (nativePluginEatsNavKey()) {
                         navHandledKey(msg.arg1, 1, false, 0, true);

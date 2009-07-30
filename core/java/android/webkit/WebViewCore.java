@@ -443,10 +443,6 @@ final class WebViewCore {
 
     private native void nativeUpdateFrameCache();
 
-    private native void nativeSetSnapAnchor(int x, int y);
-
-    private native void nativeSnapToAnchor();
-
     private native void nativeSetBackgroundColor(int color);
 
     private native void nativeDumpDomTree(boolean useFile);
@@ -674,7 +670,7 @@ final class WebViewCore {
             "CLICK", // = 118;
             "SET_NETWORK_STATE", // = 119;
             "DOC_HAS_IMAGES", // = 120;
-            "SET_SNAP_ANCHOR", // = 121;
+            "121", // = 121;
             "DELETE_SELECTION", // = 122;
             "LISTBOX_CHOICES", // = 123;
             "SINGLE_LISTBOX_CHOICE", // = 124;
@@ -725,7 +721,6 @@ final class WebViewCore {
         static final int CLICK = 118;
         static final int SET_NETWORK_STATE = 119;
         static final int DOC_HAS_IMAGES = 120;
-        static final int SET_SNAP_ANCHOR = 121;
         static final int DELETE_SELECTION = 122;
         static final int LISTBOX_CHOICES = 123;
         static final int SINGLE_LISTBOX_CHOICE = 124;
@@ -904,11 +899,13 @@ final class WebViewCore {
                             nativeClick(msg.arg1, msg.arg2);
                             break;
 
-                        case VIEW_SIZE_CHANGED:
-                            viewSizeChanged(msg.arg1, msg.arg2,
-                                    ((Float) msg.obj).floatValue());
+                        case VIEW_SIZE_CHANGED: {
+                            WebView.ViewSizeData data =
+                                    (WebView.ViewSizeData) msg.obj;
+                            viewSizeChanged(data.mWidth, data.mHeight,
+                                    data.mTextWrapWidth, data.mScale);
                             break;
-
+                        }
                         case SET_SCROLL_OFFSET:
                             // note: these are in document coordinates
                             // (inv-zoom)
@@ -1105,10 +1102,6 @@ final class WebViewCore {
                             imageResult.arg1 =
                                     mBrowserFrame.documentHasImages() ? 1 : 0;
                             imageResult.sendToTarget();
-                            break;
-
-                        case SET_SNAP_ANCHOR:
-                            nativeSetSnapAnchor(msg.arg1, msg.arg2);
                             break;
 
                         case DELETE_SELECTION:
@@ -1401,16 +1394,20 @@ final class WebViewCore {
     // These values are used to avoid requesting a layout based on old values
     private int mCurrentViewWidth = 0;
     private int mCurrentViewHeight = 0;
+    private float mCurrentViewScale = 1.0f;
 
     // notify webkit that our virtual view size changed size (after inv-zoom)
-    private void viewSizeChanged(int w, int h, float scale) {
-        if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "CORE onSizeChanged");
+    private void viewSizeChanged(int w, int h, int textwrapWidth, float scale) {
+        if (DebugFlags.WEB_VIEW_CORE) {
+            Log.v(LOGTAG, "viewSizeChanged w=" + w + "; h=" + h
+                    + "; textwrapWidth=" + textwrapWidth + "; scale=" + scale);
+        }
         if (w == 0) {
             Log.w(LOGTAG, "skip viewSizeChanged as w is 0");
             return;
         }
+        int width = w;
         if (mSettings.getUseWideViewPort()) {
-            int width;
             if (mViewportWidth == -1) {
                 if (mSettings.getLayoutAlgorithm() ==
                         WebSettings.LayoutAlgorithm.NORMAL) {
@@ -1433,19 +1430,14 @@ final class WebViewCore {
             } else {
                 width = Math.max(w, mViewportWidth);
             }
-            // while in zoom overview mode, the text are wrapped to the screen
-            // width matching mWebView.mLastScale. So that we don't trigger
-            // re-flow while toggling between overview mode and normal mode.
-            nativeSetSize(width, Math.round((float) width * h / w),
-                    Math.round(mWebView.mInZoomOverview ? w * scale
-                            / mWebView.mLastScale : w), scale, w, h);
-        } else {
-            nativeSetSize(w, h, w, scale, w, h);
         }
+        nativeSetSize(width, width == w ? h : Math.round((float) width * h / w),
+                textwrapWidth, scale, w, h);
         // Remember the current width and height
         boolean needInvalidate = (mCurrentViewWidth == 0);
         mCurrentViewWidth = w;
         mCurrentViewHeight = h;
+        mCurrentViewScale = scale;
         if (needInvalidate) {
             // ensure {@link #webkitDraw} is called as we were blocking in
             // {@link #contentDraw} when mCurrentViewWidth is 0
@@ -1490,15 +1482,30 @@ final class WebViewCore {
     // Used to end scale+scroll mode, accessed by both threads
     boolean mEndScaleZoom = false;
 
-    public class DrawData {
-        public DrawData() {
+    // mRestoreState is set in didFirstLayout(), and reset in the next
+    // webkitDraw after passing it to the UI thread.
+    private RestoreState mRestoreState = null;
+
+    static class RestoreState {
+        float mMinScale;
+        float mMaxScale;
+        float mViewScale;
+        float mTextWrapScale;
+        int mScrollX;
+        int mScrollY;
+    }
+
+    static class DrawData {
+        DrawData() {
             mInvalRegion = new Region();
             mWidthHeight = new Point();
         }
-        public Region mInvalRegion;
-        public Point mViewPoint;
-        public Point mWidthHeight;
-        public int mMinPrefWidth;
+        Region mInvalRegion;
+        Point mViewPoint;
+        Point mWidthHeight;
+        int mMinPrefWidth;
+        RestoreState mRestoreState; // only non-null if it is for the first
+                                    // picture set after the first layout
     }
 
     private void webkitDraw() {
@@ -1517,6 +1524,10 @@ final class WebViewCore {
             if (WebView.ENABLE_DOUBLETAP_ZOOM && mSettings.getUseWideViewPort()) {
                 draw.mMinPrefWidth = nativeGetContentMinPrefWidth();
             }
+            if (mRestoreState != null) {
+                draw.mRestoreState = mRestoreState;
+                mRestoreState = null;
+            }
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
             Message.obtain(mWebView.mPrivateHandler,
                     WebView.NEW_PICTURE_MSG_ID, draw).sendToTarget();
@@ -1527,9 +1538,6 @@ final class WebViewCore {
                         mWebkitScrollY).sendToTarget();
                 mWebkitScrollX = mWebkitScrollY = 0;
             }
-            // nativeSnapToAnchor() needs to be called after NEW_PICTURE_MSG_ID
-            // is sent, so that scroll will be based on the new content size.
-            nativeSnapToAnchor();
         }
     }
 
@@ -1751,23 +1759,17 @@ final class WebViewCore {
 
     // called by JNI
     private void didFirstLayout(boolean standardLoad) {
-        // Trick to ensure that the Picture has the exact height for the content
-        // by forcing to layout with 0 height after the page is ready, which is
-        // indicated by didFirstLayout. This is essential to get rid of the
-        // white space in the GMail which uses WebView for message view.
-        if (mWebView != null && mWebView.mHeightCanMeasure) {
-            mWebView.mLastHeightSent = 0;
-            // Send a negative scale to indicate that WebCore should reuse the
-            // current scale
-            mEventHub.sendMessage(Message.obtain(null,
-                    EventHub.VIEW_SIZE_CHANGED, mWebView.mLastWidthSent,
-                    mWebView.mLastHeightSent, -1.0f));
+        if (DebugFlags.WEB_VIEW_CORE) {
+            Log.v(LOGTAG, "didFirstLayout standardLoad =" + standardLoad);
         }
 
         mBrowserFrame.didFirstLayout();
 
         // reset the scroll position as it is a new page now
         mWebkitScrollX = mWebkitScrollY = 0;
+
+        // for non-standard load, we only adjust scale if mRestoredScale > 0
+        if (mWebView == null || (mRestoredScale == 0 && !standardLoad)) return;
 
         // set the viewport settings from WebKit
         setViewportSettingsFromNative();
@@ -1820,47 +1822,74 @@ final class WebViewCore {
         }
 
         // now notify webview
-        if (mWebView != null) {
-            WebView.ScaleLimitData scaleLimit = new WebView.ScaleLimitData();
-            scaleLimit.mMinScale = mViewportMinimumScale;
-            scaleLimit.mMaxScale = mViewportMaximumScale;
-
-            if (mRestoredScale > 0) {
-                Message.obtain(mWebView.mPrivateHandler,
-                        WebView.DID_FIRST_LAYOUT_MSG_ID,
-                        mRestoredScreenWidthScale > 0 ?
-                        -mRestoredScreenWidthScale : mRestoredScale, 0,
-                        scaleLimit).sendToTarget();
+        int webViewWidth = Math.round(mCurrentViewWidth * mCurrentViewScale);
+        mRestoreState = new RestoreState();
+        mRestoreState.mMinScale = mViewportMinimumScale / 100.0f;
+        mRestoreState.mMaxScale = mViewportMaximumScale / 100.0f;
+        mRestoreState.mScrollX = mRestoredX;
+        mRestoreState.mScrollY = mRestoredY;
+        if (mRestoredScale > 0) {
+            if (mRestoredScreenWidthScale > 0) {
+                mRestoreState.mTextWrapScale =
+                        mRestoredScreenWidthScale / 100.0f;
+                // 0 will trigger WebView to turn on zoom overview mode
+                mRestoreState.mViewScale = 0;
             } else {
-                // if standardLoad is true, use mViewportInitialScale, otherwise
-                // pass -1 to the WebView to indicate no change of the scale.
-                Message.obtain(mWebView.mPrivateHandler,
-                        WebView.DID_FIRST_LAYOUT_MSG_ID,
-                        standardLoad ? mViewportInitialScale : -1,
-                        mViewportWidth, scaleLimit).sendToTarget();
+                mRestoreState.mViewScale = mRestoreState.mTextWrapScale =
+                        mRestoredScale / 100.0f;
             }
-
-            // force an early draw for quick feedback after the first layout
-            if (mCurrentViewWidth != 0) {
-                synchronized (this) {
-                    if (mDrawIsScheduled) {
-                        mEventHub.removeMessages(EventHub.WEBKIT_DRAW);
-                    }
-                    mDrawIsScheduled = true;
-                    // if no restored offset, move the new page to (0, 0)
-                    mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
-                            EventHub.MESSAGE_RELAY, Message.obtain(
-                                    mWebView.mPrivateHandler,
-                                    WebView.SCROLL_TO_MSG_ID, mRestoredX,
-                                    mRestoredY)));
-                    mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
-                            EventHub.WEBKIT_DRAW));
-                }
+        } else {
+            if (mViewportInitialScale > 0) {
+                mRestoreState.mViewScale = mRestoreState.mTextWrapScale =
+                        mViewportInitialScale / 100.0f;
+            } else if (mViewportWidth > 0 && mViewportWidth < webViewWidth) {
+                mRestoreState.mViewScale = mRestoreState.mTextWrapScale =
+                        (float) webViewWidth / mViewportWidth;
+            } else {
+                mRestoreState.mTextWrapScale =
+                        WebView.DEFAULT_SCALE_PERCENT / 100.0f;
+                // 0 will trigger WebView to turn on zoom overview mode
+                mRestoreState.mViewScale = 0;
             }
-
-            // reset restored offset, scale
-            mRestoredX = mRestoredY = mRestoredScale = mRestoredScreenWidthScale = 0;
         }
+
+        if (mWebView.mHeightCanMeasure) {
+            // Trick to ensure that the Picture has the exact height for the
+            // content by forcing to layout with 0 height after the page is
+            // ready, which is indicated by didFirstLayout. This is essential to
+            // get rid of the white space in the GMail which uses WebView for
+            // message view.
+            mWebView.mLastHeightSent = 0;
+            // Send a negative scale to indicate that WebCore should reuse
+            // the current scale
+            WebView.ViewSizeData data = new WebView.ViewSizeData();
+            data.mWidth = mWebView.mLastWidthSent;
+            data.mHeight = 0;
+            // if mHeightCanMeasure is true, getUseWideViewPort() can't be
+            // true. It is safe to use mWidth for mTextWrapWidth.
+            data.mTextWrapWidth = data.mWidth;
+            data.mScale = -1.0f;
+            mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
+                    EventHub.VIEW_SIZE_CHANGED, data));
+        } else if (mSettings.getUseWideViewPort() && mCurrentViewWidth > 0) {
+            WebView.ViewSizeData data = new WebView.ViewSizeData();
+            // mViewScale as 0 means it is in zoom overview mode. So we don't
+            // know the exact scale. If mRestoredScale is non-zero, use it;
+            // otherwise just use mTextWrapScale as the initial scale.
+            data.mScale = mRestoreState.mViewScale == 0
+                    ? (mRestoredScale > 0 ? mRestoredScale
+                            : mRestoreState.mTextWrapScale)
+                    : mRestoreState.mViewScale;
+            data.mWidth = Math.round(webViewWidth / data.mScale);
+            data.mHeight = mCurrentViewHeight * data.mWidth
+                    / mCurrentViewWidth;
+            data.mTextWrapWidth = Math.round(webViewWidth
+                    / mRestoreState.mTextWrapScale);
+            mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
+                    EventHub.VIEW_SIZE_CHANGED, data));
+        }
+        // reset restored offset, scale
+        mRestoredX = mRestoredY = mRestoredScale = mRestoredScreenWidthScale = 0;
     }
 
     // called by JNI
