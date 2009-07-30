@@ -1338,25 +1338,26 @@ public class CDMAPhone extends PhoneBase {
         return isOtaSpNum;
     }
 
-     /**
-      * isOTASPNumber: checks a given number against the IS-683A OTASP dial string and carrier
-      * OTASP dial string.
-      *
-      * @param dialStr the number to look up.
-      * @return true if the number is in IS-683A OTASP dial string or carrier OTASP dial string
-      */
+    /**
+     * isOTASPNumber: checks a given number against the IS-683A OTASP dial string and carrier
+     * OTASP dial string.
+     *
+     * @param dialStr the number to look up.
+     * @return true if the number is in IS-683A OTASP dial string or carrier OTASP dial string
+     */
     @Override
-     public  boolean isOtaSpNumber(String dialStr){
-         boolean isOtaSpNum = false;
-         if (dialStr != null) {
-             isOtaSpNum = isIs683OtaSpDialStr(dialStr);
-             if(isOtaSpNum == false){
-                 isOtaSpNum = isCarrierOtaSpNum(dialStr);
-             }
-         }
-         if (DBG) Log.d(LOG_TAG, "isOtaSpNumber " + isOtaSpNum);
-         return isOtaSpNum;
-     }
+    public  boolean isOtaSpNumber(String dialStr){
+        boolean isOtaSpNum = false;
+        String dialableStr = PhoneNumberUtils.extractNetworkPortion(dialStr);
+        if (dialableStr != null) {
+            isOtaSpNum = isIs683OtaSpDialStr(dialableStr);
+            if (isOtaSpNum == false) {
+                isOtaSpNum = isCarrierOtaSpNum(dialableStr);
+            }
+        }
+        if (DBG) Log.d(LOG_TAG, "isOtaSpNumber " + isOtaSpNum);
+        return isOtaSpNum;
+    }
 
     @Override
     public int getCdmaEriIconIndex() {
