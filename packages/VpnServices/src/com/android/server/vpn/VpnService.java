@@ -28,7 +28,11 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.net.DatagramSocket;
+import java.net.Socket;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +40,9 @@ import java.util.List;
 /**
  * The service base class for managing a type of VPN connection.
  */
-abstract class VpnService<E extends VpnProfile> {
+abstract class VpnService<E extends VpnProfile> implements Serializable {
+    protected static final long serialVersionUID = 1L;
+    private static final boolean DBG = true;
     private static final int NOTIFICATION_ID = 1;
 
     private static final String DNS1 = "net.dns1";
@@ -50,12 +56,16 @@ abstract class VpnService<E extends VpnProfile> {
     private static final String REMOTE_IP = "net.ipremote";
     private static final String DNS_DOMAIN_SUFFICES = "net.dns.search";
 
+    private static final int CHALLENGE_ERROR_CODE = 5;
+    private static final int REMOTE_HUNG_UP_ERROR_CODE = 7;
     private static final int AUTH_ERROR_CODE = 51;
 
     private final String TAG = VpnService.class.getSimpleName();
 
+    // FIXME: profile is only needed in connecting phase, so we can just save
+    // the profile name and service class name for recovery
     E mProfile;
-    VpnServiceBinder mContext;
+    transient VpnServiceBinder mContext;
 
     private VpnState mState = VpnState.IDLE;
     private Throwable mError;
@@ -63,9 +73,9 @@ abstract class VpnService<E extends VpnProfile> {
     // connection settings
     private String mOriginalDns1;
     private String mOriginalDns2;
-    private String mVpnDns1 = "";
-    private String mVpnDns2 = "";
     private String mOriginalDomainSuffices;
+    private String mLocalIp;
+    private String mLocalIf;
 
     private long mStartTime; // VPN connection start time
 
@@ -73,7 +83,7 @@ abstract class VpnService<E extends VpnProfile> {
     private DaemonHelper mDaemonHelper = new DaemonHelper();
 
     // for helping showing, updating notification
-    private NotificationHelper mNotification = new NotificationHelper();
+    private transient NotificationHelper mNotification;
 
     /**
      * Establishes a VPN connection with the specified username and password.
@@ -81,12 +91,21 @@ abstract class VpnService<E extends VpnProfile> {
     protected abstract void connect(String serverIp, String username,
             String password) throws IOException;
 
+    protected abstract void stopPreviouslyRunDaemons();
+
     /**
      * Starts a VPN daemon.
      */
     protected DaemonProxy startDaemon(String daemonName)
             throws IOException {
         return mDaemonHelper.startDaemon(daemonName);
+    }
+
+    /**
+     * Stops a VPN daemon.
+     */
+    protected void stopDaemon(String daemonName) {
+        new DaemonProxy(daemonName).stop();
     }
 
     /**
@@ -104,8 +123,22 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     void setContext(VpnServiceBinder context, E profile) {
-        mContext = context;
         mProfile = profile;
+        recover(context);
+    }
+
+    void recover(VpnServiceBinder context) {
+        mContext = context;
+        mNotification = new NotificationHelper();
+
+        if (VpnState.CONNECTED.equals(mState)) {
+            Log.i("VpnService", "     recovered: " + mProfile.getName());
+            new Thread(new Runnable() {
+                public void run() {
+                    enterConnectivityLoop();
+                }
+            }).start();
+        }
     }
 
     VpnState getState() {
@@ -117,14 +150,14 @@ abstract class VpnService<E extends VpnProfile> {
             mState = VpnState.CONNECTING;
             broadcastConnectivity(VpnState.CONNECTING);
 
+            stopPreviouslyRunDaemons();
             String serverIp = getIp(getProfile().getServerName());
-
+            saveLocalIpAndInterface(serverIp);
             onBeforeConnect();
             connect(serverIp, username, password);
             waitUntilConnectedOrTimedout();
             return true;
         } catch (Throwable e) {
-            Log.e(TAG, "onConnect()", e);
             onError(e);
             return false;
         }
@@ -132,7 +165,7 @@ abstract class VpnService<E extends VpnProfile> {
 
     synchronized void onDisconnect() {
         try {
-            Log.d(TAG, "       disconnecting VPN...");
+            Log.i(TAG, "disconnecting VPN...");
             mState = VpnState.DISCONNECTING;
             broadcastConnectivity(VpnState.DISCONNECTING);
             mNotification.showDisconnect();
@@ -152,6 +185,7 @@ abstract class VpnService<E extends VpnProfile> {
             Log.w(TAG, "   multiple errors occur, record the last one: "
                     + error);
         }
+        Log.e(TAG, "onError()", error);
         mError = error;
         onDisconnect();
     }
@@ -161,16 +195,18 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
 
-    private void onBeforeConnect() {
+    private void onBeforeConnect() throws IOException {
         mNotification.disableNotification();
 
-        SystemProperties.set(VPN_DNS1, "-");
-        SystemProperties.set(VPN_DNS2, "-");
+        SystemProperties.set(VPN_DNS1, "");
+        SystemProperties.set(VPN_DNS2, "");
         SystemProperties.set(VPN_STATUS, VPN_IS_DOWN);
-        Log.d(TAG, "       VPN UP: " + SystemProperties.get(VPN_STATUS));
+        if (DBG) {
+            Log.d(TAG, "       VPN UP: " + SystemProperties.get(VPN_STATUS));
+        }
     }
 
-    private void waitUntilConnectedOrTimedout() {
+    private void waitUntilConnectedOrTimedout() throws IOException {
         sleep(2000); // 2 seconds
         for (int i = 0; i < 60; i++) {
             if (mState != VpnState.CONNECTING) {
@@ -187,39 +223,49 @@ abstract class VpnService<E extends VpnProfile> {
 
         synchronized (VpnService.this) {
             if (mState == VpnState.CONNECTING) {
-                Log.d(TAG, "       connecting timed out !!");
                 onError(new IOException("Connecting timed out"));
             }
         }
     }
 
-    private synchronized void onConnected() {
-        Log.d(TAG, "onConnected()");
+    private synchronized void onConnected() throws IOException {
+        if (DBG) Log.d(TAG, "onConnected()");
 
         mDaemonHelper.closeSockets();
-        saveVpnDnsProperties();
+        saveOriginalDns();
         saveAndSetDomainSuffices();
 
         mState = VpnState.CONNECTED;
+        mStartTime = System.currentTimeMillis();
+
+        // set DNS after saving the states in case the process gets killed
+        // before states are saved
+        saveSelf();
+        setVpnDns();
         broadcastConnectivity(VpnState.CONNECTED);
 
         enterConnectivityLoop();
     }
 
+    private void saveSelf() throws IOException {
+        mContext.saveStates();
+    }
+
     private synchronized void onFinalCleanUp() {
-        Log.d(TAG, "onFinalCleanUp()");
+        if (DBG) Log.d(TAG, "onFinalCleanUp()");
 
         if (mState == VpnState.IDLE) return;
 
         // keep the notification when error occurs
         if (!anyError()) mNotification.disableNotification();
 
-        restoreOriginalDnsProperties();
+        restoreOriginalDns();
         restoreOriginalDomainSuffices();
         mState = VpnState.IDLE;
         broadcastConnectivity(VpnState.IDLE);
 
         // stop the service itself
+        mContext.removeStates();
         mContext.stopSelf();
     }
 
@@ -227,46 +273,38 @@ abstract class VpnService<E extends VpnProfile> {
         return (mError != null);
     }
 
-    private void restoreOriginalDnsProperties() {
+    private void restoreOriginalDns() {
         // restore only if they are not overridden
-        if (mVpnDns1.equals(SystemProperties.get(DNS1))) {
-            Log.d(TAG, String.format("restore original dns prop: %s --> %s",
+        String vpnDns1 = SystemProperties.get(VPN_DNS1);
+        if (vpnDns1.equals(SystemProperties.get(DNS1))) {
+            Log.i(TAG, String.format("restore original dns prop: %s --> %s",
                     SystemProperties.get(DNS1), mOriginalDns1));
-            Log.d(TAG, String.format("restore original dns prop: %s --> %s",
+            Log.i(TAG, String.format("restore original dns prop: %s --> %s",
                     SystemProperties.get(DNS2), mOriginalDns2));
             SystemProperties.set(DNS1, mOriginalDns1);
             SystemProperties.set(DNS2, mOriginalDns2);
         }
     }
 
-    private void saveVpnDnsProperties() {
-        mOriginalDns1 = mOriginalDns2 = "";
-        for (int i = 0; i < 5; i++) {
-            mVpnDns1 = SystemProperties.get(VPN_DNS1);
-            mVpnDns2 = SystemProperties.get(VPN_DNS2);
-            if (mOriginalDns1.equals(mVpnDns1)) {
-                Log.d(TAG, "wait for vpn dns to settle in..." + i);
-                sleep(200);
-            } else {
-                mOriginalDns1 = SystemProperties.get(DNS1);
-                mOriginalDns2 = SystemProperties.get(DNS2);
-                SystemProperties.set(DNS1, mVpnDns1);
-                SystemProperties.set(DNS2, mVpnDns2);
-                Log.d(TAG, String.format("save original dns prop: %s, %s",
-                        mOriginalDns1, mOriginalDns2));
-                Log.d(TAG, String.format("set vpn dns prop: %s, %s",
-                        mVpnDns1, mVpnDns2));
-                return;
-            }
-        }
-        Log.d(TAG, "saveVpnDnsProperties(): DNS not updated??");
-        mOriginalDns1 = mVpnDns1 = SystemProperties.get(DNS1);
-        mOriginalDns2 = mVpnDns2 = SystemProperties.get(DNS2);
+    private void saveOriginalDns() {
+        mOriginalDns1 = SystemProperties.get(DNS1);
+        mOriginalDns2 = SystemProperties.get(DNS2);
+        Log.i(TAG, String.format("save original dns prop: %s, %s",
+                mOriginalDns1, mOriginalDns2));
+    }
+
+    private void setVpnDns() {
+        String vpnDns1 = SystemProperties.get(VPN_DNS1);
+        String vpnDns2 = SystemProperties.get(VPN_DNS2);
+        SystemProperties.set(DNS1, vpnDns1);
+        SystemProperties.set(DNS2, vpnDns2);
+        Log.i(TAG, String.format("set vpn dns prop: %s, %s",
+                vpnDns1, vpnDns2));
     }
 
     private void saveAndSetDomainSuffices() {
         mOriginalDomainSuffices = SystemProperties.get(DNS_DOMAIN_SUFFICES);
-        Log.d(TAG, "save original dns search: " + mOriginalDomainSuffices);
+        Log.i(TAG, "save original suffices: " + mOriginalDomainSuffices);
         String list = mProfile.getDomainSuffices();
         if (!TextUtils.isEmpty(list)) {
             SystemProperties.set(DNS_DOMAIN_SUFFICES, list);
@@ -274,7 +312,7 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     private void restoreOriginalDomainSuffices() {
-        Log.d(TAG, "restore original dns search --> " + mOriginalDomainSuffices);
+        Log.i(TAG, "restore original suffices --> " + mOriginalDomainSuffices);
         SystemProperties.set(DNS_DOMAIN_SUFFICES, mOriginalDomainSuffices);
     }
 
@@ -298,46 +336,73 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     private void enterConnectivityLoop() {
-        mStartTime = System.currentTimeMillis();
-
-        Log.d(TAG, "   +++++   connectivity monitor running");
+        Log.i(TAG, "VPN connectivity monitor running");
         try {
             for (;;) {
                 synchronized (VpnService.this) {
-                    if (mState != VpnState.CONNECTED) break;
+                    if (mState != VpnState.CONNECTED || !checkConnectivity()) {
+                        break;
+                    }
                     mNotification.update();
-                    checkConnectivity();
+                    checkDns();
                     VpnService.this.wait(1000); // 1 second
                 }
             }
         } catch (InterruptedException e) {
-            Log.e(TAG, "connectivity monitor", e);
+            onError(e);
         }
-        Log.d(TAG, "   -----   connectivity monitor stopped");
+        Log.i(TAG, "VPN connectivity monitor stopped");
     }
 
-    private void checkConnectivity() {
+    private void saveLocalIpAndInterface(String serverIp) throws IOException {
+        DatagramSocket s = new DatagramSocket();
+        int port = 80; // arbitrary
+        s.connect(InetAddress.getByName(serverIp), port);
+        InetAddress localIp = s.getLocalAddress();
+        mLocalIp = localIp.getHostAddress();
+        NetworkInterface localIf = NetworkInterface.getByInetAddress(localIp);
+        mLocalIf = (localIf == null) ? null : localIf.getName();
+        if (TextUtils.isEmpty(mLocalIf)) {
+            throw new IOException("Local interface is empty!");
+        }
+        if (DBG) {
+            Log.d(TAG, "  Local IP: " + mLocalIp + ", if: " + mLocalIf);
+        }
+    }
+
+    // returns false if vpn connectivity is broken
+    private boolean checkConnectivity() {
         if (mDaemonHelper.anyDaemonStopped() || isLocalIpChanged()) {
             onDisconnect();
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private void checkDns() {
+        String dns1 = SystemProperties.get(DNS1);
+        String vpnDns1 = SystemProperties.get(VPN_DNS1);
+        if (!dns1.equals(vpnDns1) && dns1.equals(mOriginalDns1)) {
+            // dhcp expires?
+            setVpnDns();
         }
     }
 
     private boolean isLocalIpChanged() {
-        // TODO
-        if (!isDnsIntact()) {
-            Log.w(TAG, "       local IP changed");
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private boolean isDnsIntact() {
-        String dns1 = SystemProperties.get(DNS1);
-        if (!mVpnDns1.equals(dns1)) {
-            Log.w(TAG, "   dns being overridden by: " + dns1);
-            return false;
-        } else {
+        try {
+            InetAddress localIp = InetAddress.getByName(mLocalIp);
+            NetworkInterface localIf =
+                    NetworkInterface.getByInetAddress(localIp);
+            if (localIf == null || !mLocalIf.equals(localIf.getName())) {
+                Log.w(TAG, "       local If changed from " + mLocalIf
+                        + " to " + localIf);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (IOException e) {
+            Log.w(TAG, "isLocalIpChanged()", e);
             return true;
         }
     }
@@ -349,7 +414,7 @@ abstract class VpnService<E extends VpnProfile> {
         }
     }
 
-    private class DaemonHelper {
+    private class DaemonHelper implements Serializable {
         private List<DaemonProxy> mDaemonList =
                 new ArrayList<DaemonProxy>();
 
@@ -376,7 +441,7 @@ abstract class VpnService<E extends VpnProfile> {
         synchronized boolean anyDaemonStopped() {
             for (DaemonProxy s : mDaemonList) {
                 if (s.isStopped()) {
-                    Log.w(TAG, "       daemon gone: " + s.getName());
+                    Log.w(TAG, "    VPN daemon gone: " + s.getName());
                     return true;
                 }
             }
@@ -399,6 +464,14 @@ abstract class VpnService<E extends VpnProfile> {
 
                     case AUTH_ERROR_CODE:
                         onError(VpnManager.VPN_ERROR_AUTH);
+                        return true;
+
+                    case CHALLENGE_ERROR_CODE:
+                        onError(VpnManager.VPN_ERROR_CHALLENGE);
+                        return true;
+
+                    case REMOTE_HUNG_UP_ERROR_CODE:
+                        onError(VpnManager.VPN_ERROR_REMOTE_HUNG_UP);
                         return true;
 
                     default:

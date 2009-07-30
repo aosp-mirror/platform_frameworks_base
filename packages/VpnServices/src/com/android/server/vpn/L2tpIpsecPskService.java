@@ -45,4 +45,10 @@ class L2tpIpsecPskService extends VpnService<L2tpIpsecPskProfile> {
                 (p.isSecretEnabled() ? p.getSecretString() : null),
                 username, password);
     }
+
+    @Override
+    protected void stopPreviouslyRunDaemons() {
+        stopDaemon(IPSEC);
+        stopDaemon(MtpdHelper.MTPD);
+    }
 }

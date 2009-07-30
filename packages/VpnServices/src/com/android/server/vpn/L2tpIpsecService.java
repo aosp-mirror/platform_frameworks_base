@@ -46,6 +46,12 @@ class L2tpIpsecService extends VpnService<L2tpIpsecProfile> {
                 username, password);
     }
 
+    @Override
+    protected void stopPreviouslyRunDaemons() {
+        stopDaemon(IPSEC);
+        stopDaemon(MtpdHelper.MTPD);
+    }
+
     private String getCaCertPath() {
         return CertTool.getInstance().getCaCertificate(
                 getProfile().getCaCertificate());
