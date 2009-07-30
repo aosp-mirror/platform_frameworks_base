@@ -504,9 +504,10 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             msg.obj = CDMAPhone.REASON_RADIO_TURNED_OFF;
             dcTracker.sendMessage(msg);
 
-            // Poll data state up to 15 times, with a 100ms delay
-            // totaling 1.5 sec. Normal data disable action will finish in 100ms.
-            for (int i = 0; i < MAX_NUM_DATA_STATE_READS; i++) {
+            // Poll data state up to 50 times, with a 100ms delay
+            // totaling 5 sec.
+            // TODO: change the 5 seconds wait from blocking to non-blocking.
+            for (int i = 0; i < 50; i++) {
                 DataConnectionTracker.State currentState = dcTracker.getState();
                 if (currentState != DataConnectionTracker.State.CONNECTED
                         && currentState != DataConnectionTracker.State.DISCONNECTING) {

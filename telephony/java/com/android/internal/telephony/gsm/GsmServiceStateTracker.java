@@ -151,6 +151,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     static final int PS_NOTIFICATION = 888; //id to update and cancel PS restricted
     static final int CS_NOTIFICATION = 999; //id to update and cancel CS restricted
 
+    static final int MAX_NUM_DATA_STATE_READS = 15;
+
     private ContentObserver mAutoTimeObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
