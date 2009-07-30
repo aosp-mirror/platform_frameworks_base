@@ -67,7 +67,7 @@ public class FilmRS {
         float anim = ((float)x-50) / 270.f;
         mBufferPos[POS_TRANSLATE] = 2f * anim + 0.5f;   // translation
         mBufferPos[POS_ROTATE] = (anim * 40);  // rotation
-        mBufferPos[POS_FOCUS] = ((float)y) / 16.f - 8;  // focusPos
+        mBufferPos[POS_FOCUS] = ((float)y) / 16.f - 10.f;  // focusPos
         mAllocPos.data(mBufferPos);
     }
 
@@ -92,6 +92,9 @@ public class FilmRS {
     private RenderScript.Allocation mAllocPos;
     private RenderScript.Allocation mAllocState;
     private RenderScript.Allocation mAllocPV;
+    private RenderScript.Allocation mAllocOffsetsTex;
+    private RenderScript.Allocation mAllocOffsets;
+
     private RenderScript.TriangleMesh mMesh;
     private RenderScript.Light mLight;
 
@@ -101,21 +104,11 @@ public class FilmRS {
     private float[] mBufferPos = new float[3];
     private int[] mBufferState;
 
-    private void initSamplers() {
-        mRS.samplerBegin();
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN,
-                       RenderScript.SamplerValue.LINEAR_MIP_LINEAR);
-        mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_S,
-                       RenderScript.SamplerValue.CLAMP);
-        mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_T,
-                       RenderScript.SamplerValue.CLAMP);
-        mSampler = mRS.samplerCreate();
-    }
-
     private void initPFS() {
         mRS.programFragmentStoreBegin(null, null);
         mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.LESS);
         mRS.programFragmentStoreDitherEnable(true);
+        mRS.programFragmentStoreDepthMask(true);
         mPFSBackground = mRS.programFragmentStoreCreate();
         mPFSBackground.setName("PFSBackground");
 
@@ -130,15 +123,27 @@ public class FilmRS {
     }
 
     private void initPF() {
+        mRS.samplerBegin();
+        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN,
+                       RenderScript.SamplerValue.LINEAR);//_MIP_LINEAR);
+        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MAG,
+                       RenderScript.SamplerValue.LINEAR);
+        mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_S,
+                       RenderScript.SamplerValue.CLAMP);
+        mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_T,
+                       RenderScript.SamplerValue.WRAP);
+        mSampler = mRS.samplerCreate();
+
+
         mRS.programFragmentBegin(null, null);
         mPFBackground = mRS.programFragmentCreate();
         mPFBackground.setName("PFBackground");
 
         mRS.programFragmentBegin(null, null);
         mRS.programFragmentSetTexEnable(0, true);
-        //mRS.programFragmentSetEnvMode(0, RS_TEX_ENV_MODE_REPLACE);
-        //rsProgramFragmentSetType(0, gEnv.tex[0]->getType());
+        mRS.programFragmentSetTexEnvMode(0, RenderScript.EnvMode.REPLACE);
         mPFImages = mRS.programFragmentCreate();
+        mPFImages.bindSampler(mSampler, 0);
         mPFImages.setName("PFImages");
     }
 
@@ -148,12 +153,12 @@ public class FilmRS {
         mLight.setPosition(0, -0.5f, -1.0f);
 
         mRS.programVertexBegin(null, null);
-        mRS.programVertexSetTextureMatrixEnable(true);
         mRS.programVertexAddLight(mLight);
         mPVBackground = mRS.programVertexCreate();
         mPVBackground.setName("PVBackground");
 
         mRS.programVertexBegin(null, null);
+        mRS.programVertexSetTextureMatrixEnable(true);
         mPVImages = mRS.programVertexCreate();
         mPVImages.setName("PVImages");
     }
@@ -179,8 +184,8 @@ public class FilmRS {
         b = BitmapFactory.decodeResource(mRes, R.drawable.p03, opts);
         mImages[2] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
 
-        b = BitmapFactory.decodeResource(mRes, R.drawable.p04, opts);
-        mImages[3] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        b = BitmapFactory.decodeResource(mRes, R.drawable.path1927, opts);
+        mImages[3] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p05, opts);
         mImages[4] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
@@ -242,10 +247,8 @@ public class FilmRS {
         mMesh.setName("mesh");
 
         initPFS();
-        initSamplers();
         initPF();
         initPV();
-        mPFImages.bindSampler(mSampler, 0);
 
         Log.e("rs", "Done loading named");
 
@@ -272,6 +275,21 @@ public class FilmRS {
         mScriptStrip.bindAllocation(mAllocPos, 1);
         mScriptStrip.bindAllocation(mAllocState, 2);
         mScriptStrip.bindAllocation(mPVA.mAlloc, 3);
+
+
+        mAllocOffsets = mRS.allocationCreatePredefSized(
+            RenderScript.ElementPredefined.USER_I32,
+            mFSM.mTriangleOffsets.length);
+        mAllocOffsets.data(mFSM.mTriangleOffsets);
+        mScriptStrip.bindAllocation(mAllocOffsets, 4);
+
+        mAllocOffsetsTex = mRS.allocationCreatePredefSized(
+            RenderScript.ElementPredefined.USER_FLOAT,
+            mFSM.mTriangleOffsetsTex.length);
+        mAllocOffsetsTex.data(mFSM.mTriangleOffsetsTex);
+        mScriptStrip.bindAllocation(mAllocOffsetsTex, 5);
+
+
 
 
 /*

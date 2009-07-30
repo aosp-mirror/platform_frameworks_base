@@ -47,8 +47,8 @@ int main(int index)
 
 
     // Start of images.
-    bindProgramFragmentStore(NAMED_PFImages);
-    bindProgramFragment(NAMED_PFSImages);
+    bindProgramFragmentStore(NAMED_PFSImages);
+    bindProgramFragment(NAMED_PFImages);
     bindProgramVertex(NAMED_PVImages);
 
     float focusPos = loadF(1, POS_FOCUS);
@@ -87,7 +87,16 @@ int main(int index)
 
         offset = offset + triangleOffsetsCount / 2;
 
-        if (!((offset < 0) || (offset >= triangleOffsetsCount))) {
+    int drawit = 1;
+    if (offset < 0) {
+        drawit = 0;
+    }
+    if (offset >= triangleOffsetsCount) {
+        drawit = 0;
+    }
+
+        //if (!((offset < 0) || (offset >= triangleOffsetsCount))) {
+        if (drawit) {
             int start = offset -2;
             int end = offset + 2;
 
@@ -99,11 +108,9 @@ int main(int index)
             }
 
             bindTexture(NAMED_PFImages, 0, loadI32(0, imgId - 1));
-    /*
-            matrixLoadTranslate(con, &m, -pos - env->triangleOffsetsTex[env->triangleOffsetsCount / 2], 0, 0);
-            storeEnvMatrix(con, 3, RS_PROGRAM_VERTEX_TEXTURE_OFFSET, &m);
-            renderTriangleMeshRange(con, env->mesh, env->triangleOffsets[start], env->triangleOffsets[end] - env->triangleOffsets[start]);
-    */
+            matrixLoadTranslate(&f16, -pos - loadF(5, triangleOffsetsCount / 2), 0, 0);
+            vpLoadTextureMatrix(&f16);
+            drawTriangleMeshRange(NAMED_mesh, loadI32(4, start), loadI32(4, end) - loadI32(4, start));
         }
     }
     return 0;

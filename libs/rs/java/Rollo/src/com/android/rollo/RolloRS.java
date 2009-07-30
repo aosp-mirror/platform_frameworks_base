@@ -200,9 +200,6 @@ public class RolloRS {
         mRS.contextBindProgramVertex(mPV);
 
         mAllocScratchBuf = new int[32];
-        for(int ct=0; ct < mAllocScratchBuf.length; ct++) {
-            mAllocScratchBuf[ct] = 0;
-        }
         mAllocScratch = mRS.allocationCreatePredefSized(
             RenderScript.ElementPredefined.USER_I32, mAllocScratchBuf.length);
         mAllocScratch.data(mAllocScratchBuf);
@@ -417,9 +414,9 @@ public class RolloRS {
         Canvas c = new Canvas(b);
         Paint p = new Paint();
         p.setTypeface(Typeface.DEFAULT_BOLD);
-        p.setTextSize(16);
+        p.setTextSize(20);
         p.setColor(0xffffffff);
-        c.drawText(t, 2, 20, p);
+        c.drawText(t, 2, 26, p);
         return mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
     }
 
