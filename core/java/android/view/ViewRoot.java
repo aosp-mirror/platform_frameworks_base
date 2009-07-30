@@ -21,7 +21,6 @@ import com.android.internal.view.IInputMethodSession;
 
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -1220,6 +1219,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                         if (mTranslator != null) {
                             mTranslator.translateCanvas(canvas);
                         }
+                        canvas.setScreenDensity(scalingRequired
+                                ? DisplayMetrics.DENSITY_DEVICE : 0);
                         mView.draw(canvas);
                         if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
                             mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
@@ -1328,6 +1329,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                     if (mTranslator != null) {
                         mTranslator.translateCanvas(canvas);
                     }
+                    canvas.setScreenDensity(scalingRequired
+                            ? DisplayMetrics.DENSITY_DEVICE : 0);
                     mView.draw(canvas);
                 } finally {
                     mAttachInfo.mIgnoreDirtyState = false;

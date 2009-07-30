@@ -50,6 +50,9 @@ public class Canvas {
 
     // Package-scoped for quick access.
     /*package*/ int mDensity = Bitmap.DENSITY_NONE;
+
+    // Used to determine when compatibility scaling is in effect.
+    private int mScreenDensity = Bitmap.DENSITY_NONE;
     
     // Used by native code
     @SuppressWarnings({"UnusedDeclaration"})
@@ -219,6 +222,11 @@ public class Canvas {
         mDensity = density;
     }
 
+    /** @hide */
+    public void setScreenDensity(int density) {
+        mScreenDensity = density;
+    }
+    
     // the SAVE_FLAG constants must match their native equivalents
 
     /** restore the current matrix when restore() is called */
@@ -971,7 +979,8 @@ public class Canvas {
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         throwIfRecycled(bitmap);
         native_drawBitmap(mNativeCanvas, bitmap.ni(), left, top,
-                paint != null ? paint.mNativePaint : 0, mDensity, bitmap.mDensity);
+                paint != null ? paint.mNativePaint : 0, mDensity, mScreenDensity,
+                bitmap.mDensity);
     }
 
     /**
@@ -1002,7 +1011,8 @@ public class Canvas {
         }
         throwIfRecycled(bitmap);
         native_drawBitmap(mNativeCanvas, bitmap.ni(), src, dst,
-                          paint != null ? paint.mNativePaint : 0);
+                          paint != null ? paint.mNativePaint : 0,
+                          mScreenDensity, bitmap.mDensity);
     }
 
     /**
@@ -1033,7 +1043,8 @@ public class Canvas {
         }
         throwIfRecycled(bitmap);
         native_drawBitmap(mNativeCanvas, bitmap.ni(), src, dst,
-                          paint != null ? paint.mNativePaint : 0);
+                          paint != null ? paint.mNativePaint : 0,
+                          mScreenDensity, bitmap.mDensity);
     }
     
     /**
@@ -1513,13 +1524,19 @@ public class Canvas {
     private native void native_drawBitmap(int nativeCanvas, int bitmap,
                                                  float left, float top,
                                                  int nativePaintOrZero,
-                                                 int canvasDensity, int bitmapDensity);
+                                                 int canvasDensity,
+                                                 int screenDensity,
+                                                 int bitmapDensity);
     private native void native_drawBitmap(int nativeCanvas, int bitmap,
                                                  Rect src, RectF dst,
-                                                 int nativePaintOrZero);
+                                                 int nativePaintOrZero,
+                                                 int screenDensity,
+                                                 int bitmapDensity);
     private static native void native_drawBitmap(int nativeCanvas, int bitmap,
                                                  Rect src, Rect dst,
-                                                 int nativePaintOrZero);
+                                                 int nativePaintOrZero,
+                                                 int screenDensity,
+                                                 int bitmapDensity);
     private static native void native_drawBitmap(int nativeCanvas, int[] colors,
                                                 int offset, int stride, float x,
                                                  float y, int width, int height,
