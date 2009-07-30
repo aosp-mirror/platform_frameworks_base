@@ -494,7 +494,7 @@ class PackageManagerService extends IPackageManager.Stub {
             mDrmAppInstallObserver = new AppDirObserver(
                 mDrmAppPrivateInstallDir.getPath(), OBSERVER_EVENTS, false);
             mDrmAppInstallObserver.startWatching();
-            scanDirLI(mDrmAppPrivateInstallDir, 0, scanMode);
+            scanDirLI(mDrmAppPrivateInstallDir, 0, scanMode | SCAN_FORWARD_LOCKED);
 
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PMS_SCAN_END,
                     SystemClock.uptimeMillis());
@@ -1766,7 +1766,12 @@ class PackageManagerService extends IPackageManager.Stub {
         int i;
         for (i=0; i<files.length; i++) {
             File file = new File(dir, files[i]);
-            PackageParser.Package pkg = scanPackageLI(file, file, file, 
+            File resFile = file;
+            // Pick up the resource path from settings for fwd locked apps
+            if ((scanMode & SCAN_FORWARD_LOCKED) != 0) {
+                resFile = null;
+            }
+            PackageParser.Package pkg = scanPackageLI(file, file, resFile,
                     flags|PackageParser.PARSE_MUST_BE_APK, scanMode);
         }
     }
@@ -1868,8 +1873,12 @@ class PackageManagerService extends IPackageManager.Stub {
         if (ps != null && !ps.codePath.equals(ps.resourcePath)) {
             scanMode |= SCAN_FORWARD_LOCKED;
         }
+        File resFile = destResourceFile;
+        if ((scanMode & SCAN_FORWARD_LOCKED) != 0) {
+            resFile = getFwdLockedResource(ps.name);
+        }
         // Note that we invoke the following method only if we are about to unpack an application
-        return scanPackageLI(scanFile, destCodeFile, destResourceFile,
+        return scanPackageLI(scanFile, destCodeFile, resFile,
                 pkg, parseFlags, scanMode | SCAN_UPDATE_SIGNATURE);
     }
 
@@ -3811,6 +3820,11 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
     
+    private File getFwdLockedResource(String pkgName) {
+        final String publicZipFileName = pkgName + ".zip";
+        return new File(mAppInstallDir, publicZipFileName);
+    }
+
     private PackageInstalledInfo installPackageLI(Uri pPackageURI,
             int pFlags, boolean newInstall, String installerPackageName) {
         File tmpPackageFile = null;
@@ -3890,8 +3904,7 @@ class PackageManagerService extends IPackageManager.Stub {
             final String destFilePath = destPackageFile.getAbsolutePath();
             File destResourceFile;
             if ((pFlags&PackageManager.INSTALL_FORWARD_LOCK) != 0) {
-                final String publicZipFileName = pkgName + ".zip";
-                destResourceFile = new File(mAppInstallDir, publicZipFileName);
+                destResourceFile = getFwdLockedResource(pkgName);
                 forwardLocked = true;
             } else {
                 destResourceFile = destPackageFile;
