@@ -228,6 +228,11 @@ int remove_key(const char *namespace, const char *keyname)
     char keyfile[KEYFILE_LEN];
 
     if (state != UNLOCKED) return -state;
+    if ((strlen(namespace) >= MAX_KEY_NAME_LENGTH) ||
+        (strlen(keyname) >= MAX_KEY_NAME_LENGTH)) {
+        LOGE("keyname is too long.");
+        return -1;
+    }
     sprintf(keyfile, KEYFILE_NAME, namespace, keyname);
     return unlink(keyfile);
 }
@@ -243,12 +248,12 @@ int put_key(const char *namespace, const char *keyname,
         LOGE("Can not store key with current state %d\n", state);
         return -state;
     }
-    sprintf(keyfile, KEYFILE_NAME, namespace, keyname);
-    // flatten the args
-    if (strlen(keyname) >= MAX_KEY_NAME_LENGTH) {
+    if ((strlen(namespace) >= MAX_KEY_NAME_LENGTH) ||
+        (strlen(keyname) >= MAX_KEY_NAME_LENGTH)) {
         LOGE("keyname is too long.");
         return -1;
     }
+    sprintf(keyfile, KEYFILE_NAME, namespace, keyname);
     strcpy(blob.keyname, keyname);
     blob.value_size = size;
     if (size > MAX_KEY_VALUE_LENGTH) {
@@ -270,6 +275,11 @@ int get_key(const char *namespace, const char *keyname,
     if (state != UNLOCKED) {
         LOGE("Can not retrieve key value with current state %d\n", state);
         return -state;
+    }
+    if ((strlen(namespace) >= MAX_KEY_NAME_LENGTH) ||
+        (strlen(keyname) >= MAX_KEY_NAME_LENGTH)) {
+        LOGE("keyname is too long.");
+        return -1;
     }
     sprintf(keyfile, KEYFILE_NAME, namespace, keyname);
     ret = load_n_decrypt(keyname, keyfile, &decryptKey, &blob);
@@ -299,6 +309,13 @@ int list_keys(const char *namespace, char reply[BUFFER_MAX])
         LOGE("cannot open keystore dir or namespace is null\n");
         return -1;
     }
+
+    if (strlen(namespace) >= MAX_KEY_NAME_LENGTH) {
+        LOGE("namespace is too long.");
+        return -1;
+    }
+
+    reply[0] = 0;
     while ((de = readdir(d))) {
         char *prefix, *name, *keyfile = de->d_name;
         char *context = NULL;
@@ -367,6 +384,7 @@ KEYSTORE_STATE get_state()
 
 int reset_keystore()
 {
+    int ret = 0;
     DIR *d;
     struct dirent *de;
 
@@ -374,18 +392,24 @@ int reset_keystore()
         LOGE("cannot open keystore dir\n");
         return -1;
     }
-    while ((de = readdir(d))) unlink(de->d_name);
+    while ((de = readdir(d))) {
+        if (unlink(de->d_name) != 0) ret = -1;
+    }
     closedir(d);
     state = UNINITIALIZED;
-    LOGI("keystore is reset.");
-    return 0;
+    if (ret == 0) {
+        LOGI("keystore is reset.");
+    } else {
+        LOGI("keystore can not be cleaned up entirely.");
+    }
+    return ret;
 }
 
 int init_keystore(const char *dir)
 {
     int fd;
 
-    if (!dir) mkdir(dir, 0770);
+    if (dir) mkdir(dir, 0770);
     if (!dir || chdir(dir)) {
         LOGE("Can not open/create the keystore directory %s\n",
              dir ? dir : "(null)");
