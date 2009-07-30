@@ -50,6 +50,10 @@ public class VpnManager {
     public static final int VPN_ERROR_CONNECTION_FAILED = 2;
     /** Error code to indicate the server is not known. */
     public static final int VPN_ERROR_UNKNOWN_SERVER = 3;
+    /** Error code to indicate an error from challenge response. */
+    public static final int VPN_ERROR_CHALLENGE = 4;
+    /** Error code to indicate an error of remote server hanging up. */
+    public static final int VPN_ERROR_REMOTE_HUNG_UP = 5;
     private static final int VPN_ERROR_NO_ERROR = 0;
 
     public static final String PROFILES_PATH = "/data/misc/vpn/profiles";

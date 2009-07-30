@@ -22,9 +22,21 @@ package android.net.vpn;
  */
 public class PptpProfile extends VpnProfile {
     private static final long serialVersionUID = 1L;
+    private boolean mEncryption = true;
 
     @Override
     public VpnType getType() {
         return VpnType.PPTP;
+    }
+
+    /**
+     * Enables/disables the encryption for PPTP tunnel.
+     */
+    public void setEncryptionEnabled(boolean enabled) {
+        mEncryption = enabled;
+    }
+
+    public boolean isEncryptionEnabled() {
+        return mEncryption;
     }
 }

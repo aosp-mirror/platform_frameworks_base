@@ -27,23 +27,31 @@ import android.net.vpn.VpnManager;
 import android.net.vpn.VpnProfile;
 import android.net.vpn.VpnState;
 import android.os.IBinder;
+import android.util.Log;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /**
  * The service class for managing a VPN connection. It implements the
  * {@link IVpnService} binder interface.
  */
 public class VpnServiceBinder extends Service {
-    private final String TAG = VpnServiceBinder.class.getSimpleName();
+    private static final String TAG = VpnServiceBinder.class.getSimpleName();
+    private static final boolean DBG = true;
+
+    private static final String STATES_FILE_PATH = "/data/misc/vpn/.states";
 
     // The actual implementation is delegated to the VpnService class.
     private VpnService<? extends VpnProfile> mService;
 
     private final IBinder mBinder = new IVpnService.Stub() {
         public boolean connect(VpnProfile p, String username, String password) {
-            android.util.Log.d("VpnServiceBinder", "becoming foreground");
-            setForeground(true);
             return VpnServiceBinder.this.connect(p, username, password);
         }
 
@@ -57,6 +65,13 @@ public class VpnServiceBinder extends Service {
     };
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        checkSavedStates();
+    }
+
+
+    @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
     }
@@ -66,14 +81,30 @@ public class VpnServiceBinder extends Service {
         return mBinder;
     }
 
+    void saveStates() throws IOException {
+        if (DBG) Log.d("VpnServiceBinder", "     saving states");
+        ObjectOutputStream oos =
+                new ObjectOutputStream(new FileOutputStream(STATES_FILE_PATH));
+        oos.writeObject(mService);
+        oos.close();
+    }
+
+    void removeStates() {
+        try {
+            new File(STATES_FILE_PATH).delete();
+        } catch (Throwable e) {
+            if (DBG) Log.d("VpnServiceBinder", "     remove states: " + e);
+        }
+    }
+
     private synchronized boolean connect(final VpnProfile p,
             final String username, final String password) {
         if (mService != null) return false;
+        final VpnService s = mService = createService(p);
 
         new Thread(new Runnable() {
             public void run() {
-                mService = createService(p);
-                mService.onConnect(username, password);
+                s.onConnect(username, password);
             }
         }).start();
         return true;
@@ -81,12 +112,11 @@ public class VpnServiceBinder extends Service {
 
     private synchronized void disconnect() {
         if (mService == null) return;
+        final VpnService s = mService;
 
         new Thread(new Runnable() {
             public void run() {
-                mService.onDisconnect();
-                android.util.Log.d("VpnServiceBinder", "becoming background");
-                setForeground(false);
+                s.onDisconnect();
             }
         }).start();
     }
@@ -97,6 +127,21 @@ public class VpnServiceBinder extends Service {
             broadcastConnectivity(p.getName(), VpnState.IDLE);
         } else {
             broadcastConnectivity(p.getName(), mService.getState());
+        }
+    }
+
+    private void checkSavedStates() {
+        try {
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
+                    STATES_FILE_PATH));
+            mService = (VpnService<? extends VpnProfile>) ois.readObject();
+            mService.recover(this);
+            ois.close();
+        } catch (FileNotFoundException e) {
+            // do nothing
+        } catch (Throwable e) {
+            Log.i("VpnServiceBinder", "recovery error, remove states: " + e);
+            removeStates();
         }
     }
 

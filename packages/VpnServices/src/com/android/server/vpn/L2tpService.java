@@ -35,4 +35,9 @@ class L2tpService extends VpnService<L2tpProfile> {
                 (p.isSecretEnabled() ? p.getSecretString() : null),
                 username, password);
     }
+
+    @Override
+    protected void stopPreviouslyRunDaemons() {
+        stopDaemon(MtpdHelper.MTPD);
+    }
 }
