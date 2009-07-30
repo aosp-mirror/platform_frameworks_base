@@ -527,6 +527,19 @@ public class SmsMessage extends SmsMessageBase {
      * Parses a SMS message from its BearerData stream. (mobile-terminated only)
      */
     protected void parseSms() {
+        // Message Waiting Info Record defined in 3GPP2 C.S-0005, 3.7.5.6
+        // It contains only an 8-bit number with the number of messages waiting
+        if (mEnvelope.teleService == SmsEnvelope.TELESERVICE_MWI) {
+            mBearerData = new BearerData();
+            if (mEnvelope.bearerData != null) {
+                mBearerData.numberOfMessages = 0x000000FF & mEnvelope.bearerData[0];
+            }
+            if (Config.DEBUG) {
+                Log.d(LOG_TAG, "parseSms: get MWI " +
+                      Integer.toString(mBearerData.numberOfMessages));
+            }
+            return;
+        }
         mBearerData = BearerData.decode(mEnvelope.bearerData);
         messageRef = mBearerData.messageId;
         if (mBearerData.userData != null) {
