@@ -461,7 +461,8 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
                 glRotatef(-90, 0, 0, 1);
             }
 
-            if (!(mFlags & DisplayHardware::NPOT_EXTENSION)) {
+            if (!(mFlags & (DisplayHardware::NPOT_EXTENSION |
+                            DisplayHardware::DIRECT_TEXTURE))) {
                 // find the smallest power-of-two that will accommodate our surface
                 GLuint tw = 1 << (31 - clz(width));
                 GLuint th = 1 << (31 - clz(height));
