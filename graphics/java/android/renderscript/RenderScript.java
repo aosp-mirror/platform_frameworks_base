@@ -23,6 +23,12 @@ package android.renderscript;
 import java.io.InputStream;
 import java.io.IOException;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.Color;
+
 import android.os.Bundle;
 import android.content.res.Resources;
 import android.util.Log;
@@ -32,8 +38,6 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.View;
 import android.view.Surface;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 
 /**
  * @hide
@@ -53,6 +57,8 @@ public class RenderScript {
     private static boolean sInitialized;
     native private static void _nInit();
 
+    private static BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
+
     static {
         sInitialized = false;
         try {
@@ -62,6 +68,7 @@ public class RenderScript {
         } catch (UnsatisfiedLinkError e) {
             Log.d(LOG_TAG, "RenderScript JNI library not found!");
         }
+        mBitmapOptions.inScaled = false;
     }
 
     native private int  nDeviceCreate();
@@ -538,6 +545,17 @@ public class RenderScript {
         int id = nAllocationCreateFromBitmapBoxed(dstFmt.mID, genMips, b);
         return new Allocation(id);
     }
+
+    public Allocation allocationCreateFromBitmapResource(Resources res, int id, ElementPredefined internalElement, boolean genMips) {
+        Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
+        return allocationCreateFromBitmap(b, internalElement, genMips);
+    }
+
+    public Allocation allocationCreateFromBitmapResourceBoxed(Resources res, int id, ElementPredefined internalElement, boolean genMips) {
+        Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
+        return allocationCreateFromBitmapBoxed(b, internalElement, genMips);
+    }
+
 
     //////////////////////////////////////////////////////////////////////////////////
     // Adapter1D
