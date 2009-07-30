@@ -81,6 +81,10 @@ import java.util.ArrayList;
     // True if the most recent drag event has caused either the TextView to
     // scroll or the web page to scroll.  Gets reset after a touch down.
     private boolean         mScrolled;
+    // Gets set to true when the the IME jumps to the next textfield.  When this
+    // happens, the next time the user hits a key it is okay for the focus
+    // pointer to not match the WebTextView's node pointer
+    private boolean         mOkayForFocusNotToMatch;
     // Array to store the final character added in onTextChanged, so that its
     // KeyEvents may be determined.
     private char[]          mCharacter = new char[1];
@@ -99,7 +103,6 @@ import java.util.ArrayList;
         super(context);
         mWebView = webView;
         mMaxLength = -1;
-        setImeOptions(EditorInfo.IME_ACTION_NONE);
     }
 
     @Override
@@ -125,8 +128,8 @@ import java.util.ArrayList;
                 isArrowKey = true;
                 break;
         }
-
-        if (!isArrowKey && mWebView.nativeFocusNodePointer() != mNodePointer) {
+        if (!isArrowKey && !mOkayForFocusNotToMatch
+                && mWebView.nativeFocusNodePointer() != mNodePointer) {
             mWebView.nativeClearCursor();
             // Do not call remove() here, which hides the soft keyboard.  If
             // the soft keyboard is being displayed, the user will still want
@@ -135,6 +138,9 @@ import java.util.ArrayList;
             mWebView.requestFocus();
             return mWebView.dispatchKeyEvent(event);
         }
+        // After a jump to next textfield and the first key press, the cursor
+        // and focus will once again match, so reset this value.
+        mOkayForFocusNotToMatch = false;
 
         Spannable text = (Spannable) getText();
         int oldLength = text.length();
@@ -302,6 +308,36 @@ import java.util.ArrayList;
                     + mWebView.getUrl();
         }
         return connection;
+    }
+
+    @Override
+    public void onEditorAction(int actionCode) {
+        switch (actionCode) {
+        case EditorInfo.IME_ACTION_NEXT:
+            mWebView.nativeMoveCursorToNextTextInput();
+            // Preemptively rebuild the WebTextView, so that the action will
+            // be set properly.
+            mWebView.rebuildWebTextView();
+            // Since the cursor will no longer be in the same place as the
+            // focus, set the focus controller back to inactive
+            mWebView.setFocusControllerInactive();
+            mOkayForFocusNotToMatch = true;
+            break;
+        case EditorInfo.IME_ACTION_DONE:
+            super.onEditorAction(actionCode);
+            break;
+        case EditorInfo.IME_ACTION_GO:
+            // Send an enter and hide the soft keyboard
+            InputMethodManager.getInstance(mContext)
+                    .hideSoftInputFromWindow(getWindowToken(), 0);
+            sendDomEvent(new KeyEvent(KeyEvent.ACTION_DOWN,
+                    KeyEvent.KEYCODE_ENTER));
+            sendDomEvent(new KeyEvent(KeyEvent.ACTION_UP,
+                    KeyEvent.KEYCODE_ENTER));
+
+        default:
+            break;
+        }
     }
 
     @Override
@@ -659,10 +695,26 @@ import java.util.ArrayList;
     public void setSingleLine(boolean single) {
         int inputType = EditorInfo.TYPE_CLASS_TEXT
                 | EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
-        if (!single) {
+        if (single) {
+            int action = mWebView.nativeTextFieldAction();
+            switch (action) {
+            // Keep in sync with CachedRoot::ImeAction
+            case 0: // NEXT
+                setImeOptions(EditorInfo.IME_ACTION_NEXT);
+                break;
+            case 1: // GO
+                setImeOptions(EditorInfo.IME_ACTION_GO);
+                break;
+            case -1: // FAILURE
+            case 2: // DONE
+                setImeOptions(EditorInfo.IME_ACTION_DONE);
+                break;
+            }
+        } else {
             inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
                     | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES
                     | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT;
+            setImeOptions(EditorInfo.IME_ACTION_NONE);
         }
         mSingle = single;
         setHorizontallyScrolling(single);

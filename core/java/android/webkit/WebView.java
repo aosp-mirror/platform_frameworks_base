@@ -3123,7 +3123,7 @@ public class WebView extends AbsoluteLayout
      * mWebTextView to have the appropriate properties, such as password,
      * multiline, and what text it contains.  It also removes it if necessary.
      */
-    private void rebuildWebTextView() {
+    /* package */ void rebuildWebTextView() {
         // If the WebView does not have focus, do nothing until it gains focus.
         if (!hasFocus() && (null == mWebTextView || !mWebTextView.hasFocus())
                 || (mTouchMode >= FIRST_SCROLL_ZOOM
@@ -3385,7 +3385,8 @@ public class WebView extends AbsoluteLayout
         } else if (nativeCursorIsTextInput()) {
             // This message will put the node in focus, for the DOM's notion
             // of focus, and make the focuscontroller active
-            mWebViewCore.sendMessage(EventHub.CLICK);
+            mWebViewCore.sendMessage(EventHub.CLICK, nativeCursorFramePointer(),
+                    nativeCursorNodePointer());
             // This will bring up the WebTextView and put it in focus, for
             // our view system's notion of focus
             rebuildWebTextView();
@@ -3626,7 +3627,7 @@ public class WebView extends AbsoluteLayout
      * not draw the blinking cursor.  It gets set to "active" to draw the cursor
      * in WebViewCore.cpp, when the WebCore thread receives key events/clicks.
      */
-    private void setFocusControllerInactive() {
+    /* package */ void setFocusControllerInactive() {
         // Do not need to also check whether mWebViewCore is null, because
         // mNativeClass is only set if mWebViewCore is non null
         if (mNativeClass == 0) return;
@@ -5627,6 +5628,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeHideCursor();
     private native String   nativeImageURI(int x, int y);
     private native void     nativeInstrumentReport();
+    /* package */ native void nativeMoveCursorToNextTextInput();
     // return true if the page has been scrolled
     private native boolean  nativeMotionUp(int x, int y, int slop);
     // returns false if it handled the key
@@ -5644,6 +5646,8 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsDown();
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
+    // Returns a value corresponding to CachedFrame::ImeAction
+    /* package */ native int  nativeTextFieldAction();
     private native int      nativeTextGeneration();
     // Never call this version except by updateCachedTextfield(String) -
     // we always want to pass in our generation number.
