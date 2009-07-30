@@ -323,15 +323,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     private void notifyAccessibilityServicesDelayedLocked(AccessibilityEvent event,
             boolean isDefault) {
-        for (int i = 0, count = mServices.size(); i < count; i++) {
-            Service service = mServices.get(i);
+        try {
+            for (int i = 0, count = mServices.size(); i < count; i++) {
+                Service service = mServices.get(i);
 
-            if (service.mIsDefault == isDefault) {
-                if (canDispathEventLocked(service, event, mHandledFeedbackTypes)) {
-                    mHandledFeedbackTypes |= service.mFeedbackType;
-                    notifyAccessibilityServiceDelayedLocked(service, event);
+                if (service.mIsDefault == isDefault) {
+                    if (canDispathEventLocked(service, event, mHandledFeedbackTypes)) {
+                        mHandledFeedbackTypes |= service.mFeedbackType;
+                        notifyAccessibilityServiceDelayedLocked(service, event);
+                    }
                 }
             }
+        } catch (IndexOutOfBoundsException oobe) {
+            // An out of bounds exception can happen if services are going away
+            // as the for loop is running. If that happens, just bail because
+            // there are no more services to notify.
+            return;
         }
     }
 
