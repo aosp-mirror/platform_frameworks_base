@@ -18,10 +18,6 @@ package com.android.film;
 
 import java.io.Writer;
 
-import android.renderscript.RenderScript;
-import android.renderscript.ProgramVertexAlloc;
-import android.renderscript.Matrix;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -30,13 +26,17 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
+import android.renderscript.Matrix;
+import android.renderscript.ProgramVertexAlloc;
+import android.renderscript.RenderScript;
+import android.renderscript.RenderScript.ElementPredefined;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 
 public class FilmRS {
     private final int POS_TRANSLATE = 0;
@@ -175,44 +175,47 @@ public class FilmRS {
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inScaled = false;
 
+        RenderScript.ElementPredefined ie = 
+            RenderScript.ElementPredefined.RGB_565;
+
         b = BitmapFactory.decodeResource(mRes, R.drawable.p01, opts);
-        mImages[0] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[0] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p02, opts);
-        mImages[1] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[1] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p03, opts);
-        mImages[2] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[2] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
-        b = BitmapFactory.decodeResource(mRes, R.drawable.path1927, opts);
-        mImages[3] = mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGB_565, true);
+        b = BitmapFactory.decodeResource(mRes, R.drawable.p04, opts);
+        mImages[3] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p05, opts);
-        mImages[4] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[4] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p06, opts);
-        mImages[5] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[5] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p07, opts);
-        mImages[6] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[6] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p08, opts);
-        mImages[7] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[7] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p09, opts);
-        mImages[8] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[8] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p10, opts);
-        mImages[9] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[9] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p11, opts);
-        mImages[10] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[10] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p12, opts);
-        mImages[11] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[11] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         b = BitmapFactory.decodeResource(mRes, R.drawable.p13, opts);
-        mImages[12] = mRS.allocationCreateFromBitmapBoxed(b, RenderScript.ElementPredefined.RGB_565, true);
+        mImages[12] = mRS.allocationCreateFromBitmapBoxed(b, ie, true);
 
         for(int ct=0; ct < mImages.length; ct++) {
             mImages[ct].uploadToTexture(1);
@@ -289,31 +292,7 @@ public class FilmRS {
         mAllocOffsetsTex.data(mFSM.mTriangleOffsetsTex);
         mScriptStrip.bindAllocation(mAllocOffsetsTex, 5);
 
-
-
-
-/*
-        {
-            Resources res = getResources();
-            Drawable d = res.getDrawable(R.drawable.gadgets_clock_mp3);
-            BitmapDrawable bd = (BitmapDrawable)d;
-            Bitmap b = bd.getBitmap();
-            mTexture = mRS.allocationCreateFromBitmap(b,
-                                                      RenderScript.ElementPredefined.RGB_565,
-                                                      true);
-            mTexture.uploadToTexture(0);
-        }
-
-        mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.SRC_ALPHA, RenderScript.BlendDstFunc.ONE);
-        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
-        mPFS = mRS.programFragmentStoreCreate();
-        mPFS.setName("MyBlend");
-        mRS.contextBindProgramFragmentStore(mPFS);
-        */
-
         setFilmStripPosition(0, 0);
-
         mRS.contextBindRootScript(mScriptStrip);
     }
 }
