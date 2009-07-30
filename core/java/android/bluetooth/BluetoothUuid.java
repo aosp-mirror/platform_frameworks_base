@@ -30,14 +30,13 @@ public final class BluetoothUuid {
      * The following 128 bit values are calculated as:
      *  uuid * 2^96 + BASE_UUID
      */
-    public static final UUID AudioSink = UUID.fromString("0000110A-0000-1000-8000-00805F9B34FB");
-    public static final UUID AudioSource = UUID.fromString("0000110B-0000-1000-8000-00805F9B34FB");
+    public static final UUID AudioSink = UUID.fromString("0000110B-0000-1000-8000-00805F9B34FB");
+    public static final UUID AudioSource = UUID.fromString("0000110A-0000-1000-8000-00805F9B34FB");
     public static final UUID AdvAudioDist = UUID.fromString("0000110D-0000-1000-8000-00805F9B34FB");
     public static final UUID HSP       = UUID.fromString("00001108-0000-1000-8000-00805F9B34FB");
-    public static final UUID HeadsetHS = UUID.fromString("00001131-0000-1000-8000-00805F9B34FB");
-    public static final UUID Handsfree  = UUID.fromString("0000111e-0000-1000-8000-00805F9B34FB");
-    public static final UUID HandsfreeAudioGateway
-                                          = UUID.fromString("0000111f-0000-1000-8000-00805F9B34FB");
+    public static final UUID Handsfree  = UUID.fromString("0000111E-0000-1000-8000-00805F9B34FB");
+    public static final UUID AvrcpController =
+                                          UUID.fromString("0000110E-0000-1000-8000-00805F9B34FB");
 
     public static boolean isAudioSource(UUID uuid) {
         return uuid.equals(AudioSource);
@@ -56,7 +55,10 @@ public final class BluetoothUuid {
     }
 
     public static boolean isHeadset(UUID uuid) {
-        return uuid.equals(HSP) || uuid.equals(HeadsetHS);
+        return uuid.equals(HSP);
+    }
+
+    public static boolean isAvrcpController(UUID uuid) {
+        return uuid.equals(AvrcpController);
     }
 }
-
