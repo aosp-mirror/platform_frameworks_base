@@ -1409,6 +1409,17 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";
     /**
+     * Activity Action:  Start this activity to request system shutdown.
+     * The optional boolean extra field {@link #EXTRA_KEY_CONFIRM} can be set to true
+     * to request confirmation from the user before shutting down.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * {@hide}
+     */
+    public static final String ACTION_REQUEST_SHUTDOWN = "android.intent.action.ACTION_REQUEST_SHUTDOWN";
+    /**
      * Broadcast Action:  Indicates low memory condition on the device
      * 
      * <p class="note">This is a protected intent that can only be sent
@@ -1891,6 +1902,14 @@ public class Intent implements Parcelable {
      * triggered the creation of the Intent it is in.
      */
     public static final String EXTRA_KEY_EVENT = "android.intent.extra.KEY_EVENT";
+
+    /**
+     * Set to true in {@link #ACTION_REQUEST_SHUTDOWN} to request confirmation from the user
+     * before shutting down.
+     *
+     * {@hide}
+     */
+    public static final String EXTRA_KEY_CONFIRM = "android.intent.extra.KEY_CONFIRM";
 
     /**
      * Used as an boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED} or

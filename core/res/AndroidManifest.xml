@@ -1130,6 +1130,16 @@
                 android:exported="true">
         </activity>
 
+        <activity android:name="com.android.server.ShutdownActivity"
+            android:permission="android.permission.SHUTDOWN"
+            android:excludeFromRecents="true"
+            android:multiprocess="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_REQUEST_SHUTDOWN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <service android:name="com.android.server.LoadAverageService"
             android:exported="true" />
 
