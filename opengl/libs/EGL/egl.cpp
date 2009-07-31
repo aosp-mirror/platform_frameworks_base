@@ -135,9 +135,10 @@ struct egl_image_t : public egl_object_t<'_img'>
 
 struct tls_t
 {
-    tls_t() : error(EGL_SUCCESS), ctx(0) { }
+    tls_t() : error(EGL_SUCCESS), ctx(0), logCallWithNoContext(EGL_TRUE) { }
     EGLint      error;
     EGLContext  ctx;
+    EGLBoolean  logCallWithNoContext;
 };
 
 
@@ -352,8 +353,14 @@ static int ext_context_lost() {
 }
 
 static void gl_no_context() {
-    LOGE("call to OpenGL ES API with no current context");
+    tls_t* tls = getTLS();
+    if (tls->logCallWithNoContext == EGL_TRUE) {
+        tls->logCallWithNoContext = EGL_FALSE;
+        LOGE("call to OpenGL ES API with no current context "
+             "(logged once per thread)");
+    }
 }
+
 static void early_egl_init(void) 
 {
 #if !USE_FAST_TLS_KEY
