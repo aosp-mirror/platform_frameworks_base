@@ -183,6 +183,7 @@ public class JetPlayer
      */
     public void release() {
         native_release();
+        singletonRef = null;
     }
     
     
