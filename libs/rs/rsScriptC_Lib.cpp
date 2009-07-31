@@ -129,12 +129,91 @@ static void SC_storeMatrix(uint32_t bank, uint32_t offset, const rsc_Matrix *m)
 // Math routines
 //////////////////////////////////////////////////////////////////////////////
 
+#define PI 3.1415926f
+#define DEG_TO_RAD PI / 180.0f
+#define RAD_TO_DEG 180.0f / PI
+
 static float SC_randf(float max)
 {
     float r = (float)rand();
     return r / RAND_MAX * max;
 }
 
+static float SC_randf2(float min, float max)
+{
+    float r = (float)rand();
+    return r / RAND_MAX * (max - min) + min;
+}
+
+static float SC_clampf(float amount, float low, float high)
+{
+    return amount < low ? low : (amount > high ? high : amount);
+}
+
+static float SC_maxf(float a, float b)
+{
+    return a > b ? a : b; 
+}
+
+static float SC_minf(float a, float b)
+{
+    return a < b ? a : b; 
+}
+
+static float SC_sqrf(float v)
+{
+    return v * v; 
+}
+
+static float SC_distf2(float x1, float y1, float x2, float y2)
+{
+    float x = x2 - x1;
+    float y = y2 - y1;
+    return sqrtf(x * x + y * y); 
+}
+
+static float SC_distf3(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+    float x = x2 - x1;
+    float y = y2 - y1;
+    float z = z2 - z1;
+    return sqrtf(x * x + y * y + z * z); 
+}
+
+static float SC_magf2(float a, float b)
+{
+    return sqrtf(a * a + b * b);
+}
+
+static float SC_magf3(float a, float b, float c)
+{
+    return sqrtf(a * a + b * b + c * c);
+}
+
+static float SC_radf(float degrees)
+{
+    return degrees * DEG_TO_RAD; 
+}
+
+static float SC_degf(float radians)
+{
+    return radians * RAD_TO_DEG; 
+}
+
+static float SC_lerpf(float start, float stop, float amount)
+{
+    return start + (stop - start) * amount;
+}
+
+static float SC_normf(float start, float stop, float value)
+{
+    return (value - start) / (stop - start);
+}
+
+static float SC_mapf(float minStart, float minStop, float maxStart, float maxStop, float value)
+{
+    return maxStart + (maxStart - maxStop) * ((value - minStart) / (minStop - minStart));
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Time routines
@@ -176,7 +255,7 @@ static uint32_t SC_minute()
     }
 }   
 
-static uint32_t  SC_hour()
+static uint32_t SC_hour()
 {
     GET_TLS();
     
@@ -192,7 +271,61 @@ static uint32_t  SC_hour()
         timeinfo = localtime(&rawtime);
         return timeinfo->tm_hour;
     }
+}
+
+static uint32_t SC_day()
+{
+    GET_TLS();
+    
+    time_t rawtime;
+    time(&rawtime);
+    
+    if (sc->mEnviroment.mTimeZone) {
+        struct tm timeinfo;
+        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
+        return timeinfo.tm_mday;
+    } else {
+        struct tm *timeinfo;
+        timeinfo = localtime(&rawtime);
+        return timeinfo->tm_mday;
+    }
 }   
+
+static uint32_t SC_month()
+{
+    GET_TLS();
+    
+    time_t rawtime;
+    time(&rawtime);
+    
+    if (sc->mEnviroment.mTimeZone) {
+        struct tm timeinfo;
+        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
+        return timeinfo.tm_mon;
+    } else {
+        struct tm *timeinfo;
+        timeinfo = localtime(&rawtime);
+        return timeinfo->tm_mon;
+    }
+} 
+
+static uint32_t SC_year()
+{
+    GET_TLS();
+    
+    time_t rawtime;
+    time(&rawtime);
+    
+    if (sc->mEnviroment.mTimeZone) {
+        struct tm timeinfo;
+        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
+        return timeinfo.tm_year;
+    } else {
+        struct tm *timeinfo;
+        timeinfo = localtime(&rawtime);
+        return timeinfo->tm_year;
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Matrix routines
@@ -510,14 +643,58 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "float", "(float)" },
     { "cosf", (void *)&cosf,
         "float", "(float)" },
+    { "asinf", (void *)&asinf,
+        "float", "(float)" },
+    { "acosf", (void *)&acosf,
+        "float", "(float)" },
+    { "atanf", (void *)&atanf,
+        "float", "(float)" },
+    { "atan2f", (void *)&atan2f,
+        "float", "(floatm float)" },
     { "fabsf", (void *)&fabsf,
         "float", "(float)" },
     { "randf", (void *)&SC_randf,
         "float", "(float)" },
+    { "randf2", (void *)&SC_randf2,
+        "float", "(float, float)" },
     { "floorf", (void *)&floorf,
         "float", "(float)" },
     { "ceilf", (void *)&ceilf,
         "float", "(float)" },
+    { "expf", (void *)&expf,
+        "float", "(float)" },
+    { "logf", (void *)&logf,
+        "float", "(float)" },
+    { "powf", (void *)&powf,
+        "float", "(float, float)" },
+    { "maxf", (void *)&SC_maxf,
+        "float", "(float, float)" },
+    { "minf", (void *)&SC_minf,
+        "float", "(float, float)" },
+    { "sqrtf", (void *)&sqrtf,
+        "float", "(float)" },
+    { "sqrf", (void *)&SC_sqrf,
+        "float", "(float)" },
+    { "clampf", (void *)&SC_clampf,
+        "float", "(float, float, float)" },
+    { "distf2", (void *)&SC_distf2,
+        "float", "(float, float, float, float)" },
+    { "distf3", (void *)&SC_distf3,
+        "float", "(float, float, float, float, float, float)" },
+    { "magf2", (void *)&SC_magf2,
+        "float", "(float, float)" },
+    { "magf3", (void *)&SC_magf3,
+        "float", "(float, float, float)" },
+    { "radf", (void *)&SC_radf,
+        "float", "(float)" },
+    { "degf", (void *)&SC_degf,
+        "float", "(float)" },
+    { "lerpf", (void *)&SC_lerpf,
+        "float", "(float, float, float)" },
+    { "normf", (void *)&SC_normf,
+        "float", "(float, float, float)" },
+    { "mapf", (void *)&SC_mapf,
+        "float", "(float, float, float, float, float)" },
 
     // time
     { "second", (void *)&SC_second,
@@ -525,6 +702,12 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "minute", (void *)&SC_minute,
         "int", "()" },
     { "hour", (void *)&SC_hour,
+        "int", "()" },
+    { "day", (void *)&SC_day,
+        "int", "()" },
+    { "month", (void *)&SC_month,
+        "int", "()" },
+    { "year", (void *)&SC_year,
         "int", "()" },
 
     // matrix
