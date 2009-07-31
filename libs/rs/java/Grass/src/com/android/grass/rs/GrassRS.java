@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,12 @@ import static android.renderscript.RenderScript.EnvMode.*;
 import static android.renderscript.RenderScript.DepthFunc.*;
 import static android.renderscript.RenderScript.BlendSrcFunc;
 import static android.renderscript.RenderScript.BlendDstFunc;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap;
 
 import java.util.TimeZone;
 
 class GrassRS {
-    private static final int RSID_SKY_TEXTURES = 0;
+    private static final int RSID_STATE = 0;
+    private static final int RSID_SKY_TEXTURES = 1;
     private static final int SKY_TEXTURES_COUNT = 4;
 
     private Resources mResources;
@@ -52,6 +51,8 @@ class GrassRS {
     private RenderScript.Allocation[] mSkyTextures;
     @SuppressWarnings({"FieldCanBeLocal"})
     private int[] mSkyBufferIDs;
+    @SuppressWarnings({"FieldCanBeLocal"})
+    private RenderScript.Allocation mState;
 
     public GrassRS() {
     }
@@ -66,6 +67,7 @@ class GrassRS {
         createProgramVertex();
         createProgramFragmentStore();
         createProgramFragment();
+        createScriptStructures();
         
         mRS.scriptCBegin();
         mRS.scriptCSetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -76,9 +78,15 @@ class GrassRS {
         mScript = mRS.scriptCCreate();
 
         loadSkyTextures();        
+        mScript.bindAllocation(mState, RSID_STATE);
         mScript.bindAllocation(mSkyTexturesIDs, RSID_SKY_TEXTURES);
 
         mRS.contextBindRootScript(mScript);        
+    }
+
+    private void createScriptStructures() {
+        mState = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, 1);    
+        mState.data(new int[1]);
     }
 
     private void loadSkyTextures() {
