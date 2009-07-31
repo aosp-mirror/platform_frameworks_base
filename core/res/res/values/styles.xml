@@ -659,12 +659,12 @@
     </style>
     
     <style name="Preference.PreferenceScreen">
-        <item name="android:widgetLayout">@android:layout/preferences</item>
     </style>
 
     <style name="Preference.DialogPreference">
         <item name="android:positiveButtonText">@android:string/ok</item>
         <item name="android:negativeButtonText">@android:string/cancel</item>
+        <item name="android:widgetLayout">@android:layout/preference_dialog</item>
     </style>
     
     <style name="Preference.DialogPreference.YesNoPreference">
@@ -680,6 +680,7 @@
         <item name="android:ringtoneType">ringtone</item>
         <item name="android:showSilent">true</item>
         <item name="android:showDefault">true</item>
+        <item name="android:widgetLayout">@android:layout/preference_dialog</item>
     </style>
 
     <!-- Other Misc Styles -->
