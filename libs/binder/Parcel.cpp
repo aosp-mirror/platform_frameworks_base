@@ -661,7 +661,7 @@ status_t Parcel::writeWeakBinder(const wp<IBinder>& val)
 
 status_t Parcel::writeNativeHandle(const native_handle* handle)
 {
-    if (handle->version != sizeof(native_handle))
+    if (!handle || handle->version != sizeof(native_handle))
         return BAD_TYPE;
 
     status_t err;
