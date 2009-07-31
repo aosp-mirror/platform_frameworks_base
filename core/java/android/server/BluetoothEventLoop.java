@@ -402,13 +402,14 @@ class BluetoothEventLoop {
 
         boolean authorized = false;
         UUID uuid = UUID.fromString(deviceUuid);
-        if (mBluetoothService.isEnabled() && BluetoothUuid.isAudioSink(uuid)) {
+        if (mBluetoothService.isEnabled() &&
+                (BluetoothUuid.isAudioSink(uuid) || BluetoothUuid.isAvrcpController(uuid))) {
             BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
             authorized = a2dp.getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {
-                Log.i(TAG, "Allowing incoming A2DP connection from " + address);
+                Log.i(TAG, "Allowing incoming A2DP / AVRCP connection from " + address);
             } else {
-                Log.i(TAG, "Rejecting incoming A2DP connection from " + address);
+                Log.i(TAG, "Rejecting incoming A2DP / AVRCP connection from " + address);
             }
         } else {
             Log.i(TAG, "Rejecting incoming " + deviceUuid + " connection from " + address);
