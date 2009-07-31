@@ -60,6 +60,12 @@ struct android_native_base_t
 
 // ---------------------------------------------------------------------------
 
+/* attributes queriable with query() */
+enum {
+    NATIVE_WINDOW_WIDTH     = 0,
+    NATIVE_WINDOW_HEIGHT    = 1
+};
+
 struct android_native_window_t 
 {
 #ifdef __cplusplus
@@ -129,8 +135,15 @@ struct android_native_window_t
     int     (*queueBuffer)(struct android_native_window_t* window,
                 struct android_native_buffer_t* buffer);
 
+    /*
+     * hook used to retrieve information about the native window.
+     * 
+     * Returns 0 on success or -errno on error.
+     */
+    int     (*query)(struct android_native_window_t* window,
+            int what, int* value);
     
-    void* reserved_proc[5];
+    void* reserved_proc[4];
 };
 
 // ---------------------------------------------------------------------------

@@ -124,6 +124,7 @@ FramebufferNativeWindow::FramebufferNativeWindow()
     android_native_window_t::dequeueBuffer = dequeueBuffer;
     android_native_window_t::lockBuffer = lockBuffer;
     android_native_window_t::queueBuffer = queueBuffer;
+    android_native_window_t::query = query;
 }
 
 FramebufferNativeWindow::~FramebufferNativeWindow() {
@@ -196,6 +197,23 @@ int FramebufferNativeWindow::queueBuffer(android_native_window_t* window,
     self->mNumFreeBuffers++;
     self->mCondition.broadcast();
     return res;
+}
+
+int FramebufferNativeWindow::query(android_native_window_t* window,
+        int what, int* value) 
+{
+    FramebufferNativeWindow* self = getSelf(window);
+    Mutex::Autolock _l(self->mutex);
+    framebuffer_device_t* fb = self->fbDev;
+    switch (what) {
+        case NATIVE_WINDOW_WIDTH:
+            *value = fb->width;
+            return NO_ERROR;
+        case NATIVE_WINDOW_HEIGHT:
+            *value = fb->height;
+            return NO_ERROR;
+    }
+    return BAD_VALUE;
 }
 
 // ----------------------------------------------------------------------------
