@@ -27,7 +27,7 @@ applications:</p>
 <ul>
   <li>It gives you access to other Android development tools from inside the Eclipse IDE. For 
 example, ADT lets you access the many capabilities of the DDMS tool: take screenshots, manage 
-port-forwarding, set breakpoints, and view thread and process informationd irectly from Eclipse.</li>
+port-forwarding, set breakpoints, and view thread and process information directly from Eclipse.</li>
   <li>It provides a New Project Wizard, which helps you quickly create and set up all of the 
 basic files you'll need for a new Android application.</li>
   <li>It automates and simplifies the process of building your Android application.</li>
@@ -145,7 +145,7 @@ create an AVD.</p>
 <p>If you will be running your applications only on actual device hardware, you do not 
 need an AVD &mdash; see 
 <a href="{@docRoot}guide/developing/device.html">Developing On a Device</a> for information
-on running your applicaiton.</p>
+on running your application.</p>
 
 <h3 id="CreatingAnAvd">Creating an AVD</h3>
 

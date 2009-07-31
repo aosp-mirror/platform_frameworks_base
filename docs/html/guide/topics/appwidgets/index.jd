@@ -382,7 +382,7 @@ so the Activity needs to accept this Intent. For example:</p>
 
 <p>Also, the Activity must be declared in the AppWidgetProviderInfo XML file, with the 
 <code>android:configure</code> attribute (see <a href="#MetaData">Adding 
-the AppWidgetProvierInfo Metadata</a> above). For example, the configuration Activity
+the AppWidgetProviderInfo Metadata</a> above). For example, the configuration Activity
 can be declared like this:</p>
 
 <pre>

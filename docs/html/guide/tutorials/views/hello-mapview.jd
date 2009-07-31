@@ -81,7 +81,7 @@ First, we'll create a simple Activity that can view and navigate a map. Then we 
 
    <li>Now open the HelloMapView.java file. For this Activity, we're going to extend the special sub-class of 
       Activity called MapActivity, so change the class declaration to extend 
-      MapActicity, instead of Activity:</p>
+      MapActivity, instead of Activity:</p>
 
       <pre>public class HelloMapView extends MapActivity {</pre>
 
@@ -134,7 +134,7 @@ mZoom = (ZoomControls) mapView.getZoomControls();</pre>
       <p>By using the ZoomControls object provided by MapView, we don't have to do any of the work
       required to actually perform the zoom operations. The ZoomControls widget that MapView 
       returns for us is already hooked into the MapView and works as soon as we add it to the 
-      layout. The controls will appear whenever the user touches the map, then dissapear after 
+      layout. The controls will appear whenever the user touches the map, then disappear after 
       a few moments of inactivity.</p></li>
 
    <li>Now just plug our ZoomControls into the LinearLayout we added:

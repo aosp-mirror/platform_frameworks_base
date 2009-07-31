@@ -167,7 +167,7 @@ page.title=Glossary
     <dd>An XML file that each application must define, to describe the
     application's package name, version, components (activities, intent
     filters, services), imported libraries, and describes the various
-    activies, and so on. See <a
+    activities, and so on. See <a
     href="{@docRoot}guide/topics/manifest/manifest-intro.html">The
     AndroidManifest.xml File</a> for complete information.</dd>
 

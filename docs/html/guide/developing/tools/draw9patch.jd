@@ -5,7 +5,7 @@ page.title=Draw 9-patch
    {@link android.graphics.NinePatch} graphic using a WYSIWYG editor.</p>
 <p>For an introduction to Nine-patch graphics and how they work, please read 
 the section on Nine-patch in the 
-<a href="{@docRoot}guide/topics/resources/available-resources.html#ninepatch">Ninepatch Images</a> topic.</p>
+<a href="{@docRoot}guide/topics/resources/available-resources.html#ninepatch">Nine-patch Images</a> topic.</p>
 
 <div class="sidebox" style="width:auto"><br/>
 <img src="{@docRoot}images/draw9patch-norm.png" alt="" height="300" width="341" />

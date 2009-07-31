@@ -123,7 +123,7 @@ android create project \
   <li><code>default.properties</code> - Properties for the build system. <em>Do not modify 
   this file</em>.</li>
   <li><code>build.properties</code> - Customizable properties for the build system. You can edit this 
-  file to overried default build settings used by Ant.</li>
+  file to override default build settings used by Ant.</li>
   <li><code>src<em>/your/package/namespace/ActivityName</em>.java</code> - The Activity class 
   you specified during project creation.</li>
   <li><code>bin/</code>  - Output directory for the build script.</li>
@@ -230,7 +230,7 @@ environment variable to specify the path to where the JDK is installed.</p>
 <p class="note"><strong>Note:</strong> When installing JDK on Windows, the default is to install 
 in the "Program Files" directory. This location will cause <code>ant</code> to fail, because of 
 the space. To fix the problem, you can specify the JAVA_HOME variable like this: 
-<code>set JAVA_HOME=c:\Prora~1\Java\<jdkdir></code>. The easiest solution, however, is to 
+<code>set JAVA_HOME=c:\Progra~1\Java\<jdkdir></code>. The easiest solution, however, is to 
 install JDK in a non-space directory, for example: <code>c:\java\jdk1.6.0_02</code>.</p>
 
 

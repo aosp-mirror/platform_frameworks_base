@@ -174,7 +174,7 @@ uninstall procedure and continue to <a href="#installAdt">Install the 0.9 ADT pl
 <ol>
     <li>Select <strong>Help</strong> &gt; <strong>Software Updates</strong>.</li>
     <li>Select the <strong>Available Software</strong> tab.</li>
-    <li>Expand the entry for the Andriod plugin (may be listed as the location URL)
+    <li>Expand the entry for the Android plugin (may be listed as the location URL)
       and select "Developer Tools" by checking the box next to it, then click 
       <strong>Install</strong>.</li>
     <li>On the next window, "Android DDMS" and "Android Development Tools" 
@@ -272,7 +272,7 @@ first target ("1"), which uses the Android 1.1 platform library.</p>
 your AIDL Java files will be generated in here. You <strong>must</strong> remove
 the old <code>R.java</code> and old auto-generated AIDL java files from the 
 <code>src/</code> folder. (This
-does not apply to your own hand-crafted parcelabe AIDL java files.)</p>
+does not apply to your own hand-crafted parcelable AIDL java files.)</p>
 
 <p class="note"><strong>Note:</strong> The "activitycreator" tool has been replaced 
 by the new "android" tool. For information on creating new projects with the android tool,
@@ -368,7 +368,7 @@ if it performs any of the following:</p>
   listens for special keypress events that only occur on a keypad, then your application
   should degrade gracefully when there is no keyboard available.
   </li>
-  <li>Performs its own layout orientation changes based on the acceletometer (or via other
+  <li>Performs its own layout orientation changes based on the accelerometer (or via other
   sensors). Some devices running Android 1.5 will automatically rotate the orientation
   (and all devices have the option to turn on auto-rotation), so if your application also
   attempts to rotate the orientation, it can result in strange behavior. In addition, if your

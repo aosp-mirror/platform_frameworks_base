@@ -328,7 +328,7 @@ loopback interface.
 <p>The listening classes, called broadcast receivers, extend {@link android.content.BroadcastReceiver
     BroadcastReceiver}. If you want Android to instantiate the object whenever an appropriate
     intent notification is sent, define the receiver with a <code>&lt;receiver&gt;</code> element
-    in the AndroidManifext.xml file. If the caller is expected to instantiate the
+    in the AndroidManifest.xml file. If the caller is expected to instantiate the
     object in preparation to receive a message, this is not required. The receiver
     will get a call to their {@link android.content.BroadcastReceiver#onReceive(android.content.Context,android.content.Intent)
     BroadcastReceiver.onReceive()} method. A receiver can define an <code>&lt;intent-filter&gt;</code> tag
@@ -468,7 +468,7 @@ user receiving new e-mail.</p>
 };
 
 
-private void IncomingMotherInlawCall(Connection c) {
+private void IncomingMotherInLawCall(Connection c) {
     String Text;
     
     // &quot;Answer&quot; callback.
@@ -486,7 +486,7 @@ private void IncomingMotherInlawCall(Connection c) {
     new AlertDialog.Builder(this)
       .setMessage("Phyllis is calling")
       .setPositiveButton("Answer", acceptMsg)
-      .setOnCanceListener(new OnCancelListener() {
+      .setOnCancelListener(new OnCancelListener() {
         public void onCancel(DialogInterface dialog) {
           rejectMsg.sendToTarget();
         }});

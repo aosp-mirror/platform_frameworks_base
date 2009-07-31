@@ -53,7 +53,7 @@ tabs to navigate between different views.</p>
     be associated with a different tab.
     In this case, each tab simply shows a different {@link android.widget.TextView} with some text. </p>
     <p>Notice that the TabWidget and the FrameLayout elements have specific <code>android</code> namespace IDs. These are necessary
-    so that the TabHost can automatically retireve references to them, populate the TabWidget with the tabs that we'll define
+    so that the TabHost can automatically retrieve references to them, populate the TabWidget with the tabs that we'll define
     in our code, and swap the views in the FrameLayout. We've also defined our own IDs for each TextView, which we'll use to 
     associate each tab with the view that it should reveal.</p>
     <p>Of course, you can 

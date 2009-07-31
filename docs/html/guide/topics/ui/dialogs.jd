@@ -154,7 +154,7 @@ to the object and if the dialog is showing, it will dismiss it.</p>
 
 <h3>Using dismiss listeners</h3>
 
-<p>If you'd like your applcation to perform some procedures the moment that a dialog is dismissed, 
+<p>If you'd like your application to perform some procedures the moment that a dialog is dismissed, 
 then you should attach an on-dismiss listener to your Dialog.</p>
 
 <p>First define the {@link android.content.DialogInterface.OnDismissListener} interface.

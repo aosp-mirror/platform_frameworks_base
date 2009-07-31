@@ -112,7 +112,7 @@ like <code>drawBitmap(...)</code>, <code>drawRect(...)</code>, <code>drawText(..
 Other classes that you might use also have <code>draw()</code> methods. For example, you'll probably
 have some {@link android.graphics.drawable.Drawable} objects that you want to put on the Canvas. Drawable
 has its own <code>{@link android.graphics.drawable.Drawable#draw(Canvas) draw()}</code> method 
-that takes your Canvas as an arguement.</p>
+that takes your Canvas as an argument.</p>
 
 
 <h3 id="on-view">On a View</h3>
@@ -124,7 +124,7 @@ and drawing with a Canvas in <code>{@link android.view.View#onDraw(Canvas) View.
 The most convenient aspect of doing so is that the Android framework will
 provide you with a pre-defined Canvas to which you will place your drawing calls.</p>
 
-<p>To start, extend the {@link android.view.View} class (or descendent thereof) and define
+<p>To start, extend the {@link android.view.View} class (or descendant thereof) and define
 the <code>{@link android.view.View#onDraw(Canvas) onDraw()}</code> callback method. This method will be called by the Android 
 framework to request that your View draw itself. This is where you will perform all your calls
 to draw through the {@link android.graphics.Canvas}, which is passed to you through the <code>onDraw()</code> callback.</p>
@@ -190,7 +190,7 @@ with <code>{@link android.graphics.Canvas#drawBitmap(Bitmap,Rect,RectF,Paint) dr
 you will see traces of the drawings you previously performed.</p>
 
 
-<p>For a sample application, see the Lunar Landar game, in the SDK samples folder:
+<p>For a sample application, see the Lunar Lander game, in the SDK samples folder:
 <code>&lt;your-sdk-directory>/samples/LunarLander/</code>. Or,
 browse the source in the <a href="{@docRoot}guide/samples/index.html">Sample Code</a> section.</p>
 
