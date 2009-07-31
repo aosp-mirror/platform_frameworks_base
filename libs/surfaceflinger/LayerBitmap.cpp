@@ -178,6 +178,7 @@ sp<Buffer> LayerBitmap::allocate()
 {
     Mutex::Autolock _l(mLock);
     surface_info_t* info = mInfo;
+    mBuffer.clear(); // free buffer before allocating a new one
     sp<Buffer> buffer = new Buffer(mWidth, mHeight, mFormat, mFlags);
     status_t err = buffer->initCheck();
     if (LIKELY(err == NO_ERROR)) {
