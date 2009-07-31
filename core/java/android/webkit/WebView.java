@@ -2292,13 +2292,13 @@ public class WebView extends AbsoluteLayout
 
     // Scale from content to view coordinates, and pin.
     // Also called by jni webview.cpp
-    private void setContentScrollBy(int cx, int cy, boolean animate) {
+    private boolean setContentScrollBy(int cx, int cy, boolean animate) {
         if (mDrawHistory) {
             // disallow WebView to change the scroll position as History Picture
             // is used in the view system.
             // TODO: as we switchOutDrawHistory when trackball or navigation
             // keys are hit, this should be safe. Right?
-            return;
+            return false;
         }
         cx = contentToView(cx);
         cy = contentToView(cy);
@@ -2315,11 +2315,9 @@ public class WebView extends AbsoluteLayout
             // FIXME: Why do we only scroll horizontally if there is no
             // vertical scroll?
 //                Log.d(LOGTAG, "setContentScrollBy cy=" + cy);
-            if (cy == 0 && cx != 0) {
-                pinScrollBy(cx, 0, animate, 0);
-            }
+            return cy == 0 && cx != 0 && pinScrollBy(cx, 0, animate, 0);
         } else {
-            pinScrollBy(cx, cy, animate, 0);
+            return pinScrollBy(cx, cy, animate, 0);
         }
     }
 
