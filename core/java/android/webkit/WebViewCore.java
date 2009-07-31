@@ -648,6 +648,7 @@ final class WebViewCore {
     }
 
         static final String[] HandlerDebugString = {
+            "UPDATE_FRAME_CACHE_IF_LOADING", // = 98
             "SCROLL_TEXT_INPUT", // = 99
             "LOAD_URL", // = 100;
             "STOP_LOADING", // = 101;
@@ -699,6 +700,7 @@ final class WebViewCore {
 
     class EventHub {
         // Message Ids
+        static final int UPDATE_FRAME_CACHE_IF_LOADING = 98;
         static final int SCROLL_TEXT_INPUT = 99;
         static final int LOAD_URL = 100;
         static final int STOP_LOADING = 101;
@@ -805,10 +807,11 @@ final class WebViewCore {
                 @Override
                 public void handleMessage(Message msg) {
                     if (DebugFlags.WEB_VIEW_CORE) {
-                        Log.v(LOGTAG, (msg.what < SCROLL_TEXT_INPUT || msg.what
+                        Log.v(LOGTAG, (msg.what < UPDATE_FRAME_CACHE_IF_LOADING
+                                || msg.what
                                 > FREE_MEMORY ? Integer.toString(msg.what)
                                 : HandlerDebugString[msg.what
-                                        - SCROLL_TEXT_INPUT])
+                                        - UPDATE_FRAME_CACHE_IF_LOADING])
                                 + " arg1=" + msg.arg1 + " arg2=" + msg.arg2
                                 + " obj=" + msg.obj);
                     }
@@ -823,6 +826,10 @@ final class WebViewCore {
                             mBrowserFrame.destroy();
                             mBrowserFrame = null;
                             mNativeClass = 0;
+                            break;
+
+                        case UPDATE_FRAME_CACHE_IF_LOADING:
+                            nativeUpdateFrameCacheIfLoading();
                             break;
 
                         case SCROLL_TEXT_INPUT:
@@ -1937,6 +1944,8 @@ final class WebViewCore {
         Message.obtain(mWebView.mPrivateHandler,
                 WebView.CLEAR_TEXT_ENTRY).sendToTarget();
     }
+
+    private native void nativeUpdateFrameCacheIfLoading();
 
     /**
      * Scroll the focused textfield to (x, y) in document space

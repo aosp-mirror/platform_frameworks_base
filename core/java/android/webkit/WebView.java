@@ -3814,6 +3814,8 @@ public class WebView extends AbsoluteLayout
                 } else {
                     mTouchMode = TOUCH_INIT_MODE;
                     mPreventDrag = mForwardTouchEvents;
+                    mWebViewCore.sendMessage(
+                            EventHub.UPDATE_FRAME_CACHE_IF_LOADING);
                     if (mLogEvent && eventTime - mLastTouchUpTime < 1000) {
                         EventLog.writeEvent(EVENT_LOG_DOUBLE_TAP_DURATION,
                                 (eventTime - mLastTouchUpTime), eventTime);
@@ -4681,7 +4683,7 @@ public class WebView extends AbsoluteLayout
             // mLastTouchX and mLastTouchY are the point in the current viewport
             int contentX = viewToContent((int) mLastTouchX + mScrollX);
             int contentY = viewToContent((int) mLastTouchY + mScrollY);
-            int left = nativeGetBlockLeftEdge(contentX, contentY);
+            int left = nativeGetBlockLeftEdge(contentX, contentY, mActualScale);
             if (left != NO_LEFTEDGE) {
                 // add a 5pt padding to the left edge. Re-calculate the zoom
                 // center so that the new scroll x will be on the left edge.
@@ -5656,5 +5658,5 @@ public class WebView extends AbsoluteLayout
     private native void     nativeUpdatePluginReceivesEvents();
     // return NO_LEFTEDGE means failure.
     private static final int NO_LEFTEDGE = -1;
-    private native int      nativeGetBlockLeftEdge(int x, int y);
+    private native int      nativeGetBlockLeftEdge(int x, int y, float scale);
 }
