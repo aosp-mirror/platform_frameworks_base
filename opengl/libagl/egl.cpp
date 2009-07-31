@@ -145,7 +145,7 @@ struct egl_surface_t
 
     virtual     EGLBoolean  bindDrawSurface(ogles_context_t* gl) = 0;
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl) = 0;
-    virtual     void        connect() {}
+    virtual     EGLBoolean  connect() { return EGL_TRUE; }
     virtual     void        disconnect() {}
     virtual     EGLint      getWidth() const = 0;
     virtual     EGLint      getHeight() const = 0;
@@ -214,7 +214,7 @@ struct egl_window_surface_v2_t : public egl_surface_t
     virtual     EGLBoolean  swapBuffers();
     virtual     EGLBoolean  bindDrawSurface(ogles_context_t* gl);
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl);
-    virtual     void        connect();
+    virtual     EGLBoolean  connect();
     virtual     void        disconnect();
     virtual     EGLint      getWidth() const    { return width;  }
     virtual     EGLint      getHeight() const   { return height; }
@@ -382,10 +382,12 @@ egl_window_surface_v2_t::~egl_window_surface_v2_t() {
     }
 }
 
-void egl_window_surface_v2_t::connect() 
+EGLBoolean egl_window_surface_v2_t::connect() 
 {
     // dequeue a buffer
-    nativeWindow->dequeueBuffer(nativeWindow, &buffer);
+    if (nativeWindow->dequeueBuffer(nativeWindow, &buffer) != NO_ERROR) {
+        return setError(EGL_BAD_ALLOC, EGL_FALSE);
+    }
 
     // allocate a corresponding depth-buffer
     width = buffer->width;
@@ -396,8 +398,7 @@ void egl_window_surface_v2_t::connect()
         depth.stride  = depth.width; // use the width here
         depth.data    = (GGLubyte*)malloc(depth.stride*depth.height*2);
         if (depth.data == 0) {
-            setError(EGL_BAD_ALLOC, EGL_NO_SURFACE);
-            return;
+            return setError(EGL_BAD_ALLOC, EGL_FALSE);
         }
     }
 
@@ -411,9 +412,10 @@ void egl_window_surface_v2_t::connect()
             GRALLOC_USAGE_SW_WRITE_OFTEN, &bits) != NO_ERROR) {
         LOGE("connect() failed to lock buffer %p (%ux%u)",
                 buffer, buffer->width, buffer->height);
-        setError(EGL_BAD_ACCESS, EGL_NO_SURFACE);
+        return setError(EGL_BAD_ACCESS, EGL_FALSE);
         // FIXME: we should make sure we're not accessing the buffer anymore
     }
+    return EGL_TRUE;
 }
 
 void egl_window_surface_v2_t::disconnect() 
@@ -444,6 +446,7 @@ status_t egl_window_surface_v2_t::lock(
 
 status_t egl_window_surface_v2_t::unlock(android_native_buffer_t* buf)
 {
+    if (!buf) return BAD_VALUE;
     int err = module->unlock(module, buf->handle);
     return err;
 }
@@ -515,6 +518,10 @@ void egl_window_surface_v2_t::copyBlt(
 
 EGLBoolean egl_window_surface_v2_t::swapBuffers()
 {
+    if (!buffer) {
+        return setError(EGL_BAD_ACCESS, EGL_FALSE);
+    }
+    
     /*
      * Handle eglSetSwapRectangleANDROID()
      * We copyback from the front buffer 
@@ -580,7 +587,7 @@ EGLBoolean egl_window_surface_v2_t::swapBuffers()
             GRALLOC_USAGE_SW_WRITE_OFTEN, &bits) != NO_ERROR) {
         LOGE("eglSwapBuffers() failed to lock buffer %p (%ux%u)",
                 buffer, buffer->width, buffer->height);
-        setError(EGL_BAD_ACCESS, EGL_NO_SURFACE);
+        return setError(EGL_BAD_ACCESS, EGL_FALSE);
         // FIXME: we should make sure we're not accessing the buffer anymore
     }
 
@@ -1748,7 +1755,9 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
                 ogles_scissor(gl, 0, 0, w, h);
             }
             if (d) {
-                d->connect();
+                if (d->connect() == EGL_FALSE) {
+                    return EGL_FALSE;
+                }
                 d->ctx = ctx;
                 d->bindDrawSurface(gl);
             }
