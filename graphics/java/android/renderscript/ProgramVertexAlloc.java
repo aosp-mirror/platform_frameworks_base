@@ -40,10 +40,7 @@ public class ProgramVertexAlloc {
         mProjection = new Matrix();
         mTexture = new Matrix();
 
-        mAlloc = rs.allocationCreatePredefSized(
-            RenderScript.ElementPredefined.USER_FLOAT, 
-            48);
-
+        mAlloc = rs.allocationCreateSized(Element.USER_FLOAT, 48);
         mAlloc.subData1D(MODELVIEW_OFFSET, 16, mModel.mMat);
         mAlloc.subData1D(PROJECTION_OFFSET, 16, mProjection.mMat);
         mAlloc.subData1D(TEXTURE_OFFSET, 16, mTexture.mMat);

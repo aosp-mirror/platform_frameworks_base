@@ -23,9 +23,11 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
+
 import android.renderscript.RenderScript;
 import android.renderscript.ProgramVertexAlloc;
-import android.util.Log;
+import android.renderscript.Element;
 
 public class FountainRS {
 
@@ -65,10 +67,10 @@ public class FountainRS {
     private void initRS() {
         int partCount = 1024;
 
-        mIntAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, 10);
-        mPartAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, partCount * 3 * 3);
+        mIntAlloc = mRS.allocationCreateSized(Element.USER_I32, 10);
+        mPartAlloc = mRS.allocationCreateSized(Element.USER_I32, partCount * 3 * 3);
         mPartAlloc.setName("PartBuffer");
-        mVertAlloc = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, partCount * 5 + 1);
+        mVertAlloc = mRS.allocationCreateSized(Element.USER_I32, partCount * 5 + 1);
 
         mRS.programFragmentStoreBegin(null, null);
         mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.SRC_ALPHA, RenderScript.BlendDstFunc.ONE);

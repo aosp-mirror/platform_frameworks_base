@@ -20,9 +20,8 @@ import java.io.Writer;
 
 import android.renderscript.RenderScript;
 import android.renderscript.ProgramVertexAlloc;
+import android.renderscript.Element;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -30,8 +29,9 @@ import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.Typeface;
-import android.os.Handler;
-import android.os.Message;
+
+import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
 
 public class RolloRS {
@@ -190,8 +190,8 @@ public class RolloRS {
         mRS.contextBindProgramVertex(mPV);
 
         mAllocScratchBuf = new int[32];
-        mAllocScratch = mRS.allocationCreatePredefSized(
-            RenderScript.ElementPredefined.USER_I32, mAllocScratchBuf.length);
+        mAllocScratch = mRS.allocationCreateSized(
+            Element.USER_I32, mAllocScratchBuf.length);
         mAllocScratch.data(mAllocScratchBuf);
 
         Log.e("rs", "Done loading named");
@@ -201,18 +201,15 @@ public class RolloRS {
         {
             mIcons = new RenderScript.Allocation[29];
             mAllocIconIDBuf = new int[mIcons.length];
-            mAllocIconID = mRS.allocationCreatePredefSized(
-                RenderScript.ElementPredefined.USER_I32, mAllocIconIDBuf.length);
+            mAllocIconID = mRS.allocationCreateSized(
+                Element.USER_I32, mAllocIconIDBuf.length);
 
             mLabels = new RenderScript.Allocation[29];
             mAllocLabelIDBuf = new int[mLabels.length];
-            mAllocLabelID = mRS.allocationCreatePredefSized(
-                RenderScript.ElementPredefined.USER_I32, mLabels.length);
+            mAllocLabelID = mRS.allocationCreateSized(
+                Element.USER_I32, mLabels.length);
 
-            RenderScript.ElementPredefined ie565 =
-                RenderScript.ElementPredefined.RGB_565;
-            RenderScript.ElementPredefined ie8888 =
-                RenderScript.ElementPredefined.RGBA_8888;
+            Element ie8888 = Element.RGBA_8888;
 
             mIcons[0] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.browser, ie8888, true);
             mIcons[1] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.market, ie8888, true);
@@ -310,7 +307,7 @@ public class RolloRS {
         p.setTextSize(20);
         p.setColor(0xffffffff);
         c.drawText(t, 2, 26, p);
-        return mRS.allocationCreateFromBitmap(b, RenderScript.ElementPredefined.RGBA_8888, true);
+        return mRS.allocationCreateFromBitmap(b, Element.RGBA_8888, true);
     }
 
 
@@ -323,8 +320,8 @@ public class RolloRS {
         mScript = mRS.scriptCCreate();
 
         mAllocStateBuf = new int[] {0, 0, 0, 8, 0, 0, -1, 0, mAllocIconIDBuf.length, 0, 0};
-        mAllocState = mRS.allocationCreatePredefSized(
-            RenderScript.ElementPredefined.USER_I32, mAllocStateBuf.length);
+        mAllocState = mRS.allocationCreateSized(
+            Element.USER_I32, mAllocStateBuf.length);
         mScript.bindAllocation(mAllocState, 0);
         mScript.bindAllocation(mAllocIconID, 1);
         mScript.bindAllocation(mAllocScratch, 2);

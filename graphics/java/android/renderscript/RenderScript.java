@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-/**
- * @hide
- *
- **/
 package android.renderscript;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+
+import android.content.res.Resources;
+import android.os.Bundle;
+import android.util.Config;
+import android.util.Log;
+import android.view.Surface;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.graphics.Color;
 
-import android.os.Bundle;
-import android.content.res.Resources;
-import android.util.Log;
-import android.util.Config;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.Window;
-import android.view.View;
-import android.view.Surface;
 
 /**
  * @hide
@@ -71,125 +62,125 @@ public class RenderScript {
         mBitmapOptions.inScaled = false;
     }
 
-    native private int  nDeviceCreate();
-    native private void nDeviceDestroy(int dev);
-    native private int  nContextCreate(int dev, Surface sur, int ver);
-    native private void nContextDestroy(int con);
+    native int  nDeviceCreate();
+    native void nDeviceDestroy(int dev);
+    native int  nContextCreate(int dev, Surface sur, int ver);
+    native void nContextDestroy(int con);
 
     //void rsContextBindSampler (uint32_t slot, RsSampler sampler);
     //void rsContextBindRootScript (RsScript sampler);
-    native private void nContextBindRootScript(int script);
-    native private void nContextBindSampler(int sampler, int slot);
-    native private void nContextBindProgramFragmentStore(int pfs);
-    native private void nContextBindProgramFragment(int pf);
-    native private void nContextBindProgramVertex(int pf);
+    native void nContextBindRootScript(int script);
+    native void nContextBindSampler(int sampler, int slot);
+    native void nContextBindProgramFragmentStore(int pfs);
+    native void nContextBindProgramFragment(int pf);
+    native void nContextBindProgramVertex(int pf);
 
-    native private void nAssignName(int obj, byte[] name);
-    native private int  nFileOpen(byte[] name);
+    native void nAssignName(int obj, byte[] name);
+    native int  nFileOpen(byte[] name);
 
-    native private void nElementBegin();
-    native private void nElementAddPredefined(int predef);
-    native private void nElementAdd(int kind, int type, int norm, int bits);
-    native private int  nElementCreate();
-    native private int  nElementGetPredefined(int predef);
-    native private void nElementDestroy(int obj);
+    native void nElementBegin();
+    native void nElementAddPredefined(int predef);
+    native void nElementAdd(int kind, int type, int norm, int bits);
+    native int  nElementCreate();
+    native int  nElementGetPredefined(int predef);
+    native void nElementDestroy(int obj);
 
-    native private void nTypeBegin(int elementID);
-    native private void nTypeAdd(int dim, int val);
-    native private int  nTypeCreate();
-    native private void nTypeDestroy(int id);
+    native void nTypeBegin(int elementID);
+    native void nTypeAdd(int dim, int val);
+    native int  nTypeCreate();
+    native void nTypeDestroy(int id);
 
-    native private int  nAllocationCreateTyped(int type);
-    native private int  nAllocationCreatePredefSized(int predef, int count);
-    native private int  nAllocationCreateSized(int elem, int count);
-    native private int  nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp);
-    native private int  nAllocationCreateFromBitmapBoxed(int dstFmt, boolean genMips, Bitmap bmp);
+    native int  nAllocationCreateTyped(int type);
+    native int  nAllocationCreatePredefSized(int predef, int count);
+    native int  nAllocationCreateSized(int elem, int count);
+    native int  nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp);
+    native int  nAllocationCreateFromBitmapBoxed(int dstFmt, boolean genMips, Bitmap bmp);
 
-    native private void nAllocationUploadToTexture(int alloc, int baseMioLevel);
-    native private void nAllocationDestroy(int alloc);
-    native private void nAllocationData(int id, int[] d);
-    native private void nAllocationData(int id, float[] d);
-    native private void nAllocationSubData1D(int id, int off, int count, int[] d);
-    native private void nAllocationSubData1D(int id, int off, int count, float[] d);
-    native private void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, int[] d);
-    native private void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, float[] d);
+    native void nAllocationUploadToTexture(int alloc, int baseMioLevel);
+    native void nAllocationDestroy(int alloc);
+    native void nAllocationData(int id, int[] d);
+    native void nAllocationData(int id, float[] d);
+    native void nAllocationSubData1D(int id, int off, int count, int[] d);
+    native void nAllocationSubData1D(int id, int off, int count, float[] d);
+    native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, int[] d);
+    native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, float[] d);
 
-    native private void nTriangleMeshDestroy(int id);
-    native private void nTriangleMeshBegin(int vertex, int index);
-    native private void nTriangleMeshAddVertex_XY (float x, float y);
-    native private void nTriangleMeshAddVertex_XYZ (float x, float y, float z);
-    native private void nTriangleMeshAddVertex_XY_ST (float x, float y, float s, float t);
-    native private void nTriangleMeshAddVertex_XYZ_ST (float x, float y, float z, float s, float t);
-    native private void nTriangleMeshAddVertex_XYZ_ST_NORM (float x, float y, float z, float s, float t, float nx, float ny, float nz);
-    native private void nTriangleMeshAddTriangle(int i1, int i2, int i3);
-    native private int  nTriangleMeshCreate();
+    native void nTriangleMeshDestroy(int id);
+    native void nTriangleMeshBegin(int vertex, int index);
+    native void nTriangleMeshAddVertex_XY (float x, float y);
+    native void nTriangleMeshAddVertex_XYZ (float x, float y, float z);
+    native void nTriangleMeshAddVertex_XY_ST (float x, float y, float s, float t);
+    native void nTriangleMeshAddVertex_XYZ_ST (float x, float y, float z, float s, float t);
+    native void nTriangleMeshAddVertex_XYZ_ST_NORM (float x, float y, float z, float s, float t, float nx, float ny, float nz);
+    native void nTriangleMeshAddTriangle(int i1, int i2, int i3);
+    native int  nTriangleMeshCreate();
 
-    native private void nAdapter1DDestroy(int id);
-    native private void nAdapter1DBindAllocation(int ad, int alloc);
-    native private void nAdapter1DSetConstraint(int ad, int dim, int value);
-    native private void nAdapter1DData(int ad, int[] d);
-    native private void nAdapter1DSubData(int ad, int off, int count, int[] d);
-    native private void nAdapter1DData(int ad, float[] d);
-    native private void nAdapter1DSubData(int ad, int off, int count, float[] d);
-    native private int  nAdapter1DCreate();
+    native void nAdapter1DDestroy(int id);
+    native void nAdapter1DBindAllocation(int ad, int alloc);
+    native void nAdapter1DSetConstraint(int ad, int dim, int value);
+    native void nAdapter1DData(int ad, int[] d);
+    native void nAdapter1DSubData(int ad, int off, int count, int[] d);
+    native void nAdapter1DData(int ad, float[] d);
+    native void nAdapter1DSubData(int ad, int off, int count, float[] d);
+    native int  nAdapter1DCreate();
 
-    native private void nScriptDestroy(int script);
-    native private void nScriptBindAllocation(int vtm, int alloc, int slot);
-    native private void nScriptCBegin();
-    native private void nScriptCSetClearColor(float r, float g, float b, float a);
-    native private void nScriptCSetClearDepth(float depth);
-    native private void nScriptCSetClearStencil(int stencil);
-    native private void nScriptCSetTimeZone(byte[] timeZone);
-    native private void nScriptCAddType(int type);
-    native private void nScriptCSetRoot(boolean isRoot);
-    native private void nScriptCSetScript(byte[] script, int offset, int length);
-    native private int  nScriptCCreate();
+    native void nScriptDestroy(int script);
+    native void nScriptBindAllocation(int vtm, int alloc, int slot);
+    native void nScriptCBegin();
+    native void nScriptCSetClearColor(float r, float g, float b, float a);
+    native void nScriptCSetClearDepth(float depth);
+    native void nScriptCSetClearStencil(int stencil);
+    native void nScriptCSetTimeZone(byte[] timeZone);
+    native void nScriptCAddType(int type);
+    native void nScriptCSetRoot(boolean isRoot);
+    native void nScriptCSetScript(byte[] script, int offset, int length);
+    native int  nScriptCCreate();
 
-    native private void nSamplerDestroy(int sampler);
-    native private void nSamplerBegin();
-    native private void nSamplerSet(int param, int value);
-    native private int  nSamplerCreate();
+    native void nSamplerDestroy(int sampler);
+    native void nSamplerBegin();
+    native void nSamplerSet(int param, int value);
+    native int  nSamplerCreate();
 
-    native private void nProgramFragmentStoreBegin(int in, int out);
-    native private void nProgramFragmentStoreDepthFunc(int func);
-    native private void nProgramFragmentStoreDepthMask(boolean enable);
-    native private void nProgramFragmentStoreColorMask(boolean r, boolean g, boolean b, boolean a);
-    native private void nProgramFragmentStoreBlendFunc(int src, int dst);
-    native private void nProgramFragmentStoreDither(boolean enable);
-    native private int  nProgramFragmentStoreCreate();
-    native private void nProgramFragmentStoreDestroy(int pgm);
+    native void nProgramFragmentStoreBegin(int in, int out);
+    native void nProgramFragmentStoreDepthFunc(int func);
+    native void nProgramFragmentStoreDepthMask(boolean enable);
+    native void nProgramFragmentStoreColorMask(boolean r, boolean g, boolean b, boolean a);
+    native void nProgramFragmentStoreBlendFunc(int src, int dst);
+    native void nProgramFragmentStoreDither(boolean enable);
+    native int  nProgramFragmentStoreCreate();
+    native void nProgramFragmentStoreDestroy(int pgm);
 
-    native private void nProgramFragmentBegin(int in, int out);
-    native private void nProgramFragmentBindTexture(int vpf, int slot, int a);
-    native private void nProgramFragmentBindSampler(int vpf, int slot, int s);
-    native private void nProgramFragmentSetType(int slot, int vt);
-    native private void nProgramFragmentSetEnvMode(int slot, int env);
-    native private void nProgramFragmentSetTexEnable(int slot, boolean enable);
-    native private int  nProgramFragmentCreate();
-    native private void nProgramFragmentDestroy(int pgm);
+    native void nProgramFragmentBegin(int in, int out);
+    native void nProgramFragmentBindTexture(int vpf, int slot, int a);
+    native void nProgramFragmentBindSampler(int vpf, int slot, int s);
+    native void nProgramFragmentSetType(int slot, int vt);
+    native void nProgramFragmentSetEnvMode(int slot, int env);
+    native void nProgramFragmentSetTexEnable(int slot, boolean enable);
+    native int  nProgramFragmentCreate();
+    native void nProgramFragmentDestroy(int pgm);
 
-    native private void nProgramVertexDestroy(int pv);
-    native private void nProgramVertexBindAllocation(int pv, int slot, int mID);
-    native private void nProgramVertexBegin(int inID, int outID);
-    native private void nProgramVertexSetType(int slot, int mID);
-    native private void nProgramVertexSetTextureMatrixEnable(boolean enable);
-    native private void nProgramVertexAddLight(int id);
-    native private int  nProgramVertexCreate();
+    native void nProgramVertexDestroy(int pv);
+    native void nProgramVertexBindAllocation(int pv, int slot, int mID);
+    native void nProgramVertexBegin(int inID, int outID);
+    native void nProgramVertexSetType(int slot, int mID);
+    native void nProgramVertexSetTextureMatrixEnable(boolean enable);
+    native void nProgramVertexAddLight(int id);
+    native int  nProgramVertexCreate();
 
-    native private void nLightBegin();
-    native private void nLightSetIsMono(boolean isMono);
-    native private void nLightSetIsLocal(boolean isLocal);
-    native private int  nLightCreate();
-    native private void nLightDestroy(int l);
-    native private void nLightSetColor(int l, float r, float g, float b);
-    native private void nLightSetPosition(int l, float x, float y, float z);
+    native void nLightBegin();
+    native void nLightSetIsMono(boolean isMono);
+    native void nLightSetIsLocal(boolean isLocal);
+    native int  nLightCreate();
+    native void nLightDestroy(int l);
+    native void nLightSetColor(int l, float r, float g, float b);
+    native void nLightSetPosition(int l, float x, float y, float z);
 
 
     private int     mDev;
     private int     mContext;
     private Surface mSurface;
 
-
+    private static boolean mElementsInitialized = false;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -198,120 +189,25 @@ public class RenderScript {
         mSurface = sur;
         mDev = nDeviceCreate();
         mContext = nContextCreate(mDev, mSurface, 0);
-    }
 
-    private class BaseObj {
-        BaseObj() {
-            mID = 0;
-        }
-
-        public int getID() {
-            return mID;
-        }
-
-        int mID;
-        String mName;
-
-        public void setName(String s) throws IllegalStateException, IllegalArgumentException
-        {
-            if(s.length() < 1) {
-                throw new IllegalArgumentException("setName does not accept a zero length string.");
-            }
-            if(mName != null) {
-                throw new IllegalArgumentException("setName object already has a name.");
-            }
-
-            try {
-                byte[] bytes = s.getBytes("UTF-8");
-                nAssignName(mID, bytes);
-                mName = s;
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        protected void finalize() throws Throwable
-        {
-            if (mID != 0) {
-                Log.v(LOG_TAG,
-                      "Element finalized without having released the RS reference.");
-            }
-            super.finalize();
+        // TODO: This should be protected by a lock
+        if(!mElementsInitialized) {
+            Element.init(this);
+            mElementsInitialized = true;
         }
     }
-
 
     //////////////////////////////////////////////////////////////////////////////////
     // Element
 
-    public enum ElementPredefined {
-        USER_U8 (0),
-        USER_I8 (1),
-        USER_U16 (2),
-        USER_I16 (3),
-        USER_U32 (4),
-        USER_I32 (5),
-        USER_FLOAT (6),
-
-        A_8                (7),
-        RGB_565            (8),
-        RGB_888            (11),
-        RGBA_5551          (9),
-        RGBA_4444          (10),
-        RGBA_8888          (12),
-
-        INDEX_16           (13),
-        INDEX_32           (14),
-        XY_F32             (15),
-        XYZ_F32            (16),
-        ST_XY_F32          (17),
-        ST_XYZ_F32         (18),
-        NORM_XYZ_F32       (19),
-        NORM_ST_XYZ_F32    (20);
-
-        int mID;
-        ElementPredefined(int id) {
-            mID = id;
-        }
+    Element.Builder mElementBuilder = new Element.Builder(this);
+    public Element.Builder elementBuilderCreate() throws IllegalStateException {
+        mElementBuilder.begin();
+        return mElementBuilder;
     }
 
-    public enum DataType {
-        FLOAT (0),
-        UNSIGNED (1),
-        SIGNED (2);
 
-        int mID;
-        DataType(int id) {
-            mID = id;
-        }
-    }
 
-    public enum DataKind {
-        USER (0),
-        RED (1),
-        GREEN (2),
-        BLUE (3),
-        ALPHA (4),
-        LUMINANCE (5),
-        INTENSITY (6),
-        X (7),
-        Y (8),
-        Z (9),
-        W (10),
-        S (11),
-        T (12),
-        Q (13),
-        R (14),
-        NX (15),
-        NY (16),
-        NZ (17),
-        INDEX (18);
-
-        int mID;
-        DataKind(int id) {
-            mID = id;
-        }
-    }
 
     public enum DepthFunc {
         ALWAYS (0),
@@ -398,46 +294,6 @@ public class RenderScript {
         }
     }
 
-
-
-    public class Element extends BaseObj {
-        Element(int id) {
-            mID = id;
-        }
-
-        public void estroy() {
-            nElementDestroy(mID);
-            mID = 0;
-        }
-    }
-
-    public void elementBegin() {
-        nElementBegin();
-    }
-
-    public void elementAddPredefined(ElementPredefined e) {
-        nElementAddPredefined(e.mID);
-    }
-
-    public void elementAdd(DataType dt, DataKind dk, boolean isNormalized, int bits) {
-        int norm = 0;
-        if (isNormalized) {
-            norm = 1;
-        }
-        nElementAdd(dt.mID, dk.mID, norm, bits);
-    }
-
-    public Element elementCreate() {
-        int id = nElementCreate();
-        return new Element(id);
-    }
-
-    public Element elementGetPredefined(ElementPredefined predef) {
-        int id = nElementGetPredefined(predef.mID);
-        return new Element(id);
-    }
-
-
     //////////////////////////////////////////////////////////////////////////////////
     // Type
 
@@ -457,6 +313,7 @@ public class RenderScript {
 
     public class Type extends BaseObj {
         Type(int id) {
+            super(RenderScript.this);
             mID = id;
         }
 
@@ -485,6 +342,7 @@ public class RenderScript {
 
     public class Allocation extends BaseObj {
         Allocation(int id) {
+            super(RenderScript.this);
             mID = id;
         }
 
@@ -527,34 +385,48 @@ public class RenderScript {
         return new Allocation(id);
     }
 
-    public Allocation allocationCreatePredefSized(ElementPredefined e, int count) {
-        int id = nAllocationCreatePredefSized(e.mID, count);
-        return new Allocation(id);
-    }
-
     public Allocation allocationCreateSized(Element e, int count) {
-        int id = nAllocationCreateSized(e.mID, count);
+        int id;
+        if(e.mIsPredefined) {
+            id = nAllocationCreatePredefSized(e.mPredefinedID, count);
+        } else {
+            id = nAllocationCreateSized(e.mID, count);
+        }
         return new Allocation(id);
     }
 
-    public Allocation allocationCreateFromBitmap(Bitmap b, ElementPredefined dstFmt, boolean genMips) {
-        int id = nAllocationCreateFromBitmap(dstFmt.mID, genMips, b);
+    public Allocation allocationCreateFromBitmap(Bitmap b, Element dstFmt, boolean genMips)
+        throws IllegalArgumentException {
+        if(!dstFmt.mIsPredefined) {
+            throw new IllegalStateException("Attempting to allocate a bitmap with a non-static element.");
+        }
+
+        int id = nAllocationCreateFromBitmap(dstFmt.mPredefinedID, genMips, b);
         return new Allocation(id);
     }
 
-    public Allocation allocationCreateFromBitmapBoxed(Bitmap b, ElementPredefined dstFmt, boolean genMips) {
-        int id = nAllocationCreateFromBitmapBoxed(dstFmt.mID, genMips, b);
+    public Allocation allocationCreateFromBitmapBoxed(Bitmap b, Element dstFmt, boolean genMips)
+        throws IllegalArgumentException {
+        if(!dstFmt.mIsPredefined) {
+            throw new IllegalStateException("Attempting to allocate a bitmap with a non-static element.");
+        }
+
+        int id = nAllocationCreateFromBitmapBoxed(dstFmt.mPredefinedID, genMips, b);
         return new Allocation(id);
     }
 
-    public Allocation allocationCreateFromBitmapResource(Resources res, int id, ElementPredefined internalElement, boolean genMips) {
+    public Allocation allocationCreateFromBitmapResource(Resources res, int id, Element dstFmt, boolean genMips)
+        throws IllegalArgumentException {
+
         Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
-        return allocationCreateFromBitmap(b, internalElement, genMips);
+        return allocationCreateFromBitmap(b, dstFmt, genMips);
     }
 
-    public Allocation allocationCreateFromBitmapResourceBoxed(Resources res, int id, ElementPredefined internalElement, boolean genMips) {
+    public Allocation allocationCreateFromBitmapResourceBoxed(Resources res, int id, Element dstFmt, boolean genMips)
+        throws IllegalArgumentException {
+
         Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
-        return allocationCreateFromBitmapBoxed(b, internalElement, genMips);
+        return allocationCreateFromBitmapBoxed(b, dstFmt, genMips);
     }
 
 
@@ -563,6 +435,7 @@ public class RenderScript {
 
     public class Adapter1D extends BaseObj {
         Adapter1D(int id) {
+            super(RenderScript.this);
             mID = id;
         }
 
@@ -607,6 +480,7 @@ public class RenderScript {
 
     public class TriangleMesh extends BaseObj {
         TriangleMesh(int id) {
+            super(RenderScript.this);
             mID = id;
         }
 
@@ -617,6 +491,7 @@ public class RenderScript {
     }
 
     public void triangleMeshBegin(Element vertex, Element index) {
+        Log.e("rs", "vtx " + vertex.toString() + "  " + vertex.mID + "  " + vertex.mPredefinedID);
         nTriangleMeshBegin(vertex.mID, index.mID);
     }
 
@@ -654,6 +529,7 @@ public class RenderScript {
 
     public class Script extends BaseObj {
         Script(int id) {
+            super(RenderScript.this);
             mID = id;
         }
 
@@ -674,12 +550,12 @@ public class RenderScript {
     public void scriptCSetTimeZone(String timeZone) {
         try {
             byte[] bytes = timeZone.getBytes("UTF-8");
-            nScriptCSetTimeZone(bytes);            
+            nScriptCSetTimeZone(bytes);
         } catch (java.io.UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
-    
+
     public void scriptCSetClearColor(float r, float g, float b, float a) {
         nScriptCSetClearColor(r, g, b, a);
     }
@@ -752,6 +628,7 @@ public class RenderScript {
 
     public class ProgramVertex extends BaseObj {
         ProgramVertex(int id) {
+            super(RenderScript.this);
             mID = id;
         }
 
@@ -800,6 +677,7 @@ public class RenderScript {
 
     public class ProgramFragmentStore extends BaseObj {
         ProgramFragmentStore(int id) {
+            super(RenderScript.this);
             mID = id;
         }
 
@@ -851,6 +729,7 @@ public class RenderScript {
 
     public class ProgramFragment extends BaseObj {
         ProgramFragment(int id) {
+            super(RenderScript.this);
             mID = id;
         }
 
@@ -906,6 +785,7 @@ public class RenderScript {
 
     public class Sampler extends BaseObj {
         Sampler(int id) {
+            super(RenderScript.this);
             mID = id;
         }
 
@@ -933,6 +813,7 @@ public class RenderScript {
 
     public class Light extends BaseObj {
         Light(int id) {
+            super(RenderScript.this);
             mID = id;
         }
 
@@ -972,6 +853,7 @@ public class RenderScript {
 
     public class File extends BaseObj {
         File(int id) {
+            super(RenderScript.this);
             mID = id;
         }
 
@@ -1034,4 +916,5 @@ public class RenderScript {
 */
 
 }
+
 

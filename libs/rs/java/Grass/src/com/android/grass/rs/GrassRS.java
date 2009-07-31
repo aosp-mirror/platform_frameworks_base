@@ -17,14 +17,15 @@
 package com.android.grass.rs;
 
 import android.content.res.Resources;
-import android.renderscript.RenderScript;
-import static android.renderscript.RenderScript.ElementPredefined.*;
 import static android.renderscript.RenderScript.SamplerParam.*;
 import static android.renderscript.RenderScript.SamplerValue.*;
 import static android.renderscript.RenderScript.EnvMode.*;
 import static android.renderscript.RenderScript.DepthFunc.*;
 import static android.renderscript.RenderScript.BlendSrcFunc;
 import static android.renderscript.RenderScript.BlendDstFunc;
+
+import android.renderscript.RenderScript;
+import android.renderscript.Element;
 
 import java.util.TimeZone;
 
@@ -85,15 +86,15 @@ class GrassRS {
     }
 
     private void createScriptStructures() {
-        mState = mRS.allocationCreatePredefSized(RenderScript.ElementPredefined.USER_I32, 1);    
+        mState = mRS.allocationCreateSized(Element.USER_I32, 1);    
         mState.data(new int[1]);
     }
 
     private void loadSkyTextures() {
         mSkyBufferIDs = new int[SKY_TEXTURES_COUNT];
         mSkyTextures = new RenderScript.Allocation[SKY_TEXTURES_COUNT];
-        mSkyTexturesIDs = mRS.allocationCreatePredefSized(
-                USER_FLOAT, SKY_TEXTURES_COUNT);
+        mSkyTexturesIDs = mRS.allocationCreateSized(
+                Element.USER_FLOAT, SKY_TEXTURES_COUNT);
 
         final RenderScript.Allocation[] textures = mSkyTextures;
         textures[0] = loadTexture(R.drawable.night, "night");
@@ -115,7 +116,7 @@ class GrassRS {
 
     private RenderScript.Allocation loadTexture(int id, String name) {
         RenderScript.Allocation allocation = mRS.allocationCreateFromBitmapResource(mResources, id,
-                RGB_565, false);
+                Element.RGB_565, false);
         allocation.setName(name);
         return allocation;
     }
