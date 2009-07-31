@@ -674,6 +674,26 @@ public class MediaScanner
                 }
                 values.put(MediaStore.MediaColumns.TITLE, title);
             }
+            String album = values.getAsString(Audio.Media.ALBUM);
+            if (MediaFile.UNKNOWN_STRING.equals(album)) {
+                album = values.getAsString(MediaStore.MediaColumns.DATA);
+                // extract last path segment before file name
+                int lastSlash = album.lastIndexOf('/');
+                if (lastSlash >= 0) {
+                    int previousSlash = 0;
+                    while (true) {
+                        int idx = album.indexOf('/', previousSlash + 1);
+                        if (idx < 0 || idx >= lastSlash) {
+                            break;
+                        }
+                        previousSlash = idx;
+                    }
+                    if (previousSlash != 0) {
+                        album = album.substring(previousSlash + 1, lastSlash);
+                        values.put(Audio.Media.ALBUM, album);
+                    }
+                }
+            }
             if (isAudio) {
                 values.put(Audio.Media.IS_RINGTONE, ringtones);
                 values.put(Audio.Media.IS_NOTIFICATION, notifications);
