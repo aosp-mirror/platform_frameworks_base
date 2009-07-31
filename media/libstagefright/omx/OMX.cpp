@@ -24,9 +24,15 @@
 #include <assert.h>
 
 #include "OMX.h"
+#include "OMXRenderer.h"
+
 #include "pv_omxcore.h"
 
 #include <binder/IMemory.h>
+#include <media/stagefright/QComHardwareRenderer.h>
+#include <media/stagefright/SoftwareRenderer.h>
+#include <media/stagefright/TIHardwareRenderer.h>
+#include <media/stagefright/VideoRenderer.h>
 
 #include <OMX_Component.h>
 
@@ -618,6 +624,63 @@ void OMX::empty_buffer(
     assert(err == OMX_ErrorNone);
 }
 #endif
+
+////////////////////////////////////////////////////////////////////////////////
+
+sp<IOMXRenderer> OMX::createRenderer(
+        const sp<ISurface> &surface,
+        const char *componentName,
+        OMX_COLOR_FORMATTYPE colorFormat,
+        size_t encodedWidth, size_t encodedHeight,
+        size_t displayWidth, size_t displayHeight) {
+    VideoRenderer *impl = NULL;
+
+    static const int OMX_QCOM_COLOR_FormatYVU420SemiPlanar = 0x7FA30C00;
+
+    if (colorFormat == OMX_QCOM_COLOR_FormatYVU420SemiPlanar
+        && !strncmp(componentName, "OMX.qcom.video.decoder.", 23)) {
+        LOGW("Using QComHardwareRenderer.");
+        impl =
+            new QComHardwareRenderer(
+                    surface,
+                    displayWidth, displayHeight,
+                    encodedWidth, encodedHeight);
+    } else if (colorFormat == OMX_COLOR_FormatCbYCrY
+            && !strcmp(componentName, "OMX.TI.Video.Decoder")) {
+        LOGW("Using TIHardwareRenderer.");
+        impl =
+            new TIHardwareRenderer(
+                    surface,
+                    displayWidth, displayHeight,
+                    encodedWidth, encodedHeight);
+    } else {
+        LOGW("Using software renderer.");
+        impl = new SoftwareRenderer(
+                surface,
+                displayWidth, displayHeight,
+                encodedWidth, encodedHeight);
+    }
+
+    return new OMXRenderer(impl);
+}
+
+OMXRenderer::OMXRenderer(VideoRenderer *impl)
+    : mImpl(impl) {
+}
+
+OMXRenderer::~OMXRenderer() {
+    delete mImpl;
+    mImpl = NULL;
+}
+
+void OMXRenderer::render(IOMX::buffer_id buffer) {
+    OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *)buffer;
+
+    mImpl->render(
+            header->pBuffer + header->nOffset,
+            header->nFilledLen,
+            header->pPlatformPrivate);
+}
 
 }  // namespace android
 

@@ -79,6 +79,13 @@ public:
             OMX_U32 flags, OMX_TICKS timestamp);
 #endif
 
+    virtual sp<IOMXRenderer> createRenderer(
+            const sp<ISurface> &surface,
+            const char *componentName,
+            OMX_COLOR_FORMATTYPE colorFormat,
+            size_t encodedWidth, size_t encodedHeight,
+            size_t displayWidth, size_t displayHeight);
+
 private:
     static OMX_CALLBACKTYPE kCallbacks;
 

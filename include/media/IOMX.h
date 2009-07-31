@@ -23,6 +23,7 @@
 #include <utils/String8.h>
 
 #include <OMX_Core.h>
+#include <OMX_Video.h>
 
 #define IOMX_USES_SOCKETS       0
 
@@ -30,6 +31,8 @@ namespace android {
 
 class IMemory;
 class IOMXObserver;
+class IOMXRenderer;
+class ISurface;
 
 class IOMX : public IInterface {
 public:
@@ -87,6 +90,13 @@ public:
             OMX_U32 range_offset, OMX_U32 range_length,
             OMX_U32 flags, OMX_TICKS timestamp) = 0;
 #endif
+
+    virtual sp<IOMXRenderer> createRenderer(
+            const sp<ISurface> &surface,
+            const char *componentName,
+            OMX_COLOR_FORMATTYPE colorFormat,
+            size_t encodedWidth, size_t encodedHeight,
+            size_t displayWidth, size_t displayHeight) = 0;
 };
 
 struct omx_message {
@@ -155,6 +165,13 @@ public:
     virtual void on_message(const omx_message &msg) = 0;
 };
 
+class IOMXRenderer : public IInterface {
+public:
+    DECLARE_META_INTERFACE(OMXRenderer);
+
+    virtual void render(IOMX::buffer_id buffer) = 0;
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 class BnOMX : public BnInterface<IOMX> {
@@ -165,6 +182,13 @@ public:
 };
 
 class BnOMXObserver : public BnInterface<IOMXObserver> {
+public:
+    virtual status_t onTransact(
+            uint32_t code, const Parcel &data, Parcel *reply,
+            uint32_t flags = 0);
+};
+
+class BnOMXRenderer : public BnInterface<IOMXRenderer> {
 public:
     virtual status_t onTransact(
             uint32_t code, const Parcel &data, Parcel *reply,

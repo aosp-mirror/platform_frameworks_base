@@ -35,12 +35,8 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXDecoder.h>
-#include <media/stagefright/QComHardwareRenderer.h>
 #include <media/stagefright/ShoutcastSource.h>
-#include <media/stagefright/SoftwareRenderer.h>
-#include <media/stagefright/SurfaceRenderer.h>
 #include <media/stagefright/TimeSource.h>
-#include <media/stagefright/TIHardwareRenderer.h>
 #include <ui/PixelFormat.h>
 #include <ui/Surface.h>
 
@@ -61,7 +57,6 @@ MediaPlayerImpl::MediaPlayerImpl(const char *uri)
       mDuration(0),
       mPlaying(false),
       mPaused(false),
-      mRenderer(NULL),
       mSeeking(false),
       mFrameSize(0),
       mUseSoftwareColorConversion(false) {
@@ -121,7 +116,6 @@ MediaPlayerImpl::MediaPlayerImpl(int fd, int64_t offset, int64_t length)
       mDuration(0),
       mPlaying(false),
       mPaused(false),
-      mRenderer(NULL),
       mSeeking(false),
       mFrameSize(0),
       mUseSoftwareColorConversion(false) {
@@ -379,7 +373,7 @@ void MediaPlayerImpl::displayOrDiscardFrame(
 
     {
         Mutex::Autolock autoLock(mLock);
-        if (mRenderer != NULL) {
+        if (mVideoRenderer.get() != NULL) {
             sendFrameToISurface(buffer);
         }
     }
@@ -652,52 +646,26 @@ void MediaPlayerImpl::populateISurface() {
     success = success && meta->findInt32(kKeyHeight, &decodedHeight);
     assert(success);
 
-    static const int OMX_QCOM_COLOR_FormatYVU420SemiPlanar = 0x7FA30C00;
+    const sp<ISurface> &isurface =
+        mSurface.get() != NULL ? mSurface->getISurface() : mISurface;
 
-    if (mSurface.get() != NULL) {
-        LOGW("Using SurfaceRenderer.");
-        mRenderer =
-            new SurfaceRenderer(
-                    mSurface, mVideoWidth, mVideoHeight,
-                    decodedWidth, decodedHeight);
-    } else if (format == OMX_QCOM_COLOR_FormatYVU420SemiPlanar
-        && !strncmp(component, "OMX.qcom.video.decoder.", 23)) {
-        LOGW("Using QComHardwareRenderer.");
-        mRenderer =
-            new QComHardwareRenderer(
-                    mISurface, mVideoWidth, mVideoHeight,
-                    decodedWidth, decodedHeight);
-    } else if (format == OMX_COLOR_FormatCbYCrY
-            && !strcmp(component, "OMX.TI.Video.Decoder")) {
-        LOGW("Using TIHardwareRenderer.");
-        mRenderer =
-            new TIHardwareRenderer(
-                    mISurface, mVideoWidth, mVideoHeight,
-                    decodedWidth, decodedHeight);
-    } else {
-        LOGW("Using software renderer.");
-        mRenderer = new SoftwareRenderer(
-                mISurface, mVideoWidth, mVideoHeight,
-                decodedWidth, decodedHeight);
-    }
+    mVideoRenderer =
+        mClient.interface()->createRenderer(
+                isurface, component,
+                (OMX_COLOR_FORMATTYPE)format,
+                decodedWidth, decodedHeight,
+                mVideoWidth, mVideoHeight);
 }
 
 void MediaPlayerImpl::depopulateISurface() {
-    delete mRenderer;
-    mRenderer = NULL;
+    mVideoRenderer.clear();
 }
 
 void MediaPlayerImpl::sendFrameToISurface(MediaBuffer *buffer) {
-    void *platformPrivate;
-    if (!buffer->meta_data()->findPointer(
-                kKeyPlatformPrivate, &platformPrivate)) {
-        platformPrivate = NULL;
+    void *id;
+    if (buffer->meta_data()->findPointer(kKeyBufferID, &id)) {
+        mVideoRenderer->render((IOMX::buffer_id)id);
     }
-
-    mRenderer->render(
-        (const uint8_t *)buffer->data() + buffer->range_offset(),
-        buffer->range_length(),
-        platformPrivate);
 }
 
 void MediaPlayerImpl::setAudioSink(

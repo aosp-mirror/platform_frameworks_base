@@ -9,13 +9,17 @@ LOCAL_C_INCLUDES := $(PV_INCLUDES)
 LOCAL_CFLAGS := $(PV_CFLAGS_MINUS_VISIBILITY)
 
 LOCAL_SRC_FILES:=                 \
-	OMX.cpp
+	OMX.cpp                   \
+        QComHardwareRenderer.cpp  \
+        SoftwareRenderer.cpp      \
+        TIHardwareRenderer.cpp
 
-LOCAL_SHARED_LIBRARIES := \
-        libbinder         \
-        libmedia          \
-	libutils          \
-        libui             \
+LOCAL_SHARED_LIBRARIES :=       \
+        libbinder               \
+        libmedia                \
+	libutils                \
+        libui                   \
+        libcutils               \
         libopencore_common
 
 LOCAL_PRELINK_MODULE:= false

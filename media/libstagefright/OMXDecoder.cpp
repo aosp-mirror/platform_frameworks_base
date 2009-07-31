@@ -154,8 +154,7 @@ OMXDecoder *OMXDecoder::Create(
     if (!strncmp(codec, "OMX.qcom.video.", 15)) {
         quirks |= kRequiresLoadedToIdleAfterAllocation;
     }
-    if (!strcmp(codec, "OMX.TI.AAC.decode")
-        || !strcmp(codec, "OMX.TI.MP3.decode")) {
+    if (!strcmp(codec, "OMX.TI.MP3.decode")) {
         quirks |= kMeasuresTimeInMilliseconds;
     }
 
@@ -1550,6 +1549,10 @@ void OMXDecoder::onRealFillBufferDone(const omx_message &msg) {
     media_buffer->meta_data()->setPointer(
             kKeyPlatformPrivate,
             msg.u.extended_buffer_data.platform_private);
+
+    media_buffer->meta_data()->setPointer(
+            kKeyBufferID,
+            msg.u.extended_buffer_data.buffer);
 
     if (msg.u.extended_buffer_data.flags & OMX_BUFFERFLAG_EOS) {
         mErrorCondition = ERROR_END_OF_STREAM;
