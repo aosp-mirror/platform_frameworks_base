@@ -944,7 +944,7 @@ public final class SimulatedCommands extends BaseCommands
     }
 
     public void setupDataCall(String radioTechnology, String profile, String apn, String user,
-            String password, Message result) {
+            String password, String authType, Message result) {
         unimplemented(result);
     }
 

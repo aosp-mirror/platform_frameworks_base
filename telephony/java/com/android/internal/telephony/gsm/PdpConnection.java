@@ -84,9 +84,13 @@ public class PdpConnection extends DataConnection {
         lastFailCause = FailCause.NONE;
         receivedDisconnectReq = false;
 
-        phone.mCM.setupDataCall(Integer.toString(RILConstants.GSM_PHONE),
+        int authType = (apn.user != null) ? RILConstants.SETUP_DATA_AUTH_PAP_CHAP :
+            RILConstants.SETUP_DATA_AUTH_NONE;
+
+        phone.mCM.setupDataCall(Integer.toString(RILConstants.SETUP_DATA_TECH_GSM),
                 Integer.toString(RILConstants.DATA_PROFILE_DEFAULT), apn.apn, apn.user,
-                apn.password, obtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE));
+                apn.password, Integer.toString(authType),
+                obtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE));
     }
 
     private void tearDownData(Message msg) {

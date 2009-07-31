@@ -1237,10 +1237,17 @@ public final class RIL extends BaseCommands implements CommandsInterface {
      */
     public void
     setupDefaultPDP(String apn, String user, String password, Message result) {
-        String radioTechnology = "1"; //0 for CDMA, 1 for GSM/UMTS
+        int radioTechnology;
+        int authType;
         String profile = ""; //profile number, NULL for GSM/UMTS
-        setupDataCall(radioTechnology, profile, apn, user,
-                password, result);
+
+        radioTechnology = RILConstants.SETUP_DATA_TECH_GSM;
+        //TODO(): Add to the APN database, AuthType is set to CHAP/PAP
+        authType = (user != null) ? RILConstants.SETUP_DATA_AUTH_PAP_CHAP
+                : RILConstants.SETUP_DATA_AUTH_NONE;
+
+        setupDataCall(Integer.toString(radioTechnology), profile, apn, user,
+                password, Integer.toString(authType), result);
 
     }
 
@@ -1259,7 +1266,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
      */
     public void
     setupDataCall(String radioTechnology, String profile, String apn,
-            String user, String password, Message result) {
+            String user, String password, String authType, Message result) {
         RILRequest rr
                 = RILRequest.obtain(RIL_REQUEST_SETUP_DATA_CALL, result);
 
@@ -1270,15 +1277,12 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeString(apn);
         rr.mp.writeString(user);
         rr.mp.writeString(password);
-        //TODO(): Add to the APN database, AuthType is set to CHAP/PAP
-        // 0 => Neither PAP nor CHAP will be performed, 3 => PAP / CHAP will be performed.
-        if (user != null)
-            rr.mp.writeString("3");
-        else
-            rr.mp.writeString("0");
+        rr.mp.writeString(authType);
 
-        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest) + " "
-                + apn);
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> "
+                + requestToString(rr.mRequest) + " " + radioTechnology + " "
+                + profile + " " + apn + " " + user + " "
+                + password + " " + authType);
 
         send(rr);
     }
