@@ -463,6 +463,7 @@ public class ImageView extends View {
         if (matrix == null && !mMatrix.isIdentity() ||
                 matrix != null && !mMatrix.equals(matrix)) {
             mMatrix.set(matrix);
+            configureBounds();
             invalidate();
         }
     }
