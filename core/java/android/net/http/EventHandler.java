@@ -141,7 +141,10 @@ public interface EventHandler {
      * SSL certificate error callback. Handles SSL error(s) on the way
      * up to the user. The callback has to make sure that restartConnection() is called,
      * otherwise the connection will be suspended indefinitely.
+     * @return True if the callback can handle the error, which means it will
+     *              call restartConnection() to unblock the thread later,
+     *              otherwise return false.
      */
-    public void handleSslErrorRequest(SslError error);
+    public boolean handleSslErrorRequest(SslError error);
 
 }
