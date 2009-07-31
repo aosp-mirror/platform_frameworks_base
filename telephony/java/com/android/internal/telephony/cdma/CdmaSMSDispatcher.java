@@ -19,6 +19,7 @@ package com.android.internal.telephony.cdma;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -31,6 +32,7 @@ import android.provider.Telephony.Sms.Intents;
 import android.preference.PreferenceManager;
 import android.util.Config;
 import android.util.Log;
+import android.telephony.SmsManager;
 
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.CommandsInterface;
@@ -45,6 +47,7 @@ import com.android.internal.util.HexDump;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.lang.Boolean;
 
 
 final class CdmaSMSDispatcher extends SMSDispatcher {
@@ -329,6 +332,24 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             PendingIntent deliveryIntent) {
         sendRawPdu(submitPdu.encodedScAddress, submitPdu.encodedMessage,
                 sentIntent, deliveryIntent);
+    }
+
+    protected void sendRawPdu(byte[] smsc, byte[] pdu, PendingIntent sentIntent,
+            PendingIntent deliveryIntent) {
+        String inEcm = SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE);
+        if (Boolean.parseBoolean(inEcm)) {
+            if (sentIntent != null) {
+                try {
+                    sentIntent.send(SmsManager.RESULT_ERROR_NO_SERVICE);
+                } catch (CanceledException ex) {}
+            }
+            if (Config.LOGD) {
+                Log.d(TAG, "Block SMS in Emergency Callback mode");
+            }
+            return;
+        }
+
+        super.sendRawPdu(smsc, pdu, sentIntent, deliveryIntent);
     }
 
     /** {@inheritDoc} */
