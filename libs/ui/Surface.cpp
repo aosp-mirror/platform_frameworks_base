@@ -558,14 +558,16 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 
     volatile const surface_info_t* const back = lcblk->surface + backIdx;
     if (back->flags & surface_info_t::eNeedNewBuffer) {
-        getBufferLocked(backIdx);
+        err = getBufferLocked(backIdx);
     }
 
-    const sp<SurfaceBuffer>& backBuffer(mBuffers[backIdx]);
-    mDirtyRegion.set(backBuffer->width, backBuffer->height);
-    *buffer = backBuffer.get();
+    if (err == NO_ERROR) {
+        const sp<SurfaceBuffer>& backBuffer(mBuffers[backIdx]);
+        mDirtyRegion.set(backBuffer->width, backBuffer->height);
+        *buffer = backBuffer.get();
+    }
   
-    return NO_ERROR;
+    return err;
 }
 
 int Surface::lockBuffer(android_native_buffer_t* buffer)
@@ -729,7 +731,7 @@ status_t Surface::getBufferLocked(int index)
             currentBuffer.clear();
         }
         err = getBufferMapper().registerBuffer(buffer->handle);
-        LOGW_IF(err, "map(...) failed %d (%s)", err, strerror(-err));
+        LOGW_IF(err, "registerBuffer(...) failed %d (%s)", err, strerror(-err));
         if (err == NO_ERROR) {
             currentBuffer = buffer;
         }

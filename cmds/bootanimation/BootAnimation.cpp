@@ -152,11 +152,13 @@ status_t BootAnimation::readyToRun() {
     eglChooseConfig(display, attribs, &config, 1, &numConfigs);
 
     surface = eglCreateWindowSurface(display, config, s.get(), NULL);
-
     context = eglCreateContext(display, config, NULL, NULL);
     eglQuerySurface(display, surface, EGL_WIDTH, &w);
     eglQuerySurface(display, surface, EGL_HEIGHT, &h);
-    eglMakeCurrent(display, surface, surface, context);
+    
+    if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE)
+        return NO_INIT;
+    
     mDisplay = display;
     mContext = context;
     mSurface = surface;
