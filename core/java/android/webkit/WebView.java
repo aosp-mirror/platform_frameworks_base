@@ -3984,6 +3984,7 @@ public class WebView extends AbsoluteLayout
                 switch (mTouchMode) {
                     case TOUCH_DOUBLE_TAP_MODE: // double tap
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
+                        mTouchMode = TOUCH_DONE_MODE;
                         doDoubleTap();
                         break;
                     case TOUCH_INIT_MODE: // tap
