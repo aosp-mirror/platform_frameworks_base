@@ -216,8 +216,8 @@ struct egl_window_surface_v2_t : public egl_surface_t
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl);
     virtual     void        connect();
     virtual     void        disconnect();
-    virtual     EGLint      getWidth() const    { return buffer->width;  }
-    virtual     EGLint      getHeight() const   { return buffer->height; }
+    virtual     EGLint      getWidth() const    { return width;  }
+    virtual     EGLint      getHeight() const   { return height; }
     virtual     EGLint      getHorizontalResolution() const;
     virtual     EGLint      getVerticalResolution() const;
     virtual     EGLint      getRefreshRate() const;
@@ -365,26 +365,8 @@ egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
     
     // keep a reference on the window
     nativeWindow->common.incRef(&nativeWindow->common);
-
-    // dequeue a buffer
-    nativeWindow->dequeueBuffer(nativeWindow, &buffer);
-
-    // allocate a corresponding depth-buffer
-    width = buffer->width;
-    height = buffer->height;
-    if (depthFormat) {
-        depth.width   = width;
-        depth.height  = height;
-        depth.stride  = depth.width; // use the width here
-        depth.data    = (GGLubyte*)malloc(depth.stride*depth.height*2);
-        if (depth.data == 0) {
-            setError(EGL_BAD_ALLOC, EGL_NO_SURFACE);
-            return;
-        }
-    }
-
-    // keep a reference on the buffer
-    buffer->common.incRef(&buffer->common);
+    nativeWindow->query(nativeWindow, NATIVE_WINDOW_WIDTH, &width);
+    nativeWindow->query(nativeWindow, NATIVE_WINDOW_HEIGHT, &height);
 }
 
 egl_window_surface_v2_t::~egl_window_surface_v2_t() {
@@ -402,6 +384,26 @@ egl_window_surface_v2_t::~egl_window_surface_v2_t() {
 
 void egl_window_surface_v2_t::connect() 
 {
+    // dequeue a buffer
+    nativeWindow->dequeueBuffer(nativeWindow, &buffer);
+
+    // allocate a corresponding depth-buffer
+    width = buffer->width;
+    height = buffer->height;
+    if (depth.format) {
+        depth.width   = width;
+        depth.height  = height;
+        depth.stride  = depth.width; // use the width here
+        depth.data    = (GGLubyte*)malloc(depth.stride*depth.height*2);
+        if (depth.data == 0) {
+            setError(EGL_BAD_ALLOC, EGL_NO_SURFACE);
+            return;
+        }
+    }
+
+    // keep a reference on the buffer
+    buffer->common.incRef(&buffer->common);
+
     // Lock the buffer
     nativeWindow->lockBuffer(nativeWindow, buffer);
     // pin the buffer down
@@ -419,6 +421,16 @@ void egl_window_surface_v2_t::disconnect()
     if (buffer && bits) {
         bits = NULL;
         unlock(buffer);
+    }
+    // enqueue the last frame
+    nativeWindow->queueBuffer(nativeWindow, buffer);
+    if (buffer) {
+        buffer->common.decRef(&buffer->common);
+        buffer = 0;
+    }
+    if (previousBuffer) {
+        previousBuffer->common.decRef(&previousBuffer->common); 
+        previousBuffer = 0;
     }
 }
 

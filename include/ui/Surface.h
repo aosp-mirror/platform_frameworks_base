@@ -115,6 +115,8 @@ private:
     sp<ISurface>                mSurface;
     SurfaceID                   mToken;
     uint32_t                    mIdentity;
+    uint32_t                    mWidth;
+    uint32_t                    mHeight;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
     mutable Mutex               mLock;
@@ -192,10 +194,12 @@ private:
     static int dequeueBuffer(android_native_window_t* window, android_native_buffer_t** buffer);
     static int lockBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
     static int queueBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
+    static int query(android_native_window_t* window, int what, int* value);
 
     int dequeueBuffer(android_native_buffer_t** buffer);
     int lockBuffer(android_native_buffer_t* buffer);
     int queueBuffer(android_native_buffer_t* buffer);
+    int query(int what, int* value);
 
     status_t dequeueBuffer(sp<SurfaceBuffer>* buffer);
     status_t lockBuffer(const sp<SurfaceBuffer>& buffer);
@@ -209,6 +213,8 @@ private:
     sp<SurfaceBuffer>           mLockedBuffer;
     SurfaceID                   mToken;
     uint32_t                    mIdentity;
+    uint32_t                    mWidth;
+    uint32_t                    mHeight;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
     mutable Region              mDirtyRegion;

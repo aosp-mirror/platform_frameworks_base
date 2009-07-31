@@ -180,7 +180,7 @@ SurfaceControl::SurfaceControl(
         uint32_t w, uint32_t h, PixelFormat format, uint32_t flags)
     : mClient(client), mSurface(surface),
       mToken(data.token), mIdentity(data.identity),
-      mFormat(format), mFlags(flags)
+      mWidth(w), mHeight(h), mFormat(format), mFlags(flags)
 {
 }
         
@@ -338,6 +338,8 @@ status_t SurfaceControl::writeSurfaceToParcel(
     uint32_t format = 0;
     SurfaceID token = -1;
     uint32_t identity = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
     sp<SurfaceComposerClient> client;
     sp<ISurface> sur;
     if (SurfaceControl::isValid(control)) {
@@ -345,6 +347,8 @@ status_t SurfaceControl::writeSurfaceToParcel(
         identity = control->mIdentity;
         client   = control->mClient;
         sur      = control->mSurface;
+        width    = control->mWidth;
+        height   = control->mHeight;
         format   = control->mFormat;
         flags    = control->mFlags;
     }
@@ -352,6 +356,8 @@ status_t SurfaceControl::writeSurfaceToParcel(
     parcel->writeStrongBinder(sur!=0     ? sur->asBinder()      : NULL);
     parcel->writeInt32(token);
     parcel->writeInt32(identity);
+    parcel->writeInt32(width);
+    parcel->writeInt32(height);
     parcel->writeInt32(format);
     parcel->writeInt32(flags);
     return NO_ERROR;
@@ -373,6 +379,7 @@ sp<Surface> SurfaceControl::getSurface() const
 Surface::Surface(const sp<SurfaceControl>& surface)
     : mClient(surface->mClient), mSurface(surface->mSurface),
       mToken(surface->mToken), mIdentity(surface->mIdentity),
+      mWidth(surface->mWidth), mHeight(surface->mHeight),
       mFormat(surface->mFormat), mFlags(surface->mFlags),
       mBufferMapper(BufferMapper::get())
 {
@@ -386,6 +393,8 @@ Surface::Surface(const Parcel& parcel)
     mSurface    = interface_cast<ISurface>(parcel.readStrongBinder());
     mToken      = parcel.readInt32();
     mIdentity   = parcel.readInt32();
+    mWidth      = parcel.readInt32();
+    mHeight     = parcel.readInt32();
     mFormat     = parcel.readInt32();
     mFlags      = parcel.readInt32();
 
@@ -401,6 +410,7 @@ void Surface::init()
     android_native_window_t::dequeueBuffer    = dequeueBuffer;
     android_native_window_t::lockBuffer       = lockBuffer;
     android_native_window_t::queueBuffer      = queueBuffer;
+    android_native_window_t::query            = query;
     mSwapRectangle.makeInvalid();
     DisplayInfo dinfo;
     SurfaceComposerClient::getDisplayInfo(0, &dinfo);
@@ -492,6 +502,13 @@ int Surface::queueBuffer(android_native_window_t* window,
     return self->queueBuffer(buffer);
 }
 
+int Surface::query(android_native_window_t* window, 
+        int what, int* value)
+{
+    Surface* self = getSelf(window);
+    return self->query(what, value);
+}
+
 // ----------------------------------------------------------------------------
 
 status_t Surface::dequeueBuffer(sp<SurfaceBuffer>* buffer)
@@ -499,6 +516,9 @@ status_t Surface::dequeueBuffer(sp<SurfaceBuffer>* buffer)
     android_native_buffer_t* out;
     status_t err = dequeueBuffer(&out);
     *buffer = SurfaceBuffer::getSelf(out);
+    // reset the width/height with the what we get from the buffer
+    mWidth  = uint32_t(out->width);
+    mHeight = uint32_t(out->height);
     return err;
 }
 
@@ -584,6 +604,19 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
         mClient->signalServer();
 
     return NO_ERROR;
+}
+
+int Surface::query(int what, int* value)
+{
+    switch (what) {
+        case NATIVE_WINDOW_WIDTH:
+            *value = int(mWidth);
+            return NO_ERROR;
+        case NATIVE_WINDOW_HEIGHT:
+            *value = int(mHeight);
+            return NO_ERROR;
+    }
+    return BAD_VALUE;
 }
 
 // ----------------------------------------------------------------------------
