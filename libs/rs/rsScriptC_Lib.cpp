@@ -566,6 +566,59 @@ static void SC_color(float r, float g, float b, float a)
     glColor4f(r, g, b, a);
 }
 
+static void SC_hsb(float h, float s, float b, float a)
+{
+    float red = 0.0f;
+    float green = 0.0f;
+    float blue = 0.0f;
+    
+    float x = h;
+    float y = s;
+    float z = b;
+    
+    float hf = (x - (int) x) * 6.0f;
+    int ihf = (int) hf;
+    float f = hf - ihf;
+    float pv = z * (1.0f - y);
+    float qv = z * (1.0f - y * f);
+    float tv = z * (1.0f - y * (1.0f - f));
+    
+    switch (ihf) {
+        case 0:         // Red is the dominant color
+            red = z;
+            green = tv;
+            blue = pv;
+            break;
+        case 1:         // Green is the dominant color
+            red = qv;
+            green = z;
+            blue = pv;
+            break;
+        case 2:
+            red = pv;
+            green = z;
+            blue = tv;
+            break;
+        case 3:         // Blue is the dominant color
+            red = pv;
+            green = qv;
+            blue = z;
+            break;
+        case 4:
+            red = tv;
+            green = pv;
+            blue = z;
+            break;
+        case 5:         // Red is the dominant color
+            red = z;
+            green = pv;
+            blue = qv;
+            break;
+    }
+    
+    glColor4f(red, green, blue, a);
+}
+
 /*
 extern "C" void materialDiffuse(float r, float g, float b, float a)
 {
@@ -650,7 +703,7 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "atanf", (void *)&atanf,
         "float", "(float)" },
     { "atan2f", (void *)&atan2f,
-        "float", "(floatm float)" },
+        "float", "(float, float)" },
     { "fabsf", (void *)&fabsf,
         "float", "(float)" },
     { "randf", (void *)&SC_randf,
@@ -771,6 +824,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "pfClearColor", (void *)&SC_ClearColor,
         "void", "(float, float, float, float)" },
     { "color", (void *)&SC_color,
+        "void", "(float, float, float, float)" },
+    { "hsb", (void *)&SC_hsb,
         "void", "(float, float, float, float)" },
 
     { "uploadToTexture", (void *)&SC_uploadToTexture,

@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.util.MathUtils;
+
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -105,6 +107,92 @@ public class Color {
     }
 
     /**
+     * Returns the hue component of a color int.
+     * 
+     * @return A value between 0.0f and 1.0f
+     * 
+     * @hide Pending API council
+     */
+    public static float hue(int color) {
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = color & 0xFF;
+
+        int V = Math.max(b, Math.max(r, g));
+        int temp = Math.min(b, Math.min(r, g));
+
+        float H;
+
+        if (V == temp) {
+            H = 0;
+        } else {
+            final float vtemp = (float) (V - temp);
+            final float cr = (V - r) / vtemp;
+            final float cg = (V - g) / vtemp;
+            final float cb = (V - b) / vtemp;
+
+            if (r == V) {
+                H = cb - cg;
+            } else if (g == V) {
+                H = 2 + cr - cb;
+            } else {
+                H = 4 + cg - cr;
+            }
+
+            H /= 6.f;
+            if (H < 0) {
+                H++;
+            }
+        }
+
+        return H;
+    }
+
+    /**
+     * Returns the saturation component of a color int.
+     * 
+     * @return A value between 0.0f and 1.0f
+     * 
+     * @hide Pending API council
+     */
+    public static float saturation(int color) {
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = color & 0xFF;
+
+
+        int V = Math.max(b, Math.max(r, g));
+        int temp = Math.min(b, Math.min(r, g));
+
+        float S;
+
+        if (V == temp) {
+            S = 0;
+        } else {
+            S = (V - temp) / (float) V;
+        }
+
+        return S;
+    }
+
+    /**
+     * Returns the brightness component of a color int.
+     * 
+     * @return A value between 0.0f and 1.0f
+     * 
+     * @hide Pending API council
+     */
+    public static float brightness(int color) {
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = color & 0xFF;
+
+        int V = Math.max(b, Math.max(r, g));
+
+        return (V / 255.f);
+    }
+
+    /**
      * Parse the color string, and return the corresponding color-int.
      * If the string cannot be parsed, throws an IllegalArgumentException
      * exception. Supported formats are:
@@ -131,6 +219,87 @@ public class Color {
             }
         }
         throw new IllegalArgumentException("Unknown color");
+    }
+
+    /**
+     * Convert HSB components to an ARGB color. Alpha set to 0xFF.
+     *     hsv[0] is Hue [0 .. 1)
+     *     hsv[1] is Saturation [0...1]
+     *     hsv[2] is Value [0...1]
+     * If hsv values are out of range, they are pinned.
+     * @param hsb  3 element array which holds the input HSB components.
+     * @return the resulting argb color
+     * 
+     * @hide Pending API council
+     */
+    public static int HSBtoColor(float[] hsb) {
+        return HSBtoColor(hsb[0], hsb[1], hsb[2]);
+    }
+    
+    /**
+     * Convert HSB components to an ARGB color. Alpha set to 0xFF.
+     *     hsv[0] is Hue [0 .. 1)
+     *     hsv[1] is Saturation [0...1]
+     *     hsv[2] is Value [0...1]
+     * If hsv values are out of range, they are pinned.
+     * @param h Hue component
+     * @param s Saturation component
+     * @param b Brightness component
+     * @return the resulting argb color
+     * 
+     * @hide Pending API council
+     */
+    public static int HSBtoColor(float h, float s, float b) {
+        h = MathUtils.constrain(h, 0.0f, 1.0f);
+        s = MathUtils.constrain(s, 0.0f, 1.0f);
+        b = MathUtils.constrain(b, 0.0f, 1.0f);
+        
+        float red = 0.0f;
+        float green = 0.0f;
+        float blue = 0.0f;
+        
+        final float hf = (h - (int) h) * 6.0f;
+        final int ihf = (int) hf;
+        final float f = hf - ihf;
+        final float pv = b * (1.0f - s);
+        final float qv = b * (1.0f - s * f);
+        final float tv = b * (1.0f - s * (1.0f - f));
+
+        switch (ihf) {
+            case 0:         // Red is the dominant color
+                red = b;
+                green = tv;
+                blue = pv;
+                break;
+            case 1:         // Green is the dominant color
+                red = qv;
+                green = b;
+                blue = pv;
+                break;
+            case 2:
+                red = pv;
+                green = b;
+                blue = tv;
+                break;
+            case 3:         // Blue is the dominant color
+                red = pv;
+                green = qv;
+                blue = b;
+                break;
+            case 4:
+                red = tv;
+                green = pv;
+                blue = b;
+                break;
+            case 5:         // Red is the dominant color
+                red = b;
+                green = pv;
+                blue = qv;
+                break;
+        }
+
+        return 0xFF000000 | (((int) (red * 255.0f)) << 16) |
+                (((int) (green * 255.0f)) << 8) | ((int) (blue * 255.0f));
     }
 
     /**
@@ -193,25 +362,24 @@ public class Color {
         return nativeHSVToColor(alpha, hsv);
     }
 
-    private static native void nativeRGBToHSV(int red, int greed, int blue,
-                                              float hsv[]);
+    private static native void nativeRGBToHSV(int red, int greed, int blue, float hsv[]); 
     private static native int nativeHSVToColor(int alpha, float hsv[]);
 
     private static final HashMap<String, Integer> sColorNameMap;
 
     static {
-        sColorNameMap = new HashMap();
-        sColorNameMap.put("black", Integer.valueOf(BLACK));
-        sColorNameMap.put("darkgray", Integer.valueOf(DKGRAY));
-        sColorNameMap.put("gray", Integer.valueOf(GRAY));
-        sColorNameMap.put("lightgray", Integer.valueOf(LTGRAY));
-        sColorNameMap.put("white", Integer.valueOf(WHITE));
-        sColorNameMap.put("red", Integer.valueOf(RED));
-        sColorNameMap.put("green", Integer.valueOf(GREEN));
-        sColorNameMap.put("blue", Integer.valueOf(BLUE));
-        sColorNameMap.put("yellow", Integer.valueOf(YELLOW));
-        sColorNameMap.put("cyan", Integer.valueOf(CYAN));
-        sColorNameMap.put("magenta", Integer.valueOf(MAGENTA));
+        sColorNameMap = new HashMap<String, Integer>();
+        sColorNameMap.put("black", BLACK);
+        sColorNameMap.put("darkgray", DKGRAY);
+        sColorNameMap.put("gray", GRAY);
+        sColorNameMap.put("lightgray", LTGRAY);
+        sColorNameMap.put("white", WHITE);
+        sColorNameMap.put("red", RED);
+        sColorNameMap.put("green", GREEN);
+        sColorNameMap.put("blue", BLUE);
+        sColorNameMap.put("yellow", YELLOW);
+        sColorNameMap.put("cyan", CYAN);
+        sColorNameMap.put("magenta", MAGENTA);
     }
 }
 

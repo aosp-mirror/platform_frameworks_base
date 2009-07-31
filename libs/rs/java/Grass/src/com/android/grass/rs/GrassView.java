@@ -30,7 +30,7 @@ class GrassView extends RSSurfaceView {
         super.surfaceChanged(holder, format, w, h);
 
         RenderScript RS = createRenderScript();
-        GrassRS render = new GrassRS();
+        GrassRS render = new GrassRS(w, h);
         render.init(RS, getResources());
     }
 }
