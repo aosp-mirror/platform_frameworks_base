@@ -24,6 +24,9 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+#include <time.h>
+#include <cutils/tztime.h>
+
 using namespace android;
 using namespace android::renderscript;
 
@@ -133,7 +136,63 @@ static float SC_randf(float max)
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+// Time routines
+//////////////////////////////////////////////////////////////////////////////
 
+static uint32_t SC_second()
+{
+    GET_TLS();
+
+    time_t rawtime;
+    time(&rawtime);
+
+    if (sc->mEnviroment.mTimeZone) {
+        struct tm timeinfo;
+        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
+        return timeinfo.tm_sec;
+    } else {
+        struct tm *timeinfo;
+        timeinfo = localtime(&rawtime);
+        return timeinfo->tm_sec;
+    }
+}
+
+static uint32_t SC_minute()
+{
+    GET_TLS();
+    
+    time_t rawtime;
+    time(&rawtime);
+    
+    if (sc->mEnviroment.mTimeZone) {
+        struct tm timeinfo;
+        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
+        return timeinfo.tm_min;
+    } else {
+        struct tm *timeinfo;
+        timeinfo = localtime(&rawtime);
+        return timeinfo->tm_min;
+    }
+}   
+
+static uint32_t  SC_hour()
+{
+    GET_TLS();
+    
+    time_t rawtime;
+    time(&rawtime);
+    
+    if (sc->mEnviroment.mTimeZone) {
+        struct tm timeinfo;
+        localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
+        return timeinfo.tm_hour;
+    } else {
+        struct tm *timeinfo;
+        timeinfo = localtime(&rawtime);
+        return timeinfo->tm_hour;
+    }
+}   
 
 //////////////////////////////////////////////////////////////////////////////
 // Matrix routines
@@ -459,6 +518,14 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "float", "(float)" },
     { "ceilf", (void *)&ceilf,
         "float", "(float)" },
+
+    // time
+    { "second", (void *)&SC_second,
+        "int", "()" },
+    { "minute", (void *)&SC_minute,
+        "int", "()" },
+    { "hour", (void *)&SC_hour,
+        "int", "()" },
 
     // matrix
     { "matrixLoadIdentity", (void *)&SC_matrixLoadIdentity,

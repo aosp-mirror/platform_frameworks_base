@@ -139,6 +139,7 @@ public class RenderScript {
     native private void nScriptCSetClearColor(float r, float g, float b, float a);
     native private void nScriptCSetClearDepth(float depth);
     native private void nScriptCSetClearStencil(int stencil);
+    native private void nScriptCSetTimeZone(byte[] timeZone);
     native private void nScriptCAddType(int type);
     native private void nScriptCSetRoot(boolean isRoot);
     native private void nScriptCSetScript(byte[] script, int offset, int length);
@@ -670,6 +671,15 @@ public class RenderScript {
         nScriptCBegin();
     }
 
+    public void scriptCSetTimeZone(String timeZone) {
+        try {
+            byte[] bytes = timeZone.getBytes("UTF-8");
+            nScriptCSetTimeZone(bytes);            
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     public void scriptCSetClearColor(float r, float g, float b, float a) {
         nScriptCSetClearColor(r, g, b, a);
     }

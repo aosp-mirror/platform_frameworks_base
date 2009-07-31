@@ -280,6 +280,11 @@ ScriptCSetClearColor {
 	param float a
 	}
 
+ScriptCSetTimeZone {
+	param const char * timeZone
+	param uint32_t length
+	}
+
 ScriptCSetClearDepth {
 	param float depth
 	}

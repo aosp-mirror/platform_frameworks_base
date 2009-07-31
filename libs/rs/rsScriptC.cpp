@@ -230,6 +230,12 @@ void rsi_ScriptCSetClearColor(Context * rsc, float r, float g, float b, float a)
     ss->mEnviroment.mClearColor[3] = a;
 }
 
+void rsi_ScriptCSetTimeZone(Context * rsc, const char * timeZone, uint32_t length)
+{
+    ScriptCState *ss = &rsc->mScriptC;
+    ss->mEnviroment.mTimeZone = timeZone;
+}
+
 void rsi_ScriptCSetClearDepth(Context * rsc, float v)
 {
     ScriptCState *ss = &rsc->mScriptC;

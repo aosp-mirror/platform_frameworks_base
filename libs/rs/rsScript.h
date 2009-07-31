@@ -43,6 +43,9 @@ public:
         float mClearDepth;
         uint32_t mClearStencil;
 
+        uint32_t mStartTimeMillis;
+        const char* mTimeZone;
+
         ObjectBaseRef<ProgramVertex> mVertex;
         ObjectBaseRef<ProgramFragment> mFragment;
         //ObjectBaseRef<ProgramRaster> mRaster;
