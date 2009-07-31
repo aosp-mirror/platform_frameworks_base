@@ -90,9 +90,6 @@ int main(void* con, int ft, int launchID)
             float ty1 = ((y * 3.1f) - 5.f) * scale;
             float ty2 = ty1 + scale * 1.8f;
             bindTexture(NAMED_PF, 0, loadI32(1, index));
-            //if (done && (index != selectedID)) {
-                //color(0.4f, 0.4f, 0.4f, 1.0f);
-            //}
             drawQuad(tx1, ty1, tz1,
                      tx2, ty1, tz2,
                      tx2, ty2, tz2,

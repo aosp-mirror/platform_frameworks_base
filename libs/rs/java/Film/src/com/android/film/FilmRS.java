@@ -21,22 +21,12 @@ import java.io.Writer;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Message;
+import android.util.Log;
+
 import android.renderscript.Matrix;
 import android.renderscript.ProgramVertexAlloc;
 import android.renderscript.RenderScript;
-import android.renderscript.RenderScript.ElementPredefined;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.renderscript.Element;
 
 public class FilmRS {
     private final int POS_TRANSLATE = 0;
@@ -76,8 +66,8 @@ public class FilmRS {
     private RenderScript mRS;
     private RenderScript.Script mScriptStrip;
     private RenderScript.Script mScriptImage;
-    private RenderScript.Element mElementVertex;
-    private RenderScript.Element mElementIndex;
+    private Element mElementVertex;
+    private Element mElementIndex;
     private RenderScript.Sampler mSampler;
     private RenderScript.ProgramFragmentStore mPFSBackground;
     private RenderScript.ProgramFragmentStore mPFSImages;
@@ -166,13 +156,10 @@ public class FilmRS {
     private void loadImages() {
         mBufferIDs = new int[13];
         mImages = new RenderScript.Allocation[13];
-        mAllocIDs = mRS.allocationCreatePredefSized(
-            RenderScript.ElementPredefined.USER_FLOAT,
-            mBufferIDs.length);
+        mAllocIDs = mRS.allocationCreateSized(
+            Element.USER_FLOAT, mBufferIDs.length);
 
-        RenderScript.ElementPredefined ie = 
-            RenderScript.ElementPredefined.RGB_565;
-
+        Element ie = Element.RGB_565;
         mImages[0] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p01, ie, true);
         mImages[1] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p02, ie, true);
         mImages[2] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p03, ie, true);
@@ -197,9 +184,8 @@ public class FilmRS {
     private void initState()
     {
         mBufferState = new int[10];
-        mAllocState = mRS.allocationCreatePredefSized(
-            RenderScript.ElementPredefined.USER_FLOAT,
-            mBufferState.length);
+        mAllocState = mRS.allocationCreateSized(
+            Element.USER_FLOAT, mBufferState.length);
 
         mBufferState[STATE_TRIANGLE_OFFSET_COUNT] = mFSM.mTriangleOffsetsCount;
         mBufferState[STATE_LAST_FOCUS] = -1;
@@ -208,10 +194,8 @@ public class FilmRS {
     }
 
     private void initRS() {
-        mElementVertex = mRS.elementGetPredefined(
-            RenderScript.ElementPredefined.NORM_ST_XYZ_F32);
-        mElementIndex = mRS.elementGetPredefined(
-            RenderScript.ElementPredefined.INDEX_16);
+        mElementVertex = Element.NORM_ST_XYZ_F32;
+        mElementIndex = Element.INDEX_16;
 
         mRS.triangleMeshBegin(mElementVertex, mElementIndex);
         mFSM = new FilmStripMesh();
@@ -231,9 +215,8 @@ public class FilmRS {
         mRS.scriptCSetRoot(true);
         mScriptStrip = mRS.scriptCCreate();
 
-        mAllocPos = mRS.allocationCreatePredefSized(
-            RenderScript.ElementPredefined.USER_FLOAT,
-            mBufferPos.length);
+        mAllocPos = mRS.allocationCreateSized(
+            Element.USER_FLOAT, mBufferPos.length);
 
         loadImages();
         initState();
@@ -250,15 +233,13 @@ public class FilmRS {
         mScriptStrip.bindAllocation(mPVA.mAlloc, 3);
 
 
-        mAllocOffsets = mRS.allocationCreatePredefSized(
-            RenderScript.ElementPredefined.USER_I32,
-            mFSM.mTriangleOffsets.length);
+        mAllocOffsets = mRS.allocationCreateSized(
+            Element.USER_I32, mFSM.mTriangleOffsets.length);
         mAllocOffsets.data(mFSM.mTriangleOffsets);
         mScriptStrip.bindAllocation(mAllocOffsets, 4);
 
-        mAllocOffsetsTex = mRS.allocationCreatePredefSized(
-            RenderScript.ElementPredefined.USER_FLOAT,
-            mFSM.mTriangleOffsetsTex.length);
+        mAllocOffsetsTex = mRS.allocationCreateSized(
+            Element.USER_FLOAT, mFSM.mTriangleOffsetsTex.length);
         mAllocOffsetsTex.data(mFSM.mTriangleOffsetsTex);
         mScriptStrip.bindAllocation(mAllocOffsetsTex, 5);
 
