@@ -93,7 +93,7 @@ SoundPool::~SoundPool()
 
 void SoundPool::addToRestartList(SoundChannel* channel)
 {
-    Mutex::Autolock lock(&mLock);
+    Mutex::Autolock lock(&mRestartLock);
     mRestart.push_back(channel);
     mCondition.signal();
 }
@@ -106,9 +106,9 @@ int SoundPool::beginThread(void* arg)
 
 int SoundPool::run()
 {
-    mLock.lock();
+    mRestartLock.lock();
     while (!mQuit) {
-        mCondition.wait(mLock);
+        mCondition.wait(mRestartLock);
         LOGV("awake");
         if (mQuit) break;
 
@@ -125,19 +125,19 @@ int SoundPool::run()
 
     mRestart.clear();
     mCondition.signal();
-    mLock.unlock();
+    mRestartLock.unlock();
     LOGV("goodbye");
     return 0;
 }
 
 void SoundPool::quit()
 {
-    mLock.lock();
+    mRestartLock.lock();
     mQuit = true;
     mCondition.signal();
-    mCondition.wait(mLock);
+    mCondition.wait(mRestartLock);
     LOGV("return from quit");
-    mLock.unlock();
+    mRestartLock.unlock();
 }
 
 bool SoundPool::startThreads()
@@ -484,11 +484,8 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
     // if not idle, this voice is being stolen
     if (mState != IDLE) {
         LOGV("channel %d stolen - event queued for channel %d", channelID(), nextChannelID);
-        stop_l();
         mNextEvent.set(sample, nextChannelID, leftVolume, rightVolume, priority, loop, rate);
-#ifdef USE_SHARED_MEM_BUFFER
-        mSoundPool->done(this);
-#endif
+        stop();
         return;
     }
 
