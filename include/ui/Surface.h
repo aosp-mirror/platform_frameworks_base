@@ -36,6 +36,7 @@ namespace android {
 
 class BufferMapper;
 class Rect;
+class MediaPlayerImpl;
 class Surface;
 class SurfaceComposerClient;
 struct per_client_cblk_t;
@@ -180,6 +181,7 @@ private:
     // mediaplayer needs access to ISurface for display
     friend class MediaPlayer;
     friend class Test;
+    friend class MediaPlayerImpl;
     const sp<ISurface>& getISurface() const { return mSurface; }
 
     status_t getBufferLocked(int index);

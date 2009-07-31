@@ -19,14 +19,10 @@ LOCAL_SRC_FILES:=                 \
         MediaSource.cpp           \
         MetaData.cpp              \
         MmapSource.cpp            \
-        QComHardwareRenderer.cpp  \
         SampleTable.cpp           \
         ShoutcastSource.cpp       \
-        SoftwareRenderer.cpp      \
-        SurfaceRenderer.cpp       \
         TimeSource.cpp            \
         TimedEventQueue.cpp       \
-        TIHardwareRenderer.cpp    \
         Utils.cpp                 \
         AudioPlayer.cpp           \
         ESDS.cpp                  \

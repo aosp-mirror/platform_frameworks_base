@@ -44,6 +44,7 @@ enum {
     kKeyColorFormat      = 'colf',
     kKeyPlatformPrivate  = 'priv',
     kKeyDecoderComponent = 'decC',
+    kKeyBufferID         = 'bfID',
 };
 
 enum {

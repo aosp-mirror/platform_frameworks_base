@@ -5,6 +5,7 @@
 #include <binder/IMemory.h>
 #include <binder/Parcel.h>
 #include <media/IOMX.h>
+#include <ui/ISurface.h>
 
 namespace android {
 
@@ -23,7 +24,9 @@ enum {
     OBSERVE_NODE,
     FILL_BUFFER,
     EMPTY_BUFFER,
+    CREATE_RENDERER,
     OBSERVER_ON_MSG,
+    RENDERER_RENDER,
 };
 
 static void *readVoidStar(const Parcel *parcel) {
@@ -262,6 +265,28 @@ public:
         remote()->transact(EMPTY_BUFFER, data, &reply, IBinder::FLAG_ONEWAY);
     }
 #endif
+
+    virtual sp<IOMXRenderer> createRenderer(
+            const sp<ISurface> &surface,
+            const char *componentName,
+            OMX_COLOR_FORMATTYPE colorFormat,
+            size_t encodedWidth, size_t encodedHeight,
+            size_t displayWidth, size_t displayHeight) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
+
+        data.writeStrongBinder(surface->asBinder());
+        data.writeCString(componentName);
+        data.writeInt32(colorFormat);
+        data.writeInt32(encodedWidth);
+        data.writeInt32(encodedHeight);
+        data.writeInt32(displayWidth);
+        data.writeInt32(displayHeight);
+
+        remote()->transact(CREATE_RENDERER, data, &reply);
+
+        return interface_cast<IOMXRenderer>(reply.readStrongBinder());
+    }
 };
 
 IMPLEMENT_META_INTERFACE(OMX, "android.hardware.IOMX");
@@ -513,6 +538,33 @@ status_t BnOMX::onTransact(
         }
 #endif
 
+        case CREATE_RENDERER:
+        {
+            CHECK_INTERFACE(IOMX, data, reply);
+
+            sp<ISurface> isurface =
+                interface_cast<ISurface>(data.readStrongBinder());
+
+            const char *componentName = data.readCString();
+
+            OMX_COLOR_FORMATTYPE colorFormat =
+                static_cast<OMX_COLOR_FORMATTYPE>(data.readInt32());
+
+            size_t encodedWidth = (size_t)data.readInt32();
+            size_t encodedHeight = (size_t)data.readInt32();
+            size_t displayWidth = (size_t)data.readInt32();
+            size_t displayHeight = (size_t)data.readInt32();
+
+            sp<IOMXRenderer> renderer =
+                createRenderer(isurface, componentName, colorFormat,
+                               encodedWidth, encodedHeight,
+                               displayWidth, displayHeight);
+
+            reply->writeStrongBinder(renderer->asBinder());
+
+            return OK;
+        }
+
         default:
             return BBinder::onTransact(code, data, reply, flags);
     }
@@ -549,6 +601,46 @@ status_t BnOMXObserver::onTransact(
 
             // XXX Could use readInplace maybe?
             on_message(msg);
+
+            return NO_ERROR;
+        }
+
+        default:
+            return BBinder::onTransact(code, data, reply, flags);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+class BpOMXRenderer : public BpInterface<IOMXRenderer> {
+public:
+    BpOMXRenderer(const sp<IBinder> &impl)
+        : BpInterface<IOMXRenderer>(impl) {
+    }
+
+    virtual void render(IOMX::buffer_id buffer) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IOMXRenderer::getInterfaceDescriptor());
+        writeVoidStar(buffer, &data);
+
+        // NOTE: Do NOT make this a ONE_WAY call, it must be synchronous
+        // so that the caller knows when to recycle the buffer.
+        remote()->transact(RENDERER_RENDER, data, &reply);
+    }
+};
+
+IMPLEMENT_META_INTERFACE(OMXRenderer, "android.hardware.IOMXRenderer");
+
+status_t BnOMXRenderer::onTransact(
+    uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags) {
+    switch (code) {
+        case RENDERER_RENDER:
+        {
+            CHECK_INTERFACE(IOMXRenderer, data, reply);
+
+            IOMX::buffer_id buffer = readVoidStar(&data);
+
+            render(buffer);
 
             return NO_ERROR;
         }

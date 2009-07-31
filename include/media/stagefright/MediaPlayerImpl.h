@@ -28,6 +28,7 @@
 namespace android {
 
 class AudioPlayer;
+class IOMXRenderer;
 class ISurface;
 class MediaExtractor;
 class MediaBuffer;
@@ -37,7 +38,6 @@ class MetaData;
 class OMXDecoder;
 class Surface;
 class TimeSource;
-class VideoRenderer;
 
 class MediaPlayerImpl {
 public:
@@ -93,7 +93,7 @@ private:
 
     sp<Surface> mSurface;
     sp<ISurface> mISurface;
-    VideoRenderer *mRenderer;
+    sp<IOMXRenderer> mVideoRenderer;
 
     sp<MediaPlayerBase::AudioSink> mAudioSink;
 

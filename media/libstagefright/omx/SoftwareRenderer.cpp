@@ -61,6 +61,10 @@ SoftwareRenderer::~SoftwareRenderer() {
 
 void SoftwareRenderer::render(
         const void *data, size_t size, void *platformPrivate) {
+    if (size != (mDecodedHeight * mDecodedWidth * 3) / 2) {
+        LOGE("size is %d, expected %d",
+                size, (mDecodedHeight * mDecodedWidth * 3) / 2);
+    }
     assert(size >= (mDecodedWidth * mDecodedHeight * 3) / 2);
 
     static const signed kClipMin = -278;
