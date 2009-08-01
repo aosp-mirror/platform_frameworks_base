@@ -465,37 +465,37 @@ MyApp/
     </tr>
     <tr>
       <td>MCC and MNC</td>
-      <td>The mobile country code optionally followed by mobile network code
+      <td><p>The mobile country code optionally followed by mobile network code
       from the SIM in the device. For example
       <code>mcc310</code> (U.S. on any carrier);
       <code>mcc310-mnc004</code> (U.S., Verizon brand);
       <code>mcc208-mnc00</code> (France, Orange brand);
       <code>mcc234-mnc00</code> (U.K., BT brand).
-        <p>
+        </p><p>
         If the device uses a radio connection  (GSM phone), the MCC will come
         from the SIM, and the MNC will come from the  network to which the
         device is attached. You might sometimes use the MCC alone, for example
         to include country-specific legal resources in your application. If
         your application specifies resources for a MCC/MNC  combination, those
-        resources can only be used if both the MCC and the MNC match. </td>
+        resources can only be used if both the MCC and the MNC match. </p></td>
     </tr>
     <tr>
         <td>Language and region</td>
-        <td>The two letter <a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO
+        <td><p>The two letter <a href="http://www.loc.gov/standards/iso639-2/php/code_list.php">ISO
                 639-1</a> language code optionally followed by a two letter
                 <a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/list-en1.html">ISO
                 3166-1-alpha-2</a> region code (preceded by lowercase &quot;r&quot;). For example 
                 <code>fr</code>, <code>en-rUS</code>, <code>fr-rFR</code>, <code>es-rES</code>.
-                <p>
+          </p><p>
           The codes are <em>not</em> case-sensitive; the r prefix is used to
           distinguish the region portion.
           You cannot specify a region alone, but you can specify a language alone,
-          for example <code>en</code>, <code>fr</code>, <code>es</code>. </td>
+          for example <code>en</code>, <code>fr</code>, <code>es</code>.</p> </td>
     </tr>
     <tr>
         <td>Screen dimensions</td>
-        <td><code>small</code>, <code>normal</code>, <code>large</code>
-        <p>
+        <td><p><code>small</code>, <code>normal</code>, <code>large</code>
+        </p><p>
         Specify that the resource is for a particular class of screen.
         The meanings of these are:</p>
         <ul>
@@ -517,27 +517,27 @@ MyApp/
     </tr>
     <tr>
         <td>Wider/taller screens</td>
-        <td><code>long</code>, <code>notlong</code>
-        <p>
+        <td><p><code>long</code>, <code>notlong</code>
+        </p><p>
         Specify that the resource is for a taller/wider than traditional
         screen.  This is based purely on the aspect ration of the screen:
         QVGA, HVGA, and VGA are notlong; WQVGA, WVGA, FWVGA are long.  Note
         that long may mean either wide or tall, depending on the current
-        orientation.
+        orientation.</p>
         </td>
     </tr>
     <tr>
         <td>Screen orientation</td>
-        <td><code>port</code>, <code>land</code>, <code>square</code>
-        <p>
+        <td><p><code>port</code>, <code>land</code>, <code>square</code>
+        </p><p>
         Specifies that the resource is for a screen that is tall (port)
-        or wide (land); square is not currently used.
+        or wide (land); square is not currently used.</p>
         </td>
     </tr>
     <tr>
         <td>Screen pixel density</td>
-        <td><code>ldpi</code>, <code>mdpi</code>, <code>hdpi</code>, <code>nodpi</code>
-        <p>
+        <td><p><code>ldpi</code>, <code>mdpi</code>, <code>hdpi</code>, <code>nodpi</code>
+        </p><p>
          Specifies the screen density the resource is defined for.  The medium
          density of traditional HVGA screens (mdpi) is defined to be approximately
          160dpi; low density (ldpi) is 120, and high density (hdpi) is 240.  There
@@ -545,7 +545,7 @@ MyApp/
          in ldpi would be 12x12 is mdpi and 16x16 in hdpi.  The special
          <code>nodpi</code> density can be used with bitmap resources to prevent
          them from being scaled at load time to match the device density.
-        <p>
+        </p><p>
          When Android selects which resource files to use,
          it handles screen density  differently than the other qualifiers.
          In step 1 of <a href="#best-match">How Android finds the best
@@ -553,10 +553,11 @@ MyApp/
          be a match. In step 4, if the qualifier being considered is screen
          density, Android will select the best final match at that point,
          without any need to move on to step 5.
-         <p>
+         </p><p>
          You can also specify explicit densities like <code>92dpi</code>
          or <code>108dpi</code>, but these are not fully supported by the
          system so should not be used.
+         </p>
          </td>
     </tr>
     <tr>
@@ -565,9 +566,9 @@ MyApp/
     </tr>
     <tr>
         <td>Whether the keyboard is available to the user</td>
-        <td><code>keysexposed</code>, <code>keyshidden</code>, <code>keyssoft</code>
-        <p>
-          If your application has specific resources that should only be used with a soft keyboard, use the <code>keyssoft</code> value. If no <code>keyssoft</code> resources are available (only <code>keysexposed</code> and <code>keyshidden</code>) and the device  shows a soft keyboard,  the system will use <code>keysexposed</code> resources. </td>
+        <td><p><code>keysexposed</code>, <code>keyshidden</code>, <code>keyssoft</code>
+        </p><p>
+          If your application has specific resources that should only be used with a soft keyboard, use the <code>keyssoft</code> value. If no <code>keyssoft</code> resources are available (only <code>keysexposed</code> and <code>keyshidden</code>) and the device  shows a soft keyboard,  the system will use <code>keysexposed</code> resources.</p> </td>
     </tr>
     <tr>
         <td>Primary text input method</td>

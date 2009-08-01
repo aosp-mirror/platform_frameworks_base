@@ -1093,7 +1093,7 @@
 
   <public type="attr" name="tension" id="0x0101026a" />
   <public type="attr" name="extraTension" />
-  <public type="attr" name="density" />
+  <public type="attr" name="anyDensity" />
   <public type="attr" name="searchSuggestThreshold" />
   <public type="attr" name="includeInGlobalSearch" />
   <public type="attr" name="onClick" />

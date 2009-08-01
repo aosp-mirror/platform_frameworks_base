@@ -68,8 +68,9 @@ public interface RILConstants {
     int CDMA_CELL_BROADCAST_SMS_DISABLED = 1;
     int CDMA_CELL_BROADCAST_SMS_ENABLED  = 0;
 
-    int CDMA_PHONE = 0;
+    int NO_PHONE = 0;
     int GSM_PHONE = 1;
+    int CDMA_PHONE = 2;
 
     int CDM_TTY_MODE_DISABLED = 0;
     int CDM_TTY_MODE_ENABLED = 1;
@@ -84,14 +85,6 @@ cat include/telephony/ril.h | \
    sed -re 's/^#define +([^ ]+)* +([^ ]+)/    int \1 = \2;/' \
    >>java/android/com.android.internal.telephony/gsm/RILConstants.java
 */
-
-
-    int RIL_SIM_ABSENT = 0;
-    int RIL_SIM_NOT_READY = 1;
-    int RIL_SIM_READY = 2;
-    int RIL_SIM_PIN = 3;
-    int RIL_SIM_PUK = 4;
-    int RIL_SIM_NETWORK_PERSONALIZATION = 5;
 
     /**
      * No restriction at all including voice/SMS/USSD/SS/AV64

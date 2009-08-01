@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="month_long_standalone_january">Gennaio</string>
-    <string name="month_long_standalone_february">Febbraio</string>
-    <string name="month_long_standalone_march">Marzo</string>
-    <string name="month_long_standalone_april">Aprile</string>
-    <string name="month_long_standalone_may">Maggio</string>
-    <string name="month_long_standalone_june">Giugno</string>
-    <string name="month_long_standalone_july">Luglio</string>
-    <string name="month_long_standalone_august">Agosto</string>
-    <string name="month_long_standalone_september">Settembre</string>
-    <string name="month_long_standalone_october">Ottobre</string>
-    <string name="month_long_standalone_november">Novembre</string>
-    <string name="month_long_standalone_december">Dicembre</string>
+    <string name="month_long_standalone_january">gennaio</string>
+    <string name="month_long_standalone_february">febbraio</string>
+    <string name="month_long_standalone_march">marzo</string>
+    <string name="month_long_standalone_april">aprile</string>
+    <string name="month_long_standalone_may">maggio</string>
+    <string name="month_long_standalone_june">giugno</string>
+    <string name="month_long_standalone_july">luglio</string>
+    <string name="month_long_standalone_august">agosto</string>
+    <string name="month_long_standalone_september">settembre</string>
+    <string name="month_long_standalone_october">ottobre</string>
+    <string name="month_long_standalone_november">novembre</string>
+    <string name="month_long_standalone_december">dicembre</string>
 
     <string name="month_long_january">gennaio</string>
     <string name="month_long_february">febbraio</string>
@@ -100,8 +100,8 @@
     <string name="numeric_date_format">dd/MM/yyyy</string>
     <string name="numeric_date_template">"%s/%s/%s"</string>
     <string name="month_day_year">%d %B %Y</string>
-    <string name="time_of_day">%H.%M.%S</string>
-    <string name="date_and_time">%H.%M.%S %d/%b/%Y</string>
+    <string name="time_of_day">%H:%M:%S</string>
+    <string name="date_and_time">%H:%M:%S %d/%b/%Y</string>
     <string name="date_time">%2$s %1$s</string>
     <string name="time_date">%1$s %3$s</string>
     <string name="abbrev_month_day_year">%d/%b/%Y</string>

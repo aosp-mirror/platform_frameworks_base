@@ -63,6 +63,8 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     private static final int MSG_STOP_SEARCH = 2;
     // arg1 is activity id
     private static final int MSG_ACTIVITY_RESUMING = 3;
+    // obj is the reason
+    private static final int MSG_CLOSING_SYSTEM_DIALOGS = 4;
 
     private static final String KEY_INITIAL_QUERY = "q";
     private static final String KEY_LAUNCH_ACTIVITY = "a";
@@ -127,8 +129,7 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     private void registerBroadcastReceiver() {
         if (!mReceiverRegistered) {
             IntentFilter filter = new IntentFilter(
-                    Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-            filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+                    Intent.ACTION_CONFIGURATION_CHANGED);
             mContext.registerReceiver(mBroadcastReceiver, filter, null,
                     mSearchUiThread);
             mReceiverRegistered = true;
@@ -149,12 +150,7 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
-                if (!"search".equals(intent.getStringExtra("reason"))) {
-                    if (DBG) debug(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-                    performStopSearch();
-                }
-            } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
+            if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 if (DBG) debug(Intent.ACTION_CONFIGURATION_CHANGED);
                 performOnConfigurationChanged();
             }
@@ -190,6 +186,9 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
         msgData.putBundle(KEY_APP_SEARCH_DATA, appSearchData);
         msgData.putInt(KEY_IDENT, ident);
         mSearchUiThread.sendMessage(msg);
+        // be a little more eager in setting this so isVisible will return the correct value if
+        // called immediately after startSearch
+        mVisible = true;
     }
 
     /**
@@ -199,6 +198,9 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     public void stopSearch() {
         if (DBG) debug("stopSearch()");
         mSearchUiThread.sendEmptyMessage(MSG_STOP_SEARCH);
+        // be a little more eager in setting this so isVisible will return the correct value if
+        // called immediately after stopSearch
+        mVisible = false;
     }
 
     /**
@@ -210,6 +212,18 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
         Message msg = Message.obtain();
         msg.what = MSG_ACTIVITY_RESUMING;
         msg.arg1 = ident;
+        mSearchUiThread.sendMessage(msg);
+    }
+
+    /**
+     * Handles closing of system windows/dialogs
+     * Can be called from any thread.
+     */
+    public void closingSystemDialogs(String reason) {
+        if (DBG) debug("closingSystemDialogs(reason=" + reason + ")");
+        Message msg = Message.obtain();
+        msg.what = MSG_CLOSING_SYSTEM_DIALOGS;
+        msg.obj = reason;
         mSearchUiThread.sendMessage(msg);
     }
 
@@ -237,6 +251,9 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
                     break;
                 case MSG_ACTIVITY_RESUMING:
                     performActivityResuming(msg.arg1);
+                    break;
+                case MSG_CLOSING_SYSTEM_DIALOGS:
+                    performClosingSystemDialogs((String)msg.obj);
                     break;
             }
         }
@@ -320,6 +337,19 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
                 mSearchDialog.hide();
                 mVisible = false;
             }
+        }
+    }
+
+    /**
+     * Updates due to system dialogs being closed
+     * This must be called on the search UI thread.
+     */
+    void performClosingSystemDialogs(String reason) {
+        if (DBG) debug("performClosingSystemDialogs(): mStartedIdent="
+                + mStartedIdent + ", reason: " + reason);
+        if (!"search".equals(reason)) {
+            if (DBG) debug(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            performStopSearch();
         }
     }
 

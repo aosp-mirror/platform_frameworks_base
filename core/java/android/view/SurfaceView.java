@@ -140,7 +140,7 @@ public class SurfaceView extends View {
     int mType = -1;
     final Rect mSurfaceFrame = new Rect();
     private Translator mTranslator;
-
+    
     public SurfaceView(Context context) {
         super(context);
         setWillNotDraw(true);
@@ -253,23 +253,6 @@ public class SurfaceView extends View {
     }
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        // SurfaceView uses pre-scaled size unless fixed size is requested. This hook
-        // scales the event back to the pre-scaled coordinates for such surface.
-        if (mScaled) {
-            MotionEvent scaledBack = MotionEvent.obtain(event);
-            mTranslator.translateEventInScreenToAppWindow(event);
-            try {
-                return super.dispatchTouchEvent(scaledBack);
-            } finally {
-                scaledBack.recycle();
-            }
-        } else {
-            return super.dispatchTouchEvent(event);
-        }
-    }
-
-    @Override
     protected void dispatchDraw(Canvas canvas) {
         // if SKIP_DRAW is cleared, draw() has already punched a hole
         if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
@@ -291,8 +274,6 @@ public class SurfaceView extends View {
         mWindowType = type;
     }
 
-    boolean mScaled = false;
-    
     private void updateWindow(boolean force) {
         if (!mHaveFrame) {
             return;
@@ -300,27 +281,15 @@ public class SurfaceView extends View {
         ViewRoot viewRoot = (ViewRoot) getRootView().getParent();
         mTranslator = viewRoot.mTranslator;
 
-        float appScale = mTranslator == null ? 1.0f : mTranslator.applicationScale;
-        
         Resources res = getContext().getResources();
         if (mTranslator != null || !res.getCompatibilityInfo().supportsScreen()) {
-            mSurface.setCompatibleDisplayMetrics(res.getDisplayMetrics());
+            mSurface.setCompatibleDisplayMetrics(res.getDisplayMetrics(), mTranslator);
         }
         
         int myWidth = mRequestedWidth;
         if (myWidth <= 0) myWidth = getWidth();
         int myHeight = mRequestedHeight;
         if (myHeight <= 0) myHeight = getHeight();
-
-        // Use original size if the app specified the size of the view,
-        // and let the flinger to scale up.
-        if (mRequestedWidth <= 0 && mTranslator != null) {
-            myWidth = (int) (myWidth * appScale + 0.5f);
-            myHeight = (int) (myHeight * appScale + 0.5f);
-            mScaled = true;
-        } else {
-            mScaled = false;
-        }
 
         getLocationInWindow(mLocation);
         final boolean creating = mWindow == null;
@@ -394,10 +363,17 @@ public class SurfaceView extends View {
 
                 if (localLOGV) Log.i(TAG, "New surface: " + mSurface
                         + ", vis=" + visible + ", frame=" + mWinFrame);
+                
                 mSurfaceFrame.left = 0;
                 mSurfaceFrame.top = 0;
-                mSurfaceFrame.right = mWinFrame.width();
-                mSurfaceFrame.bottom = mWinFrame.height();
+                if (mTranslator == null) {
+                    mSurfaceFrame.right = mWinFrame.width();
+                    mSurfaceFrame.bottom = mWinFrame.height();
+                } else {
+                    float appInvertedScale = mTranslator.applicationInvertedScale;
+                    mSurfaceFrame.right = (int) (mWinFrame.width() * appInvertedScale + 0.5f);
+                    mSurfaceFrame.bottom = (int) (mWinFrame.height() * appInvertedScale + 0.5f);
+                }
                 mSurfaceLock.unlock();
 
                 try {
@@ -641,10 +617,6 @@ public class SurfaceView extends View {
             if (localLOGV) Log.i(TAG, "Returned canvas: " + c);
             if (c != null) {
                 mLastLockTime = SystemClock.uptimeMillis();
-                if (mScaled) {
-                    mSaveCount = c.save();
-                    mTranslator.translateCanvas(c);
-                }
                 return c;
             }
             
@@ -667,9 +639,6 @@ public class SurfaceView extends View {
         }
 
         public void unlockCanvasAndPost(Canvas canvas) {
-            if (mScaled) {
-                canvas.restoreToCount(mSaveCount);
-            }
             mSurface.unlockCanvasAndPost(canvas);
             mSurfaceLock.unlock();
         }

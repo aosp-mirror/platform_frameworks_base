@@ -197,6 +197,9 @@ void DisplayHardware::init(uint32_t dpy)
             LOGW("ro.sf.lcd_density not defined, using 160 dpi by default.");
             strcpy(property, "160");
         }
+    } else {
+        /* for the emulator case, reset the dpi values too */
+        mDpiX = mDpiY = atoi(property);
     }
     mDensity = atoi(property) * (1.0f/160.0f);
 

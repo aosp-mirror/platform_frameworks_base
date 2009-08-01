@@ -6837,6 +6837,10 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         pw.print(mOrientationChanging);
                         pw.print(" mAppFreezing="); pw.println(mAppFreezing);
             }
+            if (mHScale != 1 || mVScale != 1) {
+                pw.print(prefix); pw.print("mHScale="); pw.print(mHScale);
+                        pw.print(" mVScale="); pw.println(mVScale);
+            }
         }
 
         @Override
@@ -8175,7 +8179,9 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
                         // This has changed the visibility of windows, so perform
                         // a new layout to get them all up-to-date.
                         mLayoutNeeded = true;
-                        moveInputMethodWindowsIfNeededLocked(true);
+                        if (!moveInputMethodWindowsIfNeededLocked(true)) {
+                            assignLayersLocked();
+                        }
                         performLayoutLockedInner();
                         updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES);
 

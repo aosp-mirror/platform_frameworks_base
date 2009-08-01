@@ -79,14 +79,26 @@ static int encrypt_n_save(AES_KEY *enc_key, DATA_BLOB *blob,
 {
     int size, fd, ret = -1;
     unsigned char enc_blob[MAX_BLOB_LEN];
-
     char tmpfile[KEYFILE_LEN];
+
+    if ((keyfile == NULL) || (strlen(keyfile) >= (KEYFILE_LEN - 4))) {
+        LOGE("keyfile name is too long or null");
+        return -1;
+    }
     strcpy(tmpfile, keyfile);
     strcat(tmpfile, ".tmp");
 
     // prepare the blob
+    if (IV_LEN > USER_KEY_LEN) {
+        LOGE("iv length is too long.");
+        return -1;
+    }
     memcpy(blob->iv, iv, IV_LEN);
     blob->blob_size = get_blob_size(blob);
+    if (blob->blob_size > MAX_BLOB_LEN) {
+        LOGE("blob data size is too large.");
+        return -1;
+    }
     memcpy(enc_blob, blob->blob, blob->blob_size);
     AES_cbc_encrypt((unsigned char *)enc_blob, (unsigned char *)blob->blob,
                     blob->blob_size, enc_key, iv, AES_ENCRYPT);
@@ -133,8 +145,13 @@ static int store_master_key(char *upasswd, unsigned char *master_key)
     DATA_BLOB blob;
 
     // prepare the blob
+    if (strlen(MASTER_KEY_TAG) >= USER_KEY_LEN) return -1;
     strlcpy(blob.keyname, MASTER_KEY_TAG, USER_KEY_LEN);
     blob.value_size = USER_KEY_LEN;
+    if (USER_KEY_LEN > MAX_KEY_VALUE_LENGTH) {
+        LOGE("master_key length is too long.");
+        return -1;
+    }
     memcpy((void*)blob.value, (const void*)master_key, USER_KEY_LEN);
 
     // generate the encryption key
@@ -150,6 +167,10 @@ static int get_master_key(char *upasswd, unsigned char *master_key)
 
     get_decrypt_key(upasswd, &key);
     ret = load_n_decrypt(MASTER_KEY_TAG, MASTER_KEY, &key, &blob);
+    if (blob.value_size > USER_KEY_LEN) {
+        LOGE("the blob's value size is too large");
+        return -1;
+    }
     if (!ret) memcpy(master_key, blob.value, blob.value_size);
     return ret;
 }
@@ -207,6 +228,11 @@ int remove_key(const char *namespace, const char *keyname)
     char keyfile[KEYFILE_LEN];
 
     if (state != UNLOCKED) return -state;
+    if ((strlen(namespace) >= MAX_KEY_NAME_LENGTH) ||
+        (strlen(keyname) >= MAX_KEY_NAME_LENGTH)) {
+        LOGE("keyname is too long.");
+        return -1;
+    }
     sprintf(keyfile, KEYFILE_NAME, namespace, keyname);
     return unlink(keyfile);
 }
@@ -222,10 +248,18 @@ int put_key(const char *namespace, const char *keyname,
         LOGE("Can not store key with current state %d\n", state);
         return -state;
     }
+    if ((strlen(namespace) >= MAX_KEY_NAME_LENGTH) ||
+        (strlen(keyname) >= MAX_KEY_NAME_LENGTH)) {
+        LOGE("keyname is too long.");
+        return -1;
+    }
     sprintf(keyfile, KEYFILE_NAME, namespace, keyname);
-    // flatten the args
     strcpy(blob.keyname, keyname);
     blob.value_size = size;
+    if (size > MAX_KEY_VALUE_LENGTH) {
+        LOGE("the data size is too large.");
+        return -1;
+    }
     memcpy(blob.value, data, size);
     return encrypt_n_save(&encryptKey, &blob, keyfile);
 }
@@ -242,10 +276,16 @@ int get_key(const char *namespace, const char *keyname,
         LOGE("Can not retrieve key value with current state %d\n", state);
         return -state;
     }
+    if ((strlen(namespace) >= MAX_KEY_NAME_LENGTH) ||
+        (strlen(keyname) >= MAX_KEY_NAME_LENGTH)) {
+        LOGE("keyname is too long.");
+        return -1;
+    }
     sprintf(keyfile, KEYFILE_NAME, namespace, keyname);
     ret = load_n_decrypt(keyname, keyfile, &decryptKey, &blob);
     if (!ret) {
         if ((blob.value_size > MAX_KEY_VALUE_LENGTH)) {
+            LOGE("blob value size is too large.");
             ret = -1;
         } else {
             *size = blob.value_size;
@@ -269,6 +309,13 @@ int list_keys(const char *namespace, char reply[BUFFER_MAX])
         LOGE("cannot open keystore dir or namespace is null\n");
         return -1;
     }
+
+    if (strlen(namespace) >= MAX_KEY_NAME_LENGTH) {
+        LOGE("namespace is too long.");
+        return -1;
+    }
+
+    reply[0] = 0;
     while ((de = readdir(d))) {
         char *prefix, *name, *keyfile = de->d_name;
         char *context = NULL;
@@ -337,6 +384,7 @@ KEYSTORE_STATE get_state()
 
 int reset_keystore()
 {
+    int ret = 0;
     DIR *d;
     struct dirent *de;
 
@@ -344,18 +392,24 @@ int reset_keystore()
         LOGE("cannot open keystore dir\n");
         return -1;
     }
-    while ((de = readdir(d))) unlink(de->d_name);
+    while ((de = readdir(d))) {
+        if (unlink(de->d_name) != 0) ret = -1;
+    }
     closedir(d);
     state = UNINITIALIZED;
-    LOGI("keystore is reset.");
-    return 0;
+    if (ret == 0) {
+        LOGI("keystore is reset.");
+    } else {
+        LOGI("keystore can not be cleaned up entirely.");
+    }
+    return ret;
 }
 
 int init_keystore(const char *dir)
 {
     int fd;
 
-    if (!dir) mkdir(dir, 0770);
+    if (dir) mkdir(dir, 0770);
     if (!dir || chdir(dir)) {
         LOGE("Can not open/create the keystore directory %s\n",
              dir ? dir : "(null)");

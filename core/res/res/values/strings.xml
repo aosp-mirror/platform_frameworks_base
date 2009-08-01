@@ -228,8 +228,6 @@
     <string name="httpErrorFileNotFound">The requested file was not found.</string>
     <!-- Displayed when a request failed because there are too many requests right now. -->
     <string name="httpErrorTooManyRequests">Too many requests are being processed. Try again later.</string>
-    <!-- Displayed a toast that a certificate is saved in the keystore -->
-    <string name="certificateSaved">The certificate is saved in the system\'s key store.</string>
 
     <!-- Sync notifications --> <skip />
     <!-- A notification is shown when there is a sync error.  This is the text that will scroll through the notification bar (will be seen by the user as he uses another application). -->
@@ -911,12 +909,12 @@
         you.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readPhoneState">read phone state</string>
+    <string name="permlab_readPhoneState">read phone state and identity</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readPhoneState">Allows the application to access the phone
         features of the device.  An application with this permission can determine the phone
-        number of this phone, whether a call is active, the number that call is connected to
-        and the like.</string>
+        number and serial number of this phone, whether a call is active, the number that call
+        is connected to and the like.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_wakeLock">prevent phone from sleeping</string>

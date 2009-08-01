@@ -1,0 +1,338 @@
+videos=true
+page.title=Videos
+@jd:body
+
+<script src="http://swfobject.googlecode.com/svn/trunk/swfobject/swfobject.js" type="text/javascript"></script>
+<script src="{@docRoot}assets/jquery-history.js" type="text/javascript"></script>
+<script type="text/javascript">
+// for debugging in FF, so other browsers ignore the console commands.
+var console;
+if (!console) console = { 'log': function() {} };
+
+/* This 'playlist' object defines the playlist IDs for each tab.
+ * Each name inside 'playlist' corresponds to class names for the tab that the playlists belong to (eg: "googleioTab" and "googleioBox" divs).
+ * Each string in 'ids' is the ID of a YouTube playlist that belongs in the corresponding tab.
+ */
+var playlists = {
+  'googleio' : {
+    'ids': ["734A052F802C96B9"]
+  },
+  'about' : {
+    'ids': ["D7C64411AF40DEA5","611F8C5DBF49CEC6"]
+  },
+  'developertips' : {
+    'ids': ["43E15866EF0033A2"]
+  },
+  'developersandbox' : {
+    'ids': ["77426907BBAD558E"]
+  }
+};
+
+/* Some playlists include the title in the description meta-data, so we need to account for this when building the thumbnail lists, so we don't show the title twice
+ * This string is read via indexOf(), so multiple IDs need only be comma-separated in this string.
+ */
+var playlistsWithTitleInDescription = "734A052F802C96B9";
+
+/* This 'featured' object defines the Feature Videos list. 
+ * Each playlist ID is paired with a custom video description.
+ */
+var featured = {
+// How to Make your Android UI Fast..
+  'N6YdwzAvwOA' : "Make your user interface fast, with more efficient AdapterViews, better bitmap scaling, faster redrawing, ViewStub layouts, fewer Views, and more.", 
+// Coding for Life: Battery Life
+  'OUemfrKe65c' : "Learn what kinds of operations consume the most battery and how you can reduce your usage, with tips for parsing and zipping data, using wakelocks, and running a Service.",
+// How Do I Code Thee?
+  'GARMe7Km_gk' : "If you'd like to augment your Android applications with pieces written in JavaScript or native code, watch this video."
+};
+
+/* When an event on the browser history occurs (back, forward, load),
+ * load the video found in the URL hash 
+ */
+$(window).history(function(e, hash) {
+  if (location.href.indexOf("#v=") != -1) {
+    videoId = location.href.split("#v=");
+    clickVideo(videoId[1]); // click the link with a matching class
+  }
+});
+
+/* Load a video into the player box.
+ * @param id        The YouTube video ID
+ * @param title     The video title to display in the player box (character escaped)
+ * @param autoplay  Whether to automatically play the video 
+ */
+function loadVideo(id, title, autoplay) {
+  if($("." + id).hasClass("noplay")) {
+  	console.log("noplay");
+  	autoplay = false;
+  	$("." + id).removeClass("noplay");
+  }
+  swfobject.embedSWF('http://www.youtube.com/v/' + id + '&rel=1&border=0&fs=1&autoplay=' + 
+      (autoplay?1:0), 'player', '500', '334', '9.0.0', false, false, {allowfullscreen: 'true'});
+  $("#videoPlayerTitle").html("<h2>" + unescape(title) + "</h2>");
+  
+  $.history.add('v=' + id); // add the current video to the browser history
+  document.getElementById("doc-content").scrollTop = 0; // scroll the window to the top 
+}
+
+/* Draw all videos from a playlist into a 'videoPreviews' list
+ * @param data  The feed data returned from the youtube request
+ */
+function renderPlaylist(data) {  
+  var MAX_DESC_LENGTH = 390; // the length at which we will trim the description
+  var feed = data.feed;
+  var entries = feed.entry || [];
+  var playlistId = feed.yt$playlistId.$t;
+  
+  var ul = $('<ul class="videoPreviews" />');
+  
+  // Loop through each entry (each video) and add it to the 'videoPreviews' list
+  for (var i = 0; i < entries.length; i++) {
+    var entry = entries[i];
+    
+    var title = entry.title.$t;
+    var id = entry.media$group.yt$videoid.$t;
+    var thumbUrl = entry.media$group.media$thumbnail[0].url;
+    var fullDescription = entry.media$group.media$description.$t;
+    var playerUrl = entry.media$group.media$content[0].url;
+      
+    // Check whether this playlist includes the video title inside the description meta-data, so we can remove it
+    if (playlistsWithTitleInDescription.indexOf(playlistId) != -1) {
+      var lines = fullDescription.split("\n");
+      // If the first line includes the first 17 chars from the title, let's use the title from the desciption instead (because it's a more complete title)
+      // This accounts for, literally, "Google I/O 2009 -", which is (so far) the min AND max for properly identifying a title in the only playlist with titles in the description
+      if (lines[0].indexOf(title.slice(0,16)) != -1) {  
+			h3Title = "<h3>" + lines[0] + "</h3>"; 	
+      	if (lines[2].length < 30) lines = lines.slice(3);  // also, if the second line is very short (the speaker name), slice it out too
+      	else lines = lines.slice(1);  // otherwise, slice after the first line
+      }
+      fullDescription = lines.join("");
+    } 
+    
+    var shortDescription = fullDescription.substr(0, MAX_DESC_LENGTH);
+    shortDescription += shortDescription.length == MAX_DESC_LENGTH ? "..." : ""; // add ellipsis if we've chopped the description
+  
+    var img = $('<img src="' + thumbUrl + '" width="120" height="90"/>');
+    var a = $('<a class="' + id + '" href="#" onclick="loadVideo(\'' + id + '\',\'' + escape(title) + '\',true); return setSelected(this);" />');
+    var pShortDescription = $('<p class="short">' + shortDescription + '</p>');
+    var pFullDescription = $('<p class="full">' + fullDescription + '</p>');
+    var h3Title = "<h3>" + title + "</h3>";
+    var pToggle = "<p class='toggle'><a href='#' onclick='return toggleDescription(this)'><span class='more'>more</span><span class='less'>less</span></a></p>";
+    var li = $('<li/>');
+    
+    li.append(a);
+    a.append(img).append(h3Title).append(pShortDescription);
+    
+    // Add the full description and "more/less" toggle, if necessary
+    if (fullDescription.length > MAX_DESC_LENGTH) {
+    	a.append(pFullDescription);
+    	li.append(pToggle);
+    }
+    
+    ul.append(li);
+  }
+  
+  // Now add the 'videoPreviews' list to the page, and be sure we put it in the right tab
+  // This is the part that allows us to put multiple playlists in one tab
+  for (var x in playlists) {
+    var ids = playlists[x].ids;
+    for (var i in ids) {
+      if (ids[i] == playlistId) {
+        $("#"+x+"Box").append(ul);
+        break;
+      }
+    }
+  }  
+}
+
+/* Draw a featured video into the existing 'videoPreviews' list 
+ * @param data  The video data returned from the youtube request
+ */
+function renderFeatured(data) {  
+  var MAX_TITLE_LENGTH = 48;
+  var entry = data.entry || [];
+  var id = entry.media$group.yt$videoid.$t;
+  var description = featured[id];
+  var title = entry.title.$t;
+  var thumbUrl = entry.media$group.media$thumbnail[0].url;
+  var playerUrl = entry.media$group.media$content[0].url;
+  
+  var ellipsis = title.length > MAX_TITLE_LENGTH ? "..." : "";
+    
+  var h3Title = "<h3>"+ title.substr(0,MAX_TITLE_LENGTH) + ellipsis + "</h3>";
+  var img = $('<img src="' + thumbUrl + '" width="120" height="90"/>');
+  var p = $('<p>' + description + '</p>');
+  var a = $('<a class="' + id + '" href="#" onclick="loadVideo(\'' + id + '\',\'' + title + '\',true); return setSelected(this);" />');
+  var li = $("<li/>");
+  
+  a.append(h3Title).append(img).append(p);
+  li.append(a);
+
+  $("#mainBodyRight .videoPreviews").append(li);
+}
+
+/* Request the playlist feeds from YouTube */
+function showPlaylists() {
+  for (var x in playlists) {
+    var ids = playlists[x].ids;
+    for (var i in ids) {
+      var script = "<script type='text/javascript' src='http://gdata.youtube.com/feeds/api/playlists/" 
+      				  + ids[i] + 
+      				  "?v=2&alt=json-in-script&callback=renderPlaylist'><\/script>";
+    	$("body").append(script);
+    }
+  }
+}
+
+/* Request the featured videos from YouTube */
+function showFeatured() {
+  for (var id in featured) {
+    var script = "<script type='text/javascript' src='http://gdata.youtube.com/feeds/api/videos/" 
+    					+ id + 
+    					"?v=2&alt=json-in-script&callback=renderFeatured'><\/script>";
+    $("body").append(script);
+  }
+}
+
+/* Reveal a tab (playlist) box 
+ * @param name  The name of the tab
+ */
+function showBox(name) {
+  $("#"+name+"Box").addClass("selected").siblings().removeClass("selected");
+  $("#"+name+"Tab").addClass("selected").siblings().removeClass("selected");
+  return false;
+}
+
+/* Highlight a video thumbnail, including all duplicates that there may be 
+ * @param link  The link <a> object that was clicked
+ */
+function setSelected(link) {
+  var videoId = $(link).attr("class");
+  if (videoId.indexOf("selected") != -1) {  // this means this video is already selected and playing, so bail out
+    return false;
+  }
+  $(".videoPreviews .selected").removeClass("selected");
+  $("a." + videoId).addClass("selected").each( function (i) {
+  	 if ($(this).is(":hidden")) {
+  	   var boxName = $(this).parent().parent().parent().attr("id").split("Box");
+  	   $("#"+boxName[0]+"Tab a").click();
+  	 }
+  });
+  return false;
+}
+
+/* Reveal and hide the long/short descriptions for a video in the playlist 
+ * @param link  The link <a> object that was clicked 
+ */
+function toggleDescription(link) {
+	var aToggle = $(link);
+	$("span", aToggle).toggle();
+	var aDescription = $(">a", aToggle.parent().parent());
+	$("p.short", aDescription).toggle();
+	$("p.full", aDescription).toggle();
+	if ($("span.less", aToggle).is(":visible")) {
+		aDescription.css("height", "auto");
+	} else {
+		aDescription.css("height", "90px");
+	}
+	return false;
+}
+
+/* Add actions to the page onload event so that we load a video right away */
+addLoadEvent(function () {
+  // if there's a video url in the hash, click that video
+  if (location.href.indexOf("#v=") != -1) {
+    var videoId = location.href.split("#v=");
+    clickVideo(videoId[1]);
+  } else { // otherwise, click the default video
+    clickDefaultVideo();
+  }
+});
+
+
+var clickVideoAttempts = 0; // Used with clickVideo()
+
+/* Click a video in order to load it and select it 
+ * @param videoId  The ID of the video to click
+ */
+function clickVideo(videoId) {
+  if ($("." + videoId).length != 0) {  // if we find the video, click it and return
+   $("." + videoId).addClass("noplay"); // add class to indicate we should NOT autoplay (class removed by loadVideo)
+  	$("." + videoId + ":first").click();
+	 return;
+  } else { // if we don't find it, increment clickVideoAttempts
+	 console.log("video NOT found: " + videoId);
+	 clickVideoAttempts++;
+  }
+    
+  // if we don't find it after 20 attempts (2 seconds), click the first feature video
+  if (clickVideoAttempts > 10) {
+	 console.log("video never found, clicking default...");
+    clickVideoAttempts = 0;
+    clickDefaultVideo();
+  } else { // try again after 100 milliseconds
+	 setTimeout('clickVideo("'+videoId+'")', 100);
+  }
+}
+
+/* Click the default video that should be loaded on page load (the first video in the featured list) */
+function clickDefaultVideo() {
+	if ($("#mainBodyRight .videoPreviews a:first").length != 0) {
+  	var videoId = $("#mainBodyRight .videoPreviews a:first").attr("class");
+    $("." + videoId).addClass("noplay"); // add class to indicate we should NOT autoplay (class removed by loadVideo)
+  	$("." + videoId + ":first").click();
+  	return;
+  } else { // if we don't find it, increment clickVideoAttempts
+	 console.log("default video NOT found");
+	 clickVideoAttempts++;
+  }
+  
+  // if we don't find it after 50 attempts (5 seconds), just fail
+  if (clickVideoAttempts > 50) {
+	  console.log("default video never found...");
+  } else { // try again after 100 milliseconds
+	 	setTimeout('clickDefaultVideo()', 100);
+  }
+}
+</script>
+
+  <div id="mainBodyFixed">
+	
+    <div id="mainBodyLeft" class="videoPlayer" >	
+      <div id="videoPlayerBox">
+        <div id="videoBorder">
+          <div id="videoPlayerTitle"></div>
+          <div id="objectWrapper">
+            <object id="player"></object>
+          </div>
+        </div>
+      </div>
+    </div><!-- end mainBodyLeft -->
+    
+    <div id="mainBodyRight" class="videoPlayer">
+      <h2>Featured Videos</h2>
+      <ul class="videoPreviews"></ul>
+    </div><!-- end mainBodyRight -->
+	  
+    <ul id="videoTabs">
+      <li id="aboutTab" class="selected"><a onclick="return showBox('about');" href="#">About the Platform</a></li>
+      <li id="developertipsTab"><a onclick="return showBox('developertips');" href="#">Developer Tips</a></li>
+      <li id="googleioTab"><a onclick="return showBox('googleio');" href="#">Google I/O Sessions</a></li>
+      <li id="developersandboxTab"><a onclick="return showBox('developersandbox');" href="#">Developer Sandbox</a></li>
+    </ul>
+  	
+    <div id="videos">
+      <div id="aboutBox" class="selected"></div>
+      <div id="developertipsBox"></div>
+      <div id="googleioBox"></div>
+      <div id="developersandboxBox"></div>
+    </div>
+    
+  </div><!-- end mainBodyFixed -->
+  
+<script type="text/javascript">
+// Initialization actions
+showFeatured();            // load featured videos
+showPlaylists();           // load playslists
+</script>
+
+	

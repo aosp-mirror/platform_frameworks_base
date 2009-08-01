@@ -284,6 +284,12 @@ public class DateFormat {
      */
     public static java.text.DateFormat getDateFormatForSetting(Context context,
                                                                String value) {
+        String format = getDateFormatStringForSetting(context, value);
+
+        return new java.text.SimpleDateFormat(format);
+    }
+
+    private static String getDateFormatStringForSetting(Context context, String value) {
         if (value != null) {
             int month = value.indexOf('M');
             int day = value.indexOf('d');
@@ -291,7 +297,7 @@ public class DateFormat {
 
             if (month >= 0 && day >= 0 && year >= 0) {
                 String template = context.getString(R.string.numeric_date_template);
-                if (year < month) {
+                if (year < month && year < day) {
                     if (month < day) {
                         value = String.format(template, "yyyy", "MM", "dd");
                     } else {
@@ -311,7 +317,7 @@ public class DateFormat {
                     }
                 }
 
-                return new java.text.SimpleDateFormat(value);
+                return value;
             }
         }
 
@@ -321,7 +327,7 @@ public class DateFormat {
          * so that we get a four-digit year instead a two-digit year.
          */
         value = context.getString(R.string.numeric_date_format);
-        return new java.text.SimpleDateFormat(value);
+        return value;
     }
     
     /**
@@ -347,7 +353,11 @@ public class DateFormat {
     /**
      * Gets the current date format stored as a char array. The array will contain
      * 3 elements ({@link #DATE}, {@link #MONTH}, and {@link #YEAR}) in the order    
-     * preferred by the user.
+     * specified by the user's format preference.  Note that this order is
+     * only appropriate for all-numeric dates; spelled-out (MEDIUM and LONG)
+     * dates will generally contain other punctuation, spaces, or words,
+     * not just the day, month, and year, and not necessarily in the same
+     * order returned here.
      */    
     public static final char[] getDateFormatOrder(Context context) {
         char[] order = new char[] {DATE, MONTH, YEAR};
@@ -380,22 +390,10 @@ public class DateFormat {
     }
     
     private static String getDateFormatString(Context context) {
-        java.text.DateFormat df;
-        df = java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT);
-        if (df instanceof SimpleDateFormat) {
-            return ((SimpleDateFormat) df).toPattern();
-        }
-
         String value = Settings.System.getString(context.getContentResolver(),
                 Settings.System.DATE_FORMAT);
-        if (value == null || value.length() < 6) {
-            /*
-             * No need to localize -- this is an emergency fallback in case
-             * the setting is missing, but it should always be set.
-             */
-            value = "MM-dd-yyyy";
-        }
-        return value;
+
+        return getDateFormatStringForSetting(context, value);
     }
 
     /**

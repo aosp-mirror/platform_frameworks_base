@@ -32,8 +32,9 @@
 #define ERR_CONSTRUCT_NEW_DATA  2
 #define ERR_RSA_KEYGEN          3
 #define ERR_X509_PROCESS        4
-#define ERR_BIO_READ            5
-#define ERR_MAXIMUM             6
+#define ERR_SPKAC_TOO_LONG      5
+#define ERR_INVALID_ARGS        6
+#define ERR_MAXIMUM             7
 
 typedef struct {
     EVP_PKEY *pkey;

@@ -43,6 +43,7 @@ import java.util.ArrayList;
         return sInstance;
     }
 
+    @Deprecated
     private SmsManager() {
         mSmsMgrProxy = android.telephony.SmsManager.getDefault();
     }

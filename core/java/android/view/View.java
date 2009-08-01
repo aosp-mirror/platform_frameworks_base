@@ -46,6 +46,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.Config;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pool;
@@ -5976,6 +5977,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
                 try {
                     bitmap = Bitmap.createBitmap(width, height, quality);
+                    bitmap.setDensity(getResources().getDisplayMetrics().densityDpi);
                     if (autoScale) {
                         mDrawingCache = new SoftReference<Bitmap>(bitmap);
                     } else {

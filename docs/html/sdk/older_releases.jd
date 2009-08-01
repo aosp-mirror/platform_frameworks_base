@@ -26,6 +26,12 @@ release</a>.</p>
      <th>Description</td>
    </tr>
    <tr>
+     <td><a href="{@docRoot}sdk/1.5_r1/index.html">Android 1.5 SDK, Release 2</a></td>
+     <td style="text-align:center;">Android 1.5<br>Android 1.1</td>
+     <td><em>May 2009</em></td>
+     <td>Replaced by Android 1.5 SDK, Release 3. <em><a href="RELEASENOTES.html#1.5_r2">Release notes</a></em></td>
+   </tr>
+   <tr>
      <td><a href="{@docRoot}sdk/1.5_r1/index.html">Android 1.5 SDK, Release 1</a></td>
      <td style="text-align:center;">Android 1.5<br>Android 1.1</td>
      <td><em>April 2009</em></td>

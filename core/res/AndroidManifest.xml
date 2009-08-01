@@ -209,7 +209,7 @@
 
     <!-- Allows an application to read (but not write) the user's
         browsing history and bookmarks. -->
-    <permission android:name="android.permission.READ_HISTORY_BOOKMARKS"
+    <permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:label="@string/permlab_readHistoryBookmarks"
         android:description="@string/permdesc_readHistoryBookmarks"
@@ -217,7 +217,7 @@
 
     <!-- Allows an application to write (but not read) the user's
         browsing history and bookmarks. -->
-    <permission android:name="android.permission.WRITE_HISTORY_BOOKMARKS"
+    <permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
         android:label="@string/permlab_writeHistoryBookmarks"
         android:description="@string/permdesc_writeHistoryBookmarks"
@@ -833,7 +833,8 @@
         android:protectionLevel="signature" />
 
     <!-- Allows an application to call the activity manager shutdown() API
-         to put the higher-level system there into a shutdown state. -->
+         to put the higher-level system there into a shutdown state.
+         @hide -->
     <permission android:name="android.permission.SHUTDOWN"
         android:label="@string/permlab_shutdown"
         android:description="@string/permdesc_shutdown"
@@ -842,7 +843,8 @@
     <!-- Allows an application to tell the activity manager to temporarily
          stop application switches, putting it into a special mode that
          prevents applications from immediately switching away from some
-         critical UI such as the home screen. -->
+         critical UI such as the home screen.
+         @hide -->
     <permission android:name="android.permission.STOP_APP_SWITCHES"
         android:label="@string/permlab_stopAppSwitches"
         android:description="@string/permdesc_stopAppSwitches"

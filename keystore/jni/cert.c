@@ -36,17 +36,17 @@ static char emsg[][30] = {
     STR(ERR_CONSTRUCT_NEW_DATA),
     STR(ERR_RSA_KEYGEN),
     STR(ERR_X509_PROCESS),
-    STR(ERR_BIO_READ),
+    STR(ERR_SPKAC_TOO_LONG),
+    STR(ERR_INVALID_ARGS),
 };
 
-static void save_in_store(X509_REQ *req, EVP_PKEY *pkey)
+static void save_in_store(EVP_PKEY *pkey)
 {
     EVP_PKEY *newpkey = EVP_PKEY_new();
     RSA *rsa = EVP_PKEY_get1_RSA(pkey);
     EVP_PKEY_set1_RSA(newpkey, rsa);
     PKEY_STORE_free(pkey_store[store_index]);
-    pkey_store[store_index].key_len =
-    i2d_X509_PUBKEY(req->req_info->pubkey, &pkey_store[store_index].public_key);
+    pkey_store[store_index].key_len = i2d_RSA_PUBKEY(rsa, &pkey_store[store_index].public_key);
     pkey_store[store_index++].pkey = newpkey;
     store_index %= KEYGEN_STORE_SIZE;
     RSA_free(rsa);
@@ -69,17 +69,19 @@ static EVP_PKEY *get_pkey_from_store(X509 *cert)
     return (i == KEYGEN_STORE_SIZE) ? NULL : pkey_store[i].pkey;
 }
 
-int gen_csr(int bits, const char *organizations, char reply[REPLY_MAX])
+int gen_csr(int bits, const char *challenge, char reply[REPLY_MAX])
 {
     int len, ret_code = 0;
     BIGNUM *bn = NULL;
-    BIO *bio = NULL;
+    char *spkstr = NULL;
     EVP_PKEY *pkey = NULL;
     RSA *rsa = NULL;
-    X509_REQ *req = NULL;
-    X509_NAME *name = NULL;
+    NETSCAPE_SPKI *req = NULL;
 
-    if ((bio = BIO_new(BIO_s_mem())) == NULL) goto err;
+    if (challenge == NULL) {
+        ret_code = ERR_INVALID_ARGS;
+        goto err;
+    }
 
     if ((bits != KEYLENGTH_MEDIUM) && (bits != KEYLENGTH_MAXIMUM)) {
         ret_code = ERR_INVALID_KEY_LENGTH;
@@ -87,7 +89,7 @@ int gen_csr(int bits, const char *organizations, char reply[REPLY_MAX])
     }
 
     if (((pkey = EVP_PKEY_new()) == NULL) ||
-        ((req = X509_REQ_new()) == NULL) ||
+        ((req = NETSCAPE_SPKI_new()) == NULL) ||
         ((rsa = RSA_new()) == NULL) || ((bn = BN_new()) == NULL)) {
         ret_code = ERR_CONSTRUCT_NEW_DATA;
         goto err;
@@ -100,40 +102,26 @@ int gen_csr(int bits, const char *organizations, char reply[REPLY_MAX])
         goto err;
     }
 
-    // rsa will be part of the req, it will be freed in X509_REQ_free(req)
     rsa = NULL;
+    ASN1_STRING_set(req->spkac->challenge, challenge, (int)strlen(challenge));
+    NETSCAPE_SPKI_set_pubkey(req, pkey);
+    NETSCAPE_SPKI_sign(req, pkey, EVP_md5());
+    spkstr = NETSCAPE_SPKI_b64_encode(req);
 
-    X509_REQ_set_pubkey(req, pkey);
-    name = X509_REQ_get_subject_name(req);
-
-    X509_NAME_add_entry_by_txt(name, "C",  MBSTRING_ASC,
-                               (const unsigned char *)"US", -1, -1, 0);
-    X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC,
-                               (const unsigned char *) ANDROID_KEYSTORE,
-                               -1, -1, 0);
-    X509_NAME_add_entry_by_txt(name, "O", MBSTRING_ASC,
-                               (const unsigned char *)organizations, -1, -1, 0);
-
-    if (!X509_REQ_sign(req, pkey, EVP_md5()) ||
-        (PEM_write_bio_X509_REQ(bio, req) <= 0)) {
-        ret_code = ERR_X509_PROCESS;
-        goto err;
-    }
-    if ((len = BIO_read(bio, reply, REPLY_MAX - 1)) > 0) {
-      reply[len] = 0;
-      save_in_store(req, pkey);
+    if ((strlcpy(reply, spkstr, REPLY_MAX)) < REPLY_MAX) {
+        save_in_store(pkey);
     } else {
-      ret_code = ERR_BIO_READ;
+        ret_code = ERR_SPKAC_TOO_LONG;
     }
 
 err:
     if (rsa) RSA_free(rsa);
     if (bn) BN_free(bn);
-    if (req) X509_REQ_free(req);
+    if (req) NETSCAPE_SPKI_free(req);
     if (pkey) EVP_PKEY_free(pkey);
-    if (bio) BIO_free(bio);
+    if (spkstr) OPENSSL_free(spkstr);
     if ((ret_code > 0) && (ret_code < ERR_MAXIMUM)) LOGE(emsg[ret_code]);
-    return ret_code;
+    return -ret_code;
 }
 
 PKCS12 *get_p12_handle(const char *buf, int bufLen)

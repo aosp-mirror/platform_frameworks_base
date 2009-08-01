@@ -60,7 +60,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.HandlerThread;
 import android.os.Parcel;
 import android.os.RemoteException;
@@ -495,7 +494,7 @@ class PackageManagerService extends IPackageManager.Stub {
             mDrmAppInstallObserver = new AppDirObserver(
                 mDrmAppPrivateInstallDir.getPath(), OBSERVER_EVENTS, false);
             mDrmAppInstallObserver.startWatching();
-            scanDirLI(mDrmAppPrivateInstallDir, 0, scanMode);
+            scanDirLI(mDrmAppPrivateInstallDir, 0, scanMode | SCAN_FORWARD_LOCKED);
 
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PMS_SCAN_END,
                     SystemClock.uptimeMillis());
@@ -1764,7 +1763,12 @@ class PackageManagerService extends IPackageManager.Stub {
         int i;
         for (i=0; i<files.length; i++) {
             File file = new File(dir, files[i]);
-            PackageParser.Package pkg = scanPackageLI(file, file, file, 
+            File resFile = file;
+            // Pick up the resource path from settings for fwd locked apps
+            if ((scanMode & SCAN_FORWARD_LOCKED) != 0) {
+                resFile = null;
+            }
+            PackageParser.Package pkg = scanPackageLI(file, file, resFile,
                     flags|PackageParser.PARSE_MUST_BE_APK, scanMode);
         }
     }
@@ -1826,6 +1830,11 @@ class PackageManagerService extends IPackageManager.Stub {
             ps = mSettings.peekPackageLP(pkg.packageName);
             updatedPkg = mSettings.mDisabledSysPackages.get(pkg.packageName);
         }
+        // Verify certificates first
+        if (!collectCertificatesLI(pp, ps, pkg, scanFile, parseFlags)) {
+            Log.i(TAG, "Failed verifying certificates for package:" + pkg.packageName);
+            return null;
+        }
         if (updatedPkg != null) {
             // An updated system app will not have the PARSE_IS_SYSTEM flag set initially
             parseFlags |= PackageParser.PARSE_IS_SYSTEM;
@@ -1843,23 +1852,30 @@ class PackageManagerService extends IPackageManager.Stub {
                         return null;
                     } else {
                         // Delete the older apk pointed to by ps
+                        // At this point, its safely assumed that package installation for
+                        // apps in system partition will go through. If not there won't be a working
+                        // version of the app
+                        synchronized (mPackages) {
+                            // Just remove the loaded entries from package lists.
+                            mPackages.remove(ps.name);
+                        }
                         deletePackageResourcesLI(ps.name, ps.codePathString, ps.resourcePathString);
                         mSettings.enableSystemPackageLP(ps.name);
                     }
                 }
             }
         }
-        if (!collectCertificatesLI(pp, ps, pkg, scanFile, parseFlags)) {
-            Log.i(TAG, "Failed verifying certificates for package:" + pkg.packageName);
-            return null;
-        }
         // The apk is forward locked (not public) if its code and resources
         // are kept in different files.
         if (ps != null && !ps.codePath.equals(ps.resourcePath)) {
             scanMode |= SCAN_FORWARD_LOCKED;
         }
+        File resFile = destResourceFile;
+        if ((scanMode & SCAN_FORWARD_LOCKED) != 0) {
+            resFile = getFwdLockedResource(ps.name);
+        }
         // Note that we invoke the following method only if we are about to unpack an application
-        return scanPackageLI(scanFile, destCodeFile, destResourceFile,
+        return scanPackageLI(scanFile, destCodeFile, resFile,
                 pkg, parseFlags, scanMode | SCAN_UPDATE_SIGNATURE);
     }
 
@@ -2132,7 +2148,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.packageName,
                 pkg.applicationInfo.processName,
                 pkg.applicationInfo.uid);
-        pkg.applicationInfo.publicSourceDir = pkgSetting.resourcePathString;
+        pkg.applicationInfo.publicSourceDir = destResourceFile.toString();
 
         File dataPath;
         if (mPlatformPackage == pkg) {
@@ -2259,15 +2275,26 @@ class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_FACTORY_TEST;
         }
 
+        // We don't expect installation to fail beyond this point,
         if ((scanMode&SCAN_MONITOR) != 0) {
             pkg.mPath = destCodeFile.getAbsolutePath();
             mAppDirs.put(pkg.mPath, pkg);
         }
 
+        // Request the ActivityManager to kill the process(only for existing packages)
+        // so that we do not end up in a confused state while the user is still using the older
+        // version of the application while the new one gets installed.
+        IActivityManager am = ActivityManagerNative.getDefault();
+        if ((am != null) && ((parseFlags & PackageManager.INSTALL_REPLACE_EXISTING ) != 0)) {
+            try {
+                am.killApplicationWithUid(pkg.applicationInfo.packageName,
+                        pkg.applicationInfo.uid);
+            } catch (RemoteException e) {
+            }
+        }
         synchronized (mPackages) {
-            // We don't expect installation to fail beyond this point
             // Add the new setting to mSettings
-            mSettings.insertPackageSettingLP(pkgSetting, pkg.packageName, suid);
+            mSettings.insertPackageSettingLP(pkgSetting, pkg, destCodeFile, destResourceFile);
             // Add the new setting to mPackages
             mPackages.put(pkg.applicationInfo.packageName, pkg);
             int N = pkg.providers.size();
@@ -2955,7 +2982,8 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         
         if ((addedPermission || replace) && !ps.permissionsFixed &&
-                (ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) {
+                ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) ||
+                ((ps.pkgFlags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)){
             // This is the first that we have heard about this package, so the
             // permissions we have now selected are fixed until explicitly
             // changed.
@@ -3789,6 +3817,11 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
     
+    private File getFwdLockedResource(String pkgName) {
+        final String publicZipFileName = pkgName + ".zip";
+        return new File(mAppInstallDir, publicZipFileName);
+    }
+
     private PackageInstalledInfo installPackageLI(Uri pPackageURI,
             int pFlags, boolean newInstall, String installerPackageName) {
         File tmpPackageFile = null;
@@ -3868,8 +3901,7 @@ class PackageManagerService extends IPackageManager.Stub {
             final String destFilePath = destPackageFile.getAbsolutePath();
             File destResourceFile;
             if ((pFlags&PackageManager.INSTALL_FORWARD_LOCK) != 0) {
-                final String publicZipFileName = pkgName + ".zip";
-                destResourceFile = new File(mAppInstallDir, publicZipFileName);
+                destResourceFile = getFwdLockedResource(pkgName);
                 forwardLocked = true;
             } else {
                 destResourceFile = destPackageFile;
@@ -4156,7 +4188,9 @@ class PackageManagerService extends IPackageManager.Stub {
     private void removePackageDataLI(PackageParser.Package p, PackageRemovedInfo outInfo, 
             int flags) {
         String packageName = p.packageName;
-        outInfo.removedPackage = packageName;
+        if (outInfo != null) {
+            outInfo.removedPackage = packageName;
+        }
         removePackageLI(p, true);
         // Retrieve object to delete permissions for shared user later on
         PackageSetting deletedPs;
@@ -4178,7 +4212,9 @@ class PackageManagerService extends IPackageManager.Stub {
                 dataDir.delete();
             }
             synchronized (mPackages) {
-                outInfo.removedUid = mSettings.removePackageLP(packageName);                
+                if (outInfo != null) {
+                    outInfo.removedUid = mSettings.removePackageLP(packageName);
+                }
             }
         }
         synchronized (mPackages) {
@@ -4253,7 +4289,7 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         return true;
     }
-    
+
     private void deletePackageResourcesLI(String packageName,
             String sourceDir, String publicSourceDir) {
         File sourceFile = new File(sourceDir);
@@ -4283,7 +4319,9 @@ class PackageManagerService extends IPackageManager.Stub {
             Log.w(TAG, "Package " + p.packageName + " has no applicationInfo.");
             return false;
         }
-        outInfo.uid = applicationInfo.uid;
+        if (outInfo != null) {
+            outInfo.uid = applicationInfo.uid;
+        }
 
         // Delete package data from internal structures and also remove data if flag is set
         removePackageDataLI(p, outInfo, flags);
@@ -4902,26 +4940,40 @@ class PackageManagerService extends IPackageManager.Stub {
                     if (ps.pkg != null) {
                         pw.print("    dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
                         pw.print("    targetSdk="); pw.println(ps.pkg.applicationInfo.targetSdkVersion);
-                        pw.print("    densities="); pw.println(ps.pkg.supportsDensityList);
-                        ArrayList<String> screens = new ArrayList<String>();
+                        pw.print("    supportsScreens=[");
+                        boolean first = true;
                         if ((ps.pkg.applicationInfo.flags & 
                                 ApplicationInfo.FLAG_SUPPORTS_NORMAL_SCREENS) != 0) {
-                            screens.add("medium");
+                            if (!first) pw.print(", ");
+                            first = false;
+                            pw.print("medium");
                         }
                         if ((ps.pkg.applicationInfo.flags & 
                                 ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-                            screens.add("large");
+                            if (!first) pw.print(", ");
+                            first = false;
+                            pw.print("large");
                         }
                         if ((ps.pkg.applicationInfo.flags & 
                                 ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS) != 0) {
-                            screens.add("small,");
+                            if (!first) pw.print(", ");
+                            first = false;
+                            pw.print("small");
                         }
                         if ((ps.pkg.applicationInfo.flags & 
                                 ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
-                            screens.add("resizeable,");
+                            if (!first) pw.print(", ");
+                            first = false;
+                            pw.print("resizeable");
                         }
-                        pw.print("    supportsScreens="); pw.println(screens);
+                        if ((ps.pkg.applicationInfo.flags & 
+                                ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
+                            if (!first) pw.print(", ");
+                            first = false;
+                            pw.print("anyDensity");
+                        }
                     }
+                    pw.println("]");
                     pw.print("    timeStamp="); pw.println(ps.getTimeStampStr());
                     pw.print("    signatures="); pw.println(ps.signatures);
                     pw.print("    permissionsFixed="); pw.print(ps.permissionsFixed);
@@ -5446,7 +5498,7 @@ class PackageManagerService extends IPackageManager.Stub {
         String resourcePathString;
         private long timeStamp;
         private String timeStampString = "0";
-        final int versionCode;
+        int versionCode;
 
         PackageSignatures signatures = new PackageSignatures();
 
@@ -5684,10 +5736,6 @@ class PackageManagerService extends IPackageManager.Stub {
             final String name = pkg.packageName;
             PackageSetting p = getPackageLP(name, sharedUser, codePath,
                     resourcePath, pkg.mVersionCode, pkgFlags, create, add);
-
-            if (p != null) {
-                p.pkg = pkg;
-            }
             return p;
         }
         
@@ -5835,22 +5883,18 @@ class PackageManagerService extends IPackageManager.Stub {
             if (p != null) {
                 if (!p.codePath.equals(codePath)) {
                     // Check to see if its a disabled system app
-                    PackageSetting ps = mDisabledSysPackages.get(name);
-                    if((ps != null) && ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
+                    if((p != null) && ((p.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
                         // This is an updated system app with versions in both system
                         // and data partition. Just let the most recent version
                         // take precedence.
-                        return p;
+                        Log.w(TAG, "Trying to update system app code path from " +
+                                p.codePathString + " to " + codePath.toString());
                     } else {
                         // Let the app continue with previous uid if code path changes.
                         reportSettingsProblem(Log.WARN,
                                 "Package " + name + " codePath changed from " + p.codePath
                                 + " to " + codePath + "; Retaining data and using new code from " +
                                 codePath);
-                        p.codePath = codePath;
-                        p.resourcePath = resourcePath;
-                        p.codePathString = codePath.toString();
-                        p.resourcePathString = resourcePath.toString();
                     }
                 } else if (p.sharedUser != sharedUser) {
                     reportSettingsProblem(Log.WARN,
@@ -5874,8 +5918,29 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (sharedUser != null) {
                     p.userId = sharedUser.userId;
                 } else if (MULTIPLE_APPLICATION_UIDS) {
-                    // Assign new user id
-                    p.userId = newUserIdLP(p);
+                    // Clone the setting here for disabled system packages
+                    PackageSetting dis = mDisabledSysPackages.get(name);
+                    if (dis != null) {
+                        // For disabled packages a new setting is created
+                        // from the existing user id. This still has to be
+                        // added to list of user id's
+                        // Copy signatures from previous setting
+                        if (dis.signatures.mSignatures != null) {
+                            p.signatures.mSignatures = dis.signatures.mSignatures.clone();
+                        }
+                        p.userId = dis.userId;
+                        // Clone permissions
+                        p.grantedPermissions = new HashSet<String>(dis.grantedPermissions);
+                        p.loadedPermissions = new HashSet<String>(dis.loadedPermissions);
+                        // Clone component info
+                        p.disabledComponents = new HashSet<String>(dis.disabledComponents);
+                        p.enabledComponents = new HashSet<String>(dis.enabledComponents);
+                        // Add new setting to list of user ids
+                        addUserIdLP(p.userId, p, name);
+                    } else {
+                        // Assign new user id
+                        p.userId = newUserIdLP(p);
+                    }
                 } else {
                     p.userId = FIRST_APPLICATION_UID;
                 }
@@ -5887,15 +5952,39 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (add) {
                     // Finish adding new package by adding it and updating shared 
                     // user preferences
-                    insertPackageSettingLP(p, name, sharedUser);
+                    addPackageSettingLP(p, name, sharedUser);
                 }
             }
             return p;
         }
-        
+
+        private void insertPackageSettingLP(PackageSetting p, PackageParser.Package pkg,
+                File codePath, File resourcePath) {
+            p.pkg = pkg;
+            // Update code path if needed
+            if (!codePath.toString().equalsIgnoreCase(p.codePathString)) {
+                Log.w(TAG, "Code path for pkg : " + p.pkg.packageName +
+                        " changing form " + p.codePathString + " to " + codePath);
+                p.codePath = codePath;
+                p.codePathString = codePath.toString();
+            }
+            //Update resource path if needed
+            if (!resourcePath.toString().equalsIgnoreCase(p.resourcePathString)) {
+                Log.w(TAG, "Resource path for pkg : " + p.pkg.packageName +
+                        " changing form " + p.resourcePathString + " to " + resourcePath);
+                p.resourcePath = resourcePath;
+                p.resourcePathString = resourcePath.toString();
+            }
+            // Update version code if needed
+             if (pkg.mVersionCode != p.versionCode) {
+                p.versionCode = pkg.mVersionCode;
+            }
+            addPackageSettingLP(p, pkg.packageName, p.sharedUser);
+        }
+
         // Utility method that adds a PackageSetting to mPackages and
         // completes updating the shared user attributes
-        private void insertPackageSettingLP(PackageSetting p, String name,
+        private void addPackageSettingLP(PackageSetting p, String name,
                 SharedUserSetting sharedUser) {
             mPackages.put(name, p);
             if (sharedUser != null) {
@@ -5988,7 +6077,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 if (mUserIds.get(index) != null) {
                     reportSettingsProblem(Log.ERROR,
-                            "Adding duplicate shared id: " + uid
+                            "Adding duplicate user id: " + uid
                             + " name=" + name);
                     return false;
                 }

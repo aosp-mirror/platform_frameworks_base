@@ -5,6 +5,75 @@ page.title=SDK Release Notes
 releases. For the latest known issues, please ensure that you're viewing this
 page at <a href="http://developer.android.com/sdk/RELEASENOTES.html">http://developer.android.com/sdk/RELEASENOTES.html</a>.</p>
 
+<h2 id="1.5_r3">Android 1.5 SDK, Release 3</h2>
+
+<p>Provides an updated Android 1.5 system image that includes permissions
+fixes, as described below, and a new application &mdash; an IME for Japanese 
+text input. Also provides the same set of developer tools included in the 
+previous SDK, but with bug fixes and several new features.</p>
+
+<h3>Permissions Fixes</h3>
+
+<p>The latest version of the Android platform, deployable to 
+Android-powered devices, includes fixes to the permissions-checking
+in certain areas of the framework. Specifically, the Android system
+now properly checks and enforces several existing permissions where it
+did not do so in the previous release. Because of these changes in 
+enforcement, you are strongly encouraged to test your application 
+against the new Android 1.5 system image included in this SDK, to ensure 
+that it functions normally. </p>
+
+<p>In particular, if your application uses any of the system areas listed below,
+you should add the required permissions to the application's manifest and then
+test the areas of your code that depend on the permission-protected services.
+Even if you believe your application does not use the permissions-protected
+services, you should compile and test your application under the latest platform
+version to ensure that users will not encounter problems when using your
+application. </p>
+
+<p>The changes to permissions are as follows:</p>
+
+<ul>
+<li>When an application requests access to device camera (through
+android.hardware.camera), the <code>CAMERA</code> permission check is now
+properly enforced. </li>
+<li>When an application requests access to device audio capture (through
+android.media.MediaRecorder), the <code>RECORD_AUDIO</code> permission check is
+now properly enforced.</li>
+</ul>
+
+<p>For more information, see the issue described in the oCert advisory
+below:</p>
+
+<p style="margin-left: 2em;"><a href="http://www.ocert.org/advisories/ocert-2009-011.html">http://www.ocert.org/advisories/ocert-2009-011.html</a> </p>
+
+<h3>Resolved Issues, Changes</h3>
+
+<ul>
+<li>The SDK includes a new version of the Google APIs add-on. The add-on
+provides an updated com.google.android.maps external library that fixes compile
+errors related to certain classes such as GeoPoint. For information about the
+Google APIs add-on and the library it provides, see:
+
+<p style="margin-left:2em;"><a
+href="http://code.google.com/android/add-ons/google-apis">http://code.google.com/android/add-ons/google-apis</a> </p></li>
+
+<li>The SDK add-on architecture now lets device manufacturers specify a USB
+Vendor ID in their add-ons. 
+<li>The <code>android</code> tool provides a new command that scans SDK add-ons
+for their USB Vendor IDs and makes them available to adb (OS X and Linux
+versions of the SDK only). The command is  <code>android update adb</code>. On
+Windows versions of the SDK, a custom USB driver is included that supports the
+"Google" and "HTC" Vendor IDs, which allow adb to recognize G1 and HTC
+Magic devices. For other devices, contact the device manufacturer 
+to obtain a USB driver, especially if you have an SDK add-on that defines 
+a new USB Vendor ID.</li>
+<li>The telephony, sensor, and geo fix issues in the emulator are now
+fixed.</li>
+<li>When you use adb to uninstall an upgraded application, the Android system
+now properly restores any permissions that had already been granted to the
+previous (downgrade) version of the application</li>
+</ul>
 
 <h2 id="1.5_r2">Android 1.5 SDK, Release 2</h2>
 

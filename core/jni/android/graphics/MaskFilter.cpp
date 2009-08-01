@@ -4,15 +4,23 @@
 
 #include <jni.h>
 
+static void ThrowIAE_IfNull(JNIEnv* env, void* ptr) {
+    if (NULL == ptr) {
+        doThrowIAE(env);
+    }
+}
+
 class SkMaskFilterGlue {
 public:
     static void destructor(JNIEnv* env, jobject, SkMaskFilter* filter) {
-        SkASSERT(filter);
-        filter->unref();
+        filter->safeUnref();
     }
 
     static SkMaskFilter* createBlur(JNIEnv* env, jobject, float radius, int blurStyle) {
-        return SkBlurMaskFilter::Create(SkFloatToScalar(radius), (SkBlurMaskFilter::BlurStyle)blurStyle);
+        SkMaskFilter* filter = SkBlurMaskFilter::Create(SkFloatToScalar(radius),
+                                        (SkBlurMaskFilter::BlurStyle)blurStyle);
+        ThrowIAE_IfNull(env, filter);
+        return filter;
     }
  
     static SkMaskFilter* createEmboss(JNIEnv* env, jobject, jfloatArray dirArray, float ambient, float specular, float radius) {
@@ -24,8 +32,12 @@ public:
             direction[i] = SkFloatToScalar(values[i]);
         }
 
-        return SkBlurMaskFilter::CreateEmboss(direction, SkFloatToScalar(ambient),
-                                              SkFloatToScalar(specular), SkFloatToScalar(radius));
+        SkMaskFilter* filter =  SkBlurMaskFilter::CreateEmboss(direction,
+                                                      SkFloatToScalar(ambient),
+                                                      SkFloatToScalar(specular),
+                                                      SkFloatToScalar(radius));
+        ThrowIAE_IfNull(env, filter);
+        return filter;
     }
 };
 

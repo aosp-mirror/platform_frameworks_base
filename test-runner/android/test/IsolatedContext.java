@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 
 import java.util.List;
+import java.io.File;
 
 /**
      * A mock context which prevents its users from talking to the rest of the device while
@@ -82,4 +83,8 @@ public class IsolatedContext extends ContextWrapper {
         return null;
     }
 
+    @Override
+    public File getFilesDir() {
+        return new File("/dev/null");
+    }
 }

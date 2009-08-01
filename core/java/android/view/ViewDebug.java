@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.util.Config;
 import android.util.Log;
 import android.util.DisplayMetrics;
 import android.content.res.Resources;
@@ -140,7 +141,9 @@ public class ViewDebug {
     public static boolean consistencyCheckEnabled = false;
 
     static {
-        Debug.setFieldsOn(ViewDebug.class, true);
+        if (Config.DEBUG) {        
+	        Debug.setFieldsOn(ViewDebug.class, true);
+	    }
     }
 
     /**

@@ -1683,53 +1683,7 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_REBOOT =
             "android.intent.action.REBOOT";
-    /**
-     * Broadcast Action: Triggers the platform Text-To-Speech engine to
-     * start the activity that installs the resource files on the device
-     * that are required for TTS to be operational. Since the installation
-     * of the data can be interrupted or declined by the user, the application
-     * shouldn't expect successful installation upon return from that intent,
-     * and if need be, should check installation status with 
-     * {@link #ACTION_TTS_CHECK_TTS_DATA}.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_TTS_INSTALL_TTS_DATA =
-            "android.intent.action.INSTALL_TTS_DATA";
 
-    /**
-     * Broadcast Action: Starts the activity from the platform Text-To-Speech
-     * engine to verify the proper installation and availability of the
-     * resource files on the system. Upon completion, the activity will
-     * return one of the following codes: 
-     * {@link android.speech.tts.TextToSpeech.Engine#CHECK_VOICE_DATA_PASS},
-     * {@link android.speech.tts.TextToSpeech.Engine#CHECK_VOICE_DATA_FAIL},
-     * {@link android.speech.tts.TextToSpeech.Engine#CHECK_VOICE_DATA_BAD_DATA},
-     * {@link android.speech.tts.TextToSpeech.Engine#CHECK_VOICE_DATA_MISSING_DATA}, or
-     * {@link android.speech.tts.TextToSpeech.Engine#CHECK_VOICE_DATA_MISSING_VOLUME}.
-     * <p> Moreover, the data received in the activity result will contain the following
-     * fields:
-     * <ul>
-     *   <li>{@link android.speech.tts.TextToSpeech.Engine#VOICE_DATA_ROOT_DIRECTORY} which
-     *       indicates the path to the location of the resource files</li>,
-     *   <li>{@link android.speech.tts.TextToSpeech.Engine#VOICE_DATA_FILES} which contains
-     *       the list of all the resource files</li>,
-     *   <li>and {@link android.speech.tts.TextToSpeech.Engine#VOICE_DATA_FILES_INFO} which
-     *       contains, for each resource file, the description of the language covered by
-     *       the file in the xxx-YYY format, where xxx is the 3-letter ISO language code,
-     *       and YYY is the 3-letter ISO country code.</li>
-     * </ul>
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_TTS_CHECK_TTS_DATA =
-            "android.intent.action.CHECK_TTS_DATA";
-
-    /**
-     * Broadcast Action: The TextToSpeech synthesizer has completed processing 
-     * all of the text in the speech queue.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_TTS_QUEUE_PROCESSING_COMPLETED =
-            "android.intent.action.TTS_QUEUE_PROCESSING_COMPLETED";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -2390,7 +2344,7 @@ public class Intent implements Parcelable {
     /**
      * Create an intent from a URI.  This URI may encode the action,
      * category, and other intent fields, if it was returned by
-     * {@link #toUri}..  If the Intent was not generate by toUri(), its data
+     * {@link #toUri}.  If the Intent was not generate by toUri(), its data
      * will be the entire URI and its action will be ACTION_VIEW.
      *
      * <p>The URI given here must not be relative -- that is, it must include

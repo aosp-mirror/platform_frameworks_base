@@ -131,41 +131,15 @@ public class CompatibilityInfo {
             mCompatibilityFlags |= EXPANDABLE | CONFIGURED_EXPANDABLE;
         }
         
-        float packageDensityScale = -1.0f;
-        int packageDensity = 0;
-        if (appInfo.supportsDensities != null) {
-            int minDiff = Integer.MAX_VALUE;
-            for (int density : appInfo.supportsDensities) {
-                if (density == ApplicationInfo.ANY_DENSITY) {
-                    packageDensity = DisplayMetrics.DENSITY_DEVICE;
-                    packageDensityScale = 1.0f;
-                    break;
-                }
-                int tmpDiff = Math.abs(DisplayMetrics.DENSITY_DEVICE - density);
-                if (tmpDiff == 0) {
-                    packageDensity = DisplayMetrics.DENSITY_DEVICE;
-                    packageDensityScale = 1.0f;
-                    break;
-                }
-                // prefer higher density (appScale>1.0), unless that's only option.
-                if (tmpDiff < minDiff && packageDensityScale < 1.0f) {
-                    packageDensity = density;
-                    packageDensityScale = DisplayMetrics.DENSITY_DEVICE / (float) density;
-                    minDiff = tmpDiff;
-                }
-            }
-        }
-        if (packageDensityScale > 0.0f) {
-            applicationDensity = packageDensity;
-            applicationScale = packageDensityScale;
+        if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
+            applicationDensity = DisplayMetrics.DENSITY_DEVICE;
+            applicationScale = 1.0f;
+            applicationInvertedScale = 1.0f;
         } else {
             applicationDensity = DisplayMetrics.DENSITY_DEFAULT;
-            applicationScale =
-                    DisplayMetrics.DENSITY_DEVICE / (float) DisplayMetrics.DENSITY_DEFAULT;
-        }
-
-        applicationInvertedScale = 1.0f / applicationScale;
-        if (applicationScale != 1.0f) {
+            applicationScale = DisplayMetrics.DENSITY_DEVICE
+                    / (float) DisplayMetrics.DENSITY_DEFAULT;
+            applicationInvertedScale = 1.0f / applicationScale;
             mCompatibilityFlags |= SCALING_REQUIRED;
         }
     }
@@ -254,20 +228,11 @@ public class CompatibilityInfo {
     }
 
     /**
-     * Returns the translator which can translate the coordinates of the window.
-     * There are five different types of Translator.
+     * Returns the translator which translates the coordinates in compatibility mode.
      * @param params the window's parameter
      */
-    public Translator getTranslator(WindowManager.LayoutParams params) {
-        if ( (mCompatibilityFlags & SCALING_EXPANDABLE_MASK)
-                == (EXPANDABLE|LARGE_SCREENS)) {
-            if (DBG) Log.d(TAG, "no translation required");
-            return null;
-        }
-        if (!isScalingRequired()) {
-            return null;
-        }
-        return new Translator();
+    public Translator getTranslator() {
+        return isScalingRequired() ? new Translator() : null;
     }
 
     /**

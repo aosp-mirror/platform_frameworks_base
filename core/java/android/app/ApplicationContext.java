@@ -541,7 +541,10 @@ class ApplicationContext extends Context {
             if (fd != null) {
                 Bitmap bm = BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor());
                 if (bm != null) {
-                    return new BitmapDrawable(bm);
+                    // For now clear the density until we figure out how
+                    // to deal with it for wallpapers.
+                    bm.setDensity(0);
+                    return new BitmapDrawable(getResources(), bm);
                 }
             }
         } catch (RemoteException e) {
@@ -1949,6 +1952,15 @@ class ApplicationContext extends Context {
             try {
                 Resources r = getResourcesForApplication(appInfo);
                 dr = r.getDrawable(resid);
+                if (false) {
+                    RuntimeException e = new RuntimeException("here");
+                    e.fillInStackTrace();
+                    Log.w(TAG, "Getting drawable 0x" + Integer.toHexString(resid)
+                            + " from package " + packageName
+                            + ": app scale=" + r.getCompatibilityInfo().applicationScale
+                            + ", caller scale=" + mContext.getResources().getCompatibilityInfo().applicationScale,
+                            e);
+                }
                 if (DEBUG_ICONS) Log.v(TAG, "Getting drawable 0x"
                         + Integer.toHexString(resid) + " from " + r
                         + ": " + dr);
@@ -2036,10 +2048,9 @@ class ApplicationContext extends Context {
             if (app.packageName.equals("system")) {
                 return mContext.mMainThread.getSystemContext().getResources();
             }
-            ActivityThread.PackageInfo pi = mContext.mMainThread.getPackageInfoNoCheck(app);
             Resources r = mContext.mMainThread.getTopLevelResources(
                     app.uid == Process.myUid() ? app.sourceDir
-                    : app.publicSourceDir, pi);
+                    : app.publicSourceDir, mContext.mPackageInfo);
             if (r != null) {
                 return r;
             }

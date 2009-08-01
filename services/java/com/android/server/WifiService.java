@@ -1075,6 +1075,17 @@ public class WifiService extends IWifiManager.Stub {
                 break setVariables;
             }
 
+            if ((config.phase2 != null) && !WifiNative.setNetworkVariableCommand(
+                    netId,
+                    WifiConfiguration.phase2VarName,
+                    config.phase2)) {
+                if (DBG) {
+                    Log.d(TAG, config.SSID + ": failed to set phase2: "+
+                          config.phase2);
+                }
+                break setVariables;
+            }
+
             if ((config.identity != null) && !WifiNative.setNetworkVariableCommand(
                     netId,
                     WifiConfiguration.identityVarName,
