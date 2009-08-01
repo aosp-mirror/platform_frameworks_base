@@ -21,6 +21,7 @@ import java.io.Writer;
 import android.renderscript.RenderScript;
 import android.renderscript.ProgramVertexAlloc;
 import android.renderscript.Element;
+import android.renderscript.Allocation;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -100,20 +101,20 @@ public class RolloRS {
     private ProgramVertexAlloc mPVAlloc;
     private RenderScript.ProgramVertex mPVOrtho;
     private ProgramVertexAlloc mPVOrthoAlloc;
-    private RenderScript.Allocation[] mIcons;
-    private RenderScript.Allocation[] mLabels;
+    private Allocation[] mIcons;
+    private Allocation[] mLabels;
 
     private int[] mAllocStateBuf;
-    private RenderScript.Allocation mAllocState;
+    private Allocation mAllocState;
 
     private int[] mAllocIconIDBuf;
-    private RenderScript.Allocation mAllocIconID;
+    private Allocation mAllocIconID;
 
     private int[] mAllocLabelIDBuf;
-    private RenderScript.Allocation mAllocLabelID;
+    private Allocation mAllocLabelID;
 
     private int[] mAllocScratchBuf;
-    private RenderScript.Allocation mAllocScratch;
+    private Allocation mAllocScratch;
 
     private void initNamed() {
         mRS.samplerBegin();
@@ -190,7 +191,7 @@ public class RolloRS {
         mRS.contextBindProgramVertex(mPV);
 
         mAllocScratchBuf = new int[32];
-        mAllocScratch = mRS.allocationCreateSized(
+        mAllocScratch = Allocation.createSized(mRS,
             Element.USER_I32, mAllocScratchBuf.length);
         mAllocScratch.data(mAllocScratchBuf);
 
@@ -199,37 +200,37 @@ public class RolloRS {
 
 
         {
-            mIcons = new RenderScript.Allocation[29];
+            mIcons = new Allocation[29];
             mAllocIconIDBuf = new int[mIcons.length];
-            mAllocIconID = mRS.allocationCreateSized(
+            mAllocIconID = Allocation.createSized(mRS,
                 Element.USER_I32, mAllocIconIDBuf.length);
 
-            mLabels = new RenderScript.Allocation[29];
+            mLabels = new Allocation[29];
             mAllocLabelIDBuf = new int[mLabels.length];
-            mAllocLabelID = mRS.allocationCreateSized(
+            mAllocLabelID = Allocation.createSized(mRS,
                 Element.USER_I32, mLabels.length);
 
             Element ie8888 = Element.RGBA_8888;
 
-            mIcons[0] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.browser, ie8888, true);
-            mIcons[1] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.market, ie8888, true);
-            mIcons[2] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.photos, ie8888, true);
-            mIcons[3] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.settings, ie8888, true);
-            mIcons[4] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.calendar, ie8888, true);
-            mIcons[5] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.g1155, ie8888, true);
-            mIcons[6] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.g2140, ie8888, true);
-            mIcons[7] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.maps, ie8888, true);
-            mIcons[8] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.path431, ie8888, true);
-            mIcons[9] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.path676, ie8888, true);
-            mIcons[10] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.path754, ie8888, true);
-            mIcons[11] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.path815, ie8888, true);
-            mIcons[12] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.path1920, ie8888, true);
-            mIcons[13] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.path1927, ie8888, true);
-            mIcons[14] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.path3099, ie8888, true);
-            mIcons[15] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.path3950, ie8888, true);
-            mIcons[16] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.path4481, ie8888, true);
-            mIcons[17] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.path5168, ie8888, true);
-            mIcons[18] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.polygon2408, ie8888, true);
+            mIcons[0] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.browser, ie8888, true);
+            mIcons[1] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.market, ie8888, true);
+            mIcons[2] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.photos, ie8888, true);
+            mIcons[3] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.settings, ie8888, true);
+            mIcons[4] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.calendar, ie8888, true);
+            mIcons[5] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.g1155, ie8888, true);
+            mIcons[6] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.g2140, ie8888, true);
+            mIcons[7] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.maps, ie8888, true);
+            mIcons[8] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.path431, ie8888, true);
+            mIcons[9] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.path676, ie8888, true);
+            mIcons[10] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.path754, ie8888, true);
+            mIcons[11] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.path815, ie8888, true);
+            mIcons[12] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.path1920, ie8888, true);
+            mIcons[13] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.path1927, ie8888, true);
+            mIcons[14] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.path3099, ie8888, true);
+            mIcons[15] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.path3950, ie8888, true);
+            mIcons[16] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.path4481, ie8888, true);
+            mIcons[17] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.path5168, ie8888, true);
+            mIcons[18] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.polygon2408, ie8888, true);
 
             mLabels[0] = makeTextBitmap("browser");
             mLabels[1] = makeTextBitmap("market");
@@ -274,16 +275,16 @@ public class RolloRS {
             mLabels[28] = mLabels[9];
 
 /*
-            mIcons[19] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.solitaire, ie8888, true);
-            mIcons[20] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.sudoku, ie8888, true);
-            mIcons[21] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.taptaprevenge, ie8888, true);
-            mIcons[22] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.tetris, ie8888, true);
-            mIcons[23] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.tictactoe, ie8888, true);
-            mIcons[24] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.tweetie, ie8888, true);
-            mIcons[25] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.urbanspoon, ie8888, true);
-            mIcons[26] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.waterslide_extreme, ie8888, true);
-            mIcons[27] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.weather_channel, ie8888, true);
-            mIcons[28] = mRS.allocationCreateFromBitmapResource(mRes, R.raw.zippo, ie8888, true);
+            mIcons[19] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.solitaire, ie8888, true);
+            mIcons[20] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.sudoku, ie8888, true);
+            mIcons[21] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.taptaprevenge, ie8888, true);
+            mIcons[22] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.tetris, ie8888, true);
+            mIcons[23] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.tictactoe, ie8888, true);
+            mIcons[24] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.tweetie, ie8888, true);
+            mIcons[25] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.urbanspoon, ie8888, true);
+            mIcons[26] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.waterslide_extreme, ie8888, true);
+            mIcons[27] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.weather_channel, ie8888, true);
+            mIcons[28] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.zippo, ie8888, true);
 */
 
 
@@ -299,7 +300,7 @@ public class RolloRS {
 
     }
 
-    RenderScript.Allocation makeTextBitmap(String t) {
+    Allocation makeTextBitmap(String t) {
         Bitmap b = Bitmap.createBitmap(128, 32, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(b);
         Paint p = new Paint();
@@ -307,7 +308,7 @@ public class RolloRS {
         p.setTextSize(20);
         p.setColor(0xffffffff);
         c.drawText(t, 2, 26, p);
-        return mRS.allocationCreateFromBitmap(b, Element.RGBA_8888, true);
+        return Allocation.createFromBitmap(mRS, b, Element.RGBA_8888, true);
     }
 
 
@@ -320,7 +321,7 @@ public class RolloRS {
         mScript = mRS.scriptCCreate();
 
         mAllocStateBuf = new int[] {0, 0, 0, 8, 0, 0, -1, 0, mAllocIconIDBuf.length, 0, 0};
-        mAllocState = mRS.allocationCreateSized(
+        mAllocState = Allocation.createSized(mRS,
             Element.USER_I32, mAllocStateBuf.length);
         mScript.bindAllocation(mAllocState, 0);
         mScript.bindAllocation(mAllocIconID, 1);

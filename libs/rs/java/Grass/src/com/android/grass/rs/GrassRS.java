@@ -26,6 +26,7 @@ import static android.renderscript.RenderScript.BlendDstFunc;
 
 import android.renderscript.RenderScript;
 import android.renderscript.Element;
+import android.renderscript.Allocation;
 
 import java.util.TimeZone;
 
@@ -47,13 +48,13 @@ class GrassRS {
     private RenderScript.ProgramFragmentStore mPfsBackground;
 
     @SuppressWarnings({"FieldCanBeLocal"})
-    private RenderScript.Allocation mSkyTexturesIDs;
+    private Allocation mSkyTexturesIDs;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private RenderScript.Allocation[] mSkyTextures;
+    private Allocation[] mSkyTextures;
     @SuppressWarnings({"FieldCanBeLocal"})
     private int[] mSkyBufferIDs;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private RenderScript.Allocation mState;
+    private Allocation mState;
 
     public GrassRS() {
     }
@@ -69,7 +70,7 @@ class GrassRS {
         createProgramFragmentStore();
         createProgramFragment();
         createScriptStructures();
-        
+
         mRS.scriptCBegin();
         mRS.scriptCSetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         mRS.scriptCSetScript(mResources, R.raw.grass);
@@ -78,25 +79,25 @@ class GrassRS {
 
         mScript = mRS.scriptCCreate();
 
-        loadSkyTextures();        
+        loadSkyTextures();
         mScript.bindAllocation(mState, RSID_STATE);
         mScript.bindAllocation(mSkyTexturesIDs, RSID_SKY_TEXTURES);
 
-        mRS.contextBindRootScript(mScript);        
+        mRS.contextBindRootScript(mScript);
     }
 
     private void createScriptStructures() {
-        mState = mRS.allocationCreateSized(Element.USER_I32, 1);    
+        mState = Allocation.createSized(mRS, Element.USER_I32, 1);
         mState.data(new int[1]);
     }
 
     private void loadSkyTextures() {
         mSkyBufferIDs = new int[SKY_TEXTURES_COUNT];
-        mSkyTextures = new RenderScript.Allocation[SKY_TEXTURES_COUNT];
-        mSkyTexturesIDs = mRS.allocationCreateSized(
-                Element.USER_FLOAT, SKY_TEXTURES_COUNT);
+        mSkyTextures = new Allocation[SKY_TEXTURES_COUNT];
+        mSkyTexturesIDs = Allocation.createSized(
+                mRS, Element.USER_FLOAT, SKY_TEXTURES_COUNT);
 
-        final RenderScript.Allocation[] textures = mSkyTextures;
+        final Allocation[] textures = mSkyTextures;
         textures[0] = loadTexture(R.drawable.night, "night");
         textures[1] = loadTexture(R.drawable.sunrise, "sunrise");
         textures[2] = loadTexture(R.drawable.sky, "sky");
@@ -106,7 +107,7 @@ class GrassRS {
         final int count = textures.length;
 
         for (int i = 0; i < count; i++) {
-            final RenderScript.Allocation texture = textures[i];
+            final Allocation texture = textures[i];
             texture.uploadToTexture(0);
             bufferIds[i] = texture.getID();
         }
@@ -114,8 +115,8 @@ class GrassRS {
         mSkyTexturesIDs.data(bufferIds);
     }
 
-    private RenderScript.Allocation loadTexture(int id, String name) {
-        RenderScript.Allocation allocation = mRS.allocationCreateFromBitmapResource(mResources, id,
+    private Allocation loadTexture(int id, String name) {
+        Allocation allocation = Allocation.createFromBitmapResource(mRS, mResources, id,
                 Element.RGB_565, false);
         allocation.setName(name);
         return allocation;

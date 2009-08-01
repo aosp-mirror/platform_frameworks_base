@@ -27,6 +27,7 @@ import android.renderscript.Matrix;
 import android.renderscript.ProgramVertexAlloc;
 import android.renderscript.RenderScript;
 import android.renderscript.Element;
+import android.renderscript.Allocation;
 
 public class FilmRS {
     private final int POS_TRANSLATE = 0;
@@ -77,13 +78,13 @@ public class FilmRS {
     private RenderScript.ProgramVertex mPVImages;
     private ProgramVertexAlloc mPVA;
 
-    private RenderScript.Allocation mImages[];
-    private RenderScript.Allocation mAllocIDs;
-    private RenderScript.Allocation mAllocPos;
-    private RenderScript.Allocation mAllocState;
-    private RenderScript.Allocation mAllocPV;
-    private RenderScript.Allocation mAllocOffsetsTex;
-    private RenderScript.Allocation mAllocOffsets;
+    private Allocation mImages[];
+    private Allocation mAllocIDs;
+    private Allocation mAllocPos;
+    private Allocation mAllocState;
+    private Allocation mAllocPV;
+    private Allocation mAllocOffsetsTex;
+    private Allocation mAllocOffsets;
 
     private RenderScript.TriangleMesh mMesh;
     private RenderScript.Light mLight;
@@ -155,24 +156,24 @@ public class FilmRS {
 
     private void loadImages() {
         mBufferIDs = new int[13];
-        mImages = new RenderScript.Allocation[13];
-        mAllocIDs = mRS.allocationCreateSized(
+        mImages = new Allocation[13];
+        mAllocIDs = Allocation.createSized(mRS,
             Element.USER_FLOAT, mBufferIDs.length);
 
         Element ie = Element.RGB_565;
-        mImages[0] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p01, ie, true);
-        mImages[1] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p02, ie, true);
-        mImages[2] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p03, ie, true);
-        mImages[3] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p04, ie, true);
-        mImages[4] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p05, ie, true);
-        mImages[5] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p06, ie, true);
-        mImages[6] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p07, ie, true);
-        mImages[7] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p08, ie, true);
-        mImages[8] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p09, ie, true);
-        mImages[9] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p10, ie, true);
-        mImages[10] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p11, ie, true);
-        mImages[11] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p12, ie, true);
-        mImages[12] = mRS.allocationCreateFromBitmapResourceBoxed(mRes, R.drawable.p13, ie, true);
+        mImages[0] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p01, ie, true);
+        mImages[1] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p02, ie, true);
+        mImages[2] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p03, ie, true);
+        mImages[3] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p04, ie, true);
+        mImages[4] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p05, ie, true);
+        mImages[5] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p06, ie, true);
+        mImages[6] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p07, ie, true);
+        mImages[7] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p08, ie, true);
+        mImages[8] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p09, ie, true);
+        mImages[9] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p10, ie, true);
+        mImages[10] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p11, ie, true);
+        mImages[11] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p12, ie, true);
+        mImages[12] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p13, ie, true);
 
         for(int ct=0; ct < mImages.length; ct++) {
             mImages[ct].uploadToTexture(1);
@@ -184,7 +185,7 @@ public class FilmRS {
     private void initState()
     {
         mBufferState = new int[10];
-        mAllocState = mRS.allocationCreateSized(
+        mAllocState = Allocation.createSized(mRS,
             Element.USER_FLOAT, mBufferState.length);
 
         mBufferState[STATE_TRIANGLE_OFFSET_COUNT] = mFSM.mTriangleOffsetsCount;
@@ -215,7 +216,7 @@ public class FilmRS {
         mRS.scriptCSetRoot(true);
         mScriptStrip = mRS.scriptCCreate();
 
-        mAllocPos = mRS.allocationCreateSized(
+        mAllocPos = Allocation.createSized(mRS,
             Element.USER_FLOAT, mBufferPos.length);
 
         loadImages();
@@ -233,12 +234,12 @@ public class FilmRS {
         mScriptStrip.bindAllocation(mPVA.mAlloc, 3);
 
 
-        mAllocOffsets = mRS.allocationCreateSized(
+        mAllocOffsets = Allocation.createSized(mRS,
             Element.USER_I32, mFSM.mTriangleOffsets.length);
         mAllocOffsets.data(mFSM.mTriangleOffsets);
         mScriptStrip.bindAllocation(mAllocOffsets, 4);
 
-        mAllocOffsetsTex = mRS.allocationCreateSized(
+        mAllocOffsetsTex = Allocation.createSized(mRS,
             Element.USER_FLOAT, mFSM.mTriangleOffsetsTex.length);
         mAllocOffsetsTex.data(mFSM.mTriangleOffsetsTex);
         mScriptStrip.bindAllocation(mAllocOffsetsTex, 5);

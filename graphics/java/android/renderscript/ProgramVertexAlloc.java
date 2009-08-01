@@ -17,6 +17,8 @@
 package android.renderscript;
 
 import java.lang.Math;
+
+import android.renderscript.Element;
 import android.util.Log;
 
 
@@ -33,14 +35,14 @@ public class ProgramVertexAlloc {
     Matrix mProjection;
     Matrix mTexture;
 
-    public RenderScript.Allocation mAlloc;
+    public Allocation mAlloc;
 
     public ProgramVertexAlloc(RenderScript rs) {
         mModel = new Matrix();
         mProjection = new Matrix();
         mTexture = new Matrix();
 
-        mAlloc = rs.allocationCreateSized(Element.USER_FLOAT, 48);
+        mAlloc = Allocation.createSized(rs, Element.USER_FLOAT, 48);
         mAlloc.subData1D(MODELVIEW_OFFSET, 16, mModel.mMat);
         mAlloc.subData1D(PROJECTION_OFFSET, 16, mProjection.mMat);
         mAlloc.subData1D(TEXTURE_OFFSET, 16, mTexture.mMat);
