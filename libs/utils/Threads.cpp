@@ -296,6 +296,19 @@ Mutex::Mutex(const char* name)
     // XXX: name not used for now
     HANDLE hMutex;
 
+    assert(sizeof(hMutex) == sizeof(mState));
+
+    hMutex = CreateMutex(NULL, FALSE, NULL);
+    mState = (void*) hMutex;
+}
+
+Mutex::Mutex(int type, const char* name)
+{
+    // XXX: type and name not used for now
+    HANDLE hMutex;
+
+    assert(sizeof(hMutex) == sizeof(mState));
+
     hMutex = CreateMutex(NULL, FALSE, NULL);
     mState = (void*) hMutex;
 }
@@ -486,7 +499,11 @@ status_t Condition::wait(Mutex& mutex)
 
 status_t Condition::waitRelative(Mutex& mutex, nsecs_t reltime)
 {
-    return wait(mutex, systemTime()+reltime);
+    WinCondition* condState = (WinCondition*) mState;
+    HANDLE hMutex = (HANDLE) mutex.mState;
+    nsecs_t absTime = systemTime()+reltime;
+
+    return ((WinCondition*)mState)->wait(condState, hMutex, &absTime);
 }
 
 /*
