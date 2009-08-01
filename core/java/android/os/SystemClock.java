@@ -30,7 +30,13 @@ package android.os;
  *     backwards or forwards unpredictably.  This clock should only be used
  *     when correspondence with real-world dates and times is important, such
  *     as in a calendar or alarm clock application.  Interval or elapsed
- *     time measurements should use a different clock.
+ *     time measurements should use a different clock.  If you are using
+ *     System.currentTimeMillis(), consider listening to the
+ *     {@link android.content.Intent#ACTION_TIME_TICK ACTION_TIME_TICK},
+ *     {@link android.content.Intent#ACTION_TIME_CHANGED ACTION_TIME_CHANGED}
+ *     and {@link android.content.Intent#ACTION_TIMEZONE_CHANGED
+ *     ACTION_TIMEZONE_CHANGED} {@link android.content.Intent Intent}
+ *     broadcasts to find out when the time changes.
  *
  *     <li> <p> {@link #uptimeMillis} is counted in milliseconds since the
  *     system was booted.  This clock stops when the system enters deep
