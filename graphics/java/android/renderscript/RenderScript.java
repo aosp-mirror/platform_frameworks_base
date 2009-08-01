@@ -20,14 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import android.content.res.Resources;
-import android.os.Bundle;
+import android.graphics.Bitmap;
 import android.util.Config;
 import android.util.Log;
 import android.view.Surface;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 
 
 /**
@@ -48,7 +44,6 @@ public class RenderScript {
     private static boolean sInitialized;
     native private static void _nInit();
 
-    private static BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
 
     static {
         sInitialized = false;
@@ -59,7 +54,6 @@ public class RenderScript {
         } catch (UnsatisfiedLinkError e) {
             Log.d(LOG_TAG, "RenderScript JNI library not found!");
         }
-        mBitmapOptions.inScaled = false;
     }
 
     native int  nDeviceCreate();
@@ -206,6 +200,11 @@ public class RenderScript {
         return mElementBuilder;
     }
 
+    Type.Builder mTypeBuilder = new Type.Builder(this);
+    public Type.Builder typeBuilderCreate(Element e) throws IllegalStateException {
+        mTypeBuilder.begin(e);
+        return mTypeBuilder;
+    }
 
 
 
@@ -293,187 +292,6 @@ public class RenderScript {
             mID = id;
         }
     }
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // Type
-
-    public enum Dimension {
-        X (0),
-        Y (1),
-        Z (2),
-        LOD (3),
-        FACE (4),
-        ARRAY_0 (100);
-
-        int mID;
-        Dimension(int id) {
-            mID = id;
-        }
-    }
-
-    public class Type extends BaseObj {
-        Type(int id) {
-            super(RenderScript.this);
-            mID = id;
-        }
-
-        public void destroy() {
-            nTypeDestroy(mID);
-            mID = 0;
-        }
-    }
-
-    public void typeBegin(Element e) {
-        nTypeBegin(e.mID);
-    }
-
-    public void typeAdd(Dimension d, int value) {
-        nTypeAdd(d.mID, value);
-    }
-
-    public Type typeCreate() {
-        int id = nTypeCreate();
-        return new Type(id);
-    }
-
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // Allocation
-
-    public class Allocation extends BaseObj {
-        Allocation(int id) {
-            super(RenderScript.this);
-            mID = id;
-        }
-
-        public void uploadToTexture(int baseMipLevel) {
-            nAllocationUploadToTexture(mID, baseMipLevel);
-        }
-
-        public void destroy() {
-            nAllocationDestroy(mID);
-            mID = 0;
-        }
-
-        public void data(int[] d) {
-            nAllocationData(mID, d);
-        }
-
-        public void data(float[] d) {
-            nAllocationData(mID, d);
-        }
-
-        public void subData1D(int off, int count, int[] d) {
-            nAllocationSubData1D(mID, off, count, d);
-        }
-
-        public void subData1D(int off, int count, float[] d) {
-            nAllocationSubData1D(mID, off, count, d);
-        }
-
-        public void subData2D(int xoff, int yoff, int w, int h, int[] d) {
-            nAllocationSubData2D(mID, xoff, yoff, w, h, d);
-        }
-
-        public void subData2D(int xoff, int yoff, int w, int h, float[] d) {
-            nAllocationSubData2D(mID, xoff, yoff, w, h, d);
-        }
-    }
-
-    public Allocation allocationCreateTyped(Type type) {
-        int id = nAllocationCreateTyped(type.mID);
-        return new Allocation(id);
-    }
-
-    public Allocation allocationCreateSized(Element e, int count) {
-        int id;
-        if(e.mIsPredefined) {
-            id = nAllocationCreatePredefSized(e.mPredefinedID, count);
-        } else {
-            id = nAllocationCreateSized(e.mID, count);
-        }
-        return new Allocation(id);
-    }
-
-    public Allocation allocationCreateFromBitmap(Bitmap b, Element dstFmt, boolean genMips)
-        throws IllegalArgumentException {
-        if(!dstFmt.mIsPredefined) {
-            throw new IllegalStateException("Attempting to allocate a bitmap with a non-static element.");
-        }
-
-        int id = nAllocationCreateFromBitmap(dstFmt.mPredefinedID, genMips, b);
-        return new Allocation(id);
-    }
-
-    public Allocation allocationCreateFromBitmapBoxed(Bitmap b, Element dstFmt, boolean genMips)
-        throws IllegalArgumentException {
-        if(!dstFmt.mIsPredefined) {
-            throw new IllegalStateException("Attempting to allocate a bitmap with a non-static element.");
-        }
-
-        int id = nAllocationCreateFromBitmapBoxed(dstFmt.mPredefinedID, genMips, b);
-        return new Allocation(id);
-    }
-
-    public Allocation allocationCreateFromBitmapResource(Resources res, int id, Element dstFmt, boolean genMips)
-        throws IllegalArgumentException {
-
-        Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
-        return allocationCreateFromBitmap(b, dstFmt, genMips);
-    }
-
-    public Allocation allocationCreateFromBitmapResourceBoxed(Resources res, int id, Element dstFmt, boolean genMips)
-        throws IllegalArgumentException {
-
-        Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
-        return allocationCreateFromBitmapBoxed(b, dstFmt, genMips);
-    }
-
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // Adapter1D
-
-    public class Adapter1D extends BaseObj {
-        Adapter1D(int id) {
-            super(RenderScript.this);
-            mID = id;
-        }
-
-        public void destroy() {
-            nAdapter1DDestroy(mID);
-            mID = 0;
-        }
-
-        public void bindAllocation(Allocation a) {
-            nAdapter1DBindAllocation(mID, a.mID);
-        }
-
-        public void setConstraint(Dimension dim, int value) {
-            nAdapter1DSetConstraint(mID, dim.mID, value);
-        }
-
-        public void data(int[] d) {
-            nAdapter1DData(mID, d);
-        }
-
-        public void subData(int off, int count, int[] d) {
-            nAdapter1DSubData(mID, off, count, d);
-        }
-
-        public void data(float[] d) {
-            nAdapter1DData(mID, d);
-        }
-
-        public void subData(int off, int count, float[] d) {
-            nAdapter1DSubData(mID, off, count, d);
-        }
-    }
-
-    public Adapter1D adapter1DCreate() {
-        int id = nAdapter1DCreate();
-        return new Adapter1D(id);
-    }
-
 
     //////////////////////////////////////////////////////////////////////////////////
     // Triangle Mesh
