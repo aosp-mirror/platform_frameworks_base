@@ -2394,6 +2394,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param id The id of the managed dialog.
      *
+     * @see Dialog
      * @see #onCreateDialog(int)
      * @see #onPrepareDialog(int, Dialog)
      * @see #dismissDialog(int)
