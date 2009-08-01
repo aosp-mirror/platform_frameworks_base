@@ -67,10 +67,6 @@ void alpha(float a) {
     color(1.0f, 1.0f, 1.0f, a);
 }
 
-float norm(float a, float start, float end) {
-    return (a - start) / (end - start);
-}
-
 void drawNight() {
     bindTexture(NAMED_PFBackground, 0, loadI32(RSID_SKY_TEXTURES, RSID_SKY_TEXTURE_NIGHT));
     // NOTE: Hacky way to draw the night sky
@@ -93,6 +89,19 @@ void drawSunset() {
 }
 
 void drawBlade(int index, float now) {
+    float offset = loadF(RSID_BLADES, index + BLADE_STRUCT_OFFSET);
+    float scale = loadF(RSID_BLADES, index + BLADE_STRUCT_SCALE);
+    float degree = loadF(RSID_BLADES, index + BLADE_STRUCT_DEGREE);
+    float hardness = loadF(RSID_BLADES, index + BLADE_STRUCT_HARDNESS);
+    
+    float xpos = loadF(RSID_BLADES, index + BLADE_STRUCT_XPOS);
+    float ypos = loadF(RSID_BLADES, index + BLADE_STRUCT_YPOS);
+
+    float lengthX = loadF(RSID_BLADES, index + BLADE_STRUCT_LENGTHX);
+    float lengthY = loadF(RSID_BLADES, index + BLADE_STRUCT_LENGTHY);
+
+    int size = loadF(RSID_BLADES, index + BLADE_STRUCT_SIZE);
+
     float h = loadF(RSID_BLADES, index + BLADE_STRUCT_H);
     float s = loadF(RSID_BLADES, index + BLADE_STRUCT_S);
     float b = loadF(RSID_BLADES, index + BLADE_STRUCT_B);
@@ -103,7 +112,7 @@ void drawBlade(int index, float now) {
     }
 
     if (now >= AFTERNOON && now < DUSK) {
-        newB = 1.0f - ((now - AFTERNOON) / (DUSK - AFTERNOON));
+        newB = 1.0f - normf(AFTERNOON, DUSK, now);
     }
 
     if (now >= DUSK) {
@@ -111,26 +120,15 @@ void drawBlade(int index, float now) {
     }
 
     hsb(h, s, lerpf(0, b, newB), 1.0f);
-    
-    float scale = loadF(RSID_BLADES, index + BLADE_STRUCT_SCALE);
-    float degree = loadF(RSID_BLADES, index + BLADE_STRUCT_DEGREE);
-    float hardness = loadF(RSID_BLADES, index + BLADE_STRUCT_HARDNESS);
 
     float targetDegree = 0.0f; // TODO Compute
     degree += (targetDegree - degree) * 0.3f;
-    
-    float xpos = loadF(RSID_BLADES, index + BLADE_STRUCT_XPOS);
-    float ypos = loadF(RSID_BLADES, index + BLADE_STRUCT_YPOS);
-
-    float lengthX = loadF(RSID_BLADES, index + BLADE_STRUCT_LENGTHX);
-    float lengthY = loadF(RSID_BLADES, index + BLADE_STRUCT_LENGTHY);
 
     float angle = PI / 2.0f;
     
     float currentX = xpos;
     float currentY = ypos;
     
-    int size = loadF(RSID_BLADES, index + BLADE_STRUCT_SIZE);
     int i = size;
 
     for ( ; i > 0; i--) {
@@ -169,25 +167,25 @@ int main(int launchID) {
 
     if (now >= MIDNIGHT && now < MORNING) {
         drawNight();
-        alpha(norm(now, MIDNIGHT, MORNING));
+        alpha(normf(MIDNIGHT, MORNING, now));
         drawSunrise();
     }
     
     if (now >= MORNING && now < AFTERNOON) {
         drawSunrise();
-        alpha(norm(now, MORNING, AFTERNOON));
+        alpha(normf(MORNING, AFTERNOON, now));
         drawNoon();
     }
 
     if (now >= AFTERNOON && now < DUSK) {
         drawNoon();
-        alpha(norm(now, AFTERNOON, DUSK));
+        alpha(normf(AFTERNOON, DUSK, now));
         drawSunset();
     }
     
     if (now >= DUSK) {
         drawNight();
-        alpha(1.0f - norm(now, DUSK, 1.0f));
+        alpha(1.0f - normf(DUSK, 1.0f, now));
         drawSunset();
     }
     
