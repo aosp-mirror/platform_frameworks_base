@@ -49,19 +49,20 @@ public class UserData {
     public static final int IS91_MSG_TYPE_SHORT_MESSAGE      = 0x85;
 
     /**
-     * IA5 data encoding character mappings.
-     * (See CCITT Rec. T.50 Tables 1 and 3)
+     * US ASCII character mapping table.
      *
-     * Note this mapping is the the same as for printable ASCII
-     * characters, with a 0x20 offset, meaning that the ASCII SPACE
-     * character occurs with code 0x20.
+     * This table contains only the printable ASCII characters, with a
+     * 0x20 offset, meaning that the ASCII SPACE character is at index
+     * 0, with the resulting code of 0x20.
      *
-     * Note this mapping is also equivalent to that used by the IS-91
-     * protocol, except for the latter using only 6 bits, and hence
-     * mapping only entries up to the '_' character.
+     * Note this mapping is also equivalent to that used by both the
+     * IS5 and the IS-91 encodings.  For the former this is defined
+     * using CCITT Rec. T.50 Tables 1 and 3.  For the latter IS 637 B,
+     * Table 4.3.1.4.1-1 -- and note the encoding uses only 6 bits,
+     * and hence only maps entries up to the '_' character.
      *
      */
-    public static final char[] IA5_MAP = {
+    public static final char[] ASCII_MAP = {
         ' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
         '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
@@ -85,8 +86,8 @@ public class UserData {
     public static final int ASCII_CR_INDEX = 0x0D;
     public static final SparseIntArray charToAscii = new SparseIntArray();
     static {
-        for (int i = 0; i < IA5_MAP.length; i++) {
-            charToAscii.put(IA5_MAP[i], PRINTABLE_ASCII_MIN_INDEX + i);
+        for (int i = 0; i < ASCII_MAP.length; i++) {
+            charToAscii.put(ASCII_MAP[i], PRINTABLE_ASCII_MIN_INDEX + i);
         }
         charToAscii.put('\r', ASCII_LF_INDEX);
         charToAscii.put('\n', ASCII_CR_INDEX);
@@ -113,11 +114,11 @@ public class UserData {
     }
 
     /**
-     * Mapping for IA5 values less than 32 are flow control signals
+     * Mapping for ASCII values less than 32 are flow control signals
      * and not used here.
      */
-    public static final int IA5_MAP_BASE_INDEX = 0x20;
-    public static final int IA5_MAP_MAX_INDEX = IA5_MAP_BASE_INDEX + IA5_MAP.length - 1;
+    public static final int ASCII_MAP_BASE_INDEX = 0x20;
+    public static final int ASCII_MAP_MAX_INDEX = ASCII_MAP_BASE_INDEX + ASCII_MAP.length - 1;
 
     /**
      * Contains the data header of the user data

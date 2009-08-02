@@ -853,7 +853,7 @@ public final class BearerData {
         }
     }
 
-    private static String decodeIa5(byte[] data, int offset, int numFields)
+    private static String decode7bitAscii(byte[] data, int offset, int numFields)
         throws CodingException
     {
         try {
@@ -868,37 +868,19 @@ public final class BearerData {
             inStream.skip(offset);
             for (int i = 0; i < numFields; i++) {
                 int charCode = inStream.read(7);
-                if ((charCode < UserData.IA5_MAP_BASE_INDEX) ||
-                        (charCode > UserData.IA5_MAP_MAX_INDEX)) {
-                    throw new CodingException("unsupported AI5 character code (" + charCode + ")");
+                if ((charCode >= UserData.ASCII_MAP_BASE_INDEX) ||
+                        (charCode <= UserData.ASCII_MAP_MAX_INDEX)) {
+                    strBuf.append(UserData.ASCII_MAP[charCode - UserData.ASCII_MAP_BASE_INDEX]);
+                } else if (charCode == UserData.ASCII_LF_INDEX) {
+                    strBuf.append('\r');
+                } else if (charCode == UserData.ASCII_CR_INDEX) {
+                    strBuf.append('\n');
+                } else {
+                    /* For other charCodes, they are unprintable, and so simply use SPACE. */
+                    strBuf.append(' ');
                 }
-                strBuf.append(UserData.IA5_MAP[charCode - UserData.IA5_MAP_BASE_INDEX]);
             }
             return strBuf.toString();
-        } catch (BitwiseInputStream.AccessException ex) {
-            throw new CodingException("AI5 decode failed: " + ex);
-        }
-    }
-
-    private static String decode7bitAscii(byte[] data, int offset, int numFields)
-        throws CodingException
-    {
-        try {
-            offset *= 8;
-            BitwiseInputStream inStream = new BitwiseInputStream(data);
-            int wantedBits = offset + (numFields * 7);
-            if (inStream.available() < wantedBits) {
-                throw new CodingException("insufficient data (wanted " + wantedBits +
-                                          " bits, but only have " + inStream.available() + ")");
-            }
-            inStream.skip(offset);
-            byte[] expandedData = new byte[numFields];
-            for (int i = 0; i < numFields; i++) {
-                expandedData[i] = (byte)inStream.read(7);
-            }
-            return new String(expandedData, 0, numFields, "US-ASCII");
-        } catch (java.io.UnsupportedEncodingException ex) {
-            throw new CodingException("7bit ASCII decode failed: " + ex);
         } catch (BitwiseInputStream.AccessException ex) {
             throw new CodingException("7bit ASCII decode failed: " + ex);
         }
@@ -956,11 +938,9 @@ public final class BearerData {
             // octet encoded.
             userData.payloadStr = decodeLatin(userData.payload, offset, userData.numFields);
             break;
+        case UserData.ENCODING_IA5:
         case UserData.ENCODING_7BIT_ASCII:
             userData.payloadStr = decode7bitAscii(userData.payload, offset, userData.numFields);
-            break;
-        case UserData.ENCODING_IA5:
-            userData.payloadStr = decodeIa5(userData.payload, offset, userData.numFields);
             break;
         case UserData.ENCODING_UNICODE_16:
             userData.payloadStr = decodeUtf16(userData.payload, offset, userData.numFields);
@@ -1003,7 +983,7 @@ public final class BearerData {
         try {
             StringBuffer strbuf = new StringBuffer(dataLen);
             while (inStream.available() >= 6) {
-                strbuf.append(UserData.IA5_MAP[inStream.read(6)]);
+                strbuf.append(UserData.ASCII_MAP[inStream.read(6)]);
             }
             String data = strbuf.toString();
             bData.numberOfMessages = Integer.parseInt(data.substring(0, 2));
@@ -1045,7 +1025,7 @@ public final class BearerData {
         }
         StringBuffer strbuf = new StringBuffer(dataLen);
         for (int i = 0; i < numFields; i++) {
-            strbuf.append(UserData.IA5_MAP[inStream.read(6)]);
+            strbuf.append(UserData.ASCII_MAP[inStream.read(6)]);
         }
         bData.userData.payloadStr = strbuf.toString();
     }
