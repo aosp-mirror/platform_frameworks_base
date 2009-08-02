@@ -375,7 +375,8 @@ public class StatusBarPolicy {
             else if (action.equals(Intent.ACTION_BATTERY_LOW)) {
                 onBatteryLow(intent);
             }
-            else if (action.equals(Intent.ACTION_BATTERY_OKAY)) {
+            else if (action.equals(Intent.ACTION_BATTERY_OKAY)
+                    || action.equals(Intent.ACTION_POWER_CONNECTED)) {
                 onBatteryOkay(intent);
             }
             else if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION) ||
@@ -523,6 +524,7 @@ public class StatusBarPolicy {
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(Intent.ACTION_BATTERY_LOW);
         filter.addAction(Intent.ACTION_BATTERY_OKAY);
+        filter.addAction(Intent.ACTION_POWER_CONNECTED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_ALARM_CHANGED);
         filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
