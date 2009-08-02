@@ -16,14 +16,15 @@
 
 package android.content;
 
-import android.net.Uri;
 import android.database.Cursor;
-import android.os.Parcelable;
+import android.net.Uri;
 import android.os.Parcel;
-import android.os.Debug;
+import android.os.Parcelable;
+import android.text.TextUtils;
 
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class ContentProviderOperation implements Parcelable {
     /** @hide exposed for unit tests */
@@ -33,7 +34,7 @@ public class ContentProviderOperation implements Parcelable {
     /** @hide exposed for unit tests */
     public final static int TYPE_DELETE = 3;
     /** @hide exposed for unit tests */
-    public final static int TYPE_COUNT = 4;
+    public final static int TYPE_ASSERT = 4;
 
     private final int mType;
     private final Uri mUri;
@@ -43,8 +44,6 @@ public class ContentProviderOperation implements Parcelable {
     private final Integer mExpectedCount;
     private final ContentValues mValuesBackReferences;
     private final Map<Integer, Integer> mSelectionArgsBackReferences;
-
-    private static final String[] COUNT_COLUMNS = new String[]{"count(*)"};
 
     /**
      * Creates a {@link ContentProviderOperation} by copying the contents of a
@@ -156,15 +155,12 @@ public class ContentProviderOperation implements Parcelable {
     }
 
     /**
-     * Create a {@link Builder} suitable for building a count query. When used in conjunction
-     * with {@link Builder#withExpectedCount(int)} this is useful for checking that the
-     * uri/selection has the expected number of rows.
-     * {@link ContentProviderOperation}.
-     * @param uri The {@link Uri} to query.
-     * @return a {@link Builder}
+     * Create a {@link Builder} suitable for building a
+     * {@link ContentProviderOperation} to assert a set of values as provided
+     * through {@link Builder#withValues(ContentValues)}.
      */
-    public static Builder newCountQuery(Uri uri) {
-        return new Builder(TYPE_COUNT, uri);
+    public static Builder newAssertQuery(Uri uri) {
+        return new Builder(TYPE_ASSERT, uri);
     }
 
     public Uri getUri() {
@@ -181,7 +177,7 @@ public class ContentProviderOperation implements Parcelable {
     }
 
     public boolean isReadOperation() {
-        return mType == TYPE_COUNT;
+        return mType == TYPE_ASSERT;
     }
 
     /**
@@ -217,18 +213,30 @@ public class ContentProviderOperation implements Parcelable {
             numRows = provider.delete(mUri, mSelection, selectionArgs);
         } else if (mType == TYPE_UPDATE) {
             numRows = provider.update(mUri, values, mSelection, selectionArgs);
-        } else if (mType == TYPE_COUNT) {
-            Cursor cursor = provider.query(mUri, COUNT_COLUMNS, mSelection, selectionArgs, null);
+        } else if (mType == TYPE_ASSERT) {
+            // Build projection map from expected values
+            final ArrayList<String> projectionList = new ArrayList<String>();
+            for (Map.Entry<String, Object> entry : values.valueSet()) {
+                projectionList.add(entry.getKey());
+            }
+
+            // Assert that all rows match expected values
+            final String[] projection = projectionList.toArray(new String[projectionList.size()]);
+            final Cursor cursor = provider.query(mUri, projection, mSelection, selectionArgs, null);
+            numRows = cursor.getCount();
             try {
-                if (!cursor.moveToNext()) {
-                    throw new RuntimeException("since we are doing a count query we should always "
-                            + "be able to move to the first row");
+                while (cursor.moveToNext()) {
+                    for (int i = 0; i < projection.length; i++) {
+                        final String cursorValue = cursor.getString(i);
+                        final String expectedValue = values.getAsString(projection[i]);
+                        if (!TextUtils.equals(cursorValue, expectedValue)) {
+                            // Throw exception when expected values don't match
+                            throw new OperationApplicationException("Found value " + cursorValue
+                                    + " when expected " + expectedValue + " for column "
+                                    + projection[i]);
+                        }
+                    }
                 }
-                if (cursor.getCount() != 1) {
-                    throw new RuntimeException("since we are doing a count query there should "
-                            + "always be exacly row, found " + cursor.getCount());
-                }
-                numRows = cursor.getInt(0);
             } finally {
                 cursor.close();
             }
@@ -353,7 +361,7 @@ public class ContentProviderOperation implements Parcelable {
      * first created by calling {@link ContentProviderOperation#newInsert(android.net.Uri)},
      * {@link ContentProviderOperation#newUpdate(android.net.Uri)},
      * {@link ContentProviderOperation#newDelete(android.net.Uri)} or
-     * {@link ContentProviderOperation#newCountQuery(android.net.Uri)}. The withXXX methods
+     * {@link ContentProviderOperation#newAssertQuery(Uri)}. The withXXX methods
      * can then be used to add parameters to the builder. See the specific methods to find for
      * which {@link Builder} type each is allowed. Call {@link #build} to create the
      * {@link ContentProviderOperation} once all the parameters have been supplied.
@@ -379,7 +387,7 @@ public class ContentProviderOperation implements Parcelable {
 
         /** Create a ContentProviderOperation from this {@link Builder}. */
         public ContentProviderOperation build() {
-            if (mType == TYPE_UPDATE) {
+            if (mType == TYPE_UPDATE || mType == TYPE_ASSERT) {
                 if ((mValues == null || mValues.size() == 0)
                         && (mValuesBackReferences == null || mValuesBackReferences.size() == 0)) {
                     throw new IllegalArgumentException("Empty values");
@@ -394,13 +402,13 @@ public class ContentProviderOperation implements Parcelable {
          * value should be used for the column. The value is added as a {@link String}.
          * A column value from the back references takes precedence over a value specified in
          * {@link #withValues}.
-         * This can only be used with builders of type insert or update.
+         * This can only be used with builders of type insert, update, or assert.
          * @return this builder, to allow for chaining.
          */
         public Builder withValueBackReferences(ContentValues backReferences) {
-            if (mType != TYPE_INSERT && mType != TYPE_UPDATE) {
+            if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException(
-                        "only inserts and updates can have value back-references");
+                        "only inserts, updates, and asserts can have value back-references");
             }
             mValuesBackReferences = backReferences;
             return this;
@@ -410,13 +418,13 @@ public class ContentProviderOperation implements Parcelable {
          * Add a ContentValues back reference.
          * A column value from the back references takes precedence over a value specified in
          * {@link #withValues}.
-         * This can only be used with builders of type insert or update.
+         * This can only be used with builders of type insert, update, or assert.
          * @return this builder, to allow for chaining.
          */
         public Builder withValueBackReference(String key, int previousResult) {
-            if (mType != TYPE_INSERT && mType != TYPE_UPDATE) {
+            if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException(
-                        "only inserts and updates can have value back-references");
+                        "only inserts, updates, and asserts can have value back-references");
             }
             if (mValuesBackReferences == null) {
                 mValuesBackReferences = new ContentValues();
@@ -428,13 +436,13 @@ public class ContentProviderOperation implements Parcelable {
         /**
          * Add a back references as a selection arg. Any value at that index of the selection arg
          * that was specified by {@link #withSelection} will be overwritten.
-         * This can only be used with builders of type update, delete, or count query.
+         * This can only be used with builders of type update, delete, or assert.
          * @return this builder, to allow for chaining.
          */
         public Builder withSelectionBackReference(int selectionArgIndex, int previousResult) {
-            if (mType != TYPE_COUNT && mType != TYPE_UPDATE && mType != TYPE_DELETE) {
-                throw new IllegalArgumentException(
-                        "only deletes, updates and counts can have selection back-references");
+            if (mType != TYPE_UPDATE && mType != TYPE_DELETE && mType != TYPE_ASSERT) {
+                throw new IllegalArgumentException("only updates, deletes, and asserts "
+                        + "can have selection back-references");
             }
             if (mSelectionArgsBackReferences == null) {
                 mSelectionArgsBackReferences = new HashMap<Integer, Integer>();
@@ -447,12 +455,13 @@ public class ContentProviderOperation implements Parcelable {
          * The ContentValues to use. This may be null. These values may be overwritten by
          * the corresponding value specified by {@link #withValueBackReference} or by
          * future calls to {@link #withValues} or {@link #withValue}.
-         * This can only be used with builders of type insert or update.
+         * This can only be used with builders of type insert, update, or assert.
          * @return this builder, to allow for chaining.
          */
         public Builder withValues(ContentValues values) {
-            if (mType != TYPE_INSERT && mType != TYPE_UPDATE) {
-                throw new IllegalArgumentException("only inserts and updates can have values");
+            if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
+                throw new IllegalArgumentException(
+                        "only inserts, updates, and asserts can have values");
             }
             if (mValues == null) {
                 mValues = new ContentValues();
@@ -464,14 +473,14 @@ public class ContentProviderOperation implements Parcelable {
         /**
          * A value to insert or update. This value may be overwritten by
          * the corresponding value specified by {@link #withValueBackReference}.
-         * This can only be used with builders of type insert or update.
+         * This can only be used with builders of type insert, update, or assert.
          * @param key the name of this value
          * @param value the value itself. the type must be acceptable for insertion by
          * {@link ContentValues#put}
          * @return this builder, to allow for chaining.
          */
         public Builder withValue(String key, Object value) {
-            if (mType != TYPE_INSERT && mType != TYPE_UPDATE) {
+            if (mType != TYPE_INSERT && mType != TYPE_UPDATE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException("only inserts and updates can have values");
             }
             if (mValues == null) {
@@ -508,13 +517,13 @@ public class ContentProviderOperation implements Parcelable {
          * replaced with the corresponding occurence of the selection argument. Any of the
          * selection arguments may be overwritten by a selection argument back reference as
          * specified by {@link #withSelectionBackReference}.
-         * This can only be used with builders of type update, delete, or count query.
+         * This can only be used with builders of type update, delete, or assert.
          * @return this builder, to allow for chaining.
          */
         public Builder withSelection(String selection, String[] selectionArgs) {
-            if (mType != TYPE_DELETE && mType != TYPE_UPDATE && mType != TYPE_COUNT) {
+            if (mType != TYPE_UPDATE && mType != TYPE_DELETE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException(
-                        "only deletes, updates and counts can have selections");
+                        "only updates, deletes, and asserts can have selections");
             }
             mSelection = selection;
             mSelectionArgs = selectionArgs;
@@ -524,13 +533,13 @@ public class ContentProviderOperation implements Parcelable {
         /**
          * If set then if the number of rows affected by this operation do not match
          * this count {@link OperationApplicationException} will be throw.
-         * This can only be used with builders of type update, delete, or count query.
+         * This can only be used with builders of type update, delete, or assert.
          * @return this builder, to allow for chaining.
          */
         public Builder withExpectedCount(int count) {
-            if (mType != TYPE_DELETE && mType != TYPE_UPDATE && mType != TYPE_COUNT) {
+            if (mType != TYPE_UPDATE && mType != TYPE_DELETE && mType != TYPE_ASSERT) {
                 throw new IllegalArgumentException(
-                        "only deletes, updates and counts can have expected counts");
+                        "only updates, deletes, and asserts can have expected counts");
             }
             mExpectedCount = count;
             return this;

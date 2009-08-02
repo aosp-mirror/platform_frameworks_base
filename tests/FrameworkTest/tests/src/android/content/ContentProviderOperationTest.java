@@ -16,7 +16,9 @@
 
 package android.content;
 
+import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -28,7 +30,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.Map;
+import java.util.Map.Entry;
 
 @SmallTest
 public class ContentProviderOperationTest extends TestCase {
@@ -130,6 +134,46 @@ public class ContentProviderOperationTest extends TestCase {
         assertEquals(sTestUri1.buildUpon().appendPath("19").toString(), result.uri.toString());
     }
 
+    public void testAssert() {
+        // Build an operation to assert values match provider
+        ContentProviderOperation op1 = ContentProviderOperation.newAssertQuery(sTestUri1)
+                .withValues(sTestValues1).build();
+
+        try {
+            // Assert that values match from cursor
+            ContentProviderResult result = op1.apply(new TestContentProvider() {
+                public Cursor query(Uri uri, String[] projection, String selection,
+                        String[] selectionArgs, String sortOrder) {
+                    // Return cursor over specific set of values
+                    return getCursor(sTestValues1);
+                }
+            }, null, 0);
+        } catch (OperationApplicationException e) {
+            fail("newAssert() failed");
+        }
+    }
+
+    /**
+     * Build a {@link Cursor} with a single row that contains all values
+     * provided through the given {@link ContentValues}.
+     */
+    private Cursor getCursor(ContentValues contentValues) {
+        final Set<Entry<String, Object>> valueSet = contentValues.valueSet();
+        final String[] keys = new String[valueSet.size()];
+        final Object[] values = new Object[valueSet.size()];
+
+        int i = 0;
+        for (Entry<String, Object> entry : valueSet) {
+            keys[i] = entry.getKey();
+            values[i] = entry.getValue();
+            i++;
+        }
+
+        final MatrixCursor cursor = new MatrixCursor(keys);
+        cursor.addRow(values);
+        return cursor;
+    }
+
     public void testValueBackRefs() {
         ContentValues values = new ContentValues();
         values.put("a", "in1");
@@ -167,11 +211,15 @@ public class ContentProviderOperationTest extends TestCase {
 
         String[] selectionArgs = new String[]{"a", null, null, "b", null};
 
+        final ContentValues values = new ContentValues();
+        values.put("unused", "unused");
+
         ContentProviderOperation op1 = ContentProviderOperation.newUpdate(sTestUri1)
                 .withSelectionBackReference(1, 3)
                 .withSelectionBackReference(2, 1)
                 .withSelectionBackReference(4, 2)
                 .withSelection("unused", selectionArgs)
+                .withValues(values)
                 .build();
         String[] s2 = op1.resolveSelectionArgsBackReferences(
                 previousResults, previousResults.length);
@@ -212,7 +260,7 @@ public class ContentProviderOperationTest extends TestCase {
             parcel.setDataPosition(0);
             op2 = ContentProviderOperation.CREATOR.createFromParcel(parcel);
 
-            assertEquals(1 /* ContentProviderOperation.TYPE_INSERT */, operationGetType(op2));
+            assertEquals(ContentProviderOperation.TYPE_INSERT, operationGetType(op2));
             assertEquals("content://goo/bar", operationGetUri(op2).toString());
             assertEquals(Integer.valueOf(42), operationGetExpectedCount(op2));
             assertEquals("selection", operationGetSelection(op2));
@@ -238,9 +286,8 @@ public class ContentProviderOperationTest extends TestCase {
             op1.writeToParcel(parcel, 0);
             parcel.setDataPosition(0);
             op2 = ContentProviderOperation.CREATOR.createFromParcel(parcel);
-            assertEquals(2 /* ContentProviderOperation.TYPE_UPDATE */, operationGetType(op2));
+            assertEquals(ContentProviderOperation.TYPE_UPDATE, operationGetType(op2));
             assertEquals("content://goo/bar", operationGetUri(op2).toString());
-            assertNull(operationGetEntity(op2));
             assertNull(operationGetExpectedCount(op2));
             assertNull(operationGetSelection(op2));
             assertNull(operationGetSelectionArgs(op2));
@@ -261,9 +308,8 @@ public class ContentProviderOperationTest extends TestCase {
             op1.writeToParcel(parcel, 0);
             parcel.setDataPosition(0);
             op2 = ContentProviderOperation.CREATOR.createFromParcel(parcel);
-            assertEquals(3 /* ContentProviderOperation.TYPE_DELETE */, operationGetType(op2));
+            assertEquals(ContentProviderOperation.TYPE_DELETE, operationGetType(op2));
             assertEquals("content://goo/bar", operationGetUri(op2).toString());
-            assertNull(operationGetEntity(op2));
             assertNull(operationGetExpectedCount(op2));
             assertNull(operationGetSelection(op2));
             assertNull(operationGetSelectionArgs(op2));
@@ -329,15 +375,6 @@ public class ContentProviderOperationTest extends TestCase {
         field.set(builder, values);
     }
 
-    private void builderSetEntity(
-            ContentProviderOperation.Builder builder, Entity entity)
-            throws NoSuchFieldException, IllegalAccessException {
-        Field field;
-        field = CLASS_BUILDER.getDeclaredField("mEntity");
-        field.setAccessible(true);
-        field.set(builder, entity);
-    }
-
     private void builderSetExpectedCount(
             ContentProviderOperation.Builder builder, Integer expectedCount)
             throws NoSuchFieldException, IllegalAccessException {
@@ -380,13 +417,6 @@ public class ContentProviderOperationTest extends TestCase {
         final Field field = CLASS_OPERATION.getDeclaredField("mValues");
         field.setAccessible(true);
         return (ContentValues) field.get(operation);
-    }
-
-    private Entity operationGetEntity(ContentProviderOperation operation)
-            throws NoSuchFieldException, IllegalAccessException {
-        final Field field = CLASS_OPERATION.getDeclaredField("mEntity");
-        field.setAccessible(true);
-        return (Entity) field.get(operation);
     }
 
     private Integer operationGetExpectedCount(ContentProviderOperation operation)
