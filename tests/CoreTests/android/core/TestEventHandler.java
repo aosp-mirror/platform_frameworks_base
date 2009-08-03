@@ -497,7 +497,7 @@ public class TestEventHandler implements EventHandler {
      * SSL certificate error callback. Handles SSL error(s) on the way
      * up to the user.
      */
-    public void handleSslErrorRequest(SslError error) {
+    public boolean handleSslErrorRequest(SslError error) {
       int primaryError = error.getPrimaryError();
 
       if (Config.LOGV) {
@@ -527,6 +527,9 @@ public class TestEventHandler implements EventHandler {
 
       if (expectSslErrors == -1) // && expectSslCertificate == certificate?
         expects[TEST_SSL_CERTIFICATE_ERROR] = false;
+
+      // return false so that we won't block the thread
+      return false;
     }
 
     /**
