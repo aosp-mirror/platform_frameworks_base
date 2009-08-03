@@ -147,8 +147,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
     synchronized boolean onConnect(String username, String password) {
         try {
-            mState = VpnState.CONNECTING;
-            broadcastConnectivity(VpnState.CONNECTING);
+            setState(VpnState.CONNECTING);
 
             stopPreviouslyRunDaemons();
             String serverIp = getIp(getProfile().getServerName());
@@ -166,8 +165,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
     synchronized void onDisconnect() {
         try {
             Log.i(TAG, "disconnecting VPN...");
-            mState = VpnState.DISCONNECTING;
-            broadcastConnectivity(VpnState.DISCONNECTING);
+            setState(VpnState.DISCONNECTING);
             mNotification.showDisconnect();
 
             mDaemonHelper.stopAll();
@@ -235,14 +233,13 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         saveOriginalDns();
         saveAndSetDomainSuffices();
 
-        mState = VpnState.CONNECTED;
         mStartTime = System.currentTimeMillis();
 
         // set DNS after saving the states in case the process gets killed
         // before states are saved
         saveSelf();
         setVpnDns();
-        broadcastConnectivity(VpnState.CONNECTED);
+        setState(VpnState.CONNECTED);
 
         enterConnectivityLoop();
     }
@@ -256,14 +253,21 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
         if (mState == VpnState.IDLE) return;
 
+        // keep the notification when error occurs
+        if (!anyError()) mNotification.disableNotification();
+
         restoreOriginalDns();
         restoreOriginalDomainSuffices();
-        mState = VpnState.IDLE;
-        broadcastConnectivity(VpnState.IDLE);
+        setState(VpnState.IDLE);
 
         // stop the service itself
+        SystemProperties.set(VPN_STATUS, VPN_IS_DOWN);
         mContext.removeStates();
         mContext.stopSelf();
+    }
+
+    private boolean anyError() {
+        return (mError != null);
     }
 
     private void restoreOriginalDns() {
@@ -309,6 +313,11 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         SystemProperties.set(DNS_DOMAIN_SUFFICES, mOriginalDomainSuffices);
     }
 
+    private void setState(VpnState newState) {
+        mState = newState;
+        broadcastConnectivity(newState);
+    }
+
     private void broadcastConnectivity(VpnState s) {
         VpnManager m = new VpnManager(mContext);
         Throwable err = mError;
@@ -319,6 +328,9 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             } else if (err instanceof VpnConnectingError) {
                 m.broadcastConnectivity(mProfile.getName(), s,
                         ((VpnConnectingError) err).getErrorCode());
+            } else if (VPN_IS_UP.equals(SystemProperties.get(VPN_STATUS))) {
+                m.broadcastConnectivity(mProfile.getName(), s,
+                        VpnManager.VPN_ERROR_CONNECTION_LOST);
             } else {
                 m.broadcastConnectivity(mProfile.getName(), s,
                         VpnManager.VPN_ERROR_CONNECTION_FAILED);
@@ -366,7 +378,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
     // returns false if vpn connectivity is broken
     private boolean checkConnectivity() {
         if (mDaemonHelper.anyDaemonStopped() || isLocalIpChanged()) {
-            onDisconnect();
+            onError(new IOException("Connectivity lost"));
             return false;
         } else {
             return true;
