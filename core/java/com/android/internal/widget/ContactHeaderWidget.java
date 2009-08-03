@@ -225,9 +225,10 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
             c = mContentResolver.query(Uri.withAppendedPath(
                     RawContacts.CONTENT_FILTER_EMAIL_URI, Uri.encode(emailAddress)),
                     EMAIL_LOOKUP_PROJECTION, null, null, null);
-            c.moveToFirst();
-            long contactId = c.getLong(EMAIL_LOOKUP_CONTACT_ID_COLUMN_INDEX);
-            bindFromContactId(contactId);
+            if (c.moveToFirst()) {
+                long contactId = c.getLong(EMAIL_LOOKUP_CONTACT_ID_COLUMN_INDEX);
+                bindFromContactId(contactId);
+            }
         } finally {
             if (c != null) {
                 c.close();
@@ -248,9 +249,10 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         try {
             c = mContentResolver.query(Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, number),
                     PHONE_LOOKUP_PROJECTION, null, null, null);
-            c.moveToFirst();
-            long contactId = c.getLong(PHONE_LOOKUP_CONTACT_ID_COLUMN_INDEX);
-            bindFromContactId(contactId);
+            if (c.moveToFirst()) {
+                long contactId = c.getLong(PHONE_LOOKUP_CONTACT_ID_COLUMN_INDEX);
+                bindFromContactId(contactId);
+            }
         } finally {
             if (c != null) {
                 c.close();
