@@ -15,6 +15,8 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.BasicHttpParams;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -211,7 +213,7 @@ public class AndroidGDataClient implements GDataClient {
         HttpResponse response = null;
         int status = 500;
         int redirectsLeft = MAX_REDIRECTS;
-
+        
         URI uri;
         try {
             uri = new URI(uriString);
@@ -238,12 +240,16 @@ public class AndroidGDataClient implements GDataClient {
             // while by default we have a 2.0 in this variable, it is possible to construct
             // a client that has an empty version field, to work with 1.0 services. 
             if (!TextUtils.isEmpty(mGDataVersion)) {
-                request.addHeader("GData-Version", mGDataVersion);
+                request.addHeader("GDataVersion", mGDataVersion);
             }
 
             // if we have a passed down eTag value, we need to add several headers
             if (!TextUtils.isEmpty(eTag)) { 
                 String method = request.getMethod();
+                Header overrideMethodHeader = request.getFirstHeader(X_HTTP_METHOD_OVERRIDE);
+                if (overrideMethodHeader != null) {
+                    method = overrideMethodHeader.getValue();
+                }
                 if ("GET".equals(method)) {
                     // add the none match header, if the resource is not changed
                     // this request will result in a 304 now.
@@ -252,12 +258,11 @@ public class AndroidGDataClient implements GDataClient {
                            || "PUT".equals(method)) {
                     // now we send an if-match, but only if the passed in eTag is a strong eTag
                     // as this only makes sense for a strong eTag
-                     if (eTag.startsWith("W/") == false) {
-                         request.addHeader("If-Match", eTag);
-                     }
+                    if (!eTag.startsWith("W/")) {
+                        request.addHeader("If-Match", eTag);
+                    }
                 }
             }
-
 
             if (LOCAL_LOGV) {
                 for (Header h : request.getAllHeaders()) {
