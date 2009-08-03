@@ -157,12 +157,20 @@ public class WebSettings {
     private boolean         mBlockNetworkLoads;
     private boolean         mJavaScriptEnabled = false;
     private boolean         mPluginsEnabled = false;
-    private long            mWebStorageDefaultQuota = 0;
     private boolean         mJavaScriptCanOpenWindowsAutomatically = false;
     private boolean         mUseDoubleTree = false;
     private boolean         mUseWideViewport = false;
     private boolean         mSupportMultipleWindows = false;
     private boolean         mShrinksStandaloneImagesToFit = false;
+    // HTML5 API flags
+    private boolean         mAppCacheEnabled = false;
+    private boolean         mDatabaseEnabled = false;
+    private boolean         mDomStorageEnabled = false;
+    private boolean         mWorkersEnabled = false;  // only affects V8.
+    // HTML5 configuration parameters
+    private long            mAppCacheMaxSize = Long.MAX_VALUE;
+    private String          mAppCachePath = "";
+    private String          mDatabasePath = "";
     // Don't need to synchronize the get/set methods as they
     // are basic types, also none of these values are used in
     // native WebCore code.
@@ -177,12 +185,6 @@ public class WebSettings {
     private boolean         mSupportZoom = true;
     private boolean         mBuiltInZoomControls = false;
     private boolean         mAllowFileAccess = true;
-    private String          mDatabasePath = "";
-    private boolean         mDatabaseEnabled = false;
-    private String          mAppCachePath = "";
-    private boolean         mAppCacheEnabled = false;
-    private long            mAppCacheMaxSize = Long.MAX_VALUE;
-    private boolean         mDomStorageEnabled = false;
 
     // Class to handle messages before WebCore is ready.
     private class EventHandler {
@@ -945,18 +947,6 @@ public class WebSettings {
     }
 
     /**
-     * @hide
-     * Set the default quota for WebStorage DBs
-     * @param quota the default quota in bytes
-     */
-    public synchronized void setWebStorageDefaultQuota(long quota) {
-        if (mWebStorageDefaultQuota != quota) {
-            mWebStorageDefaultQuota = quota;
-            postSync();
-        }
-    }
-
-    /**
      * Set the path to where database storage API databases should be saved.
      * This will update WebCore when the Sync runs in the C++ side.
      * @param databasePath String path to the directory where databases should
@@ -1061,6 +1051,20 @@ public class WebSettings {
     }
 
     /**
+     * Tell the WebView to enable WebWorkers API.
+     * @param flag True if the WebView should enable WebWorkers.
+     * Note that this flag only affects V8. JSC does not have
+     * an equivalent setting.
+     * @hide pending api council approval
+     */
+    public synchronized void setWorkersEnabled(boolean flag) {
+        if (mWorkersEnabled != flag) {
+            mWorkersEnabled = flag;
+            postSync();
+        }
+    }
+
+    /**
      * Return true if javascript is enabled. <b>Note: The default is false.</b>
      * @return True if javascript is enabled.
      */
@@ -1081,15 +1085,6 @@ public class WebSettings {
      */
     public synchronized String getPluginsPath() {
         return "";
-    }
-
-    /**
-     * @hide
-     * Return the default quota for WebStorage DBs
-     * @return the default quota in bytes
-     */
-    public synchronized long getWebStorageDefaultQuota() {
-        return mWebStorageDefaultQuota;
     }
 
     /**
