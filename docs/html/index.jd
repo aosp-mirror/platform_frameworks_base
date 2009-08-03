@@ -11,19 +11,19 @@ home=true
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
-                                <img src="/assets/images/home/IO-logo.png" alt="Google I/O Developer Conference 2009" width="242px" />
-                                <div id="announcement" style="width:270px">
-                                  <p>Google I/O is a two-day developer event that will take place May 27-28 at Moscone Center, San Francisco. The agenda includes a number of great sessions on Android topics by team engineers and other developers.</p>
-                                  <p><a href="http://code.google.com/events/io/">Learn more &raquo;</a></p>
+                                <img src="/assets/images/home/android_adc.png" alt="Android Developer Challenge 2" width="232px" />
+                                <div id="announcement" style="width:275px">
+                                  <p>The second Android Developer Challenge has begun! In this contest,
+                                  real-world users will help review and score applications and the overall winner will 
+                                  take away $250,000. The deadline for submitting an application to the contest is August 31, 2009.</p>
+                                  <p><a href="http://code.google.com/android/adc/">Learn more about ADC 2 &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->  
                         </div><!-- end topAnnouncement -->
-                        <div id="carousel">
-                            <div id="carouselMain">
-                                <div id="bulletinImg"></div>
-                                <div id="bulletinDesc"></div>
-                            </div>
+                        <div id="carouselMain" style="height:192px"> <!-- this height can be adjusted based on the content height -->
+                        </div>
                             <div class="clearer"></div>
+                        <div id="carouselWheel">
                             <div class="app-list-container" align="center"> 
                                 <a href="javascript:{}" id="arrow-left" onclick="" class="arrow-left-off"></a>
                                 <div id="list-clip">
@@ -31,10 +31,10 @@ home=true
                                       <!-- populated by buildCarousel() -->
                                     </div>
                                 </div><!-- end list-clip -->
-                                <a href="javascript:page_right()" id="arrow-right" onclick="" class="arrow-right-on"></a>
+                                <a href="javascript:{ page_right(); }" id="arrow-right" onclick="" class="arrow-right-on"></a>
                                 <div class="clearer"></div>
                             </div><!-- end app-list container -->
-                        </div><!-- end carousel -->
+                        </div><!-- end carouselWheel -->
                     </div><!-- end homeMiddle -->
 
                     <div style="clear:both">&nbsp;</div>
@@ -79,8 +79,8 @@ home=true
                                       <td class="imageCell"><a href="http://www.youtube.com/user/androiddevelopers"><img src="{@docRoot}assets/images/video-droid.png" style="padding:0" /></a></td>
                                       <td>
                                               <h2 class="green">Watch</h2>
-                                              <object width="150" height="140"><param name="movie" value="http://www.youtube.com/v/x1ZZ-R3p_w8&hl=en&fs=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/x1ZZ-R3p_w8&hl=en&fs=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="150" height="140"></embed></object>
-                                              <p style="margin-top:1em"><a href="http://www.youtube.com/user/androiddevelopers">More Android videos &raquo;</a></p>
+                                              <object width="150" height="140"><param name="movie" value="http://www.youtube.com/v/GARMe7Km_gk&hl=en&fs=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/GARMe7Km_gk&hl=en&fs=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="150" height="140"></embed></object>
+                                              <p style="margin-top:1em"><a href="{@docRoot}videos/index.html">More Android videos &raquo;</a></p>
                                       </td>
                               </tr>
 
@@ -120,10 +120,19 @@ home=true
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"SDK 1.5 r2",
+      'name':"SDK 1.5 r3",
       'img':"sdk-large.png",
       'title':"Android 1.5 SDK",
-      'desc': "<p>Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r2/index.html'>Download Android 1.5 SDK</a></p>"
+      'desc': "<p>Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r3/index.html'>Download Android 1.5 SDK &raquo;</a></p>"
+    },
+    
+    'io': {
+      'layout':"imgLeft",
+      'icon':"io-small.png",
+      'name':"Google I/O",
+      'img':"io-large.png",
+      'title':"Google I/O Developer Conference",
+      'desc': "<p>The Google I/O developer conference took place May 27-28 in San Francisco. If you missed the conference, you can experience the Android sessions by viewing YouTube videos.</p><p><a href='{@docRoot}videos/index.html'>See the sessions from Google I/O &raquo;</a></p>"
     },
 
     'mapskey': {
@@ -133,15 +142,6 @@ home=true
       'img':"maps-large.png",
       'title':"Maps API Key",
       'desc':"<p>If you're writing an Android application that uses Google Maps (with MapView), you must register your application to obtain a Maps API Key. Without the key, your maps application will not work on Android devices. Obtaining a key requires just a couple of steps.</p><p><a href='http://code.google.com/android/add-ons/google-apis/maps-overview.html'>Learn more &raquo;</a></p>"
-    },
-
-    'market': {
-      'layout':"imgTop",
-      'icon':"market-small.png",
-      'name':"Android Market",
-      'img':"market-large.png",
-      'title':"",
-      'desc': "<p>Android Market helps you get your applications into the hands of users. The beta version of Market is now open and you can begin sharing your applications with users of the first Android-powered phone, the T-Mobile G1.</p><p><a href='http://market.android.com/publish/'>Publish your Android app on Market &raquo;</a></p>"
     },
 
     'devphone': {

@@ -462,17 +462,27 @@ public:
     static void drawBitmap__BitmapFFPaint(JNIEnv* env, jobject jcanvas,
                                           SkCanvas* canvas, SkBitmap* bitmap,
                                           jfloat left, jfloat top,
-                                          SkPaint* paint,
-                                          jboolean autoScale, jfloat densityScale) {
+                                          SkPaint* paint, jint canvasDensity,
+                                          jint screenDensity, jint bitmapDensity) {
         SkScalar left_ = SkFloatToScalar(left);
         SkScalar top_ = SkFloatToScalar(top);
 
-        if (!autoScale || densityScale <= 0.0f) {
-            canvas->drawBitmap(*bitmap, left_, top_, paint);
+        if (canvasDensity == bitmapDensity || canvasDensity == 0
+                || bitmapDensity == 0) {
+            if (screenDensity != 0 && screenDensity != bitmapDensity) {
+                SkPaint filteredPaint;
+                if (paint) {
+                    filteredPaint = *paint;
+                }
+                filteredPaint.setFilterBitmap(true);
+                canvas->drawBitmap(*bitmap, left_, top_, &filteredPaint);
+            } else {
+                canvas->drawBitmap(*bitmap, left_, top_, paint);
+            }
         } else {
             canvas->save();
-            SkScalar canvasScale = GraphicsJNI::getCanvasDensityScale(env, jcanvas);
-            SkScalar scale = canvasScale / SkFloatToScalar(densityScale);
+            SkScalar scale = SkFloatToScalar(canvasDensity / (float)bitmapDensity);
+            canvas->translate(left_, top_);
             canvas->scale(scale, scale);
 
             SkPaint filteredPaint;
@@ -481,37 +491,52 @@ public:
             }
             filteredPaint.setFilterBitmap(true);
 
-            canvas->drawBitmap(*bitmap, left_, top_, &filteredPaint);
+            canvas->drawBitmap(*bitmap, 0, 0, &filteredPaint);
 
             canvas->restore();
         }
     }
 
     static void doDrawBitmap(JNIEnv* env, SkCanvas* canvas, SkBitmap* bitmap,
-                        jobject srcIRect, const SkRect& dst, SkPaint* paint) {
+                        jobject srcIRect, const SkRect& dst, SkPaint* paint,
+                        jint screenDensity, jint bitmapDensity) {
         SkIRect    src, *srcPtr = NULL;
 
         if (NULL != srcIRect) {
             GraphicsJNI::jrect_to_irect(env, srcIRect, &src);
             srcPtr = &src;
         }
-        canvas->drawBitmapRect(*bitmap, srcPtr, dst, paint);
+        
+        if (screenDensity != 0 && screenDensity != bitmapDensity) {
+            SkPaint filteredPaint;
+            if (paint) {
+                filteredPaint = *paint;
+            }
+            filteredPaint.setFilterBitmap(true);
+            canvas->drawBitmapRect(*bitmap, srcPtr, dst, &filteredPaint);
+        } else {
+            canvas->drawBitmapRect(*bitmap, srcPtr, dst, paint);
+        }
     }
 
     static void drawBitmapRF(JNIEnv* env, jobject, SkCanvas* canvas,
                              SkBitmap* bitmap, jobject srcIRect,
-                             jobject dstRectF, SkPaint* paint) {
+                             jobject dstRectF, SkPaint* paint,
+                             jint screenDensity, jint bitmapDensity) {
         SkRect      dst;
         GraphicsJNI::jrectf_to_rect(env, dstRectF, &dst);
-        doDrawBitmap(env, canvas, bitmap, srcIRect, dst, paint);
+        doDrawBitmap(env, canvas, bitmap, srcIRect, dst, paint,
+                screenDensity, bitmapDensity);
     }
     
     static void drawBitmapRR(JNIEnv* env, jobject, SkCanvas* canvas,
                              SkBitmap* bitmap, jobject srcIRect,
-                             jobject dstRect, SkPaint* paint) {
+                             jobject dstRect, SkPaint* paint,
+                             jint screenDensity, jint bitmapDensity) {
         SkRect      dst;
         GraphicsJNI::jrect_to_rect(env, dstRect, &dst);
-        doDrawBitmap(env, canvas, bitmap, srcIRect, dst, paint);
+        doDrawBitmap(env, canvas, bitmap, srcIRect, dst, paint,
+                screenDensity, bitmapDensity);
     }
     
     static void drawBitmapArray(JNIEnv* env, jobject, SkCanvas* canvas,
@@ -905,11 +930,11 @@ static JNINativeMethod gCanvasMethods[] = {
     {"native_drawRoundRect","(ILandroid/graphics/RectF;FFI)V",
         (void*) SkCanvasGlue::drawRoundRect},
     {"native_drawPath","(III)V", (void*) SkCanvasGlue::drawPath},
-    {"native_drawBitmap","(IIFFIZF)V",
+    {"native_drawBitmap","(IIFFIIII)V",
         (void*) SkCanvasGlue::drawBitmap__BitmapFFPaint},
-    {"native_drawBitmap","(IILandroid/graphics/Rect;Landroid/graphics/RectF;I)V",
+    {"native_drawBitmap","(IILandroid/graphics/Rect;Landroid/graphics/RectF;III)V",
         (void*) SkCanvasGlue::drawBitmapRF},
-    {"native_drawBitmap","(IILandroid/graphics/Rect;Landroid/graphics/Rect;I)V",
+    {"native_drawBitmap","(IILandroid/graphics/Rect;Landroid/graphics/Rect;III)V",
         (void*) SkCanvasGlue::drawBitmapRR},
     {"native_drawBitmap", "(I[IIIFFIIZI)V",
     (void*)SkCanvasGlue::drawBitmapArray},

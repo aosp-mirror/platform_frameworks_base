@@ -21,7 +21,6 @@ import com.android.internal.view.IInputMethodSession;
 
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -187,7 +186,7 @@ public final class ViewRoot extends Handler implements ViewParent,
      */
     AudioManager mAudioManager;
 
-    private final float mDensity;
+    private final int mDensity;
 
     public ViewRoot(Context context) {
         super();
@@ -229,7 +228,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         mAdded = false;
         mAttachInfo = new View.AttachInfo(sWindowSession, mWindow, this, this);
         mViewConfiguration = ViewConfiguration.get(context);
-        mDensity = context.getResources().getDisplayMetrics().density;
+        mDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
     @Override
@@ -389,10 +388,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                 attrs = mWindowAttributes;
                 Resources resources = mView.getContext().getResources();
                 CompatibilityInfo compatibilityInfo = resources.getCompatibilityInfo();
-                mTranslator = compatibilityInfo.getTranslator(attrs);
+                mTranslator = compatibilityInfo.getTranslator();
 
                 if (mTranslator != null || !compatibilityInfo.supportsScreen()) {
-                    mSurface.setCompatibleDisplayMetrics(resources.getDisplayMetrics());
+                    mSurface.setCompatibleDisplayMetrics(resources.getDisplayMetrics(),
+                            mTranslator);
                 }
 
                 boolean restore = false;
@@ -1212,6 +1212,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                         if (mTranslator != null) {
                             mTranslator.translateCanvas(canvas);
                         }
+                        canvas.setScreenDensity(scalingRequired
+                                ? DisplayMetrics.DENSITY_DEVICE : 0);
                         mView.draw(canvas);
                         if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
                             mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
@@ -1269,7 +1271,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
 
             // TODO: Do this in native
-            canvas.setDensityScale(mDensity);
+            canvas.setDensity(mDensity);
         } catch (Surface.OutOfResourcesException e) {
             Log.e("ViewRoot", "OutOfResourcesException locking surface", e);
             // TODO: we should ask the window manager to do something!
@@ -1320,6 +1322,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                     if (mTranslator != null) {
                         mTranslator.translateCanvas(canvas);
                     }
+                    canvas.setScreenDensity(scalingRequired
+                            ? DisplayMetrics.DENSITY_DEVICE : 0);
                     mView.draw(canvas);
                 } finally {
                     mAttachInfo.mIgnoreDirtyState = false;

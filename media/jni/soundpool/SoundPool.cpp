@@ -18,8 +18,7 @@
 #define LOG_TAG "SoundPool"
 #include <utils/Log.h>
 
-//
-#define USE_SHARED_MEM_BUFFER
+//#define USE_SHARED_MEM_BUFFER
 
 // XXX needed for timing latency
 #include <utils/Timers.h>

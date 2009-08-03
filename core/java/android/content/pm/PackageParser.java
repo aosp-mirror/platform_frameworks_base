@@ -675,6 +675,7 @@ public class PackageParser {
         int supportsNormalScreens = 1;
         int supportsLargeScreens = 1;
         int resizeable = 1;
+        int anyDensity = 1;
         
         int outerDepth = parser.getDepth();
         while ((type=parser.next()) != parser.END_DOCUMENT
@@ -854,21 +855,6 @@ public class PackageParser {
 
                 XmlUtils.skipCurrentTag(parser);
 
-            } else if (tagName.equals("supports-density")) {
-                sa = res.obtainAttributes(attrs,
-                        com.android.internal.R.styleable.AndroidManifestSupportsDensity);
-
-                int density = sa.getInteger(
-                        com.android.internal.R.styleable.AndroidManifestSupportsDensity_density, -1);
-
-                sa.recycle();
-
-                if (density != -1 && !pkg.supportsDensityList.contains(density)) {
-                    pkg.supportsDensityList.add(density);
-                }
-
-                XmlUtils.skipCurrentTag(parser);
-
             } else if (tagName.equals("supports-screens")) {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestSupportsScreens);
@@ -887,6 +873,9 @@ public class PackageParser {
                 resizeable = sa.getInteger(
                         com.android.internal.R.styleable.AndroidManifestSupportsScreens_resizeable,
                         supportsLargeScreens);
+                anyDensity = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_anyDensity,
+                        anyDensity);
 
                 sa.recycle();
                 
@@ -962,7 +951,7 @@ public class PackageParser {
         
         if (supportsSmallScreens < 0 || (supportsSmallScreens > 0
                 && pkg.applicationInfo.targetSdkVersion
-                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+                        >= android.os.Build.VERSION_CODES.DONUT)) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS;
         }
         if (supportsNormalScreens != 0) {
@@ -970,32 +959,19 @@ public class PackageParser {
         }
         if (supportsLargeScreens < 0 || (supportsLargeScreens > 0
                 && pkg.applicationInfo.targetSdkVersion
-                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+                        >= android.os.Build.VERSION_CODES.DONUT)) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS;
         }
         if (resizeable < 0 || (resizeable > 0
                 && pkg.applicationInfo.targetSdkVersion
-                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
+                        >= android.os.Build.VERSION_CODES.DONUT)) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS;
         }
-        int densities[] = null;
-        int size = pkg.supportsDensityList.size();
-        if (size > 0) {
-            densities = pkg.supportsDensities = new int[size];
-            List<Integer> densityList = pkg.supportsDensityList;
-            for (int i = 0; i < size; i++) {
-                densities[i] = densityList.get(i);
-            }
+        if (anyDensity < 0 || (anyDensity > 0
+                && pkg.applicationInfo.targetSdkVersion
+                        >= android.os.Build.VERSION_CODES.DONUT)) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES;
         }
-        /**
-         * TODO: enable this before code freeze. b/1967935
-         * *
-        if ((densities == null || densities.length == 0)
-                && (pkg.applicationInfo.targetSdkVersion
-                        >= android.os.Build.VERSION_CODES.CUR_DEVELOPMENT)) {
-            pkg.supportsDensities = ApplicationInfo.ANY_DENSITIES_ARRAY;
-        }
-         */
 
         return pkg;
     }
@@ -2446,9 +2422,6 @@ public class PackageParser {
         // We store the application meta-data independently to avoid multiple unwanted references
         public Bundle mAppMetaData = null;
 
-        public final ArrayList<Integer> supportsDensityList = new ArrayList<Integer>();
-        public int[] supportsDensities = null;
-
         // If this is a 3rd party app, this is the path of the zip file.
         public String mPath;
 
@@ -2630,10 +2603,6 @@ public class PackageParser {
                 && p.usesLibraryFiles != null) {
             return true;
         }
-        if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0
-                && p.supportsDensities != null) {
-            return true;
-        }
         return false;
     }
 
@@ -2655,9 +2624,6 @@ public class PackageParser {
         }
         if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0) {
             ai.sharedLibraryFiles = p.usesLibraryFiles;
-        }
-        if ((flags & PackageManager.GET_SUPPORTS_DENSITIES) != 0) {
-            ai.supportsDensities = p.supportsDensities;
         }
         if (!sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();

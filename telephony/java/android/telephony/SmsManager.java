@@ -40,7 +40,6 @@ import java.util.List;
 /**
  * Manages SMS operations such as sending data, text, and pdu SMS messages.
  * Get this object by calling the static method SmsManager.getDefault().
- * @hide
  */
 public final class SmsManager {
     private static SmsManager sInstance;
@@ -202,6 +201,8 @@ public final class SmsManager {
 
     /**
      * Send a raw SMS PDU.
+     * A PDU is a protocol data unit. It contains the message and the
+     * associated meta information.
      *
      * @param smsc the SMSC to send the message through, or NULL for the
      *  default SMSC
@@ -219,8 +220,6 @@ public final class SmsManager {
      * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is delivered to the recipient.  The
      *  raw pdu of the status report is in the extended data ("pdu").
-     *
-     * @hide
      */
     private void sendRawPdu(byte[] smsc, byte[] pdu, PendingIntent sentIntent,
             PendingIntent deliveryIntent) {
@@ -252,6 +251,8 @@ public final class SmsManager {
 
     /**
      * Copy a raw SMS PDU to the ICC.
+     * ICC (Integrated Circuit Card) is the card of the device.
+     * For example, this can be the SIM or USIM for GSM.
      *
      * @param smsc the SMSC for this message, or NULL for the default SMSC
      * @param pdu the raw PDU to store
@@ -278,6 +279,8 @@ public final class SmsManager {
 
     /**
      * Delete the specified message from the ICC.
+     * ICC (Integrated Circuit Card) is the card of the device.
+     * For example, this can be the SIM or USIM for GSM.
      *
      * @param messageIndex is the record index of the message on ICC
      * @return true for success
@@ -304,6 +307,8 @@ public final class SmsManager {
 
     /**
      * Update the specified message on the ICC.
+     * ICC (Integrated Circuit Card) is the card of the device.
+     * For example, this can be the SIM or USIM for GSM.
      *
      * @param messageIndex record index of message to update
      * @param newStatus new message status (STATUS_ON_ICC_READ,
@@ -331,6 +336,8 @@ public final class SmsManager {
 
     /**
      * Retrieves all messages currently stored on ICC.
+     * ICC (Integrated Circuit Card) is the card of the device.
+     * For example, this can be the SIM or USIM for GSM.
      *
      * @return <code>ArrayList</code> of <code>SmsMessage</code> objects
      *
@@ -359,12 +366,12 @@ public final class SmsManager {
      *   <code>getAllMessagesFromIcc</code>
      * @return <code>ArrayList</code> of <code>SmsMessage</code> objects.
      */
-    private ArrayList<SmsMessage> createMessageListFromRawRecords(List records) {
+    private ArrayList<SmsMessage> createMessageListFromRawRecords(List<SmsRawData> records) {
         ArrayList<SmsMessage> messages = new ArrayList<SmsMessage>();
         if (records != null) {
             int count = records.size();
             for (int i = 0; i < count; i++) {
-                SmsRawData data = (SmsRawData)records.get(i);
+                SmsRawData data = records.get(i);
                 // List contains all records, including "free" records (null)
                 if (data != null) {
                     SmsMessage sms = SmsMessage.createFromEfRecord(i+1, data.getBytes());

@@ -32,6 +32,12 @@ public class MatrixCursorTest extends TestCase {
         cursor.newRow().add(null);
         cursor.moveToNext();
         assertTrue(cursor.isNull(0));
+        assertNull(cursor.getString(0));
+        assertEquals(0, cursor.getShort(0));
+        assertEquals(0, cursor.getInt(0));
+        assertEquals(0L, cursor.getLong(0));
+        assertEquals(0.0f, cursor.getFloat(0));
+        assertEquals(0.0d, cursor.getDouble(0));
     }
 
     public void testMatrixCursor() {

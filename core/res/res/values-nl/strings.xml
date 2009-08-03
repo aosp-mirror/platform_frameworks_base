@@ -111,7 +111,6 @@
     <string name="httpErrorFile">"Het bestand kan niet worden geopend."</string>
     <string name="httpErrorFileNotFound">"Het opgevraagde bestand is niet gevonden."</string>
     <string name="httpErrorTooManyRequests">"Er worden te veel aanvragen verwerkt. Probeer het later opnieuw."</string>
-    <string name="certificateSaved">"Het certificaat is opgeslagen in de opslagruimte voor sleutels van het systeem."</string>
     <string name="contentServiceSync">"Synchroniseren"</string>
     <string name="contentServiceSyncNotificationTitle">"Synchroniseren"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Te veel verwijderen voor <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>

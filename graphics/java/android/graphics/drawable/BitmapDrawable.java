@@ -63,16 +63,54 @@ public class BitmapDrawable extends Drawable {
 
     private boolean mApplyGravity;
     private boolean mRebuildShader;
+    private boolean mMutated;
+    
+    private int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
+
+    // These are scaled to match the target density.
     private int mBitmapWidth;
     private int mBitmapHeight;
-    private boolean mMutated;
-
+    
+    /**
+     * Create an empty drawable, not dealing with density.
+     * @deprecated Use {@link #BitmapDrawable(Resources)} to ensure
+     * that the drawable has correctly set its target density.
+     */
     public BitmapDrawable() {
         mBitmapState = new BitmapState((Bitmap) null);
     }
 
+    /**
+     * Create an empty drawable, setting initial target density based on
+     * the display metrics of the resources.
+     */
+    public BitmapDrawable(Resources res) {
+        mBitmapState = new BitmapState((Bitmap) null);
+        if (res != null) {
+            setTargetDensity(res.getDisplayMetrics());
+            mBitmapState.mTargetDensity = mTargetDensity;
+        }
+    }
+
+    /**
+     * Create drawable from a bitmap, not dealing with density.
+     * @deprecated Use {@link #BitmapDrawable(Resources, Bitmap)} to ensure
+     * that the drawable has correctly set its target density.
+     */
     public BitmapDrawable(Bitmap bitmap) {
         this(new BitmapState(bitmap));
+    }
+
+    /**
+     * Create drawable from a bitmap, setting initial target density based on
+     * the display metrics of the resources.
+     */
+    public BitmapDrawable(Resources res, Bitmap bitmap) {
+        this(new BitmapState(bitmap));
+        if (res != null) {
+            setTargetDensity(res.getDisplayMetrics());
+            mBitmapState.mTargetDensity = mTargetDensity;
+        }
     }
 
     public BitmapDrawable(String filepath) {
@@ -97,11 +135,15 @@ public class BitmapDrawable extends Drawable {
         return mBitmap;
     }
 
+    private void computeBitmapSize() {
+        mBitmapWidth = mBitmap.getScaledWidth(mTargetDensity);
+        mBitmapHeight = mBitmap.getScaledHeight(mTargetDensity);
+    }
+    
     private void setBitmap(Bitmap bitmap) {
         mBitmap = bitmap;
         if (bitmap != null) {
-            mBitmapWidth = bitmap.getWidth();
-            mBitmapHeight = bitmap.getHeight();
+            computeBitmapSize();
         } else {
             mBitmapWidth = mBitmapHeight = -1;
         }
@@ -114,13 +156,11 @@ public class BitmapDrawable extends Drawable {
      *
      * @param canvas The Canvas from which the density scale must be obtained.
      *
-     * @see android.graphics.Bitmap#setDensityScale(float) 
-     * @see android.graphics.Bitmap#getDensityScale()
-     *
-     * @hide pending API council approval
+     * @see android.graphics.Bitmap#setDensity(int)
+     * @see android.graphics.Bitmap#getDensity()
      */
-    public void setDensityScale(Canvas canvas) {
-        setDensityScale(canvas.getDensityScale());
+    public void setTargetDensity(Canvas canvas) {
+        setTargetDensity(canvas.getDensity());
     }
 
     /**
@@ -128,32 +168,33 @@ public class BitmapDrawable extends Drawable {
      *
      * @param metrics The DisplayMetrics indicating the density scale for this drawable.
      *
-     * @see android.graphics.Bitmap#setDensityScale(float)
-     * @see android.graphics.Bitmap#getDensityScale()
-     *
-     * @hide pending API council approval
+     * @see android.graphics.Bitmap#setDensity(int)
+     * @see android.graphics.Bitmap#getDensity()
      */
-    public void setDensityScale(DisplayMetrics metrics) {
-        setDensityScale(metrics.density);
+    public void setTargetDensity(DisplayMetrics metrics) {
+        mTargetDensity = metrics.densityDpi;
+        if (mBitmap != null) {
+            computeBitmapSize();
+        }
     }
 
     /**
-     * Set the density scale at which this drawable will be rendered.
+     * Set the density at which this drawable will be rendered.
      *
      * @param density The density scale for this drawable.
      *
-     * @see android.graphics.Bitmap#setDensityScale(float)
-     * @see android.graphics.Bitmap#getDensityScale()
-     *
-     * @hide pending API council approval
+     * @see android.graphics.Bitmap#setDensity(int)
+     * @see android.graphics.Bitmap#getDensity()
      */
-    public void setDensityScale(float density) {
-        density = (density == Bitmap.DENSITY_SCALE_UNKNOWN ? 1.0f : density);
-        mBitmapState.mTargetDensityScale = density;
+    public void setTargetDensity(int density) {
+        mTargetDensity = density == 0 ? DisplayMetrics.DENSITY_DEFAULT : density;
+        if (mBitmap != null) {
+            computeBitmapSize();
+        }
     }
 
     /** Get the gravity used to position/stretch the bitmap within its bounds.
-        See android.view.Gravity
+     * See android.view.Gravity
      * @return the gravity applied to the bitmap
      */
     public int getGravity() {
@@ -302,7 +343,7 @@ public class BitmapDrawable extends Drawable {
         }
         mBitmapState.mBitmap = bitmap;
         setBitmap(bitmap);
-        setDensityScale(r.getDisplayMetrics());
+        setTargetDensity(r.getDisplayMetrics());
 
         final Paint paint = mBitmapState.mPaint;
         paint.setAntiAlias(a.getBoolean(com.android.internal.R.styleable.BitmapDrawable_antialias,
@@ -332,29 +373,12 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     public int getIntrinsicWidth() {
-        final Bitmap bitmap = mBitmap;
-        final BitmapState state = mBitmapState;
-
-        if (!state.mAutoScale || state.mBitmapScale == Bitmap.DENSITY_SCALE_UNKNOWN) {
-            return mBitmapWidth;
-        } else {
-            return bitmap != null ? (int) (mBitmapWidth /
-                    (state.mBitmapScale / state.mTargetDensityScale) + 0.5f) : -1;
-
-        }
+        return mBitmapWidth;
     }
 
     @Override
     public int getIntrinsicHeight() {
-        final Bitmap bitmap = mBitmap;
-        final BitmapState state = mBitmapState;
-
-        if (!state.mAutoScale || state.mBitmapScale == Bitmap.DENSITY_SCALE_UNKNOWN) {
-            return mBitmapHeight;
-        } else {
-            return bitmap != null ? (int) (mBitmapHeight /
-                    (state.mBitmapScale / state.mTargetDensityScale) + 0.5f) : -1;
-        }
+        return mBitmapHeight;
     }
 
     @Override
@@ -380,19 +404,10 @@ public class BitmapDrawable extends Drawable {
         Paint mPaint = new Paint(DEFAULT_PAINT_FLAGS);
         Shader.TileMode mTileModeX;
         Shader.TileMode mTileModeY;
-        boolean mAutoScale;
-        float mBitmapScale;
-        float mTargetDensityScale = 1.0f;
+        int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
 
         BitmapState(Bitmap bitmap) {
             mBitmap = bitmap;
-            if (bitmap != null) {
-                mBitmapScale = bitmap.getDensityScale();
-                mAutoScale = bitmap.isAutoScalingEnabled();
-            } else {
-                mBitmapScale = 1.0f;
-                mAutoScale = false;
-            }
         }
 
         BitmapState(BitmapState bitmapState) {
@@ -401,7 +416,7 @@ public class BitmapDrawable extends Drawable {
             mGravity = bitmapState.mGravity;
             mTileModeX = bitmapState.mTileModeX;
             mTileModeY = bitmapState.mTileModeY;
-            mTargetDensityScale = bitmapState.mTargetDensityScale;
+            mTargetDensity = bitmapState.mTargetDensity;
             mPaint = new Paint(bitmapState.mPaint);
         }
 
@@ -418,6 +433,7 @@ public class BitmapDrawable extends Drawable {
 
     private BitmapDrawable(BitmapState state) {
         mBitmapState = state;
+        mTargetDensity = state.mTargetDensity;
         setBitmap(state.mBitmap);
     }
 }

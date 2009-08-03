@@ -35,6 +35,7 @@ public abstract class GestureLibrary {
         return false;
     }
 
+    /** @hide */
     public Learner getLearner() {
         return mStore.getLearner();
     }

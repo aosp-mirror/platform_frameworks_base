@@ -28,13 +28,13 @@ import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
 
 
 /**
  * A Short Message Service message.
- * @hide
  */
 public class SmsMessage {
     private static final boolean LOCAL_DEBUG = true;
@@ -49,18 +49,6 @@ public class SmsMessage {
         UNKNOWN, CLASS_0, CLASS_1, CLASS_2, CLASS_3;
     }
 
-    /**
-     * TODO(cleanup): given that we now have more than one possible
-     * 7bit encoding, this result starts to look rather vague and
-     * maybe confusing...  If this is just an indication of code unit
-     * size, maybe that is no problem.  Otherwise, should we try to
-     * create an aggregate collection of GSM and CDMA encodings?  CDMA
-     * contains a superset of the encodings we use (it does not
-     * support 8-bit GSM, but we also do not use that encoding
-     * currently)...  We could get rid of these and directly reference
-     * the CDMA encoding definitions...
-     */
-
     /** User data text encoding code unit size */
     public static final int ENCODING_UNKNOWN = 0;
     public static final int ENCODING_7BIT = 1;
@@ -71,24 +59,9 @@ public class SmsMessage {
     public static final int MAX_USER_DATA_BYTES = 140;
 
     /**
-     * TODO(cleanup): It would be more flexible and less fragile to
-     * rewrite this (meaning get rid of the following constant) such
-     * that an actual UDH is taken into consideration (meaning its
-     * length is measured), allowing for messages that actually
-     * contain other UDH fields...  Hence it is actually a shame to
-     * extend the API with this constant.  If necessary, maybe define
-     * the size of such a header and let the math for calculating
-     * max_octets/septets be done elsewhere.  And, while I am griping,
-     * if we use the word septet, we should use the word octet in
-     * corresponding places, not byte...
-     */
-
-    /**
      * The maximum number of payload bytes per message if a user data header
      * is present.  This assumes the header only contains the
      * CONCATENATED_8_BIT_REFERENCE element.
-     *
-     * @hide pending API Council approval to extend the public API
      */
     public static final int MAX_USER_DATA_BYTES_WITH_HEADER = 134;
 
@@ -103,17 +76,26 @@ public class SmsMessage {
     public static final int MAX_USER_DATA_SEPTETS_WITH_HEADER = 153;
 
     /** Contains actual SmsMessage. Only public for debugging and for framework layer.
-    * {@hide}
-    */
+     *
+     * @hide
+     */
     public SmsMessageBase mWrappedSmsMessage;
 
-    public static class SubmitPdu extends SubmitPduBase {
+    public static class SubmitPdu {
 
-        //Constructor
-        public SubmitPdu() {
+        public byte[] encodedScAddress; // Null if not applicable.
+        public byte[] encodedMessage;
+
+        public String toString() {
+            return "SubmitPdu: encodedScAddress = "
+                    + Arrays.toString(encodedScAddress)
+                    + ", encodedMessage = "
+                    + Arrays.toString(encodedMessage);
         }
 
-        /* {@hide} */
+        /**
+         * @hide
+         */
         protected SubmitPdu(SubmitPduBase spb) {
             this.encodedMessage = spb.encodedMessage;
             this.encodedScAddress = spb.encodedScAddress;
@@ -121,7 +103,11 @@ public class SmsMessage {
 
     }
 
-    // Constructor
+    /**
+     * Constructor
+     *
+     * @hide
+     */
     public SmsMessage() {
         this(getSmsFacility());
     }
@@ -278,8 +264,8 @@ public class SmsMessage {
     public static int[] calculateLength(CharSequence msgBody, boolean use7bitOnly) {
         int activePhone = TelephonyManager.getDefault().getPhoneType();
         TextEncodingDetails ted = (PHONE_TYPE_CDMA == activePhone) ?
-            com.android.internal.telephony.gsm.SmsMessage.calculateLength(msgBody, use7bitOnly) :
-            com.android.internal.telephony.cdma.SmsMessage.calculateLength(msgBody, use7bitOnly);
+            com.android.internal.telephony.cdma.SmsMessage.calculateLength(msgBody, use7bitOnly) :
+            com.android.internal.telephony.gsm.SmsMessage.calculateLength(msgBody, use7bitOnly);
         int ret[] = new int[4];
         ret[0] = ted.msgCount;
         ret[1] = ted.codeUnitCount;
@@ -295,12 +281,14 @@ public class SmsMessage {
      * @param text text, must not be null.
      * @return an <code>ArrayList</code> of strings that, in order,
      *   comprise the original msg text
+     *
+     * @hide
      */
     public static ArrayList<String> fragmentText(String text) {
         int activePhone = TelephonyManager.getDefault().getPhoneType();
         TextEncodingDetails ted = (PHONE_TYPE_CDMA == activePhone) ?
-            com.android.internal.telephony.gsm.SmsMessage.calculateLength(text, false) :
-            com.android.internal.telephony.cdma.SmsMessage.calculateLength(text, false);
+            com.android.internal.telephony.cdma.SmsMessage.calculateLength(text, false) :
+            com.android.internal.telephony.gsm.SmsMessage.calculateLength(text, false);
 
         // TODO(cleanup): The code here could be rolled into the logic
         // below cleanly if these MAX_* constants were defined more
@@ -321,11 +309,8 @@ public class SmsMessage {
         while (pos < textLen) {
             int nextPos = 0;  // Counts code units.
             if (ted.codeUnitSize == ENCODING_7BIT) {
-                if (PHONE_TYPE_CDMA == activePhone) {
-                    nextPos = pos + Math.min(limit, textLen - pos);
-                } else {
-                    nextPos = GsmAlphabet.findGsmSeptetLimitIndex(text, pos, limit);
-                }
+                // For multi-segment messages, CDMA 7bit equals GSM 7bit encoding (EMS mode).
+                nextPos = GsmAlphabet.findGsmSeptetLimitIndex(text, pos, limit);
             } else {  // Assume unicode.
                 nextPos = pos + Math.min(limit / 2, textLen - pos);
             }
@@ -346,10 +331,11 @@ public class SmsMessage {
      * current encoding.
      *
      * @param messageBody the message to encode
-     * @param use7bitOnly if true, characters that are not part of the GSM
-     *         alphabet are counted as a single space char.  If false, a
-     *         messageBody containing non-GSM alphabet characters is calculated
-     *         for 16-bit encoding.
+     * @param use7bitOnly if true, characters that are not part of the radio
+     *         specific (GSM / CDMA) alphabet encoding are converted to as a
+     *         single space characters. If false, a messageBody containing
+     *         non-GSM or non-CDMA alphabet characters are encoded using
+     *         16-bit encoding.
      * @return an int[4] with int[0] being the number of SMS's required, int[1]
      *         the number of code units used, and int[2] is the number of code
      *         units remaining until the next message. int[3] is the encoding
@@ -691,6 +677,8 @@ public class SmsMessage {
     /** This method returns the reference to a specific
      *  SmsMessage object, which is used for accessing its static methods.
      * @return Specific SmsMessage.
+     *
+     * @hide
      */
     private static final SmsMessageBase getSmsFacility(){
         int activePhone = TelephonyManager.getDefault().getPhoneType();

@@ -52,6 +52,9 @@ import android.util.AndroidException;
  * categories, and components, and same flags), it will receive a IntentSender
  * representing the same token if that is still valid.
  *
+ * <p>Instances of this class can not be made directly, but rather must be
+ * created from an existing {@link android.app.PendingIntent} with
+ * {@link android.app.PendingIntent#getIntentSender() PendingIntent.getIntentSender()}.
  */
 public class IntentSender implements Parcelable {
     private final IIntentSender mTarget;
@@ -245,11 +248,13 @@ public class IntentSender implements Parcelable {
         return b != null ? new IntentSender(b) : null;
     }
 
-    protected IntentSender(IIntentSender target) {
+    /** @hide */
+    public IntentSender(IIntentSender target) {
         mTarget = target;
     }
 
-    protected IntentSender(IBinder target) {
+    /** @hide */
+    public IntentSender(IBinder target) {
         mTarget = IIntentSender.Stub.asInterface(target);
     }
 }

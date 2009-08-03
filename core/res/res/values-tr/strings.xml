@@ -134,8 +134,6 @@
     <string name="httpErrorFile">"Dosyaya erişilemedi."</string>
     <string name="httpErrorFileNotFound">"İstenen dosya bulunamadı."</string>
     <string name="httpErrorTooManyRequests">"Çok fazla sayıda istek işleniyor. Daha sonra yeniden deneyin."</string>
-    <!-- no translation found for certificateSaved (2832076323378077191) -->
-    <skip />
     <string name="contentServiceSync">"Senk."</string>
     <string name="contentServiceSyncNotificationTitle">"Senk."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"Çok fazla <xliff:g id="CONTENT_TYPE">%s</xliff:g> silme var."</string>

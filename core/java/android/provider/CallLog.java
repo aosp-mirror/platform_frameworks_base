@@ -151,34 +151,20 @@ public class CallLog {
                 int presentation, int callType, long start, int duration) {
             final ContentResolver resolver = context.getContentResolver();
 
-            // TODO(Moto): Which is correct: original code, this only changes the
-            // number if the number is empty and never changes the caller info name.
-        if (false) {
-            if (TextUtils.isEmpty(number)) {
-                if (presentation == Connection.PRESENTATION_RESTRICTED) {
-                    number = CallerInfo.PRIVATE_NUMBER;
-                } else if (presentation == Connection.PRESENTATION_PAYPHONE) {
-                    number = CallerInfo.PAYPHONE_NUMBER;
-                } else {
-                    number = CallerInfo.UNKNOWN_NUMBER;
-                }
-            }
-        } else {
-            // NEWCODE: From Motorola
-
-            //If this is a private number then set the number to Private, otherwise check
-            //if the number field is empty and set the number to Unavailable
+            // If this is a private number then set the number to Private, otherwise check
+            // if the number field is empty and set the number to Unavailable
             if (presentation == Connection.PRESENTATION_RESTRICTED) {
                 number = CallerInfo.PRIVATE_NUMBER;
-                ci.name = "";
+                if (ci != null) ci.name = "";
             } else if (presentation == Connection.PRESENTATION_PAYPHONE) {
                 number = CallerInfo.PAYPHONE_NUMBER;
-                ci.name = "";
-            } else if (TextUtils.isEmpty(number) || presentation == Connection.PRESENTATION_UNKNOWN) {
+                if (ci != null) ci.name = "";
+            } else if (TextUtils.isEmpty(number)
+                    || presentation == Connection.PRESENTATION_UNKNOWN) {
                 number = CallerInfo.UNKNOWN_NUMBER;
-                ci.name = "";
+                if (ci != null) ci.name = "";
             }
-        }
+
             ContentValues values = new ContentValues(5);
 
             values.put(NUMBER, number);

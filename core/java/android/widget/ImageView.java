@@ -317,7 +317,7 @@ public class ImageView extends View {
     public void setImageBitmap(Bitmap bm) {
         // if this is used frequently, may handle bitmaps explicitly
         // to reduce the intermediate drawable object
-        setImageDrawable(new BitmapDrawable(bm));
+        setImageDrawable(new BitmapDrawable(mContext.getResources(), bm));
     }
 
     public void setImageState(int[] state, boolean merge) {
@@ -463,6 +463,7 @@ public class ImageView extends View {
         if (matrix == null && !mMatrix.isIdentity() ||
                 matrix != null && !mMatrix.equals(matrix)) {
             mMatrix.set(matrix);
+            configureBounds();
             invalidate();
         }
     }

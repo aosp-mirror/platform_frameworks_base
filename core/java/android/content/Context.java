@@ -1283,7 +1283,8 @@ public abstract class Context {
      * Use with {@link #getSystemService} to retrieve an
      * {@blink android.backup.IBackupManager IBackupManager} for communicating
      * with the backup mechanism.
-     *
+     * @hide
+     * 
      * @see #getSystemService
      */
     public static final String BACKUP_SERVICE = "backup";

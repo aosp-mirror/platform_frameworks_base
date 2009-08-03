@@ -80,6 +80,11 @@ public class DisplayMetrics {
      */
     public float density;
     /**
+     * The screen density expressed as dots-per-inch.  May be either
+     * {@link #DENSITY_LOW}, {@link #DENSITY_MEDIUM}, or {@link #DENSITY_HIGH}.
+     */
+    public int densityDpi;
+    /**
      * A scaling factor for fonts displayed on the display.  This is the same
      * as {@link #density}, except that it may be adjusted in smaller
      * increments at runtime based on a user preference for the font size.
@@ -101,6 +106,7 @@ public class DisplayMetrics {
         widthPixels = o.widthPixels;
         heightPixels = o.heightPixels;
         density = o.density;
+        densityDpi = o.densityDpi;
         scaledDensity = o.scaledDensity;
         xdpi = o.xdpi;
         ydpi = o.ydpi;
@@ -110,6 +116,7 @@ public class DisplayMetrics {
         widthPixels = 0;
         heightPixels = 0;
         density = DENSITY_DEVICE / (float) DENSITY_DEFAULT;
+        densityDpi = DENSITY_DEVICE;
         scaledDensity = density;
         xdpi = DENSITY_DEVICE;
         ydpi = DENSITY_DEVICE;
@@ -186,9 +193,11 @@ public class DisplayMetrics {
                 heightPixels = defaultHeight;
             }
         }
+        
         if (compatibilityInfo.isScalingRequired()) {
             float invertedRatio = compatibilityInfo.applicationInvertedScale;
             density *= invertedRatio;
+            densityDpi = (int)((density*DisplayMetrics.DENSITY_DEFAULT)+.5f);
             scaledDensity *= invertedRatio;
             xdpi *= invertedRatio;
             ydpi *= invertedRatio;

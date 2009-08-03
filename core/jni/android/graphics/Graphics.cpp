@@ -163,7 +163,6 @@ static jfieldID gBitmapConfig_nativeInstanceID;
 
 static jclass   gCanvas_class;
 static jfieldID gCanvas_nativeInstanceID;
-static jfieldID gCanvas_densityScaleID;
 
 static jclass   gPaint_class;
 static jfieldID gPaint_nativeInstanceID;
@@ -318,13 +317,6 @@ SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
     SkCanvas* c = (SkCanvas*)env->GetIntField(canvas, gCanvas_nativeInstanceID);
     SkASSERT(c);
     return c;
-}
-
-SkScalar GraphicsJNI::getCanvasDensityScale(JNIEnv* env, jobject canvas) {
-    SkASSERT(env);
-    SkASSERT(canvas);
-    SkASSERT(env->IsInstanceOf(canvas, gCanvas_class));
-    return SkFloatToScalar(env->GetFloatField(canvas, gCanvas_densityScaleID));
 }
 
 SkPaint* GraphicsJNI::getNativePaint(JNIEnv* env, jobject paint) {
@@ -557,7 +549,6 @@ int register_android_graphics_Graphics(JNIEnv* env)
 
     gCanvas_class = make_globalref(env, "android/graphics/Canvas");
     gCanvas_nativeInstanceID = getFieldIDCheck(env, gCanvas_class, "mNativeCanvas", "I");
-    gCanvas_densityScaleID = getFieldIDCheck(env, gCanvas_class, "mDensityScale", "F");
 
     gPaint_class = make_globalref(env, "android/graphics/Paint");
     gPaint_nativeInstanceID = getFieldIDCheck(env, gPaint_class, "mNativePaint", "I");

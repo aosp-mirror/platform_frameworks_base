@@ -43,25 +43,23 @@ static int Color_HSVToColor(JNIEnv* env, jobject, int alpha, jfloatArray hsvArra
 
 static void Shader_destructor(JNIEnv* env, jobject, SkShader* shader)
 {
-    SkASSERT(shader != NULL);
-    shader->unref();
+    shader->safeUnref();
 }
 
 static bool Shader_getLocalMatrix(JNIEnv* env, jobject, const SkShader* shader, SkMatrix* matrix)
 {
-    SkASSERT(shader != NULL);    
-    return shader->getLocalMatrix(matrix);
+    return shader ? shader->getLocalMatrix(matrix) : false;
 }
  
 static void Shader_setLocalMatrix(JNIEnv* env, jobject, SkShader* shader, const SkMatrix* matrix)
 {
-    SkASSERT(shader != NULL);
-    
-    if (NULL == matrix) {
-        shader->resetLocalMatrix();
-    }
-    else {
-        shader->setLocalMatrix(*matrix);
+    if (shader) {
+        if (NULL == matrix) {
+            shader->resetLocalMatrix();
+        }
+        else {
+            shader->setLocalMatrix(*matrix);
+        }
     }
 }
 

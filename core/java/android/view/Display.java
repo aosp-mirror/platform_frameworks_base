@@ -94,6 +94,7 @@ public class Display
         outMetrics.widthPixels  = getWidth();
         outMetrics.heightPixels = getHeight();
         outMetrics.density      = mDensity;
+        outMetrics.densityDpi   = (int)((mDensity*DisplayMetrics.DENSITY_DEFAULT)+.5f);
         outMetrics.scaledDensity= outMetrics.density;
         outMetrics.xdpi         = mDpiX;
         outMetrics.ydpi         = mDpiY;

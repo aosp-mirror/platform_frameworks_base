@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.*;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.StateSet;
 import android.util.Xml;
 import android.util.TypedValue;
@@ -657,9 +658,8 @@ public abstract class Drawable {
     }
 
     /**
-     * Create a drawable from an inputstream
-     *
-     * @hide pending API council approval
+     * Create a drawable from an inputstream, using the given resources and
+     * value to determine density information.
      */
     public static Drawable createFromResourceStream(Resources res, TypedValue value,
             InputStream is, String srcName) {
@@ -675,7 +675,17 @@ public abstract class Drawable {
             Rects only to drop them on the floor.
         */
         Rect pad = new Rect();
-        Bitmap  bm = BitmapFactory.decodeStream(res, value, is, pad, null);
+        
+        // Special stuff for compatibility mode: if the target density is not
+        // the same as the display density, but the resource -is- the same as
+        // the display density, then don't scale it down to the target density.
+        // This allows us to load the system's density-correct resources into
+        // an application in compatibility mode, without scaling those down
+        // to the compatibility density only to have them scaled back up when
+        // drawn to the screen.
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
+        Bitmap  bm = BitmapFactory.decodeResourceStream(res, value, is, pad, opts);
         if (bm != null) {
             byte[] np = bm.getNinePatchChunk();
             if (np == null || !NinePatch.isNinePatchChunk(np)) {
@@ -754,10 +764,13 @@ public abstract class Drawable {
         } else if (name.equals("bitmap")) {
             drawable = new BitmapDrawable();
             if (r != null) {
-               ((BitmapDrawable) drawable).setDensityScale(r.getDisplayMetrics());
+               ((BitmapDrawable) drawable).setTargetDensity(r.getDisplayMetrics());
             }
         } else if (name.equals("nine-patch")) {
             drawable = new NinePatchDrawable();
+            if (r != null) {
+                ((NinePatchDrawable) drawable).setTargetDensity(r.getDisplayMetrics());
+             }
         } else {
             throw new XmlPullParserException(parser.getPositionDescription() +
                     ": invalid drawable tag " + name);
@@ -812,15 +825,10 @@ public abstract class Drawable {
             Rect pad, String srcName) {
 
         if (np != null) {
-            return new NinePatchDrawable(bm, np, pad, srcName);
+            return new NinePatchDrawable(res, bm, np, pad, srcName);
         }
 
-        final BitmapDrawable drawable = new BitmapDrawable(bm);
-        if (res != null) {
-            drawable.setDensityScale(res.getDisplayMetrics());
-        }
-
-        return drawable;
+        return new BitmapDrawable(res, bm);
     }
 }
 

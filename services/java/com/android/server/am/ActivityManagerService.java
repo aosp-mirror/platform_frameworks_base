@@ -184,8 +184,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int LOG_BOOT_PROGRESS_ENABLE_SCREEN = 3050;
 
     // The flags that are set for all calls we make to the package manager.
-    static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES
-            | PackageManager.GET_SUPPORTS_DENSITIES;
+    static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
     
     private static final String SYSTEM_SECURE = "ro.secure";
 
@@ -722,6 +721,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * currently running in, so this object must be kept immutable.
      */
     Configuration mConfiguration = new Configuration();
+
+    /**
+     * Hardware-reported OpenGLES version.
+     */
+    final int GL_ES_VERSION;
 
     /**
      * List of initialization arguments to pass to all processes when binding applications to them.
@@ -1395,6 +1399,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         mUsageStatsService = new UsageStatsService( new File(
                 systemDir, "usagestats").toString());
+
+        GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
+            ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
 
         mConfiguration.makeDefault();
         mProcessStats.init();
@@ -4728,6 +4735,57 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
+    }
+
+    /*
+     * The pkg name and uid have to be specified.
+     * @see android.app.IActivityManager#killApplicationWithUid(java.lang.String, int)
+     */
+    public void killApplicationWithUid(String pkg, int uid) {
+        if (pkg == null) {
+            return;
+        }
+        // Make sure the uid is valid.
+        if (uid < 0) {
+            Log.w(TAG, "Invalid uid specified for pkg : " + pkg);
+            return;
+        }
+        int callerUid = Binder.getCallingUid();
+        // Only the system server can kill an application
+        if (callerUid == Process.SYSTEM_UID) {
+            uninstallPackageLocked(pkg, uid, false);
+        } else {
+            throw new SecurityException(callerUid + " cannot kill pkg: " +
+                    pkg);
+        }
+    }
+
+    public void closeSystemDialogs(String reason) {
+        Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        if (reason != null) {
+            intent.putExtra("reason", reason);
+        }
+        
+        final int uid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (this) {
+            int i = mWatchers.beginBroadcast();
+            while (i > 0) {
+                i--;
+                IActivityWatcher w = mWatchers.getBroadcastItem(i);
+                if (w != null) {
+                    try {
+                        w.closingSystemDialogs(reason);
+                    } catch (RemoteException e) {
+                    }
+                }
+            }
+            mWatchers.finishBroadcast();
+            
+            broadcastIntentLocked(null, null, intent, null,
+                    null, 0, null, null, null, false, false, -1, uid);
+        }
+        Binder.restoreCallingIdentity(origId);
     }
     
     private void restartPackageLocked(final String packageName, int uid) {
@@ -11847,6 +11905,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     && mConfiguration.keyboard != Configuration.KEYBOARD_NOKEYS) {
                 config.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD;
             }
+            config.reqGlEsVersion = GL_ES_VERSION;
         }
         return config;
     }

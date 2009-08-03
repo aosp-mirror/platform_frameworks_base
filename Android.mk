@@ -349,7 +349,7 @@ web_docs_sample_code_flags := \
 # most current Android platform version included in the SDK package. 
 framework_docs_SDK_VERSION :=  1.5
 # release version for SDK (ie "Release x")
-framework_docs_SDK_REL_ID :=   2
+framework_docs_SDK_REL_ID :=   3
 framework_docs_SDK_CURRENT_DIR := $(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
@@ -416,7 +416,8 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		$(web_docs_sample_code_flags) \
 		-toroot / \
-		-hdf android.whichdoc online
+		-hdf android.whichdoc online \
+		-hdf template.showLanguageMenu true
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk

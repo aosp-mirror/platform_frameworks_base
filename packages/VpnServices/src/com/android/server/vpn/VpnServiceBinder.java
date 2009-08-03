@@ -27,15 +27,25 @@ import android.net.vpn.VpnManager;
 import android.net.vpn.VpnProfile;
 import android.net.vpn.VpnState;
 import android.os.IBinder;
+import android.util.Log;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /**
  * The service class for managing a VPN connection. It implements the
  * {@link IVpnService} binder interface.
  */
 public class VpnServiceBinder extends Service {
-    private final String TAG = VpnServiceBinder.class.getSimpleName();
+    private static final String TAG = VpnServiceBinder.class.getSimpleName();
+    private static final boolean DBG = true;
+
+    private static final String STATES_FILE_PATH = "/data/misc/vpn/.states";
 
     // The actual implementation is delegated to the VpnService class.
     private VpnService<? extends VpnProfile> mService;
@@ -46,7 +56,7 @@ public class VpnServiceBinder extends Service {
         }
 
         public void disconnect() {
-            if (mService != null) mService.onDisconnect(true);
+            VpnServiceBinder.this.disconnect();
         }
 
         public void checkStatus(VpnProfile p) {
@@ -54,21 +64,61 @@ public class VpnServiceBinder extends Service {
         }
     };
 
-    public void onStart (Intent intent, int startId) {
-        super.onStart(intent, startId);
-        setForeground(true);
-        android.util.Log.d("VpnServiceBinder", "becomes a foreground service");
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        checkSavedStates();
     }
 
+
+    @Override
+    public void onStart(Intent intent, int startId) {
+        super.onStart(intent, startId);
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
-    private synchronized boolean connect(
-            VpnProfile p, String username, String password) {
+    void saveStates() throws IOException {
+        if (DBG) Log.d("VpnServiceBinder", "     saving states");
+        ObjectOutputStream oos =
+                new ObjectOutputStream(new FileOutputStream(STATES_FILE_PATH));
+        oos.writeObject(mService);
+        oos.close();
+    }
+
+    void removeStates() {
+        try {
+            new File(STATES_FILE_PATH).delete();
+        } catch (Throwable e) {
+            if (DBG) Log.d("VpnServiceBinder", "     remove states: " + e);
+        }
+    }
+
+    private synchronized boolean connect(final VpnProfile p,
+            final String username, final String password) {
         if (mService != null) return false;
-        mService = createService(p);
-        return mService.onConnect(username, password);
+        final VpnService s = mService = createService(p);
+
+        new Thread(new Runnable() {
+            public void run() {
+                s.onConnect(username, password);
+            }
+        }).start();
+        return true;
+    }
+
+    private synchronized void disconnect() {
+        if (mService == null) return;
+        final VpnService s = mService;
+
+        new Thread(new Runnable() {
+            public void run() {
+                s.onDisconnect();
+            }
+        }).start();
     }
 
     private synchronized void checkStatus(VpnProfile p) {
@@ -77,6 +127,21 @@ public class VpnServiceBinder extends Service {
             broadcastConnectivity(p.getName(), VpnState.IDLE);
         } else {
             broadcastConnectivity(p.getName(), mService.getState());
+        }
+    }
+
+    private void checkSavedStates() {
+        try {
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
+                    STATES_FILE_PATH));
+            mService = (VpnService<? extends VpnProfile>) ois.readObject();
+            mService.recover(this);
+            ois.close();
+        } catch (FileNotFoundException e) {
+            // do nothing
+        } catch (Throwable e) {
+            Log.i("VpnServiceBinder", "recovery error, remove states: " + e);
+            removeStates();
         }
     }
 

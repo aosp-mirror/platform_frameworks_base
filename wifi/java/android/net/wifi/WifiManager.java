@@ -870,7 +870,10 @@ public class WifiManager {
      * Create a new MulticastLock
      *
      * @param tag a tag for the MulticastLock to identify it in debugging
-     *            messages.
+     *            messages.  This string is never shown to the user under
+     *            normal conditions, but should be descriptive enough to
+     *            identify your application and the specific MulticastLock
+     *            within it, if it holds multiple MulticastLocks.
      *
      * @return a new, unacquired MulticastLock with the given tag.
      *
@@ -886,26 +889,36 @@ public class WifiManager {
      * addressed to this device.  Acquring a MulticastLock will
      * cause the stack to receive packets addressed to multicast
      * addresses.  Processing these extra packets can cause a noticable
-     * battery drain and should be disabled when not needed
+     * battery drain and should be disabled when not needed.
      */
     public class MulticastLock {
         private String mTag;
         private final IBinder mBinder;
+        private int mRefCount;
+        private boolean mRefCounted;
         private boolean mHeld;
 
         private MulticastLock(String tag) {
             mTag = tag;
             mBinder = new Binder();
+            mRefCount = 0;
+            mRefCounted = true;
             mHeld = false;
         }
 
         /**
          * Locks Wifi Multicast on until {@link #release} is called.
          *
-         * The first call to {@code acquire} will lock the Multicast on
-         * but subsequent calls will be ignored.  Only one call to
-         * {@link #release} will be required, regardless of the number of
-         * times that {@code acquire} is called.
+         * If this MulticastLock is reference-counted each call to
+         * {@code acquire} will increment the reference count, and the
+         * wifi interface will receive multicast packets as long as the
+         * reference count is above zero.
+         *
+         * If this MulticastLock is not reference-counted, the first call to
+         * {@code acquire} will turn on the multicast packets, but subsequent
+         * calls will be ignored.  Only one call to {@link #release} will
+         * be required, regardless of the number of times that {@code acquire}
+         * is called.
          *
          * Note that other applications may also lock Wifi Multicast on.
          * Only they can relinquish their lock.
@@ -915,7 +928,7 @@ public class WifiManager {
          */
         public void acquire() {
             synchronized (mBinder) {
-                if (!mHeld) {
+                if (mRefCounted ? (++mRefCount > 0) : (!mHeld)) {
                     try {
                         mService.acquireMulticastLock(mBinder, mTag);
                         synchronized (WifiManager.this) {
@@ -926,9 +939,9 @@ public class WifiManager {
                             }
                             mActiveLockCount++;
                         }
-                        mHeld = true;
                     } catch (RemoteException ignore) {
                     }
+                    mHeld = true;
                 }
             }
         }
@@ -936,6 +949,18 @@ public class WifiManager {
         /**
          * Unlocks Wifi Multicast, restoring the filter of packets
          * not addressed specifically to this device and saving power.
+         *
+         * If this MulticastLock is reference-counted, each call to
+         * {@code release} will decrement the reference count, and the
+         * multicast packets will only stop being received when the reference
+         * count reaches zero.  If the reference count goes below zero (that
+         * is, if {@code release} is called a greater number of times than
+         * {@link #acquire}), an exception is thrown.
+         *
+         * If this MulticastLock is not reference-counted, the first call to
+         * {@code release} (after the radio was multicast locked using
+         * {@linke #acquire}) will unlock the multicast, and subsequent calls
+         * will be ignored.
          *
          * Note that if any other Wifi Multicast Locks are still outstanding
          * this {@code release} call will not have an immediate effect.  Only
@@ -947,17 +972,40 @@ public class WifiManager {
          */
         public void release() {
             synchronized (mBinder) {
-                if (mHeld) {
+                if (mRefCounted ? (--mRefCount == 0) : (mHeld)) {
                     try {
                         mService.releaseMulticastLock();
                         synchronized (WifiManager.this) {
                             mActiveLockCount--;
                         }
-                        mHeld = false;
                     } catch (RemoteException ignore) {
                     }
+                    mHeld = false;
+                }
+                if (mRefCount < 0) {
+                    throw new RuntimeException("MulticastLock under-locked "
+                            + mTag);
                 }
             }
+        }
+
+        /**
+         * Controls whether this is a reference-counted or non-reference-
+         * counted MulticastLock.
+         *
+         * Reference-counted MulticastLocks keep track of the number of calls
+         * to {@link #acquire} and {@link #release}, and only stop the
+         * reception of multicast packets when every call to {@link #acquire}
+         * has been balanced with a call to {@link #release}.  Non-reference-
+         * counted MulticastLocks allow the reception of multicast packets
+         * whenever {@link #acquire} is called and stop accepting multicast
+         * packets whenever {@link #release} is called.
+         *
+         * @param refCounted true if this MulticastLock should keep a reference
+         * count
+         */
+        public void setReferenceCounted(boolean refCounted) {
+            mRefCounted = refCounted;
         }
 
         /**
@@ -972,17 +1020,23 @@ public class WifiManager {
         }
 
         public String toString() {
-            String s1, s2;
+            String s1, s2, s3;
             synchronized (mBinder) {
                 s1 = Integer.toHexString(System.identityHashCode(this));
                 s2 = mHeld ? "held; " : "";
-                return "MulticastLock{ " + s1 + "; " + s2 + " }";
+                if (mRefCounted) {
+                    s3 = "refcounted: refcount = " + mRefCount;
+                } else {
+                    s3 = "not refcounted";
+                }
+                return "MulticastLock{ " + s1 + "; " + s2 + s3 + " }";
             }
         }
 
         @Override
         protected void finalize() throws Throwable {
             super.finalize();
+            setReferenceCounted(false);
             release();
         }
     }

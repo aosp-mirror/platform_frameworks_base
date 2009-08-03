@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -161,8 +162,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     private static final int MSG_REMOVE_PREVIEW = 2;
     private static final int MSG_REPEAT = 3;
     private static final int MSG_LONGPRESS = 4;
-    
-    private static final int DELAY_BEFORE_PREVIEW = 70;
+
+    private static final int DELAY_BEFORE_PREVIEW = 40;
     private static final int DELAY_AFTER_PREVIEW = 60;
     
     private int mVerticalCorrection;
@@ -825,10 +826,10 @@ public class KeyboardView extends View implements View.OnClickListener {
             mPreviewText.setCompoundDrawables(null, null, null, null);
             mPreviewText.setText(getPreviewText(key));
             if (key.label.length() > 1 && key.codes.length < 2) {
-                mPreviewText.setTextSize(mKeyTextSize);
+                mPreviewText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mKeyTextSize);
                 mPreviewText.setTypeface(Typeface.DEFAULT_BOLD);
             } else {
-                mPreviewText.setTextSize(mPreviewTextSizeLarge);
+                mPreviewText.setTextSize(TypedValue.COMPLEX_UNIT_PX, mPreviewTextSizeLarge);
                 mPreviewText.setTypeface(Typeface.DEFAULT);
             }
         }

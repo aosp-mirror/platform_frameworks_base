@@ -111,7 +111,6 @@
     <string name="httpErrorFile">"無法存取此檔案。"</string>
     <string name="httpErrorFileNotFound">"找不到要求的檔案。"</string>
     <string name="httpErrorTooManyRequests">"太多執行要求。請稍後再試一次。"</string>
-    <string name="certificateSaved">"憑證已儲存在系統的金鑰存放區。"</string>
     <string name="contentServiceSync">"同步處理"</string>
     <string name="contentServiceSyncNotificationTitle">"同步處理"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc">"同時刪除太多 <xliff:g id="CONTENT_TYPE">%s</xliff:g>。"</string>

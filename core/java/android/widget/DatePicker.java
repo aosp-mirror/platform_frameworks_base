@@ -31,6 +31,7 @@ import com.android.internal.widget.NumberPicker;
 import com.android.internal.widget.NumberPicker.OnChangedListener;
 
 import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -101,7 +102,8 @@ public class DatePicker extends FrameLayout {
         mMonthPicker = (NumberPicker) findViewById(R.id.month);
         mMonthPicker.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
         DateFormatSymbols dfs = new DateFormatSymbols();
-        mMonthPicker.setRange(1, 12, dfs.getShortMonths());
+        String[] months = dfs.getShortMonths();
+        mMonthPicker.setRange(1, 12, months);
         mMonthPicker.setSpeed(200);
         mMonthPicker.setOnChangeListener(new OnChangedListener() {
             public void onChanged(NumberPicker picker, int oldVal, int newVal) {
@@ -146,7 +148,7 @@ public class DatePicker extends FrameLayout {
         init(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), null);
         
         // re-order the number pickers to match the current date format
-        reorderPickers();
+        reorderPickers(months);
         
         if (!isEnabled()) {
             setEnabled(false);
@@ -161,29 +163,69 @@ public class DatePicker extends FrameLayout {
         mYearPicker.setEnabled(enabled);
     }
 
-    private void reorderPickers() {
-        char[] order = DateFormat.getDateFormatOrder(mContext);
-        
-        /* Default order is month, date, year so if that's the order then
-         * do nothing.
+    private void reorderPickers(String[] months) {
+        java.text.DateFormat format;
+        String order;
+
+        /*
+         * If the user is in a locale where the medium date format is
+         * still numeric (Japanese and Czech, for example), respect
+         * the date format order setting.  Otherwise, use the order
+         * that the locale says is appropriate for a spelled-out date.
          */
-        if ((order[0] == DateFormat.MONTH) && (order[1] == DateFormat.DATE)) {
-            return;
+
+        if (months[0].startsWith("1")) {
+            format = DateFormat.getDateFormat(getContext());
+        } else {
+            format = DateFormat.getMediumDateFormat(getContext());
         }
-        
+
+        if (format instanceof SimpleDateFormat) {
+            order = ((SimpleDateFormat) format).toPattern();
+        } else {
+            // Shouldn't happen, but just in case.
+            order = new String(DateFormat.getDateFormatOrder(getContext()));
+        }
+
         /* Remove the 3 pickers from their parent and then add them back in the
          * required order.
          */
         LinearLayout parent = (LinearLayout) findViewById(R.id.parent);
         parent.removeAllViews();
-        for (char c : order) {
-            if (c == DateFormat.DATE) {
-                parent.addView(mDayPicker);
-            } else if (c == DateFormat.MONTH) {
-                parent.addView(mMonthPicker);
-            } else {
-                parent.addView (mYearPicker);
+
+        boolean quoted = false;
+        boolean didDay = false, didMonth = false, didYear = false;
+
+        for (int i = 0; i < order.length(); i++) {
+            char c = order.charAt(i);
+
+            if (c == '\'') {
+                quoted = !quoted;
             }
+
+            if (!quoted) {
+                if (c == DateFormat.DATE && !didDay) {
+                    parent.addView(mDayPicker);
+                    didDay = true;
+                } else if ((c == DateFormat.MONTH || c == 'L') && !didMonth) {
+                    parent.addView(mMonthPicker);
+                    didMonth = true;
+                } else if (c == DateFormat.YEAR && !didYear) {
+                    parent.addView (mYearPicker);
+                    didYear = true;
+                }
+            }
+        }
+
+        // Shouldn't happen, but just in case.
+        if (!didMonth) {
+            parent.addView(mMonthPicker);
+        }
+        if (!didDay) {
+            parent.addView(mDayPicker);
+        }
+        if (!didYear) {
+            parent.addView(mYearPicker);
         }
     }
 
@@ -192,6 +234,7 @@ public class DatePicker extends FrameLayout {
         mMonth = monthOfYear;
         mDay = dayOfMonth;
         updateSpinners();
+        reorderPickers(new DateFormatSymbols().getShortMonths());
     }
 
     private static class SavedState extends BaseSavedState {
