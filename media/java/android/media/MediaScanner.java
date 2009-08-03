@@ -99,6 +99,7 @@ public class MediaScanner
 {
     static {
         System.loadLibrary("media_jni");
+        native_init();
     }
 
     private final static String TAG = "MediaScanner";
@@ -1404,6 +1405,7 @@ public class MediaScanner
 
     public native byte[] extractAlbumArt(FileDescriptor fd);
 
+    private static native final void native_init();
     private native final void native_setup();
     private native final void native_finalize();
     @Override

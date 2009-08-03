@@ -371,6 +371,53 @@ android_media_MediaRecorder_release(JNIEnv *env, jobject thiz)
     }
 }
 
+// This function gets some field IDs, which in turn causes class initialization.
+// It is called from a static block in MediaRecorder, which won't run until the
+// first time an instance of this class is used.
+static void
+android_media_MediaRecorder_native_init(JNIEnv *env)
+{
+    jclass clazz;
+
+    clazz = env->FindClass("android/media/MediaRecorder");
+    if (clazz == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/media/MediaRecorder");
+        return;
+    }
+
+    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    if (fields.context == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaRecorder.mNativeContext");
+        return;
+    }
+
+    fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
+    if (fields.surface == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaRecorder.mSurface");
+        return;
+    }
+
+    jclass surface = env->FindClass("android/view/Surface");
+    if (surface == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/view/Surface");
+        return;
+    }
+
+    fields.surface_native = env->GetFieldID(surface, "mSurface", "I");
+    if (fields.surface_native == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find Surface.mSurface");
+        return;
+    }
+
+    fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
+                                               "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+    if (fields.post_event == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "MediaRecorder.postEventFromNative");
+        return;
+    }
+}
+
+
 static void
 android_media_MediaRecorder_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
@@ -418,55 +465,19 @@ static JNINativeMethod gMethods[] = {
     {"getMaxAmplitude",      "()I",                             (void *)android_media_MediaRecorder_native_getMaxAmplitude},
     {"start",                "()V",                             (void *)android_media_MediaRecorder_start},
     {"stop",                 "()V",                             (void *)android_media_MediaRecorder_stop},
-    {"native_reset",                "()V",                             (void *)android_media_MediaRecorder_native_reset},
+    {"native_reset",         "()V",                             (void *)android_media_MediaRecorder_native_reset},
     {"release",              "()V",                             (void *)android_media_MediaRecorder_release},
+    {"native_init",          "()V",                             (void *)android_media_MediaRecorder_native_init},
     {"native_setup",         "(Ljava/lang/Object;)V",           (void *)android_media_MediaRecorder_native_setup},
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
 };
 
 static const char* const kClassPathName = "android/media/MediaRecorder";
 
+// This function only registers the native methods, and is called from
+// JNI_OnLoad in android_media_MediaPlayer.cpp
 int register_android_media_MediaRecorder(JNIEnv *env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass("android/media/MediaRecorder");
-    if (clazz == NULL) {
-        LOGE("Can't find android/media/MediaRecorder");
-        return -1;
-    }
-
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
-    if (fields.context == NULL) {
-        LOGE("Can't find MediaRecorder.mNativeContext");
-        return -1;
-    }
-
-    fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
-    if (fields.surface == NULL) {
-        LOGE("Can't find MediaRecorder.mSurface");
-        return -1;
-    }
-
-    jclass surface = env->FindClass("android/view/Surface");
-    if (surface == NULL) {
-        LOGE("Can't find android/view/Surface");
-        return -1;
-    }
-
-    fields.surface_native = env->GetFieldID(surface, "mSurface", "I");
-    if (fields.surface_native == NULL) {
-        LOGE("Can't find Surface fields");
-        return -1;
-    }
-
-    fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
-                                               "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-    if (fields.post_event == NULL) {
-        LOGE("Can't find MediaRecorder.postEventFromNative");
-        return -1;
-    }
-
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MediaRecorder", gMethods, NELEM(gMethods));
 }

@@ -40,6 +40,7 @@ struct fields_t {
 
 static fields_t fields;
 static Mutex sLock;
+static const char* const kClassPathName = "android/media/MediaMetadataRetriever";
 
 static void process_media_retriever_call(JNIEnv *env, status_t opStatus, const char* exception, const char *message)
 {
@@ -269,6 +270,36 @@ static void android_media_MediaMetadataRetriever_native_finalize(JNIEnv *env, jo
     android_media_MediaMetadataRetriever_release(env, thiz);
 }
 
+// This function gets a field ID, which in turn causes class initialization.
+// It is called from a static block in MediaMetadataRetriever, which won't run until the
+// first time an instance of this class is used.
+static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
+{
+    jclass clazz = env->FindClass(kClassPathName);
+    if (clazz == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/media/MediaMetadataRetriever");
+        return;
+    }
+
+    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    if (fields.context == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaMetadataRetriever.mNativeContext");
+        return;
+    }
+
+    fields.bitmapClazz = env->FindClass("android/graphics/Bitmap");
+    if (fields.bitmapClazz == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/graphics/Bitmap");
+        return;
+    }
+
+    fields.bitmapConstructor = env->GetMethodID(fields.bitmapClazz, "<init>", "(IZ[B)V");
+    if (fields.bitmapConstructor == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find Bitmap constructor");
+        return;
+    }
+}
+
 static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobject thiz)
 {
     LOGV("native_setup");
@@ -292,36 +323,13 @@ static JNINativeMethod nativeMethods[] = {
         {"release",         "()V", (void *)android_media_MediaMetadataRetriever_release},
         {"native_finalize", "()V", (void *)android_media_MediaMetadataRetriever_native_finalize},
         {"native_setup",    "()V", (void *)android_media_MediaMetadataRetriever_native_setup},
+        {"native_init",     "()V", (void *)android_media_MediaMetadataRetriever_native_init},
 };
 
-// Register native mehtods with Android runtime environment
+// This function only registers the native methods, and is called from
+// JNI_OnLoad in android_media_MediaPlayer.cpp
 int register_android_media_MediaMetadataRetriever(JNIEnv *env)
 {
-    static const char* const kClassPathName = "android/media/MediaMetadataRetriever";
-    jclass clazz = env->FindClass(kClassPathName);
-    if (clazz == NULL) {
-        LOGE("Can't find class: %s", kClassPathName);
-        return -1;
-    }
-
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
-    if (fields.context == NULL) {
-        LOGE("Can't find MediaMetadataRetriever.mNativeContext");
-        return -1;
-    }
-
-    fields.bitmapClazz = env->FindClass("android/graphics/Bitmap");
-    if (fields.bitmapClazz == NULL) {
-        LOGE("Bitmap class is not found");
-        return -1;
-    }
-
-    fields.bitmapConstructor = env->GetMethodID(fields.bitmapClazz, "<init>", "(IZ[B)V");
-    if (fields.bitmapConstructor == NULL) {
-        LOGE("Bitmap constructor is not found");
-        return -1;
-    }
-
     return AndroidRuntime::registerNativeMethods
-    (env, kClassPathName, nativeMethods, NELEM(nativeMethods));
+        (env, kClassPathName, nativeMethods, NELEM(nativeMethods));
 }

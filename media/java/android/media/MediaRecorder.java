@@ -57,6 +57,7 @@ public class MediaRecorder
 {
     static {
         System.loadLibrary("media_jni");
+        native_init();
     }
     private final static String TAG = "MediaRecorder";
 
@@ -654,6 +655,8 @@ public class MediaRecorder
      * using the MediaRecorder.
      */
     public native void release();
+
+    private static native final void native_init();
 
     private native final void native_setup(Object mediarecorder_this) throws IllegalStateException;
 

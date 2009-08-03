@@ -511,6 +511,51 @@ android_media_MediaPlayer_getMetadata(JNIEnv *env, jobject thiz, jboolean update
     return media_player->getMetadata(update_only, apply_filter, metadata) == OK;
 }
 
+// This function gets some field IDs, which in turn causes class initialization.
+// It is called from a static block in MediaPlayer, which won't run until the
+// first time an instance of this class is used.
+static void
+android_media_MediaPlayer_native_init(JNIEnv *env)
+{
+    jclass clazz;
+
+    clazz = env->FindClass("android/media/MediaPlayer");
+    if (clazz == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/media/MediaPlayer");
+        return;
+    }
+
+    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    if (fields.context == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaPlayer.mNativeContext");
+        return;
+    }
+
+    fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
+                                               "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+    if (fields.post_event == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaPlayer.postEventFromNative");
+        return;
+    }
+
+    fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
+    if (fields.surface == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaPlayer.mSurface");
+        return;
+    }
+
+    jclass surface = env->FindClass("android/view/Surface");
+    if (surface == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/view/Surface");
+        return;
+    }
+
+    fields.surface_native = env->GetFieldID(surface, "mSurface", "I");
+    if (fields.surface_native == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find Surface.mSurface");
+        return;
+    }
+}
 
 static void
 android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
@@ -576,53 +621,16 @@ static JNINativeMethod gMethods[] = {
     {"native_invoke",       "(Landroid/os/Parcel;Landroid/os/Parcel;)I",(void *)android_media_MediaPlayer_invoke},
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
     {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},
+    {"native_init",         "()V",                              (void *)android_media_MediaPlayer_native_init},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";
 
+// This function only registers the native methods
 static int register_android_media_MediaPlayer(JNIEnv *env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass("android/media/MediaPlayer");
-    if (clazz == NULL) {
-        LOGE("Can't find android/media/MediaPlayer");
-        return -1;
-    }
-
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
-    if (fields.context == NULL) {
-        LOGE("Can't find MediaPlayer.mNativeContext");
-        return -1;
-    }
-
-    fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
-                                               "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-    if (fields.post_event == NULL) {
-        LOGE("Can't find MediaPlayer.postEventFromNative");
-        return -1;
-    }
-
-    fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
-    if (fields.surface == NULL) {
-        LOGE("Can't find MediaPlayer.mSurface");
-        return -1;
-    }
-
-    jclass surface = env->FindClass("android/view/Surface");
-    if (surface == NULL) {
-        LOGE("Can't find android/view/Surface");
-        return -1;
-    }
-
-    fields.surface_native = env->GetFieldID(surface, "mSurface", "I");
-    if (fields.surface_native == NULL) {
-        LOGE("Can't find Surface fields");
-        return -1;
-    }
-
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MediaPlayer", gMethods, NELEM(gMethods));
 }

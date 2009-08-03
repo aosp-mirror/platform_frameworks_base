@@ -466,6 +466,7 @@ public class MediaPlayer
 
     static {
         System.loadLibrary("media_jni");
+        native_init();
     }
 
     private final static String TAG = "MediaPlayer";
@@ -1109,6 +1110,7 @@ public class MediaPlayer
      */
     private native final int native_setMetadataFilter(Parcel request);
 
+    private static native final void native_init();
     private native final void native_setup(Object mediaplayer_this);
     private native final void native_finalize();
 
