@@ -12,11 +12,9 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
     libopencore_player \
-    libopencore_author \
     libomx_amrenc_sharedlibrary \
     libandroid_runtime \
     libnativehelper \
-    libcutils \
     libutils \
     libbinder \
     libmedia \
