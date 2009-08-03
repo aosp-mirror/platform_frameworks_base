@@ -106,6 +106,7 @@ class LoadListener extends Handler implements EventHandler {
     private String   mErrorDescription;
     private SslError mSslError;
     private RequestHandle mRequestHandle;
+    private RequestHandle mSslErrorRequestHandle;
 
     // Request data. It is only valid when we are doing a load from the
     // cache. It is needed if the cache returns a redirect
@@ -693,7 +694,7 @@ class LoadListener extends Handler implements EventHandler {
      * IMPORTANT: as this is called from network thread, can't call native
      * directly
      */
-    public void handleSslErrorRequest(SslError error) {
+    public boolean handleSslErrorRequest(SslError error) {
         if (WebView.LOGV_ENABLED) {
             Log.v(LOGTAG,
                     "LoadListener.handleSslErrorRequest(): url:" + url() +
@@ -701,6 +702,15 @@ class LoadListener extends Handler implements EventHandler {
                     " certificate: " + error.getCertificate());
         }
         sendMessageInternal(obtainMessage(MSG_SSL_ERROR, error));
+        // if it has been canceled, return false so that the network thread
+        // won't be blocked. If it is not canceled, save the mRequestHandle
+        // so that if it is canceled when MSG_SSL_ERROR is handled, we can
+        // still call handleSslErrorResponse which will call restartConnection
+        // to unblock the network thread.
+        if (!mCancelled) {
+            mSslErrorRequestHandle = mRequestHandle;
+        }
+        return !mCancelled;
     }
 
     // Handle the ssl error on the WebCore thread.
@@ -708,7 +718,10 @@ class LoadListener extends Handler implements EventHandler {
         if (!mCancelled) {
             mSslError = error;
             Network.getInstance(mContext).handleSslErrorRequest(this);
+        } else if (mSslErrorRequestHandle != null) {
+            mSslErrorRequestHandle.handleSslErrorResponse(true);
         }
+        mSslErrorRequestHandle = null;
     }
 
     /**
