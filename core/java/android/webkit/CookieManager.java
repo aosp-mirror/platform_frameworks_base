@@ -23,9 +23,12 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * CookieManager manages cookies according to RFC2109 spec.
@@ -187,6 +190,14 @@ public final class CookieManager {
         public String toString() {
             return "domain: " + domain + "; path: " + path + "; name: " + name
                     + "; value: " + value;
+        }
+    }
+
+    private static final CookieComparator COMPARATOR = new CookieComparator();
+
+    private static final class CookieComparator implements Comparator<Cookie> {
+        public int compare(Cookie cookie1, Cookie cookie2) {
+            return cookie2.path.length() - cookie1.path.length();
         }
     }
 
@@ -401,8 +412,8 @@ public final class CookieManager {
         long now = System.currentTimeMillis();
         boolean secure = HTTPS.equals(uri.mScheme);
         Iterator<Cookie> iter = cookieList.iterator();
-        StringBuilder ret = new StringBuilder(256);
 
+        SortedSet<Cookie> cookieSet = new TreeSet<Cookie>(COMPARATOR);
         while (iter.hasNext()) {
             Cookie cookie = iter.next();
             if (cookie.domainMatch(hostAndPath[0]) &&
@@ -413,19 +424,26 @@ public final class CookieManager {
                     && (!cookie.secure || secure)
                     && cookie.mode != Cookie.MODE_DELETED) {
                 cookie.lastAcessTime = now;
-
-                if (ret.length() > 0) {
-                    ret.append(SEMICOLON);
-                    // according to RC2109, SEMICOLON is office separator,
-                    // but when log in yahoo.com, it needs WHITE_SPACE too.
-                    ret.append(WHITE_SPACE);
-                }
-
-                ret.append(cookie.name);
-                ret.append(EQUAL);
-                ret.append(cookie.value);
+                cookieSet.add(cookie);
             }
         }
+
+        StringBuilder ret = new StringBuilder(256);
+        Iterator<Cookie> setIter = cookieSet.iterator();
+        while (setIter.hasNext()) {
+            Cookie cookie = setIter.next();
+            if (ret.length() > 0) {
+                ret.append(SEMICOLON);
+                // according to RC2109, SEMICOLON is official separator,
+                // but when log in yahoo.com, it needs WHITE_SPACE too.
+                ret.append(WHITE_SPACE);
+            }
+
+            ret.append(cookie.name);
+            ret.append(EQUAL);
+            ret.append(cookie.value);
+        }
+
         if (ret.length() > 0) {
             if (DebugFlags.COOKIE_MANAGER) {
                 Log.v(LOGTAG, "getCookie: uri: " + uri + " value: " + ret);
