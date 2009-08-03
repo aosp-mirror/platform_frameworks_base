@@ -209,6 +209,10 @@ public class CertTool {
             }
             freeX509Certificate(handle);
         }
-        if (intent != null) context.startActivity(intent);
+        if (intent != null) {
+            context.startActivity(intent);
+        } else {
+            Log.w("CertTool", "incorrect data for addCertificate()");
+        }
     }
 }
