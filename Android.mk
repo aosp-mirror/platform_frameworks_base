@@ -332,7 +332,13 @@ framework_docs_LOCAL_JAVA_LIBRARIES := \
 
 framework_docs_LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
+# The since flag (-since N.xml API_LEVEL) is used to add API Level information
+# to the reference documentation. Must be in order of oldest to newest.
 framework_docs_LOCAL_DROIDDOC_OPTIONS := \
+    -since ./frameworks/base/api/1.xml 1 \
+    -since ./frameworks/base/api/2.xml 2 \
+    -since ./frameworks/base/api/3.xml 3 \
+    -since ./frameworks/base/api/current.xml Donut \
 		-error 1 -error 2 -warning 3 -error 4 -error 6 -error 8 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
