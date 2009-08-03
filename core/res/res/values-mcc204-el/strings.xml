@@ -15,5 +15,5 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="locale_replacement">"el_GR"</string>
+    <string name="locale_replacement" msgid="2972154133076909542">"el_GR"</string>
 </resources>
