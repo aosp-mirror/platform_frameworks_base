@@ -551,6 +551,86 @@ nAdapter1DCreate(JNIEnv *_env, jobject _this)
 // -----------------------------------
 
 static void
+nAdapter2DDestroy(JNIEnv *_env, jobject _this, jint adapter)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nAdapter2DDestroy, con(%p), adapter(%p)", con, (RsAdapter2D)adapter);
+    rsAdapter2DDestroy((RsAdapter2D)adapter);
+}
+
+static void
+nAdapter2DBindAllocation(JNIEnv *_env, jobject _this, jint adapter, jint alloc)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nAdapter2DBindAllocation, con(%p), adapter(%p), alloc(%p)", con, (RsAdapter2D)adapter, (RsAllocation)alloc);
+    rsAdapter2DBindAllocation((RsAdapter2D)adapter, (RsAllocation)alloc);
+}
+
+static void
+nAdapter2DSetConstraint(JNIEnv *_env, jobject _this, jint adapter, jint dim, jint value)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nAdapter2DSetConstraint, con(%p), adapter(%p), dim(%i), value(%i)", con, (RsAdapter2D)adapter, dim, value);
+    rsAdapter2DSetConstraint((RsAdapter2D)adapter, (RsDimension)dim, value);
+}
+
+static void
+nAdapter2DData_i(JNIEnv *_env, jobject _this, jint adapter, jintArray data)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAdapter2DData_i, con(%p), adapter(%p), len(%i)", con, (RsAdapter2D)adapter, len);
+    jint *ptr = _env->GetIntArrayElements(data, NULL);
+    rsAdapter2DData((RsAdapter2D)adapter, ptr);
+    _env->ReleaseIntArrayElements(data, ptr, 0/*JNI_ABORT*/);
+}
+
+static void
+nAdapter2DData_f(JNIEnv *_env, jobject _this, jint adapter, jfloatArray data)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAdapter2DData_f, con(%p), adapter(%p), len(%i)", con, (RsAdapter2D)adapter, len);
+    jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
+    rsAdapter2DData((RsAdapter2D)adapter, ptr);
+    _env->ReleaseFloatArrayElements(data, ptr, 0/*JNI_ABORT*/);
+}
+
+static void
+nAdapter2DSubData_i(JNIEnv *_env, jobject _this, jint adapter, jint xoff, jint yoff, jint w, jint h, jintArray data)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAdapter2DSubData_i, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)",
+            con, (RsAdapter2D)adapter, xoff, yoff, w, h, len);
+    jint *ptr = _env->GetIntArrayElements(data, NULL);
+    rsAdapter2DSubData((RsAdapter2D)adapter, xoff, yoff, w, h, ptr);
+    _env->ReleaseIntArrayElements(data, ptr, 0/*JNI_ABORT*/);
+}
+
+static void
+nAdapter2DSubData_f(JNIEnv *_env, jobject _this, jint adapter, jint xoff, jint yoff, jint w, jint h, jfloatArray data)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAdapter2DSubData_f, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)",
+            con, (RsAdapter2D)adapter, xoff, yoff, w, h, len);
+    jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
+    rsAdapter2DSubData((RsAdapter1D)adapter, xoff, yoff, w, h, ptr);
+    _env->ReleaseFloatArrayElements(data, ptr, 0/*JNI_ABORT*/);
+}
+
+static jint
+nAdapter2DCreate(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nAdapter2DCreate, con(%p)", con);
+    return (jint)rsAdapter2DCreate();
+}
+
+// -----------------------------------
+
+static void
 nScriptDestroy(JNIEnv *_env, jobject _this, jint script)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -1058,10 +1138,19 @@ static JNINativeMethod methods[] = {
 {"nAdapter1DBindAllocation",       "(II)V",                                (void*)nAdapter1DBindAllocation },
 {"nAdapter1DSetConstraint",        "(III)V",                               (void*)nAdapter1DSetConstraint },
 {"nAdapter1DData",                 "(I[I)V",                               (void*)nAdapter1DData_i },
-{"nAdapter1DSubData",              "(III[I)V",                             (void*)nAdapter1DSubData_i },
 {"nAdapter1DData",                 "(I[F)V",                               (void*)nAdapter1DData_f },
+{"nAdapter1DSubData",              "(III[I)V",                             (void*)nAdapter1DSubData_i },
 {"nAdapter1DSubData",              "(III[F)V",                             (void*)nAdapter1DSubData_f },
 {"nAdapter1DCreate",               "()I",                                  (void*)nAdapter1DCreate },
+
+{"nAdapter2DDestroy",              "(I)V",                                 (void*)nAdapter2DDestroy },
+{"nAdapter2DBindAllocation",       "(II)V",                                (void*)nAdapter2DBindAllocation },
+{"nAdapter2DSetConstraint",        "(III)V",                               (void*)nAdapter2DSetConstraint },
+{"nAdapter2DData",                 "(I[I)V",                               (void*)nAdapter2DData_i },
+{"nAdapter2DData",                 "(I[F)V",                               (void*)nAdapter2DData_f },
+{"nAdapter2DSubData",              "(IIIII[I)V",                           (void*)nAdapter2DSubData_i },
+{"nAdapter2DSubData",              "(IIIII[F)V",                           (void*)nAdapter2DSubData_f },
+{"nAdapter2DCreate",               "()I",                                  (void*)nAdapter2DCreate },
 
 {"nScriptDestroy",                 "(I)V",                                 (void*)nScriptDestroy },
 {"nScriptBindAllocation",          "(III)V",                               (void*)nScriptBindAllocation },

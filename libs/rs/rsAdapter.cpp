@@ -61,8 +61,8 @@ void Adapter1D::subData(uint32_t xoff, uint32_t count, const void *data)
 
 void Adapter1D::data(const void *data)
 {
-    memcpy(getElement(0), 
-           data, 
+    memcpy(getElement(0),
+           data,
            mAllocation.get()->getType()->getSizeBytes());
 }
 
@@ -71,7 +71,9 @@ namespace renderscript {
 
 RsAdapter1D rsi_Adapter1DCreate(Context *rsc)
 {
-    return new Adapter1D();
+    Adapter1D *a = new Adapter1D();
+    a->incRef();
+    return a;
 }
 
 void rsi_Adapter1DDestroy(Context *rsc, RsAdapter1D va)
@@ -176,8 +178,8 @@ void Adapter2D::subData(uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, co
 
 void Adapter2D::data(const void *data)
 {
-    memcpy(getElement(0,0), 
-           data, 
+    memcpy(getElement(0,0),
+           data,
            mAllocation.get()->getType()->getSizeBytes());
 }
 
@@ -188,7 +190,9 @@ namespace renderscript {
 
 RsAdapter2D rsi_Adapter2DCreate(Context *rsc)
 {
-    return new Adapter2D();
+    Adapter2D *a = new Adapter2D();
+    a->incRef();
+    return a;
 }
 
 void rsi_Adapter2DDestroy(Context *rsc, RsAdapter2D va)

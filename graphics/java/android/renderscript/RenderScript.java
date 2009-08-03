@@ -113,10 +113,19 @@ public class RenderScript {
     native void nAdapter1DBindAllocation(int ad, int alloc);
     native void nAdapter1DSetConstraint(int ad, int dim, int value);
     native void nAdapter1DData(int ad, int[] d);
-    native void nAdapter1DSubData(int ad, int off, int count, int[] d);
     native void nAdapter1DData(int ad, float[] d);
+    native void nAdapter1DSubData(int ad, int off, int count, int[] d);
     native void nAdapter1DSubData(int ad, int off, int count, float[] d);
     native int  nAdapter1DCreate();
+
+    native void nAdapter2DDestroy(int id);
+    native void nAdapter2DBindAllocation(int ad, int alloc);
+    native void nAdapter2DSetConstraint(int ad, int dim, int value);
+    native void nAdapter2DData(int ad, int[] d);
+    native void nAdapter2DData(int ad, float[] d);
+    native void nAdapter2DSubData(int ad, int xoff, int yoff, int w, int h, int[] d);
+    native void nAdapter2DSubData(int ad, int xoff, int yoff, int w, int h, float[] d);
+    native int  nAdapter2DCreate();
 
     native void nScriptDestroy(int script);
     native void nScriptBindAllocation(int vtm, int alloc, int slot);
@@ -719,19 +728,6 @@ public class RenderScript {
     public void contextBindProgramVertex(ProgramVertex pf) {
         nContextBindProgramVertex(pf.mID);
     }
-
-/*
-    RsAdapter2D rsAdapter2DCreate ();
-    void rsAdapter2DBindAllocation (RsAdapter2D adapt, RsAllocation alloc);
-    void rsAdapter2DDestroy (RsAdapter2D adapter);
-    void rsAdapter2DSetConstraint (RsAdapter2D adapter, RsDimension dim, uint32_t value);
-    void rsAdapter2DData (RsAdapter2D adapter, const void * data);
-    void rsAdapter2DSubData (RsAdapter2D adapter, uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void * data);
-    void rsSamplerBegin ();
-    void rsSamplerSet (RsSamplerParam p, RsSamplerValue value);
-    RsSampler rsSamplerCreate ();
-    void rsSamplerBind (RsSampler sampler, RsAllocation alloc);
-*/
 
 }
 
