@@ -15,5 +15,8 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="5400580392303600842">"Sincronizzazione feed"</string>
+    <string name="app_label" msgid="4589592829302498102">"VPNサービス"</string>
+    <string name="vpn_notification_title_connected" msgid="2567196609405266775">"%s VPNが接続されました"</string>
+    <string name="vpn_notification_title_disconnected" msgid="3564361788336568244">"%s VPNが切断されました"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="1952209867082269429">"タップしてVPNに再接続してください。"</string>
 </resources>
