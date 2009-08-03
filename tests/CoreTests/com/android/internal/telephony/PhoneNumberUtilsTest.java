@@ -335,4 +335,73 @@ public class PhoneNumberUtilsTest extends TestCase {
         assertEquals("(800) 222-3334",
                      PhoneNumberUtils.convertKeypadLettersToDigits("(800) ABC-DEFG"));
     }
+
+    @SmallTest
+    public void testCheckAndProcessPlusCode() {
+        assertEquals("8475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+8475797000"));
+        assertEquals("18475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+18475797000"));
+        assertEquals("0111234567",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+1234567"));
+        assertEquals("01123456700000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+23456700000"));
+        assertEquals("01111875767800",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+11875767800"));
+        assertEquals("8475797000,18475231753",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,+18475231753"));
+        assertEquals("8475797000,18475231753",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+8475797000,+18475231753"));
+        assertEquals("8475797000;8475231753",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000;+8475231753"));
+        assertEquals("8475797000,0111234567",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,+1234567"));
+        assertEquals("847597000;01111875767000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("847597000;+11875767000"));
+        assertEquals("8475797000,,8475231753",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,,+8475231753"));
+        assertEquals("8475797000;,8475231753",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000;,+8475231753"));
+        assertEquals("8475797000,;18475231753",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,;+18475231753"));
+        assertEquals("8475797000;,01111875767000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000;,+11875767000"));
+        assertEquals("8475797000,;01111875767000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,;+11875767000"));
+        assertEquals("8475797000,,,01111875767000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,,,+11875767000"));
+        assertEquals("8475797000;,,01111875767000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000;,,+11875767000"));
+        assertEquals("+;,8475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+;,8475797000"));
+        assertEquals("8475797000,",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,"));
+        assertEquals("847+579-7000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("847+579-7000"));
+        assertEquals(",8475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode(",8475797000"));
+        assertEquals(";;8475797000,,",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode(";;8475797000,,"));
+        assertEquals("+this+is$weird;,+",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+this+is$weird;,+"));
+        assertEquals("",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode(""));
+        assertNull(PhoneNumberUtils.cdmaCheckAndProcessPlusCode(null));
+    }
+
+    @SmallTest
+    public void testCheckAndProcessPlusCodeByNumberFormat() {
+        assertEquals("+8475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCodeByNumberFormat("+8475797000",
+                PhoneNumberUtils.FORMAT_JAPAN));
+        assertEquals("+0384756700",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCodeByNumberFormat("+0384756700",
+                PhoneNumberUtils.FORMAT_JAPAN));
+        assertEquals("+1234567",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCodeByNumberFormat("+1234567",
+                PhoneNumberUtils.FORMAT_UNKNOWN));
+        assertEquals("+23456700000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCodeByNumberFormat("+23456700000",
+                PhoneNumberUtils.FORMAT_UNKNOWN));
+    }
 }
