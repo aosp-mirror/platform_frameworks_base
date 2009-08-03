@@ -90,12 +90,12 @@ public class Allocation extends BaseObj {
             mRS.nAdapter1DData(mID, d);
         }
 
-        public void subData(int off, int count, int[] d) {
-            mRS.nAdapter1DSubData(mID, off, count, d);
-        }
-
         public void data(float[] d) {
             mRS.nAdapter1DData(mID, d);
+        }
+
+        public void subData(int off, int count, int[] d) {
+            mRS.nAdapter1DSubData(mID, off, count, d);
         }
 
         public void subData(int off, int count, float[] d) {
@@ -111,6 +111,46 @@ public class Allocation extends BaseObj {
         return new Adapter1D(id, mRS);
     }
 
+
+    public class Adapter2D extends BaseObj {
+        Adapter2D(int id, RenderScript rs) {
+            super(rs);
+            mID = id;
+        }
+
+        public void destroy() {
+            mRS.nAdapter2DDestroy(mID);
+            mID = 0;
+        }
+
+        public void setConstraint(Dimension dim, int value) {
+            mRS.nAdapter2DSetConstraint(mID, dim.mID, value);
+        }
+
+        public void data(int[] d) {
+            mRS.nAdapter2DData(mID, d);
+        }
+
+        public void data(float[] d) {
+            mRS.nAdapter2DData(mID, d);
+        }
+
+        public void subData(int xoff, int yoff, int w, int h, int[] d) {
+            mRS.nAdapter2DSubData(mID, xoff, yoff, w, h, d);
+        }
+
+        public void subData(int xoff, int yoff, int w, int h, float[] d) {
+            mRS.nAdapter2DSubData(mID, xoff, yoff, w, h, d);
+        }
+    }
+
+    public Adapter2D createAdapter2D() {
+        int id = mRS.nAdapter2DCreate();
+        if (id != 0) {
+            mRS.nAdapter2DBindAllocation(id, mID);
+        }
+        return new Adapter2D(id, mRS);
+    }
 
 
     // creation

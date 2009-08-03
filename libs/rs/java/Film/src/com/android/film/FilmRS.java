@@ -28,6 +28,7 @@ import android.renderscript.ProgramVertexAlloc;
 import android.renderscript.RenderScript;
 import android.renderscript.Element;
 import android.renderscript.Allocation;
+import android.renderscript.Dimension;
 
 public class FilmRS {
     private final int POS_TRANSLATE = 0;
@@ -175,7 +176,23 @@ public class FilmRS {
         mImages[11] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p12, ie, true);
         mImages[12] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p13, ie, true);
 
+        int black[] = new int[1024];
         for(int ct=0; ct < mImages.length; ct++) {
+            Allocation.Adapter2D a = mImages[ct].createAdapter2D();
+
+            int size = 512;
+            int mip = 0;
+            while(size >= 2) {
+                a.subData(0, 0, 2, size, black);
+                a.subData(size-2, 0, 2, size, black);
+                a.subData(0, 0, size, 2, black);
+                a.subData(0, size-2, size, 2, black);
+                size >>= 1;
+                mip++;
+                a.setConstraint(Dimension.LOD, mip);
+            }
+            a.destroy();
+
             mImages[ct].uploadToTexture(1);
             mBufferIDs[ct] = mImages[ct].getID();
         }
