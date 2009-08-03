@@ -241,6 +241,27 @@ done:
     return array;
 }
 
+// This function gets a field ID, which in turn causes class initialization.
+// It is called from a static block in MediaScanner, which won't run until the
+// first time an instance of this class is used.
+static void
+android_media_MediaScanner_native_init(JNIEnv *env)
+{
+     jclass clazz;
+
+    clazz = env->FindClass("android/media/MediaScanner");
+    if (clazz == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/media/MediaScanner");
+        return;
+    }
+
+    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    if (fields.context == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaScanner.mNativeContext");
+        return;
+    }
+}
+
 static void
 android_media_MediaScanner_native_setup(JNIEnv *env, jobject thiz)
 {
@@ -275,28 +296,17 @@ static JNINativeMethod gMethods[] = {
                                                         (void *)android_media_MediaScanner_processFile},
     {"setLocale",         "(Ljava/lang/String;)V",      (void *)android_media_MediaScanner_setLocale},
     {"extractAlbumArt",   "(Ljava/io/FileDescriptor;)[B",     (void *)android_media_MediaScanner_extractAlbumArt},
+    {"native_init",        "()V",                      (void *)android_media_MediaScanner_native_init},
     {"native_setup",        "()V",                      (void *)android_media_MediaScanner_native_setup},
     {"native_finalize",     "()V",                      (void *)android_media_MediaScanner_native_finalize},
 };
 
 static const char* const kClassPathName = "android/media/MediaScanner";
 
+// This function only registers the native methods, and is called from
+// JNI_OnLoad in android_media_MediaPlayer.cpp
 int register_android_media_MediaScanner(JNIEnv *env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass("android/media/MediaScanner");
-    if (clazz == NULL) {
-        LOGE("Can't find android/media/MediaScanner");
-        return -1;
-    }
-
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
-    if (fields.context == NULL) {
-        LOGE("Can't find MediaScanner.mNativeContext");
-        return -1;
-    }
-
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MediaScanner", gMethods, NELEM(gMethods));
 }
