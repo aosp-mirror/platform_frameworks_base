@@ -342,7 +342,12 @@ void MPEG4Writer::Track::threadEntry() {
                 ++offset;
             }
 
-            assert(offset + 3 < size);
+            // assert(offset + 3 < size);
+            if (offset + 3 >= size) {
+                // XXX assume the entire first chunk of data is the codec specific
+                // data.
+                offset = size;
+            }
 
             mCodecSpecificDataSize = offset;
             mCodecSpecificData = malloc(offset);

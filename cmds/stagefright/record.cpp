@@ -114,8 +114,8 @@ int main(int argc, char **argv) {
     assert(success);
 
     sp<MetaData> enc_meta = new MetaData;
-    // enc_meta->setCString(kKeyMIMEType, "video/3gpp");
-    enc_meta->setCString(kKeyMIMEType, "video/mp4v-es");
+    enc_meta->setCString(kKeyMIMEType, "video/3gpp");
+    // enc_meta->setCString(kKeyMIMEType, "video/mp4v-es");
     enc_meta->setInt32(kKeyWidth, width);
     enc_meta->setInt32(kKeyHeight, height);
 
@@ -129,7 +129,8 @@ int main(int argc, char **argv) {
     MPEG4Writer writer("/sdcard/output.mp4");
     writer.addSource(enc_meta, encoder);
     writer.start();
-    sleep(120);
+    sleep(20);
+    printf("stopping now.\n");
     writer.stop();
 #else
     encoder->start();

@@ -91,8 +91,10 @@ private:
     sp<IOMX> mOMX;
     IOMX::node_id mNode;
     char *mComponentName;
+    char *mMIME;
     bool mIsMP3;
     bool mIsAVC;
+    bool mIsEncoder;
     uint32_t mQuirks;
 
     MediaSource *mSource;
@@ -132,6 +134,7 @@ private:
 
     OMXDecoder(OMXClient *client, IOMX::node_id node,
                const char *mime, const char *codec,
+               bool is_encoder,
                uint32_t quirks);
 
     void setPortStatus(OMX_U32 port_index, PortStatus status);
@@ -148,6 +151,7 @@ private:
             OMX_COLOR_FORMATTYPE colorFormat);
 
     void setVideoOutputFormat(const char *mime, OMX_U32 width, OMX_U32 height);
+    void setVideoInputFormat(const char *mime, OMX_U32 width, OMX_U32 height);
     void setup();
     void dumpPortDefinition(OMX_U32 port_index);
 

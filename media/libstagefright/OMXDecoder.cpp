@@ -76,9 +76,12 @@ static const CodecInfo kEncoderInfo[] = {
     { "audio/3gpp", "OMX.PV.amrencnb" },
     { "audio/mp4a-latm", "OMX.PV.aacenc" },
     { "video/mp4v-es", "OMX.qcom.video.encoder.mpeg4" },
+    { "video/mp4v-es", "OMX.TI.Video.encoder" },
     { "video/mp4v-es", "OMX.PV.mpeg4enc" },
     { "video/3gpp", "OMX.qcom.video.encoder.h263" },
+    { "video/3gpp", "OMX.TI.Video.encoder" },
     { "video/3gpp", "OMX.PV.h263enc" },
+    { "video/avc", "OMX.TI.Video.encoder" },
     { "video/avc", "OMX.PV.avcenc" },
 };
 
@@ -158,7 +161,8 @@ OMXDecoder *OMXDecoder::Create(
         quirks |= kMeasuresTimeInMilliseconds;
     }
 
-    OMXDecoder *decoder = new OMXDecoder(client, node, mime, codec, quirks);
+    OMXDecoder *decoder = new OMXDecoder(
+            client, node, mime, codec, createEncoder, quirks);
 
     uint32_t type;
     const void *data;
@@ -166,7 +170,7 @@ OMXDecoder *OMXDecoder::Create(
     if (meta->findData(kKeyESDS, &type, &data, &size)) {
         ESDS esds((const char *)data, size);
         assert(esds.InitCheck() == OK);
-        
+
         const void *codec_specific_data;
         size_t codec_specific_data_size;
         esds.getCodecSpecificInfo(
@@ -211,13 +215,16 @@ OMXDecoder *OMXDecoder::Create(
 
 OMXDecoder::OMXDecoder(OMXClient *client, IOMX::node_id node,
                        const char *mime, const char *codec,
+                       bool is_encoder,
                        uint32_t quirks)
     : mClient(client),
       mOMX(mClient->interface()),
       mNode(node),
       mComponentName(strdup(codec)),
+      mMIME(strdup(mime)),
       mIsMP3(!strcasecmp(mime, "audio/mpeg")),
       mIsAVC(!strcasecmp(mime, "video/avc")),
+      mIsEncoder(is_encoder),
       mQuirks(quirks),
       mSource(NULL),
       mCodecSpecificDataIterator(mCodecSpecificData.begin()),
@@ -251,6 +258,9 @@ OMXDecoder::~OMXDecoder() {
     status_t err = mOMX->free_node(mNode);
     assert(err == OK);
     mNode = 0;
+
+    free(mMIME);
+    mMIME = NULL;
 
     free(mComponentName);
     mComponentName = NULL;
@@ -512,6 +522,27 @@ status_t OMXDecoder::setVideoPortFormatType(
         // The following assertion is violated by TI's video decoder.
         // assert(format.nIndex == index);
 
+#if 1
+        LOGI("portIndex: %ld, index: %ld, eCompressionFormat=%d eColorFormat=%d",
+             portIndex,
+             index, format.eCompressionFormat, format.eColorFormat);
+#endif
+
+        if (!strcmp("OMX.TI.Video.encoder", mComponentName)) {
+            if (portIndex == kPortIndexInput
+                    && colorFormat == format.eColorFormat) {
+                // eCompressionFormat does not seem right.
+                found = true;
+                break;
+            }
+            if (portIndex == kPortIndexOutput
+                    && compressionFormat == format.eCompressionFormat) {
+                // eColorFormat does not seem right.
+                found = true;
+                break;
+            }
+        }
+
         if (format.eCompressionFormat == compressionFormat
             && format.eColorFormat == colorFormat) {
             found = true;
@@ -525,6 +556,7 @@ status_t OMXDecoder::setVideoPortFormatType(
         return UNKNOWN_ERROR;
     }
 
+    LOGI("found a match.");
     status_t err = mOMX->set_parameter(
             mNode, OMX_IndexParamVideoPortFormat,
             &format, sizeof(format));
@@ -532,7 +564,83 @@ status_t OMXDecoder::setVideoPortFormatType(
     return err;
 }
 
-#if 1
+void OMXDecoder::setVideoInputFormat(
+        const char *mime, OMX_U32 width, OMX_U32 height) {
+    LOGI("setVideoInputFormat width=%ld, height=%ld", width, height);
+
+    OMX_VIDEO_CODINGTYPE compressionFormat = OMX_VIDEO_CodingUnused;
+    if (!strcasecmp("video/avc", mMIME)) {
+        compressionFormat = OMX_VIDEO_CodingAVC;
+    } else if (!strcasecmp("video/mp4v-es", mMIME)) {
+        compressionFormat = OMX_VIDEO_CodingMPEG4;
+    } else if (!strcasecmp("video/3gpp", mMIME)) {
+        compressionFormat = OMX_VIDEO_CodingH263;
+    } else {
+        LOGE("Not a supported video mime type: %s", mime);
+        assert(!"Should not be here. Not a supported video mime type.");
+    }
+
+    OMX_COLOR_FORMATTYPE colorFormat =
+        0 ? OMX_COLOR_FormatYCbYCr : OMX_COLOR_FormatCbYCrY;
+
+    setVideoPortFormatType(
+            kPortIndexInput, OMX_VIDEO_CodingUnused,
+            colorFormat);
+
+    setVideoPortFormatType(
+            kPortIndexOutput, compressionFormat, OMX_COLOR_FormatUnused);
+
+    OMX_PARAM_PORTDEFINITIONTYPE def;
+    OMX_VIDEO_PORTDEFINITIONTYPE *video_def = &def.format.video;
+
+    def.nSize = sizeof(def);
+    def.nVersion.s.nVersionMajor = 1;
+    def.nVersion.s.nVersionMinor = 1;
+    def.nPortIndex = kPortIndexOutput;
+
+    status_t err = mOMX->get_parameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+
+    assert(err == NO_ERROR);
+
+    assert(def.eDomain == OMX_PortDomainVideo);
+
+    video_def->nFrameWidth = width;
+    video_def->nFrameHeight = height;
+
+    video_def->eCompressionFormat = compressionFormat;
+    video_def->eColorFormat = OMX_COLOR_FormatUnused;
+
+    err = mOMX->set_parameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    assert(err == NO_ERROR);
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    def.nSize = sizeof(def);
+    def.nVersion.s.nVersionMajor = 1;
+    def.nVersion.s.nVersionMinor = 1;
+    def.nPortIndex = kPortIndexInput;
+
+    err = mOMX->get_parameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    assert(err == NO_ERROR);
+
+    def.nBufferSize = (width * height * 2); // (width * height * 3) / 2;
+    LOGI("setting nBufferSize = %ld", def.nBufferSize);
+
+    assert(def.eDomain == OMX_PortDomainVideo);
+
+    video_def->nFrameWidth = width;
+    video_def->nFrameHeight = height;
+    video_def->eCompressionFormat = OMX_VIDEO_CodingUnused;
+    video_def->eColorFormat = colorFormat;
+
+    err = mOMX->set_parameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    assert(err == NO_ERROR);
+}
+
 void OMXDecoder::setVideoOutputFormat(
         const char *mime, OMX_U32 width, OMX_U32 height) {
     LOGI("setVideoOutputFormat width=%ld, height=%ld", width, height);
@@ -541,7 +649,8 @@ void OMXDecoder::setVideoOutputFormat(
     // Enabling this code appears to be the right thing(tm), but,...
     // the TI decoder then loses the ability to output YUV420 and only outputs
     // YCbYCr (16bit)
-    if (!strcasecmp("video/avc", mime)) {
+    if (!strcmp("OMX.TI.Video.Decoder", mComponentName)
+        && !strcasecmp("video/avc", mime)) {
         OMX_PARAM_COMPONENTROLETYPE role;
         role.nSize = sizeof(role);
         role.nVersion.s.nVersionMajor = 1;
@@ -565,6 +674,7 @@ void OMXDecoder::setVideoOutputFormat(
     } else if (!strcasecmp("video/3gpp", mime)) {
         compressionFormat = OMX_VIDEO_CodingH263;
     } else {
+        LOGE("Not a supported video mime type: %s", mime);
         assert(!"Should not be here. Not a supported video mime type.");
     }
 
@@ -604,12 +714,10 @@ void OMXDecoder::setVideoOutputFormat(
     OMX_PARAM_PORTDEFINITIONTYPE def;
     OMX_VIDEO_PORTDEFINITIONTYPE *video_def = &def.format.video;
 
-    bool is_encoder = strstr(mComponentName, ".encoder.") != NULL;  // XXX
-
     def.nSize = sizeof(def);
     def.nVersion.s.nVersionMajor = 1;
     def.nVersion.s.nVersionMinor = 1;
-    def.nPortIndex = is_encoder ? kPortIndexOutput : kPortIndexInput;
+    def.nPortIndex = kPortIndexInput;
 
     status_t err = mOMX->get_parameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
@@ -625,7 +733,7 @@ void OMXDecoder::setVideoOutputFormat(
 #endif
 
     assert(def.eDomain == OMX_PortDomainVideo);
-    
+
     video_def->nFrameWidth = width;
     video_def->nFrameHeight = height;
 
@@ -640,14 +748,14 @@ void OMXDecoder::setVideoOutputFormat(
     def.nSize = sizeof(def);
     def.nVersion.s.nVersionMajor = 1;
     def.nVersion.s.nVersionMinor = 1;
-    def.nPortIndex = is_encoder ? kPortIndexInput : kPortIndexOutput;
+    def.nPortIndex = kPortIndexOutput;
 
     err = mOMX->get_parameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     assert(err == NO_ERROR);
 
     assert(def.eDomain == OMX_PortDomainVideo);
-    
+
 #if 0
     def.nBufferSize =
         (((width + 15) & -16) * ((height + 15) & -16) * 3) / 2;  // YUV420
@@ -660,176 +768,6 @@ void OMXDecoder::setVideoOutputFormat(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     assert(err == NO_ERROR);
 }
-
-#else
-static void hexdump(const void *_data, size_t size) {
-    char line[256];
-    char tmp[16];
-
-    const uint8_t *data = (const uint8_t *)_data;
-    size_t offset = 0;
-    while (offset < size) {
-        sprintf(line, "0x%04x  ", offset);
-
-        size_t n = size - offset;
-        if (n > 16) {
-            n = 16;
-        }
-
-        for (size_t i = 0; i < 16; ++i) {
-            if (i == 8) {
-                strcat(line, " ");
-            }
-
-            if (offset + i < size) {
-                sprintf(tmp, "%02x ", data[offset + i]);
-                strcat(line, tmp);
-            } else {
-                strcat(line, "   ");
-            }
-        }
-
-        strcat(line, " ");
-
-        for (size_t i = 0; i < n; ++i) {
-            if (isprint(data[offset + i])) {
-                sprintf(tmp, "%c", data[offset + i]);
-                strcat(line, tmp);
-            } else {
-                strcat(line, ".");
-            }
-        }
-
-        LOGI(line);
-
-        offset += 16;
-    }
-}
-
-static void DumpPortDefinitionType(const void *_param) {
-    OMX_PARAM_PORTDEFINITIONTYPE *param = (OMX_PARAM_PORTDEFINITIONTYPE *)_param;
-
-    LOGI("nPortIndex=%ld eDir=%s nBufferCountActual=%ld nBufferCountMin=%ld nBufferSize=%ld", param->nPortIndex, param->eDir == OMX_DirInput ? "input" : "output",
-        param->nBufferCountActual, param->nBufferCountMin, param->nBufferSize);
-
-    if (param->eDomain == OMX_PortDomainVideo) {
-        OMX_VIDEO_PORTDEFINITIONTYPE *video = &param->format.video;
-        LOGI("nFrameWidth=%ld nFrameHeight=%ld nStride=%ld nSliceHeight=%ld nBitrate=%ld xFramerate=%ld eCompressionFormat=%d eColorFormat=%d",
-            video->nFrameWidth, video->nFrameHeight, video->nStride, video->nSliceHeight, video->nBitrate, video->xFramerate, video->eCompressionFormat, video->eColorFormat);
-    } else {
-        hexdump(param, param->nSize);
-    }
-}
-
-void OMXDecoder::setVideoOutputFormat(
-        const char *mime, OMX_U32 width, OMX_U32 height) {
-    LOGI("setVideoOutputFormat width=%ld, height=%ld", width, height);
-
-#if 0
-    // Enabling this code appears to be the right thing(tm), but,...
-    // the decoder then loses the ability to output YUV420 and only outputs
-    // YCbYCr (16bit)
-    {
-        OMX_PARAM_COMPONENTROLETYPE role;
-        role.nSize = sizeof(role);
-        role.nVersion.s.nVersionMajor = 1;
-        role.nVersion.s.nVersionMinor = 1;
-        strncpy((char *)role.cRole, "video_decoder.avc",
-                OMX_MAX_STRINGNAME_SIZE - 1);
-        role.cRole[OMX_MAX_STRINGNAME_SIZE - 1] = '\0';
-
-        status_t err = mOMX->set_parameter(
-                mNode, OMX_IndexParamStandardComponentRole,
-                &role, sizeof(role));
-        assert(err == OK);
-    }
-#endif
-
-    setVideoPortFormatType(
-            kPortIndexInput, OMX_VIDEO_CodingAVC, OMX_COLOR_FormatUnused);
-
-#if 1
-    {
-        OMX_VIDEO_PARAM_PORTFORMATTYPE format;
-        format.nSize = sizeof(format);
-        format.nVersion.s.nVersionMajor = 1;
-        format.nVersion.s.nVersionMinor = 1;
-        format.nPortIndex = kPortIndexOutput;
-        format.nIndex = 0;
-
-        status_t err = mOMX->get_parameter(
-                mNode, OMX_IndexParamVideoPortFormat,
-                &format, sizeof(format));
-        assert(err == OK);
-
-        LOGI("XXX MyOMX_GetParameter OMX_IndexParamVideoPortFormat");
-        hexdump(&format, format.nSize);
-
-        assert(format.eCompressionFormat == OMX_VIDEO_CodingUnused);
-        assert(format.eColorFormat == OMX_COLOR_FormatYUV420Planar
-               || format.eColorFormat == OMX_COLOR_FormatYUV420SemiPlanar
-               || format.eColorFormat == OMX_COLOR_FormatCbYCrY);
-
-        err = mOMX->set_parameter(
-                mNode, OMX_IndexParamVideoPortFormat,
-                &format, sizeof(format));
-        assert(err == OK);
-    }
-#endif
-
-    OMX_PORT_PARAM_TYPE ptype;
-    ptype.nSize = sizeof(ptype);
-    ptype.nVersion.s.nVersionMajor = 1;
-    ptype.nVersion.s.nVersionMinor = 1;
-
-    status_t err = mOMX->get_parameter(
-            mNode, OMX_IndexParamVideoInit, &ptype, sizeof(ptype));
-    assert(err == OK);
-
-    LOGI("XXX MyOMX_GetParameter OMX_IndexParamVideoInit");
-    hexdump(&ptype, ptype.nSize);
-
-    OMX_PARAM_PORTDEFINITIONTYPE def;
-    def.nSize = sizeof(def);
-    def.nVersion.s.nVersionMajor = 1;
-    def.nVersion.s.nVersionMinor = 1;
-    def.nPortIndex = kPortIndexInput;
-
-    err = mOMX->get_parameter(
-            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-    assert(err == OK);
-
-    LOGI("XXX MyOMX_GetParameter OMX_IndexParamPortDefinition");
-    DumpPortDefinitionType(&def);
-
-    OMX_VIDEO_PORTDEFINITIONTYPE *video_def = &def.format.video;
-    video_def->nFrameWidth = width;
-    video_def->nFrameHeight = height;
-
-    err = mOMX->set_parameter(
-            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-    assert(err == OK);
-
-    ////////////////////////////////////////////////////////////////////////////
-
-    def.nPortIndex = kPortIndexOutput;
-
-    err = mOMX->get_parameter(
-            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-    assert(err == OK);
-
-    LOGI("XXX MyOMX_GetParameter OMX_IndexParamPortDefinition");
-    DumpPortDefinitionType(&def);
-
-    video_def->nFrameWidth = width;
-    video_def->nFrameHeight = height;
-
-    err = mOMX->set_parameter(
-            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-    assert(err == OK);
-}
-
-#endif
 
 void OMXDecoder::setup() {
     const sp<MetaData> &meta = mSource->getFormat();
@@ -848,7 +786,11 @@ void OMXDecoder::setup() {
         success = success && meta->findInt32(kKeyHeight, &height);
         assert(success);
 
-        setVideoOutputFormat(mime, width, height);
+        if (mIsEncoder) {
+            setVideoInputFormat(mime, width, height);
+        } else {
+            setVideoOutputFormat(mime, width, height);
+        }
     }
 
     // dumpPortDefinition(0);
@@ -1253,7 +1195,7 @@ void OMXDecoder::initiateShutdown() {
     if (mShutdownInitiated) {
         return;
     }
-    
+
     if (mState == OMX_StateLoaded) {
         return;
     }
