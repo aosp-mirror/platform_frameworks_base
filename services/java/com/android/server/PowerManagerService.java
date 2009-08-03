@@ -765,15 +765,17 @@ class PowerManagerService extends IPowerManager.Stub
         switch (type)
         {
             case PowerManager.FULL_WAKE_LOCK:
-                return "FULL_WAKE_LOCK         ";
+                return "FULL_WAKE_LOCK                ";
             case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
-                return "SCREEN_BRIGHT_WAKE_LOCK";
+                return "SCREEN_BRIGHT_WAKE_LOCK       ";
             case PowerManager.SCREEN_DIM_WAKE_LOCK:
-                return "SCREEN_DIM_WAKE_LOCK   ";
+                return "SCREEN_DIM_WAKE_LOCK          ";
             case PowerManager.PARTIAL_WAKE_LOCK:
-                return "PARTIAL_WAKE_LOCK      ";
+                return "PARTIAL_WAKE_LOCK             ";
+            case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
+                return "PROXIMITY_SCREEN_OFF_WAKE_LOCK";
             default:
-                return "???                    ";
+                return "???                           ";
         }
     }
 
