@@ -954,8 +954,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             ActivityManagerNative.getDefault().stopAppSwitches();
                         } catch (RemoteException e) {
                         }
-                        mContext.startActivity(mHomeIntent);
                         sendCloseSystemWindows();
+                        mContext.startActivity(mHomeIntent);
                     }
                 }
             });
@@ -965,8 +965,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 ActivityManagerNative.getDefault().stopAppSwitches();
             } catch (RemoteException e) {
             }
-            mContext.startActivity(mHomeIntent);
             sendCloseSystemWindows();
+            mContext.startActivity(mHomeIntent);
         }
     }
 
@@ -1700,11 +1700,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     static void sendCloseSystemWindows(Context context, String reason) {
         if (ActivityManagerNative.isSystemReady()) {
-            Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-            if (reason != null) {
-                intent.putExtra(SYSTEM_DIALOG_REASON_KEY, reason);
+            try {
+                ActivityManagerNative.getDefault().closeSystemDialogs(reason);
+            } catch (RemoteException e) {
             }
-            context.sendBroadcast(intent);
         }
     }
 
@@ -1816,12 +1815,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 ActivityManagerNative.getDefault().stopAppSwitches();
             } catch (RemoteException e) {
             }
+            sendCloseSystemWindows();
             mContext.startActivity(mHomeIntent);
         } else {
             // This code brings home to the front or, if it is already
             // at the front, puts the device to sleep.
             try {
                 ActivityManagerNative.getDefault().stopAppSwitches();
+                sendCloseSystemWindows();
                 int result = ActivityManagerNative.getDefault()
                         .startActivity(null, mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
@@ -1833,7 +1834,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // bummer, the activity manager, which is in this process, is dead
             }
         }
-        sendCloseSystemWindows();
         return true;
     }
     
