@@ -256,9 +256,6 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
         if (mState == VpnState.IDLE) return;
 
-        // keep the notification when error occurs
-        if (!anyError()) mNotification.disableNotification();
-
         restoreOriginalDns();
         restoreOriginalDomainSuffices();
         mState = VpnState.IDLE;
@@ -267,10 +264,6 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         // stop the service itself
         mContext.removeStates();
         mContext.stopSelf();
-    }
-
-    private boolean anyError() {
-        return (mError != null);
     }
 
     private void restoreOriginalDns() {
