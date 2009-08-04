@@ -122,33 +122,41 @@ class BluetoothEventLoop {
         return isEventLoopRunningNative();
     }
 
+    private void addDevice(String address, String[] properties) {
+        mBluetoothService.addRemoteDeviceProperties(address, properties);
+        String rssi = mBluetoothService.getRemoteDeviceProperty(address, "RSSI");
+        String classValue = mBluetoothService.getRemoteDeviceProperty(address, "Class");
+        String name = mBluetoothService.getRemoteDeviceProperty(address, "Name");
+        short rssiValue;
+        // For incoming connections, we don't get the RSSI value. Use a default of MIN_VALUE.
+        // If we accept the pairing, we will automatically show it at the top of the list.
+        if (rssi != null) {
+            rssiValue = (short)Integer.valueOf(rssi).intValue();
+        } else {
+            rssiValue = Short.MIN_VALUE;
+        }
+        if (classValue != null) {
+            Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_FOUND_ACTION);
+            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            intent.putExtra(BluetoothIntent.CLASS, Integer.valueOf(classValue));
+            intent.putExtra(BluetoothIntent.RSSI, rssiValue);
+            intent.putExtra(BluetoothIntent.NAME, name);
+
+            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+        } else {
+            log ("ClassValue: " + classValue + " for remote device: " + address + " is null");
+        }
+    }
+
     private void onDeviceFound(String address, String[] properties) {
         if (properties == null) {
             Log.e(TAG, "ERROR: Remote device properties are null");
             return;
         }
-        mBluetoothService.addRemoteDeviceProperties(address, properties);
-        String rssi = mBluetoothService.getRemoteDeviceProperty(address, "RSSI");
-        String classValue = mBluetoothService.getRemoteDeviceProperty(address, "Class");
-        String name = mBluetoothService.getRemoteDeviceProperty(address, "Name");
-
-        if (rssi != null && classValue != null) {
-            Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_FOUND_ACTION);
-            intent.putExtra(BluetoothIntent.ADDRESS, address);
-            intent.putExtra(BluetoothIntent.CLASS, Integer.valueOf(classValue));
-            intent.putExtra(BluetoothIntent.RSSI, (short)Integer.valueOf(rssi).intValue());
-            intent.putExtra(BluetoothIntent.NAME, name);
-
-            mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-        } else {
-            log ("RSSI: " + rssi + " or ClassValue: " + classValue +
-                    " for remote device: " + address + " is null");
-        }
+        addDevice(address, properties);
     }
 
     private void onDeviceDisappeared(String address) {
-        mBluetoothService.removeRemoteDeviceProperties(address);
-
         Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_DISAPPEARED_ACTION);
         intent.putExtra(BluetoothIntent.ADDRESS, address);
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
@@ -208,7 +216,14 @@ class BluetoothEventLoop {
     }
 
     private void onDeviceCreated(String deviceObjectPath) {
-        // do nothing.
+        String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
+        if (!mBluetoothService.isRemoteDeviceInCache(address)) {
+            // Incoming connection, we haven't seen this device, add to cache.
+            String[] properties = mBluetoothService.getRemoteDeviceProperties(address);
+            if (properties != null) {
+                addDevice(address, properties);
+            }
+        }
         return;
     }
 
@@ -316,6 +331,13 @@ class BluetoothEventLoop {
                 }
             }
             mBluetoothService.setRemoteDeviceProperty(address, name, uuid);
+        } else if (name.equals("Paired")) {
+            if (propValues[1].equals("true")) {
+                mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDED);
+            } else {
+                mBluetoothService.getBondState().setBondState(address,
+                        BluetoothDevice.BOND_NOT_BONDED);
+            }
         }
     }
 
@@ -403,7 +425,8 @@ class BluetoothEventLoop {
         boolean authorized = false;
         UUID uuid = UUID.fromString(deviceUuid);
         if (mBluetoothService.isEnabled() &&
-                (BluetoothUuid.isAudioSink(uuid) || BluetoothUuid.isAvrcpController(uuid))) {
+                (BluetoothUuid.isAudioSink(uuid) || BluetoothUuid.isAvrcpController(uuid)
+                        || BluetoothUuid.isAdvAudioDist(uuid))) {
             BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
             authorized = a2dp.getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {

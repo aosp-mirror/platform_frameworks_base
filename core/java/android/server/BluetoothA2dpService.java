@@ -375,6 +375,10 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     }
 
     private synchronized void onSinkPropertyChanged(String path, String []propValues) {
+        if (!mBluetoothService.isEnabled()) {
+            return;
+        }
+
         String name = propValues[0];
         String address = mBluetoothService.getAddressFromObjectPath(path);
         if (address == null) {
@@ -382,15 +386,16 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             return;
         }
 
-        if (mAudioDevices.get(address) == null) {
-            // Ignore this state change, since it means we have got it after
-            // bluetooth has been disabled.
-            return;
-        }
         if (name.equals(PROPERTY_STATE)) {
             int state = convertBluezSinkStringtoState(propValues[1]);
-            int prevState = mAudioDevices.get(address);
-            handleSinkStateChange(address, prevState, state);
+            if (mAudioDevices.get(address) == null) {
+                // This is for an incoming connection for a device not known to us.
+                // We have authorized it and bluez state has changed.
+                addAudioSink(address);
+            } else {
+                int prevState = mAudioDevices.get(address);
+                handleSinkStateChange(address, prevState, state);
+            }
         }
     }
 
@@ -436,7 +441,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         }
         return sinks;
     }
-
 
     @Override
     protected synchronized void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
