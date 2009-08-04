@@ -804,6 +804,15 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         return mBondState.getBondState(address.toUpperCase());
     }
 
+    /*package*/ boolean isRemoteDeviceInCache(String address) {
+        return (mRemoteDeviceProperties.get(address) != null);
+    }
+
+    /*package*/ String[] getRemoteDeviceProperties(String address) {
+        String objectPath = getObjectPathFromAddress(address);
+        return (String [])getDevicePropertiesNative(objectPath);
+    }
+
     /*package*/ synchronized String getRemoteDeviceProperty(String address, String property) {
         Map<String, String> properties = mRemoteDeviceProperties.get(address);
         if (properties != null) {
@@ -812,8 +821,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             // Query for remote device properties, again.
             // We will need to reload the cache when we switch Bluetooth on / off
             // or if we crash.
-            String objectPath = getObjectPathFromAddress(address);
-            String propValues[] = (String [])getDevicePropertiesNative(objectPath);
+            String[] propValues = getRemoteDeviceProperties(address);
             if (propValues != null) {
                 addRemoteDeviceProperties(address, propValues);
                 return getRemoteDeviceProperty(address, property);
