@@ -124,6 +124,7 @@ public class ReliabilityTestActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         Log.v(LOGTAG, "onDestroy, inst=" + Integer.toHexString(hashCode()));
+        webView.clearCache(true);
         webView.destroy();
     }
 
