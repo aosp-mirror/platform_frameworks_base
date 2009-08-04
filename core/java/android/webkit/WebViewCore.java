@@ -1164,6 +1164,7 @@ final class WebViewCore {
 
                         case SET_JS_FLAGS:
                             nativeSetJsFlags((String)msg.obj);
+                            break;
 
                         case GEOLOCATION_PERMISSIONS_PROVIDE:
                             GeolocationPermissionsData data =
