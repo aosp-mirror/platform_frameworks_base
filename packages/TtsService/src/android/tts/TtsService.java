@@ -142,8 +142,6 @@ public class TtsService extends Service implements OnCompletionListener {
     private final ReentrantLock synthesizerLock = new ReentrantLock();
 
     private static SynthProxy sNativeSynth = null;
-    private static Boolean sIsKillingSynth = true;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -154,7 +152,6 @@ public class TtsService extends Service implements OnCompletionListener {
         String soLibPath = "/system/lib/libttspico.so";
         if (sNativeSynth == null) {
             sNativeSynth = new SynthProxy(soLibPath);
-            sIsKillingSynth = false;
         }
 
         mSelf = this;
@@ -175,9 +172,6 @@ public class TtsService extends Service implements OnCompletionListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        sIsKillingSynth = true;
-        Log.i("TtsService", "TtsService.onDestroy()");
         // Don't hog the media player
         cleanUpPlayer();
 
@@ -186,7 +180,6 @@ public class TtsService extends Service implements OnCompletionListener {
 
         // Unregister all callbacks.
         mCallbacks.kill();
-        //Log.i("TtsService", "TtsService.onDestroy() ended");
     }
 
 
@@ -250,9 +243,6 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private int setSpeechRate(String callingApp, int rate) {
-        if (sIsKillingSynth) {
-            return TextToSpeech.ERROR;
-        }
         if (isDefaultEnforced()) {
             return sNativeSynth.setSpeechRate(getDefaultRate());
         } else {
@@ -262,37 +252,23 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private int setPitch(String callingApp, int pitch) {
-        if (sIsKillingSynth) {
-            return TextToSpeech.ERROR;
-        }
         return sNativeSynth.setPitch(pitch);
     }
 
 
     private int isLanguageAvailable(String lang, String country, String variant) {
-        if (sIsKillingSynth) {
-            return TextToSpeech.LANG_NOT_SUPPORTED;
-        }
         //Log.v("TtsService", "TtsService.isLanguageAvailable(" + lang + ", " + country + ", " +variant+")");
         return sNativeSynth.isLanguageAvailable(lang, country, variant);
     }
 
 
     private String[] getLanguage() {
-        if (sIsKillingSynth) {
-            Log.v("TtsService", "killing synth:: aborting getLanguage()");
-            return null;
-        }
         return sNativeSynth.getLanguage();
     }
 
 
     private int setLanguage(String callingApp, String lang, String country, String variant) {
         Log.v("TtsService", "TtsService.setLanguage(" + lang + ", " + country + ", " + variant + ")");
-        if (sIsKillingSynth) {
-            Log.v("TtsService", "killing synth:: aborting setLanguage()");
-            return TextToSpeech.ERROR;
-        }
         if (isDefaultEnforced()) {
             return sNativeSynth.setLanguage(getDefaultLanguage(), getDefaultCountry(),
                     getDefaultLocVariant());
@@ -426,12 +402,7 @@ public class TtsService extends Service implements OnCompletionListener {
                 }
                 if ((mCurrentSpeechItem != null) &&
                      mCurrentSpeechItem.mCallingApp.equals(callingApp)) {
-                    if (sIsKillingSynth) {
-                        Log.v("TtsService", "killing synth:: aborting stop()");
-                        result = TextToSpeech.ERROR;
-                    } else {
-                        result = sNativeSynth.stop();
-                    }
+                    result = sNativeSynth.stop();
                     mKillList.put(mCurrentSpeechItem, true);
                     if (mPlayer != null) {
                         try {
@@ -480,12 +451,7 @@ public class TtsService extends Service implements OnCompletionListener {
                 if ((mCurrentSpeechItem != null) &&
                     ((mCurrentSpeechItem.mType != SpeechItem.TEXT_TO_FILE) ||
                       mCurrentSpeechItem.mCallingApp.equals(callingApp))) {
-                    if (sIsKillingSynth) {
-                        Log.v("TtsService", "killing synth:: aborting stop()");
-                        result = TextToSpeech.ERROR;
-                    } else {
-                        result = sNativeSynth.stop();
-                    }
+                    result = sNativeSynth.stop();
                     mKillList.put(mCurrentSpeechItem, true);
                     if (mPlayer != null) {
                         try {
@@ -625,9 +591,7 @@ public class TtsService extends Service implements OnCompletionListener {
                         if (speechRate.length() > 0){
                             setSpeechRate("", Integer.parseInt(speechRate));
                         }
-                        if (!sIsKillingSynth) {
-                            sNativeSynth.speak(speechItem.mText, streamType);
-                        }
+                        sNativeSynth.speak(speechItem.mText, streamType);
                     }
                 } catch (InterruptedException e) {
                     Log.e("TtsService", "TTS speakInternalOnly(): tryLock interrupted");
@@ -696,9 +660,7 @@ public class TtsService extends Service implements OnCompletionListener {
                         if (speechRate.length() > 0){
                             setSpeechRate("", Integer.parseInt(speechRate));
                         }
-                        if (!sIsKillingSynth) {
-                            sNativeSynth.synthesizeToFile(speechItem.mText, speechItem.mFilename);
-                        }
+                        sNativeSynth.synthesizeToFile(speechItem.mText, speechItem.mFilename);
                     }
                 } catch (InterruptedException e) {
                     Log.e("TtsService", "TTS synthToFileInternalOnly(): tryLock interrupted");
