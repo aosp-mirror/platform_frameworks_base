@@ -133,7 +133,7 @@ static void vibratorOff(JNIEnv *env, jobject clazz)
 
 static JNINativeMethod method_table[] = {
     { "init_native", "()I", (void*)init_native },
-    { "finalize_native", "(I)V", (void*)init_native },
+    { "finalize_native", "(I)V", (void*)finalize_native },
     { "setLight_native", "(IIIIII)V", (void*)setLight_native },
     { "vibratorOn", "(J)V", (void*)vibratorOn },
     { "vibratorOff", "()V", (void*)vibratorOff }
