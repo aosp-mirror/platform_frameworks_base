@@ -39,6 +39,8 @@ public class WebHistoryItem implements Cloneable {
     private Bitmap mFavicon;
     // The pre-flattened data used for saving the state.
     private byte[] mFlattenedData;
+    // The apple-touch-icon url for use when adding the site to the home screen
+    private String mTouchIconUrl;
 
     /**
      * Basic constructor that assigns a unique id to the item. Called by JNI
@@ -127,6 +129,14 @@ public class WebHistoryItem implements Cloneable {
     }
 
     /**
+     * Return the touch icon url.
+     * @hide
+     */
+    public String getTouchIconUrl() {
+        return mTouchIconUrl;
+    }
+
+    /**
      * Set the favicon.
      * @param icon A Bitmap containing the favicon for this history item.
      * Note: The VM ensures 32-bit atomic read/write operations so we don't have
@@ -134,6 +144,14 @@ public class WebHistoryItem implements Cloneable {
      */
     /*package*/ void setFavicon(Bitmap icon) {
         mFavicon = icon;
+    }
+
+    /**
+     * Set the touch icon url.
+     * @hide
+     */
+    /*package*/ void setTouchIconUrl(String url) {
+        mTouchIconUrl = url;
     }
 
     /**

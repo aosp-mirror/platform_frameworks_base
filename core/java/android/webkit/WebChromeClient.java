@@ -45,6 +45,14 @@ public class WebChromeClient {
     public void onReceivedIcon(WebView view, Bitmap icon) {}
 
     /**
+     * Notify the host application of the url for an apple-touch-icon.
+     * @param view The WebView that initiated the callback.
+     * @param url The icon url.
+     * @hide pending council approval
+     */
+    public void onReceivedTouchIconUrl(WebView view, String url) {}
+
+    /**
      * A callback interface used by the host application to notify
      * the current page that its custom view has been dismissed.
      *
