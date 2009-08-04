@@ -744,7 +744,7 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
 
         size_t toWrite;
 
-        if (mFormat == AudioSystem::PCM_8_BIT) {
+        if (mFormat == AudioSystem::PCM_8_BIT && !(mFlags & AudioSystem::OUTPUT_FLAG_DIRECT)) {
             // Divide capacity by 2 to take expansion into account
             toWrite = audioBuffer.size>>1;
             // 8 to 16 bit conversion
@@ -753,7 +753,7 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
             while(count--) {
                 *dst++ = (int16_t)(*src++^0x80) << 8;
             }
-        }else {
+        } else {
             toWrite = audioBuffer.size;
             memcpy(audioBuffer.i8, src, toWrite);
             src += toWrite;
@@ -840,7 +840,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         // Divide buffer size by 2 to take into account the expansion
         // due to 8 to 16 bit conversion: the callback must fill only half
         // of the destination buffer
-        if (mFormat == AudioSystem::PCM_8_BIT) {
+        if (mFormat == AudioSystem::PCM_8_BIT && !(mFlags & AudioSystem::OUTPUT_FLAG_DIRECT)) {
             audioBuffer.size >>= 1;
         }
 
@@ -859,7 +859,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         }
         if (writtenSize > reqSize) writtenSize = reqSize;
 
-        if (mFormat == AudioSystem::PCM_8_BIT) {
+        if (mFormat == AudioSystem::PCM_8_BIT && !(mFlags & AudioSystem::OUTPUT_FLAG_DIRECT)) {
             // 8 to 16 bit conversion
             const int8_t *src = audioBuffer.i8 + writtenSize-1;
             int count = writtenSize;
