@@ -24,11 +24,12 @@
 #define RSID_FRAME_COUNT 0
 #define RSID_BLADES_COUNT 1
 
-#define RSID_SKY_TEXTURES 1
+#define RSID_TEXTURES 1
 #define RSID_SKY_TEXTURE_NIGHT 0
 #define RSID_SKY_TEXTURE_SUNRISE 1
 #define RSID_SKY_TEXTURE_NOON 2
 #define RSID_SKY_TEXTURE_SUNSET 3
+#define RSID_GRASS_TEXTURE 4
 
 #define RSID_BLADES 2
 #define BLADE_STRUCT_FIELDS_COUNT 12
@@ -44,6 +45,8 @@
 #define BLADE_STRUCT_H 9
 #define BLADE_STRUCT_S 10
 #define BLADE_STRUCT_B 11
+
+#define TESSELATION 4.0f
 
 #define MIDNIGHT 0.0f
 #define MORNING 0.375f
@@ -68,23 +71,23 @@ void alpha(float a) {
 }
 
 void drawNight() {
-    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_SKY_TEXTURES, RSID_SKY_TEXTURE_NIGHT));
+    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_NIGHT));
     // NOTE: Hacky way to draw the night sky
     drawRect(WVGA_PORTRAIT_WIDTH - 512.0f, -32.0f, WVGA_PORTRAIT_WIDTH, 1024.0f - 32.0f, 0.0f);
 }
 
 void drawSunrise() {
-    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_SKY_TEXTURES, RSID_SKY_TEXTURE_SUNRISE));
+    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_SUNRISE));
     drawRect(0.0f, 0.0f, WVGA_PORTRAIT_WIDTH, WVGA_PORTRAIT_HEIGHT, 0.0f);
 }
 
 void drawNoon() {
-    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_SKY_TEXTURES, RSID_SKY_TEXTURE_NOON));
+    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_NOON));
     drawRect(0.0f, 0.0f, WVGA_PORTRAIT_WIDTH, WVGA_PORTRAIT_HEIGHT, 0.0f);
 }
 
 void drawSunset() {
-    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_SKY_TEXTURES, RSID_SKY_TEXTURE_SUNSET));
+    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_SUNSET));
     drawRect(0.0f, 0.0f, WVGA_PORTRAIT_WIDTH, WVGA_PORTRAIT_HEIGHT, 0.0f);
 }
 
@@ -125,21 +128,25 @@ void drawBlade(int index, float now) {
     degree += (targetDegree - degree) * 0.3f;
 
     float angle = PI / 2.0f;
-    
+
     float currentX = xpos;
     float currentY = ypos;
-    
-    int i = size;
+
+    int i = size * TESSELATION;
+    float lx = lengthX / TESSELATION;
+    float ly = lengthY / TESSELATION;
+    float ss = 2.0f / i + scale / TESSELATION;
+    float sh = 0.7f / TESSELATION;
 
     for ( ; i > 0; i--) {
-        float nextX = currentX - cosf(angle) * size * lengthX;
-        float nextY = currentY - sinf(angle) * size * lengthY;
+        float nextX = currentX - cosf(angle) * size * lx;
+        float nextY = currentY - sinf(angle) * size * ly;
         angle += degree * hardness;
 
-        drawQuad(nextX + (i - 1) * scale, nextY, 0.0f,
-                 nextX - (i - 1) * scale, nextY, 0.0f,
-                 currentX - i * scale, currentY + 0.7f, 0.0f,
-                 currentX + i * scale, currentY + 0.7f, 0.0f);
+        drawQuad(nextX + (i - 1) * ss, nextY, 0.0f,
+                 nextX - (i - 1) * ss, nextY, 0.0f,
+                 currentX - i * ss, currentY + sh, 0.0f,
+                 currentX + i * ss, currentY + sh, 0.0f);
 
         currentX = nextX;
         currentY = nextY;
@@ -149,7 +156,10 @@ void drawBlade(int index, float now) {
 }
 
 void drawBlades(float now) {
-    bindTexture(NAMED_PFBackground, 0, 0);    
+    // For anti-aliasing
+    bindProgramFragmentStore(NAMED_PFSGrass);
+    bindProgramFragment(NAMED_PFGrass);
+    bindTexture(NAMED_PFGrass, 0, loadI32(RSID_TEXTURES, RSID_GRASS_TEXTURE));
 
     int bladesCount = loadI32(RSID_STATE, RSID_BLADES_COUNT);
     int count = bladesCount * BLADE_STRUCT_FIELDS_COUNT;
@@ -188,7 +198,7 @@ int main(int launchID) {
         alpha(1.0f - normf(DUSK, 1.0f, now));
         drawSunset();
     }
-    
+
     drawBlades(now);
 
     frameCount++;
