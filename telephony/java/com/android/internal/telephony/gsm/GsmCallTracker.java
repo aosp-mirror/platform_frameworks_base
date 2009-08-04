@@ -738,6 +738,7 @@ public final class GsmCallTracker extends CallTracker {
         }
 
         call.onHangupLocal();
+        phone.notifyPreciseCallStateChanged();
     }
 
     /* package */

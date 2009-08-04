@@ -761,6 +761,7 @@ public final class CdmaCallTracker extends CallTracker {
         }
 
         call.onHangupLocal();
+        phone.notifyPreciseCallStateChanged();
     }
 
     /* package */

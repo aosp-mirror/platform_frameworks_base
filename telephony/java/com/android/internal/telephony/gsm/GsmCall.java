@@ -185,6 +185,7 @@ class GsmCall extends Call {
 
             cn.onHangupLocal();
         }
+        state = State.DISCONNECTING;
     }
 
     /**
