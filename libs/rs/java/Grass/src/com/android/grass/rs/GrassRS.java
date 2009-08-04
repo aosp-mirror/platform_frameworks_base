@@ -30,7 +30,6 @@ import static android.renderscript.Element.*;
 import static android.util.MathUtils.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.renderscript.Script;
 import android.renderscript.ScriptC;
 
 import java.util.TimeZone;
@@ -69,7 +68,7 @@ class GrassRS {
     private final int mHeight;
 
     @SuppressWarnings({"FieldCanBeLocal"})
-    private Script mScript;
+    private ScriptC mScript;
     @SuppressWarnings({"FieldCanBeLocal"})
     private RenderScript.Sampler mSampler;
     @SuppressWarnings({"FieldCanBeLocal"})
