@@ -6,6 +6,10 @@ WriteModifiers(FILE* to, int mod, int mask)
 {
     int m = mod & mask;
 
+    if (m & OVERRIDE) {
+        fprintf(to, "@Override ");
+    }
+
     if ((m & SCOPE_MASK) == PUBLIC) {
         fprintf(to, "public ");
     }
@@ -79,7 +83,7 @@ Field::Write(FILE* to)
     if (this->comment.length() != 0) {
         fprintf(to, "%s\n", this->comment.c_str());
     }
-    WriteModifiers(to, this->modifiers, SCOPE_MASK | STATIC | FINAL);
+    WriteModifiers(to, this->modifiers, SCOPE_MASK | STATIC | FINAL | OVERRIDE);
     fprintf(to, "%s %s", this->variable->type->QualifiedName().c_str(),
             this->variable->name.c_str());
     if (this->value.length() != 0) {
@@ -674,7 +678,7 @@ Method::Write(FILE* to)
         fprintf(to, "%s\n", this->comment.c_str());
     }
 
-    WriteModifiers(to, this->modifiers, SCOPE_MASK | STATIC | FINAL);
+    WriteModifiers(to, this->modifiers, SCOPE_MASK | STATIC | FINAL | OVERRIDE);
 
     if (this->returnType != NULL) {
         string dim;
