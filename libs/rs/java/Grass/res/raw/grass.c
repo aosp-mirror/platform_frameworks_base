@@ -17,12 +17,11 @@
 #pragma stateFragment(PFBackground)
 #pragma stateFragmentStore(PFSBackground)
 
-#define WVGA_PORTRAIT_WIDTH 480.0f
-#define WVGA_PORTRAIT_HEIGHT 762.0f
-
 #define RSID_STATE 0
 #define RSID_FRAME_COUNT 0
 #define RSID_BLADES_COUNT 1
+#define RSID_WIDTH 2
+#define RSID_HEIGHT 3
 
 #define RSID_TEXTURES 1
 #define RSID_SKY_TEXTURE_NIGHT 0
@@ -33,7 +32,7 @@
 
 #define RSID_BLADES 2
 #define BLADE_STRUCT_FIELDS_COUNT 12
-#define BLADE_STRUCT_DEGREE 0
+#define BLADE_STRUCT_ANGLE 0
 #define BLADE_STRUCT_SIZE 1
 #define BLADE_STRUCT_XPOS 2
 #define BLADE_STRUCT_YPOS 3
@@ -46,7 +45,9 @@
 #define BLADE_STRUCT_S 10
 #define BLADE_STRUCT_B 11
 
-#define TESSELATION 4.0f
+#define TESSELATION 2.0f
+
+#define MAX_BEND 0.09f
 
 #define MIDNIGHT 0.0f
 #define MORNING 0.375f
@@ -70,31 +71,30 @@ void alpha(float a) {
     color(1.0f, 1.0f, 1.0f, a);
 }
 
-void drawNight() {
+void drawNight(int width, int height) {
     bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_NIGHT));
-    // NOTE: Hacky way to draw the night sky
-    drawRect(WVGA_PORTRAIT_WIDTH - 512.0f, -32.0f, WVGA_PORTRAIT_WIDTH, 1024.0f - 32.0f, 0.0f);
+    drawRect(width - 512.0f, -32.0f, width, 1024.0f - 32.0f, 0.0f);
 }
 
-void drawSunrise() {
+void drawSunrise(int width, int height) {
     bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_SUNRISE));
-    drawRect(0.0f, 0.0f, WVGA_PORTRAIT_WIDTH, WVGA_PORTRAIT_HEIGHT, 0.0f);
+    drawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
-void drawNoon() {
+void drawNoon(int width, int height) {
     bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_NOON));
-    drawRect(0.0f, 0.0f, WVGA_PORTRAIT_WIDTH, WVGA_PORTRAIT_HEIGHT, 0.0f);
+    drawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
-void drawSunset() {
+void drawSunset(int width, int height) {
     bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_SUNSET));
-    drawRect(0.0f, 0.0f, WVGA_PORTRAIT_WIDTH, WVGA_PORTRAIT_HEIGHT, 0.0f);
+    drawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
-void drawBlade(int index, float now) {
+void drawBlade(int index, float now, int frameCount) {
     float offset = loadF(RSID_BLADES, index + BLADE_STRUCT_OFFSET);
     float scale = loadF(RSID_BLADES, index + BLADE_STRUCT_SCALE);
-    float degree = loadF(RSID_BLADES, index + BLADE_STRUCT_DEGREE);
+    float angle = loadF(RSID_BLADES, index + BLADE_STRUCT_ANGLE);
     float hardness = loadF(RSID_BLADES, index + BLADE_STRUCT_HARDNESS);
     
     float xpos = loadF(RSID_BLADES, index + BLADE_STRUCT_XPOS);
@@ -124,38 +124,43 @@ void drawBlade(int index, float now) {
 
     hsb(h, s, lerpf(0, b, newB), 1.0f);
 
-    float targetDegree = 0.0f; // TODO Compute
-    degree += (targetDegree - degree) * 0.3f;
+    float newAngle = turbulencef2(xpos * 0.006f, frameCount * 0.006f, 4.0f) - 0.5f;
+    newAngle /= 2.0f;
+    angle = clampf(angle + (newAngle + offset - angle) * 0.15f, -MAX_BEND, MAX_BEND);
 
-    float angle = PI / 2.0f;
+    float currentAngle = PI / 2.0f;
 
-    float currentX = xpos;
-    float currentY = ypos;
+    float bottomX = xpos;
+    float bottomY = ypos;
 
     int i = size * TESSELATION;
     float lx = lengthX / TESSELATION;
     float ly = lengthY / TESSELATION;
-    float ss = 2.0f / i + scale / TESSELATION;
-    float sh = 0.7f / TESSELATION;
+    float ss = 4.0f / i + scale / TESSELATION;
+    float sh = 0.5f / TESSELATION;
+    float d = angle * hardness / TESSELATION;
 
     for ( ; i > 0; i--) {
-        float nextX = currentX - cosf(angle) * size * lx;
-        float nextY = currentY - sinf(angle) * size * ly;
-        angle += degree * hardness;
+        float topX = bottomX - cosf(currentAngle) * size * lx;
+        float topY = bottomY - sinf(currentAngle) * size * ly;
+        currentAngle += d;
 
-        drawQuad(nextX + (i - 1) * ss, nextY, 0.0f,
-                 nextX - (i - 1) * ss, nextY, 0.0f,
-                 currentX - i * ss, currentY + sh, 0.0f,
-                 currentX + i * ss, currentY + sh, 0.0f);
+        float spi = (i - 1) * ss;
+        float si = i * ss;
 
-        currentX = nextX;
-        currentY = nextY;
+        drawQuad(topX + spi, topY, 0.0f,
+                 topX - spi, topY, 0.0f,
+                 bottomX - si, bottomY + sh, 0.0f,
+                 bottomX + si, bottomY + sh, 0.0f);
+
+        bottomX = topX;
+        bottomY = topY;
     }
-    
-    storeF(RSID_BLADES, index + BLADE_STRUCT_DEGREE, degree);
+
+    storeF(RSID_BLADES, index + BLADE_STRUCT_ANGLE, angle);
 }
 
-void drawBlades(float now) {
+void drawBlades(float now, int frameCount) {
     // For anti-aliasing
     bindProgramFragmentStore(NAMED_PFSGrass);
     bindProgramFragment(NAMED_PFGrass);
@@ -166,40 +171,37 @@ void drawBlades(float now) {
 
     int i = 0;
     for ( ; i < count; i += BLADE_STRUCT_FIELDS_COUNT) {
-        drawBlade(i, now);
+        drawBlade(i, now, frameCount);
     }
 }
 
 int main(int launchID) {
+    int width = loadI32(RSID_STATE, RSID_WIDTH);
+    int height = loadI32(RSID_STATE, RSID_HEIGHT);
+
     int frameCount = loadI32(RSID_STATE, RSID_FRAME_COUNT);
     float now = time(frameCount);
     alpha(1.0f);
 
     if (now >= MIDNIGHT && now < MORNING) {
-        drawNight();
+        drawNight(width, height);
         alpha(normf(MIDNIGHT, MORNING, now));
-        drawSunrise();
-    }
-    
-    if (now >= MORNING && now < AFTERNOON) {
-        drawSunrise();
+        drawSunrise(width, height);
+    } else if (now >= MORNING && now < AFTERNOON) {
+        drawSunrise(width, height);
         alpha(normf(MORNING, AFTERNOON, now));
-        drawNoon();
-    }
-
-    if (now >= AFTERNOON && now < DUSK) {
-        drawNoon();
+        drawNoon(width, height);
+    } else if (now >= AFTERNOON && now < DUSK) {
+        drawNoon(width, height);
         alpha(normf(AFTERNOON, DUSK, now));
-        drawSunset();
-    }
-    
-    if (now >= DUSK) {
-        drawNight();
+        drawSunset(width, height);
+    } else if (now >= DUSK) {
+        drawNight(width, height);
         alpha(1.0f - normf(DUSK, 1.0f, now));
-        drawSunset();
+        drawSunset(width, height);
     }
 
-    drawBlades(now);
+    drawBlades(now, frameCount);
 
     frameCount++;
     storeI32(RSID_STATE, RSID_FRAME_COUNT, frameCount);

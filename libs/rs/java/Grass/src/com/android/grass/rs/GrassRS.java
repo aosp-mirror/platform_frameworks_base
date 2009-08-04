@@ -39,6 +39,8 @@ class GrassRS {
     private static final int RSID_STATE = 0;
     private static final int RSID_STATE_FRAMECOUNT = 0;
     private static final int RSID_STATE_BLADES_COUNT = 1;
+    private static final int RSID_STATE_WIDTH = 2;
+    private static final int RSID_STATE_HEIGHT = 3;
 
     private static final int RSID_SKY_TEXTURES = 1;
     private static final int SKY_TEXTURES_COUNT = 5;
@@ -46,7 +48,7 @@ class GrassRS {
     private static final int RSID_BLADES = 2;
     private static final int BLADES_COUNT = 100;
     private static final int BLADE_STRUCT_FIELDS_COUNT = 12;
-    private static final int BLADE_STRUCT_DEGREE = 0;
+    private static final int BLADE_STRUCT_ANGLE = 0;
     private static final int BLADE_STRUCT_SIZE = 1;
     private static final int BLADE_STRUCT_XPOS = 2;
     private static final int BLADE_STRUCT_YPOS = 3;
@@ -129,10 +131,12 @@ class GrassRS {
     }
 
     private void createScriptStructures() {
-        final int[] data = new int[2];
+        final int[] data = new int[4];
         mState = Allocation.createSized(mRS, USER_I32, data.length);
         data[RSID_STATE_FRAMECOUNT] = 0;
         data[RSID_STATE_BLADES_COUNT] = BLADES_COUNT;
+        data[RSID_STATE_WIDTH] = mWidth;
+        data[RSID_STATE_HEIGHT] = mHeight;
         mState.data(data);
 
         final float[] blades = new float[BLADES_COUNT * BLADE_STRUCT_FIELDS_COUNT];
@@ -145,7 +149,7 @@ class GrassRS {
 
     private void createBlade(float[] blades, int index) {
         //noinspection PointlessArithmeticExpression
-        blades[index + BLADE_STRUCT_DEGREE] = 0.0f;
+        blades[index + BLADE_STRUCT_ANGLE] = 0.0f;
         blades[index + BLADE_STRUCT_SIZE] = random(4.0f) + 4.0f;
         blades[index + BLADE_STRUCT_XPOS] = random(mWidth);
         blades[index + BLADE_STRUCT_YPOS] = mHeight;

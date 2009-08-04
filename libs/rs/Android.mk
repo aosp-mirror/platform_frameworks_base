@@ -90,6 +90,7 @@ LOCAL_SRC_FILES:= \
 	rsObjectBase.cpp \
 	rsMatrix.cpp \
         rsMesh.cpp \
+	rsNoise.cpp \
 	rsProgram.cpp \
 	rsProgramFragment.cpp \
 	rsProgramFragmentStore.cpp \

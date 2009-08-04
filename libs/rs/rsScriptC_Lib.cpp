@@ -17,6 +17,7 @@
 #include "rsContext.h"
 #include "rsScriptC.h"
 #include "rsMatrix.h"
+#include "rsNoise.h"
 
 #include "acc/acc.h"
 #include "utils/String8.h"
@@ -748,6 +749,16 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "float", "(float, float, float)" },
     { "mapf", (void *)&SC_mapf,
         "float", "(float, float, float, float, float)" },
+    { "noisef", (void *)&SC_noisef,
+        "float", "(float)" },
+    { "noisef2", (void *)&SC_noisef2,
+        "float", "(float, float)" },
+    { "noisef3", (void *)&SC_noisef3,
+        "float", "(float, float, float)" },
+    { "turbulencef2", (void *)&SC_turbulencef2,
+        "float", "(float, float, float)" },
+    { "turbulencef3", (void *)&SC_turbulencef3,
+        "float", "(float, float, float, float)" },
 
     // time
     { "second", (void *)&SC_second,
