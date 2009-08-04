@@ -24,12 +24,13 @@ import static android.renderscript.RenderScript.DepthFunc.*;
 import static android.renderscript.RenderScript.BlendSrcFunc;
 import static android.renderscript.RenderScript.BlendDstFunc;
 import android.renderscript.RenderScript;
-import android.renderscript.Element;
 import android.renderscript.Allocation;
 import android.renderscript.ProgramVertexAlloc;
 import static android.renderscript.Element.*;
 
 import static android.util.MathUtils.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import java.util.TimeZone;
 
@@ -39,7 +40,7 @@ class GrassRS {
     private static final int RSID_STATE_BLADES_COUNT = 1;
 
     private static final int RSID_SKY_TEXTURES = 1;
-    private static final int SKY_TEXTURES_COUNT = 4;
+    private static final int SKY_TEXTURES_COUNT = 5;
     
     private static final int RSID_BLADES = 2;    
     private static final int BLADES_COUNT = 100;
@@ -59,6 +60,7 @@ class GrassRS {
     
     private Resources mResources;
     private RenderScript mRS;
+    private final BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
     
     private final int mWidth;
     private final int mHeight;
@@ -77,19 +79,25 @@ class GrassRS {
     private ProgramVertexAlloc mPvOrthoAlloc;
 
     @SuppressWarnings({"FieldCanBeLocal"})
-    private Allocation mSkyTexturesIDs;
+    private Allocation mTexturesIDs;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private Allocation[] mSkyTextures;
+    private Allocation[] mTextures;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private int[] mSkyBufferIDs;
+    private int[] mTextureBufferIDs;
     @SuppressWarnings({"FieldCanBeLocal"})
     private Allocation mState;
     @SuppressWarnings({"FieldCanBeLocal"})
     private Allocation mBlades;
+    @SuppressWarnings({"FieldCanBeLocal"})
+    private RenderScript.ProgramFragment mPfGrass;
+    @SuppressWarnings({"FieldCanBeLocal"})
+    private RenderScript.ProgramFragmentStore mPfsGrass;
 
     public GrassRS(int width, int height) {
         mWidth = width;
         mHeight = height;
+        mBitmapOptions.inScaled = false;
+        mBitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
     }
 
     public void init(RenderScript rs, Resources res) {
@@ -114,7 +122,7 @@ class GrassRS {
 
         loadSkyTextures();
         mScript.bindAllocation(mState, RSID_STATE);
-        mScript.bindAllocation(mSkyTexturesIDs, RSID_SKY_TEXTURES);
+        mScript.bindAllocation(mTexturesIDs, RSID_SKY_TEXTURES);
         mScript.bindAllocation(mBlades, RSID_BLADES);
 
         mRS.contextBindRootScript(mScript);
@@ -146,23 +154,24 @@ class GrassRS {
         blades[index + BLADE_STRUCT_LENGTHX] = random(4.5f) + 3.0f;
         blades[index + BLADE_STRUCT_LENGTHY] = random(5.5f) + 2.0f;
         blades[index + BLADE_STRUCT_HARDNESS] = random(1.0f) + 0.2f;
-        blades[index + BLADE_STRUCT_H] = (51.0f + random(5.0f)) / 255.0f;
-        blades[index + BLADE_STRUCT_S] = (200.0f + random(55.0f)) / 255.0f;
-        blades[index + BLADE_STRUCT_B] = (90.0f + random(165.0f)) / 255.0f;
+        blades[index + BLADE_STRUCT_H] = random(0.02f) + 0.2f;
+        blades[index + BLADE_STRUCT_S] = random(0.22f) + 0.78f;
+        blades[index + BLADE_STRUCT_B] = random(0.65f) + 0.35f;
     }
 
     private void loadSkyTextures() {
-        mSkyBufferIDs = new int[SKY_TEXTURES_COUNT];
-        mSkyTextures = new Allocation[SKY_TEXTURES_COUNT];
-        mSkyTexturesIDs = Allocation.createSized(mRS, USER_FLOAT, SKY_TEXTURES_COUNT);
+        mTextureBufferIDs = new int[SKY_TEXTURES_COUNT];
+        mTextures = new Allocation[SKY_TEXTURES_COUNT];
+        mTexturesIDs = Allocation.createSized(mRS, USER_FLOAT, SKY_TEXTURES_COUNT);
 
-        final Allocation[] textures = mSkyTextures;
+        final Allocation[] textures = mTextures;
         textures[0] = loadTexture(R.drawable.night, "night");
         textures[1] = loadTexture(R.drawable.sunrise, "sunrise");
         textures[2] = loadTexture(R.drawable.sky, "sky");
         textures[3] = loadTexture(R.drawable.sunset, "sunset");
+        textures[4] = loadTextureARGB(R.drawable.aa, "aa");
 
-        final int[] bufferIds = mSkyBufferIDs;
+        final int[] bufferIds = mTextureBufferIDs;
         final int count = textures.length;
 
         for (int i = 0; i < count; i++) {
@@ -171,12 +180,21 @@ class GrassRS {
             bufferIds[i] = texture.getID();
         }
 
-        mSkyTexturesIDs.data(bufferIds);
+        mTexturesIDs.data(bufferIds);
     }
 
     private Allocation loadTexture(int id, String name) {
-        Allocation allocation = Allocation.createFromBitmapResource(mRS, mResources, id,
-                Element.RGB_565, false);
+        final Allocation allocation = Allocation.createFromBitmapResource(mRS, mResources,
+                id, RGB_565, false);
+        allocation.setName(name);
+        return allocation;
+    }
+    
+    private Allocation loadTextureARGB(int id, String name) {
+        // Forces ARGB 32 bits, because pngcrush sometimes optimize our PNGs to
+        // indexed pictures, which are not well supported
+        final Bitmap b = BitmapFactory.decodeResource(mResources, id, mBitmapOptions);
+        final Allocation allocation = Allocation.createFromBitmap(mRS, b, RGBA_8888, false);
         allocation.setName(name);
         return allocation;
     }
@@ -195,6 +213,13 @@ class GrassRS {
         mPfBackground = mRS.programFragmentCreate();
         mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(mSampler, 0);
+
+        mRS.programFragmentBegin(null, null);
+        mRS.programFragmentSetTexEnable(0, true);
+        mRS.programFragmentSetTexEnvMode(0, MODULATE);
+        mPfGrass = mRS.programFragmentCreate();
+        mPfGrass.setName("PFGrass");
+        mPfGrass.bindSampler(mSampler, 0);        
     }
 
     private void createProgramFragmentStore() {
@@ -205,6 +230,14 @@ class GrassRS {
         mRS.programFragmentStoreDepthMask(false);
         mPfsBackground = mRS.programFragmentStoreCreate();
         mPfsBackground.setName("PFSBackground");
+
+        mRS.programFragmentStoreBegin(null, null);
+        mRS.programFragmentStoreDepthFunc(ALWAYS);
+        mRS.programFragmentStoreBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+        mRS.programFragmentStoreDitherEnable(true);
+        mRS.programFragmentStoreDepthMask(false);
+        mPfsGrass = mRS.programFragmentStoreCreate();
+        mPfsGrass.setName("PFSGrass");        
     }
 
     private void createProgramVertex() {
