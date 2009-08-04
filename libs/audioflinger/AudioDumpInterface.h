@@ -57,6 +57,7 @@ public:
     AudioStreamOut*     finalStream() { return mFinalStream; }
     uint32_t            device() { return mDevice; }
 
+    int                 getId()  { return mId; }
 private:
     AudioDumpInterface *mInterface;
     int                  mId;

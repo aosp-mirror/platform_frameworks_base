@@ -197,8 +197,8 @@ audio_io_handle_t AudioPolicyManagerGeneric::getOutput(AudioSystem::stream_type 
 
 #ifdef AUDIO_POLICY_TEST
     if (mCurOutput != 0) {
-        LOGV("getOutput() test output mCurOutput %d, samplingRate %d, format %d, channelcount %d, mDirectOutput %d",
-                mCurOutput, mTestSamplingRate, mTestFormat, mTestChannelcount, mDirectOutput);
+        LOGV("getOutput() test output mCurOutput %d, samplingRate %d, format %d, channels %x, mDirectOutput %d",
+                mCurOutput, mTestSamplingRate, mTestFormat, mTestChannels, mDirectOutput);
 
         if (mTestOutputs[mCurOutput] == 0) {
             LOGV("getOutput() opening test output");
@@ -206,7 +206,7 @@ audio_io_handle_t AudioPolicyManagerGeneric::getOutput(AudioSystem::stream_type 
             outputDesc->mDevice = mTestDevice;
             outputDesc->mSamplingRate = mTestSamplingRate;
             outputDesc->mFormat = mTestFormat;
-            outputDesc->mChannels = (mTestChannelcount == 1) ? AudioSystem::CHANNEL_OUT_MONO : AudioSystem::CHANNEL_OUT_STEREO;
+            outputDesc->mChannels = mTestChannels;
             outputDesc->mLatency = mTestLatencyMs;
             outputDesc->mFlags = (AudioSystem::output_flags)(mDirectOutput ? AudioSystem::OUTPUT_FLAG_DIRECT : 0);
             outputDesc->mRefCount[stream] = 0;
@@ -216,7 +216,12 @@ audio_io_handle_t AudioPolicyManagerGeneric::getOutput(AudioSystem::stream_type 
                                             &outputDesc->mChannels,
                                             &outputDesc->mLatency,
                                             outputDesc->mFlags);
-            mOutputs.add(mTestOutputs[mCurOutput], outputDesc);
+            if (mTestOutputs[mCurOutput]) {
+                AudioParameter outputCmd = AudioParameter();
+                outputCmd.addInt(String8("set_id"),mCurOutput);
+                mpClientInterface->setParameters(mTestOutputs[mCurOutput],outputCmd.toString());
+                mOutputs.add(mTestOutputs[mCurOutput], outputDesc);
+            }
         }
         return mTestOutputs[mCurOutput];
     }
@@ -495,10 +500,14 @@ AudioPolicyManagerGeneric::AudioPolicyManagerGeneric(AudioPolicyClientInterface 
     }
 
 #ifdef AUDIO_POLICY_TEST
+    AudioParameter outputCmd = AudioParameter();
+    outputCmd.addInt(String8("set_id"), 0);
+    mpClientInterface->setParameters(mHardwareOutput, outputCmd.toString());
+
     mTestDevice = AudioSystem::DEVICE_OUT_SPEAKER;
     mTestSamplingRate = 44100;
     mTestFormat = AudioSystem::PCM_16_BIT;
-    mTestChannelcount = 2;
+    mTestChannels =  AudioSystem::CHANNEL_OUT_STEREO;
     mTestLatencyMs = 0;
     mCurOutput = 0;
     mDirectOutput = false;
@@ -537,15 +546,23 @@ bool AudioPolicyManagerGeneric::threadLoop()
     LOGV("entering threadLoop()");
     while (!exitPending())
     {
+        String8 command;
+        int valueInt;
+        String8 value;
+
         Mutex::Autolock _l(mLock);
         mWaitWorkCV.waitRelative(mLock, milliseconds(50));
-        String8 command;
+
         command = mpClientInterface->getParameters(0, String8("test_cmd_policy"));
-        if (command != "") {
+        AudioParameter param = AudioParameter(command);
+
+        if (param.getInt(String8("test_cmd_policy"), valueInt) == NO_ERROR &&
+            valueInt != 0) {
             LOGV("Test command %s received", command.string());
-            AudioParameter param = AudioParameter(command);
-            int valueInt;
-            String8 value;
+            String8 target;
+            if (param.get(String8("target"), target) != NO_ERROR) {
+                target = "Manager";
+            }
             if (param.getInt(String8("test_cmd_policy_output"), valueInt) == NO_ERROR) {
                 param.remove(String8("test_cmd_policy_output"));
                 mCurOutput = valueInt;
@@ -565,28 +582,84 @@ bool AudioPolicyManagerGeneric::threadLoop()
 
             if (param.get(String8("test_cmd_policy_format"), value) == NO_ERROR) {
                 param.remove(String8("test_cmd_policy_format"));
+                int format = AudioSystem::INVALID_FORMAT;
                 if (value == "PCM 16 bits") {
-                    mTestFormat = AudioSystem::PCM_16_BIT;
+                    format = AudioSystem::PCM_16_BIT;
                 } else if (value == "PCM 8 bits") {
-                    mTestFormat = AudioSystem::PCM_8_BIT;
+                    format = AudioSystem::PCM_8_BIT;
                 } else if (value == "Compressed MP3") {
-                    mTestFormat = AudioSystem::MP3;
+                    format = AudioSystem::MP3;
+                }
+                if (format != AudioSystem::INVALID_FORMAT) {
+                    if (target == "Manager") {
+                        mTestFormat = format;
+                    } else if (mTestOutputs[mCurOutput] != 0) {
+                        AudioParameter outputParam = AudioParameter();
+                        outputParam.addInt(String8("format"), format);
+                        mpClientInterface->setParameters(mTestOutputs[mCurOutput], outputParam.toString());
+                    }
                 }
             }
             if (param.get(String8("test_cmd_policy_channels"), value) == NO_ERROR) {
                 param.remove(String8("test_cmd_policy_channels"));
+                int channels = 0;
+
                 if (value == "Channels Stereo") {
-                    mTestChannelcount = 2;
+                    channels =  AudioSystem::CHANNEL_OUT_STEREO;
                 } else if (value == "Channels Mono") {
-                    mTestChannelcount = 1;
+                    channels =  AudioSystem::CHANNEL_OUT_MONO;
+                }
+                if (channels != 0) {
+                    if (target == "Manager") {
+                        mTestChannels = channels;
+                    } else if (mTestOutputs[mCurOutput] != 0) {
+                        AudioParameter outputParam = AudioParameter();
+                        outputParam.addInt(String8("channels"), channels);
+                        mpClientInterface->setParameters(mTestOutputs[mCurOutput], outputParam.toString());
+                    }
                 }
             }
             if (param.getInt(String8("test_cmd_policy_sampleRate"), valueInt) == NO_ERROR) {
                 param.remove(String8("test_cmd_policy_sampleRate"));
                 if (valueInt >= 0 && valueInt <= 96000) {
-                    mTestSamplingRate = valueInt;
+                    int samplingRate = valueInt;
+                    if (target == "Manager") {
+                        mTestSamplingRate = samplingRate;
+                    } else if (mTestOutputs[mCurOutput] != 0) {
+                        AudioParameter outputParam = AudioParameter();
+                        outputParam.addInt(String8("sampling_rate"), samplingRate);
+                        mpClientInterface->setParameters(mTestOutputs[mCurOutput], outputParam.toString());
+                    }
                 }
             }
+
+            if (param.get(String8("test_cmd_policy_reopen"), value) == NO_ERROR) {
+                param.remove(String8("test_cmd_policy_reopen"));
+
+                mpClientInterface->closeOutput(mHardwareOutput);
+                delete mOutputs.valueFor(mHardwareOutput);
+                mOutputs.removeItem(mHardwareOutput);
+
+                AudioOutputDescriptor *outputDesc = new AudioOutputDescriptor();
+                outputDesc->mDevice = (uint32_t)AudioSystem::DEVICE_OUT_SPEAKER;
+                mHardwareOutput = mpClientInterface->openOutput(&outputDesc->mDevice,
+                                                &outputDesc->mSamplingRate,
+                                                &outputDesc->mFormat,
+                                                &outputDesc->mChannels,
+                                                &outputDesc->mLatency,
+                                                outputDesc->mFlags);
+                if (mHardwareOutput == 0) {
+                    LOGE("Failed to reopen hardware output stream, samplingRate: %d, format %d, channels %d",
+                            outputDesc->mSamplingRate, outputDesc->mFormat, outputDesc->mChannels);
+                } else {
+                    AudioParameter outputCmd = AudioParameter();
+                    outputCmd.addInt(String8("set_id"), 0);
+                    mpClientInterface->setParameters(mHardwareOutput, outputCmd.toString());
+                    mOutputs.add(mHardwareOutput, outputDesc);
+                }
+            }
+
+
             mpClientInterface->setParameters(0, String8("test_cmd_policy="));
         }
     }

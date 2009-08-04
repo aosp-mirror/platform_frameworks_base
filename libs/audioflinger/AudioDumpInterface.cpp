@@ -71,9 +71,21 @@ AudioStreamOut* AudioDumpInterface::openOutputStream(
             }
         }
     } else {
-        if (format != 0 && *format != 0) lFormat = *format;
-        if (channels != 0 && *channels != 0) lChannels = *channels;
-        if (sampleRate != 0 && *sampleRate != 0) lRate = *sampleRate;
+        if (format != 0 && *format != 0) {
+            lFormat = *format;
+        } else {
+            lFormat = AudioSystem::PCM_16_BIT;
+        }
+        if (channels != 0 && *channels != 0) {
+            lChannels = *channels;
+        } else {
+            lChannels = AudioSystem::CHANNEL_OUT_STEREO;
+        }
+        if (sampleRate != 0 && *sampleRate != 0) {
+            lRate = *sampleRate;
+        } else {
+            lRate = 44100;
+        }
         if (status) *status = NO_ERROR;
     }
     LOGV("openOutputStream(), outFinal %p", outFinal);
@@ -93,9 +105,13 @@ void AudioDumpInterface::closeOutputStream(AudioStreamOut* out)
         LOGW("Attempt to close invalid output stream");
         return;
     }
+
+    LOGV("closeOutputStream() output %p", out);
+
     dumpOut->standby();
     if (dumpOut->finalStream() != NULL) {
         mFinalInterface->closeOutputStream(dumpOut->finalStream());
+        mFirstHwOutput = true;
     }
 
     mOutputs.remove(dumpOut);
@@ -159,7 +175,7 @@ status_t AudioDumpInterface::setParameters(const String8& keyValuePairs)
 
     if (param.get(String8("test_cmd_file_name"), value) == NO_ERROR) {
         mFileName = value;
-        return NO_ERROR;
+        param.remove(String8("test_cmd_file_name"));
     }
     if (param.get(String8("test_cmd_policy"), value) == NO_ERROR) {
         Mutex::Autolock _l(mLock);
@@ -176,21 +192,35 @@ status_t AudioDumpInterface::setParameters(const String8& keyValuePairs)
 String8 AudioDumpInterface::getParameters(const String8& keys)
 {
     AudioParameter param = AudioParameter(keys);
+    AudioParameter response;
     String8 value;
 
 //    LOGV("getParameters %s", keys.string());
-
-    if (param.get(String8("test_cmd_file_name"), value) == NO_ERROR) {
-        return mFileName;
-    }
     if (param.get(String8("test_cmd_policy"), value) == NO_ERROR) {
         Mutex::Autolock _l(mLock);
+        if (mPolicyCommands.length() != 0) {
+            response = AudioParameter(mPolicyCommands);
+            response.addInt(String8("test_cmd_policy"), 1);
+        } else {
+            response.addInt(String8("test_cmd_policy"), 0);
+        }
+        param.remove(String8("test_cmd_policy"));
 //        LOGV("test_cmd_policy command %s read", mPolicyCommands.string());
-        return mPolicyCommands;
     }
 
-    if (mFinalInterface != 0 ) return mFinalInterface->getParameters(keys);
-    return String8("");
+    if (param.get(String8("test_cmd_file_name"), value) == NO_ERROR) {
+        response.add(String8("test_cmd_file_name"), mFileName);
+        param.remove(String8("test_cmd_file_name"));
+    }
+
+    String8 keyValuePairs = response.toString();
+
+    if (param.size() && mFinalInterface != 0 ) {
+        keyValuePairs += ";";
+        keyValuePairs += mFinalInterface->getParameters(param.toString());
+    }
+
+    return keyValuePairs;
 }
 
 
@@ -213,6 +243,7 @@ AudioStreamOutDump::AudioStreamOutDump(AudioDumpInterface *interface,
 
 AudioStreamOutDump::~AudioStreamOutDump()
 {
+    LOGV("AudioStreamOutDump destructor");
     Close();
 }
 
@@ -283,15 +314,55 @@ status_t AudioStreamOutDump::setVolume(float left, float right)
 }
 status_t AudioStreamOutDump::setParameters(const String8& keyValuePairs)
 {
-    LOGV("AudioStreamOutDump::setParameters()");
-    if (mFinalStream != 0 ) return mFinalStream->setParameters(keyValuePairs);
-    return NO_ERROR;
+    LOGV("AudioStreamOutDump::setParameters %s", keyValuePairs.string());
+
+    if (mFinalStream != 0 ) {
+        return mFinalStream->setParameters(keyValuePairs);
+    }
+
+    AudioParameter param = AudioParameter(keyValuePairs);
+    String8 value;
+    int valueInt;
+    status_t status = NO_ERROR;
+
+    if (param.getInt(String8("set_id"), valueInt) == NO_ERROR) {
+        mId = valueInt;
+    }
+
+    if (param.getInt(String8("format"), valueInt) == NO_ERROR) {
+        if (mOutFile == 0) {
+            mFormat = valueInt;
+        } else {
+            status = INVALID_OPERATION;
+        }
+    }
+    if (param.getInt(String8("channels"), valueInt) == NO_ERROR) {
+        if (valueInt == AudioSystem::CHANNEL_OUT_STEREO || valueInt == AudioSystem::CHANNEL_OUT_MONO) {
+            mChannels = valueInt;
+        } else {
+            status = BAD_VALUE;
+        }
+    }
+    if (param.getInt(String8("sampling_rate"), valueInt) == NO_ERROR) {
+        if (valueInt > 0 && valueInt <= 48000) {
+            if (mOutFile == 0) {
+                mSampleRate = valueInt;
+            } else {
+                status = INVALID_OPERATION;
+            }
+        } else {
+            status = BAD_VALUE;
+        }
+    }
+    return status;
 }
+
 String8 AudioStreamOutDump::getParameters(const String8& keys)
 {
-    String8 result = String8("");
-    if (mFinalStream != 0 ) result = mFinalStream->getParameters(keys);
-    return result;
+    if (mFinalStream != 0 ) return mFinalStream->getParameters(keys);
+
+    AudioParameter param = AudioParameter(keys);
+    return param.toString();
 }
 
 status_t AudioStreamOutDump::dump(int fd, const Vector<String16>& args)
@@ -426,9 +497,10 @@ status_t AudioStreamInDump::setParameters(const String8& keyValuePairs)
 
 String8 AudioStreamInDump::getParameters(const String8& keys)
 {
-    String8 result = String8("");
-    if (mFinalStream != 0 ) result = mFinalStream->getParameters(keys);
-    return result;
+    if (mFinalStream != 0 ) return mFinalStream->getParameters(keys);
+
+    AudioParameter param = AudioParameter(keys);
+    return param.toString();
 }
 
 status_t AudioStreamInDump::dump(int fd, const Vector<String16>& args)

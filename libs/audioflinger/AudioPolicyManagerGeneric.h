@@ -180,7 +180,7 @@ private:
         uint32_t        mTestDevice;
         uint32_t        mTestSamplingRate;
         uint32_t        mTestFormat;
-        uint32_t        mTestChannelcount;
+        uint32_t        mTestChannels;
         uint32_t        mTestLatencyMs;
 #endif //AUDIO_POLICY_TEST
 
