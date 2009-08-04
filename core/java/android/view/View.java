@@ -6913,7 +6913,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Set the background to a given resource. The resource should refer to
-     * a Drawable object.
+     * a Drawable object or 0 to remove the background.
      * @param resid The identifier of the resource.
      * @attr ref android.R.styleable#View_background
      */
