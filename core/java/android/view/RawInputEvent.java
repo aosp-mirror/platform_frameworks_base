@@ -13,6 +13,8 @@ public class RawInputEvent {
     public static final int CLASS_ALPHAKEY = 0x00000002;
     public static final int CLASS_TOUCHSCREEN = 0x00000004;
     public static final int CLASS_TRACKBALL = 0x00000008;
+    public static final int CLASS_TOUCHSCREEN_MT = 0x00000010;
+    public static final int CLASS_DPAD = 0x00000020;
     
     // More special classes for QueuedEvent below.
     public static final int CLASS_CONFIGURATION_CHANGED = 0x10000000;
@@ -158,8 +160,21 @@ public class RawInputEvent {
     public static final int ABS_TOOL_WIDTH = 0x1c;
     public static final int ABS_VOLUME = 0x20;
     public static final int ABS_MISC = 0x28;
+    public static final int ABS_MT_TOUCH_MAJOR = 0x30;
+    public static final int ABS_MT_TOUCH_MINOR = 0x31;
+    public static final int ABS_MT_WIDTH_MAJOR = 0x32;
+    public static final int ABS_MT_WIDTH_MINOR = 0x33;
+    public static final int ABS_MT_ORIENTATION = 0x34;
+    public static final int ABS_MT_POSITION_X = 0x35;
+    public static final int ABS_MT_POSITION_Y = 0x36;
+    public static final int ABS_MT_TOOL_TYPE = 0x37;
+    public static final int ABS_MT_BLOB_ID = 0x38;
     public static final int ABS_MAX = 0x3f;
 
+    public static final int SYN_REPORT = 0;
+    public static final int SYN_CONFIG = 1;
+    public static final int SYN_MT_REPORT = 2;
+    
     public int deviceId;
     public int type;
     public int scancode;

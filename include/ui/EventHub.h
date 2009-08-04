@@ -55,7 +55,9 @@ public:
         CLASS_KEYBOARD      = 0x00000001,
         CLASS_ALPHAKEY      = 0x00000002,
         CLASS_TOUCHSCREEN   = 0x00000004,
-        CLASS_TRACKBALL     = 0x00000008
+        CLASS_TRACKBALL     = 0x00000008,
+        CLASS_TOUCHSCREEN_MT= 0x00000010,
+        CLASS_DPAD          = 0x00000020
     };
     uint32_t getDeviceClasses(int32_t deviceId) const;
     
@@ -122,6 +124,7 @@ private:
     };
 
     device_t* getDevice(int32_t deviceId) const;
+    bool hasKeycode(device_t* device, int keycode) const;
     
     // Protect all internal state.
     mutable Mutex   mLock;
