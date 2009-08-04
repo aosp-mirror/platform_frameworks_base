@@ -132,6 +132,7 @@ static int initGraphics()
      };
      
      EGLint numConfigs = -1;
+     EGLint n = 0;
      EGLint majorVersion;
      EGLint minorVersion;
      EGLConfig config;
@@ -148,15 +149,43 @@ static int initGraphics()
      egl_error("eglInitialize");
 
      eglGetConfigs(dpy, NULL, 0, &numConfigs);
-     egl_error("eglGetConfigs");
-     fprintf(stderr,"num configs %d\n", numConfigs);
+
+     // Get all the "potential match" configs...
+     EGLConfig* const configs = malloc(sizeof(EGLConfig)*numConfigs);
+     eglChooseConfig(dpy, s_configAttribs, configs, numConfigs, &n);
+     config = configs[0];
+     if (n > 1) {
+         // if there is more than one candidate, go through the list
+         // and pick one that matches our framebuffer format
+         int fbSzA = 0; // should not hardcode
+         int fbSzR = 5; // should not hardcode
+         int fbSzG = 6; // should not hardcode
+         int fbSzB = 5; // should not hardcode
+         int i;
+         for (i=0 ; i<n ; i++) {
+             EGLint r,g,b,a;
+             eglGetConfigAttrib(dpy, configs[i], EGL_RED_SIZE,   &r);
+             eglGetConfigAttrib(dpy, configs[i], EGL_GREEN_SIZE, &g);
+             eglGetConfigAttrib(dpy, configs[i], EGL_BLUE_SIZE,  &b);
+             eglGetConfigAttrib(dpy, configs[i], EGL_ALPHA_SIZE, &a);
+             if (fbSzA == a && fbSzR == r && fbSzG == g && fbSzB  == b) {
+                 config = configs[i];
+                 break;
+             }
+         }
+     }
+     free(configs);
      
-     eglChooseConfig(dpy, s_configAttribs, &config, 1, &numConfigs);
-     egl_error("eglChooseConfig");
+     
+     //eglGetConfigs(dpy, NULL, 0, &numConfigs);
+     //egl_error("eglGetConfigs");
+     //fprintf(stderr,"num configs %d\n", numConfigs);     
+     //eglChooseConfig(dpy, s_configAttribs, &config, 1, &numConfigs);
+     //egl_error("eglChooseConfig");
 
      surface = eglCreateWindowSurface(dpy, config,
              android_createDisplaySurface(), NULL);
-     egl_error("eglMapWindowSurface");
+     egl_error("eglCreateWindowSurface");
 
      fprintf(stderr,"surface = %p\n", surface);
 
