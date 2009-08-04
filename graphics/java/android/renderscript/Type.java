@@ -45,23 +45,47 @@ public class Type extends BaseObj {
 
     public static class Builder {
         RenderScript mRS;
-        boolean mActive = true;
+        Entry[] mEntries;
+        int mEntryCount;
+        Element mElement;
 
-        Builder(RenderScript rs) {
-            mRS = rs;
+        class Entry {
+            Dimension mDim;
+            int mValue;
         }
 
-        public void begin(Element e) {
-            mRS.nTypeBegin(e.mID);
+        public Builder(RenderScript rs, Element e) {
+            mRS = rs;
+            mEntries = new Entry[4];
+            mElement = e;
         }
 
         public void add(Dimension d, int value) {
-            mRS.nTypeAdd(d.mID, value);
+            if(mEntries.length >= mEntryCount) {
+                Entry[] en = new Entry[mEntryCount + 8];
+                for(int ct=0; ct < mEntries.length; ct++) {
+                    en[ct] = mEntries[ct];
+                }
+                mEntries = en;
+            }
+            mEntries[mEntryCount] = new Entry();
+            mEntries[mEntryCount].mDim = d;
+            mEntries[mEntryCount].mValue = value;
+            mEntryCount++;
+        }
+
+        static synchronized Type internalCreate(RenderScript rs, Builder b) {
+            rs.nTypeBegin(b.mElement.mID);
+            for (int ct=0; ct < b.mEntryCount; ct++) {
+                Entry en = b.mEntries[ct];
+                rs.nTypeAdd(en.mDim.mID, en.mValue);
+            }
+            int id = rs.nTypeCreate();
+            return new Type(id, rs);
         }
 
         public Type create() {
-            int id = mRS.nTypeCreate();
-            return new Type(id, mRS);
+            return internalCreate(mRS, this);
         }
     }
 

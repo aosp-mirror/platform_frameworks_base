@@ -37,22 +37,28 @@ public class Script extends BaseObj {
     }
 
     public void setClearColor(float r, float g, float b, float a) {
-        //mRS.nScriptCSetClearColor(r, g, b, a);
+        mRS.nScriptSetClearColor(mID, r, g, b, a);
     }
 
     public void setClearDepth(float d) {
-        //mRS.nScriptCSetClearDepth(d);
+        mRS.nScriptSetClearDepth(mID, d);
     }
 
     public void setClearStencil(int stencil) {
-        //mRS.nScriptCSetClearStencil(stencil);
+        mRS.nScriptSetClearStencil(mID, stencil);
     }
 
+    public void setTimeZone(String timeZone) {
+        try {
+            mRS.nScriptSetTimeZone(mID, timeZone.getBytes("UTF-8"));
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static class Builder {
         RenderScript mRS;
         boolean mIsRoot = false;
-        byte[] mTimeZone;
 
         Builder(RenderScript rs) {
             mRS = rs;
@@ -63,22 +69,11 @@ public class Script extends BaseObj {
         }
 
         void transferCreate() {
-            if(mTimeZone != null) {
-                mRS.nScriptCSetTimeZone(mTimeZone);
-            }
             mRS.nScriptCSetRoot(mIsRoot);
         }
 
         void transferObject(Script s) {
             s.mIsRoot = mIsRoot;
-        }
-
-        public void setTimeZone(String timeZone) {
-            try {
-                mTimeZone = timeZone.getBytes("UTF-8");
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
         }
 
         public void setRoot(boolean r) {

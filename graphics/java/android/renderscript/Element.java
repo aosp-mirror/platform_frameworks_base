@@ -146,58 +146,75 @@ public class Element extends BaseObj {
 
     public static class Builder {
         RenderScript mRS;
-        boolean mActive = true;
+        Entry[] mEntries;
+        int mEntryCount;
 
-        Builder(RenderScript rs) {
+        private class Entry {
+            Element mElement;
+            Element.DataType mType;
+            Element.DataKind mKind;
+            boolean mIsNormalized;
+            int mBits;
+        }
+
+        public Builder(RenderScript rs) {
             mRS = rs;
+            mEntryCount = 0;
+            mEntries = new Entry[8];
         }
 
-        void begin() throws IllegalStateException {
-            if (mActive) {
-                throw new IllegalStateException("Element builder already active.");
+        void addEntry(Entry e) {
+            if(mEntries.length >= mEntryCount) {
+                Entry[] en = new Entry[mEntryCount + 8];
+                for(int ct=0; ct < mEntries.length; ct++) {
+                    en[ct] = mEntries[ct];
+                }
+                mEntries = en;
             }
-            mRS.nElementBegin();
-            mActive = true;
+            mEntries[mEntryCount] = e;
+            mEntryCount++;
         }
 
-        public Builder add(Element e) throws IllegalArgumentException, IllegalStateException {
-            if(!mActive) {
-                throw new IllegalStateException("Element builder not active.");
-            }
+        public Builder add(Element e) throws IllegalArgumentException {
             if(!e.mIsPredefined) {
                 throw new IllegalArgumentException("add requires a predefined Element.");
             }
-            mRS.nElementAddPredefined(e.mID);
+            Entry en = new Entry();
+            en.mElement = e;
+            addEntry(en);
             return this;
         }
 
-        public Builder add(Element.DataType dt, Element.DataKind dk, boolean isNormalized, int bits)
-            throws IllegalStateException {
-            if(!mActive) {
-                throw new IllegalStateException("Element builder not active.");
-            }
-            int norm = 0;
-            if (isNormalized) {
-                norm = 1;
-            }
-            mRS.nElementAdd(dt.mID, dk.mID, norm, bits);
+        public Builder add(Element.DataType dt, Element.DataKind dk, boolean isNormalized, int bits) {
+            Entry en = new Entry();
+            en.mType = dt;
+            en.mKind = dk;
+            en.mIsNormalized = isNormalized;
+            en.mBits = bits;
+            addEntry(en);
             return this;
         }
 
-        public void abort() throws IllegalStateException {
-            if(!mActive) {
-                throw new IllegalStateException("Element builder not active.");
+        static synchronized Element internalCreate(RenderScript rs, Builder b) {
+            rs.nElementBegin();
+            for (int ct=0; ct < b.mEntryCount; ct++) {
+                Entry en = b.mEntries[ct];
+                if(en.mElement !=  null) {
+                    rs.nElementAddPredefined(en.mElement.mPredefinedID);
+                } else {
+                    int norm = 0;
+                    if (en.mIsNormalized) {
+                        norm = 1;
+                    }
+                    rs.nElementAdd(en.mType.mID, en.mKind.mID, norm, en.mBits);
+                }
             }
-            mActive = false;
+            int id = rs.nElementCreate();
+            return new Element(id, rs);
         }
 
-        public Element create() throws IllegalStateException {
-            if(!mActive) {
-                throw new IllegalStateException("Element builder not active.");
-            }
-            int id = mRS.nElementCreate();
-            mActive = false;
-            return new Element(id, mRS);
+        public Element create() {
+            return internalCreate(mRS, this);
         }
     }
 

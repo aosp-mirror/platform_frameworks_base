@@ -49,6 +49,32 @@ void rsi_ScriptBindAllocation(Context * rsc, RsScript vs, RsAllocation va, uint3
     s->mSlots[slot].set(static_cast<Allocation *>(va));
 }
 
+void rsi_ScriptSetClearColor(Context * rsc, RsScript vs, float r, float g, float b, float a)
+{
+    Script *s = static_cast<Script *>(vs);
+    s->mEnviroment.mClearColor[0] = r;
+    s->mEnviroment.mClearColor[1] = g;
+    s->mEnviroment.mClearColor[2] = b;
+    s->mEnviroment.mClearColor[3] = a;
+}
+
+void rsi_ScriptSetTimeZone(Context * rsc, RsScript vs, const char * timeZone, uint32_t length)
+{
+    Script *s = static_cast<Script *>(vs);
+    s->mEnviroment.mTimeZone = timeZone;
+}
+
+void rsi_ScriptSetClearDepth(Context * rsc, RsScript vs, float v)
+{
+    Script *s = static_cast<Script *>(vs);
+    s->mEnviroment.mClearDepth = v;
+}
+
+void rsi_ScriptSetClearStencil(Context * rsc, RsScript vs, uint32_t v)
+{
+    Script *s = static_cast<Script *>(vs);
+    s->mEnviroment.mClearStencil = v;
+}
 
 }
 }

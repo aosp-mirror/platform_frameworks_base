@@ -647,52 +647,54 @@ nScriptBindAllocation(JNIEnv *_env, jobject _this, jint script, jint alloc, jint
 }
 
 static void
-nScriptCBegin(JNIEnv *_env, jobject _this)
+nScriptSetClearColor(JNIEnv *_env, jobject _this, jint script, jfloat r, jfloat g, jfloat b, jfloat a)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCBegin, con(%p)", con);
-    rsScriptCBegin();
+    LOG_API("nScriptSetClearColor, con(%p), s(%p), r(%f), g(%f), b(%f), a(%f)", con, script, r, g, b, a);
+    rsScriptSetClearColor((RsScript)script, r, g, b, a);
 }
 
 static void
-nScriptCSetClearColor(JNIEnv *_env, jobject _this, jfloat r, jfloat g, jfloat b, jfloat a)
+nScriptSetClearDepth(JNIEnv *_env, jobject _this, jint script, jfloat d)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCSetClearColor, con(%p), r(%f), g(%f), b(%f), a(%f)", con, r, g, b, a);
-    rsScriptCSetClearColor(r, g, b, a);
+    LOG_API("nScriptCSetClearDepth, con(%p), s(%p), depth(%f)", con, script, d);
+    rsScriptSetClearDepth((RsScript)script, d);
 }
 
 static void
-nScriptCSetClearDepth(JNIEnv *_env, jobject _this, jfloat d)
+nScriptSetClearStencil(JNIEnv *_env, jobject _this, jint script, jint stencil)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCSetClearDepth, con(%p), depth(%f)", con, d);
-    rsScriptCSetClearDepth(d);
+    LOG_API("nScriptCSetClearStencil, con(%p), s(%p), stencil(%i)", con, script, stencil);
+    rsScriptSetClearStencil((RsScript)script, stencil);
 }
 
 static void
-nScriptCSetClearStencil(JNIEnv *_env, jobject _this, jint stencil)
+nScriptSetTimeZone(JNIEnv *_env, jobject _this, jint script, jbyteArray timeZone)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCSetClearStencil, con(%p), stencil(%i)", con, stencil);
-    rsScriptCSetClearStencil(stencil);
-}
-
-static void
-nScriptCSetTimeZone(JNIEnv *_env, jobject _this, jbyteArray timeZone)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCSetTimeZone, con(%p), timeZone(%s)", con, timeZone);
+    LOG_API("nScriptCSetTimeZone, con(%p), s(%p), timeZone(%s)", con, script, timeZone);
 
     jint length = _env->GetArrayLength(timeZone);
     jbyte* timeZone_ptr;
     timeZone_ptr = (jbyte *) _env->GetPrimitiveArrayCritical(timeZone, (jboolean *)0);
 
-    rsScriptCSetTimeZone((const char *)timeZone_ptr, length);
+    rsScriptSetTimeZone((RsScript)script, (const char *)timeZone_ptr, length);
 
     if (timeZone_ptr) {
         _env->ReleasePrimitiveArrayCritical(timeZone, timeZone_ptr, 0);
     }
+}
+
+// -----------------------------------
+
+static void
+nScriptCBegin(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nScriptCBegin, con(%p)", con);
+    rsScriptCBegin();
 }
 
 static void
@@ -1154,11 +1156,12 @@ static JNINativeMethod methods[] = {
 
 {"nScriptDestroy",                 "(I)V",                                 (void*)nScriptDestroy },
 {"nScriptBindAllocation",          "(III)V",                               (void*)nScriptBindAllocation },
+{"nScriptSetClearColor",           "(IFFFF)V",                             (void*)nScriptSetClearColor },
+{"nScriptSetClearDepth",           "(IF)V",                                (void*)nScriptSetClearDepth },
+{"nScriptSetClearStencil",         "(II)V",                                (void*)nScriptSetClearStencil },
+{"nScriptSetTimeZone",             "(I[B)V",                               (void*)nScriptSetTimeZone },
+
 {"nScriptCBegin",                  "()V",                                  (void*)nScriptCBegin },
-{"nScriptCSetClearColor",          "(FFFF)V",                              (void*)nScriptCSetClearColor },
-{"nScriptCSetClearDepth",          "(F)V",                                 (void*)nScriptCSetClearDepth },
-{"nScriptCSetClearStencil",        "(I)V",                                 (void*)nScriptCSetClearStencil },
-{"nScriptCSetTimeZone",            "([B)V",                                (void*)nScriptCSetTimeZone },
 {"nScriptCAddType",                "(I)V",                                 (void*)nScriptCAddType },
 {"nScriptCSetRoot",                "(Z)V",                                 (void*)nScriptCSetRoot },
 {"nScriptCSetScript",              "([BII)V",                              (void*)nScriptCSetScript },

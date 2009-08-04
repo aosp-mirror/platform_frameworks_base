@@ -31,6 +31,8 @@ import android.renderscript.Allocation;
 import android.renderscript.Dimension;
 import android.renderscript.ScriptC;
 import android.renderscript.Script;
+import android.renderscript.ProgramFragment;
+import android.renderscript.ProgramStore;
 
 public class FilmRS {
     private final int POS_TRANSLATE = 0;
@@ -73,10 +75,10 @@ public class FilmRS {
     private Element mElementVertex;
     private Element mElementIndex;
     private RenderScript.Sampler mSampler;
-    private RenderScript.ProgramFragmentStore mPFSBackground;
-    private RenderScript.ProgramFragmentStore mPFSImages;
-    private RenderScript.ProgramFragment mPFBackground;
-    private RenderScript.ProgramFragment mPFImages;
+    private ProgramStore mPSBackground;
+    private ProgramStore mPSImages;
+    private ProgramFragment mPFBackground;
+    private ProgramFragment mPFImages;
     private RenderScript.ProgramVertex mPVBackground;
     private RenderScript.ProgramVertex mPVImages;
     private ProgramVertexAlloc mPVA;
@@ -99,21 +101,21 @@ public class FilmRS {
     private int[] mBufferState;
 
     private void initPFS() {
-        mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.LESS);
-        mRS.programFragmentStoreDitherEnable(true);
-        mRS.programFragmentStoreDepthMask(true);
-        mPFSBackground = mRS.programFragmentStoreCreate();
-        mPFSBackground.setName("PFSBackground");
+        ProgramStore.Builder b = new ProgramStore.Builder(mRS, null, null);
 
-        mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.EQUAL);
-        mRS.programFragmentStoreDitherEnable(false);
-        mRS.programFragmentStoreDepthMask(false);
-        mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.ONE,
-                                          RenderScript.BlendDstFunc.ONE);
-        mPFSImages = mRS.programFragmentStoreCreate();
-        mPFSImages.setName("PFSImages");
+        b.setDepthFunc(ProgramStore.DepthFunc.LESS);
+        b.setDitherEnable(true);
+        b.setDepthMask(true);
+        mPSBackground = b.create();
+        mPSBackground.setName("PSBackground");
+
+        b.setDepthFunc(ProgramStore.DepthFunc.EQUAL);
+        b.setDitherEnable(false);
+        b.setDepthMask(false);
+        b.setBlendFunc(ProgramStore.BlendSrcFunc.ONE,
+                       ProgramStore.BlendDstFunc.ONE);
+        mPSImages = b.create();
+        mPSImages.setName("PSImages");
     }
 
     private void initPF() {
@@ -128,15 +130,14 @@ public class FilmRS {
                        RenderScript.SamplerValue.WRAP);
         mSampler = mRS.samplerCreate();
 
+        ProgramFragment.Builder b = new ProgramFragment.Builder(mRS, null, null);
 
-        mRS.programFragmentBegin(null, null);
-        mPFBackground = mRS.programFragmentCreate();
+        mPFBackground = b.create();
         mPFBackground.setName("PFBackground");
 
-        mRS.programFragmentBegin(null, null);
-        mRS.programFragmentSetTexEnable(0, true);
-        mRS.programFragmentSetTexEnvMode(0, RenderScript.EnvMode.REPLACE);
-        mPFImages = mRS.programFragmentCreate();
+        b.setTexEnable(true, 0);
+        b.setTexEnvMode(ProgramFragment.EnvMode.REPLACE, 0);
+        mPFImages = b.create();
         mPFImages.bindSampler(mSampler, 0);
         mPFImages.setName("PFImages");
     }

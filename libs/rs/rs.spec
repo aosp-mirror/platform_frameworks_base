@@ -127,14 +127,14 @@ AllocationDestroy {
 AllocationData {
 	param RsAllocation va
 	param const void * data
-	} 
+	}
 
 Allocation1DSubData {
 	param RsAllocation va
 	param uint32_t xoff
 	param uint32_t count
 	param const void *data
-	} 
+	}
 
 Allocation2DSubData {
 	param RsAllocation va
@@ -168,14 +168,14 @@ Adapter1DSetConstraint {
 Adapter1DData {
 	param RsAdapter1D adapter
 	param const void * data
-	} 
+	}
 
 Adapter1DSubData {
 	param RsAdapter1D adapter
 	param uint32_t xoff
 	param uint32_t count
 	param const void *data
-	} 
+	}
 
 Adapter2DCreate {
 	ret RsAdapter2D
@@ -199,7 +199,7 @@ Adapter2DSetConstraint {
 Adapter2DData {
 	param RsAdapter2D adapter
 	param const void *data
-	} 
+	}
 
 Adapter2DSubData {
 	param RsAdapter2D adapter
@@ -273,23 +273,27 @@ ScriptBindAllocation {
 ScriptCBegin {
 	}
 
-ScriptCSetClearColor {
+ScriptSetClearColor {
+	param RsScript s
 	param float r
 	param float g
 	param float b
 	param float a
 	}
 
-ScriptCSetTimeZone {
+ScriptSetTimeZone {
+	param RsScript s
 	param const char * timeZone
 	param uint32_t length
 	}
 
-ScriptCSetClearDepth {
+ScriptSetClearDepth {
+	param RsScript s
 	param float depth
 	}
 
-ScriptCSetClearStencil {
+ScriptSetClearStencil {
+	param RsScript s
 	param uint32_t stencil
 	}
 

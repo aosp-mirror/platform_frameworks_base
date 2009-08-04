@@ -49,7 +49,7 @@ ScriptC::~ScriptC()
 
 bool ScriptC::run(Context *rsc, uint32_t launchIndex)
 {
-    Context::ScriptTLSStruct * tls = 
+    Context::ScriptTLSStruct * tls =
     (Context::ScriptTLSStruct *)pthread_getspecific(Context::gThreadTLSKey);
 
     if (mEnviroment.mFragmentStore.get()) {
@@ -100,7 +100,7 @@ void ScriptCState::clear()
 
 }
 
-static ACCvoid* symbolLookup(ACCvoid* pContext, const ACCchar* name) 
+static ACCvoid* symbolLookup(ACCvoid* pContext, const ACCchar* name)
 {
     const ScriptCState::SymbolTable_t *sym = ScriptCState::lookupSymbol(name);
     if (sym) {
@@ -194,7 +194,7 @@ void ScriptCState::runCompiler(Context *rsc)
                     mEnviroment.mFragmentStore.clear();
                     continue;
                 }
-                ProgramFragmentStore * pfs = 
+                ProgramFragmentStore * pfs =
                     (ProgramFragmentStore *)rsc->lookupName(str[ct+1]);
                 if (pfs != NULL) {
                     mEnviroment.mFragmentStore.set(pfs);
@@ -205,7 +205,7 @@ void ScriptCState::runCompiler(Context *rsc)
 
         }
 
-            
+
     } else {
         // Deal with an error.
     }
@@ -219,33 +219,6 @@ void rsi_ScriptCBegin(Context * rsc)
 {
     ScriptCState *ss = &rsc->mScriptC;
     ss->clear();
-}
-
-void rsi_ScriptCSetClearColor(Context * rsc, float r, float g, float b, float a)
-{
-    ScriptCState *ss = &rsc->mScriptC;
-    ss->mEnviroment.mClearColor[0] = r;
-    ss->mEnviroment.mClearColor[1] = g;
-    ss->mEnviroment.mClearColor[2] = b;
-    ss->mEnviroment.mClearColor[3] = a;
-}
-
-void rsi_ScriptCSetTimeZone(Context * rsc, const char * timeZone, uint32_t length)
-{
-    ScriptCState *ss = &rsc->mScriptC;
-    ss->mEnviroment.mTimeZone = timeZone;
-}
-
-void rsi_ScriptCSetClearDepth(Context * rsc, float v)
-{
-    ScriptCState *ss = &rsc->mScriptC;
-    ss->mEnviroment.mClearDepth = v;
-}
-
-void rsi_ScriptCSetClearStencil(Context * rsc, uint32_t v)
-{
-    ScriptCState *ss = &rsc->mScriptC;
-    ss->mEnviroment.mClearStencil = v;
 }
 
 void rsi_ScriptCAddType(Context * rsc, RsType vt)
