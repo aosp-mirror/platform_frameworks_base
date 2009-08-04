@@ -324,6 +324,13 @@ static jint android_net_wifi_getRssiHelper(const char *cmd)
     // number we're interested in.  if we're associating, it returns "OK".
     // beware - <SSID> can contain spaces.
     if (strcmp(reply, "OK") != 0) {
+        // beware of trailing spaces
+        char* end = reply + strlen(reply);
+        while (end > reply && end[-1] == ' ') {
+            end--;
+        }
+        *end = 0;
+
         char* lastSpace = strrchr(reply, ' ');
         // lastSpace should be preceded by "rssi" and followed by the value
         if (lastSpace && !strncmp(lastSpace - 4, "rssi", 4)) {
