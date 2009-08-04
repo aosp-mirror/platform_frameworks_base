@@ -197,7 +197,24 @@ public final class CookieManager {
 
     private static final class CookieComparator implements Comparator<Cookie> {
         public int compare(Cookie cookie1, Cookie cookie2) {
-            return cookie2.path.length() - cookie1.path.length();
+            // According to RFC 2109, multiple cookies are ordered in a way such
+            // that those with more specific Path attributes precede those with
+            // less specific. Ordering with respect to other attributes (e.g.,
+            // Domain) is unspecified.
+            // As Set is not modified if the two objects are same, we do want to
+            // assign different value for each cookie.
+            int diff = cookie2.path.length() - cookie1.path.length();
+            if (diff == 0) {
+                diff = cookie2.domain.length() - cookie1.domain.length();
+                if (diff == 0) {
+                    diff = cookie2.name.hashCode() - cookie1.name.hashCode();
+                    if (diff == 0) {
+                        Log.w(LOGTAG, "Found two cookies with the same value." +
+                                "cookie1=" + cookie1 + " , cookie2=" + cookie2);
+                    }
+                }
+            }
+            return diff;
         }
     }
 
