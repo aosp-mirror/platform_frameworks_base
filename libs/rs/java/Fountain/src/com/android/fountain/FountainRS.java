@@ -29,6 +29,8 @@ import android.renderscript.RenderScript;
 import android.renderscript.ProgramVertexAlloc;
 import android.renderscript.Element;
 import android.renderscript.Allocation;
+import android.renderscript.Script;
+import android.renderscript.ScriptC;
 
 public class FountainRS {
 
@@ -57,7 +59,7 @@ public class FountainRS {
     private Allocation mIntAlloc;
     private Allocation mPartAlloc;
     private Allocation mVertAlloc;
-    private RenderScript.Script mScript;
+    private Script mScript;
     private RenderScript.ProgramFragmentStore mPFS;
     private RenderScript.ProgramFragment mPF;
 
@@ -98,11 +100,11 @@ public class FountainRS {
         }
         mPartAlloc.data(t2);
 
-        mRS.scriptCBegin();
-        mRS.scriptCSetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        mRS.scriptCSetScript(mRes, R.raw.fountain);
-        mRS.scriptCSetRoot(true);
-        mScript = mRS.scriptCCreate();
+        ScriptC.Builder sb = new ScriptC.Builder(mRS);
+        sb.setScript(mRes, R.raw.fountain);
+        sb.setRoot(true);
+        mScript = sb.create();
+        mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         mScript.bindAllocation(mIntAlloc, 0);
         mScript.bindAllocation(mPartAlloc, 1);
