@@ -945,6 +945,8 @@ public class CDMAPhone extends PhoneBase {
             }
             // send an Intent
             sendEmergencyCallbackModeChange();
+            // Re-initiate data connection
+            mDataConnection.setDataEnabled(true);
         }
     }
 
