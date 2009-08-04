@@ -27,10 +27,11 @@ import android.renderscript.RenderScript;
 import android.renderscript.Allocation;
 import android.renderscript.ProgramVertexAlloc;
 import static android.renderscript.Element.*;
-
 import static android.util.MathUtils.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.renderscript.Script;
+import android.renderscript.ScriptC;
 
 import java.util.TimeZone;
 
@@ -41,8 +42,8 @@ class GrassRS {
 
     private static final int RSID_SKY_TEXTURES = 1;
     private static final int SKY_TEXTURES_COUNT = 5;
-    
-    private static final int RSID_BLADES = 2;    
+
+    private static final int RSID_BLADES = 2;
     private static final int BLADES_COUNT = 100;
     private static final int BLADE_STRUCT_FIELDS_COUNT = 12;
     private static final int BLADE_STRUCT_DEGREE = 0;
@@ -57,16 +58,16 @@ class GrassRS {
     private static final int BLADE_STRUCT_H = 9;
     private static final int BLADE_STRUCT_S = 10;
     private static final int BLADE_STRUCT_B = 11;
-    
+
     private Resources mResources;
     private RenderScript mRS;
     private final BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
-    
+
     private final int mWidth;
     private final int mHeight;
 
     @SuppressWarnings({"FieldCanBeLocal"})
-    private RenderScript.Script mScript;
+    private Script mScript;
     @SuppressWarnings({"FieldCanBeLocal"})
     private RenderScript.Sampler mSampler;
     @SuppressWarnings({"FieldCanBeLocal"})
@@ -74,7 +75,7 @@ class GrassRS {
     @SuppressWarnings({"FieldCanBeLocal"})
     private RenderScript.ProgramFragmentStore mPfsBackground;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private RenderScript.ProgramVertex mPvBackground;    
+    private RenderScript.ProgramVertex mPvBackground;
     @SuppressWarnings({"FieldCanBeLocal"})
     private ProgramVertexAlloc mPvOrthoAlloc;
 
@@ -112,13 +113,12 @@ class GrassRS {
         createProgramFragment();
         createScriptStructures();
 
-        mRS.scriptCBegin();
-        mRS.scriptCSetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        mRS.scriptCSetScript(mResources, R.raw.grass);
-        mRS.scriptCSetTimeZone(TimeZone.getDefault().getID());
-        mRS.scriptCSetRoot(true);
-
-        mScript = mRS.scriptCCreate();
+        ScriptC.Builder sb = new ScriptC.Builder(mRS);
+        sb.setScript(mResources, R.raw.grass);
+        sb.setTimeZone(TimeZone.getDefault().getID());
+        sb.setRoot(true);
+        mScript = sb.create();
+        mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         loadSkyTextures();
         mScript.bindAllocation(mState, RSID_STATE);
@@ -189,7 +189,7 @@ class GrassRS {
         allocation.setName(name);
         return allocation;
     }
-    
+
     private Allocation loadTextureARGB(int id, String name) {
         // Forces ARGB 32 bits, because pngcrush sometimes optimize our PNGs to
         // indexed pictures, which are not well supported
@@ -219,7 +219,7 @@ class GrassRS {
         mRS.programFragmentSetTexEnvMode(0, MODULATE);
         mPfGrass = mRS.programFragmentCreate();
         mPfGrass.setName("PFGrass");
-        mPfGrass.bindSampler(mSampler, 0);        
+        mPfGrass.bindSampler(mSampler, 0);
     }
 
     private void createProgramFragmentStore() {
@@ -237,7 +237,7 @@ class GrassRS {
         mRS.programFragmentStoreDitherEnable(true);
         mRS.programFragmentStoreDepthMask(false);
         mPfsGrass = mRS.programFragmentStoreCreate();
-        mPfsGrass.setName("PFSGrass");        
+        mPfsGrass.setName("PFSGrass");
     }
 
     private void createProgramVertex() {

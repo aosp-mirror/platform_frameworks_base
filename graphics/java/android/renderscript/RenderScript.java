@@ -216,7 +216,6 @@ public class RenderScript {
     }
 
 
-
     public enum DepthFunc {
         ALWAYS (0),
         LESS (1),
@@ -349,105 +348,6 @@ public class RenderScript {
     public TriangleMesh triangleMeshCreate() {
         int id = nTriangleMeshCreate();
         return new TriangleMesh(id);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // Script
-
-    public class Script extends BaseObj {
-        Script(int id) {
-            super(RenderScript.this);
-            mID = id;
-        }
-
-        public void destroy() {
-            nScriptDestroy(mID);
-            mID = 0;
-        }
-
-        public void bindAllocation(Allocation va, int slot) {
-            nScriptBindAllocation(mID, va.mID, slot);
-        }
-    }
-
-    public void scriptCBegin() {
-        nScriptCBegin();
-    }
-
-    public void scriptCSetTimeZone(String timeZone) {
-        try {
-            byte[] bytes = timeZone.getBytes("UTF-8");
-            nScriptCSetTimeZone(bytes);
-        } catch (java.io.UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void scriptCSetClearColor(float r, float g, float b, float a) {
-        nScriptCSetClearColor(r, g, b, a);
-    }
-
-    public void scriptCSetClearDepth(float d) {
-        nScriptCSetClearDepth(d);
-    }
-
-    public void scriptCSetClearStencil(int stencil) {
-        nScriptCSetClearStencil(stencil);
-    }
-
-    public void scriptCAddType(Type t) {
-        nScriptCAddType(t.mID);
-    }
-
-    public void scriptCSetRoot(boolean r) {
-        nScriptCSetRoot(r);
-    }
-
-    public void scriptCSetScript(String s) {
-        try {
-            byte[] bytes = s.getBytes("UTF-8");
-            nScriptCSetScript(bytes, 0, bytes.length);
-        } catch (java.io.UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void scriptCSetScript(Resources resources, int id) {
-        InputStream is = resources.openRawResource(id);
-        try {
-            try {
-                scriptCSetScript(is);
-            } finally {
-                is.close();
-            }
-        } catch(IOException e) {
-            throw new Resources.NotFoundException();
-        }
-    }
-
-    public void  scriptCSetScript(InputStream is) throws IOException {
-        byte[] buf = new byte[1024];
-        int currentPos = 0;
-        while(true) {
-            int bytesLeft = buf.length - currentPos;
-            if (bytesLeft == 0) {
-                byte[] buf2 = new byte[buf.length * 2];
-                System.arraycopy(buf, 0, buf2, 0, buf.length);
-                buf = buf2;
-                bytesLeft = buf.length - currentPos;
-            }
-            int bytesRead = is.read(buf, currentPos, bytesLeft);
-            if (bytesRead <= 0) {
-                break;
-            }
-            currentPos += bytesRead;
-        }
-        nScriptCSetScript(buf, 0, currentPos);
-    }
-
-    public Script scriptCCreate() {
-        int id = nScriptCCreate();
-        return new Script(id);
     }
 
     //////////////////////////////////////////////////////////////////////////////////

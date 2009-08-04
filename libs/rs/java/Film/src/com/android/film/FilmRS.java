@@ -29,6 +29,8 @@ import android.renderscript.RenderScript;
 import android.renderscript.Element;
 import android.renderscript.Allocation;
 import android.renderscript.Dimension;
+import android.renderscript.ScriptC;
+import android.renderscript.Script;
 
 public class FilmRS {
     private final int POS_TRANSLATE = 0;
@@ -66,8 +68,8 @@ public class FilmRS {
 
     private Resources mRes;
     private RenderScript mRS;
-    private RenderScript.Script mScriptStrip;
-    private RenderScript.Script mScriptImage;
+    private Script mScriptStrip;
+    private Script mScriptImage;
     private Element mElementVertex;
     private Element mElementIndex;
     private RenderScript.Sampler mSampler;
@@ -227,11 +229,11 @@ public class FilmRS {
 
         Log.e("rs", "Done loading named");
 
-        mRS.scriptCBegin();
-        mRS.scriptCSetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        mRS.scriptCSetScript(mRes, R.raw.filmstrip);
-        mRS.scriptCSetRoot(true);
-        mScriptStrip = mRS.scriptCCreate();
+        ScriptC.Builder sb = new ScriptC.Builder(mRS);
+        sb.setScript(mRes, R.raw.filmstrip);
+        sb.setRoot(true);
+        mScriptStrip = sb.create();
+        mScriptStrip.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         mAllocPos = Allocation.createSized(mRS,
             Element.USER_FLOAT, mBufferPos.length);

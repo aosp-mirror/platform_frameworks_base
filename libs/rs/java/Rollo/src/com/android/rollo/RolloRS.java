@@ -22,6 +22,8 @@ import android.renderscript.RenderScript;
 import android.renderscript.ProgramVertexAlloc;
 import android.renderscript.Element;
 import android.renderscript.Allocation;
+import android.renderscript.Script;
+import android.renderscript.ScriptC;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -90,7 +92,7 @@ public class RolloRS {
 
     private Resources mRes;
     private RenderScript mRS;
-    private RenderScript.Script mScript;
+    private Script mScript;
     private RenderScript.Sampler mSampler;
     private RenderScript.Sampler mSamplerText;
     private RenderScript.ProgramFragmentStore mPFSBackground;
@@ -313,12 +315,12 @@ public class RolloRS {
 
 
     private void initRS() {
-        mRS.scriptCBegin();
-        mRS.scriptCSetClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        mRS.scriptCSetScript(mRes, R.raw.rollo);
-        //mRS.scriptCSetScript(mRes, R.raw.rollo2);
-        mRS.scriptCSetRoot(true);
-        mScript = mRS.scriptCCreate();
+        ScriptC.Builder sb = new ScriptC.Builder(mRS);
+        sb.setScript(mRes, R.raw.rollo);
+        //sb.setScript(mRes, R.raw.rollo2);
+        sb.setRoot(true);
+        mScript = sb.create();
+        mScript.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         mAllocStateBuf = new int[] {0, 0, 0, 8, 0, 0, -1, 0, mAllocIconIDBuf.length, 0, 0};
         mAllocState = Allocation.createSized(mRS,
