@@ -710,12 +710,14 @@ void AudioFlinger::removeClient(pid_t pid)
 AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger)
     :   Thread(false),
         mAudioFlinger(audioFlinger), mSampleRate(0), mFrameCount(0), mChannelCount(0),
-        mFormat(0), mFrameSize(1), mNewParameters(String8("")), mStandby(false)
+        mFormat(0), mFrameSize(1), mStandby(false)
 {
 }
 
 AudioFlinger::ThreadBase::~ThreadBase()
 {
+    mParamCond.broadcast();
+    mNewParameters.clear();
 }
 
 void AudioFlinger::ThreadBase::exit()
@@ -755,20 +757,28 @@ size_t AudioFlinger::ThreadBase::frameCount() const
 
 status_t AudioFlinger::ThreadBase::setParameters(const String8& keyValuePairs)
 {
-    status_t result;
+    status_t status;
 
+    LOGV("ThreadBase::setParameters() %s", keyValuePairs.string());
     Mutex::Autolock _l(mLock);
-    mNewParameters = keyValuePairs;
 
+    mNewParameters.add(keyValuePairs);
     mWaitWorkCV.signal();
     mParamCond.wait(mLock);
-
-    return mParamStatus;
+    status = mParamStatus;
+    mWaitWorkCV.signal();
+    return status;
 }
 
 void AudioFlinger::ThreadBase::sendConfigEvent(int event, int param)
 {
     Mutex::Autolock _l(mLock);
+    sendConfigEvent_l(event, param);
+}
+
+// sendConfigEvent_l() must be called with ThreadBase::mLock held
+void AudioFlinger::ThreadBase::sendConfigEvent_l(int event, int param)
+{
     ConfigEvent *configEvent = new ConfigEvent();
     configEvent->mEvent = event;
     configEvent->mParam = param;
@@ -1454,10 +1464,14 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
 {
     bool reconfig = false;
 
-    if (mNewParameters != "") {
+    while (!mNewParameters.isEmpty()) {
         status_t status = NO_ERROR;
-        AudioParameter param = AudioParameter(mNewParameters);
+        String8 keyValuePair = mNewParameters[0];
+        AudioParameter param = AudioParameter(keyValuePair);
         int value;
+
+        mNewParameters.removeAt(0);
+
         if (param.getInt(String8(AudioParameter::keySamplingRate), value) == NO_ERROR) {
             reconfig = true;
         }
@@ -1486,12 +1500,12 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
             }
         }
         if (status == NO_ERROR) {
-            status = mOutput->setParameters(mNewParameters);
+            status = mOutput->setParameters(keyValuePair);
             if (!mStandby && status == INVALID_OPERATION) {
                mOutput->standby();
                mStandby = true;
                mBytesWritten = 0;
-               status = mOutput->setParameters(mNewParameters);
+               status = mOutput->setParameters(keyValuePair);
             }
             if (status == NO_ERROR && reconfig) {
                 delete mAudioMixer;
@@ -1502,12 +1516,12 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
                     if (name < 0) break;
                     mTracks[i]->mName = name;
                 }
-                sendConfigEvent(AudioSystem::OUTPUT_CONFIG_CHANGED);
+                sendConfigEvent_l(AudioSystem::OUTPUT_CONFIG_CHANGED);
             }
         }
         mParamStatus = status;
-        mNewParameters = "";
         mParamCond.signal();
+        mWaitWorkCV.wait(mLock);
     }
     return reconfig;
 }
@@ -1759,10 +1773,14 @@ bool AudioFlinger::DirectOutputThread::checkForNewParameters_l()
 {
     bool reconfig = false;
 
-    if (mNewParameters != "") {
+    while (!mNewParameters.isEmpty()) {
         status_t status = NO_ERROR;
-        AudioParameter param = AudioParameter(mNewParameters);
+        String8 keyValuePair = mNewParameters[0];
+        AudioParameter param = AudioParameter(keyValuePair);
         int value;
+
+        mNewParameters.removeAt(0);
+
         if (param.getInt(String8(AudioParameter::keyFrameCount), value) == NO_ERROR) {
             // do not accept frame count changes if tracks are open as the track buffer
             // size depends on frame count and correct behavior would not be garantied
@@ -1774,21 +1792,21 @@ bool AudioFlinger::DirectOutputThread::checkForNewParameters_l()
             }
         }
         if (status == NO_ERROR) {
-            status = mOutput->setParameters(mNewParameters);
+            status = mOutput->setParameters(keyValuePair);
             if (!mStandby && status == INVALID_OPERATION) {
                mOutput->standby();
                mStandby = true;
                mBytesWritten = 0;
-               status = mOutput->setParameters(mNewParameters);
+               status = mOutput->setParameters(keyValuePair);
             }
             if (status == NO_ERROR && reconfig) {
                 readOutputParameters();
-                sendConfigEvent(AudioSystem::OUTPUT_CONFIG_CHANGED);
+                sendConfigEvent_l(AudioSystem::OUTPUT_CONFIG_CHANGED);
             }
         }
         mParamStatus = status;
-        mNewParameters = "";
         mParamCond.signal();
+        mWaitWorkCV.wait(mLock);
     }
     return reconfig;
 }
@@ -3100,13 +3118,17 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
 {
     bool reconfig = false;
 
-    if (mNewParameters != "") {
+    while (!mNewParameters.isEmpty()) {
         status_t status = NO_ERROR;
-        AudioParameter param = AudioParameter(mNewParameters);
+        String8 keyValuePair = mNewParameters[0];
+        AudioParameter param = AudioParameter(keyValuePair);
         int value;
         int reqFormat = mFormat;
         int reqSamplingRate = mReqSampleRate;
         int reqChannelCount = mReqChannelCount;
+
+        mNewParameters.removeAt(0);
+
         if (param.getInt(String8(AudioParameter::keySamplingRate), value) == NO_ERROR) {
             reqSamplingRate = value;
             reconfig = true;
@@ -3130,10 +3152,10 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
             }
         }
         if (status == NO_ERROR) {
-            status = mInput->setParameters(mNewParameters);
+            status = mInput->setParameters(keyValuePair);
             if (status == INVALID_OPERATION) {
                mInput->standby();
-               status = mInput->setParameters(mNewParameters);
+               status = mInput->setParameters(keyValuePair);
             }
             if (reconfig) {
                 if (status == BAD_VALUE &&
@@ -3144,13 +3166,13 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
                 }
                 if (status == NO_ERROR) {
                     readInputParameters();
-                    sendConfigEvent(AudioSystem::INPUT_CONFIG_CHANGED);
+                    sendConfigEvent_l(AudioSystem::INPUT_CONFIG_CHANGED);
                 }
             }
         }
-        mNewParameters = "";
         mParamStatus = status;
         mParamCond.signal();
+        mWaitWorkCV.wait(mLock);
     }
     return reconfig;
 }

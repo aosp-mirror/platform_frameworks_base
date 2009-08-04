@@ -318,6 +318,7 @@ private:
         virtual     String8     getParameters(const String8& keys) = 0;
         virtual     void        audioConfigChanged(int event, int param = 0) = 0;
                     void        sendConfigEvent(int event, int param = 0);
+                    void        sendConfigEvent_l(int event, int param = 0);
                     void        processConfigEvents();
 
         mutable     Mutex                   mLock;
@@ -341,7 +342,7 @@ private:
                     int                     mFormat;
                     uint32_t                mFrameSize;
                     Condition               mParamCond;
-                    String8                 mNewParameters;
+                    Vector<String8>         mNewParameters;
                     status_t                mParamStatus;
                     Vector<ConfigEvent *>   mConfigEvents;
                     bool                    mStandby;
