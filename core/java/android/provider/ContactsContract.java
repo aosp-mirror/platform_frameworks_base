@@ -80,6 +80,62 @@ public final class ContactsContract {
         }
     }
 
+    /**
+     * Generic columns for use by sync adapters. The specific functions of
+     * these columns are private to the sync adapter. Other clients of the API
+     * should not attempt to either read or write this column.
+     */
+    private interface BaseSyncColumns {
+
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC1 = "sync1";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC2 = "sync2";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC3 = "sync3";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC4 = "sync4";
+    }
+
+    /**
+     * Columns that appear when each row of a table belongs to a specific
+     * account, including sync information that an account may need.
+     */
+    private interface SyncColumns extends BaseSyncColumns {
+        /**
+         * The name of the account instance to which this row belongs.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACCOUNT_NAME = "account_name";
+
+        /**
+         * The type of account to which this row belongs, which when paired with
+         * {@link #ACCOUNT_NAME} identifies a specific account.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACCOUNT_TYPE = "account_type";
+
+        /**
+         * String that uniquely identifies this row to its source account.
+         * <P>Type: TEXT</P>
+         */
+        public static final String SOURCE_ID = "sourceid";
+
+        /**
+         * Version number that is updated whenever this row or its related data
+         * changes.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String VERSION = "version";
+
+        /**
+         * Flag indicating that {@link #VERSION} has changed, and this row needs
+         * to be synchronized by its owning account.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String DIRTY = "dirty";
+    }
+
     public interface ContactOptionsColumns {
         /**
          * The number of times a person has been contacted
@@ -169,14 +225,12 @@ public final class ContactsContract {
         public static final String PRIMARY_PHONE_NUMBER = CommonDataKinds.Phone.NUMBER;
     }
 
-
     /**
      * Constants for the contacts table, which contains a record per group
      * of raw contact representing the same person.
      */
-    // TODO make final once renaming is complete
-    public static /*final*/ class Contacts implements BaseColumns, ContactsColumns,
-            ContactOptionsColumns {
+    public static class Contacts implements BaseColumns, ContactsColumns,
+            ContactOptionsColumns, SyncColumns {
         /**
          * This utility class cannot be instantiated
          */
@@ -238,7 +292,7 @@ public final class ContactsContract {
          * A sub-directory of a single contact that contains all of the constituent raw contact
          * {@link Data} rows.
          */
-        public static final class Data implements BaseColumns, DataColumns {
+        public static final class Data implements BaseColumns, DataColumns, BaseSyncColumns {
             /**
              * no public constructor since this is a utility class
              */
@@ -271,52 +325,12 @@ public final class ContactsContract {
              * suggestions.
              * <p>
              * Type: INTEGER
+             *
+             * @deprecated Please use the "limit" parameter
              */
+            @Deprecated
             public static final String MAX_SUGGESTIONS = "max_suggestions";
         }
-    }
-
-    @Deprecated
-    public static final class Aggregates extends Contacts {}
-
-    /**
-     * Columns that appear when each row of a table belongs to a specific
-     * account, including sync information that an account may need.
-     */
-    private interface SyncColumns {
-        /**
-         * The name of the account instance to which this row belongs.
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACCOUNT_NAME = "account_name";
-
-        /**
-         * The type of account to which this row belongs, which when paired with
-         * {@link #ACCOUNT_NAME} identifies a specific account.
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACCOUNT_TYPE = "account_type";
-
-        /**
-         * String that uniquely identifies this row to its source account.
-         * <P>Type: TEXT</P>
-         */
-        public static final String SOURCE_ID = "sourceid";
-
-        /**
-         * Version number that is updated whenever this row or its related data
-         * changes.
-         * <P>Type: INTEGER</P>
-         */
-        public static final String VERSION = "version";
-
-        /**
-         * Flag indicating that {@link #VERSION} has changed, and this row needs
-         * to be synchronized by its owning account.
-         * <P>Type: INTEGER (boolean)</P>
-         */
-        public static final String DIRTY = "dirty";
-
     }
 
     private interface RawContactsColumns {
@@ -360,7 +374,7 @@ public final class ContactsContract {
      * are the primary consumers of this API.
      */
     public static final class RawContacts implements BaseColumns, RawContactsColumns,
-            SyncColumns, ContactOptionsColumns {
+            ContactOptionsColumns, SyncColumns  {
         /**
          * This utility class cannot be instantiated
          */
@@ -508,6 +522,13 @@ public final class ContactsContract {
         public static final String DATA14 = "data14";
         /** Generic data column, the meaning is {@link #MIMETYPE} specific */
         public static final String DATA15 = "data15";
+
+        /**
+         * An optional update or insert URI parameter that determines if the
+         * corresponding raw contact should be marked as dirty. The default
+         * value is true.
+         */
+        public static final String MARK_AS_DIRTY = "mark_as_dirty";
     }
 
     /**
@@ -516,7 +537,7 @@ public final class ContactsContract {
      * definition and some generic columns. Each data type can define the meaning for each of
      * the generic columns.
      */
-    public static final class Data implements BaseColumns, DataColumns {
+    public static final class Data implements BaseColumns, DataColumns, BaseSyncColumns {
         /**
          * This utility class cannot be instantiated
          */
@@ -693,9 +714,6 @@ public final class ContactsContract {
              * The {@link RawContacts#_ID} that this data belongs to.
              */
             public static final String RAW_CONTACT_ID = "raw_contact_id";
-
-            @Deprecated
-            public static final String CONTACT_ID = RAW_CONTACT_ID;
         }
 
         /**
