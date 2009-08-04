@@ -22,6 +22,8 @@ enum {
     FINAL           = 0x00000020,
     ABSTRACT        = 0x00000040,
 
+    OVERRIDE        = 0x00000100,
+
     ALL_MODIFIERS   = 0xffffffff
 };
 
