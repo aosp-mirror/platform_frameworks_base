@@ -40,7 +40,7 @@ public:
     virtual status_t    standby();
     virtual status_t    dump(int fd, const Vector<String16>& args);
     virtual status_t    setParameters(const String8& keyValuePairs) { return NO_ERROR;}
-    virtual String8     getParameters(const String8& keys) {String8 result = String8(""); return result;}
+    virtual String8     getParameters(const String8& keys);
 };
 
 class AudioStreamInStub : public AudioStreamIn {
@@ -55,7 +55,7 @@ public:
     virtual status_t    dump(int fd, const Vector<String16>& args);
     virtual status_t    standby() { return NO_ERROR; }
     virtual status_t    setParameters(const String8& keyValuePairs) { return NO_ERROR;}
-    virtual String8     getParameters(const String8& keys) {String8 result = String8(""); return result;}
+    virtual String8     getParameters(const String8& keys);
 };
 
 class AudioHardwareStub : public  AudioHardwareBase

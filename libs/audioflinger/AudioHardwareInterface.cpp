@@ -140,8 +140,8 @@ status_t AudioHardwareBase::setParameters(const String8& keyValuePairs)
 // default implementation
 String8 AudioHardwareBase::getParameters(const String8& keys)
 {
-    String8 result = String8("");
-    return result;
+    AudioParameter param = AudioParameter(keys);
+    return param.toString();
 }
 
 // default implementation
