@@ -307,36 +307,42 @@ class BackupManagerService extends IBackupManager.Stub {
         mEverStored = new File(mBaseStateDir, "processed");
         File tempProcessedFile = new File(mBaseStateDir, "processed.new");
         try {
-            RandomAccessFile temp = new RandomAccessFile(tempProcessedFile, "rw");
-            mEverStoredStream = new RandomAccessFile(mEverStored, "r");
+            // If there are previous contents, parse them out then start a new
+            // file to continue the recordkeeping.
+            if (mEverStored.exists()) {
+                RandomAccessFile temp = new RandomAccessFile(tempProcessedFile, "rw");
+                mEverStoredStream = new RandomAccessFile(mEverStored, "r");
 
-            // parse its existing contents
-            mEverStoredStream.seek(0);
-            temp.seek(0);
-            try {
-                while (true) {
-                    PackageInfo info;
-                    String pkg = mEverStoredStream.readUTF();
-                    try {
-                        info = mPackageManager.getPackageInfo(pkg, 0);
-                        mEverStoredApps.add(pkg);
-                        temp.writeUTF(pkg);
-                        if (DEBUG) Log.v(TAG, "   + " + pkg);
-                    } catch (NameNotFoundException e) {
-                        // nope, this package was uninstalled; don't include it
-                        if (DEBUG) Log.v(TAG, "   - " + pkg);
+                // parse its existing contents
+                mEverStoredStream.seek(0);
+                temp.seek(0);
+                try {
+                    while (true) {
+                        PackageInfo info;
+                        String pkg = mEverStoredStream.readUTF();
+                        try {
+                            info = mPackageManager.getPackageInfo(pkg, 0);
+                            mEverStoredApps.add(pkg);
+                            temp.writeUTF(pkg);
+                            if (DEBUG) Log.v(TAG, "   + " + pkg);
+                        } catch (NameNotFoundException e) {
+                            // nope, this package was uninstalled; don't include it
+                            if (DEBUG) Log.v(TAG, "   - " + pkg);
+                        }
                     }
+                } catch (EOFException e) {
+                    // now we're at EOF
                 }
-            } catch (EOFException e) {
-                // now we're at EOF
-            }
 
-            // Once we've rewritten the backup history log, atomically replace the
-            // old one with the new one then reopen the file for continuing use.
-            temp.close();
-            mEverStoredStream.close();
-            tempProcessedFile.renameTo(mEverStored);
+                // Once we've rewritten the backup history log, atomically replace the
+                // old one with the new one then reopen the file for continuing use.
+                temp.close();
+                mEverStoredStream.close();
+                tempProcessedFile.renameTo(mEverStored);
+            }
+            // This will create the file if it doesn't exist
             mEverStoredStream = new RandomAccessFile(mEverStored, "rwd");
+            mEverStoredStream.seek(mEverStoredStream.length());
         } catch (IOException e) {
             Log.e(TAG, "Unable to open known-stored file!");
             mEverStoredStream = null;
