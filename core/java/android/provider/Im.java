@@ -1614,6 +1614,12 @@ public class Im {
         /** specifies whether or not to show as away when device is idle */
         public static final String SETTING_SHOW_AWAY_ON_IDLE = "show_away_on_idle";
 
+        /** specifies whether or not to upload heartbeat stat upon login */
+        public static final String SETTING_UPLOAD_HEARTBEAT_STAT = "upload_heartbeat_stat";
+
+        /** specifies the last heartbeat interval received from the server */
+        public static final String SETTING_HEARTBEAT_INTERVAL = "heartbeat_interval";
+
         /**
          * Used for reliable message queue (RMQ). This is for storing the last rmq id received
          * from the GTalk server
@@ -1833,6 +1839,28 @@ public class Im {
             putBooleanValue(contentResolver, providerId, SETTING_SHOW_AWAY_ON_IDLE, showAway);
         }
 
+        /**
+         * A convenience method to set whether or not to upload heartbeat stat.
+         *
+         * @param contentResolver The ContentResolver to use to access the setting table.
+         * @param uploadStat Whether or not to upload heartbeat stat.
+         */
+        public static void setUploadHeartbeatStat(ContentResolver contentResolver,
+                long providerId, boolean uploadStat) {
+            putBooleanValue(contentResolver, providerId, SETTING_UPLOAD_HEARTBEAT_STAT, uploadStat);
+        }
+
+        /**
+         * A convenience method to set the heartbeat interval last received from the server.
+         *
+         * @param contentResolver The ContentResolver to use to access the setting table.
+         * @param interval The heartbeat interval last received from the server.
+         */
+        public static void setHeartbeatInterval(ContentResolver contentResolver,
+                long providerId, long interval) {
+            putLongValue(contentResolver, providerId, SETTING_HEARTBEAT_INTERVAL, interval);
+        }
+
         public static class QueryMap extends ContentQueryMap {
             private ContentResolver mContentResolver;
             private long mProviderId;
@@ -1982,6 +2010,43 @@ public class Im {
             }
 
             /**
+             * Set whether or not to upload heartbeat stat.
+             *
+             * @param uploadStat whether or not to upload heartbeat stat.
+             */
+            public void setUploadHeartbeatStat(boolean uploadStat) {
+                ProviderSettings.setUploadHeartbeatStat(mContentResolver, mProviderId, uploadStat);
+            }
+
+            /**
+             * Get whether or not to upload heartbeat stat.
+             *
+             * @return Whether or not to upload heartbeat stat.
+             */
+            public boolean getUploadHeartbeatStat() {
+                return getBoolean(SETTING_UPLOAD_HEARTBEAT_STAT,
+                        false /* by default do not upload */);
+            }
+
+            /**
+             * Set the last received heartbeat interval from the server.
+             *
+             * @param interval the last received heartbeat interval from the server.
+             */
+            public void setHeartbeatInterval(long interval) {
+                ProviderSettings.setHeartbeatInterval(mContentResolver, mProviderId, interval);
+            }
+
+            /**
+             * Get the last received heartbeat interval from the server.
+             *
+             * @return the last received heartbeat interval from the server.
+             */
+            public long getHeartbeatInterval() {
+                return getLong(SETTING_HEARTBEAT_INTERVAL, 0L /* an invalid default interval */);
+            }
+
+            /**
              * Convenience function for retrieving a single settings value
              * as a boolean.
              *
@@ -2018,6 +2083,19 @@ public class Im {
             private int getInteger(String name, int def) {
                 ContentValues values = getValues(name);
                 return values != null ? values.getAsInteger(VALUE) : def;
+            }
+
+            /**
+             * Convenience function for retrieving a single settings value
+             * as a Long.
+             *
+             * @param name The name of the setting to retrieve.
+             * @param def The value to return if the setting is not defined.
+             * @return The setting's current value or 'def' if it is not defined.
+             */
+            private long getLong(String name, long def) {
+                ContentValues values = getValues(name);
+                return values != null ? values.getAsLong(VALUE) : def;
             }
         }
 
