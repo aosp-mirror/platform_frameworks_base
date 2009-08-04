@@ -96,7 +96,7 @@ class NotificationManagerService extends INotificationManager.Stub
     private Vibrator mVibrator = new Vibrator();
 
     // adb
-    private int mBatteryPlugged;
+    private boolean mUsbConnected;
     private boolean mAdbEnabled = false;
     private boolean mAdbNotificationShown = false;
     private Notification mAdbNotification;
@@ -310,8 +310,11 @@ class NotificationManagerService extends INotificationManager.Stub
                     mBatteryFull = batteryFull;
                     updateLights();
                 }
-                
-                mBatteryPlugged = intent.getIntExtra("plugged", 0);
+            } else if (action.equals(Intent.ACTION_UMS_CONNECTED)) {
+                mUsbConnected = true;
+                updateAdbNotification();
+            } else if (action.equals(Intent.ACTION_UMS_DISCONNECTED)) {
+                mUsbConnected = false;
                 updateAdbNotification();
             } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)) {
@@ -380,6 +383,8 @@ class NotificationManagerService extends INotificationManager.Stub
         // register for battery changed notifications
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(Intent.ACTION_UMS_CONNECTED);
+        filter.addAction(Intent.ACTION_UMS_DISCONNECTED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         mContext.registerReceiver(mIntentReceiver, filter);
@@ -954,7 +959,7 @@ class NotificationManagerService extends INotificationManager.Stub
     // security feature that we don't want people customizing the platform
     // to accidentally lose.
     private void updateAdbNotification() {
-        if (mAdbEnabled && mBatteryPlugged == BatteryManager.BATTERY_PLUGGED_USB) {
+        if (mAdbEnabled && mUsbConnected) {
             if ("0".equals(SystemProperties.get("persist.adb.notify"))) {
                 return;
             }
