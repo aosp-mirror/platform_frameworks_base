@@ -39,7 +39,7 @@ import com.google.android.collect.Lists;
  * and you probably will not need to instantiate, extend, or call this
  * class yourself. See the full {@link android.test} package description
  * to learn more about testing Android applications.
- * 
+ *
  * {@hide} Not needed for 1.0 SDK.
  */
 public class TestRunner implements PerformanceTestCase.Intermediates {
@@ -84,6 +84,7 @@ public class TestRunner implements PerformanceTestCase.Intermediates {
             super();
         }
 
+        @Override
         public void run(TestResult result) {
             result.addListener(this);
             super.run(result);
@@ -301,7 +302,7 @@ public class TestRunner implements PerformanceTestCase.Intermediates {
                     if (mMode == PERFORMANCE) {
                         runInPerformanceMode(test, className, false, className);
                     } else if (mMode == PROFILING) {
-                        //Need a way to mark a test to be run in profiling mode or not. 
+                        //Need a way to mark a test to be run in profiling mode or not.
                         startProfiling();
                         test.run();
                         finishProfiling();
@@ -337,6 +338,7 @@ public class TestRunner implements PerformanceTestCase.Intermediates {
                         AndroidTestCase testcase = (AndroidTestCase) test;
                         try {
                             testcase.setContext(mContext);
+                            testcase.setTestContext(mContext);
                         } catch (Exception ex) {
                             Log.i("TestHarness", ex.toString());
                         }
@@ -700,7 +702,7 @@ public class TestRunner implements PerformanceTestCase.Intermediates {
             }
         } catch (ClassNotFoundException e) {
             return 1; // this gets the count right, because either this test
-            // is missing, and it will fail when run or it is a single Junit test to be run. 
+            // is missing, and it will fail when run or it is a single Junit test to be run.
         }
         return 0;
     }

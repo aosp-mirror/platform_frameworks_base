@@ -158,16 +158,18 @@ public class AndroidTestRunner extends BaseTestRunner {
             mTestResult.addListener(testListener);
         }
 
+        Context testContext = mInstrumentation.getContext();
         for (TestCase testCase : mTestCases) {
-            setContextIfAndroidTestCase(testCase, mContext);
+            setContextIfAndroidTestCase(testCase, mContext, testContext);
             setInstrumentationIfInstrumentationTestCase(testCase, mInstrumentation);
             testCase.run(mTestResult);
         }
     }
 
-    private void setContextIfAndroidTestCase(Test test, Context context) {
+    private void setContextIfAndroidTestCase(Test test, Context context, Context testContext) {
         if (AndroidTestCase.class.isAssignableFrom(test.getClass())) {
             ((AndroidTestCase) test).setContext(context);
+            ((AndroidTestCase) test).setTestContext(testContext);
         }
     }
 

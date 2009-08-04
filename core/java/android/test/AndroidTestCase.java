@@ -30,6 +30,7 @@ import java.lang.reflect.Field;
 public class AndroidTestCase extends TestCase {
 
     protected Context mContext;
+    private Context mTestContext;
 
     @Override
     protected void setUp() throws Exception {
@@ -43,7 +44,7 @@ public class AndroidTestCase extends TestCase {
 
     public void testAndroidTestCaseSetupProperly() {
         assertNotNull("Context is null. setContext should be called before tests are run",
-                mContext);        
+                mContext);
     }
 
     public void setContext(Context context) {
@@ -52,6 +53,25 @@ public class AndroidTestCase extends TestCase {
 
     public Context getContext() {
         return mContext;
+    }
+
+    /**
+     * Test context can be used to access resources from the test's own package
+     * as opposed to the resources from the test target package. Access to the
+     * latter is provided by the context set with the {@link #setContext}
+     * method.
+     *
+     * @hide
+     */
+    public void setTestContext(Context context) {
+        mTestContext = context;
+    }
+
+    /**
+     * @hide
+     */
+    public Context getTestContext() {
+        return mTestContext;
     }
 
     /**
@@ -125,9 +145,9 @@ public class AndroidTestCase extends TestCase {
      * to scrub out any class variables.  This protects against memory leaks in the case where a
      * test case creates a non-static inner class (thus referencing the test case) and gives it to
      * someone else to hold onto.
-     * 
+     *
      * @param testCaseClass The class of the derived TestCase implementation.
-     * 
+     *
      * @throws IllegalAccessException
      */
     protected void scrubClass(final Class<?> testCaseClass)
