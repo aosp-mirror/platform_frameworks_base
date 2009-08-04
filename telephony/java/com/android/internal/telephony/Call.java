@@ -25,10 +25,10 @@ public abstract class Call {
     /* Enums */
 
     public enum State {
-        IDLE, ACTIVE, HOLDING, DIALING, ALERTING, INCOMING, WAITING, DISCONNECTED;
+        IDLE, ACTIVE, HOLDING, DIALING, ALERTING, INCOMING, WAITING, DISCONNECTED, DISCONNECTING;
 
         public boolean isAlive() {
-            return !(this == IDLE || this == DISCONNECTED);
+            return !(this == IDLE || this == DISCONNECTED || this == DISCONNECTING);
         }
 
         public boolean isRinging() {

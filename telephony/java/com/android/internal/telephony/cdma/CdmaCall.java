@@ -24,6 +24,7 @@ import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.DriverCall;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.Call.State;
 
 /**
  * {@hide}
@@ -186,6 +187,7 @@ public final class CdmaCall extends Call {
 
             cn.onHangupLocal();
         }
+        state = State.DISCONNECTING;
     }
 
     /**
