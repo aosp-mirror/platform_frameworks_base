@@ -69,7 +69,6 @@ import android.view.WindowManager.LayoutParams;
  * {@link #setVisible(boolean) setVisible(false)} from the
  * {@link View#onDetachedFromWindow}.
  *
- * @hide
  */
 public class ZoomButtonsController implements View.OnTouchListener {
 
