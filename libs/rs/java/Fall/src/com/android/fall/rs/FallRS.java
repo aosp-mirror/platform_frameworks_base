@@ -21,9 +21,9 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptC;
 import android.renderscript.ProgramFragment;
 import android.renderscript.ProgramStore;
-import android.renderscript.ProgramVertexAlloc;
 import android.renderscript.Allocation;
 import android.renderscript.Sampler;
+import android.renderscript.ProgramVertex;
 import static android.renderscript.Sampler.Value.LINEAR;
 import static android.renderscript.Sampler.Value.CLAMP;
 import static android.renderscript.ProgramStore.DepthFunc.*;
@@ -58,8 +58,8 @@ class FallRS {
     private Sampler mSampler;
     private ProgramFragment mPfBackground;
     private ProgramStore mPfsBackground;
-    private RenderScript.ProgramVertex mPvBackground;
-    private ProgramVertexAlloc mPvOrthoAlloc;
+    private ProgramVertex mPvBackground;
+    private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
 
     private Allocation mTexturesIDs;
     private Allocation[] mTextures;
@@ -204,13 +204,13 @@ class FallRS {
     }
 
     private void createProgramVertex() {
-        mPvOrthoAlloc = new ProgramVertexAlloc(mRS);
+        mPvOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
         mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
 
-        mRS.programVertexBegin(null, null);
-        mRS.programVertexSetTextureMatrixEnable(true);
-        mPvBackground = mRS.programVertexCreate();
-        mPvBackground.bindAllocation(0, mPvOrthoAlloc.mAlloc);
+        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
+        pvb.setTextureMatrixEnable(true);
+        mPvBackground = pvb.create();
+        mPvBackground.bindAllocation(0, mPvOrthoAlloc);
         mPvBackground.setName("PVBackground");
     }
 }
