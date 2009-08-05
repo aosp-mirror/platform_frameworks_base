@@ -15,6 +15,8 @@
 ** limitations under the License.
 */
 
+#define LOG_TAG "fillrate"
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -22,12 +24,15 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+#include <utils/StopWatch.h>
+#include <ui/FramebufferNativeWindow.h>
+
+using namespace android;
+
 int main(int argc, char** argv)
 {
-    EGLint s_configAttribs[] = {
-         EGL_RED_SIZE,       5,
-         EGL_GREEN_SIZE,     6,
-         EGL_BLUE_SIZE,      5,
+    EGLint configAttribs[] = {
+         EGL_DEPTH_SIZE, 0,
          EGL_NONE
      };
      
@@ -46,8 +51,8 @@ int main(int argc, char** argv)
      
      // Get all the "potential match" configs...
      eglGetConfigs(dpy, NULL, 0, &numConfigs);
-     EGLConfig* const configs = malloc(sizeof(EGLConfig)*numConfigs);
-     eglChooseConfig(dpy, s_configAttribs, configs, numConfigs, &n);
+     EGLConfig* const configs = (EGLConfig*)malloc(sizeof(EGLConfig)*numConfigs);
+     eglChooseConfig(dpy, configAttribs, configs, numConfigs, &n);
      config = configs[0];
      if (n > 1) {
          // if there is more than one candidate, go through the list
@@ -71,68 +76,74 @@ int main(int argc, char** argv)
      }
      free(configs);
      
-     
-     
      surface = eglCreateWindowSurface(dpy, config,
              android_createDisplaySurface(), NULL);
      context = eglCreateContext(dpy, config, NULL, NULL);
      eglMakeCurrent(dpy, surface, surface, context);   
      eglQuerySurface(dpy, surface, EGL_WIDTH, &w);
      eglQuerySurface(dpy, surface, EGL_HEIGHT, &h);
-     GLint dim = w<h ? w : h;
-
-
-     GLint crop[4] = { 0, 4, 4, -4 };
+     
+     printf("w=%d, h=%d\n", w, h);
+     
      glBindTexture(GL_TEXTURE_2D, 0);
-     glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
      glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
      glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
      glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
      glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
      glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+     glDisable(GL_DITHER);
+     glDisable(GL_BLEND);
      glEnable(GL_TEXTURE_2D);
      glColor4f(1,1,1,1);
 
-     // packing is always 4
-     uint8_t t8[]  = { 
-             0x00, 0x55, 0x00, 0x55, 
-             0xAA, 0xFF, 0xAA, 0xFF,
-             0x00, 0x55, 0x00, 0x55, 
-             0xAA, 0xFF, 0xAA, 0xFF  };
+     uint32_t* t32 = (uint32_t*)malloc(512*512*4); 
+     for (int y=0 ; y<512 ; y++) {
+         for (int x=0 ; x<512 ; x++) {
+             t32[x+y*512] = 0x10FFFFFF;
+         }
+     }
 
-     uint16_t t16[]  = { 
-             0x0000, 0x5555, 0x0000, 0x5555, 
-             0xAAAA, 0xFFFF, 0xAAAA, 0xFFFF,
-             0x0000, 0x5555, 0x0000, 0x5555, 
-             0xAAAA, 0xFFFF, 0xAAAA, 0xFFFF  };
-
-     uint16_t t5551[]  = { 
-             0x0000, 0xFFFF, 0x0000, 0xFFFF, 
-             0xFFFF, 0x0000, 0xFFFF, 0x0000,
-             0x0000, 0xFFFF, 0x0000, 0xFFFF, 
-             0xFFFF, 0x0000, 0xFFFF, 0x0000  };
-
-     uint32_t t32[]  = { 
-             0xFF000000, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000, 
-             0xFF00FF00, 0xFFFF0000, 0xFF000000, 0xFF0000FF, 
-             0xFF00FFFF, 0xFF00FF00, 0x00FF00FF, 0xFFFFFF00, 
-             0xFF000000, 0xFFFF00FF, 0xFF00FFFF, 0xFFFFFFFF
+     const GLfloat vertices[4][2] = {
+             { 0,  0 },
+             { 0,  h },
+             { w,  h },
+             { w,  0 }
      };
 
+     const GLfloat texCoords[4][2] = {
+             { 0,  0 },
+             { 0,  1 },
+             { 1,  1 },
+             { 1,  0 }
+     };
 
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, t32);
+
+     glViewport(0, 0, w, h);
+     glMatrixMode(GL_PROJECTION);
+     glLoadIdentity();
+     glOrthof(0, w, 0, h, 0, 1);
+
+     glEnableClientState(GL_VERTEX_ARRAY);
+     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+     glVertexPointer(2, GL_FIXED, 0, vertices);
+     glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+
+     glClearColor(1,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 4, 4, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, t8);
-     glDrawTexiOES(0, 0, 0, dim/2, dim/2);
-
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 4, 4, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, t16);
-     glDrawTexiOES(dim/2, 0, 0, dim/2, dim/2);
-
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, t16);
-     glDrawTexiOES(0, dim/2, 0, dim/2, dim/2);
-
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, t32);
-     glDrawTexiOES(dim/2, dim/2, 0, dim/2, dim/2);
-
+     glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
      eglSwapBuffers(dpy, surface);
+     
+     for (int c=1 ; c<32 ; c++) {
+         glClear(GL_COLOR_BUFFER_BIT);
+         nsecs_t now = systemTime();
+         for (int i=0 ; i<c ; i++) {
+             glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
+         }
+         eglSwapBuffers(dpy, surface);
+         nsecs_t t = systemTime() - now;
+         printf("%lld\t%d\t%f\n", t, c, (double(t)/c)/1000000.0);
+     }
      return 0;
 }
