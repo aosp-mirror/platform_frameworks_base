@@ -52,7 +52,7 @@ public class ProgramFragment extends BaseObj {
         mRS.nProgramFragmentBindTexture(mID, slot, va.mID);
     }
 
-    public void bindSampler(RenderScript.Sampler vs, int slot) {
+    public void bindSampler(Sampler vs, int slot) {
         mRS.nProgramFragmentBindSampler(mID, slot, vs.mID);
     }
 

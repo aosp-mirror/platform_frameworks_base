@@ -5,15 +5,6 @@
 #pragma stateFragment(PFBackground)
 #pragma stateFragmentStore(PSBackground)
 
-/*
-typedef struct FilmScriptUserEnvRec {
-    RsAllocation tex[13];
-    int32_t triangleOffsets[64];
-    float triangleOffsetsTex[64];
-    int32_t triangleOffsetsCount;
-} FilmScriptUserEnv;
-*/
-
 #define POS_TRANSLATE 0
 #define POS_ROTATE 1
 #define POS_FOCUS 2
@@ -39,9 +30,7 @@ int main(int index)
     matrixRotate(mat1, rot, 1.f, 0.f, 0.f);
     storeMatrix(3, 0, mat1);
 
-    //materialDiffuse(con, 0.0f, 0.0f, 0.0f, 1.0f);
-    //materialSpecular(con, 0.5f, 0.5f, 0.5f, 0.5f);
-    //materialShininess(intToFloat(20));
+    // Draw the lighting effect in the strip and fill the Z buffer.
     drawTriangleMesh(NAMED_mesh);
 
 
