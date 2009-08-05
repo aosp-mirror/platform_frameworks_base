@@ -24,6 +24,8 @@ import android.renderscript.Element;
 import android.renderscript.Allocation;
 import android.renderscript.Script;
 import android.renderscript.ScriptC;
+import android.renderscript.ProgramFragment;
+import android.renderscript.ProgramStore;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -95,10 +97,10 @@ public class RolloRS {
     private Script mScript;
     private RenderScript.Sampler mSampler;
     private RenderScript.Sampler mSamplerText;
-    private RenderScript.ProgramFragmentStore mPFSBackground;
-    private RenderScript.ProgramFragmentStore mPFSText;
-    private RenderScript.ProgramFragment mPFImages;
-    private RenderScript.ProgramFragment mPFText;
+    private ProgramStore mPSBackground;
+    private ProgramStore mPSText;
+    private ProgramFragment mPFImages;
+    private ProgramFragment mPFText;
     private RenderScript.ProgramVertex mPV;
     private ProgramVertexAlloc mPVAlloc;
     private RenderScript.ProgramVertex mPVOrtho;
@@ -142,37 +144,33 @@ public class RolloRS {
         mSamplerText = mRS.samplerCreate();
 
 
-        mRS.programFragmentBegin(null, null);
-        mRS.programFragmentSetTexEnable(0, true);
-        mRS.programFragmentSetTexEnvMode(0, RenderScript.EnvMode.MODULATE);
-        mPFImages = mRS.programFragmentCreate();
+        ProgramFragment.Builder bf = new ProgramFragment.Builder(mRS, null, null);
+        bf.setTexEnable(true, 0);
+        bf.setTexEnvMode(ProgramFragment.EnvMode.MODULATE, 0);
+        mPFImages = bf.create();
         mPFImages.setName("PF");
         mPFImages.bindSampler(mSampler, 0);
 
-        mRS.programFragmentBegin(null, null);
-        mRS.programFragmentSetTexEnable(0, true);
-        mRS.programFragmentSetTexEnvMode(0, RenderScript.EnvMode.MODULATE);
-        mPFText = mRS.programFragmentCreate();
+        bf.setTexEnvMode(ProgramFragment.EnvMode.MODULATE, 0);
+        mPFText = bf.create();
         mPFText.setName("PFText");
         mPFText.bindSampler(mSamplerText, 0);
 
-        mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.LESS);
-        mRS.programFragmentStoreDitherEnable(false);
-        mRS.programFragmentStoreDepthMask(true);
-        mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.SRC_ALPHA,
-                                          RenderScript.BlendDstFunc.ONE_MINUS_SRC_ALPHA);
-        mPFSBackground = mRS.programFragmentStoreCreate();
-        mPFSBackground.setName("PFS");
+        ProgramStore.Builder bs = new ProgramStore.Builder(mRS, null, null);
+        bs.setDepthFunc(ProgramStore.DepthFunc.LESS);
+        bs.setDitherEnable(false);
+        bs.setDepthMask(true);
+        bs.setBlendFunc(ProgramStore.BlendSrcFunc.SRC_ALPHA,
+                        ProgramStore.BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+        mPSBackground = bs.create();
+        mPSBackground.setName("PFS");
 
-        mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
-        mRS.programFragmentStoreDitherEnable(false);
-        mRS.programFragmentStoreDepthMask(false);
-        mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.SRC_ALPHA,
-                                          RenderScript.BlendDstFunc.ONE_MINUS_SRC_ALPHA);
-        mPFSText = mRS.programFragmentStoreCreate();
-        mPFSText.setName("PFSText");
+        bs.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+        bs.setDepthMask(false);
+        bs.setBlendFunc(ProgramStore.BlendSrcFunc.SRC_ALPHA,
+                        ProgramStore.BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+        mPSText = bs.create();
+        mPSText.setName("PFSText");
 
         mPVAlloc = new ProgramVertexAlloc(mRS);
         mRS.programVertexBegin(null, null);

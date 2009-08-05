@@ -19,11 +19,13 @@ package com.android.grass.rs;
 import android.content.res.Resources;
 import static android.renderscript.RenderScript.SamplerParam.*;
 import static android.renderscript.RenderScript.SamplerValue.*;
-import static android.renderscript.RenderScript.EnvMode.*;
-import static android.renderscript.RenderScript.DepthFunc.*;
-import static android.renderscript.RenderScript.BlendSrcFunc;
-import static android.renderscript.RenderScript.BlendDstFunc;
+import static android.renderscript.ProgramFragment.EnvMode.*;
+import static android.renderscript.ProgramStore.DepthFunc.*;
+import static android.renderscript.ProgramStore.BlendSrcFunc;
+import static android.renderscript.ProgramStore.BlendDstFunc;
 import android.renderscript.RenderScript;
+import android.renderscript.ProgramFragment;
+import android.renderscript.ProgramStore;
 import android.renderscript.Allocation;
 import android.renderscript.ProgramVertexAlloc;
 import static android.renderscript.Element.*;
@@ -72,9 +74,9 @@ class GrassRS {
     @SuppressWarnings({"FieldCanBeLocal"})
     private RenderScript.Sampler mSampler;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private RenderScript.ProgramFragment mPfBackground;
+    private ProgramFragment mPfBackground;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private RenderScript.ProgramFragmentStore mPfsBackground;
+    private ProgramStore mPfsBackground;
     @SuppressWarnings({"FieldCanBeLocal"})
     private RenderScript.ProgramVertex mPvBackground;
     @SuppressWarnings({"FieldCanBeLocal"})
@@ -91,9 +93,9 @@ class GrassRS {
     @SuppressWarnings({"FieldCanBeLocal"})
     private Allocation mBlades;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private RenderScript.ProgramFragment mPfGrass;
+    private ProgramFragment mPfGrass;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private RenderScript.ProgramFragmentStore mPfsGrass;
+    private ProgramStore mPfsGrass;
 
     public GrassRS(int width, int height) {
         mWidth = width;
@@ -116,10 +118,10 @@ class GrassRS {
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setScript(mResources, R.raw.grass);
-        sb.setTimeZone(TimeZone.getDefault().getID());
         sb.setRoot(true);
         mScript = sb.create();
         mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        mScript.setTimeZone(TimeZone.getDefault().getID());
 
         loadSkyTextures();
         mScript.bindAllocation(mState, RSID_STATE);
@@ -210,36 +212,33 @@ class GrassRS {
         mRS.samplerSet(WRAP_MODE_T, CLAMP);
         mSampler = mRS.samplerCreate();
 
-        mRS.programFragmentBegin(null, null);
-        mRS.programFragmentSetTexEnable(0, true);
-        mRS.programFragmentSetTexEnvMode(0, REPLACE);
-        mPfBackground = mRS.programFragmentCreate();
+        ProgramFragment.Builder b;
+        b = new ProgramFragment.Builder(mRS, null, null);
+        b.setTexEnable(true, 0);
+        b.setTexEnvMode(REPLACE, 0);
+        mPfBackground = b.create();
         mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(mSampler, 0);
 
-        mRS.programFragmentBegin(null, null);
-        mRS.programFragmentSetTexEnable(0, true);
-        mRS.programFragmentSetTexEnvMode(0, MODULATE);
-        mPfGrass = mRS.programFragmentCreate();
+        b.setTexEnvMode(MODULATE, 0);
+        mPfGrass = b.create();
         mPfGrass.setName("PFGrass");
         mPfGrass.bindSampler(mSampler, 0);
     }
 
     private void createProgramFragmentStore() {
-        mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreDepthFunc(ALWAYS);
-        mRS.programFragmentStoreBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
-        mRS.programFragmentStoreDitherEnable(true);
-        mRS.programFragmentStoreDepthMask(false);
-        mPfsBackground = mRS.programFragmentStoreCreate();
+        ProgramStore.Builder b;
+        b = new ProgramStore.Builder(mRS, null, null);
+
+        b.setDepthFunc(ALWAYS);
+        b.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+        b.setDitherEnable(true);
+        b.setDepthMask(false);
+        mPfsBackground = b.create();
         mPfsBackground.setName("PFSBackground");
 
-        mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreDepthFunc(ALWAYS);
-        mRS.programFragmentStoreBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
-        mRS.programFragmentStoreDitherEnable(true);
-        mRS.programFragmentStoreDepthMask(false);
-        mPfsGrass = mRS.programFragmentStoreCreate();
+        b.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+        mPfsGrass = b.create();
         mPfsGrass.setName("PFSGrass");
     }
 

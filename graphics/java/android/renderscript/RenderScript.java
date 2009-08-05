@@ -128,12 +128,13 @@ public class RenderScript {
     native int  nAdapter2DCreate();
 
     native void nScriptDestroy(int script);
-    native void nScriptBindAllocation(int vtm, int alloc, int slot);
+    native void nScriptBindAllocation(int script, int alloc, int slot);
+    native void nScriptSetClearColor(int script, float r, float g, float b, float a);
+    native void nScriptSetClearDepth(int script, float depth);
+    native void nScriptSetClearStencil(int script, int stencil);
+    native void nScriptSetTimeZone(int script, byte[] timeZone);
+
     native void nScriptCBegin();
-    native void nScriptCSetClearColor(float r, float g, float b, float a);
-    native void nScriptCSetClearDepth(float depth);
-    native void nScriptCSetClearStencil(int stencil);
-    native void nScriptCSetTimeZone(byte[] timeZone);
     native void nScriptCAddType(int type);
     native void nScriptCSetRoot(boolean isRoot);
     native void nScriptCSetScript(byte[] script, int offset, int length);
@@ -203,77 +204,6 @@ public class RenderScript {
     //////////////////////////////////////////////////////////////////////////////////
     // Element
 
-    Element.Builder mElementBuilder = new Element.Builder(this);
-    public Element.Builder elementBuilderCreate() throws IllegalStateException {
-        mElementBuilder.begin();
-        return mElementBuilder;
-    }
-
-    Type.Builder mTypeBuilder = new Type.Builder(this);
-    public Type.Builder typeBuilderCreate(Element e) throws IllegalStateException {
-        mTypeBuilder.begin(e);
-        return mTypeBuilder;
-    }
-
-
-    public enum DepthFunc {
-        ALWAYS (0),
-        LESS (1),
-        LEQUAL (2),
-        GREATER (3),
-        GEQUAL (4),
-        EQUAL (5),
-        NOTEQUAL (6);
-
-        int mID;
-        DepthFunc(int id) {
-            mID = id;
-        }
-    }
-
-    public enum BlendSrcFunc {
-        ZERO (0),
-        ONE (1),
-        DST_COLOR (2),
-        ONE_MINUS_DST_COLOR (3),
-        SRC_ALPHA (4),
-        ONE_MINUS_SRC_ALPHA (5),
-        DST_ALPHA (6),
-        ONE_MINUS_DST_ALPA (7),
-        SRC_ALPHA_SATURATE (8);
-
-        int mID;
-        BlendSrcFunc(int id) {
-            mID = id;
-        }
-    }
-
-    public enum BlendDstFunc {
-        ZERO (0),
-        ONE (1),
-        SRC_COLOR (2),
-        ONE_MINUS_SRC_COLOR (3),
-        SRC_ALPHA (4),
-        ONE_MINUS_SRC_ALPHA (5),
-        DST_ALPHA (6),
-        ONE_MINUS_DST_ALPA (7);
-
-        int mID;
-        BlendDstFunc(int id) {
-            mID = id;
-        }
-    }
-
-    public enum EnvMode {
-        REPLACE (0),
-        MODULATE (1),
-        DECAL (2);
-
-        int mID;
-        EnvMode(int id) {
-            mID = id;
-        }
-    }
 
     public enum SamplerParam {
         FILTER_MIN (0),
@@ -402,110 +332,8 @@ public class RenderScript {
     //////////////////////////////////////////////////////////////////////////////////
     // ProgramFragmentStore
 
-    public class ProgramFragmentStore extends BaseObj {
-        ProgramFragmentStore(int id) {
-            super(RenderScript.this);
-            mID = id;
-        }
-
-        public void destroy() {
-            nProgramFragmentStoreDestroy(mID);
-            mID = 0;
-        }
-    }
-
-    public void programFragmentStoreBegin(Element in, Element out) {
-        int inID = 0;
-        int outID = 0;
-        if (in != null) {
-            inID = in.mID;
-        }
-        if (out != null) {
-            outID = out.mID;
-        }
-        nProgramFragmentStoreBegin(inID, outID);
-    }
-
-    public void programFragmentStoreDepthFunc(DepthFunc func) {
-        nProgramFragmentStoreDepthFunc(func.mID);
-    }
-
-    public void programFragmentStoreDepthMask(boolean enable) {
-        nProgramFragmentStoreDepthMask(enable);
-    }
-
-    public void programFragmentStoreColorMask(boolean r, boolean g, boolean b, boolean a) {
-        nProgramFragmentStoreColorMask(r,g,b,a);
-    }
-
-    public void programFragmentStoreBlendFunc(BlendSrcFunc src, BlendDstFunc dst) {
-        nProgramFragmentStoreBlendFunc(src.mID, dst.mID);
-    }
-
-    public void programFragmentStoreDitherEnable(boolean enable) {
-        nProgramFragmentStoreDither(enable);
-    }
-
-    public ProgramFragmentStore programFragmentStoreCreate() {
-        int id = nProgramFragmentStoreCreate();
-        return new ProgramFragmentStore(id);
-    }
-
     //////////////////////////////////////////////////////////////////////////////////
     // ProgramFragment
-
-    public class ProgramFragment extends BaseObj {
-        ProgramFragment(int id) {
-            super(RenderScript.this);
-            mID = id;
-        }
-
-        public void destroy() {
-            nProgramFragmentDestroy(mID);
-            mID = 0;
-        }
-
-        public void bindTexture(Allocation va, int slot) {
-            nProgramFragmentBindTexture(mID, slot, va.mID);
-        }
-
-        public void bindSampler(Sampler vs, int slot) {
-            nProgramFragmentBindSampler(mID, slot, vs.mID);
-        }
-    }
-
-    public void programFragmentBegin(Element in, Element out) {
-        int inID = 0;
-        int outID = 0;
-        if (in != null) {
-            inID = in.mID;
-        }
-        if (out != null) {
-            outID = out.mID;
-        }
-        nProgramFragmentBegin(inID, outID);
-    }
-
-    public void programFragmentSetType(int slot, Type t) {
-        nProgramFragmentSetType(slot, t.mID);
-    }
-
-    public void programFragmentSetType(int slot, EnvMode t) {
-        nProgramFragmentSetEnvMode(slot, t.mID);
-    }
-
-    public void programFragmentSetTexEnable(int slot, boolean enable) {
-        nProgramFragmentSetTexEnable(slot, enable);
-    }
-
-    public void programFragmentSetTexEnvMode(int slot, EnvMode env) {
-        nProgramFragmentSetEnvMode(slot, env.mID);
-    }
-
-    public ProgramFragment programFragmentCreate() {
-        int id = nProgramFragmentCreate();
-        return new ProgramFragment(id);
-    }
 
     //////////////////////////////////////////////////////////////////////////////////
     // Sampler
@@ -617,7 +445,7 @@ public class RenderScript {
         //nContextBindSampler(s.mID);
     //}
 
-    public void contextBindProgramFragmentStore(ProgramFragmentStore pfs) {
+    public void contextBindProgramFragmentStore(ProgramStore pfs) {
         nContextBindProgramFragmentStore(pfs.mID);
     }
 

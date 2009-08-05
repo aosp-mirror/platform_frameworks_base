@@ -31,6 +31,8 @@ import android.renderscript.Element;
 import android.renderscript.Allocation;
 import android.renderscript.Script;
 import android.renderscript.ScriptC;
+import android.renderscript.ProgramFragment;
+import android.renderscript.ProgramStore;
 
 public class FountainRS {
 
@@ -60,8 +62,8 @@ public class FountainRS {
     private Allocation mPartAlloc;
     private Allocation mVertAlloc;
     private Script mScript;
-    private RenderScript.ProgramFragmentStore mPFS;
-    private RenderScript.ProgramFragment mPF;
+    private ProgramStore mPFS;
+    private ProgramFragment mPF;
 
     private Bitmap mBackground;
 
@@ -75,16 +77,16 @@ public class FountainRS {
         mPartAlloc.setName("PartBuffer");
         mVertAlloc = Allocation.createSized(mRS, Element.USER_I32, partCount * 5 + 1);
 
-        mRS.programFragmentStoreBegin(null, null);
-        mRS.programFragmentStoreBlendFunc(RenderScript.BlendSrcFunc.SRC_ALPHA, RenderScript.BlendDstFunc.ONE);
-        mRS.programFragmentStoreDepthFunc(RenderScript.DepthFunc.ALWAYS);
-        mRS.programFragmentStoreDepthMask(false);
-        mRS.programFragmentStoreDitherEnable(false);
-        mPFS = mRS.programFragmentStoreCreate();
+        ProgramStore.Builder bs = new ProgramStore.Builder(mRS, null, null);
+        bs.setBlendFunc(ProgramStore.BlendSrcFunc.SRC_ALPHA, ProgramStore.BlendDstFunc.ONE);
+        bs.setDepthFunc(ProgramStore.DepthFunc.ALWAYS);
+        bs.setDepthMask(false);
+        bs.setDitherEnable(false);
+        mPFS = bs.create();
         mPFS.setName("PFSBlend");
 
-        mRS.programFragmentBegin(null, null);
-        mPF = mRS.programFragmentCreate();
+        ProgramFragment.Builder bf = new ProgramFragment.Builder(mRS, null, null);
+        mPF = bf.create();
         mPF.setName("PgmFragParts");
 
         mParams[0] = 0;

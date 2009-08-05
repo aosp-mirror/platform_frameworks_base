@@ -3,7 +3,7 @@
 #pragma version(1)
 #pragma stateVertex(PVBackground)
 #pragma stateFragment(PFBackground)
-#pragma stateFragmentStore(PFSBackground)
+#pragma stateFragmentStore(PSBackground)
 
 /*
 typedef struct FilmScriptUserEnvRec {
@@ -29,16 +29,15 @@ typedef struct FilmScriptUserEnvRec {
 
 int main(int index)
 {
-    int f1,f2,f3,f4, f5,f6,f7,f8, f9,f10,f11,f12, f13,f14,f15,f16;
-    int g1,g2,g3,g4, g5,g6,g7,g8, g9,g10,g11,g12, g13,g14,g15,g16;
+    float mat1[16];
 
     float trans = loadF(1, POS_TRANSLATE);
     float rot = loadF(1, POS_ROTATE);
-    matrixLoadScale(&f16, 2.f, 2.f, 2.f);
-    matrixTranslate(&f16, 0.f, 0.f, trans);
-    matrixRotate(&f16, 90.f, 0.f, 0.f, 1.f);
-    matrixRotate(&f16, rot, 1.f, 0.f, 0.f);
-    storeMatrix(3, 0, &f16);
+    matrixLoadScale(mat1, 2.f, 2.f, 2.f);
+    matrixTranslate(mat1, 0.f, 0.f, trans);
+    matrixRotate(mat1, 90.f, 0.f, 0.f, 1.f);
+    matrixRotate(mat1, rot, 1.f, 0.f, 0.f);
+    storeMatrix(3, 0, mat1);
 
     //materialDiffuse(con, 0.0f, 0.0f, 0.0f, 1.0f);
     //materialSpecular(con, 0.5f, 0.5f, 0.5f, 0.5f);
@@ -47,7 +46,7 @@ int main(int index)
 
 
     // Start of images.
-    bindProgramFragmentStore(NAMED_PFSImages);
+    bindProgramFragmentStore(NAMED_PSImages);
     bindProgramFragment(NAMED_PFImages);
     bindProgramVertex(NAMED_PVImages);
 
@@ -108,8 +107,8 @@ int main(int index)
             }
 
             bindTexture(NAMED_PFImages, 0, loadI32(0, imgId - 1));
-            matrixLoadTranslate(&f16, -pos - loadF(5, triangleOffsetsCount / 2), 0, 0);
-            vpLoadTextureMatrix(&f16);
+            matrixLoadTranslate(mat1, -pos - loadF(5, triangleOffsetsCount / 2), 0, 0);
+            vpLoadTextureMatrix(mat1);
             drawTriangleMeshRange(NAMED_mesh, loadI32(4, start), loadI32(4, end) - loadI32(4, start));
         }
     }
