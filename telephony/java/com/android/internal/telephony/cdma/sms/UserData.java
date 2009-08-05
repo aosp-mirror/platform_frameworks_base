@@ -82,15 +82,15 @@ public class UserData {
      * Only elements between these indices in the ASCII table are printable.
      */
     public static final int PRINTABLE_ASCII_MIN_INDEX = 0x20;
-    public static final int ASCII_LF_INDEX = 0x0A;
+    public static final int ASCII_NL_INDEX = 0x0A;
     public static final int ASCII_CR_INDEX = 0x0D;
     public static final SparseIntArray charToAscii = new SparseIntArray();
     static {
         for (int i = 0; i < ASCII_MAP.length; i++) {
             charToAscii.put(ASCII_MAP[i], PRINTABLE_ASCII_MIN_INDEX + i);
         }
-        charToAscii.put('\r', ASCII_LF_INDEX);
-        charToAscii.put('\n', ASCII_CR_INDEX);
+        charToAscii.put('\n', ASCII_NL_INDEX);
+        charToAscii.put('\r', ASCII_CR_INDEX);
     }
 
     /*
