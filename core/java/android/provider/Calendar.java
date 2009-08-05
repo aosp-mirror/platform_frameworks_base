@@ -217,6 +217,13 @@ public final class Calendar {
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String HIDDEN = "hidden";
+
+        /**
+         * The owner account for this calendar, based on the calendar feed.
+         * This will be different from the _SYNC_ACCOUNT for delegated calendars.
+         * <P>Type: String</P>
+         */
+        public static final String OWNER_ACCOUNT = "ownerAccount";
     }
 
     public interface AttendeesColumns {
@@ -458,6 +465,14 @@ public final class Calendar {
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String LAST_DATE = "lastDate";
+
+        /**
+         * Whether the event has attendee information.  True if the event
+         * has full attendee data, false if the event has information about
+         * self only.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String HAS_ATTENDEE_DATA = "hasAttendeeData";
     }
 
     /**
