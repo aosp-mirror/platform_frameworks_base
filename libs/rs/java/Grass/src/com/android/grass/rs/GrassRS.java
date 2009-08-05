@@ -32,6 +32,8 @@ import static android.util.MathUtils.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.renderscript.ScriptC;
+import android.renderscript.Type;
+import android.renderscript.Dimension;
 import static android.renderscript.Sampler.Value.*;
 
 import java.util.TimeZone;
@@ -64,7 +66,6 @@ class GrassRS {
 
     private Resources mResources;
     private RenderScript mRS;
-    private final BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
 
     private final int mWidth;
     private final int mHeight;
@@ -89,8 +90,6 @@ class GrassRS {
     public GrassRS(int width, int height) {
         mWidth = width;
         mHeight = height;
-        mBitmapOptions.inScaled = false;
-        mBitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
     }
 
     public void init(RenderScript rs, Resources res) {
@@ -190,7 +189,7 @@ class GrassRS {
         textures[1] = loadTexture(R.drawable.sunrise, "sunrise");
         textures[2] = loadTexture(R.drawable.sky, "sky");
         textures[3] = loadTexture(R.drawable.sunset, "sunset");
-        textures[4] = loadTextureARGB(R.drawable.aa, "aa");
+        textures[4] = generateTextureAlpha(4, 1, new int[] { 0x00FFFF00 }, "aa");
 
         final int[] bufferIds = mTextureBufferIDs;
         final int count = textures.length;
@@ -204,18 +203,20 @@ class GrassRS {
         mTexturesIDs.data(bufferIds);
     }
 
-    private Allocation loadTexture(int id, String name) {
-        final Allocation allocation = Allocation.createFromBitmapResource(mRS, mResources,
-                id, RGB_565, false);
+    private Allocation generateTextureAlpha(int width, int height, int[] data, String name) {
+        final Type.Builder builder = new Type.Builder(mRS, A_8);
+        builder.add(Dimension.X, width);
+        builder.add(Dimension.Y, height);
+        
+        final Allocation allocation = Allocation.createTyped(mRS, builder.create());
+        allocation.data(data);
         allocation.setName(name);
         return allocation;
     }
 
-    private Allocation loadTextureARGB(int id, String name) {
-        // Forces ARGB 32 bits, because pngcrush sometimes optimize our PNGs to
-        // indexed pictures, which are not well supported
-        final Bitmap b = BitmapFactory.decodeResource(mResources, id, mBitmapOptions);
-        final Allocation allocation = Allocation.createFromBitmap(mRS, b, RGBA_8888, false);
+    private Allocation loadTexture(int id, String name) {
+        final Allocation allocation = Allocation.createFromBitmapResource(mRS, mResources,
+                id, RGB_565, false);
         allocation.setName(name);
         return allocation;
     }
@@ -236,7 +237,7 @@ class GrassRS {
         mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(mSampler, 0);
 
-        b.setTexEnvMode(MODULATE, 0);
+        b.setTexEnvMode(REPLACE, 0);
         mPfGrass = b.create();
         mPfGrass.setName("PFGrass");
         mPfGrass.bindSampler(mSampler, 0);
@@ -253,7 +254,7 @@ class GrassRS {
         mPfsBackground = b.create();
         mPfsBackground.setName("PFSBackground");
 
-        b.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+        b.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
         mPfsGrass = b.create();
         mPfsGrass.setName("PFSGrass");
     }

@@ -24,7 +24,7 @@ import android.renderscript.ProgramStore;
 import android.renderscript.ProgramVertex;
 import android.renderscript.Allocation;
 import android.renderscript.Sampler;
-import android.renderscript.ProgramVertex;
+import android.renderscript.Element;
 import static android.renderscript.Sampler.Value.LINEAR;
 import static android.renderscript.Sampler.Value.CLAMP;
 import static android.renderscript.ProgramStore.DepthFunc.*;
@@ -38,7 +38,7 @@ import android.graphics.Bitmap;
 import java.util.TimeZone;
 
 class FallRS {
-    private static final int MESH_RESOLUTION = 64;
+    private static final int MESH_RESOLUTION = 32;
 
     private static final int RSID_STATE = 0;
     private static final int RSID_STATE_FRAMECOUNT = 0;
@@ -67,6 +67,7 @@ class FallRS {
     private int[] mTextureBufferIDs;
 
     private Allocation mState;
+    private RenderScript.TriangleMesh mMesh;
 
     public FallRS(int width, int height) {
         mWidth = width;
@@ -94,6 +95,7 @@ class FallRS {
         }
         mState.destroy();
         mTextureBufferIDs = null;
+        mMesh.destroy();
     }
 
     @Override
@@ -127,7 +129,44 @@ class FallRS {
     }
 
     private void createMesh() {
+        final RenderScript rs = mRS;
+        rs.triangleMeshBegin(Element.XYZ_F32, Element.INDEX_16);
 
+        int wResolution;
+        int hResolution;
+
+        final int width = mWidth;
+        final int height = mHeight;
+
+        if (width < height) {
+            wResolution = MESH_RESOLUTION;
+            hResolution = (int) (MESH_RESOLUTION * height / (float) width);
+        } else {
+            wResolution = (int) (MESH_RESOLUTION * width / (float) height);
+            hResolution = MESH_RESOLUTION;
+        }
+
+        final float quadWidth = width / (float) wResolution;
+        final float quadHeight = height / (float) hResolution;
+
+        for (int y = 0; y <= hResolution; y++) {
+            final float yOffset = y * quadHeight;
+            for (int x = 0; x <= wResolution; x++) {
+                rs.triangleMeshAddVertex_XYZ(x * quadWidth, yOffset, 0.0f);
+            }
+        }
+
+        for (int y = 0; y < hResolution; y++) {
+            for (int x = 0; x < wResolution; x++) {
+                final int index = y * (wResolution + 1) + x;
+                final int iWR1 = index + wResolution + 1;
+                rs.triangleMeshAddTriangle(index, index + 1, iWR1);
+                rs.triangleMeshAddTriangle(index + 1, iWR1, iWR1 + 1);
+            }
+        }
+
+        mMesh = rs.triangleMeshCreate();
+        mMesh.setName("mesh");
     }
 
     private void createScriptStructures() {
