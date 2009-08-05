@@ -33,6 +33,8 @@ import android.renderscript.ScriptC;
 import android.renderscript.Script;
 import android.renderscript.ProgramFragment;
 import android.renderscript.ProgramStore;
+import android.renderscript.Sampler;
+import android.renderscript.Light;
 
 public class FilmRS {
     private final int POS_TRANSLATE = 0;
@@ -74,7 +76,7 @@ public class FilmRS {
     private Script mScriptImage;
     private Element mElementVertex;
     private Element mElementIndex;
-    private RenderScript.Sampler mSampler;
+    private Sampler mSampler;
     private ProgramStore mPSBackground;
     private ProgramStore mPSImages;
     private ProgramFragment mPFBackground;
@@ -92,7 +94,7 @@ public class FilmRS {
     private Allocation mAllocOffsets;
 
     private RenderScript.TriangleMesh mMesh;
-    private RenderScript.Light mLight;
+    private Light mLight;
 
     private FilmStripMesh mFSM;
 
@@ -119,16 +121,12 @@ public class FilmRS {
     }
 
     private void initPF() {
-        mRS.samplerBegin();
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN,
-                       RenderScript.SamplerValue.LINEAR);//_MIP_LINEAR);
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MAG,
-                       RenderScript.SamplerValue.LINEAR);
-        mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_S,
-                       RenderScript.SamplerValue.CLAMP);
-        mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_T,
-                       RenderScript.SamplerValue.WRAP);
-        mSampler = mRS.samplerCreate();
+        Sampler.Builder bs = new Sampler.Builder(mRS);
+        bs.setMin(Sampler.Value.LINEAR);//_MIP_LINEAR);
+        bs.setMag(Sampler.Value.LINEAR);
+        bs.setWrapS(Sampler.Value.CLAMP);
+        bs.setWrapT(Sampler.Value.WRAP);
+        mSampler = bs.create();
 
         ProgramFragment.Builder b = new ProgramFragment.Builder(mRS, null, null);
 
@@ -143,8 +141,7 @@ public class FilmRS {
     }
 
     private void initPV() {
-        mRS.lightBegin();
-        mLight = mRS.lightCreate();
+        mLight = (new Light.Builder(mRS)).create();
         mLight.setPosition(0, -0.5f, -1.0f);
 
         mRS.programVertexBegin(null, null);

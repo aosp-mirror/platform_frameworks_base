@@ -26,6 +26,7 @@ import android.renderscript.Script;
 import android.renderscript.ScriptC;
 import android.renderscript.ProgramFragment;
 import android.renderscript.ProgramStore;
+import android.renderscript.Sampler;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -95,8 +96,8 @@ public class RolloRS {
     private Resources mRes;
     private RenderScript mRS;
     private Script mScript;
-    private RenderScript.Sampler mSampler;
-    private RenderScript.Sampler mSamplerText;
+    private Sampler mSampler;
+    private Sampler mSamplerText;
     private ProgramStore mPSBackground;
     private ProgramStore mPSText;
     private ProgramFragment mPFImages;
@@ -121,27 +122,16 @@ public class RolloRS {
     private Allocation mAllocScratch;
 
     private void initNamed() {
-        mRS.samplerBegin();
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN,
-                       RenderScript.SamplerValue.LINEAR);//_MIP_LINEAR);
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MAG,
-                       RenderScript.SamplerValue.LINEAR);
-        mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_S,
-                       RenderScript.SamplerValue.CLAMP);
-        mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_T,
-                       RenderScript.SamplerValue.CLAMP);
-        mSampler = mRS.samplerCreate();
+        Sampler.Builder sb = new Sampler.Builder(mRS);
+        sb.setMin(Sampler.Value.LINEAR);//_MIP_LINEAR);
+        sb.setMag(Sampler.Value.LINEAR);
+        sb.setWrapS(Sampler.Value.CLAMP);
+        sb.setWrapT(Sampler.Value.CLAMP);
+        mSampler = sb.create();
 
-        mRS.samplerBegin();
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MIN,
-                       RenderScript.SamplerValue.NEAREST);
-        mRS.samplerSet(RenderScript.SamplerParam.FILTER_MAG,
-                       RenderScript.SamplerValue.NEAREST);
-        mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_S,
-                       RenderScript.SamplerValue.CLAMP);
-        mRS.samplerSet(RenderScript.SamplerParam.WRAP_MODE_T,
-                       RenderScript.SamplerValue.CLAMP);
-        mSamplerText = mRS.samplerCreate();
+        sb.setMin(Sampler.Value.NEAREST);
+        sb.setMag(Sampler.Value.NEAREST);
+        mSamplerText = sb.create();
 
 
         ProgramFragment.Builder bf = new ProgramFragment.Builder(mRS, null, null);

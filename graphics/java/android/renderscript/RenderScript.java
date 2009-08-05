@@ -201,35 +201,6 @@ public class RenderScript {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////////
-    // Element
-
-
-    public enum SamplerParam {
-        FILTER_MIN (0),
-        FILTER_MAG (1),
-        WRAP_MODE_S (2),
-        WRAP_MODE_T (3),
-        WRAP_MODE_R (4);
-
-        int mID;
-        SamplerParam(int id) {
-            mID = id;
-        }
-    }
-
-    public enum SamplerValue {
-        NEAREST (0),
-        LINEAR (1),
-        LINEAR_MIP_LINEAR (2),
-        WRAP (3),
-        CLAMP (4);
-
-        int mID;
-        SamplerValue(int id) {
-            mID = id;
-        }
-    }
 
     //////////////////////////////////////////////////////////////////////////////////
     // Triangle Mesh
@@ -328,80 +299,6 @@ public class RenderScript {
         return new ProgramVertex(id);
     }
 
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // ProgramFragmentStore
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // ProgramFragment
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // Sampler
-
-    public class Sampler extends BaseObj {
-        Sampler(int id) {
-            super(RenderScript.this);
-            mID = id;
-        }
-
-        public void destroy() {
-            nSamplerDestroy(mID);
-            mID = 0;
-        }
-    }
-
-    public void samplerBegin() {
-        nSamplerBegin();
-    }
-
-    public void samplerSet(SamplerParam p, SamplerValue v) {
-        nSamplerSet(p.mID, v.mID);
-    }
-
-    public Sampler samplerCreate() {
-        int id = nSamplerCreate();
-        return new Sampler(id);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////
-    // Light
-
-    public class Light extends BaseObj {
-        Light(int id) {
-            super(RenderScript.this);
-            mID = id;
-        }
-
-        public void destroy() {
-            nLightDestroy(mID);
-            mID = 0;
-        }
-
-        public void setColor(float r, float g, float b) {
-            nLightSetColor(mID, r, g, b);
-        }
-
-        public void setPosition(float x, float y, float z) {
-            nLightSetPosition(mID, x, y, z);
-        }
-    }
-
-    public void lightBegin() {
-        nLightBegin();
-    }
-
-    public void lightSetIsMono(boolean isMono) {
-        nLightSetIsMono(isMono);
-    }
-
-    public void lightSetIsLocal(boolean isLocal) {
-        nLightSetIsLocal(isLocal);
-    }
-
-    public Light lightCreate() {
-        int id = nLightCreate();
-        return new Light(id);
-    }
 
     //////////////////////////////////////////////////////////////////////////////////
     // File

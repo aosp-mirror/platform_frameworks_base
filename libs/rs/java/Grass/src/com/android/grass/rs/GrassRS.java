@@ -17,8 +17,8 @@
 package com.android.grass.rs;
 
 import android.content.res.Resources;
-import static android.renderscript.RenderScript.SamplerParam.*;
-import static android.renderscript.RenderScript.SamplerValue.*;
+import android.renderscript.Sampler;
+import static android.renderscript.Sampler.Value.*;
 import static android.renderscript.ProgramFragment.EnvMode.*;
 import static android.renderscript.ProgramStore.DepthFunc.*;
 import static android.renderscript.ProgramStore.BlendSrcFunc;
@@ -72,7 +72,7 @@ class GrassRS {
     @SuppressWarnings({"FieldCanBeLocal"})
     private ScriptC mScript;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private RenderScript.Sampler mSampler;
+    private Sampler mSampler;
     @SuppressWarnings({"FieldCanBeLocal"})
     private ProgramFragment mPfBackground;
     @SuppressWarnings({"FieldCanBeLocal"})
@@ -205,12 +205,12 @@ class GrassRS {
     }
 
     private void createProgramFragment() {
-        mRS.samplerBegin();
-        mRS.samplerSet(FILTER_MIN, LINEAR);
-        mRS.samplerSet(FILTER_MAG, LINEAR);
-        mRS.samplerSet(WRAP_MODE_S, CLAMP);
-        mRS.samplerSet(WRAP_MODE_T, CLAMP);
-        mSampler = mRS.samplerCreate();
+        Sampler.Builder bs = new Sampler.Builder(mRS);
+        bs.setMin(LINEAR);
+        bs.setMag(LINEAR);
+        bs.setWrapS(CLAMP);
+        bs.setWrapT(CLAMP);
+        mSampler = bs.create();
 
         ProgramFragment.Builder b;
         b = new ProgramFragment.Builder(mRS, null, null);
