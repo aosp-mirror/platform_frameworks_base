@@ -1889,7 +1889,9 @@ public class WifiService extends IWifiManager.Stub {
             // our new size == 1 (first call), but this function won't
             // be called often and by making the stopPacket call each
             // time we're less fragile and self-healing.
-            WifiNative.stopPacketFiltering();
+            synchronized (mWifiStateTracker) {
+                WifiNative.stopPacketFiltering();
+            }
         }
 
         int uid = Binder.getCallingUid();
@@ -1925,7 +1927,9 @@ public class WifiService extends IWifiManager.Stub {
             removed.unlinkDeathRecipient();
         }
         if (mMulticasters.size() == 0) {
-            WifiNative.startPacketFiltering();
+            synchronized (mWifiStateTracker) {
+                WifiNative.startPacketFiltering();
+            }
         }
 
         Long ident = Binder.clearCallingIdentity();
