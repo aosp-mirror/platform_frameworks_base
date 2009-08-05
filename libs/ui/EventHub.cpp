@@ -16,6 +16,7 @@
 //#define LOG_NDEBUG 0
 
 #include <ui/EventHub.h>
+#include <ui/KeycodeLabels.h>
 #include <hardware_legacy/power.h>
 
 #include <cutils/properties.h>
@@ -57,6 +58,18 @@
 #define SEQ_MASK 0x7fff0000
 #define SEQ_SHIFT 16
 #define id_to_index(id)         ((id&ID_MASK)+1)
+
+#ifndef ABS_MT_TOUCH_MAJOR
+#define ABS_MT_TOUCH_MAJOR      0x30    /* Major axis of touching ellipse */
+#endif
+
+#ifndef ABS_MT_POSITION_X
+#define ABS_MT_POSITION_X       0x35    /* Center X ellipse position */
+#endif
+
+#ifndef ABS_MT_POSITION_Y
+#define ABS_MT_POSITION_Y       0x36    /* Center Y ellipse position */
+#endif
 
 namespace android {
 
@@ -590,6 +603,8 @@ int EventHub::open_device(const char *deviceName)
     mFDs[mFDCount].events = POLLIN;
 
     // figure out the kinds of events the device reports
+    
+    // See if this is a keyboard, and classify it.
     uint8_t key_bitmask[(KEY_MAX+1)/8];
     memset(key_bitmask, 0, sizeof(key_bitmask));
     LOGV("Getting keys...");
@@ -601,15 +616,11 @@ int EventHub::open_device(const char *deviceName)
         for (int i=0; i<((BTN_MISC+7)/8); i++) {
             if (key_bitmask[i] != 0) {
                 device->classes |= CLASS_KEYBOARD;
-                // 'Q' key support = cheap test of whether this is an alpha-capable kbd
-                if (test_bit(KEY_Q, key_bitmask)) {
-                    device->classes |= CLASS_ALPHAKEY;
-                }
                 break;
             }
         }
         if ((device->classes & CLASS_KEYBOARD) != 0) {
-            device->keyBitmask = new uint8_t[(KEY_MAX+1)/8];
+            device->keyBitmask = new uint8_t[sizeof(key_bitmask)];
             if (device->keyBitmask != NULL) {
                 memcpy(device->keyBitmask, key_bitmask, sizeof(key_bitmask));
             } else {
@@ -619,6 +630,8 @@ int EventHub::open_device(const char *deviceName)
             }
         }
     }
+    
+    // See if this is a trackball.
     if (test_bit(BTN_MOUSE, key_bitmask)) {
         uint8_t rel_bitmask[(REL_MAX+1)/8];
         memset(rel_bitmask, 0, sizeof(rel_bitmask));
@@ -630,16 +643,22 @@ int EventHub::open_device(const char *deviceName)
             }
         }
     }
-    if (test_bit(BTN_TOUCH, key_bitmask)) {
-        uint8_t abs_bitmask[(ABS_MAX+1)/8];
-        memset(abs_bitmask, 0, sizeof(abs_bitmask));
-        LOGV("Getting absolute controllers...");
-        if (ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(abs_bitmask)), abs_bitmask) >= 0)
-        {
-            if (test_bit(ABS_X, abs_bitmask) && test_bit(ABS_Y, abs_bitmask)) {
-                device->classes |= CLASS_TOUCHSCREEN;
-            }
-        }
+    
+    uint8_t abs_bitmask[(ABS_MAX+1)/8];
+    memset(abs_bitmask, 0, sizeof(abs_bitmask));
+    LOGV("Getting absolute controllers...");
+    ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(abs_bitmask)), abs_bitmask);
+    
+    // Is this a new modern multi-touch driver?
+    if (test_bit(ABS_MT_TOUCH_MAJOR, abs_bitmask)
+            && test_bit(ABS_MT_POSITION_X, abs_bitmask)
+            && test_bit(ABS_MT_POSITION_Y, abs_bitmask)) {
+        device->classes |= CLASS_TOUCHSCREEN | CLASS_TOUCHSCREEN_MT;
+        
+    // Is this an old style single-touch driver?
+    } else if (test_bit(BTN_TOUCH, key_bitmask)
+            && test_bit(ABS_X, abs_bitmask) && test_bit(ABS_Y, abs_bitmask)) {
+        device->classes |= CLASS_TOUCHSCREEN;
     }
 
 #ifdef EV_SW
@@ -657,9 +676,6 @@ int EventHub::open_device(const char *deviceName)
         }
     }
 #endif
-
-    LOGI("New device: path=%s name=%s id=0x%x (of 0x%x) index=%d fd=%d classes=0x%x\n",
-         deviceName, name, device->id, mNumDevicesById, mFDCount, fd, device->classes);
 
     if ((device->classes&CLASS_KEYBOARD) != 0) {
         char devname[101];
@@ -707,10 +723,27 @@ int EventHub::open_device(const char *deviceName)
         sprintf(propName, "hw.keyboards.%u.devname", publicID);
         property_set(propName, devname);
 
-        LOGI("New keyboard: publicID=%d device->id=%d devname='%s' propName='%s' keylayout='%s'\n",
+        // 'Q' key support = cheap test of whether this is an alpha-capable kbd
+        if (hasKeycode(device, kKeyCodeQ)) {
+            device->classes |= CLASS_ALPHAKEY;
+        }
+        
+        // See if this has a DPAD.
+        if (hasKeycode(device, kKeyCodeDpadUp) &&
+                hasKeycode(device, kKeyCodeDpadDown) &&
+                hasKeycode(device, kKeyCodeDpadLeft) &&
+                hasKeycode(device, kKeyCodeDpadRight) &&
+                hasKeycode(device, kKeyCodeDpadCenter)) {
+            device->classes |= CLASS_DPAD;
+        }
+        
+        LOGI("New keyboard: publicID=%d device->id=0x%x devname='%s' propName='%s' keylayout='%s'\n",
                 publicID, device->id, devname, propName, keylayoutFilename);
     }
 
+    LOGI("New device: path=%s name=%s id=0x%x (of 0x%x) index=%d fd=%d classes=0x%x\n",
+         deviceName, name, device->id, mNumDevicesById, mFDCount, fd, device->classes);
+         
     LOGV("Adding device %s %p at %d, id = %d, classes = 0x%x\n",
          deviceName, device, mFDCount, devid, device->classes);
 
@@ -721,6 +754,25 @@ int EventHub::open_device(const char *deviceName)
 
     mFDCount++;
     return 0;
+}
+
+bool EventHub::hasKeycode(device_t* device, int keycode) const
+{
+    if (device->keyBitmask == NULL || device->layoutMap == NULL) {
+        return false;
+    }
+    
+    Vector<int32_t> scanCodes;
+    device->layoutMap->findScancodes(keycode, &scanCodes);
+    const size_t N = scanCodes.size();
+    for (size_t i=0; i<N && i<=KEY_MAX; i++) {
+        int32_t sc = scanCodes.itemAt(i);
+        if (sc >= 0 && sc <= KEY_MAX && test_bit(sc, device->keyBitmask)) {
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 int EventHub::close_device(const char *deviceName)
