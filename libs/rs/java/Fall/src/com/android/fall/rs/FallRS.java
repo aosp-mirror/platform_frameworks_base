@@ -14,53 +14,38 @@
  * limitations under the License.
  */
 
-package com.android.grass.rs;
+package com.android.fall.rs;
 
 import android.content.res.Resources;
-import android.renderscript.Sampler;
-import static android.renderscript.ProgramFragment.EnvMode.*;
-import static android.renderscript.ProgramStore.DepthFunc.*;
-import static android.renderscript.ProgramStore.BlendSrcFunc;
-import static android.renderscript.ProgramStore.BlendDstFunc;
 import android.renderscript.RenderScript;
+import android.renderscript.ScriptC;
 import android.renderscript.ProgramFragment;
 import android.renderscript.ProgramStore;
-import android.renderscript.Allocation;
 import android.renderscript.ProgramVertexAlloc;
+import android.renderscript.Allocation;
+import android.renderscript.Sampler;
+import static android.renderscript.Sampler.Value.LINEAR;
+import static android.renderscript.Sampler.Value.CLAMP;
+import static android.renderscript.ProgramStore.DepthFunc.*;
+import static android.renderscript.ProgramStore.BlendDstFunc;
+import static android.renderscript.ProgramStore.BlendSrcFunc;
+import static android.renderscript.ProgramFragment.EnvMode.*;
 import static android.renderscript.Element.*;
-import static android.util.MathUtils.*;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.renderscript.ScriptC;
-import static android.renderscript.Sampler.Value.*;
+import android.graphics.Bitmap;
 
 import java.util.TimeZone;
 
-class GrassRS {
+class FallRS {
+    private static final int MESH_RESOLUTION = 64;
+
     private static final int RSID_STATE = 0;
     private static final int RSID_STATE_FRAMECOUNT = 0;
-    private static final int RSID_STATE_BLADES_COUNT = 1;
-    private static final int RSID_STATE_WIDTH = 2;
-    private static final int RSID_STATE_HEIGHT = 3;
+    private static final int RSID_STATE_WIDTH = 1;
+    private static final int RSID_STATE_HEIGHT = 2;
 
     private static final int RSID_TEXTURES = 1;
-    private static final int TEXTURES_COUNT = 5;
-
-    private static final int RSID_BLADES = 2;
-    private static final int BLADES_COUNT = 100;
-    private static final int BLADE_STRUCT_FIELDS_COUNT = 12;
-    private static final int BLADE_STRUCT_ANGLE = 0;
-    private static final int BLADE_STRUCT_SIZE = 1;
-    private static final int BLADE_STRUCT_XPOS = 2;
-    private static final int BLADE_STRUCT_YPOS = 3;
-    private static final int BLADE_STRUCT_OFFSET = 4;
-    private static final int BLADE_STRUCT_SCALE = 5;
-    private static final int BLADE_STRUCT_LENGTHX = 6;
-    private static final int BLADE_STRUCT_LENGTHY = 7;
-    private static final int BLADE_STRUCT_HARDNESS = 8;
-    private static final int BLADE_STRUCT_H = 9;
-    private static final int BLADE_STRUCT_S = 10;
-    private static final int BLADE_STRUCT_B = 11;
+    private static final int TEXTURES_COUNT = 0;
 
     private Resources mResources;
     private RenderScript mRS;
@@ -81,12 +66,8 @@ class GrassRS {
     private int[] mTextureBufferIDs;
 
     private Allocation mState;
-    private Allocation mBlades;
 
-    private ProgramFragment mPfGrass;
-    private ProgramStore mPfsGrass;
-
-    public GrassRS(int width, int height) {
+    public FallRS(int width, int height) {
         mWidth = width;
         mHeight = height;
         mBitmapOptions.inScaled = false;
@@ -111,9 +92,6 @@ class GrassRS {
             a.destroy();
         }
         mState.destroy();
-        mBlades.destroy();
-        mPfGrass.destroy();
-        mPfsGrass.destroy();
         mTextureBufferIDs = null;
     }
 
@@ -131,9 +109,10 @@ class GrassRS {
         createProgramFragmentStore();
         createProgramFragment();
         createScriptStructures();
+        createMesh();
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
-        sb.setScript(mResources, R.raw.grass);
+        sb.setScript(mResources, R.raw.fall);
         sb.setRoot(true);
         mScript = sb.create();
         mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -142,42 +121,21 @@ class GrassRS {
         loadSkyTextures();
         mScript.bindAllocation(mState, RSID_STATE);
         mScript.bindAllocation(mTexturesIDs, RSID_TEXTURES);
-        mScript.bindAllocation(mBlades, RSID_BLADES);
 
         mRS.contextBindRootScript(mScript);
     }
 
+    private void createMesh() {
+        
+    }
+
     private void createScriptStructures() {
-        final int[] data = new int[4];
+        final int[] data = new int[3];
         mState = Allocation.createSized(mRS, USER_I32, data.length);
         data[RSID_STATE_FRAMECOUNT] = 0;
-        data[RSID_STATE_BLADES_COUNT] = BLADES_COUNT;
         data[RSID_STATE_WIDTH] = mWidth;
         data[RSID_STATE_HEIGHT] = mHeight;
         mState.data(data);
-
-        final float[] blades = new float[BLADES_COUNT * BLADE_STRUCT_FIELDS_COUNT];
-        mBlades = Allocation.createSized(mRS, USER_FLOAT, blades.length);
-        for (int i = 0; i < blades.length; i+= BLADE_STRUCT_FIELDS_COUNT) {
-            createBlade(blades, i);
-        }
-        mBlades.data(blades);
-    }
-
-    private void createBlade(float[] blades, int index) {
-        //noinspection PointlessArithmeticExpression
-        blades[index + BLADE_STRUCT_ANGLE] = 0.0f;
-        blades[index + BLADE_STRUCT_SIZE] = random(4.0f) + 4.0f;
-        blades[index + BLADE_STRUCT_XPOS] = random(mWidth);
-        blades[index + BLADE_STRUCT_YPOS] = mHeight;
-        blades[index + BLADE_STRUCT_OFFSET] = random(0.2f) - 0.1f;
-        blades[index + BLADE_STRUCT_SCALE] = random(0.6f) + 0.2f;
-        blades[index + BLADE_STRUCT_LENGTHX] = random(4.5f) + 3.0f;
-        blades[index + BLADE_STRUCT_LENGTHY] = random(5.5f) + 2.0f;
-        blades[index + BLADE_STRUCT_HARDNESS] = random(1.0f) + 0.2f;
-        blades[index + BLADE_STRUCT_H] = random(0.02f) + 0.2f;
-        blades[index + BLADE_STRUCT_S] = random(0.22f) + 0.78f;
-        blades[index + BLADE_STRUCT_B] = random(0.65f) + 0.35f;
     }
 
     private void loadSkyTextures() {
@@ -186,11 +144,7 @@ class GrassRS {
         mTexturesIDs = Allocation.createSized(mRS, USER_FLOAT, TEXTURES_COUNT);
 
         final Allocation[] textures = mTextures;
-        textures[0] = loadTexture(R.drawable.night, "night");
-        textures[1] = loadTexture(R.drawable.sunrise, "sunrise");
-        textures[2] = loadTexture(R.drawable.sky, "sky");
-        textures[3] = loadTexture(R.drawable.sunset, "sunset");
-        textures[4] = loadTextureARGB(R.drawable.aa, "aa");
+        // TOOD: Load textures
 
         final int[] bufferIds = mTextureBufferIDs;
         final int count = textures.length;
@@ -235,11 +189,6 @@ class GrassRS {
         mPfBackground = b.create();
         mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(mSampler, 0);
-
-        b.setTexEnvMode(MODULATE, 0);
-        mPfGrass = b.create();
-        mPfGrass.setName("PFGrass");
-        mPfGrass.bindSampler(mSampler, 0);
     }
 
     private void createProgramFragmentStore() {
@@ -252,10 +201,6 @@ class GrassRS {
         b.setDepthMask(false);
         mPfsBackground = b.create();
         mPfsBackground.setName("PFSBackground");
-
-        b.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
-        mPfsGrass = b.create();
-        mPfsGrass.setName("PFSGrass");
     }
 
     private void createProgramVertex() {

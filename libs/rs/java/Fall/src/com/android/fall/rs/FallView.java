@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.grass.rs;
+
+package com.android.fall.rs;
 
 import android.content.Context;
-import android.renderscript.RSSurfaceView;
-import android.renderscript.RenderScript;
 import android.view.SurfaceHolder;
+import android.renderscript.RenderScript;
+import android.renderscript.RSSurfaceView;
 
-class GrassView extends RSSurfaceView {
-    private GrassRS mRender;
+class FallView extends RSSurfaceView {
+    private FallRS mRender;
 
-    public GrassView(Context context) {
+    public FallView(Context context) {
         super(context);
     }
 
@@ -32,7 +33,7 @@ class GrassView extends RSSurfaceView {
         super.surfaceChanged(holder, format, w, h);
 
         RenderScript RS = createRenderScript();
-        mRender = new GrassRS(w, h);
+        mRender = new FallRS(w, h);
         mRender.init(RS, getResources());
     }
 

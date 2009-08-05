@@ -59,6 +59,22 @@ static int32_t SC_loadI32(uint32_t bank, uint32_t offset)
     return i[offset];
 }
 
+static float* SC_loadArrayF(uint32_t bank)
+{
+    GET_TLS();
+    void *vp = sc->mSlots[bank]->getPtr();
+    float *f = static_cast<float *>(vp);
+    return f;
+}
+
+static int32_t* SC_loadArrayI32(uint32_t bank)
+{
+    GET_TLS();
+    void *vp = sc->mSlots[bank]->getPtr();
+    int32_t *i = static_cast<int32_t *>(vp);
+    return i;
+}
+
 static uint32_t SC_loadU32(uint32_t bank, uint32_t offset)
 {
     GET_TLS();
@@ -678,6 +694,10 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     //{ "loadU32", (void *)&SC_loadU32, "unsigned int", "(int, int)" },
     { "loadF", (void *)&SC_loadF,
         "float", "(int, int)" },
+    { "loadArrayF", (void *)&SC_loadArrayF,
+        "float*", "(int)" },
+    { "loadArrayI32", (void *)&SC_loadArrayI32,
+        "int*", "(int)" },
     { "loadVec4", (void *)&SC_loadVec4,
         "void", "(int, int, float *)" },
     { "loadMatrix", (void *)&SC_loadMatrix,
