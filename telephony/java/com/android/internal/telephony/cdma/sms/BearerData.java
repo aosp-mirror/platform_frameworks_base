@@ -868,13 +868,13 @@ public final class BearerData {
             inStream.skip(offset);
             for (int i = 0; i < numFields; i++) {
                 int charCode = inStream.read(7);
-                if ((charCode >= UserData.ASCII_MAP_BASE_INDEX) ||
+                if ((charCode >= UserData.ASCII_MAP_BASE_INDEX) &&
                         (charCode <= UserData.ASCII_MAP_MAX_INDEX)) {
                     strBuf.append(UserData.ASCII_MAP[charCode - UserData.ASCII_MAP_BASE_INDEX]);
-                } else if (charCode == UserData.ASCII_LF_INDEX) {
-                    strBuf.append('\r');
-                } else if (charCode == UserData.ASCII_CR_INDEX) {
+                } else if (charCode == UserData.ASCII_NL_INDEX) {
                     strBuf.append('\n');
+                } else if (charCode == UserData.ASCII_CR_INDEX) {
+                    strBuf.append('\r');
                 } else {
                     /* For other charCodes, they are unprintable, and so simply use SPACE. */
                     strBuf.append(' ');
