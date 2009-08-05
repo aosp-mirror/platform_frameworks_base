@@ -108,6 +108,9 @@ status_t SurfaceBuffer::unlock()
 status_t SurfaceBuffer::writeToParcel(Parcel* reply, 
         android_native_buffer_t const* buffer)
 {
+    if (buffer == NULL) {
+        return BAD_VALUE;
+    }
     reply->writeInt32(buffer->width);
     reply->writeInt32(buffer->height);
     reply->writeInt32(buffer->stride);
