@@ -533,6 +533,17 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
         mTransitionAnimationScale = Settings.System.getFloat(context.getContentResolver(),
                 Settings.System.TRANSITION_ANIMATION_SCALE, mTransitionAnimationScale);
 
+        int max_events_per_sec = 35;
+        try {
+            max_events_per_sec = Integer.parseInt(SystemProperties
+                    .get("windowsmgr.max_events_per_sec"));
+            if (max_events_per_sec < 1) {
+                max_events_per_sec = 35;
+            }
+        } catch (NumberFormatException e) {
+        }
+        mMinWaitTimeBetweenTouchEvents = 1000 / max_events_per_sec;
+
         mQueue = new KeyQ();
 
         mInputThread = new InputDispatcherThread();
@@ -3989,8 +4000,8 @@ public class WindowManagerService extends IWindowManager.Stub implements Watchdo
             }
         } //end if target
 
-        // TODO remove once we settle on a value or make it app specific
-        if (action == MotionEvent.ACTION_DOWN) {
+        // Enable this for testing the "right" value
+        if (false && action == MotionEvent.ACTION_DOWN) {
             int max_events_per_sec = 35;
             try {
                 max_events_per_sec = Integer.parseInt(SystemProperties
