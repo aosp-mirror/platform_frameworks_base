@@ -21,9 +21,11 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -31,6 +33,7 @@ import android.os.SystemClock;
 import android.provider.SocialContract;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.Intents;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
@@ -123,12 +126,14 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
 
         mDisplayNameView = (TextView) findViewById(R.id.name);
         mPhoneticNameView = (TextView) findViewById(R.id.phonetic_name);
-        mStarredView = (CheckBox) findViewById(R.id.star);
+
+        mStarredView = (CheckBox)findViewById(R.id.star);
         mStarredView.setOnClickListener(this);
-        // Don't show start by default.
-        mStarredView.setVisibility(View.GONE);
-        mPhotoView = (ImageView) findViewById(R.id.photo);
-        mStatusView = (TextView) findViewById(R.id.status);
+
+        mPhotoView = (ImageView)findViewById(R.id.photo);
+        mPhotoView.setOnClickListener(this);
+
+        mStatusView = (TextView)findViewById(R.id.status);
 
         // Set the photo with a random "no contact" image
         long now = SystemClock.elapsedRealtime();
@@ -310,11 +315,36 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     public void onClick(View view) {
-        if (view.getId() == R.id.star) {
-            ContentValues values = new ContentValues(1);
-            values.put(Contacts.STARRED, mStarredView.isChecked());
-            mContentResolver.update(mContactUri, values, null, null);
+        switch (view.getId()) {
+            case R.id.star: {
+                // Toggle "starred" state
+                final ContentValues values = new ContentValues(1);
+                values.put(Contacts.STARRED, mStarredView.isChecked());
+                mContentResolver.update(mContactUri, values, null, null);
+                break;
+            }
+            case R.id.photo: {
+                // Photo launches contact detail action
+                final Intent intent = new Intent(Intents.SHOW_OR_CREATE_CONTACT, mContactUri);
+                final Rect target = getTargetRect(view);
+                intent.putExtra(Intents.EXTRA_TARGET_RECT, target);
+                intent.putExtra(Intents.EXTRA_MODE, Intents.MODE_SMALL);
+                mContext.startActivity(intent);
+                break;
+            }
         }
+    }
+
+    private Rect getTargetRect(View anchor) {
+        final int[] location = new int[2];
+        anchor.getLocationOnScreen(location);
+
+        final Rect rect = new Rect();
+        rect.left = location[0];
+        rect.top = location[1];
+        rect.right = rect.left + anchor.getWidth();
+        rect.bottom = rect.top + anchor.getHeight();
+        return rect;
     }
 
     private Bitmap loadContactPhoto(long photoId, BitmapFactory.Options options) {

@@ -1412,6 +1412,28 @@ public final class ContactsContract {
         public static final String EXTRA_TARGET_RECT = "target_rect";
 
         /**
+         * Optional extra used with {@link #SHOW_OR_CREATE_CONTACT} to specify a
+         * desired dialog style, usually a variation on size. One of
+         * {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or {@link #MODE_LARGE}.
+         */
+        public static final String EXTRA_MODE = "mode";
+
+        /**
+         * Value for {@link #EXTRA_MODE} to show a small-sized dialog.
+         */
+        public static final int MODE_SMALL = 1;
+
+        /**
+         * Value for {@link #EXTRA_MODE} to show a medium-sized dialog.
+         */
+        public static final int MODE_MEDIUM = 2;
+
+        /**
+         * Value for {@link #EXTRA_MODE} to show a large-sized dialog.
+         */
+        public static final int MODE_LARGE = 3;
+
+        /**
          * Intents related to the Contacts app UI.
          */
         public static final class UI {
