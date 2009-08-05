@@ -252,55 +252,6 @@ public class RenderScript {
     }
 
     //////////////////////////////////////////////////////////////////////////////////
-    // ProgramVertex
-
-    public class ProgramVertex extends BaseObj {
-        ProgramVertex(int id) {
-            super(RenderScript.this);
-            mID = id;
-        }
-
-        public void destroy() {
-            nProgramVertexDestroy(mID);
-            mID = 0;
-        }
-
-        public void bindAllocation(int slot, Allocation va) {
-            nProgramVertexBindAllocation(mID, slot, va.mID);
-        }
-    }
-
-    public void programVertexBegin(Element in, Element out) {
-        int inID = 0;
-        int outID = 0;
-        if (in != null) {
-            inID = in.mID;
-        }
-        if (out != null) {
-            outID = out.mID;
-        }
-        nProgramVertexBegin(inID, outID);
-    }
-
-    public void programVertexSetType(int slot, Type t) {
-        nProgramVertexSetType(slot, t.mID);
-    }
-
-    public void programVertexSetTextureMatrixEnable(boolean enable) {
-        nProgramVertexSetTextureMatrixEnable(enable);
-    }
-
-    public void programVertexAddLight(Light l) {
-        nProgramVertexAddLight(l.mID);
-    }
-
-    public ProgramVertex programVertexCreate() {
-        int id = nProgramVertexCreate();
-        return new ProgramVertex(id);
-    }
-
-
-    //////////////////////////////////////////////////////////////////////////////////
     // File
 
     public class File extends BaseObj {

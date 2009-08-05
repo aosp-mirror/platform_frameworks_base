@@ -26,7 +26,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.ProgramFragment;
 import android.renderscript.ProgramStore;
 import android.renderscript.Allocation;
-import android.renderscript.ProgramVertexAlloc;
+import android.renderscript.ProgramVertex;
 import static android.renderscript.Element.*;
 import static android.util.MathUtils.*;
 import android.graphics.Bitmap;
@@ -73,8 +73,8 @@ class GrassRS {
     private Sampler mSampler;
     private ProgramFragment mPfBackground;
     private ProgramStore mPfsBackground;
-    private RenderScript.ProgramVertex mPvBackground;
-    private ProgramVertexAlloc mPvOrthoAlloc;
+    private ProgramVertex mPvBackground;
+    private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
 
     private Allocation mTexturesIDs;
     private Allocation[] mTextures;
@@ -98,7 +98,7 @@ class GrassRS {
         mResources = res;
         initRS();
     }
-    
+
     public void destroy() {
         mScript.destroy();
         mSampler.destroy();
@@ -259,13 +259,13 @@ class GrassRS {
     }
 
     private void createProgramVertex() {
-        mPvOrthoAlloc = new ProgramVertexAlloc(mRS);
+        mPvOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
         mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
 
-        mRS.programVertexBegin(null, null);
-        mRS.programVertexSetTextureMatrixEnable(true);
-        mPvBackground = mRS.programVertexCreate();
-        mPvBackground.bindAllocation(0, mPvOrthoAlloc.mAlloc);
+        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
+        pvb.setTextureMatrixEnable(true);
+        mPvBackground = pvb.create();
+        mPvBackground.bindAllocation(0, mPvOrthoAlloc);
         mPvBackground.setName("PVBackground");
     }
 }

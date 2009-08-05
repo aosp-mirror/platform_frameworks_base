@@ -24,7 +24,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import android.renderscript.Matrix;
-import android.renderscript.ProgramVertexAlloc;
+import android.renderscript.ProgramVertex;
 import android.renderscript.RenderScript;
 import android.renderscript.Element;
 import android.renderscript.Allocation;
@@ -81,9 +81,9 @@ public class FilmRS {
     private ProgramStore mPSImages;
     private ProgramFragment mPFBackground;
     private ProgramFragment mPFImages;
-    private RenderScript.ProgramVertex mPVBackground;
-    private RenderScript.ProgramVertex mPVImages;
-    private ProgramVertexAlloc mPVA;
+    private ProgramVertex mPVBackground;
+    private ProgramVertex mPVImages;
+    private ProgramVertex.MatrixAllocation mPVA;
 
     private Allocation mImages[];
     private Allocation mAllocIDs;
@@ -144,14 +144,14 @@ public class FilmRS {
         mLight = (new Light.Builder(mRS)).create();
         mLight.setPosition(0, -0.5f, -1.0f);
 
-        mRS.programVertexBegin(null, null);
-        mRS.programVertexAddLight(mLight);
-        mPVBackground = mRS.programVertexCreate();
+        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
+        pvb.addLight(mLight);
+        mPVBackground = pvb.create();
         mPVBackground.setName("PVBackground");
 
-        mRS.programVertexBegin(null, null);
-        mRS.programVertexSetTextureMatrixEnable(true);
-        mPVImages = mRS.programVertexCreate();
+        pvb = new ProgramVertex.Builder(mRS, null, null);
+        pvb.setTextureMatrixEnable(true);
+        mPVImages = pvb.create();
         mPVImages.setName("PVImages");
     }
 
@@ -239,9 +239,9 @@ public class FilmRS {
         loadImages();
         initState();
 
-        mPVA = new ProgramVertexAlloc(mRS);
-        mPVBackground.bindAllocation(0, mPVA.mAlloc);
-        mPVImages.bindAllocation(0, mPVA.mAlloc);
+        mPVA = new ProgramVertex.MatrixAllocation(mRS);
+        mPVBackground.bindAllocation(0, mPVA);
+        mPVImages.bindAllocation(0, mPVA);
         mPVA.setupProjectionNormalized(320, 480);
 
 

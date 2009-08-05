@@ -26,6 +26,8 @@ import android.util.Log;
  *
  **/
 public class ProgramFragment extends BaseObj {
+    public static final int MAX_SLOT = 2;
+
     public enum EnvMode {
         REPLACE (0),
         MODULATE (1),
@@ -48,17 +50,26 @@ public class ProgramFragment extends BaseObj {
         mID = 0;
     }
 
-    public void bindTexture(Allocation va, int slot) {
+    public void bindTexture(Allocation va, int slot)
+        throws IllegalArgumentException {
+        if((slot < 0) || (slot >= MAX_SLOT)) {
+            throw new IllegalArgumentException("Slot ID out of range.");
+        }
+
         mRS.nProgramFragmentBindTexture(mID, slot, va.mID);
     }
 
-    public void bindSampler(Sampler vs, int slot) {
+    public void bindSampler(Sampler vs, int slot)
+        throws IllegalArgumentException {
+        if((slot < 0) || (slot >= MAX_SLOT)) {
+            throw new IllegalArgumentException("Slot ID out of range.");
+        }
+
         mRS.nProgramFragmentBindSampler(mID, slot, vs.mID);
     }
 
 
     public static class Builder {
-        public static final int MAX_SLOT = 2;
         RenderScript mRS;
         Element mIn;
         Element mOut;

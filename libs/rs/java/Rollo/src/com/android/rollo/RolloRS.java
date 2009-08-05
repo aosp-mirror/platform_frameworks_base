@@ -19,7 +19,7 @@ package com.android.rollo;
 import java.io.Writer;
 
 import android.renderscript.RenderScript;
-import android.renderscript.ProgramVertexAlloc;
+import android.renderscript.ProgramVertex;
 import android.renderscript.Element;
 import android.renderscript.Allocation;
 import android.renderscript.Script;
@@ -102,10 +102,10 @@ public class RolloRS {
     private ProgramStore mPSText;
     private ProgramFragment mPFImages;
     private ProgramFragment mPFText;
-    private RenderScript.ProgramVertex mPV;
-    private ProgramVertexAlloc mPVAlloc;
-    private RenderScript.ProgramVertex mPVOrtho;
-    private ProgramVertexAlloc mPVOrthoAlloc;
+    private ProgramVertex mPV;
+    private ProgramVertex.MatrixAllocation mPVAlloc;
+    private ProgramVertex mPVOrtho;
+    private ProgramVertex.MatrixAllocation mPVOrthoAlloc;
     private Allocation[] mIcons;
     private Allocation[] mLabels;
 
@@ -162,21 +162,21 @@ public class RolloRS {
         mPSText = bs.create();
         mPSText.setName("PFSText");
 
-        mPVAlloc = new ProgramVertexAlloc(mRS);
-        mRS.programVertexBegin(null, null);
-        mRS.programVertexSetTextureMatrixEnable(false);
-        mPV = mRS.programVertexCreate();
-        mPV.setName("PV");
-        mPV.bindAllocation(0, mPVAlloc.mAlloc);
+        mPVAlloc = new ProgramVertex.MatrixAllocation(mRS);
         mPVAlloc.setupProjectionNormalized(mWidth, mHeight);
 
-        mPVOrthoAlloc = new ProgramVertexAlloc(mRS);
-        mRS.programVertexBegin(null, null);
-        mRS.programVertexSetTextureMatrixEnable(true);
-        mPVOrtho = mRS.programVertexCreate();
-        mPVOrtho.setName("PVOrtho");
-        mPVOrtho.bindAllocation(0, mPVOrthoAlloc.mAlloc);
+        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
+        mPV = pvb.create();
+        mPV.setName("PV");
+        mPV.bindAllocation(0, mPVAlloc);
+
+        mPVOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
         mPVOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
+
+        pvb.setTextureMatrixEnable(true);
+        mPVOrtho = pvb.create();
+        mPVOrtho.setName("PVOrtho");
+        mPVOrtho.bindAllocation(0, mPVOrthoAlloc);
 
         mRS.contextBindProgramVertex(mPV);
 

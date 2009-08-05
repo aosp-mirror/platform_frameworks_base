@@ -26,7 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import android.renderscript.RenderScript;
-import android.renderscript.ProgramVertexAlloc;
+import android.renderscript.ProgramVertex;
 import android.renderscript.Element;
 import android.renderscript.Allocation;
 import android.renderscript.Script;
