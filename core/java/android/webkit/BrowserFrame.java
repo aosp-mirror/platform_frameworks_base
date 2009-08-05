@@ -615,6 +615,11 @@ class BrowserFrame extends Handler {
         mCallbackProxy.onReceivedIcon(icon);
     }
 
+    // Called by JNI when an apple-touch-icon attribute was found.
+    private void didReceiveTouchIconUrl(String url) {
+        mCallbackProxy.onReceivedTouchIconUrl(url);
+    }
+
     /**
      * Request a new window from the client.
      * @return The BrowserFrame object stored in the new WebView.

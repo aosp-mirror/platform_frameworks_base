@@ -2003,6 +2003,15 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Get the touch icon url for the apple-touch-icon <link> element.
+     * @hide
+     */
+    public String getTouchIconUrl() {
+        WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
+        return h != null ? h.getTouchIconUrl() : null;
+    }
+
+    /**
      * Get the progress for the current page.
      * @return The progress for the current page between 0 and 100.
      */

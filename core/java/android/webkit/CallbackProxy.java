@@ -104,6 +104,7 @@ class CallbackProxy extends Handler {
     private static final int ADD_MESSAGE_TO_CONSOLE              = 129;
     private static final int GEOLOCATION_PERMISSIONS_SHOW_PROMPT = 130;
     private static final int GEOLOCATION_PERMISSIONS_HIDE_PROMPT = 131;
+    private static final int RECEIVED_TOUCH_ICON_URL             = 132;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -241,6 +242,13 @@ class CallbackProxy extends Handler {
             case RECEIVED_ICON:
                 if (mWebChromeClient != null) {
                     mWebChromeClient.onReceivedIcon(mWebView, (Bitmap) msg.obj);
+                }
+                break;
+
+            case RECEIVED_TOUCH_ICON_URL:
+                if (mWebChromeClient != null) {
+                    mWebChromeClient.onReceivedTouchIconUrl(mWebView,
+                            (String) msg.obj);
                 }
                 break;
 
@@ -1052,6 +1060,21 @@ class CallbackProxy extends Handler {
             return;
         }
         sendMessage(obtainMessage(RECEIVED_ICON, icon));
+    }
+
+    /* package */ void onReceivedTouchIconUrl(String url) {
+        // We should have a current item but we do not want to crash so check
+        // for null.
+        WebHistoryItem i = mBackForwardList.getCurrentItem();
+        if (i != null) {
+            i.setTouchIconUrl(url);
+        }
+        // Do an unsynchronized quick check to avoid posting if no callback has
+        // been set.
+        if (mWebChromeClient == null) {
+            return;
+        }
+        sendMessage(obtainMessage(RECEIVED_TOUCH_ICON_URL, url));
     }
 
     public void onReceivedTitle(String title) {
