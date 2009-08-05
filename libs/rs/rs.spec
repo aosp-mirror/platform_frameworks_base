@@ -409,13 +409,7 @@ ProgramVertexCreate {
 
 ProgramVertexBindAllocation {
 	param RsProgramVertex vpgm
-	param uint32_t slot
 	param RsAllocation constants
-	}
-
-ProgramVertexSetType {
-	param uint32_t slot
-	param RsType constants
 	}
 
 ProgramVertexSetTextureMatrixEnable {

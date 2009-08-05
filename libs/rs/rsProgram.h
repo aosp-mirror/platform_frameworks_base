@@ -33,9 +33,11 @@ public:
     virtual ~Program();
 
 
-    void setAllocation(Allocation *);
+    void bindAllocation(Allocation *);
 
     virtual void setupGL();
+
+    void checkUpdatedAllocation(const Allocation *);
 
 protected:
     // Components not listed in "in" will be passed though
@@ -45,8 +47,7 @@ protected:
 
     ObjectBaseRef<Allocation> mConstants;
 
-    bool mDirty;
-
+    mutable bool mDirty;
 };
 
 

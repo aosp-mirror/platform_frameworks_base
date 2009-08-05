@@ -23,19 +23,19 @@
 namespace android {
 namespace renderscript {
 
+class ProgramFragmentState;
 
 class ProgramFragment : public Program
 {
 public:
     const static uint32_t MAX_TEXTURE = 2;
-    const static uint32_t MAX_CONSTANTS = 2;
 
 
 
     ProgramFragment(Element *in, Element *out);
     virtual ~ProgramFragment();
 
-    virtual void setupGL();
+    virtual void setupGL(ProgramFragmentState *);
 
 
 
@@ -53,7 +53,7 @@ protected:
     // Texture lookups go though a sampler which in effect converts normalized
     // coordinates into type specific.  Multiple samples may also be taken
     // and filtered.
-    // 
+    //
     // Constants are strictly accessed by programetic loads.
     ObjectBaseRef<Allocation> mTextures[MAX_TEXTURE];
     ObjectBaseRef<Sampler> mSamplers[MAX_TEXTURE];
@@ -61,21 +61,12 @@ protected:
     uint32_t mTextureDimensions[MAX_TEXTURE];
 
 
-    ObjectBaseRef<Allocation> mConstants[MAX_CONSTANTS];
-    ObjectBaseRef<Type> mConstantTypes[MAX_CONSTANTS];
-
-
     // Hacks to create a program for now
     RsTexEnvMode mEnvModes[MAX_TEXTURE];
     uint32_t mTextureEnableMask;
-
-
-
-
-
 };
 
-class ProgramFragmentState 
+class ProgramFragmentState
 {
 public:
     ProgramFragmentState();
@@ -87,6 +78,8 @@ public:
     ObjectBaseRef<Type> mTextureTypes[ProgramFragment::MAX_TEXTURE];
     ObjectBaseRef<ProgramFragment> mDefault;
     Vector<ProgramFragment *> mPrograms;
+
+    ObjectBaseRef<ProgramFragment> mLast;
 };
 
 

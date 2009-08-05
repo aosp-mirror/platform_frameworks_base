@@ -39,8 +39,13 @@ ProgramFragment::~ProgramFragment()
 {
 }
 
-void ProgramFragment::setupGL()
+void ProgramFragment::setupGL(ProgramFragmentState *state)
 {
+    if ((state->mLast.get() == this) && !mDirty) {
+        return;
+    }
+    state->mLast.set(this);
+
     for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
         glActiveTexture(GL_TEXTURE0 + ct);
         if (!(mTextureEnableMask & (1 << ct)) || !mTextures[ct].get()) {
@@ -90,8 +95,8 @@ void ProgramFragment::setupGL()
         }
     }
 
-
     glActiveTexture(GL_TEXTURE0);
+    mDirty = false;
 }
 
 
@@ -104,6 +109,7 @@ void ProgramFragment::bindTexture(uint32_t slot, Allocation *a)
 
     //LOGE("bindtex %i %p", slot, a);
     mTextures[slot].set(a);
+    mDirty = true;
 }
 
 void ProgramFragment::bindSampler(uint32_t slot, Sampler *s)
@@ -114,6 +120,7 @@ void ProgramFragment::bindSampler(uint32_t slot, Sampler *s)
     }
 
     mSamplers[slot].set(s);
+    mDirty = true;
 }
 
 void ProgramFragment::setType(uint32_t slot, const Element *e, uint32_t dim)
@@ -190,7 +197,7 @@ void rsi_ProgramFragmentBindTexture(Context *rsc, RsProgramFragment vpf, uint32_
     ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
     pf->bindTexture(slot, static_cast<Allocation *>(a));
     if (pf == rsc->getFragment()) {
-        pf->setupGL();
+        //pf->setupGL();
     }
 }
 
@@ -200,7 +207,7 @@ void rsi_ProgramFragmentBindSampler(Context *rsc, RsProgramFragment vpf, uint32_
     pf->bindSampler(slot, static_cast<Sampler *>(s));
 
     if (pf == rsc->getFragment()) {
-        pf->setupGL();
+        //pf->setupGL();
     }
 }
 

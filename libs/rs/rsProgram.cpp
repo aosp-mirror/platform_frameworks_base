@@ -34,10 +34,17 @@ Program::~Program()
 }
 
 
-void Program::setAllocation(Allocation *alloc)
+void Program::bindAllocation(Allocation *alloc)
 {
     mConstants.set(alloc);
     mDirty = true;
+}
+
+void Program::checkUpdatedAllocation(const Allocation *alloc)
+{
+    if (mConstants.get() == alloc) {
+        mDirty = true;
+    }
 }
 
 void Program::setupGL()

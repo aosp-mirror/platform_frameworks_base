@@ -85,10 +85,15 @@ bool Context::runScript(Script *s, uint32_t launchID)
 
 bool Context::runRootScript()
 {
+#if RS_LOG_TIMES
+    struct timespec beginTime;
+    clock_gettime(CLOCK_MONOTONIC, &beginTime);
+#endif
+
     rsAssert(mRootScript->mEnviroment.mIsRoot);
 
-    glColor4f(1,1,1,1);
-    glEnable(GL_LIGHT0);
+    //glColor4f(1,1,1,1);
+    //glEnable(GL_LIGHT0);
     glViewport(0, 0, mWidth, mHeight);
 
     glDepthMask(GL_TRUE);
@@ -102,19 +107,34 @@ bool Context::runRootScript()
     glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    return runScript(mRootScript.get(), 0);
+#if RS_LOG_TIMES
+    struct timespec startTime;
+    clock_gettime(CLOCK_MONOTONIC, &startTime);
+#endif
+    bool ret = runScript(mRootScript.get(), 0);
+
+#if RS_LOG_TIMES
+    struct timespec endTime;
+    clock_gettime(CLOCK_MONOTONIC, &endTime);
+
+    int t1 = ((unsigned long)startTime.tv_nsec - (unsigned long)beginTime.tv_nsec) / 1000 / 1000;
+    int t2 = ((unsigned long)endTime.tv_nsec - (unsigned long)startTime.tv_nsec) / 1000 / 1000;
+    LOGE("times  %i,  %i", t1, t2);
+#endif
+
+    return ret;
 }
 
 void Context::setupCheck()
 {
     if (mFragmentStore.get()) {
-        mFragmentStore->setupGL();
+        mFragmentStore->setupGL(&mStateFragmentStore);
     }
     if (mFragment.get()) {
-        mFragment->setupGL();
+        mFragment->setupGL(&mStateFragment);
     }
     if (mVertex.get()) {
-        mVertex->setupGL();
+        mVertex->setupGL(&mStateVertex);
     }
 
 }
@@ -245,7 +265,6 @@ void Context::setFragmentStore(ProgramFragmentStore *pfs)
     } else {
         mFragmentStore.set(pfs);
     }
-    mFragmentStore->setupGL();
 }
 
 void Context::setFragment(ProgramFragment *pf)
@@ -255,7 +274,13 @@ void Context::setFragment(ProgramFragment *pf)
     } else {
         mFragment.set(pf);
     }
-    mFragment->setupGL();
+}
+
+void Context::allocationCheck(const Allocation *a)
+{
+    mVertex->checkUpdatedAllocation(a);
+    mFragment->checkUpdatedAllocation(a);
+    mFragmentStore->checkUpdatedAllocation(a);
 }
 
 void Context::setVertex(ProgramVertex *pv)
@@ -265,7 +290,6 @@ void Context::setVertex(ProgramVertex *pv)
     } else {
         mVertex.set(pv);
     }
-    mVertex->setupGL();
 }
 
 void Context::assignName(ObjectBase *obj, const char *name, uint32_t len)

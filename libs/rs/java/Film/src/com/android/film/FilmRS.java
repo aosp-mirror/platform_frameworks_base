@@ -240,8 +240,8 @@ public class FilmRS {
         initState();
 
         mPVA = new ProgramVertex.MatrixAllocation(mRS);
-        mPVBackground.bindAllocation(0, mPVA);
-        mPVImages.bindAllocation(0, mPVA);
+        mPVBackground.bindAllocation(mPVA);
+        mPVImages.bindAllocation(mPVA);
         mPVA.setupProjectionNormalized(320, 480);
 
 

@@ -164,9 +164,8 @@ public class RenderScript {
     native void nProgramFragmentDestroy(int pgm);
 
     native void nProgramVertexDestroy(int pv);
-    native void nProgramVertexBindAllocation(int pv, int slot, int mID);
+    native void nProgramVertexBindAllocation(int pv, int mID);
     native void nProgramVertexBegin(int inID, int outID);
-    native void nProgramVertexSetType(int slot, int mID);
     native void nProgramVertexSetTextureMatrixEnable(boolean enable);
     native void nProgramVertexAddLight(int id);
     native int  nProgramVertexCreate();

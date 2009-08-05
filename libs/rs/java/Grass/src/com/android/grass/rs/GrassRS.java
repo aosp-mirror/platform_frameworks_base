@@ -265,7 +265,7 @@ class GrassRS {
         ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
         pvb.setTextureMatrixEnable(true);
         mPvBackground = pvb.create();
-        mPvBackground.bindAllocation(0, mPvOrthoAlloc);
+        mPvBackground.bindAllocation(mPvOrthoAlloc);
         mPvBackground.setName("PVBackground");
     }
 }

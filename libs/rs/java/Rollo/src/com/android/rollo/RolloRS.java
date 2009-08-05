@@ -168,7 +168,7 @@ public class RolloRS {
         ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
         mPV = pvb.create();
         mPV.setName("PV");
-        mPV.bindAllocation(0, mPVAlloc);
+        mPV.bindAllocation(mPVAlloc);
 
         mPVOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
         mPVOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
@@ -176,7 +176,7 @@ public class RolloRS {
         pvb.setTextureMatrixEnable(true);
         mPVOrtho = pvb.create();
         mPVOrtho.setName("PVOrtho");
-        mPVOrtho.bindAllocation(0, mPVOrthoAlloc);
+        mPVOrtho.bindAllocation(mPVOrthoAlloc);
 
         mRS.contextBindProgramVertex(mPV);
 
