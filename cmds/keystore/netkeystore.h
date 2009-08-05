@@ -19,6 +19,7 @@
 #define __NETKEYSTORE_H__
 
 #include <stdio.h>
+#include <arpa/inet.h>
 #include <cutils/sockets.h>
 #include <cutils/log.h>
 
@@ -68,6 +69,8 @@ static inline int read_marshal(int s, LPC_MARSHAL *cmd)
         LOGE("failed to read header\n");
         return -1;
     }
+    cmd->len = ntohl(cmd->len);
+    cmd->opcode = ntohl(cmd->opcode);
     if (cmd->len > BUFFER_MAX) {
         LOGE("invalid size %d\n", cmd->len);
         return -1;
@@ -82,11 +85,14 @@ static inline int read_marshal(int s, LPC_MARSHAL *cmd)
 
 static inline int write_marshal(int s, LPC_MARSHAL *cmd)
 {
+    int len = cmd->len;
+    cmd->len = htonl(cmd->len);
+    cmd->opcode = htonl(cmd->opcode);
     if (writex(s, cmd, 2 * sizeof(uint32_t))) {
         LOGE("failed to write marshal header\n");
         return -1;
     }
-    if (writex(s, cmd->data, cmd->len)) {
+    if (writex(s, cmd->data, len)) {
         LOGE("failed to write marshal data\n");
         return -1;
     }

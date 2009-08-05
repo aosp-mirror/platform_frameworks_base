@@ -121,15 +121,16 @@ public class ServiceCommand {
         Reply reply = new Reply();
 
         if (!readBytes(buf, 4)) return null;
-        reply.len = (((int) buf[0]) & 0xff) | ((((int) buf[1]) & 0xff) << 8) |
-                ((((int) buf[2]) & 0xff) << 16) |
-                ((((int) buf[3]) & 0xff) << 24);
+        reply.len = ((((int) buf[0]) & 0xff) << 24) |
+                ((((int) buf[1]) & 0xff) << 16) |
+                ((((int) buf[2]) & 0xff) << 8) |
+                (((int) buf[3]) & 0xff);
 
         if (!readBytes(buf, 4)) return null;
-        reply.returnCode = (((int) buf[0]) & 0xff) |
-                ((((int) buf[1]) & 0xff) << 8) |
-                ((((int) buf[2]) & 0xff) << 16) |
-                ((((int) buf[3]) & 0xff) << 24);
+        reply.returnCode = ((((int) buf[0]) & 0xff) << 24) |
+                ((((int) buf[1]) & 0xff) << 16) |
+                ((((int) buf[2]) & 0xff) << 8) |
+                (((int) buf[3]) & 0xff);
 
         if (reply.len > BUFFER_LENGTH) {
             Log.e(mTag,"invalid reply length (" + reply.len + ")");
@@ -145,15 +146,15 @@ public class ServiceCommand {
         byte[] data = (_data == null) ? new byte[0] : _data.getBytes();
         int len = data.length;
         // the length of data
-        buf[0] = (byte) (len & 0xff);
-        buf[1] = (byte) ((len >> 8) & 0xff);
-        buf[2] = (byte) ((len >> 16) & 0xff);
-        buf[3] = (byte) ((len >> 24) & 0xff);
+        buf[0] = (byte) ((len >> 24) & 0xff);
+        buf[1] = (byte) ((len >> 16) & 0xff);
+        buf[2] = (byte) ((len >> 8) & 0xff);
+        buf[3] = (byte) (len & 0xff);
         // the opcode of the command
-        buf[4] = (byte) (cmd & 0xff);
-        buf[5] = (byte) ((cmd >> 8) & 0xff);
-        buf[6] = (byte) ((cmd >> 16) & 0xff);
-        buf[7] = (byte) ((cmd >> 24) & 0xff);
+        buf[4] = (byte) ((cmd >> 24) & 0xff);
+        buf[5] = (byte) ((cmd >> 16) & 0xff);
+        buf[6] = (byte) ((cmd >> 8) & 0xff);
+        buf[7] = (byte) (cmd & 0xff);
         try {
             mOut.write(buf, 0, 8);
             mOut.write(data, 0, len);

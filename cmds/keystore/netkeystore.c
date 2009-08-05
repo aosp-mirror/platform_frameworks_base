@@ -242,6 +242,7 @@ static int set_read_timeout(int socket)
 {
     struct timeval tv;
     tv.tv_sec = READ_TIMEOUT;
+    tv.tv_usec = 0;
     if (setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv,  sizeof tv))
     {
         LOGE("setsockopt failed");
