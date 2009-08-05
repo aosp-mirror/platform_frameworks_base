@@ -186,6 +186,13 @@ final class JWebCoreJavaBridge extends Handler {
     }
 
     /**
+     * Returns the path of the plugin data directory
+     */
+    private String getPluginSharedDataDirectory() {
+        return PluginManager.getInstance(null).getPluginSharedDataDirectory();
+    }
+
+    /**
      * setSharedTimer
      * @param timemillis The relative time when the timer should fire
      */

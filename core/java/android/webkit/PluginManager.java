@@ -154,4 +154,8 @@ public class PluginManager {
         }
         return directories.toArray(new String[directories.size()]);
     }
+
+    String getPluginSharedDataDirectory() {
+        return mContext.getDir("plugins", 0).getPath();
+    }
 }
