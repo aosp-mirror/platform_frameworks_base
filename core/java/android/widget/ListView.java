@@ -3264,12 +3264,13 @@ public class ListView extends AbsListView {
         if (mChoiceMode == CHOICE_MODE_MULTIPLE) {
             mCheckStates.put(position, value);
         } else {
-            // Clear the old value: if something was selected and value == false
-            // then it is unselected
-            mCheckStates.clear();
-            // If value == true, select the appropriate position
+            // Clear all values if we're checking something, or unchecking the currently
+            // selected item
+            if (value || isItemChecked(position)) {
+                mCheckStates.clear();
+            }
             // this may end up selecting the value we just cleared but this way
-            // we don't have to first to a get(position)
+            // we ensure length of mCheckStates is 1, a fact getCheckedItemPosition relies on
             if (value) {
                 mCheckStates.put(position, true);
             }
