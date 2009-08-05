@@ -658,7 +658,14 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (col == NONE) {
             return null;
         }
-        return cursor.getString(col);
+        try {
+            return cursor.getString(col);
+        } catch (Exception e) {
+            Log.e(LOG_TAG,
+                    "unexpected error retrieving valid column from cursor, "
+                            + "did the remote process die?", e);
+            return null;
+        }
     }
 
 }
