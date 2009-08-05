@@ -432,7 +432,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } finally {
                 db.endTransaction();
             }
-            upgradeVersion = 36;
+            upgradeVersion = 37;
         }
 
         if (upgradeVersion == 37) {
