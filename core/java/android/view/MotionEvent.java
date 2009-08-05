@@ -643,8 +643,8 @@ public final class MotionEvent implements Parcelable {
      * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
      * (the first pointer that is down) to {@link #getPointerCount()}-1.
      */
-    public final int getPointerId(int index) {
-        return mPointerIdentifiers[index];
+    public final int getPointerId(int pointerIndex) {
+        return mPointerIdentifiers[pointerIndex];
     }
     
     /**
