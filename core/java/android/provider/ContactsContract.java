@@ -230,7 +230,7 @@ public final class ContactsContract {
      * of raw contact representing the same person.
      */
     public static class Contacts implements BaseColumns, ContactsColumns,
-            ContactOptionsColumns, SyncColumns {
+            ContactOptionsColumns {
         /**
          * This utility class cannot be instantiated
          */
