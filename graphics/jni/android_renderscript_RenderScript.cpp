@@ -909,19 +909,11 @@ nProgramVertexBegin(JNIEnv *_env, jobject _this, jint in, jint out)
 }
 
 static void
-nProgramVertexBindAllocation(JNIEnv *_env, jobject _this, jint vpv, jint slot, jint a)
+nProgramVertexBindAllocation(JNIEnv *_env, jobject _this, jint vpv, jint a)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramVertexBindAllocation, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramVertex)vpv, slot, (RsAllocation)a);
-    rsProgramVertexBindAllocation((RsProgramFragment)vpv, slot, (RsAllocation)a);
-}
-
-static void
-nProgramVertexSetType(JNIEnv *_env, jobject _this, jint slot, jint t)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexSetType, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramVertex)vpv, slot, (RsType)t);
-    rsProgramVertexSetType(slot, (RsType)t);
+    rsProgramVertexBindAllocation((RsProgramFragment)vpv, (RsAllocation)a);
 }
 
 static void
@@ -1186,9 +1178,8 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentDestroy",        "(I)V",                                 (void*)nProgramFragmentDestroy },
 
 {"nProgramVertexDestroy",          "(I)V",                                 (void*)nProgramVertexDestroy },
-{"nProgramVertexBindAllocation",   "(III)V",                               (void*)nProgramVertexBindAllocation },
+{"nProgramVertexBindAllocation",   "(II)V",                                (void*)nProgramVertexBindAllocation },
 {"nProgramVertexBegin",            "(II)V",                                (void*)nProgramVertexBegin },
-{"nProgramVertexSetType",          "(II)V",                                (void*)nProgramVertexSetType },
 {"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
 {"nProgramVertexAddLight",         "(I)V",                                 (void*)nProgramVertexAddLight },
 {"nProgramVertexCreate",           "()I",                                  (void*)nProgramVertexCreate },

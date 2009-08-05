@@ -44,9 +44,14 @@ static void logMatrix(const char *txt, const float *f)
     LOGV("%6.2f, %6.2f, %6.2f, %6.2f", f[3], f[7], f[11], f[15]);
 }
 
-void ProgramVertex::setupGL()
+void ProgramVertex::setupGL(ProgramVertexState *state)
 {
-    const float *f = static_cast<const float *>(mConstants[0]->getPtr());
+    if ((state->mLast.get() == this) && !mDirty) {
+        return;
+    }
+    state->mLast.set(this);
+
+    const float *f = static_cast<const float *>(mConstants->getPtr());
 
     glMatrixMode(GL_TEXTURE);
     if (mTextureMatrixEnable) {
@@ -72,7 +77,7 @@ void ProgramVertex::setupGL()
     } else {
         glDisable(GL_LIGHTING);
     }
-    
+
     if (!f) {
         LOGE("Must bind constants to vertex program");
     }
@@ -81,16 +86,8 @@ void ProgramVertex::setupGL()
     glLoadMatrixf(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET]);
-}
 
-void ProgramVertex::setConstantType(uint32_t slot, const Type *t)
-{
-    mConstantTypes[slot].set(t);
-}
-
-void ProgramVertex::bindAllocation(uint32_t slot, Allocation *a)
-{
-    mConstants[slot].set(a);
+    mDirty = false;
 }
 
 void ProgramVertex::addLight(const Light *l)
@@ -103,20 +100,23 @@ void ProgramVertex::addLight(const Light *l)
 
 void ProgramVertex::setProjectionMatrix(const rsc_Matrix *m) const
 {
-    float *f = static_cast<float *>(mConstants[0]->getPtr());
+    float *f = static_cast<float *>(mConstants->getPtr());
     memcpy(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET], m, sizeof(rsc_Matrix));
+    mDirty = true;
 }
 
 void ProgramVertex::setModelviewMatrix(const rsc_Matrix *m) const
 {
-    float *f = static_cast<float *>(mConstants[0]->getPtr());
+    float *f = static_cast<float *>(mConstants->getPtr());
     memcpy(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET], m, sizeof(rsc_Matrix));
+    mDirty = true;
 }
 
 void ProgramVertex::setTextureMatrix(const rsc_Matrix *m) const
 {
-    float *f = static_cast<float *>(mConstants[0]->getPtr());
+    float *f = static_cast<float *>(mConstants->getPtr());
     memcpy(&f[RS_PROGRAM_VERTEX_TEXTURE_OFFSET], m, sizeof(rsc_Matrix));
+    mDirty = true;
 }
 
 
@@ -139,8 +139,8 @@ void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
     mDefaultAlloc.set(alloc);
     mDefault.set(pv);
 
-    pv->bindAllocation(0, alloc);
-    
+    pv->bindAllocation(alloc);
+
     Matrix m;
     m.loadOrtho(0,w, h,0, -1,1);
     alloc->subData(RS_PROGRAM_VERTEX_PROJECTION_OFFSET, 16, &m.m[0]);
@@ -167,15 +167,10 @@ RsProgramVertex rsi_ProgramVertexCreate(Context *rsc)
     return pv;
 }
 
-void rsi_ProgramVertexBindAllocation(Context *rsc, RsProgramVertex vpgm, uint32_t slot, RsAllocation constants)
+void rsi_ProgramVertexBindAllocation(Context *rsc, RsProgramVertex vpgm, RsAllocation constants)
 {
     ProgramVertex *pv = static_cast<ProgramVertex *>(vpgm);
-    pv->bindAllocation(slot, static_cast<Allocation *>(constants));
-}
-
-void rsi_ProgramVertexSetType(Context *rsc, uint32_t slot, RsType constants)
-{
-    rsc->mStateVertex.mPV->setConstantType(slot, static_cast<const Type *>(constants));
+    pv->bindAllocation(static_cast<Allocation *>(constants));
 }
 
 void rsi_ProgramVertexSetTextureMatrixEnable(Context *rsc, bool enable)

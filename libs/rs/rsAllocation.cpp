@@ -501,23 +501,25 @@ RsAllocation rsi_AllocationCreateFromFile(Context *rsc, const char *file, bool g
     return texAlloc;
 }
 
-
 void rsi_AllocationData(Context *rsc, RsAllocation va, const void *data)
 {
     Allocation *a = static_cast<Allocation *>(va);
     a->data(data);
+    rsc->allocationCheck(a);
 }
 
 void rsi_Allocation1DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t count, const void *data)
 {
     Allocation *a = static_cast<Allocation *>(va);
     a->subData(xoff, count, data);
+    rsc->allocationCheck(a);
 }
 
 void rsi_Allocation2DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data)
 {
     Allocation *a = static_cast<Allocation *>(va);
     a->subData(xoff, yoff, w, h, data);
+    rsc->allocationCheck(a);
 }
 
 

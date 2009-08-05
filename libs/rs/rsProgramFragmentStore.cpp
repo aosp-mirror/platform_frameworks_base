@@ -48,8 +48,13 @@ ProgramFragmentStore::~ProgramFragmentStore()
 {
 }
 
-void ProgramFragmentStore::setupGL()
+void ProgramFragmentStore::setupGL(ProgramFragmentStoreState *state)
 {
+    if (state->mLast.get() == this) {
+        return;
+    }
+    state->mLast.set(this);
+
     glColorMask(mColorRWriteEnable,
                 mColorGWriteEnable,
                 mColorBWriteEnable,
@@ -123,7 +128,7 @@ void ProgramFragmentStore::setDepthMask(bool mask)
 void ProgramFragmentStore::setBlendFunc(RsBlendSrcFunc src, RsBlendDstFunc dst)
 {
     mBlendEnable = true;
-    if ((src == RS_BLEND_SRC_ONE) && 
+    if ((src == RS_BLEND_SRC_ONE) &&
         (dst == RS_BLEND_DST_ZERO)) {
         mBlendEnable = false;
     }

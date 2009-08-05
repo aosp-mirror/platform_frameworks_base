@@ -45,7 +45,7 @@
 namespace android {
 namespace renderscript {
 
-class Context 
+class Context
 {
 public:
     Context(Device *, Surface *);
@@ -86,6 +86,7 @@ public:
     const ProgramVertex * getVertex() {return mVertex.get();}
 
     void setupCheck();
+    void allocationCheck(const Allocation *);
 
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);

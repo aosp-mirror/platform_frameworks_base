@@ -38,8 +38,8 @@ public class ProgramVertex extends BaseObj {
         mID = 0;
     }
 
-    public void bindAllocation(int slot, MatrixAllocation va) {
-        mRS.nProgramVertexBindAllocation(mID, slot, va.mAlloc.mID);
+    public void bindAllocation(MatrixAllocation va) {
+        mRS.nProgramVertexBindAllocation(mID, va.mAlloc.mID);
     }
 
 

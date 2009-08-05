@@ -17,12 +17,13 @@
 #ifndef ANDROID_RS_UTILS_H
 #define ANDROID_RS_UTILS_H
 
-#define LOG_NDEBUG 0 
+#define LOG_NDEBUG 0
 #define LOG_TAG "rs"
 #include <utils/Log.h>
 #include <utils/Vector.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <time.h>
 
 #include <EGL/egl.h>
 #include <math.h>
@@ -37,6 +38,8 @@ namespace renderscript {
 #else
 #define rsAssert(v) while(0)
 #endif
+
+#define RS_LOG_TIMES 0
 
 template<typename T>
 T rsMin(T in1, T in2)

@@ -21,6 +21,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptC;
 import android.renderscript.ProgramFragment;
 import android.renderscript.ProgramStore;
+import android.renderscript.ProgramVertex;
 import android.renderscript.Allocation;
 import android.renderscript.Sampler;
 import android.renderscript.ProgramVertex;
@@ -79,7 +80,7 @@ class FallRS {
         mResources = res;
         initRS();
     }
-    
+
     public void destroy() {
         mScript.destroy();
         mSampler.destroy();
@@ -126,7 +127,7 @@ class FallRS {
     }
 
     private void createMesh() {
-        
+
     }
 
     private void createScriptStructures() {
@@ -210,7 +211,7 @@ class FallRS {
         ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
         pvb.setTextureMatrixEnable(true);
         mPvBackground = pvb.create();
-        mPvBackground.bindAllocation(0, mPvOrthoAlloc);
+        mPvBackground.bindAllocation(mPvOrthoAlloc);
         mPvBackground.setName("PVBackground");
     }
 }
