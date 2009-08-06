@@ -1476,10 +1476,12 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (DEBUG) Log.v(TAG, "Found the app - running clear process");
                 // found it; fire off the clear request
                 synchronized (mQueueLock) {
+                    long oldId = Binder.clearCallingIdentity();
                     mWakelock.acquire();
                     Message msg = mBackupHandler.obtainMessage(MSG_RUN_CLEAR,
                             new ClearParams(getTransport(mCurrentTransport), info));
                     mBackupHandler.sendMessage(msg);
+                    Binder.restoreCallingIdentity(oldId);
                 }
                 break;
             }
@@ -1705,10 +1707,12 @@ class BackupManagerService extends IBackupManager.Stub {
 
             for (int i = 0; i < mRestoreSets.length; i++) {
                 if (token == mRestoreSets[i].token) {
+                    long oldId = Binder.clearCallingIdentity();
                     mWakelock.acquire();
                     Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
                     msg.obj = new RestoreParams(mRestoreTransport, observer, token);
                     mBackupHandler.sendMessage(msg);
+                    Binder.restoreCallingIdentity(oldId);
                     return 0;
                 }
             }
