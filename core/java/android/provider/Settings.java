@@ -3298,39 +3298,6 @@ public final class Settings {
                 "short_keylight_delay_ms";
 
         /**
-         * URL that points to the voice search servers. To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_URL = "voice_search_url";
-
-        /**
-         * Speech encoding used with voice search on 3G networks. To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENCODING_THREE_G = "voice_search_encoding_three_g";
-
-        /**
-         * Speech encoding used with voice search on WIFI networks. To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENCODING_WIFI = "voice_search_encoding_wifi";
-
-        /**
-         * Whether to use automatic gain control in voice search (0 = disable, 1 = enable).
-         * To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENABLE_AGC = "voice_search_enable_agc";
-
-        /**
-         * Whether to use noise suppression in voice search (0 = disable, 1 = enable).
-         * To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENABLE_NS = "voice_search_enable_ns";
-
-        /**
-         * Whether to use the IIR filter in voice search (0 = disable, 1 = enable).
-         * To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENABLE_IIR = "voice_search_enable_iir";
-
-        /**
          * List of test suites (local disk filename) for the automatic instrumentation test runner.
          * The file format is similar to automated_suites.xml, see AutoTesterService.
          * If this setting is missing or empty, the automatic test runner will not start.
