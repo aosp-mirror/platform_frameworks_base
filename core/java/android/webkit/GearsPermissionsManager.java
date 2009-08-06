@@ -139,7 +139,13 @@ class GearsPermissionsManager {
         file = new File(file.getAbsolutePath() + File.separator
                 + GEARS_DATABASE_DIR + File.separator + GEARS_DATABASE_FILE);
         // Remember whether or not we need to create the LocationAccess table.
-        boolean needToCreateTables = !file.exists();
+        boolean needToCreateTables = false;
+        if (!file.exists()) {
+            needToCreateTables = true;
+            // Create the path or else SQLiteDatabase.openOrCreateDatabase()
+            // may throw on the device.
+            file.getParentFile().mkdirs();
+        }
         // If the database file does not yet exist and the system location
         // setting says that the Gears origins need to be removed from the
         // location permission table, it means that we don't actually need
