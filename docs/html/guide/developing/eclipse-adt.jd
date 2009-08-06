@@ -135,7 +135,7 @@ folders and files in your new project:</p>
 
 <h2 id="Running">Running Your Application</h2>
 
-<p><em>Wait!</em> Before you can run your application on the Android Emulator, 
+<p>Before you can run your application on the Android Emulator, 
 you <strong>must</strong> create an Android Virtual Device (AVD). 
 An AVD is a configuration that specifies the Android platform to be used on the emulator.
 You can read more in the <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual
@@ -149,45 +149,31 @@ on running your applicaiton.</p>
 
 <h3 id="CreatingAnAvd">Creating an AVD</h3>
 
-<p>To avoid some explanation that's beyond the scope of this document, here's the 
-basic procedure to create an AVD:</p>
+<p>With ADT 0.9.2 and above, the Android AVD Manager provides a simple graphical interface
+for creating and managing AVDs. (If you're using ADT version 0.9.1 or older, you must 
+use the <code>android</code> tool to create your AVDs&mdash;read the AVD guide to
+<a href="{@docRoot}guide/developing/tools/avd.html#creating">Creating an AVD</a>.)
+
+<p>To create an AVD with the Android AVD Manager:</p>
 
 <ol>
-  <li>Open a command-line (e.g.,"Command Prompt" application on Windows, or "Terminal"
-  on Mac/Linux) and navigate to your SDK package's 
-  <code>tools/</code> directory.</li>
-  <li>First, you need to select a Deployment Target. To view available targets, execute:
-    <pre>android list targets</pre>
-    <p>This will output a list of available Android targets, such as:</p>
-<pre>
-id:1
-    Name: Android 1.1
-    Type: platform
-    API level: 2
-    Skins: HVGA (default), HVGA-L, HVGA-P, QVGA-L, QVGA-P
-id:2
-    Name: Android 1.5
-    Type: platform
-    API level: 3
-    Skins: HVGA (default), HVGA-L, HVGA-P, QVGA-L, QVGA-P
-</pre>
-    <p>Find the target that matches the Android platform upon which you'd like
-    to run your application. Note the integer value of the <code>id</code> &mdash;
-    you'll use this in the next step.</p>
+  <li>Select <strong>Window > Android AVD Manager</strong>, or click the Android AVD Manager icon (a black device)
+    in the Eclipse toolbar.</p>
   </li>
-  <li>Create a new AVD using your selected Deployment Target. Execute:
-    <pre>android create avd --name <em>&lt;your_avd_name&gt;</em> --target <em>&lt;targetID&gt;</em></pre>
-  <li>Next, you'll be asked whether you'd like to create a custom hardware profile.
-  If you respond "yes," you'll be presented with a series of prompts to define various aspects of the
-  device hardware (leave entries blank to use default values, which are shown in brackets). Otherwise,
-  press return to use all default values ("no" is the default).</li>
+  <li>In the Virtual Devices panel, you'll see a list of existing AVDs. Click <strong>New</strong>
+  to create a new AVD.</li>
+  <li>Fill in the details for the AVD. 
+    <p>Give it a name, a platform target, an SD card image (optional), and
+    a skin (HVGA is default).</p>
   </li>
+  <li>Click <strong>Create AVD</strong>.</li>
 </ol>
 
-<p>That's it; your AVD is ready. In the next section, you'll see how the AVD is used
+<p>Your AVD is now ready and you can close the Android AVD Manager. 
+In the next section, you'll see how the AVD is used
 when launching your application on an emulator.</p>
 
-<p>To learn more about creating and managing AVDs, please read the 
+<p>For more information about AVDs, read the 
 <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>
 documentation.</p>
 
