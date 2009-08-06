@@ -72,42 +72,43 @@ void alpha(float a) {
 }
 
 void drawNight(int width, int height) {
-    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_NIGHT));
+    bindTexture(NAMED_PFBackground, 0, NAMED_TNight);
     drawRect(width - 512.0f, -32.0f, width, 1024.0f - 32.0f, 0.0f);
 }
 
 void drawSunrise(int width, int height) {
-    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_SUNRISE));
+    bindTexture(NAMED_PFBackground, 0, NAMED_TSunrise);
     drawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
 void drawNoon(int width, int height) {
-    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_NOON));
+    bindTexture(NAMED_PFBackground, 0, NAMED_TSky);
     drawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
 void drawSunset(int width, int height) {
-    bindTexture(NAMED_PFBackground, 0, loadI32(RSID_TEXTURES, RSID_SKY_TEXTURE_SUNSET));
+    bindTexture(NAMED_PFBackground, 0, NAMED_TSunset);
     drawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
 void drawBlade(int index, float now, int frameCount) {
-    float offset = loadF(RSID_BLADES, index + BLADE_STRUCT_OFFSET);
-    float scale = loadF(RSID_BLADES, index + BLADE_STRUCT_SCALE);
-    float angle = loadF(RSID_BLADES, index + BLADE_STRUCT_ANGLE);
-    float hardness = loadF(RSID_BLADES, index + BLADE_STRUCT_HARDNESS);
+    float *bladeStruct = loadArrayF(RSID_BLADES, index);
+    float offset = bladeStruct[BLADE_STRUCT_OFFSET];
+    float scale = bladeStruct[BLADE_STRUCT_SCALE];
+    float angle = bladeStruct[BLADE_STRUCT_ANGLE];
+    float hardness = bladeStruct[BLADE_STRUCT_HARDNESS];
     
-    float xpos = loadF(RSID_BLADES, index + BLADE_STRUCT_XPOS);
-    float ypos = loadF(RSID_BLADES, index + BLADE_STRUCT_YPOS);
+    float xpos = bladeStruct[BLADE_STRUCT_XPOS];
+    float ypos = bladeStruct[BLADE_STRUCT_YPOS];
 
-    float lengthX = loadF(RSID_BLADES, index + BLADE_STRUCT_LENGTHX);
-    float lengthY = loadF(RSID_BLADES, index + BLADE_STRUCT_LENGTHY);
+    float lengthX = bladeStruct[BLADE_STRUCT_LENGTHX];
+    float lengthY = bladeStruct[BLADE_STRUCT_LENGTHY];
 
-    int size = loadF(RSID_BLADES, index + BLADE_STRUCT_SIZE);
+    int size = bladeStruct[BLADE_STRUCT_SIZE];
 
-    float h = loadF(RSID_BLADES, index + BLADE_STRUCT_H);
-    float s = loadF(RSID_BLADES, index + BLADE_STRUCT_S);
-    float b = loadF(RSID_BLADES, index + BLADE_STRUCT_B);
+    float h = bladeStruct[BLADE_STRUCT_H];
+    float s = bladeStruct[BLADE_STRUCT_S];
+    float b = bladeStruct[BLADE_STRUCT_B];
 
     float newB = 1.0f;
     if (now >= MIDNIGHT && now < MORNING) {
@@ -162,9 +163,7 @@ void drawBlade(int index, float now, int frameCount) {
 
 void drawBlades(float now, int frameCount) {
     // For anti-aliasing
-    bindProgramFragmentStore(NAMED_PFSGrass);
-    bindProgramFragment(NAMED_PFGrass);
-    bindTexture(NAMED_PFGrass, 0, loadI32(RSID_TEXTURES, RSID_GRASS_TEXTURE));
+    bindTexture(NAMED_PFBackground, 0, NAMED_TAa);
 
     int bladesCount = loadI32(RSID_STATE, RSID_BLADES_COUNT);
     int count = bladesCount * BLADE_STRUCT_FIELDS_COUNT;

@@ -29,8 +29,6 @@ import android.renderscript.Allocation;
 import android.renderscript.ProgramVertex;
 import static android.renderscript.Element.*;
 import static android.util.MathUtils.*;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.renderscript.ScriptC;
 import android.renderscript.Type;
 import android.renderscript.Dimension;
@@ -84,9 +82,6 @@ class GrassRS {
     private Allocation mState;
     private Allocation mBlades;
 
-    private ProgramFragment mPfGrass;
-    private ProgramStore mPfsGrass;
-
     public GrassRS(int width, int height) {
         mWidth = width;
         mHeight = height;
@@ -111,8 +106,6 @@ class GrassRS {
         }
         mState.destroy();
         mBlades.destroy();
-        mPfGrass.destroy();
-        mPfsGrass.destroy();
         mTextureBufferIDs = null;
     }
 
@@ -130,6 +123,7 @@ class GrassRS {
         createProgramFragmentStore();
         createProgramFragment();
         createScriptStructures();
+        loadSkyTextures();
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setScript(mResources, R.raw.grass);
@@ -138,7 +132,6 @@ class GrassRS {
         mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         mScript.setTimeZone(TimeZone.getDefault().getID());
 
-        loadSkyTextures();
         mScript.bindAllocation(mState, RSID_STATE);
         mScript.bindAllocation(mTexturesIDs, RSID_TEXTURES);
         mScript.bindAllocation(mBlades, RSID_BLADES);
@@ -185,11 +178,11 @@ class GrassRS {
         mTexturesIDs = Allocation.createSized(mRS, USER_FLOAT, TEXTURES_COUNT);
 
         final Allocation[] textures = mTextures;
-        textures[0] = loadTexture(R.drawable.night, "night");
-        textures[1] = loadTexture(R.drawable.sunrise, "sunrise");
-        textures[2] = loadTexture(R.drawable.sky, "sky");
-        textures[3] = loadTexture(R.drawable.sunset, "sunset");
-        textures[4] = generateTextureAlpha(4, 1, new int[] { 0x00FFFF00 }, "aa");
+        textures[0] = loadTexture(R.drawable.night, "TNight");
+        textures[1] = loadTexture(R.drawable.sunrise, "TSunrise");
+        textures[2] = loadTexture(R.drawable.sky, "TSky");
+        textures[3] = loadTexture(R.drawable.sunset, "TSunset");
+        textures[4] = generateTextureAlpha(4, 1, new int[] { 0x00FFFF00 }, "TAa");
 
         final int[] bufferIds = mTextureBufferIDs;
         final int count = textures.length;
@@ -236,11 +229,6 @@ class GrassRS {
         mPfBackground = b.create();
         mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(mSampler, 0);
-
-        b.setTexEnvMode(REPLACE, 0);
-        mPfGrass = b.create();
-        mPfGrass.setName("PFGrass");
-        mPfGrass.bindSampler(mSampler, 0);
     }
 
     private void createProgramFragmentStore() {
@@ -253,10 +241,6 @@ class GrassRS {
         b.setDepthMask(false);
         mPfsBackground = b.create();
         mPfsBackground.setName("PFSBackground");
-
-        b.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
-        mPfsGrass = b.create();
-        mPfsGrass.setName("PFSGrass");
     }
 
     private void createProgramVertex() {
