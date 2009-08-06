@@ -20,6 +20,18 @@ ADB_OPTS="$@"
 #FIXME: what was this for?
 #adb kill-server
 
+b_pkgs=$(adb $ADB_OPTS shell dumpsys backup | \
+         ruby -ne 'print($1+" ") if $_ =~ /^\s*ApplicationInfo\{\S+ (.+?)\}/')
+
+# wipe prior backup data for packages, including the metadata package @pm@
+for pkg in $b_pkgs '@pm@'; do
+    adb $ADB_OPTS shell bmgr wipe "$pkg"
+done
+
+# who knows?
+echo 'Waiting 5 seconds for things to settle...'
+sleep 5
+
 # run adb as root so we can poke at com.android.backuptest's data
 root_status=$(adb $ADB_OPTS root)
 if [ "x$root_status" != "xadbd is already running as root" ]; then
@@ -35,16 +47,20 @@ adb $ADB_OPTS shell bmgr transport com.google.android.backup/.BackupTransportSer
 
 # load up the three files
 adb $ADB_OPTS shell \
-   "rm /data/data/com.android.backuptest/files/* ; \
+   "rm /data/data/com.android.backuptest/files/file.txt ; \
+    rm /data/data/com.android.backuptest/files/another_file.txt ; \
+    rm /data/data/com.android.backuptest/files/empty.txt ; \
     mkdir /data/data/com.android.backuptest ; \
     mkdir /data/data/com.android.backuptest/files ; \
     mkdir /data/data/com.android.backuptest/shared_prefs ; \
-    echo -n \"<map><int name=\\\"pref\\\" value=\\\"1\\\" /></map>\" > /data/data com.android.backuptest/shared_prefs/raw.xml ; \
+    echo -n \"<map><int name=\\\"pref\\\" value=\\\"1\\\" /></map>\" \
+            > /data/data/com.android.backuptest/shared_prefs/raw.xml ; \
     echo -n first file > /data/data/com.android.backuptest/files/file.txt ; \
     echo -n asdf > /data/data/com.android.backuptest/files/another_file.txt ; \
-    echo -n 3 > /data/data/com.android.backuptest/files/3.txt ; \
     echo -n "" > /data/data/com.android.backuptest/files/empty.txt ; \
+    date >> /data/data/com.android.backuptest/files/3.txt ; \
 "
+#    echo -n 3 > /data/data/com.android.backuptest/files/3.txt ; \
 
 # say that the data has changed
 adb $ADB_OPTS shell bmgr backup com.android.backuptest

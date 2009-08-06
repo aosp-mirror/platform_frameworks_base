@@ -70,7 +70,7 @@ echo
 # check the results
 check_file files/file.txt "first file"
 check_file files/another_file.txt "asdf"
-check_file files/3.txt "3"
+#check_file files/3.txt "3"
 check_file files/empty.txt ""
 check_file shared_prefs/raw.xml '<map><int name="pref" value="1" /></map>'
 
@@ -83,4 +83,7 @@ echo --- Restored shared_prefs
 adb $ADB_OPTS shell "ls -l /data/data/com.android.backuptest/shared_prefs"
 echo ---
 echo
+
+echo "Last 3 timestamps in 3.txt:"
+adb $ADB_OPTS shell cat /data/data/com.android.backuptest/files/3.txt | tail -n 3
 
