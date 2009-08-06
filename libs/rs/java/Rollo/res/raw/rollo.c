@@ -61,6 +61,7 @@ int main(void* con, int ft, int launchID)
     storeF(2, SCRATCH_ZOOM, zoom);
 
     float targetRot = loadI32(0, STATE_FIRST_VISIBLE) / 180.0f * 3.14f;
+    targetRot = targetRot * 0.80f - .12f;
     float drawRot = filter(loadF(2, SCRATCH_ROT), targetRot, 0.1f * touchCut);
     storeF(2, SCRATCH_ROT, drawRot);
 

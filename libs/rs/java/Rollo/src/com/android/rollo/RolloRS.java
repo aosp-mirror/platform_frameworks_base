@@ -264,20 +264,6 @@ public class RolloRS {
             mLabels[27] = mLabels[8];
             mLabels[28] = mLabels[9];
 
-/*
-            mIcons[19] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.solitaire, ie8888, true);
-            mIcons[20] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.sudoku, ie8888, true);
-            mIcons[21] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.taptaprevenge, ie8888, true);
-            mIcons[22] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.tetris, ie8888, true);
-            mIcons[23] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.tictactoe, ie8888, true);
-            mIcons[24] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.tweetie, ie8888, true);
-            mIcons[25] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.urbanspoon, ie8888, true);
-            mIcons[26] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.waterslide_extreme, ie8888, true);
-            mIcons[27] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.weather_channel, ie8888, true);
-            mIcons[28] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.zippo, ie8888, true);
-*/
-
-
             for(int ct=0; ct < mIcons.length; ct++) {
                 mIcons[ct].uploadToTexture(0);
                 mLabels[ct].uploadToTexture(0);

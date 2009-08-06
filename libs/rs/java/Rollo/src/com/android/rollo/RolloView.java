@@ -187,6 +187,8 @@ public class RolloView extends RSSurfaceView {
                 mFlingY = ny;
             } else {
                 mFlingMode = false;
+                mColumn = (float)(java.lang.Math.floor(mColumn * 0.25f + 0.3f) * 4.f) + 1.f;
+                setColumn(true);
             }
         }
 
