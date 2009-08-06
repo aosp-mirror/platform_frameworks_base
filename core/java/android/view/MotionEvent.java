@@ -185,7 +185,12 @@ public final class MotionEvent implements Parcelable {
      */
     static public final int NUM_SAMPLE_DATA = 4;
     
-    static private final int BASE_AVAIL_POINTERS = 2;
+    /**
+     * Number of possible pointers.
+     * @hide
+     */
+    static public final int BASE_AVAIL_POINTERS = 5;
+    
     static private final int BASE_AVAIL_SAMPLES = 8;
     
     static private final int MAX_RECYCLED = 10;
@@ -290,8 +295,19 @@ public final class MotionEvent implements Parcelable {
         ev.mNumPointers = pointers;
         ev.mNumSamples = 1;
         
-        System.arraycopy(inPointerIds, 0, ev.mPointerIdentifiers, 0, pointers);
-        System.arraycopy(inData, 0, ev.mDataSamples, 0, pointers * NUM_SAMPLE_DATA);
+        int[] pointerIdentifiers = ev.mPointerIdentifiers;
+        if (pointerIdentifiers.length < pointers) {
+            ev.mPointerIdentifiers = pointerIdentifiers = new int[pointers];
+        }
+        System.arraycopy(inPointerIds, 0, pointerIdentifiers, 0, pointers);
+        
+        final int ND = pointers * NUM_SAMPLE_DATA;
+        float[] dataSamples = ev.mDataSamples;
+        if (dataSamples.length < ND) {
+            ev.mDataSamples = dataSamples = new float[ND];
+        }
+        System.arraycopy(inData, 0, dataSamples, 0, ND);
+        
         ev.mTimeSamples[0] = eventTime;
 
         if (DEBUG_POINTERS) {
