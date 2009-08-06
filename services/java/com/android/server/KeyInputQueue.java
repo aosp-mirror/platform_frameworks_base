@@ -194,10 +194,10 @@ public abstract class KeyInputQueue {
         }
     }
 
-    private void readVirtualKeys() {
+    private void readVirtualKeys(String deviceName) {
         try {
             FileInputStream fis = new FileInputStream(
-                    "/sys/board_properties/virtualkeys.synaptics-rmi-touchscreen");
+                    "/sys/board_properties/virtualkeys." + deviceName);
             InputStreamReader isr = new InputStreamReader(fis);
             BufferedReader br = new BufferedReader(isr);
             String str = br.readLine();
@@ -276,7 +276,6 @@ public abstract class KeyInputQueue {
 
         mHapticFeedbackCallback = hapticFeedbackCallback;
         
-        readVirtualKeys();
         readExcludedDevices();
         
         PowerManager pm = (PowerManager)context.getSystemService(
@@ -393,6 +392,9 @@ public abstract class KeyInputQueue {
                         synchronized (mFirst) {
                             di = newInputDevice(ev.deviceId);
                             mDevices.put(ev.deviceId, di);
+                            if ((di.classes & RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
+                                readVirtualKeys(di.name);
+                            }
                             configChanged = true;
                         }
                     } else if (ev.type == RawInputEvent.EV_DEVICE_REMOVED) {
