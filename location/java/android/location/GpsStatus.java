@@ -115,6 +115,15 @@ public final class GpsStatus {
         void onGpsStatusChanged(int event);
     }
 
+    /**
+     * Used for receiving NMEA data from the GPS.
+     *
+     * {@hide}
+     */
+    public interface NmeaListener {
+        void onNmeaReceived(long timestamp, String nmea);
+    }
+
     GpsStatus() {
         for (int i = 0; i < mSatellites.length; i++) {
             mSatellites[i] = new GpsSatellite(i + 1);
