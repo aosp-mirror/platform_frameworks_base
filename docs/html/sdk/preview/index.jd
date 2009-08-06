@@ -80,7 +80,7 @@ attribute looks like this: </p>
 
 <p>If you are developing in Eclipse with ADT and want to get started with Android 1.6 Early Look SDK, you <em>must</em> download and install the correct version of the ADT Plugin (0.9.2 or higher). </p>
 
-<p>The new version of ADT is downloadable from the usual remote update site or is separately downloadable as a .zip archive. For instructions on how to download the plugin, please see <a href="upgrading.html#updateAdt">Upgrading Your Eclipse Plugin</a>. </p>
+<p>The new version of ADT is downloadable from the usual remote update site or is separately downloadable as a .zip archive. For instructions on how to download the plugin, please see <a href="upgrading.html#UpdateAdt">Upgrading Your Eclipse Plugin</a>. </p>
 
 <h3>Android AVD Manager</h3>
 

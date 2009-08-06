@@ -29,7 +29,7 @@ sdk.date=August 2009
 development environment.</p>
 
 <p>If you encounter any problems during installation, see the 
-<a href="#installnotes">Installation Notes</a> at the bottom of
+<a href="#InstallationNotes">Installation Notes</a> at the bottom of
 this page.</p>
 
 <h4 style="margin-top">Upgrading?</h4>
@@ -101,7 +101,7 @@ should remember to update your <code>PATH</code> settings to point to the new lo
 the next section describes how to install the Android Development Tools (ADT) plugin and set up Eclipse. 
 If you choose not to use Eclipse, you can 
 develop Android applications in an IDE of your choice and then compile, debug and deploy using
-the tools included in the SDK (skip to <a href="#next">Next Steps</a>).</p>
+the tools included in the SDK (skip to <a href="#NextSteps">Next Steps</a>).</p>
 
 
 <h2 id="InstallingADT">Installing the ADT Plugin for Eclipse</h2>
@@ -120,7 +120,7 @@ approach to Android development and is the fastest way to get started.
 you do not need to install Eclipse or ADT, instead, you can directly
 use the SDK tools to build and debug your application&mdash;skip to <a href="#NextSteps">Next Steps</a>.)</p>
 
-<p>Once you have Eclipse installed, as described in <a href="#setup">Preparing for 
+<p>Once you have Eclipse installed, as described in <a href="#Preparing">Preparing for 
 Installation</a>, follow the steps below to
 download the ADT plugin and install it in your respective Eclipse
 environment. </p>
@@ -193,7 +193,7 @@ locate your downloaded SDK directory. </li>
 
 <p>Done! If you haven't encountered any problems, then you're ready to
 begin developing Android applications. See the 
-<a href="#next">Next Steps</a> section for suggestions on how to start. </p>
+<a href="#NextSteps">Next Steps</a> section for suggestions on how to start. </p>
 
 
 <h3 id="Troubleshooting">Troubleshooting ADT Installation</h3>
