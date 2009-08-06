@@ -2,7 +2,7 @@
 
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
-LOCAL_SRC_FILES:= app-linux.c demo.c.arm
+LOCAL_SRC_FILES:= app-linux.cpp demo.c.arm
 LOCAL_SHARED_LIBRARIES := libEGL libGLESv1_CM libui
 LOCAL_MODULE:= angeles
 LOCAL_MODULE_TAGS := optional

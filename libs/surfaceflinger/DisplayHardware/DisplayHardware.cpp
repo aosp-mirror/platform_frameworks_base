@@ -26,6 +26,7 @@
 
 #include <ui/PixelFormat.h>
 #include <ui/FramebufferNativeWindow.h>
+#include <ui/EGLUtils.h>
 
 #include <GLES/gl.h>
 #include <EGL/egl.h>
@@ -144,32 +145,11 @@ void DisplayHardware::init(uint32_t dpy)
     eglInitialize(display, NULL, NULL);
     eglGetConfigs(display, NULL, 0, &numConfigs);
 
-    // Get all the "potential match" configs...
-    EGLConfig* const configs = new EGLConfig[numConfigs];
-    eglChooseConfig(display, attribs, configs, numConfigs, &n);
-    LOGE_IF(n<=0, "no EGLConfig available!");
-    EGLConfig config = configs[0];
-    if (n > 1) {
-        // if there is more than one candidate, go through the list
-        // and pick one that matches our framebuffer format
-        int fbSzA = fbFormatInfo.getSize(PixelFormatInfo::INDEX_ALPHA);
-        int fbSzR = fbFormatInfo.getSize(PixelFormatInfo::INDEX_RED);
-        int fbSzG = fbFormatInfo.getSize(PixelFormatInfo::INDEX_GREEN);
-        int fbSzB = fbFormatInfo.getSize(PixelFormatInfo::INDEX_BLUE); 
-        for (int i=0 ; i<n ; i++) {
-            EGLint r,g,b,a;
-            eglGetConfigAttrib(display, configs[i], EGL_RED_SIZE,   &r);
-            eglGetConfigAttrib(display, configs[i], EGL_GREEN_SIZE, &g);
-            eglGetConfigAttrib(display, configs[i], EGL_BLUE_SIZE,  &b);
-            eglGetConfigAttrib(display, configs[i], EGL_ALPHA_SIZE, &a);
-            if (fbSzA == a && fbSzR == r && fbSzG == g && fbSzB  == b) {
-                config = configs[i];
-                break;
-            }
-        }
-    }
-    delete [] configs;
-
+    EGLConfig config;
+    status_t err = EGLUtils::selectConfigForPixelFormat(
+            display, attribs, fbDev->format, &config);
+    LOGE_IF(err, "couldn't find an EGLConfig matching the screen format");
+    
     /*
      * Gather EGL extensions
      */

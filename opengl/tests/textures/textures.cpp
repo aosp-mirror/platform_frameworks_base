@@ -22,59 +22,39 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+#include <ui/FramebufferNativeWindow.h>
+#include <ui/EGLUtils.h>
+
+using namespace android;
+
 int main(int argc, char** argv)
 {
-    EGLint s_configAttribs[] = {
-         EGL_RED_SIZE,       5,
-         EGL_GREEN_SIZE,     6,
-         EGL_BLUE_SIZE,      5,
+    EGLint configAttribs[] = {
+         EGL_DEPTH_SIZE, 0,
          EGL_NONE
      };
      
-     EGLint numConfigs = -1, n=0;
      EGLint majorVersion;
      EGLint minorVersion;
-     EGLConfig config;
      EGLContext context;
+     EGLConfig config;
      EGLSurface surface;
      EGLint w, h;
-     
      EGLDisplay dpy;
 
      dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
      eglInitialize(dpy, &majorVersion, &minorVersion);
+          
+     EGLNativeWindowType window = android_createDisplaySurface();
      
-     // Get all the "potential match" configs...
-     eglGetConfigs(dpy, NULL, 0, &numConfigs);
-     EGLConfig* const configs = malloc(sizeof(EGLConfig)*numConfigs);
-     eglChooseConfig(dpy, s_configAttribs, configs, numConfigs, &n);
-     config = configs[0];
-     if (n > 1) {
-         // if there is more than one candidate, go through the list
-         // and pick one that matches our framebuffer format
-         int fbSzA = 0; // should not hardcode
-         int fbSzR = 5; // should not hardcode
-         int fbSzG = 6; // should not hardcode
-         int fbSzB = 5; // should not hardcode
-         int i;
-         for (i=0 ; i<n ; i++) {
-             EGLint r,g,b,a;
-             eglGetConfigAttrib(dpy, configs[i], EGL_RED_SIZE,   &r);
-             eglGetConfigAttrib(dpy, configs[i], EGL_GREEN_SIZE, &g);
-             eglGetConfigAttrib(dpy, configs[i], EGL_BLUE_SIZE,  &b);
-             eglGetConfigAttrib(dpy, configs[i], EGL_ALPHA_SIZE, &a);
-             if (fbSzA == a && fbSzR == r && fbSzG == g && fbSzB  == b) {
-                 config = configs[i];
-                 break;
-             }
-         }
+     status_t err = EGLUtils::selectConfigForNativeWindow(
+             dpy, configAttribs, window, &config);
+     if (err) {
+         fprintf(stderr, "couldn't find an EGLConfig matching the screen format\n");
+         return 0;
      }
-     free(configs);
-     
-     
-     
-     surface = eglCreateWindowSurface(dpy, config,
-             android_createDisplaySurface(), NULL);
+
+     surface = eglCreateWindowSurface(dpy, config, window, NULL);
      context = eglCreateContext(dpy, config, NULL, NULL);
      eglMakeCurrent(dpy, surface, surface, context);   
      eglQuerySurface(dpy, surface, EGL_WIDTH, &w);

@@ -63,7 +63,8 @@ struct android_native_base_t
 /* attributes queriable with query() */
 enum {
     NATIVE_WINDOW_WIDTH     = 0,
-    NATIVE_WINDOW_HEIGHT    = 1
+    NATIVE_WINDOW_HEIGHT    = 1,
+    NATIVE_WINDOW_FORMAT    = 2,
 };
 
 struct android_native_window_t 
