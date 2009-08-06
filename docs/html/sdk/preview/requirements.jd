@@ -1,4 +1,6 @@
 page.title=System Requirements
+sdk.version=1.6
+sdk.preview=true
 @jd:body
 
 <p>The sections below describe the system and software requirements for developing 
