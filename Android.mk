@@ -83,8 +83,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IStatusBar.aidl \
 	core/java/android/app/IThumbnailReceiver.aidl \
 	core/java/android/app/ITransientNotification.aidl \
-	core/java/android/app/IWallpaperService.aidl \
-	core/java/android/app/IWallpaperServiceCallback.aidl \
+	core/java/android/app/IWallpaperManager.aidl \
+	core/java/android/app/IWallpaperManagerCallback.aidl \
 	core/java/android/backup/IBackupManager.aidl \
 	core/java/android/backup/IRestoreObserver.aidl \
 	core/java/android/backup/IRestoreSession.aidl \
@@ -114,6 +114,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IParentalControlCallback.aidl \
 	core/java/android/os/IPermissionController.aidl \
 	core/java/android/os/IPowerManager.aidl \
+    core/java/android/service/wallpaper/IWallpaperService.aidl \
 	core/java/android/text/IClipboard.aidl \
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
 	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
