@@ -185,6 +185,7 @@ public class WebSettings {
     private boolean         mSupportZoom = true;
     private boolean         mBuiltInZoomControls = false;
     private boolean         mAllowFileAccess = true;
+    private boolean         mLoadWithOverviewMode = true;
 
     // Class to handle messages before WebCore is ready.
     private class EventHandler {
@@ -424,6 +425,22 @@ public class WebSettings {
      */
     public boolean getAllowFileAccess() {
         return mAllowFileAccess;
+    }
+
+    /**
+     * Set whether the WebView loads a page with overview mode.
+     * @hide Pending API council approval
+     */
+    public void setLoadWithOverviewMode(boolean overview) {
+        mLoadWithOverviewMode = overview;
+    }
+
+    /**
+     * Returns true if this WebView loads page with overview mode
+     * @hide Pending API council approval
+     */
+    public boolean getLoadWithOverviewMode() {
+        return mLoadWithOverviewMode;
     }
 
     /**

@@ -105,6 +105,10 @@ final class WebViewCore {
     private int mWebkitScrollX = 0;
     private int mWebkitScrollY = 0;
 
+    // If the site doesn't use viewport meta tag to specify the viewport, use
+    // DEFAULT_VIEWPORT_WIDTH as default viewport width
+    static final int DEFAULT_VIEWPORT_WIDTH = 800;
+
     // The thread name used to identify the WebCore thread and for use in
     // debugging other classes that require operation within the WebCore thread.
     /* package */ static final String THREAD_NAME = "WebViewCoreThread";
@@ -1419,7 +1423,7 @@ final class WebViewCore {
             if (mViewportWidth == -1) {
                 if (mSettings.getLayoutAlgorithm() ==
                         WebSettings.LayoutAlgorithm.NORMAL) {
-                    width = WebView.ZOOM_OUT_WIDTH;
+                    width = DEFAULT_VIEWPORT_WIDTH;
                 } else {
                     /*
                      * if a page's minimum preferred width is wider than the
@@ -1433,7 +1437,8 @@ final class WebViewCore {
                      * In the worse case, the native width will be adjusted when
                      * next zoom or screen orientation change happens.
                      */
-                    width = Math.max(w, nativeGetContentMinPrefWidth());
+                    width = Math.max(w, Math.max(DEFAULT_VIEWPORT_WIDTH,
+                            nativeGetContentMinPrefWidth()));
                 }
             } else {
                 width = Math.max(w, mViewportWidth);
@@ -1530,7 +1535,8 @@ final class WebViewCore {
             // layout.
             draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
             if (WebView.ENABLE_DOUBLETAP_ZOOM && mSettings.getUseWideViewPort()) {
-                draw.mMinPrefWidth = nativeGetContentMinPrefWidth();
+                draw.mMinPrefWidth = Math.max(DEFAULT_VIEWPORT_WIDTH,
+                        nativeGetContentMinPrefWidth());
             }
             if (mRestoreState != null) {
                 draw.mRestoreState = mRestoreState;
