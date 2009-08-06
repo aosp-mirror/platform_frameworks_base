@@ -52,6 +52,11 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
+#include <ui/FramebufferNativeWindow.h>
+#include <ui/EGLUtils.h>
+
+using namespace android;
+
 #include "app.h"
 
 
@@ -115,76 +120,32 @@ static void checkEGLErrors()
 
 static int initGraphics()
 {
-    EGLint s_configAttribs[] = {
-         EGL_RED_SIZE,       5,
-         EGL_GREEN_SIZE,     6,
-         EGL_BLUE_SIZE,      5,
- #if 1
-         EGL_DEPTH_SIZE,     16,
-         EGL_STENCIL_SIZE,   0,
- #else
-         EGL_ALPHA_SIZE,     EGL_DONT_CARE,
-         EGL_DEPTH_SIZE,     EGL_DONT_CARE,
-         EGL_STENCIL_SIZE,   EGL_DONT_CARE,
-         EGL_SURFACE_TYPE,   EGL_DONT_CARE,
- #endif
+    EGLint configAttribs[] = {
+         EGL_DEPTH_SIZE, 16,
          EGL_NONE
      };
      
-     EGLint numConfigs = -1;
-     EGLint n = 0;
      EGLint majorVersion;
      EGLint minorVersion;
-     EGLConfig config;
      EGLContext context;
+     EGLConfig config;
      EGLSurface surface;
-     
+     EGLint w, h;
      EGLDisplay dpy;
 
      dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-     egl_error("eglGetDisplay");
-     fprintf(stderr,"dpy = 0x%08x\n", (unsigned) dpy);
-     
      eglInitialize(dpy, &majorVersion, &minorVersion);
-     egl_error("eglInitialize");
-
-     eglGetConfigs(dpy, NULL, 0, &numConfigs);
-
-     // Get all the "potential match" configs...
-     EGLConfig* const configs = malloc(sizeof(EGLConfig)*numConfigs);
-     eglChooseConfig(dpy, s_configAttribs, configs, numConfigs, &n);
-     config = configs[0];
-     if (n > 1) {
-         // if there is more than one candidate, go through the list
-         // and pick one that matches our framebuffer format
-         int fbSzA = 0; // should not hardcode
-         int fbSzR = 5; // should not hardcode
-         int fbSzG = 6; // should not hardcode
-         int fbSzB = 5; // should not hardcode
-         int i;
-         for (i=0 ; i<n ; i++) {
-             EGLint r,g,b,a;
-             eglGetConfigAttrib(dpy, configs[i], EGL_RED_SIZE,   &r);
-             eglGetConfigAttrib(dpy, configs[i], EGL_GREEN_SIZE, &g);
-             eglGetConfigAttrib(dpy, configs[i], EGL_BLUE_SIZE,  &b);
-             eglGetConfigAttrib(dpy, configs[i], EGL_ALPHA_SIZE, &a);
-             if (fbSzA == a && fbSzR == r && fbSzG == g && fbSzB  == b) {
-                 config = configs[i];
-                 break;
-             }
-         }
+          
+     EGLNativeWindowType window = android_createDisplaySurface();
+     
+     status_t err = EGLUtils::selectConfigForNativeWindow(
+             dpy, configAttribs, window, &config);
+     if (err) {
+         fprintf(stderr, "couldn't find an EGLConfig matching the screen format\n");
+         return 0;
      }
-     free(configs);
-     
-     
-     //eglGetConfigs(dpy, NULL, 0, &numConfigs);
-     //egl_error("eglGetConfigs");
-     //fprintf(stderr,"num configs %d\n", numConfigs);     
-     //eglChooseConfig(dpy, s_configAttribs, &config, 1, &numConfigs);
-     //egl_error("eglChooseConfig");
 
-     surface = eglCreateWindowSurface(dpy, config,
-             android_createDisplaySurface(), NULL);
+     surface = eglCreateWindowSurface(dpy, config, window, NULL);
      egl_error("eglCreateWindowSurface");
 
      fprintf(stderr,"surface = %p\n", surface);

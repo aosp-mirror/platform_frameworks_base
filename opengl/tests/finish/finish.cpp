@@ -24,39 +24,41 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+#include <utils/Timers.h>
 
-long long systemTime()
-{
-    struct timespec t;
-    t.tv_sec = t.tv_nsec = 0;
-    clock_gettime(CLOCK_MONOTONIC, &t);
-    return (long long)(t.tv_sec)*1000000000LL + t.tv_nsec;
-}
+#include <ui/FramebufferNativeWindow.h>
+#include <ui/EGLUtils.h>
+
+using namespace android;
 
 int main(int argc, char** argv)
 {
-    EGLint s_configAttribs[] = {
-         EGL_RED_SIZE,       5,
-         EGL_GREEN_SIZE,     6,
-         EGL_BLUE_SIZE,      5,
+    EGLint configAttribs[] = {
+         EGL_DEPTH_SIZE, 0,
          EGL_NONE
      };
      
-     EGLint numConfigs = -1;
      EGLint majorVersion;
      EGLint minorVersion;
-     EGLConfig config;
      EGLContext context;
+     EGLConfig config;
      EGLSurface surface;
      EGLint w, h;
-     
      EGLDisplay dpy;
 
      dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
      eglInitialize(dpy, &majorVersion, &minorVersion);
-     eglChooseConfig(dpy, s_configAttribs, &config, 1, &numConfigs);
-     surface = eglCreateWindowSurface(dpy, config, 
-             android_createDisplaySurface(), NULL);
+          
+     EGLNativeWindowType window = android_createDisplaySurface();
+     
+     status_t err = EGLUtils::selectConfigForNativeWindow(
+             dpy, configAttribs, window, &config);
+     if (err) {
+         fprintf(stderr, "couldn't find an EGLConfig matching the screen format\n");
+         return 0;
+     }
+
+     surface = eglCreateWindowSurface(dpy, config, window, NULL);
      context = eglCreateContext(dpy, config, NULL, NULL);
      eglMakeCurrent(dpy, surface, surface, context);   
      eglQuerySurface(dpy, surface, EGL_WIDTH, &w);
@@ -75,13 +77,13 @@ int main(int argc, char** argv)
      long long now, t;
      int i;
 
-     char* texels = malloc(512*512*2);
+     char* texels = (char*)malloc(512*512*2);
      memset(texels,0xFF,512*512*2);
      
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
              512, 512, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, texels);
 
-     char* dst = malloc(320*480*2);
+     char* dst = (char*)malloc(320*480*2);
      memset(dst, 0, 320*480*2);
      printf("307200 bytes memcpy\n");
      for (i=0 ; i<4 ; i++) {

@@ -5,6 +5,11 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+#include <ui/FramebufferNativeWindow.h>
+#include <ui/EGLUtils.h>
+
+using namespace android;
+
 int main(int argc, char** argv)
 {
     if (argc!=2 && argc!=3) {
@@ -34,12 +39,14 @@ int main(int argc, char** argv)
 
      dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
      eglInitialize(dpy, &majorVersion, &minorVersion);
-     eglChooseConfig(dpy, s_configAttribs, &config, 1, &numConfigs);
      if (!usePbuffer) {
-         surface = eglCreateWindowSurface(dpy, config,
-                 android_createDisplaySurface(), NULL);
+         EGLNativeWindowType window = android_createDisplaySurface();
+         surface = eglCreateWindowSurface(dpy, config, window, NULL);
+         EGLUtils::selectConfigForNativeWindow(
+                 dpy, s_configAttribs, window, &config);
      } else {
          printf("using pbuffer\n");
+         eglChooseConfig(dpy, s_configAttribs, &config, 1, &numConfigs);
          EGLint attribs[] = { EGL_WIDTH, 320, EGL_HEIGHT, 480, EGL_NONE };
          surface = eglCreatePbufferSurface(dpy, config, attribs);
          if (surface == EGL_NO_SURFACE) {
