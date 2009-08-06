@@ -73,7 +73,7 @@ then you need to update it to point to the new SDK. For example, for a
 <h2 id="UpdateAdt">Update Your Eclipse ADT Plugin</h2>
 
 <p>If you don't use Eclipse for development,
-skip to <a href="#updateYourProjects">Update Your Projects</a>.</p>
+skip to <a href="#RunYourApps">Run Your Applications</a>.</p>
 
 <!--
 <p><em>If you installed ADT 0.9.2 with the Android 1.6 Early Look SDK, there have been
