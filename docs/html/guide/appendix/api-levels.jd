@@ -44,15 +44,17 @@ When you install a new SDK, be sure to read the SDK Contents on the install page
 Level for each platform available in the SDK. Also see the comparison of 
 <a href="#VersionsVsApiLevels">Platform Versions vs. API Levels</a>, below.</p>
 
-<p class="note"><strong>Note:</strong> During "preview" SDK releases, there may not yet be an official platform version
-or API Level number specified. In these cases, a string value equal to the
-current codename will be a valid value for <code>minSdkVersion</code>, instead of an integer. This codename value
-will only be valid while using the preview SDK. When the final SDK is released, you must update your manifest to use
+<p class="note"><strong>Note:</strong> During an "Early Look" SDK release, the APIs may not be final, so the
+API Level number cannot be specified. In this case, a string value matching the
+platform codename must be used as the value for <code>minSdkVersion</code>. This codename value
+will only be valid while using the Early Look SDK with the emulator. An application using this API Level
+can never be installed on an Android device. When the final SDK is released, you must update your manifest to use
 the official API Level integer.</p>
 
 <h2 id="VersionsVsApiLevels">Platform Versions vs. API Levels</h2>
 
-<p>The following table specifies the <em>maximum</em> API Level supported by each version of the Android platform.</p>
+<p>The following table specifies the <em>maximum</em> API Level supported by each version of the Android platform.
+(Every platform is backward-compatible to API Level 1.)</p>
 
 <table>
   <tr><th>Platform Version</th><th>API Level</th></tr>
@@ -72,7 +74,7 @@ package, class, and member. You can see this information on the right side of ea
 This means that the reference assumes you're using the latest API Level and will show you everything available
 with it. If you're developing applications for a version of Android that does not support the latest API Level, 
 then you can filter the reference to reveal only the packages, classes, and members available for that API Level.
-When viewing the reference, use the "Filter by API Level" selection box (below the search bar) to pick the API Level
+When viewing the reference, use the "Filter by API Level" selection box (below the search box) to pick the API Level
 you'd like to view.</p>
 
 
