@@ -9179,9 +9179,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                       + " #" + i + ":");
                 r.dump(pw, prefix + "  ");
             } else if (inclOomAdj) {
-                pw.println(String.format("%s%s #%2d: adj=%3d/%d %s",
+                pw.println(String.format("%s%s #%2d: adj=%4d/%d %s (%s)",
                         prefix, (r.persistent ? persistentLabel : normalLabel),
-                        i, r.setAdj, r.setSchedGroup, r.toString()));
+                        i, r.setAdj, r.setSchedGroup, r.toString(), r.adjType));
+                if (r.adjSource != null || r.adjTarget != null) {
+                    pw.println(prefix + "          " + r.adjTarget
+                            + " used by " + r.adjSource);
+                }
             } else {
                 pw.println(String.format("%s%s #%2d: %s",
                         prefix, (r.persistent ? persistentLabel : normalLabel),
@@ -9345,6 +9349,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
+        // Make sure we have no more records on the stopping list.
+        int i = mStoppingServices.size();
+        while (i > 0) {
+            i--;
+            ServiceRecord sr = mStoppingServices.get(i);
+            if (sr.app == app) {
+                mStoppingServices.remove(i);
+            }
+        }
+        
         app.executingServices.clear();
     }
 
@@ -9474,6 +9488,24 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             app.conProviders.clear();
         }
 
+        // At this point there may be remaining entries in mLaunchingProviders
+        // where we were the only one waiting, so they are no longer of use.
+        // Look for these and clean up if found.
+        // XXX Commented out for now.  Trying to figure out a way to reproduce
+        // the actual situation to identify what is actually going on.
+        if (false) {
+            for (int i=0; i<NL; i++) {
+                ContentProviderRecord cpr = (ContentProviderRecord)
+                        mLaunchingProviders.get(i);
+                if (cpr.clients.size() <= 0 && cpr.externals <= 0) {
+                    synchronized (cpr) {
+                        cpr.launchingApp = null;
+                        cpr.notifyAll();
+                    }
+                }
+            }
+        }
+        
         skipCurrentReceiverLocked(app);
 
         // Unregister any receivers.
@@ -9922,6 +9954,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (DEBUG_SERVICE) Log.v(TAG, "Bringing up service " + r.name
                 + " " + r.intent);
 
+        // We are now bringing the service up, so no longer in the
+        // restarting state.
+        mRestartingServices.remove(r);
+        
         final String appName = r.processName;
         ProcessRecord app = getProcessRecordLocked(appName, r.appInfo.uid);
         if (app != null && app.thread != null) {
@@ -12224,33 +12260,60 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             return (app.curAdj=EMPTY_APP_ADJ);
         }
 
-        app.isForeground = false;
+        if (app.maxAdj <= FOREGROUND_APP_ADJ) {
+            // The max adjustment doesn't allow this app to be anything
+            // below foreground, so it is not worth doing work for it.
+            app.adjType = "fixed";
+            app.adjSeq = mAdjSeq;
+            app.curRawAdj = app.maxAdj;
+            app.curSchedGroup = Process.THREAD_GROUP_DEFAULT;
+            return (app.curAdj=app.maxAdj);
+       }
+        
+        app.adjSource = null;
+        app.adjTarget = null;
 
         // Determine the importance of the process, starting with most
         // important to least, and assign an appropriate OOM adjustment.
         int adj;
         int N;
-        if (app == TOP_APP || app.instrumentationClass != null
-                || app.persistentActivities > 0) {
+        if (app == TOP_APP) {
             // The last app on the list is the foreground app.
             adj = FOREGROUND_APP_ADJ;
-            app.isForeground = true;
+            app.adjType = "top";
+        } else if (app.instrumentationClass != null) {
+            // Don't want to kill running instrumentation.
+            adj = FOREGROUND_APP_ADJ;
+            app.adjType = "instr";
+        } else if (app.persistentActivities > 0) {
+            // Special persistent activities...  shouldn't be used these days.
+            adj = FOREGROUND_APP_ADJ;
+            app.adjType = "pers";
         } else if (app.curReceiver != null ||
                 (mPendingBroadcast != null && mPendingBroadcast.curApp == app)) {
             // An app that is currently receiving a broadcast also
             // counts as being in the foreground.
             adj = FOREGROUND_APP_ADJ;
+            app.adjType = "broadcast";
         } else if (app.executingServices.size() > 0) {
             // An app that is currently executing a service callback also
             // counts as being in the foreground.
             adj = FOREGROUND_APP_ADJ;
-        } else if (app.foregroundServices || app.forcingToForeground != null) {
+            app.adjType = "exec-service";
+        } else if (app.foregroundServices) {
             // The user is aware of this app, so make it visible.
             adj = VISIBLE_APP_ADJ;
+            app.adjType = "foreground-service";
+        } else if (app.forcingToForeground != null) {
+            // The user is aware of this app, so make it visible.
+            adj = VISIBLE_APP_ADJ;
+            app.adjType = "force-foreground";
+            app.adjSource = app.forcingToForeground;
         } else if (app == mHomeProcess) {
             // This process is hosting what we currently consider to be the
             // home app, so we don't want to let it go into the background.
             adj = HOME_APP_ADJ;
+            app.adjType = "home";
         } else if ((N=app.activities.size()) != 0) {
             // This app is in the background with paused activities.
             adj = hiddenAdj;
@@ -12258,12 +12321,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (((HistoryRecord)app.activities.get(j)).visible) {
                     // This app has a visible activity!
                     adj = VISIBLE_APP_ADJ;
+                    app.adjType = "visible";
                     break;
                 }
             }
         } else {
             // A very not-needed process.
             adj = EMPTY_APP_ADJ;
+            app.adjType = "empty";
         }
 
         // By default, we use the computed adjustment.  It may be changed if
@@ -12279,15 +12344,19 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (adj > BACKUP_APP_ADJ) {
                 if (DEBUG_BACKUP) Log.v(TAG, "oom BACKUP_APP_ADJ for " + app);
                 adj = BACKUP_APP_ADJ;
+                app.adjType = "backup";
             }
         }
 
         if (app.services.size() != 0 && adj > FOREGROUND_APP_ADJ) {
             // If this process has active services running in it, we would
             // like to avoid killing it unless it would prevent the current
-            // application from running.
+            // application from running.  By default we put the process in
+            // with the rest of the background processes; as we scan through
+            // its services we may bump it up from there.
             if (adj > hiddenAdj) {
                 adj = hiddenAdj;
+                app.adjType = "services";
             }
             final long now = SystemClock.uptimeMillis();
             // This process is more important if the top activity is
@@ -12302,12 +12371,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // of the background processes.
                         if (adj > SECONDARY_SERVER_ADJ) {
                             adj = SECONDARY_SERVER_ADJ;
-                        }
-                    } else {
-                        // This service has been inactive for too long, just
-                        // put it with the rest of the background processes.
-                        if (adj > hiddenAdj) {
-                            adj = hiddenAdj;
+                            app.adjType = "started-services";
                         }
                     }
                 }
@@ -12337,6 +12401,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             if (adj > clientAdj) {
                                 adj = clientAdj > VISIBLE_APP_ADJ
                                         ? clientAdj : VISIBLE_APP_ADJ;
+                                app.adjType = "service";
+                                app.adjSource = cr.binding.client;
+                                app.adjTarget = s.serviceInfo.name;
                             }
                         }
                         HistoryRecord a = cr.activity;
@@ -12347,6 +12414,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 (a.state == ActivityState.RESUMED
                                  || a.state == ActivityState.PAUSING)) {
                             adj = FOREGROUND_APP_ADJ;
+                            app.adjType = "service";
+                            app.adjSource = a;
+                            app.adjTarget = s.serviceInfo.name;
                         }
                     }
                 }
@@ -12360,6 +12430,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // CONTENT_PROVIDER_ADJ, which is just shy of EMPTY.
             if (adj > CONTENT_PROVIDER_ADJ) {
                 adj = CONTENT_PROVIDER_ADJ;
+                app.adjType = "pub-providers";
             }
             Iterator jt = app.pubProviders.values().iterator();
             while (jt.hasNext() && adj > FOREGROUND_APP_ADJ) {
@@ -12384,7 +12455,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             client, myHiddenAdj, TOP_APP);
                         if (adj > clientAdj) {
                             adj = clientAdj > FOREGROUND_APP_ADJ
-                            ? clientAdj : FOREGROUND_APP_ADJ;
+                                    ? clientAdj : FOREGROUND_APP_ADJ;
+                            app.adjType = "provider";
+                            app.adjSource = client;
+                            app.adjTarget = cpr.info.name;
                         }
                     }
                 }
@@ -12394,6 +12468,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (cpr.externals != 0) {
                     if (adj > FOREGROUND_APP_ADJ) {
                         adj = FOREGROUND_APP_ADJ;
+                        app.adjType = "provider";
+                        app.adjTarget = cpr.info.name;
                     }
                 }
             }
@@ -12408,7 +12484,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         app.curAdj = adj;
-        app.curSchedGroup = (adj > VISIBLE_APP_ADJ && !app.persistent)
+        app.curSchedGroup = adj > VISIBLE_APP_ADJ
                 ? Process.THREAD_GROUP_BG_NONINTERACTIVE
                 : Process.THREAD_GROUP_DEFAULT;
         
@@ -12509,28 +12585,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         int adj = computeOomAdjLocked(app, hiddenAdj, TOP_APP);
 
-        //Log.i(TAG, "Computed adj " + adj + " for app " + app.processName);
-        //Thread priority adjustment is disabled out to see
-        //how the kernel scheduler performs.
-        if (false) {
-            if (app.pid != 0 && app.isForeground != app.setIsForeground) {
-                app.setIsForeground = app.isForeground;
-                if (app.pid != MY_PID) {
-                    if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Log.v(TAG, "Setting priority of " + app
-                            + " to " + (app.isForeground
-                            ? Process.THREAD_PRIORITY_FOREGROUND
-                            : Process.THREAD_PRIORITY_DEFAULT));
-                    try {
-                        Process.setThreadPriority(app.pid, app.isForeground
-                                ? Process.THREAD_PRIORITY_FOREGROUND
-                                : Process.THREAD_PRIORITY_DEFAULT);
-                    } catch (RuntimeException e) {
-                        Log.w(TAG, "Exception trying to set priority of application thread "
-                                + app.pid, e);
-                    }
-                }
-            }
-        }
         if (app.pid != 0 && app.pid != MY_PID) {
             if (app.curRawAdj != app.setRawAdj) {
                 if (app.curRawAdj > FOREGROUND_APP_ADJ
