@@ -82,8 +82,8 @@ static inline int max(int v1, int v2)
     return (v1 > v2) ? v1 : v2;
 }
 
-EventHub::device_t::device_t(int32_t _id, const char* _path)
-    : id(_id), path(_path), classes(0)
+EventHub::device_t::device_t(int32_t _id, const char* _path, const char* name)
+    : id(_id), path(_path), name(name), classes(0)
     , keyBitmask(NULL), layoutMap(new KeyLayoutMap()), next(NULL) {
 }
 
@@ -593,7 +593,7 @@ int EventHub::open_device(const char *deviceName)
         version >> 16, (version >> 8) & 0xff, version & 0xff);
 #endif
 
-    device_t* device = new device_t(devid|mDevicesById[devid].seq, deviceName);
+    device_t* device = new device_t(devid|mDevicesById[devid].seq, deviceName, name);
     if (device == NULL) {
         LOGE("out of memory");
         return -1;
@@ -678,17 +678,14 @@ int EventHub::open_device(const char *deviceName)
 #endif
 
     if ((device->classes&CLASS_KEYBOARD) != 0) {
-        char devname[101];
-        char tmpfn[101];
+        char tmpfn[sizeof(name)];
         char keylayoutFilename[300];
 
         // a more descriptive name
-        ioctl(mFDs[mFDCount].fd, EVIOCGNAME(sizeof(devname)-1), devname);
-        devname[sizeof(devname)-1] = 0;
-        device->name = devname;
+        device->name = name;
 
         // replace all the spaces with underscores
-        strcpy(tmpfn, devname);
+        strcpy(tmpfn, name);
         for (char *p = strchr(tmpfn, ' '); p && *p; p = strchr(tmpfn, ' '))
             *p = '_';
 
@@ -721,7 +718,7 @@ int EventHub::open_device(const char *deviceName)
         }
         char propName[100];
         sprintf(propName, "hw.keyboards.%u.devname", publicID);
-        property_set(propName, devname);
+        property_set(propName, name);
 
         // 'Q' key support = cheap test of whether this is an alpha-capable kbd
         if (hasKeycode(device, kKeyCodeQ)) {
@@ -738,7 +735,7 @@ int EventHub::open_device(const char *deviceName)
         }
         
         LOGI("New keyboard: publicID=%d device->id=0x%x devname='%s' propName='%s' keylayout='%s'\n",
-                publicID, device->id, devname, propName, keylayoutFilename);
+                publicID, device->id, name, propName, keylayoutFilename);
     }
 
     LOGI("New device: path=%s name=%s id=0x%x (of 0x%x) index=%d fd=%d classes=0x%x\n",

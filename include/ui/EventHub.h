@@ -119,7 +119,7 @@ private:
         String8         keylayoutFilename;
         device_t*       next;
         
-        device_t(int32_t _id, const char* _path);
+        device_t(int32_t _id, const char* _path, const char* name);
         ~device_t();
     };
 
