@@ -1,4 +1,7 @@
+sdk.version=1.5
+sdk.rel.id=3
 page.title=System Requirements
+
 @jd:body
 
 <p>The sections below describe the system and software requirements for developing Android applications using the Android SDK tools included in Android <?cs var:sdk.version ?> SDK, Release <?cs var:sdk.rel.id ?>. </p>
