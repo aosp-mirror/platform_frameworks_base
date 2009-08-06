@@ -202,7 +202,12 @@ public class KeyboardView extends View implements View.OnClickListener {
     private boolean mAbortKey;
     private Key mInvalidatedKey;
     private Rect mClipRegion = new Rect(0, 0, 0, 0);
-    
+
+    // Variables for dealing with multiple pointers
+    private int mOldPointerCount = 1;
+    private float mOldPointerX;
+    private float mOldPointerY;
+
     private Drawable mKeyBackground;
 
     private static final int REPEAT_INTERVAL = 50; // ~20 keys per second
@@ -226,6 +231,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     private Rect mDirtyRect = new Rect();
     /** The keyboard bitmap for faster updates */
     private Bitmap mBuffer;
+    /** Notes if the keyboard just changed, so that we could possibly reallocate the mBuffer. */
+    private boolean mKeyboardChanged;
     /** The canvas for the above mutable keyboard bitmap */
     private Canvas mCanvas;
     
@@ -339,6 +346,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPaint.setAntiAlias(true);
         mPaint.setTextSize(keyTextSize);
         mPaint.setTextAlign(Align.CENTER);
+        mPaint.setAlpha(255);
 
         mPadding = new Rect(0, 0, 0, 0);
         mMiniKeyboardCache = new HashMap<Key,View>();
@@ -404,9 +412,8 @@ public class KeyboardView extends View implements View.OnClickListener {
         List<Key> keys = mKeyboard.getKeys();
         mKeys = keys.toArray(new Key[keys.size()]);
         requestLayout();
-        // Release buffer, just in case the new keyboard has a different size. 
-        // It will be reallocated on the next draw.
-        mBuffer = null;
+        // Hint to reallocate the buffer if the size changed
+        mKeyboardChanged = true;
         invalidateAllKeys();
         computeProximityThreshold(keyboard);
         mMiniKeyboardCache.clear(); // Not really necessary to do every time, but will free up views
@@ -566,17 +573,21 @@ public class KeyboardView extends View implements View.OnClickListener {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mDrawPending || mBuffer == null) {
+        if (mDrawPending || mBuffer == null || mKeyboardChanged) {
             onBufferDraw();
         }
         canvas.drawBitmap(mBuffer, 0, 0, null);
     }
-    
+
     private void onBufferDraw() {
-        if (mBuffer == null) {
-            mBuffer = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-            mCanvas = new Canvas(mBuffer);
+        if (mBuffer == null || mKeyboardChanged) {
+            if (mBuffer == null || mKeyboardChanged &&
+                    (mBuffer.getWidth() != getWidth() || mBuffer.getHeight() != getHeight())) {
+                mBuffer = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+                mCanvas = new Canvas(mBuffer);
+            }
             invalidateAllKeys();
+            mKeyboardChanged = false;
         }
         final Canvas canvas = mCanvas;
         canvas.clipRect(mDirtyRect, Op.REPLACE);
@@ -592,7 +603,6 @@ public class KeyboardView extends View implements View.OnClickListener {
         final Key[] keys = mKeys;
         final Key invalidKey = mInvalidatedKey;
 
-        paint.setAlpha(255);
         paint.setColor(mKeyTextColor);
         boolean drawSingleKey = false;
         if (invalidKey != null && canvas.getClipBounds(clipRegion)) {
@@ -613,7 +623,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             }
             int[] drawableState = key.getCurrentDrawableState();
             keyBackground.setState(drawableState);
-            
+
             // Switch the character to uppercase if shift is pressed
             String label = key.label == null? null : adjustCase(key.label).toString();
             
@@ -682,7 +692,6 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     private int getKeyIndices(int x, int y, int[] allKeys) {
         final Key[] keys = mKeys;
-        final boolean shifted = mKeyboard.isShifted();
         int primaryIndex = NOT_A_KEY;
         int closestKey = NOT_A_KEY;
         int closestKeyDist = mProximityThreshold + 1;
@@ -1013,15 +1022,48 @@ public class KeyboardView extends View implements View.OnClickListener {
         }
         return false;
     }
-    
+
     @Override
     public boolean onTouchEvent(MotionEvent me) {
+        // Convert multi-pointer up/down events to single up/down events to 
+        // deal with the typical multi-pointer behavior of two-thumb typing
+        int pointerCount = me.getPointerCount();
+        boolean result = false;
+        if (pointerCount != mOldPointerCount) {
+            long now = me.getEventTime();
+            if (pointerCount == 1) {
+                // Send a down event for the latest pointer
+                MotionEvent down = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN,
+                        me.getX(), me.getY(), me.getMetaState());
+                result = onModifiedTouchEvent(down);
+                down.recycle();
+            } else {
+                // Send an up event for the last pointer
+                MotionEvent up = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP,
+                        mOldPointerX, mOldPointerY, me.getMetaState());
+                result = onModifiedTouchEvent(up);
+                up.recycle();
+            }
+        } else {
+            if (pointerCount == 1) {
+                mOldPointerX = me.getX();
+                mOldPointerY = me.getY();
+                result = onModifiedTouchEvent(me);
+            } else {
+                // Don't do anything when 2 pointers are down and moving.
+                result = true;
+            }
+        }
+        mOldPointerCount = pointerCount;
+        return result;
+    }
+
+    private boolean onModifiedTouchEvent(MotionEvent me) {
         int touchX = (int) me.getX() - mPaddingLeft;
         int touchY = (int) me.getY() + mVerticalCorrection - mPaddingTop;
         int action = me.getAction();
         long eventTime = me.getEventTime();
         int keyIndex = getKeyIndices(touchX, touchY, null);
-        
         if (mGestureDetector.onTouchEvent(me)) {
             showPreview(NOT_A_KEY);
             mHandler.removeMessages(MSG_REPEAT);
