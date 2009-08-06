@@ -46,18 +46,23 @@ public class ProcessStats {
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
         PROC_SPACE_TERM,
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 9: minor faults
         PROC_SPACE_TERM,
-        PROC_SPACE_TERM,
-        PROC_SPACE_TERM,
+        PROC_SPACE_TERM|PROC_OUT_LONG,                  // 11: major faults
         PROC_SPACE_TERM,
         PROC_SPACE_TERM|PROC_OUT_LONG,                  // 13: utime
         PROC_SPACE_TERM|PROC_OUT_LONG                   // 14: stime
     };
 
+    static final int PROCESS_STAT_MINOR_FAULTS = 0;
+    static final int PROCESS_STAT_MAJOR_FAULTS = 1;
+    static final int PROCESS_STAT_UTIME = 2;
+    static final int PROCESS_STAT_STIME = 3;
+    
     /** Stores user time and system time in 100ths of a second. */
-    private final long[] mProcessStatsData = new long[2];
+    private final long[] mProcessStatsData = new long[4];
     /** Stores user time and system time in 100ths of a second. */
-    private final long[] mSinglePidStatsData = new long[2];
+    private final long[] mSinglePidStatsData = new long[4];
 
     private static final int[] PROCESS_FULL_STATS_FORMAT = new int[] {
         PROC_SPACE_TERM,
@@ -151,6 +156,11 @@ public class ProcessStats {
         public int rel_utime;
         public int rel_stime;
 
+        public long base_minfaults;
+        public long base_majfaults;
+        public int rel_minfaults;
+        public int rel_majfaults;
+        
         public boolean active;
         public boolean added;
         public boolean removed;
@@ -313,12 +323,16 @@ public class ProcessStats {
                     continue;
                 }
                 
-                final long utime = procStats[0];
-                final long stime = procStats[1];
+                final long minfaults = procStats[PROCESS_STAT_MINOR_FAULTS];
+                final long majfaults = procStats[PROCESS_STAT_MAJOR_FAULTS];
+                final long utime = procStats[PROCESS_STAT_UTIME];
+                final long stime = procStats[PROCESS_STAT_STIME];
 
                 if (utime == st.base_utime && stime == st.base_stime) {
                     st.rel_utime = 0;
                     st.rel_stime = 0;
+                    st.rel_minfaults = 0;
+                    st.rel_majfaults = 0;
                     if (st.active) {
                         st.active = false;
                     }
@@ -342,6 +356,10 @@ public class ProcessStats {
                 st.rel_stime = (int)(stime - st.base_stime);
                 st.base_utime = utime;
                 st.base_stime = stime;
+                st.rel_minfaults = (int)(minfaults - st.base_minfaults);
+                st.rel_majfaults = (int)(majfaults - st.base_majfaults);
+                st.base_minfaults = minfaults;
+                st.base_majfaults = majfaults;
                 //Log.i("Load", "Stats changed " + name + " pid=" + st.pid
                 //      + " name=" + st.name + " utime=" + utime
                 //      + " stime=" + stime);
@@ -364,11 +382,13 @@ public class ProcessStats {
                         procStats, null)) {
                     st.baseName = parentPid < 0
                             ? procStatsString[0] : Integer.toString(pid);
-                    st.base_utime = procStats[1];
-                    st.base_stime = procStats[2];
+                    st.base_utime = 0; //procStats[1];
+                    st.base_stime = 0; //procStats[2];
+                    st.base_minfaults = st.base_majfaults = 0;
                 } else {
                     st.baseName = "<unknown>";
                     st.base_utime = st.base_stime = 0;
+                    st.base_minfaults = st.base_majfaults = 0;
                 }
 
                 if (parentPid < 0) {
@@ -386,6 +406,8 @@ public class ProcessStats {
                 //Log.i("Load", "New process: " + st.pid + " " + st.name);
                 st.rel_utime = 0;
                 st.rel_stime = 0;
+                st.rel_minfaults = 0;
+                st.rel_majfaults = 0;
                 st.added = true;
                 if (!first) {
                     workingProcs.add(st);
@@ -396,6 +418,8 @@ public class ProcessStats {
             // This process has gone away!
             st.rel_utime = 0;
             st.rel_stime = 0;
+            st.rel_minfaults = 0;
+            st.rel_majfaults = 0;
             st.removed = true;
             workingProcs.add(st);
             allProcs.remove(curStatsIndex);
@@ -412,6 +436,8 @@ public class ProcessStats {
             final Stats st = allProcs.get(curStatsIndex);
             st.rel_utime = 0;
             st.rel_stime = 0;
+            st.rel_minfaults = 0;
+            st.rel_majfaults = 0;
             st.removed = true;
             workingProcs.add(st);
             allProcs.remove(curStatsIndex);
@@ -427,7 +453,8 @@ public class ProcessStats {
         final long[] statsData = mSinglePidStatsData;
         if (Process.readProcFile(statFile, PROCESS_STATS_FORMAT,
                 null, statsData, null)) {
-            long time = statsData[0] + statsData[1];
+            long time = statsData[PROCESS_STAT_UTIME]
+                    + statsData[PROCESS_STAT_STIME];
             return time;
         }
         return 0;
@@ -497,33 +524,35 @@ public class ProcessStats {
         pw.print(now-mCurrentSampleTime);
         pw.println("ms ago:");
         
-        final int totalTime = mRelUserTime + mRelSystemTime + mRelIoWaitTime + mRelIrqTime + 
-                mRelSoftIrqTime + mRelIdleTime;
+        final int totalTime = mRelUserTime + mRelSystemTime + mRelIoWaitTime
+                + mRelIrqTime + mRelSoftIrqTime + mRelIdleTime;
         
         int N = mWorkingProcs.size();
         for (int i=0; i<N; i++) {
             Stats st = mWorkingProcs.get(i);
             printProcessCPU(pw, st.added ? " +" : (st.removed ? " -": "  "),
-                    st.name, totalTime, st.rel_utime, st.rel_stime, 0, 0, 0);
+                    st.name, totalTime, st.rel_utime, st.rel_stime, 0, 0, 0,
+                    st.rel_minfaults, st.rel_majfaults);
             if (!st.removed && st.workingThreads != null) {
                 int M = st.workingThreads.size();
                 for (int j=0; j<M; j++) {
                     Stats tst = st.workingThreads.get(j);
                     printProcessCPU(pw,
                             tst.added ? "   +" : (tst.removed ? "   -": "    "),
-                            tst.name, totalTime, tst.rel_utime, tst.rel_stime, 0, 0, 0);
+                            tst.name, totalTime, tst.rel_utime, tst.rel_stime,
+                            0, 0, 0, 0, 0);
                 }
             }
         }
         
-        printProcessCPU(pw, "", "TOTAL", totalTime, mRelUserTime, mRelSystemTime, mRelIoWaitTime,
-                mRelIrqTime, mRelSoftIrqTime);
+        printProcessCPU(pw, "", "TOTAL", totalTime, mRelUserTime, mRelSystemTime,
+                mRelIoWaitTime, mRelIrqTime, mRelSoftIrqTime, 0, 0);
         
         return sw.toString();
     }
     
     private void printProcessCPU(PrintWriter pw, String prefix, String label, int totalTime, 
-            int user, int system, int iowait, int irq, int softIrq) {
+            int user, int system, int iowait, int irq, int softIrq, int minFaults, int majFaults) {
         pw.print(prefix);
         pw.print(label);
         pw.print(": ");
@@ -548,6 +577,19 @@ public class ProcessStats {
             pw.print(" + ");
             pw.print((softIrq*100)/totalTime);
             pw.print("% softirq");
+        }
+        if (minFaults > 0 || majFaults > 0) {
+            pw.print(" / faults:");
+            if (minFaults > 0) {
+                pw.print(" ");
+                pw.print(minFaults);
+                pw.print(" minor");
+            }
+            if (majFaults > 0) {
+                pw.print(" ");
+                pw.print(majFaults);
+                pw.print(" major");
+            }
         }
         pw.println();
     }
