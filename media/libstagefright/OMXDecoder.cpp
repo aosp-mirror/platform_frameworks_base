@@ -157,9 +157,6 @@ OMXDecoder *OMXDecoder::Create(
     if (!strncmp(codec, "OMX.qcom.video.", 15)) {
         quirks |= kRequiresLoadedToIdleAfterAllocation;
     }
-    if (!strcmp(codec, "OMX.TI.MP3.decode")) {
-        quirks |= kMeasuresTimeInMilliseconds;
-    }
 
     OMXDecoder *decoder = new OMXDecoder(
             client, node, mime, codec, createEncoder, quirks);
