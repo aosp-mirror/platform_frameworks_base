@@ -1,5 +1,6 @@
 sdk.version=1.5
 sdk.rel.id=3
+
 sdk.date=July 2009
 
 sdk.win_download=android-sdk-windows-1.5_r3.zip
