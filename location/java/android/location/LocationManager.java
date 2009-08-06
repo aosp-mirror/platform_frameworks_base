@@ -51,6 +51,8 @@ public class LocationManager {
     private ILocationManager mService;
     private final HashMap<GpsStatus.Listener, GpsStatusListenerTransport> mGpsStatusListeners =
             new HashMap<GpsStatus.Listener, GpsStatusListenerTransport>();
+    private final HashMap<GpsStatus.NmeaListener, GpsStatusListenerTransport> mNmeaListeners =
+            new HashMap<GpsStatus.NmeaListener, GpsStatusListenerTransport>();
     private final GpsStatus mGpsStatus = new GpsStatus();
 
     /**
@@ -1123,49 +1125,103 @@ public class LocationManager {
     private class GpsStatusListenerTransport extends IGpsStatusListener.Stub {
 
         private final GpsStatus.Listener mListener;
+        private final GpsStatus.NmeaListener mNmeaListener;
+
+        // This must not equal any of the GpsStatus event IDs
+        private static final int NMEA_RECEIVED = 1000;
+
+        private class Nmea {
+            long mTimestamp;
+            String mNmea;
+
+            Nmea(long timestamp, String nmea) {
+                mTimestamp = timestamp;
+                mNmea = nmea;
+            }
+        }
+        private ArrayList<Nmea> mNmeaBuffer;
 
         GpsStatusListenerTransport(GpsStatus.Listener listener) {
             mListener = listener;
+            mNmeaListener = null;
+        }
+
+        GpsStatusListenerTransport(GpsStatus.NmeaListener listener) {
+            mNmeaListener = listener;
+            mListener = null;
+            mNmeaBuffer = new ArrayList<Nmea>();
         }
 
         public void onGpsStarted() {
-            Message msg = Message.obtain();
-            msg.what = GpsStatus.GPS_EVENT_STARTED;
-            mGpsHandler.sendMessage(msg);
+            if (mListener != null) {
+                Message msg = Message.obtain();
+                msg.what = GpsStatus.GPS_EVENT_STARTED;
+                mGpsHandler.sendMessage(msg);
+            }
         }
 
         public void onGpsStopped() {
-            Message msg = Message.obtain();
-            msg.what = GpsStatus.GPS_EVENT_STOPPED;
-            mGpsHandler.sendMessage(msg);
+            if (mListener != null) {
+                Message msg = Message.obtain();
+                msg.what = GpsStatus.GPS_EVENT_STOPPED;
+                mGpsHandler.sendMessage(msg);
+            }
         }
 
         public void onFirstFix(int ttff) {
-            mGpsStatus.setTimeToFirstFix(ttff);
-            Message msg = Message.obtain();
-            msg.what = GpsStatus.GPS_EVENT_FIRST_FIX;
-            mGpsHandler.sendMessage(msg);
+            if (mListener != null) {
+                mGpsStatus.setTimeToFirstFix(ttff);
+                Message msg = Message.obtain();
+                msg.what = GpsStatus.GPS_EVENT_FIRST_FIX;
+                mGpsHandler.sendMessage(msg);
+            }
         }
 
         public void onSvStatusChanged(int svCount, int[] prns, float[] snrs,
                 float[] elevations, float[] azimuths, int ephemerisMask,
                 int almanacMask, int usedInFixMask) {
-            mGpsStatus.setStatus(svCount, prns, snrs, elevations, azimuths,
-                    ephemerisMask, almanacMask, usedInFixMask);
+            if (mListener != null) {
+                mGpsStatus.setStatus(svCount, prns, snrs, elevations, azimuths,
+                        ephemerisMask, almanacMask, usedInFixMask);
 
-            Message msg = Message.obtain();
-            msg.what = GpsStatus.GPS_EVENT_SATELLITE_STATUS;
-            // remove any SV status messages already in the queue
-            mGpsHandler.removeMessages(GpsStatus.GPS_EVENT_SATELLITE_STATUS);
-            mGpsHandler.sendMessage(msg);
+                Message msg = Message.obtain();
+                msg.what = GpsStatus.GPS_EVENT_SATELLITE_STATUS;
+                // remove any SV status messages already in the queue
+                mGpsHandler.removeMessages(GpsStatus.GPS_EVENT_SATELLITE_STATUS);
+                mGpsHandler.sendMessage(msg);
+            }
+        }
+
+        public void onNmeaReceived(long timestamp, String nmea) {
+            if (mNmeaListener != null) {
+                synchronized (mNmeaBuffer) {
+                    mNmeaBuffer.add(new Nmea(timestamp, nmea));
+                }
+                Message msg = Message.obtain();
+                msg.what = NMEA_RECEIVED;
+                // remove any NMEA_RECEIVED messages already in the queue
+                mGpsHandler.removeMessages(NMEA_RECEIVED);
+                mGpsHandler.sendMessage(msg);
+            }
         }
 
         private final Handler mGpsHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                // synchronize on mGpsStatus to ensure the data is copied atomically.
-                synchronized(mGpsStatus) {
-                    mListener.onGpsStatusChanged(msg.what);
+                if (msg.what == NMEA_RECEIVED) {
+                    synchronized (mNmeaBuffer) {
+                        int length = mNmeaBuffer.size();
+                        for (int i = 0; i < length; i++) {
+                            Nmea nmea = mNmeaBuffer.get(i);
+                            mNmeaListener.onNmeaReceived(nmea.mTimestamp, nmea.mNmea);
+                        }
+                        mNmeaBuffer.clear();
+                    }
+                } else {
+                    // synchronize on mGpsStatus to ensure the data is copied atomically.
+                    synchronized(mGpsStatus) {
+                        mListener.onGpsStatusChanged(msg.what);
+                    }
                 }
             }
         };
@@ -1209,6 +1265,56 @@ public class LocationManager {
     public void removeGpsStatusListener(GpsStatus.Listener listener) {
         try {
             GpsStatusListenerTransport transport = mGpsStatusListeners.remove(listener);
+            if (transport != null) {
+                mService.removeGpsStatusListener(transport);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in unregisterGpsStatusListener: ", e);
+        }
+    }
+
+    /**
+     * Adds an NMEA listener.
+     *
+     * @param listener NMEA listener object to register
+     *
+     * @return true if the listener was successfully added
+     *
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
+     *
+     * {@hide}
+     */
+    public boolean addNmeaListener(GpsStatus.NmeaListener listener) {
+        boolean result;
+
+        if (mNmeaListeners.get(listener) != null) {
+            // listener is already registered
+            return true;
+        }
+        try {
+            GpsStatusListenerTransport transport = new GpsStatusListenerTransport(listener);
+            result = mService.addGpsStatusListener(transport);
+            if (result) {
+                mNmeaListeners.put(listener, transport);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in registerGpsStatusListener: ", e);
+            result = false;
+        }
+
+        return result;
+    }
+
+    /**
+     * Removes an NMEA listener.
+     *
+     * @param listener NMEA listener object to remove
+     *
+     * {@hide}
+     */
+    public void removeNmeaListener(GpsStatus.NmeaListener listener) {
+        try {
+            GpsStatusListenerTransport transport = mNmeaListeners.remove(listener);
             if (transport != null) {
                 mService.removeGpsStatusListener(transport);
             }
