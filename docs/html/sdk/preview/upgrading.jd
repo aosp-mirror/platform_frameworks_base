@@ -1,5 +1,6 @@
 page.title=Upgrading the SDK
-sdk.version=1.6 Early Look
+sdk.version=1.6
+sdk.preview=true
 @jd:body
 
 
@@ -8,10 +9,10 @@ sdk.version=1.6 Early Look
 
   <h2>Upgrading the SDK</h2>
   <ul>
-    <li>To move existing projects into the SDK, you must make some minor changes in your 
-    development environment.</li>
-    <li>ADT 0.9[.1] is not compatible with the Android 1.6 Early Look SDK. You must upgrade
+    <li>ADT 0.9 / 0.9.1 is not compatible with the Android 1.6 Early Look SDK. You must upgrade
     ADT to 0.9.2.</li>
+    <li>The Early Look SDK uses a special provisional API Level, "Donut", which is required
+    to compile against the new Donut platform.</li>
   </ul>
 
   <h2>In this document</h2>

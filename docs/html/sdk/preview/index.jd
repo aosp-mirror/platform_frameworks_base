@@ -1,6 +1,7 @@
-sdk.redirect=0
-sdk.preview=true
 page.title=Android 1.6 Early Look SDK
+sdk.redirect=0
+sdk.version=1.6
+sdk.preview=true
 
 sdk.date=August 2009
 

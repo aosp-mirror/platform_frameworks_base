@@ -1,5 +1,6 @@
 page.title=Installing the Android SDK
-sdk.version=1.6 Early Look
+sdk.version=1.6
+sdk.preview=true
 sdk.date=August 2009
 
 @jd:body
@@ -20,13 +21,6 @@ sdk.date=August 2009
     <li><a href="#NextSteps">Next Steps</a></li>
     <li><a href="#InstallationNotes">Installation Notes</a></li>
   </ol>
-
-<!--  
-  <h2>Migrating references</h2>
-  <ol>
-    <li><a href="{@docRoot}sdk/api_diff/donut/changes.html">Android 1.6 Early Look API Differences</a></li>
-  </ol>
-  -->
 
 </div>
 </div>

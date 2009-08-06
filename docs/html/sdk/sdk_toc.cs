@@ -19,7 +19,10 @@
    /if ?>
     <ul><?cs 
      if:android.whichdoc == "online" ?>
-      <li><a href="index.html">
+      <li><a href="<?cs var:toroot ?>sdk/<?cs
+        if:sdk.preview ?>preview<?cs
+			  else ?><?cs var:sdk.current ?><?cs
+			  /if ?>/index.html">
           <span class="en">Download</span>
           <span class="de">Herunterladen</span>
           <span class="es">Descargar</span>
@@ -30,7 +33,10 @@
           <span class="zh-TW">下載</span>
          </a></li><?cs 
      /if ?>
-      <li><a href="installing.html">
+      <li><a href="<?cs var:toroot ?>sdk/<?cs
+        if:sdk.preview ?>preview<?cs
+			  else ?><?cs var:sdk.current ?><?cs
+			  /if ?>/installing.html">
           <span class="en">Installing</span>
           <span class="de">Installieren</span>
           <span class="es">Instalación</span>
@@ -40,8 +46,14 @@
           <span class="zh-CN">安装</span>
           <span class="zh-TW">安裝</span>
       </a></li>
-      <li><a href="upgrading.html">Upgrading</a></li>
-      <li><a href="requirements.html">System Requirements</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/<?cs
+        if:sdk.preview ?>preview<?cs
+			  else ?><?cs var:sdk.current ?><?cs
+			  /if ?>/upgrading.html">Upgrading</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/<?cs
+        if:sdk.preview ?>preview<?cs
+			  else ?><?cs var:sdk.current ?><?cs
+			  /if ?>/requirements.html">System Requirements</a></li>
     </ul>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/terms.html">SDK Terms and Conditions</a></li>
