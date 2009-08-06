@@ -792,7 +792,11 @@ class BackupManagerService extends IBackupManager.Stub {
 
         synchronized(mClearDataLock) {
             mClearingData = true;
-            mPackageManager.clearApplicationUserData(packageName, observer);
+            try {
+                mActivityManager.clearApplicationUserData(packageName, observer);
+            } catch (RemoteException e) {
+                // can't happen because the activity manager is in this process
+            }
 
             // only wait 10 seconds for the clear data to happen
             long timeoutMark = System.currentTimeMillis() + TIMEOUT_INTERVAL;
