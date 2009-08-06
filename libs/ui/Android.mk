@@ -5,6 +5,7 @@ LOCAL_SRC_FILES:= \
 	BufferMapper.cpp \
 	Camera.cpp \
 	CameraParameters.cpp \
+	EGLUtils.cpp \
 	EventHub.cpp \
 	EventRecurrence.cpp \
 	FramebufferNativeWindow.cpp \
@@ -29,6 +30,7 @@ LOCAL_SRC_FILES:= \
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
+	libEGL \
 	libbinder \
 	libpixelflinger \
 	libhardware \
