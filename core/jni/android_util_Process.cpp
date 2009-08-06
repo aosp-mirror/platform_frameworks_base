@@ -251,10 +251,27 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     }
 
     while ((de = readdir(d))) {
+        int t_pid;
+        int t_pri;
+
         if (de->d_name[0] == '.')
             continue;
+        t_pid = atoi(de->d_name);
 
-        if (add_pid_to_cgroup(atoi(de->d_name), grp)) {
+        if (!t_pid) {
+            LOGE("Error getting pid for '%s'\n", de->d_name);
+            continue;
+        }
+
+        t_pri = getpriority(PRIO_PROCESS, t_pid);
+
+        if (grp == ANDROID_TGROUP_DEFAULT &&
+            t_pri >= ANDROID_PRIORITY_BACKGROUND) {
+            // This task wants to stay at background
+            continue;
+        }
+     
+        if (add_pid_to_cgroup(t_pid, grp)) {
             // If the thread exited on us, ignore it and keep going
             if (errno != ESRCH && errno != ENOENT) {
                 signalExceptionForGroupError(env, clazz, errno);
