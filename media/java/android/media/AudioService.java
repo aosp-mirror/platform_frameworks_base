@@ -25,6 +25,8 @@ import android.bluetooth.BluetoothIntent;
 import android.content.BroadcastReceiver;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothA2dp;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothClass;
 
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
@@ -219,6 +221,8 @@ public class AudioService extends IAudioService.Stub {
     // Forced device usage for communications
     private int mForcedUseForComm;
 
+    private BluetoothDevice mBluetoothDevice = null;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -243,7 +247,7 @@ public class AudioService extends IAudioService.Stub {
         IntentFilter intentFilter =
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG);
         intentFilter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
-        intentFilter.addAction(BluetoothIntent.HEADSET_AUDIO_STATE_CHANGED_ACTION);
+        intentFilter.addAction(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION);
         context.registerReceiver(mReceiver, intentFilter);
     }
 
@@ -756,9 +760,11 @@ public class AudioService extends IAudioService.Stub {
     public void setBluetoothScoOn(boolean on){
         if (on) {
             AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_BT_SCO);
+            AudioSystem.setForceUse(AudioSystem.FOR_RECORD, AudioSystem.FORCE_BT_SCO);
             mForcedUseForComm = AudioSystem.FORCE_BT_SCO;
         } else {
             AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_NONE);
+            AudioSystem.setForceUse(AudioSystem.FOR_RECORD, AudioSystem.FORCE_NONE);
             mForcedUseForComm = AudioSystem.FORCE_NONE;
         }
     }
@@ -1257,8 +1263,9 @@ public class AudioService extends IAudioService.Stub {
                     // Restore call state
                     AudioSystem.setPhoneState(mMode);
 
-                    // Restore forced usage for communcations
+                    // Restore forced usage for communcations and record
                     AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm);
+                    AudioSystem.setForceUse(AudioSystem.FOR_RECORD, mForcedUseForComm);
 
                     // Restore stream volumes
                     int numStreamTypes = AudioSystem.getNumStreamTypes();
@@ -1343,31 +1350,61 @@ public class AudioService extends IAudioService.Stub {
                 int state = intent.getIntExtra(BluetoothA2dp.SINK_STATE,
                                                BluetoothA2dp.STATE_DISCONNECTED);
                 String address = intent.getStringExtra(BluetoothIntent.ADDRESS);
-                if (state == BluetoothA2dp.STATE_DISCONNECTED) {
+
+                boolean isConnected = (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) &&
+                                       ((String)mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)).equals(address));
+
+                if (isConnected &&
+                    state != BluetoothA2dp.STATE_CONNECTED && state != BluetoothA2dp.STATE_PLAYING) {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
                             address);
                     mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
-                } else if (state == BluetoothA2dp.STATE_CONNECTED){
+                } else if (!isConnected &&
+                           (state == BluetoothA2dp.STATE_CONNECTED || state != BluetoothA2dp.STATE_PLAYING)){
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE,
                                                          address);
                     mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP), address);
                 }
-            } else if (action.equals(BluetoothIntent.HEADSET_AUDIO_STATE_CHANGED_ACTION)) {
-                int state = intent.getIntExtra(BluetoothIntent.HEADSET_AUDIO_STATE,
+            } else if (action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION)) {
+                int state = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
                                                BluetoothHeadset.STATE_ERROR);
                 String address = intent.getStringExtra(BluetoothIntent.ADDRESS);
-                if (state == BluetoothHeadset.AUDIO_STATE_DISCONNECTED) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO,
+                int device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
+                if (mBluetoothDevice == null) {
+                    mBluetoothDevice = (BluetoothDevice)mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+                }
+                if (mBluetoothDevice != null) {
+                    int btClass = mBluetoothDevice.getRemoteClass(address);
+                    if (BluetoothClass.Device.Major.getDeviceMajor(btClass) == BluetoothClass.Device.Major.AUDIO_VIDEO) {
+                        switch (BluetoothClass.Device.getDevice(btClass)) {
+                        case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+                        case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
+                            device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
+                            break;
+                        case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
+                            device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                }
+
+                boolean isConnected = (mConnectedDevices.containsKey(device) &&
+                                       ((String)mConnectedDevices.get(device)).equals(address));
+
+                if (isConnected && state != BluetoothHeadset.STATE_CONNECTED) {
+                    AudioSystem.setDeviceConnectionState(device,
                                                          AudioSystem.DEVICE_STATE_UNAVAILABLE,
                                                          address);
-                    mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO);
-                } else if (state == BluetoothHeadset.AUDIO_STATE_CONNECTED) {
-                    AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO,
+                    mConnectedDevices.remove(device);
+                } else if (!isConnected && state == BluetoothHeadset.STATE_CONNECTED) {
+                    AudioSystem.setDeviceConnectionState(device,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE,
                                                          address);
-                    mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO), address);
+                    mConnectedDevices.put( new Integer(device), address);
                 }
             } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", 0);
@@ -1440,6 +1477,4 @@ public class AudioService extends IAudioService.Stub {
             }
         }
     }
-
-
 }

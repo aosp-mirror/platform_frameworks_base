@@ -810,7 +810,7 @@ void AudioFlinger::ThreadBase::processConfigEvents()
 
 AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output)
     :   ThreadBase(audioFlinger),
-        mMixBuffer(0), mSuspended(false), mBytesWritten(0), mOutput(output),
+        mMixBuffer(0), mSuspended(0), mBytesWritten(0), mOutput(output),
         mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false)
 {
     readOutputParameters();

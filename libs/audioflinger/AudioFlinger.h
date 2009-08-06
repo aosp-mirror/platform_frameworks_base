@@ -502,8 +502,8 @@ private:
                     AudioStreamOut* getOutput() { return mOutput; }
 
         virtual     int         type() const { return mType; }
-                    void        suspend() { mSuspended = true; }
-                    void        restore() { mSuspended = false; }
+                    void        suspend() { mSuspended++; }
+                    void        restore() { if (mSuspended) mSuspended--; }
         virtual     String8     getParameters(const String8& keys);
         virtual     void        audioConfigChanged(int event, int param = 0);
 
@@ -520,7 +520,7 @@ private:
     protected:
         int                             mType;
         int16_t*                        mMixBuffer;
-        bool                            mSuspended;
+        int                             mSuspended;
         int                             mBytesWritten;
         bool                            mMasterMute;
         SortedVector< wp<Track> >       mActiveTracks;
