@@ -1991,14 +1991,16 @@ final class WebViewCore {
             implements SurfaceHolder.Callback {
         private final ViewManager.ChildView mChildView;
         private int mPointer;
+        private final boolean mIsFixedSize;
         SurfaceViewProxy(Context context, ViewManager.ChildView childView,
-                int pointer) {
+                int pointer, boolean isFixedSize) {
             super(context);
             setWillNotDraw(false); // this prevents the black box artifact
             getHolder().addCallback(this);
             mChildView = childView;
             mChildView.mView = this;
             mPointer = pointer;
+            mIsFixedSize = isFixedSize;
         }
         void destroy() {
             mPointer = 0;
@@ -2006,6 +2008,10 @@ final class WebViewCore {
         }
         void attach(int x, int y, int width, int height) {
             mChildView.attachView(x, y, width, height);
+
+            if (mIsFixedSize) {
+                getHolder().setFixedSize(width, height);
+            }
         }
 
         // SurfaceHolder.Callback methods
@@ -2029,12 +2035,12 @@ final class WebViewCore {
 
     // PluginWidget functions for mainting SurfaceViews for the Surface drawing
     // model.
-    private SurfaceView createSurface(int nativePointer) {
+    private SurfaceView createSurface(int nativePointer, boolean isFixedSize) {
         if (mWebView == null) {
             return null;
         }
         return new SurfaceViewProxy(mContext,
-                mWebView.mViewManager.createView(), nativePointer);
+                mWebView.mViewManager.createView(), nativePointer, isFixedSize);
     }
 
     private void destroySurface(SurfaceView surface) {
