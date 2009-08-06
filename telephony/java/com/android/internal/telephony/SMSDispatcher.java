@@ -445,7 +445,11 @@ public abstract class SMSDispatcher extends Handler {
             } else if (tracker.mSentIntent != null) {
                 // Done retrying; return an error to the app.
                 try {
-                    tracker.mSentIntent.send(RESULT_ERROR_GENERIC_FAILURE);
+                    Intent fillIn = new Intent();
+                    if (ar.result != null) {
+                        fillIn.putExtra("errorCode", ((SmsResponse)ar.result).errorCode);
+                    }
+                    tracker.mSentIntent.send(mContext, RESULT_ERROR_GENERIC_FAILURE, fillIn);
                 } catch (CanceledException ex) {}
             }
         }

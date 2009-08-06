@@ -54,10 +54,13 @@ public final class SmsManager {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is sucessfully sent, or failed.
      *  The result code will be <code>Activity.RESULT_OK<code> for success,
-     *  or one of these errors:
-     *  <code>RESULT_ERROR_GENERIC_FAILURE</code>
-     *  <code>RESULT_ERROR_RADIO_OFF</code>
-     *  <code>RESULT_ERROR_NULL_PDU</code>.
+     *  or one of these errors:<br>
+     *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+     *  <code>RESULT_ERROR_RADIO_OFF</code><br>
+     *  <code>RESULT_ERROR_NULL_PDU</code><br>
+     *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
+     *  the extra "errorCode" containing a radio technology specific value,
+     *  generally only useful for troubleshooting.<br>
      *  The per-application based SMS control checks sentIntent. If sentIntent
      *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
@@ -109,10 +112,13 @@ public final class SmsManager {
      *   <code>PendingIntent</code>s (one for each message part) that is
      *   broadcast when the corresponding message part has been sent.
      *   The result code will be <code>Activity.RESULT_OK<code> for success,
-     *   or one of these errors:
-     *   <code>RESULT_ERROR_GENERIC_FAILURE</code>
-     *   <code>RESULT_ERROR_RADIO_OFF</code>
-     *   <code>RESULT_ERROR_NULL_PDU</code>.
+     *   or one of these errors:<br>
+     *   <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+     *   <code>RESULT_ERROR_RADIO_OFF</code><br>
+     *   <code>RESULT_ERROR_NULL_PDU</code><br>
+     *   For <code>RESULT_ERROR_GENERIC_FAILURE</code> each sentIntent may include
+     *   the extra "errorCode" containing a radio technology specific value,
+     *   generally only useful for troubleshooting.<br>
      *   The per-application based SMS control checks sentIntent. If sentIntent
      *   is NULL the caller will be checked against all unknown applicaitons,
      *   which cause smaller number of SMS to be sent in checking period.
@@ -169,10 +175,13 @@ public final class SmsManager {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is sucessfully sent, or failed.
      *  The result code will be <code>Activity.RESULT_OK<code> for success,
-     *  or one of these errors:
-     *  <code>RESULT_ERROR_GENERIC_FAILURE</code>
-     *  <code>RESULT_ERROR_RADIO_OFF</code>
-     *  <code>RESULT_ERROR_NULL_PDU</code>.
+     *  or one of these errors:<br>
+     *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+     *  <code>RESULT_ERROR_RADIO_OFF</code><br>
+     *  <code>RESULT_ERROR_NULL_PDU</code><br>
+     *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
+     *  the extra "errorCode" containing a radio technology specific value,
+     *  generally only useful for troubleshooting.<br>
      *  The per-application based SMS control checks sentIntent. If sentIntent
      *  is NULL the caller will be checked against all unknown applicaitons,
      *  which cause smaller number of SMS to be sent in checking period.
@@ -210,10 +219,13 @@ public final class SmsManager {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed.
      *  The result code will be <code>Activity.RESULT_OK<code> for success,
-     *  or one of these errors:
-     *  <code>RESULT_ERROR_GENERIC_FAILURE</code>
-     *  <code>RESULT_ERROR_RADIO_OFF</code>
-     *  <code>RESULT_ERROR_NULL_PDU</code>.
+     *  or one of these errors:<br>
+     *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+     *  <code>RESULT_ERROR_RADIO_OFF</code><br>
+     *  <code>RESULT_ERROR_NULL_PDU</code><br>
+     *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
+     *  the extra "errorCode" containing a radio technology specific value,
+     *  generally only useful for troubleshooting.<br>
      *  The per-application based SMS control checks sentIntent. If sentIntent
      *  is NULL the caller will be checked against all unknown applications,
      *  which cause smaller number of SMS to be sent in checking period.
