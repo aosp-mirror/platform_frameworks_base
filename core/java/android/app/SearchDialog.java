@@ -1743,7 +1743,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 }
                 // If the drop-down obscures the keyboard, the user wouldn't see anything
                 // happening when pressing back, so we dismiss the entire dialog instead.
-                if (isInputMethodNotNeeded()) {
+                //
+                // also: if there is no text entered, we also want to dismiss the whole dialog,
+                // not just the soft keyboard.  the exception to this is if there are shortcuts
+                // that aren't displayed (e.g are being obscured by the soft keyboard); in that
+                // case we want to dismiss the soft keyboard so the user can see the rest of the
+                // shortcuts.
+                if (isInputMethodNotNeeded() ||
+                        (isEmpty() && getDropDownChildCount() >= getAdapter().getCount())) {
                     mSearchDialog.cancel();
                     return true;
                 }
