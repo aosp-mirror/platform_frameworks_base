@@ -349,14 +349,15 @@ web_docs_sample_code_flags := \
 		-samplecode $(sample_dir)/NotePad \
 		            guide/samples/NotePad "Note Pad"
 
-# SDK version identifiers used in the published docs. 
-
-# major[.minor] version for SDK. Typically identical to the 
-# most current Android platform version included in the SDK package. 
-framework_docs_SDK_VERSION :=  1.5
-# release version for SDK (ie "Release x")
-framework_docs_SDK_REL_ID :=   3
-framework_docs_SDK_CURRENT_DIR := $(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
+## SDK version identifiers used in the published docs
+  # major[.minor] version for current SDK. (full releases only)
+framework_docs_SDK_VERSION:=1.5
+  # release version (ie "Release x")  (full releases only)
+framework_docs_SDK_REL_ID:=3
+  # name of current SDK directory (full releases only)
+framework_docs_SDK_CURRENT_DIR:=$(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
+  # flag to build offline docs for a preview release
+framework_docs_SDK_PREVIEW:=true
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
@@ -385,7 +386,11 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-apixml $(INTERNAL_PLATFORM_API_FILE) \
 		-sdkvalues $(OUT_DOCS) \
 		-warning 3 \
-		-hdf android.whichdoc offline
+		-hdf android.whichdoc offline 
+
+ifeq ($(framework_docs_SDK_PREVIEW),true)
+  LOCAL_DROIDDOC_OPTIONS += -hdf sdk.current preview 
+endif
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
