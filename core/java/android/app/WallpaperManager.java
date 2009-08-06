@@ -88,7 +88,7 @@ public class WallpaperManager {
     }
 
     /**
-     * Like {@link #peekWallpaper}, but always returns a valid Drawable.  If
+     * Like {@link #peek}, but always returns a valid Drawable.  If
      * no wallpaper is set, the system default wallpaper is returned.
      *
      * @return Returns a Drawable object that will draw the wallpaper.
