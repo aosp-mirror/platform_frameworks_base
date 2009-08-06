@@ -301,7 +301,7 @@ class ServerThread extends Thread {
 
             try {
                 Log.i(TAG, "Starting Wallpaper Service");
-                ServiceManager.addService(Context.WALLPAPER_SERVICE, new WallpaperService(context));
+                ServiceManager.addService(Context.WALLPAPER_SERVICE, new WallpaperManagerService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Wallpaper Service", e);
             }

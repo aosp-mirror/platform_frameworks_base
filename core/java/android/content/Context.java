@@ -488,89 +488,44 @@ public abstract class Context {
     public abstract String[] databaseList();
 
     /**
-     * Like {@link #peekWallpaper}, but always returns a valid Drawable.  If
-     * no wallpaper is set, the system default wallpaper is returned.
-     *
-     * @return Returns a Drawable object that will draw the wallpaper.
+     * @deprecated Use {@link android.app.WallpaperManager#get
+     * WallpaperManager.get()} instead.
      */
     public abstract Drawable getWallpaper();
 
     /**
-     * Retrieve the current system wallpaper.  This is returned as an
-     * abstract Drawable that you can install in a View to display whatever
-     * wallpaper the user has currently set.  If there is no wallpaper set,
-     * a null pointer is returned.
-     *
-     * @return Returns a Drawable object that will draw the wallpaper or a
-     * null pointer if these is none.
+     * @deprecated Use {@link android.app.WallpaperManager#peek
+     * WallpaperManager.peek()} instead.
      */
     public abstract Drawable peekWallpaper();
 
     /**
-     * Returns the desired minimum width for the wallpaper. Callers of
-     * {@link #setWallpaper(android.graphics.Bitmap)} or
-     * {@link #setWallpaper(java.io.InputStream)} should check this value
-     * beforehand to make sure the supplied wallpaper respects the desired
-     * minimum width.
-     *
-     * If the returned value is <= 0, the caller should use the width of
-     * the default display instead.
-     *
-     * @return The desired minimum width for the wallpaper. This value should
-     * be honored by applications that set the wallpaper but it is not
-     * mandatory.
+     * @deprecated Use {@link android.app.WallpaperManager#getDesiredMinimumWidth()
+     * WallpaperManager.getDesiredMinimumWidth()} instead.
      */
     public abstract int getWallpaperDesiredMinimumWidth();
 
     /**
-     * Returns the desired minimum height for the wallpaper. Callers of
-     * {@link #setWallpaper(android.graphics.Bitmap)} or
-     * {@link #setWallpaper(java.io.InputStream)} should check this value
-     * beforehand to make sure the supplied wallpaper respects the desired
-     * minimum height.
-     *
-     * If the returned value is <= 0, the caller should use the height of
-     * the default display instead.
-     *
-     * @return The desired minimum height for the wallpaper. This value should
-     * be honored by applications that set the wallpaper but it is not
-     * mandatory.
+     * @deprecated Use {@link android.app.WallpaperManager#getDesiredMinimumHeight()
+     * WallpaperManager.getDesiredMinimumHeight()} instead.
      */
     public abstract int getWallpaperDesiredMinimumHeight();
 
     /**
-     * Change the current system wallpaper to a bitmap.  The given bitmap is
-     * converted to a PNG and stored as the wallpaper.  On success, the intent
-     * {@link Intent#ACTION_WALLPAPER_CHANGED} is broadcast.
-     *
-     * @param bitmap The bitmap to save.
-     *
-     * @throws IOException If an error occurs reverting to the default
-     * wallpaper.
+     * @deprecated Use {@link android.app.WallpaperManager#set(Bitmap)
+     * WallpaperManager.set()} instead.
      */
     public abstract void setWallpaper(Bitmap bitmap) throws IOException;
 
     /**
-     * Change the current system wallpaper to a specific byte stream.  The
-     * give InputStream is copied into persistent storage and will now be
-     * used as the wallpaper.  Currently it must be either a JPEG or PNG
-     * image.  On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
-     * is broadcast.
-     *
-     * @param data A stream containing the raw data to install as a wallpaper.
-     *
-     * @throws IOException If an error occurs reverting to the default
-     * wallpaper.
+     * @deprecated Use {@link android.app.WallpaperManager#set(InputStream)
+     * WallpaperManager.set()} instead.
      */
     public abstract void setWallpaper(InputStream data) throws IOException;
 
     /**
-     * Remove any currently set wallpaper, reverting to the system's default
-     * wallpaper. On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
-     * is broadcast.
-     *
-     * @throws IOException If an error occurs reverting to the default
-     * wallpaper.
+     * @deprecated Use {@link android.app.WallpaperManager#clear
+     * WallpaperManager.clear()} instead.
      */
     public abstract void clearWallpaper() throws IOException;
 

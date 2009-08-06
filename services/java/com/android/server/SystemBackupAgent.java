@@ -53,7 +53,7 @@ public class SystemBackupAgent extends BackupHelperAgent {
         try {
             super.onRestore(data, appVersionCode, newState);
 
-            WallpaperService wallpaper = (WallpaperService)ServiceManager.getService(
+            WallpaperManagerService wallpaper = (WallpaperManagerService)ServiceManager.getService(
                     Context.WALLPAPER_SERVICE);
             wallpaper.settingsRestored();
         } catch (IOException ex) {

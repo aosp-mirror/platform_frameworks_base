@@ -59,8 +59,6 @@ import android.content.res.XmlResourceParser;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
 import android.location.ILocationManager;
@@ -78,7 +76,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.Looper;
-import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -88,10 +85,8 @@ import android.os.FileUtils.FileStatus;
 import android.telephony.TelephonyManager;
 import android.text.ClipboardManager;
 import android.util.AndroidRuntimeException;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
@@ -165,7 +160,6 @@ class ApplicationContext extends Context {
     private static LocationManager sLocationManager;
     private static boolean sIsBluetoothDeviceCached = false;
     private static BluetoothDevice sBluetoothDevice;
-    private static IWallpaperService sWallpaperService;
     private static final HashMap<File, SharedPreferencesImpl> sSharedPrefs =
             new HashMap<File, SharedPreferencesImpl>();
 
@@ -180,8 +174,8 @@ class ApplicationContext extends Context {
     private Resources.Theme mTheme = null;
     private PackageManager mPackageManager;
     private NotificationManager mNotificationManager = null;
-    private AccessibilityManager mAccessibilityManager = null;
     private ActivityManager mActivityManager = null;
+    private WallpaperManager mWallpaperManager = null;
     private Context mReceiverRestrictedContext = null;
     private SearchManager mSearchManager = null;
     private SensorManager mSensorManager = null;
@@ -201,9 +195,6 @@ class ApplicationContext extends Context {
 
     private File mCacheDir;
     
-    private Drawable mWallpaper;
-    private IWallpaperServiceCallback mWallpaperCallback = null;
-        
     private static long sInstanceCount = 0;
 
     private static final String[] EMPTY_FILE_LIST = {};
@@ -523,130 +514,37 @@ class ApplicationContext extends Context {
     
     @Override
     public Drawable getWallpaper() {
-        Drawable dr = peekWallpaper();
-        return dr != null ? dr : getResources().getDrawable(
-                com.android.internal.R.drawable.default_wallpaper);
+        return getWallpaperManager().get();
     }
 
     @Override
-    public synchronized Drawable peekWallpaper() {
-        if (mWallpaper != null) {
-            return mWallpaper;
-        }
-        mWallpaperCallback = new WallpaperCallback(this);
-        mWallpaper = getCurrentWallpaperLocked();
-        return mWallpaper;
-    }
-
-    private Drawable getCurrentWallpaperLocked() {
-        try {
-            ParcelFileDescriptor fd = getWallpaperService().getWallpaper(mWallpaperCallback);
-            if (fd != null) {
-                Bitmap bm = BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor());
-                if (bm != null) {
-                    // For now clear the density until we figure out how
-                    // to deal with it for wallpapers.
-                    bm.setDensity(0);
-                    return new BitmapDrawable(getResources(), bm);
-                }
-            }
-        } catch (RemoteException e) {
-        }
-        return null;
+    public Drawable peekWallpaper() {
+        return getWallpaperManager().peek();
     }
 
     @Override
     public int getWallpaperDesiredMinimumWidth() {
-        try {
-            return getWallpaperService().getWidthHint();
-        } catch (RemoteException e) {
-            // Shouldn't happen!
-            return 0;
-        }
+        return getWallpaperManager().getDesiredMinimumWidth();
     }
 
     @Override
     public int getWallpaperDesiredMinimumHeight() {
-        try {
-            return getWallpaperService().getHeightHint();
-        } catch (RemoteException e) {
-            // Shouldn't happen!
-            return 0;
-        }
+        return getWallpaperManager().getDesiredMinimumHeight();
     }
 
     @Override
     public void setWallpaper(Bitmap bitmap) throws IOException  {
-        try {
-            ParcelFileDescriptor fd = getWallpaperService().setWallpaper(null);
-            if (fd == null) {
-                return;
-            }
-            FileOutputStream fos = null;
-            try {
-                fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 90, fos);
-            } finally {
-                if (fos != null) {
-                    fos.close();
-                }
-            }
-        } catch (RemoteException e) {
-        }
+        getWallpaperManager().set(bitmap);
     }
 
     @Override
     public void setWallpaper(InputStream data) throws IOException {
-        try {
-            ParcelFileDescriptor fd = getWallpaperService().setWallpaper(null);
-            if (fd == null) {
-                return;
-            }
-            FileOutputStream fos = null;
-            try {
-                fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                setWallpaper(data, fos);
-            } finally {
-                if (fos != null) {
-                    fos.close();
-                }
-            }
-        } catch (RemoteException e) {
-        }
-    }
-
-    private void setWallpaper(InputStream data, FileOutputStream fos)
-            throws IOException {
-        byte[] buffer = new byte[32768];
-        int amt;
-        while ((amt=data.read(buffer)) > 0) {
-            fos.write(buffer, 0, amt);
-        }
+        getWallpaperManager().set(data);
     }
 
     @Override
     public void clearWallpaper() throws IOException {
-        try {
-            Resources resources = getResources();
-            /* Set the wallpaper to the default values */
-            ParcelFileDescriptor fd = getWallpaperService().setWallpaper(
-                    "res:" + resources.getResourceName(
-                        com.android.internal.R.drawable.default_wallpaper));
-            if (fd != null) {
-                FileOutputStream fos = null;
-                try {
-                    fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                    setWallpaper(resources.openRawResource(
-                            com.android.internal.R.drawable.default_wallpaper),
-                            fos);
-                } finally {
-                    if (fos != null) {
-                        fos.close();
-                    }
-                }
-            }
-        } catch (RemoteException e) {
-        }
+        getWallpaperManager().clear();
     }
 
     @Override
@@ -907,6 +805,8 @@ class ApplicationContext extends Context {
             }
         } else if (ACTIVITY_SERVICE.equals(name)) {
             return getActivityManager();
+        } else if (INPUT_METHOD_SERVICE.equals(name)) {
+            return InputMethodManager.getInstance(this);
         } else if (ALARM_SERVICE.equals(name)) {
             return getAlarmManager();
         } else if (ACCOUNT_SERVICE.equals(name)) {
@@ -927,7 +827,7 @@ class ApplicationContext extends Context {
             return getLocationManager();
         } else if (SEARCH_SERVICE.equals(name)) {
             return getSearchManager();
-        } else if ( SENSOR_SERVICE.equals(name)) {
+        } else if (SENSOR_SERVICE.equals(name)) {
             return getSensorManager();
         } else if (BLUETOOTH_SERVICE.equals(name)) {
             return getBluetoothDevice();
@@ -946,8 +846,8 @@ class ApplicationContext extends Context {
             return getTelephonyManager();
         } else if (CLIPBOARD_SERVICE.equals(name)) {
             return getClipboardManager();
-        } else if (INPUT_METHOD_SERVICE.equals(name)) {
-            return InputMethodManager.getInstance(this);
+        } else if (WALLPAPER_SERVICE.equals(name)) {
+            return getWallpaperManager();
         }
 
         return null;
@@ -1020,8 +920,7 @@ class ApplicationContext extends Context {
         return sWifiManager;
     }
 
-    private NotificationManager getNotificationManager()
-    {
+    private NotificationManager getNotificationManager() {
         synchronized (mSync) {
             if (mNotificationManager == null) {
                 mNotificationManager = new NotificationManager(
@@ -1030,6 +929,16 @@ class ApplicationContext extends Context {
             }
         }
         return mNotificationManager;
+    }
+
+    private WallpaperManager getWallpaperManager() {
+        synchronized (mSync) {
+            if (mWallpaperManager == null) {
+                mWallpaperManager = new WallpaperManager(getOuterContext(),
+                        mMainThread.getHandler());
+            }
+        }
+        return mWallpaperManager;
     }
 
     private TelephonyManager getTelephonyManager() {
@@ -1106,16 +1015,6 @@ class ApplicationContext extends Context {
         return mVibrator;
     }
   
-    private IWallpaperService getWallpaperService() {
-        synchronized (sSync) {
-            if (sWallpaperService == null) {
-                IBinder b = ServiceManager.getService(WALLPAPER_SERVICE);
-                sWallpaperService = IWallpaperService.Stub.asInterface(b);
-            }
-        }
-        return sWallpaperService;
-    }
-
     private AudioManager getAudioManager()
     {
         if (mAudioManager == null) {
@@ -2818,27 +2717,6 @@ class ApplicationContext extends Context {
                 }
             }
             return false;
-        }
-    }
-
-    private static class WallpaperCallback extends IWallpaperServiceCallback.Stub {
-        private WeakReference<ApplicationContext> mContext;
-
-        public WallpaperCallback(ApplicationContext context) {
-            mContext = new WeakReference<ApplicationContext>(context);
-        }
-
-        public synchronized void onWallpaperChanged() {
-
-            /* The wallpaper has changed but we shouldn't eagerly load the
-             * wallpaper as that would be inefficient. Reset the cached wallpaper
-             * to null so if the user requests the wallpaper again then we'll
-             * fetch it.
-             */
-            final ApplicationContext applicationContext = mContext.get();
-            if (applicationContext != null) {
-                applicationContext.mWallpaper = null;
-            }
         }
     }
 }
