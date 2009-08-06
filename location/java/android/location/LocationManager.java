@@ -1276,13 +1276,11 @@ public class LocationManager {
     /**
      * Adds an NMEA listener.
      *
-     * @param listener NMEA listener object to register
+     * @param listener a {#link GpsStatus.NmeaListener} object to register
      *
      * @return true if the listener was successfully added
      *
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
-     *
-     * {@hide}
      */
     public boolean addNmeaListener(GpsStatus.NmeaListener listener) {
         boolean result;
@@ -1308,9 +1306,7 @@ public class LocationManager {
     /**
      * Removes an NMEA listener.
      *
-     * @param listener NMEA listener object to remove
-     *
-     * {@hide}
+     * @param listener a {#link GpsStatus.NmeaListener} object to remove
      */
     public void removeNmeaListener(GpsStatus.NmeaListener listener) {
         try {
