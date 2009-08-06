@@ -34,6 +34,7 @@
 #include <ui/ISurfaceComposer.h>
 #include <ui/ISurfaceFlingerClient.h>
 #include <ui/FramebufferNativeWindow.h>
+#include <ui/EGLUtils.h>
 
 #include <core/SkBitmap.h>
 #include <images/SkImageDecoder.h>
@@ -138,8 +139,10 @@ status_t BootAnimation::readyToRun() {
     sp<Surface> s = control->getSurface();
 
     // initialize opengl and egl
-    const EGLint attribs[] = { EGL_RED_SIZE, 5, EGL_GREEN_SIZE, 6,
-            EGL_BLUE_SIZE, 5, EGL_DEPTH_SIZE, 0, EGL_NONE };
+    const EGLint attribs[] = {
+            EGL_DEPTH_SIZE, 0, 
+            EGL_NONE 
+    };
     EGLint w, h, dummy;
     EGLint numConfigs;
     EGLConfig config;
@@ -149,8 +152,7 @@ status_t BootAnimation::readyToRun() {
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
     eglInitialize(display, 0, 0);
-    eglChooseConfig(display, attribs, &config, 1, &numConfigs);
-
+    EGLUtils::selectConfigForNativeWindow(display, attribs, s.get(), &config);
     surface = eglCreateWindowSurface(display, config, s.get(), NULL);
     context = eglCreateContext(display, config, NULL, NULL);
     eglQuerySurface(display, surface, EGL_WIDTH, &w);
