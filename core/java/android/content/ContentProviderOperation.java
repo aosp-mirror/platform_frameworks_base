@@ -301,7 +301,8 @@ public class ContentProviderOperation implements Parcelable {
                 : mSelectionArgsBackReferences.entrySet()) {
             final Integer selectionArgIndex = selectionArgBackRef.getKey();
             final int backRefIndex = selectionArgBackRef.getValue();
-            newArgs[selectionArgIndex] = backRefToValue(backRefs, numBackRefs, backRefIndex);
+            newArgs[selectionArgIndex] =
+                    String.valueOf(backRefToValue(backRefs, numBackRefs, backRefIndex));
         }
         return newArgs;
     }
@@ -315,18 +316,18 @@ public class ContentProviderOperation implements Parcelable {
      * the numBackRefs
      * @return the string representation of the requested back reference.
      */
-    private static String backRefToValue(ContentProviderResult[] backRefs, int numBackRefs,
+    private static long backRefToValue(ContentProviderResult[] backRefs, int numBackRefs,
             Integer backRefIndex) {
         if (backRefIndex >= numBackRefs) {
             throw new ArrayIndexOutOfBoundsException("asked for back ref " + backRefIndex
                     + " but there are only " + numBackRefs + " back refs");
         }
         ContentProviderResult backRef = backRefs[backRefIndex];
-        String backRefValue;
+        long backRefValue;
         if (backRef.uri != null) {
-            backRefValue = backRef.uri.getLastPathSegment();
+            backRefValue = ContentUris.parseId(backRef.uri);
         } else {
-            backRefValue = String.valueOf(backRef.count);
+            backRefValue = backRef.count;
         }
         return backRefValue;
     }

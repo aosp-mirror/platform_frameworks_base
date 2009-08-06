@@ -292,7 +292,7 @@ public final class ContactsContract {
          * A sub-directory of a single contact that contains all of the constituent raw contact
          * {@link Data} rows.
          */
-        public static final class Data implements BaseColumns, DataColumns, BaseSyncColumns {
+        public static final class Data implements BaseColumns, DataColumns {
             /**
              * no public constructor since this is a utility class
              */
@@ -523,6 +523,15 @@ public final class ContactsContract {
         /** Generic data column, the meaning is {@link #MIMETYPE} specific */
         public static final String DATA15 = "data15";
 
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC1 = "data_sync1";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC2 = "data_sync2";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC3 = "data_sync3";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC4 = "data_sync4";
+
         /**
          * An optional update or insert URI parameter that determines if the
          * corresponding raw contact should be marked as dirty. The default
@@ -537,7 +546,7 @@ public final class ContactsContract {
      * definition and some generic columns. Each data type can define the meaning for each of
      * the generic columns.
      */
-    public static final class Data implements BaseColumns, DataColumns, BaseSyncColumns {
+    public static final class Data implements BaseColumns, DataColumns {
         /**
          * This utility class cannot be instantiated
          */
@@ -905,6 +914,12 @@ public final class ContactsContract {
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
+
+            /**
+             * The display name for the email address
+             * <P>Type: TEXT</P>
+             */
+            public static final String DISPLAY_NAME = "data4";
         }
 
         /**
@@ -1024,9 +1039,9 @@ public final class ContactsContract {
             public static final String COUNTRY = "data13";
         }
 
-       /**
-        * Common data definition for IM addresses.
-        */
+        /**
+         * Common data definition for IM addresses.
+         */
         public static final class Im implements BaseCommonColumns, CommonColumns {
             private Im() {}
 
@@ -1060,6 +1075,7 @@ public final class ContactsContract {
             public static final int PROTOCOL_GOOGLE_TALK = 5;
             public static final int PROTOCOL_ICQ = 6;
             public static final int PROTOCOL_JABBER = 7;
+            public static final int PROTOCOL_NETMEETING = 8;
         }
 
         /**
@@ -1085,6 +1101,102 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String TITLE = "data4";
+
+            /**
+             * The department at this company as the user entered it.
+             * <P>Type: TEXT</P>
+             */
+            public static final String DEPARTMENT = "data5";
+
+            /**
+             * The job description at this company as the user entered it.
+             * <P>Type: TEXT</P>
+             */
+            public static final String JOB_DESCRIPTION = "data6";
+
+            /**
+             * The symbol of this company as the user entered it.
+             * <P>Type: TEXT</P>
+             */
+            public static final String SYMBOL = "data7";
+
+            /**
+             * The phonetic name of this company as the user entered it.
+             * <P>Type: TEXT</P>
+             */
+            public static final String PHONETIC_NAME = "data8";
+        }
+
+        /**
+         * Common data definition for miscellaneous information.
+         */
+        public static final class Miscellaneous implements BaseCommonColumns {
+            private Miscellaneous() {}
+
+            /** MIME type used when storing this in data table. */
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/misc";
+
+            /**
+             * The birthday as the user entered it.
+             * <P>Type: TEXT</P>
+             */
+            public static final String BIRTHDAY = "data1";
+
+            /**
+             * The nickname as the user entered it.
+             * <P>Type: TEXT</P>
+             */
+            public static final String NICKNAME = "data2";
+        }
+
+        /**
+         * Common data definition for relations.
+         */
+        public static final class Relation implements BaseCommonColumns, CommonColumns {
+            private Relation() {}
+
+            /** MIME type used when storing this in data table. */
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/relation";
+
+            public static final int TYPE_ASSISTANT = 1;
+            public static final int TYPE_BROTHER = 2;
+            public static final int TYPE_CHILD = 3;
+            public static final int TYPE_DOMESTIC_PARTNER = 4;
+            public static final int TYPE_FATHER = 5;
+            public static final int TYPE_FRIEND = 6;
+            public static final int TYPE_MANAGER = 7;
+            public static final int TYPE_MOTHER = 8;
+            public static final int TYPE_PARENT = 9;
+            public static final int TYPE_PARTNER = 10;
+            public static final int TYPE_REFERRED_BY = 11;
+            public static final int TYPE_RELATIVE = 12;
+            public static final int TYPE_SISTER = 13;
+            public static final int TYPE_SPOUSE = 14;
+
+            /**
+             * The name of the relative as the user entered it.
+             * <P>Type: TEXT</P>
+             */
+            public static final String NAME = DATA;
+        }
+
+        /**
+         * Common data definition for events.
+         */
+        public static final class Event implements BaseCommonColumns, CommonColumns {
+            private Event() {}
+
+            /** MIME type used when storing this in data table. */
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/event";
+
+            public static final int TYPE_ANNIVERSARY = 1;
+            public static final int TYPE_OTHER = 2;
+            
+            /**
+             * The event start date as the user entered it.
+             * <P>Type: TEXT</P>
+             */
+            public static final String START_DATE = DATA;
         }
 
         /**
@@ -1149,11 +1261,19 @@ public final class ContactsContract {
         /**
          * Website related to the contact.
          */
-        public static final class Website implements BaseCommonColumns {
+        public static final class Website implements BaseCommonColumns, CommonColumns {
             private Website() {}
 
             /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/website";
+
+            public static final int TYPE_HOMEPAGE = 1;
+            public static final int TYPE_BLOG = 2;
+            public static final int TYPE_PROFILE = 3;
+            public static final int TYPE_HOME = 4;
+            public static final int TYPE_WORK = 5;
+            public static final int TYPE_FTP = 6;
+            public static final int TYPE_OTHER = 7;
 
             /**
              * The website URL string.
