@@ -212,6 +212,9 @@ int FramebufferNativeWindow::query(android_native_window_t* window,
         case NATIVE_WINDOW_HEIGHT:
             *value = fb->height;
             return NO_ERROR;
+        case NATIVE_WINDOW_FORMAT:
+            *value = fb->format;
+            return NO_ERROR;
     }
     return BAD_VALUE;
 }

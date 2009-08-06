@@ -620,6 +620,9 @@ int Surface::query(int what, int* value)
         case NATIVE_WINDOW_HEIGHT:
             *value = int(mHeight);
             return NO_ERROR;
+        case NATIVE_WINDOW_FORMAT:
+            *value = int(mFormat);
+            return NO_ERROR;
     }
     return BAD_VALUE;
 }
