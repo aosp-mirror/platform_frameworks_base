@@ -698,6 +698,12 @@ public abstract class PhoneBase implements Phone {
         return null;
     }
 
+    public boolean isMinInfoReady() {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+        return false;
+    }
+
     public String getCdmaPrlVersion(){
         //  This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
@@ -720,6 +726,16 @@ public abstract class PhoneBase implements Phone {
     }
 
     public void unregisterForCdmaOtaStatusChange(Handler h) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void registerForSubscriptionInfoReady(Handler h, int what, Object obj) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void unregisterForSubscriptionInfoReady(Handler h) {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
     }

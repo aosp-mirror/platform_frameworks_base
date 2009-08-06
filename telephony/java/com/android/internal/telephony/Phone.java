@@ -542,6 +542,20 @@ public interface Phone {
     void unregisterForCdmaOtaStatusChange(Handler h);
 
     /**
+     * Registration point for subscription info ready
+     * @param h handler to notify
+     * @param what what code of message when delivered
+     * @param obj placed in Message.obj
+     */
+    public void registerForSubscriptionInfoReady(Handler h, int what, Object obj);
+
+    /**
+     * Unregister for notifications for subscription info
+     * @param h Handler to be removed from the registrant list.
+     */
+    public void unregisterForSubscriptionInfoReady(Handler h);
+
+    /**
      * Returns SIM record load state. Use
      * <code>getSimCard().registerForReady()</code> for change notification.
      *
@@ -1364,6 +1378,13 @@ public interface Phone {
      * Retrieves the MIN for CDMA phones.
      */
     String getCdmaMin();
+
+    /**
+     * Check if subscription data has been assigned to mMin
+     *
+     * return true if MIN info is ready; false otherwise.
+     */
+    boolean isMinInfoReady();
 
     /**
      *  Retrieves PRL Version for CDMA phones
