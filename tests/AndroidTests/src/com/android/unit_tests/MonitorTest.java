@@ -267,7 +267,7 @@ public class MonitorTest extends TestCase {
     private static Throwable errorException;
     private static Thread testThread;
 
-    @MediumTest
+    // TODO: Flaky test. Add back MediumTest annotation once fixed
     public void testInterruptTest() throws Exception {
 
 
