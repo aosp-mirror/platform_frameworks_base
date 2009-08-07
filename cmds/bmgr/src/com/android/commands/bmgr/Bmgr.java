@@ -268,7 +268,7 @@ public final class Bmgr {
 
     private void printRestoreSets(RestoreSet[] sets) {
         for (RestoreSet s : sets) {
-            System.out.println("  " + s.token + " : " + s.name);
+            System.out.println("  " + Long.toHexString(s.token) + " : " + s.name);
         }
     }
 
@@ -294,7 +294,7 @@ public final class Bmgr {
     private void doRestore() {
         long token;
         try {
-            token = Long.parseLong(nextArg());
+            token = Long.parseLong(nextArg(), 16);
         } catch (NumberFormatException e) {
             showUsage();
             return;
