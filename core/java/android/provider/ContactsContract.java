@@ -432,6 +432,7 @@ public final class ContactsContract {
          *
          * @hide
          */
+        @Deprecated
         public static final Uri CONTENT_FILTER_EMAIL_URI =
                 Uri.withAppendedPath(CONTENT_URI, "filter_email");
 
@@ -642,13 +643,13 @@ public final class ContactsContract {
          * Reference to the {@link RawContacts#_ID} this presence references.
          * <P>Type: INTEGER</P>
          */
-        public static final String RAW_CONTACT_ID = "raw_contact_id";
+        public static final String RAW_CONTACT_ID = "presence_raw_contact_id";
 
         /**
          * Reference to the {@link Data#_ID} entry that owns this presence.
          * <P>Type: INTEGER</P>
          */
-        public static final String DATA_ID = "data_id";
+        public static final String DATA_ID = "presence_data_id";
 
         /**
          * The IM service the presence is coming from. Formatted using either
@@ -950,6 +951,22 @@ public final class ContactsContract {
             /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/email";
 
+            /**
+             * The content:// style URI for all data records of the
+             * {@link Email#CONTENT_ITEM_TYPE} MIME type, combined with the
+             * associated raw contact and aggregate contact data.
+             */
+            public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
+                    "emails");
+
+            /**
+             * The content:// style URL for filtering data rows by email address. The
+             * filter argument should be passed as an additional path segment after
+             * this URI.
+             */
+            public static final Uri CONTENT_FILTER_EMAIL_URI = Uri.withAppendedPath(CONTENT_URI,
+                    "filter");
+
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
@@ -1230,7 +1247,7 @@ public final class ContactsContract {
 
             public static final int TYPE_ANNIVERSARY = 1;
             public static final int TYPE_OTHER = 2;
-            
+
             /**
              * The event start date as the user entered it.
              * <P>Type: TEXT</P>
