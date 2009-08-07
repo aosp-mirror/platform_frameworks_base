@@ -18,11 +18,13 @@ package android.appwidget;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.SystemClock;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,6 +33,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+import android.widget.FrameLayout.LayoutParams;
 
 /**
  * Provides the glue to show AppWidget views. This class offers automatic animation
@@ -58,7 +61,8 @@ public class AppWidgetHostView extends FrameLayout {
     };
 
     Context mContext;
-    
+    Context mRemoteContext;
+
     int mAppWidgetId;
     AppWidgetProviderInfo mInfo;
     View mView;
@@ -104,6 +108,16 @@ public class AppWidgetHostView extends FrameLayout {
         return mInfo;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        // We're being asked to inflate parameters, probably by a LayoutInflater
+        // in a remote Context. To help resolve any remote references, we
+        // inflate through our last mRemoteContext when it exists.
+        final Context context = mRemoteContext != null ? mRemoteContext : mContext;
+        return new FrameLayout.LayoutParams(context, attrs);
+    }
+
     /**
      * Process a set of {@link RemoteViews} coming in as an update from the
      * AppWidget provider. Will animate into these new views as needed.
@@ -143,6 +157,9 @@ public class AppWidgetHostView extends FrameLayout {
             mLayoutId = -1;
             mViewMode = VIEW_MODE_DEFAULT;
         } else {
+            // Prepare a local reference to the remote Context so we're ready to
+            // inflate any requested LayoutParams.
+            mRemoteContext = getRemoteContext(remoteViews);
             int layoutId = remoteViews.getLayoutId();
 
             // If our stale view has been prepared to match active, and the new
@@ -203,6 +220,24 @@ public class AppWidgetHostView extends FrameLayout {
         }
     }
 
+    /**
+     * Build a {@link Context} cloned into another package name, usually for the
+     * purposes of reading remote resources.
+     */
+    private Context getRemoteContext(RemoteViews views) {
+        // Bail if missing package name
+        final String packageName = views.getPackage();
+        if (packageName == null) return mContext;
+
+        try {
+            // Return if cloned successfully, otherwise default
+            return mContext.createPackageContext(packageName, Context.CONTEXT_RESTRICTED);
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Package name " + packageName + " not found");
+            return mContext;
+        }
+    }
+
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         if (CROSSFADE) {
             int alpha;
@@ -246,17 +281,15 @@ public class AppWidgetHostView extends FrameLayout {
      * {@link FrameLayout.LayoutParams} before inserting.
      */
     protected void prepareView(View view) {
-        // Take requested dimensions from parent, but apply default gravity.
-        ViewGroup.LayoutParams requested = view.getLayoutParams();
+        // Take requested dimensions from child, but apply default gravity.
+        FrameLayout.LayoutParams requested = (FrameLayout.LayoutParams)view.getLayoutParams();
         if (requested == null) {
             requested = new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT,
                     LayoutParams.FILL_PARENT);
         }
-        
-        FrameLayout.LayoutParams params =
-            new FrameLayout.LayoutParams(requested.width, requested.height);
-        params.gravity = Gravity.CENTER;
-        view.setLayoutParams(params);
+
+        requested.gravity = Gravity.CENTER;
+        view.setLayoutParams(requested);
     }
     
     /**
