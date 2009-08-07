@@ -31,6 +31,8 @@ class EGLUtils
 {
 public:
 
+    static const char *strerror(EGLint err);
+
     static status_t selectConfigForPixelFormat(
             EGLDisplay dpy,
             EGLint const* attrs,
