@@ -85,6 +85,7 @@ public abstract class AsyncQueryHandler extends Handler {
                             cursor.getCount();
                         }
                     } catch (Exception e) {
+                        Log.d(TAG, e.toString());
                         cursor = null;
                     }
 
