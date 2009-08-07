@@ -180,13 +180,31 @@ public final class ContactsContract {
          * Reference to the row in the data table holding the primary phone number.
          * <P>Type: INTEGER REFERENCES data(_id)</P>
          */
+        @Deprecated
         public static final String PRIMARY_PHONE_ID = "primary_phone_id";
+
+        /**
+         * Reference to the row in the data table holding the default phone number.
+         * If the contact has only one phone number, that number is the default one.
+         * Otherwise it is the one explicitly selected by the user as primary.
+         * <P>Type: INTEGER REFERENCES data(_id)</P>
+         */
+        public static final String DEFAULT_PHONE_ID = "default_phone_id";
 
         /**
          * Reference to the row in the data table holding the primary email address.
          * <P>Type: INTEGER REFERENCES data(_id)</P>
          */
+        @Deprecated
         public static final String PRIMARY_EMAIL_ID = "primary_email_id";
+
+        /**
+         * Reference to the row in the data table holding the default email address.
+         * If the contact has only one email address, that address is the default one.
+         * Otherwise it is the one explicitly selected by the user as primary.
+         * <P>Type: INTEGER REFERENCES data(_id)</P>
+         */
+        public static final String DEFAULT_EMAIL_ID = "default_email_id";
 
         /**
          * Reference to the row in the data table holding the photo.
@@ -210,19 +228,40 @@ public final class ContactsContract {
          * The type of data, for example Home or Work.
          * <P>Type: INTEGER</P>
          */
+        @Deprecated
         public static final String PRIMARY_PHONE_TYPE = CommonDataKinds.Phone.TYPE;
+
+        /**
+         * The type of data, for example Home or Work.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DEFAULT_PHONE_TYPE = "default_phone_type";
 
         /**
          * The user defined label for the primary phone.
          * <P>Type: TEXT</P>
          */
+        @Deprecated
         public static final String PRIMARY_PHONE_LABEL = CommonDataKinds.Phone.LABEL;
+
+        /**
+         * The user defined label for the default phone.
+         * <P>Type: TEXT</P>
+         */
+        public static final String DEFAULT_PHONE_LABEL = "default_phone_label";
 
         /**
          * The primary phone number.
          * <P>Type: TEXT</P>
          */
+        @Deprecated
         public static final String PRIMARY_PHONE_NUMBER = CommonDataKinds.Phone.NUMBER;
+
+        /**
+         * The default phone number.
+         * <P>Type: TEXT</P>
+         */
+        public static final String DEFAULT_PHONE_NUMBER = "default_phone_number";
     }
 
     /**
