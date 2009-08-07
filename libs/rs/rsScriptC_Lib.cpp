@@ -75,6 +75,25 @@ static int32_t* SC_loadArrayI32(uint32_t bank, uint32_t offset)
     return i + offset;
 }
 
+static float* SC_loadTriangleMeshVerticesF(RsTriangleMesh mesh)
+{
+    TriangleMesh *tm = static_cast<TriangleMesh *>(mesh);
+    void *vp = tm->mVertexData;
+    float *f = static_cast<float *>(vp);
+    return f;
+}
+
+static void SC_updateTriangleMesh(RsTriangleMesh mesh)
+{
+    TriangleMesh *tm = static_cast<TriangleMesh *>(mesh);
+    glBindBuffer(GL_ARRAY_BUFFER, tm->mBufferObjects[0]);
+    glBufferData(GL_ARRAY_BUFFER, tm->mVertexDataSize, tm->mVertexData, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, tm->mIndexDataSize, tm->mIndexData, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);    
+}
 
 static uint32_t SC_loadU32(uint32_t bank, uint32_t offset)
 {
@@ -584,6 +603,36 @@ static void SC_color(float r, float g, float b, float a)
     glColor4f(r, g, b, a);
 }
 
+static void SC_ambient(float r, float g, float b, float a)
+{
+    GLfloat params[] = { r, g, b, a };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, params);
+}
+
+static void SC_diffuse(float r, float g, float b, float a)
+{
+    GLfloat params[] = { r, g, b, a };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, params);
+}
+
+static void SC_specular(float r, float g, float b, float a)
+{
+    GLfloat params[] = { r, g, b, a };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, params);
+}
+
+static void SC_emission(float r, float g, float b, float a)
+{
+    GLfloat params[] = { r, g, b, a };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, params);
+}
+
+static void SC_shininess(float r, float g, float b, float a)
+{
+    GLfloat params[] = { r, g, b, a };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, params);
+}
+
 static void SC_hsb(float h, float s, float b, float a)
 {
     float red = 0.0f;
@@ -712,6 +761,10 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(int, int, float *)" },
     { "storeMatrix", (void *)&SC_storeMatrix,
         "void", "(int, int, float *)" },
+    { "loadTriangleMeshVerticesF", (void *)&SC_loadTriangleMeshVerticesF,
+        "float*", "(int)" },
+    { "updateTriangleMesh", (void *)&SC_updateTriangleMesh,
+        "void", "(int)" },
 
     // math
     { "sinf", (void *)&sinf,
@@ -858,6 +911,16 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "color", (void *)&SC_color,
         "void", "(float, float, float, float)" },
     { "hsb", (void *)&SC_hsb,
+        "void", "(float, float, float, float)" },
+    { "ambient", (void *)&SC_ambient,
+        "void", "(float, float, float, float)" },
+    { "diffuse", (void *)&SC_diffuse,
+        "void", "(float, float, float, float)" },
+    { "specular", (void *)&SC_specular,
+        "void", "(float, float, float, float)" },
+    { "emission", (void *)&SC_emission,
+        "void", "(float, float, float, float)" },
+    { "shininess", (void *)&SC_shininess,
         "void", "(float, float, float, float)" },
 
     { "uploadToTexture", (void *)&SC_uploadToTexture,

@@ -63,7 +63,7 @@ void ProgramVertex::setupGL(ProgramVertexState *state)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     if (mLightCount) {
-        int v = 1;
+        int v = 0;
         glEnable(GL_LIGHTING);
         glLightModelxv(GL_LIGHT_MODEL_TWO_SIDE, &v);
         for (uint32_t ct = 0; ct < mLightCount; ct++) {
