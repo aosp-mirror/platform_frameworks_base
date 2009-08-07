@@ -829,9 +829,6 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
 AudioFlinger::PlaybackThread::~PlaybackThread()
 {
     delete [] mMixBuffer;
-    if (mType != DUPLICATING) {
-        mAudioFlinger->mAudioHardware->closeOutputStream(mOutput);
-    }
 }
 
 status_t AudioFlinger::PlaybackThread::dump(int fd, const Vector<String16>& args)
@@ -2855,7 +2852,6 @@ AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger, A
 
 AudioFlinger::RecordThread::~RecordThread()
 {
-    mAudioFlinger->mAudioHardware->closeInputStream(mInput);
     delete[] mRsmpInBuffer;
     if (mResampler != 0) {
         delete mResampler;
@@ -3326,7 +3322,9 @@ int AudioFlinger::openDuplicateOutput(int output1, int output2)
 
 status_t AudioFlinger::closeOutput(int output)
 {
-    PlaybackThread *thread;
+    // keep strong reference on the playback thread so that
+    // it is not destroyed while exit() is executed
+    sp <PlaybackThread> thread;
     {
         Mutex::Autolock _l(mLock);
         thread = checkPlaybackThread_l(output);
@@ -3340,7 +3338,7 @@ status_t AudioFlinger::closeOutput(int output)
             for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
                 if (mPlaybackThreads.valueAt(i)->type() == PlaybackThread::DUPLICATING) {
                     DuplicatingThread *dupThread = (DuplicatingThread *)mPlaybackThreads.valueAt(i).get();
-                    dupThread->removeOutputTrack((MixerThread *)thread);
+                    dupThread->removeOutputTrack((MixerThread *)thread.get());
                 }
             }
         }
@@ -3348,6 +3346,9 @@ status_t AudioFlinger::closeOutput(int output)
     }
     thread->exit();
 
+    if (thread->type() != PlaybackThread::DUPLICATING) {
+        mAudioHardware->closeOutputStream(thread->getOutput());
+    }
     return NO_ERROR;
 }
 
@@ -3449,7 +3450,9 @@ int AudioFlinger::openInput(uint32_t *pDevices,
 
 status_t AudioFlinger::closeInput(int input)
 {
-    RecordThread *thread;
+    // keep strong reference on the record thread so that
+    // it is not destroyed while exit() is executed
+    sp <RecordThread> thread;
     {
         Mutex::Autolock _l(mLock);
         thread = checkRecordThread_l(input);
@@ -3461,6 +3464,8 @@ status_t AudioFlinger::closeInput(int input)
         mRecordThreads.removeItem(input);
     }
     thread->exit();
+
+    mAudioHardware->closeInputStream(thread->getInput());
 
     return NO_ERROR;
 }
