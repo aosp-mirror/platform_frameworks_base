@@ -233,6 +233,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
             if (c.moveToFirst()) {
                 long contactId = c.getLong(EMAIL_LOOKUP_CONTACT_ID_COLUMN_INDEX);
                 bindFromContactId(contactId);
+            } else {
+                bindStatic(emailAddress, "");
             }
         } finally {
             if (c != null) {
@@ -257,12 +259,21 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
             if (c.moveToFirst()) {
                 long contactId = c.getLong(PHONE_LOOKUP_CONTACT_ID_COLUMN_INDEX);
                 bindFromContactId(contactId);
+            } else {
+                bindStatic(number, "");
             }
         } finally {
             if (c != null) {
                 c.close();
             }
         }
+    }
+
+    public void bindStatic(String main, String secondary) {
+        mDisplayNameView.setText(main);
+        mStatusView.setText(secondary);
+        mStarredView.setVisibility(View.GONE);
+        mPhotoView.setImageBitmap(loadPlaceholderPhoto(null));
     }
 
     protected void redrawHeader() {
