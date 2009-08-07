@@ -154,150 +154,8 @@ OMX_ERRORTYPE OMX::OnFillBufferDone(
     return meta->owner()->OnFillBufferDone(meta, pBuffer);
 }
 
-OMX::OMX()
-#if IOMX_USES_SOCKETS
-    : mSock(-1)
-#endif
-{
+OMX::OMX() {
 }
-
-OMX::~OMX() {
-#if IOMX_USES_SOCKETS
-    assert(mSock < 0);
-#endif
-}
-
-#if IOMX_USES_SOCKETS
-status_t OMX::connect(int *sd) {
-    Mutex::Autolock autoLock(mLock);
-
-    if (mSock >= 0) {
-        return UNKNOWN_ERROR;
-    }
-
-    int sockets[2];
-    if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sockets) < 0) {
-        return UNKNOWN_ERROR;
-    }
-
-    mSock = sockets[0];
-    *sd = sockets[1];
-
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-
-    int err = pthread_create(&mThread, &attr, ThreadWrapper, this);
-    assert(err == 0);
-
-    pthread_attr_destroy(&attr);
-
-    return OK;
-}
-
-// static
-void *OMX::ThreadWrapper(void *me) {
-    ((OMX *)me)->threadEntry();
-
-    return NULL;
-}
-
-void OMX::threadEntry() {
-    bool done = false;
-    while (!done) {
-        omx_message msg;
-        ssize_t n = recv(mSock, &msg, sizeof(msg), 0);
-
-        if (n <= 0) {
-            break;
-        }
-
-        Mutex::Autolock autoLock(mLock);
-
-        switch (msg.type) {
-            case omx_message::FILL_BUFFER:
-            {
-                OMX_BUFFERHEADERTYPE *header =
-                    static_cast<OMX_BUFFERHEADERTYPE *>(
-                            msg.u.buffer_data.buffer);
-
-                header->nFilledLen = 0;
-                header->nOffset = 0;
-                header->hMarkTargetComponent = NULL;
-                header->nFlags = 0;
-
-                NodeMeta *node_meta = static_cast<NodeMeta *>(
-                        msg.u.buffer_data.node);
-                
-                LOGV("FillThisBuffer buffer=%p", header);
-
-                OMX_ERRORTYPE err =
-                    OMX_FillThisBuffer(node_meta->handle(), header);
-                assert(err == OMX_ErrorNone);
-                break;
-            }
-
-            case omx_message::EMPTY_BUFFER:
-            {
-                OMX_BUFFERHEADERTYPE *header =
-                    static_cast<OMX_BUFFERHEADERTYPE *>(
-                            msg.u.extended_buffer_data.buffer);
-
-                header->nFilledLen = msg.u.extended_buffer_data.range_length;
-                header->nOffset = msg.u.extended_buffer_data.range_offset;
-                header->hMarkTargetComponent = NULL;
-                header->nFlags = msg.u.extended_buffer_data.flags;
-                header->nTimeStamp = msg.u.extended_buffer_data.timestamp;
-
-                BufferMeta *buffer_meta =
-                    static_cast<BufferMeta *>(header->pAppPrivate);
-                buffer_meta->CopyToOMX(header);
-
-                NodeMeta *node_meta = static_cast<NodeMeta *>(
-                        msg.u.extended_buffer_data.node);
-
-                LOGV("EmptyThisBuffer buffer=%p", header);
-
-                OMX_ERRORTYPE err =
-                    OMX_EmptyThisBuffer(node_meta->handle(), header);
-                assert(err == OMX_ErrorNone);
-                break;
-            }
-
-            case omx_message::SEND_COMMAND:
-            {
-                NodeMeta *node_meta = static_cast<NodeMeta *>(
-                        msg.u.send_command_data.node);
-
-                OMX_ERRORTYPE err =
-                    OMX_SendCommand(
-                            node_meta->handle(), msg.u.send_command_data.cmd,
-                            msg.u.send_command_data.param, NULL);
-                assert(err == OMX_ErrorNone);
-                break;
-            }
-
-            case omx_message::DISCONNECT:
-            {
-                omx_message msg;
-                msg.type = omx_message::DISCONNECTED;
-                ssize_t n = send(mSock, &msg, sizeof(msg), 0);
-                assert(n > 0 && static_cast<size_t>(n) == sizeof(msg));
-                done = true;
-                break;
-            }
-
-            default:
-                LOGE("received unknown omx_message type %d", msg.type);
-                break;
-        }
-    }
-
-    Mutex::Autolock autoLock(mLock);
-    close(mSock);
-    mSock = -1;
-}
-#endif
 
 status_t OMX::list_nodes(List<String8> *list) {
     OMX_MasterInit();  // XXX Put this somewhere else.
@@ -361,12 +219,6 @@ status_t OMX::free_node(node_id node) {
 status_t OMX::send_command(
         node_id node, OMX_COMMANDTYPE cmd, OMX_S32 param) {
     Mutex::Autolock autoLock(mLock);
-
-#if IOMX_USES_SOCKETS
-    if (mSock < 0) {
-        return UNKNOWN_ERROR;
-    }
-#endif
 
     NodeMeta *meta = static_cast<NodeMeta *>(node);
     OMX_ERRORTYPE err = OMX_SendCommand(meta->handle(), cmd, param, NULL);
@@ -510,17 +362,10 @@ OMX_ERRORTYPE OMX::OnEvent(
     msg.u.event_data.data1 = nData1;
     msg.u.event_data.data2 = nData2;
 
-#if !IOMX_USES_SOCKETS
     sp<IOMXObserver> observer = meta->observer();
     if (observer.get() != NULL) {
         observer->on_message(msg);
     }
-#else
-    assert(mSock >= 0);
-
-    ssize_t n = send(mSock, &msg, sizeof(msg), 0);
-    assert(n > 0 && static_cast<size_t>(n) == sizeof(msg));
-#endif
 
     return OMX_ErrorNone;
 }
@@ -534,16 +379,10 @@ OMX_ERRORTYPE OMX::OnEmptyBufferDone(
     msg.u.buffer_data.node = meta;
     msg.u.buffer_data.buffer = pBuffer;
 
-#if !IOMX_USES_SOCKETS
     sp<IOMXObserver> observer = meta->observer();
     if (observer.get() != NULL) {
         observer->on_message(msg);
     }
-#else
-    assert(mSock >= 0);
-    ssize_t n = send(mSock, &msg, sizeof(msg), 0);
-    assert(n > 0 && static_cast<size_t>(n) == sizeof(msg));
-#endif
 
     return OMX_ErrorNone;
 }
@@ -564,22 +403,14 @@ OMX_ERRORTYPE OMX::OnFillBufferDone(
     msg.u.extended_buffer_data.timestamp = pBuffer->nTimeStamp;
     msg.u.extended_buffer_data.platform_private = pBuffer->pPlatformPrivate;
 
-#if !IOMX_USES_SOCKETS
     sp<IOMXObserver> observer = meta->observer();
     if (observer.get() != NULL) {
         observer->on_message(msg);
     }
-#else
-    assert(mSock >= 0);
-
-    ssize_t n = send(mSock, &msg, sizeof(msg), 0);
-    assert(n > 0 && static_cast<size_t>(n) == sizeof(msg));
-#endif
 
     return OMX_ErrorNone;
 }
 
-#if !IOMX_USES_SOCKETS
 status_t OMX::observe_node(
         node_id node, const sp<IOMXObserver> &observer) {
     NodeMeta *node_meta = static_cast<NodeMeta *>(node);
@@ -623,7 +454,6 @@ void OMX::empty_buffer(
         OMX_EmptyThisBuffer(node_meta->handle(), header);
     assert(err == OMX_ErrorNone);
 }
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -1041,8 +1041,7 @@ void OMXDecoder::onEventCmdComplete(OMX_COMMANDTYPE type, OMX_U32 data) {
                 IOMX::buffer_id buffer = *obuffers->begin();
                 obuffers->erase(obuffers->begin());
 
-                status_t err = mClient->fillBuffer(mNode, buffer);
-                assert(err == NO_ERROR);
+                mOMX->fill_buffer(mNode, buffer);
             }
 
             break;
@@ -1178,7 +1177,7 @@ void OMXDecoder::onStateChanged(OMX_STATETYPE to) {
 
         LOGV("Executing->Idle complete, initiating Idle->Loaded");
         status_t err =
-            mClient->send_command(mNode, OMX_CommandStateSet, OMX_StateLoaded);
+            mOMX->send_command(mNode, OMX_CommandStateSet, OMX_StateLoaded);
         assert(err == NO_ERROR);
 
         freePortBuffers(kPortIndexInput);
@@ -1215,7 +1214,7 @@ void OMXDecoder::initiateShutdown() {
         setPortStatus(kPortIndexInput, kPortStatusFlushingToShutdown);
         setPortStatus(kPortIndexOutput, kPortStatusFlushingToShutdown);
     } else {
-        err = mClient->send_command(
+        err = mOMX->send_command(
                 mNode, OMX_CommandStateSet, OMX_StateIdle);
 
         setPortStatus(kPortIndexInput, kPortStatusShutdown);
@@ -1300,14 +1299,14 @@ void OMXDecoder::onFillBufferDone(const omx_message &msg) {
         default:
         {
             if (msg.type == omx_message::INITIAL_FILL_BUFFER) {
-                err = mClient->fillBuffer(mNode, buffer);
+                mOMX->fill_buffer(mNode, buffer);
             } else {
                 LOGV("[%s] Filled OUTPUT buffer %p, flags=0x%08lx.",
                      mComponentName, buffer, msg.u.extended_buffer_data.flags);
 
                 onRealFillBufferDone(msg);
-                err = NO_ERROR;
             }
+            err = NO_ERROR;
             break;
         }
     }
@@ -1348,12 +1347,10 @@ void OMXDecoder::onRealEmptyBufferDone(IOMX::buffer_id buffer) {
 
         ++mCodecSpecificDataIterator;
 
-        status_t err = mClient->emptyBuffer(
+        mOMX->empty_buffer(
                 mNode, buffer, 0, range_length, 
                 OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_CODECCONFIG,
                 0);
-
-        assert(err == NO_ERROR);
 
         return;
     }
@@ -1385,10 +1382,9 @@ void OMXDecoder::onRealEmptyBufferDone(IOMX::buffer_id buffer) {
         }
 
         if (err != OK) {
-            status_t err2 = mClient->emptyBuffer(
+            mOMX->empty_buffer(
                     mNode, buffer, 0, 0, OMX_BUFFERFLAG_EOS, 0);
 
-            assert(err2 == NO_ERROR);
             return;
         }
 
@@ -1452,9 +1448,8 @@ void OMXDecoder::onRealEmptyBufferDone(IOMX::buffer_id buffer) {
     LOGV("[%s] Calling EmptyBuffer on buffer %p size:%d flags:0x%08lx",
          mComponentName, buffer, src_length, flags);
 
-    status_t err2 = mClient->emptyBuffer(
+    mOMX->empty_buffer(
             mNode, buffer, 0, src_length, flags, timestamp);
-    assert(err2 == OK);
 }
 
 void OMXDecoder::onRealFillBufferDone(const omx_message &msg) {
@@ -1517,8 +1512,7 @@ void OMXDecoder::signalBufferReturned(MediaBuffer *_buffer) {
     } else {
         LOGV("[%s] Calling FillBuffer on buffer %p.", mComponentName, buffer);
 
-        status_t err = mClient->fillBuffer(mNode, buffer);
-        assert(err == NO_ERROR);
+        mOMX->fill_buffer(mNode, buffer);
     }
 }
 

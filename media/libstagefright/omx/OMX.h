@@ -17,8 +17,6 @@
 #ifndef ANDROID_OMX_H_
 #define ANDROID_OMX_H_
 
-#include <pthread.h>
-
 #include <media/IOMX.h>
 #include <utils/threads.h>
 
@@ -29,11 +27,6 @@ class NodeMeta;
 class OMX : public BnOMX {
 public:
     OMX();
-    virtual ~OMX();
-
-#if IOMX_USES_SOCKETS
-    virtual status_t connect(int *sd);
-#endif
 
     virtual status_t list_nodes(List<String8> *list);
 
@@ -66,7 +59,6 @@ public:
     virtual status_t free_buffer(
             node_id node, OMX_U32 port_index, buffer_id buffer);
 
-#if !IOMX_USES_SOCKETS
     virtual status_t observe_node(
             node_id node, const sp<IOMXObserver> &observer);
 
@@ -77,7 +69,6 @@ public:
             buffer_id buffer,
             OMX_U32 range_offset, OMX_U32 range_length,
             OMX_U32 flags, OMX_TICKS timestamp);
-#endif
 
     virtual sp<IOMXRenderer> createRenderer(
             const sp<ISurface> &surface,
@@ -88,14 +79,6 @@ public:
 
 private:
     static OMX_CALLBACKTYPE kCallbacks;
-
-#if IOMX_USES_SOCKETS
-    int mSock;
-    pthread_t mThread;
-
-    static void *ThreadWrapper(void *me);
-    void threadEntry();
-#endif
 
     Mutex mLock;
 

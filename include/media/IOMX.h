@@ -25,8 +25,6 @@
 #include <OMX_Core.h>
 #include <OMX_Video.h>
 
-#define IOMX_USES_SOCKETS       0
-
 namespace android {
 
 class IMemory;
@@ -40,12 +38,6 @@ public:
 
     typedef void *buffer_id;
     typedef void *node_id;
-
-#if IOMX_USES_SOCKETS
-    // If successful, returns a socket descriptor used for further
-    // communication. Caller assumes ownership of "*sd".
-    virtual status_t connect(int *sd) = 0;
-#endif
 
     virtual status_t list_nodes(List<String8> *list) = 0;
 
@@ -78,7 +70,6 @@ public:
     virtual status_t free_buffer(
             node_id node, OMX_U32 port_index, buffer_id buffer) = 0;
 
-#if !IOMX_USES_SOCKETS
     virtual status_t observe_node(
             node_id node, const sp<IOMXObserver> &observer) = 0;
 
@@ -89,7 +80,6 @@ public:
             buffer_id buffer,
             OMX_U32 range_offset, OMX_U32 range_length,
             OMX_U32 flags, OMX_TICKS timestamp) = 0;
-#endif
 
     virtual sp<IOMXRenderer> createRenderer(
             const sp<ISurface> &surface,
@@ -104,14 +94,6 @@ struct omx_message {
         EVENT,
         EMPTY_BUFFER_DONE,
         FILL_BUFFER_DONE,
-
-#if IOMX_USES_SOCKETS
-        EMPTY_BUFFER,
-        FILL_BUFFER,
-        SEND_COMMAND,
-        DISCONNECT,
-        DISCONNECTED,
-#endif
 
         // reserved for OMXDecoder use.
         START,

@@ -87,31 +87,13 @@ public:
     status_t registerObserver(IOMX::node_id node, OMXObserver *observer);
     void unregisterObserver(IOMX::node_id node);
 
-    status_t fillBuffer(IOMX::node_id node, IOMX::buffer_id buffer);
-
-    status_t emptyBuffer(
-            IOMX::node_id node, IOMX::buffer_id buffer,
-            OMX_U32 range_offset, OMX_U32 range_length,
-            OMX_U32 flags, OMX_TICKS timestamp);
-
-    status_t send_command(
-            IOMX::node_id node, OMX_COMMANDTYPE cmd, OMX_S32 param);
-
 private:
     sp<IOMX> mOMX;
-
-    int mSock;
     Mutex mLock;
-    pthread_t mThread;
 
     KeyedVector<IOMX::node_id, OMXObserver *> mObservers;
 
     sp<OMXClientReflector> mReflector;
-
-#if IOMX_USES_SOCKETS
-    static void *ThreadWrapper(void *me);
-    void threadEntry();
-#endif
 
     bool onOMXMessage(const omx_message &msg);
 
