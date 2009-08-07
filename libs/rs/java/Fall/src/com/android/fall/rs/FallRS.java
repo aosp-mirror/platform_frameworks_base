@@ -33,8 +33,6 @@ import static android.renderscript.ProgramStore.BlendDstFunc;
 import static android.renderscript.ProgramStore.BlendSrcFunc;
 import static android.renderscript.ProgramFragment.EnvMode.*;
 import static android.renderscript.Element.*;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap;
 
 import java.util.TimeZone;
 
@@ -51,17 +49,20 @@ class FallRS {
     private static final int RSID_STATE_RIPPLE_INDEX = 6;
     private static final int RSID_STATE_DROP_X = 7;
     private static final int RSID_STATE_DROP_Y = 8;
+    private static final int RSID_STATE_RUNNING = 9;
     
     private static final int RSID_TEXTURES = 1;
-    private static final int TEXTURES_COUNT = 0;
+    private static final int TEXTURES_COUNT = 1;
+    private static final int RSID_TEXTURE_RIVERBED = 0;
 
     private static final int RSID_RIPPLE_MAP = 2;
 
     private static final int RSID_REFRACTION_MAP = 3;
 
+    private boolean mIsRunning = true;    
+    
     private Resources mResources;
     private RenderScript mRS;
-    private final BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
 
     private final int mWidth;
     private final int mHeight;
@@ -69,8 +70,10 @@ class FallRS {
     private ScriptC mScript;
     private Sampler mSampler;
     private ProgramFragment mPfBackground;
+    private ProgramFragment mPfLighting;
     private ProgramStore mPfsBackground;
     private ProgramVertex mPvBackground;
+    private ProgramVertex mPvLines;
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
     private Light mLight;
 
@@ -89,8 +92,6 @@ class FallRS {
     public FallRS(int width, int height) {
         mWidth = width;
         mHeight = height;
-        mBitmapOptions.inScaled = false;
-        mBitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
     }
 
     public void init(RenderScript rs, Resources res) {
@@ -116,6 +117,8 @@ class FallRS {
         mLight.destroy();
         mRippleMap.destroy();
         mRefractionMap.destroy();
+        mPvLines.destroy();
+        mPfLighting.destroy();
     }
 
     @Override
@@ -177,10 +180,11 @@ class FallRS {
         
         for (int y = 0; y <= hResolution; y++) {
             final float yOffset = y * quadHeight - glHeight / 2.0f - quadHeight;
+            final float t = 1.0f - y / (float) hResolution;
             for (int x = 0; x <= wResolution; x++) {
                 rs.triangleMeshAddVertex_XYZ_ST_NORM(
                         -1.0f + x * quadWidth - quadWidth, yOffset, 0.0f,
-                        x / (float) wResolution, y / (float) wResolution,
+                        x / (float) wResolution, t,
                         0.0f, 0.0f, -1.0f);
             }
         }
@@ -204,7 +208,7 @@ class FallRS {
     private void createScriptStructures() {
         final int rippleMapSize = (mMeshWidth + 2) * (mMeshHeight + 2);
 
-        final int[] data = new int[9];
+        final int[] data = new int[10];
         mState = Allocation.createSized(mRS, USER_I32, data.length);
         data[RSID_STATE_FRAMECOUNT] = 0;
         data[RSID_STATE_WIDTH] = mWidth;
@@ -215,6 +219,7 @@ class FallRS {
         data[RSID_STATE_RIPPLE_INDEX] = 0;
         data[RSID_STATE_DROP_X] = mMeshWidth / 2;
         data[RSID_STATE_DROP_Y] = mMeshHeight / 2;
+        data[RSID_STATE_RUNNING] = 1;
         mState.data(data);
 
         final int[] rippleMap = new int[rippleMapSize * 2];
@@ -236,7 +241,7 @@ class FallRS {
         mTexturesIDs = Allocation.createSized(mRS, USER_FLOAT, TEXTURES_COUNT);
 
         final Allocation[] textures = mTextures;
-        // TOOD: Load textures
+        textures[RSID_TEXTURE_RIVERBED] = loadTexture(R.drawable.riverbed, "TRiverbed");
 
         final int[] bufferIds = mTextureBufferIDs;
         final int count = textures.length;
@@ -257,15 +262,6 @@ class FallRS {
         return allocation;
     }
 
-    private Allocation loadTextureARGB(int id, String name) {
-        // Forces ARGB 32 bits, because pngcrush sometimes optimize our PNGs to
-        // indexed pictures, which are not well supported
-        final Bitmap b = BitmapFactory.decodeResource(mResources, id, mBitmapOptions);
-        final Allocation allocation = Allocation.createFromBitmap(mRS, b, RGBA_8888, false);
-        allocation.setName(name);
-        return allocation;
-    }
-
     private void createProgramFragment() {
         Sampler.Builder sampleBuilder = new Sampler.Builder(mRS);
         sampleBuilder.setMin(LINEAR);
@@ -280,12 +276,18 @@ class FallRS {
         mPfBackground = builder.create();
         mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(mSampler, 0);
+        
+        builder = new ProgramFragment.Builder(mRS, null, null);
+        builder.setTexEnable(false, 0);
+        mPfLighting = builder.create();
+        mPfLighting.setName("PFLighting");
+        mPfLighting.bindSampler(mSampler, 0);
     }
 
     private void createProgramFragmentStore() {
         ProgramStore.Builder builder = new ProgramStore.Builder(mRS, null, null);
-        builder.setDepthFunc(LESS);
-        builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+        builder.setDepthFunc(ALWAYS);
+        builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
         builder.setDitherEnable(true);
         builder.setDepthMask(true);
         mPfsBackground = builder.create();
@@ -297,7 +299,7 @@ class FallRS {
         mPvOrthoAlloc.setupProjectionNormalized(mWidth, mHeight);
 
         mLight = new Light.Builder(mRS).create();
-        mLight.setPosition(0.0f, 0.0f, -1.0f);
+        mLight.setPosition(0.0f, 2.0f, -8.0f);
 
         ProgramVertex.Builder builder = new ProgramVertex.Builder(mRS, null, null);
         builder.setTextureMatrixEnable(true);
@@ -305,11 +307,21 @@ class FallRS {
         mPvBackground = builder.create();
         mPvBackground.bindAllocation(mPvOrthoAlloc);
         mPvBackground.setName("PVBackground");
+        
+        builder = new ProgramVertex.Builder(mRS, null, null);
+        mPvLines = builder.create();
+        mPvLines.bindAllocation(mPvOrthoAlloc);
+        mPvLines.setName("PVLines");
     }
 
-    public void addDrop(float x, float y) {
+    void addDrop(float x, float y) {
         mState.subData1D(RSID_STATE_DROP_X, 2, new int[] {
                 (int) ((x / mWidth) * mMeshWidth), (int) ((y / mHeight) * mMeshHeight)
         });
+    }
+    
+    void togglePause() {
+        mIsRunning = !mIsRunning;
+        mState.subData1D(RSID_STATE_RUNNING, 1, new int[] { mIsRunning ? 1 : 0 });
     }
 }

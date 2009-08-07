@@ -20,6 +20,7 @@ package com.android.fall.rs;
 import android.content.Context;
 import android.view.SurfaceHolder;
 import android.view.MotionEvent;
+import android.view.KeyEvent;
 import android.renderscript.RenderScript;
 import android.renderscript.RSSurfaceView;
 
@@ -28,6 +29,8 @@ class FallView extends RSSurfaceView {
 
     public FallView(Context context) {
         super(context);
+        setFocusable(true);
+        setFocusableInTouchMode(true);
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -41,6 +44,15 @@ class FallView extends RSSurfaceView {
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         if (mRender != null) mRender.destroy();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+                keyCode == KeyEvent.KEYCODE_MENU) {
+            mRender.togglePause();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
