@@ -1,5 +1,3 @@
-ifeq ($(BUILD_WITH_STAGEFRIGHT),true)
-
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -62,5 +60,3 @@ include $(BUILD_EXECUTABLE)
 # LOCAL_MODULE:= play
 # 
 # include $(BUILD_EXECUTABLE)
-
-endif

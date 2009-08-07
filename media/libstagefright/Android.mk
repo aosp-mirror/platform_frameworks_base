@@ -1,5 +1,3 @@
-ifeq ($(BUILD_WITH_STAGEFRIGHT),true)
-
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -54,4 +52,3 @@ LOCAL_MODULE:= libstagefright
 include $(BUILD_SHARED_LIBRARY)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
-endif

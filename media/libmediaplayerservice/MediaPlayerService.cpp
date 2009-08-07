@@ -58,20 +58,9 @@
 #include "VorbisPlayer.h"
 #include <media/PVPlayer.h>
 #include "TestPlayerStub.h"
-
-//#undef USE_STAGEFRIGHT
-
-#if USE_STAGEFRIGHT
 #include "StagefrightPlayer.h"
-#endif
 
-#ifdef BUILD_WITH_STAGEFRIGHT
 #include <OMX.h>
-#else
-#include <media/IOMX.h>
-#endif
-
-
 
 /* desktop Linux needs a little help with gettid() */
 #if defined(HAVE_GETTID) && !defined(HAVE_ANDROID_OS)
@@ -199,10 +188,6 @@ typedef struct {
     const player_type playertype;
 } extmap;
 extmap FILE_EXTS [] =  {
-#if USE_STAGEFRIGHT
-        {".mp4", STAGEFRIGHT_PLAYER},
-        {".3gp", STAGEFRIGHT_PLAYER},
-#endif
         {".mid", SONIVOX_PLAYER},
         {".midi", SONIVOX_PLAYER},
         {".smf", SONIVOX_PLAYER},
@@ -289,11 +274,7 @@ sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClie
 }
 
 sp<IOMX> MediaPlayerService::createOMX() {
-#ifdef BUILD_WITH_STAGEFRIGHT
     return new OMX;
-#else
-    return NULL;
-#endif
 }
 
 status_t MediaPlayerService::AudioCache::dump(int fd, const Vector<String16>& args) const
@@ -620,6 +601,16 @@ void MediaPlayerService::Client::disconnect()
     IPCThreadState::self()->flushCommands();
 }
 
+static player_type getDefaultPlayerType() {
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.enable-player", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        return STAGEFRIGHT_PLAYER;
+    }
+
+    return PV_PLAYER;
+}
+
 static player_type getPlayerType(int fd, int64_t offset, int64_t length)
 {
     char buf[20];
@@ -650,12 +641,7 @@ static player_type getPlayerType(int fd, int64_t offset, int64_t length)
         EAS_Shutdown(easdata);
     }
 
-#if USE_STAGEFRIGHT
-    return STAGEFRIGHT_PLAYER;
-#endif
-
-    // Fall through to PV
-    return PV_PLAYER;
+    return getDefaultPlayerType();
 }
 
 static player_type getPlayerType(const char* url)
@@ -676,12 +662,7 @@ static player_type getPlayerType(const char* url)
         }
     }
 
-#if USE_STAGEFRIGHT
-    return STAGEFRIGHT_PLAYER;
-#endif
-
-    // Fall through to PV
-    return PV_PLAYER;
+    return getDefaultPlayerType();
 }
 
 static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
@@ -703,17 +684,10 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
             LOGV(" create VorbisPlayer");
             p = new VorbisPlayer();
             break;
-#if USE_STAGEFRIGHT
         case STAGEFRIGHT_PLAYER:
             LOGV(" create StagefrightPlayer");
             p = new StagefrightPlayer;
             break;
-#else
-        case STAGEFRIGHT_PLAYER:
-            LOG_ALWAYS_FATAL(
-                    "Should not be here, stagefright player not enabled.");
-            break;
-#endif
         case TEST_PLAYER:
             LOGV("Create Test Player stub");
             p = new TestPlayerStub();
