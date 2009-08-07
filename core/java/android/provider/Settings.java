@@ -2992,6 +2992,12 @@ public final class Settings {
                 "vending_require_sim_for_purchase";
 
         /**
+         * Indicates the Vending Machine backup state. It is set if the
+         * Vending application has been backed up at least once.
+         */
+        public static final String VENDING_BACKUP_STATE = "vending_backup_state";
+
+        /**
          * The current version id of the Vending Machine terms of service.
          */
         public static final String VENDING_TOS_VERSION = "vending_tos_version";
