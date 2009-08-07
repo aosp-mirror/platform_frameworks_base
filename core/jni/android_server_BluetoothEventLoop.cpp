@@ -711,6 +711,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                                 method_onDeviceFound,
                                 env->NewStringUTF(c_address),
                                 str_array);
+            env->DeleteLocalRef(str_array);
         } else
             LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
         return DBUS_HANDLER_RESULT_HANDLED;
@@ -774,6 +775,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
             env->CallVoidMethod(nat->me,
                               method_onPropertyChanged,
                               str_array);
+            env->DeleteLocalRef(str_array);
         } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
         return DBUS_HANDLER_RESULT_HANDLED;
     } else if (dbus_message_is_signal(msg,
@@ -786,6 +788,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                             method_onDevicePropertyChanged,
                             env->NewStringUTF(remote_device_path),
                             str_array);
+            env->DeleteLocalRef(str_array);
         } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
         return DBUS_HANDLER_RESULT_HANDLED;
 
