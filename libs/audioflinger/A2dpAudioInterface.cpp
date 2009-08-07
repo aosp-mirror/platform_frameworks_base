@@ -89,7 +89,7 @@ AudioStreamOut* A2dpAudioInterface::openOutputStream(
 
 void A2dpAudioInterface::closeOutputStream(AudioStreamOut* out) {
     if (mOutput == 0 || mOutput != out) {
-        LOGW("Attempt to close invalid output stream");
+        mHardwareInterface->closeOutputStream(out);
     }
     else {
         delete mOutput;
