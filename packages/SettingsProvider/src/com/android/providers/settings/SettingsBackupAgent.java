@@ -122,7 +122,7 @@ public class SettingsBackupAgent extends BackupHelperAgent {
     public void onRestore(BackupDataInput data, int appVersionCode,
             ParcelFileDescriptor newState) throws IOException {
 
-        enableWifi(false);
+
         enableBluetooth(false);
 
         while (data.readNextHeader()) {
@@ -134,11 +134,15 @@ public class SettingsBackupAgent extends BackupHelperAgent {
             } else if (KEY_SECURE.equals(key)) {
                 restoreSettings(data, Settings.Secure.CONTENT_URI);
             } else if (FILE_WIFI_SUPPLICANT.equals(key)) {
+                int retainedWifiState = enableWifi(false);
                 restoreFile(FILE_WIFI_SUPPLICANT, data);
                 FileUtils.setPermissions(FILE_WIFI_SUPPLICANT,
                         FileUtils.S_IRUSR | FileUtils.S_IWUSR |
                         FileUtils.S_IRGRP | FileUtils.S_IWGRP,
                         Process.myUid(), Process.WIFI_UID);
+                // retain the previous WIFI state.
+                enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED ||
+                        retainedWifiState == WifiManager.WIFI_STATE_ENABLING);
             } else if (KEY_SYNC.equals(key)) {
                 mSettingsHelper.setSyncProviders(data);
             } else if (KEY_LOCALE.equals(key)) {
@@ -257,7 +261,7 @@ public class SettingsBackupAgent extends BackupHelperAgent {
     }
 
     /**
-     * Given a cursor sorted by key name and a set of keys sorted by name, 
+     * Given a cursor sorted by key name and a set of keys sorted by name,
      * extract the required keys and values and write them to a byte array.
      * @param sortedCursor
      * @param sortedKeys
@@ -373,11 +377,14 @@ public class SettingsBackupAgent extends BackupHelperAgent {
         return result;
     }
 
-    private void enableWifi(boolean enable) {
+    private int enableWifi(boolean enable) {
         WifiManager wfm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         if (wfm != null) {
+            int state = wfm.getWifiState();
             wfm.setWifiEnabled(enable);
+            return state;
         }
+        return WifiManager.WIFI_STATE_UNKNOWN;
     }
 
     private void enableBluetooth(boolean enable) {
