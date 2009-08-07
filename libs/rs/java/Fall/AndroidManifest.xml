@@ -5,6 +5,7 @@
     <application android:label="FallRS">
 
         <activity
+            android:screenOrientation="portrait"
             android:name="Fall"
             android:theme="@android:style/Theme.NoTitleBar">
 

@@ -544,6 +544,24 @@ static void SC_drawTriangleArray(int ialloc, uint32_t count)
     glDrawArrays(GL_TRIANGLES, 0, count * 3);
 }
 
+static void SC_drawLine(float x1, float y1, float z1,
+                        float x2, float y2, float z2)
+{
+    GET_TLS();
+    rsc->setupCheck();
+
+    float vtx[] = { x1, y1, z1, x2, y2, z2 };
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vtx);
+
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+
+    glDrawArrays(GL_LINES, 0, 2);
+}
+
 static void SC_drawQuad(float x1, float y1, float z1,
                         float x2, float y2, float z2,
                         float x3, float y3, float z3,
@@ -627,10 +645,9 @@ static void SC_emission(float r, float g, float b, float a)
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, params);
 }
 
-static void SC_shininess(float r, float g, float b, float a)
+static void SC_shininess(float s)
 {
-    GLfloat params[] = { r, g, b, a };
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, params);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, s);
 }
 
 static void SC_hsb(float h, float s, float b, float a)
@@ -685,25 +702,6 @@ static void SC_hsb(float h, float s, float b, float a)
     
     glColor4f(red, green, blue, a);
 }
-
-/*
-extern "C" void materialDiffuse(float r, float g, float b, float a)
-{
-    float v[] = {r, g, b, a};
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, v);
-}
-
-extern "C" void materialSpecular(float r, float g, float b, float a)
-{
-    float v[] = {r, g, b, a};
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, v);
-}
-
-extern "C" void materialShininess(float s)
-{
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &s);
-}
-*/
 
 static void SC_uploadToTexture(RsAllocation va, uint32_t baseMipLevel)
 {
@@ -903,6 +901,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(int mesh)" },
     { "drawTriangleMeshRange", (void *)&SC_drawTriangleMeshRange,
         "void", "(int mesh, int start, int count)" },
+    { "drawLine", (void *)&SC_drawLine,
+        "void", "(float x1, float y1, float z1, float x2, float y2, float z2)" },
 
 
     // misc
@@ -921,7 +921,7 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "emission", (void *)&SC_emission,
         "void", "(float, float, float, float)" },
     { "shininess", (void *)&SC_shininess,
-        "void", "(float, float, float, float)" },
+        "void", "(float)" },
 
     { "uploadToTexture", (void *)&SC_uploadToTexture,
         "void", "(int, int)" },
