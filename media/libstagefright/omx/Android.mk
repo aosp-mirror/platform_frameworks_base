@@ -1,5 +1,3 @@
-ifeq ($(BUILD_WITH_STAGEFRIGHT),true)
-
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -27,5 +25,3 @@ LOCAL_PRELINK_MODULE:= false
 LOCAL_MODULE:= libstagefright_omx
 
 include $(BUILD_SHARED_LIBRARY)
-
-endif
