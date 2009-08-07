@@ -31,6 +31,7 @@ class IMemory;
 class IOMXObserver;
 class IOMXRenderer;
 class ISurface;
+class Surface;
 
 class IOMX : public IInterface {
 public:
@@ -87,6 +88,16 @@ public:
             OMX_COLOR_FORMATTYPE colorFormat,
             size_t encodedWidth, size_t encodedHeight,
             size_t displayWidth, size_t displayHeight) = 0;
+
+    // Note: This method is _not_ virtual, it exists as a wrapper around
+    // the virtual "createRenderer" method above facilitating extraction
+    // of the ISurface from a regular Surface.
+    sp<IOMXRenderer> createRenderer(
+            const sp<Surface> &surface,
+            const char *componentName,
+            OMX_COLOR_FORMATTYPE colorFormat,
+            size_t encodedWidth, size_t encodedHeight,
+            size_t displayWidth, size_t displayHeight);
 };
 
 struct omx_message {

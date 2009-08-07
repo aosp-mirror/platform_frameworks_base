@@ -646,15 +646,21 @@ void MediaPlayerImpl::populateISurface() {
     success = success && meta->findInt32(kKeyHeight, &decodedHeight);
     assert(success);
 
-    const sp<ISurface> &isurface =
-        mSurface.get() != NULL ? mSurface->getISurface() : mISurface;
-
-    mVideoRenderer =
-        mClient.interface()->createRenderer(
-                isurface, component,
-                (OMX_COLOR_FORMATTYPE)format,
-                decodedWidth, decodedHeight,
-                mVideoWidth, mVideoHeight);
+    if (mSurface.get() != NULL) {
+        mVideoRenderer =
+            mClient.interface()->createRenderer(
+                    mSurface, component,
+                    (OMX_COLOR_FORMATTYPE)format,
+                    decodedWidth, decodedHeight,
+                    mVideoWidth, mVideoHeight);
+    } else {
+        mVideoRenderer =
+            mClient.interface()->createRenderer(
+                    mISurface, component,
+                    (OMX_COLOR_FORMATTYPE)format,
+                    decodedWidth, decodedHeight,
+                    mVideoWidth, mVideoHeight);
+    }
 }
 
 void MediaPlayerImpl::depopulateISurface() {

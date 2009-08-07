@@ -6,6 +6,7 @@
 #include <binder/Parcel.h>
 #include <media/IOMX.h>
 #include <ui/ISurface.h>
+#include <ui/Surface.h>
 
 namespace android {
 
@@ -28,6 +29,18 @@ enum {
     OBSERVER_ON_MSG,
     RENDERER_RENDER,
 };
+
+sp<IOMXRenderer> IOMX::createRenderer(
+        const sp<Surface> &surface,
+        const char *componentName,
+        OMX_COLOR_FORMATTYPE colorFormat,
+        size_t encodedWidth, size_t encodedHeight,
+        size_t displayWidth, size_t displayHeight) {
+    return createRenderer(
+            surface->getISurface(),
+            componentName, colorFormat, encodedWidth, encodedHeight,
+            displayWidth, displayHeight);
+}
 
 static void *readVoidStar(const Parcel *parcel) {
     // FIX if sizeof(void *) != sizeof(int32)
