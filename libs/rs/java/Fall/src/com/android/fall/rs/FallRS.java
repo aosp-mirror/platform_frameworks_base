@@ -25,6 +25,7 @@ import android.renderscript.ProgramVertex;
 import android.renderscript.Allocation;
 import android.renderscript.Sampler;
 import android.renderscript.Element;
+import android.renderscript.Light;
 import static android.renderscript.Sampler.Value.LINEAR;
 import static android.renderscript.Sampler.Value.CLAMP;
 import static android.renderscript.ProgramStore.DepthFunc.*;
@@ -38,15 +39,25 @@ import android.graphics.Bitmap;
 import java.util.TimeZone;
 
 class FallRS {
-    private static final int MESH_RESOLUTION = 32;
+    private static final int MESH_RESOLUTION = 48;
 
     private static final int RSID_STATE = 0;
     private static final int RSID_STATE_FRAMECOUNT = 0;
     private static final int RSID_STATE_WIDTH = 1;
     private static final int RSID_STATE_HEIGHT = 2;
-
+    private static final int RSID_STATE_MESH_WIDTH = 3;
+    private static final int RSID_STATE_MESH_HEIGHT = 4;
+    private static final int RSID_STATE_RIPPLE_MAP_SIZE = 5;
+    private static final int RSID_STATE_RIPPLE_INDEX = 6;
+    private static final int RSID_STATE_DROP_X = 7;
+    private static final int RSID_STATE_DROP_Y = 8;
+    
     private static final int RSID_TEXTURES = 1;
     private static final int TEXTURES_COUNT = 0;
+
+    private static final int RSID_RIPPLE_MAP = 2;
+
+    private static final int RSID_REFRACTION_MAP = 3;
 
     private Resources mResources;
     private RenderScript mRS;
@@ -61,6 +72,7 @@ class FallRS {
     private ProgramStore mPfsBackground;
     private ProgramVertex mPvBackground;
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
+    private Light mLight;
 
     private Allocation mTexturesIDs;
     private Allocation[] mTextures;
@@ -68,6 +80,11 @@ class FallRS {
 
     private Allocation mState;
     private RenderScript.TriangleMesh mMesh;
+    private int mMeshWidth;
+    private int mMeshHeight;
+
+    private Allocation mRippleMap;
+    private Allocation mRefractionMap;
 
     public FallRS(int width, int height) {
         mWidth = width;
@@ -96,6 +113,9 @@ class FallRS {
         mState.destroy();
         mTextureBufferIDs = null;
         mMesh.destroy();
+        mLight.destroy();
+        mRippleMap.destroy();
+        mRefractionMap.destroy();
     }
 
     @Override
@@ -111,8 +131,9 @@ class FallRS {
         createProgramVertex();
         createProgramFragmentStore();
         createProgramFragment();
-        createScriptStructures();
         createMesh();
+        createScriptStructures();
+        loadTextures();
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setScript(mResources, R.raw.fall);
@@ -121,16 +142,17 @@ class FallRS {
         mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         mScript.setTimeZone(TimeZone.getDefault().getID());
 
-        loadSkyTextures();
         mScript.bindAllocation(mState, RSID_STATE);
         mScript.bindAllocation(mTexturesIDs, RSID_TEXTURES);
+        mScript.bindAllocation(mRippleMap, RSID_RIPPLE_MAP);
+        mScript.bindAllocation(mRefractionMap, RSID_REFRACTION_MAP);
 
         mRS.contextBindRootScript(mScript);
     }
 
     private void createMesh() {
         final RenderScript rs = mRS;
-        rs.triangleMeshBegin(Element.XYZ_F32, Element.INDEX_16);
+        rs.triangleMeshBegin(Element.NORM_ST_XYZ_F32, Element.INDEX_16);
 
         int wResolution;
         int hResolution;
@@ -146,13 +168,20 @@ class FallRS {
             hResolution = MESH_RESOLUTION;
         }
 
-        final float quadWidth = width / (float) wResolution;
-        final float quadHeight = height / (float) hResolution;
+        final float glHeight = 2.0f * height / (float) width;
+        final float quadWidth = 2.0f / (float) wResolution;
+        final float quadHeight = glHeight / (float) hResolution;
 
+        wResolution += 2;
+        hResolution += 2;        
+        
         for (int y = 0; y <= hResolution; y++) {
-            final float yOffset = y * quadHeight;
+            final float yOffset = y * quadHeight - glHeight / 2.0f - quadHeight;
             for (int x = 0; x <= wResolution; x++) {
-                rs.triangleMeshAddVertex_XYZ(x * quadWidth, yOffset, 0.0f);
+                rs.triangleMeshAddVertex_XYZ_ST_NORM(
+                        -1.0f + x * quadWidth - quadWidth, yOffset, 0.0f,
+                        x / (float) wResolution, y / (float) wResolution,
+                        0.0f, 0.0f, -1.0f);
             }
         }
 
@@ -167,18 +196,41 @@ class FallRS {
 
         mMesh = rs.triangleMeshCreate();
         mMesh.setName("mesh");
+
+        mMeshWidth = wResolution + 1;
+        mMeshHeight = hResolution + 1;
     }
 
     private void createScriptStructures() {
-        final int[] data = new int[3];
+        final int rippleMapSize = (mMeshWidth + 2) * (mMeshHeight + 2);
+
+        final int[] data = new int[9];
         mState = Allocation.createSized(mRS, USER_I32, data.length);
         data[RSID_STATE_FRAMECOUNT] = 0;
         data[RSID_STATE_WIDTH] = mWidth;
         data[RSID_STATE_HEIGHT] = mHeight;
+        data[RSID_STATE_MESH_WIDTH] = mMeshWidth;
+        data[RSID_STATE_MESH_HEIGHT] = mMeshHeight;
+        data[RSID_STATE_RIPPLE_MAP_SIZE] = rippleMapSize;
+        data[RSID_STATE_RIPPLE_INDEX] = 0;
+        data[RSID_STATE_DROP_X] = mMeshWidth / 2;
+        data[RSID_STATE_DROP_Y] = mMeshHeight / 2;
         mState.data(data);
+
+        final int[] rippleMap = new int[rippleMapSize * 2];
+        mRippleMap = Allocation.createSized(mRS, USER_I32, rippleMap.length);
+
+        final int[] refractionMap = new int[513];
+        float ir = 1.0f / 1.333f;
+        for (int i = 0; i < refractionMap.length; i++) {
+            float d = (float) Math.tan(Math.asin(Math.sin(Math.atan(i * (1.0f / 256.0f))) * ir));
+            refractionMap[i] = (int) Math.floor(d * (1 << 16) + 0.5f);
+        }
+        mRefractionMap = Allocation.createSized(mRS, USER_I32, refractionMap.length);
+        mRefractionMap.data(refractionMap);
     }
 
-    private void loadSkyTextures() {
+    private void loadTextures() {
         mTextureBufferIDs = new int[TEXTURES_COUNT];
         mTextures = new Allocation[TEXTURES_COUNT];
         mTexturesIDs = Allocation.createSized(mRS, USER_FLOAT, TEXTURES_COUNT);
@@ -215,42 +267,49 @@ class FallRS {
     }
 
     private void createProgramFragment() {
-        Sampler.Builder bs = new Sampler.Builder(mRS);
-        bs.setMin(LINEAR);
-        bs.setMag(LINEAR);
-        bs.setWrapS(CLAMP);
-        bs.setWrapT(CLAMP);
-        mSampler = bs.create();
+        Sampler.Builder sampleBuilder = new Sampler.Builder(mRS);
+        sampleBuilder.setMin(LINEAR);
+        sampleBuilder.setMag(LINEAR);
+        sampleBuilder.setWrapS(CLAMP);
+        sampleBuilder.setWrapT(CLAMP);
+        mSampler = sampleBuilder.create();
 
-        ProgramFragment.Builder b;
-        b = new ProgramFragment.Builder(mRS, null, null);
-        b.setTexEnable(true, 0);
-        b.setTexEnvMode(REPLACE, 0);
-        mPfBackground = b.create();
+        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS, null, null);
+        builder.setTexEnable(true, 0);
+        builder.setTexEnvMode(REPLACE, 0);
+        mPfBackground = builder.create();
         mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(mSampler, 0);
     }
 
     private void createProgramFragmentStore() {
-        ProgramStore.Builder b;
-        b = new ProgramStore.Builder(mRS, null, null);
-
-        b.setDepthFunc(ALWAYS);
-        b.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
-        b.setDitherEnable(true);
-        b.setDepthMask(false);
-        mPfsBackground = b.create();
+        ProgramStore.Builder builder = new ProgramStore.Builder(mRS, null, null);
+        builder.setDepthFunc(LESS);
+        builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+        builder.setDitherEnable(true);
+        builder.setDepthMask(true);
+        mPfsBackground = builder.create();
         mPfsBackground.setName("PFSBackground");
     }
 
     private void createProgramVertex() {
         mPvOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
-        mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
+        mPvOrthoAlloc.setupProjectionNormalized(mWidth, mHeight);
 
-        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
-        pvb.setTextureMatrixEnable(true);
-        mPvBackground = pvb.create();
+        mLight = new Light.Builder(mRS).create();
+        mLight.setPosition(0.0f, 0.0f, -1.0f);
+
+        ProgramVertex.Builder builder = new ProgramVertex.Builder(mRS, null, null);
+        builder.setTextureMatrixEnable(true);
+        builder.addLight(mLight);
+        mPvBackground = builder.create();
         mPvBackground.bindAllocation(mPvOrthoAlloc);
         mPvBackground.setName("PVBackground");
+    }
+
+    public void addDrop(float x, float y) {
+        mState.subData1D(RSID_STATE_DROP_X, 2, new int[] {
+                (int) ((x / mWidth) * mMeshWidth), (int) ((y / mHeight) * mMeshHeight)
+        });
     }
 }

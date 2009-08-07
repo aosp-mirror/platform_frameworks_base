@@ -19,6 +19,7 @@ package com.android.fall.rs;
 
 import android.content.Context;
 import android.view.SurfaceHolder;
+import android.view.MotionEvent;
 import android.renderscript.RenderScript;
 import android.renderscript.RSSurfaceView;
 
@@ -40,5 +41,21 @@ class FallView extends RSSurfaceView {
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         if (mRender != null) mRender.destroy();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_MOVE:
+                mRender.addDrop(event.getX(), event.getY());
+                try {
+                    Thread.sleep(16);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
+                break;
+        }
+        return true;
     }
 }

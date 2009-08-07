@@ -123,7 +123,7 @@ class GrassRS {
         createProgramFragmentStore();
         createProgramFragment();
         createScriptStructures();
-        loadSkyTextures();
+        loadTextures();
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setScript(mResources, R.raw.grass);
@@ -172,7 +172,7 @@ class GrassRS {
         blades[index + BLADE_STRUCT_B] = random(0.65f) + 0.35f;
     }
 
-    private void loadSkyTextures() {
+    private void loadTextures() {
         mTextureBufferIDs = new int[TEXTURES_COUNT];
         mTextures = new Allocation[TEXTURES_COUNT];
         mTexturesIDs = Allocation.createSized(mRS, USER_FLOAT, TEXTURES_COUNT);
