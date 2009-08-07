@@ -311,12 +311,14 @@ public final class Bmgr {
                 return;
             }
             RestoreSet[] sets = mRestore.getAvailableRestoreSets();
-            for (RestoreSet s : sets) {
-                if (s.token == token) {
-                    System.out.println("Scheduling restore: " + s.name);
-                    mRestore.performRestore(token, observer);
-                    didRestore = true;
-                    break;
+            if (sets != null) {
+                for (RestoreSet s : sets) {
+                    if (s.token == token) {
+                        System.out.println("Scheduling restore: " + s.name);
+                        mRestore.performRestore(token, observer);
+                        didRestore = true;
+                        break;
+                    }
                 }
             }
             if (!didRestore) {
