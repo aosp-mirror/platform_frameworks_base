@@ -83,6 +83,11 @@ public class SettingsBackupAgent extends BackupHelperAgent {
     };
 
     private static final String FILE_WIFI_SUPPLICANT = "/data/misc/wifi/wpa_supplicant.conf";
+
+    // the key to store the WIFI data under, should be sorted as last, so restore happens last.
+    // use very late unicode character to quasi-guarantee last sort position.
+    private static final String KEY_WIFI_SUPPLICANT = "\uffeeWIFI";
+
     private static final String FILE_BT_ROOT = "/data/misc/hcid/";
 
     private SettingsHelper mSettingsHelper;
@@ -113,7 +118,7 @@ public class SettingsBackupAgent extends BackupHelperAgent {
         stateChecksums[STATE_LOCALE] =
                 writeIfChanged(stateChecksums[STATE_LOCALE], KEY_LOCALE, locale, data);
         stateChecksums[STATE_WIFI] =
-                writeIfChanged(stateChecksums[STATE_WIFI], FILE_WIFI_SUPPLICANT, wifiData, data);
+                writeIfChanged(stateChecksums[STATE_WIFI], KEY_WIFI_SUPPLICANT, wifiData, data);
 
         writeNewChecksums(stateChecksums, newState);
     }
@@ -133,7 +138,7 @@ public class SettingsBackupAgent extends BackupHelperAgent {
                 mSettingsHelper.applyAudioSettings();
             } else if (KEY_SECURE.equals(key)) {
                 restoreSettings(data, Settings.Secure.CONTENT_URI);
-            } else if (FILE_WIFI_SUPPLICANT.equals(key)) {
+            } else if (KEY_WIFI_SUPPLICANT.equals(key)) {
                 int retainedWifiState = enableWifi(false);
                 restoreFile(FILE_WIFI_SUPPLICANT, data);
                 FileUtils.setPermissions(FILE_WIFI_SUPPLICANT,
