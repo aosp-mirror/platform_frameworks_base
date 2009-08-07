@@ -327,21 +327,24 @@ public final class Bmgr {
                     printRestoreSets(sets);
                 }
             }
+
+            // now wait for it to be done
+            synchronized (observer) {
+                while (!observer.done) {
+                    try {
+                        observer.wait();
+                    } catch (InterruptedException ex) {
+                    }
+                }
+            }
+
+            // once the restore has finished, close down the session and we're done
             mRestore.endRestoreSession();
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
         }
 
-        // now wait for it to be done
-        synchronized (observer) {
-            while (!observer.done) {
-                try {
-                    observer.wait();
-                } catch (InterruptedException ex) {
-                }
-            }
-        }
         System.out.println("done");
     }
 
