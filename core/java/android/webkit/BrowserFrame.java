@@ -560,13 +560,6 @@ class BrowserFrame extends Handler {
             return loadListener;
         }
 
-        // during synchronous load, the WebViewCore thread is blocked, so we
-        // need to endCacheTransaction first so that http thread won't be 
-        // blocked in setupFile() when createCacheFile.
-        if (synchronous) {
-            CacheManager.endCacheTransaction();
-        }
-
         FrameLoader loader = new FrameLoader(loadListener, mSettings, method);
         loader.setHeaders(headers);
         loader.setPostData(postData);
@@ -580,10 +573,6 @@ class BrowserFrame extends Handler {
             checker.responseAlert("startLoadingResource fail");
         }
         checker.responseAlert("startLoadingResource succeed");
-
-        if (synchronous) {
-            CacheManager.startCacheTransaction();
-        }
 
         return !synchronous ? loadListener : null;
     }

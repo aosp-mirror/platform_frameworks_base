@@ -534,12 +534,7 @@ public final class CacheManager {
                 // cache file. If it is not, resolve the collision.
                 while (file.exists()) {
                     if (checkOldPath) {
-                        // as this is called from http thread through 
-                        // createCacheFile, we need endCacheTransaction before 
-                        // database access.
-                        WebViewCore.endCacheTransaction();
                         CacheResult oldResult = mDataBase.getCache(url);
-                        WebViewCore.startCacheTransaction();
                         if (oldResult != null && oldResult.contentLength > 0) {
                             if (path.equals(oldResult.localPath)) {
                                 path = oldResult.localPath;
