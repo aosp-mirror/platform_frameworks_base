@@ -61,8 +61,9 @@ status_t EGLUtils::selectConfigForPixelFormat(
     const int fbSzG = fbFormatInfo.getSize(PixelFormatInfo::INDEX_GREEN);
     const int fbSzB = fbFormatInfo.getSize(PixelFormatInfo::INDEX_BLUE); 
     
+    int i;
     EGLConfig config = NULL;
-    for (int i=0 ; i<n ; i++) {
+    for (i=0 ; i<n ; i++) {
         EGLint r,g,b,a;
         eglGetConfigAttrib(dpy, configs[i], EGL_RED_SIZE,   &r);
         eglGetConfigAttrib(dpy, configs[i], EGL_GREEN_SIZE, &g);
@@ -76,7 +77,7 @@ status_t EGLUtils::selectConfigForPixelFormat(
 
     free(configs);
     
-    if (config) {
+    if (i<n) {
         *outConfig = config;
         return NO_ERROR;
     }
