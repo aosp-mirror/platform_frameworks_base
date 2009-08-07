@@ -37,6 +37,9 @@ status_t EGLUtils::selectConfigForPixelFormat(
 {
     EGLint numConfigs = -1, n=0;
 
+    if (!attrs)
+        return BAD_VALUE;
+
     if (outConfig == NULL)
         return BAD_VALUE;
     
@@ -93,6 +96,10 @@ status_t EGLUtils::selectConfigForNativeWindow(
 {
     int err;
     int format;
+    
+    if (!window)
+        return BAD_VALUE;
+    
     if ((err = window->query(window, NATIVE_WINDOW_FORMAT, &format)) < 0) {
         return err;
     }

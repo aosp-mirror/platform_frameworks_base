@@ -25,6 +25,7 @@
 #include <cutils/log.h>
 #include <cutils/atomic.h>
 #include <utils/threads.h>
+#include <utils/RefBase.h>
 
 #include <ui/SurfaceComposerClient.h>
 #include <ui/Rect.h>
@@ -81,10 +82,16 @@ FramebufferNativeWindow::FramebufferNativeWindow()
     hw_module_t const* module;
     if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &module) == 0) {
         int stride;
-        framebuffer_open(module, &fbDev);
-        gralloc_open(module, &grDev);
         int err;
+        err = framebuffer_open(module, &fbDev);
+        LOGE_IF(err, "couldn't open framebuffer HAL (%s)", strerror(-err));
+        
+        err = gralloc_open(module, &grDev);
+        LOGE_IF(err, "couldn't open gralloc HAL (%s)", strerror(-err));
 
+        // bail out if we can't initialize the modules
+        if (!fbDev || !grDev)
+            return;
         
         mUpdateOnDemand = (fbDev->setUpdateRect != 0);
         
@@ -127,11 +134,19 @@ FramebufferNativeWindow::FramebufferNativeWindow()
     android_native_window_t::query = query;
 }
 
-FramebufferNativeWindow::~FramebufferNativeWindow() {
-    grDev->free(grDev, buffers[0]->handle);
-    grDev->free(grDev, buffers[1]->handle);
-    gralloc_close(grDev);
-    framebuffer_close(fbDev);
+FramebufferNativeWindow::~FramebufferNativeWindow() 
+{
+    if (grDev) {
+        if (buffers[0] != NULL)
+            grDev->free(grDev, buffers[0]->handle);
+        if (buffers[1] != NULL)
+            grDev->free(grDev, buffers[1]->handle);
+        gralloc_close(grDev);
+    }
+
+    if (fbDev) {
+        framebuffer_close(fbDev);
+    }
 }
 
 status_t FramebufferNativeWindow::setUpdateRectangle(const Rect& r) 
@@ -216,6 +231,7 @@ int FramebufferNativeWindow::query(android_native_window_t* window,
             *value = fb->format;
             return NO_ERROR;
     }
+    *value = 0;
     return BAD_VALUE;
 }
 
@@ -223,9 +239,16 @@ int FramebufferNativeWindow::query(android_native_window_t* window,
 }; // namespace android
 // ----------------------------------------------------------------------------
 
+using namespace android;
 
 EGLNativeWindowType android_createDisplaySurface(void)
 {
-    return new android::FramebufferNativeWindow();
+    FramebufferNativeWindow* w;
+    w = new FramebufferNativeWindow();
+    if (w->getDevice() == NULL) {
+        // get a ref so it can be destroyed when we exit this block
+        sp<FramebufferNativeWindow> ref(w);
+        return NULL;
+    }
+    return (EGLNativeWindowType)w;
 }
-
