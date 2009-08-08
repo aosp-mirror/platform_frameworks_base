@@ -93,6 +93,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     private int mRegistrationState = -1;
     private RegistrantList cdmaDataConnectionAttachedRegistrants = new RegistrantList();
     private RegistrantList cdmaDataConnectionDetachedRegistrants = new RegistrantList();
+    private RegistrantList cdmaForSubscriptionInfoReadyRegistrants = new RegistrantList();
 
     // Sometimes we get the NITZ time before we know what country we are in.
     // Keep the time zone information from the NITZ string so we can fix
@@ -125,6 +126,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     private int mHomeNetworkId[] = null;
     private String mMin;
     private String mPrlVersion;
+    private boolean mIsMinInfoReady = false;
 
     private boolean isEriTextLoaded = false;
     private boolean isSubscriptionFromRuim = false;
@@ -262,6 +264,25 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     }
     void unregisterForCdmaDataConnectionDetached(Handler h) {
         cdmaDataConnectionDetachedRegistrants.remove(h);
+    }
+
+    /**
+     * Registration point for subscription info ready
+     * @param h handler to notify
+     * @param what what code of message when delivered
+     * @param obj placed in Message.obj
+     */
+    public void registerForSubscriptionInfoReady(Handler h, int what, Object obj) {
+        Registrant r = new Registrant(h, what, obj);
+        cdmaForSubscriptionInfoReadyRegistrants.add(r);
+
+        if (isMinInfoReady()) {
+            r.notifyRegistrant();
+        }
+    }
+
+    public void unregisterForSubscriptionInfoReady(Handler h) {
+        cdmaForSubscriptionInfoReadyRegistrants.remove(h);
     }
 
     //***** Called from CDMAPhone
@@ -426,6 +447,13 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                     mMin = cdmaSubscription[3];
                     mPrlVersion = cdmaSubscription[4];
                     Log.d(LOG_TAG,"GET_CDMA_SUBSCRIPTION MDN=" + mMdn);
+                    //Notify apps subscription info is ready
+                    if (cdmaForSubscriptionInfoReadyRegistrants != null) {
+                        cdmaForSubscriptionInfoReadyRegistrants.notifyRegistrants();
+                    }
+                    if (!mIsMinInfoReady) {
+                        mIsMinInfoReady = true;
+                    }
                 } else {
                     Log.w(LOG_TAG,"error parsing cdmaSubscription params num="
                             + cdmaSubscription.length);
@@ -1544,5 +1572,14 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Check if subscription data has been assigned to mMin
+     *
+     * return true if MIN info is ready; false otherwise.
+     */
+    public boolean isMinInfoReady() {
+        return mIsMinInfoReady;
     }
 }

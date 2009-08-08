@@ -315,6 +315,14 @@ public class PhoneProxy extends Handler implements Phone {
          mActivePhone.unregisterForCdmaOtaStatusChange(h);
     }
 
+    public void registerForSubscriptionInfoReady(Handler h, int what, Object obj) {
+        mActivePhone.registerForSubscriptionInfoReady(h, what, obj);
+    }
+
+    public void unregisterForSubscriptionInfoReady(Handler h) {
+        mActivePhone.unregisterForSubscriptionInfoReady(h);
+    }
+
     public boolean getIccRecordsLoaded() {
         return mActivePhone.getIccRecordsLoaded();
     }
@@ -417,6 +425,10 @@ public class PhoneProxy extends Handler implements Phone {
 
     public String getCdmaMin() {
         return mActivePhone.getCdmaMin();
+    }
+
+    public boolean isMinInfoReady() {
+        return mActivePhone.isMinInfoReady();
     }
 
     public String getCdmaPrlVersion() {

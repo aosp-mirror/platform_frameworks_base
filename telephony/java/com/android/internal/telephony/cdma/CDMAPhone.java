@@ -441,6 +441,10 @@ public class CDMAPhone extends PhoneBase {
         return mSST.getCdmaMin();
     }
 
+    public boolean isMinInfoReady() {
+        return mSST.isMinInfoReady();
+    }
+
     public void getCallWaiting(Message onComplete) {
         mCM.queryCallWaiting(CommandsInterface.SERVICE_CLASS_VOICE, onComplete);
     }
@@ -554,6 +558,14 @@ public class CDMAPhone extends PhoneBase {
 
     public void unregisterForCdmaOtaStatusChange(Handler h) {
         mCM.unregisterForCdmaOtaProvision(h);
+    }
+
+    public void registerForSubscriptionInfoReady(Handler h, int what, Object obj) {
+        mSST.registerForSubscriptionInfoReady(h, what, obj);
+    }
+
+    public void unregisterForSubscriptionInfoReady(Handler h) {
+        mSST.unregisterForSubscriptionInfoReady(h);
     }
 
     public void setOnEcbModeExitResponse(Handler h, int what, Object obj) {
