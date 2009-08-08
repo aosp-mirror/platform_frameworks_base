@@ -1276,8 +1276,6 @@ public class WebView extends AbsoluteLayout
      *
      * @param url The url of the resource to load.
      * @param postData The data will be passed to "POST" request.
-     *
-     * @hide pending API solidification
      */
     public void postUrl(String url, byte[] postData) {
         if (URLUtil.isNetworkUrl(url)) {
