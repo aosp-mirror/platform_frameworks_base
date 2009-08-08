@@ -792,11 +792,15 @@ class BackupManagerService extends IBackupManager.Stub {
 
         synchronized(mClearDataLock) {
             mClearingData = true;
+            /* This is causing some critical processes to be killed during setup.
+               Temporarily revert this change until we find a better solution.
             try {
                 mActivityManager.clearApplicationUserData(packageName, observer);
             } catch (RemoteException e) {
                 // can't happen because the activity manager is in this process
             }
+            */
+            mPackageManager.clearApplicationUserData(packageName, observer);
 
             // only wait 10 seconds for the clear data to happen
             long timeoutMark = System.currentTimeMillis() + TIMEOUT_INTERVAL;
