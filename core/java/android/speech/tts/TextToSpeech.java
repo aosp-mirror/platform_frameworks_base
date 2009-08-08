@@ -189,6 +189,12 @@ public class TextToSpeech {
                 "android.speech.tts.engine.INSTALL_TTS_DATA";
 
         /**
+         * {@hide}
+         */
+        @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        public static final String ACTION_TTS_DATA_INSTALLED =
+                "android.speech.tts.engine.TTS_DATA_INSTALLED";
+        /**
          * Broadcast Action: Starts the activity from the platform Text-To-Speech
          * engine to verify the proper installation and availability of the
          * resource files on the system. Upon completion, the activity will
@@ -232,6 +238,16 @@ public class TextToSpeech {
          * the text-to-speech engine specifies the locale associated with each resource file.
          */
         public static final String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
+
+        // extras for a TTS engine's data installation
+        /**
+         * Extra information received with the {@link #ACTION_TTS_DATA_INSTALLED} intent
+         * which indicates whether the TTS data installation requested with
+         * {@link #ACTION_INSTALL_TTS_DATA} completed successfully or not. The value is
+         * {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
+         * {@hide}
+         */
+        public static final String EXTRA_TTS_DATA_INSTALLED = "dataInstalled";
 
         // keys for the parameters passed with speak commands. Hidden keys are used internally
         // to maintain engine state for each TextToSpeech instance.
