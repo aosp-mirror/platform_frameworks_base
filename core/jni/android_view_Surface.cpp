@@ -242,11 +242,12 @@ static jboolean Surface_isValid(JNIEnv* env, jobject clazz)
 
 static inline SkBitmap::Config convertPixelFormat(PixelFormat format)
 {
-    /* note: if PIXEL_FORMAT_XRGB_8888 means that all alpha bytes are 0xFF, then
+    /* note: if PIXEL_FORMAT_RGBX_8888 means that all alpha bytes are 0xFF, then
         we can map to SkBitmap::kARGB_8888_Config, and optionally call
         bitmap.setIsOpaque(true) on the resulting SkBitmap (as an accelerator)
     */
 	switch (format) {
+	case PIXEL_FORMAT_RGBX_8888:    return SkBitmap::kARGB_8888_Config;
     case PIXEL_FORMAT_RGBA_8888:    return SkBitmap::kARGB_8888_Config;
     case PIXEL_FORMAT_RGBA_4444:    return SkBitmap::kARGB_4444_Config;
 	case PIXEL_FORMAT_RGB_565:		return SkBitmap::kRGB_565_Config;
@@ -294,6 +295,9 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
     SkBitmap bitmap;
     ssize_t bpr = info.s * bytesPerPixel(info.format);
     bitmap.setConfig(convertPixelFormat(info.format), info.w, info.h, bpr);
+    if (info.format == PIXEL_FORMAT_RGBX_8888) {
+        bitmap.setIsOpaque(true);
+    }
     if (info.w > 0 && info.h > 0) {
         bitmap.setPixels(info.bits);
     } else {
