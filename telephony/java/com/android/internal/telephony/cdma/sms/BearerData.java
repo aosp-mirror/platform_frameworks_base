@@ -1106,7 +1106,7 @@ public final class BearerData {
         if (paramBits >= EXPECTED_PARAM_SIZE) {
             paramBits -= EXPECTED_PARAM_SIZE;
             decodeSuccess = true;
-            bData.numberOfMessages = inStream.read(8);
+            bData.numberOfMessages = IccUtils.beBcdByteToInt((byte)inStream.read(8));
         }
         if ((! decodeSuccess) || (paramBits > 0)) {
             Log.d(LOG_TAG, "NUMBER_OF_MESSAGES decode " +

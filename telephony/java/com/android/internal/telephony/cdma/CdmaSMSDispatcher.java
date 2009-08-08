@@ -91,7 +91,8 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         int teleService = sms.getTeleService();
         boolean handled = false;
 
-        if ((sms.getUserData() == null) && (SmsEnvelope.TELESERVICE_MWI != teleService)) {
+        if ((sms.getUserData() == null) && (SmsEnvelope.TELESERVICE_MWI != teleService) &&
+            (SmsEnvelope.TELESERVICE_VMN != teleService)) {
             if (Config.LOGD) {
                 Log.d(TAG, "Received SMS without user data");
             }
