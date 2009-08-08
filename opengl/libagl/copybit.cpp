@@ -75,6 +75,8 @@ private:
 static bool supportedCopybitsFormat(int format) {
     switch (format) {
     case COPYBIT_FORMAT_RGBA_8888:
+    case COPYBIT_FORMAT_RGBX_8888:
+    case COPYBIT_FORMAT_RGB_888:
     case COPYBIT_FORMAT_RGB_565:
     case COPYBIT_FORMAT_BGRA_8888:
     case COPYBIT_FORMAT_RGBA_5551:
