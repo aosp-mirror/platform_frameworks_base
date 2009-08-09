@@ -192,6 +192,22 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     private final int mDensity;
 
+    public static IWindowSession getWindowSession(Looper mainLooper) {
+        synchronized (mStaticInit) {
+            if (!mInitialized) {
+                try {
+                    InputMethodManager imm = InputMethodManager.getInstance(mainLooper);
+                    sWindowSession = IWindowManager.Stub.asInterface(
+                            ServiceManager.getService("window"))
+                            .openSession(imm.getClient(), imm.getInputContext());
+                    mInitialized = true;
+                } catch (RemoteException e) {
+                }
+            }
+            return sWindowSession;
+        }
+    }
+    
     public ViewRoot(Context context) {
         super();
 
@@ -204,19 +220,8 @@ public final class ViewRoot extends Handler implements ViewParent,
         // Initialize the statics when this class is first instantiated. This is
         // done here instead of in the static block because Zygote does not
         // allow the spawning of threads.
-        synchronized (mStaticInit) {
-            if (!mInitialized) {
-                try {
-                    InputMethodManager imm = InputMethodManager.getInstance(context);
-                    sWindowSession = IWindowManager.Stub.asInterface(
-                            ServiceManager.getService("window"))
-                            .openSession(imm.getClient(), imm.getInputContext());
-                    mInitialized = true;
-                } catch (RemoteException e) {
-                }
-            }
-        }
-
+        getWindowSession(context.getMainLooper());
+        
         mThread = Thread.currentThread();
         mLocation = new WindowLeaked(null);
         mLocation.fillInStackTrace();

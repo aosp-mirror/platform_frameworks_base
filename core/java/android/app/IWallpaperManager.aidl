@@ -18,6 +18,7 @@ package android.app;
 
 import android.os.ParcelFileDescriptor;
 import android.app.IWallpaperManagerCallback;
+import android.content.ComponentName;
 
 /** @hide */
 interface IWallpaperManager {
@@ -26,6 +27,11 @@ interface IWallpaperManager {
      * Set the wallpaper.
      */
     ParcelFileDescriptor setWallpaper(String name);
+    
+    /**
+     * Set the live wallpaper.
+     */
+    void setWallpaperComponent(in ComponentName name);
     
     /**
      * Get the wallpaper.

@@ -31,6 +31,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.MEMORY_TYPE_GPU;
@@ -40,6 +41,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.policy.PolicyManager;
@@ -399,6 +401,8 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowState mInputMethodWindow = null;
     final ArrayList<WindowState> mInputMethodDialogs = new ArrayList<WindowState>();
 
+    final ArrayList<WindowToken> mWallpaperTokens = new ArrayList<WindowToken>();
+    
     AppWindowToken mFocusedApp = null;
 
     PowerManagerService mPowerManager;
@@ -1167,6 +1171,83 @@ public class WindowManagerService extends IWindowManager.Stub
         moveInputMethodDialogsLocked(findDesiredInputMethodWindowIndexLocked(true));
     }
 
+    boolean adjustWallpaperWindowsLocked() {
+        boolean changed = false;
+        
+        // First find top-most window that has asked to be on top of the
+        // wallpaper; all wallpapers go behind it.
+        final ArrayList localmWindows = mWindows;
+        int N = localmWindows.size();
+        WindowState w = null;
+        int i = N;
+        while (i > 0) {
+            i--;
+            w = (WindowState)localmWindows.get(i);
+            if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isVisibleOrAdding()) {
+                break;
+            }
+        }
+
+        if (w != null) {
+            // Now w is the window we are supposed to be behind...  but we
+            // need to be sure to also be behind any of its attached windows,
+            // AND any starting window associated with it.
+            while (i > 0) {
+                WindowState wb = (WindowState)localmWindows.get(i-1);
+                if (wb.mAttachedWindow != w &&
+                        (wb.mAttrs.type != TYPE_APPLICATION_STARTING ||
+                                wb.mToken != w.mToken)) {
+                    // This window is not related to the previous one in any
+                    // interesting way, so stop here.
+                    break;
+                }
+                w = wb;
+                i--;
+            }
+        }
+        
+        // Okay i is the position immediately above the wallpaper.  Look at
+        // what is below it for later.
+        w = i > 0 ? (WindowState)localmWindows.get(i-1) : null;
+        
+        // Start stepping backwards from here, ensuring that our wallpaper windows
+        // are correctly placed.
+        int curTokenIndex = mWallpaperTokens.size();
+        while (curTokenIndex > 0) {
+            curTokenIndex--;
+            WindowToken token = mWallpaperTokens.get(curTokenIndex);
+            int curWallpaperIndex = token.windows.size();
+            while (curWallpaperIndex > 0) {
+                curWallpaperIndex--;
+                WindowState wallpaper = token.windows.get(curWallpaperIndex);
+                // First, if this window is at the current index, then all
+                // is well.
+                if (wallpaper == w) {
+                    i--;
+                    w = i > 0 ? (WindowState)localmWindows.get(i-1) : null;
+                    continue;
+                }
+                
+                // The window didn't match...  the current wallpaper window,
+                // wherever it is, is in the wrong place, so make sure it is
+                // not in the list.
+                int oldIndex = localmWindows.indexOf(wallpaper);
+                if (oldIndex >= 0) {
+                    localmWindows.remove(oldIndex);
+                    if (oldIndex < i) {
+                        i--;
+                    }
+                }
+                
+                // Now stick it in.
+                localmWindows.add(i, wallpaper);
+                changed = true;
+            }
+        }
+        
+        return changed;
+    }
+
     public int addWindow(Session session, IWindow client,
             WindowManager.LayoutParams attrs, int viewVisibility,
             Rect outContentInsets) {
@@ -1224,6 +1305,11 @@ public class WindowManagerService extends IWindowManager.Stub
                           + attrs.token + ".  Aborting.");
                     return WindowManagerImpl.ADD_BAD_APP_TOKEN;
                 }
+                if (attrs.type == TYPE_WALLPAPER) {
+                    Log.w(TAG, "Attempted to add wallpaper window with unknown token "
+                          + attrs.token + ".  Aborting.");
+                    return WindowManagerImpl.ADD_BAD_APP_TOKEN;
+                }
                 token = new WindowToken(attrs.token, -1, false);
                 addToken = true;
             } else if (attrs.type >= FIRST_APPLICATION_WINDOW
@@ -1247,6 +1333,12 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if (attrs.type == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
                     Log.w(TAG, "Attempted to add input method window with bad token "
+                            + attrs.token + ".  Aborting.");
+                      return WindowManagerImpl.ADD_BAD_APP_TOKEN;
+                }
+            } else if (attrs.type == TYPE_WALLPAPER) {
+                if (token.windowType != TYPE_WALLPAPER) {
+                    Log.w(TAG, "Attempted to add wallpaper window with bad token "
                             + attrs.token + ".  Aborting.");
                       return WindowManagerImpl.ADD_BAD_APP_TOKEN;
                 }
@@ -1300,6 +1392,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 imMayMove = false;
             } else {
                 addWindowToListInOrderLocked(win, true);
+                if (attrs.type == TYPE_WALLPAPER ||
+                        (attrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
+                    adjustWallpaperWindowsLocked();
+                }
             }
 
             win.mEnterAnimationPending = true;
@@ -1461,6 +1557,11 @@ public class WindowManagerService extends IWindowManager.Stub
             mInputMethodDialogs.remove(win);
         }
 
+        if (win.mAttrs.type == TYPE_WALLPAPER ||
+                (win.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
+            adjustWallpaperWindowsLocked();
+        }
+        
         final WindowToken token = win.mToken;
         final AppWindowToken atoken = win.mAppToken;
         token.windows.remove(win);
@@ -1618,6 +1719,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     || ((flagChanges&WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0)
                     || (!win.mRelayoutCalled);
 
+            boolean wallpaperMayMove = win.mViewVisibility != viewVisibility
+                    && (win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
+            
             win.mRelayoutCalled = true;
             final int oldVisibility = win.mViewVisibility;
             win.mViewVisibility = viewVisibility;
@@ -1712,6 +1816,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (imMayMove) {
                 if (moveInputMethodWindowsIfNeededLocked(false)) {
+                    assignLayers = true;
+                }
+            }
+            if (wallpaperMayMove) {
+                if (adjustWallpaperWindowsLocked()) {
                     assignLayers = true;
                 }
             }
@@ -2010,6 +2119,9 @@ public class WindowManagerService extends IWindowManager.Stub
             wtoken = new WindowToken(token, type, true);
             mTokenMap.put(token, wtoken);
             mTokenList.add(wtoken);
+            if (type == TYPE_WALLPAPER) {
+                mWallpaperTokens.add(wtoken);
+            }
         }
     }
 
@@ -2055,6 +2167,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     if (delayed) {
                         mExitingTokens.add(wtoken);
+                    } else if (wtoken.windowType == TYPE_WALLPAPER) {
+                        mWallpaperTokens.remove(wtoken);
                     }
                 }
 
@@ -5719,6 +5833,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final int mSubLayer;
         final boolean mLayoutAttached;
         final boolean mIsImWindow;
+        final boolean mIsWallpaper;
+        final boolean mIsFloatingLayer;
         int mViewVisibility;
         boolean mPolicyVisibility = true;
         boolean mPolicyVisibilityAfterAnim = true;
@@ -5876,6 +5992,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mAttachedWindow = null;
                 mLayoutAttached = false;
                 mIsImWindow = false;
+                mIsWallpaper = false;
+                mIsFloatingLayer = false;
                 mBaseLayer = 0;
                 mSubLayer = 0;
                 return;
@@ -5896,6 +6014,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
                 mIsImWindow = attachedWindow.mAttrs.type == TYPE_INPUT_METHOD
                         || attachedWindow.mAttrs.type == TYPE_INPUT_METHOD_DIALOG;
+                mIsWallpaper = attachedWindow.mAttrs.type == TYPE_WALLPAPER;
+                mIsFloatingLayer = mIsImWindow || mIsWallpaper;
             } else {
                 // The multiplier here is to reserve space for multiple
                 // windows in the same type layer.
@@ -5907,6 +6027,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mLayoutAttached = false;
                 mIsImWindow = mAttrs.type == TYPE_INPUT_METHOD
                         || mAttrs.type == TYPE_INPUT_METHOD_DIALOG;
+                mIsWallpaper = mAttrs.type == TYPE_WALLPAPER;
+                mIsFloatingLayer = mIsImWindow || mIsWallpaper;
             }
 
             WindowState appWin = this;
@@ -6711,7 +6833,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean isFullscreen(int screenWidth, int screenHeight) {
             return mFrame.left <= 0 && mFrame.top <= 0 &&
-                mFrame.right >= screenWidth && mFrame.bottom >= screenHeight;
+                    mFrame.right >= screenWidth && mFrame.bottom >= screenHeight;
         }
 
         void removeLocked() {
@@ -6801,8 +6923,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print(prefix); pw.print("mAttachedWindow="); pw.print(mAttachedWindow);
                         pw.print(" mLayoutAttached="); pw.println(mLayoutAttached);
             }
-            if (mIsImWindow) {
-                pw.print(prefix); pw.print("mIsImWindow="); pw.println(mIsImWindow);
+            if (mIsImWindow || mIsWallpaper || mIsFloatingLayer) {
+                pw.print(prefix); pw.print("mIsImWindow="); pw.print(mIsImWindow);
+                        pw.print(" mIsWallpaper="); pw.print(mIsWallpaper);
+                        pw.print(" mIsFloatingLayer="); pw.println(mIsFloatingLayer);
             }
             pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
                     pw.print(" mSubLayer="); pw.print(mSubLayer);
@@ -7838,7 +7962,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         for (i=0; i<N; i++) {
             WindowState w = (WindowState)mWindows.get(i);
-            if (w.mBaseLayer == curBaseLayer || w.mIsImWindow) {
+            if (w.mBaseLayer == curBaseLayer || w.mIsFloatingLayer) {
                 curLayer += WINDOW_LAYER_MULTIPLIER;
                 w.mLayer = curLayer;
             } else {
@@ -8242,6 +8366,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // This has changed the visibility of windows, so perform
                         // a new layout to get them all up-to-date.
                         mLayoutNeeded = true;
+                        adjustWallpaperWindowsLocked();
                         if (!moveInputMethodWindowsIfNeededLocked(true)) {
                             assignLayersLocked();
                         }
@@ -8701,6 +8826,9 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowToken token = mExitingTokens.get(i);
             if (!token.hasVisible) {
                 mExitingTokens.remove(i);
+                if (token.windowType == TYPE_WALLPAPER) {
+                    mWallpaperTokens.remove(token);
+                }
             }
         }
 
@@ -9121,6 +9249,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 for (int i=0; i<mTokenList.size(); i++) {
                     pw.print("  #"); pw.print(i); pw.print(": ");
                             pw.println(mTokenList.get(i));
+                }
+            }
+            if (mWallpaperTokens.size() > 0) {
+                pw.println(" ");
+                pw.println("  Wallpaper tokens:");
+                for (int i=mWallpaperTokens.size()-1; i>=0; i--) {
+                    WindowToken token = mWallpaperTokens.get(i);
+                    pw.print("  Wallpaper #"); pw.print(i);
+                            pw.print(' '); pw.print(token); pw.println(':');
+                    token.dump(pw, "    ");
                 }
             }
             if (mAppTokens.size() > 0) {

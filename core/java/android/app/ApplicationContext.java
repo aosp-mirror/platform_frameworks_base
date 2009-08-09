@@ -514,12 +514,12 @@ class ApplicationContext extends Context {
     
     @Override
     public Drawable getWallpaper() {
-        return getWallpaperManager().get();
+        return getWallpaperManager().getDrawable();
     }
 
     @Override
     public Drawable peekWallpaper() {
-        return getWallpaperManager().peek();
+        return getWallpaperManager().peekDrawable();
     }
 
     @Override
@@ -534,12 +534,12 @@ class ApplicationContext extends Context {
 
     @Override
     public void setWallpaper(Bitmap bitmap) throws IOException  {
-        getWallpaperManager().set(bitmap);
+        getWallpaperManager().setBitmap(bitmap);
     }
 
     @Override
     public void setWallpaper(InputStream data) throws IOException {
-        getWallpaperManager().set(data);
+        getWallpaperManager().setStream(data);
     }
 
     @Override

@@ -488,13 +488,13 @@ public abstract class Context {
     public abstract String[] databaseList();
 
     /**
-     * @deprecated Use {@link android.app.WallpaperManager#get
+     * @deprecated Use {@link android.app.WallpaperManager#getDrawable
      * WallpaperManager.get()} instead.
      */
     public abstract Drawable getWallpaper();
 
     /**
-     * @deprecated Use {@link android.app.WallpaperManager#peek
+     * @deprecated Use {@link android.app.WallpaperManager#peekDrawable
      * WallpaperManager.peek()} instead.
      */
     public abstract Drawable peekWallpaper();
@@ -512,13 +512,13 @@ public abstract class Context {
     public abstract int getWallpaperDesiredMinimumHeight();
 
     /**
-     * @deprecated Use {@link android.app.WallpaperManager#set(Bitmap)
+     * @deprecated Use {@link android.app.WallpaperManager#setBitmap(Bitmap)
      * WallpaperManager.set()} instead.
      */
     public abstract void setWallpaper(Bitmap bitmap) throws IOException;
 
     /**
-     * @deprecated Use {@link android.app.WallpaperManager#set(InputStream)
+     * @deprecated Use {@link android.app.WallpaperManager#setStream(InputStream)
      * WallpaperManager.set()} instead.
      */
     public abstract void setWallpaper(InputStream data) throws IOException;

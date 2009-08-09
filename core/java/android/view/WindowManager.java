@@ -314,6 +314,12 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_INPUT_METHOD_DIALOG= FIRST_SYSTEM_WINDOW+12;
 
         /**
+         * Window type: wallpaper window, placed behind any window that wants
+         * to sit on top of the wallpaper.
+         */
+        public static final int TYPE_WALLPAPER          = FIRST_SYSTEM_WINDOW+13;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
@@ -479,16 +485,23 @@ public interface WindowManager extends ViewManager {
          * key guard or any other lock screens. Can be used with
          * {@link #FLAG_KEEP_SCREEN_ON} to turn screen on and display windows
          * directly before showing the key guard window
-         *
-         * {@hide} */
+         */
         public static final int FLAG_SHOW_WHEN_LOCKED = 0x00080000;
 
+        /** Window flag: ask that the system wallpaper be shown behind
+         * your window.  The window surface must be translucent to be able
+         * to actually see the wallpaper behind it; this flag just ensures
+         * that the wallpaper surface will be there if this window actually
+         * has translucent regions.
+         */
+        public static final int FLAG_SHOW_WALLPAPER = 0x00100000;
+        
         /** Window flag: special flag to limit the size of the window to be
          * original size ([320x480] x density). Used to create window for applications
          * running under compatibility mode.
          *
          * {@hide} */
-        public static final int FLAG_COMPATIBLE_WINDOW = 0x00100000;
+        public static final int FLAG_COMPATIBLE_WINDOW = 0x20000000;
 
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when

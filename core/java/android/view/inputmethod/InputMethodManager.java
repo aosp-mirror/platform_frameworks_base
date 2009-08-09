@@ -446,13 +446,22 @@ public final class InputMethodManager {
      * @hide
      */
     static public InputMethodManager getInstance(Context context) {
+        return getInstance(context.getMainLooper());
+    }
+    
+    /**
+     * Internally, the input method manager can't be context-dependent, so
+     * we have this here for the places that need it.
+     * @hide
+     */
+    static public InputMethodManager getInstance(Looper mainLooper) {
         synchronized (mInstanceSync) {
             if (mInstance != null) {
                 return mInstance;
             }
             IBinder b = ServiceManager.getService(Context.INPUT_METHOD_SERVICE);
             IInputMethodManager service = IInputMethodManager.Stub.asInterface(b);
-            mInstance = new InputMethodManager(service, context.getMainLooper());
+            mInstance = new InputMethodManager(service, mainLooper);
         }
         return mInstance;
     }

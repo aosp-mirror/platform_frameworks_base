@@ -894,6 +894,13 @@
         android:description="@string/permdesc_bindInputMethod"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by wallpaper services, to ensure that only the
+         system can bind to them. -->
+    <permission android:name="android.permission.BIND_WALLPAPER"
+        android:label="@string/permlab_bindWallpaper"
+        android:description="@string/permdesc_bindWallpaper"
+        android:protectionLevel="signature" />
+
     <!-- Allows low-level access to setting the orientation (actually
          rotation) of the screen.  Not for use by normal applications. -->
     <permission android:name="android.permission.SET_ORIENTATION"
@@ -1082,6 +1089,12 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signature" />
 
+    <!-- Allows applications to set a live wallpaper.
+         @hide -->
+    <permission android:name="android.permission.SET_WALLPAPER_COMPONENT"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
@@ -1140,7 +1153,14 @@
         </activity>
 
         <service android:name="com.android.server.LoadAverageService"
-            android:exported="true" />
+                android:exported="true" />
+
+        <service android:name="com.android.internal.service.wallpaper.ImageWallpaper"
+                android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+        </service>
 
         <receiver android:name="com.android.server.BootReceiver" >
             <intent-filter>

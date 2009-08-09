@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package android.app;
 
 import android.content.Context;
@@ -21,6 +37,14 @@ public class WallpaperManager {
     private static String TAG = "WallpaperManager";
     private static boolean DEBUG = false;
 
+    /**
+     * Launch an activity for the user to pick the current global live
+     * wallpaper.
+     * @hide
+     */
+    public static final String ACTION_LIVE_WALLPAPER_CHOOSER
+            = "android.service.wallpaper.LIVE_WALLPAPER_CHOOSER";
+    
     private final Context mContext;
     
     static class Globals extends IWallpaperManagerCallback.Stub {
@@ -88,13 +112,26 @@ public class WallpaperManager {
     }
 
     /**
-     * Like {@link #peek}, but always returns a valid Drawable.  If
+     * Retrieve a WallpaperManager associated with the given Context.
+     */
+    public static WallpaperManager getInstance(Context context) {
+        return (WallpaperManager)context.getSystemService(
+                Context.WALLPAPER_SERVICE);
+    }
+    
+    /** @hide */
+    public IWallpaperManager getIWallpaperManager() {
+        return getGlobals().mService;
+    }
+    
+    /**
+     * Like {@link #peekDrawable}, but always returns a valid Drawable.  If
      * no wallpaper is set, the system default wallpaper is returned.
      *
      * @return Returns a Drawable object that will draw the wallpaper.
      */
-    public Drawable get() {
-        Drawable dr = peek();
+    public Drawable getDrawable() {
+        Drawable dr = peekDrawable();
         return dr != null ? dr : Resources.getSystem().getDrawable(
                 com.android.internal.R.drawable.default_wallpaper);
     }
@@ -108,7 +145,7 @@ public class WallpaperManager {
      * @return Returns a Drawable object that will draw the wallpaper or a
      * null pointer if these is none.
      */
-    public Drawable peek() {
+    public Drawable peekDrawable() {
         return getGlobals().peekWallpaper(mContext);
     }
 
@@ -123,7 +160,7 @@ public class WallpaperManager {
      * @throws IOException If an error occurs reverting to the default
      * wallpaper.
      */
-    public void set(int resid) throws IOException {
+    public void setResource(int resid) throws IOException {
         try {
             Resources resources = mContext.getResources();
             /* Set the wallpaper to the default values */
@@ -154,7 +191,7 @@ public class WallpaperManager {
      * @throws IOException If an error occurs reverting to the default
      * wallpaper.
      */
-    public void set(Bitmap bitmap) throws IOException {
+    public void setBitmap(Bitmap bitmap) throws IOException {
         try {
             ParcelFileDescriptor fd = getGlobals().mService.setWallpaper(null);
             if (fd == null) {
@@ -185,7 +222,7 @@ public class WallpaperManager {
      * @throws IOException If an error occurs reverting to the default
      * wallpaper.
      */
-    public void set(InputStream data) throws IOException {
+    public void setStream(InputStream data) throws IOException {
         try {
             ParcelFileDescriptor fd = getGlobals().mService.setWallpaper(null);
             if (fd == null) {
@@ -215,8 +252,8 @@ public class WallpaperManager {
 
     /**
      * Returns the desired minimum width for the wallpaper. Callers of
-     * {@link #set(android.graphics.Bitmap)} or
-     * {@link #set(java.io.InputStream)} should check this value
+     * {@link #setBitmap(android.graphics.Bitmap)} or
+     * {@link #setStream(java.io.InputStream)} should check this value
      * beforehand to make sure the supplied wallpaper respects the desired
      * minimum width.
      *
@@ -238,8 +275,8 @@ public class WallpaperManager {
 
     /**
      * Returns the desired minimum height for the wallpaper. Callers of
-     * {@link #set(android.graphics.Bitmap)} or
-     * {@link #set(java.io.InputStream)} should check this value
+     * {@link #setBitmap(android.graphics.Bitmap)} or
+     * {@link #setStream(java.io.InputStream)} should check this value
      * beforehand to make sure the supplied wallpaper respects the desired
      * minimum height.
      *
@@ -267,7 +304,7 @@ public class WallpaperManager {
      * @param minimumWidth Desired minimum width
      * @param minimumHeight Desired minimum height
      */
-    public void setDimensionHints(int minimumWidth, int minimumHeight) {
+    public void suggestDesiredDimensions(int minimumWidth, int minimumHeight) {
         try {
             getGlobals().mService.setDimensionHints(minimumWidth, minimumHeight);
         } catch (RemoteException e) {
@@ -283,6 +320,6 @@ public class WallpaperManager {
      * wallpaper.
      */
     public void clear() throws IOException {
-        set(com.android.internal.R.drawable.default_wallpaper);
+        setResource(com.android.internal.R.drawable.default_wallpaper);
     }
 }
