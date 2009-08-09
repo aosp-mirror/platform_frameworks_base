@@ -33,6 +33,9 @@ import static android.renderscript.ProgramStore.BlendDstFunc;
 import static android.renderscript.ProgramStore.BlendSrcFunc;
 import static android.renderscript.ProgramFragment.EnvMode.*;
 import static android.renderscript.Element.*;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
+import static android.util.MathUtils.*;
 
 import java.util.TimeZone;
 
@@ -50,19 +53,38 @@ class FallRS {
     private static final int RSID_STATE_DROP_X = 7;
     private static final int RSID_STATE_DROP_Y = 8;
     private static final int RSID_STATE_RUNNING = 9;
+    private static final int RSID_STATE_LEAVES_COUNT = 10;
     
-    private static final int RSID_TEXTURES = 1;
-    private static final int TEXTURES_COUNT = 1;
+    private static final int TEXTURES_COUNT = 2;
+    private static final int LEAVES_TEXTURES_COUNT = 4;
     private static final int RSID_TEXTURE_RIVERBED = 0;
+    private static final int RSID_TEXTURE_LEAVES = 1;
 
-    private static final int RSID_RIPPLE_MAP = 2;
+    private static final int RSID_RIPPLE_MAP = 1;
+    
+    private static final int RSID_REFRACTION_MAP = 2;
 
-    private static final int RSID_REFRACTION_MAP = 3;
+    private static final int RSID_LEAVES = 3;
+    private static final int LEAVES_COUNT = 8;
+    private static final int LEAF_STRUCT_FIELDS_COUNT = 11;
+    private static final int LEAF_STRUCT_X = 0;
+    private static final int LEAF_STRUCT_Y = 1;
+    private static final int LEAF_STRUCT_SCALE = 2;
+    private static final int LEAF_STRUCT_ANGLE = 3;
+    private static final int LEAF_STRUCT_SPIN = 4;
+    private static final int LEAF_STRUCT_U1 = 5;
+    private static final int LEAF_STRUCT_U2 = 6;
+    private static final int LEAF_STRUCT_ALTITUDE = 7;
+    private static final int LEAF_STRUCT_RIPPLED = 8;
+    private static final int LEAF_STRUCT_DELTAX = 9;
+    private static final int LEAF_STRUCT_DELTAY = 10;
 
     private boolean mIsRunning = true;    
     
     private Resources mResources;
     private RenderScript mRS;
+
+    private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
 
     private final int mWidth;
     private final int mHeight;
@@ -71,15 +93,15 @@ class FallRS {
     private Sampler mSampler;
     private ProgramFragment mPfBackground;
     private ProgramFragment mPfLighting;
+    private ProgramFragment mPfLeaf;
     private ProgramStore mPfsBackground;
+    private ProgramStore mPfsLeaf;
     private ProgramVertex mPvBackground;
     private ProgramVertex mPvLines;
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
     private Light mLight;
 
-    private Allocation mTexturesIDs;
     private Allocation[] mTextures;
-    private int[] mTextureBufferIDs;
 
     private Allocation mState;
     private RenderScript.TriangleMesh mMesh;
@@ -88,10 +110,14 @@ class FallRS {
 
     private Allocation mRippleMap;
     private Allocation mRefractionMap;
+    private Allocation mLeaves;
+    private float mGlHeight;
 
     public FallRS(int width, int height) {
         mWidth = width;
         mHeight = height;
+        mOptionsARGB.inScaled = false;
+        mOptionsARGB.inPreferredConfig = Bitmap.Config.ARGB_8888;
     }
 
     public void init(RenderScript rs, Resources res) {
@@ -107,18 +133,19 @@ class FallRS {
         mPfsBackground.destroy();
         mPvBackground.destroy();
         mPvOrthoAlloc.mAlloc.destroy();
-        mTexturesIDs.destroy();
         for (Allocation a : mTextures) {
             a.destroy();
         }
         mState.destroy();
-        mTextureBufferIDs = null;
         mMesh.destroy();
         mLight.destroy();
         mRippleMap.destroy();
         mRefractionMap.destroy();
         mPvLines.destroy();
         mPfLighting.destroy();
+        mLeaves.destroy();
+        mPfsLeaf.destroy();
+        mPfLeaf.destroy();
     }
 
     @Override
@@ -146,9 +173,9 @@ class FallRS {
         mScript.setTimeZone(TimeZone.getDefault().getID());
 
         mScript.bindAllocation(mState, RSID_STATE);
-        mScript.bindAllocation(mTexturesIDs, RSID_TEXTURES);
         mScript.bindAllocation(mRippleMap, RSID_RIPPLE_MAP);
         mScript.bindAllocation(mRefractionMap, RSID_REFRACTION_MAP);
+        mScript.bindAllocation(mLeaves, RSID_LEAVES);
 
         mRS.contextBindRootScript(mScript);
     }
@@ -171,15 +198,15 @@ class FallRS {
             hResolution = MESH_RESOLUTION;
         }
 
-        final float glHeight = 2.0f * height / (float) width;
+        mGlHeight = 2.0f * height / (float) width;
         final float quadWidth = 2.0f / (float) wResolution;
-        final float quadHeight = glHeight / (float) hResolution;
+        final float quadHeight = mGlHeight / (float) hResolution;
 
         wResolution += 2;
         hResolution += 2;        
         
         for (int y = 0; y <= hResolution; y++) {
-            final float yOffset = y * quadHeight - glHeight / 2.0f - quadHeight;
+            final float yOffset = y * quadHeight - mGlHeight / 2.0f - quadHeight;
             final float t = 1.0f - y / (float) hResolution;
             for (int x = 0; x <= wResolution; x++) {
                 rs.triangleMeshAddVertex_XYZ_ST_NORM(
@@ -208,7 +235,7 @@ class FallRS {
     private void createScriptStructures() {
         final int rippleMapSize = (mMeshWidth + 2) * (mMeshHeight + 2);
 
-        final int[] data = new int[10];
+        final int[] data = new int[11];
         mState = Allocation.createSized(mRS, USER_I32, data.length);
         data[RSID_STATE_FRAMECOUNT] = 0;
         data[RSID_STATE_WIDTH] = mWidth;
@@ -220,6 +247,7 @@ class FallRS {
         data[RSID_STATE_DROP_X] = mMeshWidth / 2;
         data[RSID_STATE_DROP_Y] = mMeshHeight / 2;
         data[RSID_STATE_RUNNING] = 1;
+        data[RSID_STATE_LEAVES_COUNT] = LEAVES_COUNT;
         mState.data(data);
 
         final int[] rippleMap = new int[rippleMapSize * 2];
@@ -233,26 +261,43 @@ class FallRS {
         }
         mRefractionMap = Allocation.createSized(mRS, USER_I32, refractionMap.length);
         mRefractionMap.data(refractionMap);
+
+        final float[] leaves = new float[LEAVES_COUNT * LEAF_STRUCT_FIELDS_COUNT];
+        mLeaves = Allocation.createSized(mRS, USER_FLOAT, leaves.length);
+        for (int i = 0; i < leaves.length; i += LEAF_STRUCT_FIELDS_COUNT) {
+            createLeaf(leaves, i);
+        }
+        mLeaves.data(leaves);
+    }
+
+    private void createLeaf(float[] leaves, int index) {
+        int sprite = random(LEAVES_TEXTURES_COUNT);
+        //noinspection PointlessArithmeticExpression
+        leaves[index + LEAF_STRUCT_X] = random(-1.0f, 1.0f);
+        leaves[index + LEAF_STRUCT_Y] = random(-mGlHeight / 2.0f, mGlHeight / 2.0f);
+        leaves[index + LEAF_STRUCT_SCALE] = random(0.3f, 0.4f);
+        leaves[index + LEAF_STRUCT_ANGLE] = random(0.0f, (float) (Math.PI * 2.0));
+        leaves[index + LEAF_STRUCT_SPIN] = random(-0.02f, 0.02f);
+        leaves[index + LEAF_STRUCT_U1] = sprite / (float) LEAVES_TEXTURES_COUNT;
+        leaves[index + LEAF_STRUCT_U2] = (sprite + 1) / (float) LEAVES_TEXTURES_COUNT;
+        leaves[index + LEAF_STRUCT_ALTITUDE] = 0.2f;
+        leaves[index + LEAF_STRUCT_RIPPLED] = -1.0f;
+        leaves[index + LEAF_STRUCT_DELTAX] = random(-0.02f, 0.02f) / 100.0f;
+        leaves[index + LEAF_STRUCT_DELTAY] = 0.08f * random(0.9f, 1.1f) / 100.0f;
     }
 
     private void loadTextures() {
-        mTextureBufferIDs = new int[TEXTURES_COUNT];
         mTextures = new Allocation[TEXTURES_COUNT];
-        mTexturesIDs = Allocation.createSized(mRS, USER_FLOAT, TEXTURES_COUNT);
 
         final Allocation[] textures = mTextures;
         textures[RSID_TEXTURE_RIVERBED] = loadTexture(R.drawable.riverbed, "TRiverbed");
+        textures[RSID_TEXTURE_LEAVES] = loadTextureARGB(R.drawable.leaves, "TLeaves");
 
-        final int[] bufferIds = mTextureBufferIDs;
         final int count = textures.length;
-
         for (int i = 0; i < count; i++) {
             final Allocation texture = textures[i];
             texture.uploadToTexture(0);
-            bufferIds[i] = texture.getID();
         }
-
-        mTexturesIDs.data(bufferIds);
     }
 
     private Allocation loadTexture(int id, String name) {
@@ -261,6 +306,13 @@ class FallRS {
         allocation.setName(name);
         return allocation;
     }
+
+    private Allocation loadTextureARGB(int id, String name) {
+        Bitmap b = BitmapFactory.decodeResource(mResources, id, mOptionsARGB);
+        final Allocation allocation = Allocation.createFromBitmap(mRS, b, RGBA_8888, false);
+        allocation.setName(name);
+        return allocation;
+    }    
 
     private void createProgramFragment() {
         Sampler.Builder sampleBuilder = new Sampler.Builder(mRS);
@@ -276,12 +328,19 @@ class FallRS {
         mPfBackground = builder.create();
         mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(mSampler, 0);
-        
+
         builder = new ProgramFragment.Builder(mRS, null, null);
         builder.setTexEnable(false, 0);
         mPfLighting = builder.create();
         mPfLighting.setName("PFLighting");
         mPfLighting.bindSampler(mSampler, 0);
+        
+        builder = new ProgramFragment.Builder(mRS, null, null);
+        builder.setTexEnable(true, 0);
+        builder.setTexEnvMode(REPLACE, 0);
+        mPfLeaf = builder.create();
+        mPfLeaf.setName("PFLeaf");
+        mPfLeaf.bindSampler(mSampler, 0);
     }
 
     private void createProgramFragmentStore() {
@@ -292,6 +351,14 @@ class FallRS {
         builder.setDepthMask(true);
         mPfsBackground = builder.create();
         mPfsBackground.setName("PFSBackground");
+
+        builder = new ProgramStore.Builder(mRS, null, null);
+        builder.setDepthFunc(ALWAYS);
+        builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+        builder.setDitherEnable(true);
+        builder.setDepthMask(true);
+        mPfsLeaf = builder.create();
+        mPfsLeaf.setName("PFSLeaf");
     }
 
     private void createProgramVertex() {

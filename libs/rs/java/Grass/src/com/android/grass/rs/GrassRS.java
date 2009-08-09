@@ -43,10 +43,9 @@ class GrassRS {
     private static final int RSID_STATE_WIDTH = 2;
     private static final int RSID_STATE_HEIGHT = 3;
 
-    private static final int RSID_TEXTURES = 1;
     private static final int TEXTURES_COUNT = 5;
 
-    private static final int RSID_BLADES = 2;
+    private static final int RSID_BLADES = 1;
     private static final int BLADES_COUNT = 100;
     private static final int BLADE_STRUCT_FIELDS_COUNT = 12;
     private static final int BLADE_STRUCT_ANGLE = 0;
@@ -75,9 +74,7 @@ class GrassRS {
     private ProgramVertex mPvBackground;
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
 
-    private Allocation mTexturesIDs;
     private Allocation[] mTextures;
-    private int[] mTextureBufferIDs;
 
     private Allocation mState;
     private Allocation mBlades;
@@ -100,13 +97,11 @@ class GrassRS {
         mPfsBackground.destroy();
         mPvBackground.destroy();
         mPvOrthoAlloc.mAlloc.destroy();
-        mTexturesIDs.destroy();
         for (Allocation a : mTextures) {
             a.destroy();
         }
         mState.destroy();
         mBlades.destroy();
-        mTextureBufferIDs = null;
     }
 
     @Override
@@ -133,7 +128,6 @@ class GrassRS {
         mScript.setTimeZone(TimeZone.getDefault().getID());
 
         mScript.bindAllocation(mState, RSID_STATE);
-        mScript.bindAllocation(mTexturesIDs, RSID_TEXTURES);
         mScript.bindAllocation(mBlades, RSID_BLADES);
 
         mRS.contextBindRootScript(mScript);
@@ -173,9 +167,7 @@ class GrassRS {
     }
 
     private void loadTextures() {
-        mTextureBufferIDs = new int[TEXTURES_COUNT];
         mTextures = new Allocation[TEXTURES_COUNT];
-        mTexturesIDs = Allocation.createSized(mRS, USER_FLOAT, TEXTURES_COUNT);
 
         final Allocation[] textures = mTextures;
         textures[0] = loadTexture(R.drawable.night, "TNight");
@@ -184,16 +176,11 @@ class GrassRS {
         textures[3] = loadTexture(R.drawable.sunset, "TSunset");
         textures[4] = generateTextureAlpha(4, 1, new int[] { 0x00FFFF00 }, "TAa");
 
-        final int[] bufferIds = mTextureBufferIDs;
         final int count = textures.length;
-
         for (int i = 0; i < count; i++) {
             final Allocation texture = textures[i];
             texture.uploadToTexture(0);
-            bufferIds[i] = texture.getID();
         }
-
-        mTexturesIDs.data(bufferIds);
     }
 
     private Allocation generateTextureAlpha(int width, int height, int[] data, String name) {

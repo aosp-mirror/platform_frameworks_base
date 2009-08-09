@@ -28,12 +28,26 @@
 #define RSID_DROP_X 7
 #define RSID_DROP_Y 8
 #define RSID_RUNNING 9
+#define RSID_LEAVES_COUNT 10
     
-#define RSID_TEXTURES 1
+#define RSID_RIPPLE_MAP 1
+#define RSID_REFRACTION_MAP 2
+#define RSID_LEAVES 3
 
-#define RSID_RIPPLE_MAP 2
+#define LEAF_STRUCT_FIELDS_COUNT 11
+#define LEAF_STRUCT_X 0
+#define LEAF_STRUCT_Y 1
+#define LEAF_STRUCT_SCALE 2
+#define LEAF_STRUCT_ANGLE 3
+#define LEAF_STRUCT_SPIN 4
+#define LEAF_STRUCT_U1 5
+#define LEAF_STRUCT_U2 6
+#define LEAF_STRUCT_ALTITUDE 7
+#define LEAF_STRUCT_RIPPLED 8
+#define LEAF_STRUCT_DELTAX 9
+#define LEAF_STRUCT_DELTAY 10
 
-#define RSID_REFRACTION_MAP 3
+#define LEAF_SIZE 0.35f
 
 #define REFRACTION 1.333f
 #define DAMP 3
@@ -277,7 +291,43 @@ void drawNormals() {
     }
 }
 
+void drawLeaf(int index, int frameCount) {
+    float *leafStruct = loadArrayF(RSID_LEAVES, index);
+
+    float x = leafStruct[LEAF_STRUCT_X];
+    float x1 = x - LEAF_SIZE;
+    float x2 = x + LEAF_SIZE;
+
+    float y = leafStruct[LEAF_STRUCT_Y];
+    float y1 = y - LEAF_SIZE;
+    float y2 = y + LEAF_SIZE;
+
+    float u1 = leafStruct[LEAF_STRUCT_U1];
+    float u2 = leafStruct[LEAF_STRUCT_U2];
+
+    drawQuadTexCoords(x1, y1, 0.0f, u1, 1.0f,
+                      x2, y1, 0.0f, u2, 1.0f,
+                      x2, y2, 0.0f, u2, 0.0f,
+                      x1, y2, 0.0f, u1, 0.0f);
+}
+
+void drawLeaves(int frameCount) {
+    bindProgramFragment(NAMED_PFLeaf);
+    bindProgramFragmentStore(NAMED_PFSLeaf);
+    bindTexture(NAMED_PFLeaf, 0, NAMED_TLeaves);
+
+    int leavesCount = loadI32(RSID_STATE, RSID_LEAVES_COUNT);
+    int count = leavesCount * LEAF_STRUCT_FIELDS_COUNT;
+
+    int i = 0;
+    for ( ; i < count; i += LEAF_STRUCT_FIELDS_COUNT) {
+        drawLeaf(i, frameCount);
+    }
+}
+
 int main(int index) {
+    int frameCount = loadI32(RSID_STATE, RSID_FRAME_COUNT);
+
     int dropX = loadI32(RSID_STATE, RSID_DROP_X);
     if (dropX != -1) {
         int dropY = loadI32(RSID_STATE, RSID_DROP_Y);
@@ -295,7 +345,7 @@ int main(int index) {
 
     bindTexture(NAMED_PFBackground, 0, NAMED_TRiverbed);
     drawTriangleMesh(NAMED_mesh);
-    
+
     ambient(0.0f, 0.0f, 0.0f, 1.0f);
     diffuse(0.0f, 0.0f, 0.0f, 1.0f);
     specular(0.44f, 0.44f, 0.44f, 1.0f);
@@ -303,16 +353,14 @@ int main(int index) {
     bindProgramFragment(NAMED_PFLighting);
     drawTriangleMesh(NAMED_mesh);
 
-//    bindProgramVertex(NAMED_PVSky);
-//    bindProgramFragment(NAMED_PFSky);
-//    bindProgramFragmentStore(NAMED_PFSSky);
-//    color(1.0f, 1.0f, 1.0f, 0.30f);
-//    bindTexture(NAMED_PFSky, 0, NAMED_TSky);
-//    drawTriangleMesh(NAMED_mesh);
+    drawLeaves(frameCount);
 
     if (!isRunning) {
         drawNormals();
     }
+
+    frameCount++;
+    storeI32(RSID_STATE, RSID_FRAME_COUNT, frameCount);
 
     return 1;
 }
