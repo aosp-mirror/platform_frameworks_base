@@ -31,6 +31,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.provider.Checkin;
 import android.telephony.ServiceState;
@@ -45,6 +46,7 @@ import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.telephony.DataConnectionTracker;
+import com.android.internal.telephony.RetryManager;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.TelephonyEventLog;
 
@@ -61,8 +63,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     // Indicates baseband will not auto-attach
     private boolean noAutoAttach = false;
-    long nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
-    private boolean mReregisterOnReconnectFailure = false;
     private boolean mIsScreenOn = true;
 
     //useful for debugging
@@ -75,6 +75,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     /** Currently active CdmaDataConnection */
     private CdmaDataConnection mActiveDataConnection;
+
+    /** Manage the behavior of data retry after failure */
+    private final RetryManager mRetryMgr = new RetryManager();
 
     /** Defined cdma connection profiles */
     private static final int EXTERNAL_NETWORK_DEFAULT_ID = 0;
@@ -183,10 +186,19 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         dataEnabled[EXTERNAL_NETWORK_DEFAULT_ID] =
                 !sp.getBoolean(CDMAPhone.DATA_DISABLED_ON_BOOT_KEY, false);
         noAutoAttach = !dataEnabled[EXTERNAL_NETWORK_DEFAULT_ID];
+
+        if (!mRetryMgr.configure(SystemProperties.get("ro.cdma.data_retry_config"))) {
+            if (!mRetryMgr.configure(DEFAULT_DATA_RETRY_CONFIG)) {
+                // Should never happen, log an error and default to a simple linear sequence.
+                Log.e(LOG_TAG, "Could not configure using DEFAULT_DATA_RETRY_CONFIG="
+                        + DEFAULT_DATA_RETRY_CONFIG);
+                mRetryMgr.configure(20, 2000, 1000);
+            }
+        }
     }
 
     public void dispose() {
-        //Unregister from all events
+        // Unregister from all events
         phone.mCM.unregisterForAvailable(this);
         phone.mCM.unregisterForOffOrNotAvailable(this);
         mCdmaPhone.mRuimRecords.unregisterForRecordsLoaded(this);
@@ -459,9 +471,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         setState(State.CONNECTED);
         phone.notifyDataConnection(reason);
         startNetStatPoll();
-        // reset reconnect timer
-        nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
-        mReregisterOnReconnectFailure = false;
+        mRetryMgr.resetRetryCount();
     }
 
     private void resetPollStats() {
@@ -617,21 +627,13 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     private void reconnectAfterFail(FailCause lastFailCauseCode, String reason) {
         if (state == State.FAILED) {
-            if (nextReconnectDelay > RECONNECT_DELAY_MAX_MILLIS) {
-                if (mReregisterOnReconnectFailure) {
-                    // We have already tried to re-register to the network.
-                    // This might be a problem with the data network.
-                    nextReconnectDelay = RECONNECT_DELAY_MAX_MILLIS;
-                } else {
-                    // Try to Re-register to the network.
-                    Log.d(LOG_TAG, "PDP activate failed, Reregistering to the network");
-                    mReregisterOnReconnectFailure = true;
-                    mCdmaPhone.mSST.reRegisterNetwork(null);
-                    nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
-                    return;
-                }
-            }
-
+            /**
+             * For now With CDMA we never try to reconnect on
+             * error and instead just continue to retry
+             * at the last time until the state is changed.
+             * TODO: Make this configurable?
+             */
+            int nextReconnectDelay = mRetryMgr.getRetryTimer();
             Log.d(LOG_TAG, "Data Connection activate failed. Scheduling next attempt for "
                     + (nextReconnectDelay / 1000) + "s");
 
@@ -645,8 +647,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     SystemClock.elapsedRealtime() + nextReconnectDelay,
                     mReconnectIntent);
 
-            // double it for next time
-            nextReconnectDelay *= 2;
+            mRetryMgr.increaseRetryCount();
 
             if (!shouldPostNotification(lastFailCauseCode)) {
                 Log.d(LOG_TAG,"NOT Posting Data Connection Unavailable notification "
@@ -723,10 +724,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      * @override com.android.internal.telephony.DataConnectionTracker
      */
     protected void onRadioOffOrNotAvailable() {
-        // Make sure our reconnect delay starts at the initial value
-        // next time the radio comes on
-        nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
-        mReregisterOnReconnectFailure = false;
+        mRetryMgr.resetRetryCount();
 
         if (phone.getSimulatedRadioControl() != null) {
             // Assume data is connected on the simulator
@@ -802,9 +800,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 resetPollStats();
             }
         } else {
-            // reset reconnect timer
-            nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
-            mReregisterOnReconnectFailure = false;
+            mRetryMgr.resetRetryCount();
             // in case data setup was attempted when we were on a voice call
             trySetupData(Phone.REASON_VOICE_CALL_ENDED);
         }
@@ -840,7 +836,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         } else {
             if (state == State.FAILED) {
                 cleanUpConnection(false, Phone.REASON_CDMA_DATA_DETACHED);
-                nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                mRetryMgr.resetRetryCount();
 
                 CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
                 int bsid = (loc != null) ? loc.getBaseStationId() : -1;
