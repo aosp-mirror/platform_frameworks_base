@@ -202,6 +202,11 @@ static float SC_sqrf(float v)
     return v * v; 
 }
 
+static int SC_sqr(int v)
+{
+    return v * v;
+}
+
 static float SC_distf2(float x1, float y1, float x2, float y2)
 {
     float x = x2 - x1;
@@ -562,22 +567,25 @@ static void SC_drawLine(float x1, float y1, float z1,
     glDrawArrays(GL_LINES, 0, 2);
 }
 
-static void SC_drawQuad(float x1, float y1, float z1,
-                        float x2, float y2, float z2,
-                        float x3, float y3, float z3,
-                        float x4, float y4, float z4)
+static void SC_drawQuadTexCoords(float x1, float y1, float z1,
+                                 float u1, float v1,
+                                 float x2, float y2, float z2,
+                                 float u2, float v2,
+                                 float x3, float y3, float z3,
+                                 float u3, float v3,
+                                 float x4, float y4, float z4,
+                                 float u4, float v4)
 {
     GET_TLS();
-
+    
     //LOGE("Quad");
     //LOGE("%4.2f, %4.2f, %4.2f", x1, y1, z1);
     //LOGE("%4.2f, %4.2f, %4.2f", x2, y2, z2);
     //LOGE("%4.2f, %4.2f, %4.2f", x3, y3, z3);
     //LOGE("%4.2f, %4.2f, %4.2f", x4, y4, z4);
-
+    
     float vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
-    static const float tex[] = {0,1, 1,1, 1,0, 0,0};
-
+    const float tex[] = {u1,v1, u2,v2, u3,v3, u4,v4};
 
     rsc->setupCheck();
 
@@ -601,6 +609,17 @@ static void SC_drawQuad(float x1, float y1, float z1,
     //glColorPointer(4, GL_UNSIGNED_BYTE, 12, ptr);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+}
+
+static void SC_drawQuad(float x1, float y1, float z1,
+                        float x2, float y2, float z2,
+                        float x3, float y3, float z3,
+                        float x4, float y4, float z4)
+{
+    SC_drawQuadTexCoords(x1, y1, z1, 0, 1,
+                         x2, y2, z2, 1, 1,
+                         x3, y3, z3, 1, 0,
+                         x4, y4, z4, 0, 0);
 }
 
 static void SC_drawRect(float x1, float y1,
@@ -765,6 +784,10 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(int)" },
 
     // math
+    { "abs", (void *)&abs,
+        "int", "(int)" },
+    { "absf", (void *)&fabs,
+        "float", "(float)" },
     { "sinf", (void *)&sinf,
         "float", "(float)" },
     { "cosf", (void *)&cosf,
@@ -797,8 +820,12 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "float", "(float, float)" },
     { "minf", (void *)&SC_minf,
         "float", "(float, float)" },
+    { "sqrt", (void *)&sqrt,
+        "int", "(int)" },
     { "sqrtf", (void *)&sqrtf,
         "float", "(float)" },
+    { "sqr", (void *)&SC_sqr,
+        "int", "(int)" },
     { "sqrf", (void *)&SC_sqrf,
         "float", "(float)" },
     { "clampf", (void *)&SC_clampf,
@@ -895,6 +922,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(float x1, float y1, float x2, float y2, float z)" },
     { "drawQuad", (void *)&SC_drawQuad,
         "void", "(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
+    { "drawQuadTexCoords", (void *)&SC_drawQuadTexCoords,
+        "void", "(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4)" },
     { "drawTriangleArray", (void *)&SC_drawTriangleArray,
         "void", "(int ialloc, int count)" },
     { "drawTriangleMesh", (void *)&SC_drawTriangleMesh,
