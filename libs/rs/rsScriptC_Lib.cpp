@@ -21,6 +21,7 @@
 
 #include "acc/acc.h"
 #include "utils/String8.h"
+#include "utils/Timers.h"
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -261,7 +262,7 @@ static float SC_mapf(float minStart, float minStop, float maxStart, float maxSto
 // Time routines
 //////////////////////////////////////////////////////////////////////////////
 
-static uint32_t SC_second()
+static int32_t SC_second()
 {
     GET_TLS();
 
@@ -279,7 +280,7 @@ static uint32_t SC_second()
     }
 }
 
-static uint32_t SC_minute()
+static int32_t SC_minute()
 {
     GET_TLS();
 
@@ -297,7 +298,7 @@ static uint32_t SC_minute()
     }
 }
 
-static uint32_t SC_hour()
+static int32_t SC_hour()
 {
     GET_TLS();
 
@@ -315,7 +316,7 @@ static uint32_t SC_hour()
     }
 }
 
-static uint32_t SC_day()
+static int32_t SC_day()
 {
     GET_TLS();
 
@@ -333,7 +334,7 @@ static uint32_t SC_day()
     }
 }
 
-static uint32_t SC_month()
+static int32_t SC_month()
 {
     GET_TLS();
 
@@ -351,7 +352,7 @@ static uint32_t SC_month()
     }
 }
 
-static uint32_t SC_year()
+static int32_t SC_year()
 {
     GET_TLS();
 
@@ -367,6 +368,24 @@ static uint32_t SC_year()
         timeinfo = localtime(&rawtime);
         return timeinfo->tm_year;
     }
+}
+
+static int32_t SC_uptimeMillis()
+{
+    return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
+}
+
+static int32_t SC_startTimeMillis()
+{
+    GET_TLS();
+    return sc->mEnviroment.mStartTimeMillis;
+}
+
+static int32_t SC_elapsedTimeMillis()
+{
+    GET_TLS();
+    return nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC))
+            - sc->mEnviroment.mStartTimeMillis;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -895,6 +914,12 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "int", "()" },
     { "year", (void *)&SC_year,
         "int", "()" },
+    { "uptimeMillis", (void*)&SC_uptimeMillis,
+        "int", "()" },      // TODO: use long instead
+    { "startTimeMillis", (void*)&SC_startTimeMillis,
+        "int", "()" },      // TODO: use long instead
+    { "elapsedTimeMillis", (void*)&SC_elapsedTimeMillis,
+        "int", "()" },      // TODO: use long instead
 
     // matrix
     { "matrixLoadIdentity", (void *)&SC_matrixLoadIdentity,

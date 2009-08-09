@@ -20,6 +20,7 @@
 
 #include "acc/acc.h"
 #include "utils/String8.h"
+#include "utils/Timers.h"
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -60,6 +61,11 @@ bool ScriptC::run(Context *rsc, uint32_t launchIndex)
     }
     if (mEnviroment.mVertex.get()) {
         rsc->setVertex(mEnviroment.mVertex.get());
+    }
+
+    if (launchIndex == 0) {
+        mEnviroment.mStartTimeMillis
+                = nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
     }
 
     bool ret = false;
