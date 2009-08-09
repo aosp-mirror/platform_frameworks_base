@@ -80,7 +80,6 @@ public final class CdmaCallTracker extends CallTracker {
     int pendingCallClirMode;
     Phone.State state = Phone.State.IDLE;
 
-    private boolean mIsInEmergencyCall = false;
 
 //    boolean needsPoll;
 
@@ -211,9 +210,6 @@ public final class CdmaCallTracker extends CallTracker {
             // Always unmute when initiating a new call
             setMute(false);
 
-            // Check data call
-            disableDataCallInEmergencyCall(dialString);
-
             String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
             if(inEcm.equals("false")) {
                 cm.dial(pendingMO.address, clirMode, obtainCompleteMessage());
@@ -240,9 +236,6 @@ public final class CdmaCallTracker extends CallTracker {
     private Connection
     dialThreeWay (String dialString) {
         if (!foregroundCall.isIdle()) {
-            // Check data call
-            disableDataCallInEmergencyCall(dialString);
-
             // Attach the new connection to foregroundCall
             pendingMO = new CdmaConnection(phone.getContext(),
                                 dialString, this, foregroundCall);
@@ -536,9 +529,6 @@ public final class CdmaCallTracker extends CallTracker {
                     }
                 }
                 foregroundCall.setGeneric(false);
-
-                mIsInEmergencyCall = false;
-
                 // Dropped connections are removed from the CallTracker
                 // list but kept in the Call list
                 connections[i] = null;
@@ -976,26 +966,6 @@ public final class CdmaCallTracker extends CallTracker {
                throw new RuntimeException("unexpected event not handled");
             }
         }
-    }
-
-    /**
-     * Disable data call when emergency call is connected
-     */
-    private void disableDataCallInEmergencyCall(String dialString) {
-        if (PhoneNumberUtils.isEmergencyNumber(dialString)) {
-            phone.disableDataConnectivity();
-            mIsInEmergencyCall = true;
-        }
-    }
-
-    /**
-     * Check if current call is in emergency call
-     *
-     * @return true if it is in emergency call
-     *         false if it is not in emergency call
-     */
-    boolean isInEmergencyCall() {
-        return mIsInEmergencyCall;
     }
 
     protected void log(String msg) {
