@@ -52,6 +52,7 @@ import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.RetryManager;
 import com.android.internal.telephony.TelephonyEventLog;
 import com.android.internal.telephony.DataConnection.FailCause;
 
@@ -85,7 +86,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     INetStatService netstat;
     // Indicates baseband will not auto-attach
     private boolean noAutoAttach = false;
-    long nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+
     private boolean mReregisterOnReconnectFailure = false;
     private ContentResolver mResolver;
 
@@ -94,6 +95,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     // call reRegisterNetwork, or pingTest succeeds.
     private int mPdpResetCount = 0;
     private boolean mIsScreenOn = true;
+
+    private final RetryManager mRetryMgr = new RetryManager();
+
+    /** Delay between APN attempts */
+    protected static final int APN_DELAY_MILLIS = 5000;
 
     //useful for debugging
     boolean failNextConnect = false;
@@ -247,6 +253,15 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(phone.getContext());
         dataEnabled[APN_DEFAULT_ID] = !sp.getBoolean(GSMPhone.DATA_DISABLED_ON_BOOT_KEY, false);
         noAutoAttach = !dataEnabled[APN_DEFAULT_ID];
+
+        if (!mRetryMgr.configure(SystemProperties.get("ro.gsm.data_retry_config"))) {
+            if (!mRetryMgr.configure(DEFAULT_DATA_RETRY_CONFIG)) {
+                // Should never happen, log an error and default to a simple linear sequence.
+                Log.e(LOG_TAG, "Could not configure using DEFAULT_DATA_RETRY_CONFIG="
+                        + DEFAULT_DATA_RETRY_CONFIG);
+                mRetryMgr.configure(20, 2000, 1000);
+            }
+        }
     }
 
     public void dispose() {
@@ -558,7 +573,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         } else {
             if (state == State.FAILED) {
                 cleanUpConnection(false, Phone.REASON_GPRS_ATTACHED);
-                nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                mRetryMgr.resetRetryCount();
             }
             trySetupData(Phone.REASON_GPRS_ATTACHED);
         }
@@ -808,7 +823,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             cleanUpConnection(isConnected, Phone.REASON_APN_CHANGED);
             if (!isConnected) {
                 // reset reconnect timer
-                nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                mRetryMgr.resetRetryCount();
                 mReregisterOnReconnectFailure = false;
                 trySetupData(Phone.REASON_APN_CHANGED);
             }
@@ -889,7 +904,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         phone.notifyDataConnection(reason);
         startNetStatPoll();
         // reset reconnect timer
-        nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+        mRetryMgr.resetRetryCount();
         mReregisterOnReconnectFailure = false;
     }
 
@@ -1175,20 +1190,21 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private void reconnectAfterFail(FailCause lastFailCauseCode, String reason) {
         if (state == State.FAILED) {
-            if (nextReconnectDelay > RECONNECT_DELAY_MAX_MILLIS) {
+            if (!mRetryMgr.isRetryNeeded()) {
                 if (mReregisterOnReconnectFailure) {
-                    // We have already tried to re-register to the network.
-                    // This might be a problem with the data network.
-                    nextReconnectDelay = RECONNECT_DELAY_MAX_MILLIS;
+                    // We've re-registerd once now just retry forever.
+                    mRetryMgr.retryForeverUsingLastTimeout();
                 } else {
-                    // Try to Re-register to the network.
+                    // Try to re-register to the network.
                     Log.d(LOG_TAG, "PDP activate failed, Reregistering to the network");
                     mReregisterOnReconnectFailure = true;
                     mGsmPhone.mSST.reRegisterNetwork(null);
-                    nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                    mRetryMgr.resetRetryCount();
                     return;
                 }
             }
+
+            int nextReconnectDelay = mRetryMgr.getRetryTimer();
             Log.d(LOG_TAG, "PDP activate failed. Scheduling next attempt for "
                     + (nextReconnectDelay / 1000) + "s");
 
@@ -1202,8 +1218,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     SystemClock.elapsedRealtime() + nextReconnectDelay,
                     mReconnectIntent);
 
-            // double it for next time
-            nextReconnectDelay *= 2;
+            mRetryMgr.increaseRetryCount();
 
             if (!shouldPostNotification(lastFailCauseCode)) {
                 Log.d(LOG_TAG,"NOT Posting GPRS Unavailable notification "
@@ -1276,7 +1291,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected void onRadioOffOrNotAvailable() {
         // Make sure our reconnect delay starts at the initial value
         // next time the radio comes on
-        nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+        mRetryMgr.resetRetryCount();
         mReregisterOnReconnectFailure = false;
 
         if (phone.getSimulatedRadioControl() != null) {
@@ -1361,8 +1376,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 setState(State.SCANNING);
                 // Wait a bit before trying the next APN, so that
                 // we're not tying up the RIL command channel
-                sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason),
-                        RECONNECT_DELAY_INITIAL_MILLIS);
+                sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason), APN_DELAY_MILLIS);
             }
         }
     }
@@ -1407,7 +1421,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
         } else {
             // reset reconnect timer
-            nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+            mRetryMgr.resetRetryCount();
             mReregisterOnReconnectFailure = false;
             // in case data setup was attempted when we were on a voice call
             trySetupData(Phone.REASON_VOICE_CALL_ENDED);
@@ -1684,7 +1698,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 } else {
                     if (state == State.FAILED) {
                         cleanUpConnection(false, Phone.REASON_PS_RESTRICT_ENABLED);
-                        nextReconnectDelay = RECONNECT_DELAY_INITIAL_MILLIS;
+                        mRetryMgr.resetRetryCount();
                         mReregisterOnReconnectFailure = false;
                     }
                     trySetupData(Phone.REASON_PS_RESTRICT_ENABLED);

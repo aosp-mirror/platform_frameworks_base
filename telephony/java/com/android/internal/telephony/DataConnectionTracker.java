@@ -96,10 +96,11 @@ public abstract class DataConnectionTracker extends Handler {
     public static final int EVENT_CLEAN_UP_CONNECTION = 34;
 
     //***** Constants
-    protected static final int RECONNECT_DELAY_INITIAL_MILLIS = 5 * 1000;
 
-    /** Cap out with 30 min retry interval. */
-    protected static final int RECONNECT_DELAY_MAX_MILLIS = 30 * 60 * 1000;
+    /** Retry configuration: A doubling of retry times from 5secs to 30minutes */
+    protected static final String DEFAULT_DATA_RETRY_CONFIG = "default_randomization=2000,"
+        + "5000,10000,20000,40000,80000:5000,160000:5000,"
+        + "320000:5000,640000:5000,1280000:5000,1800000:5000";
 
     /** Slow poll when attempting connection recovery. */
     protected static final int POLL_NETSTAT_SLOW_MILLIS = 5000;
