@@ -9,32 +9,18 @@
 DIGIT    [0-9]
 ID       [a-zA-Z_][a-zA-Z0-9_]*
 
+    #include "spec.h"
 
    int num_lines = 0;
 
-   typedef struct {
-      int isConst;
-      int type;
-      int bits;
-      int ptrLevel;
-      char name[256];
-      char typename[256];
-   } VarType;
-
    VarType *currType = 0;
-
-   typedef struct {
-      char name[256];
-      int sync;
-      int paramCount;
-      VarType ret;
-      VarType params[16];
-   } ApiEntry;
 
    ApiEntry apis[128];
    int apiCount = 0;
 
    int typeNextState;
+
+   extern "C" int yylex();
 
 %%
 
@@ -141,7 +127,7 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 <var_type>{ID} {
     currType->type = 4;
     currType->bits = 32;
-    memcpy(currType->typename, yytext, yyleng);
+    memcpy(currType->typeName, yytext, yyleng);
     BEGIN(typeNextState);
     }
 

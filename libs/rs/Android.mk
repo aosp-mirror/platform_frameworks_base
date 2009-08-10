@@ -14,17 +14,8 @@ LOCAL_IS_HOST_MODULE := true
 LOCAL_MODULE_CLASS := EXECUTABLES
 intermediates := $(local-intermediates-dir)
 
-GEN := $(addprefix $(intermediates)/, \
-            lex.yy.c \
-        )
-$(GEN):	PRIVATE_CUSTOM_TOOL = flex -o $@ $<
-
-$(intermediates)/lex.yy.c : $(LOCAL_PATH)/spec.lex
-	$(transform-generated-source)
-
-$(LOCAL_PATH)/rsg_generator.c : $(intermediates)/lex.yy.c
-
 LOCAL_SRC_FILES:= \
+    spec.l \
     rsg_generator.c
 
 include $(BUILD_HOST_EXECUTABLE)
