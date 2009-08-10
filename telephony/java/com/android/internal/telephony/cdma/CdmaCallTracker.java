@@ -321,13 +321,16 @@ public final class CdmaCallTracker extends CallTracker {
     canDial() {
         boolean ret;
         int serviceState = phone.getServiceState().getState();
+        String disableCall = SystemProperties.get(
+                TelephonyProperties.PROPERTY_DISABLE_CALL, "false");
 
-        ret = (serviceState != ServiceState.STATE_POWER_OFF) &&
-                pendingMO == null
+        ret = (serviceState != ServiceState.STATE_POWER_OFF)
+                && pendingMO == null
                 && !ringingCall.isRinging()
+                && !disableCall.equals("true")
                 && (!foregroundCall.getState().isAlive()
-                || (foregroundCall.getState() == CdmaCall.State.ACTIVE)
-                || !backgroundCall.getState().isAlive());
+                    || (foregroundCall.getState() == CdmaCall.State.ACTIVE)
+                    || !backgroundCall.getState().isAlive());
 
         return ret;
     }
