@@ -1,6 +1,6 @@
 
-
-#include "lex.yy.c"
+#include "spec.h"
+#include <stdio.h>
 
 void printFileHeader(FILE *f)
 {
@@ -45,7 +45,7 @@ void printVarType(FILE *f, const VarType *vt)
             fprintf(f, "double");
         break;
     case 4:
-        fprintf(f, "%s", vt->typename);
+        fprintf(f, "%s", vt->typeName);
         break;
     }
 
@@ -157,7 +157,7 @@ void printApiCpp(FILE *f)
             needFlush += vt->ptrLevel;
             fprintf(f, "    cmd->%s = %s;\n", vt->name, vt->name);
         }
-        if (api->ret.typename[0]) {
+        if (api->ret.typeName[0]) {
             needFlush = 1;
         }
 
@@ -167,7 +167,7 @@ void printApiCpp(FILE *f)
         }
         fprintf(f, "(RS_CMD_ID_%s, size);\n", api->name);
 
-        if (api->ret.typename[0]) {
+        if (api->ret.typeName[0]) {
             fprintf(f, "    return reinterpret_cast<");
             printVarType(f, &api->ret);
             fprintf(f, ">(io->mToCoreRet);\n");
@@ -199,7 +199,7 @@ void printPlaybackCpp(FILE *f)
         //fprintf(f, "    LOGE(\"play command %s\\n\");\n", api->name);
         fprintf(f, "    const RS_CMD_%s *cmd = static_cast<const RS_CMD_%s *>(vp);\n", api->name, api->name);
         fprintf(f, "    ");
-        if (api->ret.typename[0]) {
+        if (api->ret.typeName[0]) {
             fprintf(f, "gIO->mToCoreRet = (intptr_t)");
         }
         fprintf(f, "rsi_%s(con", api->name);
