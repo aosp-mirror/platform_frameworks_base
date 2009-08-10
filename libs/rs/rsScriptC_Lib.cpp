@@ -188,6 +188,11 @@ static float SC_clampf(float amount, float low, float high)
     return amount < low ? low : (amount > high ? high : amount);
 }
 
+static int SC_clamp(int amount, int low, int high)
+{
+    return amount < low ? low : (amount > high ? high : amount);
+}
+
 static float SC_maxf(float a, float b)
 {
     return a > b ? a : b;
@@ -826,6 +831,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(int)" },
 
     // math
+    { "modf", (void *)&fmod,
+        "float", "(float, float)" },
     { "abs", (void *)&abs,
         "int", "(int)" },
     { "absf", (void *)&fabs,
@@ -870,6 +877,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "int", "(int)" },
     { "sqrf", (void *)&SC_sqrf,
         "float", "(float)" },
+    { "clamp", (void *)&SC_clamp,
+        "int", "(int, int, int)" },
     { "clampf", (void *)&SC_clampf,
         "float", "(float, float, float)" },
     { "distf2", (void *)&SC_distf2,

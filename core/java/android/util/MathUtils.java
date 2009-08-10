@@ -116,7 +116,7 @@ public final class MathUtils {
         return degrees * DEG_TO_RAD;
     }
 
-    public static float degress(float radians) {
+    public static float degrees(float radians) {
         return radians * RAD_TO_DEG;
     }
 

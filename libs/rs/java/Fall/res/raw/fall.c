@@ -34,6 +34,10 @@
 #define RSID_REFRACTION_MAP 2
 #define RSID_LEAVES 3
 
+#define RSID_GL_STATE 4
+#define RSID_GL_WIDTH 0
+#define RSID_GL_HEIGHT 1
+
 #define LEAF_STRUCT_FIELDS_COUNT 11
 #define LEAF_STRUCT_X 0
 #define LEAF_STRUCT_Y 1
@@ -47,7 +51,9 @@
 #define LEAF_STRUCT_DELTAX 9
 #define LEAF_STRUCT_DELTAY 10
 
-#define LEAF_SIZE 0.35f
+#define LEAVES_TEXTURES_COUNT 4
+
+#define LEAF_SIZE 0.55f
 
 #define REFRACTION 1.333f
 #define DAMP 3
@@ -261,7 +267,7 @@ void generateRipples() {
             vertices[(yOffset + x) * 8 + 2] = -n3z;
             
             // reset Z
-            vertices[(yOffset + x) * 8 + 7] = 0.0f;
+            //vertices[(yOffset + x) * 8 + 7] = 0.0f;
         }
     }
 }
@@ -271,7 +277,7 @@ void drawNormals() {
     int height = loadI32(RSID_STATE, RSID_MESH_HEIGHT);
 
     float *vertices = loadTriangleMeshVerticesF(NAMED_mesh);
-    
+
     bindProgramVertex(NAMED_PVLines);
     color(1.0f, 0.0f, 0.0f, 1.0f);
 
@@ -280,18 +286,50 @@ void drawNormals() {
         int yOffset = y * width;
         int x = 0;
         for ( ; x < width; x++) {
-            float vx = vertices[(yOffset + x) * 8 + 5];
-            float vy = vertices[(yOffset + x) * 8 + 6];
-            float vz = vertices[(yOffset + x) * 8 + 7];
-            float nx = vertices[(yOffset + x) * 8 + 0];
-            float ny = vertices[(yOffset + x) * 8 + 1];
-            float nz = vertices[(yOffset + x) * 8 + 2];
+            int offset = (yOffset + x) * 8;
+            float vx = vertices[offset + 5];
+            float vy = vertices[offset + 6];
+            float vz = vertices[offset + 7];
+            float nx = vertices[offset + 0];
+            float ny = vertices[offset + 1];
+            float nz = vertices[offset + 2];
             drawLine(vx, vy, vz, vx + nx / 10.0f, vy + ny / 10.0f, vz + nz / 10.0f);
         }
     }
 }
 
-void drawLeaf(int index, int frameCount) {
+float averageZ(float x1, float x2, float y1, float y2, float* vertices,
+        int meshWidth, int meshHeight, float glWidth, float glHeight) {
+
+    x1 = ((x1 + glWidth / 2.0f) / glWidth) * meshWidth;
+    x2 = ((x2 + glWidth / 2.0f) / glWidth) * meshWidth;
+    y1 = ((y1 + glHeight / 2.0f) / glHeight) * meshHeight;
+    y2 = ((y2 + glHeight / 2.0f) / glHeight) * meshHeight;
+
+    int quadX1 = clamp(x1, 0, meshWidth);
+    int quadX2 = clamp(x2, 0, meshWidth);
+    int quadY1 = clamp(y1, 0, meshHeight);
+    int quadY2 = clamp(y2, 0, meshHeight);
+
+    float z = 0.0f;
+    int vertexCount = 0;
+
+    int y = quadY1;
+    for ( ; y < quadY2; y++) {
+        int x = quadX1;
+        int yOffset = y * meshWidth;
+        for ( ; x < quadX2; x++) {
+            z += vertices[(yOffset + x) * 8 + 7];
+            vertexCount++;
+        }
+    }
+
+    return 75.0f * z / vertexCount;
+}
+
+void drawLeaf(int index, int frameCount, float* vertices, int meshWidth, int meshHeight,
+        float glWidth, float glHeight) {
+
     float *leafStruct = loadArrayF(RSID_LEAVES, index);
 
     float x = leafStruct[LEAF_STRUCT_X];
@@ -305,10 +343,77 @@ void drawLeaf(int index, int frameCount) {
     float u1 = leafStruct[LEAF_STRUCT_U1];
     float u2 = leafStruct[LEAF_STRUCT_U2];
 
-    drawQuadTexCoords(x1, y1, 0.0f, u1, 1.0f,
-                      x2, y1, 0.0f, u2, 1.0f,
-                      x2, y2, 0.0f, u2, 0.0f,
-                      x1, y2, 0.0f, u1, 0.0f);
+    float z1 = 0.0f;
+    float z2 = 0.0f;
+    float z3 = 0.0f;
+    float z4 = 0.0f;
+    
+    float a = leafStruct[LEAF_STRUCT_ALTITUDE];
+    float s = leafStruct[LEAF_STRUCT_SCALE];
+    float r = leafStruct[LEAF_STRUCT_ANGLE];
+
+    float tz = 0.0f;
+    if (a > 0.0f) {
+        tz = -a;
+    } else {
+        z1 = averageZ(x1, x, y1, y, vertices, meshWidth, meshHeight, glWidth, glHeight);
+        z2 = averageZ(x, x2, y1, y, vertices, meshWidth, meshHeight, glWidth, glHeight);
+        z3 = averageZ(x, x2, y, y2, vertices, meshWidth, meshHeight, glWidth, glHeight);
+        z4 = averageZ(x1, x, y, y2, vertices, meshWidth, meshHeight, glWidth, glHeight);
+    }
+
+    x1 -= x;
+    x2 -= x;
+    y1 -= y;
+    y2 -= y;
+
+    float matrix[16];
+    matrixLoadIdentity(matrix);
+    matrixTranslate(matrix, x, y, tz);
+    matrixScale(matrix, s, s, 1.0f);
+    matrixRotate(matrix, r, 0.0f, 0.0f, 1.0f);
+    vpLoadModelMatrix(matrix);
+
+    drawQuadTexCoords(x1, y1, z1, u1, 1.0f,
+                      x2, y1, z2, u2, 1.0f,
+                      x2, y2, z3, u2, 0.0f,
+                      x1, y2, z4, u1, 0.0f);
+
+    float spin = leafStruct[LEAF_STRUCT_SPIN];
+    if (a <= 0.0f) {
+        float rippled = leafStruct[LEAF_STRUCT_RIPPLED];
+        if (rippled < 0.0f) {
+            drop(((x + glWidth / 2.0f) / glWidth) * meshWidth,
+                 meshHeight - ((y + glHeight / 2.0f) / glHeight) * meshHeight,
+                 DROP_RADIUS);
+            spin /= 4.0f;
+            leafStruct[LEAF_STRUCT_SPIN] = spin;
+            leafStruct[LEAF_STRUCT_RIPPLED] = 1.0f;
+        }
+        leafStruct[LEAF_STRUCT_X] = x + leafStruct[LEAF_STRUCT_DELTAX];
+        leafStruct[LEAF_STRUCT_Y] = y + leafStruct[LEAF_STRUCT_DELTAY];
+        r += spin;
+        leafStruct[LEAF_STRUCT_ANGLE] = r;
+    } else {
+        a -= 0.005f;
+        leafStruct[LEAF_STRUCT_ALTITUDE] = a;
+        r += spin * 2.0f;
+        leafStruct[LEAF_STRUCT_ANGLE] = r;
+    }
+
+    if (-LEAF_SIZE * s + x > glWidth / 2.0f || LEAF_SIZE * s + x < -glWidth / 2.0f ||
+        LEAF_SIZE * s + y < -glHeight / 2.0f) {
+
+        int sprite = randf(LEAVES_TEXTURES_COUNT);
+        leafStruct[LEAF_STRUCT_X] = randf2(-1.0f, 1.0f);   
+        leafStruct[LEAF_STRUCT_Y] = glHeight / 2.0f + LEAF_SIZE * 2 * randf(1.0f);
+        leafStruct[LEAF_STRUCT_SCALE] = randf2(0.4f, 0.5f);
+        leafStruct[LEAF_STRUCT_SPIN] = degf(randf2(-0.02f, 0.02f)) / 4.0f;
+        leafStruct[LEAF_STRUCT_U1] = sprite / (float) LEAVES_TEXTURES_COUNT;
+        leafStruct[LEAF_STRUCT_U2] = (sprite + 1) / (float) LEAVES_TEXTURES_COUNT;
+        leafStruct[LEAF_STRUCT_DELTAX] = randf2(-0.02f, 0.02f) / 100.0f;
+        leafStruct[LEAF_STRUCT_DELTAY] = -0.08f * randf2(0.9f, 1.1f) / 100.0f;
+    }
 }
 
 void drawLeaves(int frameCount) {
@@ -318,10 +423,16 @@ void drawLeaves(int frameCount) {
 
     int leavesCount = loadI32(RSID_STATE, RSID_LEAVES_COUNT);
     int count = leavesCount * LEAF_STRUCT_FIELDS_COUNT;
+    int width = loadI32(RSID_STATE, RSID_MESH_WIDTH);
+    int height = loadI32(RSID_STATE, RSID_MESH_HEIGHT);    
+    float glWidth = loadF(RSID_GL_STATE, RSID_GL_WIDTH);
+    float glHeight = loadF(RSID_GL_STATE, RSID_GL_HEIGHT);
+
+    float *vertices = loadTriangleMeshVerticesF(NAMED_mesh);    
 
     int i = 0;
     for ( ; i < count; i += LEAF_STRUCT_FIELDS_COUNT) {
-        drawLeaf(i, frameCount);
+        drawLeaf(i, frameCount, vertices, width, height, glWidth, glHeight);
     }
 }
 
@@ -342,6 +453,10 @@ int main(int index) {
         generateRipples();
         updateTriangleMesh(NAMED_mesh);
     }
+
+    float matrix[16];
+    matrixLoadIdentity(matrix);
+    vpLoadModelMatrix(matrix);
 
     bindTexture(NAMED_PFBackground, 0, NAMED_TRiverbed);
     drawTriangleMesh(NAMED_mesh);
