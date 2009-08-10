@@ -24,10 +24,15 @@ import java.io.InputStream;
 import java.util.Map.Entry;
 import java.util.HashMap;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
 /**
  * @hide
  **/
 public class ScriptC extends Script {
+    private static final String TAG = "ScriptC";
+
     ScriptC(int id, RenderScript rs) {
         super(id, rs);
     }
@@ -111,6 +116,41 @@ public class ScriptC extends Script {
 
         public void addDefine(String name, float value) {
             mFloatDefines.put(name, value);
+        }
+
+        /**
+         * Takes the all public static final fields for a class, and adds defines
+         * for them, using the name of the field as the name of the define.
+         */
+        public void addDefines(Class cl) {
+            addDefines(cl.getFields(), (Modifier.STATIC | Modifier.FINAL | Modifier.PUBLIC), null);
+        }
+
+        /**
+         * Takes the all public fields for an object, and adds defines
+         * for them, using the name of the field as the name of the define.
+         */
+        public void addDefines(Object o) {
+            addDefines(o.getClass().getFields(), Modifier.PUBLIC, o);
+        }
+
+        void addDefines(Field[] fields, int mask, Object o) {
+            for (Field f: fields) {
+                try {
+                    if ((f.getModifiers() & mask) == mask) {
+                        Class t = f.getType();
+                        if (t == int.class) {
+                            mIntDefines.put(f.getName(), f.getInt(o));
+                        }
+                        else if (t == float.class) {
+                            mFloatDefines.put(f.getName(), f.getFloat(o));
+                        }
+                    }
+                } catch (IllegalAccessException ex) {
+                    // TODO: Do we want this log?
+                    Log.d(TAG, "addDefines skipping field " + f.getName());
+                }
+            }
         }
 
         public ScriptC create() {
