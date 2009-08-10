@@ -1083,7 +1083,7 @@ class BackupManagerService extends IBackupManager.Stub {
         public void run() {
             long startRealtime = SystemClock.elapsedRealtime();
             if (DEBUG) Log.v(TAG, "Beginning restore process mTransport=" + mTransport
-                    + " mObserver=" + mObserver + " mToken=" + mToken);
+                    + " mObserver=" + mObserver + " mToken=" + Long.toHexString(mToken));
             /**
              * Restore sequence:
              *
@@ -1706,7 +1706,8 @@ class BackupManagerService extends IBackupManager.Stub {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                     "performRestore");
 
-            if (DEBUG) Log.d(TAG, "performRestore token=" + token + " observer=" + observer);
+            if (DEBUG) Log.d(TAG, "performRestore token=" + Long.toHexString(token)
+                    + " observer=" + observer);
 
             if (mRestoreTransport == null || mRestoreSets == null) {
                 Log.e(TAG, "Ignoring performRestore() with no restore set");
