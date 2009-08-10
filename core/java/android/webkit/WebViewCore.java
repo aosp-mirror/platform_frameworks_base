@@ -1999,10 +1999,11 @@ final class WebViewCore {
         private int mPointer;
         private final boolean mIsFixedSize;
         SurfaceViewProxy(Context context, ViewManager.ChildView childView,
-                int pointer, boolean isFixedSize) {
+                int pointer, int pixelFormat, boolean isFixedSize) {
             super(context);
             setWillNotDraw(false); // this prevents the black box artifact
             getHolder().addCallback(this);
+            getHolder().setFormat(pixelFormat);
             mChildView = childView;
             mChildView.mView = this;
             mPointer = pointer;
@@ -2041,12 +2042,13 @@ final class WebViewCore {
 
     // PluginWidget functions for mainting SurfaceViews for the Surface drawing
     // model.
-    private SurfaceView createSurface(int nativePointer, boolean isFixedSize) {
+    private SurfaceView createSurface(int nativePointer, int pixelFormat,
+                                      boolean isFixedSize) {
         if (mWebView == null) {
             return null;
         }
-        return new SurfaceViewProxy(mContext,
-                mWebView.mViewManager.createView(), nativePointer, isFixedSize);
+        return new SurfaceViewProxy(mContext, mWebView.mViewManager.createView(),
+                                    nativePointer, pixelFormat, isFixedSize);
     }
 
     private void destroySurface(SurfaceView surface) {
