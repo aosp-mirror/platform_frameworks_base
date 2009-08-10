@@ -30,8 +30,7 @@
 
 namespace android {
 
-OMXClient::OMXClient()
-    : mSock(-1) {
+OMXClient::OMXClient() {
 }
 
 OMXClient::~OMXClient() {
@@ -40,10 +39,6 @@ OMXClient::~OMXClient() {
 
 status_t OMXClient::connect() {
     Mutex::Autolock autoLock(mLock);
-
-    if (mSock >= 0) {
-        return UNKNOWN_ERROR;
-    }
 
     sp<IServiceManager> sm = defaultServiceManager();
     sp<IBinder> binder = sm->getService(String16("media.player"));
@@ -54,152 +49,22 @@ status_t OMXClient::connect() {
     mOMX = service->createOMX();
     assert(mOMX.get() != NULL);
 
-#if IOMX_USES_SOCKETS
-    status_t result = mOMX->connect(&mSock);
-    if (result != OK) {
-        mSock = -1;
-
-        mOMX = NULL;
-        return result;
-    }
-
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-
-    int err = pthread_create(&mThread, &attr, ThreadWrapper, this);
-    assert(err == 0);
-
-    pthread_attr_destroy(&attr);
-#else
     mReflector = new OMXClientReflector(this);
-#endif
 
     return OK;
 }
 
 void OMXClient::disconnect() {
-    {
-        Mutex::Autolock autoLock(mLock);
+    Mutex::Autolock autoLock(mLock);
 
-        if (mSock < 0) {
-            return;
-        }
-
-        assert(mObservers.isEmpty());
+    if (mReflector.get() != NULL) {
+        return;
     }
 
-#if IOMX_USES_SOCKETS
-    omx_message msg;
-    msg.type = omx_message::DISCONNECT;
-    ssize_t n = send(mSock, &msg, sizeof(msg), 0);
-    assert(n > 0 && static_cast<size_t>(n) == sizeof(msg));
+    assert(mObservers.isEmpty());
 
-    void *dummy;
-    pthread_join(mThread, &dummy);
-#else
     mReflector->reset();
     mReflector.clear();
-#endif
-}
-
-#if IOMX_USES_SOCKETS
-// static
-void *OMXClient::ThreadWrapper(void *me) {
-    ((OMXClient *)me)->threadEntry();
-
-    return NULL;
-}
-
-void OMXClient::threadEntry() {
-    bool done = false;
-    while (!done) {
-        omx_message msg;
-        ssize_t n = recv(mSock, &msg, sizeof(msg), 0);
-
-        if (n <= 0) {
-            break;
-        }
-
-        done = onOMXMessage(msg);
-    }
-
-    Mutex::Autolock autoLock(mLock);
-    close(mSock);
-    mSock = -1;
-}
-#endif
-
-status_t OMXClient::fillBuffer(IOMX::node_id node, IOMX::buffer_id buffer) {
-#if !IOMX_USES_SOCKETS
-    mOMX->fill_buffer(node, buffer);
-#else
-    if (mSock < 0) {
-        return UNKNOWN_ERROR;
-    }
-
-    omx_message msg;
-    msg.type = omx_message::FILL_BUFFER;
-    msg.u.buffer_data.node = node;
-    msg.u.buffer_data.buffer = buffer;
-
-    ssize_t n = send(mSock, &msg, sizeof(msg), 0);
-    assert(n > 0 && static_cast<size_t>(n) == sizeof(msg));
-#endif
-
-    return OK;
-}
-
-status_t OMXClient::emptyBuffer(
-        IOMX::node_id node, IOMX::buffer_id buffer,
-        OMX_U32 range_offset, OMX_U32 range_length,
-        OMX_U32 flags, OMX_TICKS timestamp) {
-#if !IOMX_USES_SOCKETS
-    mOMX->empty_buffer(
-            node, buffer, range_offset, range_length, flags, timestamp);
-#else
-    if (mSock < 0) {
-        return UNKNOWN_ERROR;
-    }
-
-    // XXX I don't like all this copying...
-
-    omx_message msg;
-    msg.type = omx_message::EMPTY_BUFFER;
-    msg.u.extended_buffer_data.node = node;
-    msg.u.extended_buffer_data.buffer = buffer;
-    msg.u.extended_buffer_data.range_offset = range_offset;
-    msg.u.extended_buffer_data.range_length = range_length;
-    msg.u.extended_buffer_data.flags = flags;
-    msg.u.extended_buffer_data.timestamp = timestamp;
-
-    ssize_t n = send(mSock, &msg, sizeof(msg), 0);
-    assert(n > 0 && static_cast<size_t>(n) == sizeof(msg));
-#endif
-
-    return OK;
-}
-
-status_t OMXClient::send_command(
-        IOMX::node_id node, OMX_COMMANDTYPE cmd, OMX_S32 param) {
-#if !IOMX_USES_SOCKETS
-    return mOMX->send_command(node, cmd, param);
-#else
-    if (mSock < 0) {
-        return UNKNOWN_ERROR;
-    }
-
-    omx_message msg;
-    msg.type = omx_message::SEND_COMMAND;
-    msg.u.send_command_data.node = node;
-    msg.u.send_command_data.cmd = cmd;
-    msg.u.send_command_data.param = param;
-
-    ssize_t n = send(mSock, &msg, sizeof(msg), 0);
-    assert(n > 0 && static_cast<size_t>(n) == sizeof(msg));
-#endif
-
-    return OK;
 }
 
 status_t OMXClient::registerObserver(
@@ -214,9 +79,7 @@ status_t OMXClient::registerObserver(
     mObservers.add(node, observer);
     observer->start();
 
-#if !IOMX_USES_SOCKETS
     mOMX->observe_node(node, mReflector);
-#endif
 
     return OK;
 }
@@ -262,15 +125,6 @@ bool OMXClient::onOMXMessage(const omx_message &msg) {
             LOGV("EmptyBufferDone %p", msg.u.buffer_data.buffer);
             break;
         }
-
-#if IOMX_USES_SOCKETS
-        case omx_message::DISCONNECTED:
-        {
-            LOGV("Disconnected");
-            done = true;
-            break;
-        }
-#endif
 
         default:
             LOGE("received unknown omx_message type %d", msg.type);

@@ -45,23 +45,6 @@ public:
         : BpInterface<IOMX>(impl) {
     }
 
-#if IOMX_USES_SOCKETS
-    virtual status_t connect(int *sd) {
-        Parcel data, reply;
-        data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        remote()->transact(CONNECT, data, &reply);
-
-        status_t err = reply.readInt32();
-        if (err == OK) {
-            *sd = dup(reply.readFileDescriptor());
-        } else {
-            *sd = -1;
-        }
-
-        return reply.readInt32();
-    }
-#endif
-
     virtual status_t list_nodes(List<String8> *list) {
         list->clear();
 
@@ -229,7 +212,6 @@ public:
         return reply.readInt32();
     }
 
-#if !IOMX_USES_SOCKETS
     virtual status_t observe_node(
             node_id node, const sp<IOMXObserver> &observer) {
         Parcel data, reply;
@@ -264,7 +246,6 @@ public:
         data.writeInt64(timestamp);
         remote()->transact(EMPTY_BUFFER, data, &reply, IBinder::FLAG_ONEWAY);
     }
-#endif
 
     virtual sp<IOMXRenderer> createRenderer(
             const sp<ISurface> &surface,
@@ -302,28 +283,6 @@ IMPLEMENT_META_INTERFACE(OMX, "android.hardware.IOMX");
 status_t BnOMX::onTransact(
     uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags) {
     switch (code) {
-#if IOMX_USES_SOCKETS
-        case CONNECT:
-        {
-            CHECK_INTERFACE(IOMX, data, reply);
-
-            int s;
-            status_t err = connect(&s);
-            
-            reply->writeInt32(err);
-            if (err == OK) {
-                assert(s >= 0);
-                reply->writeDupFileDescriptor(s);
-                close(s);
-                s = -1;
-            } else {
-                assert(s == -1);
-            }
-
-            return NO_ERROR;
-        }
-#endif
-
         case LIST_NODES:
         {
             CHECK_INTERFACE(IOMX, data, reply);
@@ -495,7 +454,6 @@ status_t BnOMX::onTransact(
             return NO_ERROR;
         }
 
-#if !IOMX_USES_SOCKETS
         case OBSERVE_NODE:
         {
             CHECK_INTERFACE(IOMX, data, reply);
@@ -536,7 +494,6 @@ status_t BnOMX::onTransact(
 
             return NO_ERROR;
         }
-#endif
 
         case CREATE_RENDERER:
         {
