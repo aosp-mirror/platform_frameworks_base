@@ -237,7 +237,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             final int N = mDrawableContainerState.getChildCount();
             final Drawable[] drawables = mDrawableContainerState.getChildren();
             for (int i = 0; i < N; i++) {
-                drawables[i].mutate();
+                if (drawables[i] != null) drawables[i].mutate();
             }
             mMutated = true;
         }
