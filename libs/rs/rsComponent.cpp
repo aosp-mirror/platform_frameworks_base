@@ -15,6 +15,7 @@
  */
 
 #include "rsComponent.h"
+#include <GLES/gl.h>
 
 using namespace android;
 using namespace android::renderscript;
@@ -29,7 +30,7 @@ Component::Component()
 }
 
 Component::Component(
-    DataKind dk, DataType dt, 
+    DataKind dk, DataType dt,
     bool isNormalized, uint32_t bits)
 {
     mType = dt;
@@ -41,3 +42,37 @@ Component::Component(
 Component::~Component()
 {
 }
+
+uint32_t Component::getGLType() const
+{
+    switch(mType) {
+    case RS_TYPE_FLOAT:
+        rsAssert(mBits == 32);
+        return GL_FLOAT;
+    case RS_TYPE_SIGNED:
+        switch(mBits) {
+        case 32:
+            return 0;//GL_INT;
+        case 16:
+            return GL_SHORT;
+        case 8:
+            return GL_BYTE;
+        }
+        break;
+    case RS_TYPE_UNSIGNED:
+        switch(mBits) {
+        case 32:
+            return 0;//GL_UNSIGNED_INT;
+        case 16:
+            return GL_UNSIGNED_SHORT;
+        case 8:
+            return GL_UNSIGNED_BYTE;
+        }
+        break;
+    }
+    //rsAssert(!"Bad type");
+    //LOGE("mType %i, mKind %i, mBits %i, mIsNormalized %i", mType, mKind, mBits, mIsNormalized);
+    return 0;
+}
+
+

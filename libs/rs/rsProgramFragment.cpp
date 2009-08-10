@@ -196,19 +196,12 @@ void rsi_ProgramFragmentBindTexture(Context *rsc, RsProgramFragment vpf, uint32_
 {
     ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
     pf->bindTexture(slot, static_cast<Allocation *>(a));
-    if (pf == rsc->getFragment()) {
-        //pf->setupGL();
-    }
 }
 
 void rsi_ProgramFragmentBindSampler(Context *rsc, RsProgramFragment vpf, uint32_t slot, RsSampler s)
 {
     ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
     pf->bindSampler(slot, static_cast<Sampler *>(s));
-
-    if (pf == rsc->getFragment()) {
-        //pf->setupGL();
-    }
 }
 
 void rsi_ProgramFragmentSetType(Context *rsc, uint32_t slot, RsType vt)

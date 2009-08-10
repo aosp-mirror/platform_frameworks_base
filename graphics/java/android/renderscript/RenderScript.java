@@ -178,6 +178,11 @@ public class RenderScript {
     native void nLightSetColor(int l, float r, float g, float b);
     native void nLightSetPosition(int l, float x, float y, float z);
 
+    native void nSimpleMeshDestroy(int id);
+    native int  nSimpleMeshCreate(int batchID, int idxID, int[] vtxID, int prim);
+    native void nSimpleMeshBindVertex(int id, int alloc, int slot);
+    native void nSimpleMeshBindIndex(int id, int alloc);
+
 
     private int     mDev;
     private int     mContext;

@@ -43,8 +43,11 @@ public class Allocation extends BaseObj {
     }
 
     public void destroy() {
+        if(mDestroyed) {
+            throw new IllegalStateException("Object already destroyed.");
+        }
+        mDestroyed = true;
         mRS.nAllocationDestroy(mID);
-        mID = 0;
     }
 
     public void data(int[] d) {
@@ -160,17 +163,27 @@ public class Allocation extends BaseObj {
         mBitmapOptions.inScaled = false;
     }
 
-    static public Allocation createTyped(RenderScript rs, Type type) {
+    static public Allocation createTyped(RenderScript rs, Type type)
+        throws IllegalArgumentException {
+
+        if(type.mID == 0) {
+            throw new IllegalStateException("Bad Type");
+        }
         int id = rs.nAllocationCreateTyped(type.mID);
         return new Allocation(id, rs);
     }
 
-    static public Allocation createSized(RenderScript rs, Element e, int count) {
+    static public Allocation createSized(RenderScript rs, Element e, int count)
+        throws IllegalArgumentException {
+
         int id;
         if(e.mIsPredefined) {
             id = rs.nAllocationCreatePredefSized(e.mPredefinedID, count);
         } else {
             id = rs.nAllocationCreateSized(e.mID, count);
+            if(id == 0) {
+                throw new IllegalStateException("Bad element.");
+            }
         }
         return new Allocation(id, rs);
     }

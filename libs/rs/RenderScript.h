@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 //////////////////////////////////////////////////////
-// 
+//
 
 typedef void * RsAdapter1D;
 typedef void * RsAdapter2D;
@@ -38,6 +38,7 @@ typedef void * RsSampler;
 typedef void * RsScript;
 typedef void * RsScriptBasicTemp;
 typedef void * RsTriangleMesh;
+typedef void * RsSimpleMesh;
 typedef void * RsType;
 typedef void * RsLight;
 
@@ -51,6 +52,8 @@ void rsDeviceDestroy(RsDevice);
 RsContext rsContextCreate(RsDevice, void *, uint32_t version);
 void rsContextDestroy(RsContext);
 
+#define RS_MAX_TEXTURE 2
+
 enum RsDataType {
     RS_TYPE_FLOAT,
     RS_TYPE_UNSIGNED,
@@ -59,22 +62,22 @@ enum RsDataType {
 
 enum RsDataKind {
     RS_KIND_USER,
-    RS_KIND_RED, 
-    RS_KIND_GREEN, 
-    RS_KIND_BLUE, 
-    RS_KIND_ALPHA, 
-    RS_KIND_LUMINANCE, 
+    RS_KIND_RED,
+    RS_KIND_GREEN,
+    RS_KIND_BLUE,
+    RS_KIND_ALPHA,
+    RS_KIND_LUMINANCE,
     RS_KIND_INTENSITY,
-    RS_KIND_X, 
-    RS_KIND_Y, 
-    RS_KIND_Z, 
+    RS_KIND_X,
+    RS_KIND_Y,
+    RS_KIND_Z,
     RS_KIND_W,
-    RS_KIND_S, 
-    RS_KIND_T, 
-    RS_KIND_Q, 
+    RS_KIND_S,
+    RS_KIND_T,
+    RS_KIND_Q,
     RS_KIND_R,
-    RS_KIND_NX, 
-    RS_KIND_NY, 
+    RS_KIND_NX,
+    RS_KIND_NY,
     RS_KIND_NZ,
     RS_KIND_INDEX
 };
@@ -86,7 +89,7 @@ enum RsElementPredefined {
     RS_ELEMENT_USER_I16,
     RS_ELEMENT_USER_U32,
     RS_ELEMENT_USER_I32,
-    RS_ELEMENT_USER_FLOAT, 
+    RS_ELEMENT_USER_FLOAT,
 
     RS_ELEMENT_A_8,          // 7
     RS_ELEMENT_RGB_565,      // 8
@@ -96,14 +99,14 @@ enum RsElementPredefined {
     RS_ELEMENT_RGBA_8888,    // 12
 
     RS_ELEMENT_INDEX_16, //13
-    RS_ELEMENT_INDEX_32, 
-    RS_ELEMENT_XY_F32, 
-    RS_ELEMENT_XYZ_F32, 
-    RS_ELEMENT_ST_XY_F32, 
-    RS_ELEMENT_ST_XYZ_F32, 
+    RS_ELEMENT_INDEX_32,
+    RS_ELEMENT_XY_F32,
+    RS_ELEMENT_XYZ_F32,
+    RS_ELEMENT_ST_XY_F32,
+    RS_ELEMENT_ST_XYZ_F32,
     RS_ELEMENT_NORM_XYZ_F32,
     RS_ELEMENT_NORM_ST_XYZ_F32,
-};  
+};
 
 enum RsSamplerParam {
     RS_SAMPLER_MIN_FILTER,
@@ -111,7 +114,7 @@ enum RsSamplerParam {
     RS_SAMPLER_WRAP_S,
     RS_SAMPLER_WRAP_T,
     RS_SAMPLER_WRAP_R
-};  
+};
 
 enum RsSamplerValue {
     RS_SAMPLER_NEAREST,
@@ -119,7 +122,7 @@ enum RsSamplerValue {
     RS_SAMPLER_LINEAR_MIP_LINEAR,
     RS_SAMPLER_WRAP,
     RS_SAMPLER_CLAMP
-};  
+};
 
 enum RsDimension {
     RS_DIMENSION_X,
@@ -128,9 +131,9 @@ enum RsDimension {
     RS_DIMENSION_LOD,
     RS_DIMENSION_FACE,
 
-    RS_DIMENSION_ARRAY_0 = 100, 
-    RS_DIMENSION_ARRAY_1, 
-    RS_DIMENSION_ARRAY_2, 
+    RS_DIMENSION_ARRAY_0 = 100,
+    RS_DIMENSION_ARRAY_1,
+    RS_DIMENSION_ARRAY_2,
     RS_DIMENSION_ARRAY_3,
     RS_DIMENSION_MAX = RS_DIMENSION_ARRAY_3
 };

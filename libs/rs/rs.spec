@@ -460,3 +460,32 @@ FileOpen {
 	}
 
 
+SimpleMeshCreate {
+	ret RsSimpleMesh
+	param RsAllocation prim
+	param RsAllocation index
+	param RsAllocation *vtx
+	param uint32_t vtxCount
+	param uint32_t primType
+	}
+
+SimpleMeshDestroy {
+	param RsSimpleMesh mesh
+	}
+
+SimpleMeshBindIndex {
+	param RsSimpleMesh mesh
+	param RsAllocation idx
+	}
+
+SimpleMeshBindPrimitive {
+	param RsSimpleMesh mesh
+	param RsAllocation prim
+	}
+
+SimpleMeshBindVertex {
+	param RsSimpleMesh mesh
+	param RsAllocation vtx
+	param uint32_t slot
+	}
+

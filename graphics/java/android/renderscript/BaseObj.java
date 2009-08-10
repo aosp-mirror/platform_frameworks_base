@@ -27,6 +27,7 @@ class BaseObj {
     BaseObj(RenderScript rs) {
         mRS = rs;
         mID = 0;
+        mDestroyed = false;
     }
 
     public int getID() {
@@ -34,6 +35,7 @@ class BaseObj {
     }
 
     int mID;
+    boolean mDestroyed;
     String mName;
     RenderScript mRS;
 
@@ -57,7 +59,7 @@ class BaseObj {
 
     protected void finalize() throws Throwable
     {
-        if (mID != 0) {
+        if (!mDestroyed) {
             Log.v(RenderScript.LOG_TAG,
                   "Element finalized without having released the RS reference.");
         }

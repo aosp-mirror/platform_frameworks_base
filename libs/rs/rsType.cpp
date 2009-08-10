@@ -15,6 +15,7 @@
  */
 
 #include "rsContext.h"
+#include <GLES/gl.h>
 
 using namespace android;
 using namespace android::renderscript;
@@ -23,6 +24,7 @@ Type::Type()
 {
     mLODs = 0;
     mLODCount = 0;
+    memset(&mGL, 0, sizeof(mGL));
     clear();
 }
 
@@ -102,6 +104,7 @@ void Type::compute()
     }
     mTotalSizeBytes = offset;
 
+    makeGLComponents();
 }
 
 uint32_t Type::getLODOffset(uint32_t lod, uint32_t x) const
@@ -126,8 +129,155 @@ uint32_t Type::getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) co
 }
 
 
+void Type::makeGLComponents()
+{
+    uint32_t texNum = 0;
+    memset(&mGL, 0, sizeof(mGL));
+
+    for (uint32_t ct=0; ct < getElement()->getComponentCount(); ct++) {
+        const Component *c = getElement()->getComponent(ct);
+
+        switch(c->getKind()) {
+        case Component::X:
+            rsAssert(mGL.mVtx.size == 0);
+            mGL.mVtx.size = 1;
+            mGL.mVtx.offset = mElement->getComponentOffsetBytes(ct);
+            mGL.mVtx.type = c->getGLType();
+            break;
+        case Component::Y:
+            rsAssert(mGL.mVtx.size == 1);
+            rsAssert(mGL.mVtx.type == c->getGLType());
+            mGL.mVtx.size = 2;
+            break;
+        case Component::Z:
+            rsAssert(mGL.mVtx.size == 2);
+            rsAssert(mGL.mVtx.type == c->getGLType());
+            mGL.mVtx.size = 3;
+            break;
+        case Component::W:
+            rsAssert(mGL.mVtx.size == 4);
+            rsAssert(mGL.mVtx.type == c->getGLType());
+            mGL.mVtx.size = 4;
+        break;
+
+        case Component::RED:
+            rsAssert(mGL.mColor.size == 0);
+            mGL.mColor.size = 1;
+            mGL.mColor.offset = mElement->getComponentOffsetBytes(ct);
+            mGL.mColor.type = c->getGLType();
+            break;
+        case Component::GREEN:
+            rsAssert(mGL.mColor.size == 1);
+            rsAssert(mGL.mColor.type == c->getGLType());
+            mGL.mColor.size = 2;
+            break;
+        case Component::BLUE:
+            rsAssert(mGL.mColor.size == 2);
+            rsAssert(mGL.mColor.type == c->getGLType());
+            mGL.mColor.size = 3;
+            break;
+        case Component::ALPHA:
+            rsAssert(mGL.mColor.size == 3);
+            rsAssert(mGL.mColor.type == c->getGLType());
+            mGL.mColor.size = 4;
+        break;
+
+        case Component::NX:
+            rsAssert(mGL.mNorm.size == 0);
+            mGL.mNorm.size = 1;
+            mGL.mNorm.offset = mElement->getComponentOffsetBytes(ct);
+            mGL.mNorm.type = c->getGLType();
+        break;
+        case Component::NY:
+            rsAssert(mGL.mNorm.size == 1);
+            rsAssert(mGL.mNorm.type == c->getGLType());
+            mGL.mNorm.size = 2;
+        break;
+        case Component::NZ:
+            rsAssert(mGL.mNorm.size == 2);
+            rsAssert(mGL.mNorm.type == c->getGLType());
+            mGL.mNorm.size = 3;
+        break;
+
+        case Component::S:
+            if (mGL.mTex[texNum].size) {
+                texNum++;
+            }
+            mGL.mTex[texNum].size = 1;
+            mGL.mTex[texNum].offset = mElement->getComponentOffsetBytes(ct);
+            mGL.mTex[texNum].type = c->getGLType();
+        break;
+        case Component::T:
+            rsAssert(mGL.mTex[texNum].size == 1);
+            rsAssert(mGL.mTex[texNum].type == c->getGLType());
+            mGL.mTex[texNum].size = 2;
+        break;
+        case Component::R:
+            rsAssert(mGL.mTex[texNum].size == 2);
+            rsAssert(mGL.mTex[texNum].type == c->getGLType());
+            mGL.mTex[texNum].size = 3;
+        break;
+        case Component::Q:
+            rsAssert(mGL.mTex[texNum].size == 3);
+            rsAssert(mGL.mTex[texNum].type == c->getGLType());
+            mGL.mTex[texNum].size = 4;
+        break;
+
+        default:
+            break;
+        }
+    }
+}
+
+void Type::enableGLVertexBuffer() const
+{
+    // Note: We are only going to enable buffers and never disable them
+    // here.  The reasonis more than one Allocation may be used as a vertex
+    // source.  So we cannot disable arrays that may have been in use by
+    // another allocation.
+
+    uint32_t stride = mElement->getSizeBytes();
+    if (mGL.mVtx.size) {
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(mGL.mVtx.size,
+                        mGL.mVtx.type,
+                        stride,
+                        (void *)mGL.mVtx.offset);
+    }
+
+    if (mGL.mNorm.size) {
+        glEnableClientState(GL_NORMAL_ARRAY);
+        rsAssert(mGL.mNorm.size == 3);
+        glNormalPointer(mGL.mNorm.size,
+                        stride,
+                        (void *)mGL.mNorm.offset);
+    }
+
+    if (mGL.mColor.size) {
+        glEnableClientState(GL_COLOR_ARRAY);
+        glColorPointer(mGL.mColor.size,
+                       mGL.mColor.type,
+                       stride,
+                       (void *)mGL.mColor.offset);
+    }
+
+    for (uint32_t ct=0; ct < RS_MAX_TEXTURE; ct++) {
+        if (mGL.mTex[ct].size) {
+            glClientActiveTexture(GL_TEXTURE0 + ct);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+            glTexCoordPointer(mGL.mTex[ct].size,
+                              mGL.mTex[ct].type,
+                              stride,
+                              (void *)mGL.mTex[ct].offset);
+        }
+    }
+    glClientActiveTexture(GL_TEXTURE0);
+
+}
+
+
 //////////////////////////////////////////////////
-// 
+//
 namespace android {
 namespace renderscript {
 
@@ -190,6 +340,7 @@ RsType rsi_TypeCreate(Context *rsc)
     TypeState * stc = &rsc->mStateType;
 
     Type * st = new Type();
+    st->incRef();
     st->setDimX(stc->mX);
     st->setDimY(stc->mY);
     st->setDimZ(stc->mZ);
@@ -198,23 +349,13 @@ RsType rsi_TypeCreate(Context *rsc)
     st->setDimFaces(stc->mFaces);
     st->compute();
 
-    stc->mAllTypes.add(st);
-
     return st;
 }
 
 void rsi_TypeDestroy(Context *rsc, RsType vst)
 {
-    TypeState * stc = &rsc->mStateType;
     Type * st = static_cast<Type *>(vst);
-
-    for (size_t ct = 0; ct < stc->mAllTypes.size(); ct++) {
-        if (stc->mAllTypes[ct] == st) {
-            stc->mAllTypes.removeAt(ct);
-            break;
-        }
-    }
-    delete st;
+    st->decRef();
 }
 
 }

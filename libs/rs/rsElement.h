@@ -39,12 +39,12 @@ public:
 
 
     size_t getSizeBits() const;
-    size_t getSizeBytes() const { 
-        return (getSizeBits() + 7) >> 3; 
+    size_t getSizeBytes() const {
+        return (getSizeBits() + 7) >> 3;
     }
 
     size_t getComponentOffsetBits(uint32_t componentNumber) const;
-    size_t getComponentOffsetBytes(uint32_t componentNumber) const { 
+    size_t getComponentOffsetBytes(uint32_t componentNumber) const {
         return (getComponentOffsetBits(componentNumber) + 7) >> 3;
     }
 
@@ -68,7 +68,6 @@ public:
     ElementState();
     ~ElementState();
 
-    Vector<Element *> mAllElements;
     Vector<Component *> mComponentBuildList;
 
 
@@ -78,7 +77,7 @@ public:
             mElement = NULL;
         }
         Predefined(RsElementPredefined en, Element *e) {
-            mEnum = en; 
+            mEnum = en;
             mElement = e;
         }
         RsElementPredefined mEnum;
@@ -87,7 +86,7 @@ public:
     Vector<Predefined> mPredefinedList;
 
     void initPredefined();
-    
+
 };
 
 

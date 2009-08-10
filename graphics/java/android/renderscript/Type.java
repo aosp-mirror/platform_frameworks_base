@@ -16,31 +16,31 @@
 
 package android.renderscript;
 
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import android.content.res.Resources;
-import android.os.Bundle;
 import android.util.Config;
 import android.util.Log;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 /**
  * @hide
  *
  **/
 public class Type extends BaseObj {
+    Dimension[] mDimensions;
+    int[] mValues;
+    Element mElement;
+
+
     Type(int id, RenderScript rs) {
         super(rs);
         mID = id;
     }
 
     public void destroy() {
+        if(mDestroyed) {
+            throw new IllegalStateException("Object already destroyed.");
+        }
+        mDestroyed = true;
         mRS.nTypeDestroy(mID);
-        mID = 0;
     }
 
     public static class Builder {
@@ -85,7 +85,15 @@ public class Type extends BaseObj {
         }
 
         public Type create() {
-            return internalCreate(mRS, this);
+            Type t = internalCreate(mRS, this);
+            t.mElement = mElement;
+            t.mDimensions = new Dimension[mEntryCount];
+            t.mValues = new int[mEntryCount];
+            for(int ct=0; ct < mEntryCount; ct++) {
+                t.mDimensions[ct] = mEntries[ct].mDim;
+                t.mValues[ct] = mEntries[ct].mValue;
+            }
+            return t;
         }
     }
 

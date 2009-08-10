@@ -41,11 +41,11 @@ Allocation::Allocation(const Type *type)
     mBufferID = 0;
 
     mType.set(type);
+    rsAssert(type);
     mPtr = malloc(mType->getSizeBytes());
     if (!mPtr) {
         LOGE("Allocation::Allocation, alloc failure");
     }
-
 }
 
 Allocation::~Allocation()
@@ -113,6 +113,7 @@ void Allocation::uploadToBufferObject()
     glBufferData(GL_ARRAY_BUFFER, mType->getSizeBytes(), getPtr(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+
 
 void Allocation::data(const void *data)
 {

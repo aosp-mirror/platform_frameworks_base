@@ -23,7 +23,7 @@
 namespace android {
 namespace renderscript {
 
-    
+
 
 class Allocation : public ObjectBase
 {
@@ -55,10 +55,14 @@ public:
 
     void data(const void *data);
     void subData(uint32_t xoff, uint32_t count, const void *data);
-    void subData(uint32_t xoff, uint32_t yoff, 
+    void subData(uint32_t xoff, uint32_t yoff,
                  uint32_t w, uint32_t h, const void *data);
     void subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
                  uint32_t w, uint32_t h, uint32_t d, const void *data);
+
+    void enableGLVertexBuffers() const;
+    void setupGLIndexBuffers() const;
+
 
 protected:
     ObjectBaseRef<const Type> mType;
@@ -87,7 +91,6 @@ protected:
     // is allowed.
     bool mIsVertexBuffer;
     uint32_t mBufferID;
-
 };
 
 }

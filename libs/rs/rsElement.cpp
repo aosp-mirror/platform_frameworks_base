@@ -348,7 +348,7 @@ ElementState::~ElementState()
 }
 
 /////////////////////////////////////////
-// 
+//
 
 namespace android {
 namespace renderscript {
@@ -378,7 +378,7 @@ RsElement rsi_ElementGetPredefined(Context *rsc, RsElementPredefined predef)
         sec->initPredefined();
     }
 
-    if ((predef < 0) || 
+    if ((predef < 0) ||
         (static_cast<uint32_t>(predef) >= sec->mPredefinedList.size())) {
         LOGE("rsElementGetPredefined: Request for bad predefined type");
         // error
@@ -395,14 +395,17 @@ void rsi_ElementAdd(Context *rsc, RsDataKind dk, RsDataType dt, bool isNormalize
 {
     ElementState * sec = &rsc->mStateElement;
 
+    Component *c = new Component(static_cast<Component::DataKind>(dk),
+                                 static_cast<Component::DataType>(dt),
+                                 isNormalized,
+                                 bits);
+    sec->mComponentBuildList.add(c);
 }
 
 RsElement rsi_ElementCreate(Context *rsc)
 {
     ElementState * sec = &rsc->mStateElement;
-
     Element *se = new Element(sec->mComponentBuildList.size());
-    sec->mAllElements.add(se);
 
     for (size_t ct = 0; ct < se->getComponentCount(); ct++) {
         se->setComponent(ct, sec->mComponentBuildList[ct]);
@@ -415,15 +418,7 @@ RsElement rsi_ElementCreate(Context *rsc)
 
 void rsi_ElementDestroy(Context *rsc, RsElement vse)
 {
-    ElementState * sec = &rsc->mStateElement;
     Element * se = static_cast<Element *>(vse);
-
-    for (size_t ct = 0; ct < sec->mAllElements.size(); ct++) {
-        if (sec->mAllElements[ct] == se) {
-            sec->mAllElements.removeAt(ct);
-            break;
-        }
-    }
     se->decRef();
 }
 

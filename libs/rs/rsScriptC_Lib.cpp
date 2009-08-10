@@ -89,10 +89,10 @@ static void SC_updateTriangleMesh(RsTriangleMesh mesh)
     glBindBuffer(GL_ARRAY_BUFFER, tm->mBufferObjects[0]);
     glBufferData(GL_ARRAY_BUFFER, tm->mVertexDataSize, tm->mVertexData, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, tm->mIndexDataSize, tm->mIndexData, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 static uint32_t SC_loadU32(uint32_t bank, uint32_t offset)
@@ -189,17 +189,17 @@ static float SC_clampf(float amount, float low, float high)
 
 static float SC_maxf(float a, float b)
 {
-    return a > b ? a : b; 
+    return a > b ? a : b;
 }
 
 static float SC_minf(float a, float b)
 {
-    return a < b ? a : b; 
+    return a < b ? a : b;
 }
 
 static float SC_sqrf(float v)
 {
-    return v * v; 
+    return v * v;
 }
 
 static int SC_sqr(int v)
@@ -211,7 +211,7 @@ static float SC_distf2(float x1, float y1, float x2, float y2)
 {
     float x = x2 - x1;
     float y = y2 - y1;
-    return sqrtf(x * x + y * y); 
+    return sqrtf(x * x + y * y);
 }
 
 static float SC_distf3(float x1, float y1, float z1, float x2, float y2, float z2)
@@ -219,7 +219,7 @@ static float SC_distf3(float x1, float y1, float z1, float x2, float y2, float z
     float x = x2 - x1;
     float y = y2 - y1;
     float z = z2 - z1;
-    return sqrtf(x * x + y * y + z * z); 
+    return sqrtf(x * x + y * y + z * z);
 }
 
 static float SC_magf2(float a, float b)
@@ -234,12 +234,12 @@ static float SC_magf3(float a, float b, float c)
 
 static float SC_radf(float degrees)
 {
-    return degrees * DEG_TO_RAD; 
+    return degrees * DEG_TO_RAD;
 }
 
 static float SC_degf(float radians)
 {
-    return radians * RAD_TO_DEG; 
+    return radians * RAD_TO_DEG;
 }
 
 static float SC_lerpf(float start, float stop, float amount)
@@ -282,10 +282,10 @@ static uint32_t SC_second()
 static uint32_t SC_minute()
 {
     GET_TLS();
-    
+
     time_t rawtime;
     time(&rawtime);
-    
+
     if (sc->mEnviroment.mTimeZone) {
         struct tm timeinfo;
         localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
@@ -295,15 +295,15 @@ static uint32_t SC_minute()
         timeinfo = localtime(&rawtime);
         return timeinfo->tm_min;
     }
-}   
+}
 
 static uint32_t SC_hour()
 {
     GET_TLS();
-    
+
     time_t rawtime;
     time(&rawtime);
-    
+
     if (sc->mEnviroment.mTimeZone) {
         struct tm timeinfo;
         localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
@@ -318,10 +318,10 @@ static uint32_t SC_hour()
 static uint32_t SC_day()
 {
     GET_TLS();
-    
+
     time_t rawtime;
     time(&rawtime);
-    
+
     if (sc->mEnviroment.mTimeZone) {
         struct tm timeinfo;
         localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
@@ -331,15 +331,15 @@ static uint32_t SC_day()
         timeinfo = localtime(&rawtime);
         return timeinfo->tm_mday;
     }
-}   
+}
 
 static uint32_t SC_month()
 {
     GET_TLS();
-    
+
     time_t rawtime;
     time(&rawtime);
-    
+
     if (sc->mEnviroment.mTimeZone) {
         struct tm timeinfo;
         localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
@@ -349,15 +349,15 @@ static uint32_t SC_month()
         timeinfo = localtime(&rawtime);
         return timeinfo->tm_mon;
     }
-} 
+}
 
 static uint32_t SC_year()
 {
     GET_TLS();
-    
+
     time_t rawtime;
     time(&rawtime);
-    
+
     if (sc->mEnviroment.mTimeZone) {
         struct tm timeinfo;
         localtime_tz(&rawtime, &timeinfo, sc->mEnviroment.mTimeZone);
@@ -631,6 +631,23 @@ static void SC_drawRect(float x1, float y1,
                 x1, y1, z);
 }
 
+static void SC_drawSimpleMesh(RsSimpleMesh vsm)
+{
+    GET_TLS();
+    SimpleMesh *sm = static_cast<SimpleMesh *>(vsm);
+    rsc->setupCheck();
+    sm->render();
+}
+
+static void SC_drawSimpleMeshRange(RsSimpleMesh vsm, uint32_t start, uint32_t len)
+{
+    GET_TLS();
+    SimpleMesh *sm = static_cast<SimpleMesh *>(vsm);
+    rsc->setupCheck();
+    sm->renderRange(start, len);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -674,18 +691,18 @@ static void SC_hsb(float h, float s, float b, float a)
     float red = 0.0f;
     float green = 0.0f;
     float blue = 0.0f;
-    
+
     float x = h;
     float y = s;
     float z = b;
-    
+
     float hf = (x - (int) x) * 6.0f;
     int ihf = (int) hf;
     float f = hf - ihf;
     float pv = z * (1.0f - y);
     float qv = z * (1.0f - y * f);
     float tv = z * (1.0f - y * (1.0f - f));
-    
+
     switch (ihf) {
         case 0:         // Red is the dominant color
             red = z;
@@ -718,7 +735,7 @@ static void SC_hsb(float h, float s, float b, float a)
             blue = qv;
             break;
     }
-    
+
     glColor4f(red, green, blue, a);
 }
 
@@ -726,6 +743,12 @@ static void SC_uploadToTexture(RsAllocation va, uint32_t baseMipLevel)
 {
     GET_TLS();
     rsi_AllocationUploadToTexture(rsc, va, baseMipLevel);
+}
+
+static void SC_uploadToBufferObject(RsAllocation va)
+{
+    GET_TLS();
+    rsi_AllocationUploadToBufferObject(rsc, va);
 }
 
 static void SC_ClearColor(float r, float g, float b, float a)
@@ -932,6 +955,10 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(int mesh, int start, int count)" },
     { "drawLine", (void *)&SC_drawLine,
         "void", "(float x1, float y1, float z1, float x2, float y2, float z2)" },
+    { "drawSimpleMesh", (void *)&SC_drawSimpleMesh,
+        "void", "(int ism)" },
+    { "drawSimpleMeshRange", (void *)&SC_drawSimpleMeshRange,
+        "void", "(int ism, int start, int len)" },
 
 
     // misc
@@ -954,6 +981,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
 
     { "uploadToTexture", (void *)&SC_uploadToTexture,
         "void", "(int, int)" },
+    { "uploadToBufferObject", (void *)&SC_uploadToBufferObject,
+        "void", "(int)" },
 
 
     { "debugF", (void *)&SC_debugF,

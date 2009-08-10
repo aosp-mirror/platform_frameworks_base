@@ -99,6 +99,7 @@ LOCAL_SRC_FILES:= \
 	rsScript.cpp \
 	rsScriptC.cpp \
 	rsScriptC_Lib.cpp \
+	rsSimpleMesh.cpp \
 	rsThreadIO.cpp \
 	rsType.cpp \
 	rsTriangleMesh.cpp

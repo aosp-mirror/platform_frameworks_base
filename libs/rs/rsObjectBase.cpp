@@ -27,6 +27,7 @@ ObjectBase::ObjectBase()
 
 ObjectBase::~ObjectBase()
 {
+    //LOGV("~ObjectBase %p  ref %i", this, mRefCount);
     rsAssert(!mRefCount);
 }
 

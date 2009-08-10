@@ -34,8 +34,11 @@ public class ProgramVertex extends BaseObj {
     }
 
     public void destroy() {
+        if(mDestroyed) {
+            throw new IllegalStateException("Object already destroyed.");
+        }
+        mDestroyed = true;
         mRS.nProgramVertexDestroy(mID);
-        mID = 0;
     }
 
     public void bindAllocation(MatrixAllocation va) {

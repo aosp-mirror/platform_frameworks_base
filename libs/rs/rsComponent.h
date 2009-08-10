@@ -52,6 +52,8 @@ public:
     DataKind getKind() const {return mKind;}
     uint32_t getBits() const {return mBits;}
 
+    uint32_t getGLType() const;
+
 protected:
 
     DataType mType;

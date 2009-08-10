@@ -12,8 +12,9 @@ int main(int launchID) {
     int ct, ct2;
     int newPart;
     int drawCount;
-    int dx, dy, idx;
-    int posx,posy;
+    int idx;
+    float dx, dy;
+    float posx,posy;
     int c;
     int srcIdx;
     int dstIdx;
@@ -37,15 +38,15 @@ int main(int launchID) {
     if (touch) {
         newPart = loadI32(2, 0);
         for (ct2=0; ct2<rate; ct2++) {
-            dx = (int)((randf(1.f) - 0.5f) * 0x10000);
-            dy = (int)((randf(1.f) - 0.5f) * 0x10000);
+            dx = randf(1.f) - 0.5f;
+            dy = randf(1.f) - 0.5f;
 
             idx = newPart * 5 + 1;
-            storeI32(2, idx, dx);
-            storeI32(2, idx + 1, dy);
+            storeF(2, idx, dx);
+            storeF(2, idx + 1, dy);
             storeI32(2, idx + 2, maxLife);
-            storeI32(2, idx + 3, x << 16);
-            storeI32(2, idx + 4, y << 16);
+            storeF(2, idx + 3, x);
+            storeF(2, idx + 4, y);
 
             newPart++;
             if (newPart >= count) {
@@ -59,48 +60,50 @@ int main(int launchID) {
     for (ct=0; ct < count; ct++) {
         srcIdx = ct * 5 + 1;
 
-        dx = loadI32(2, srcIdx);
-        dy = loadI32(2, srcIdx + 1);
+        dx = loadF(2, srcIdx);
+        dy = loadF(2, srcIdx + 1);
         life = loadI32(2, srcIdx + 2);
-        posx = loadI32(2, srcIdx + 3);
-        posy = loadI32(2, srcIdx + 4);
+        posx = loadF(2, srcIdx + 3);
+        posy = loadF(2, srcIdx + 4);
 
         if (life) {
-            if (posy < (480 << 16)) {
+            if (posy < 480.f) {
                 dstIdx = drawCount * 9;
                 c = 0xffafcf | ((life >> lifeShift) << 24);
 
                 storeI32(1, dstIdx, c);
-                storeI32(1, dstIdx + 1, posx);
-                storeI32(1, dstIdx + 2, posy);
+                storeF(1, dstIdx + 1, posx);
+                storeF(1, dstIdx + 2, posy);
 
                 storeI32(1, dstIdx + 3, c);
-                storeI32(1, dstIdx + 4, posx + 0x10000);
-                storeI32(1, dstIdx + 5, posy + dy * 4);
+                storeF(1, dstIdx + 4, posx + 1.f);
+                storeF(1, dstIdx + 5, posy + dy);
 
                 storeI32(1, dstIdx + 6, c);
-                storeI32(1, dstIdx + 7, posx - 0x10000);
-                storeI32(1, dstIdx + 8, posy + dy * 4);
+                storeF(1, dstIdx + 7, posx - 1.f);
+                storeF(1, dstIdx + 8, posy + dy);
                 drawCount ++;
             } else {
                 if (dy > 0) {
-                    dy = (-dy) >> 1;
+                    dy *= -0.5f;
                 }
             }
 
             posx = posx + dx;
             posy = posy + dy;
-            dy = dy + 0x400;
+            dy = dy + 0.1f;
             life --;
 
             //storeI32(2, srcIdx, dx);
-            storeI32(2, srcIdx + 1, dy);
+            storeF(2, srcIdx + 1, dy);
             storeI32(2, srcIdx + 2, life);
-            storeI32(2, srcIdx + 3, posx);
-            storeI32(2, srcIdx + 4, posy);
+            storeF(2, srcIdx + 3, posx);
+            storeF(2, srcIdx + 4, posy);
         }
     }
 
-    drawTriangleArray(NAMED_PartBuffer, drawCount);
+    //drawTriangleArray(NAMED_PartBuffer, drawCount);
+    uploadToBufferObject(NAMED_PartBuffer);
+    drawSimpleMeshRange(NAMED_PartMesh, 0, drawCount * 3);
     return 1;
 }

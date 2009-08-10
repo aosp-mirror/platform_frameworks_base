@@ -137,8 +137,11 @@ public class Element extends BaseObj {
         if(mIsPredefined) {
             throw new IllegalStateException("Attempting to destroy a predefined Element.");
         }
+        if(mDestroyed) {
+            throw new IllegalStateException("Object already destroyed.");
+        }
+        mDestroyed = true;
         mRS.nElementDestroy(mID);
-        mID = 0;
     }
 
 
@@ -206,7 +209,7 @@ public class Element extends BaseObj {
                     if (en.mIsNormalized) {
                         norm = 1;
                     }
-                    rs.nElementAdd(en.mType.mID, en.mKind.mID, norm, en.mBits);
+                    rs.nElementAdd(en.mKind.mID, en.mType.mID, norm, en.mBits);
                 }
             }
             int id = rs.nElementCreate();

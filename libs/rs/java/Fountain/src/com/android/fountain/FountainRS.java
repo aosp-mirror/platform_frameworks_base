@@ -33,6 +33,10 @@ import android.renderscript.Script;
 import android.renderscript.ScriptC;
 import android.renderscript.ProgramFragment;
 import android.renderscript.ProgramStore;
+import android.renderscript.SimpleMesh;
+import android.renderscript.Type;
+import android.renderscript.Primitive;
+
 
 public class FountainRS {
 
@@ -64,6 +68,7 @@ public class FountainRS {
     private Script mScript;
     private ProgramStore mPFS;
     private ProgramFragment mPF;
+    private SimpleMesh mSM;
 
     private Bitmap mBackground;
 
@@ -73,8 +78,6 @@ public class FountainRS {
         int partCount = 1024;
 
         mIntAlloc = Allocation.createSized(mRS, Element.USER_I32, 10);
-        mPartAlloc = Allocation.createSized(mRS, Element.USER_I32, partCount * 3 * 3);
-        mPartAlloc.setName("PartBuffer");
         mVertAlloc = Allocation.createSized(mRS, Element.USER_I32, partCount * 5 + 1);
 
         ProgramStore.Builder bs = new ProgramStore.Builder(mRS, null, null);
@@ -96,12 +99,27 @@ public class FountainRS {
         mParams[4] = 0;
         mIntAlloc.data(mParams);
 
-        int t2[] = new int[partCount * 4*3];
-        for (int ct=0; ct < t2.length; ct++) {
-            t2[ct] = 0;
-        }
-        mPartAlloc.data(t2);
+        Element.Builder eb = new Element.Builder(mRS);
+        eb.add(Element.DataType.UNSIGNED, Element.DataKind.RED, true, 8);
+        eb.add(Element.DataType.UNSIGNED, Element.DataKind.GREEN, true, 8);
+        eb.add(Element.DataType.UNSIGNED, Element.DataKind.BLUE, true, 8);
+        eb.add(Element.DataType.UNSIGNED, Element.DataKind.ALPHA, true, 8);
+        eb.add(Element.DataType.FLOAT, Element.DataKind.X, false, 32);
+        eb.add(Element.DataType.FLOAT, Element.DataKind.Y, false, 32);
+        Element primElement = eb.create();
 
+        SimpleMesh.Builder smb = new SimpleMesh.Builder(mRS);
+        int vtxSlot = smb.addVertexType(primElement, partCount * 3);
+        smb.setPrimitive(Primitive.TRIANGLE);
+        mSM = smb.create();
+        mSM.setName("PartMesh");
+
+        mPartAlloc = mSM.createVertexAllocation(vtxSlot);
+        mPartAlloc.setName("PartBuffer");
+        mSM.bindVertexAllocation(mPartAlloc, 0);
+
+        // All setup of named objects should be done by this point
+        // because we are about to compile the script.
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setScript(mRes, R.raw.fountain);
         sb.setRoot(true);

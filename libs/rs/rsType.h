@@ -23,7 +23,7 @@
 namespace android {
 namespace renderscript {
 
-    
+
 class Type : public ObjectBase
 {
 public:
@@ -67,6 +67,8 @@ public:
     void clear();
     void compute();
 
+    void enableGLVertexBuffer() const;
+
 
 protected:
     struct LOD {
@@ -94,7 +96,7 @@ protected:
     bool mDimLOD;
     bool mFaces;
 
-    // A list of array dimensions.  The count is the number of array dimensions and the 
+    // A list of array dimensions.  The count is the number of array dimensions and the
     // sizes is a per array size.
     //Vector<size_t> mDimArraysSizes;
 
@@ -104,6 +106,21 @@ protected:
     size_t mTotalSizeBytes;
     LOD *mLODs;
     uint32_t mLODCount;
+
+    struct VertexComponent_t {
+        uint32_t offset;
+        uint32_t type;
+        uint32_t size;
+        uint32_t stride;
+    };
+    struct GLState_t {
+        VertexComponent_t mVtx;
+        VertexComponent_t mNorm;
+        VertexComponent_t mColor;
+        VertexComponent_t mTex[RS_MAX_TEXTURE];
+    };
+    GLState_t mGL;
+    void makeGLComponents();
 
 private:
     Type(const Type &);
@@ -115,8 +132,6 @@ public:
     TypeState();
     ~TypeState();
 
-    Vector<Type *> mAllTypes;
-
     size_t mX;
     size_t mY;
     size_t mZ;
@@ -124,8 +139,11 @@ public:
     bool mFaces;
     ObjectBaseRef<const Element> mElement;
 
+    ObjectBaseRef<const Type> mIndexType;
+    ObjectBaseRef<const Type> mPrimitiveType;
+    ObjectBaseRef<const Type> *mVertexTypes;
 
-    
+
 };
 
 
