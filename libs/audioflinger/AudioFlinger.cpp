@@ -2908,7 +2908,7 @@ bool AudioFlinger::RecordThread::threadLoop()
                     if (mReqChannelCount != mActiveTrack->channelCount()) {
                         mActiveTrack.clear();
                     } else {
-                        mActiveTrack->mState == TrackBase::ACTIVE;
+                        mActiveTrack->mState = TrackBase::ACTIVE;
                     }
                     mStartStopCond.broadcast();
                 }
