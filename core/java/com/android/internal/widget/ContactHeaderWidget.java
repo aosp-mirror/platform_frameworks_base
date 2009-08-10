@@ -35,6 +35,7 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Intents;
 import android.provider.ContactsContract.PhoneLookup;
+import android.provider.ContactsContract.Presence;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.SocialContract.Activities;
@@ -61,12 +62,13 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     private TextView mPhoneticNameView;
     private CheckBox mStarredView;
     private ImageView mPhotoView;
+    private ImageView mPresenceView;
     private TextView mStatusView;
     private int mNoPhotoResource;
     private QueryHandler mQueryHandler;
 
     protected long mContactId;
-    protected Uri mContactDataUri;
+    protected Uri mContactSummaryUri;
     protected Uri mContactUri;
     protected Uri mStatusUri;
 
@@ -84,12 +86,14 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         Contacts.DISPLAY_NAME,
         Contacts.STARRED,
         Contacts.PHOTO_ID,
+        Contacts.PRESENCE_STATUS,
     };
     protected static final int HEADER_DISPLAY_NAME_COLUMN_INDEX = 0;
     //TODO: We need to figure out how we're going to get the phonetic name.
     //static final int HEADER_PHONETIC_NAME_COLUMN_INDEX
     protected static final int HEADER_STARRED_COLUMN_INDEX = 1;
     protected static final int HEADER_PHOTO_ID_COLUMN_INDEX = 2;
+    protected static final int HEADER_PRESENCE_STATUS_COLUMN_INDEX = 3;
 
     //Projection used for finding the most recent social status.
     protected static final String[] SOCIAL_PROJECTION = new String[] {
@@ -143,6 +147,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mPhotoView = (ImageView)findViewById(R.id.photo);
         mPhotoView.setOnClickListener(this);
         mPhotoView.setOnLongClickListener(this);
+
+        mPresenceView = (ImageView) findViewById(R.id.presence);
 
         mStatusView = (TextView)findViewById(R.id.status);
 
@@ -250,7 +256,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     public void bindFromContactId(long contactId) {
         mContactId = contactId;
         mContactUri = ContentUris.withAppendedId(Contacts.CONTENT_URI, mContactId);
-        mContactDataUri = Uri.withAppendedPath(mContactUri, Contacts.Data.CONTENT_DIRECTORY);
+        mContactSummaryUri = ContentUris.withAppendedId(Contacts.CONTENT_SUMMARY_URI, mContactId);
         mStatusUri = ContentUris.withAppendedId(
                 SocialContract.Activities.CONTENT_CONTACT_STATUS_URI, mContactId);
         redrawHeader();
@@ -317,8 +323,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     protected void redrawHeader() {
-        if (mContactDataUri != null) {
-            mQueryHandler.startQuery(TOKEN_CONTACT_INFO, null, mContactDataUri, HEADER_PROJECTION,
+        if (mContactSummaryUri != null) {
+            mQueryHandler.startQuery(TOKEN_CONTACT_INFO, null, mContactSummaryUri, HEADER_PROJECTION,
                     null, null, null);
         }
 
@@ -352,6 +358,10 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                 photoBitmap = loadPlaceholderPhoto(null);
             }
             mPhotoView.setImageBitmap(photoBitmap);
+
+            //Set the presence status
+            int presence = c.getInt(HEADER_PRESENCE_STATUS_COLUMN_INDEX);
+            mPresenceView.setImageResource(Presence.getPresenceIconResourceId(presence));
         }
     }
 

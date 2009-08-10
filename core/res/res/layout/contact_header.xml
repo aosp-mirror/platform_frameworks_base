@@ -48,6 +48,13 @@
                 
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/presence"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="3dip"
+        android:paddingRight="6dip"/>
+        
     <CheckBox
         android:id="@+id/star"
         android:layout_width="wrap_content"
