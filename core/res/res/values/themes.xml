@@ -280,6 +280,25 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
     
+    <!-- Default theme for windows that want to have the user's selected
+    	 wallpaper appear behind them.  -->
+    <style name="Theme.Wallpaper">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowShowWallpaper">true</item>
+    </style>
+
+    <!-- Variant of the translucent theme with no title bar -->
+    <style name="Theme.Wallpaper.NoTitleBar">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Variant of the translucent theme that has no title bar and
+         fills the entire screen -->
+    <style name="Theme.Wallpaper.NoTitleBar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
     <!-- Default theme for translucent activities, that is windows that allow you
          to see through them to the windows behind.  This sets up the translucent
          flag and appropriate animations for your windows.  -->

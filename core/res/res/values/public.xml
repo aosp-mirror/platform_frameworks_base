@@ -1167,9 +1167,13 @@
 
   <public type="attr" name="accountType" />
   <public type="attr" name="contentAuthority" />
+  <public type="attr" name="windowShowWallpaper" />
 
   <public type="drawable" name="stat_sys_vp_phone_call" />
   <public type="drawable" name="stat_sys_vp_phone_call_on_hold" />
   
+  <public type="style" name="Theme.Wallpaper" />
+  <public type="style" name="Theme.Wallpaper.NoTitleBar" />
+  <public type="style" name="Theme.Wallpaper.NoTitleBar.Fullscreen" />
 
 </resources>

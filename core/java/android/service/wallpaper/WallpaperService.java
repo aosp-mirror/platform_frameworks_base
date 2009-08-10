@@ -21,6 +21,7 @@ import com.android.internal.view.BaseIWindow;
 import com.android.internal.view.BaseSurfaceHolder;
 
 import android.app.Service;
+import android.app.WallpaperManager;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -55,12 +56,14 @@ public abstract class WallpaperService extends Service {
     private static final int DO_DETACH = 20;
     
     private static final int MSG_UPDATE_SURFACE = 10000;
+    private static final int MSG_VISIBILITY_CHANGED = 10010;
     
     /**
      * The actual implementation of a wallpaper.  A wallpaper service may
      * have multiple instances running (for example as a real wallpaper
      * and as a preview), each of which is represented by its own Engine
-     * instance.
+     * instance.  You must implement {@link WallpaperService#onCreateEngine()}
+     * to return your concrete Engine implementation.
      */
     public class Engine {
         IWallpaperEngineWrapper mIWallpaperEngine;
@@ -119,21 +122,79 @@ public abstract class WallpaperService extends Service {
         };
         
         final BaseIWindow mWindow = new BaseIWindow() {
-            
+            public void dispatchAppVisibility(boolean visible) {
+                Message msg = mCaller.obtainMessageI(MSG_VISIBILITY_CHANGED,
+                        visible ? 1 : 0);
+                mCaller.sendMessage(msg);
+            }
         };
         
-        public void onAttach(SurfaceHolder surfaceHolder) {
+        /**
+         * Provides access to the surface in which this wallpaper is drawn.
+         */
+        public SurfaceHolder getSurfaceHolder() {
+            return mSurfaceHolder;
         }
         
-        public void onDetach() {
+        /**
+         * Convenience for {@link WallpaperManager#getDesiredMinimumWidth()
+         * WallpaperManager.getDesiredMinimumWidth()}, returning the width
+         * that the system would like this wallpaper to run in.
+         */
+        public int getDesiredMinimumWidth() {
+            return mIWallpaperEngine.mReqWidth;
         }
         
+        /**
+         * Convenience for {@link WallpaperManager#getDesiredMinimumHeight()
+         * WallpaperManager.getDesiredMinimumHeight()}, returning the height
+         * that the system would like this wallpaper to run in.
+         */
+        public int getDesiredMinimumHeight() {
+            return mIWallpaperEngine.mReqHeight;
+        }
+        
+        /**
+         * Called once to initialize the engine.  After returning, the
+         * engine's surface will be created by the framework.
+         */
+        public void onCreate(SurfaceHolder surfaceHolder) {
+        }
+        
+        /**
+         * Called right before the engine is going away.  After this the
+         * surface will be destroyed and this Engine object is no longer
+         * valid.
+         */
+        public void onDestroy() {
+        }
+        
+        /**
+         * Called to inform you of the wallpaper becoming visible or
+         * hidden.  <em>It is very important that a wallpaper only use
+         * CPU while it is visible.</em>.
+         */
+        public void onVisibilityChanged(boolean visible) {
+        }
+        
+        /**
+         * Convenience for {@link SurfaceHolder.Callback#surfaceChanged
+         * SurfaceHolder.Callback.surfaceChanged()}.
+         */
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         }
 
+        /**
+         * Convenience for {@link SurfaceHolder.Callback#surfaceCreated
+         * SurfaceHolder.Callback.surfaceCreated()}.
+         */
         public void onSurfaceCreated(SurfaceHolder holder) {
         }
 
+        /**
+         * Convenience for {@link SurfaceHolder.Callback#surfaceDestroyed
+         * SurfaceHolder.Callback.surfaceDestroyed()}.
+         */
         public void onSurfaceDestroyed(SurfaceHolder holder) {
         }
 
@@ -249,14 +310,14 @@ public abstract class WallpaperService extends Service {
             mSession = ViewRoot.getWindowSession(getMainLooper());
             mWindow.setSession(mSession);
             
-            onAttach(mSurfaceHolder);
+            onCreate(mSurfaceHolder);
             
             mInitializing = false;
             updateSurface(false);
         }
         
         void detach() {
-            onDetach();
+            onDestroy();
             if (mDestroyReportNeeded) {
                 mDestroyReportNeeded = false;
                 SurfaceHolder.Callback callbacks[];
@@ -329,6 +390,11 @@ public abstract class WallpaperService extends Service {
                 }
                 case MSG_UPDATE_SURFACE:
                     mEngine.updateSurface(false);
+                    break;
+                case MSG_VISIBILITY_CHANGED:
+                    if (DEBUG) Log.v(TAG, "Visibility change in " + mEngine
+                            + ": " + message.arg1);
+                    mEngine.onVisibilityChanged(message.arg1 != 0);
                     break;
                 default :
                     Log.w(TAG, "Unknown message type " + message.what);
