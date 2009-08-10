@@ -104,6 +104,8 @@ void ScriptCState::clear()
 
     mAccScript = NULL;
 
+    mInt32Defines.clear();
+    mFloatDefines.clear();
 }
 
 static ACCvoid* symbolLookup(ACCvoid* pContext, const ACCchar* name)
@@ -123,6 +125,8 @@ void ScriptCState::runCompiler(Context *rsc)
 
     rsc->appendNameDefines(&tmp);
     appendDecls(&tmp);
+    rsc->appendVarDefines(&tmp);
+    appendVarDefines(&tmp);
     tmp.append("#line 1\n");
 
     const char* scriptSource[] = {tmp.string(), mProgram.mScriptText};
@@ -138,7 +142,6 @@ void ScriptCState::runCompiler(Context *rsc)
         ACCsizei len;
         accGetScriptInfoLog(mAccScript, sizeof(buf), &len, buf);
         LOGE(buf);
-
     }
 
     mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
@@ -215,8 +218,30 @@ void ScriptCState::runCompiler(Context *rsc)
     } else {
         // Deal with an error.
     }
-
 }
+
+
+void ScriptCState::appendVarDefines(String8 *str)
+{
+    char buf[256];
+    LOGD("appendVarDefines mInt32Defines.size()=%d mFloatDefines.size()=%d\n",
+            mInt32Defines.size(), mFloatDefines.size());
+    for (size_t ct=0; ct < mInt32Defines.size(); ct++) {
+        str->append("#define ");
+        str->append(mInt32Defines.keyAt(ct));
+        str->append(" ");
+        sprintf(buf, "%i\n", (int)mInt32Defines.valueAt(ct));
+        str->append(buf);
+    }
+    for (size_t ct=0; ct < mFloatDefines.size(); ct++) {
+        str->append("#define ");
+        str->append(mFloatDefines.keyAt(ct));
+        str->append(" ");
+        sprintf(buf, "%ff\n", mFloatDefines.valueAt(ct));
+        str->append(buf);
+    }
+}
+
 
 namespace android {
 namespace renderscript {
@@ -268,6 +293,18 @@ RsScript rsi_ScriptCCreate(Context * rsc)
     ss->clear();
 
     return s;
+}
+
+void rsi_ScriptCSetDefineF(Context *rsc, const char* name, float value)
+{
+    ScriptCState *ss = &rsc->mScriptC;
+    ss->mFloatDefines.add(String8(name), value);
+}
+
+void rsi_ScriptCSetDefineI32(Context *rsc, const char* name, int32_t value)
+{
+    ScriptCState *ss = &rsc->mScriptC;
+    ss->mInt32Defines.add(String8(name), value);
 }
 
 }

@@ -21,6 +21,8 @@
 
 #include "RenderScriptEnv.h"
 
+#include <utils/KeyedVector.h>
+
 struct ACCscript;
 
 // ---------------------------------------------------------------------------
@@ -70,6 +72,7 @@ public:
 
     void clear();
     void runCompiler(Context *rsc);
+    void appendVarDefines(String8 *str);
 
     struct SymbolTable_t {
         const char * mName;
@@ -80,6 +83,9 @@ public:
     static SymbolTable_t gSyms[];
     static const SymbolTable_t * lookupSymbol(const char *);
     static void appendDecls(String8 *str);
+
+    KeyedVector<String8,int> mInt32Defines;
+    KeyedVector<String8,float> mFloatDefines;
 };
 
 

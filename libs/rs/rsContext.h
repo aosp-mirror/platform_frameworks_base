@@ -19,6 +19,8 @@
 
 #include "rsUtils.h"
 
+#include <utils/KeyedVector.h>
+#include <utils/String8.h>
 #include <utils/Vector.h>
 #include <ui/Surface.h>
 
@@ -93,7 +95,7 @@ public:
     void removeName(ObjectBase *obj);
     ObjectBase * lookupName(const char *name) const;
     void appendNameDefines(String8 *str) const;
-
+    void appendVarDefines(String8 *str) const;
 
     ProgramFragment * getDefaultProgramFragment() const {
         return mStateFragment.mDefault.get();
@@ -103,6 +105,14 @@ public:
     }
     ProgramFragmentStore * getDefaultProgramFragmentStore() const {
         return mStateFragmentStore.mDefault.get();
+    }
+
+    void addInt32Define(const char* name, int32_t value) {
+        mInt32Defines.add(String8(name), value);
+    }
+
+    void addFloatDefine(const char* name, float value) {
+        mFloatDefines.add(String8(name), value);
     }
 
 protected:
@@ -143,6 +153,8 @@ private:
     Surface *mWndSurface;
 
     Vector<ObjectBase *> mNames;
+    KeyedVector<String8,int> mInt32Defines;
+    KeyedVector<String8,float> mFloatDefines;
 };
 
 

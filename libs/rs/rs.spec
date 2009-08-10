@@ -16,6 +16,16 @@ ContextBindProgramVertex {
 	param RsProgramVertex pgm
 	}
 
+ContextSetDefineF {
+    param const char* name
+    param float value
+    }
+
+ContextSetDefineI32 {
+    param const char* name
+    param int32_t value
+    }
+
 AssignName {
 	param void *obj
 	param const char *name
@@ -318,6 +328,15 @@ ScriptCCreate {
 	ret RsScript
 	}
 
+ScriptCSetDefineF {
+    param const char* name
+    param float value
+    }
+
+ScriptCSetDefineI32 {
+    param const char* name
+    param int32_t value
+    }
 
 ProgramFragmentStoreBegin {
 	param RsElement in

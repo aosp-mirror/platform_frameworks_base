@@ -331,6 +331,26 @@ void Context::appendNameDefines(String8 *str) const
     }
 }
 
+void Context::appendVarDefines(String8 *str) const
+{
+    char buf[256];
+    for (size_t ct=0; ct < mInt32Defines.size(); ct++) {
+        str->append("#define ");
+        str->append(mInt32Defines.keyAt(ct));
+        str->append(" ");
+        sprintf(buf, "%i\n", (int)mInt32Defines.valueAt(ct));
+        str->append(buf);
+
+    }
+    for (size_t ct=0; ct < mFloatDefines.size(); ct++) {
+        str->append("#define ");
+        str->append(mFloatDefines.keyAt(ct));
+        str->append(" ");
+        sprintf(buf, "%ff\n", mFloatDefines.valueAt(ct));
+        str->append(buf);
+    }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -381,6 +401,15 @@ void rsi_AssignName(Context *rsc, void * obj, const char *name, uint32_t len)
     rsc->assignName(ob, name, len);
 }
 
+void rsi_ContextSetDefineF(Context *rsc, const char* name, float value)
+{
+    rsc->addInt32Define(name, value);
+}
+
+void rsi_ContextSetDefineI32(Context *rsc, const char* name, int32_t value)
+{
+    rsc->addFloatDefine(name, value);
+}
 
 }
 }
