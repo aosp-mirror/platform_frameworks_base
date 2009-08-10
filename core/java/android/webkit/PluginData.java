@@ -47,10 +47,6 @@ public final class PluginData {
     private Map<String, String[]> mHeaders;
 
     /**
-     * The index of the header value in the above mapping.
-     */
-    private int mHeaderValueIndex;
-    /**
      * The associated HTTP response code.
      */
     private int mStatusCode;
