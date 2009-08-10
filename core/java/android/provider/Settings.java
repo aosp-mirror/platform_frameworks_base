@@ -3346,6 +3346,14 @@ public final class Settings {
         public static final String USE_LOCATION_FOR_SERVICES = "use_location";
 
         /**
+         * The length of the calendar sync window into the future.
+         * This specifies the number of days into the future for the sliding window sync.
+         * Setting this to zero will disable sliding sync.
+         */
+        public static final String GOOGLE_CALENDAR_SYNC_WINDOW_DAYS =
+                "google_calendar_sync_window_days";
+
+        /**
          * @deprecated
          * @hide
          */
