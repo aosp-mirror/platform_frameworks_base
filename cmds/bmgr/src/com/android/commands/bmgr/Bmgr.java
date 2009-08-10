@@ -315,8 +315,7 @@ public final class Bmgr {
                 for (RestoreSet s : sets) {
                     if (s.token == token) {
                         System.out.println("Scheduling restore: " + s.name);
-                        mRestore.performRestore(token, observer);
-                        didRestore = true;
+                        didRestore = (mRestore.performRestore(token, observer) == 0);
                         break;
                     }
                 }
@@ -330,12 +329,15 @@ public final class Bmgr {
                 }
             }
 
-            // now wait for it to be done
-            synchronized (observer) {
-                while (!observer.done) {
-                    try {
-                        observer.wait();
-                    } catch (InterruptedException ex) {
+            // if we kicked off a restore successfully, we have to wait for it
+            // to complete before we can shut down the restore session safely
+            if (didRestore) {
+                synchronized (observer) {
+                    while (!observer.done) {
+                        try {
+                            observer.wait();
+                        } catch (InterruptedException ex) {
+                        }
                     }
                 }
             }
