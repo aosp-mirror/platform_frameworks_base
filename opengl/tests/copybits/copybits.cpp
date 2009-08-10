@@ -23,6 +23,9 @@
 #include <hardware/gralloc.h>
 #include <hardware/hardware.h>
 
+#include <ui/FramebufferNativeWindow.h>
+#include <ui/EGLUtils.h>
+
 #define EGL_EGLEXT_PROTOTYPES
 #define GL_GLEXT_PROTOTYPES
 
@@ -31,8 +34,6 @@
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
-
-extern "C" EGLNativeWindowType android_createDisplaySurface(void);
 
 using namespace android;
 
@@ -268,6 +269,8 @@ int init_gl_surface(void)
             EGL_NONE
     };
 
+    EGLNativeWindowType window = android_createDisplaySurface();
+
     printf("init_gl_surface\n");
     if ( (eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY)) == EGL_NO_DISPLAY )
     {
@@ -281,14 +284,15 @@ int init_gl_surface(void)
         return 0;
     }
 
-    if ( eglChooseConfig(eglDisplay, attrib, &myConfig, 1, &numConfigs) != EGL_TRUE )
+    if ( EGLUtils::selectConfigForNativeWindow(eglDisplay, attrib, window, &myConfig) != 0)
     {
-        printf("eglChooseConfig failed\n");
+        printf("EGLUtils::selectConfigForNativeWindow failed\n");
         return 0;
     }
+        
 
     if ( (eglSurface = eglCreateWindowSurface(eglDisplay, myConfig,
-            android_createDisplaySurface(), 0)) == EGL_NO_SURFACE )
+            window, 0)) == EGL_NO_SURFACE )
     {
         printf("eglCreateWindowSurface failed\n");
         return 0;

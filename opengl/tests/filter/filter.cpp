@@ -37,10 +37,14 @@ int main(int argc, char** argv)
      
      EGLDisplay dpy;
 
+     EGLNativeWindowType window = 0;
+     if (!usePbuffer) {
+         window = android_createDisplaySurface();
+     }
+     
      dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
      eglInitialize(dpy, &majorVersion, &minorVersion);
      if (!usePbuffer) {
-         EGLNativeWindowType window = android_createDisplaySurface();
          surface = eglCreateWindowSurface(dpy, config, window, NULL);
          EGLUtils::selectConfigForNativeWindow(
                  dpy, s_configAttribs, window, &config);

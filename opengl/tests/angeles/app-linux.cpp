@@ -133,11 +133,11 @@ static int initGraphics()
      EGLint w, h;
      EGLDisplay dpy;
 
+     EGLNativeWindowType window = android_createDisplaySurface();
+     
      dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
      eglInitialize(dpy, &majorVersion, &minorVersion);
           
-     EGLNativeWindowType window = android_createDisplaySurface();
-     
      status_t err = EGLUtils::selectConfigForNativeWindow(
              dpy, configAttribs, window, &config);
      if (err) {
