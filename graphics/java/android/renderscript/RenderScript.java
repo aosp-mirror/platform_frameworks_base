@@ -68,6 +68,8 @@ public class RenderScript {
     native void nContextBindProgramFragmentStore(int pfs);
     native void nContextBindProgramFragment(int pf);
     native void nContextBindProgramVertex(int pf);
+    native void nContextAddDefineI32(String name, int value);
+    native void nContextAddDefineF(String name, float value);
 
     native void nAssignName(int obj, byte[] name);
     native int  nFileOpen(byte[] name);
@@ -139,6 +141,8 @@ public class RenderScript {
     native void nScriptCSetRoot(boolean isRoot);
     native void nScriptCSetScript(byte[] script, int offset, int length);
     native int  nScriptCCreate();
+    native void nScriptCAddDefineI32(String name, int value);
+    native void nScriptCAddDefineF(String name, float value);
 
     native void nSamplerDestroy(int sampler);
     native void nSamplerBegin();

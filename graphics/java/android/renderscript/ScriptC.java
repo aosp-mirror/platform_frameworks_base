@@ -16,11 +16,13 @@
 
 package android.renderscript;
 
+import android.content.res.Resources;
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
-
-import android.content.res.Resources;
-
+import java.util.Map.Entry;
+import java.util.HashMap;
 
 /**
  * @hide
@@ -30,12 +32,11 @@ public class ScriptC extends Script {
         super(id, rs);
     }
 
-
-
-
     public static class Builder extends Script.Builder {
         byte[] mProgram;
         int mProgramLength;
+        HashMap<String,Integer> mIntDefines = new HashMap();
+        HashMap<String,Float> mFloatDefines = new HashMap();
 
         public Builder(RenderScript rs) {
             super(rs);
@@ -63,7 +64,7 @@ public class ScriptC extends Script {
             }
         }
 
-        public void  setScript(InputStream is) throws IOException {
+        public void setScript(InputStream is) throws IOException {
             byte[] buf = new byte[1024];
             int currentPos = 0;
             while(true) {
@@ -88,19 +89,33 @@ public class ScriptC extends Script {
             b.mRS.nScriptCBegin();
             b.transferCreate();
 
-            b.mRS.nScriptCSetScript(b.mProgram, 0, b.mProgramLength);
+            for (Entry<String,Integer> e: b.mIntDefines.entrySet()) {
+                b.mRS.nScriptCAddDefineI32(e.getKey(), e.getValue().intValue());
+            }
+            for (Entry<String,Float> e: b.mFloatDefines.entrySet()) {
+                b.mRS.nScriptCAddDefineF(e.getKey(), e.getValue().floatValue());
+            }
 
+            b.mRS.nScriptCSetScript(b.mProgram, 0, b.mProgramLength);
 
             int id = b.mRS.nScriptCCreate();
             ScriptC obj = new ScriptC(id, b.mRS);
             b.transferObject(obj);
+
             return obj;
+        }
+
+        public void addDefine(String name, int value) {
+            mIntDefines.put(name, value);
+        }
+
+        public void addDefine(String name, float value) {
+            mFloatDefines.put(name, value);
         }
 
         public ScriptC create() {
             return internalCreate(this);
         }
     }
-
 }
 

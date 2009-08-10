@@ -765,6 +765,26 @@ nScriptCCreate(JNIEnv *_env, jobject _this)
     return (jint)rsScriptCCreate();
 }
 
+static void
+nScriptCAddDefineI32(JNIEnv *_env, jobject _this, jstring name, jint value)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    const char* n = _env->GetStringUTFChars(name, NULL);
+    LOG_API("nScriptCAddDefineI32, con(%p) name(%s) value(%d)", con, n, value);
+    rsScriptCSetDefineI32(n, value);
+    _env->ReleaseStringUTFChars(name, n);
+}
+
+static void
+nScriptCAddDefineF(JNIEnv *_env, jobject _this, jstring name, jfloat value)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    const char* n = _env->GetStringUTFChars(name, NULL);
+    LOG_API("nScriptCAddDefineF, con(%p) name(%s) value(%f)", con, n, value);
+    rsScriptCSetDefineF(n, value);
+    _env->ReleaseStringUTFChars(name, n);
+}
+
 // ---------------------------------------------------------------------------
 
 static void
@@ -985,6 +1005,27 @@ nContextBindProgramVertex(JNIEnv *_env, jobject _this, jint pf)
     rsContextBindProgramVertex((RsProgramVertex)pf);
 }
 
+static void
+nContextAddDefineI32(JNIEnv *_env, jobject _this, jstring name, jint value)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    const char* n = _env->GetStringUTFChars(name, NULL);
+    LOG_API("nScriptCAddDefineI32, con(%p) name(%s) value(%d)", con, n, value);
+    rsContextSetDefineI32(n, value);
+    _env->ReleaseStringUTFChars(name, n);
+}
+
+static void
+nContextAddDefineF(JNIEnv *_env, jobject _this, jstring name, jfloat value)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    const char* n = _env->GetStringUTFChars(name, NULL);
+    LOG_API("nScriptCAddDefineF, con(%p) name(%s) value(%f)", con, n, value);
+    rsContextSetDefineF(n, value);
+    _env->ReleaseStringUTFChars(name, n);
+}
+
+
 // ---------------------------------------------------------------------------
 
 static void
@@ -1197,6 +1238,8 @@ static JNINativeMethod methods[] = {
 {"nScriptCSetRoot",                "(Z)V",                                 (void*)nScriptCSetRoot },
 {"nScriptCSetScript",              "([BII)V",                              (void*)nScriptCSetScript },
 {"nScriptCCreate",                 "()I",                                  (void*)nScriptCCreate },
+{"nScriptCAddDefineI32",           "(Ljava/lang/String;I)V",               (void*)nScriptCAddDefineI32 },
+{"nScriptCAddDefineF",             "(Ljava/lang/String;F)V",               (void*)nScriptCAddDefineF },
 
 {"nProgramFragmentStoreBegin",     "(II)V",                                (void*)nProgramFragmentStoreBegin },
 {"nProgramFragmentStoreDepthFunc", "(I)V",                                 (void*)nProgramFragmentStoreDepthFunc },
