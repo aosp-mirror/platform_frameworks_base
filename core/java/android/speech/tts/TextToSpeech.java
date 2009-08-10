@@ -1032,7 +1032,7 @@ public class TextToSpeech {
             }
             try {
                 String[] locStrings =  mITts.getLanguage();
-                if (locStrings.length == 3) {
+                if ((locStrings != null) && (locStrings.length == 3)) {
                     return new Locale(locStrings[0], locStrings[1], locStrings[2]);
                 } else {
                     return null;
