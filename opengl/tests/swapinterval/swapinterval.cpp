@@ -44,12 +44,13 @@ int main(int argc, char** argv)
     EGLint w, h;
     EGLDisplay dpy;
 
+    
+    EGLNativeWindowType window = android_createDisplaySurface();
+
     dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglInitialize(dpy, 0 ,0) ;//&majorVersion, &minorVersion);
     eglGetConfigs(dpy, NULL, 0, &numConfigs);
     printf("# configs = %d\n", numConfigs);
-    
-    EGLNativeWindowType window = android_createDisplaySurface();
 
     status_t err = EGLUtils::selectConfigForNativeWindow(
             dpy, configAttribs, window, &config);
