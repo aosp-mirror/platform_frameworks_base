@@ -39,6 +39,7 @@ import android.renderscript.Primitive;
 
 
 public class FountainRS {
+    public static final int PART_COUNT = 4000;
 
     public FountainRS() {
     }
@@ -75,10 +76,8 @@ public class FountainRS {
     int mParams[] = new int[10];
 
     private void initRS() {
-        int partCount = 1024;
-
         mIntAlloc = Allocation.createSized(mRS, Element.USER_I32, 10);
-        mVertAlloc = Allocation.createSized(mRS, Element.USER_I32, partCount * 5 + 1);
+        mVertAlloc = Allocation.createSized(mRS, Element.USER_I32, PART_COUNT * 5 + 1);
 
         ProgramStore.Builder bs = new ProgramStore.Builder(mRS, null, null);
         bs.setBlendFunc(ProgramStore.BlendSrcFunc.SRC_ALPHA, ProgramStore.BlendDstFunc.ONE);
@@ -93,10 +92,12 @@ public class FountainRS {
         mPF.setName("PgmFragParts");
 
         mParams[0] = 0;
-        mParams[1] = partCount;
+        mParams[1] = PART_COUNT;
         mParams[2] = 0;
         mParams[3] = 0;
         mParams[4] = 0;
+        mParams[5] = 0;
+        mParams[6] = 0;
         mIntAlloc.data(mParams);
 
         Element.Builder eb = new Element.Builder(mRS);
@@ -109,7 +110,7 @@ public class FountainRS {
         Element primElement = eb.create();
 
         SimpleMesh.Builder smb = new SimpleMesh.Builder(mRS);
-        int vtxSlot = smb.addVertexType(primElement, partCount * 3);
+        int vtxSlot = smb.addVertexType(primElement, PART_COUNT * 3);
         smb.setPrimitive(Primitive.TRIANGLE);
         mSM = smb.create();
         mSM.setName("PartMesh");

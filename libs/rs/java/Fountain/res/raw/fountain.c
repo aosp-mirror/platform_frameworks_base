@@ -7,8 +7,7 @@
 
 
 int main(int launchID) {
-    int count, touch, x, y, rate, maxLife, lifeShift;
-    int life;
+    int count, touch, x, y, rate;
     int ct, ct2;
     int newPart;
     int drawCount;
@@ -25,15 +24,7 @@ int main(int launchID) {
     y = loadI32(0, 4);
 
     rate = 4;
-    maxLife = (count / rate) - 1;
-    lifeShift = 0;
-    {
-        life = maxLife;
-        while (life > 255) {
-            life = life >> 1;
-            lifeShift ++;
-        }
-    }
+    int maxLife = (count / rate) - 1;
 
     if (touch) {
         newPart = loadI32(2, 0);
@@ -57,19 +48,20 @@ int main(int launchID) {
     }
 
     drawCount = 0;
+    float height = getHeight();
     for (ct=0; ct < count; ct++) {
         srcIdx = ct * 5 + 1;
 
         dx = loadF(2, srcIdx);
         dy = loadF(2, srcIdx + 1);
-        life = loadI32(2, srcIdx + 2);
+        int life = loadI32(2, srcIdx + 2);
         posx = loadF(2, srcIdx + 3);
         posy = loadF(2, srcIdx + 4);
 
         if (life) {
-            if (posy < 480.f) {
+            if (posy < height) {
                 dstIdx = drawCount * 9;
-                c = 0xffafcf | ((life >> lifeShift) << 24);
+                c = 0xcfcfcfcf;
 
                 storeI32(1, dstIdx, c);
                 storeF(1, dstIdx + 1, posx);
@@ -91,7 +83,7 @@ int main(int launchID) {
 
             posx = posx + dx;
             posy = posy + dy;
-            dy = dy + 0.1f;
+            dy = dy + 0.05f;
             life --;
 
             //storeI32(2, srcIdx, dx);

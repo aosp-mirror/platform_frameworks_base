@@ -60,6 +60,8 @@ public:
     void subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
                  uint32_t w, uint32_t h, uint32_t d, const void *data);
 
+    void read(void *data);
+
     void enableGLVertexBuffers() const;
     void setupGLIndexBuffers() const;
 

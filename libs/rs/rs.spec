@@ -155,6 +155,10 @@ Allocation2DSubData {
 	param const void *data
 	}
 
+AllocationRead {
+	param RsAllocation va
+	param void * data
+	}
 
 Adapter1DCreate {
 	ret RsAdapter1D

@@ -547,32 +547,6 @@ static void SC_drawTriangleMeshRange(RsTriangleMesh mesh, uint32_t start, uint32
     rsi_TriangleMeshRenderRange(rsc, mesh, start, count);
 }
 
-// Assumes (GL_FIXED) x,y,z (GL_UNSIGNED_BYTE)r,g,b,a
-static void SC_drawTriangleArray(int ialloc, uint32_t count)
-{
-    GET_TLS();
-    RsAllocation alloc = (RsAllocation)ialloc;
-
-    const Allocation *a = (const Allocation *)alloc;
-    const uint32_t *ptr = (const uint32_t *)a->getPtr();
-
-    rsc->setupCheck();
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-
-    glVertexPointer(2, GL_FIXED, 12, ptr + 1);
-    //glTexCoordPointer(2, GL_FIXED, 24, ptr + 1);
-    glColorPointer(4, GL_UNSIGNED_BYTE, 12, ptr);
-
-    glDrawArrays(GL_TRIANGLES, 0, count * 3);
-}
-
 static void SC_drawLine(float x1, float y1, float z1,
                         float x2, float y2, float z2)
 {
@@ -601,13 +575,13 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
                                  float u4, float v4)
 {
     GET_TLS();
-    
+
     //LOGE("Quad");
     //LOGE("%4.2f, %4.2f, %4.2f", x1, y1, z1);
     //LOGE("%4.2f, %4.2f, %4.2f", x2, y2, z2);
     //LOGE("%4.2f, %4.2f, %4.2f", x3, y3, z3);
     //LOGE("%4.2f, %4.2f, %4.2f", x4, y4, z4);
-    
+
     float vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
     const float tex[] = {u1,v1, u2,v2, u3,v3, u4,v4};
 
@@ -795,7 +769,17 @@ static void SC_debugI32(const char *s, int32_t i)
     LOGE("%s %i", s, i);
 }
 
+static uint32_t SC_getWidth()
+{
+    GET_TLS();
+    return rsc->getWidth();
+}
 
+static uint32_t SC_getHeight()
+{
+    GET_TLS();
+    return rsc->getHeight();
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
@@ -981,8 +965,6 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
     { "drawQuadTexCoords", (void *)&SC_drawQuadTexCoords,
         "void", "(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4)" },
-    { "drawTriangleArray", (void *)&SC_drawTriangleArray,
-        "void", "(int ialloc, int count)" },
     { "drawTriangleMesh", (void *)&SC_drawTriangleMesh,
         "void", "(int mesh)" },
     { "drawTriangleMeshRange", (void *)&SC_drawTriangleMeshRange,
@@ -1017,6 +999,12 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(int, int)" },
     { "uploadToBufferObject", (void *)&SC_uploadToBufferObject,
         "void", "(int)" },
+
+    { "getWidth", (void *)&SC_getWidth,
+        "int", "()" },
+    { "getHeight", (void *)&SC_getHeight,
+        "int", "()" },
+
 
 
     { "debugF", (void *)&SC_debugF,

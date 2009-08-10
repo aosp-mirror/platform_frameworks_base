@@ -100,6 +100,8 @@ public class RenderScript {
     native void nAllocationSubData1D(int id, int off, int count, float[] d);
     native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, int[] d);
     native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, float[] d);
+    native void nAllocationRead(int id, int[] d);
+    native void nAllocationRead(int id, float[] d);
 
     native void nTriangleMeshDestroy(int id);
     native void nTriangleMeshBegin(int vertex, int index);
@@ -187,6 +189,10 @@ public class RenderScript {
     native void nSimpleMeshBindVertex(int id, int alloc, int slot);
     native void nSimpleMeshBindIndex(int id, int alloc);
 
+    native void nAnimationDestroy(int id);
+    native void nAnimationBegin(int attribCount, int keyframeCount);
+    native void nAnimationAdd(float time, float[] attribs);
+    native int  nAnimationCreate();
 
     private int     mDev;
     private int     mContext;

@@ -120,6 +120,11 @@ void Allocation::data(const void *data)
     memcpy(mPtr, data, mType->getSizeBytes());
 }
 
+void Allocation::read(void *data)
+{
+    memcpy(data, mPtr, mType->getSizeBytes());
+}
+
 void Allocation::subData(uint32_t xoff, uint32_t count, const void *data)
 {
     uint32_t eSize = mType->getElementSizeBytes();
@@ -521,6 +526,12 @@ void rsi_Allocation2DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint3
     Allocation *a = static_cast<Allocation *>(va);
     a->subData(xoff, yoff, w, h, data);
     rsc->allocationCheck(a);
+}
+
+void rsi_AllocationRead(Context *rsc, RsAllocation va, void *data)
+{
+    Allocation *a = static_cast<Allocation *>(va);
+    a->read(data);
 }
 
 

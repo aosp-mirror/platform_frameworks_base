@@ -74,6 +74,15 @@ public class Allocation extends BaseObj {
         mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d);
     }
 
+    public void readData(int[] d) {
+        mRS.nAllocationRead(mID, d);
+    }
+
+    public void readData(float[] d) {
+        mRS.nAllocationRead(mID, d);
+    }
+
+
     public class Adapter1D extends BaseObj {
         Adapter1D(int id, RenderScript rs) {
             super(rs);

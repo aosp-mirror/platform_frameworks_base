@@ -115,6 +115,9 @@ public:
         mFloatDefines.add(String8(name), value);
     }
 
+    uint32_t getWidth() const {return mWidth;}
+    uint32_t getHeight() const {return mHeight;}
+
 protected:
     Device *mDev;
 

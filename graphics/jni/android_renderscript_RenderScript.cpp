@@ -389,6 +389,27 @@ nAllocationSubData2D_f(JNIEnv *_env, jobject _this, jint alloc, jint xoff, jint 
     _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
 }
 
+static void
+nAllocationRead_i(JNIEnv *_env, jobject _this, jint alloc, jintArray data)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
+    jint *ptr = _env->GetIntArrayElements(data, NULL);
+    rsAllocationData((RsAllocation)alloc, ptr);
+    _env->ReleaseIntArrayElements(data, ptr, JNI_COMMIT);
+}
+
+static void
+nAllocationRead_f(JNIEnv *_env, jobject _this, jint alloc, jfloatArray data)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
+    jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
+    rsAllocationData((RsAllocation)alloc, ptr);
+    _env->ReleaseFloatArrayElements(data, ptr, JNI_COMMIT);
+}
 
 
 // -----------------------------------
@@ -1197,6 +1218,8 @@ static JNINativeMethod methods[] = {
 {"nAllocationSubData1D",           "(III[F)V",                             (void*)nAllocationSubData1D_f },
 {"nAllocationSubData2D",           "(IIIII[I)V",                           (void*)nAllocationSubData2D_i },
 {"nAllocationSubData2D",           "(IIIII[F)V",                           (void*)nAllocationSubData2D_f },
+{"nAllocationRead",                "(I[I)V",                               (void*)nAllocationRead_i },
+{"nAllocationRead",                "(I[F)V",                               (void*)nAllocationRead_f },
 
 {"nTriangleMeshDestroy",           "(I)V",                                 (void*)nTriangleMeshDestroy },
 {"nTriangleMeshBegin",             "(II)V",                                (void*)nTriangleMeshBegin },
