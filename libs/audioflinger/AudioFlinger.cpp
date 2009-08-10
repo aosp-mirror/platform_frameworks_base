@@ -1512,6 +1512,10 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
                     int name = getTrackName_l();
                     if (name < 0) break;
                     mTracks[i]->mName = name;
+                    // limit track sample rate to 2 x new output sample rate
+                    if (mTracks[i]->mCblk->sampleRate > 2 * sampleRate()) {
+                        mTracks[i]->mCblk->sampleRate = 2 * sampleRate();
+                    }
                 }
                 sendConfigEvent_l(AudioSystem::OUTPUT_CONFIG_CHANGED);
             }
