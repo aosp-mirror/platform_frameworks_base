@@ -403,6 +403,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final ArrayList<WindowToken> mWallpaperTokens = new ArrayList<WindowToken>();
     
+    // If non-null, this is the currently visible window that is associated
+    // with the wallpaper.
+    WindowState mWallpaperTarget = null;
+    int mWallpaperAnimLayerAdjustment;
+    
     AppWindowToken mFocusedApp = null;
 
     PowerManagerService mPowerManager;
@@ -1180,15 +1185,23 @@ public class WindowManagerService extends IWindowManager.Stub
         int N = localmWindows.size();
         WindowState w = null;
         int i = N;
+        boolean visible = false;
         while (i > 0) {
             i--;
             w = (WindowState)localmWindows.get(i);
-            if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isVisibleOrAdding()) {
+            if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isReadyForDisplay()) {
+                visible = true;
                 break;
             }
         }
 
-        if (w != null) {
+        if (!visible) w = null;
+        mWallpaperTarget = w;
+        
+        if (visible) {
+            mWallpaperAnimLayerAdjustment = w.mAppToken != null
+                    ? w.mAppToken.animLayerAdjustment : 0;
+            
             // Now w is the window we are supposed to be behind...  but we
             // need to be sure to also be behind any of its attached windows,
             // AND any starting window associated with it.
@@ -1220,6 +1233,24 @@ public class WindowManagerService extends IWindowManager.Stub
             while (curWallpaperIndex > 0) {
                 curWallpaperIndex--;
                 WindowState wallpaper = token.windows.get(curWallpaperIndex);
+                
+                // First, make sure the client has the current visibility
+                // state.
+                if (wallpaper.mWallpaperVisible != visible) {
+                    wallpaper.mWallpaperVisible = visible;
+                    try {
+                        if (DEBUG_VISIBILITY) Log.v(TAG,
+                                "Setting visibility of wallpaper " + wallpaper
+                                + ": " + visible);
+                        wallpaper.mClient.dispatchAppVisibility(visible);
+                    } catch (RemoteException e) {
+                    }
+                }
+                
+                wallpaper.mAnimLayer = wallpaper.mLayer + mWallpaperAnimLayerAdjustment;
+                if (DEBUG_LAYERS) Log.v(TAG, "Wallpaper win " + wallpaper
+                        + " anim layer: " + wallpaper.mAnimLayer);
+                
                 // First, if this window is at the current index, then all
                 // is well.
                 if (wallpaper == w) {
@@ -1246,6 +1277,24 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         return changed;
+    }
+
+    void setWallpaperAnimLayerAdjustment(int adj) {
+        if (DEBUG_LAYERS) Log.v(TAG, "Setting wallpaper layer adj to " + adj);
+        mWallpaperAnimLayerAdjustment = adj;
+        int curTokenIndex = mWallpaperTokens.size();
+        while (curTokenIndex > 0) {
+            curTokenIndex--;
+            WindowToken token = mWallpaperTokens.get(curTokenIndex);
+            int curWallpaperIndex = token.windows.size();
+            while (curWallpaperIndex > 0) {
+                curWallpaperIndex--;
+                WindowState wallpaper = token.windows.get(curWallpaperIndex);
+                wallpaper.mAnimLayer = wallpaper.mLayer + adj;
+                if (DEBUG_LAYERS) Log.v(TAG, "Wallpaper win " + wallpaper
+                        + " anim layer: " + wallpaper.mAnimLayer);
+            }
+        }
     }
 
     public int addWindow(Session session, IWindow client,
@@ -1867,6 +1916,9 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             WindowState win = windowForClientLocked(session, client);
             if (win != null && win.finishDrawingLocked()) {
+                if ((win.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
+                    adjustWallpaperWindowsLocked();
+                }
                 mLayoutNeeded = true;
                 performLayoutAndPlaceSurfacesLocked();
             }
@@ -5842,6 +5894,7 @@ public class WindowManagerService extends IWindowManager.Stub
         Surface mSurface;
         boolean mAttachedHidden;    // is our parent window hidden?
         boolean mLastHidden;        // was this window last hidden?
+        boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
         int mRequestedWidth;
         int mRequestedHeight;
         int mLastRequestedWidth;
@@ -6518,6 +6571,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mAnimLayer = mLayer;
             if (mIsImWindow) {
                 mAnimLayer += mInputMethodAnimLayerAdjustment;
+            } else if (mIsWallpaper) {
+                mAnimLayer += mWallpaperAnimLayerAdjustment;
             }
             if (DEBUG_LAYERS) Log.v(TAG, "Stepping win " + this
                     + " anim layer: " + mAnimLayer);
@@ -6604,6 +6659,19 @@ public class WindowManagerService extends IWindowManager.Stub
             Transformation appTransformation =
                     (mAppToken != null && mAppToken.hasTransformation)
                     ? mAppToken.transformation : null;
+            
+            // Wallpapers are animated based on the "real" window they
+            // are currently targeting.
+            if (mAttrs.type == TYPE_WALLPAPER && mWallpaperTarget != null) {
+                if (mWallpaperTarget.mHasLocalTransformation) {
+                    attachedTransformation = mWallpaperTarget.mTransformation;
+                }
+                if (mWallpaperTarget.mAppToken != null &&
+                        mWallpaperTarget.mAppToken.hasTransformation) {
+                    appTransformation = mWallpaperTarget.mAppToken.transformation;
+                }
+            }
+            
             if (selfTransformation || attachedTransformation != null
                     || appTransformation != null) {
                 // cache often used attributes locally
@@ -6926,7 +6994,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mIsImWindow || mIsWallpaper || mIsFloatingLayer) {
                 pw.print(prefix); pw.print("mIsImWindow="); pw.print(mIsImWindow);
                         pw.print(" mIsWallpaper="); pw.print(mIsWallpaper);
-                        pw.print(" mIsFloatingLayer="); pw.println(mIsFloatingLayer);
+                        pw.print(" mIsFloatingLayer="); pw.print(mIsFloatingLayer);
+                        pw.print(" mWallpaperVisible="); pw.println(mWallpaperVisible);
             }
             pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
                     pw.print(" mSubLayer="); pw.print(mSubLayer);
@@ -7211,6 +7280,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         + w.mAnimLayer);
                 if (w == mInputMethodTarget) {
                     setInputMethodAnimLayerAdjustment(adj);
+                }
+                if (w == mWallpaperTarget) {
+                    setWallpaperAnimLayerAdjustment(adj);
                 }
             }
         }
@@ -7978,6 +8050,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (w.mIsImWindow) {
                 w.mAnimLayer += mInputMethodAnimLayerAdjustment;
+            } else if (w.mIsWallpaper) {
+                w.mAnimLayer += mWallpaperAnimLayerAdjustment;
             }
             if (DEBUG_LAYERS) Log.v(TAG, "Assign layer " + w + ": "
                     + w.mAnimLayer);
@@ -8659,7 +8733,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     boolean opaqueDrawn = w.isOpaqueDrawn();
-                    if (opaqueDrawn && w.isFullscreen(dw, dh)) {
+                    if ((opaqueDrawn && w.isFullscreen(dw, dh))
+                            || attrs.type == TYPE_WALLPAPER) {
                         // This window completely covers everything behind it,
                         // so we want to leave all of them as unblurred (for
                         // performance reasons).
@@ -9316,7 +9391,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print( "  no DimAnimator ");
             }
             pw.print("  mInputMethodAnimLayerAdjustment=");
-                    pw.println(mInputMethodAnimLayerAdjustment);
+                    pw.print(mInputMethodAnimLayerAdjustment);
+                    pw.print("  mWallpaperAnimLayerAdjustment=");
+                    pw.println(mWallpaperAnimLayerAdjustment);
             pw.print("  mDisplayFrozen="); pw.print(mDisplayFrozen);
                     pw.print(" mWindowsFreezingScreen="); pw.print(mWindowsFreezingScreen);
                     pw.print(" mAppsFreezingScreen="); pw.println(mAppsFreezingScreen);

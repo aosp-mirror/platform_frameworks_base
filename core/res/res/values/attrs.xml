@@ -215,6 +215,9 @@
         <attr name="windowIsFloating" format="boolean" />
         <!-- Flag indicating whether this is a translucent window. -->
         <attr name="windowIsTranslucent" format="boolean" />
+        <!-- Flag indicating that this window's background should be the
+        	 user's current wallpaper. -->
+        <attr name="windowShowWallpaper" format="boolean" />
         <!-- This Drawable is overlaid over the foreground of the Window's content area, usually
              to place a shadow below the title.  -->
         <attr name="windowContentOverlay" format="reference" />
@@ -900,6 +903,7 @@
         <attr name="windowFullscreen" />
         <attr name="windowIsFloating" />
         <attr name="windowIsTranslucent" />
+        <attr name="windowShowWallpaper" />
         <attr name="windowAnimationStyle" />
         <attr name="windowSoftInputMode" />
         <attr name="windowDisablePreview" />
