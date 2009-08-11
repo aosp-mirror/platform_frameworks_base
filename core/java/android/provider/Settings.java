@@ -2728,7 +2728,14 @@ public final class Settings {
          * Controls how many attempts Gmail will try to upload an uphill operations before it
          * abandons the operation. Defaults to 20.
          */
-        public static final String GMAIL_NUM_RETRY_UPHILL_OP = "gmail_discard_error_uphill_op";
+        public static final String GMAIL_NUM_RETRY_UPHILL_OP = "gmail_num_retry_uphill_op";
+
+        /**
+         * How much time in seconds Gmail will try to upload an uphill operations before it
+         * abandons the operation. Defaults to 36400 (one day).
+         */
+        public static final String GMAIL_WAIT_TIME_RETRY_UPHILL_OP =
+                "gmail_wait_time_retry_uphill_op";
 
         /**
          * Controls if the protocol buffer version of the protocol will use a multipart request for
