@@ -99,32 +99,36 @@ public class ImageWallpaper extends WallpaperService {
         
         void drawFrame(boolean drawText) {
             SurfaceHolder sh = getSurfaceHolder();
-            Canvas c = sh.lockCanvas();
-            if (c != null) {
-                final Rect frame = sh.getSurfaceFrame();
-                mBackground.setBounds(frame);
-                mBackground.draw(c);
-                
-                if (drawText) {
-                    // Figure out animation.
-                    long now = SystemClock.uptimeMillis();
-                    while (mAnimStartTime < (now-1000)) {
-                        mAnimStartTime += 1000;
-                        mAnimLarger = !mAnimLarger;
+            Canvas c = null;
+            try {
+                c = sh.lockCanvas();
+                if (c != null) {
+                    final Rect frame = sh.getSurfaceFrame();
+                    mBackground.setBounds(frame);
+                    mBackground.draw(c);
+                    
+                    if (drawText) {
+                        // Figure out animation.
+                        long now = SystemClock.uptimeMillis();
+                        while (mAnimStartTime < (now-1000)) {
+                            mAnimStartTime += 1000;
+                            mAnimLarger = !mAnimLarger;
+                        }
+                        float size = (now-mAnimStartTime) / (float)1000;
+                        if (!mAnimLarger) size = 1-size;
+                        int alpha = (int)(255*(size*size));
+                        mTextPaint.setARGB(alpha, 255, 255, 255);
+                        mTextPaint.setShadowLayer(5*mDensity, 3*mDensity, 3*mDensity,
+                                alpha<<24);
+                        mTextPaint.setTextSize(100 * mDensity * size);
+                        c.drawText("Am I live?",
+                                frame.left + (frame.right-frame.left)/2,
+                                frame.top + (frame.bottom-frame.top)/2, mTextPaint);
                     }
-                    float size = (now-mAnimStartTime) / (float)1000;
-                    if (!mAnimLarger) size = 1-size;
-                    int alpha = (int)(255*(size*size));
-                    mTextPaint.setARGB(alpha, 255, 255, 255);
-                    mTextPaint.setShadowLayer(5*mDensity, 3*mDensity, 3*mDensity,
-                            alpha<<24);
-                    mTextPaint.setTextSize(100 * mDensity * size);
-                    c.drawText("Am I live?",
-                            frame.left + (frame.right-frame.left)/2,
-                            frame.top + (frame.bottom-frame.top)/2, mTextPaint);
                 }
+            } finally {
+                if (c != null) sh.unlockCanvasAndPost(c);
             }
-            sh.unlockCanvasAndPost(c);
         }
     }
     
