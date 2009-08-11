@@ -42,11 +42,6 @@ public class SslErrorHandler extends Handler {
     private static final String LOGTAG = "network";
 
     /**
-     * Network.
-     */
-    private Network mNetwork;
-
-    /**
      * Queue of loaders that experience SSL-related problems.
      */
     private LinkedList<LoadListener> mLoaderQueue;
@@ -72,9 +67,7 @@ public class SslErrorHandler extends Handler {
     /**
      * Creates a new error handler with an empty loader queue.
      */
-    /* package */ SslErrorHandler(Network network) {
-        mNetwork = network;
-
+    /* package */ SslErrorHandler() {
         mLoaderQueue = new LinkedList<LoadListener>();
         mSslPrefTable = new Bundle();
     }
