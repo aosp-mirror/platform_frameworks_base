@@ -133,11 +133,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
         if (VpnState.CONNECTED.equals(mState)) {
             Log.i("VpnService", "     recovered: " + mProfile.getName());
-            new Thread(new Runnable() {
-                public void run() {
-                    enterConnectivityLoop();
-                }
-            }).start();
+            startConnectivityMonitor();
         }
     }
 
@@ -213,16 +209,18 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
                     SystemProperties.get(VPN_STATUS))) {
                 onConnected();
                 return;
-            } else if (mDaemonHelper.anySocketError()) {
-                return;
+            } else {
+                int err = mDaemonHelper.getSocketError();
+                if (err != 0) {
+                    onError(err);
+                    return;
+                }
             }
             sleep(500); // 0.5 second
         }
 
-        synchronized (VpnService.this) {
-            if (mState == VpnState.CONNECTING) {
-                onError(new IOException("Connecting timed out"));
-            }
+        if (mState == VpnState.CONNECTING) {
+            onError(new IOException("Connecting timed out"));
         }
     }
 
@@ -235,13 +233,15 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
         mStartTime = System.currentTimeMillis();
 
-        // set DNS after saving the states in case the process gets killed
-        // before states are saved
+        // Correct order to make sure VpnService doesn't break when killed:
+        // (1) set state to CONNECTED
+        // (2) save states
+        // (3) set DNS
+        setState(VpnState.CONNECTED);
         saveSelf();
         setVpnDns();
-        setState(VpnState.CONNECTED);
 
-        enterConnectivityLoop();
+        startConnectivityMonitor();
     }
 
     private void saveSelf() throws IOException {
@@ -340,23 +340,28 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         }
     }
 
-    private void enterConnectivityLoop() {
-        Log.i(TAG, "VPN connectivity monitor running");
-        try {
-            for (;;) {
-                synchronized (VpnService.this) {
-                    if (mState != VpnState.CONNECTED || !checkConnectivity()) {
-                        break;
+    private void startConnectivityMonitor() {
+        new Thread(new Runnable() {
+            public void run() {
+                Log.i(TAG, "VPN connectivity monitor running");
+                try {
+                    for (;;) {
+                        synchronized (VpnService.this) {
+                            if ((mState != VpnState.CONNECTED)
+                                || !checkConnectivity()) {
+                                break;
+                            }
+                            mNotification.update();
+                            checkDns();
+                            VpnService.this.wait(1000); // 1 second
+                        }
                     }
-                    mNotification.update();
-                    checkDns();
-                    VpnService.this.wait(1000); // 1 second
+                } catch (InterruptedException e) {
+                    onError(e);
                 }
+                Log.i(TAG, "VPN connectivity monitor stopped");
             }
-        } catch (InterruptedException e) {
-            onError(e);
-        }
-        Log.i(TAG, "VPN connectivity monitor stopped");
+        }).start();
     }
 
     private void saveLocalIpAndInterface(String serverIp) throws IOException {
@@ -432,11 +437,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         }
 
         synchronized void stopAll() {
-            if (mDaemonList.isEmpty()) {
-                onFinalCleanUp();
-            } else {
-                for (DaemonProxy s : mDaemonList) s.stop();
-            }
+            for (DaemonProxy s : mDaemonList) s.stop();
         }
 
         synchronized void closeSockets() {
@@ -461,30 +462,26 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             }
         }
 
-        synchronized boolean anySocketError() {
+        synchronized int getSocketError() {
             for (DaemonProxy s : mDaemonList) {
                 switch (getResultFromSocket(s)) {
                     case 0:
-                        continue;
+                        return 0;
 
                     case AUTH_ERROR_CODE:
-                        onError(VpnManager.VPN_ERROR_AUTH);
-                        return true;
+                        return VpnManager.VPN_ERROR_AUTH;
 
                     case CHALLENGE_ERROR_CODE:
-                        onError(VpnManager.VPN_ERROR_CHALLENGE);
-                        return true;
+                        return VpnManager.VPN_ERROR_CHALLENGE;
 
                     case REMOTE_HUNG_UP_ERROR_CODE:
-                        onError(VpnManager.VPN_ERROR_REMOTE_HUNG_UP);
-                        return true;
+                        return VpnManager.VPN_ERROR_REMOTE_HUNG_UP;
 
                     default:
-                        onError(VpnManager.VPN_ERROR_CONNECTION_FAILED);
-                        return true;
+                        return VpnManager.VPN_ERROR_CONNECTION_FAILED;
                 }
             }
-            return false;
+            return 0;
         }
     }
 
