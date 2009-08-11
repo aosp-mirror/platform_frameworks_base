@@ -52,7 +52,7 @@ public class SslErrorHandler extends Handler {
     private Bundle mSslPrefTable;
 
     // Message id for handling the response
-    private final int HANDLE_RESPONSE = 100;
+    private static final int HANDLE_RESPONSE = 100;
 
     @Override
     public void handleMessage(Message msg) {
