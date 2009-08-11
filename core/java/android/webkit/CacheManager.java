@@ -429,7 +429,7 @@ public final class CacheManager {
         if (checkCacheRedirect(cacheRet.httpStatusCode)) {
             // location is in database, no need to keep the file
             cacheRet.contentLength = 0;
-            cacheRet.localPath = new String();
+            cacheRet.localPath = "";
             cacheRet.outFile.delete();
         } else if (cacheRet.contentLength == 0) {
             cacheRet.outFile.delete();

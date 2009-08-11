@@ -685,7 +685,7 @@ class BrowserFrame extends Handler {
 
             default:
                 Log.e(LOGTAG, "getRawResFilename got incompatible resource ID");
-                return new String();
+                return "";
         }
         TypedValue value = new TypedValue();
         mContext.getResources().getValue(resid, value, true);
