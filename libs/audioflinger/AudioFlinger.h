@@ -245,6 +245,7 @@ private:
             virtual status_t    start() = 0;
             virtual void        stop() = 0;
                     sp<IMemory> getCblk() const;
+                    audio_track_cblk_t* cblk() const { return mCblk; }
 
         protected:
             friend class ThreadBase;
@@ -259,10 +260,6 @@ private:
 
             virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer) = 0;
             virtual void releaseBuffer(AudioBufferProvider::Buffer* buffer);
-
-            audio_track_cblk_t* cblk() const {
-                return mCblk;
-            }
 
             int format() const {
                 return mFormat;
@@ -528,6 +525,7 @@ private:
     private:
 
         friend class AudioFlinger;
+        friend class OutputTrack;
         friend class Track;
         friend class TrackBase;
         friend class MixerThread;

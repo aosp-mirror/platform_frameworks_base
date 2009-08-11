@@ -1860,9 +1860,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                          mSuspended) {
                 if (!mStandby) {
                     for (size_t i = 0; i < outputTracks.size(); i++) {
-                        mLock.unlock();
                         outputTracks[i]->stop();
-                        mLock.lock();
                     }
                     mStandby = true;
                     mBytesWritten = 0;
@@ -1903,9 +1901,9 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             if (!mSuspended) {
                 for (size_t i = 0; i < outputTracks.size(); i++) {
                     outputTracks[i]->write(curBuf, mFrameCount);
+                    mustSleep = false;
                 }
                 mStandby = false;
-                mustSleep = false;
                 mBytesWritten += mixBufferSize;
             }
         } else {
@@ -1935,11 +1933,14 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
         outputTracks.clear();
     }
 
-    if (!mStandby) {
-        for (size_t i = 0; i < outputTracks.size(); i++) {
-            mLock.unlock();
-            outputTracks[i]->stop();
-            mLock.lock();
+    { // scope for the mLock
+
+        Mutex::Autolock _l(mLock);
+        if (!mStandby) {
+            LOGV("DuplicatingThread() exiting out of standby");
+            for (size_t i = 0; i < mOutputTracks.size(); i++) {
+                mOutputTracks[i]->destroy();
+            }
         }
     }
 
@@ -1957,9 +1958,11 @@ void AudioFlinger::DuplicatingThread::addOutputTrack(MixerThread *thread)
                                             mFormat,
                                             mChannelCount,
                                             frameCount);
-    thread->setStreamVolume(AudioSystem::NUM_STREAM_TYPES, 1.0f);
-    mOutputTracks.add(outputTrack);
-    LOGV("addOutputTrack() track %p, on thread %p", outputTrack, thread);
+    if (outputTrack->cblk() != NULL) {
+        thread->setStreamVolume(AudioSystem::NUM_STREAM_TYPES, 1.0f);
+        mOutputTracks.add(outputTrack);
+        LOGV("addOutputTrack() track %p, on thread %p", outputTrack, thread);
+    }
 }
 
 void AudioFlinger::DuplicatingThread::removeOutputTrack(MixerThread *thread)
@@ -1967,6 +1970,7 @@ void AudioFlinger::DuplicatingThread::removeOutputTrack(MixerThread *thread)
     Mutex::Autolock _l(mLock);
     for (size_t i = 0; i < mOutputTracks.size(); i++) {
         if (mOutputTracks[i]->thread() == (ThreadBase *)thread) {
+            mOutputTracks[i]->destroy();
             mOutputTracks.removeAt(i);
             return;
         }
@@ -2456,20 +2460,23 @@ AudioFlinger::PlaybackThread::OutputTrack::OutputTrack(
 {
 
     PlaybackThread *playbackThread = (PlaybackThread *)thread.unsafe_get();
-    mCblk->out = 1;
-    mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
-    mCblk->volume[0] = mCblk->volume[1] = 0x1000;
-    mOutBuffer.frameCount = 0;
-    mWaitTimeMs = (playbackThread->frameCount() * 2 * 1000) / playbackThread->sampleRate();
-
-    LOGV("OutputTrack constructor mCblk %p, mBuffer %p, mCblk->buffers %p, mCblk->frameCount %d, mCblk->sampleRate %d, mCblk->channels %d mBufferEnd %p mWaitTimeMs %d",
-            mCblk, mBuffer, mCblk->buffers, mCblk->frameCount, mCblk->sampleRate, mCblk->channels, mBufferEnd, mWaitTimeMs);
-
+    if (mCblk != NULL) {
+        mCblk->out = 1;
+        mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
+        mCblk->volume[0] = mCblk->volume[1] = 0x1000;
+        mOutBuffer.frameCount = 0;
+        mWaitTimeMs = (playbackThread->frameCount() * 2 * 1000) / playbackThread->sampleRate();
+        playbackThread->mTracks.add(this);
+        LOGV("OutputTrack constructor mCblk %p, mBuffer %p, mCblk->buffers %p, mCblk->frameCount %d, mCblk->sampleRate %d, mCblk->channels %d mBufferEnd %p mWaitTimeMs %d",
+                mCblk, mBuffer, mCblk->buffers, mCblk->frameCount, mCblk->sampleRate, mCblk->channels, mBufferEnd, mWaitTimeMs);
+    } else {
+        LOGW("Error creating output track on thread %p", playbackThread);
+    }
 }
 
 AudioFlinger::PlaybackThread::OutputTrack::~OutputTrack()
 {
-    stop();
+    clearBufferQueue();
 }
 
 status_t AudioFlinger::PlaybackThread::OutputTrack::start()
