@@ -1,6 +1,9 @@
 #ifndef SPEC_H
 #define SPEC_H
 
+#include <string.h>
+#include <stdlib.h>
+
 #if __cplusplus
 extern "C" {
 #endif
