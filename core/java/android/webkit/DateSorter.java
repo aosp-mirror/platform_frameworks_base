@@ -43,9 +43,6 @@ public class DateSorter {
     
     private static final int NUM_DAYS_AGO = 5;
 
-    Date mDate = new Date();
-    Calendar mCal = Calendar.getInstance();
-
     /**
      * @param context Application context
      */

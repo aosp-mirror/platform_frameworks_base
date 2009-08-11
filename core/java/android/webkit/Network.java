@@ -136,7 +136,7 @@ class Network {
             Assert.assertTrue(Thread.currentThread().
                     getName().equals(WebViewCore.THREAD_NAME));
         }
-        mSslErrorHandler = new SslErrorHandler(this);
+        mSslErrorHandler = new SslErrorHandler();
         mHttpAuthHandler = new HttpAuthHandler(this);
 
         mRequestQueue = new RequestQueue(context);
