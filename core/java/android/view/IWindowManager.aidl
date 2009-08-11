@@ -90,7 +90,6 @@ interface IWindowManager
     void exitKeyguardSecurely(IOnKeyguardExitResult callback);
     boolean inKeyguardRestrictedInputMode();
 
-    
     // These can only be called with the SET_ANIMATON_SCALE permission.
     float getAnimationScale(int which);
     float[] getAnimationScales();

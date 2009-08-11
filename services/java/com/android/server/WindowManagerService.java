@@ -1223,6 +1223,9 @@ public class WindowManagerService extends IWindowManager.Stub
         // what is below it for later.
         w = i > 0 ? (WindowState)localmWindows.get(i-1) : null;
         
+        final int dw = mDisplay.getWidth();
+        final int dh = mDisplay.getHeight();
+        
         // Start stepping backwards from here, ensuring that our wallpaper windows
         // are correctly placed.
         int curTokenIndex = mWallpaperTokens.size();
@@ -1245,6 +1248,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         wallpaper.mClient.dispatchAppVisibility(visible);
                     } catch (RemoteException e) {
                     }
+                }
+                
+                if (visible) {
+                    updateWallpaperOffsetLocked(mWallpaperTarget, wallpaper, dw, dh);                        
                 }
                 
                 wallpaper.mAnimLayer = wallpaper.mLayer + mWallpaperAnimLayerAdjustment;
@@ -1279,7 +1286,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return changed;
     }
 
-    void setWallpaperAnimLayerAdjustment(int adj) {
+    void setWallpaperAnimLayerAdjustmentLocked(int adj) {
         if (DEBUG_LAYERS) Log.v(TAG, "Setting wallpaper layer adj to " + adj);
         mWallpaperAnimLayerAdjustment = adj;
         int curTokenIndex = mWallpaperTokens.size();
@@ -1297,6 +1304,50 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    boolean updateWallpaperOffsetLocked(WindowState target,
+            WindowState wallpaperWin, int dw, int dh) {
+        int availw = wallpaperWin.mFrame.right-wallpaperWin.mFrame.left-dw;
+        int offset = availw > 0 ? -(int)(availw*target.mWallpaperX+.5f) : 0;
+        boolean changed = wallpaperWin.mXOffset != offset;
+        if (changed) {
+            wallpaperWin.mXOffset = offset;
+        }
+        int availh = wallpaperWin.mFrame.bottom-wallpaperWin.mFrame.top-dh;
+        offset = availh > 0 ? -(int)(availh*target.mWallpaperY+.5f) : 0;
+        if (wallpaperWin.mYOffset != offset) {
+            changed = true;
+            wallpaperWin.mYOffset = offset;
+        }
+        return changed;
+    }
+    
+    boolean updateWallpaperOffsetLocked() {
+        final int dw = mDisplay.getWidth();
+        final int dh = mDisplay.getHeight();
+        
+        boolean changed = false;
+        
+        WindowState target = mWallpaperTarget;
+        if (target != null) {
+            int curTokenIndex = mWallpaperTokens.size();
+            while (curTokenIndex > 0) {
+                curTokenIndex--;
+                WindowToken token = mWallpaperTokens.get(curTokenIndex);
+                int curWallpaperIndex = token.windows.size();
+                while (curWallpaperIndex > 0) {
+                    curWallpaperIndex--;
+                    WindowState wallpaper = token.windows.get(curWallpaperIndex);
+                    if (updateWallpaperOffsetLocked(target, wallpaper, dw, dh)) {
+                        wallpaper.computeShownFrameLocked();
+                        changed = true;
+                    }
+                }
+            }
+        }
+        
+        return changed;
+    }
+    
     public int addWindow(Session session, IWindow client,
             WindowManager.LayoutParams attrs, int viewVisibility,
             Rect outContentInsets) {
@@ -1710,6 +1761,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void setWindowWallpaperPositionLocked(WindowState window, float x, float y) {
+        if (window.mWallpaperX != x || window.mWallpaperY != y)  {
+            window.mWallpaperX = x;
+            window.mWallpaperY = y;
+            
+            if (mWallpaperTarget == window) {
+                if (updateWallpaperOffsetLocked()) {
+                    performLayoutAndPlaceSurfacesLocked();
+                }
+            }
+        }
+    }
+    
     public int relayoutWindow(Session session, IWindow client,
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, boolean insetsPending,
@@ -5810,6 +5874,18 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        public void setWallpaperPosition(IBinder window, float x, float y) {
+            synchronized(mWindowMap) {
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    setWindowWallpaperPositionLocked(windowForClientLocked(this, window),
+                            x, y);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            }
+        }
+        
         void windowAddedLocked() {
             if (mSurfaceSession == null) {
                 if (localLOGV) Log.v(
@@ -5899,8 +5975,8 @@ public class WindowManagerService extends IWindowManager.Stub
         int mRequestedHeight;
         int mLastRequestedWidth;
         int mLastRequestedHeight;
-        int mReqXPos;
-        int mReqYPos;
+        int mXOffset;
+        int mYOffset;
         int mLayer;
         int mAnimLayer;
         int mLastLayer;
@@ -5985,6 +6061,9 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean mHasLocalTransformation;
         final Transformation mTransformation = new Transformation();
 
+        float mWallpaperX = 0;
+        float mWallpaperY = 0;
+        
         // This is set after IWindowSession.relayout() has been called at
         // least once for the window.  It allows us to detect the situation
         // where we don't yet have a surface, but should have one soon, so
@@ -6104,8 +6183,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mRequestedHeight = 0;
             mLastRequestedWidth = 0;
             mLastRequestedHeight = 0;
-            mReqXPos = 0;
-            mReqYPos = 0;
+            mXOffset = 0;
+            mYOffset = 0;
             mLayer = 0;
             mAnimLayer = 0;
             mLastLayer = 0;
@@ -6702,8 +6781,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mDtDx = tmpFloats[Matrix.MSKEW_X];
                 mDsDy = tmpFloats[Matrix.MSKEW_Y];
                 mDtDy = tmpFloats[Matrix.MSCALE_Y];
-                int x = (int)tmpFloats[Matrix.MTRANS_X];
-                int y = (int)tmpFloats[Matrix.MTRANS_Y];
+                int x = (int)tmpFloats[Matrix.MTRANS_X] + mXOffset;
+                int y = (int)tmpFloats[Matrix.MTRANS_Y] + mYOffset;
                 int w = frame.width();
                 int h = frame.height();
                 mShownFrame.set(x, y, x+w, y+h);
@@ -6740,6 +6819,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             mShownFrame.set(mFrame);
+            if (mXOffset != 0 || mYOffset != 0) {
+                mShownFrame.offset(mXOffset, mYOffset);
+            }
             mShownAlpha = mAlpha;
             mDsDx = 1;
             mDtDx = 0;
@@ -7027,9 +7109,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.print(" mAttachedHidden="); pw.println(mAttachedHidden);
             }
             pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
-                    pw.print(" h="); pw.print(mRequestedHeight);
-                    pw.print(" x="); pw.print(mReqXPos);
-                    pw.print(" y="); pw.println(mReqYPos);
+                    pw.print(" h="); pw.println(mRequestedHeight);
+            if (mXOffset != 0 || mYOffset != 0) {
+                pw.print(prefix); pw.print("Offsets x="); pw.print(mXOffset);
+                        pw.print(" y="); pw.println(mYOffset);
+            }
             pw.print(prefix); pw.print("mGivenContentInsets=");
                     mGivenContentInsets.printShortString(pw);
                     pw.print(" mGivenVisibleInsets=");
@@ -7096,6 +7180,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mHScale != 1 || mVScale != 1) {
                 pw.print(prefix); pw.print("mHScale="); pw.print(mHScale);
                         pw.print(" mVScale="); pw.println(mVScale);
+            }
+            if (mWallpaperX != 0 || mWallpaperY != 0) {
+                pw.print(prefix); pw.print("mWallpaperX="); pw.print(mWallpaperX);
+                        pw.print(" mWallpaperY="); pw.println(mWallpaperY);
             }
         }
 
@@ -7282,7 +7370,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     setInputMethodAnimLayerAdjustment(adj);
                 }
                 if (w == mWallpaperTarget) {
-                    setWallpaperAnimLayerAdjustment(adj);
+                    setWallpaperAnimLayerAdjustmentLocked(adj);
                 }
             }
         }

@@ -108,4 +108,10 @@ interface IWindowSession {
     boolean getInTouchMode();
     
     boolean performHapticFeedback(IWindow window, int effectId, boolean always);
+    
+    /**
+     * For windows with the wallpaper behind them, and the wallpaper is
+     * larger than the screen, set the offset within the screen.
+     */
+    void setWallpaperPosition(IBinder windowToken, float x, float y);
 }

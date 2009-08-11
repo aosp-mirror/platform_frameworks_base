@@ -990,6 +990,10 @@ public final class Bridge implements ILayoutBridge {
             // pass for now.
         }
 
+        public void setWallpaperPosition(IBinder window, float x, float y) {
+            // pass for now.
+        }
+        
         public IBinder asBinder() {
             // pass for now.
             return null;

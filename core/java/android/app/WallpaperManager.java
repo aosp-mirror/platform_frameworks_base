@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.view.ViewRoot;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -308,6 +309,28 @@ public class WallpaperManager {
         try {
             getGlobals().mService.setDimensionHints(minimumWidth, minimumHeight);
         } catch (RemoteException e) {
+        }
+    }
+    
+    /**
+     * Set the position of the current wallpaper within any larger space, when
+     * that wallpaper is visible behind the given window.  The X and Y offsets
+     * are floating point numbers ranging from 0 to 1, representing where the
+     * wallpaper should be positioned within the screen space.  These only
+     * make sense when the wallpaper is larger than the screen.
+     * 
+     * @param windowToken The window who these offsets should be associated
+     * with, as returned by {@link android.view.View#getWindowVisibility()
+     * View.getWindowToken()}.
+     * @param xOffset The offset olong the X dimension, from 0 to 1.
+     * @param yOffset The offset along the Y dimension, from 0 to 1.
+     */
+    public void setWallpaperOffsets(IBinder windowToken, float xOffset, float yOffset) {
+        try {
+            ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
+                    windowToken, xOffset, yOffset);
+        } catch (RemoteException e) {
+            // Ignore.
         }
     }
     
