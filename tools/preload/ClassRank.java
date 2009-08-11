@@ -26,7 +26,7 @@ class ClassRank implements Comparator<Operation> {
      * Increase this number to add more weight to classes which were loaded
      * earlier.
      */
-    static final int SEQUENCE_WEIGHT = 500; // 5 ms
+    static final int SEQUENCE_WEIGHT = 500; // 0.5ms
 
     static final int BUCKET_SIZE = 5;
 

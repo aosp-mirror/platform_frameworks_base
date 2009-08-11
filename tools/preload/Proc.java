@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
@@ -23,7 +21,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collections;
-import java.util.TreeSet;
 import java.io.Serializable;
 
 /**
@@ -37,11 +34,6 @@ class Proc implements Serializable {
      * Default percentage of time to cut off of app class loading times.
      */
     static final int PERCENTAGE_TO_PRELOAD = 75;
-
-    /**
-     * Maximum number of classes to preload for a given process.
-     */
-    static final int MAX_TO_PRELOAD = 100;
 
     /** Parent process. */
     final Proc parent;
@@ -97,11 +89,9 @@ class Proc implements Serializable {
 
     /**
      * Returns a list of classes which should be preloaded.
-     * 
-     * @param takeAllClasses forces all classes to be taken (irrespective of ranking)
      */
-    List<LoadedClass> highestRankedClasses(boolean takeAllClasses) {
-        if (!isApplication()) {
+    List<LoadedClass> highestRankedClasses() {
+        if (!isApplication() || Policy.isService(this.name)) {
             return Collections.emptyList();
         }
 
@@ -114,25 +104,13 @@ class Proc implements Serializable {
         int timeToSave = totalTimeMicros() * percentageToPreload() / 100;
         int timeSaved = 0;
 
-        boolean service = Policy.isService(this.name);
-
+        int count = 0;
         List<LoadedClass> highest = new ArrayList<LoadedClass>();
         for (Operation operation : ranked) {
-            
-            // These are actual ranking decisions, which can be overridden
-            if (!takeAllClasses) {
-                if (highest.size() >= MAX_TO_PRELOAD) {
-                    System.out.println(name + " got " 
-                            + (timeSaved * 100 / timeToSave) + "% through");
-                    break;
-                }
-    
-                if (timeSaved >= timeToSave) {
-                    break;
-                }
+            if (timeSaved >= timeToSave || count++ > 100) {
+                break;
             }
 
-            // The remaining rules apply even to wired-down processes
             if (!Policy.isPreloadableClass(operation.loadedClass.name)) {
                 continue;
             }
@@ -140,13 +118,8 @@ class Proc implements Serializable {
             if (!operation.loadedClass.systemClass) {
                 continue;
             }
-
-            // Only load java.* class for services.
-            if (!service || operation.loadedClass.name.startsWith("java.")) {
-                highest.add(operation.loadedClass);
-            }
-
-            // For services, still count the time even if it's not in java.* 
+    
+            highest.add(operation.loadedClass);
             timeSaved += operation.medianExclusiveTimeMicros();
         }
 
@@ -166,11 +139,13 @@ class Proc implements Serializable {
 
     /** 
      * Returns true if this process is an app.
-     *      
-     * TODO: Replace the hardcoded list with a walk up the parent chain looking for zygote.
      */
     public boolean isApplication() {
-        return Policy.isFromZygote(name);
+        if (name.equals("com.android.development")) {
+            return false;
+        }
+
+        return parent != null && parent.name.equals("zygote");
     }
 
     /**

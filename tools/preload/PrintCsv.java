@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.BufferedInputStream;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.TreeSet;
 
 /**
  * Prints raw information in CSV format.
@@ -37,13 +40,14 @@ public class PrintCsv {
                 + ",Preloaded"
                 + ",Median Load Time (us)"
                 + ",Median Init Time (us)"
+                + ",Process Names"
                 + ",Load Count"
-                + ",Init Count"
-                + ",Managed Heap (B)"
-                + ",Native Heap (B)"
-                + ",Managed Pages (kB)"
-                + ",Native Pages (kB)"
-                + ",Other Pages (kB)");
+                + ",Init Count");
+//                + ",Managed Heap (B)"
+//                + ",Native Heap (B)"
+//                + ",Managed Pages (kB)"
+//                + ",Native Pages (kB)"
+//                + ",Other Pages (kB)");
 
         MemoryUsage baseline = root.baseline;
 
@@ -60,10 +64,23 @@ public class PrintCsv {
             System.out.print(',');
             System.out.print(loadedClass.medianInitTimeMicros());
             System.out.print(',');
+            System.out.print('"');
+
+            Set<String> procNames = new TreeSet<String>();
+            for (Operation op : loadedClass.loads)
+                procNames.add(op.process.name);
+            for (Operation op : loadedClass.initializations)
+                procNames.add(op.process.name);
+            for (String name : procNames) {
+                System.out.print(name + "\n");
+            }
+            
+            System.out.print('"');
+            System.out.print(',');
             System.out.print(loadedClass.loads.size());
             System.out.print(',');
             System.out.print(loadedClass.initializations.size());
-
+/*
             if (loadedClass.memoryUsage.isAvailable()) {
                 MemoryUsage subtracted
                         = loadedClass.memoryUsage.subtract(baseline);
@@ -82,7 +99,7 @@ public class PrintCsv {
             } else {
                 System.out.print(",n/a,n/a,n/a,n/a,n/a");
             }
-
+*/
             System.out.println();
         }
     }
