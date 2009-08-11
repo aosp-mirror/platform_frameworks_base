@@ -573,8 +573,8 @@ public final class ContactsContract {
         public static final String SYNC4 = "data_sync4";
 
         /**
-         * An optional update or insert URI parameter that determines if the
-         * corresponding raw contact should be marked as dirty. The default
+         * An optional insert, update or delete URI parameter that determines if
+         * the corresponding raw contact should be marked as dirty. The default
          * value is true.
          */
         public static final String MARK_AS_DIRTY = "mark_as_dirty";
@@ -1453,6 +1453,12 @@ public final class ContactsContract {
          * merely marked as deleted.
          */
         public static final String DELETE_PERMANENTLY = "delete_permanently";
+
+        /**
+         * An optional update or insert URI parameter that determines if the
+         * group should be marked as dirty. The default value is true.
+         */
+        public static final String MARK_AS_DIRTY = "mark_as_dirty";
     }
 
     /**
