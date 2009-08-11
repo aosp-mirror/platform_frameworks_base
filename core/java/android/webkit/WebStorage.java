@@ -70,7 +70,7 @@ public final class WebStorage {
 
     private Handler mHandler = null;
 
-    private class Origin {
+    private static class Origin {
         String mOrigin = null;
         long mQuota = 0;
 
