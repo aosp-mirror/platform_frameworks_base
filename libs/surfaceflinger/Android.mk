@@ -24,6 +24,9 @@ LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 ifeq ($(TARGET_BOARD_PLATFORM), msm7k)
 	LOCAL_CFLAGS += -DDIM_WITH_TEXTURE
 endif
+ifeq ($(TARGET_BOARD_PLATFORM), qsd8k)
+	LOCAL_CFLAGS += -DDIM_WITH_TEXTURE
+endif
 
 # need "-lrt" on Linux simulator to pick up clock_gettime
 ifeq ($(TARGET_SIMULATOR),true)
