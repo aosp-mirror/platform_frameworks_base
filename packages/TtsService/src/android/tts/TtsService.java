@@ -172,10 +172,18 @@ public class TtsService extends Service implements OnCompletionListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        // TODO replace the call to stopAll() with a method to clear absolutely all upcoming
+        // uses of the native synth, including synthesis to a file, and delete files for which
+        // synthesis was not complete.
+        stopAll("");
+
         // Don't hog the media player
         cleanUpPlayer();
 
-        sNativeSynth.shutdown();
+        if (sNativeSynth != null) {
+            sNativeSynth.shutdown();
+        }
         sNativeSynth = null;
 
         // Unregister all callbacks.
@@ -243,38 +251,70 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private int setSpeechRate(String callingApp, int rate) {
-        if (isDefaultEnforced()) {
-            return sNativeSynth.setSpeechRate(getDefaultRate());
-        } else {
-            return sNativeSynth.setSpeechRate(rate);
+        int res = TextToSpeech.ERROR;
+        try {
+            if (isDefaultEnforced()) {
+                res = sNativeSynth.setSpeechRate(getDefaultRate());
+            } else {
+                res = sNativeSynth.setSpeechRate(rate);
+            }
+        } catch (NullPointerException e) {
+            // synth will become null during onDestroy()
+            res = TextToSpeech.ERROR;
         }
+        return res;
     }
 
 
     private int setPitch(String callingApp, int pitch) {
-        return sNativeSynth.setPitch(pitch);
+        int res = TextToSpeech.ERROR;
+        try {
+            res = sNativeSynth.setPitch(pitch);
+        } catch (NullPointerException e) {
+            // synth will become null during onDestroy()
+            res = TextToSpeech.ERROR;
+        }
+        return res;
     }
 
 
     private int isLanguageAvailable(String lang, String country, String variant) {
         //Log.v("TtsService", "TtsService.isLanguageAvailable(" + lang + ", " + country + ", " +variant+")");
-        return sNativeSynth.isLanguageAvailable(lang, country, variant);
+        int res = TextToSpeech.LANG_NOT_SUPPORTED;
+        try {
+            res = sNativeSynth.isLanguageAvailable(lang, country, variant);
+        } catch (NullPointerException e) {
+            // synth will become null during onDestroy()
+            res = TextToSpeech.LANG_NOT_SUPPORTED;
+        }
+        return res;
     }
 
 
     private String[] getLanguage() {
-        return sNativeSynth.getLanguage();
+        try {
+            return sNativeSynth.getLanguage();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 
     private int setLanguage(String callingApp, String lang, String country, String variant) {
         Log.v("TtsService", "TtsService.setLanguage(" + lang + ", " + country + ", " + variant + ")");
-        if (isDefaultEnforced()) {
-            return sNativeSynth.setLanguage(getDefaultLanguage(), getDefaultCountry(),
-                    getDefaultLocVariant());
-        } else {
-            return sNativeSynth.setLanguage(lang, country, variant);
+        int res = TextToSpeech.ERROR;
+        try {
+            if (isDefaultEnforced()) {
+                res = sNativeSynth.setLanguage(getDefaultLanguage(), getDefaultCountry(),
+                        getDefaultLocVariant());
+            } else {
+                res = sNativeSynth.setLanguage(lang, country, variant);
+            }
+        } catch (NullPointerException e) {
+            // synth will become null during onDestroy()
+            res = TextToSpeech.ERROR;
         }
+        return res;
     }
 
 
@@ -402,7 +442,12 @@ public class TtsService extends Service implements OnCompletionListener {
                 }
                 if ((mCurrentSpeechItem != null) &&
                      mCurrentSpeechItem.mCallingApp.equals(callingApp)) {
-                    result = sNativeSynth.stop();
+                    try {
+                        result = sNativeSynth.stop();
+                    } catch (NullPointerException e1) {
+                        // synth will become null during onDestroy()
+                        result = TextToSpeech.ERROR;
+                    }
                     mKillList.put(mCurrentSpeechItem, true);
                     if (mPlayer != null) {
                         try {
@@ -434,7 +479,8 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     /**
-     * Stops all speech output and removes any utterances still in the queue globally.
+     * Stops all speech output and removes any utterances still in the queue globally, except
+     * those intended to be synthesized to file.
      */
     private int stopAll(String callingApp) {
         int result = TextToSpeech.ERROR;
@@ -451,7 +497,12 @@ public class TtsService extends Service implements OnCompletionListener {
                 if ((mCurrentSpeechItem != null) &&
                     ((mCurrentSpeechItem.mType != SpeechItem.TEXT_TO_FILE) ||
                       mCurrentSpeechItem.mCallingApp.equals(callingApp))) {
-                    result = sNativeSynth.stop();
+                    try {
+                        result = sNativeSynth.stop();
+                    } catch (NullPointerException e1) {
+                        // synth will become null during onDestroy()
+                        result = TextToSpeech.ERROR;
+                    }
                     mKillList.put(mCurrentSpeechItem, true);
                     if (mPlayer != null) {
                         try {
@@ -591,7 +642,12 @@ public class TtsService extends Service implements OnCompletionListener {
                         if (speechRate.length() > 0){
                             setSpeechRate("", Integer.parseInt(speechRate));
                         }
-                        sNativeSynth.speak(speechItem.mText, streamType);
+                        try {
+                            sNativeSynth.speak(speechItem.mText, streamType);
+                        } catch (NullPointerException e) {
+                            // synth will become null during onDestroy()
+                            Log.v("TtsService", " null synth, can't speak");
+                        }
                     }
                 } catch (InterruptedException e) {
                     Log.e("TtsService", "TTS speakInternalOnly(): tryLock interrupted");
@@ -660,7 +716,12 @@ public class TtsService extends Service implements OnCompletionListener {
                         if (speechRate.length() > 0){
                             setSpeechRate("", Integer.parseInt(speechRate));
                         }
-                        sNativeSynth.synthesizeToFile(speechItem.mText, speechItem.mFilename);
+                        try {
+                            sNativeSynth.synthesizeToFile(speechItem.mText, speechItem.mFilename);
+                        } catch (NullPointerException e) {
+                            // synth will become null during onDestroy()
+                            Log.v("TtsService", " null synth, can't synthesize to file");
+                        }
                     }
                 } catch (InterruptedException e) {
                     Log.e("TtsService", "TTS synthToFileInternalOnly(): tryLock interrupted");
