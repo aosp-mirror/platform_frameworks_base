@@ -630,7 +630,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         settings.setDatabaseEnabled(true);
         settings.setDatabasePath(getDir("databases",0).getAbsolutePath());
         settings.setDomStorageEnabled(true);
-        settings.setWorkersEnabled(true);
+        settings.setWorkersEnabled(false);
 
         webview.addJavascriptInterface(callbackProxy, "layoutTestController");
         webview.addJavascriptInterface(callbackProxy, "eventSender");
