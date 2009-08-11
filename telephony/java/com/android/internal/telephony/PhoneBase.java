@@ -59,10 +59,13 @@ public abstract class PhoneBase implements Phone {
     private static final String LOG_TAG = "PHONE";
     private static final boolean LOCAL_DEBUG = true;
 
-    // Key used to read and write the saved network selection value
+    // Key used to read and write the saved network selection numeric value
     public static final String NETWORK_SELECTION_KEY = "network_selection_key";
+    // Key used to read and write the saved network selection operator name
+    public static final String NETWORK_SELECTION_NAME_KEY = "network_selection_name_key";
 
- // Key used to read/write "disable data connection on boot" pref (used for testing)
+
+    // Key used to read/write "disable data connection on boot" pref (used for testing)
     public static final String DATA_DISABLED_ON_BOOT_KEY = "disabled_on_boot_key";
 
     //***** Event Constants
