@@ -163,8 +163,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     private static final int MSG_REPEAT = 3;
     private static final int MSG_LONGPRESS = 4;
 
-    private static final int DELAY_BEFORE_PREVIEW = 40;
-    private static final int DELAY_AFTER_PREVIEW = 60;
+    private static final int DELAY_BEFORE_PREVIEW = 0;
+    private static final int DELAY_AFTER_PREVIEW = 70;
     
     private int mVerticalCorrection;
     private int mProximityThreshold;
