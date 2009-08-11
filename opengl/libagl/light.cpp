@@ -216,6 +216,8 @@ static inline void light_picker(ogles_context_t* c)
 static inline void validate_light_mvi(ogles_context_t* c)
 {
     uint32_t en = c->lighting.enabledLights;
+    // Vector from object to viewer, in eye coordinates
+    const vec4_t eyeViewer = { 0, 0, 0x1000, 0 };
     while (en) {
         const int i = 31 - gglClz(en);
         en &= ~(1<<i);
@@ -223,6 +225,9 @@ static inline void validate_light_mvi(ogles_context_t* c)
         c->transforms.mvui.point4(&c->transforms.mvui,
                 &l.objPosition, &l.position);
         vnorm3(l.normalizedObjPosition.v, l.objPosition.v);
+        c->transforms.mvui.point4(&c->transforms.mvui,
+                &l.objViewer, &eyeViewer);
+        vnorm3(l.objViewer.v, l.objViewer.v);
     }
 }
 
@@ -379,9 +384,9 @@ void lightVertex(ogles_context_t* c, vertex_t* v)
             // specular
             if (ggl_unlikely(s && l.implicitSpecular.v[3])) {
                 vec4_t h;
-                h.x = d.x;
-                h.y = d.y;
-                h.z = d.z + 0x10000;
+                h.x = d.x + l.objViewer.x;
+                h.y = d.y + l.objViewer.y;
+                h.z = d.z + l.objViewer.z;
                 vnorm3(h.v, h.v);
                 s = dot3(n.v, h.v);
                 s = (s<0) ? (twoSide?(-s):0) : s;
