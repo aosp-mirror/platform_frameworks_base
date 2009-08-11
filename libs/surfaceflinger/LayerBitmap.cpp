@@ -38,13 +38,14 @@ namespace android {
 // Buffer and implementation of android_native_buffer_t
 // ===========================================================================
 
-Buffer::Buffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t flags)
+Buffer::Buffer(uint32_t w, uint32_t h, PixelFormat format,
+        uint32_t reqUsage, uint32_t flags)
     : SurfaceBuffer(), mInitCheck(NO_INIT), mFlags(flags), 
     mVStride(0)
 {
     this->format = format;
     if (w>0 && h>0) {
-        mInitCheck = initSize(w, h);
+        mInitCheck = initSize(w, h, reqUsage);
     }
 }
 
@@ -65,7 +66,7 @@ android_native_buffer_t* Buffer::getNativeBuffer() const
     return static_cast<android_native_buffer_t*>(const_cast<Buffer*>(this));
 }
 
-status_t Buffer::initSize(uint32_t w, uint32_t h)
+status_t Buffer::initSize(uint32_t w, uint32_t h, uint32_t reqUsage)
 {
     status_t err = NO_ERROR;
 
@@ -88,16 +89,9 @@ status_t Buffer::initSize(uint32_t w, uint32_t h)
         usage = BufferAllocator::USAGE_SW_READ_OFTEN | 
                 BufferAllocator::USAGE_SW_WRITE_OFTEN;
     } else {
-        if (mFlags & Buffer::GPU) {
-            // the client wants to do GL rendering
-            usage = BufferAllocator::USAGE_HW_RENDER |
-                    BufferAllocator::USAGE_HW_TEXTURE;
-        } else {
-            // software rendering-client, h/w composition
-            usage = BufferAllocator::USAGE_SW_READ_OFTEN | 
-                    BufferAllocator::USAGE_SW_WRITE_OFTEN |
-                    BufferAllocator::USAGE_HW_TEXTURE;
-        }
+        // it's allowed to modify the usage flags here, but generally
+        // the requested flags should be honored.
+        usage = reqUsage | BufferAllocator::USAGE_HW_TEXTURE;
     }
 
     err = allocator.alloc(w, h, format, usage, &handle, &stride);
@@ -174,12 +168,12 @@ status_t LayerBitmap::setSize(uint32_t w, uint32_t h)
     return NO_ERROR;
 }
 
-sp<Buffer> LayerBitmap::allocate()
+sp<Buffer> LayerBitmap::allocate(uint32_t reqUsage)
 {
     Mutex::Autolock _l(mLock);
     surface_info_t* info = mInfo;
     mBuffer.clear(); // free buffer before allocating a new one
-    sp<Buffer> buffer = new Buffer(mWidth, mHeight, mFormat, mFlags);
+    sp<Buffer> buffer = new Buffer(mWidth, mHeight, mFormat, reqUsage, mFlags);
     status_t err = buffer->initCheck();
     if (LIKELY(err == NO_ERROR)) {
         info->flags  = surface_info_t::eBufferDirty;

@@ -217,7 +217,7 @@ void Layer::onDraw(const Region& clip) const
     drawWithOpenGL(clip, mTextures[index]);
 }
 
-sp<SurfaceBuffer> Layer::peekBuffer()
+sp<SurfaceBuffer> Layer::peekBuffer(int usage)
 {
     /*
      * This is called from the client's Surface::lock(), after it locked
@@ -250,7 +250,7 @@ sp<SurfaceBuffer> Layer::peekBuffer()
     }
     
     LayerBitmap& layerBitmap(mBuffers[backBufferIndex]);
-    sp<SurfaceBuffer> buffer = layerBitmap.allocate();
+    sp<SurfaceBuffer> buffer = layerBitmap.allocate(usage);
     
     LOGD_IF(DEBUG_RESIZE,
             "Layer::getBuffer(this=%p), index=%d, (%d,%d), (%d,%d)",
@@ -649,12 +649,12 @@ Layer::SurfaceLayer::~SurfaceLayer()
 {
 }
 
-sp<SurfaceBuffer> Layer::SurfaceLayer::getBuffer()
+sp<SurfaceBuffer> Layer::SurfaceLayer::getBuffer(int usage)
 {
     sp<SurfaceBuffer> buffer = 0;
     sp<Layer> owner(getOwner());
     if (owner != 0) {
-        buffer = owner->peekBuffer();
+        buffer = owner->peekBuffer(usage);
     }
     return buffer;
 }

@@ -58,7 +58,8 @@ public:
     };
 
     // creates w * h buffer
-    Buffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t flags = 0);
+    Buffer(uint32_t w, uint32_t h, PixelFormat format,
+            uint32_t reqUsage, uint32_t flags = 0);
 
     // return status
     status_t initCheck() const;
@@ -81,7 +82,7 @@ private:
     Buffer& operator = (const Buffer& rhs);
     const Buffer& operator = (const Buffer& rhs) const;
 
-    status_t initSize(uint32_t w, uint32_t h);
+    status_t initSize(uint32_t w, uint32_t h, uint32_t reqUsage);
 
     ssize_t                 mInitCheck;
     uint32_t                mFlags;
@@ -108,7 +109,7 @@ public:
 
     status_t setSize(uint32_t w, uint32_t h);
 
-    sp<Buffer> allocate();
+    sp<Buffer> allocate(uint32_t reqUsage);
     status_t free();
     
     sp<const Buffer>  getBuffer() const { return mBuffer; }

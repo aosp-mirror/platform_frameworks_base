@@ -50,7 +50,7 @@ protected:
 public: 
     DECLARE_META_INTERFACE(Surface);
 
-    virtual sp<SurfaceBuffer> getBuffer() = 0; 
+    virtual sp<SurfaceBuffer> getBuffer(int usage) = 0; 
     
     class BufferHeap {
     public:
