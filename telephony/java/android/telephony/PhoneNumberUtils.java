@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.SystemProperties;
 import android.provider.Contacts;
+import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -129,15 +130,23 @@ public class PhoneNumberUtils
         }
 
         String type = intent.resolveType(context);
+        String phoneColumn = null;
 
-        Cursor c = context.getContentResolver().query(
-                uri, new String[]{ Contacts.People.Phones.NUMBER },
-                null, null, null);
+        // Correctly read out the phone entry based on requested provider
+        final String authority = uri.getAuthority();
+        if (Contacts.AUTHORITY.equals(authority)) {
+            phoneColumn = Contacts.People.Phones.NUMBER;
+        } else if (ContactsContract.AUTHORITY.equals(authority)) {
+            phoneColumn = ContactsContract.CommonDataKinds.Phone.NUMBER;
+        }
+
+        final Cursor c = context.getContentResolver().query(uri, new String[] {
+            phoneColumn
+        }, null, null, null);
         if (c != null) {
             try {
                 if (c.moveToFirst()) {
-                    number = c.getString(
-                            c.getColumnIndex(Contacts.People.Phones.NUMBER));
+                    number = c.getString(c.getColumnIndex(phoneColumn));
                 }
             } finally {
                 c.close();
