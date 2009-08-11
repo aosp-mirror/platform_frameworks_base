@@ -67,6 +67,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ListAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
@@ -1750,13 +1751,18 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 // case we want to dismiss the soft keyboard so the user can see the rest of the
                 // shortcuts.
                 if (isInputMethodNotNeeded() ||
-                        (isEmpty() && getDropDownChildCount() >= getAdapter().getCount())) {
+                        (isEmpty() && getDropDownChildCount() >= getAdapterCount())) {
                     mSearchDialog.cancel();
                     return true;
                 }
                 return false; // will dismiss soft keyboard if necessary
             }
             return false;
+        }
+
+        private int getAdapterCount() {
+            final ListAdapter adapter = getAdapter();
+            return adapter == null ? 0 : adapter.getCount();
         }
     }
     
