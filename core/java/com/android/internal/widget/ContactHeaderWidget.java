@@ -52,7 +52,8 @@ import com.android.internal.R;
 
 
 /* Widget that is used across system apps for displaying a header banner with contact info */
-public class ContactHeaderWidget extends FrameLayout implements View.OnClickListener {
+public class ContactHeaderWidget extends FrameLayout implements View.OnClickListener,
+        View.OnLongClickListener {
 
     private static final String TAG = "ContactHeaderWidget";
 
@@ -70,6 +71,13 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     protected Uri mStatusUri;
 
     protected ContentResolver mContentResolver;
+
+    public interface ContactHeaderListener {
+        public void onPhotoLongClick(View view);
+        public void onDisplayNameLongClick(View view);
+    }
+
+    private ContactHeaderListener mListener;
 
     //Projection used for the summary info in the header.
     protected static final String[] HEADER_PROJECTION = new String[] {
@@ -125,6 +133,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         inflater.inflate(R.layout.contact_header, this);
 
         mDisplayNameView = (TextView) findViewById(R.id.name);
+        mDisplayNameView.setOnLongClickListener(this);
+
         mPhoneticNameView = (TextView) findViewById(R.id.phonetic_name);
 
         mStarredView = (CheckBox)findViewById(R.id.star);
@@ -132,6 +142,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
 
         mPhotoView = (ImageView)findViewById(R.id.photo);
         mPhotoView.setOnClickListener(this);
+        mPhotoView.setOnLongClickListener(this);
 
         mStatusView = (TextView)findViewById(R.id.status);
 
@@ -150,6 +161,35 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         }
 
         mQueryHandler = new QueryHandler(mContentResolver);
+    }
+
+    public void setContactHeaderListener(ContactHeaderListener listener) {
+        mListener = listener;
+    }
+
+    /** {@inheritDoc} */
+    public boolean onLongClick(View v) {
+        switch (v.getId()) {
+            case R.id.photo:
+                performPhotoLongClick();
+                return true;
+            case R.id.name:
+                performDisplayNameLongClick();
+                return true;
+        }
+        return false;
+    }
+
+    private void performPhotoLongClick() {
+        if (mListener != null) {
+            mListener.onPhotoLongClick(mPhotoView);
+        }
+    }
+
+    private void performDisplayNameLongClick() {
+        if (mListener != null) {
+            mListener.onDisplayNameLongClick(mDisplayNameView);
+        }
     }
 
     private class QueryHandler extends AsyncQueryHandler {
