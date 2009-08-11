@@ -1032,11 +1032,13 @@ public class GSMPhone extends PhoneBase {
     /**
      * Small container class used to hold information relevant to
      * the carrier selection process. operatorNumeric can be ""
-     * if we are looking for automatic selection.
+     * if we are looking for automatic selection. operatorAlphaLong is the
+     * corresponding operator name.
      */
     private static class NetworkSelectMessage {
         public Message message;
         public String operatorNumeric;
+        public String operatorAlphaLong;
     }
 
     public void
@@ -1047,6 +1049,7 @@ public class GSMPhone extends PhoneBase {
         NetworkSelectMessage nsm = new NetworkSelectMessage();
         nsm.message = response;
         nsm.operatorNumeric = "";
+        nsm.operatorAlphaLong = "";
 
         // get the message
         Message msg = h.obtainMessage(EVENT_SET_NETWORK_AUTOMATIC_COMPLETE, nsm);
@@ -1064,6 +1067,7 @@ public class GSMPhone extends PhoneBase {
         NetworkSelectMessage nsm = new NetworkSelectMessage();
         nsm.message = response;
         nsm.operatorNumeric = network.operatorNumeric;
+        nsm.operatorAlphaLong = network.operatorAlphaLong;
 
         // get the message
         Message msg = h.obtainMessage(EVENT_SET_NETWORK_MANUAL_COMPLETE, nsm);
@@ -1499,6 +1503,7 @@ public class GSMPhone extends PhoneBase {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(NETWORK_SELECTION_KEY, nsm.operatorNumeric);
+        editor.putString(NETWORK_SELECTION_NAME_KEY, nsm.operatorAlphaLong);
 
         // commit and log the result.
         if (! editor.commit()) {
