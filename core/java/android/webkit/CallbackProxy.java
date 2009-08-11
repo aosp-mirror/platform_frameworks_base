@@ -111,7 +111,7 @@ class CallbackProxy extends Handler {
 
     // Result transportation object for returning results across thread
     // boundaries.
-    private class ResultTransport<E> {
+    private static class ResultTransport<E> {
         // Private result object
         private E mResult;
 
