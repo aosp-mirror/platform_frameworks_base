@@ -2514,7 +2514,11 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected void finalize() throws Throwable {
-        destroy();
+        try {
+            destroy();
+        } finally {
+            super.finalize();
+        }
     }
 
     @Override
