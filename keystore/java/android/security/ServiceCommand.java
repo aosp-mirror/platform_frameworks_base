@@ -49,6 +49,8 @@ public class ServiceCommand {
 
     public static final int BUFFER_LENGTH = 4096;
 
+    private static final boolean DBG = true;
+
     private String mServiceName;
     private String mTag;
     private InputStream mIn;
@@ -59,7 +61,7 @@ public class ServiceCommand {
         if (mSocket != null) {
             return true;
         }
-        Log.i(mTag, "connecting...");
+        if (DBG) Log.d(mTag, "connecting...");
         try {
             mSocket = new LocalSocket();
 
@@ -78,7 +80,7 @@ public class ServiceCommand {
     }
 
     private void disconnect() {
-        Log.i(mTag,"disconnecting...");
+        if (DBG) Log.d(mTag,"disconnecting...");
         try {
             if (mSocket != null) mSocket.close();
         } catch (IOException ex) { }
@@ -105,7 +107,7 @@ public class ServiceCommand {
                 }
                 off += count;
             } catch (IOException ex) {
-                Log.e(mTag,"read exception");
+                Log.e(mTag,"read exception", ex);
                 break;
             }
         }
@@ -156,7 +158,7 @@ public class ServiceCommand {
             mOut.write(buf, 0, 8);
             mOut.write(data, 0, len);
         } catch (IOException ex) {
-            Log.e(mTag,"write error");
+            Log.e(mTag,"write error", ex);
             disconnect();
             return false;
         }

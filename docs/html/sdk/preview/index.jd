@@ -1,5 +1,194 @@
-sdk.redirect=true
+page.title=Android 1.6 Early Look SDK
+sdk.redirect=0
+sdk.version=1.6
+sdk.preview=true
+
+sdk.date=August 2009
+
+sdk.win_download=android-sdk-windows-1.5_r3.zip
+sdk.win_bytes=191477853
+sdk.win_checksum=1725fd6963ce69102ba7192568dfc711
+
+sdk.mac_download=android-sdk-mac_x86-1.5_r3.zip
+sdk.mac_bytes=183024673
+sdk.mac_checksum=b1bafdaefdcec89a14b604b504e7daec
+
+sdk.linux_download=android-sdk-linux_x86-1.5_r3.zip
+sdk.linux_bytes=178117561
+sdk.linux_checksum=350d0211678ced38da926b8c9ffa4fac
+
+adt.zip_download=ADT-0.9.2.zip
+adt.zip_version=0.9.2
+adt.zip_bytes=178117561
+adt.zip_checksum=350d0211678ced38da926b8c9ffa4fac
 
 @jd:body
+
+<h2 id="overview">SDK Overview</h2>
+
+<p>This Early Look SDK provides the tools, libraries, and system images that you need to start developing and testing applications on the next version of the Android platform &mdash; Android 1.6.</p>
+
+<p>The sections below provide information about the contents of the SDK, as well as any applicable release notes.</p>
+
+<p>This Early Look SDK is provided for development and testing purposes only. You can use it to get familiar with the new Android 1.6 framework APIs and the UI and features of the Android 1.6 system, and you can use it to begin testing your existing applications with the new API and system. However, this SDK is not suitable for compiling applications for deployment to Android-powered devices running the Android 1.6 platform, when such devices are available. For more information, see <a href="#provisional">Framework API and Provisional API Level</a>. </p>
+
+<p>The sections below provide information about the contents of the SDK, as well as any applicable release notes.</p>
+
+<p class="note"><strong>Note:</strong> This is an <em>early look SDK only</em>. 
+The tools and documentation are not complete. The API reference documentation for the early look 
+SDK is provided only in the downloadable SDK package &mdash; documentation for this early 
+look release is <em>not</em> available at <a href="http://developer.android.com">http://developer.android.com</a>. 
+To access the API reference for the early
+look SDK, see the documentation in your SDK's <em>docs/reference/</em> directory.
+<br/><br/>
+Additionally, note that the APIs provided in this SDK are subject to change until the final 
+Android 1.6 SDK is released. You should not compile any applications for distribution using 
+this version of the SDK. If you do so, your applications will not function properly when deployed 
+to Android-powered devices running the final Android 1.6 platform. Please wait for the final 
+Android 1.6 SDK before distributing applications built on the Android 1.6 system image.
+</p>
+
+<h3 id="provisional">Framework API and Provisional API Level</h3>
+
+<p>This SDK gives you early access to the framework API that will be offered in Android 1.6. However, at the time of this release, The API specification for Android 1.6 was not yet final, meaning that it is possible that the API could change before the final release of the Android 1.6 platform. </p>
+
+<p>To help distinguish the API offered in the Early Look SDK from that of the final Android 1.6 platform, this SDK assigns a provisional API Level identifier &mdash; <strong>Donut</strong> &mdash; to its Early Look framework API. When the Android 1.6 framework API specification is final, the API Level identifier will change to <strong>4</strong> and the "Donut" identifier will no longer be supported. </p>
+
+<p>The "Donut" framework API is for development only and is not supported as a platform for compiling applications for deployment or publishing. The API Level of "Donut" will not be supported by any Android-powered devices in the field, including those running the Android 1.6 platform. This means that when the final Android 1.6 platform is released, you will need to change your application's <code>android:minSdkVersion</code> manifest attribute to reference the API Level of "4", rather than "Donut", if your application is using Android 1.6 APIs. You would then need to recompile your application before publishing it. </p>
+
+<p>The use of a provisional API Level in this SDK is designed to protect developers and device users from inadvertently publishing or installing applications based on the Early Look framework API, which may not run properly on actual devices running Android 1.6.</p>
+
+<p>To develop using the Early Look framework API, you must reference an API Level of "Donut" in your application's manifest. </p>
+
+<p>Specifically, you must define a <code>android:minSdkVersion</code>
+attribute in a <code>&lt;uses-sdk&gt;</code> element as a child of
+<code>&lt;manifest&gt;</code> in the manifest file. When set, the
+attribute looks like this: </p>
+
+<pre>&lt;manifest&gt;
+  ...
+  &lt;uses-sdk android:minSdkVersion="Donut" /&gt;
+  ...
+&lt;/manifest&gt;</pre>
+
+<p>If you are developing in Eclipse with ADT, please read the next section for information about the ADT upgrade that supports the Early Look SDK's provisional API Level. </p>
+
+
+<h3>ADT Plugin for Eclipse</h3>
+
+<p>An updated version of the ADT Plugin for Eclipse is available in connection with the Android 1.6 Early Look SDK. The new version, ADT 0.9.2, provides support for the provisional API Level "Donut" that is offered in the Early Look SDK and includes several new features and improvements. These changes mean that this Early Look SDK does not work with older Eclipse plugins (ADT 0.9.1).</li>
+
+<p>If you are developing in Eclipse with ADT and want to get started with Android 1.6 Early Look SDK, you <em>must</em> download and install the correct version of the ADT Plugin (0.9.2 or higher). </p>
+
+<p>The new version of ADT is downloadable from the usual remote update site or is separately downloadable as a .zip archive. For instructions on how to download the plugin, please see <a href="upgrading.html#UpdateAdt">Upgrading Your Eclipse Plugin</a>. </p>
+
+<h3>Android AVD Manager</h3>
+
+<p>The SDK offers a new tool called Android AVD Manager that lets you manage your AVDs more efficiently. For example, you can quickly create new AVDs, manage their properties, and run a target AVD from a single window. 
+
+If you are developing in Eclipse with ADT, you can access the Android AVD Manager from the <strong>Window</strong> menu. </p>
+
+If you are developing in another IDE, you can access the AVD manager capabilities through the <code>android</code> command-line tool, located in the &lt;sdk&gt;/tools directory. You can launch the tool with a graphical UI by using the <code>android</code> command without specifying any options. The command-line version of the tool is also still available.</p>
+
+<h3>SDK Component Updater</h3>
+
+<p>This SDK includes a new SDK Component Updater tool that lets you download updated versions of SDK components individually into your environment, as soon as they become available. </p>
+
+<p>The Updater provides a graphical UI that lets you quickly check what Android platforms, add-ons, extras, and documentation packages are available in your SDK environment, what their versions are, and whether updated versions are available. Using the Updater, you can download one or more items from the remote repository and install them directly in your SDK environment. For example, the updater lets you receive updates to SDK tools incrementally, as they are made available, without having to wait for the next SDK release. </p>
+
+<p>To access the Updater, use the <code>android</code> command-line tool, located in the &lt;sdk&gt;/tools directory. You can launch the Updater by using the <code>android</code> command without specifying any options. </p>
+
+<p>In ADT, it you can also access the Updater through the Android AVD Manager tool. </p>
+
+<h3>Support for Test Packages in New Project Wizard</h3>
+
+<p>The New Project Wizard available in the ADT 0.9.2 now lets you add a test package containing JUnit or other classes of tests while you are creating or importing a new Android application project. </p>
+
+
+<h3>Other Notes and Resolved Issues</h3>
+
+<ul>
+<li>This SDK release adds support for Eclipse 3.5 (Galileo) and no longer formally supports Eclipse 3.3 (Europa). </li>
+<li>The issue preventing adb from recognizing Samsung Galaxy devices (linux SDK only) has been fixed.</li>
+</ul>
+
+<h2>SDK Contents</h2>
+
+<h4>Development tools</h4>
+
+<p>The SDK includes a full set of tools for developing and debugging application code and designing an application UI. You can read about the tools in the  
+<a href="{@docRoot}guide/developing/tools/index.html">Dev Guide</a> and access them in the <code>&lt;sdk&gt;/tools/</code> directory. 
+
+<p>The tools package in this SDK includes updates from those provided in the previous SDK. The tools use the same project structure as in the previous SDK (Android 1.5), but have been updated to support the the provisional API Level identifier "donut". If you have application projects developed in the Android 1.5 SDK, you can migrate them to the latest SDK without modification. For more information about how to migrate, see <a href="upgrading.html">Upgrading the SDK</a>.
+
+<p>For more information about the new tools features, see the <a href="#overview">SDK Overview</a> section above. 
+
+<h4 id="system_images">Android Platforms</h4>
+
+<p>This SDK includes multiple Android platform versions that you can use to develop applications. For each version, both a fully compliant Android library and system image are provided. The table below lists the platform versions included in this SDK. For more information about a platform version &mdash; features, applications included, localizations, API changes, and so on &mdash; see its Version Notes. </p>
+
+<table style="margin-right:1em;" width="80%">
+<tr>
+<th><nobr>Platform</nobr></th><th><nobr>API Level</nobr></th><th>Notes</th><th>Description</th>
+</tr>
+<tr>
+<td width="5%"><nobr>Android 1.6 Early Look (Android Donut)</nobr></td>
+<td  width="5%">Donut</td>
+<td  width="5%"></td>
+<td>Includes an Early Look Android 1.6 library and system image with a set of development applications. Does not include any external libraries (such as the Maps external library).</td>
+</tr>
+<tr>
+<td width="5%"><nobr>Android 1.5</nobr></td>
+<td  width="5%">3</td>
+<td  width="5%"><nobr><a href="{@docRoot}sdk/android-1.5.html">Version Notes</a></nobr></td>
+<td>Includes a standard Android 1.5 library and system image with a set of development applications. Does not include any external libraries (such as the Maps external library).</td>
+</tr>
+</table>
+
+<h4 id="system_images">SDK Add-Ons</h4>
+
+<p>An SDK add-on provides a development environment for an Android external library or a customized (but fully compliant) Android system image. This SDK includes the SDK add-on listed below. The Android system API Level required by the add-on is noted.</p>
+
+<table style="margin-right:1em;" width="80%">
+<tr>
+<th><nobr>Add-On</nobr></th><th><nobr>API Level</nobr></th><th>Notes</th><th>Description</th>
+</tr>
+<tr>
+<td width="5%"><nobr>Google APIs</nobr></td>
+<td  width="5%">Donut</td>
+<td  width="5%">&nbsp;</td>
+<td>Includes the com.google.android.maps external library, an Early Look 
+Android 1.6 system image, a {@link android.location.Geocoder Geocoder}
+backend service implementation, documentation, and sample code. </td>
+</tr>
+<tr>
+<td width="5%"><nobr>Google APIs</nobr></td>
+<td  width="5%">3</td>
+<td  width="5%">&nbsp;</td>
+<td>Includes the com.google.android.maps external library, a compliant 
+system image, a {@link android.location.Geocoder Geocoder}
+backend service implementation, documentation, and sample code. </td>
+</tr>
+</table>
+
+<h4>Sample Code and Applications</h4>
+
+<p>You can look at a variety of tutorials and samples in the <a href="{@docRoot}guide/samples/index.html">Dev Guide</a> and access the sample code itself
+in the <code>&lt;sdk&gt;/platforms/&lt;platform&gt;/samples/</code> directory of the SDK package. Note the new location &mdash; the SDK now includes multiple platform versions that you can develop against and each has its own sample code directory. </p>
+
+<p>For example, to view or build the samples available for the Android 
+1.6 Early Look platform (AVD target "Android Donut"), you will find the samples in the <code>&lt;sdk&gt;/platforms/android-Donut/samples/</code> directory of the SDK package. </p>
+
+<h4>Documentation</h4>
+
+<p>The SDK package includes a full set of local documentation. To view it, open the <code>&lt;sdk&gt;/documentation.html</code> file in a web browser. If you are developing in an IDE such as Eclipse, you can also view the reference documentation directly in the IDE. </p>
+
+
+<hr/>
+
+<div class="special">
+<p>Feedback on this preview SDK is welcome on the public Android Open Source forums:</p>
+<p style="margin-left:2em;"><a href="http://source.android.com/discuss">http://source.android.com/discuss</a></p>
+</div>
 
 

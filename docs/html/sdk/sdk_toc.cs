@@ -2,7 +2,10 @@
 <ul>
   <li><?cs 
    if:android.whichdoc != "online" ?>
-    <h2>Android <?cs var:sdk.version ?> SDK, r<?cs var:sdk.rel.id ?></h2><?cs 
+    <h2>Android <?cs var:sdk.version ?> <?cs 
+      if: sdk.preview ?>Early Look SDK<?cs 
+      else ?>SDK, r<?cs var:sdk.rel.id ?><?cs 
+      /if ?></h2><?cs 
    else ?>
     <h2><span class="en">Current SDK Release</span>
         <span class="de">Aktuelle SDK-Version</span>
@@ -16,7 +19,10 @@
    /if ?>
     <ul><?cs 
      if:android.whichdoc == "online" ?>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs var:sdk.current ?>/index.html">
+      <li><a href="<?cs var:toroot ?>sdk/<?cs
+        if:sdk.preview ?>preview<?cs
+			  else ?><?cs var:sdk.current ?><?cs
+			  /if ?>/index.html">
           <span class="en">Download</span>
           <span class="de">Herunterladen</span>
           <span class="es">Descargar</span>
@@ -27,7 +33,10 @@
           <span class="zh-TW">下載</span>
          </a></li><?cs 
      /if ?>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs var:sdk.current ?>/installing.html">
+      <li><a href="<?cs var:toroot ?>sdk/<?cs
+        if:sdk.preview ?>preview<?cs
+			  else ?><?cs var:sdk.current ?><?cs
+			  /if ?>/installing.html">
           <span class="en">Installing</span>
           <span class="de">Installieren</span>
           <span class="es">Instalación</span>
@@ -37,12 +46,21 @@
           <span class="zh-CN">安装</span>
           <span class="zh-TW">安裝</span>
       </a></li>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs var:sdk.current ?>/upgrading.html">Upgrading</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs var:sdk.current ?>/requirements.html">System Requirements</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/<?cs
+        if:sdk.preview ?>preview<?cs
+			  else ?><?cs var:sdk.current ?><?cs
+			  /if ?>/upgrading.html">Upgrading</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/<?cs
+        if:sdk.preview ?>preview<?cs
+			  else ?><?cs var:sdk.current ?><?cs
+			  /if ?>/requirements.html">System Requirements</a></li>
     </ul>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/terms.html">SDK Terms and Conditions</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/RELEASENOTES.html">SDK Release Notes</a></li>
+      <li><a href="<?cs var:toroot ?><?cs 
+        if:sdk.current == "preview" ?>sdk/preview/index.html<?cs 
+        else ?>sdk/RELEASENOTES.html<?cs 
+        /if ?>">SDK Release Notes</a></li>
     </ul><?cs 
  if:android.whichdoc == "online" ?>
   <li>

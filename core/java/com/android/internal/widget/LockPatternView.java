@@ -581,14 +581,14 @@ public class LockPatternView extends View {
                     mInProgressX = x;
                     mInProgressY = y;
 
-                    if (mPatternInProgress) {
+                    if (mPatternInProgress && patternSize > 0) {
                         final ArrayList<Cell> pattern = mPattern;
                         final float radius = mSquareWidth * mDiameterFactor * 0.5f;
 
-                        Cell cell = pattern.get(patternSize - 1);
+                        final Cell lastCell = pattern.get(patternSize - 1);
 
-                        float startX = getCenterXForColumn(cell.column);
-                        float startY = getCenterYForRow(cell.row);
+                        float startX = getCenterXForColumn(lastCell.column);
+                        float startY = getCenterYForRow(lastCell.row);
 
                         float left;
                         float top;

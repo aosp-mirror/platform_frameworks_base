@@ -2884,7 +2884,7 @@ class PackageManagerService extends IPackageManager.Stub {
         if (gp.gids == null) {
             gp.gids = mGlobalGids;
         }
-        
+       
         final int N = pkg.requestedPermissions.size();
         for (int i=0; i<N; i++) {
             String name = pkg.requestedPermissions.get(i);
@@ -3755,7 +3755,7 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
     }
-    
+   
     private void updateSettingsLI(String pkgName, File tmpPackageFile, 
             String destFilePath, File destPackageFile,
             File destResourceFile, 
@@ -4220,7 +4220,7 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             if ( (deletedPs != null) && (deletedPs.sharedUser != null)) {
                 // remove permissions associated with package
-                mSettings.updateSharedUserPerms (deletedPs);
+                mSettings.updateSharedUserPermsLP(deletedPs, mGlobalGids);
             }
             // Save settings now
             mSettings.writeLP ();
@@ -6008,7 +6008,15 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        private void updateSharedUserPerms (PackageSetting deletedPs) {
+        /*
+         * Update the shared user setting when a package using
+         * specifying the shared user id is removed. The gids
+         * associated with each permission of the deleted package
+         * are removed from the shared user's gid list only if its
+         * not in use by other permissions of packages in the
+         * shared user setting.
+         */
+        private void updateSharedUserPermsLP(PackageSetting deletedPs, int[] globalGids) {
             if ( (deletedPs == null) || (deletedPs.pkg == null)) {
                 Log.i(TAG, "Trying to update info for null package. Just ignoring");
                 return;
@@ -6037,13 +6045,14 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             // Update gids
-            int newGids[] = null;
-            for (PackageSetting pkg:sus.packages) {
-                newGids = appendInts(newGids, pkg.gids);
+            int newGids[] = globalGids;
+            for (String eachPerm : sus.grantedPermissions) {
+                BasePermission bp = mPermissions.get(eachPerm);
+                newGids = appendInts(newGids, bp.gids);
             }
             sus.gids = newGids;
         }
-        
+
         private int removePackageLP(String name) {
             PackageSetting p = mPackages.get(name);
             if (p != null) {

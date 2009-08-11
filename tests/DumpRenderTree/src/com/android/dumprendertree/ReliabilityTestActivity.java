@@ -122,8 +122,10 @@ public class ReliabilityTestActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        Log.v(LOGTAG, "onDestroy, inst=" + Integer.toHexString(hashCode()));
         super.onDestroy();
+        Log.v(LOGTAG, "onDestroy, inst=" + Integer.toHexString(hashCode()));
+        webView.clearCache(true);
+        webView.destroy();
     }
 
     private boolean isPageDone() {
@@ -270,8 +272,7 @@ public class ReliabilityTestActivity extends Activity {
         }
 
         public void run() {
-            if (initialStartCount == pageStartCount) {
-                //perform cleanup
+            if (initialStartCount == pageStartCount && !isPageDone()) {
                 handler.removeMessages(MSG_TIMEOUT);
                 webView.stopLoading();
                 handler.postDelayed(pageDoneRunner, manualDelay);

@@ -199,6 +199,7 @@ public class WebSettings {
                     switch (msg.what) {
                         case SYNC:
                             synchronized (WebSettings.this) {
+                                checkGearsPermissions();
                                 if (mBrowserFrame.mNativeFrame != 0) {
                                     nativeSync(mBrowserFrame.mNativeFrame);
                                 }

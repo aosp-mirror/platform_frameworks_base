@@ -693,39 +693,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         return mLaunchComponent.flattenToShortString().startsWith("com.android.browser/");
     }
 
-    /*
-     * Menu.
-     */
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Show search settings menu item if anyone handles the intent for it
-        Intent settingsIntent = new Intent(SearchManager.INTENT_ACTION_SEARCH_SETTINGS);
-        settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PackageManager pm = getContext().getPackageManager();
-        ActivityInfo activityInfo = settingsIntent.resolveActivityInfo(pm, 0);
-        if (activityInfo != null) {
-            settingsIntent.setClassName(activityInfo.applicationInfo.packageName,
-                    activityInfo.name);
-            CharSequence label = activityInfo.loadLabel(getContext().getPackageManager());
-            menu.add(Menu.NONE, Menu.NONE, Menu.NONE, label)
-                    .setIcon(android.R.drawable.ic_menu_preferences)
-                    .setAlphabeticShortcut('P')
-                    .setIntent(settingsIntent);
-            return true;
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onMenuOpened(int featureId, Menu menu) {
-        // The menu shows up above the IME, regardless of whether it is in front
-        // of the drop-down or not. This looks weird when there is no IME, so
-        // we make sure it is visible.
-        mSearchAutoComplete.ensureImeVisible();
-        return super.onMenuOpened(featureId, menu);
-    }
-
     /**
      * Listeners of various types
      */
@@ -899,16 +866,15 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 return;
             }
             try {
+                // First stop the existing search before starting voice search, or else we'll end
+                // up showing the search dialog again once we return to the app.
+                ((SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE)).
+                        stopSearch();
+                
                 if (mSearchable.getVoiceSearchLaunchWebSearch()) {
                     getContext().startActivity(mVoiceWebSearchIntent);
                 } else if (mSearchable.getVoiceSearchLaunchRecognizer()) {
-                    Intent appSearchIntent = createVoiceAppSearchIntent(mVoiceAppSearchIntent);
-                    
-                    // Stop the existing search before starting voice search, or else we'll end
-                    // up showing the search dialog again once we return to the app.
-                    ((SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE)).
-                            stopSearch();
-                    
+                    Intent appSearchIntent = createVoiceAppSearchIntent(mVoiceAppSearchIntent);                    
                     getContext().startActivity(appSearchIntent);
                 }
             } catch (ActivityNotFoundException e) {

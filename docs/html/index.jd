@@ -11,7 +11,7 @@ home=true
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
-                                <img src="/assets/images/home/android_adc.png" alt="Android Developer Challenge 2" width="232px" />
+                                <img src="{@docRoot}assets/images/home/android_adc.png" alt="Android Developer Challenge 2" width="232px" />
                                 <div id="announcement" style="width:275px">
                                   <p>The second Android Developer Challenge has begun! In this contest,
                                   real-world users will help review and score applications and the overall winner will 

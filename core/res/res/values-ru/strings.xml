@@ -15,41 +15,41 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort">"Б"</string>
-    <string name="kilobyteShort">"КБ"</string>
-    <string name="megabyteShort">"МБ"</string>
-    <string name="gigabyteShort">"ГБ"</string>
-    <string name="terabyteShort">"TБ"</string>
-    <string name="petabyteShort">"ПБ"</string>
+    <string name="byteShort" msgid="8340973892742019101">"Б"</string>
+    <string name="kilobyteShort" msgid="5973789783504771878">"КБ"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"МБ"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"ГБ"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"TБ"</string>
+    <string name="petabyteShort" msgid="5637816680144990219">"ПБ"</string>
     <!-- no translation found for fileSizeSuffix (7670819340156489359) -->
     <skip />
-    <string name="untitled">"&lt;без названия&gt;"</string>
-    <string name="ellipsis">"…"</string>
-    <string name="emptyPhoneNumber">"(Нет номера телефона)"</string>
-    <string name="unknownName">"(Неизвестно)"</string>
-    <string name="defaultVoiceMailAlphaTag">"Голосовая почта"</string>
-    <string name="defaultMsisdnAlphaTag">"MSISDN1"</string>
-    <string name="mmiError">"Неполадки подключения или неверный код MMI."</string>
-    <string name="serviceEnabled">"Служба включена."</string>
-    <string name="serviceEnabledFor">"Служба подключена для:"</string>
-    <string name="serviceDisabled">"Служба отключена."</string>
-    <string name="serviceRegistered">"Регистрация пройдена успешно."</string>
-    <string name="serviceErased">"Удаление выполнено успешно."</string>
-    <string name="passwordIncorrect">"Неверный пароль."</string>
-    <string name="mmiComplete">"Запрос MMI завершен."</string>
-    <string name="badPin">"Введен неверный старый PUK."</string>
-    <string name="badPuk">"Введен неверный PUK."</string>
-    <string name="mismatchPin">"Введенные PIN-коды не совпадают."</string>
-    <string name="invalidPin">"Введите PIN-код (от 4 до 8 цифр)."</string>
-    <string name="needPuk">"SIM-карта заблокирована с помощью кода PUK. Для разблокировки введите код PUK."</string>
-    <string name="needPuk2">"Для разблокировки SIM-карты введите PUK2."</string>
-    <string name="ClipMmi">"Идентификация вызывающего абонента"</string>
-    <string name="ClirMmi">"Идентификация звонящего абонента"</string>
-    <string name="CfMmi">"Переадресация вызова"</string>
-    <string name="CwMmi">"Параллельный вызов"</string>
-    <string name="BaMmi">"Запрет вызовов"</string>
-    <string name="PwdMmi">"Смена пароля"</string>
-    <string name="PinMmi">"Смена PIN"</string>
+    <string name="untitled" msgid="6071602020171759109">"&lt;без названия&gt;"</string>
+    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
+    <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Нет номера телефона)"</string>
+    <string name="unknownName" msgid="2277556546742746522">"(Неизвестно)"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Голосовая почта"</string>
+    <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
+    <string name="mmiError" msgid="5154499457739052907">"Неполадки подключения или неверный код MMI."</string>
+    <string name="serviceEnabled" msgid="8147278346414714315">"Служба включена."</string>
+    <string name="serviceEnabledFor" msgid="6856228140453471041">"Служба подключена для:"</string>
+    <string name="serviceDisabled" msgid="1937553226592516411">"Служба отключена."</string>
+    <string name="serviceRegistered" msgid="6275019082598102493">"Регистрация пройдена успешно."</string>
+    <string name="serviceErased" msgid="1288584695297200972">"Удаление выполнено успешно."</string>
+    <string name="passwordIncorrect" msgid="7612208839450128715">"Неверный пароль."</string>
+    <string name="mmiComplete" msgid="8232527495411698359">"Запрос MMI завершен."</string>
+    <string name="badPin" msgid="5085454289896032547">"Введен неверный старый PUK."</string>
+    <string name="badPuk" msgid="5702522162746042460">"Введен неверный PUK."</string>
+    <string name="mismatchPin" msgid="3695902225843339274">"Введенные PIN-коды не совпадают."</string>
+    <string name="invalidPin" msgid="3850018445187475377">"Введите PIN-код (от 4 до 8 цифр)."</string>
+    <string name="needPuk" msgid="919668385956251611">"SIM-карта заблокирована с помощью кода PUK. Для разблокировки введите код PUK."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Для разблокировки SIM-карты введите PUK2."</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"Идентификация вызывающего абонента"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"Идентификация звонящего абонента"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Переадресация вызова"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"Параллельный вызов"</string>
+    <string name="BaMmi" msgid="455193067926770581">"Запрет вызовов"</string>
+    <string name="PwdMmi" msgid="7043715687905254199">"Смена пароля"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"Смена PIN"</string>
     <!-- no translation found for CnipMmi (3110534680557857162) -->
     <skip />
     <!-- no translation found for CnirMmi (3062102121430548731) -->
@@ -62,25 +62,25 @@
     <skip />
     <!-- no translation found for DndMmi (1265478932418334331) -->
     <skip />
-    <string name="CLIRDefaultOnNextCallOn">"Идентификация абонента по умолчанию запрещена. След. вызов: запрещена"</string>
-    <string name="CLIRDefaultOnNextCallOff">"Идентификация абонента по умолчанию запрещена. След. вызов: разрешена"</string>
-    <string name="CLIRDefaultOffNextCallOn">"Идентификация абонента по умолчанию не запрещена. След. вызов: запрещена"</string>
-    <string name="CLIRDefaultOffNextCallOff">"Идентификация абонента по умолчанию не запрещена. След. вызов: разрешена"</string>
-    <string name="serviceNotProvisioned">"Услуга не предоставляется."</string>
-    <string name="CLIRPermanent">"Невозможно изменить настройку идентификации абонента."</string>
-    <string name="RestrictedChangedTitle">"Ограничения доступа изменены"</string>
-    <string name="RestrictedOnData">"Служба данных заблокирована."</string>
-    <string name="RestrictedOnEmergency">"Служба экстренной помощи заблокирована."</string>
-    <string name="RestrictedOnNormal">"Служба передачи SMS/голосовых сообщений заблокирована."</string>
-    <string name="RestrictedOnAll">"Все службы передачи SMS/голосовых сообщений заблокированы."</string>
-    <string name="serviceClassVoice">"Голосовая связь"</string>
-    <string name="serviceClassData">"Данные"</string>
-    <string name="serviceClassFAX">"ФАКС"</string>
-    <string name="serviceClassSMS">"SMS"</string>
-    <string name="serviceClassDataAsync">"Асинхр."</string>
-    <string name="serviceClassDataSync">"Синхр."</string>
-    <string name="serviceClassPacket">"Пакет"</string>
-    <string name="serviceClassPAD">"PAD"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Идентификация абонента по умолчанию запрещена. След. вызов: запрещена"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Идентификация абонента по умолчанию запрещена. След. вызов: разрешена"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Идентификация абонента по умолчанию не запрещена. След. вызов: запрещена"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Идентификация абонента по умолчанию не запрещена. След. вызов: разрешена"</string>
+    <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услуга не предоставляется."</string>
+    <string name="CLIRPermanent" msgid="5460892159398802465">"Невозможно изменить настройку идентификации абонента."</string>
+    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Ограничения доступа изменены"</string>
+    <string name="RestrictedOnData" msgid="8653794784690065540">"Служба данных заблокирована."</string>
+    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Служба экстренной помощи заблокирована."</string>
+    <string name="RestrictedOnNormal" msgid="2045364908281990708">"Служба передачи SMS/голосовых сообщений заблокирована."</string>
+    <string name="RestrictedOnAll" msgid="4923139582141626159">"Все службы передачи SMS/голосовых сообщений заблокированы."</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"Голосовая связь"</string>
+    <string name="serviceClassData" msgid="872456782077937893">"Данные"</string>
+    <string name="serviceClassFAX" msgid="5566624998840486475">"ФАКС"</string>
+    <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
+    <string name="serviceClassDataAsync" msgid="4523454783498551468">"Асинхр."</string>
+    <string name="serviceClassDataSync" msgid="7530000519646054776">"Синхр."</string>
+    <string name="serviceClassPacket" msgid="6991006557993423453">"Пакет"</string>
+    <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
     <!-- no translation found for roamingText0 (7170335472198694945) -->
     <skip />
     <!-- no translation found for roamingText1 (5314861519752538922) -->
@@ -109,112 +109,112 @@
     <skip />
     <!-- no translation found for roamingTextSearching (8360141885972279963) -->
     <skip />
-    <string name="cfTemplateNotForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не переадресовано"</string>
-    <string name="cfTemplateForwarded">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
-    <string name="cfTemplateForwardedTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> через <xliff:g id="TIME_DELAY">{2}</xliff:g> с."</string>
-    <string name="cfTemplateRegistered">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не переадресовано"</string>
-    <string name="cfTemplateRegisteredTime">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не переадресовано"</string>
+    <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: не переадресовано"</string>
+    <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> через <xliff:g id="TIME_DELAY">{2}</xliff:g> с."</string>
+    <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не переадресовано"</string>
+    <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не переадресовано"</string>
     <!-- no translation found for fcComplete (3118848230966886575) -->
     <skip />
     <!-- no translation found for fcError (3327560126588500777) -->
     <skip />
-    <string name="httpErrorOk">"ОК"</string>
-    <string name="httpError">"Ошибка на веб-странице."</string>
-    <string name="httpErrorLookup">"Не удалось найти URL."</string>
-    <string name="httpErrorUnsupportedAuthScheme">"Схема аутентификации сайта не поддерживается."</string>
-    <string name="httpErrorAuth">"Не удалось провести аутентификацию."</string>
-    <string name="httpErrorProxyAuth">"Не удалось выполнить аутентификацию через прокси-сервер."</string>
-    <string name="httpErrorConnect">"Не удалось подключиться к серверу."</string>
-    <string name="httpErrorIO">"Сервер не отвечает. Повторите попытку позднее."</string>
-    <string name="httpErrorTimeout">"Время ожидания соединения с сервером истекло."</string>
-    <string name="httpErrorRedirectLoop">"Страница содержит слишком много перенаправлений сервера."</string>
-    <string name="httpErrorUnsupportedScheme">"Этот протокол не поддерживается."</string>
-    <string name="httpErrorFailedSslHandshake">"Не удалось установить безопасное соединение."</string>
-    <string name="httpErrorBadUrl">"Не удалось открыть страницу. Указан недопустимый URL."</string>
-    <string name="httpErrorFile">"Не удается получить доступ к файлу."</string>
-    <string name="httpErrorFileNotFound">"Не удалось найти указанные файлы."</string>
-    <string name="httpErrorTooManyRequests">"Обрабатывается слишком много запросов. Повторите попытку позднее."</string>
-    <string name="contentServiceSync">"Синхр."</string>
-    <string name="contentServiceSyncNotificationTitle">"Синхр."</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc">"Слишком много удалений <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
-    <string name="low_memory">"Память телефона заполнена! Удалите файлы, чтобы освободить место."</string>
-    <string name="me">"Я"</string>
-    <string name="power_dialog">"Параметры телефона"</string>
-    <string name="silent_mode">"Беззвучный режим"</string>
-    <string name="turn_on_radio">"Включить беспроводную связь"</string>
-    <string name="turn_off_radio">"Отключить беспроводное соединение"</string>
-    <string name="screen_lock">"Блокировка экрана"</string>
-    <string name="power_off">"Выключить связь"</string>
-    <string name="shutdown_progress">"Выключение..."</string>
-    <string name="shutdown_confirm">"Телефон будет отключен."</string>
-    <string name="no_recent_tasks">"Нет последних приложений."</string>
-    <string name="global_actions">"Параметры телефона"</string>
-    <string name="global_action_lock">"Блокировка экрана"</string>
-    <string name="global_action_power_off">"Отключить питание"</string>
-    <string name="global_action_toggle_silent_mode">"Беззвучный режим"</string>
-    <string name="global_action_silent_mode_on_status">"Звук ВЫКЛ"</string>
-    <string name="global_action_silent_mode_off_status">"Звук ВКЛЮЧЕН"</string>
-    <string name="global_actions_toggle_airplane_mode">"Режим полета"</string>
-    <string name="global_actions_airplane_mode_on_status">"Режим полета ВКЛЮЧЕН"</string>
-    <string name="global_actions_airplane_mode_off_status">"Режим полета ВЫКЛЮЧЕН"</string>
-    <string name="safeMode">"Безопасный режим"</string>
-    <string name="android_system_label">"Система Android"</string>
-    <string name="permgrouplab_costMoney">"Платные услуги"</string>
-    <string name="permgroupdesc_costMoney">"Разрешать приложениям использовать платные услуги."</string>
-    <string name="permgrouplab_messages">"Сообщения"</string>
-    <string name="permgroupdesc_messages">"Считывать и записывать SMS, электронные письма и другие сообщения."</string>
-    <string name="permgrouplab_personalInfo">"Личная информация"</string>
-    <string name="permgroupdesc_personalInfo">"Прямой доступ к контактам и событиям календаря, сохраненным в памяти телефона."</string>
-    <string name="permgrouplab_location">"Ваше местоположение"</string>
-    <string name="permgroupdesc_location">"Отслеживание физического местоположения"</string>
-    <string name="permgrouplab_network">"Сетевой обмен данными"</string>
-    <string name="permgroupdesc_network">"Позволяет приложениям получать доступ к различным сетевым функциям."</string>
-    <string name="permgrouplab_accounts">"Ваши аккаунты Google"</string>
-    <string name="permgroupdesc_accounts">"Входить в доступные аккаунты Google."</string>
-    <string name="permgrouplab_hardwareControls">"Элементы управления аппаратным обеспечением"</string>
-    <string name="permgroupdesc_hardwareControls">"Прямой доступ к аппаратному обеспечению телефона."</string>
-    <string name="permgrouplab_phoneCalls">"Телефонные вызовы"</string>
-    <string name="permgroupdesc_phoneCalls">"Отслеживать, записывать и обрабатывать телефонные звонки."</string>
-    <string name="permgrouplab_systemTools">"Системные инструменты"</string>
-    <string name="permgroupdesc_systemTools">"Доступ нижнего уровня и управление системой."</string>
-    <string name="permgrouplab_developmentTools">"Инструменты разработки"</string>
-    <string name="permgroupdesc_developmentTools">"Функции, необходимые только разработчикам приложений."</string>
+    <string name="httpErrorOk" msgid="1191919378083472204">"ОК"</string>
+    <string name="httpError" msgid="2567300624552921790">"Ошибка на веб-странице."</string>
+    <string name="httpErrorLookup" msgid="4517085806977851374">"Не удалось найти URL."</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Схема аутентификации сайта не поддерживается."</string>
+    <string name="httpErrorAuth" msgid="7293960746955020542">"Не удалось провести аутентификацию."</string>
+    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Не удалось выполнить аутентификацию через прокси-сервер."</string>
+    <string name="httpErrorConnect" msgid="7623096283505770433">"Не удалось подключиться к серверу."</string>
+    <string name="httpErrorIO" msgid="5047872902739125260">"Сервер не отвечает. Повторите попытку позднее."</string>
+    <string name="httpErrorTimeout" msgid="4743403703762883954">"Время ожидания соединения с сервером истекло."</string>
+    <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Страница содержит слишком много перенаправлений сервера."</string>
+    <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Этот протокол не поддерживается."</string>
+    <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"Не удалось установить безопасное соединение."</string>
+    <string name="httpErrorBadUrl" msgid="6088183159988619736">"Не удалось открыть страницу. Указан недопустимый URL."</string>
+    <string name="httpErrorFile" msgid="8250549644091165175">"Не удается получить доступ к файлу."</string>
+    <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Не удалось найти указанные файлы."</string>
+    <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Обрабатывается слишком много запросов. Повторите попытку позднее."</string>
+    <string name="contentServiceSync" msgid="8353523060269335667">"Синхр."</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхр."</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Слишком много удалений <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
+    <string name="low_memory" msgid="6632412458436461203">"Память телефона заполнена! Удалите файлы, чтобы освободить место."</string>
+    <string name="me" msgid="6545696007631404292">"Я"</string>
+    <string name="power_dialog" msgid="1319919075463988638">"Параметры телефона"</string>
+    <string name="silent_mode" msgid="7167703389802618663">"Тихий режим"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"Включить беспроводную связь"</string>
+    <string name="turn_off_radio" msgid="8198784949987062346">"Отключить беспроводное соединение"</string>
+    <string name="screen_lock" msgid="799094655496098153">"Блокировка экрана"</string>
+    <string name="power_off" msgid="4266614107412865048">"Выключить связь"</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"Выключение..."</string>
+    <string name="shutdown_confirm" msgid="649792175242821353">"Телефон будет отключен."</string>
+    <string name="no_recent_tasks" msgid="279702952298056674">"Нет последних приложений."</string>
+    <string name="global_actions" msgid="2406416831541615258">"Параметры телефона"</string>
+    <string name="global_action_lock" msgid="2844945191792119712">"Блокировка экрана"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"Отключить питание"</string>
+    <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Тихий режим"</string>
+    <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Звук ВЫКЛ"</string>
+    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Звук ВКЛЮЧЕН"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Режим полета"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режим полета ВКЛЮЧЕН"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режим полета ВЫКЛЮЧЕН"</string>
+    <string name="safeMode" msgid="2788228061547930246">"Безопасный режим"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
+    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Платные услуги"</string>
+    <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"Разрешать приложениям использовать платные услуги."</string>
+    <string name="permgrouplab_messages" msgid="7521249148445456662">"Сообщения"</string>
+    <string name="permgroupdesc_messages" msgid="7045736972019211994">"Считывать и записывать SMS, электронные письма и другие сообщения."</string>
+    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Личная информация"</string>
+    <string name="permgroupdesc_personalInfo" msgid="5488050357388806068">"Прямой доступ к контактам и событиям календаря, сохраненным в памяти телефона."</string>
+    <string name="permgrouplab_location" msgid="635149742436692049">"Ваше местоположение"</string>
+    <string name="permgroupdesc_location" msgid="2430258821648348660">"Отслеживание физического местоположения"</string>
+    <string name="permgrouplab_network" msgid="5808983377727109831">"Сетевой обмен данными"</string>
+    <string name="permgroupdesc_network" msgid="5035763698958415998">"Позволяет приложениям получать доступ к различным сетевым функциям."</string>
+    <string name="permgrouplab_accounts" msgid="7140261692496314430">"Ваши аккаунты Google"</string>
+    <string name="permgroupdesc_accounts" msgid="6735915929704895193">"Входить в доступные аккаунты Google."</string>
+    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Элементы управления аппаратным обеспечением"</string>
+    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Прямой доступ к аппаратному обеспечению телефона."</string>
+    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Телефонные вызовы"</string>
+    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Отслеживать, записывать и обрабатывать телефонные звонки."</string>
+    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Системные инструменты"</string>
+    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Доступ нижнего уровня и управление системой."</string>
+    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Инструменты разработки"</string>
+    <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Функции, необходимые только разработчикам приложений."</string>
     <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
     <skip />
     <!-- no translation found for permgroupdesc_storage (9203302214915355774) -->
     <skip />
-    <string name="permlab_statusBar">"отключить или изменить строку состояния"</string>
-    <string name="permdesc_statusBar">"Позволяет приложению отключать строку состояния или добавлять/удалять системные значки."</string>
-    <string name="permlab_expandStatusBar">"разворачивать/сворачивать строку состояния"</string>
-    <string name="permdesc_expandStatusBar">"Позволяет приложению разворачивать или сворачивать строку состояния."</string>
-    <string name="permlab_processOutgoingCalls">"перехватывать исходящие вызовы"</string>
-    <string name="permdesc_processOutgoingCalls">"Позволяет приложению обрабатывать исходящие вызовы и изменять набираемый номер. Вредоносные приложения могут отслеживать, перенаправлять или запрещать исходящие вызовы."</string>
-    <string name="permlab_receiveSms">"получать SMS"</string>
-    <string name="permdesc_receiveSms">"Позволяет приложению получать и обрабатывать SMS-сообщения. Вредоносные приложения могут отслеживать ваши сообщения или удалять их, не показывая вам."</string>
-    <string name="permlab_receiveMms">"получать MMS"</string>
-    <string name="permdesc_receiveMms">"Позволяет приложению получать и обрабатывать MMS-сообщения. Вредоносные приложения могут отслеживать ваши сообщения или удалять их, не показывая вам."</string>
-    <string name="permlab_sendSms">"отправлять SMS-сообщения"</string>
-    <string name="permdesc_sendSms">"Позволяет приложению отправлять SMS-сообщения. Вредоносные приложения могут отправлять сообщения без уведомления, что приведет к непредвиденным расходам."</string>
-    <string name="permlab_readSms">"считывать SMS или MMS"</string>
-    <string name="permdesc_readSms">"Позволяет приложению считывать SMS-сообщения, сохраненные на телефоне или SIM-карте. Вредоносные приложения могут считывать конфиденциальные сообщения."</string>
-    <string name="permlab_writeSms">"изменить SMS или MMS"</string>
-    <string name="permdesc_writeSms">"Позволяет приложению перезаписывать SMS-сообщения, сохраненные на телефоне или SIM-карте. Вредоносные приложения могут удалить сообщения."</string>
-    <string name="permlab_receiveWapPush">"получать WAP"</string>
-    <string name="permdesc_receiveWapPush">"Позволяет приложению получать и обрабатывать WAP-сообщения. Вредоносные приложения могут отслеживать ваши сообщения или удалять их, не показывая вам."</string>
-    <string name="permlab_getTasks">"извлечь запущенные приложения"</string>
-    <string name="permdesc_getTasks">"Позволяет приложению получать сведения о последних и текущих задачах. Вредоносные приложения могут получить доступ к конфиденциальной информации о других приложениях."</string>
-    <string name="permlab_reorderTasks">"изменять порядок запущенных приложений"</string>
-    <string name="permdesc_reorderTasks">"Позволяет приложению переключать режим выполнения задачи с активного на фоновый. Вредоносные приложения могут установить для себя активный режим без уведомления."</string>
-    <string name="permlab_setDebugApp">"запускать отладку приложения"</string>
-    <string name="permdesc_setDebugApp">"Позволяет приложению запускать процесс отладки другого приложения. Вредоносные приложения могут использовать эту возможность для остановки других приложений."</string>
-    <string name="permlab_changeConfiguration">"изменять настройки пользовательского интерфейса"</string>
-    <string name="permdesc_changeConfiguration">"Позволяет приложению изменять текущую конфигурацию, например региональные настройки или размер шрифта."</string>
-    <string name="permlab_restartPackages">"перезапускать другие приложения"</string>
-    <string name="permdesc_restartPackages">"Позволяет приложению принудительно перезапускать другие приложения."</string>
-    <string name="permlab_forceBack">"принудительно закрывать приложения"</string>
-    <string name="permdesc_forceBack">"Позволяет приложению принудительно закрыть или вернуть в исходное состояние процессы, выполняемые в активном режиме. Не требуется для обычных приложений."</string>
-    <string name="permlab_dump">"извлекать данные о внутреннем состоянии системы"</string>
-    <string name="permdesc_dump">"Позволяет приложению извлекать внутренние сведения о состоянии системы. Вредоносные приложения смогут извлечь разнообразные личные и защищенные сведения, в которых обычно нет необходимости."</string>
+    <string name="permlab_statusBar" msgid="7417192629601890791">"отключать или изменять строку состояния"</string>
+    <string name="permdesc_statusBar" msgid="1365473595331989732">"Позволяет приложению отключать строку состояния или добавлять/удалять системные значки."</string>
+    <string name="permlab_expandStatusBar" msgid="1148198785937489264">"разворачивать/сворачивать строку состояния"</string>
+    <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Позволяет приложению разворачивать или сворачивать строку состояния."</string>
+    <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"перехватывать исходящие вызовы"</string>
+    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"Позволяет приложению обрабатывать исходящие вызовы и изменять набираемый номер. Вредоносные приложения могут отслеживать, перенаправлять или запрещать исходящие вызовы."</string>
+    <string name="permlab_receiveSms" msgid="2697628268086208535">"получать SMS"</string>
+    <string name="permdesc_receiveSms" msgid="6298292335965966117">"Позволяет приложению получать и обрабатывать SMS-сообщения. Вредоносные приложения могут отслеживать ваши сообщения или удалять их, не показывая вам."</string>
+    <string name="permlab_receiveMms" msgid="8894700916188083287">"получать MMS"</string>
+    <string name="permdesc_receiveMms" msgid="4563346832000174373">"Позволяет приложению получать и обрабатывать MMS-сообщения. Вредоносные приложения могут отслеживать ваши сообщения или удалять их, не показывая вам."</string>
+    <string name="permlab_sendSms" msgid="5600830612147671529">"отправлять SMS-сообщения"</string>
+    <string name="permdesc_sendSms" msgid="1946540351763502120">"Позволяет приложению отправлять SMS-сообщения. Вредоносные приложения могут отправлять сообщения без уведомления, что приведет к непредвиденным расходам."</string>
+    <string name="permlab_readSms" msgid="4085333708122372256">"считывать SMS или MMS"</string>
+    <string name="permdesc_readSms" msgid="3002170087197294591">"Позволяет приложению считывать SMS-сообщения, сохраненные на телефоне или SIM-карте. Вредоносные приложения могут считывать конфиденциальные сообщения."</string>
+    <string name="permlab_writeSms" msgid="6881122575154940744">"изменять SMS или MMS"</string>
+    <string name="permdesc_writeSms" msgid="6299398896177548095">"Позволяет приложению перезаписывать SMS-сообщения, сохраненные на телефоне или SIM-карте. Вредоносные приложения могут удалить сообщения."</string>
+    <string name="permlab_receiveWapPush" msgid="8258226427716551388">"получать WAP"</string>
+    <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Позволяет приложению получать и обрабатывать WAP-сообщения. Вредоносные приложения могут отслеживать ваши сообщения или удалять их, не показывая вам."</string>
+    <string name="permlab_getTasks" msgid="5005277531132573353">"извлечь запущенные приложения"</string>
+    <string name="permdesc_getTasks" msgid="7048711358713443341">"Позволяет приложению получать сведения о последних и текущих задачах. Вредоносные приложения могут получить доступ к конфиденциальной информации о других приложениях."</string>
+    <string name="permlab_reorderTasks" msgid="5669588525059921549">"изменять порядок запущенных приложений"</string>
+    <string name="permdesc_reorderTasks" msgid="126252774270522835">"Позволяет приложению переключать режим выполнения задачи с активного на фоновый. Вредоносные приложения могут установить для себя активный режим без уведомления."</string>
+    <string name="permlab_setDebugApp" msgid="4339730312925176742">"запускать отладку приложения"</string>
+    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Позволяет приложению запускать процесс отладки другого приложения. Вредоносные приложения могут использовать эту возможность для остановки других приложений."</string>
+    <string name="permlab_changeConfiguration" msgid="8214475779521218295">"изменять настройки пользовательского интерфейса"</string>
+    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Позволяет приложению изменять текущую конфигурацию, например региональные настройки или размер шрифта."</string>
+    <string name="permlab_restartPackages" msgid="2386396847203622628">"перезапускать другие приложения"</string>
+    <string name="permdesc_restartPackages" msgid="1076364837492936814">"Позволяет приложению принудительно перезапускать другие приложения."</string>
+    <string name="permlab_forceBack" msgid="1804196839880393631">"принудительно закрывать приложения"</string>
+    <string name="permdesc_forceBack" msgid="6534109744159919013">"Позволяет приложению принудительно закрыть или вернуть в исходное состояние процессы, выполняемые в активном режиме. Не требуется для обычных приложений."</string>
+    <string name="permlab_dump" msgid="1681799862438954752">"извлекать данные о внутреннем состоянии системы"</string>
+    <string name="permdesc_dump" msgid="2198776174276275220">"Позволяет приложению извлекать внутренние сведения о состоянии системы. Вредоносные приложения смогут извлечь разнообразные личные и защищенные сведения, в которых обычно нет необходимости."</string>
     <!-- no translation found for permlab_shutdown (7185747824038909016) -->
     <skip />
     <!-- no translation found for permdesc_shutdown (7046500838746291775) -->
@@ -223,294 +223,296 @@
     <skip />
     <!-- no translation found for permdesc_stopAppSwitches (3857886086919033794) -->
     <skip />
-    <string name="permlab_runSetActivityWatcher">"отслеживать и управлять запуском всех приложений"</string>
-    <string name="permdesc_runSetActivityWatcher">"Позволяет приложению отслеживать и управлять способом подключения системы. Вредоносные приложения могут разгласить конфиденциальную информацию о системе. Это разрешение необходимо только при разработке, но не при обычной работе с телефоном."</string>
-    <string name="permlab_broadcastPackageRemoved">"отправлять рассылку об удалении пакета"</string>
-    <string name="permdesc_broadcastPackageRemoved">"Позволяет приложению выполнять рассылку уведомлений об удалении пакета приложения. Вредоносные приложения могут использовать эту возможность для остановки всех остальных выполняющихся приложений."</string>
-    <string name="permlab_broadcastSmsReceived">"отправлять рассылку уведомлений о получении SMS"</string>
-    <string name="permdesc_broadcastSmsReceived">"Позволяет приложению отправлять уведомления о получении SMS-сообщения. Вредоносные приложения могут использовать эту возможность для имитации получения SMS -сообщений."</string>
-    <string name="permlab_broadcastWapPush">"отправлять рассылку уведомлений о получении WAP-сообщений поставщика услуг"</string>
-    <string name="permdesc_broadcastWapPush">"Позволяет приложению отправлять уведомления о получении WAP-сообщения поставщика услуг. Вредоносные приложения могут использовать эту возможность для имитации получения MMS-сообщения или замены содержимого любой веб-страницы на вредоносное без уведомления."</string>
-    <string name="permlab_setProcessLimit">"ограничивать количество запущенных процессов"</string>
-    <string name="permdesc_setProcessLimit">"Позволяет приложению управлять максимальным количеством выполняемых процессов. Не требуется для обычных приложений."</string>
-    <string name="permlab_setAlwaysFinish">"закрывать все приложения, работающие в фоновом режиме"</string>
-    <string name="permdesc_setAlwaysFinish">"Позволяет приложению контролировать, были ли действия завершены сразу же после их перехода в фоновый режим. Не требуется для обычных приложений."</string>
-    <string name="permlab_batteryStats">"изменять статистику батареи"</string>
-    <string name="permdesc_batteryStats">"Позволяет изменять собранную статистику батареи. Не предназначено для использования обычными приложениями."</string>
+    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"отслеживать и управлять запуском всех приложений"</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"Позволяет приложению отслеживать и управлять способом подключения системы. Вредоносные приложения могут разгласить конфиденциальную информацию о системе. Это разрешение необходимо только при разработке, но не при обычной работе с телефоном."</string>
+    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"отправлять рассылку об удалении пакета"</string>
+    <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Позволяет приложению выполнять рассылку уведомлений об удалении пакета приложения. Вредоносные приложения могут использовать эту возможность для остановки всех остальных выполняющихся приложений."</string>
+    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"отправлять рассылку уведомлений о получении SMS"</string>
+    <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"Позволяет приложению отправлять уведомления о получении SMS-сообщения. Вредоносные приложения могут использовать эту возможность для имитации получения SMS -сообщений."</string>
+    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"отправлять рассылку уведомлений о получении WAP-сообщений поставщика услуг"</string>
+    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Позволяет приложению отправлять уведомления о получении WAP-сообщения поставщика услуг. Вредоносные приложения могут использовать эту возможность для имитации получения MMS-сообщения или замены содержимого любой веб-страницы на вредоносное без уведомления."</string>
+    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ограничивать количество запущенных процессов"</string>
+    <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Позволяет приложению управлять максимальным количеством выполняемых процессов. Не требуется для обычных приложений."</string>
+    <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"закрывать все приложения, работающие в фоновом режиме"</string>
+    <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Позволяет приложению контролировать, были ли действия завершены сразу же после их перехода в фоновый режим. Не требуется для обычных приложений."</string>
+    <string name="permlab_batteryStats" msgid="7863923071360031652">"изменять статистику батареи"</string>
+    <string name="permdesc_batteryStats" msgid="5847319823772230560">"Позволяет изменять собранную статистику батареи. Не предназначено для использования обычными приложениями."</string>
     <!-- no translation found for permlab_backup (470013022865453920) -->
     <skip />
     <!-- no translation found for permdesc_backup (2305432853944929371) -->
     <skip />
-    <string name="permlab_internalSystemWindow">"показывать неавторизованные окна"</string>
-    <string name="permdesc_internalSystemWindow">"Разрешает создание окон, предназначенных для использования внутренним пользовательским интерфейсом системы. Не предназначено для использования обычными приложениями."</string>
-    <string name="permlab_systemAlertWindow">"показывать оповещения системного уровня"</string>
-    <string name="permdesc_systemAlertWindow">"Позволяет приложению отображать окна предупреждений системы. Вредоносные приложения смогут получить контроль над всем экраном телефона."</string>
-    <string name="permlab_setAnimationScale">"изменять глобальную скорость анимации"</string>
-    <string name="permdesc_setAnimationScale">"Позволяет приложению в любое время изменять общую скорость анимации (ускоренная или замедленная анимация)."</string>
-    <string name="permlab_manageAppTokens">"управлять маркерами приложений"</string>
-    <string name="permdesc_manageAppTokens">"Позволяет приложениям создавать собственные маркеры и управлять ими, обходя обычное Z-упорядочивание. Не требуется для обычных приложений."</string>
-    <string name="permlab_injectEvents">"отрабатывать нажатия клавиш и кнопок управления"</string>
-    <string name="permdesc_injectEvents">"Позволяет приложению передавать собственные события ввода (например, нажатия клавиш) в другие приложения. Вредоносные приложения могут использовать эту возможность для установки полного контроля над телефоном."</string>
-    <string name="permlab_readInputState">"записывать вводимый текст и совершаемые действия"</string>
-    <string name="permdesc_readInputState">"Позволяет приложению распознавать нажатые пользователем клавиши даже при работе с другим приложением (например, при вводе пароля). Не требуется для обычных приложений."</string>
-    <string name="permlab_bindInputMethod">"связывать с методом ввода"</string>
-    <string name="permdesc_bindInputMethod">"Позволяет выполнять привязку к интерфейсу ввода верхнего уровня. Не требуется для обычных приложений."</string>
-    <string name="permlab_setOrientation">"изменять ориентацию экрана"</string>
-    <string name="permdesc_setOrientation">"Позволяет приложению изменять ориентацию экрана в любое время. Не требуется для обычных приложений."</string>
-    <string name="permlab_signalPersistentProcesses">"отправлять приложениям сигналы Linux"</string>
-    <string name="permdesc_signalPersistentProcesses">"Позволяет приложению направлять запрос на передачу предоставленного сигнала всем постоянным процессам."</string>
-    <string name="permlab_persistentActivity">"запускать постоянную работу приложения"</string>
-    <string name="permdesc_persistentActivity">"Позволяет приложению сделать свои компоненты постоянными, благодаря чему система не может использовать их для других приложений."</string>
-    <string name="permlab_deletePackages">"удалять приложения"</string>
-    <string name="permdesc_deletePackages">"Позволяет приложению удалять пакеты Android. Вредоносные приложения могут использовать эту возможность для удаления важных приложений."</string>
-    <string name="permlab_clearAppUserData">"удалять данные других приложений"</string>
-    <string name="permdesc_clearAppUserData">"Позволяет приложению удалять данные пользователя."</string>
-    <string name="permlab_deleteCacheFiles">"очищать кэши других приложений"</string>
-    <string name="permdesc_deleteCacheFiles">"Позволяет приложению удалять файлы из кэша."</string>
-    <string name="permlab_getPackageSize">"определять объем памяти приложений"</string>
-    <string name="permdesc_getPackageSize">"Позволяет приложению получать сведения о размере кода, данных и кэша."</string>
-    <string name="permlab_installPackages">"устанавливать приложения непосредственно"</string>
-    <string name="permdesc_installPackages">"Позволяет приложению устанавливать новые или обновленные пакеты Android. Вредоносные приложения могут использовать эту возможность для добавления новых приложений со сколь угодно высоким уровнем разрешения."</string>
-    <string name="permlab_clearAppCache">"удалять все данные из кэша приложений"</string>
-    <string name="permdesc_clearAppCache">"Позволяет приложению освобождать память телефона с помощью удаления файлов из каталога кэша приложений. Обычно это разрешается только системным процессам."</string>
-    <string name="permlab_readLogs">"считывать системные файлы журналов"</string>
-    <string name="permdesc_readLogs">"Позволяет приложению считывать информацию из различных журналов системы. Приложение может получить сведения о работе пользователя с телефоном, но они не должны содержать какой-либо личной или конфиденциальной информации."</string>
-    <string name="permlab_diagnostic">"считывать/записывать данные в ресурсы, принадлежащие группе диагностики"</string>
-    <string name="permdesc_diagnostic">"Позволяет приложению считывать и записывать данные в любые ресурсы, принадлежащие группе диагностики (например, файлы в каталоге /dev). Это может повлиять на стабильность и безопасность системы. Эта возможность может быть использована ТОЛЬКО производителем или оператором для диагностики аппаратного обеспечения."</string>
-    <string name="permlab_changeComponentState">"включать или отключать компоненты приложения"</string>
-    <string name="permdesc_changeComponentState">"Позволяет приложению отключать или включать компоненты другого приложения. Вредоносные приложения могут использовать это разрешение для отключения важных возможностей телефона. Это разрешение следует использовать с осторожностью, так как это может привести к несовместимости, нестабильности и неработоспособности компонентов приложения."</string>
-    <string name="permlab_setPreferredApplications">"выбирать предпочтительные приложения"</string>
-    <string name="permdesc_setPreferredApplications">"Позволяет приложению изменять предпочтительные приложения. Вредоносные приложения могут использовать эту возможность для незаметного изменения запущенных приложений и для сбора конфиденциальной информации с помощью имитации подключения существующих приложений."</string>
-    <string name="permlab_writeSettings">"изменить общие настройки системы"</string>
-    <string name="permdesc_writeSettings">"Позволяет приложению изменять данные настроек системы. Вредоносные приложения могут повредить конфигурацию системы."</string>
-    <string name="permlab_writeSecureSettings">"изменять настройки системы безопасности"</string>
-    <string name="permdesc_writeSecureSettings">"Позволяет приложению изменять данные настроек безопасности системы. Не предназначено для использования обычными приложениями."</string>
-    <string name="permlab_writeGservices">"изменить карту служб Google"</string>
-    <string name="permdesc_writeGservices">"Позволяет приложению изменять карту служб Google. Не предназначено для использования обычными приложениями."</string>
-    <string name="permlab_receiveBootCompleted">"автоматически запускать при загрузке"</string>
-    <string name="permdesc_receiveBootCompleted">"Позволяет приложению запускаться сразу же по завершении загрузки. Это может увеличить время запуска телефона и замедлить его работу в связи с постоянной работой приложения."</string>
-    <string name="permlab_broadcastSticky">"отправить несрочную рассылку"</string>
-    <string name="permdesc_broadcastSticky">"Позволяет приложению отправлять несрочные рассылки, которые остались по завершении данной рассылки. Вредоносные приложения могут замедлить работу телефона или сделать ее нестабильной с помощью использования слишком большого объема памяти."</string>
-    <string name="permlab_readContacts">"считывать данные контакта"</string>
-    <string name="permdesc_readContacts">"Позволяет приложению считывать все данные контактов (адресов), сохраненные в памяти телефона. Вредоносные приложения могут использовать эту возможность для передачи данных посторонним лицам."</string>
-    <string name="permlab_writeContacts">"перезаписывать данные контакта"</string>
-    <string name="permdesc_writeContacts">"Позволяет приложению изменять данные (адрес) контакта, сохраненные в памяти телефона. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных контакта."</string>
-    <string name="permlab_writeOwnerData">"перезаписывать данные о владельце"</string>
-    <string name="permdesc_writeOwnerData">"Позволяет приложению изменять сведения о владельце, сохраненные на телефоне. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных владельца."</string>
-    <string name="permlab_readOwnerData">"считывать данные о владельце"</string>
-    <string name="permdesc_readOwnerData">"Позволяет приложению считывать сведения о владельце, сохраненные в памяти телефона. Вредоносные приложения могут использовать эту возможность для считывания данных владельца."</string>
-    <string name="permlab_readCalendar">"считывать данные календаря"</string>
-    <string name="permdesc_readCalendar">"Позволяет приложению считывать все события календаря, сохраненные на телефоне. Вредоносные приложения могут использовать эту возможность для передачи ваших событий календаря посторонним лицам."</string>
-    <string name="permlab_writeCalendar">"записывать данные календаря"</string>
-    <string name="permdesc_writeCalendar">"Позволяет приложению изменять события календаря, сохраненные на телефоне. Вредоносные приложения могут использовать эту возможность для удаления или изменения событий календаря."</string>
-    <string name="permlab_accessMockLocation">"копировать источники мест для проверки"</string>
-    <string name="permdesc_accessMockLocation">"Создавать копии источников данных о местоположении для проверки. Вредоносные приложения могут использовать эту возможность для перезаписи места и/или состояния, возвращаемого действительными источниками данных о местоположении, такими как GPS или операторы связи."</string>
-    <string name="permlab_accessLocationExtraCommands">"получать доступ к дополнительным командам источника данных о местоположении"</string>
-    <string name="permdesc_accessLocationExtraCommands">"Получать доступ к дополнительным командам поставщика данных о местоположении. Вредоносные приложения могут использовать эту возможность для вмешательства в работу GPS или других источников места."</string>
+    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"показывать неавторизованные окна"</string>
+    <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Разрешает создание окон, предназначенных для использования внутренним пользовательским интерфейсом системы. Не предназначено для использования обычными приложениями."</string>
+    <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"показывать оповещения системного уровня"</string>
+    <string name="permdesc_systemAlertWindow" msgid="5109622689323490558">"Позволяет приложению отображать окна предупреждений системы. Вредоносные приложения смогут получить контроль над всем экраном телефона."</string>
+    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"изменять глобальную скорость анимации"</string>
+    <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Позволяет приложению в любое время изменять общую скорость анимации (ускоренная или замедленная анимация)."</string>
+    <string name="permlab_manageAppTokens" msgid="17124341698093865">"управлять маркерами приложений"</string>
+    <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Позволяет приложениям создавать собственные маркеры и управлять ими, обходя обычное Z-упорядочивание. Не требуется для обычных приложений."</string>
+    <string name="permlab_injectEvents" msgid="1378746584023586600">"отрабатывать нажатия клавиш и кнопок управления"</string>
+    <string name="permdesc_injectEvents" msgid="3946098050410874715">"Позволяет приложению передавать собственные события ввода (например, нажатия клавиш) в другие приложения. Вредоносные приложения могут использовать эту возможность для установки полного контроля над телефоном."</string>
+    <string name="permlab_readInputState" msgid="469428900041249234">"записывать вводимый текст и совершаемые действия"</string>
+    <string name="permdesc_readInputState" msgid="5132879321450325445">"Позволяет приложению распознавать нажатые пользователем клавиши даже при работе с другим приложением (например, при вводе пароля). Не требуется для обычных приложений."</string>
+    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"связывать с методом ввода"</string>
+    <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Позволяет выполнять привязку к интерфейсу ввода верхнего уровня. Не требуется для обычных приложений."</string>
+    <string name="permlab_setOrientation" msgid="3365947717163866844">"изменять ориентацию экрана"</string>
+    <string name="permdesc_setOrientation" msgid="6335814461615851863">"Позволяет приложению изменять ориентацию экрана в любое время. Не требуется для обычных приложений."</string>
+    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"отправлять приложениям сигналы Linux"</string>
+    <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Позволяет приложению направлять запрос на передачу предоставленного сигнала всем постоянным процессам."</string>
+    <string name="permlab_persistentActivity" msgid="8659652042401085862">"запускать постоянную работу приложения"</string>
+    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Позволяет приложению сделать свои компоненты постоянными, благодаря чему система не может использовать их для других приложений."</string>
+    <string name="permlab_deletePackages" msgid="3343439331576348805">"удалять приложения"</string>
+    <string name="permdesc_deletePackages" msgid="3634943677518723314">"Позволяет приложению удалять пакеты Android. Вредоносные приложения могут использовать эту возможность для удаления важных приложений."</string>
+    <string name="permlab_clearAppUserData" msgid="2192134353540277878">"удалять данные других приложений"</string>
+    <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"Позволяет приложению удалять данные пользователя."</string>
+    <string name="permlab_deleteCacheFiles" msgid="1518556602634276725">"очищать кэши других приложений"</string>
+    <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"Позволяет приложению удалять файлы из кэша."</string>
+    <string name="permlab_getPackageSize" msgid="4799785352306641460">"определять объем памяти приложений"</string>
+    <string name="permdesc_getPackageSize" msgid="5557253039670753437">"Позволяет приложению получать сведения о размере кода, данных и кэша."</string>
+    <string name="permlab_installPackages" msgid="335800214119051089">"устанавливать приложения непосредственно"</string>
+    <string name="permdesc_installPackages" msgid="526669220850066132">"Позволяет приложению устанавливать новые или обновленные пакеты Android. Вредоносные приложения могут использовать эту возможность для добавления новых приложений со сколь угодно высоким уровнем разрешения."</string>
+    <string name="permlab_clearAppCache" msgid="4747698311163766540">"удалять все данные из кэша приложений"</string>
+    <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Позволяет приложению освобождать память телефона с помощью удаления файлов из каталога кэша приложений. Обычно это разрешается только системным процессам."</string>
+    <string name="permlab_readLogs" msgid="4811921703882532070">"считывать системные файлы журналов"</string>
+    <string name="permdesc_readLogs" msgid="2257937955580475902">"Позволяет приложению считывать информацию из различных журналов системы. Приложение может получить сведения о работе пользователя с телефоном, но они не должны содержать какой-либо личной или конфиденциальной информации."</string>
+    <string name="permlab_diagnostic" msgid="8076743953908000342">"считывать/записывать данные в ресурсы, принадлежащие группе диагностики"</string>
+    <string name="permdesc_diagnostic" msgid="3121238373951637049">"Позволяет приложению считывать и записывать данные в любые ресурсы, принадлежащие группе диагностики (например, файлы в каталоге /dev). Это может повлиять на стабильность и безопасность системы. Эта возможность может быть использована ТОЛЬКО производителем или оператором для диагностики аппаратного обеспечения."</string>
+    <string name="permlab_changeComponentState" msgid="79425198834329406">"включать или отключать компоненты приложения"</string>
+    <string name="permdesc_changeComponentState" msgid="4569107043246700630">"Позволяет приложению отключать или включать компоненты другого приложения. Вредоносные приложения могут использовать это разрешение для отключения важных возможностей телефона. Это разрешение следует использовать с осторожностью, так как это может привести к несовместимости, нестабильности и неработоспособности компонентов приложения."</string>
+    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"выбирать предпочтительные приложения"</string>
+    <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Позволяет приложению изменять предпочтительные приложения. Вредоносные приложения могут использовать эту возможность для незаметного изменения запущенных приложений и для сбора конфиденциальной информации с помощью имитации подключения существующих приложений."</string>
+    <string name="permlab_writeSettings" msgid="1365523497395143704">"изменять общие настройки системы"</string>
+    <string name="permdesc_writeSettings" msgid="838789419871034696">"Позволяет приложению изменять данные настроек системы. Вредоносные приложения могут повредить конфигурацию системы."</string>
+    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"изменять настройки системы безопасности"</string>
+    <string name="permdesc_writeSecureSettings" msgid="4116616249170428132">"Позволяет приложению изменять данные настроек безопасности системы. Не предназначено для использования обычными приложениями."</string>
+    <string name="permlab_writeGservices" msgid="2149426664226152185">"изменять карту служб Google"</string>
+    <string name="permdesc_writeGservices" msgid="6602362746516676175">"Позволяет приложению изменять карту служб Google. Не предназначено для использования обычными приложениями."</string>
+    <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"автоматически запускать при загрузке"</string>
+    <string name="permdesc_receiveBootCompleted" msgid="698336728415008796">"Позволяет приложению запускаться сразу же по завершении загрузки. Это может увеличить время запуска телефона и замедлить его работу в связи с постоянной работой приложения."</string>
+    <string name="permlab_broadcastSticky" msgid="7919126372606881614">"отправить несрочную рассылку"</string>
+    <string name="permdesc_broadcastSticky" msgid="1920045289234052219">"Позволяет приложению отправлять несрочные рассылки, которые остались по завершении данной рассылки. Вредоносные приложения могут замедлить работу телефона или сделать ее нестабильной с помощью использования слишком большого объема памяти."</string>
+    <string name="permlab_readContacts" msgid="6219652189510218240">"считывать данные контакта"</string>
+    <string name="permdesc_readContacts" msgid="3371591512896545975">"Позволяет приложению считывать все данные контактов (адресов), сохраненные в памяти телефона. Вредоносные приложения могут использовать эту возможность для передачи данных посторонним лицам."</string>
+    <string name="permlab_writeContacts" msgid="644616215860933284">"перезаписывать данные контакта"</string>
+    <string name="permdesc_writeContacts" msgid="3924383579108183601">"Позволяет приложению изменять данные (адрес) контакта, сохраненные в памяти телефона. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных контакта."</string>
+    <string name="permlab_writeOwnerData" msgid="4892555913849295393">"перезаписывать данные о владельце"</string>
+    <string name="permdesc_writeOwnerData" msgid="2344055317969787124">"Позволяет приложению изменять сведения о владельце, сохраненные на телефоне. Вредоносные приложения могут использовать эту возможность для удаления или изменения данных владельца."</string>
+    <string name="permlab_readOwnerData" msgid="6668525984731523563">"считывать данные о владельце"</string>
+    <string name="permdesc_readOwnerData" msgid="3088486383128434507">"Позволяет приложению считывать сведения о владельце, сохраненные в памяти телефона. Вредоносные приложения могут использовать эту возможность для считывания данных владельца."</string>
+    <string name="permlab_readCalendar" msgid="3728905909383989370">"считывать данные календаря"</string>
+    <string name="permdesc_readCalendar" msgid="5533029139652095734">"Позволяет приложению считывать все события календаря, сохраненные на телефоне. Вредоносные приложения могут использовать эту возможность для передачи ваших событий календаря посторонним лицам."</string>
+    <string name="permlab_writeCalendar" msgid="377926474603567214">"записывать данные календаря"</string>
+    <string name="permdesc_writeCalendar" msgid="8674240662630003173">"Позволяет приложению изменять события календаря, сохраненные на телефоне. Вредоносные приложения могут использовать эту возможность для удаления или изменения событий календаря."</string>
+    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"копировать источники мест для проверки"</string>
+    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Создавать копии источников данных о местоположении для проверки. Вредоносные приложения могут использовать эту возможность для перезаписи места и/или состояния, возвращаемого действительными источниками данных о местоположении, такими как GPS или операторы связи."</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"получать доступ к дополнительным командам источника данных о местоположении"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Получать доступ к дополнительным командам поставщика данных о местоположении. Вредоносные приложения могут использовать эту возможность для вмешательства в работу GPS или других источников места."</string>
     <!-- no translation found for permlab_installLocationProvider (6578101199825193873) -->
     <skip />
     <!-- no translation found for permdesc_installLocationProvider (5449175116732002106) -->
     <skip />
-    <string name="permlab_accessFineLocation">"точное местоположение (GPS)"</string>
-    <string name="permdesc_accessFineLocation">"Получать доступ к источникам точного местоположения, таким как GPS, если возможно. Вредоносные приложения могут использовать это разрешение для определения вашего местоположения и расходовать ресурс батареи."</string>
-    <string name="permlab_accessCoarseLocation">"отслеживать местоположение по сигналам сети"</string>
-    <string name="permdesc_accessCoarseLocation">"Получать доступ к источникам данных о местоположении, таким как база данных сотовой сети, для определения приблизительного местоположения телефона, если возможно. Вредоносные приложения могут использовать эту возможность для определения вашего приблизительного местоположения."</string>
-    <string name="permlab_accessSurfaceFlinger">"получать доступ к SurfaceFlinger"</string>
-    <string name="permdesc_accessSurfaceFlinger">"Позволяет приложению использовать функции SurfaceFlinger нижнего уровня."</string>
-    <string name="permlab_readFrameBuffer">"считывать буфер фреймов"</string>
-    <string name="permdesc_readFrameBuffer">"Позволяет приложению использовать функцию чтения содержимого буфера фреймов."</string>
-    <string name="permlab_modifyAudioSettings">"изменять настройки аудио"</string>
-    <string name="permdesc_modifyAudioSettings">"Позволяет приложению изменять глобальные аудионастройки, такие как громкость и маршрутизацию."</string>
-    <string name="permlab_recordAudio">"записывать аудио"</string>
-    <string name="permdesc_recordAudio">"Позволяет приложению получать доступ к пути аудиозаписи."</string>
-    <string name="permlab_camera">"снимать фотографии"</string>
-    <string name="permdesc_camera">"Позволяет приложению делать снимки с помощью камеры. Это разрешение позволяет приложению в любое время собирать изображения, видимые через объектив камеры."</string>
-    <string name="permlab_brick">"отключать телефон"</string>
-    <string name="permdesc_brick">"Позволяет данному приложению отключить телефон навсегда. Это очень опасно."</string>
-    <string name="permlab_reboot">"принудительно перезагружать телефон"</string>
-    <string name="permdesc_reboot">"Позволяет приложению принудительно перезагружать телефон."</string>
-    <string name="permlab_mount_unmount_filesystems">"монтировать и удалять файловые системы"</string>
-    <string name="permdesc_mount_unmount_filesystems">"Позволяет приложению монтировать и удалять файловые системы съемных носителей."</string>
-    <string name="permlab_mount_format_filesystems">"форматировать внешний накопитель"</string>
-    <string name="permdesc_mount_format_filesystems">"Позволяет приложению форматировать съемный накопитель."</string>
-    <string name="permlab_vibrate">"управлять вибровызовом"</string>
-    <string name="permdesc_vibrate">"Позволяет приложению управлять виброзвонком."</string>
-    <string name="permlab_flashlight">"управлять вспышкой"</string>
-    <string name="permdesc_flashlight">"Позволяет приложению управлять вспышкой."</string>
-    <string name="permlab_hardware_test">"проверять аппаратное обеспечение"</string>
-    <string name="permdesc_hardware_test">"Позволяет приложению управлять различными периферийными устройствами для проверки аппаратного обеспечения."</string>
-    <string name="permlab_callPhone">"посылать прямые вызовы на номера телефонов"</string>
-    <string name="permdesc_callPhone">"Позволяет приложению вызывать телефонные номера без вмешательства пользователя. Вредоносные приложения могут осуществлять нежелательные вызовы. Это разрешение не позволяет приложению совершать вызовы служб экстренной помощи."</string>
-    <string name="permlab_callPrivileged">"посылать прямые вызовы на любые номера"</string>
-    <string name="permdesc_callPrivileged">"Позволяет приложению осуществлять вызов любого номера, включая номера экстренной помощи, без вмешательства пользователя. Вредоносные приложения могут осуществить нежелательные или незаконные вызовы служб экстренной помощи."</string>
-    <string name="permlab_locationUpdates">"управлять уведомлениями об обновлении местоположения"</string>
-    <string name="permdesc_locationUpdates">"Позволяет включать/отключать отправку уведомлений об обновлениях местоположения по радиосвязи. Не предназначено для использования обычными приложениями."</string>
-    <string name="permlab_checkinProperties">"получать доступ к свойствам регистрации"</string>
-    <string name="permdesc_checkinProperties">"Позволяет получать доступ для чтения/записи свойств, загруженных службой регистрации. Не предназначено для использования обычными приложениями."</string>
-    <string name="permlab_bindGadget">"выбирать виджеты"</string>
-    <string name="permdesc_bindGadget">"Позволяет приложению сообщить системе, какие приложения могут использовать какие виджеты. Это разрешение позволяет приложениям предоставлять другим приложениям доступ к личной информации. Не предназначено для использования обычными приложениями."</string>
-    <string name="permlab_modifyPhoneState">"изменять состояние телефона"</string>
-    <string name="permdesc_modifyPhoneState">"Позволяет приложению управлять функциями телефона в устройстве. Приложение, обладающее этим разрешением, может переключать сети, включать и выключать радио на телефоне и выполнять другие подобные действия без соответствующего уведомления."</string>
-    <string name="permlab_readPhoneState">"считывать состояние телефона"</string>
-    <string name="permdesc_readPhoneState">"Позволяет приложению получить доступ к функциям телефона на устройстве. Приложение с таким разрешением может определить номер телефона устройства, наличие активного вызова, номер вызываемого/вызывающего абонента и тому подобное."</string>
-    <string name="permlab_wakeLock">"предотвратить переключение телефона в спящий режим"</string>
-    <string name="permdesc_wakeLock">"Позволяет приложению запретить переход телефона в спящий режим"</string>
-    <string name="permlab_devicePower">"включать и выключать питание телефона"</string>
-    <string name="permdesc_devicePower">"Позволяет приложению включать и отключать телефон."</string>
-    <string name="permlab_factoryTest">"запустить в тестовом режиме"</string>
-    <string name="permdesc_factoryTest">"Выполнить стандартную проверку нижнего уровня, обеспечивающую полный доступ к аппаратному обеспечению телефона. Доступно, только в режиме стандартной проверки."</string>
-    <string name="permlab_setWallpaper">"устанавливать фоновый рисунок"</string>
-    <string name="permdesc_setWallpaper">"Позволяет данному приложению устанавливать системный фоновый рисунок."</string>
-    <string name="permlab_setWallpaperHints">"давать рекомендации по размеру фоновых рисунков"</string>
-    <string name="permdesc_setWallpaperHints">"Позволяет данному приложению устанавливать советы по размеру фоновых рисунков."</string>
-    <string name="permlab_masterClear">"восстанавливать параметры системы по умолчанию, установленные на заводе-изготовителе"</string>
-    <string name="permdesc_masterClear">"Позволяет приложению восстановить стандартные настройки системы, удалив все данные, конфигурацию и установленные приложения."</string>
-    <string name="permlab_setTimeZone">"настраивать часовой пояс"</string>
-    <string name="permdesc_setTimeZone">"Позволяет приложению изменять часовой пояс телефона."</string>
-    <string name="permlab_getAccounts">"обнаруживать известные аккаунты"</string>
-    <string name="permdesc_getAccounts">"Позволяет приложению получать список аккаунтов, известных телефону."</string>
-    <string name="permlab_accessNetworkState">"просматривать состояние сети"</string>
-    <string name="permdesc_accessNetworkState">"Позволяет приложению просматривать состояние всех сетей."</string>
-    <string name="permlab_createNetworkSockets">"неограниченный доступ в Интернет"</string>
-    <string name="permdesc_createNetworkSockets">"Позволяет приложению создавать сетевые сокеты."</string>
-    <string name="permlab_writeApnSettings">"записывать настройки имени точки доступа"</string>
-    <string name="permdesc_writeApnSettings">"Позволяет приложению изменять настройки APN, такие как прокси-сервер и порт любого APN."</string>
-    <string name="permlab_changeNetworkState">"изменять настройки подключения к сети"</string>
-    <string name="permdesc_changeNetworkState">"Позволяет приложению изменять состояние подключаемости сети."</string>
-    <string name="permlab_changeBackgroundDataSetting">"изменить настройку использования данных в фоновом режиме"</string>
-    <string name="permdesc_changeBackgroundDataSetting">"Позволяет приложению изменять настройку использования данных в фоновом режиме."</string>
-    <string name="permlab_accessWifiState">"просматривать состояние Wi-Fi"</string>
-    <string name="permdesc_accessWifiState">"Позволяет приложению просматривать сведения о состоянии Wi-Fi."</string>
-    <string name="permlab_changeWifiState">"изменять состояние Wi-Fi"</string>
-    <string name="permdesc_changeWifiState">"Позволяет приложению подключаться к точкам доступа Wi-Fi и отключаться от них, а также вносить изменения в конфигурацию сетей Wi-Fi."</string>
+    <string name="permlab_accessFineLocation" msgid="8116127007541369477">"точное местоположение (GPS)"</string>
+    <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Получать доступ к источникам точного местоположения, таким как GPS, если возможно. Вредоносные приложения могут использовать это разрешение для определения вашего местоположения и расходовать ресурс батареи."</string>
+    <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"отслеживать местоположение по сигналам сети"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"Получать доступ к источникам данных о местоположении, таким как база данных сотовой сети, для определения приблизительного местоположения телефона, если возможно. Вредоносные приложения могут использовать эту возможность для определения вашего приблизительного местоположения."</string>
+    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"получать доступ к SurfaceFlinger"</string>
+    <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Позволяет приложению использовать функции SurfaceFlinger нижнего уровня."</string>
+    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"считывать буфер фреймов"</string>
+    <string name="permdesc_readFrameBuffer" msgid="5777679658669057819">"Позволяет приложению использовать функцию чтения содержимого буфера фреймов."</string>
+    <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"изменять настройки аудио"</string>
+    <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Позволяет приложению изменять глобальные аудионастройки, такие как громкость и маршрутизацию."</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"записывать аудио"</string>
+    <string name="permdesc_recordAudio" msgid="6493228261176552356">"Позволяет приложению получать доступ к пути аудиозаписи."</string>
+    <string name="permlab_camera" msgid="8059288807274039014">"снимать фотографии"</string>
+    <string name="permdesc_camera" msgid="9013476258810982546">"Позволяет приложению делать снимки с помощью камеры. Это разрешение позволяет приложению в любое время собирать изображения, видимые через объектив камеры."</string>
+    <string name="permlab_brick" msgid="8337817093326370537">"отключать телефон"</string>
+    <string name="permdesc_brick" msgid="5569526552607599221">"Позволяет данному приложению отключить телефон навсегда. Это очень опасно."</string>
+    <string name="permlab_reboot" msgid="2898560872462638242">"принудительно перезагружать телефон"</string>
+    <string name="permdesc_reboot" msgid="7914933292815491782">"Позволяет приложению принудительно перезагружать телефон."</string>
+    <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"монтировать и удалять файловые системы"</string>
+    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Позволяет приложению монтировать и удалять файловые системы съемных носителей."</string>
+    <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"форматировать внешний накопитель"</string>
+    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Позволяет приложению форматировать съемный накопитель."</string>
+    <string name="permlab_vibrate" msgid="7768356019980849603">"управлять вибровызовом"</string>
+    <string name="permdesc_vibrate" msgid="2886677177257789187">"Позволяет приложению управлять виброзвонком."</string>
+    <string name="permlab_flashlight" msgid="2155920810121984215">"управлять вспышкой"</string>
+    <string name="permdesc_flashlight" msgid="6433045942283802309">"Позволяет приложению управлять вспышкой."</string>
+    <string name="permlab_hardware_test" msgid="4148290860400659146">"проверять аппаратное обеспечение"</string>
+    <string name="permdesc_hardware_test" msgid="3668894686500081699">"Позволяет приложению управлять различными периферийными устройствами для проверки аппаратного обеспечения."</string>
+    <string name="permlab_callPhone" msgid="3925836347681847954">"посылать прямые вызовы на номера телефонов"</string>
+    <string name="permdesc_callPhone" msgid="3369867353692722456">"Позволяет приложению вызывать телефонные номера без вмешательства пользователя. Вредоносные приложения могут осуществлять нежелательные вызовы. Это разрешение не позволяет приложению совершать вызовы служб экстренной помощи."</string>
+    <string name="permlab_callPrivileged" msgid="4198349211108497879">"посылать прямые вызовы на любые номера"</string>
+    <string name="permdesc_callPrivileged" msgid="244405067160028452">"Позволяет приложению осуществлять вызов любого номера, включая номера экстренной помощи, без вмешательства пользователя. Вредоносные приложения могут осуществить нежелательные или незаконные вызовы служб экстренной помощи."</string>
+    <string name="permlab_locationUpdates" msgid="7785408253364335740">"управлять уведомлениями об обновлении местоположения"</string>
+    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Позволяет включать/отключать отправку уведомлений об обновлениях местоположения по радиосвязи. Не предназначено для использования обычными приложениями."</string>
+    <string name="permlab_checkinProperties" msgid="7855259461268734914">"получать доступ к свойствам регистрации"</string>
+    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Позволяет получать доступ для чтения/записи свойств, загруженных службой регистрации. Не предназначено для использования обычными приложениями."</string>
+    <string name="permlab_bindGadget" msgid="776905339015863471">"выбирать виджеты"</string>
+    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Позволяет приложению сообщить системе, какие приложения могут использовать какие виджеты. Это разрешение позволяет приложениям предоставлять другим приложениям доступ к личной информации. Не предназначено для использования обычными приложениями."</string>
+    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"изменять состояние телефона"</string>
+    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Позволяет приложению управлять функциями телефона в устройстве. Приложение, обладающее этим разрешением, может переключать сети, включать и выключать радио на телефоне и выполнять другие подобные действия без соответствующего уведомления."</string>
+    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
+    <skip />
+    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
+    <skip />
+    <string name="permlab_wakeLock" msgid="573480187941496130">"предотвратить переключение телефона в спящий режим"</string>
+    <string name="permdesc_wakeLock" msgid="7584036471227467099">"Позволяет приложению запретить переход телефона в спящий режим"</string>
+    <string name="permlab_devicePower" msgid="4928622470980943206">"включать и выключать питание телефона"</string>
+    <string name="permdesc_devicePower" msgid="4577331933252444818">"Позволяет приложению включать и отключать телефон."</string>
+    <string name="permlab_factoryTest" msgid="3715225492696416187">"запустить в тестовом режиме"</string>
+    <string name="permdesc_factoryTest" msgid="8136644990319244802">"Выполнить стандартную проверку нижнего уровня, обеспечивающую полный доступ к аппаратному обеспечению телефона. Доступно, только в режиме стандартной проверки."</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"устанавливать фоновый рисунок"</string>
+    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Позволяет данному приложению устанавливать системный фоновый рисунок."</string>
+    <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"давать рекомендации по размеру фоновых рисунков"</string>
+    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Позволяет данному приложению устанавливать советы по размеру фоновых рисунков."</string>
+    <string name="permlab_masterClear" msgid="2315750423139697397">"восстанавливать параметры системы по умолчанию, установленные на заводе-изготовителе"</string>
+    <string name="permdesc_masterClear" msgid="5033465107545174514">"Позволяет приложению восстановить стандартные настройки системы, удалив все данные, конфигурацию и установленные приложения."</string>
+    <string name="permlab_setTimeZone" msgid="2945079801013077340">"настраивать часовой пояс"</string>
+    <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Позволяет приложению изменять часовой пояс телефона."</string>
+    <string name="permlab_getAccounts" msgid="4549918644233460103">"обнаруживать известные аккаунты"</string>
+    <string name="permdesc_getAccounts" msgid="6839262446413155394">"Позволяет приложению получать список аккаунтов, известных телефону."</string>
+    <string name="permlab_accessNetworkState" msgid="6865575199464405769">"просматривать состояние сети"</string>
+    <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Позволяет приложению просматривать состояние всех сетей."</string>
+    <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"неограниченный доступ в Интернет"</string>
+    <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Позволяет приложению создавать сетевые сокеты."</string>
+    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"записывать настройки имени точки доступа"</string>
+    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Позволяет приложению изменять настройки APN, такие как прокси-сервер и порт любого APN."</string>
+    <string name="permlab_changeNetworkState" msgid="958884291454327309">"изменять настройки подключения к сети"</string>
+    <string name="permdesc_changeNetworkState" msgid="6278115726355634395">"Позволяет приложению изменять состояние подключаемости сети."</string>
+    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"изменять настройки использования данных в фоновом режиме"</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Позволяет приложению изменять настройку использования данных в фоновом режиме."</string>
+    <string name="permlab_accessWifiState" msgid="8100926650211034400">"просматривать состояние Wi-Fi"</string>
+    <string name="permdesc_accessWifiState" msgid="485796529139236346">"Позволяет приложению просматривать сведения о состоянии Wi-Fi."</string>
+    <string name="permlab_changeWifiState" msgid="7280632711057112137">"изменять состояние Wi-Fi"</string>
+    <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Позволяет приложению подключаться к точкам доступа Wi-Fi и отключаться от них, а также вносить изменения в конфигурацию сетей Wi-Fi."</string>
     <!-- no translation found for permlab_changeWifiMulticastState (1368253871483254784) -->
     <skip />
     <!-- no translation found for permdesc_changeWifiMulticastState (8199464507656067553) -->
     <skip />
-    <string name="permlab_bluetoothAdmin">"управление Bluetooth"</string>
-    <string name="permdesc_bluetoothAdmin">"Позволяет приложению настраивать локальный телефон Bluetooth, обнаруживать и выполнять сопряжение удаленных устройств."</string>
-    <string name="permlab_bluetooth">"создавать подключения Bluetooth"</string>
-    <string name="permdesc_bluetooth">"Позволяет приложению просматривать конфигурацию локального телефона Bluetooth, создавать подключения с сопряженными устройствами."</string>
-    <string name="permlab_disableKeyguard">"отключать блокировку клавиатуры"</string>
-    <string name="permdesc_disableKeyguard">"Позволяет приложению отключить блокировку клавиатуры и другие функции защиты паролем. Примером допустимого использования этой функции является отключение блокировки клавиатуры при получении входящего вызова и включение блокировки после завершения разговора."</string>
-    <string name="permlab_readSyncSettings">"считывать настройки синхронизации"</string>
-    <string name="permdesc_readSyncSettings">"Позволяет приложению считывать настройки синхронизации, такие как включение синхронизации Контактов."</string>
-    <string name="permlab_writeSyncSettings">"записывать настройки синхронизации"</string>
-    <string name="permdesc_writeSyncSettings">"Позволяет приложению изменять настройки синхронизации, например включение синхронизации Контактов."</string>
-    <string name="permlab_readSyncStats">"считывать статистику синхронизации"</string>
-    <string name="permdesc_readSyncStats">"Позволяет приложению считывать статистику синхронизации, например историю произведенных синхронизаций."</string>
-    <string name="permlab_subscribedFeedsRead">"считывать каналы, на которые есть подписка"</string>
-    <string name="permdesc_subscribedFeedsRead">"Позволяет приложению получить сведения о последних синхронизированных каналах."</string>
-    <string name="permlab_subscribedFeedsWrite">"изменять каналы, на которые есть подписка"</string>
-    <string name="permdesc_subscribedFeedsWrite">"Позволяет приложению изменять синхронизированные каналы. Вредоносные приложения могут использовать эту возможность для изменения синхронизированных каналов."</string>
-    <string name="permlab_readDictionary">"выполнять чтение из пользовательского словаря"</string>
-    <string name="permdesc_readDictionary">"Позволяет приложению считывать любые слова, имена и фразы личного пользования, которые могут храниться в пользовательском словаре."</string>
-    <string name="permlab_writeDictionary">"записывать в пользовательский словарь"</string>
-    <string name="permdesc_writeDictionary">"Позволяет приложению записывать новые слова в пользовательский словарь."</string>
+    <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"управление Bluetooth"</string>
+    <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Позволяет приложению настраивать локальный телефон Bluetooth, обнаруживать и выполнять сопряжение удаленных устройств."</string>
+    <string name="permlab_bluetooth" msgid="8361038707857018732">"создавать подключения Bluetooth"</string>
+    <string name="permdesc_bluetooth" msgid="762515380679392945">"Позволяет приложению просматривать конфигурацию локального телефона Bluetooth, создавать подключения с сопряженными устройствами."</string>
+    <string name="permlab_disableKeyguard" msgid="4977406164311535092">"отключать блокировку клавиатуры"</string>
+    <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Позволяет приложению отключить блокировку клавиатуры и другие функции защиты паролем. Примером допустимого использования этой функции является отключение блокировки клавиатуры при получении входящего вызова и включение блокировки после завершения разговора."</string>
+    <string name="permlab_readSyncSettings" msgid="6201810008230503052">"считывать настройки синхронизации"</string>
+    <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Позволяет приложению считывать настройки синхронизации, такие как включение синхронизации Контактов."</string>
+    <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"записывать настройки синхронизации"</string>
+    <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Позволяет приложению изменять настройки синхронизации, например включение синхронизации Контактов."</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"считывать статистику синхронизации"</string>
+    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Позволяет приложению считывать статистику синхронизации, например историю произведенных синхронизаций."</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"считывать каналы, на которые есть подписка"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Позволяет приложению получить сведения о последних синхронизированных каналах."</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"изменять каналы, на которые есть подписка"</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Позволяет приложению изменять синхронизированные каналы. Вредоносные приложения могут использовать эту возможность для изменения синхронизированных каналов."</string>
+    <string name="permlab_readDictionary" msgid="432535716804748781">"выполнять чтение из пользовательского словаря"</string>
+    <string name="permdesc_readDictionary" msgid="1082972603576360690">"Позволяет приложению считывать любые слова, имена и фразы личного пользования, которые могут храниться в пользовательском словаре."</string>
+    <string name="permlab_writeDictionary" msgid="6703109511836343341">"записывать в пользовательский словарь"</string>
+    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Позволяет приложению записывать новые слова в пользовательский словарь."</string>
     <!-- no translation found for permlab_sdcardWrite (8079403759001777291) -->
     <skip />
     <!-- no translation found for permdesc_sdcardWrite (6643963204976471878) -->
     <skip />
   <string-array name="phoneTypes">
-    <item>"Домашний"</item>
-    <item>"Мобильный"</item>
-    <item>"Рабочий"</item>
-    <item>"Рабочий факс"</item>
-    <item>"Домашний факс"</item>
-    <item>"Пейджер"</item>
-    <item>"Другой"</item>
-    <item>"Особый"</item>
+    <item msgid="8901098336658710359">"Домашний"</item>
+    <item msgid="869923650527136615">"Мобильный"</item>
+    <item msgid="7897544654242874543">"Рабочий"</item>
+    <item msgid="1103601433382158155">"Рабочий факс"</item>
+    <item msgid="1735177144948329370">"Домашний факс"</item>
+    <item msgid="603878674477207394">"Пейджер"</item>
+    <item msgid="1650824275177931637">"Другой"</item>
+    <item msgid="9192514806975898961">"Особый"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item>"Домашний"</item>
-    <item>"Рабочий"</item>
-    <item>"Другой"</item>
-    <item>"Особый"</item>
+    <item msgid="8073994352956129127">"Домашний"</item>
+    <item msgid="7084237356602625604">"Рабочий"</item>
+    <item msgid="1112044410659011023">"Другой"</item>
+    <item msgid="2374913952870110618">"Особый"</item>
   </string-array>
-    <string name="mobileEmailTypeName">"Мобильный"</string>
+    <string name="mobileEmailTypeName" msgid="2858957283716687707">"Мобильный"</string>
   <string-array name="postalAddressTypes">
-    <item>"Домашний"</item>
-    <item>"Рабочий"</item>
-    <item>"Другой"</item>
-    <item>"Особый"</item>
+    <item msgid="6880257626740047286">"Домашний"</item>
+    <item msgid="5629153956045109251">"Рабочий"</item>
+    <item msgid="4966604264500343469">"Другой"</item>
+    <item msgid="4932682847595299369">"Особый"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item>"Домашний"</item>
-    <item>"Рабочий"</item>
-    <item>"Другое"</item>
-    <item>"Особый"</item>
+    <item msgid="1738585194601476694">"Домашний"</item>
+    <item msgid="1359644565647383708">"Рабочий"</item>
+    <item msgid="7868549401053615677">"Другое"</item>
+    <item msgid="3145118944639869809">"Особый"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item>"Рабочий"</item>
-    <item>"Другой"</item>
-    <item>"Особый"</item>
+    <item msgid="7546335612189115615">"Рабочий"</item>
+    <item msgid="4378074129049520373">"Другой"</item>
+    <item msgid="3455047468583965104">"Особый"</item>
   </string-array>
   <string-array name="imProtocols">
-    <item>"AIM"</item>
-    <item>"Windows Live"</item>
-    <item>"Yahoo"</item>
-    <item>"Skype"</item>
-    <item>"QQ"</item>
-    <item>"Google Talk"</item>
-    <item>"ICQ"</item>
-    <item>"Jabber"</item>
+    <item msgid="8595261363518459565">"AIM"</item>
+    <item msgid="7390473628275490700">"Windows Live"</item>
+    <item msgid="7882877134931458217">"Yahoo"</item>
+    <item msgid="5035376313200585242">"Skype"</item>
+    <item msgid="7532363178459444943">"QQ"</item>
+    <item msgid="3713441034299660749">"Google Talk"</item>
+    <item msgid="2506857312718630823">"ICQ"</item>
+    <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="keyguard_password_enter_pin_code">"Введите PIN-код"</string>
-    <string name="keyguard_password_wrong_pin_code">"Неверный PIN-код!"</string>
-    <string name="keyguard_label_text">"Для разблокировки нажмите \"Меню\", а затем 0."</string>
-    <string name="emergency_call_dialog_number_for_display">"Номер экстренной службы"</string>
-    <string name="lockscreen_carrier_default">"(Сеть не найдена)"</string>
-    <string name="lockscreen_screen_locked">"Экран заблокирован."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled">"Нажмите \"Меню\", чтобы разблокировать экран или вызвать службу экстренной помощи."</string>
-    <string name="lockscreen_instructions_when_pattern_disabled">"Для разблокировки нажмите \"Меню\"."</string>
-    <string name="lockscreen_pattern_instructions">"Для разблокировки введите графический ключ"</string>
-    <string name="lockscreen_emergency_call">"Вызов службы экстренной помощи"</string>
-    <string name="lockscreen_pattern_correct">"Правильно!"</string>
-    <string name="lockscreen_pattern_wrong">"Повторите попытку"</string>
-    <string name="lockscreen_plugged_in">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Введите PIN-код"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Неверный PIN-код!"</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Для разблокировки нажмите \"Меню\", а затем 0."</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Экстренная служба"</string>
+    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Сеть не найдена)"</string>
+    <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Экран заблокирован."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Нажмите \"Меню\", чтобы разблокировать экран или вызвать службу экстренной помощи."</string>
+    <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Для разблокировки нажмите \"Меню\"."</string>
+    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Для разблокировки введите графический ключ"</string>
+    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Вызов службы экстренной помощи"</string>
+    <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правильно!"</string>
+    <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Повторите попытку"</string>
+    <string name="lockscreen_plugged_in" msgid="613343852842944435">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <!-- no translation found for lockscreen_charged (4938930459620989972) -->
     <skip />
-    <string name="lockscreen_low_battery">"Подключите зарядное устройство."</string>
-    <string name="lockscreen_missing_sim_message_short">"Нет SIM-карты."</string>
-    <string name="lockscreen_missing_sim_message">"SIM-карта не установлена."</string>
-    <string name="lockscreen_missing_sim_instructions">"Вставьте SIM-карту."</string>
-    <string name="lockscreen_network_locked_message">"Сеть заблокирована"</string>
-    <string name="lockscreen_sim_puk_locked_message">"SIM-карта заблокирована с помощью кода PUK."</string>
-    <string name="lockscreen_sim_puk_locked_instructions">"См. руководство пользователя или свяжитесь со службой поддержки."</string>
-    <string name="lockscreen_sim_locked_message">"SIM-карта заблокирована."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message">"Разблокировка SIM-карты…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. После <xliff:g id="NUMBER_1">%d</xliff:g> неудачных попыток вам будет предложено разблокировать телефон с помощью учетных данных Google.\n "\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown">"Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> с."</string>
-    <string name="lockscreen_forgot_pattern_button_text">"Забыли графический ключ?"</string>
-    <string name="lockscreen_glogin_too_many_attempts">"Слишком много попыток ввода графического ключа!"</string>
-    <string name="lockscreen_glogin_instructions">"Для разблокировки войдите с помощью своего аккаунта Google"</string>
-    <string name="lockscreen_glogin_username_hint">"Имя пользователя (электронная почта)"</string>
-    <string name="lockscreen_glogin_password_hint">"Пароль"</string>
-    <string name="lockscreen_glogin_submit_button">"Вход"</string>
-    <string name="lockscreen_glogin_invalid_input">"Неверное имя пользователя или пароль."</string>
-    <string name="hour_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
-    <string name="hour_cap_ampm">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Подключите зарядное устройство."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Нет SIM-карты."</string>
+    <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"SIM-карта не установлена."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Вставьте SIM-карту."</string>
+    <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Сеть заблокирована"</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-карта заблокирована с помощью кода PUK."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"См. руководство пользователя или свяжитесь со службой поддержки."</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-карта заблокирована."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Разблокировка SIM-карты…"</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Повторите попытку через <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. После <xliff:g id="NUMBER_1">%d</xliff:g> неудачных попыток вам будет предложено разблокировать телефон с помощью учетных данных Google.\n "\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> с."</string>
+    <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Забыли графический ключ?"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Слишком много попыток ввода графического ключа!"</string>
+    <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Для разблокировки войдите с помощью своего аккаунта Google"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Имя пользователя (электронная почта)"</string>
+    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Пароль"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Вход"</string>
+    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Неверное имя пользователя или пароль."</string>
+    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
     <skip />
-    <string name="status_bar_no_notifications_title">"Нет уведомлений"</string>
-    <string name="status_bar_ongoing_events_title">"Текущие"</string>
-    <string name="status_bar_latest_events_title">"Уведомления"</string>
-    <string name="battery_status_text_percent_format">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="battery_status_charging">"Идет зарядка..."</string>
-    <string name="battery_low_title">"Подключите зарядное устройство"</string>
-    <string name="battery_low_subtitle">"Батарея разряжена:"</string>
-    <string name="battery_low_percent_format">"осталось менее <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Нет уведомлений"</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Текущие"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Уведомления"</string>
+    <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="battery_status_charging" msgid="756617993998772213">"Идет зарядка..."</string>
+    <string name="battery_low_title" msgid="7923774589611311406">"Подключите зарядное устройство"</string>
+    <string name="battery_low_subtitle" msgid="7388781709819722764">"Батарея разряжена:"</string>
+    <string name="battery_low_percent_format" msgid="6564958083485073855">"осталось менее <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
     <!-- no translation found for battery_low_why (7655196144309694753) -->
     <skip />
-    <string name="factorytest_failed">"Не удалось провести стандартный тест"</string>
-    <string name="factorytest_not_system">"Действие FACTORY_TEST поддерживается только для пакетов, установленных в /system/app."</string>
-    <string name="factorytest_no_action">"Пакет, обеспечивающий действие FACTORY_TEST, не найден."</string>
-    <string name="factorytest_reboot">"Перезагрузка"</string>
-    <string name="js_dialog_title">"На странице по адресу \"<xliff:g id="TITLE">%s</xliff:g>\" сказано:"</string>
-    <string name="js_dialog_title_default">"JavaScript"</string>
-    <string name="js_dialog_before_unload">"Перейти с этой страницы?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Нажмите \"ОК\", чтобы продолжить, или \"Отмена\", чтобы остаться на текущей странице."</string>
-    <string name="save_password_label">"Подтвердите"</string>
+    <string name="factorytest_failed" msgid="5410270329114212041">"Не удалось провести стандартный тест"</string>
+    <string name="factorytest_not_system" msgid="4435201656767276723">"Действие FACTORY_TEST поддерживается только для пакетов, установленных в /system/app."</string>
+    <string name="factorytest_no_action" msgid="872991874799998561">"Пакет, обеспечивающий действие FACTORY_TEST, не найден."</string>
+    <string name="factorytest_reboot" msgid="6320168203050791643">"Перезагрузка"</string>
+    <string name="js_dialog_title" msgid="8143918455087008109">"На странице по адресу \"<xliff:g id="TITLE">%s</xliff:g>\" сказано:"</string>
+    <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
+    <string name="js_dialog_before_unload" msgid="1901675448179653089">"Перейти с этой страницы?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Нажмите \"ОК\", чтобы продолжить, или \"Отмена\", чтобы остаться на текущей странице."</string>
+    <string name="save_password_label" msgid="6860261758665825069">"Подтвердите"</string>
     <!-- no translation found for permlab_readHistoryBookmarks (1284843728203412135) -->
     <skip />
     <!-- no translation found for permdesc_readHistoryBookmarks (4981489815467617191) -->
@@ -519,243 +521,243 @@
     <skip />
     <!-- no translation found for permdesc_writeHistoryBookmarks (945571990357114950) -->
     <skip />
-    <string name="save_password_message">"Вы хотите, чтобы браузер запомнил этот пароль?"</string>
-    <string name="save_password_notnow">"Не сейчас"</string>
-    <string name="save_password_remember">"Запомнить"</string>
-    <string name="save_password_never">"Никогда"</string>
-    <string name="open_permission_deny">"У вас нет разрешения на открытие этой страницы."</string>
-    <string name="text_copied">"Текст скопирован в буфер обмена."</string>
-    <string name="more_item_label">"Дополнительно"</string>
-    <string name="prepend_shortcut_label">"Меню+"</string>
-    <string name="menu_space_shortcut_label">"пробел"</string>
-    <string name="menu_enter_shortcut_label">"ввод"</string>
-    <string name="menu_delete_shortcut_label">"удалить"</string>
-    <string name="search_go">"Поиск"</string>
-    <string name="oneMonthDurationPast">"1 месяц назад"</string>
-    <string name="beforeOneMonthDurationPast">"Более месяца назад"</string>
+    <string name="save_password_message" msgid="767344687139195790">"Вы хотите, чтобы браузер запомнил этот пароль?"</string>
+    <string name="save_password_notnow" msgid="6389675316706699758">"Не сейчас"</string>
+    <string name="save_password_remember" msgid="6491879678996749466">"Запомнить"</string>
+    <string name="save_password_never" msgid="8274330296785855105">"Никогда"</string>
+    <string name="open_permission_deny" msgid="5661861460947222274">"У вас нет разрешения на открытие этой страницы."</string>
+    <string name="text_copied" msgid="4985729524670131385">"Текст скопирован в буфер обмена."</string>
+    <string name="more_item_label" msgid="4650918923083320495">"Дополнительно"</string>
+    <string name="prepend_shortcut_label" msgid="2572214461676015642">"Меню+"</string>
+    <string name="menu_space_shortcut_label" msgid="2410328639272162537">"пробел"</string>
+    <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"ввод"</string>
+    <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"удалить"</string>
+    <string name="search_go" msgid="8298016669822141719">"Поиск"</string>
+    <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 месяц назад"</string>
+    <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Более месяца назад"</string>
   <plurals name="num_seconds_ago">
-    <item quantity="one">"1 секунду назад"</item>
-    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> с. назад"</item>
+    <item quantity="one" msgid="4869870056547896011">"1 секунду назад"</item>
+    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> с. назад"</item>
   </plurals>
   <plurals name="num_minutes_ago">
-    <item quantity="one">"1 минуту назад"</item>
-    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> мин. назад"</item>
+    <item quantity="one" msgid="3306787433088810191">"1 минуту назад"</item>
+    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> мин. назад"</item>
   </plurals>
   <plurals name="num_hours_ago">
-    <item quantity="one">"1 час назад"</item>
-    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> ч. назад"</item>
+    <item quantity="one" msgid="9150797944610821849">"1 час назад"</item>
+    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> ч. назад"</item>
   </plurals>
   <plurals name="num_days_ago">
-    <item quantity="one">"вчера"</item>
-    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> дн. назад"</item>
+    <item quantity="one" msgid="861358534398115820">"вчера"</item>
+    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> дн. назад"</item>
   </plurals>
   <plurals name="in_num_seconds">
-    <item quantity="one">"через 1 секунду"</item>
-    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> с."</item>
+    <item quantity="one" msgid="2729745560954905102">"через 1 секунду"</item>
+    <item quantity="other" msgid="1241926116443974687">"через <xliff:g id="COUNT">%d</xliff:g> с."</item>
   </plurals>
   <plurals name="in_num_minutes">
-    <item quantity="one">"через 1 минуту"</item>
-    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> мин."</item>
+    <item quantity="one" msgid="8793095251325200395">"через 1 минуту"</item>
+    <item quantity="other" msgid="3330713936399448749">"через <xliff:g id="COUNT">%d</xliff:g> мин."</item>
   </plurals>
   <plurals name="in_num_hours">
-    <item quantity="one">"через 1 час"</item>
-    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> ч."</item>
+    <item quantity="one" msgid="7164353342477769999">"через 1 час"</item>
+    <item quantity="other" msgid="547290677353727389">"через <xliff:g id="COUNT">%d</xliff:g> ч."</item>
   </plurals>
   <plurals name="in_num_days">
-    <item quantity="one">"завтра"</item>
-    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> дн."</item>
+    <item quantity="one" msgid="5413088743009839518">"завтра"</item>
+    <item quantity="other" msgid="5109449375100953247">"через <xliff:g id="COUNT">%d</xliff:g> дн."</item>
   </plurals>
   <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one">"1 сек. назад"</item>
-    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> сек. назад"</item>
+    <item quantity="one" msgid="1849036840200069118">"1 сек. назад"</item>
+    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> сек. назад"</item>
   </plurals>
   <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one">"1 мин. назад"</item>
-    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> мин. назад"</item>
+    <item quantity="one" msgid="6361490147113871545">"1 мин. назад"</item>
+    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> мин. назад"</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
-    <item quantity="one">"1 час назад"</item>
-    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> ч. назад"</item>
+    <item quantity="one" msgid="4796212039724722116">"1 час назад"</item>
+    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> ч. назад"</item>
   </plurals>
   <plurals name="abbrev_num_days_ago">
-    <item quantity="one">"вчера"</item>
-    <item quantity="other">"<xliff:g id="COUNT">%d</xliff:g> дн. назад"</item>
+    <item quantity="one" msgid="8463161711492680309">"вчера"</item>
+    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> дн. назад"</item>
   </plurals>
   <plurals name="abbrev_in_num_seconds">
-    <item quantity="one">"через 1 с."</item>
-    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> с."</item>
+    <item quantity="one" msgid="5842225370795066299">"через 1 с."</item>
+    <item quantity="other" msgid="5495880108825805108">"через <xliff:g id="COUNT">%d</xliff:g> с."</item>
   </plurals>
   <plurals name="abbrev_in_num_minutes">
-    <item quantity="one">"через 1 мин."</item>
-    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> мин."</item>
+    <item quantity="one" msgid="562786149928284878">"через 1 мин."</item>
+    <item quantity="other" msgid="4216113292706568726">"через <xliff:g id="COUNT">%d</xliff:g> мин."</item>
   </plurals>
   <plurals name="abbrev_in_num_hours">
-    <item quantity="one">"через 1 час"</item>
-    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> ч."</item>
+    <item quantity="one" msgid="3274708118124045246">"через 1 час"</item>
+    <item quantity="other" msgid="3705373766798013406">"через <xliff:g id="COUNT">%d</xliff:g> ч."</item>
   </plurals>
   <plurals name="abbrev_in_num_days">
-    <item quantity="one">"завтра"</item>
-    <item quantity="other">"через <xliff:g id="COUNT">%d</xliff:g> дн."</item>
+    <item quantity="one" msgid="2178576254385739855">"завтра"</item>
+    <item quantity="other" msgid="2973062968038355991">"через <xliff:g id="COUNT">%d</xliff:g> дн."</item>
   </plurals>
-    <string name="preposition_for_date">"в %s"</string>
-    <string name="preposition_for_time">"в %s"</string>
-    <string name="preposition_for_year">"через %s"</string>
-    <string name="day">"дн."</string>
-    <string name="days">"дн."</string>
-    <string name="hour">"ч."</string>
-    <string name="hours">"ч."</string>
-    <string name="minute">"мин."</string>
-    <string name="minutes">"мин."</string>
-    <string name="second">"с."</string>
-    <string name="seconds">"с."</string>
-    <string name="week">"нед."</string>
-    <string name="weeks">"нед."</string>
-    <string name="year">"г."</string>
-    <string name="years">"г."</string>
-    <string name="every_weekday">"Каждый рабочий день (пн-пт)"</string>
-    <string name="daily">"Ежедневно"</string>
-    <string name="weekly">"Еженедельно, <xliff:g id="DAY">%s</xliff:g>"</string>
-    <string name="monthly">"Ежемесячно"</string>
-    <string name="yearly">"Ежегодно"</string>
-    <string name="VideoView_error_title">"Не удалось воспроизвести видео"</string>
-    <string name="VideoView_error_text_invalid_progressive_playback">"Это видео не подходит для потокового воспроизведения на данном устройстве."</string>
-    <string name="VideoView_error_text_unknown">"Невозможно воспроизвести видео."</string>
-    <string name="VideoView_error_button">"ОК"</string>
-    <string name="relative_time">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="noon">"полдень"</string>
-    <string name="Noon">"Полдень"</string>
-    <string name="midnight">"полночь"</string>
-    <string name="Midnight">"Полночь"</string>
-    <string name="elapsed_time_short_format_mm_ss">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
-    <string name="elapsed_time_short_format_h_mm_ss">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll">"Выбрать все"</string>
-    <string name="selectText">"Выбрать текст"</string>
-    <string name="stopSelectingText">"Остановить выделение текста"</string>
-    <string name="cut">"Вырезать"</string>
-    <string name="cutAll">"Вырезать все"</string>
-    <string name="copy">"Копировать"</string>
-    <string name="copyAll">"Копировать все"</string>
-    <string name="paste">"Вставить"</string>
-    <string name="copyUrl">"Копировать URL"</string>
-    <string name="inputMethod">"Способ ввода"</string>
-    <string name="addToDictionary">"Добавить \"%s\" в словарь"</string>
-    <string name="editTextMenuTitle">"Изменить текст"</string>
-    <string name="low_internal_storage_view_title">"Недостаточно места"</string>
-    <string name="low_internal_storage_view_text">"Заканчивается место в памяти телефона."</string>
-    <string name="ok">"ОК"</string>
-    <string name="cancel">"Отмена"</string>
-    <string name="yes">"ОК"</string>
-    <string name="no">"Отмена"</string>
-    <string name="dialog_alert_title">"Внимание"</string>
-    <string name="capital_on">"ВКЛ"</string>
-    <string name="capital_off">"ВЫКЛ"</string>
-    <string name="whichApplication">"Завершить действие с помощью"</string>
-    <string name="alwaysUse">"Использовать по умолчанию для этого действия."</string>
-    <string name="clearDefaultHintMsg">"Удалить настройки по умолчанию: главный экран &gt; \"Настройки\" &gt; \"Приложения\" &gt; \"Управление приложениями\"."</string>
-    <string name="chooseActivity">"Выберите действие"</string>
-    <string name="noApplications">"Это действие не может выполнять ни одно приложение."</string>
-    <string name="aerr_title">"Ошибка приложения!"</string>
-    <string name="aerr_application">"Произошла неожиданная остановка приложения <xliff:g id="APPLICATION">%1$s</xliff:g> (процесс <xliff:g id="PROCESS">%2$s</xliff:g>). Повторите попытку."</string>
-    <string name="aerr_process">"Произошла неожиданная остановка процесса <xliff:g id="PROCESS">%1$s</xliff:g>. Повторите попытку."</string>
-    <string name="anr_title">"Извините!"</string>
-    <string name="anr_activity_application">"Действие <xliff:g id="ACTIVITY">%1$s</xliff:g> (в приложении <xliff:g id="APPLICATION">%2$s</xliff:g>) не отвечает."</string>
-    <string name="anr_activity_process">"Действие <xliff:g id="ACTIVITY">%1$s</xliff:g> (в процессе <xliff:g id="PROCESS">%2$s</xliff:g>) не отвечает."</string>
-    <string name="anr_application_process">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> (в процессе <xliff:g id="PROCESS">%2$s</xliff:g>) не отвечает."</string>
-    <string name="anr_process">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> не отвечает."</string>
-    <string name="force_close">"Принудительное закрытие"</string>
+    <string name="preposition_for_date" msgid="4316283606614248634">"в %s"</string>
+    <string name="preposition_for_time" msgid="6179700075291054938">"в %s"</string>
+    <string name="preposition_for_year" msgid="3852279354896963571">"через %s"</string>
+    <string name="day" msgid="8144195776058119424">"дн."</string>
+    <string name="days" msgid="4774547661021344602">"дн."</string>
+    <string name="hour" msgid="2126771916426189481">"ч."</string>
+    <string name="hours" msgid="894424005266852993">"ч."</string>
+    <string name="minute" msgid="9148878657703769868">"мин."</string>
+    <string name="minutes" msgid="5646001005827034509">"мин."</string>
+    <string name="second" msgid="3184235808021478">"с."</string>
+    <string name="seconds" msgid="3161515347216589235">"с."</string>
+    <string name="week" msgid="5617961537173061583">"нед."</string>
+    <string name="weeks" msgid="6509623834583944518">"нед."</string>
+    <string name="year" msgid="4001118221013892076">"г."</string>
+    <string name="years" msgid="6881577717993213522">"г."</string>
+    <string name="every_weekday" msgid="8777593878457748503">"Каждый рабочий день (пн-пт)"</string>
+    <string name="daily" msgid="5738949095624133403">"Ежедневно"</string>
+    <string name="weekly" msgid="983428358394268344">"Еженедельно, <xliff:g id="DAY">%s</xliff:g>"</string>
+    <string name="monthly" msgid="2667202947170988834">"Ежемесячно"</string>
+    <string name="yearly" msgid="1519577999407493836">"Ежегодно"</string>
+    <string name="VideoView_error_title" msgid="3359437293118172396">"Не удалось воспроизвести видео"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"Это видео не подходит для потокового воспроизведения на данном устройстве."</string>
+    <string name="VideoView_error_text_unknown" msgid="710301040038083944">"Невозможно воспроизвести видео."</string>
+    <string name="VideoView_error_button" msgid="2822238215100679592">"ОК"</string>
+    <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="noon" msgid="7245353528818587908">"полдень"</string>
+    <string name="Noon" msgid="3342127745230013127">"Полдень"</string>
+    <string name="midnight" msgid="7166259508850457595">"полночь"</string>
+    <string name="Midnight" msgid="5630806906897892201">"Полночь"</string>
+    <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
+    <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Выбрать все"</string>
+    <string name="selectText" msgid="3889149123626888637">"Выбрать текст"</string>
+    <string name="stopSelectingText" msgid="4157931463872320996">"Остановить выделение текста"</string>
+    <string name="cut" msgid="3092569408438626261">"Вырезать"</string>
+    <string name="cutAll" msgid="2436383270024931639">"Вырезать все"</string>
+    <string name="copy" msgid="2681946229533511987">"Копировать"</string>
+    <string name="copyAll" msgid="2590829068100113057">"Копировать все"</string>
+    <string name="paste" msgid="5629880836805036433">"Вставить"</string>
+    <string name="copyUrl" msgid="2538211579596067402">"Копировать URL"</string>
+    <string name="inputMethod" msgid="7673923508389094672">"Способ ввода"</string>
+    <string name="addToDictionary" msgid="726256909274177272">"Добавить \"%s\" в словарь"</string>
+    <string name="editTextMenuTitle" msgid="1672989176958581452">"Изменить текст"</string>
+    <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Недостаточно места"</string>
+    <string name="low_internal_storage_view_text" msgid="635106544616378836">"Заканчивается место в памяти телефона."</string>
+    <string name="ok" msgid="5970060430562524910">"ОК"</string>
+    <string name="cancel" msgid="6442560571259935130">"Отмена"</string>
+    <string name="yes" msgid="5362982303337969312">"ОК"</string>
+    <string name="no" msgid="5141531044935541497">"Отмена"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"Внимание"</string>
+    <string name="capital_on" msgid="1544682755514494298">"ВКЛ"</string>
+    <string name="capital_off" msgid="6815870386972805832">"ВЫКЛ"</string>
+    <string name="whichApplication" msgid="4533185947064773386">"Завершить действие с помощью"</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Использовать по умолчанию для этого действия."</string>
+    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Удалить настройки по умолчанию: главный экран &gt; \"Настройки\" &gt; \"Приложения\" &gt; \"Управление приложениями\"."</string>
+    <string name="chooseActivity" msgid="1009246475582238425">"Выберите действие"</string>
+    <string name="noApplications" msgid="1691104391758345586">"Это действие не может выполнять ни одно приложение."</string>
+    <string name="aerr_title" msgid="653922989522758100">"Ошибка приложения!"</string>
+    <string name="aerr_application" msgid="4683614104336409186">"Произошла неожиданная остановка приложения <xliff:g id="APPLICATION">%1$s</xliff:g> (процесс <xliff:g id="PROCESS">%2$s</xliff:g>). Повторите попытку."</string>
+    <string name="aerr_process" msgid="1551785535966089511">"Произошла неожиданная остановка процесса <xliff:g id="PROCESS">%1$s</xliff:g>. Повторите попытку."</string>
+    <string name="anr_title" msgid="3100070910664756057">"Извините!"</string>
+    <string name="anr_activity_application" msgid="3538242413112507636">"Действие <xliff:g id="ACTIVITY">%1$s</xliff:g> (в приложении <xliff:g id="APPLICATION">%2$s</xliff:g>) не отвечает."</string>
+    <string name="anr_activity_process" msgid="5420826626009561014">"Действие <xliff:g id="ACTIVITY">%1$s</xliff:g> (в процессе <xliff:g id="PROCESS">%2$s</xliff:g>) не отвечает."</string>
+    <string name="anr_application_process" msgid="4185842666452210193">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> (в процессе <xliff:g id="PROCESS">%2$s</xliff:g>) не отвечает."</string>
+    <string name="anr_process" msgid="1246866008169975783">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> не отвечает."</string>
+    <string name="force_close" msgid="3653416315450806396">"Принудительное закрытие"</string>
     <!-- no translation found for report (4060218260984795706) -->
     <skip />
-    <string name="wait">"Подождите"</string>
-    <string name="debug">"Выполнить отладку"</string>
-    <string name="sendText">"Выберите действие для текста"</string>
-    <string name="volume_ringtone">"Громкость звонка"</string>
-    <string name="volume_music">"Громкость мультимедиа"</string>
-    <string name="volume_music_hint_playing_through_bluetooth">"Воспроизведение по каналу Bluetooth"</string>
-    <string name="volume_call">"Громкость входящего вызова"</string>
-    <string name="volume_bluetooth_call">"Громкость входящего вызова Bluetooth"</string>
-    <string name="volume_alarm">"Громкость сигнала предупреждения"</string>
-    <string name="volume_notification">"Громкость уведомления"</string>
-    <string name="volume_unknown">"Громкость"</string>
-    <string name="ringtone_default">"Мелодия по умолчанию"</string>
-    <string name="ringtone_default_with_actual">"Мелодия по умолчанию (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent">"Без звука"</string>
-    <string name="ringtone_picker_title">"Мелодии"</string>
-    <string name="ringtone_unknown">"Неизвестная мелодия"</string>
+    <string name="wait" msgid="7147118217226317732">"Подождите"</string>
+    <string name="debug" msgid="9103374629678531849">"Выполнить отладку"</string>
+    <string name="sendText" msgid="5132506121645618310">"Выберите действие для текста"</string>
+    <string name="volume_ringtone" msgid="6885421406845734650">"Громкость звонка"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Громкость мультимедиа"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Воспроизведение по каналу Bluetooth"</string>
+    <string name="volume_call" msgid="3941680041282788711">"Громкость входящего вызова"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Громкость входящего вызова Bluetooth"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Громкость сигнала предупреждения"</string>
+    <string name="volume_notification" msgid="2422265656744276715">"Громкость уведомления"</string>
+    <string name="volume_unknown" msgid="1400219669770445902">"Громкость"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Мелодия по умолчанию"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Мелодия по умолчанию (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_silent" msgid="4440324407807468713">"Без звука"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Мелодии"</string>
+    <string name="ringtone_unknown" msgid="5477919988701784788">"Неизвестная мелодия"</string>
   <plurals name="wifi_available">
-    <item quantity="one">"Доступна сеть Wi-Fi"</item>
-    <item quantity="other">"Доступна сеть Wi-Fi"</item>
+    <item quantity="one" msgid="6654123987418168693">"Доступна сеть Wi-Fi"</item>
+    <item quantity="other" msgid="4192424489168397386">"Доступна сеть Wi-Fi"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
-    <item quantity="one">"Найдена доступная сеть Wi-Fi"</item>
-    <item quantity="other">"Найдены доступные сети Wi-Fi"</item>
+    <item quantity="one" msgid="1634101450343277345">"Найдена доступная сеть Wi-Fi"</item>
+    <item quantity="other" msgid="7915895323644292768">"Найдены доступные сети Wi-Fi"</item>
   </plurals>
-    <string name="select_character">"Введите символ"</string>
-    <string name="sms_control_default_app_name">"Неизвестное приложение"</string>
-    <string name="sms_control_title">"Отправка SMS-сообщений"</string>
-    <string name="sms_control_message">"Отправляется большое количество SMS-сообщений. Нажмите \"ОК\" для продолжения или \"Отмена\" для прекращения отправки."</string>
-    <string name="sms_control_yes">"ОК"</string>
-    <string name="sms_control_no">"Отмена"</string>
-    <string name="date_time_set">"Установить"</string>
-    <string name="default_permission_group">"По умолчанию"</string>
-    <string name="no_permissions">"Не требуется разрешений"</string>
-    <string name="perms_hide"><b>"Скрыть"</b></string>
-    <string name="perms_show_all"><b>"Показать все"</b></string>
-    <string name="googlewebcontenthelper_loading">"Идет загрузка…"</string>
-    <string name="usb_storage_title">"устройство USB подключено"</string>
-    <string name="usb_storage_message">"Телефон подключен к компьютеру через порт USB. Если необходимо копировать файлы с компьютера на SD-карту телефона (или наоборот), выберите \"Установить\"."</string>
-    <string name="usb_storage_button_mount">"Смонтировать"</string>
-    <string name="usb_storage_button_unmount">"Не монтировать"</string>
-    <string name="usb_storage_error_message">"При использовании SD-карты как USB-накопителя возникла неполадка."</string>
-    <string name="usb_storage_notification_title">"устройство USB подключено"</string>
-    <string name="usb_storage_notification_message">"Выберите копирование файлов на компьютер или с компьютера."</string>
-    <string name="usb_storage_stop_notification_title">"Выключить USB-накопитель"</string>
-    <string name="usb_storage_stop_notification_message">"Выберите, чтобы выключить USB-накопитель."</string>
-    <string name="usb_storage_stop_title">"Выключить USB-накопитель"</string>
-    <string name="usb_storage_stop_message">"Перед выключением USB-накопителя обязательно отключите USB-хост. Выберите \"Выключить\", чтобы выключить USB-накопитель."</string>
-    <string name="usb_storage_stop_button_mount">"Выключить"</string>
-    <string name="usb_storage_stop_button_unmount">"Отмена"</string>
-    <string name="usb_storage_stop_error_message">"При выключении USB-накопителя произошла неполадка. Убедитесь, что USB-хост отключен, и повторите попытку."</string>
-    <string name="extmedia_format_title">"Форматировать карту SD"</string>
-    <string name="extmedia_format_message">"Отформатировать карту SD? Все данные, находящиеся на карте, будут уничтожены."</string>
-    <string name="extmedia_format_button_format">"Формат"</string>
+    <string name="select_character" msgid="3365550120617701745">"Введите символ"</string>
+    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Неизвестное приложение"</string>
+    <string name="sms_control_title" msgid="7296612781128917719">"Отправка SMS-сообщений"</string>
+    <string name="sms_control_message" msgid="1289331457999236205">"Отправляется большое количество SMS-сообщений. Нажмите \"ОК\" для продолжения или \"Отмена\" для прекращения отправки."</string>
+    <string name="sms_control_yes" msgid="2532062172402615953">"ОК"</string>
+    <string name="sms_control_no" msgid="1715320703137199869">"Отмена"</string>
+    <string name="date_time_set" msgid="5777075614321087758">"Установить"</string>
+    <string name="default_permission_group" msgid="2690160991405646128">"По умолчанию"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Не требуется разрешений"</string>
+    <string name="perms_hide" msgid="7283915391320676226"><b>"Скрыть"</b></string>
+    <string name="perms_show_all" msgid="2671791163933091180"><b>"Показать все"</b></string>
+    <string name="googlewebcontenthelper_loading" msgid="4722128368651947186">"Идет загрузка…"</string>
+    <string name="usb_storage_title" msgid="5901459041398751495">"устройство USB подключено"</string>
+    <string name="usb_storage_message" msgid="2759542180575016871">"Телефон подключен к компьютеру через порт USB. Если необходимо копировать файлы с компьютера на SD-карту телефона (или наоборот), выберите \"Установить\"."</string>
+    <string name="usb_storage_button_mount" msgid="8063426289195405456">"Смонтировать"</string>
+    <string name="usb_storage_button_unmount" msgid="6092146330053864766">"Не монтировать"</string>
+    <string name="usb_storage_error_message" msgid="2534784751603345363">"При использовании SD-карты как USB-накопителя возникла неполадка."</string>
+    <string name="usb_storage_notification_title" msgid="8175892554757216525">"устройство USB подключено"</string>
+    <string name="usb_storage_notification_message" msgid="7380082404288219341">"Выберите копирование файлов на компьютер или с компьютера."</string>
+    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Выключить USB-накопитель"</string>
+    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Выберите, чтобы выключить USB-накопитель."</string>
+    <string name="usb_storage_stop_title" msgid="6014127947456185321">"Выключить USB-накопитель"</string>
+    <string name="usb_storage_stop_message" msgid="2390958966725232848">"Перед выключением USB-накопителя обязательно отключите USB-хост. Выберите \"Выключить\", чтобы выключить USB-накопитель."</string>
+    <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"Выключить"</string>
+    <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"Отмена"</string>
+    <string name="usb_storage_stop_error_message" msgid="3917317248440072084">"При выключении USB-накопителя произошла неполадка. Убедитесь, что USB-хост отключен, и повторите попытку."</string>
+    <string name="extmedia_format_title" msgid="8663247929551095854">"Форматировать карту SD"</string>
+    <string name="extmedia_format_message" msgid="3621369962433523619">"Отформатировать карту SD? Все данные, находящиеся на карте, будут уничтожены."</string>
+    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
     <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
     <skip />
     <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
     <skip />
-    <string name="select_input_method">"Выберите способ ввода"</string>
-    <string name="fast_scroll_alphabet">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="fast_scroll_numeric_alphabet">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="candidates_style"><u>"варианты"</u></string>
-    <string name="ext_media_checking_notification_title">"Подготовка карты SD"</string>
+    <string name="select_input_method" msgid="2086499663193509436">"Выберите способ ввода"</string>
+    <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style" msgid="4333913089637062257"><u>"варианты"</u></string>
+    <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"Подготовка карты SD"</string>
     <!-- no translation found for ext_media_checking_notification_message (8287319882926737053) -->
     <skip />
-    <string name="ext_media_nofs_notification_title">"Пустая карта SD"</string>
+    <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"Пустая карта SD"</string>
     <!-- no translation found for ext_media_nofs_notification_message (3817704088027829380) -->
     <skip />
-    <string name="ext_media_unmountable_notification_title">"Поврежденная карта SD"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"Поврежденная карта SD"</string>
     <!-- no translation found for ext_media_unmountable_notification_message (6902531775948238989) -->
     <skip />
-    <string name="ext_media_badremoval_notification_title">"Карта SD неожиданно извлечена"</string>
-    <string name="ext_media_badremoval_notification_message">"Перед извлечением карты SD отключите ее во избежание потери данных."</string>
-    <string name="ext_media_safe_unmount_notification_title">"Безопасное удаление карты SD"</string>
+    <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"Карта SD неожиданно извлечена"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"Перед извлечением карты SD отключите ее во избежание потери данных."</string>
+    <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"Безопасное удаление карты SD"</string>
     <!-- no translation found for ext_media_safe_unmount_notification_message (568841278138377604) -->
     <skip />
-    <string name="ext_media_nomedia_notification_title">"Отсутствует карта SD"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"Отсутствует карта SD"</string>
     <!-- no translation found for ext_media_nomedia_notification_message (3870120652983659641) -->
     <skip />
-    <string name="activity_list_empty">"Подходящих действий не найдено"</string>
-    <string name="permlab_pkgUsageStats">"обновлять статистику использования компонентов"</string>
-    <string name="permdesc_pkgUsageStats">"Позволяет изменять собранную статистику использования компонентов. Не предназначено для использования обычными приложениями."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short">"Нажмите дважды для изменения масштаба"</string>
-    <string name="gadget_host_error_inflating">"Ошибка при наполнении виджета"</string>
-    <string name="ime_action_go">"Выбрать"</string>
-    <string name="ime_action_search">"Поиск"</string>
-    <string name="ime_action_send">"Отправить"</string>
-    <string name="ime_action_next">"Далее"</string>
-    <string name="ime_action_done">"Готово"</string>
-    <string name="ime_action_default">"Выполнить"</string>
-    <string name="dial_number_using">"Набрать номер"\n"<xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using">"Создать контакт"\n"с номером <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="activity_list_empty" msgid="4168820609403385789">"Подходящих действий не найдено"</string>
+    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"обновлять статистику использования компонентов"</string>
+    <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Позволяет изменять собранную статистику использования компонентов. Не предназначено для использования обычными приложениями."</string>
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Нажмите дважды для изменения масштаба"</string>
+    <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Ошибка при наполнении виджета"</string>
+    <string name="ime_action_go" msgid="8320845651737369027">"Выбрать"</string>
+    <string name="ime_action_search" msgid="658110271822807811">"Поиск"</string>
+    <string name="ime_action_send" msgid="2316166556349314424">"Отправить"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"Далее"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"Готово"</string>
+    <string name="ime_action_default" msgid="2840921885558045721">"Выполнить"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Набрать номер"\n"<xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Создать контакт"\n"с номером <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <!-- no translation found for accessibility_compound_button_selected (5612776946036285686) -->
     <skip />
     <!-- no translation found for accessibility_compound_button_unselected (8864512895673924091) -->

@@ -103,7 +103,7 @@ StubClass::StubClass(Type* type, Type* interfaceType)
     this->transact_reply = new Variable(PARCEL_TYPE, "reply");
     this->transact_flags = new Variable(INT_TYPE, "flags");
     Method* onTransact = new Method;
-        onTransact->modifiers = PUBLIC;
+        onTransact->modifiers = PUBLIC | OVERRIDE;
         onTransact->returnType = BOOLEAN_TYPE;
         onTransact->name = "onTransact";
         onTransact->parameters.push_back(this->transact_code);

@@ -323,7 +323,10 @@ public class HttpsConnection extends Connection {
                 mSuspended = true;
             }
             // don't hold the lock while calling out to the event handler
-            eventHandler.handleSslErrorRequest(error);
+            boolean canHandle = eventHandler.handleSslErrorRequest(error);
+            if(!canHandle) {
+                throw new IOException("failed to handle "+ error);
+            }
             synchronized (mSuspendLock) {
                 if (mSuspended) {
                     try {
