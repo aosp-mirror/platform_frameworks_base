@@ -914,7 +914,7 @@ bool ToneGenerator::startTone(int toneType) {
                 }
             }
         } else {
-            mState == TONE_IDLE;
+            mState = TONE_IDLE;
         }
     } else {
         LOGV("Delayed start\n");
