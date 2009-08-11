@@ -20,10 +20,11 @@ import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.FlakyTest;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.util.Log;
 
 /**
  * A collection of tests on aspects of the AutoCompleteTextView's popup
+ *
+ * TODO: tests fail intermittently. Add back MediumTest annotation when fixed
  */
 public class AutoCompleteTextViewPopup
         extends ActivityInstrumentationTestCase2<AutoCompleteTextViewSimple> {
@@ -40,7 +41,6 @@ public class AutoCompleteTextViewPopup
     }
 
     /** Test that we can move the selection and it responds as expected */
-    @MediumTest
     @FlakyTest(tolerance=3)
     public void testPopupSetListSelection() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
@@ -73,7 +73,6 @@ public class AutoCompleteTextViewPopup
     }
 
     /** Test that we can look at the selection as we move around */
-    @MediumTest
     @FlakyTest(tolerance=3)
     public void testPopupGetListSelection() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
@@ -101,7 +100,6 @@ public class AutoCompleteTextViewPopup
     }
 
     /** Test that we can clear the selection */
-    @MediumTest
     @FlakyTest(tolerance=3)
     public void testPopupClearListSelection() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
@@ -135,7 +133,6 @@ public class AutoCompleteTextViewPopup
     }
 
     /** Make sure we handle an empty adapter properly */
-    @MediumTest
     @FlakyTest(tolerance=3)
     public void testPopupNavigateNoAdapter() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
@@ -170,7 +167,6 @@ public class AutoCompleteTextViewPopup
     }
 
     /** Test the show/hide behavior of the drop-down. */
-    @MediumTest
     @FlakyTest(tolerance=3)
     public void testPopupShow() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
