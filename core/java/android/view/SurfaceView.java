@@ -16,6 +16,8 @@
 
 package android.view;
 
+import com.android.internal.view.BaseIWindow;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.CompatibilityInfo.Translator;
@@ -435,7 +437,7 @@ public class SurfaceView extends View {
         updateWindow(false);
     }
 
-    private static class MyWindow extends IWindow.Stub {
+    private static class MyWindow extends BaseIWindow {
         private final WeakReference<SurfaceView> mSurfaceView;
 
         public MyWindow(SurfaceView surfaceView) {

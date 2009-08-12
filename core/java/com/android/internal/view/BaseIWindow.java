@@ -65,4 +65,7 @@ public class BaseIWindow extends IWindow.Stub {
 
     public void executeCommand(String command, String parameters, ParcelFileDescriptor out) {
     }
+    
+    public void dispatchWallpaperOffsets(float x, float y) {
+    }
 }

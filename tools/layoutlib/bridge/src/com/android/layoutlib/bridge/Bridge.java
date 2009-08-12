@@ -1047,6 +1047,11 @@ public final class Bridge implements ILayoutBridge {
             // pass for now.
         }
 
+        @SuppressWarnings("unused")
+        public void dispatchWallpaperOffsets(float x, float y) {
+            // pass for now.
+        }
+
         public IBinder asBinder() {
             // pass for now.
             return null;

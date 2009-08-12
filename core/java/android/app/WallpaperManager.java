@@ -335,6 +335,25 @@ public class WallpaperManager {
     }
     
     /**
+     * Clear the offsets previously associated with this window through
+     * {@link #setWallpaperOffsets(IBinder, float, float)}.  This reverts
+     * the window to its default state, where it does not cause the wallpaper
+     * to scroll from whatever its last offsets were.
+     * 
+     * @param windowToken The window who these offsets should be associated
+     * with, as returned by {@link android.view.View#getWindowVisibility()
+     * View.getWindowToken()}.
+     */
+    public void clearWallpaperOffsets(IBinder windowToken) {
+        try {
+            ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
+                    windowToken, -1, -1);
+        } catch (RemoteException e) {
+            // Ignore.
+        }
+    }
+    
+    /**
      * Remove any currently set wallpaper, reverting to the system's default
      * wallpaper. On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
      * is broadcast.
