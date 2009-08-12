@@ -45,6 +45,7 @@ public:
     virtual ~Asset(void);
 
     static int32_t getGlobalCount();
+    static String8 getAssetAllocations();
     
     /* used when opening an asset */
     typedef enum AccessMode {
@@ -108,6 +109,12 @@ public:
      * asset is compressed).
      */
     virtual int openFileDescriptor(off_t* outStart, off_t* outLength) const = 0;
+    
+    /*
+     * Return whether this asset's buffer is allocated in RAM (not mmapped).
+     * Note: not virtual so it is safe to call even when being destroyed.
+     */
+    virtual bool isAllocated(void) const { return false; }
     
     /*
      * Get a string identifying the asset's source.  This might be a full
@@ -197,6 +204,9 @@ private:
 
     AccessMode  mAccessMode;        // how the asset was opened
     String8    mAssetSource;       // debug string
+    
+    Asset*		mNext;				// linked list.
+    Asset*		mPrev;
 };
 
 
@@ -239,6 +249,7 @@ public:
     virtual off_t getLength(void) const { return mLength; }
     virtual off_t getRemainingLength(void) const { return mLength-mOffset; }
     virtual int openFileDescriptor(off_t* outStart, off_t* outLength) const;
+    virtual bool isAllocated(void) const { return mBuf != NULL; }
 
 private:
     off_t       mStart;         // absolute file offset of start of chunk
@@ -295,6 +306,7 @@ public:
     virtual off_t getLength(void) const { return mUncompressedLen; }
     virtual off_t getRemainingLength(void) const { return mUncompressedLen-mOffset; }
     virtual int openFileDescriptor(off_t* outStart, off_t* outLength) const { return -1; }
+    virtual bool isAllocated(void) const { return mBuf != NULL; }
 
 private:
     off_t       mStart;         // offset to start of compressed data

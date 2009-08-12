@@ -4449,7 +4449,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     final void appNotRespondingLocked(ProcessRecord app, HistoryRecord activity, 
-            final String annotation) {
+            HistoryRecord reportedActivity, final String annotation) {
         if (app.notResponding || app.crashing) {
             return;
         }
@@ -4477,8 +4477,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         StringBuilder info = mStringBuilder;
         info.setLength(0);
-        info.append("ANR (application not responding) in process: ");
+        info.append("ANR in process: ");
         info.append(app.processName);
+        if (reportedActivity != null && reportedActivity.app != null) {
+            info.append(" (last in ");
+            info.append(reportedActivity.app.processName);
+            info.append(")");
+        }
         if (annotation != null) {
             info.append("\nAnnotation: ");
             info.append(annotation);
@@ -4498,10 +4503,44 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         } else {
             // Dumping traces to a file so dump all active processes we know about
             synchronized (this) {
-                for (int i = mLRUProcesses.size() - 1 ; i >= 0 ; i--) {
+                // First, these are the most important processes.
+                final int[] imppids = new int[3];
+                int i=0;
+                imppids[0] = app.pid;
+                i++;
+                if (reportedActivity != null && reportedActivity.app != null
+                        && reportedActivity.app.thread != null
+                        && reportedActivity.app.pid != app.pid) {
+                    imppids[i] = reportedActivity.app.pid;
+                    i++;
+                }
+                imppids[i] = Process.myPid();
+                for (i=0; i<imppids.length && imppids[i] != 0; i++) {
+                    Process.sendSignal(imppids[i], Process.SIGNAL_QUIT);
+                    synchronized (this) {
+                        try {
+                            wait(200);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                }
+                for (i = mLRUProcesses.size() - 1 ; i >= 0 ; i--) {
                     ProcessRecord r = mLRUProcesses.get(i);
-                    if (r.thread != null) {
+                    boolean done = false;
+                    for (int j=0; j<imppids.length && imppids[j] != 0; j++) {
+                        if (imppids[j] == r.pid) {
+                            done = true;
+                            break;
+                        }
+                    }
+                    if (!done && r.thread != null) {
                         Process.sendSignal(r.pid, Process.SIGNAL_QUIT);
+                        synchronized (this) {
+                            try {
+                                wait(200);
+                            } catch (InterruptedException e) {
+                            }
+                        }
                     }
                 }
             }
@@ -4565,7 +4604,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (!dir.exists()) {
                     fileReady = dir.mkdirs();
                     FileUtils.setPermissions(dir.getAbsolutePath(),
-                            FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IRWXO, -1, -1);
+                            FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IXOTH, -1, -1);
                 } else if (dir.isDirectory()) {
                     fileReady = true;
                 }
@@ -4574,6 +4613,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // The VM will recreate it
                 Log.i(TAG, "Removing old ANR trace file from " + tracesPath);
                 fileReady = f.delete();
+            }
+            
+            if (removeExisting) {
+                try {
+                    f.createNewFile();
+                    FileUtils.setPermissions(f.getAbsolutePath(),
+                            FileUtils.S_IRWXU | FileUtils.S_IRWXG
+                            | FileUtils.S_IWOTH | FileUtils.S_IROTH, -1, -1);
+                    fileReady = true;
+                } catch (IOException e) {
+                    Log.w(TAG, "Unable to make ANR traces file", e);
+                }
             }
         }
 
@@ -10597,7 +10648,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             if (timeout != null && mLRUProcesses.contains(proc)) {
                 Log.w(TAG, "Timeout executing service: " + timeout);
-                appNotRespondingLocked(proc, null, "Executing service "
+                appNotRespondingLocked(proc, null, null, "Executing service "
                         + timeout.name);
             } else {
                 Message msg = mHandler.obtainMessage(SERVICE_TIMEOUT_MSG);
@@ -11392,7 +11443,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             
             if (app != null) {
-                appNotRespondingLocked(app, null, "Broadcast of " + r.intent.toString());
+                appNotRespondingLocked(app, null, null,
+                        "Broadcast of " + r.intent.toString());
             }
 
             if (mPendingBroadcast == r) {

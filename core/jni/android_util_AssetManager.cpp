@@ -1536,6 +1536,22 @@ static jint android_content_AssetManager_getGlobalAssetCount(JNIEnv* env, jobjec
     return Asset::getGlobalCount();
 }
 
+static jobject android_content_AssetManager_getAssetAllocations(JNIEnv* env, jobject clazz)
+{
+    String8 alloc = Asset::getAssetAllocations();
+    if (alloc.length() <= 0) {
+        return NULL;
+    }
+    
+    jstring str = env->NewStringUTF(alloc.string());
+    if (str == NULL) {
+        doThrow(env, "java/lang/OutOfMemoryError");
+        return NULL;
+    }
+    
+    return str;
+}
+
 static jint android_content_AssetManager_getGlobalAssetManagerCount(JNIEnv* env, jobject clazz)
 {
     return AssetManager::getGlobalCount();
@@ -1646,6 +1662,8 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_destroy },
     { "getGlobalAssetCount", "()I",
         (void*) android_content_AssetManager_getGlobalAssetCount },
+    { "getAssetAllocations", "()Ljava/lang/String;",
+        (void*) android_content_AssetManager_getAssetAllocations },
     { "getGlobalAssetManagerCount", "()I",
         (void*) android_content_AssetManager_getGlobalAssetCount },
 };
