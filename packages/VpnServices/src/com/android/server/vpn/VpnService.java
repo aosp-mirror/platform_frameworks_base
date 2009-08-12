@@ -466,7 +466,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             for (DaemonProxy s : mDaemonList) {
                 switch (getResultFromSocket(s)) {
                     case 0:
-                        return 0;
+                        continue;
 
                     case AUTH_ERROR_CODE:
                         return VpnManager.VPN_ERROR_AUTH;
