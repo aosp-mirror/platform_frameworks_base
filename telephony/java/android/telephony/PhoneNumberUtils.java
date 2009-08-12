@@ -26,7 +26,10 @@ import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseIntArray;
+
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_IDP_STRING;
 
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -56,6 +59,9 @@ public class PhoneNumberUtils
      */
     public static final int TOA_International = 0x91;
     public static final int TOA_Unknown = 0x81;
+
+    static final String LOG_TAG = "PhoneNumberUtils";
+    private static final boolean DBG = false;
 
     /*
      * global-phone-number = ["+"] 1*( DIGIT / written-sep )
@@ -227,6 +233,9 @@ public class PhoneNumberUtils
         }
     }
 
+    private static void log(String msg) {
+        Log.d(LOG_TAG, msg);
+    }
     /** index of the last character of the network portion
      *  (eg anything after is a post-dial string)
      */
@@ -741,6 +750,14 @@ public class PhoneNumberUtils
         return true;
     }
 
+    private static boolean isNonSeparator(String address) {
+        for (int i = 0, count = address.length(); i < count; i++) {
+            if (!isNonSeparator(address.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
     /**
      * Note: calls extractNetworkPortion(), so do not use for
      * SIM EF[ADN] style records
@@ -1228,5 +1245,262 @@ public class PhoneNumberUtils
 
         KEYPAD_MAP.put('w', '9'); KEYPAD_MAP.put('x', '9'); KEYPAD_MAP.put('y', '9'); KEYPAD_MAP.put('z', '9');
         KEYPAD_MAP.put('W', '9'); KEYPAD_MAP.put('X', '9'); KEYPAD_MAP.put('Y', '9'); KEYPAD_MAP.put('Z', '9');
+    }
+
+    //================ Plus Code formatting =========================
+    private static final char PLUS_SIGN_CHAR = '+';
+    private static final String PLUS_SIGN_STRING = "+";
+    private static final String NANP_IDP_STRING = "011";
+    private static final int NANP_LENGTH = 10;
+
+    /**
+     * This function checks if there is a plus sign (+) in the passed-in dialing number.
+     * If there is, it processes the plus sign based on the default telephone
+     * numbering plan of the system when the phone is activated and the current
+     * telephone numbering plan of the system that the phone is camped on.
+     * Currently, we only support the case that the default and current telephone
+     * numbering plans are North American Numbering Plan(NANP).
+     *
+     * The passed-in dialStr should only contain the valid format as described below,
+     * 1) the 1st character in the dialStr should be one of the really dialable
+     *    characters listed below
+     *    ISO-LATIN characters 0-9, *, # , +
+     * 2) the dialStr should already strip out the separator characters,
+     *    every character in the dialStr should be one of the non separator characters
+     *    listed below
+     *    ISO-LATIN characters 0-9, *, # , +, WILD, WAIT, PAUSE
+     *
+     * Otherwise, this function returns the dial string passed in
+     *
+     * This API is for CDMA only
+     *
+     * @hide TODO: pending API Council approval
+     */
+    public static String cdmaCheckAndProcessPlusCode(String dialStr) {
+        if (!TextUtils.isEmpty(dialStr)) {
+            if (isReallyDialable(dialStr.charAt(0)) &&
+                isNonSeparator(dialStr)) {
+                return cdmaCheckAndProcessPlusCodeByNumberFormat(dialStr,
+                        getFormatTypeForLocale(Locale.getDefault()));
+            }
+        }
+        return dialStr;
+    }
+
+    /**
+     * This function should be called from checkAndProcessPlusCode only
+     * And it is used for test purpose also.
+     *
+     * It checks the dial string by looping through the network portion,
+     * post dial portion 1, post dial porting 2, etc. If there is any
+     * plus sign, then process the plus sign.
+     * Currently, this function supports the plus sign conversion within NANP only.
+     * Specifically, it handles the plus sign in the following ways:
+     * 1)+NANP or +1NANP,remove +, e.g.
+     *   +8475797000 is converted to 8475797000,
+     *   +18475797000 is converted to 18475797000,
+     * 2)+non-NANP Numbers,replace + with the current NANP IDP, e.g,
+     *   +11875767800 is converted to 01111875767800
+     * 3)+NANP in post dial string(s), e.g.
+     *   8475797000;+8475231753 is converted to 8475797000;8475231753
+     *
+     * This function returns the original dial string if locale/numbering plan
+     * aren't supported.
+     *
+     * @hide
+     */
+    public static String cdmaCheckAndProcessPlusCodeByNumberFormat(String dialStr,int numFormat) {
+        String retStr = dialStr;
+
+        // Checks if the plus sign character is in the passed-in dial string
+        if (dialStr != null &&
+            dialStr.lastIndexOf(PLUS_SIGN_STRING) != -1) {
+
+            String postDialStr = null;
+            String tempDialStr = dialStr;
+
+            // Sets the retStr to null since the conversion will be performed below.
+            retStr = null;
+            if (DBG) log("checkAndProcessPlusCode,dialStr=" + dialStr);
+            // This routine is to process the plus sign in the dial string by loop through
+            // the network portion, post dial portion 1, post dial portion 2... etc. if
+            // applied
+            do {
+                String networkDialStr;
+
+                // Format the string based on the rules for the country the number is from
+                if (numFormat != FORMAT_NANP) {
+                    // TODO: to support NANP international conversion and
+                    // other telephone numbering plan
+                    // Currently the phone is ever used in non-NANP system
+                    // return the original dial string
+                    Log.e("checkAndProcessPlusCode:non-NANP not supported", dialStr);
+                    return dialStr;
+                } else {
+                    // For the case that the default and current telephone
+                    // numbering plans are NANP
+                    networkDialStr = extractNetworkPortion(tempDialStr);
+                    // Handles the conversion within NANP
+                    networkDialStr = processPlusCodeWithinNanp(networkDialStr);
+                }
+                // Concatenates the string that is converted from network portion
+                if (!TextUtils.isEmpty(networkDialStr)) {
+                    if (retStr == null) {
+                        retStr = networkDialStr;
+                    } else {
+                        retStr = retStr.concat(networkDialStr);
+                    }
+                } else {
+                    // This should never happen since we checked the if dialStr is null
+                    // and if it contains the plus sign in the begining of this function.
+                    // The plus sign is part of the network portion.
+                    Log.e("checkAndProcessPlusCode: null newDialStr", networkDialStr);
+                    return dialStr;
+                }
+                postDialStr = extractPostDialPortion(tempDialStr);
+                if (!TextUtils.isEmpty(postDialStr)) {
+                    int dialableIndex = findDialableIndexFromPostDialStr(postDialStr);
+
+                    // dialableIndex should always be greater than 0
+                    if (dialableIndex >= 1) {
+                        retStr = appendPwCharBackToOrigDialStr(dialableIndex,
+                                 retStr,postDialStr);
+                        // Skips the P/W character, extracts the dialable portion
+                        tempDialStr = postDialStr.substring(dialableIndex);
+                    } else {
+                        // Non-dialable character such as P/W should not be at the end of
+                        // the dial string after P/W processing in CdmaConnection.java
+                        // Set the postDialStr to "" to break out of the loop
+                        if (dialableIndex < 0) {
+                            postDialStr = "";
+                        }
+                        Log.e("wrong postDialStr=", postDialStr);
+                    }
+                }
+                if (DBG) log("checkAndProcessPlusCode,postDialStr=" + postDialStr);
+            } while (!TextUtils.isEmpty(postDialStr) && !TextUtils.isEmpty(tempDialStr));
+        }
+        return retStr;
+     }
+
+    // This function gets the default international dialing prefix
+    private static String getDefaultIdp( ) {
+        String ps = null;
+        SystemProperties.get(PROPERTY_IDP_STRING, ps);
+        if (TextUtils.isEmpty(ps)) {
+            ps = NANP_IDP_STRING;
+        }
+        return ps;
+    }
+
+    private static boolean isTwoToNine (char c) {
+        if (c >= '2' && c <= '9') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * This function checks if the passed in string conforms to the NANP format
+     * i.e. NXX-NXX-XXXX, N is any digit 2-9 and X is any digit 0-9
+     */
+    private static boolean isNanp (String dialStr) {
+        boolean retVal = false;
+        if (dialStr != null) {
+            if (dialStr.length() == NANP_LENGTH) {
+                if (isTwoToNine(dialStr.charAt(0)) &&
+                    isTwoToNine(dialStr.charAt(3))) {
+                    retVal = true;
+                    for (int i=1; i<NANP_LENGTH; i++ ) {
+                        char c=dialStr.charAt(i);
+                        if (!PhoneNumberUtils.isISODigit(c)) {
+                            retVal = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            Log.e("isNanp: null dialStr passed in", dialStr);
+        }
+        return retVal;
+    }
+
+   /**
+    * This function checks if the passed in string conforms to 1-NANP format
+    */
+    private static boolean isOneNanp(String dialStr) {
+        boolean retVal = false;
+        if (dialStr != null) {
+            String newDialStr = dialStr.substring(1);
+            if ((dialStr.charAt(0) == '1') && isNanp(newDialStr)) {
+                retVal = true;
+            }
+        } else {
+            Log.e("isOneNanp: null dialStr passed in", dialStr);
+        }
+        return retVal;
+    }
+
+    /**
+     * This function handles the plus code conversion within NANP CDMA network
+     * If the number format is
+     * 1)+NANP or +1NANP,remove +,
+     * 2)+non-NANP Numbers,replace + with the current IDP
+     */
+    private static String processPlusCodeWithinNanp(String networkDialStr) {
+        String retStr = networkDialStr;
+
+        if (DBG) log("processPlusCodeWithinNanp,networkDialStr=" + networkDialStr);
+        // If there is a plus sign at the beginning of the dial string,
+        // Convert the plus sign to the default IDP since it's an international number
+        if (networkDialStr != null &
+            networkDialStr.charAt(0) == PLUS_SIGN_CHAR &&
+            networkDialStr.length() > 1) {
+            String newStr = networkDialStr.substring(1);
+            if (isNanp(newStr) || isOneNanp(newStr)) {
+                // Remove the leading plus sign
+                retStr = newStr;
+             } else {
+                 String idpStr = getDefaultIdp();
+                 // Replaces the plus sign with the default IDP
+                 retStr = networkDialStr.replaceFirst("[+]", idpStr);
+            }
+        }
+        if (DBG) log("processPlusCodeWithinNanp,retStr=" + retStr);
+        return retStr;
+    }
+
+    // This function finds the index of the dialable character(s)
+    // in the post dial string
+    private static int findDialableIndexFromPostDialStr(String postDialStr) {
+        for (int index = 0;index < postDialStr.length();index++) {
+             char c = postDialStr.charAt(index);
+             if (isReallyDialable(c)) {
+                return index;
+             }
+        }
+        return -1;
+    }
+
+    // This function appends the non-diablable P/W character to the original
+    // dial string based on the dialable index passed in
+    private static String
+    appendPwCharBackToOrigDialStr(int dialableIndex,String origStr, String dialStr) {
+        String retStr;
+
+        // There is only 1 P/W character before the dialable characters
+        if (dialableIndex == 1) {
+            StringBuilder ret = new StringBuilder(origStr);
+            ret = ret.append(dialStr.charAt(0));
+            retStr = ret.toString();
+        } else {
+            // It means more than 1 P/W characters in the post dial string,
+            // appends to retStr
+            String nonDigitStr = dialStr.substring(0,dialableIndex);
+            retStr = origStr.concat(nonDigitStr);
+        }
+        return retStr;
     }
 }
