@@ -45,9 +45,9 @@ int main(int argc, char** argv)
      dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
      eglInitialize(dpy, &majorVersion, &minorVersion);
      if (!usePbuffer) {
-         surface = eglCreateWindowSurface(dpy, config, window, NULL);
          EGLUtils::selectConfigForNativeWindow(
                  dpy, s_configAttribs, window, &config);
+         surface = eglCreateWindowSurface(dpy, config, window, NULL);
      } else {
          printf("using pbuffer\n");
          eglChooseConfig(dpy, s_configAttribs, &config, 1, &numConfigs);
@@ -63,6 +63,12 @@ int main(int argc, char** argv)
      eglQuerySurface(dpy, surface, EGL_HEIGHT, &h);
      GLint dim = w<h ? w : h;
 
+     glViewport(0, 0, w, h);
+     glMatrixMode(GL_PROJECTION);
+     glLoadIdentity();
+     glOrthof(0, w, h, 0, 0, 1);
+
+     glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
 
      GLint crop[4] = { 0, 4, 4, -4 };
@@ -128,14 +134,50 @@ int main(int argc, char** argv)
          break;
      }
 
-     glDrawTexiOES(0, 0, 0, dim, dim);
+     //glDrawTexiOES(0, 0, 0, dim, dim);
+     
+     const GLfloat vertices[4][2] = {
+             { 0,    0   },
+             { 0,    dim },
+             { dim,  dim },
+             { dim,  0   }
+     };
 
+     const GLfloat texCoords[4][2] = {
+             { 0,  0 },
+             { 0,  1 },
+             { 1,  1 },
+             { 1,  0 }
+     };
+     
      if (!usePbuffer) {
          eglSwapBuffers(dpy, surface);
-     } else {
-         glFinish();
      }
+
+     glMatrixMode(GL_MODELVIEW);
+     //glEnable(GL_SCISSOR_TEST);
+     //glScissor(0,dim,dim,h-dim);
      
+     for (int y=0 ; y<dim ; y++) {
+         glLoadIdentity();
+         glTranslatef(0, -y, 0);
+
+         glClear(GL_COLOR_BUFFER_BIT);
+         glEnableClientState(GL_VERTEX_ARRAY);
+         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+         glVertexPointer(2, GL_FLOAT, 0, vertices);
+         glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+         glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
+
+
+         if (!usePbuffer) {
+             eglSwapBuffers(dpy, surface);
+         } else {
+             glFinish();
+         }
+     }
+
+
      eglTerminate(dpy);
      return 0;
 }
