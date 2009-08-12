@@ -203,7 +203,7 @@ public class RenderScript {
     ///////////////////////////////////////////////////////////////////////////////////
     //
 
-    RenderScript(Surface sur) {
+    public RenderScript(Surface sur) {
         mSurface = sur;
         mDev = nDeviceCreate();
         mContext = nContextCreate(mDev, mSurface, 0);
