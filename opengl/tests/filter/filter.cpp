@@ -10,6 +10,8 @@
 
 using namespace android;
 
+#define USE_DRAW_TEXTURE 1
+
 int main(int argc, char** argv)
 {
     if (argc!=2 && argc!=3) {
@@ -66,7 +68,7 @@ int main(int argc, char** argv)
      glViewport(0, 0, w, h);
      glMatrixMode(GL_PROJECTION);
      glLoadIdentity();
-     glOrthof(0, w, h, 0, 0, 1);
+     glOrthof(0, w, 0, h, 0, 1);
 
      glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
@@ -153,22 +155,25 @@ int main(int argc, char** argv)
      if (!usePbuffer) {
          eglSwapBuffers(dpy, surface);
      }
-
+     
      glMatrixMode(GL_MODELVIEW);
      //glEnable(GL_SCISSOR_TEST);
      //glScissor(0,dim,dim,h-dim);
      
      for (int y=0 ; y<dim ; y++) {
-         glLoadIdentity();
-         glTranslatef(0, -y, 0);
-
          glClear(GL_COLOR_BUFFER_BIT);
+
+#if USE_DRAW_TEXTURE && GL_OES_draw_texture
+         glDrawTexiOES(0, y, 1, dim, dim);
+#else
+         glLoadIdentity();
+         glTranslatef(0, y, 0);
          glEnableClientState(GL_VERTEX_ARRAY);
          glEnableClientState(GL_TEXTURE_COORD_ARRAY);
          glVertexPointer(2, GL_FLOAT, 0, vertices);
          glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-         glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
-
+         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+#endif
 
          if (!usePbuffer) {
              eglSwapBuffers(dpy, surface);
@@ -176,7 +181,6 @@ int main(int argc, char** argv)
              glFinish();
          }
      }
-
 
      eglTerminate(dpy);
      return 0;
