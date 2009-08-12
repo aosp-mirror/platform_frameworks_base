@@ -40,7 +40,7 @@ import java.util.List;
  * methods and the the {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH}
  * {@link android.content.Intent Intent}.  This class does provide a basic
  * overview of search services and how to integrate them with your activities.
- * If you do require direct access to the Search Manager, do not instantiate 
+ * If you do require direct access to the SearchManager, do not instantiate 
  * this class directly; instead, retrieve it through
  * {@link android.content.Context#getSystemService
  * context.getSystemService(Context.SEARCH_SERVICE)}.
@@ -49,9 +49,10 @@ import java.util.List;
  * <ol>
  * <li><a href="#DeveloperGuide">Developer Guide</a>
  * <li><a href="#HowSearchIsInvoked">How Search Is Invoked</a>
- * <li><a href="#QuerySearchApplications">Query-Search Applications</a>
- * <li><a href="#FilterSearchApplications">Filter-Search Applications</a>
+ * <li><a href="#ImplementingSearchForYourApp">Implementing Search for Your App</a>
  * <li><a href="#Suggestions">Search Suggestions</a>
+ * <li><a href="#ExposingSearchSuggestionsToQuickSearchBox">Exposing Search Suggestions to
+ * Quick Search Box</a></li>
  * <li><a href="#ActionKeys">Action Keys</a>
  * <li><a href="#SearchabilityMetadata">Searchability Metadata</a>
  * <li><a href="#PassingSearchContext">Passing Search Context</a>
@@ -62,37 +63,18 @@ import java.util.List;
  * <h3>Developer Guide</h3>
  * 
  * <p>The ability to search for user, system, or network based data is considered to be
- * a core user-level feature of the android platform.  At any time, the user should be
+ * a core user-level feature of the Android platform.  At any time, the user should be
  * able to use a familiar command, button, or keystroke to invoke search, and the user
- * should be able to search any data which is available to them.  The goal is to make search 
- * appear to the user as a seamless, system-wide feature.
+ * should be able to search any data which is available to them.
  * 
- * <p>In terms of implementation, there are three broad classes of Applications:
- * <ol>
- * <li>Applications that are not inherently searchable</li>
- * <li>Query-Search Applications</li>
- * <li>Filter-Search Applications</li>
- * </ol>
- * <p>These categories, as well as related topics, are discussed in
- * the sections below.
+ * <p>To make search appear to the user as a seamless system-wide feature, the application
+ * framework centrally controls it, offering APIs to individual applications to control how they
+ * are searched. Applications can customize how search is invoked, how the search dialog looks,
+ * and what type of search results are available, including suggestions that are available as the
+ * user types.
  *
- * <p>Even if your application is not <i>searchable</i>, it can still support the invocation of
- * search.  Please review the section <a href="#HowSearchIsInvoked">How Search Is Invoked</a>
- * for more information on how to support this.
- * 
- * <p>Many applications are <i>searchable</i>.  These are 
- * the applications which can convert a query string into a list of results.  
- * Within this subset, applications can be grouped loosely into two families:  
- * <ul><li><i>Query Search</i> applications perform batch-mode searches - each query string is 
- * converted to a list of results.</li>
- * <li><i>Filter Search</i> applications provide live filter-as-you-type searches.</li></ul>
- * <p>Generally speaking, you would use query search for network-based data, and filter 
- * search for local data, but this is not a hard requirement and applications 
- * are free to use the model that fits them best (or invent a new model).
- * <p>It should be clear that the search implementation decouples "search 
- * invocation" from "searchable".  This satisfies the goal of making search appear
- * to be "universal".  The user should be able to launch any search from 
- * almost any context.
+ * <p>Even applications which are not searchable will by default support the invocation of
+ * search to trigger Quick Search Box, the system's 'global search'.
  * 
  * <a name="HowSearchIsInvoked"></a>
  * <h3>How Search Is Invoked</h3>
@@ -100,14 +82,15 @@ import java.util.List;
  * <p>Unless impossible or inapplicable, all applications should support
  * invoking the search UI.  This means that when the user invokes the search command, 
  * a search UI will be presented to them.  The search command is currently defined as a menu
- * item called "Search" (with an alphabetic shortcut key of "S"), or on some devices, a dedicated
+ * item called "Search" (with an alphabetic shortcut key of "S"), or on many devices, a dedicated
  * search button key.
- * <p>If your application is not inherently searchable, you can also allow the search UI
- * to be invoked in a "web search" mode.  If the user enters a search term and clicks the 
- * "Search" button, this will bring the browser to the front and will launch a web-based
+ * <p>If your application is not inherently searchable, the default implementation will cause
+ * the search UI to be invoked in a "global search" mode known as Quick Search Box.  As the user
+ * types, search suggestions from across the device and the web will be surfaced, and if they
+ * click the "Search" button, this will bring the browser to the front and will launch a web-based
  * search.  The user will be able to click the "Back" button and return to your application.
  * <p>In general this is implemented by your activity, or the {@link android.app.Activity Activity}
- * base class, which captures the search command and invokes the Search Manager to 
+ * base class, which captures the search command and invokes the SearchManager to 
  * display and operate the search UI.  You can also cause the search UI to be presented in response
  * to user keystrokes in your activity (for example, to instantly start filter searching while
  * viewing a list and typing any key).
@@ -124,7 +107,7 @@ import java.util.List;
  * button or menu item - and invoking the search UI directly.</li>
  * <li>You can provide a <i>type-to-search</i> feature, in which search is invoked automatically
  * when the user enters any characters.</li>
- * <li>Even if your application is not inherently searchable, you can allow web search, 
+ * <li>Even if your application is not inherently searchable, you can allow global search, 
  * via the search key (or even via a search menu item).
  * <li>You can disable search entirely.  This should only be used in very rare circumstances,
  * as search is a system-wide feature and users will expect it to be available in all contexts.</li>
@@ -148,21 +131,23 @@ import java.util.List;
  * setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);   // search within your activity
  * setDefaultKeyMode(DEFAULT_KEYS_SEARCH_GLOBAL);  // search using platform global search</pre>
  * 
- * <p><b>How to enable web-based search.</b>  In addition to searching within your activity or
- * application, you can also use the Search Manager to invoke a platform-global search, typically
- * a web search.  There are two ways to do this:
+ * <p><b>How to enable global search with Quick Search Box.</b>  In addition to searching within
+ * your activity or application, you can also use the Search Manager to invoke a platform-global
+ * search, which uses Quick Search Box to search across the device and the web. There are two ways
+ * to do this:
  * <ul><li>You can simply define "search" within your application or activity to mean global search.
  * This is described in more detail in the 
  * <a href="#SearchabilityMetadata">Searchability Metadata</a> section.  Briefly, you will
  * add a single meta-data entry to your manifest, declaring that the default search
  * for your application is "*".  This indicates to the system that no application-specific
  * search activity is provided, and that it should launch web-based search instead.</li>
- * <li>You can specify this at invocation time via default keys (see above), overriding
- * {@link android.app.Activity#onSearchRequested}, or via a direct call to 
- * {@link android.app.Activity#startSearch}.  This is most useful if you wish to provide local
- * searchability <i>and</i> access to global search.</li></ul> 
+ * <li>Simply do nothing and the default implementation of
+ * {@link android.app.Activity#onSearchRequested} will cause global search to be triggered.
+ * (You can also always trigger search via a direct call to {@link android.app.Activity#startSearch}.
+ * This is most useful if you wish to provide local searchability <i>and</i> access to global
+ * search.)</li></ul> 
  * 
- * <p><b>How to disable search from your activity.</b>  search is a system-wide feature and users
+ * <p><b>How to disable search from your activity.</b> Search is a system-wide feature and users
  * will expect it to be available in all contexts.  If your UI design absolutely precludes
  * launching search, override {@link android.app.Activity#onSearchRequested onSearchRequested}
  * as shown:
@@ -172,7 +157,7 @@ import java.util.List;
  *    return false;
  * }</pre> 
  * 
- * <p><b>Managing focus and knowing if Search is active.</b>  The search UI is not a separate
+ * <p><b>Managing focus and knowing if search is active.</b>  The search UI is not a separate
  * activity, and when the UI is invoked or dismissed, your activity will not typically be paused,
  * resumed, or otherwise notified by the methods defined in 
  * <a href="{@docRoot}guide/topics/fundamentals.html#actlife">Application Fundamentals: 
@@ -194,17 +179,10 @@ import java.util.List;
  * the search UI.  More details on searchable activities and search intents are provided in the
  * sections below.
  *
- * <a name="QuerySearchApplications"></a>
- * <h3>Query-Search Applications</h3>
- * 
- * <p>Query-search applications are those that take a single query (e.g. a search
- * string) and present a set of results that may fit.  Primary examples include
- * web queries, map lookups, or email searches (with the common thread being
- * network query dispatch).  It may also be the case that certain local searches
- * are treated this way.  It's up to the application to decide.
+ * <a name="ImplementingSearchForYourApp"></a>
+ * <h3>Implementing Search for Your App</h3>
  *
- * <p><b>What you need to do:</b>  The following steps are necessary in order to
- * implement query search.
+ * <p>The following steps are necessary in order to implement search.
  * <ul>
  * <li>Implement search invocation as described above.  (Strictly speaking, 
  * these are decoupled, but it would make little sense to be "searchable" but not 
@@ -220,16 +198,16 @@ import java.util.List;
  * {@link #QUERY getStringExtra(SearchManager.QUERY)}.</li>
  * <li>To identify and support your searchable activity, you'll need to 
  * provide an XML file providing searchability configuration parameters, a reference to that 
- * in your searchable activity's <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>
- * entry, and an intent-filter declaring that you can 
- * receive ACTION_SEARCH intents.  This is described in more detail in the 
- * <a href="#SearchabilityMetadata">Searchability Metadata</a> section.</li>
- * <li>Your <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a> also needs a metadata entry
- * providing a global reference to the searchable activity.  This is the "glue" directing the search
- * UI, when invoked from any of your <i>other</i> activities, to use your application as the
- * default search context.  This is also described in more detail in the 
+ * in your searchable activity's
+ * <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a> entry, and an
+ * intent-filter declaring that you can receive ACTION_SEARCH intents. This is described in more
+ * detail in the <a href="#SearchabilityMetadata">Searchability Metadata</a> section.</li>
+ * <li>Your <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a> also needs a
+ * metadata entry providing a global reference to the searchable activity. This is the "glue"
+ * directing the search UI, when invoked from any of your <i>other</i> activities, to use your
+ * application as the default search context.  This is also described in more detail in the 
  * <a href="#SearchabilityMetadata">Searchability Metadata</a> section.</li> 
- * <li>Finally, you may want to define your search results activity as with the 
+ * <li>Finally, you may want to define your search results activity as single-top with the 
  * {@link android.R.attr#launchMode singleTop} launchMode flag.  This allows the system 
  * to launch searches from/to the same activity without creating a pile of them on the 
  * activity stack.  If you do this, be sure to also override 
@@ -255,25 +233,10 @@ import java.util.List;
  *     doSearchWithQuery(queryString);
  * }</pre>
  * 
- * <a name="FilterSearchApplications"></a>
- * <h3>Filter-Search Applications</h3>
- * 
- * <p>Filter-search applications are those that use live text entry (e.g. keystrokes)) to
- * display and continuously update a list of results.  Primary examples include applications
- * that use locally-stored data.
- * 
- * <p>Filter search is not directly supported by the Search Manager.  Most filter search
- * implementations will use variants of {@link android.widget.Filterable}, such as a 
- * {@link android.widget.ListView} bound to a {@link android.widget.SimpleCursorAdapter}.  However,
- * you may find it useful to mix them together, by declaring your filtered view searchable.  With
- * this configuration, you can still present the standard search dialog in all activities
- * within your application, but transition to a filtered search when you enter the activity
- * and display the results.
- * 
  * <a name="Suggestions"></a>
  * <h3>Search Suggestions</h3>
  * 
- * <p>A powerful feature of the Search Manager is the ability of any application to easily provide
+ * <p>A powerful feature of the search system is the ability of any application to easily provide
  * live "suggestions" in order to prompt the user.  Each application implements suggestions in a 
  * different, unique, and appropriate way.  Suggestions be drawn from many sources, including but 
  * not limited to:
@@ -285,11 +248,11 @@ import java.util.List;
  * <li>Summaries of possible results</li>
  * </ul>
  * 
- * <p>Another feature of suggestions is that they can expose queries or results before the user
- * ever visits the application.  This reduces the amount of context switching required, and helps
- * the user access their data quickly and with less context shifting.  In order to provide this
- * capability, suggestions are accessed via a 
- * {@link android.content.ContentProvider Content Provider}.  
+ * <p>Once an application is configured to provide search suggestions, those same suggestions can
+ * easily be made available to the system-wide Quick Search Box, providing faster access to its
+ * content from on central prominent place. See
+ * <a href="#ExposingSearchSuggestionsToQuickSearchBox">Exposing Search Suggestions to Quick Search
+ * Box</a> for more details.
  * 
  * <p>The primary form of suggestions is known as <i>queried suggestions</i> and is based on query
  * text that the user has already typed.  This would generally be based on partial matches in
@@ -299,7 +262,8 @@ import java.util.List;
  * available, they should be weighted based on other factors - for example, most recent queries 
  * or most recent results.
  * 
- * <p><b>Overview of how suggestions are provided.</b>  When the search manager identifies a 
+ * <p><b>Overview of how suggestions are provided.</b>  Suggestions are accessed via a
+ * {@link android.content.ContentProvider Content Provider}. When the search manager identifies a 
  * particular activity as searchable, it will check for certain metadata which indicates that
  * there is also a source of suggestions.  If suggestions are provided, the following steps are
  * taken.
@@ -569,6 +533,11 @@ import java.util.List;
  * query text is provided and the SUGGEST_COLUMN_INTENT_DATA values are not suitable for user 
  * inspection and editing.</li></ul>
  *
+ * <a name="ExposingSearchSuggestionsToQuickSearchBox"></a>
+ * <h3>Exposing Search Suggestions to Quick Search Box</h3>
+ * 
+ * <p>
+ * 
  * <a name="ActionKeys"></a>
  * <h3>Action Keys</h3>
  * 
