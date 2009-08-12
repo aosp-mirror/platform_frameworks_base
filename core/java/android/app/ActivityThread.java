@@ -1701,6 +1701,14 @@ public final class ActivityThread {
             printRow(pw, TWO_COUNT_COLUMNS, "numPagers:", stats.numPagers, "inactivePageKB:",
                     (stats.totalBytes - stats.referencedBytes) / 1024);
             printRow(pw, ONE_COUNT_COLUMN, "activePageKB:", stats.referencedBytes / 1024);
+            
+            // Asset details.
+            String assetAlloc = AssetManager.getAssetAllocations();
+            if (assetAlloc != null) {
+                pw.println(" ");
+                pw.println(" Asset Allocations");
+                pw.print(assetAlloc);
+            }
         }
 
         private void printRow(PrintWriter pw, String format, Object...objs) {
