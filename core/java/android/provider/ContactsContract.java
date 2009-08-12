@@ -795,7 +795,10 @@ public final class ContactsContract {
 
             /**
              * The name that should be used to display the contact.
-             * <P>Type: TEXT</P>
+             * <i>Unstructured component of the name should be consistent with
+             * its structured representation.</i>
+             * <p>
+             * Type: TEXT
              */
             public static final String DISPLAY_NAME = "data9";
         }
@@ -944,7 +947,8 @@ public final class ContactsContract {
             public static final int TYPE_OTHER = 3;
 
             /**
-             * The full, unstructured postal address.
+             * The full, unstructured postal address. <i>This field must be
+             * consistent with any structured data.</i>
              * <p>
              * Type: TEXT
              */
@@ -955,7 +959,9 @@ public final class ContactsContract {
              * Also for 'in care of' or 'c/o'.
              * <p>
              * Type: TEXT
+             * @deprecated since this isn't supported by gd:structuredPostalAddress
              */
+            @Deprecated
             public static final String AGENT = "data4";
 
             /**
@@ -963,7 +969,9 @@ public final class ContactsContract {
              * necessarily numbers), eg. "The Pillars".
              * <p>
              * Type: TEXT
+             * @deprecated since this isn't supported by gd:structuredPostalAddress
              */
+            @Deprecated
             public static final String HOUSENAME = "data5";
 
             /**
@@ -1006,7 +1014,9 @@ public final class ContactsContract {
              * intended for delivery addresses.
              * <p>
              * Type: TEXT
+             * @deprecated since this isn't supported by gd:structuredPostalAddress
              */
+            @Deprecated
             public static final String SUBREGION = "data10";
 
             /**
