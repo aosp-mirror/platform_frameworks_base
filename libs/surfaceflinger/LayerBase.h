@@ -335,7 +335,7 @@ public:
         sp<LayerBaseClient> getOwner() const;
 
     private:
-        virtual sp<SurfaceBuffer> getBuffer(int usage);
+        virtual sp<SurfaceBuffer> getBuffer();
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers); 
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();

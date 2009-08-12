@@ -184,7 +184,7 @@ private:
     friend class IOMX;
     const sp<ISurface>& getISurface() const { return mSurface; }
 
-    status_t getBufferLocked(int index, int usage);
+    status_t getBufferLocked(int index);
    
            status_t validate(per_client_cblk_t const* cblk) const;
     static void _send_dirty_region(layer_cblk_t* lcblk, const Region& dirty);
@@ -197,13 +197,11 @@ private:
     static int lockBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
     static int queueBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
     static int query(android_native_window_t* window, int what, int* value);
-    static int perform(android_native_window_t* window, int operation, ...);
 
     int dequeueBuffer(android_native_buffer_t** buffer);
     int lockBuffer(android_native_buffer_t* buffer);
     int queueBuffer(android_native_buffer_t* buffer);
     int query(int what, int* value);
-    int perform(int operation, va_list args);
 
     status_t dequeueBuffer(sp<SurfaceBuffer>* buffer);
     status_t lockBuffer(const sp<SurfaceBuffer>& buffer);
@@ -219,7 +217,6 @@ private:
     uint32_t                    mIdentity;
     uint32_t                    mWidth;
     uint32_t                    mHeight;
-    uint32_t                    mUsage;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
     mutable Region              mDirtyRegion;

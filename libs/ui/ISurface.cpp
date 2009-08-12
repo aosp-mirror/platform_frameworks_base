@@ -71,11 +71,10 @@ public:
     {
     }
 
-    virtual sp<SurfaceBuffer> getBuffer(int usage)
+    virtual sp<SurfaceBuffer> getBuffer()
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
-        data.writeInt32(usage);
         remote()->transact(GET_BUFFER, data, &reply);
         sp<SurfaceBuffer> buffer = new SurfaceBuffer(reply);
         return buffer;
@@ -136,8 +135,7 @@ status_t BnSurface::onTransact(
     switch(code) {
         case GET_BUFFER: {
             CHECK_INTERFACE(ISurface, data, reply);
-            int usage = data.readInt32();
-            sp<SurfaceBuffer> buffer(getBuffer(usage));
+            sp<SurfaceBuffer> buffer(getBuffer());
             return SurfaceBuffer::writeToParcel(reply, buffer.get());
         }
         case REGISTER_BUFFERS: {
