@@ -1725,6 +1725,8 @@ class BackupManagerService extends IBackupManager.Stub {
                     return 0;
                 }
             }
+
+            Log.w(TAG, "Restore token " + Long.toHexString(token) + " not found");
             return -1;
         }
 
