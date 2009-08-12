@@ -667,6 +667,11 @@ public final class AssetManager {
     /**
      * {@hide}
      */
+    public native static final String getAssetAllocations();
+    
+    /**
+     * {@hide}
+     */
     public native static final int getGlobalAssetManagerCount();
     
     private native final int newTheme();
