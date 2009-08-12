@@ -71,8 +71,7 @@ void LayerDim::initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h)
         // TODO: api to pass the usage flags
         sp<Buffer> buffer = new Buffer(w, h, PIXEL_FORMAT_RGB_565,
                  BufferAllocator::USAGE_SW_WRITE_OFTEN |
-                 BufferAllocator::USAGE_HW_TEXTURE |
-                 BufferAllocator::USAGE_HW_2D);
+                 BufferAllocator::USAGE_HW_TEXTURE);
         
         android_native_buffer_t* clientBuf = buffer->getNativeBuffer();
 
@@ -97,7 +96,7 @@ void LayerDim::initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h)
 
         // initialize the texture with zeros
         GGLSurface t;
-        buffer->lock(&t, GRALLOC_USAGE_SW_READ_NEVER | GRALLOC_USAGE_SW_WRITE_OFTEN);
+        buffer->lock(&t, GRALLOC_USAGE_SW_WRITE_OFTEN);
         memset(t.data, 0, t.stride * t.height * 2);
         buffer->unlock();
         sUseTexture = true;

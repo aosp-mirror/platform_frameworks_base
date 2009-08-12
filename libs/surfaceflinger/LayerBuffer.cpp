@@ -467,7 +467,6 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
                     mTempBitmap.clear();
                     mTempBitmap = new android::Buffer(
                             tmp_w, tmp_h, src.img.format,
-                            BufferAllocator::USAGE_HW_TEXTURE |
                             BufferAllocator::USAGE_HW_2D);
                     err = mTempBitmap->initCheck();
                 }
