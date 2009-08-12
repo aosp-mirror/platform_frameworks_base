@@ -426,13 +426,17 @@ public final class CacheManager {
         }
 
         cacheRet.contentLength = cacheRet.outFile.length();
-        if (checkCacheRedirect(cacheRet.httpStatusCode)) {
+        boolean redirect = checkCacheRedirect(cacheRet.httpStatusCode);
+        if (redirect) {
             // location is in database, no need to keep the file
             cacheRet.contentLength = 0;
             cacheRet.localPath = "";
-            cacheRet.outFile.delete();
-        } else if (cacheRet.contentLength == 0) {
-            cacheRet.outFile.delete();
+        }
+        if ((redirect || cacheRet.contentLength == 0)
+                && !cacheRet.outFile.delete()) {
+            Log.e(LOGTAG, cacheRet.outFile.getPath() + " delete failed.");
+        }
+        if (cacheRet.contentLength == 0) {
             return;
         }
 
@@ -467,7 +471,10 @@ public final class CacheManager {
                     // if mBaseDir doesn't exist, files can be null.
                     if (files != null) {
                         for (int i = 0; i < files.length; i++) {
-                            new File(mBaseDir, files[i]).delete();
+                            File f = new File(mBaseDir, files[i]);
+                            if (!f.delete()) {
+                                Log.e(LOGTAG, f.getPath() + " delete failed.");
+                            }
                         }
                     }
                 } catch (SecurityException e) {
@@ -495,7 +502,10 @@ public final class CacheManager {
             ArrayList<String> pathList = mDataBase.trimCache(CACHE_TRIM_AMOUNT);
             int size = pathList.size();
             for (int i = 0; i < size; i++) {
-                new File(mBaseDir, pathList.get(i)).delete();
+                File f = new File(mBaseDir, pathList.get(i));
+                if (!f.delete()) {
+                    Log.e(LOGTAG, f.getPath() + " delete failed.");
+                }
             }
         }
     }
