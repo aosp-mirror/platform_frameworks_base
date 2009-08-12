@@ -132,7 +132,6 @@ FramebufferNativeWindow::FramebufferNativeWindow()
     android_native_window_t::lockBuffer = lockBuffer;
     android_native_window_t::queueBuffer = queueBuffer;
     android_native_window_t::query = query;
-    android_native_window_t::perform = perform;
 }
 
 FramebufferNativeWindow::~FramebufferNativeWindow() 
@@ -234,18 +233,6 @@ int FramebufferNativeWindow::query(android_native_window_t* window,
     }
     *value = 0;
     return BAD_VALUE;
-}
-
-int FramebufferNativeWindow::perform(android_native_window_t* window,
-        int operation, ...)
-{
-    switch (operation) {
-        case NATIVE_WINDOW_SET_USAGE:
-            break;
-        default:
-            return NAME_NOT_FOUND;
-    }
-    return NO_ERROR;
 }
 
 // ----------------------------------------------------------------------------

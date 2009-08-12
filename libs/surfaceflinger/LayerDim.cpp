@@ -21,7 +21,6 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 
-#include "BufferAllocator.h"
 #include "LayerDim.h"
 #include "SurfaceFlinger.h"
 #include "DisplayHardware/DisplayHardware.h"
@@ -69,11 +68,7 @@ void LayerDim::initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h)
 
     if (LIKELY(flags & DisplayHardware::DIRECT_TEXTURE)) {
         // TODO: api to pass the usage flags
-        sp<Buffer> buffer = new Buffer(w, h, PIXEL_FORMAT_RGB_565,
-                 BufferAllocator::USAGE_SW_WRITE_OFTEN |
-                 BufferAllocator::USAGE_HW_TEXTURE |
-                 BufferAllocator::USAGE_HW_2D);
-        
+        sp<Buffer> buffer = new Buffer(w, h, PIXEL_FORMAT_RGB_565);
         android_native_buffer_t* clientBuf = buffer->getNativeBuffer();
 
         glGenTextures(1, &sTexId);
