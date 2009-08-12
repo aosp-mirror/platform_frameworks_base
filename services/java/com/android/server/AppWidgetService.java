@@ -1009,8 +1009,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         if (success) {
             // delete any hosts that didn't manage to get connected (should happen)
             // if it matters, they'll be reconnected.
-            final int N = mHosts.size();
-            for (int i=0; i<N; i++) {
+            for (int i=mHosts.size()-1; i>=0; i--) {
                 pruneHostLocked(mHosts.get(i));
             }
         } else {
