@@ -144,6 +144,14 @@ public final class MathUtils {
         return start + (stop - start) * amount;
     }
     
+    public static float norm(float start, float stop, float value) {
+        return (value - start) / (stop - start);
+    }
+    
+    public static float map(float minStart, float minStop, float maxStart, float maxStop, float value) {
+        return maxStart + (maxStart - maxStop) * ((value - minStart) / (minStop - minStart));
+    }
+
     public static int random(int howbig) {
         return (int) (sRandom.nextFloat() * howbig);
     }
