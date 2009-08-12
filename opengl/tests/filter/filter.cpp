@@ -157,11 +157,14 @@ int main(int argc, char** argv)
      }
      
      glMatrixMode(GL_MODELVIEW);
-     //glEnable(GL_SCISSOR_TEST);
-     //glScissor(0,dim,dim,h-dim);
+     glScissor(0,dim,dim,h-dim);
+     glDisable(GL_SCISSOR_TEST);
      
      for (int y=0 ; y<dim ; y++) {
+         //glDisable(GL_SCISSOR_TEST);
          glClear(GL_COLOR_BUFFER_BIT);
+
+         //glEnable(GL_SCISSOR_TEST);
 
 #if USE_DRAW_TEXTURE && GL_OES_draw_texture
          glDrawTexiOES(0, y, 1, dim, dim);
