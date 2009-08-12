@@ -33,13 +33,11 @@ CameraHardwareStub::CameraHardwareStub()
                     mRawHeap(0),
                     mFakeCamera(0),
                     mPreviewFrameSize(0),
-                    mRawPictureCallback(0),
-                    mJpegPictureCallback(0),
-                    mPictureCallbackCookie(0),
-                    mPreviewCallback(0),
-                    mPreviewCallbackCookie(0),
-                    mAutoFocusCallback(0),
-                    mAutoFocusCallbackCookie(0),
+                    mNotifyCb(0),
+                    mDataCb(0),
+                    mDataCbTimestamp(0),
+                    mCallbackCookie(0),
+                    mMsgEnabled(0),
                     mCurrentPreviewFrame(0)
 {
     initDefaultParameters();
@@ -112,6 +110,36 @@ sp<IMemoryHeap> CameraHardwareStub::getRawHeap() const
     return mRawHeap;
 }
 
+void CameraHardwareStub::setCallbacks(notify_callback notify_cb,
+                                      data_callback data_cb,
+                                      data_callback_timestamp data_cb_timestamp,
+                                      void* user)
+{
+    Mutex::Autolock lock(mLock);
+    mNotifyCb = notify_cb;
+    mDataCb = data_cb;
+    mDataCbTimestamp = data_cb_timestamp;
+    mCallbackCookie = user;
+}
+
+void CameraHardwareStub::enableMsgType(int32_t msgType)
+{
+    Mutex::Autolock lock(mLock);
+    mMsgEnabled |= msgType;
+}
+
+void CameraHardwareStub::disableMsgType(int32_t msgType)
+{
+    Mutex::Autolock lock(mLock);
+    mMsgEnabled &= ~msgType;
+}
+
+bool CameraHardwareStub::msgTypeEnabled(int32_t msgType)
+{
+    Mutex::Autolock lock(mLock);
+    return (mMsgEnabled & msgType);
+}
+
 // ---------------------------------------------------------------------------
 
 int CameraHardwareStub::previewThread()
@@ -150,7 +178,8 @@ int CameraHardwareStub::previewThread()
         //LOGV("previewThread: generated frame to buffer %d", mCurrentPreviewFrame);
         
         // Notify the client of a new frame.
-        mPreviewCallback(buffer, mPreviewCallbackCookie);
+        if (mMsgEnabled & CAMERA_MSG_PREVIEW_FRAME)
+            mDataCb(CAMERA_MSG_PREVIEW_FRAME, buffer, mCallbackCookie);
     
         // Advance the buffer pointer.
         mCurrentPreviewFrame = (mCurrentPreviewFrame + 1) % kBufferCount;
@@ -162,15 +191,13 @@ int CameraHardwareStub::previewThread()
     return NO_ERROR;
 }
 
-status_t CameraHardwareStub::startPreview(preview_callback cb, void* user)
+status_t CameraHardwareStub::startPreview()
 {
     Mutex::Autolock lock(mLock);
     if (mPreviewThread != 0) {
         // already running
         return INVALID_OPERATION;
     }
-    mPreviewCallback = cb;
-    mPreviewCallbackCookie = user;
     mPreviewThread = new PreviewThread(this);
     return NO_ERROR;
 }
@@ -197,7 +224,7 @@ bool CameraHardwareStub::previewEnabled() {
     return mPreviewThread != 0;
 }
 
-status_t CameraHardwareStub::startRecording(recording_callback cb, void* user)
+status_t CameraHardwareStub::startRecording()
 {
     return UNKNOWN_ERROR;
 }
@@ -225,25 +252,14 @@ int CameraHardwareStub::beginAutoFocusThread(void *cookie)
 
 int CameraHardwareStub::autoFocusThread()
 {
-    if (mAutoFocusCallback != NULL) {
-        mAutoFocusCallback(true, mAutoFocusCallbackCookie);
-        mAutoFocusCallback = NULL;
-        return NO_ERROR;
-    }
-    return UNKNOWN_ERROR;
+    if (mMsgEnabled & CAMERA_MSG_FOCUS)
+        mNotifyCb(CAMERA_MSG_FOCUS, true, 0, mCallbackCookie);
+    return NO_ERROR;
 }
 
-status_t CameraHardwareStub::autoFocus(autofocus_callback af_cb,
-                                       void *user)
+status_t CameraHardwareStub::autoFocus()
 {
     Mutex::Autolock lock(mLock);
-
-    if (mAutoFocusCallback != NULL) {
-        return mAutoFocusCallback == af_cb ? NO_ERROR : INVALID_OPERATION;
-    }
-
-    mAutoFocusCallback = af_cb;
-    mAutoFocusCallbackCookie = user;
     if (createThread(beginAutoFocusThread, this) == false)
         return UNKNOWN_ERROR;
     return NO_ERROR;
@@ -257,10 +273,10 @@ status_t CameraHardwareStub::autoFocus(autofocus_callback af_cb,
 
 int CameraHardwareStub::pictureThread()
 {
-    if (mShutterCallback)
-        mShutterCallback(mPictureCallbackCookie);
+    if (mMsgEnabled & CAMERA_MSG_SHUTTER)
+        mNotifyCb(CAMERA_MSG_SHUTTER, 0, 0, mCallbackCookie);
 
-    if (mRawPictureCallback) {
+    if (mMsgEnabled & CAMERA_MSG_RAW_IMAGE) {
         //FIXME: use a canned YUV image!
         // In the meantime just make another fake camera picture.
         int w, h;
@@ -268,42 +284,28 @@ int CameraHardwareStub::pictureThread()
         sp<MemoryBase> mem = new MemoryBase(mRawHeap, 0, w * 2 * h);
         FakeCamera cam(w, h);
         cam.getNextFrameAsYuv422((uint8_t *)mRawHeap->base());
-        if (mRawPictureCallback)
-            mRawPictureCallback(mem, mPictureCallbackCookie);
+        mDataCb(CAMERA_MSG_RAW_IMAGE, mem, mCallbackCookie);
     }
 
-    if (mJpegPictureCallback) {
+    if (mMsgEnabled & CAMERA_MSG_COMPRESSED_IMAGE) {
         sp<MemoryHeapBase> heap = new MemoryHeapBase(kCannedJpegSize);
         sp<MemoryBase> mem = new MemoryBase(heap, 0, kCannedJpegSize);
         memcpy(heap->base(), kCannedJpeg, kCannedJpegSize);
-        if (mJpegPictureCallback)
-            mJpegPictureCallback(mem, mPictureCallbackCookie);
+        mDataCb(CAMERA_MSG_COMPRESSED_IMAGE, mem, mCallbackCookie);
     }
     return NO_ERROR;
 }
 
-status_t CameraHardwareStub::takePicture(shutter_callback shutter_cb,
-                                         raw_callback raw_cb,
-                                         jpeg_callback jpeg_cb,
-                                         void* user)
+status_t CameraHardwareStub::takePicture()
 {
     stopPreview();
-    mShutterCallback = shutter_cb;
-    mRawPictureCallback = raw_cb;
-    mJpegPictureCallback = jpeg_cb;
-    mPictureCallbackCookie = user;
     if (createThread(beginPictureThread, this) == false)
         return -1;
     return NO_ERROR;
 }
 
-status_t CameraHardwareStub::cancelPicture(bool cancel_shutter,
-                                           bool cancel_raw,
-                                           bool cancel_jpeg)
+status_t CameraHardwareStub::cancelPicture()
 {
-    if (cancel_shutter) mShutterCallback = NULL;
-    if (cancel_raw) mRawPictureCallback = NULL;
-    if (cancel_jpeg) mJpegPictureCallback = NULL;
     return NO_ERROR;
 }
 

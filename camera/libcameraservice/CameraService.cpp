@@ -59,6 +59,7 @@ extern "C" {
 #define DEBUG_DUMP_PREVIEW_FRAME_TO_FILE 0 /* n-th frame to write */
 #define DEBUG_DUMP_JPEG_SNAPSHOT_TO_FILE 0
 #define DEBUG_DUMP_YUV_SNAPSHOT_TO_FILE 0
+#define DEBUG_DUMP_POSTVIEW_SNAPSHOT_TO_FILE 0
 
 #if DEBUG_DUMP_PREVIEW_FRAME_TO_FILE
 static int debug_frame_cnt;
@@ -217,6 +218,16 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
     mClientPid = clientPid;
     mHardware = openCameraHardware();
     mUseOverlay = mHardware->useOverlay();
+
+    mHardware->setCallbacks(notifyCallback,
+                            dataCallback,
+                            dataCallbackTimestamp,
+                            mCameraService.get());
+
+    // Enable zoom, error, and focus messages by default
+    mHardware->enableMsgType(CAMERA_MSG_ERROR |
+                             CAMERA_MSG_ZOOM |
+                             CAMERA_MSG_FOCUS);
 
     mMediaPlayerClick = newMediaPlayer("/system/media/audio/ui/camera_click.ogg");
     mMediaPlayerBeep = newMediaPlayer("/system/media/audio/ui/VideoRecord.ogg");
@@ -391,7 +402,13 @@ void CameraService::Client::disconnect()
     // idle state.
     mHardware->stopPreview();
     // Cancel all picture callbacks.
-    mHardware->cancelPicture(true, true, true);
+    mHardware->disableMsgType(CAMERA_MSG_SHUTTER |
+                              CAMERA_MSG_POSTVIEW_FRAME |
+                              CAMERA_MSG_RAW_IMAGE |
+                              CAMERA_MSG_COMPRESSED_IMAGE);
+    mHardware->cancelPicture();
+    // Turn off remaining messages.
+    mHardware->disableMsgType(CAMERA_MSG_ALL_MSGS);
     // Release the hardware resources.
     mHardware->release();
     // Release the held overlay resources.
@@ -456,6 +473,13 @@ void CameraService::Client::setPreviewCallbackFlag(int callback_flag)
     Mutex::Autolock lock(mLock);
     if (checkPid() != NO_ERROR) return;
     mPreviewCallbackFlag = callback_flag;
+
+    if(mUseOverlay) {
+        if(mPreviewCallbackFlag & FRAME_CALLBACK_FLAG_ENABLE_MASK)
+            mHardware->enableMsgType(CAMERA_MSG_PREVIEW_FRAME);
+        else
+            mHardware->disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
+    }
 }
 
 // start preview mode
@@ -514,7 +538,7 @@ status_t CameraService::Client::startRecordingMode()
     }
 
     // start recording mode
-    ret = mHardware->startRecording(recordingCallback, mCameraService.get());
+    ret = mHardware->startRecording();
     if (ret != NO_ERROR) {
         LOGE("mHardware->startRecording() failed with status %d", ret);
     }
@@ -617,10 +641,10 @@ status_t CameraService::Client::startPreviewMode()
             ret = setOverlay();
         }
         if (ret != NO_ERROR) return ret;
-        ret = mHardware->startPreview(NULL, mCameraService.get());
+        ret = mHardware->startPreview();
     } else {
-        ret = mHardware->startPreview(previewCallback,
-                                      mCameraService.get());
+        mHardware->enableMsgType(CAMERA_MSG_PREVIEW_FRAME);
+        ret = mHardware->startPreview();
         if (ret != NO_ERROR) return ret;
         // If preview display has been set, register preview buffers now.
         if (mSurface != 0) {
@@ -647,6 +671,9 @@ status_t CameraService::Client::startRecording()
         mMediaPlayerBeep->seekTo(0);
         mMediaPlayerBeep->start();
     }
+
+    mHardware->enableMsgType(CAMERA_MSG_VIDEO_FRAME);
+
     return startCameraMode(CAMERA_RECORDING_MODE);
 }
 
@@ -664,6 +691,7 @@ void CameraService::Client::stopPreview()
     }
 
     mHardware->stopPreview();
+    mHardware->disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
     LOGD("stopPreview(), hardware stopped OK");
 
     if (mSurface != 0 && !mUseOverlay) {
@@ -689,8 +717,11 @@ void CameraService::Client::stopRecording()
         mMediaPlayerBeep->seekTo(0);
         mMediaPlayerBeep->start();
     }
+
     mHardware->stopRecording();
+    mHardware->disableMsgType(CAMERA_MSG_VIDEO_FRAME);
     LOGD("stopRecording(), hardware stopped OK");
+
     mPreviewBuffer.clear();
 }
 
@@ -778,65 +809,6 @@ static void dump_to_file(const char *fname,
 }
 #endif
 
-// preview callback - frame buffer update
-void CameraService::Client::previewCallback(const sp<IMemory>& mem, void* user)
-{
-    LOGV("previewCallback()");
-    sp<Client> client = getClientFromCookie(user);
-    if (client == 0) {
-        return;
-    }
-
-#if DEBUG_HEAP_LEAKS && 0 // debugging
-    if (gWeakHeap == NULL) {
-        ssize_t offset;
-        size_t size;
-        sp<IMemoryHeap> heap = mem->getMemory(&offset, &size);
-        if (gWeakHeap != heap) {
-            LOGD("SETTING PREVIEW HEAP");
-            heap->trackMe(true, true);
-            gWeakHeap = heap;
-        }
-    }
-#endif
-
-#if DEBUG_DUMP_PREVIEW_FRAME_TO_FILE
-    {
-        if (debug_frame_cnt++ == DEBUG_DUMP_PREVIEW_FRAME_TO_FILE) {
-            ssize_t offset;
-            size_t size;
-            sp<IMemoryHeap> heap = mem->getMemory(&offset, &size);
-            dump_to_file("/data/preview.yuv",
-                         (uint8_t *)heap->base() + offset, size);
-        }
-    }
-#endif
-
-    // The strong pointer guarantees the client will exist, but no lock is held.
-    client->postPreviewFrame(mem);
-
-#if DEBUG_CLIENT_REFERENCES
-    //**** if the client's refcount is 1, then we are about to destroy it here,
-    // which is bad--print all refcounts.
-    if (client->getStrongCount() == 1) {
-        LOGE("++++++++++++++++ (PREVIEW) THIS WILL CAUSE A LOCKUP!");
-        client->printRefs();
-    }
-#endif
-}
-
-// recording callback
-void CameraService::Client::recordingCallback(nsecs_t timestamp, const sp<IMemory>& mem, void* user)
-{
-    LOGV("recordingCallback");
-    sp<Client> client = getClientFromCookie(user);
-    if (client == 0) {
-        return;
-    }
-    // The strong pointer guarantees the client will exist, but no lock is held.
-    client->postRecordingFrame(timestamp, mem);
-}
-
 // take a picture - image is returned in callback
 status_t CameraService::Client::autoFocus()
 {
@@ -851,8 +823,7 @@ status_t CameraService::Client::autoFocus()
         return INVALID_OPERATION;
     }
 
-    return mHardware->autoFocus(autoFocusCallback,
-                                mCameraService.get());
+    return mHardware->autoFocus();
 }
 
 // take a picture - image is returned in callback
@@ -869,38 +840,36 @@ status_t CameraService::Client::takePicture()
         return INVALID_OPERATION;
     }
 
-    return mHardware->takePicture(shutterCallback,
-                                  yuvPictureCallback,
-                                  jpegPictureCallback,
-                                  mCameraService.get());
+    mHardware->enableMsgType(CAMERA_MSG_SHUTTER |
+                             CAMERA_MSG_POSTVIEW_FRAME |
+                             CAMERA_MSG_RAW_IMAGE |
+                             CAMERA_MSG_COMPRESSED_IMAGE);
+
+    return mHardware->takePicture();
 }
 
-// picture callback - snapshot taken
-void CameraService::Client::shutterCallback(void *user)
+// snapshot taken
+void CameraService::Client::handleShutter()
 {
-    sp<Client> client = getClientFromCookie(user);
-    if (client == 0) {
-        return;
-    }
-
     // Play shutter sound.
-    if (client->mMediaPlayerClick.get() != NULL) {
-        client->mMediaPlayerClick->seekTo(0);
-        client->mMediaPlayerClick->start();
+    if (mMediaPlayerClick.get() != NULL) {
+        mMediaPlayerClick->seekTo(0);
+        mMediaPlayerClick->start();
     }
 
     // Screen goes black after the buffer is unregistered.
-    if (client->mSurface != 0 && !client->mUseOverlay) {
-        client->mSurface->unregisterBuffers();
+    if (mSurface != 0 && !mUseOverlay) {
+        mSurface->unregisterBuffers();
     }
 
-    client->postShutter();
+    mCameraClient->notifyCallback(CAMERA_MSG_SHUTTER, 0, 0);
+    mHardware->disableMsgType(CAMERA_MSG_SHUTTER);
 
     // It takes some time before yuvPicture callback to be called.
     // Register the buffer for raw image here to reduce latency.
-    if (client->mSurface != 0 && !client->mUseOverlay) {
+    if (mSurface != 0 && !mUseOverlay) {
         int w, h;
-        CameraParameters params(client->mHardware->getParameters());
+        CameraParameters params(mHardware->getParameters());
         params.getPictureSize(&w, &h);
         uint32_t transform = 0;
         if (params.getOrientation() == CameraParameters::CAMERA_ORIENTATION_PORTRAIT) {
@@ -908,26 +877,92 @@ void CameraService::Client::shutterCallback(void *user)
             transform = ISurface::BufferHeap::ROT_90;
         }
         ISurface::BufferHeap buffers(w, h, w, h,
-            PIXEL_FORMAT_YCbCr_420_SP, transform, 0, client->mHardware->getRawHeap());
+            PIXEL_FORMAT_YCbCr_420_SP, transform, 0, mHardware->getRawHeap());
 
-        client->mSurface->registerBuffers(buffers);
+        mSurface->registerBuffers(buffers);
     }
 }
 
-// picture callback - raw image ready
-void CameraService::Client::yuvPictureCallback(const sp<IMemory>& mem,
-                                               void *user)
+// preview callback - frame buffer update
+void CameraService::Client::handlePreviewData(const sp<IMemory>& mem)
 {
-    sp<Client> client = getClientFromCookie(user);
-    if (client == 0) {
-        return;
+    ssize_t offset;
+    size_t size;
+    sp<IMemoryHeap> heap = mem->getMemory(&offset, &size);
+
+#if DEBUG_HEAP_LEAKS && 0 // debugging
+    if (gWeakHeap == NULL) {
+        if (gWeakHeap != heap) {
+            LOGD("SETTING PREVIEW HEAP");
+            heap->trackMe(true, true);
+            gWeakHeap = heap;
+        }
     }
-    if (mem == NULL) {
-        client->postRaw(NULL);
-        client->postError(UNKNOWN_ERROR);
+#endif
+#if DEBUG_DUMP_PREVIEW_FRAME_TO_FILE
+    {
+        if (debug_frame_cnt++ == DEBUG_DUMP_PREVIEW_FRAME_TO_FILE) {
+            dump_to_file("/data/preview.yuv",
+                         (uint8_t *)heap->base() + offset, size);
+        }
+    }
+#endif
+
+    if (!mUseOverlay)
+    {
+        Mutex::Autolock surfaceLock(mSurfaceLock);
+        if (mSurface != NULL) {
+            mSurface->postBuffer(offset);
+        }
+    }
+
+    // Is the callback enabled or not?
+    if (!(mPreviewCallbackFlag & FRAME_CALLBACK_FLAG_ENABLE_MASK)) {
+        // If the enable bit is off, the copy-out and one-shot bits are ignored
+        LOGV("frame callback is diabled");
         return;
     }
 
+    // Is the received frame copied out or not?
+    if (mPreviewCallbackFlag & FRAME_CALLBACK_FLAG_COPY_OUT_MASK) {
+        LOGV("frame is copied out");
+        copyFrameAndPostCopiedFrame(heap, offset, size);
+    } else {
+        LOGV("frame is directly sent out without copying");
+        mCameraClient->dataCallback(CAMERA_MSG_PREVIEW_FRAME, mem);
+    }
+
+    // Is this is one-shot only?
+    if (mPreviewCallbackFlag & FRAME_CALLBACK_FLAG_ONE_SHOT_MASK) {
+        LOGV("One-shot only, thus clear the bits and disable frame callback");
+        mPreviewCallbackFlag &= ~(FRAME_CALLBACK_FLAG_ONE_SHOT_MASK |
+                                FRAME_CALLBACK_FLAG_COPY_OUT_MASK |
+                                FRAME_CALLBACK_FLAG_ENABLE_MASK);
+        if (mUseOverlay)
+            mHardware->disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
+    }
+}
+
+// picture callback - postview image ready
+void CameraService::Client::handlePostview(const sp<IMemory>& mem)
+{
+#if DEBUG_DUMP_POSTVIEW_SNAPSHOT_TO_FILE // for testing pursposes only
+    {
+        ssize_t offset;
+        size_t size;
+        sp<IMemoryHeap> heap = mem->getMemory(&offset, &size);
+        dump_to_file("/data/postview.yuv",
+                     (uint8_t *)heap->base() + offset, size);
+    }
+#endif
+
+    mCameraClient->dataCallback(CAMERA_MSG_POSTVIEW_FRAME, mem);
+    mHardware->disableMsgType(CAMERA_MSG_POSTVIEW_FRAME);
+}
+
+// picture callback - raw image ready
+void CameraService::Client::handleRawPicture(const sp<IMemory>& mem)
+{
     ssize_t offset;
     size_t size;
     sp<IMemoryHeap> heap = mem->getMemory(&offset, &size);
@@ -935,44 +970,24 @@ void CameraService::Client::yuvPictureCallback(const sp<IMemory>& mem,
     gWeakHeap = heap; // debugging
 #endif
 
-    //LOGV("yuvPictureCallback(%d, %d, %p)", offset, size, user);
+    //LOGV("handleRawPicture(%d, %d)", offset, size);
 #if DEBUG_DUMP_YUV_SNAPSHOT_TO_FILE // for testing pursposes only
     dump_to_file("/data/photo.yuv",
                  (uint8_t *)heap->base() + offset, size);
 #endif
 
     // Put the YUV version of the snapshot in the preview display.
-    if (client->mSurface != 0 && !client->mUseOverlay) {
-        client->mSurface->postBuffer(offset);
+    if (mSurface != 0 && !mUseOverlay) {
+        mSurface->postBuffer(offset);
     }
 
-    client->postRaw(mem);
-
-#if DEBUG_CLIENT_REFERENCES
-    //**** if the client's refcount is 1, then we are about to destroy it here,
-    // which is bad--print all refcounts.
-    if (client->getStrongCount() == 1) {
-        LOGE("++++++++++++++++ (RAW) THIS WILL CAUSE A LOCKUP!");
-        client->printRefs();
-    }
-#endif
+    mCameraClient->dataCallback(CAMERA_MSG_RAW_IMAGE, mem);
+    mHardware->disableMsgType(CAMERA_MSG_RAW_IMAGE);
 }
 
-// picture callback - jpeg ready
-void CameraService::Client::jpegPictureCallback(const sp<IMemory>& mem, void *user)
+// picture callback - compressed picture ready
+void CameraService::Client::handleCompressedPicture(const sp<IMemory>& mem)
 {
-    sp<Client> client = getClientFromCookie(user);
-    if (client == 0) {
-        return;
-    }
-    if (mem == NULL) {
-        client->postJpeg(NULL);
-        client->postError(UNKNOWN_ERROR);
-        return;
-    }
-
-    /** We absolutely CANNOT call into user code with a lock held **/
-
 #if DEBUG_DUMP_JPEG_SNAPSHOT_TO_FILE // for testing pursposes only
     {
         ssize_t offset;
@@ -983,32 +998,100 @@ void CameraService::Client::jpegPictureCallback(const sp<IMemory>& mem, void *us
     }
 #endif
 
-    client->postJpeg(mem);
-
-#if DEBUG_CLIENT_REFERENCES
-    //**** if the client's refcount is 1, then we are about to destroy it here,
-    // which is bad--print all refcounts.
-    if (client->getStrongCount() == 1) {
-        LOGE("++++++++++++++++ (JPEG) THIS WILL CAUSE A LOCKUP!");
-        client->printRefs();
-    }
-#endif
+    mCameraClient->dataCallback(CAMERA_MSG_COMPRESSED_IMAGE, mem);
+    mHardware->disableMsgType(CAMERA_MSG_COMPRESSED_IMAGE);
 }
 
-void CameraService::Client::autoFocusCallback(bool focused, void *user)
+void CameraService::Client::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2, void* user)
 {
-    LOGV("autoFocusCallback");
+    LOGV("notifyCallback(%d)", msgType);
 
     sp<Client> client = getClientFromCookie(user);
     if (client == 0) {
         return;
     }
 
-    client->postAutoFocus(focused);
+    switch (msgType) {
+        case CAMERA_MSG_SHUTTER:
+            client->handleShutter();
+            break;
+        default:
+            client->mCameraClient->notifyCallback(msgType, ext1, ext2);
+            break;
+    }
 
 #if DEBUG_CLIENT_REFERENCES
     if (client->getStrongCount() == 1) {
-        LOGE("++++++++++++++++ (AUTOFOCUS) THIS WILL CAUSE A LOCKUP!");
+        LOGE("++++++++++++++++ (NOTIFY CALLBACK) THIS WILL CAUSE A LOCKUP!");
+        client->printRefs();
+    }
+#endif
+}
+
+void CameraService::Client::dataCallback(int32_t msgType, const sp<IMemory>& dataPtr, void* user)
+{
+    LOGV("dataCallback(%d)", msgType);
+
+    sp<Client> client = getClientFromCookie(user);
+    if (client == 0) {
+        return;
+    }
+
+    if (dataPtr == NULL) {
+        LOGE("Null data returned in data callback");
+        client->mCameraClient->notifyCallback(CAMERA_MSG_ERROR, UNKNOWN_ERROR, 0);
+        client->mCameraClient->dataCallback(msgType, NULL);
+        return;
+    }
+
+    switch (msgType) {
+        case CAMERA_MSG_PREVIEW_FRAME:
+            client->handlePreviewData(dataPtr);
+            break;
+        case CAMERA_MSG_POSTVIEW_FRAME:
+            client->handlePostview(dataPtr);
+            break;
+        case CAMERA_MSG_RAW_IMAGE:
+            client->handleRawPicture(dataPtr);
+            break;
+        case CAMERA_MSG_COMPRESSED_IMAGE:
+            client->handleCompressedPicture(dataPtr);
+            break;
+        default:
+            client->mCameraClient->dataCallback(msgType, dataPtr);
+            break;
+    }
+
+#if DEBUG_CLIENT_REFERENCES
+    if (client->getStrongCount() == 1) {
+        LOGE("++++++++++++++++ (DATA CALLBACK) THIS WILL CAUSE A LOCKUP!");
+        client->printRefs();
+    }
+#endif
+}
+
+void CameraService::Client::dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType,
+                                                  const sp<IMemory>& dataPtr, void* user)
+{
+    LOGV("dataCallbackTimestamp(%d)", msgType);
+
+    sp<Client> client = getClientFromCookie(user);
+    if (client == 0) {
+        return;
+    }
+
+    if (dataPtr == NULL) {
+        LOGE("Null data returned in data with timestamp callback");
+        client->mCameraClient->notifyCallback(CAMERA_MSG_ERROR, UNKNOWN_ERROR, 0);
+        client->mCameraClient->dataCallbackTimestamp(0, msgType, NULL);
+        return;
+    }
+
+    client->mCameraClient->dataCallbackTimestamp(timestamp, msgType, dataPtr);
+
+#if DEBUG_CLIENT_REFERENCES
+    if (client->getStrongCount() == 1) {
+        LOGE("++++++++++++++++ (DATA CALLBACK TIMESTAMP) THIS WILL CAUSE A LOCKUP!");
         client->printRefs();
     }
 #endif
@@ -1048,30 +1131,6 @@ String8 CameraService::Client::getParameters() const
     return params;
 }
 
-void CameraService::Client::postAutoFocus(bool focused)
-{
-    LOGV("postAutoFocus");
-    mCameraClient->notifyCallback(CAMERA_MSG_FOCUS, (int32_t)focused, 0);
-}
-
-void CameraService::Client::postShutter()
-{
-    LOGD("postShutter");
-    mCameraClient->notifyCallback(CAMERA_MSG_SHUTTER, 0, 0);
-}
-
-void CameraService::Client::postRaw(const sp<IMemory>& mem)
-{
-    LOGD("postRaw");
-    mCameraClient->dataCallback(CAMERA_MSG_RAW_IMAGE, mem);
-}
-
-void CameraService::Client::postJpeg(const sp<IMemory>& mem)
-{
-    LOGD("postJpeg");
-    mCameraClient->dataCallback(CAMERA_MSG_COMPRESSED_IMAGE, mem);
-}
-
 void CameraService::Client::copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, size_t offset, size_t size)
 {
     LOGV("copyFrameAndPostCopiedFrame");
@@ -1098,65 +1157,6 @@ void CameraService::Client::copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, si
         return;
     }
     mCameraClient->dataCallback(CAMERA_MSG_PREVIEW_FRAME, frame);
-}
-
-void CameraService::Client::postRecordingFrame(nsecs_t timestamp, const sp<IMemory>& frame)
-{
-    LOGV("postRecordingFrame");
-    if (frame == 0) {
-        LOGW("frame is a null pointer");
-        return;
-    }
-    mCameraClient->dataCallbackTimestamp(timestamp, CAMERA_MSG_VIDEO_FRAME, frame);
-}
-
-void CameraService::Client::postPreviewFrame(const sp<IMemory>& mem)
-{
-    LOGV("postPreviewFrame");
-    if (mem == 0) {
-        LOGW("mem is a null pointer");
-        return;
-    }
-
-    ssize_t offset;
-    size_t size;
-    sp<IMemoryHeap> heap = mem->getMemory(&offset, &size);
-    if ( !mUseOverlay )
-    {
-        Mutex::Autolock surfaceLock(mSurfaceLock);
-        if (mSurface != NULL) {
-            mSurface->postBuffer(offset);
-        }
-    }
-
-    // Is the callback enabled or not?
-    if (!(mPreviewCallbackFlag & FRAME_CALLBACK_FLAG_ENABLE_MASK)) {
-        // If the enable bit is off, the copy-out and one-shot bits are ignored
-        LOGV("frame callback is diabled");
-        return;
-    }
-
-    // Is the received frame copied out or not?
-    if (mPreviewCallbackFlag & FRAME_CALLBACK_FLAG_COPY_OUT_MASK) {
-        LOGV("frame is copied out");
-        copyFrameAndPostCopiedFrame(heap, offset, size);
-    } else {
-        LOGV("frame is directly sent out without copying");
-        mCameraClient->dataCallback(CAMERA_MSG_PREVIEW_FRAME, mem);
-    }
-
-    // Is this is one-shot only?
-    if (mPreviewCallbackFlag & FRAME_CALLBACK_FLAG_ONE_SHOT_MASK) {
-        LOGV("One-shot only, thus clear the bits and disable frame callback");
-        mPreviewCallbackFlag &= ~(FRAME_CALLBACK_FLAG_ONE_SHOT_MASK |
-                                FRAME_CALLBACK_FLAG_COPY_OUT_MASK |
-                                FRAME_CALLBACK_FLAG_ENABLE_MASK);
-    }
-}
-
-void CameraService::Client::postError(status_t error)
-{
-    mCameraClient->notifyCallback(CAMERA_MSG_ERROR, error, 0);
 }
 
 status_t CameraService::dump(int fd, const Vector<String16>& args)

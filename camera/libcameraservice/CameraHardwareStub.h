@@ -32,23 +32,27 @@ public:
     virtual sp<IMemoryHeap> getPreviewHeap() const;
     virtual sp<IMemoryHeap> getRawHeap() const;
 
-    virtual status_t    startPreview(preview_callback cb, void* user);
+    virtual void        setCallbacks(notify_callback notify_cb,
+                                     data_callback data_cb,
+                                     data_callback_timestamp data_cb_timestamp,
+                                     void* user);
+
+    virtual void        enableMsgType(int32_t msgType);
+    virtual void        disableMsgType(int32_t msgType);
+    virtual bool        msgTypeEnabled(int32_t msgType);
+
+    virtual status_t    startPreview();
     virtual void        stopPreview();
     virtual bool        previewEnabled();
 
-    virtual status_t    startRecording(recording_callback cb, void* user);
+    virtual status_t    startRecording();
     virtual void        stopRecording();
     virtual bool        recordingEnabled();
     virtual void        releaseRecordingFrame(const sp<IMemory>& mem);
 
-    virtual status_t    autoFocus(autofocus_callback, void *user);
-    virtual status_t    takePicture(shutter_callback,
-                                    raw_callback,
-                                    jpeg_callback,
-                                    void* user);
-    virtual status_t    cancelPicture(bool cancel_shutter,
-                                      bool cancel_raw,
-                                      bool cancel_jpeg);
+    virtual status_t    autoFocus();
+    virtual status_t    takePicture();
+    virtual status_t    cancelPicture();
     virtual status_t    dump(int fd, const Vector<String16>& args) const;
     virtual status_t    setParameters(const CameraParameters& params);
     virtual CameraParameters  getParameters() const;
@@ -109,18 +113,15 @@ private:
     bool                mPreviewRunning;
     int                 mPreviewFrameSize;
 
-    shutter_callback    mShutterCallback;
-    raw_callback        mRawPictureCallback;
-    jpeg_callback       mJpegPictureCallback;
-    void                *mPictureCallbackCookie;
-
     // protected by mLock
     sp<PreviewThread>   mPreviewThread;
-    preview_callback    mPreviewCallback;
-    void                *mPreviewCallbackCookie;
 
-    autofocus_callback  mAutoFocusCallback;
-    void                *mAutoFocusCallbackCookie;
+    notify_callback    mNotifyCb;
+    data_callback      mDataCb;
+    data_callback_timestamp mDataCbTimestamp;
+    void               *mCallbackCookie;
+
+    int32_t             mMsgEnabled;
 
     // only used from PreviewThread
     int                 mCurrentPreviewFrame;

@@ -40,15 +40,16 @@ public class Camera {
     private static final String TAG = "Camera";
     
     // These match the enums in frameworks/base/include/ui/Camera.h
-    private static final int CAMERA_MSG_ERROR = 0;
-    private static final int CAMERA_MSG_SHUTTER = 1;
-    private static final int CAMERA_MSG_FOCUS = 2;
-    private static final int CAMERA_MSG_ZOOM = 3;
-    private static final int CAMERA_MSG_PREVIEW_FRAME = 4;
-    private static final int CAMERA_MSG_VIDEO_FRAME = 5;
-    private static final int CAMERA_MSG_POSTVIEW_FRAME = 6;
-    private static final int CAMERA_MSG_RAW_IMAGE = 7;
-    private static final int CAMERA_MSG_COMPRESSED_IMAGE = 8;
+    private static final int CAMERA_MSG_ERROR            = 0x001;
+    private static final int CAMERA_MSG_SHUTTER          = 0x002;
+    private static final int CAMERA_MSG_FOCUS            = 0x004;
+    private static final int CAMERA_MSG_ZOOM             = 0x008;
+    private static final int CAMERA_MSG_PREVIEW_FRAME    = 0x010;
+    private static final int CAMERA_MSG_VIDEO_FRAME      = 0x020;
+    private static final int CAMERA_MSG_POSTVIEW_FRAME   = 0x040;
+    private static final int CAMERA_MSG_RAW_IMAGE        = 0x080;
+    private static final int CAMERA_MSG_COMPRESSED_IMAGE = 0x100;
+    private static final int CAMERA_MSG_ALL_MSGS         = 0x1FF;
 
     private int mNativeContext; // accessed by native methods
     private EventHandler mEventHandler;
