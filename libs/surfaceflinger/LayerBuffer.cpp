@@ -28,6 +28,7 @@
 
 #include <hardware/copybit.h>
 
+#include "BufferAllocator.h"
 #include "LayerBuffer.h"
 #include "SurfaceFlinger.h"
 #include "DisplayHardware/DisplayHardware.h"
@@ -464,7 +465,10 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
                         mTempBitmap->getWidth() < tmp_w || 
                         mTempBitmap->getHeight() < tmp_h) {
                     mTempBitmap.clear();
-                    mTempBitmap = new android::Buffer(tmp_w, tmp_h, src.img.format);
+                    mTempBitmap = new android::Buffer(
+                            tmp_w, tmp_h, src.img.format,
+                            BufferAllocator::USAGE_HW_TEXTURE |
+                            BufferAllocator::USAGE_HW_2D);
                     err = mTempBitmap->initCheck();
                 }
 

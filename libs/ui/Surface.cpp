@@ -414,6 +414,7 @@ void Surface::init()
     android_native_window_t::lockBuffer       = lockBuffer;
     android_native_window_t::queueBuffer      = queueBuffer;
     android_native_window_t::query            = query;
+    android_native_window_t::perform          = perform;
     mSwapRectangle.makeInvalid();
     DisplayInfo dinfo;
     SurfaceComposerClient::getDisplayInfo(0, &dinfo);
@@ -423,6 +424,8 @@ void Surface::init()
     const_cast<int&>(android_native_window_t::minSwapInterval) = 1;
     const_cast<int&>(android_native_window_t::maxSwapInterval) = 1;
     const_cast<uint32_t&>(android_native_window_t::flags) = 0;
+    // be default we request a hardware surface
+    mUsage = GRALLOC_USAGE_HW_RENDER;
 }
 
 
@@ -512,6 +515,17 @@ int Surface::query(android_native_window_t* window,
     return self->query(what, value);
 }
 
+int Surface::perform(android_native_window_t* window, 
+        int operation, ...)
+{
+    va_list args;
+    va_start(args, operation);
+    Surface* self = getSelf(window);
+    int res = self->perform(operation, args);
+    va_end(args);
+    return res;
+}
+
 // ----------------------------------------------------------------------------
 
 status_t Surface::dequeueBuffer(sp<SurfaceBuffer>* buffer)
@@ -561,7 +575,7 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 
     volatile const surface_info_t* const back = lcblk->surface + backIdx;
     if (back->flags & surface_info_t::eNeedNewBuffer) {
-        err = getBufferLocked(backIdx);
+        err = getBufferLocked(backIdx, mUsage);
     }
 
     if (err == NO_ERROR) {
@@ -627,6 +641,20 @@ int Surface::query(int what, int* value)
     return BAD_VALUE;
 }
 
+int Surface::perform(int operation, va_list args)
+{
+    int res = NO_ERROR;
+    switch (operation) {
+        case NATIVE_WINDOW_SET_USAGE:
+            mUsage = va_arg(args, int);
+            break;
+        default:
+            res = NAME_NOT_FOUND;
+            break;
+    }
+    return res;
+}
+
 // ----------------------------------------------------------------------------
 
 status_t Surface::lock(SurfaceInfo* info, bool blocking) {
@@ -636,6 +664,9 @@ status_t Surface::lock(SurfaceInfo* info, bool blocking) {
 status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking) 
 {
     // FIXME: needs some locking here
+
+    // we're intending to do software rendering from this point
+    mUsage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN;
     
     sp<SurfaceBuffer> backBuffer;
     status_t err = dequeueBuffer(&backBuffer);
@@ -725,10 +756,10 @@ void Surface::setSwapRectangle(const Rect& r) {
     mSwapRectangle = r;
 }
 
-status_t Surface::getBufferLocked(int index)
+status_t Surface::getBufferLocked(int index, int usage)
 {
     status_t err = NO_MEMORY;
-    sp<SurfaceBuffer> buffer = mSurface->getBuffer();
+    sp<SurfaceBuffer> buffer = mSurface->getBuffer(usage);
     LOGE_IF(buffer==0, "ISurface::getBuffer() returned NULL");
     if (buffer != 0) {
         sp<SurfaceBuffer>& currentBuffer(mBuffers[index]);

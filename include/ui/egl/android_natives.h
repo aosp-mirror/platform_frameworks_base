@@ -67,6 +67,11 @@ enum {
     NATIVE_WINDOW_FORMAT    = 2,
 };
 
+/* valid operations for the (*perform)() hook */
+enum {
+    NATIVE_WINDOW_SET_USAGE = 0
+};
+
 struct android_native_window_t 
 {
 #ifdef __cplusplus
@@ -142,10 +147,44 @@ struct android_native_window_t
      * Returns 0 on success or -errno on error.
      */
     int     (*query)(struct android_native_window_t* window,
-            int what, int* value);
+                int what, int* value);
     
-    void* reserved_proc[4];
+    /*
+     * hook used to perform various operations on the surface.
+     * (*perform)() is a generic mechanism to add functionality to
+     * android_native_window_t while keeping backward binary compatibility.
+     * 
+     * This hook should not be called directly, instead use the helper functions
+     * defined below.
+     * 
+     * The valid operations are:
+     *     NATIVE_WINDOW_SET_USAGE
+     *  
+     */
+    
+    int     (*perform)(struct android_native_window_t* window,
+                int operation, ... );
+    
+    void* reserved_proc[3];
 };
+
+
+/*
+ *  native_window_set_usage() sets the intended usage flags for the next
+ *  buffers acquired with (*lockBuffer)() and on.
+ *  By default (if this function is never called), a usage of
+ *      GRALLOC_USAGE_HW_RENDER | GRALLOC_USAGE_HW_TEXTURE
+ *  is assumed.
+ *  Calling this function will usually cause following buffers to be
+ *  reallocated.
+ */
+
+inline int native_window_set_usage(
+        struct android_native_window_t* window, int usage)
+{
+    return window->perform(window, NATIVE_WINDOW_SET_USAGE, usage);
+}
+
 
 // ---------------------------------------------------------------------------
 

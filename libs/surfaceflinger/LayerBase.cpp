@@ -759,7 +759,7 @@ status_t LayerBaseClient::Surface::onTransact(
     return BnSurface::onTransact(code, data, reply, flags);
 }
 
-sp<SurfaceBuffer> LayerBaseClient::Surface::getBuffer() 
+sp<SurfaceBuffer> LayerBaseClient::Surface::getBuffer(int) 
 {
     return NULL; 
 }

@@ -384,6 +384,10 @@ egl_window_surface_v2_t::~egl_window_surface_v2_t() {
 
 EGLBoolean egl_window_surface_v2_t::connect() 
 {
+    // we're intending to do software rendering
+    native_window_set_usage(nativeWindow, 
+            GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
+
     // dequeue a buffer
     if (nativeWindow->dequeueBuffer(nativeWindow, &buffer) != NO_ERROR) {
         return setError(EGL_BAD_ALLOC, EGL_FALSE);
