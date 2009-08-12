@@ -44,8 +44,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import com.android.internal.app.ShutdownThread;
-
 
 /**
  * <p>BatteryService monitors the charging status, and charge level of the device
@@ -176,6 +174,22 @@ class BatteryService extends Binder {
         return mBatteryLevel;
     }
 
+    void systemReady() {
+        // check our power situation now that it is safe to display the shutdown dialog.
+        shutdownIfNoPower();
+    }
+
+    private final void shutdownIfNoPower() {
+        // shut down gracefully if our battery is critically low and we are not powered.
+        // wait until the system has booted before attempting to display the shutdown dialog.
+        if (mBatteryLevel == 0 && !isPowered() && ActivityManagerNative.isSystemReady()) {
+            Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
+            intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+        }
+    }
+
     private native void native_update();
 
     private synchronized final void update() {
@@ -184,11 +198,8 @@ class BatteryService extends Binder {
         boolean logOutlier = false;
         long dischargeDuration = 0;
 
-        // shut down gracefully if our battery is critically low and we are not powered
-        if (mBatteryLevel == 0 && isPowered(0xffffffff)) {
-            ShutdownThread.shutdown(mContext, false);
-        }
-        
+        shutdownIfNoPower();
+
         mBatteryLevelCritical = mBatteryLevel <= CRITICAL_BATTERY_LEVEL;
         if (mAcOnline) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_AC;
