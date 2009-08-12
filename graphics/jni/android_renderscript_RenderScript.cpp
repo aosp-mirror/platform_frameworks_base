@@ -396,7 +396,7 @@ nAllocationRead_i(JNIEnv *_env, jobject _this, jint alloc, jintArray data)
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAllocationData((RsAllocation)alloc, ptr);
+    rsAllocationRead((RsAllocation)alloc, ptr);
     _env->ReleaseIntArrayElements(data, ptr, JNI_COMMIT);
 }
 
@@ -405,9 +405,9 @@ nAllocationRead_f(JNIEnv *_env, jobject _this, jint alloc, jfloatArray data)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     jint len = _env->GetArrayLength(data);
-    LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
+    LOG_API("nAllocationRead_f, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAllocationData((RsAllocation)alloc, ptr);
+    rsAllocationRead((RsAllocation)alloc, ptr);
     _env->ReleaseFloatArrayElements(data, ptr, JNI_COMMIT);
 }
 
