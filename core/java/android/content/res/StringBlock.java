@@ -202,7 +202,7 @@ final class StringBlock {
                     sub = subtag(tag, ";size=");
                     if (sub != null) {
                         int size = Integer.parseInt(sub);
-                        buffer.setSpan(new AbsoluteSizeSpan(size),
+                        buffer.setSpan(new AbsoluteSizeSpan(size, true),
                                        style[i+1], style[i+2]+1,
                                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
@@ -310,7 +310,7 @@ final class StringBlock {
      * the ascent if possible, or the descent if shrinking the ascent further
      * will make the text unreadable.
      */
-    private static class Height implements LineHeightSpan {
+    private static class Height implements LineHeightSpan.WithDensity {
         private int mSize;
         private static float sProportion = 0;
 
@@ -321,9 +321,21 @@ final class StringBlock {
         public void chooseHeight(CharSequence text, int start, int end,
                                  int spanstartv, int v,
                                  Paint.FontMetricsInt fm) {
-            if (fm.bottom - fm.top < mSize) {
-                fm.top = fm.bottom - mSize;
-                fm.ascent = fm.ascent - mSize;
+            // Should not get called, at least not by StaticLayout.
+            chooseHeight(text, start, end, spanstartv, v, fm, null);
+        }
+
+        public void chooseHeight(CharSequence text, int start, int end,
+                                 int spanstartv, int v,
+                                 Paint.FontMetricsInt fm, TextPaint paint) {
+            int size = mSize;
+            if (paint != null) {
+                size *= paint.density;
+            }
+
+            if (fm.bottom - fm.top < size) {
+                fm.top = fm.bottom - size;
+                fm.ascent = fm.ascent - size;
             } else {
                 if (sProportion == 0) {
                     /*
@@ -343,27 +355,27 @@ final class StringBlock {
 
                 int need = (int) Math.ceil(-fm.top * sProportion);
 
-                if (mSize - fm.descent >= need) {
+                if (size - fm.descent >= need) {
                     /*
                      * It is safe to shrink the ascent this much.
                      */
 
-                    fm.top = fm.bottom - mSize;
-                    fm.ascent = fm.descent - mSize;
-                } else if (mSize >= need) {
+                    fm.top = fm.bottom - size;
+                    fm.ascent = fm.descent - size;
+                } else if (size >= need) {
                     /*
                      * We can't show all the descent, but we can at least
                      * show all the ascent.
                      */
 
                     fm.top = fm.ascent = -need;
-                    fm.bottom = fm.descent = fm.top + mSize;
+                    fm.bottom = fm.descent = fm.top + size;
                 } else {
                     /*
                      * Show as much of the ascent as we can, and no descent.
                      */
 
-                    fm.top = fm.ascent = -mSize;
+                    fm.top = fm.ascent = -size;
                     fm.bottom = fm.descent = 0;
                 }
             }
