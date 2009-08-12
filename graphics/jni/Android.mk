@@ -1,4 +1,10 @@
 
+# libRS needs libacc, which isn't 64-bit clean, and so can't be built
+# for the simulator on gHardy, and therefore libRS needs to be excluded
+# from the simulator as well, and so in turn librs_jni needs to be
+# excluded.
+ifneq ($(TARGET_SIMULATOR),true)
+
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -36,3 +42,4 @@ LOCAL_REQUIRED_MODULES := libRS
 
 include $(BUILD_SHARED_LIBRARY)
 
+endif #simulator
