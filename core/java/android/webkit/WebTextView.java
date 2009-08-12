@@ -85,6 +85,10 @@ import java.util.ArrayList;
     // happens, the next time the user hits a key it is okay for the focus
     // pointer to not match the WebTextView's node pointer
     private boolean         mOkayForFocusNotToMatch;
+    // Whether or not a selection change was generated from webkit.  If it was,
+    // we do not need to pass the selection back to webkit.
+    private boolean         mFromWebKit;
+    private boolean         mGotTouchDown;
     // Array to store the final character added in onTextChanged, so that its
     // KeyEvents may be determined.
     private char[]          mCharacter = new char[1];
@@ -342,7 +346,7 @@ import java.util.ArrayList;
 
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
-        if (mWebView != null) {
+        if (!mFromWebKit && mWebView != null) {
             if (DebugFlags.WEB_TEXT_VIEW) {
                 Log.v(LOGTAG, "onSelectionChanged selStart=" + selStart
                         + " selEnd=" + selEnd);
@@ -423,6 +427,7 @@ import java.util.ArrayList;
             mDragStartTime = event.getEventTime();
             mDragSent = false;
             mScrolled = false;
+            mGotTouchDown = true;
             break;
         case MotionEvent.ACTION_MOVE:
             Spannable buffer = getText();
@@ -456,14 +461,17 @@ import java.util.ArrayList;
         case MotionEvent.ACTION_CANCEL:
             if (!mScrolled) {
                 // If the page scrolled, or the TextView scrolled, we do not
-                // want to change the selection, and the long press has already
-                // been canceled, so there is no need to call into super.
-                super.onTouchEvent(event);
+                // want to change the selection
+                cancelLongPress();
+                if (mGotTouchDown && mWebView != null) {
+                    mWebView.touchUpOnTextField(event);
+                }
             }
             // Necessary for the WebView to reset its state
             if (mWebView != null && mDragSent) {
                 mWebView.onTouchEvent(event);
             }
+            mGotTouchDown = false;
             break;
         default:
             break;
@@ -683,6 +691,15 @@ import java.util.ArrayList;
         mWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
         mHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
         requestFocus();
+    }
+
+    /**
+     * Set the selection, and disable our onSelectionChanged action.
+     */
+    /* package */ void setSelectionFromWebKit(int start, int end) {
+        mFromWebKit = true;
+        Selection.setSelection((Spannable) getText(), start, end);
+        mFromWebKit = false;
     }
 
     /**

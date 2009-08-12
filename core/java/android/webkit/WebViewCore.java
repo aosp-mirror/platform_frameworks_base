@@ -440,8 +440,7 @@ final class WebViewCore {
     private native String nativeRetrieveHref(int framePtr, int nodePtr);
 
     private native void nativeTouchUp(int touchGeneration,
-            int framePtr, int nodePtr, int x, int y,
-            int size);
+            int framePtr, int nodePtr, int x, int y);
 
     private native boolean nativeHandleTouchEvent(int action, int x, int y);
 
@@ -611,17 +610,20 @@ final class WebViewCore {
         byte[] mPostData;
     }
 
-    static class DeleteSelectionData {
-        int mStart;
-        int mEnd;
-        int mTextGeneration;
-    }
-
     static class ReplaceTextData {
         String mReplace;
         int mNewStart;
         int mNewEnd;
         int mTextGeneration;
+    }
+
+    static class TextSelectionData {
+        public TextSelectionData(int start, int end) {
+            mStart = start;
+            mEnd = end;
+        }
+        int mStart;
+        int mEnd;
     }
 
     static class TouchUpData {
@@ -630,7 +632,6 @@ final class WebViewCore {
         int mNode;
         int mX;
         int mY;
-        int mSize;
     }
 
     static class TouchEventData {
@@ -1045,8 +1046,7 @@ final class WebViewCore {
                             TouchUpData touchUpData = (TouchUpData) msg.obj;
                             nativeTouchUp(touchUpData.mMoveGeneration,
                                     touchUpData.mFrame, touchUpData.mNode,
-                                    touchUpData.mX, touchUpData.mY,
-                                    touchUpData.mSize);
+                                    touchUpData.mX, touchUpData.mY);
                             break;
 
                         case TOUCH_EVENT: {
@@ -1116,11 +1116,10 @@ final class WebViewCore {
                             break;
 
                         case DELETE_SELECTION:
-                            DeleteSelectionData deleteSelectionData
-                                    = (DeleteSelectionData) msg.obj;
+                            TextSelectionData deleteSelectionData
+                                    = (TextSelectionData) msg.obj;
                             nativeDeleteSelection(deleteSelectionData.mStart,
-                                    deleteSelectionData.mEnd,
-                                    deleteSelectionData.mTextGeneration);
+                                    deleteSelectionData.mEnd, msg.arg1);
                             break;
 
                         case SET_SELECTION:
@@ -1942,6 +1941,16 @@ final class WebViewCore {
                     textGeneration, text);
             msg.getData().putBoolean("password", changeToPassword);
             msg.sendToTarget();
+        }
+    }
+
+    // called by JNI
+    private void updateTextSelection(int pointer, int start, int end,
+            int textGeneration) {
+        if (mWebView != null) {
+            Message.obtain(mWebView.mPrivateHandler,
+                WebView.UPDATE_TEXT_SELECTION_MSG_ID, pointer, textGeneration,
+                new TextSelectionData(start, end)).sendToTarget();
         }
     }
 

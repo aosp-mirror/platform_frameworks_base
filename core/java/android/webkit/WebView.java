@@ -466,7 +466,7 @@ public class WebView extends AbsoluteLayout
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 17;
     static final int MOVE_OUT_OF_PLUGIN                 = 19;
     static final int CLEAR_TEXT_ENTRY                   = 20;
-
+    static final int UPDATE_TEXT_SELECTION_MSG_ID       = 21;
     static final int UPDATE_CLIPBOARD                   = 22;
     static final int LONG_PRESS_CENTER                  = 23;
     static final int PREVENT_TOUCH_ID                   = 24;
@@ -496,7 +496,7 @@ public class WebView extends AbsoluteLayout
         "18", //        = 18;
         "MOVE_OUT_OF_PLUGIN", //             = 19;
         "CLEAR_TEXT_ENTRY", //               = 20;
-        "21", //                             = 21;
+        "UPDATE_TEXT_SELECTION_MSG_ID", //   = 21;
         "UPDATE_CLIPBOARD", //               = 22;
         "LONG_PRESS_CENTER", //              = 23;
         "PREVENT_TOUCH_ID", //               = 24;
@@ -3065,12 +3065,10 @@ public class WebView extends AbsoluteLayout
      */
     /* package */ void deleteSelection(int start, int end) {
         mTextGeneration++;
-        WebViewCore.DeleteSelectionData data
-                = new WebViewCore.DeleteSelectionData();
-        data.mStart = start;
-        data.mEnd = end;
-        data.mTextGeneration = mTextGeneration;
-        mWebViewCore.sendMessage(EventHub.DELETE_SELECTION, data);
+        WebViewCore.TextSelectionData data
+                = new WebViewCore.TextSelectionData(start, end);
+        mWebViewCore.sendMessage(EventHub.DELETE_SELECTION, mTextGeneration, 0,
+                data);
     }
 
     /**
@@ -4632,12 +4630,26 @@ public class WebView extends AbsoluteLayout
         return result;
     }
 
+    /**
+     * Do a touch up from a WebTextView.  This will be handled by webkit to
+     * change the selection.
+     * @param event MotionEvent in the WebTextView's coordinates.
+     */
+    /*package*/ void touchUpOnTextField(MotionEvent event) {
+        if (!inEditingMode()) {
+            return;
+        }
+        int x = viewToContent((int) event.getX() + mWebTextView.getLeft());
+        int y = viewToContent((int) event.getY() + mWebTextView.getTop());
+        nativeTextInputMotionUp(x, y);
+    }
+
     /*package*/ void shortPressOnTextField() {
         if (inEditingMode()) {
             View v = mWebTextView;
             int x = viewToContent((v.getLeft() + v.getRight()) >> 1);
             int y = viewToContent((v.getTop() + v.getBottom()) >> 1);
-            nativeMotionUp(x, y, mNavSlop);
+            nativeTextInputMotionUp(x, y);
         }
     }
 
@@ -5085,6 +5097,16 @@ public class WebView extends AbsoluteLayout
                         }
                     }
                     break;
+                case UPDATE_TEXT_SELECTION_MSG_ID:
+                    if (inEditingMode()
+                            && mWebTextView.isSameTextField(msg.arg1)
+                            && msg.arg2 == mTextGeneration) {
+                        WebViewCore.TextSelectionData tData
+                                = (WebViewCore.TextSelectionData) msg.obj;
+                        mWebTextView.setSelectionFromWebKit(tData.mStart,
+                                tData.mEnd);
+                    }
+                    break;
                 case MOVE_OUT_OF_PLUGIN:
                     if (nativePluginEatsNavKey()) {
                         navHandledKey(msg.arg1, 1, false, 0, true);
@@ -5449,10 +5471,9 @@ public class WebView extends AbsoluteLayout
 
     // called by JNI
     private void sendMotionUp(int touchGeneration,
-            int frame, int node, int x, int y, int size) {
+            int frame, int node, int x, int y) {
         WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
         touchUpData.mMoveGeneration = touchGeneration;
-        touchUpData.mSize = size;
         touchUpData.mFrame = frame;
         touchUpData.mNode = node;
         touchUpData.mX = x;
@@ -5651,6 +5672,12 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetHeightCanMeasure(boolean measure);
     // Returns a value corresponding to CachedFrame::ImeAction
     /* package */ native int  nativeTextFieldAction();
+    /**
+     * Perform a click on a currently focused text input.  Since it is already
+     * focused, there is no need to go through the nativeMotionUp code, which
+     * may change the Cursor.
+     */
+    private native void     nativeTextInputMotionUp(int x, int y);
     private native int      nativeTextGeneration();
     // Never call this version except by updateCachedTextfield(String) -
     // we always want to pass in our generation number.
