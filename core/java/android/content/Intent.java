@@ -1838,6 +1838,14 @@ public class Intent implements Parcelable {
      */
     public static final String CATEGORY_FRAMEWORK_INSTRUMENTATION_TEST =
             "android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST";
+
+    /**
+     * Broadcast Action:  The phone was docked or undocked.  Includes the extra
+     * field {@link #EXTRA_DOCK_STATE}, containing the current dock state.
+     * @hide
+     */
+    public static final String ACTION_DOCK_EVENT = "android.intent.action.DOCK_EVENT";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard extra data keys.
@@ -1958,6 +1966,37 @@ public class Intent implements Parcelable {
      * delivered.
      */
     public static final String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
+
+    /**
+     * Used as an int extra field in {@link android.content.Intent#ACTION_DOCK_EVENT}
+     * intents to request the dock state.  Possible values are
+     * {@link android.content.Intent#ACTION_DOCK_STATE_UNDOCKED},
+     * {@link android.content.Intent#ACTION_DOCK_STATE_DESK}, or
+     * {@link android.content.Intent#ACTION_DOCK_STATE_CAR}.
+     * @hide
+     */
+    public static final String EXTRA_DOCK_STATE = "android.intent.extra.DOCK_STATE";
+
+    /**
+     * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
+     * to represent that the phone is not in any dock.
+     * @hide
+     */
+    public static final int EXTRA_DOCK_STATE_UNDOCKED = 0;
+
+    /**
+     * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
+     * to represent that the phone is in a desk dock.
+     * @hide
+     */
+    public static final int EXTRA_DOCK_STATE_DESK = 1;
+
+    /**
+     * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
+     * to represent that the phone is in a car dock.
+     * @hide
+     */
+    public static final int EXTRA_DOCK_STATE_CAR = 2;
 
     /**
      * Used as a parcelable extra field in {@link #ACTION_APP_ERROR}, containing
