@@ -24,47 +24,32 @@ import java.util.Set;
 public class Policy {
     
     /**
+     * No constructor - use static methods only
+     */
+    private Policy() {}
+
+    /**
      * This location (in the build system) of the preloaded-classes file.
      */
-    private static final String PRELOADED_CLASS_FILE = "frameworks/base/preloaded-classes";
-    
+    private static final String PRELOADED_CLASS_FILE
+            = "frameworks/base/preloaded-classes";
+
     /**
-     * The internal process name of the system process.  Note, this also shows up as
-     * "system_process", e.g. in ddms.
-     */
-    private static final String SYSTEM_SERVER_PROCESS_NAME = "system_server";
-
-    /** 
-     * Names of non-application processes - these will not be checked for preloaded classes.
-     * 
-     * TODO: Replace this hardcoded list with a walk up the parent chain looking for zygote.
-     */
-    private static final Set<String> NOT_FROM_ZYGOTE = new HashSet<String>(Arrays.asList(
-            "zygote",
-            "dexopt",
-            "unknown",
-            SYSTEM_SERVER_PROCESS_NAME,
-            "com.android.development",
-            "app_process" // am & other shell commands
-    ));
-
-    /** 
-     * Long running services.  These are restricted in their contribution to the preloader
-     * because their launch time is less critical.
+     * Long running services. These are restricted in their contribution to the 
+     * preloader because their launch time is less critical.
      */
     private static final Set<String> SERVICES = new HashSet<String>(Arrays.asList(
-            SYSTEM_SERVER_PROCESS_NAME,
-            "com.android.acore",
-         // Commented out to make sure DefaultTimeZones gets preloaded.
-         // "com.android.phone",
+            "system_server",
             "com.google.process.content",
-            "android.process.media"
+            "android.process.media",
+            "com.google.process.gapps"
     ));
 
     /**
      * Classes which we shouldn't load from the Zygote.
      */
-    private static final Set<String> EXCLUDED_CLASSES = new HashSet<String>(Arrays.asList(
+    private static final Set<String> EXCLUDED_CLASSES
+            = new HashSet<String>(Arrays.asList(
         // Binders
         "android.app.AlarmManager",
         "android.app.SearchManager",
@@ -75,27 +60,14 @@ public class Policy {
         "android.os.AsyncTask",
         "android.pim.ContactsAsyncHelper",
         "java.lang.ProcessManager"
-        
     ));
 
-    /**
-     * No constructor - use static methods only
-     */
-    private Policy() {}
-    
     /**
      * Returns the path/file name of the preloaded classes file that will be written 
      * by WritePreloadedClassFile.
      */
     public static String getPreloadedClassFileName() {
         return PRELOADED_CLASS_FILE;
-    }
-    
-    /**
-     * Reports if a given process name was created from zygote
-     */
-    public static boolean isFromZygote(String processName) {
-        return !NOT_FROM_ZYGOTE.contains(processName);
     }
     
     /**

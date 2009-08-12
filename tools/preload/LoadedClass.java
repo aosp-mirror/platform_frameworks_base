@@ -15,10 +15,7 @@
  */
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A loaded class.
@@ -54,7 +51,7 @@ class LoadedClass implements Serializable, Comparable<LoadedClass> {
     }
 
     void measureMemoryUsage() {
-        this.memoryUsage = MemoryUsage.forClass(name);        
+//        this.memoryUsage = MemoryUsage.forClass(name);
     }
 
     int mlt = -1;
@@ -102,31 +99,20 @@ class LoadedClass implements Serializable, Comparable<LoadedClass> {
         }
     }
 
-    /**
-     * Counts loads by apps.
-     */
-    int appLoads() {
-        return operationsByApps(loads);
+    /** Returns names of apps that loaded this class. */
+    Set<String> applicationNames() {
+        Set<String> appNames = new HashSet<String>();
+        addProcessNames(loads, appNames);
+        addProcessNames(initializations, appNames);
+        return appNames;
     }
 
-    /**
-     * Counts inits by apps.
-     */
-    int appInits() {
-        return operationsByApps(initializations);
-    }
-
-    /**
-     * Counts number of app operations in the given list.
-     */
-    private static int operationsByApps(List<Operation> operations) {
-        int byApps = 0;
-        for (Operation operation : operations) {
+    private void addProcessNames(List<Operation> ops, Set<String> appNames) {
+        for (Operation operation : ops) {
             if (operation.process.isApplication()) {
-                byApps++;
+                appNames.add(operation.process.name);
             }
         }
-        return byApps;
     }
 
     public int compareTo(LoadedClass o) {
@@ -159,5 +145,9 @@ class LoadedClass implements Serializable, Comparable<LoadedClass> {
         }
 
         return false;
+    }
+
+    public boolean isPreloadable() {
+        return systemClass && Policy.isPreloadableClass(name);
     }
 }
