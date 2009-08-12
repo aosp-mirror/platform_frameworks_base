@@ -959,7 +959,7 @@ public class WifiManager {
          *
          * If this MulticastLock is not reference-counted, the first call to
          * {@code release} (after the radio was multicast locked using
-         * {@linke #acquire}) will unlock the multicast, and subsequent calls
+         * {@link #acquire}) will unlock the multicast, and subsequent calls
          * will be ignored.
          *
          * Note that if any other Wifi Multicast Locks are still outstanding
