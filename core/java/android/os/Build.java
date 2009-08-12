@@ -120,9 +120,18 @@ public class Build {
          * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission to be
          * able to modify the contents of the SD card.  (Apps targeting
          * earlier versions will always request the permission.)
+         * <li> They must explicitly request the
+         * {@link android.Manifest.permission#READ_PHONE_STATE} permission to be
+         * able to be able to retrieve phone state info.  (Apps targeting
+         * earlier versions will always request the permission.)
+         * <li> They are assumed to support different screen densities and
+         * sizes.  (Apps targeting earlier versions are assumed to only support
+         * medium density normal size screens unless otherwise indicated).
+         * They can still explicitly specify screen support either way with the
+         * supports-screens manifest tag.
          * </ul>
          */
-        public static final int DONUT = CUR_DEVELOPMENT;
+        public static final int DONUT = 4;
     }
     
     /** The type of build, like "user" or "eng". */
