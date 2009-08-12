@@ -18,7 +18,7 @@
 #export DRY_RUN="echo"
 source test_backup_common.sh
 
-BUGREPORT_DIR="$HOME/backup/bugreports"
+[ -z "$BUGREPORT_DIR" ] && BUGREPORT_DIR="$HOME/backup/bugreports"
 
 function check_file
 {
@@ -106,4 +106,6 @@ echo
 
 echo "Last 3 timestamps in 3.txt:"
 a shell cat /data/data/com.android.backuptest/files/3.txt | tail -n 3
+
+exit $need_bug
 
