@@ -1237,6 +1237,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 curWallpaperIndex--;
                 WindowState wallpaper = token.windows.get(curWallpaperIndex);
                 
+                if (visible) {
+                    updateWallpaperOffsetLocked(mWallpaperTarget, wallpaper, dw, dh);                        
+                }
+                
                 // First, make sure the client has the current visibility
                 // state.
                 if (wallpaper.mWallpaperVisible != visible) {
@@ -1248,10 +1252,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         wallpaper.mClient.dispatchAppVisibility(visible);
                     } catch (RemoteException e) {
                     }
-                }
-                
-                if (visible) {
-                    updateWallpaperOffsetLocked(mWallpaperTarget, wallpaper, dw, dh);                        
                 }
                 
                 wallpaper.mAnimLayer = wallpaper.mLayer + mWallpaperAnimLayerAdjustment;
@@ -1306,18 +1306,35 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean updateWallpaperOffsetLocked(WindowState target,
             WindowState wallpaperWin, int dw, int dh) {
-        int availw = wallpaperWin.mFrame.right-wallpaperWin.mFrame.left-dw;
-        int offset = availw > 0 ? -(int)(availw*target.mWallpaperX+.5f) : 0;
-        boolean changed = wallpaperWin.mXOffset != offset;
-        if (changed) {
-            wallpaperWin.mXOffset = offset;
+        boolean changed = false;
+        if (target.mWallpaperX >= 0) {
+            int availw = wallpaperWin.mFrame.right-wallpaperWin.mFrame.left-dw;
+            int offset = availw > 0 ? -(int)(availw*target.mWallpaperX+.5f) : 0;
+            changed = wallpaperWin.mXOffset != offset;
+            if (changed) {
+                wallpaperWin.mXOffset = offset;
+            }
         }
-        int availh = wallpaperWin.mFrame.bottom-wallpaperWin.mFrame.top-dh;
-        offset = availh > 0 ? -(int)(availh*target.mWallpaperY+.5f) : 0;
-        if (wallpaperWin.mYOffset != offset) {
-            changed = true;
-            wallpaperWin.mYOffset = offset;
+        if (target.mWallpaperY >= 0) {
+            int availh = wallpaperWin.mFrame.bottom-wallpaperWin.mFrame.top-dh;
+            int offset = availh > 0 ? -(int)(availh*target.mWallpaperY+.5f) : 0;
+            if (wallpaperWin.mYOffset != offset) {
+                changed = true;
+                wallpaperWin.mYOffset = offset;
+            }
         }
+        
+        if (wallpaperWin.mWallpaperX != target.mWallpaperX
+                || wallpaperWin.mWallpaperY != target.mWallpaperY) {
+            wallpaperWin.mWallpaperX = target.mWallpaperX;
+            wallpaperWin.mWallpaperY = target.mWallpaperY;
+            try {
+                wallpaperWin.mClient.dispatchWallpaperOffsets(
+                        wallpaperWin.mWallpaperX, wallpaperWin.mWallpaperY);
+            } catch (RemoteException e) {
+            }
+        }
+        
         return changed;
     }
     
@@ -5975,8 +5992,6 @@ public class WindowManagerService extends IWindowManager.Stub
         int mRequestedHeight;
         int mLastRequestedWidth;
         int mLastRequestedHeight;
-        int mXOffset;
-        int mYOffset;
         int mLayer;
         int mAnimLayer;
         int mLastLayer;
@@ -6061,8 +6076,14 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean mHasLocalTransformation;
         final Transformation mTransformation = new Transformation();
 
-        float mWallpaperX = 0;
-        float mWallpaperY = 0;
+        // If a window showing a wallpaper: the requested offset for the
+        // wallpaper; if a wallpaper window: the currently applied offset.
+        float mWallpaperX = -1;
+        float mWallpaperY = -1;
+        
+        // Wallpaper windows: pixels offset based on above variables.
+        int mXOffset;
+        int mYOffset;
         
         // This is set after IWindowSession.relayout() has been called at
         // least once for the window.  It allows us to detect the situation
@@ -7181,7 +7202,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print(prefix); pw.print("mHScale="); pw.print(mHScale);
                         pw.print(" mVScale="); pw.println(mVScale);
             }
-            if (mWallpaperX != 0 || mWallpaperY != 0) {
+            if (mWallpaperX != -1 || mWallpaperY != -1) {
                 pw.print(prefix); pw.print("mWallpaperX="); pw.print(mWallpaperX);
                         pw.print(" mWallpaperY="); pw.println(mWallpaperY);
             }

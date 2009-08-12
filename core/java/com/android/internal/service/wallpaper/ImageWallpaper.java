@@ -21,6 +21,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.service.wallpaper.WallpaperService;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -63,12 +64,23 @@ public class ImageWallpaper extends WallpaperService {
 
     class DrawableEngine extends Engine {
         private final Object mLock = new Object();
+        private final Rect mBounds = new Rect();
         Drawable mBackground;
+        int mXOffset;
+        int mYOffset;
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
             mBackground = mWallpaperManager.getDrawable();
+            mBounds.left = mBounds.top = 0;
+            mBounds.right = mBackground.getIntrinsicWidth();
+            mBounds.bottom = mBackground.getIntrinsicHeight();
+            int offx = (getDesiredMinimumWidth() - mBounds.right) / 2;
+            int offy = (getDesiredMinimumHeight() - mBounds.bottom) / 2;
+            mBounds.offset(offx, offy);
+            mBackground.setBounds(mBounds);
+            surfaceHolder.setSizeFromLayout();
         }
 
         @Override
@@ -76,6 +88,14 @@ public class ImageWallpaper extends WallpaperService {
             drawFrame();
         }
         
+        @Override
+        public void onOffsetsChanged(float xOffset, float yOffset,
+                int xPixels, int yPixels) {
+            mXOffset = xPixels;
+            mYOffset = yPixels;
+            drawFrame();
+        }
+
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             super.onSurfaceChanged(holder, format, width, height);
@@ -94,19 +114,16 @@ public class ImageWallpaper extends WallpaperService {
         
         void drawFrame() {
             SurfaceHolder sh = getSurfaceHolder();
-            Canvas c = null;
-            try {
-                c = sh.lockCanvas();
-                if (c != null) {
-                    final Rect frame = sh.getSurfaceFrame();
-                    synchronized (mLock) {
-                        final Drawable background = mBackground;
-                        background.setBounds(frame);
-                        background.draw(c);
-                    }
+            Canvas c = sh.lockCanvas();
+            if (c != null) {
+                //final Rect frame = sh.getSurfaceFrame();
+                synchronized (mLock) {
+                    final Drawable background = mBackground;
+                    //background.setBounds(frame);
+                    c.translate(mXOffset, mYOffset);
+                    background.draw(c);
                 }
-            } finally {
-                if (c != null) sh.unlockCanvasAndPost(c);
+                sh.unlockCanvasAndPost(c);
             }
         }
 

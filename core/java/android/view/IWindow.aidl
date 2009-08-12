@@ -56,4 +56,9 @@ oneway interface IWindow {
      * to date on the current state showing navigational focus (touch mode) too.
      */
     void windowFocusChanged(boolean hasFocus, boolean inTouchMode);
+    
+    /**
+     * Called for wallpaper windows when their offsets change.
+     */
+    void dispatchWallpaperOffsets(float x, float y);
 }

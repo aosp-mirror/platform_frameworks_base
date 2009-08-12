@@ -2858,6 +2858,9 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
             }
         }
+        
+        public void dispatchWallpaperOffsets(float x, float y) {
+        }
     }
 
     /**

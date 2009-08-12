@@ -93,6 +93,10 @@ public class HandlerCaller {
         mH.sendMessage(msg);
     }
     
+    public boolean hasMessages(int what) {
+        return mH.hasMessages(what);
+    }
+    
     public void sendMessage(Message msg) {
         mH.sendMessage(msg);
     }
