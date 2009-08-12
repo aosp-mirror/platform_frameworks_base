@@ -190,10 +190,12 @@ public class ProgressBar extends View {
 
         mBehavior = a.getInt(R.styleable.ProgressBar_indeterminateBehavior, mBehavior);
 
-        final int resID = a.getResourceId(com.android.internal.R.styleable.ProgressBar_interpolator, -1);
+        final int resID = a.getResourceId(
+                com.android.internal.R.styleable.ProgressBar_interpolator, 
+                android.R.anim.linear_interpolator); // default to linear interpolator
         if (resID > 0) {
             setInterpolator(context, resID);
-        }
+        } 
 
         setMax(a.getInt(R.styleable.ProgressBar_max, mMax));
 
