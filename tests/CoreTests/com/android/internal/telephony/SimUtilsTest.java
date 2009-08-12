@@ -44,13 +44,22 @@ public class SimUtilsTest extends TestCase {
         assertEquals("890", IccUtils.bcdToString(data, 0, data.length));
 
         /*
-        * bcdByteToInt()
-        */
+         * gsmBcdByteToInt()
+         */
 
-        assertEquals(98, IccUtils.bcdByteToInt((byte) 0x89));
+        assertEquals(98, IccUtils.gsmBcdByteToInt((byte) 0x89));
 
         // Out of range is treated as 0
-        assertEquals(8, IccUtils.bcdByteToInt((byte) 0x8c));
+        assertEquals(8, IccUtils.gsmBcdByteToInt((byte) 0x8c));
+
+        /*
+         * cdmaBcdByteToInt()
+         */
+
+        assertEquals(89, IccUtils.cdmaBcdByteToInt((byte) 0x89));
+
+        // Out of range is treated as 0
+        assertEquals(80, IccUtils.gsmBcdByteToInt((byte) 0x8c));
 
         /*
          * adnStringFieldToString()
@@ -76,4 +85,3 @@ public class SimUtilsTest extends TestCase {
     }
 
 }
-
