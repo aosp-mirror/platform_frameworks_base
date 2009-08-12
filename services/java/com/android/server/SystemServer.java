@@ -84,6 +84,7 @@ class ServerThread extends Thread {
 
         HardwareService hardware = null;
         PowerManagerService power = null;
+        BatteryService battery = null;
         IPackageManager pm = null;
         Context context = null;
         WindowManagerService wm = null;
@@ -132,7 +133,7 @@ class ServerThread extends Thread {
             ActivityManagerService.installSystemProviders();
 
             Log.i(TAG, "Starting Battery Service.");
-            BatteryService battery = new BatteryService(context);
+            battery = new BatteryService(context);
             ServiceManager.addService("battery", battery);
 
             Log.i(TAG, "Starting Hardware Service.");
@@ -380,6 +381,7 @@ class ServerThread extends Thread {
         } catch (RemoteException e) {
         }
 
+        battery.systemReady();
         Watchdog.getInstance().start();
 
         Looper.loop();
