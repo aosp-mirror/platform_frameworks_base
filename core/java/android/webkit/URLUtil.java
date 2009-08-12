@@ -126,6 +126,32 @@ public final class URLUtil {
         return retData;
     }
 
+    /**
+     * @return True iff the url is correctly URL encoded
+     */
+    static boolean verifyURLEncoding(String url) {
+        int count = url.length();
+        if (count == 0) {
+            return false;
+        }
+
+        int index = url.indexOf('%');
+        while (index >= 0 && index < count) {
+            if (index < count - 2) {
+                try {
+                    parseHex((byte) url.charAt(++index));
+                    parseHex((byte) url.charAt(++index));
+                } catch (IllegalArgumentException e) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+            index = url.indexOf('%', index + 1);
+        }
+        return true;
+    }
+
     private static int parseHex(byte b) {
         if (b >= '0' && b <= '9') return (b - '0');
         if (b >= 'A' && b <= 'F') return (b - 'A' + 10);
