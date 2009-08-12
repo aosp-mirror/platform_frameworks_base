@@ -23,7 +23,7 @@ function a { $DRY_RUN adb $ADB_OPTS "$@"; }
 function adb_root
 {
     root_status=$(a root)
-    if [ "x$root_status" != "xadbd is already running as root" ]; then
+    if [ "$root_status" != "adbd is already running as root" ]; then
         echo -n "Restarting adb as root..."
         sleep 2
         a 'wait-for-device'
