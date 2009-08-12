@@ -83,7 +83,7 @@ public final class Gmail {
     public static final String LABEL_OUTBOX = "^^out";
 
     public static final String AUTHORITY = "gmail-ls";
-    private static final String TAG = "gmail-ls";
+    private static final String TAG = "Gmail";
     private static final String AUTHORITY_PLUS_CONVERSATIONS =
             "content://" + AUTHORITY + "/conversations/";
     private static final String AUTHORITY_PLUS_LABELS =
