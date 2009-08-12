@@ -204,7 +204,7 @@ A2dpAudioInterface::A2dpAudioStreamOut::A2dpAudioStreamOut() :
     mFd(-1), mStandby(true), mStartCount(0), mRetryCount(0), mData(NULL),
     // assume BT enabled to start, this is safe because its only the
     // enabled->disabled transition we are worried about
-    mBluetoothEnabled(true), mDevice(0)
+    mBluetoothEnabled(true), mDevice(0), mClosing(false)
 {
     // use any address by default
     strcpy(mA2dpAddress, "00:00:00:00:00:00");
@@ -258,7 +258,7 @@ ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t
     size_t remaining = bytes;
     status_t status = -1;
 
-    if (!mBluetoothEnabled) {
+    if (!mBluetoothEnabled || mClosing) {
         LOGW("A2dpAudioStreamOut::write(), but bluetooth disabled");
         goto Error;
     }
@@ -307,6 +307,11 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::standby()
 {
     int result = 0;
 
+    if (mClosing) {
+        LOGV("Ignore standby, closing");
+        return result;
+    }
+
     Mutex::Autolock lock(mLock);
 
     if (!mStandby) {
@@ -333,6 +338,11 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::setParameters(const String8& ke
         } else {
             setAddress(value.string());
         }
+        param.remove(key);
+    }
+    key = String8("closing");
+    if (param.get(key, value) == NO_ERROR) {
+        mClosing = (value == "true");
         param.remove(key);
     }
     key = AudioParameter::keyRouting;

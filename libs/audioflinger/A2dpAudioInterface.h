@@ -112,6 +112,7 @@ private:
                 Mutex       mLock;
                 bool        mBluetoothEnabled;
                 uint32_t    mDevice;
+                bool        mClosing;
     };
 
     friend class A2dpAudioStreamOut;
