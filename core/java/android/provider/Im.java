@@ -2101,17 +2101,60 @@ public class Im {
 
     }
 
+
+    /**
+     * Columns for IM branding resource map cache table. This table caches the result of
+     * loading the branding resources to speed up IM landing page start.
+     */
+    public interface BrandingResourceMapCacheColumns {
+        /**
+         * The provider ID
+         * <P>Type: INTEGER</P>
+         */
+        String PROVIDER_ID = "provider_id";
+        /**
+         * The application resource ID
+         * <P>Type: INTEGER</P>
+         */
+        String APP_RES_ID = "app_res_id";
+        /**
+         * The plugin resource ID
+         * <P>Type: INTEGER</P>
+         */
+        String PLUGIN_RES_ID = "plugin_res_id";
+    }
+
+    /**
+     * The table for caching the result of loading IM branding resources.
+     */
+    public static final class BrandingResourceMapCache
+        implements BaseColumns, BrandingResourceMapCacheColumns {
+        /**
+         * The content:// style URL for this table.
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://im/brandingResMapCache");
+    }
+
+
+
+    /**
+     * //TODO: move these to MCS specific provider.
+     * The following are MCS stuff, and should really live in a separate provider specific to
+     * MCS code.
+     */
+
     /**
      * Columns from OutgoingRmq table
      */
     public interface OutgoingRmqColumns {
         String RMQ_ID = "rmq_id";
-        String TYPE = "type";
         String TIMESTAMP = "ts";
         String DATA = "data";
+        String PROTOBUF_TAG = "type";
     }
 
     /**
+     * //TODO: we should really move these to their own provider and database.
      * The table for storing outgoing rmq packets.
      */
     public static final class OutgoingRmq implements BaseColumns, OutgoingRmqColumns {
@@ -2174,6 +2217,7 @@ public class Im {
     }
 
     /**
+     * //TODO: move these out into their own provider and database
      * The table for storing the last client rmq id sent to the server.
      */
     public static final class LastRmqId implements BaseColumns, LastRmqIdColumns {
@@ -2234,35 +2278,21 @@ public class Im {
     }
 
     /**
-     * Columns for IM branding resource map cache table. This table caches the result of
-     * loading the branding resources to speed up IM landing page start.
+     * Columns for the s2dRmqIds table, which stores the server-to-device message
+     * persistent ids. These are used in the RMQ2 protocol, where in the login request, the
+     * client selective acks these s2d ids to the server.
      */
-    public interface BrandingResourceMapCacheColumns {
-        /**
-         * The provider ID
-         * <P>Type: INTEGER</P>
-         */
-        String PROVIDER_ID = "provider_id";
-        /**
-         * The application resource ID
-         * <P>Type: INTEGER</P>
-         */
-        String APP_RES_ID = "app_res_id";
-        /**
-         * The plugin resource ID
-         * <P>Type: INTEGER</P>
-         */
-        String PLUGIN_RES_ID = "plugin_res_id";
+    public interface ServerToDeviceRmqIdsColumn {
+        String RMQ_ID = "rmq_id";
     }
 
-    /**
-     * The table for caching the result of loading IM branding resources.
-     */
-    public static final class BrandingResourceMapCache
-        implements BaseColumns, BrandingResourceMapCacheColumns {
+    public static final class ServerToDeviceRmqIds implements BaseColumns,
+            ServerToDeviceRmqIdsColumn {
+
         /**
          * The content:// style URL for this table.
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://im/brandingResMapCache");
+        public static final Uri CONTENT_URI = Uri.parse("content://im/s2dids");
     }
+
 }

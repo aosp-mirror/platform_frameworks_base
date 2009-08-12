@@ -2908,44 +2908,58 @@ public final class Settings {
          * the retrying.
          */
         public static final String GTALK_MAX_RETRIES_FOR_AUTH_EXPIRED =
-            "gtalk_max_retries_for_auth_expired";
+                "gtalk_max_retries_for_auth_expired";
+
+        /**
+         * a boolean setting indicating whether the GTalkService should use RMQ2 protocol or not.
+         */
+        public static final String GTALK_USE_RMQ2_PROTOCOL =
+                "gtalk_use_rmq2";
+
+        /**
+         * a boolean setting indicating whether the GTalkService should support both RMQ and
+         * RMQ2 protocols. This setting is true for the transitional period when we need to
+         * support both protocols.
+         */
+        public static final String GTALK_SUPPORT_RMQ_AND_RMQ2_PROTOCOLS =
+                "gtalk_support_rmq_and_rmq2";
+
+        /**
+         * a boolean setting controlling whether the rmq2 protocol will include stream ids in
+         * the protobufs. This is used for debugging.
+         */
+        public static final String GTALK_RMQ2_INCLUDE_STREAM_ID =
+                "gtalk_rmq2_include_stream_id";
+
+        /**
+         * This is gdata url to lookup album and picture info from picasa web.
+         */
+        public static final String GTALK_PICASA_ALBUM_URL =
+                "gtalk_picasa_album_url";
+
+        /**
+         * This is the url to lookup picture info from flickr.
+         */
+        public static final String GTALK_FLICKR_PHOTO_INFO_URL =
+                "gtalk_flickr_photo_info_url";
+
+        /**
+         * This is the url to lookup an actual picture from flickr.
+         */
+        public static final String GTALK_FLICKR_PHOTO_URL =
+                "gtalk_flickr_photo_url";
+
+        /**
+         * This is the gdata url to lookup info on a youtube video.
+         */
+        public static final String GTALK_YOUTUBE_VIDEO_URL =
+                "gtalk_youtube_video_url";
 
         /**
          * This is the url for getting the app token for server-to-device push messaging.
          */
         public static final String PUSH_MESSAGING_REGISTRATION_URL =
                 "push_messaging_registration_url";
-
-        /**
-         * This is gdata url to lookup album and picture info from picasa web.
-         */
-        public static final String GTALK_PICASA_ALBUM_URL =
-            "gtalk_picasa_album_url";
-
-        /**
-         * This is the url to lookup picture info from flickr.
-         */
-        public static final String GTALK_FLICKR_PHOTO_INFO_URL =
-            "gtalk_flickr_photo_info_url";
-
-        /**
-         * This is the url to lookup an actual picture from flickr.
-         */
-        public static final String GTALK_FLICKR_PHOTO_URL =
-            "gtalk_flickr_photo_url";
-
-        /**
-         * This is the gdata url to lookup info on a youtube video.
-         */
-        public static final String GTALK_YOUTUBE_VIDEO_URL =
-            "gtalk_youtube_video_url";
-
-
-        /**
-         * This is the url for getting the app token for server-to-device data messaging.
-         */
-        public static final String DATA_MESSAGE_GET_APP_TOKEN_URL =
-                "data_messaging_get_app_token_url";
 
 	/**
 	 * Use android://&lt;it&gt; routing infos for Google Sync Server subcriptions.
