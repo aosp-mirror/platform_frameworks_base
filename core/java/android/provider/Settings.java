@@ -2947,6 +2947,11 @@ public final class Settings {
         public static final String DATA_MESSAGE_GET_APP_TOKEN_URL =
                 "data_messaging_get_app_token_url";
 
+	/**
+	 * Use android://&lt;it&gt; routing infos for Google Sync Server subcriptions.
+	 */
+	public static final String GSYNC_USE_RMQ2_ROUTING_INFO = "gsync_use_rmq2_routing_info";
+
         /**
          * Enable use of ssl session caching.
          * 'db' - save each session in a (per process) database
