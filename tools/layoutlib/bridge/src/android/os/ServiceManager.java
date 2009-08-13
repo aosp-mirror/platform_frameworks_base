@@ -53,6 +53,8 @@ public final class ServiceManager {
      * Return a list of all currently running services.
      */
     public static String[] listServices() throws RemoteException {
+        // actual implementation returns null sometimes, so it's ok
+        // to return null instead of an empty list.
         return null;
     }
 
