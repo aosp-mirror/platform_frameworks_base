@@ -27,6 +27,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -251,6 +252,20 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     /**
+     * Manually set the presence.
+     */
+    public void setPresence(int presence) {
+        mPresenceView.setImageResource(Presence.getPresenceIconResourceId(presence));
+    }
+
+    /**
+     * Manually set the contact uri
+     */
+    public void setContactUri(Uri uri) {
+        mContactUri = uri;
+    }
+
+    /**
      * Manually set the photo to display in the header. This doesn't change the
      * underlying {@link Contacts}, only the UI state.
      */
@@ -361,18 +376,6 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                 c.close();
             }
         }
-    }
-
-    /**
-     * @deprecated use {@link #setDisplayName(CharSequence, CharSequence)} and
-     *             {@link #setSocialSnippet(CharSequence)} instead.
-     */
-    @Deprecated
-    public void bindStatic(String main, String secondary) {
-        mDisplayNameView.setText(main);
-        mStatusView.setText(secondary);
-        mStarredView.setVisibility(View.GONE);
-        mPhotoView.setImageBitmap(loadPlaceholderPhoto(null));
     }
 
     /**

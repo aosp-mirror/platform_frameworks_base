@@ -19,7 +19,7 @@
     android:id="@+id/name"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceLargeInverse"
+    android:textAppearance="?android:attr/textAppearanceMediumInverse"
     android:textColor="@android:color/secondary_text_light"
     android:singleLine="true"
     android:ellipsize="end"
