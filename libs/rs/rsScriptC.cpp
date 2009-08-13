@@ -90,9 +90,9 @@ void ScriptCState::clear()
 {
     memset(&mProgram, 0, sizeof(mProgram));
 
-    mConstantTypeCount = 0;
     for (uint32_t ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
         mConstantBufferTypes[ct].clear();
+        mSlotNames[ct].setTo("");
     }
 
     memset(&mEnviroment, 0, sizeof(mEnviroment));
@@ -248,24 +248,56 @@ void ScriptCState::appendVarDefines(String8 *str)
 void ScriptCState::appendTypes(String8 *str)
 {
     char buf[256];
+    String8 tmp;
 
-    for (size_t ct=0; ct < mConstantTypeCount; ct++) {
+    for (size_t ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
         const Type *t = mConstantBufferTypes[ct].get();
-        const Element *e = t->getElement();
-
-        if (!t->getName()) {
+        if (!t) {
             continue;
         }
-        for (size_t ct2=0; ct2 < e->getComponentCount(); ct2++) {
-            const Component *c = e->getComponent(ct2);
-            str->append("#define OFFSETOF_");
-            str->append(t->getName());
-            str->append("_");
-            str->append(c->getComponentName());
-            sprintf(buf, " %i\n", ct2);
-            str->append(buf);
+        const Element *e = t->getElement();
+
+        if (t->getName()) {
+            for (size_t ct2=0; ct2 < e->getComponentCount(); ct2++) {
+                const Component *c = e->getComponent(ct2);
+                tmp.setTo("#define OFFSETOF_");
+                tmp.append(t->getName());
+                tmp.append("_");
+                tmp.append(c->getComponentName());
+                sprintf(buf, " %i\n", ct2);
+                tmp.append(buf);
+                LOGD(tmp);
+                str->append(tmp);
+            }
         }
 
+        if (mSlotNames[ct].length() > 0) {
+            for (size_t ct2=0; ct2 < e->getComponentCount(); ct2++) {
+                const Component *c = e->getComponent(ct2);
+                tmp.setTo("#define ");
+                tmp.append(mSlotNames[ct]);
+                tmp.append("_");
+                tmp.append(c->getComponentName());
+                switch (c->getType()) {
+                case Component::FLOAT:
+                    tmp.append(" loadF(");
+                    break;
+                case Component::SIGNED:
+                    sprintf(buf, " loadI%i(", c->getBits());
+                    tmp.append(buf);
+                    break;
+                case Component::UNSIGNED:
+                    sprintf(buf, " loadU%i(", c->getBits());
+                    tmp.append(buf);
+                    break;
+                }
+                sprintf(buf, "%i, %i)\n", ct, ct2);
+                tmp.append(buf);
+
+                LOGD(tmp);
+                str->append(tmp);
+            }
+        }
     }
 
 }
@@ -280,25 +312,10 @@ void rsi_ScriptCBegin(Context * rsc)
     ss->clear();
 }
 
-void rsi_ScriptCAddType(Context * rsc, RsType vt)
-{
-    ScriptCState *ss = &rsc->mScriptC;
-    const Type *t = static_cast<const Type *>(vt);
-
-    ss->mConstantBufferTypes[ss->mConstantTypeCount].set(t);
-    ss->mConstantTypeCount ++;
-}
-
 void rsi_ScriptCSetScript(Context * rsc, void *vp)
 {
     ScriptCState *ss = &rsc->mScriptC;
     ss->mProgram.mScript = reinterpret_cast<ScriptC::RunScript_t>(vp);
-}
-
-void rsi_ScriptCSetRoot(Context * rsc, bool isRoot)
-{
-    ScriptCState *ss = &rsc->mScriptC;
-    ss->mEnviroment.mIsRoot = isRoot;
 }
 
 void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len)
@@ -321,8 +338,12 @@ RsScript rsi_ScriptCCreate(Context * rsc)
     ss->mAccScript = NULL;
     s->mEnviroment = ss->mEnviroment;
     s->mProgram = ss->mProgram;
-    ss->clear();
+    for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
+        s->mTypes[ct].set(ss->mConstantBufferTypes[ct].get());
+        s->mSlotNames[ct] = ss->mSlotNames[ct];
+    }
 
+    ss->clear();
     return s;
 }
 

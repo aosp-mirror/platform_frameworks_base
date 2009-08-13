@@ -824,6 +824,29 @@ nScriptSetTimeZone(JNIEnv *_env, jobject _this, jint script, jbyteArray timeZone
     }
 }
 
+static void
+nScriptSetType(JNIEnv *_env, jobject _this, jint type, jstring _str, jint slot)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nScriptCAddType, con(%p), type(%p), slot(%i)", con, (RsType)type, slot);
+    const char* n = NULL;
+    if (_str) {
+        n = _env->GetStringUTFChars(_str, NULL);
+    }
+    rsScriptSetType((RsType)type, slot, n);
+    if (n) {
+        _env->ReleaseStringUTFChars(_str, n);
+    }
+}
+
+static void
+nScriptSetRoot(JNIEnv *_env, jobject _this, jboolean isRoot)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nScriptCSetRoot, con(%p), isRoot(%i)", con, isRoot);
+    rsScriptSetRoot(isRoot);
+}
+
 // -----------------------------------
 
 static void
@@ -832,22 +855,6 @@ nScriptCBegin(JNIEnv *_env, jobject _this)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nScriptCBegin, con(%p)", con);
     rsScriptCBegin();
-}
-
-static void
-nScriptCAddType(JNIEnv *_env, jobject _this, jint type)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCAddType, con(%p), type(%p)", con, (RsType)type);
-    rsScriptCAddType((RsType)type);
-}
-
-static void
-nScriptCSetRoot(JNIEnv *_env, jobject _this, jboolean isRoot)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCSetRoot, con(%p), isRoot(%i)", con, isRoot);
-    rsScriptCSetRoot(isRoot);
 }
 
 static void
@@ -1374,10 +1381,10 @@ static JNINativeMethod methods[] = {
 {"nScriptSetClearDepth",           "(IF)V",                                (void*)nScriptSetClearDepth },
 {"nScriptSetClearStencil",         "(II)V",                                (void*)nScriptSetClearStencil },
 {"nScriptSetTimeZone",             "(I[B)V",                               (void*)nScriptSetTimeZone },
+{"nScriptSetType",                 "(ILjava/lang/String;I)V",              (void*)nScriptSetType },
+{"nScriptSetRoot",                 "(Z)V",                                 (void*)nScriptSetRoot },
 
 {"nScriptCBegin",                  "()V",                                  (void*)nScriptCBegin },
-{"nScriptCAddType",                "(I)V",                                 (void*)nScriptCAddType },
-{"nScriptCSetRoot",                "(Z)V",                                 (void*)nScriptCSetRoot },
 {"nScriptCSetScript",              "([BII)V",                              (void*)nScriptCSetScript },
 {"nScriptCCreate",                 "()I",                                  (void*)nScriptCCreate },
 {"nScriptCAddDefineI32",           "(Ljava/lang/String;I)V",               (void*)nScriptCAddDefineI32 },

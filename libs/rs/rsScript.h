@@ -56,11 +56,11 @@ public:
     };
     Enviroment_t mEnviroment;
 
-    const Type * mConstantBufferTypes;
     uint32_t mCounstantBufferCount;
 
     ObjectBaseRef<Allocation> mSlots[MAX_SCRIPT_BANKS];
-    ObjectBaseRef<Type> mTypes[MAX_SCRIPT_BANKS];
+    ObjectBaseRef<const Type> mTypes[MAX_SCRIPT_BANKS];
+    String8 mSlotNames[MAX_SCRIPT_BANKS];
 
     virtual bool run(Context *, uint32_t launchID) = 0;
 };

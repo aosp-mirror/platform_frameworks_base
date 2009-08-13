@@ -142,10 +142,10 @@ public class RenderScript {
     native void nScriptSetClearDepth(int script, float depth);
     native void nScriptSetClearStencil(int script, int stencil);
     native void nScriptSetTimeZone(int script, byte[] timeZone);
+    native void nScriptSetType(int type, String name, int slot);
+    native void nScriptSetRoot(boolean isRoot);
 
     native void nScriptCBegin();
-    native void nScriptCAddType(int type);
-    native void nScriptCSetRoot(boolean isRoot);
     native void nScriptCSetScript(byte[] script, int offset, int length);
     native int  nScriptCCreate();
     native void nScriptCAddDefineI32(String name, int value);

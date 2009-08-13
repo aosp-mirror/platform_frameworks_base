@@ -69,7 +69,7 @@ public:
     Script::Enviroment_t mEnviroment;
 
     ObjectBaseRef<const Type> mConstantBufferTypes[MAX_SCRIPT_BANKS];
-    uint32_t mConstantTypeCount;
+    String8 mSlotNames[MAX_SCRIPT_BANKS];
 
     void clear();
     void runCompiler(Context *rsc);

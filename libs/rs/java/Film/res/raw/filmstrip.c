@@ -22,8 +22,8 @@ int main(int index)
 {
     float mat1[16];
 
-    float trans = loadF(1, POS_TRANSLATE);
-    float rot = loadF(1, POS_ROTATE);
+    float trans = Pos_translate;
+    float rot = Pos_rotate;
     matrixLoadScale(mat1, 2.f, 2.f, 2.f);
     matrixTranslate(mat1, 0.f, 0.f, trans);
     matrixRotate(mat1, 90.f, 0.f, 0.f, 1.f);
@@ -39,7 +39,7 @@ int main(int index)
     bindProgramFragment(NAMED_PFImages);
     bindProgramVertex(NAMED_PVImages);
 
-    float focusPos = loadF(1, POS_FOCUS);
+    float focusPos = Pos_focus;
     int focusID = 0;
     int lastFocusID = loadI32(2, STATE_LAST_FOCUS);
     int imgCount = 13;
@@ -65,7 +65,7 @@ int main(int index)
     */
     storeI32(2, STATE_LAST_FOCUS, focusID);
 
-    int triangleOffsetsCount = loadI32(2, STATE_TRIANGLE_OFFSET_COUNT);
+    int triangleOffsetsCount = Pos_triangleOffsetCount;
 
     int imgId = 0;
     for (imgId=1; imgId <= imgCount; imgId++) {

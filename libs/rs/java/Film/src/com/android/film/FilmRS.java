@@ -23,25 +23,18 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import android.renderscript.Matrix;
-import android.renderscript.ProgramVertex;
-import android.renderscript.RenderScript;
-import android.renderscript.Element;
-import android.renderscript.Allocation;
-import android.renderscript.Dimension;
-import android.renderscript.ScriptC;
-import android.renderscript.Script;
-import android.renderscript.ProgramFragment;
-import android.renderscript.ProgramStore;
-import android.renderscript.Sampler;
-import android.renderscript.Light;
+import android.renderscript.*;
 
 public class FilmRS {
-    private final int POS_TRANSLATE = 0;
-    private final int POS_ROTATE = 1;
-    private final int POS_FOCUS = 2;
+    class StripPosition {
+        public float translate;
+        public float rotate;
+        public float focus;
+        public int triangleOffsetCount;
+    }
+    StripPosition mPos = new StripPosition();
 
-    private final int STATE_TRIANGLE_OFFSET_COUNT = 0;
+
     private final int STATE_LAST_FOCUS = 1;
 
     public FilmRS() {
@@ -63,10 +56,11 @@ public class FilmRS {
         }
 
         float anim = ((float)x-50) / 270.f;
-        mBufferPos[POS_TRANSLATE] = 2f * anim + 0.5f;   // translation
-        mBufferPos[POS_ROTATE] = (anim * 40);  // rotation
-        mBufferPos[POS_FOCUS] = ((float)y) / 16.f - 10.f;  // focusPos
-        mAllocPos.data(mBufferPos);
+        mPos.translate = 2f * anim + 0.5f;   // translation
+        mPos.rotate = (anim * 40);  // rotation
+        mPos.focus = ((float)y) / 16.f - 10.f;  // focusPos
+        mPos.triangleOffsetCount = mFSM.mTriangleOffsetsCount;
+        mAllocPos.data(mPos);
     }
 
 
@@ -84,6 +78,7 @@ public class FilmRS {
     private ProgramVertex mPVBackground;
     private ProgramVertex mPVImages;
     private ProgramVertex.MatrixAllocation mPVA;
+    private Type mStripPositionType;
 
     private Allocation mImages[];
     private Allocation mAllocIDs;
@@ -204,10 +199,7 @@ public class FilmRS {
         mBufferState = new int[10];
         mAllocState = Allocation.createSized(mRS,
             Element.USER_FLOAT, mBufferState.length);
-
-        mBufferState[STATE_TRIANGLE_OFFSET_COUNT] = mFSM.mTriangleOffsetsCount;
         mBufferState[STATE_LAST_FOCUS] = -1;
-
         mAllocState.data(mBufferState);
     }
 
@@ -227,14 +219,16 @@ public class FilmRS {
 
         Log.e("rs", "Done loading named");
 
+        mStripPositionType = Type.createFromClass(mRS, StripPosition.class, 1);
+
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setScript(mRes, R.raw.filmstrip);
         sb.setRoot(true);
+        sb.setType(mStripPositionType, "Pos", 1);
         mScriptStrip = sb.create();
         mScriptStrip.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-        mAllocPos = Allocation.createSized(mRS,
-            Element.USER_FLOAT, mBufferPos.length);
+        mAllocPos = Allocation.createTyped(mRS, mStripPositionType);
 
         loadImages();
         initState();
