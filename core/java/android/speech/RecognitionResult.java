@@ -60,9 +60,11 @@ public class RecognitionResult implements Parcelable {
      * 
      * @param contact the contact name.
      * @param phoneType the phone type.
+     * @param callAction whether this result included a command to "call", or just the contact name.
      */
-    public static RecognitionResult newContactResult(String contact, int phoneType) {
-        return new RecognitionResult(CONTACT_RESULT, contact, phoneType);
+    public static RecognitionResult newContactResult(String contact, int phoneType,
+            boolean callAction) {
+        return new RecognitionResult(CONTACT_RESULT, contact, phoneType, callAction);
     }
 
     /**
@@ -112,8 +114,16 @@ public class RecognitionResult implements Parcelable {
      */
     public final String mUrl;
 
-    /** Phone number type. This is valid only when mResultType == CONTACT_RESULT */
+    /**
+     * Phone number type. This is valid only when mResultType == CONTACT_RESULT.
+     */
     public final int mPhoneType;
+    
+    /**
+     * Whether a contact recognition result included a command to "call". This is valid only
+     * when mResultType == CONTACT_RESULT.
+     */
+    public final boolean mCallAction;
 
     private RecognitionResult(int type, String query, String html, String url) {
         mResultType = type;
@@ -121,14 +131,16 @@ public class RecognitionResult implements Parcelable {
         mHtml = html;
         mUrl = url;
         mPhoneType = -1;
+        mCallAction = false;
     }
 
-    private RecognitionResult(int type, String query, int at) {
+    private RecognitionResult(int type, String query, int phoneType, boolean callAction) {
         mResultType = type;
         mText = query;
-        mPhoneType = at;
+        mPhoneType = phoneType;
         mHtml = null;
         mUrl = null;
+        mCallAction = callAction;
     }
     
     private RecognitionResult(Parcel in) {
@@ -137,6 +149,7 @@ public class RecognitionResult implements Parcelable {
         mHtml= in.readString();
         mUrl= in.readString();
         mPhoneType = in.readInt();
+        mCallAction = (in.readInt() == 1);
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -145,6 +158,7 @@ public class RecognitionResult implements Parcelable {
         out.writeString(mHtml);
         out.writeString(mUrl);
         out.writeInt(mPhoneType);
+        out.writeInt(mCallAction ? 1 : 0);
     }
     
     
