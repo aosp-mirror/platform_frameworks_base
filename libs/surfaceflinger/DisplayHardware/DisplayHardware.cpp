@@ -183,7 +183,7 @@ void DisplayHardware::init(uint32_t dpy)
     
     char property[PROPERTY_VALUE_MAX];
     /* Read density from build-specific ro.sf.lcd_density property
-     * except if it is overriden by qemu.sf.lcd_density.
+     * except if it is overridden by qemu.sf.lcd_density.
      */
     if (property_get("qemu.sf.lcd_density", property, NULL) <= 0) {
         if (property_get("ro.sf.lcd_density", property, NULL) <= 0) {
