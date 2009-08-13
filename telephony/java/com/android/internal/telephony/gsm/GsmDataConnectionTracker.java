@@ -412,7 +412,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * @return false while no data connection if all above requirements are met.
      */
     public boolean isDataConnectionAsDesired() {
-        boolean roaming = phone.getServiceState().getRoaming();
+        boolean roaming = getDataRoaming();
 
         if (mGsmPhone.mSIMRecords.getRecordsLoaded() &&
                 mGsmPhone.mSST.getCurrentGprsState() == ServiceState.STATE_IN_SERVICE &&
@@ -422,6 +422,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return (state == State.CONNECTED);
         }
         return true;
+    }
+
+    private boolean getDataRoaming() {
+        return mGsmPhone.mSST.getDataRoaming();
     }
 
     private boolean isApnTypeActive(String type) {
@@ -533,7 +537,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     private boolean isDataAllowed() {
-        boolean roaming = phone.getServiceState().getRoaming();
+        boolean roaming = getDataRoaming();
         return getAnyDataEnabled() && (!roaming || getDataOnRoamingEnabled());
     }
 
@@ -580,7 +584,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         int gprsState = mGsmPhone.mSST.getCurrentGprsState();
-        boolean roaming = phone.getServiceState().getRoaming();
+        boolean roaming = getDataRoaming();
         boolean desiredPowerState = mGsmPhone.mSST.getDesiredPowerState();
 
         if ((state == State.IDLE || state == State.SCANNING)
@@ -1245,16 +1249,38 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
+    /**
+     * Check the data roaming consistency since this can be triggered by
+     * voice roaming flag of ServiceState in setDataOnRoamingEnabled()
+     *
+     * TODO make this triggered by data roaming state only
+     */
+    @Override
     protected void onRoamingOff() {
-        trySetupData(Phone.REASON_ROAMING_OFF);
+        if (!getDataRoaming()) { //data roaming is off
+            trySetupData(Phone.REASON_ROAMING_OFF);
+        } else { // Inconsistent! data roaming is on
+            sendMessage(obtainMessage(EVENT_ROAMING_ON));
+        }
     }
 
+    /**
+     * Check the data roaming consistency since this can be triggered by
+     * voice roaming flag of ServiceState in setDataOnRoamingEnabled()
+     *
+     * TODO make this triggered by data roaming state only
+     */
+    @Override
     protected void onRoamingOn() {
-        if (getDataOnRoamingEnabled()) {
-            trySetupData(Phone.REASON_ROAMING_ON);
-        } else {
-            if (DBG) log("Tear down data connection on roaming.");
-            cleanUpConnection(true, Phone.REASON_ROAMING_ON);
+        if (getDataRoaming()) { // data roaming is on
+            if (getDataOnRoamingEnabled()) {
+                trySetupData(Phone.REASON_ROAMING_ON);
+            } else {
+                if (DBG) log("Tear down data connection on roaming.");
+                cleanUpConnection(true, Phone.REASON_ROAMING_ON);
+            }
+        } else { // Inconsistent! data roaming is off
+            sendMessage(obtainMessage(EVENT_ROAMING_OFF));
         }
     }
 
