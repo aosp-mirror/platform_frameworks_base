@@ -41,7 +41,7 @@ public class Type extends BaseObj {
     }
 
     protected void finalize() throws Throwable {
-        if(mNativeCache) {
+        if(mNativeCache != 0) {
             mRS.nTypeFinalDestroy(this);
             mNativeCache = 0;
         }
