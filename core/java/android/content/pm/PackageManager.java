@@ -865,6 +865,7 @@ public abstract class PackageManager {
      * {@link #SIGNATURE_SECOND_NOT_SIGNED}, {@link #SIGNATURE_NO_MATCH},
      * or {@link #SIGNATURE_UNKNOWN_PACKAGE}.
      *
+     * @see #checkSignatures(int, int)
      * @see #SIGNATURE_MATCH
      * @see #SIGNATURE_NEITHER_SIGNED
      * @see #SIGNATURE_FIRST_NOT_SIGNED
@@ -873,6 +874,34 @@ public abstract class PackageManager {
      * @see #SIGNATURE_UNKNOWN_PACKAGE
      */
     public abstract int checkSignatures(String pkg1, String pkg2);
+
+    /**
+     * Like {@link #checkSignatures(String, String)}, but takes UIDs of
+     * the two packages to be checked.  This can be useful, for example,
+     * when doing the check in an IPC, where the UID is the only identity
+     * available.  It is functionally identical to determining the package
+     * associated with the UIDs and checking their signatures.
+     *
+     * @param pkg1 First UID whose signature will be compared.
+     * @param pkg2 Second UID whose signature will be compared.
+     * @return Returns an integer indicating whether there is a matching
+     * signature: the value is >= 0 if there is a match (or neither package
+     * is signed), or < 0 if there is not a match.  The match result can be
+     * further distinguished with the success (>= 0) constants
+     * {@link #SIGNATURE_MATCH}, {@link #SIGNATURE_NEITHER_SIGNED}; or
+     * failure (< 0) constants {@link #SIGNATURE_FIRST_NOT_SIGNED},
+     * {@link #SIGNATURE_SECOND_NOT_SIGNED}, {@link #SIGNATURE_NO_MATCH},
+     * or {@link #SIGNATURE_UNKNOWN_PACKAGE}.
+     *
+     * @see #checkSignatures(int, int)
+     * @see #SIGNATURE_MATCH
+     * @see #SIGNATURE_NEITHER_SIGNED
+     * @see #SIGNATURE_FIRST_NOT_SIGNED
+     * @see #SIGNATURE_SECOND_NOT_SIGNED
+     * @see #SIGNATURE_NO_MATCH
+     * @see #SIGNATURE_UNKNOWN_PACKAGE
+     */
+    public abstract int checkSignatures(int uid1, int uid2);
 
     /**
      * Retrieve the names of all packages that are associated with a particular

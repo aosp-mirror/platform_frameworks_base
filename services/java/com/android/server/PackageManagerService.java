@@ -1138,25 +1138,57 @@ class PackageManagerService extends IPackageManager.Stub {
                     || p2 == null || p2.mExtras == null) {
                 return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
             }
-            return checkSignaturesLP(p1, p2);
+            return checkSignaturesLP(p1.mSignatures, p2.mSignatures);
         }
     }
 
-    int checkSignaturesLP(PackageParser.Package p1, PackageParser.Package p2) {
-        if (p1.mSignatures == null) {
-            return p2.mSignatures == null
+    public int checkUidSignatures(int uid1, int uid2) {
+        synchronized (mPackages) {
+            Signature[] s1;
+            Signature[] s2;
+            Object obj = mSettings.getUserIdLP(uid1);
+            if (obj != null) {
+                if (obj instanceof SharedUserSetting) {
+                    s1 = ((SharedUserSetting)obj).signatures.mSignatures;
+                } else if (obj instanceof PackageSetting) {
+                    s1 = ((PackageSetting)obj).signatures.mSignatures;
+                } else {
+                    return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
+                }
+            } else {
+                return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
+            }
+            obj = mSettings.getUserIdLP(uid2);
+            if (obj != null) {
+                if (obj instanceof SharedUserSetting) {
+                    s2 = ((SharedUserSetting)obj).signatures.mSignatures;
+                } else if (obj instanceof PackageSetting) {
+                    s2 = ((PackageSetting)obj).signatures.mSignatures;
+                } else {
+                    return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
+                }
+            } else {
+                return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
+            }
+            return checkSignaturesLP(s1, s2);
+        }
+    }
+
+    int checkSignaturesLP(Signature[] s1, Signature[] s2) {
+        if (s1 == null) {
+            return s2 == null
                     ? PackageManager.SIGNATURE_NEITHER_SIGNED
                     : PackageManager.SIGNATURE_FIRST_NOT_SIGNED;
         }
-        if (p2.mSignatures == null) {
+        if (s2 == null) {
             return PackageManager.SIGNATURE_SECOND_NOT_SIGNED;
         }
-        final int N1 = p1.mSignatures.length;
-        final int N2 = p2.mSignatures.length;
+        final int N1 = s1.length;
+        final int N2 = s2.length;
         for (int i=0; i<N1; i++) {
             boolean match = false;
             for (int j=0; j<N2; j++) {
-                if (p1.mSignatures[i].equals(p2.mSignatures[j])) {
+                if (s1[i].equals(s2[j])) {
                     match = true;
                     break;
                 }
@@ -2907,9 +2939,9 @@ class PackageManagerService extends IPackageManager.Stub {
                     allowed = true;
                 } else if (p.info.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE
                         || p.info.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
-                    allowed = (checkSignaturesLP(p.owner, pkg)
+                    allowed = (checkSignaturesLP(p.owner.mSignatures, pkg.mSignatures)
                                     == PackageManager.SIGNATURE_MATCH)
-                            || (checkSignaturesLP(mPlatformPackage, pkg)
+                            || (checkSignaturesLP(mPlatformPackage.mSignatures, pkg.mSignatures)
                                     == PackageManager.SIGNATURE_MATCH);
                     if (p.info.protectionLevel == PermissionInfo.PROTECTION_SIGNATURE_OR_SYSTEM) {
                         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
@@ -3556,7 +3588,8 @@ class PackageManagerService extends IPackageManager.Stub {
         // First find the old package info and check signatures
         synchronized(mPackages) {
             oldPackage = mPackages.get(pkgName);
-            if(checkSignaturesLP(pkg, oldPackage) != PackageManager.SIGNATURE_MATCH) {
+            if(checkSignaturesLP(pkg.mSignatures, oldPackage.mSignatures)
+                    != PackageManager.SIGNATURE_MATCH) {
                 res.returnCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
                 return;
             }
