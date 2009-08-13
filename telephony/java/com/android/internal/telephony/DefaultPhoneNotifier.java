@@ -94,8 +94,11 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
 
     public void notifyDataConnection(Phone sender, String reason) {
         try {
-            mRegistry.notifyDataConnection(convertDataState(sender.getDataConnectionState()),
-                    sender.isDataConnectivityPossible(), reason, sender.getActiveApn(),
+            mRegistry.notifyDataConnection(
+                    convertDataState(sender.getDataConnectionState()),
+                    sender.isDataConnectivityPossible(), reason,
+                    sender.getActiveApn(),
+                    sender.getActiveApnTypes(),
                     sender.getInterfaceName(null));
         } catch (RemoteException ex) {
             // system process is dead

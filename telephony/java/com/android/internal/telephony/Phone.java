@@ -99,8 +99,9 @@ public interface Phone {
     static final String PHONE_NAME_KEY = "phoneName";
     static final String FAILURE_REASON_KEY = "reason";
     static final String STATE_CHANGE_REASON_KEY = "reason";
-    static final String DATA_APN_TYPE_KEY = "apnType";
+    static final String DATA_APN_TYPES_KEY = "apnType";
     static final String DATA_APN_KEY = "apn";
+
     static final String DATA_IFACE_NAME_KEY = "iface";
     static final String NETWORK_UNAVAILABLE_KEY = "networkUnvailable";
     static final String PHONE_IN_ECM_STATE = "phoneinECMState";
@@ -120,10 +121,16 @@ public interface Phone {
     static final String APN_TYPE_MMS = "mms";
     /** APN type for SUPL assisted GPS */
     static final String APN_TYPE_SUPL = "supl";
+    /** APN type for DUN traffic */
+    static final String APN_TYPE_DUN = "dun";
+    /** APN type for HiPri traffic */
+    static final String APN_TYPE_HIPRI = "hipri";
 
     // "Features" accessible through the connectivity manager
     static final String FEATURE_ENABLE_MMS = "enableMMS";
     static final String FEATURE_ENABLE_SUPL = "enableSUPL";
+    static final String FEATURE_ENABLE_DUN = "enableDUN";
+    static final String FEATURE_ENABLE_HIPRI = "enableHIPRI";
 
     /**
      * Return codes for <code>enableApnType()</code>

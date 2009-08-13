@@ -88,6 +88,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private String mDataConnectionApn = "";
 
+    private String[] mDataConnectionApnTypes = null;
+
     private String mDataConnectionInterfaceName = "";
 
     private Bundle mCellLocation = new Bundle();
@@ -337,7 +339,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyDataConnection(int state, boolean isDataConnectivityPossible,
-            String reason, String apn, String interfaceName) {
+            String reason, String apn, String[] apnTypes, String interfaceName) {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
@@ -346,6 +348,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mDataConnectionPossible = isDataConnectivityPossible;
             mDataConnectionReason = reason;
             mDataConnectionApn = apn;
+            mDataConnectionApnTypes = apnTypes;
             mDataConnectionInterfaceName = interfaceName;
             for (int i = mRecords.size() - 1; i >= 0; i--) {
                 Record r = mRecords.get(i);
@@ -359,7 +362,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
         broadcastDataConnectionStateChanged(state, isDataConnectivityPossible, reason, apn,
-                interfaceName);
+                apnTypes, interfaceName);
     }
 
     public void notifyDataConnectionFailed(String reason) {
@@ -517,8 +520,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mContext.sendBroadcast(intent, android.Manifest.permission.READ_PHONE_STATE);
     }
 
-    private void broadcastDataConnectionStateChanged(int state, boolean isDataConnectivityPossible,
-            String reason, String apn, String interfaceName) {
+    private void broadcastDataConnectionStateChanged(int state,
+            boolean isDataConnectivityPossible,
+            String reason, String apn, String[] apnTypes, String interfaceName) {
         // Note: not reporting to the battery stats service here, because the
         // status bar takes care of that after taking into account all of the
         // required info.
@@ -531,6 +535,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             intent.putExtra(Phone.STATE_CHANGE_REASON_KEY, reason);
         }
         intent.putExtra(Phone.DATA_APN_KEY, apn);
+        String types = apnTypes[0];
+        for (int i = 1; i < apnTypes.length; i++) {
+            types = types+","+apnTypes[i];
+        }
+        intent.putExtra(Phone.DATA_APN_TYPES_KEY, types);
         intent.putExtra(Phone.DATA_IFACE_NAME_KEY, interfaceName);
         mContext.sendStickyBroadcast(intent);
     }

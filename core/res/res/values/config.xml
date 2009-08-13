@@ -38,4 +38,23 @@
     <!-- Flag indicating whether Last Name comes before First Name.
         This becomes true in Japan, for example.-->
     <bool name="config_lastname_comes_before_firstname">false</bool>
+
+    <!-- This string array should be overridden by the device to present a list of network attributes.  This is used by the connectivity manager to decide which networks can coexist based on the hardward -->
+    <!-- An Array of "[type-name],[associated radio-name],[priority]  -->
+    <string-array translatable="false" name="networkAttributes">
+        <item>"default,wifi,0"</item>
+        <item>"default,mobile,0"</item>
+        <item>"mms,mobile,1"</item>
+        <item>"supl,mobile,1"</item>
+        <item>"dun,mobile,1"</item>
+        <item>"hipri,mobile,2"</item>
+    </string-array>
+
+    <!-- This string array should be overridden by the device to present a list of radio attributes.  This is used by the connectivity manager to decide which networks can coexist based on the hardware -->
+    <!-- An Array of "[radio-name],[priority]                        -->
+    <!--              [# simultaneous connection types]"             -->
+    <string-array translatable="false" name="radioAttributes">
+        <item>"wifi,1,1"</item>
+        <item>"mobile,0,1"</item>
+    </string-array>
 </resources>

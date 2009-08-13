@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
 
+
 /**
  * Each subclass of this class keeps track of the state of connectivity
  * of a network interface. All state information for a network should
@@ -40,11 +41,16 @@ public abstract class NetworkStateTracker extends Handler {
     protected NetworkInfo mNetworkInfo;
     protected Context mContext;
     protected Handler mTarget;
+    protected String mInterfaceName;
+    protected String[] mDnsPropNames;
+    private boolean mPrivateDnsRouteSet;
+    protected int mDefaultGatewayAddr;
+    private boolean mDefaultRouteSet;
     private boolean mTeardownRequested;
 
-    private static boolean DBG = Config.LOGV; 
+    private static boolean DBG = Config.LOGV;
     private static final String TAG = "NetworkStateTracker";
-    
+
     public static final int EVENT_STATE_CHANGED = 1;
     public static final int EVENT_SCAN_RESULTS_AVAILABLE = 2;
     /**
@@ -56,6 +62,7 @@ public abstract class NetworkStateTracker extends Handler {
     public static final int EVENT_CONFIGURATION_CHANGED = 4;
     public static final int EVENT_ROAMING_CHANGED = 5;
     public static final int EVENT_NETWORK_SUBTYPE_CHANGED = 6;
+    public static final int EVENT_RESTORE_DEFAULT_NETWORK = 7;
 
     public NetworkStateTracker(Context context,
             Handler target,
@@ -67,6 +74,7 @@ public abstract class NetworkStateTracker extends Handler {
         mContext = context;
         mTarget = target;
         mTeardownRequested = false;
+
         this.mNetworkInfo = new NetworkInfo(networkType, subType, typeName, subtypeName);
     }
 
@@ -75,17 +83,19 @@ public abstract class NetworkStateTracker extends Handler {
     }
 
     /**
-     * Return the list of DNS servers associated with this network.
-     * @return a list of the IP addresses of the DNS servers available
-     * for the network.
-     */
-    public abstract String[] getNameServers();
-
-    /**
      * Return the system properties name associated with the tcp buffer sizes
      * for this network.
      */
     public abstract String getTcpBufferSizesPropName();
+
+    /**
+     * Return the IP addresses of the DNS servers available for the mobile data
+     * network interface.
+     * @return a list of DNS addresses, with no holes.
+     */
+    public String[] getNameServers() {
+        return getNameServerList(mDnsPropNames);
+    }
 
     /**
      * Return the IP addresses of the DNS servers available for this
@@ -110,6 +120,50 @@ public abstract class NetworkStateTracker extends Handler {
             }
         }
         return dnsAddresses;
+    }
+
+    public void addPrivateDnsRoutes() {
+        if (DBG) Log.d(TAG, "addPrivateDnsRoutes for " + this +
+                "(" + mInterfaceName + ")");
+        if (mInterfaceName != null && !mPrivateDnsRouteSet) {
+            for (String addrString : getNameServers()) {
+                int addr = NetworkUtils.lookupHost(addrString);
+                if (addr != -1) {
+                    NetworkUtils.addHostRoute(mInterfaceName, addr);
+                }
+            }
+            mPrivateDnsRouteSet = true;
+        }
+    }
+
+    public void removePrivateDnsRoutes() {
+        if (DBG) Log.d(TAG, "removePrivateDnsRoutes for " + this +
+                "(" + mInterfaceName + ")");
+        // TODO - we should do this explicitly but the NetUtils api doesnt
+        // support this yet - must remove all.  No worse than before
+        if (mInterfaceName != null && mPrivateDnsRouteSet) {
+            NetworkUtils.removeHostRoutes(mInterfaceName);
+            mPrivateDnsRouteSet = false;
+        }
+    }
+
+    public void addDefaultRoute() {
+        if (DBG) Log.d(TAG, "addDefaultRoute for " + this + "(" +
+                mInterfaceName + "), GatewayAddr=" + mDefaultGatewayAddr);
+        if ((mInterfaceName != null) && (mDefaultGatewayAddr != 0) &&
+                mDefaultRouteSet == false) {
+            NetworkUtils.setDefaultRoute(mInterfaceName, mDefaultGatewayAddr);
+            mDefaultRouteSet = true;
+        }
+    }
+
+    public void removeDefaultRoute() {
+        if (DBG) Log.d(TAG, "removeDefaultRoute for " + this + "(" +
+                mInterfaceName + ")");
+        if (mInterfaceName != null && mDefaultRouteSet == true) {
+            NetworkUtils.removeDefaultRoute(mInterfaceName);
+            mDefaultRouteSet = false;
+        }
     }
 
     /**
@@ -209,6 +263,7 @@ public abstract class NetworkStateTracker extends Handler {
      * @param extraInfo optional {@code String} providing extra information about the state change
      */
     public void setDetailedState(NetworkInfo.DetailedState state, String reason, String extraInfo) {
+        if (DBG) Log.d(TAG, "setDetailed state, old ="+mNetworkInfo.getDetailedState()+" and new state="+state);
         if (state != mNetworkInfo.getDetailedState()) {
             boolean wasConnecting = (mNetworkInfo.getState() == NetworkInfo.State.CONNECTING);
             String lastReason = mNetworkInfo.getReason();
