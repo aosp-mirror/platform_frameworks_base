@@ -695,7 +695,14 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 if (NC > 0) {
                     for (Map.Entry<String, TimeStats> ent : pus.mLaunchTimes.entrySet()) {
                         sb.append("A:");
-                        sb.append(ent.getKey());
+                        String activity = ent.getKey();
+                        if (activity.startsWith(pkgName)) {
+                            sb.append('*');
+                            sb.append(activity.substring(
+                                    pkgName.length(), activity.length()));
+                        } else {
+                            sb.append(activity);
+                        }
                         TimeStats times = ent.getValue();
                         sb.append(',');
                         sb.append(times.count);
