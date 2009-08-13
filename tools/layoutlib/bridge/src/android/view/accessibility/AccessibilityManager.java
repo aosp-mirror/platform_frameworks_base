@@ -87,6 +87,8 @@ public final class AccessibilityManager {
      * @return An unmodifiable list with {@link ServiceInfo}s.
      */
     public List<ServiceInfo> getAccessibilityServiceList() {
+        // normal implementation does this in some case, so let's do the same
+        // (unmodifiableList wrapped around null).
         List<ServiceInfo> services = null;
         return Collections.unmodifiableList(services);
     }
