@@ -521,31 +521,29 @@ public abstract class KeyInputQueue {
                             // Finger 1
                             if (ev.scancode == RawInputEvent.ABS_X) {
                                 di.mAbs.changed = true;
-                                di.mAbs.mNextData[MotionEvent.SAMPLE_X] = ev.value;
+                                di.curTouchVals[MotionEvent.SAMPLE_X] = ev.value;
                             } else if (ev.scancode == RawInputEvent.ABS_Y) {
                                 di.mAbs.changed = true;
-                                di.mAbs.mNextData[MotionEvent.SAMPLE_Y] = ev.value;
+                                di.curTouchVals[MotionEvent.SAMPLE_Y] = ev.value;
                             } else if (ev.scancode == RawInputEvent.ABS_PRESSURE) {
                                 di.mAbs.changed = true;
-                                di.mAbs.mNextData[MotionEvent.SAMPLE_PRESSURE] = ev.value;
-                                di.mAbs.mNextData[MotionEvent.NUM_SAMPLE_DATA
+                                di.curTouchVals[MotionEvent.SAMPLE_PRESSURE] = ev.value;
+                                di.curTouchVals[MotionEvent.NUM_SAMPLE_DATA
                                                  + MotionEvent.SAMPLE_PRESSURE] = ev.value;
                             } else if (ev.scancode == RawInputEvent.ABS_TOOL_WIDTH) {
                                 di.mAbs.changed = true;
-                                di.mAbs.mNextData[MotionEvent.SAMPLE_SIZE] = ev.value;
-                                di.mAbs.mNextData[MotionEvent.NUM_SAMPLE_DATA
+                                di.curTouchVals[MotionEvent.SAMPLE_SIZE] = ev.value;
+                                di.curTouchVals[MotionEvent.NUM_SAMPLE_DATA
                                                  + MotionEvent.SAMPLE_SIZE] = ev.value;
 
                             // Finger 2
                             } else if (ev.scancode == RawInputEvent.ABS_HAT0X) {
                                 di.mAbs.changed = true;
-                                di.mAbs.mNextData[(di.mAbs.mDown[0] ?
-                                        MotionEvent.NUM_SAMPLE_DATA : 0)
+                                di.curTouchVals[MotionEvent.NUM_SAMPLE_DATA 
                                          + MotionEvent.SAMPLE_X] = ev.value;
                             } else if (ev.scancode == RawInputEvent.ABS_HAT0Y) {
                                 di.mAbs.changed = true;
-                                di.mAbs.mNextData[(di.mAbs.mDown[0] ?
-                                        MotionEvent.NUM_SAMPLE_DATA : 0)
+                                di.curTouchVals[MotionEvent.NUM_SAMPLE_DATA
                                         + MotionEvent.SAMPLE_Y] = ev.value;
                             }
     
@@ -603,8 +601,21 @@ public abstract class KeyInputQueue {
                                             |RawInputEvent.CLASS_TOUCHSCREEN_MT))
                                             == RawInputEvent.CLASS_TOUCHSCREEN) {
                                         ms.mNextNumPointers = 0;
-                                        if (ms.mDown[0]) ms.mNextNumPointers++;
-                                        if (ms.mDown[1]) ms.mNextNumPointers++;
+                                        if (ms.mDown[0]) {
+                                            System.arraycopy(di.curTouchVals, 0,
+                                                    ms.mNextData, 0,
+                                                    MotionEvent.NUM_SAMPLE_DATA);
+                                            ms.mNextNumPointers++;
+                                        }
+                                        if (ms.mDown[1]) {
+                                            System.arraycopy(di.curTouchVals,
+                                                    MotionEvent.NUM_SAMPLE_DATA,
+                                                    ms.mNextData,
+                                                    ms.mNextNumPointers
+                                                    * MotionEvent.NUM_SAMPLE_DATA,
+                                                    MotionEvent.NUM_SAMPLE_DATA);
+                                            ms.mNextNumPointers++;
+                                        }
                                     }
                                     
                                     boolean doMotion = !monitorVirtualKey(di,
