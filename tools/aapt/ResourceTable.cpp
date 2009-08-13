@@ -663,6 +663,7 @@ status_t compileResourceFile(Bundle* bundle,
     const String16 public16("public");
     const String16 public_padding16("public-padding");
     const String16 private_symbols16("private-symbols");
+    const String16 add_resource16("add-resource");
     const String16 skip16("skip");
     const String16 eat_comment16("eat-comment");
 
@@ -960,6 +961,36 @@ status_t compileResourceFile(Bundle* bundle,
                 }
                 continue;
 
+            } else if (strcmp16(block.getElementName(&len), add_resource16.string()) == 0) {
+                SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
+            
+                String16 typeName;
+                ssize_t typeIdx = block.indexOfAttribute(NULL, "type");
+                if (typeIdx < 0) {
+                    srcPos.error("A 'type' attribute is required for <add-resource>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                typeName = String16(block.getAttributeStringValue(typeIdx, &len));
+
+                String16 name;
+                ssize_t nameIdx = block.indexOfAttribute(NULL, "name");
+                if (nameIdx < 0) {
+                    srcPos.error("A 'name' attribute is required for <add-resource>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                name = String16(block.getAttributeStringValue(nameIdx, &len));
+
+                outTable->canAddEntry(srcPos, myPackage, typeName, name);
+
+                while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+                    if (code == ResXMLTree::END_TAG) {
+                        if (strcmp16(block.getElementName(&len), private_symbols16.string()) == 0) {
+                            break;
+                        }
+                    }
+                }
+                continue;
+                
             } else if (strcmp16(block.getElementName(&len), declare_styleable16.string()) == 0) {
                 SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
                                 
@@ -1557,9 +1588,21 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
     }
 #endif
     if (overlay && !hasBagOrEntry(package, type, name)) {
-        sourcePos.error("Can't add new bags in an overlay.  See '%s'\n",
-                        String8(name).string());
-        return UNKNOWN_ERROR;
+        bool canAdd = false;
+        sp<Package> p = mPackages.valueFor(package);
+        if (p != NULL) {
+            sp<Type> t = p->getTypes().valueFor(type);
+            if (t != NULL) {
+                if (t->getCanAddEntries().indexOf(name) >= 0) {
+                    canAdd = true;
+                }
+            }
+        }
+        if (!canAdd) {
+            sourcePos.error("Resource does not already exist in overlay at '%s'; use <add-resource> to add.\n",
+                            String8(name).string());
+            return UNKNOWN_ERROR;
+        }
     }
     sp<Entry> e = getEntry(package, type, name, sourcePos, overlay, params);
     if (e == NULL) {
@@ -1722,6 +1765,15 @@ bool ResourceTable::appendTypeComment(const String16& package,
         }
     }
     return false;
+}
+
+void ResourceTable::canAddEntry(const SourcePos& pos,
+        const String16& package, const String16& type, const String16& name)
+{
+    sp<Type> t = getType(package, type, pos);
+    if (t != NULL) {
+        t->canAddEntry(name);
+    }
 }
 
 size_t ResourceTable::size() const {
@@ -3215,6 +3267,11 @@ status_t ResourceTable::Type::addPublic(const SourcePos& sourcePos,
     return NO_ERROR;
 }
 
+void ResourceTable::Type::canAddEntry(const String16& name)
+{
+    mCanAddEntries.add(name);
+}
+
 sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
                                                        const SourcePos& sourcePos,
                                                        const ResTable_config* config,
@@ -3224,9 +3281,10 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
     int pos = -1;
     sp<ConfigList> c = mConfigs.valueFor(entry);
     if (c == NULL) {
-        if (overlay == true) {
-            sourcePos.error("Resource %s appears in overlay but not"
-                            " in the base package.\n", String8(entry).string());
+        if (overlay == true && mCanAddEntries.indexOf(entry) < 0) {
+            sourcePos.error("Resource at %s appears in overlay but not"
+                            " in the base package; use <add-resource> to add.\n",
+                            String8(entry).string());
             return NULL;
         }
         c = new ConfigList(entry, sourcePos);

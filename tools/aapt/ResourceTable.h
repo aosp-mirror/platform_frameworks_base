@@ -132,6 +132,9 @@ public:
                            const String16& name,
                            const String16& comment);
     
+    void canAddEntry(const SourcePos& pos,
+        const String16& package, const String16& type, const String16& name);
+        
     size_t size() const;
     size_t numLocalResources() const;
     bool hasResources() const;
@@ -413,7 +416,9 @@ public:
         status_t addPublic(const SourcePos& pos,
                            const String16& name,
                            const uint32_t ident);
-
+                           
+        void canAddEntry(const String16& name);
+        
         String16 getName() const { return mName; }
         sp<Entry> getEntry(const String16& entry,
                            const SourcePos& pos,
@@ -435,6 +440,8 @@ public:
         const DefaultKeyedVector<String16, sp<ConfigList> >& getConfigs() const { return mConfigs; }
         const Vector<sp<ConfigList> >& getOrderedConfigs() const { return mOrderedConfigs; }
 
+        const SortedVector<String16>& getCanAddEntries() const { return mCanAddEntries; }
+        
         const SourcePos& getPos() const { return mPos; }
     private:
         String16 mName;
@@ -443,6 +450,7 @@ public:
         SortedVector<ConfigDescription> mUniqueConfigs;
         DefaultKeyedVector<String16, sp<ConfigList> > mConfigs;
         Vector<sp<ConfigList> > mOrderedConfigs;
+        SortedVector<String16> mCanAddEntries;
         int32_t mPublicIndex;
         int32_t mIndex;
         SourcePos mPos;
