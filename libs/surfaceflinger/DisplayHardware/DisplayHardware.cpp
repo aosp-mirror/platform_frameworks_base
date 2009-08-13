@@ -166,9 +166,17 @@ void DisplayHardware::init(uint32_t dpy)
         }
     }
 
+    eglQuerySurface(display, surface, EGL_WIDTH,  &mWidth);
+    eglQuerySurface(display, surface, EGL_HEIGHT, &mHeight);
+
 #ifdef EGL_ANDROID_swap_rectangle    
     if (strstr(egl_extensions, "EGL_ANDROID_swap_rectangle")) {
-        mFlags |= SWAP_RECTANGLE;
+        if (eglSetSwapRectangleANDROID(display, surface,
+                0, 0, mWidth, mHeight) == EGL_TRUE) {
+            // This could fail if this extension is not supported by this
+            // specific surface (of config)
+            mFlags |= SWAP_RECTANGLE;
+        }
     }
     // when we have the choice between UPDATE_ON_DEMAND and SWAP_RECTANGLE
     // choose UPDATE_ON_DEMAND, which is more efficient
@@ -177,6 +185,8 @@ void DisplayHardware::init(uint32_t dpy)
 #endif
     
 
+    LOGI("flags     : %08x", mFlags);
+    
     mDpiX = mNativeWindow->xdpi;
     mDpiY = mNativeWindow->ydpi;
     mRefreshRate = fbDev->fps; 
@@ -203,9 +213,6 @@ void DisplayHardware::init(uint32_t dpy)
     
     context = eglCreateContext(display, config, NULL, NULL);
     //checkEGLErrors("eglCreateContext");
-    
-    eglQuerySurface(display, surface, EGL_WIDTH, &mWidth);
-    eglQuerySurface(display, surface, EGL_HEIGHT, &mHeight);
     
     
     /*
