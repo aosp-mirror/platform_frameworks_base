@@ -123,6 +123,29 @@ public class TelephonyUtilsTest extends TestCase {
     }
 
     /**
+     * Test infinite retires
+     */
+    @SmallTest
+    public void testRetryManageInfinite() throws Exception {
+        RetryManager rm = new RetryManager();
+
+        assertTrue(rm.configure("1000,2000,3000,max_retries=infinite"));
+        assertTrue(rm.isRetryNeeded());
+        assertEquals(1000, rm.getRetryTimer());
+        rm.increaseRetryCount();
+        assertTrue(rm.isRetryNeeded());
+        assertEquals(2000, rm.getRetryTimer());
+        rm.increaseRetryCount();
+        assertTrue(rm.isRetryNeeded());
+        // All others are 3000 and isRetryNeeded is always true
+        for (int i=0; i < 100; i++) {
+            assertEquals(3000, rm.getRetryTimer());
+            rm.increaseRetryCount();
+            assertTrue(rm.isRetryNeeded());
+        }
+    }
+
+    /**
      * Test string configuration using all options.
      */
     @SmallTest

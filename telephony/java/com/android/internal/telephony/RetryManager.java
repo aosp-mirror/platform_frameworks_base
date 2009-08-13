@@ -41,7 +41,8 @@ import java.util.ArrayList;
  *</ul>
  *<p>
  * max_retries is the number of times that incrementRetryCount
- * maybe called before isRetryNeeded will return false.
+ * maybe called before isRetryNeeded will return false. if value
+ * is infinite then isRetryNeeded will always return true.
  *
  * default_randomizationTime will be used as the randomizationTime
  * for delay times which have no supplied randomizationTime. If
@@ -60,9 +61,13 @@ import java.util.ArrayList;
  * the 4..10 retries all using 3000 as the delay:
  * <ul><li><code>"max_retries=10, default_randomization=500, 1000, 2000, 3000"</code></ul>
  *
- * <li>4 retires with a 100ms default randomization value for the first 2 values and
- * the other two having specified values of 500ms:
+ * <li>4 retires with a 100 as the default randomization value for the first 2 values and
+ * the other two having specified values of 500:
  * <ul><li><code>"default_randomization=100, 1000, 2000, 4000:500, 5000:500"</code></ul>
+ *
+ * <li>Infinite number of retires with the first one at 1000, the second at 2000 all
+ * others will be at 3000.
+ * <ul><li><code>"max_retries=infinite,1000,2000,3000</code></ul>
  * </ul>
  *
  * {@hide}
@@ -181,9 +186,13 @@ public class RetryManager {
                         if (!value.first) return false;
                         defaultRandomization = value.second;
                     } else if (TextUtils.equals(splitStr[0], "max_retries")) {
-                        value = parseNonNegativeInt(splitStr[0], splitStr[1]);
-                        if (!value.first) return false;
-                        mMaxRetryCount = value.second;
+                        if (TextUtils.equals("infinite",splitStr[1])) {
+                            mRetryForever = true;
+                        } else {
+                            value = parseNonNegativeInt(splitStr[0], splitStr[1]);
+                            if (!value.first) return false;
+                            mMaxRetryCount = value.second;
+                        }
                     } else {
                         Log.e(LOG_TAG, "Unrecognized configuration name value pair: "
                                         + strArray[i]);
