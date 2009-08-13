@@ -112,6 +112,11 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
         mWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
 
+        // Expose window.gc function to JavaScript. JSC build exposes
+        // this function by default, but V8 requires the flag to turn it on.
+        // WebView::setJsFlags is noop in JSC build.
+        mWebView.setJsFlags("--expose_gc");
+
         mHandler = new AsyncHandler();
 
         Intent intent = getIntent();
