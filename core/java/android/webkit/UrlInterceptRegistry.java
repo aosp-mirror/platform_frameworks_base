@@ -24,6 +24,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
+/**
+ * @deprecated This class was inteded to be used by Gears. Since Gears was
+ * deprecated, so is this class.
+ */
+@Deprecated
 public final class UrlInterceptRegistry {
 
     private final static String LOGTAG = "intercept";
@@ -42,7 +47,10 @@ public final class UrlInterceptRegistry {
      * set the flag to control whether url intercept is enabled or disabled
      * 
      * @param disabled true to disable the cache
+     *
+     * @deprecated
      */
+    @Deprecated
     public static synchronized void setUrlInterceptDisabled(boolean disabled) {
         mDisabled = disabled;
     }
@@ -51,7 +59,10 @@ public final class UrlInterceptRegistry {
      * get the state of the url intercept, enabled or disabled
      * 
      * @return return if it is disabled
+     *
+     * @deprecated
      */
+    @Deprecated
     public static synchronized boolean urlInterceptDisabled() {
         return mDisabled;
     }
@@ -62,7 +73,10 @@ public final class UrlInterceptRegistry {
      *
      * @param handler The new UrlInterceptHandler object
      * @return true if the handler was not previously registered.
+     *
+     * @deprecated
      */
+    @Deprecated
     public static synchronized boolean registerHandler(
             UrlInterceptHandler handler) {
         if (!getHandlers().contains(handler)) {
@@ -78,7 +92,10 @@ public final class UrlInterceptRegistry {
      *
      * @param handler A previously registered UrlInterceptHandler.
      * @return true if the handler was found and removed from the list.
+     *
+     * @deprecated
      */
+    @Deprecated
     public static synchronized boolean unregisterHandler(
             UrlInterceptHandler handler) {
         return getHandlers().remove(handler);
@@ -89,8 +106,8 @@ public final class UrlInterceptRegistry {
      * UrlInterceptHandler interested, or null if none are.
      *
      * @return A CacheResult containing surrogate content.
-     * @Deprecated Use PluginData getPluginData( String url,
-     * Map<String, String> headers) instead.
+     *
+     * @deprecated
      */
     @Deprecated
     public static synchronized CacheResult getSurrogate(
@@ -115,7 +132,10 @@ public final class UrlInterceptRegistry {
      * intercepts are disabled.
      *
      * @return A PluginData instance containing surrogate content.
+     *
+     * @deprecated
      */
+    @Deprecated
     public static synchronized PluginData getPluginData(
             String url, Map<String, String> headers) {
         if (urlInterceptDisabled()) {

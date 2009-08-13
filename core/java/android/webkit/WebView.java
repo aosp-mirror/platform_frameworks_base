@@ -306,9 +306,6 @@ public class WebView extends AbsoluteLayout
     // Used by WebViewCore to create child views.
     /* package */ final ViewManager mViewManager;
 
-    // The list of loaded plugins.
-    private static PluginList sPluginList;
-
     /**
      * Position of the last touch event.
      */
@@ -2493,20 +2490,19 @@ public class WebView extends AbsoluteLayout
    /**
     * Return the list of currently loaded plugins.
     * @return The list of currently loaded plugins.
+    *
+    * @deprecated This was used for Gears, which has been deprecated.
     */
+    @Deprecated
     public static synchronized PluginList getPluginList() {
-        if (sPluginList == null) {
-            sPluginList = new PluginList();
-        }
-        return sPluginList;
+        return null;
     }
 
    /**
-     * TODO: need to add @Deprecated
+    * @deprecated This was used for Gears, which has been deprecated.
     */
-    public void refreshPlugins(boolean reloadOpenPages) {
-        PluginManager.getInstance(mContext).refreshPlugins(reloadOpenPages);
-    }
+    @Deprecated
+    public void refreshPlugins(boolean reloadOpenPages) { }
 
     //-------------------------------------------------------------------------
     // Override View methods

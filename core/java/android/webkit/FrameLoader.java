@@ -160,9 +160,6 @@ class FrameLoader {
         populateStaticHeaders();
         populateHeaders();
 
-        // response was handled by UrlIntercept, don't issue HTTP request
-        if (handleUrlIntercept()) return true;
-
         // response was handled by Cache, don't issue HTTP request
         if (handleCache()) {
             // push the request data down to the LoadListener
@@ -200,7 +197,7 @@ class FrameLoader {
     }
 
     /*
-     * This function is used by handleUrlInterecpt and handleCache to
+     * This function is used by handleCache to
      * setup a load from the byte stream in a CacheResult.
      */
     private void startCacheLoad(CacheResult result) {
@@ -213,30 +210,6 @@ class FrameLoader {
                 new CacheLoader(mListener, result);
         mListener.setCacheLoader(cacheLoader);
         cacheLoader.load();
-    }
-
-    /*
-     * This function is used by handleHTTPLoad to allow URL
-     * interception. This can be used to provide alternative load
-     * methods such as locally stored versions or for debugging.
-     *
-     * Returns true if the response was handled by UrlIntercept.
-     */
-    private boolean handleUrlIntercept() {
-        // Check if the URL can be served from UrlIntercept. If
-        // successful, return the data just like a cache hit.
-
-        PluginData data = UrlInterceptRegistry.getPluginData(
-                mListener.url(), mHeaders);
-
-        if(data != null) {
-            PluginContentLoader loader =
-                    new PluginContentLoader(mListener, data);
-            loader.load();
-            return true;
-        }
-        // Not intercepted. Carry on as normal.
-        return false;
     }
 
     /*
