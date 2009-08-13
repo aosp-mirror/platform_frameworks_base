@@ -743,7 +743,7 @@ public class WebView extends AbsoluteLayout
 
     private void updateZoomButtonsEnabled() {
         boolean canZoomIn = mActualScale < mMaxZoomScale;
-        boolean canZoomOut = mActualScale > mMinZoomScale;
+        boolean canZoomOut = mActualScale > mMinZoomScale && !mInZoomOverview;
         if (!canZoomIn && !canZoomOut) {
             // Hide the zoom in and out buttons, as well as the fit to page
             // button, if the page cannot zoom
@@ -3890,7 +3890,7 @@ public class WebView extends AbsoluteLayout
                         nativeHideCursor();
                     }
                     WebSettings settings = getSettings();
-                    if (settings.supportZoom() && !mInZoomOverview
+                    if (settings.supportZoom()
                             && settings.getBuiltInZoomControls()
                             && !mZoomButtonsController.isVisible()
                             && (canZoomScrollOut() ||
@@ -3959,7 +3959,7 @@ public class WebView extends AbsoluteLayout
                     mUserScroll = true;
                 }
 
-                if (!getSettings().getBuiltInZoomControls() && !mInZoomOverview) {
+                if (!getSettings().getBuiltInZoomControls()) {
                     boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
                     boolean showMagnify = canZoomScrollOut();
                     if (mZoomControls != null && (showPlusMinus || showMagnify)) {
@@ -4544,9 +4544,17 @@ public class WebView extends AbsoluteLayout
         // TODO: alternatively we can disallow this during draw history mode
         switchOutDrawHistory();
         // Center zooming to the center of the screen.
-        mZoomCenterX = getViewWidth() * .5f;
-        mZoomCenterY = getViewHeight() * .5f;
-        return zoomWithPreview(mActualScale * 1.25f);
+        if (mInZoomOverview) {
+            // if in overview mode, bring it back to normal mode
+            mLastTouchX = getViewWidth() * .5f;
+            mLastTouchY = getViewHeight() * .5f;
+            doDoubleTap();
+            return true;
+        } else {
+            mZoomCenterX = getViewWidth() * .5f;
+            mZoomCenterY = getViewHeight() * .5f;
+            return zoomWithPreview(mActualScale * 1.25f);
+        }
     }
 
     /**
