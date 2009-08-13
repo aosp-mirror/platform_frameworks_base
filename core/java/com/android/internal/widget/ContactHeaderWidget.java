@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.Manifest;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -51,8 +52,14 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 
-
-/* Widget that is used across system apps for displaying a header banner with contact info */
+/**
+ * Header used across system for displaying a title bar with contact info. You
+ * can bind specific values on the header, or use helper methods like
+ * {@link #bindFromContactId(long)} to populate asynchronously.
+ * <p>
+ * The parent must request the {@link Manifest.permission#READ_CONTACTS}
+ * permission to access contact data.
+ */
 public class ContactHeaderWidget extends FrameLayout implements View.OnClickListener,
         View.OnLongClickListener {
 
@@ -74,6 +81,9 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
 
     protected ContentResolver mContentResolver;
 
+    /**
+     * Interface for callbacks invoked when the user interacts with a header.
+     */
     public interface ContactHeaderListener {
         public void onPhotoLongClick(View view);
         public void onDisplayNameLongClick(View view);
@@ -169,6 +179,9 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mQueryHandler = new QueryHandler(mContentResolver);
     }
 
+    /**
+     * Set the given {@link ContactHeaderListener} to handle header events.
+     */
     public void setContactHeaderListener(ContactHeaderListener listener) {
         mListener = listener;
     }
@@ -222,29 +235,45 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         }
     }
 
-
-    /** {@inheritDoc} */
-    public void onQueryComplete(int token, Object cookie, Cursor cursor) {
-        try{
-            if (token == TOKEN_CONTACT_INFO) {
-                bindContactInfo(cursor);
-                invalidate();
-            } else if (token == TOKEN_SOCIAL) {
-                bindSocial(cursor);
-                invalidate();
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
     /**
      * Turn on/off showing of the star element.
      */
     public void showStar(boolean showStar) {
         mStarredView.setVisibility(showStar ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * Manually set the starred state of this header widget. This doesn't change
+     * the underlying {@link Contacts} value, only the UI state.
+     */
+    public void setStared(boolean starred) {
+        mStarredView.setChecked(starred);
+    }
+
+    /**
+     * Manually set the photo to display in the header. This doesn't change the
+     * underlying {@link Contacts}, only the UI state.
+     */
+    public void setPhoto(Bitmap bitmap) {
+        mPhotoView.setImageBitmap(bitmap);
+    }
+
+    /**
+     * Manually set the display name and phonetic name to show in the header.
+     * This doesn't change the underlying {@link Contacts}, only the UI state.
+     */
+    public void setDisplayName(CharSequence displayName, CharSequence phoneticName) {
+        mDisplayNameView.setText(displayName);
+        if (mPhoneticNameView != null) {
+            mPhoneticNameView.setText(phoneticName);
+        }
+    }
+
+    /**
+     * Manually set the social snippet text to display in the header.
+     */
+    public void setSocialSnippet(CharSequence snippet) {
+        mStatusView.setText(snippet);
     }
 
     /**
@@ -256,10 +285,29 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     public void bindFromContactId(long contactId) {
         mContactId = contactId;
         mContactUri = ContentUris.withAppendedId(Contacts.CONTENT_URI, mContactId);
-        mContactSummaryUri = ContentUris.withAppendedId(Contacts.CONTENT_SUMMARY_URI, mContactId);
-        mStatusUri = ContentUris.withAppendedId(
-                SocialContract.Activities.CONTENT_CONTACT_STATUS_URI, mContactId);
-        redrawHeader();
+
+        bindSummaryUri(ContentUris.withAppendedId(Contacts.CONTENT_SUMMARY_URI, mContactId));
+        bindSocialUri(ContentUris.withAppendedId(Activities.CONTENT_CONTACT_STATUS_URI, mContactId));
+    }
+
+    /**
+     * Convenience method for binding {@link Contacts} header details from a
+     * {@link Contacts#CONTENT_SUMMARY_URI} reference.
+     */
+    public void bindSummaryUri(Uri contactSummary) {
+        mContactSummaryUri = contactSummary;
+        mQueryHandler.startQuery(TOKEN_CONTACT_INFO, null, mContactSummaryUri, HEADER_PROJECTION,
+                null, null, null);
+    }
+
+    /**
+     * Convenience method for binding {@link Activities} header details from a
+     * {@link Activities#CONTENT_CONTACT_STATUS_URI}.
+     */
+    public void bindSocialUri(Uri contactSocial) {
+        mStatusUri = contactSocial;
+        mQueryHandler.startQuery(TOKEN_SOCIAL, null, mStatusUri, SOCIAL_PROJECTION, null, null,
+                null);
     }
 
     /**
@@ -280,7 +328,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                 long contactId = c.getLong(EMAIL_LOOKUP_CONTACT_ID_COLUMN_INDEX);
                 bindFromContactId(contactId);
             } else {
-                bindStatic(emailAddress, "");
+                setDisplayName(emailAddress, null);
             }
         } finally {
             if (c != null) {
@@ -306,7 +354,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                 long contactId = c.getLong(PHONE_LOOKUP_CONTACT_ID_COLUMN_INDEX);
                 bindFromContactId(contactId);
             } else {
-                bindStatic(number, "");
+                setDisplayName(number, null);
             }
         } finally {
             if (c != null) {
@@ -315,6 +363,11 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         }
     }
 
+    /**
+     * @deprecated use {@link #setDisplayName(CharSequence, CharSequence)} and
+     *             {@link #setSocialSnippet(CharSequence)} instead.
+     */
+    @Deprecated
     public void bindStatic(String main, String secondary) {
         mDisplayNameView.setText(main);
         mStatusView.setText(secondary);
@@ -322,57 +375,39 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mPhotoView.setImageBitmap(loadPlaceholderPhoto(null));
     }
 
-    protected void redrawHeader() {
-        if (mContactSummaryUri != null) {
-            mQueryHandler.startQuery(TOKEN_CONTACT_INFO, null, mContactSummaryUri, HEADER_PROJECTION,
-                    null, null, null);
-        }
-
-        if (mStatusUri != null) {
-            mQueryHandler.startQuery(TOKEN_SOCIAL, null, mStatusUri, SOCIAL_PROJECTION,
-                    null, null, null);
-        }
-    }
-
+    /**
+     * Bind the contact details provided by the given {@link Cursor}.
+     */
     protected void bindContactInfo(Cursor c) {
-        if (c == null) {
-            return;
+        if (c == null || !c.moveToFirst()) return;
+
+        // TODO: Bring back phonetic name
+        final String displayName = c.getString(HEADER_DISPLAY_NAME_COLUMN_INDEX);
+        final String phoneticName = null;
+        this.setDisplayName(displayName, null);
+
+        final boolean starred = c.getInt(HEADER_STARRED_COLUMN_INDEX) != 0;
+        mStarredView.setChecked(starred);
+
+        //Set the photo
+        Bitmap photoBitmap = loadContactPhoto(c.getLong(HEADER_PHOTO_ID_COLUMN_INDEX), null);
+        if (photoBitmap == null) {
+            photoBitmap = loadPlaceholderPhoto(null);
         }
-        if (c.moveToFirst()) {
-            //Set name
-            String displayName = c.getString(HEADER_DISPLAY_NAME_COLUMN_INDEX);
-            Log.i(TAG, displayName);
-            mDisplayNameView.setText(displayName);
-            //TODO: Bring back phonetic name
-            /*if (mPhoneticNameView != null) {
-                String phoneticName = c.getString(CONTACT_PHONETIC_NAME_COLUMN);
-                mPhoneticNameView.setText(phoneticName);
-            }*/
+        mPhotoView.setImageBitmap(photoBitmap);
 
-            //Set starred
-            mStarredView.setChecked(c.getInt(HEADER_STARRED_COLUMN_INDEX) == 1);
-
-            //Set the photo
-            Bitmap photoBitmap = loadContactPhoto(c.getLong(HEADER_PHOTO_ID_COLUMN_INDEX), null);
-            if (photoBitmap == null) {
-                photoBitmap = loadPlaceholderPhoto(null);
-            }
-            mPhotoView.setImageBitmap(photoBitmap);
-
-            //Set the presence status
-            int presence = c.getInt(HEADER_PRESENCE_STATUS_COLUMN_INDEX);
-            mPresenceView.setImageResource(Presence.getPresenceIconResourceId(presence));
-        }
+        //Set the presence status
+        int presence = c.getInt(HEADER_PRESENCE_STATUS_COLUMN_INDEX);
+        mPresenceView.setImageResource(Presence.getPresenceIconResourceId(presence));
     }
 
+    /**
+     * Bind the social data provided by the given {@link Cursor}.
+     */
     protected void bindSocial(Cursor c) {
-        if (c == null) {
-            return;
-        }
-        if (c.moveToFirst()) {
-            String status = c.getString(SOCIAL_TITLE_COLUMN_INDEX);
-            mStatusView.setText(status);
-        }
+        if (c == null || !c.moveToFirst()) return;
+        final String status = c.getString(SOCIAL_TITLE_COLUMN_INDEX);
+        this.setSocialSnippet(status);
     }
 
     public void onClick(View view) {
