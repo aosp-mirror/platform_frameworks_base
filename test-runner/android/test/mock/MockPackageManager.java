@@ -139,6 +139,11 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
+    public int checkSignatures(int uid1, int uid2) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String[] getPackagesForUid(int uid) {
         throw new UnsupportedOperationException();
     }

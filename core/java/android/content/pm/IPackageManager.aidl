@@ -75,6 +75,8 @@ interface IPackageManager {
     
     int checkSignatures(String pkg1, String pkg2);
     
+    int checkUidSignatures(int uid1, int uid2);
+    
     String[] getPackagesForUid(int uid);
     
     String getNameForUid(int uid);

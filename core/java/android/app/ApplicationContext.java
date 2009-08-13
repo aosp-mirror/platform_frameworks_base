@@ -1664,6 +1664,15 @@ class ApplicationContext extends Context {
         }
 
         @Override
+        public int checkSignatures(int uid1, int uid2) {
+            try {
+                return mPM.checkUidSignatures(uid1, uid2);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
+        }
+
+        @Override
         public String[] getPackagesForUid(int uid) {
             try {
                 return mPM.getPackagesForUid(uid);
