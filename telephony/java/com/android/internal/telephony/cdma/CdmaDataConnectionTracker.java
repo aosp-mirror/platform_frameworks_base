@@ -57,8 +57,7 @@ import java.util.ArrayList;
  * {@hide}
  */
 public final class CdmaDataConnectionTracker extends DataConnectionTracker {
-    private static final String LOG_TAG = "CDMA";
-    private static final boolean DBG = true;
+    protected final String LOG_TAG = "CDMA";
 
     private CDMAPhone mCdmaPhone;
 
@@ -77,12 +76,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /** Currently active CdmaDataConnection */
     private CdmaDataConnection mActiveDataConnection;
 
-    /** Defined cdma connection profiles */
-    private static final int EXTERNAL_NETWORK_DEFAULT_ID = 0;
-    private static final int EXTERNAL_NETWORK_NUM_TYPES  = 1;
-
-    private boolean[] dataEnabled = new boolean[EXTERNAL_NETWORK_NUM_TYPES];
-
     /**
      * Pool size of CdmaDataConnection objects.
      */
@@ -100,6 +93,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      private static final int DATA_CONNECTION_ACTIVE_PH_LINK_INACTIVE = 0;
      private static final int DATA_CONNECTION_ACTIVE_PH_LINK_DOWN = 1;
      private static final int DATA_CONNECTION_ACTIVE_PH_LINK_UP = 2;
+
+    private static final String[] mSupportedApnTypes = {
+            Phone.APN_TYPE_DEFAULT,
+            Phone.APN_TYPE_MMS,
+            Phone.APN_TYPE_HIPRI };
 
     // Possibly promoate to base class, the only difference is
     // the INTENT_RECONNECT_ALARM action is a different string.
@@ -182,9 +180,12 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         // and 2) whether the RIL will setup the baseband to auto-PS attach.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(phone.getContext());
 
-        dataEnabled[EXTERNAL_NETWORK_DEFAULT_ID] =
+        dataEnabled[APN_DEFAULT_ID] =
                 !sp.getBoolean(CDMAPhone.DATA_DISABLED_ON_BOOT_KEY, false);
-        noAutoAttach = !dataEnabled[EXTERNAL_NETWORK_DEFAULT_ID];
+        if (dataEnabled[APN_DEFAULT_ID]) {
+            enabledCount++;
+        }
+        noAutoAttach = !dataEnabled[APN_DEFAULT_ID];
 
         if (!mRetryMgr.configure(SystemProperties.get("ro.cdma.data_retry_config"))) {
             if (!mRetryMgr.configure(DEFAULT_DATA_RETRY_CONFIG)) {
@@ -219,7 +220,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         if(DBG) Log.d(LOG_TAG, "CdmaDataConnectionTracker finalized");
     }
 
-    void setState(State s) {
+    protected void setState(State s) {
         if (DBG) log ("setState: " + s);
         if (state != s) {
             if (s == State.INITING) { // request Data connection context
@@ -236,39 +237,33 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         state = s;
     }
 
-    public int enableApnType(String type) {
-        // This request is mainly used to enable MMS APN
-        // In CDMA there is no need to enable/disable a different APN for MMS
-        Log.d(LOG_TAG, "Request to enableApnType("+type+")");
-        if (TextUtils.equals(type, Phone.APN_TYPE_MMS)) {
-            return Phone.APN_ALREADY_ACTIVE;
-        } else if (TextUtils.equals(type, Phone.APN_TYPE_SUPL)) {
-            Log.w(LOG_TAG, "Phone.APN_TYPE_SUPL not enabled for CDMA");
-            return Phone.APN_REQUEST_FAILED;
-        } else {
-            return Phone.APN_REQUEST_FAILED;
+    @Override
+    protected boolean isApnTypeActive(String type) {
+        return (isApnTypeAvailable(type) &&
+                mCdmaPhone.mSST.getCurrentCdmaDataConnectionState() ==
+                ServiceState.STATE_IN_SERVICE);
+    }
+
+    @Override
+    protected boolean isApnTypeAvailable(String type) {
+        for (String s : mSupportedApnTypes) {
+            if (TextUtils.equals(type, s)) {
+                return true;
+            }
         }
+        return false;
     }
 
-    public int disableApnType(String type) {
-        // This request is mainly used to disable MMS APN
-        // In CDMA there is no need to enable/disable a different APN for MMS
-        Log.d(LOG_TAG, "Request to disableApnType("+type+")");
-        if (TextUtils.equals(type, Phone.APN_TYPE_MMS)) {
-            return Phone.APN_REQUEST_STARTED;
-        } else {
-            return Phone.APN_REQUEST_FAILED;
+    protected String[] getActiveApnTypes() {
+        if (mCdmaPhone.mSST.getCurrentCdmaDataConnectionState() ==
+                ServiceState.STATE_IN_SERVICE) {
+            return mSupportedApnTypes.clone();
         }
+        return new String[0];
     }
 
-    private boolean isEnabled(int cdmaDataProfile) {
-        return dataEnabled[cdmaDataProfile];
-    }
-
-    private void setEnabled(int cdmaDataProfile, boolean enable) {
-        Log.d(LOG_TAG, "setEnabled("  + cdmaDataProfile + ", " + enable + ')');
-        dataEnabled[cdmaDataProfile] = enable;
-        Log.d(LOG_TAG, "dataEnabled[DEFAULT_PROFILE]=" + dataEnabled[EXTERNAL_NETWORK_DEFAULT_ID]);
+    protected String getActiveApnString() {
+        return null;
     }
 
     /**
@@ -292,54 +287,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             return (state == State.CONNECTED);
         }
         return true;
-    }
-
-    /**
-     * Prevent mobile data connections from being established,
-     * or once again allow mobile data connections. If the state
-     * toggles, then either tear down or set up data, as
-     * appropriate to match the new state.
-     * <p>This operation only affects the default connection
-     * @param enable indicates whether to enable ({@code true}) or disable ({@code false}) data
-     * @return {@code true} if the operation succeeded
-     */
-    public boolean setDataEnabled(boolean enable) {
-
-        boolean isEnabled = isEnabled(EXTERNAL_NETWORK_DEFAULT_ID);
-
-        Log.d(LOG_TAG, "setDataEnabled("+enable+") isEnabled=" + isEnabled);
-        if (!isEnabled && enable) {
-            setEnabled(EXTERNAL_NETWORK_DEFAULT_ID, true);
-            sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
-        } else if (!enable) {
-            setEnabled(EXTERNAL_NETWORK_DEFAULT_ID, false);
-            Message msg = obtainMessage(EVENT_CLEAN_UP_CONNECTION);
-            msg.arg1 = 1; // tearDown is true
-            msg.obj = Phone.REASON_DATA_DISABLED;
-            sendMessage(msg);
-        }
-        return true;
-    }
-
-    /**
-     * Report the current state of data connectivity (enabled or disabled)
-     * @return {@code false} if data connectivity has been explicitly disabled,
-     * {@code true} otherwise.
-     */
-    public boolean getDataEnabled() {
-        return dataEnabled[EXTERNAL_NETWORK_DEFAULT_ID];
-    }
-
-    /**
-     * Report on whether data connectivity is enabled
-     * @return {@code false} if data connectivity has been explicitly disabled,
-     * {@code true} otherwise.
-     */
-    public boolean getAnyDataEnabled() {
-        for (int i=0; i < EXTERNAL_NETWORK_NUM_TYPES; i++) {
-            if (isEnabled(i)) return true;
-        }
-        return false;
     }
 
     private boolean isDataAllowed() {
@@ -921,28 +868,28 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
-    String getInterfaceName() {
+    protected String getInterfaceName(String apnType) {
         if (mActiveDataConnection != null) {
             return mActiveDataConnection.getInterface();
         }
         return null;
     }
 
-    protected String getIpAddress() {
+    protected String getIpAddress(String apnType) {
         if (mActiveDataConnection != null) {
             return mActiveDataConnection.getIpAddress();
         }
         return null;
     }
 
-    String getGateway() {
+    protected String getGateway(String apnType) {
         if (mActiveDataConnection != null) {
             return mActiveDataConnection.getGatewayAddress();
         }
         return null;
     }
 
-    protected String[] getDnsServers() {
+    protected String[] getDnsServers(String apnType) {
         if (mActiveDataConnection != null) {
             return mActiveDataConnection.getDnsServers();
         }
