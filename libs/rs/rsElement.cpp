@@ -23,45 +23,45 @@ using namespace android::renderscript;
 
 void ElementState::initPredefined()
 {
-    Component * u_8  = new Component(Component::USER,   Component::UNSIGNED,  true,  8);
-    Component * i_8  = new Component(Component::USER,   Component::SIGNED,    true,  8);
-    Component * u_16 = new Component(Component::USER,   Component::UNSIGNED,  true,  16);
-    Component * i_16 = new Component(Component::USER,   Component::SIGNED,    true,  16);
-    Component * u_32 = new Component(Component::USER,   Component::UNSIGNED,  true,  32);
-    Component * i_32 = new Component(Component::USER,   Component::SIGNED,    true,  32);
-    Component * f_32 = new Component(Component::USER,   Component::FLOAT,     true,  32);
+    Component * u_8  = new Component(Component::USER,   Component::UNSIGNED,  true,  8, 0);
+    Component * i_8  = new Component(Component::USER,   Component::SIGNED,    true,  8, 0);
+    Component * u_16 = new Component(Component::USER,   Component::UNSIGNED,  true,  16, 0);
+    Component * i_16 = new Component(Component::USER,   Component::SIGNED,    true,  16, 0);
+    Component * u_32 = new Component(Component::USER,   Component::UNSIGNED,  true,  32, 0);
+    Component * i_32 = new Component(Component::USER,   Component::SIGNED,    true,  32, 0);
+    Component * f_32 = new Component(Component::USER,   Component::FLOAT,     true,  32, 0);
 
 
-    Component * r_4  = new Component(Component::RED,    Component::UNSIGNED,  true,  4);
-    Component * r_5  = new Component(Component::RED,    Component::UNSIGNED,  true,  5);
-    Component * r_8  = new Component(Component::RED,    Component::UNSIGNED,  true,  8);
+    Component * r_4  = new Component(Component::RED,    Component::UNSIGNED,  true,  4, 0);
+    Component * r_5  = new Component(Component::RED,    Component::UNSIGNED,  true,  5, 0);
+    Component * r_8  = new Component(Component::RED,    Component::UNSIGNED,  true,  8, 0);
 
-    Component * g_4  = new Component(Component::GREEN,  Component::UNSIGNED,  true,  4);
-    Component * g_5  = new Component(Component::GREEN,  Component::UNSIGNED,  true,  5);
-    Component * g_6  = new Component(Component::GREEN,  Component::UNSIGNED,  true,  6);
-    Component * g_8  = new Component(Component::GREEN,  Component::UNSIGNED,  true,  8);
+    Component * g_4  = new Component(Component::GREEN,  Component::UNSIGNED,  true,  4, 0);
+    Component * g_5  = new Component(Component::GREEN,  Component::UNSIGNED,  true,  5, 0);
+    Component * g_6  = new Component(Component::GREEN,  Component::UNSIGNED,  true,  6, 0);
+    Component * g_8  = new Component(Component::GREEN,  Component::UNSIGNED,  true,  8, 0);
 
-    Component * b_4  = new Component(Component::BLUE,   Component::UNSIGNED,  true,  4);
-    Component * b_5  = new Component(Component::BLUE,   Component::UNSIGNED,  true,  5);
-    Component * b_8  = new Component(Component::BLUE,   Component::UNSIGNED,  true,  8);
+    Component * b_4  = new Component(Component::BLUE,   Component::UNSIGNED,  true,  4, 0);
+    Component * b_5  = new Component(Component::BLUE,   Component::UNSIGNED,  true,  5, 0);
+    Component * b_8  = new Component(Component::BLUE,   Component::UNSIGNED,  true,  8, 0);
 
-    Component * a_1  = new Component(Component::ALPHA,  Component::UNSIGNED,  true,  1);
-    Component * a_4  = new Component(Component::ALPHA,  Component::UNSIGNED,  true,  4);
-    Component * a_8  = new Component(Component::ALPHA,  Component::UNSIGNED,  true,  8);
+    Component * a_1  = new Component(Component::ALPHA,  Component::UNSIGNED,  true,  1, 0);
+    Component * a_4  = new Component(Component::ALPHA,  Component::UNSIGNED,  true,  4, 0);
+    Component * a_8  = new Component(Component::ALPHA,  Component::UNSIGNED,  true,  8, 0);
 
-    Component * idx_16 = new Component(Component::INDEX,  Component::UNSIGNED,  false, 16);
-    Component * idx_32 = new Component(Component::INDEX,  Component::UNSIGNED,  false, 32);
+    Component * idx_16 = new Component(Component::INDEX,  Component::UNSIGNED,  false, 16, 0);
+    Component * idx_32 = new Component(Component::INDEX,  Component::UNSIGNED,  false, 32, 0);
 
-    Component * x    = new Component(Component::X,      Component::FLOAT,     false, 32);
-    Component * y    = new Component(Component::Y,      Component::FLOAT,     false, 32);
-    Component * z    = new Component(Component::Z,      Component::FLOAT,     false, 32);
+    Component * x    = new Component(Component::X,      Component::FLOAT,     false, 32, 0);
+    Component * y    = new Component(Component::Y,      Component::FLOAT,     false, 32, 0);
+    Component * z    = new Component(Component::Z,      Component::FLOAT,     false, 32, 0);
 
-    Component * nx   = new Component(Component::NX,     Component::FLOAT,     false, 32);
-    Component * ny   = new Component(Component::NY,     Component::FLOAT,     false, 32);
-    Component * nz   = new Component(Component::NZ,     Component::FLOAT,     false, 32);
+    Component * nx   = new Component(Component::NX,     Component::FLOAT,     false, 32, 0);
+    Component * ny   = new Component(Component::NY,     Component::FLOAT,     false, 32, 0);
+    Component * nz   = new Component(Component::NZ,     Component::FLOAT,     false, 32, 0);
 
-    Component * s    = new Component(Component::S,      Component::FLOAT,     false, 32);
-    Component * t    = new Component(Component::T,      Component::FLOAT,     false, 32);
+    Component * s    = new Component(Component::S,      Component::FLOAT,     false, 32, 0);
+    Component * t    = new Component(Component::T,      Component::FLOAT,     false, 32, 0);
 
     Element * e;
 
@@ -391,14 +391,14 @@ RsElement rsi_ElementGetPredefined(Context *rsc, RsElementPredefined predef)
     return e;
 }
 
-void rsi_ElementAdd(Context *rsc, RsDataKind dk, RsDataType dt, bool isNormalized, size_t bits)
+void rsi_ElementAdd(Context *rsc, RsDataKind dk, RsDataType dt, bool isNormalized, size_t bits, const char *name)
 {
     ElementState * sec = &rsc->mStateElement;
-
     Component *c = new Component(static_cast<Component::DataKind>(dk),
                                  static_cast<Component::DataType>(dt),
                                  isNormalized,
-                                 bits);
+                                 bits,
+                                 name);
     sec->mComponentBuildList.add(c);
 }
 

@@ -16,9 +16,11 @@
 
 package android.renderscript;
 
+import java.lang.reflect.Field;
+
+import android.renderscript.Element;
 import android.util.Config;
 import android.util.Log;
-
 
 /**
  * @hide
@@ -28,11 +30,22 @@ public class Type extends BaseObj {
     Dimension[] mDimensions;
     int[] mValues;
     Element mElement;
+    private int mNativeCache;
+    Class mJavaClass;
 
 
     Type(int id, RenderScript rs) {
         super(rs);
         mID = id;
+        mNativeCache = 0;
+    }
+
+    protected void finalize() throws Throwable {
+        if(mNativeCache) {
+            mRS.nTypeFinalDestroy(this);
+            mNativeCache = 0;
+        }
+        super.finalize();
     }
 
     public void destroy() {
@@ -41,6 +54,45 @@ public class Type extends BaseObj {
         }
         mDestroyed = true;
         mRS.nTypeDestroy(mID);
+    }
+
+    public static Type createFromClass(RenderScript rs, Class c, int size, String scriptName) {
+        Element e = Element.createFromClass(rs, c);
+        Builder b = new Builder(rs, e);
+        b.add(Dimension.X, size);
+        Type t = b.create();
+        e.destroy();
+
+        // native fields
+        {
+            Field[] fields = c.getFields();
+            int[] arTypes = new int[fields.length];
+            int[] arBits = new int[fields.length];
+
+            for(int ct=0; ct < fields.length; ct++) {
+                Field f = fields[ct];
+                Class fc = f.getType();
+                if(fc == int.class) {
+                    arTypes[ct] = Element.DataType.SIGNED.mID;
+                    arBits[ct] = 32;
+                } else if(fc == short.class) {
+                    arTypes[ct] = Element.DataType.SIGNED.mID;
+                    arBits[ct] = 16;
+                } else if(fc == byte.class) {
+                    arTypes[ct] = Element.DataType.SIGNED.mID;
+                    arBits[ct] = 8;
+                } else if(fc == float.class) {
+                    arTypes[ct] = Element.DataType.FLOAT.mID;
+                    arBits[ct] = 32;
+                } else {
+                    throw new IllegalArgumentException("Unkown field type");
+                }
+            }
+            rs.nTypeSetupFields(t, arTypes, arBits, fields);
+        }
+        t.mJavaClass = c;
+        t.setName(scriptName);
+        return t;
     }
 
     public static class Builder {

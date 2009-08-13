@@ -20,7 +20,6 @@
 #include "rsNoise.h"
 
 #include "acc/acc.h"
-#include "utils/String8.h"
 #include "utils/Timers.h"
 
 #include <GLES/gl.h>

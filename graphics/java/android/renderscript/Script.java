@@ -21,6 +21,7 @@ package android.renderscript;
  **/
 public class Script extends BaseObj {
     boolean mIsRoot;
+    Type[] mTypes;
 
     Script(int id, RenderScript rs) {
         super(rs);
@@ -62,21 +63,40 @@ public class Script extends BaseObj {
     public static class Builder {
         RenderScript mRS;
         boolean mIsRoot = false;
+        Type[] mTypes;
+        int mTypeCount;
 
         Builder(RenderScript rs) {
             mRS = rs;
+            mTypes = new Type[4];
+            mTypeCount = 0;
         }
 
         public void addType(Type t) {
-            mRS.nScriptCAddType(t.mID);
+            if(mTypeCount >= mTypes.length) {
+                Type[] nt = new Type[mTypeCount * 2];
+                for(int ct=0; ct < mTypeCount; ct++) {
+                    nt[ct] = mTypes[ct];
+                }
+                mTypes = nt;
+            }
+            mTypes[mTypeCount] = t;
+            mTypeCount++;
         }
 
         void transferCreate() {
             mRS.nScriptCSetRoot(mIsRoot);
+            for(int ct=0; ct < mTypeCount; ct++) {
+                mRS.nScriptCAddType(mTypes[ct].mID);
+            }
         }
 
         void transferObject(Script s) {
             s.mIsRoot = mIsRoot;
+            s.mTypes = new Type[mTypeCount];
+            for(int ct=0; ct < mTypeCount; ct++) {
+                s.mTypes[ct] = mTypes[ct];
+            }
         }
 
         public void setRoot(boolean r) {

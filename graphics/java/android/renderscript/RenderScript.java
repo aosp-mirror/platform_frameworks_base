@@ -18,9 +18,11 @@ package android.renderscript;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.renderscript.Type;
 import android.util.Config;
 import android.util.Log;
 import android.view.Surface;
@@ -76,7 +78,7 @@ public class RenderScript {
 
     native void nElementBegin();
     native void nElementAddPredefined(int predef);
-    native void nElementAdd(int kind, int type, int norm, int bits);
+    native void nElementAdd(int kind, int type, int norm, int bits, String s);
     native int  nElementCreate();
     native int  nElementGetPredefined(int predef);
     native void nElementDestroy(int obj);
@@ -85,6 +87,8 @@ public class RenderScript {
     native void nTypeAdd(int dim, int val);
     native int  nTypeCreate();
     native void nTypeDestroy(int id);
+    native void nTypeFinalDestroy(Type t);
+    native void nTypeSetupFields(Type t, int[] types, int[] bits, Field[] IDs);
 
     native int  nAllocationCreateTyped(int type);
     native int  nAllocationCreatePredefSized(int predef, int count);
@@ -102,6 +106,7 @@ public class RenderScript {
     native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, float[] d);
     native void nAllocationRead(int id, int[] d);
     native void nAllocationRead(int id, float[] d);
+    native void nAllocationDataFromObject(int id, Type t, Object o);
 
     native void nTriangleMeshDestroy(int id);
     native void nTriangleMeshBegin(int vertex, int index);

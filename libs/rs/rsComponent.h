@@ -44,7 +44,7 @@ public:
     };
 
 
-    Component(DataKind dk, DataType dt, bool isNormalized, uint32_t bits);
+    Component(DataKind dk, DataType dt, bool isNorm, uint32_t bits, const char *);
     virtual ~Component();
 
     DataType getType() const {return mType;}
@@ -54,12 +54,15 @@ public:
 
     uint32_t getGLType() const;
 
+    const char * getComponentName() const {return mName.string();}
+
 protected:
 
     DataType mType;
     bool mIsNormalized;
     DataKind mKind;
     uint32_t mBits;
+    String8 mName;
 
 private:
     Component();

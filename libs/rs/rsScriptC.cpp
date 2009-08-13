@@ -19,7 +19,6 @@
 #include "rsMatrix.h"
 
 #include "acc/acc.h"
-#include "utils/String8.h"
 #include "utils/Timers.h"
 
 #include <GLES/gl.h>
@@ -91,7 +90,10 @@ void ScriptCState::clear()
 {
     memset(&mProgram, 0, sizeof(mProgram));
 
-    mConstantBufferTypes.clear();
+    mConstantTypeCount = 0;
+    for (uint32_t ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
+        mConstantBufferTypes[ct].clear();
+    }
 
     memset(&mEnviroment, 0, sizeof(mEnviroment));
     mEnviroment.mClearColor[0] = 0;
@@ -127,6 +129,7 @@ void ScriptCState::runCompiler(Context *rsc)
     appendDecls(&tmp);
     rsc->appendVarDefines(&tmp);
     appendVarDefines(&tmp);
+    appendTypes(&tmp);
     tmp.append("#line 1\n");
 
     const char* scriptSource[] = {tmp.string(), mProgram.mScriptText};
@@ -242,6 +245,31 @@ void ScriptCState::appendVarDefines(String8 *str)
     }
 }
 
+void ScriptCState::appendTypes(String8 *str)
+{
+    char buf[256];
+
+    for (size_t ct=0; ct < mConstantTypeCount; ct++) {
+        const Type *t = mConstantBufferTypes[ct].get();
+        const Element *e = t->getElement();
+
+        if (!t->getName()) {
+            continue;
+        }
+        for (size_t ct2=0; ct2 < e->getComponentCount(); ct2++) {
+            const Component *c = e->getComponent(ct2);
+            str->append("#define OFFSETOF_");
+            str->append(t->getName());
+            str->append("_");
+            str->append(c->getComponentName());
+            sprintf(buf, " %i\n", ct2);
+            str->append(buf);
+        }
+
+    }
+
+}
+
 
 namespace android {
 namespace renderscript {
@@ -255,7 +283,10 @@ void rsi_ScriptCBegin(Context * rsc)
 void rsi_ScriptCAddType(Context * rsc, RsType vt)
 {
     ScriptCState *ss = &rsc->mScriptC;
-    ss->mConstantBufferTypes.add(static_cast<const Type *>(vt));
+    const Type *t = static_cast<const Type *>(vt);
+
+    ss->mConstantBufferTypes[ss->mConstantTypeCount].set(t);
+    ss->mConstantTypeCount ++;
 }
 
 void rsi_ScriptCSetScript(Context * rsc, void *vp)

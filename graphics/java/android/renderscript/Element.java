@@ -16,6 +16,10 @@
 
 package android.renderscript;
 
+import android.util.Config;
+import android.util.Log;
+
+import java.lang.reflect.Field;
 
 /**
  * @hide
@@ -144,7 +148,26 @@ public class Element extends BaseObj {
         mRS.nElementDestroy(mID);
     }
 
+    public static Element createFromClass(RenderScript rs, Class c) {
+        Field[] fields = c.getFields();
+        Builder b = new Builder(rs);
 
+        for(Field f: fields) {
+            Class fc = f.getType();
+            if(fc == int.class) {
+                b.add(Element.DataType.SIGNED, Element.DataKind.USER, false, 32, f.getName());
+            } else if(fc == short.class) {
+                b.add(Element.DataType.SIGNED, Element.DataKind.USER, false, 16, f.getName());
+            } else if(fc == byte.class) {
+                b.add(Element.DataType.SIGNED, Element.DataKind.USER, false, 8, f.getName());
+            } else if(fc == float.class) {
+                b.add(Element.DataType.FLOAT, Element.DataKind.USER, false, 32, f.getName());
+            } else {
+                throw new IllegalArgumentException("Unkown field type");
+            }
+        }
+        return b.create();
+    }
 
 
     public static class Builder {
@@ -158,6 +181,7 @@ public class Element extends BaseObj {
             Element.DataKind mKind;
             boolean mIsNormalized;
             int mBits;
+            String mName;
         }
 
         public Builder(RenderScript rs) {
@@ -188,13 +212,19 @@ public class Element extends BaseObj {
             return this;
         }
 
-        public Builder add(Element.DataType dt, Element.DataKind dk, boolean isNormalized, int bits) {
+        public Builder add(Element.DataType dt, Element.DataKind dk, boolean isNormalized, int bits, String name) {
             Entry en = new Entry();
             en.mType = dt;
             en.mKind = dk;
             en.mIsNormalized = isNormalized;
             en.mBits = bits;
+            en.mName = name;
             addEntry(en);
+            return this;
+        }
+
+        public Builder add(Element.DataType dt, Element.DataKind dk, boolean isNormalized, int bits) {
+            add(dt, dk, isNormalized, bits, null);
             return this;
         }
 
@@ -209,7 +239,7 @@ public class Element extends BaseObj {
                     if (en.mIsNormalized) {
                         norm = 1;
                     }
-                    rs.nElementAdd(en.mKind.mID, en.mType.mID, norm, en.mBits);
+                    rs.nElementAdd(en.mKind.mID, en.mType.mID, norm, en.mBits, en.mName);
                 }
             }
             int id = rs.nElementCreate();

@@ -68,11 +68,13 @@ public:
     ScriptC::Program_t mProgram;
     Script::Enviroment_t mEnviroment;
 
-    Vector<const Type *> mConstantBufferTypes;
+    ObjectBaseRef<const Type> mConstantBufferTypes[MAX_SCRIPT_BANKS];
+    uint32_t mConstantTypeCount;
 
     void clear();
     void runCompiler(Context *rsc);
     void appendVarDefines(String8 *str);
+    void appendTypes(String8 *str);
 
     struct SymbolTable_t {
         const char * mName;

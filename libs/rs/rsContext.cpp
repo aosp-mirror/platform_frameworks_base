@@ -17,7 +17,6 @@
 #include "rsDevice.h"
 #include "rsContext.h"
 #include "rsThreadIO.h"
-#include "utils/String8.h"
 #include <ui/FramebufferNativeWindow.h>
 
 #include <GLES/gl.h>
