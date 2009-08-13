@@ -196,6 +196,7 @@ class ServerThread extends Thread {
         InputMethodManagerService imm = null;
         AppWidgetService appWidget = null;
         NotificationManagerService notification = null;
+        WallpaperManagerService wallpaper = null;
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
@@ -302,7 +303,8 @@ class ServerThread extends Thread {
 
             try {
                 Log.i(TAG, "Starting Wallpaper Service");
-                ServiceManager.addService(Context.WALLPAPER_SERVICE, new WallpaperManagerService(context));
+                wallpaper = new WallpaperManagerService(context);
+                ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Wallpaper Service", e);
             }
@@ -381,6 +383,7 @@ class ServerThread extends Thread {
         } catch (RemoteException e) {
         }
 
+        if (wallpaper != null) wallpaper.systemReady();
         battery.systemReady();
         Watchdog.getInstance().start();
 

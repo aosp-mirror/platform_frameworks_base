@@ -112,6 +112,7 @@
         <item name="windowFullscreen">false</item>
         <item name="windowIsFloating">false</item>
         <item name="windowContentOverlay">@android:drawable/title_bar_shadow</item>
+        <item name="windowShowWallpaper">false</item>
         <item name="windowTitleStyle">@android:style/WindowTitle</item>
         <item name="windowTitleSize">25dip</item>
         <item name="windowTitleBackgroundStyle">@android:style/WindowTitleBackground</item>
