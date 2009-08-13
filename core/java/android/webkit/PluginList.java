@@ -24,27 +24,40 @@ import java.util.List;
  * A simple list of initialized plugins. This list gets
  * populated when the plugins are initialized (at
  * browser startup, at the moment).
+ *
+ * @deprecated This interface was inteded to be used by Gears. Since Gears was
+ * deprecated, so is this class.
  */
+@Deprecated
 public class PluginList {
     private ArrayList<Plugin> mPlugins;
 
    /**
     * Public constructor. Initializes the list of plugins.
+    *
+    * @deprecated
     */
+    @Deprecated
     public PluginList() {
         mPlugins = new ArrayList<Plugin>();
     }
 
    /**
     * Returns the list of plugins as a java.util.List.
+    *
+    * @deprecated
     */
+    @Deprecated
     public synchronized List getList() {
         return mPlugins;
     }
 
    /**
     * Adds a plugin to the list.
+    *
+    * @deprecated
     */
+    @Deprecated
     public synchronized void addPlugin(Plugin plugin) {
         if (!mPlugins.contains(plugin)) {
             mPlugins.add(plugin);
@@ -53,7 +66,10 @@ public class PluginList {
 
    /**
     * Removes a plugin from the list.
+    *
+    * @deprecated
     */
+    @Deprecated
     public synchronized void removePlugin(Plugin plugin) {
         int location = mPlugins.indexOf(plugin);
         if (location != -1) {
@@ -63,14 +79,20 @@ public class PluginList {
 
    /**
     * Clears the plugin list.
+    *
+    * @deprecated
     */
+    @Deprecated
     public synchronized void clear() {
         mPlugins.clear();
     }
 
    /**
     * Dispatches the click event to the appropriate plugin.
+    *
+    * @deprecated
     */
+    @Deprecated
     public synchronized void pluginClicked(Context context, int position) {
         try {
             Plugin plugin = mPlugins.get(position);
