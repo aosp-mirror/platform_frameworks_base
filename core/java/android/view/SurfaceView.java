@@ -282,7 +282,9 @@ public class SurfaceView extends View {
             return;
         }
         ViewRoot viewRoot = (ViewRoot) getRootView().getParent();
-        mTranslator = viewRoot.mTranslator;
+        if (viewRoot != null) {
+            mTranslator = viewRoot.mTranslator;
+        }
 
         Resources res = getContext().getResources();
         if (mTranslator != null || !res.getCompatibilityInfo().supportsScreen()) {
