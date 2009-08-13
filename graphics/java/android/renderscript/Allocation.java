@@ -16,6 +16,8 @@
 
 package android.renderscript;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Array;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,9 +35,12 @@ import android.util.Log;
  *
  **/
 public class Allocation extends BaseObj {
-    Allocation(int id, RenderScript rs) {
+    Type mType;
+
+    Allocation(int id, RenderScript rs, Type t) {
         super(rs);
         mID = id;
+        mType = t;
     }
 
     public void uploadToTexture(int baseMipLevel) {
@@ -80,6 +85,10 @@ public class Allocation extends BaseObj {
 
     public void readData(float[] d) {
         mRS.nAllocationRead(mID, d);
+    }
+
+    public void data(Object o) {
+        mRS.nAllocationDataFromObject(mID, mType, o);
     }
 
 
@@ -179,7 +188,7 @@ public class Allocation extends BaseObj {
             throw new IllegalStateException("Bad Type");
         }
         int id = rs.nAllocationCreateTyped(type.mID);
-        return new Allocation(id, rs);
+        return new Allocation(id, rs, type);
     }
 
     static public Allocation createSized(RenderScript rs, Element e, int count)
@@ -194,7 +203,7 @@ public class Allocation extends BaseObj {
                 throw new IllegalStateException("Bad element.");
             }
         }
-        return new Allocation(id, rs);
+        return new Allocation(id, rs, null);
     }
 
     static public Allocation createFromBitmap(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
@@ -204,7 +213,7 @@ public class Allocation extends BaseObj {
         }
 
         int id = rs.nAllocationCreateFromBitmap(dstFmt.mPredefinedID, genMips, b);
-        return new Allocation(id, rs);
+        return new Allocation(id, rs, null);
     }
 
     static public Allocation createFromBitmapBoxed(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
@@ -214,7 +223,7 @@ public class Allocation extends BaseObj {
         }
 
         int id = rs.nAllocationCreateFromBitmapBoxed(dstFmt.mPredefinedID, genMips, b);
-        return new Allocation(id, rs);
+        return new Allocation(id, rs, null);
     }
 
     static public Allocation createFromBitmapResource(RenderScript rs, Resources res, int id, Element dstFmt, boolean genMips)
@@ -230,8 +239,20 @@ public class Allocation extends BaseObj {
         Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
         return createFromBitmapBoxed(rs, b, dstFmt, genMips);
     }
-
-
+/*
+    public static Allocation createFromObject(RenderScript rs, Object o) {
+        Class c = o.getClass();
+        Type t;
+        if(c.isArray()) {
+            t = Type.createFromClass(rs, c, Array.getLength(o));
+        } else {
+            t = Type.createFromClass(rs, c, 1);
+        }
+        Allocation alloc = createTyped(rs, t);
+        t.destroy();
+        return alloc;
+    } 
+*/
 }
 
 

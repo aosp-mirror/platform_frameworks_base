@@ -334,7 +334,7 @@ void FileA3D::processChunk_Element(Context *rsc, IO *io, A3DIndexEntry *ie)
         uint32_t bits = io->loadU8();
         bool isNorm = io->loadU8() != 0;
         LOGE("  %i %i %i %i", dk, dt, bits, isNorm);
-        rsi_ElementAdd(rsc, dk, dt, isNorm, bits);
+        rsi_ElementAdd(rsc, dk, dt, isNorm, bits, 0);
     }
     LOGE("processChunk_Element create");
     ie->mRsObj = rsi_ElementCreate(rsc);

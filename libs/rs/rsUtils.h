@@ -21,6 +21,8 @@
 #define LOG_TAG "rs"
 #include <utils/Log.h>
 #include <utils/Vector.h>
+#include <utils/KeyedVector.h>
+#include <utils/String8.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>

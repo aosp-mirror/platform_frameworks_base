@@ -23,23 +23,20 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.renderscript.*;
 import android.util.Log;
-
-import android.renderscript.RenderScript;
-import android.renderscript.ProgramVertex;
-import android.renderscript.Element;
-import android.renderscript.Allocation;
-import android.renderscript.Script;
-import android.renderscript.ScriptC;
-import android.renderscript.ProgramFragment;
-import android.renderscript.ProgramStore;
-import android.renderscript.SimpleMesh;
-import android.renderscript.Type;
-import android.renderscript.Primitive;
 
 
 public class FountainRS {
     public static final int PART_COUNT = 4000;
+
+    static class SomeData {
+        public int x;
+        public int y;
+        public int touch;
+        public int rate;
+        public int count;
+    }
 
     public FountainRS() {
     }
@@ -51,10 +48,10 @@ public class FountainRS {
     }
 
     public void newTouchPosition(int x, int y) {
-        mParams[0] = 1;
-        mParams[1] = x;
-        mParams[2] = y;
-        mIntAlloc.subData1D(2, 3, mParams);
+        mSD.touch = 1;
+        mSD.x = x;
+        mSD.y = y;
+        mIntAlloc.data(mSD);
     }
 
 
@@ -73,10 +70,13 @@ public class FountainRS {
 
     private Bitmap mBackground;
 
-    int mParams[] = new int[10];
+    SomeData mSD = new SomeData();
+    private Type mSDType;
 
     private void initRS() {
-        mIntAlloc = Allocation.createSized(mRS, Element.USER_I32, 10);
+        mSD = new SomeData();
+        mSDType = Type.createFromClass(mRS, SomeData.class, 1, "SomeData");
+        mIntAlloc = Allocation.createTyped(mRS, mSDType);
         mVertAlloc = Allocation.createSized(mRS, Element.USER_I32, PART_COUNT * 5 + 1);
 
         ProgramStore.Builder bs = new ProgramStore.Builder(mRS, null, null);
@@ -91,14 +91,8 @@ public class FountainRS {
         mPF = bf.create();
         mPF.setName("PgmFragParts");
 
-        mParams[0] = 0;
-        mParams[1] = PART_COUNT;
-        mParams[2] = 0;
-        mParams[3] = 0;
-        mParams[4] = 0;
-        mParams[5] = 0;
-        mParams[6] = 0;
-        mIntAlloc.data(mParams);
+        mSD.count = PART_COUNT;
+        mIntAlloc.data(mSD);
 
         Element.Builder eb = new Element.Builder(mRS);
         eb.add(Element.DataType.UNSIGNED, Element.DataKind.RED, true, 8);
@@ -124,6 +118,7 @@ public class FountainRS {
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setScript(mRes, R.raw.fountain);
         sb.setRoot(true);
+        sb.addType(mSDType);
         mScript = sb.create();
         mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 

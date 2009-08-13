@@ -29,6 +29,8 @@ class ProgramFragment;
 class ProgramRaster;
 class ProgramFragmentStore;
 
+#define MAX_SCRIPT_BANKS 16
+
 class Script : public ObjectBase
 {
 public:
@@ -57,7 +59,8 @@ public:
     const Type * mConstantBufferTypes;
     uint32_t mCounstantBufferCount;
 
-    ObjectBaseRef<Allocation> mSlots[16];
+    ObjectBaseRef<Allocation> mSlots[MAX_SCRIPT_BANKS];
+    ObjectBaseRef<Type> mTypes[MAX_SCRIPT_BANKS];
 
     virtual bool run(Context *, uint32_t launchID) = 0;
 };

@@ -44,6 +44,7 @@ ElementAdd {
 	param RsDataType dataType
 	param bool isNormalized
 	param size_t bits
+	param const char * name
 	}
 
 ElementCreate {

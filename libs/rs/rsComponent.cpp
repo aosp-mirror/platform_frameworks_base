@@ -31,12 +31,15 @@ Component::Component()
 
 Component::Component(
     DataKind dk, DataType dt,
-    bool isNormalized, uint32_t bits)
+    bool isNormalized, uint32_t bits, const char * name)
 {
     mType = dt;
     mKind = dk;
     mIsNormalized = isNormalized;
     mBits = bits;
+    if (name) {
+        mName = name;
+    }
 }
 
 Component::~Component()

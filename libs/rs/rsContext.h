@@ -19,9 +19,6 @@
 
 #include "rsUtils.h"
 
-#include <utils/KeyedVector.h>
-#include <utils/String8.h>
-#include <utils/Vector.h>
 #include <ui/Surface.h>
 
 #include "rsType.h"
