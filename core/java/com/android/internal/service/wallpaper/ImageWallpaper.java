@@ -121,6 +121,7 @@ public class ImageWallpaper extends WallpaperService {
                     final Drawable background = mBackground;
                     //background.setBounds(frame);
                     c.translate(mXOffset, mYOffset);
+                    c.drawColor(0xff000000);
                     background.draw(c);
                 }
                 sh.unlockCanvasAndPost(c);
