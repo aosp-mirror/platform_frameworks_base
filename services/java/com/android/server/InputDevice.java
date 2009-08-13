@@ -42,6 +42,10 @@ public class InputDevice {
     long mKeyDownTime = 0;
     int mMetaKeysState = 0;
     
+    // For use by KeyInputQueue for keeping track of the current touch
+    // data in the old non-multi-touch protocol.
+    final int[] curTouchVals = new int[MotionEvent.NUM_SAMPLE_DATA * 2];
+    
     final MotionState mAbs = new MotionState(0, 0);
     final MotionState mRel = new MotionState(TRACKBALL_MOVEMENT_THRESHOLD,
             TRACKBALL_MOVEMENT_THRESHOLD);
@@ -410,7 +414,7 @@ public class InputDevice {
                 
                 switch (orientation) {
                     case Surface.ROTATION_90: {
-                        final float temp = reportData[MotionEvent.SAMPLE_X];
+                        final float temp = reportData[j + MotionEvent.SAMPLE_X];
                         reportData[j + MotionEvent.SAMPLE_X] = reportData[j + MotionEvent.SAMPLE_Y];
                         reportData[j + MotionEvent.SAMPLE_Y] = w-temp;
                         break;
@@ -421,7 +425,7 @@ public class InputDevice {
                         break;
                     }
                     case Surface.ROTATION_270: {
-                        final float temp = reportData[i + MotionEvent.SAMPLE_X];
+                        final float temp = reportData[j + MotionEvent.SAMPLE_X];
                         reportData[j + MotionEvent.SAMPLE_X] = h-reportData[j + MotionEvent.SAMPLE_Y];
                         reportData[j + MotionEvent.SAMPLE_Y] = temp;
                         break;
