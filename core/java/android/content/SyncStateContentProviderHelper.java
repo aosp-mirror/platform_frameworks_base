@@ -172,7 +172,7 @@ public class SyncStateContentProviderHelper {
      */
     public void copySyncState(SQLiteDatabase dbSrc, SQLiteDatabase dbDest,
             Account account) {
-        final String[] whereArgs = new String[]{account.mName, account.mType};
+        final String[] whereArgs = new String[]{account.name, account.type};
         Cursor c = dbSrc.query(SYNC_STATE_TABLE,
                 new String[]{"_sync_account", "_sync_account_type", "data"},
                 ACCOUNT_WHERE, whereArgs, null, null, null);
@@ -209,7 +209,7 @@ public class SyncStateContentProviderHelper {
 
     public void discardSyncData(SQLiteDatabase db, Account account) {
         if (account != null) {
-            db.delete(SYNC_STATE_TABLE, ACCOUNT_WHERE, new String[]{account.mName, account.mType});
+            db.delete(SYNC_STATE_TABLE, ACCOUNT_WHERE, new String[]{account.name, account.type});
         } else {
             db.delete(SYNC_STATE_TABLE, null, null);
         }
@@ -220,7 +220,7 @@ public class SyncStateContentProviderHelper {
      */
     public byte[] readSyncDataBytes(SQLiteDatabase db, Account account) {
         Cursor c = db.query(SYNC_STATE_TABLE, null, ACCOUNT_WHERE,
-                new String[]{account.mName, account.mType}, null, null, null);
+                new String[]{account.name, account.type}, null, null, null);
         try {
             if (c.moveToFirst()) {
                 return c.getBlob(c.getColumnIndexOrThrow("data"));
@@ -238,6 +238,6 @@ public class SyncStateContentProviderHelper {
         ContentValues values = new ContentValues();
         values.put("data", data);
         db.update(SYNC_STATE_TABLE, values, ACCOUNT_WHERE,
-                new String[]{account.mName, account.mType});
+                new String[]{account.name, account.type});
     }
 }

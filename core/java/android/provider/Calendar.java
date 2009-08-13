@@ -174,7 +174,7 @@ public final class Calendar {
             return Calendar.Calendars.delete(cr,
                     Calendar.Calendars._SYNC_ACCOUNT + "=? AND "
                             + Calendar.Calendars._SYNC_ACCOUNT_TYPE + "=?",
-                    new String[] {account.mName, account.mType});
+                    new String[] {account.name, account.type});
         }
 
         /**

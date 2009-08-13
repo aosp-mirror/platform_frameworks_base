@@ -1127,8 +1127,8 @@ public class SyncStorageEngine extends Handler {
                 AuthorityInfo authority = mAuthorities.get(i);
                 out.startTag(null, "authority");
                 out.attribute(null, "id", Integer.toString(authority.ident));
-                out.attribute(null, "account", authority.account.mName);
-                out.attribute(null, "type", authority.account.mType);
+                out.attribute(null, "account", authority.account.name);
+                out.attribute(null, "type", authority.account.type);
                 out.attribute(null, "authority", authority.authority);
                 if (!authority.enabled) {
                     out.attribute(null, "enabled", "false");

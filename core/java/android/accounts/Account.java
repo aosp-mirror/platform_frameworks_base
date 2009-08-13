@@ -26,20 +26,20 @@ import android.text.TextUtils;
  * suitable for use as the key of a {@link java.util.Map}
  */
 public class Account implements Parcelable {
-    public final String mName;
-    public final String mType;
+    public final String name;
+    public final String type;
 
     public boolean equals(Object o) {
         if (o == this) return true;
         if (!(o instanceof Account)) return false;
         final Account other = (Account)o;
-        return mName.equals(other.mName) && mType.equals(other.mType);
+        return name.equals(other.name) && type.equals(other.type);
     }
 
     public int hashCode() {
         int result = 17;
-        result = 31 * result + mName.hashCode();
-        result = 31 * result + mType.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + type.hashCode();
         return result;
     }
 
@@ -50,13 +50,13 @@ public class Account implements Parcelable {
         if (TextUtils.isEmpty(type)) {
             throw new IllegalArgumentException("the type must not be empty: " + type);
         }
-        mName = name;
-        mType = type;
+        this.name = name;
+        this.type = type;
     }
 
     public Account(Parcel in) {
-        mName = in.readString();
-        mType = in.readString();
+        this.name = in.readString();
+        this.type = in.readString();
     }
 
     public int describeContents() {
@@ -64,8 +64,8 @@ public class Account implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mName);
-        dest.writeString(mType);
+        dest.writeString(name);
+        dest.writeString(type);
     }
 
     public static final Creator<Account> CREATOR = new Creator<Account>() {
@@ -79,6 +79,6 @@ public class Account implements Parcelable {
     };
 
     public String toString() {
-        return "Account {name=" + mName + ", type=" + mType + "}";
+        return "Account {name=" + name + ", type=" + type + "}";
     }
 }

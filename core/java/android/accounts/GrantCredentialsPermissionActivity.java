@@ -63,12 +63,12 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
             CharSequence grantCredentialsPermissionFormat = getResources().getText(
                     R.string.grant_credentials_permission_message_desc);
             messageView.setText(String.format(grantCredentialsPermissionFormat.toString(),
-                    mAccount.mName, accountTypeLabel));
+                    mAccount.name, accountTypeLabel));
         } else {
             CharSequence grantCredentialsPermissionFormat = getResources().getText(
                     R.string.grant_credentials_permission_message_with_authtokenlabel_desc);
             messageView.setText(String.format(grantCredentialsPermissionFormat.toString(),
-                    authTokenLabel, mAccount.mName, accountTypeLabel));
+                    authTokenLabel, mAccount.name, accountTypeLabel));
         }
 
         String[] packageLabels = new String[packages.length];
