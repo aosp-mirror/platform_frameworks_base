@@ -521,6 +521,7 @@ public class WebView extends AbsoluteLayout
     // follow the links. Double tap will toggle between zoom overview mode and
     // the last zoom scale.
     boolean mInZoomOverview = false;
+
     // ideally mZoomOverviewWidth should be mContentWidth. But sites like espn,
     // engadget always have wider mContentWidth no matter what viewport size is.
     int mZoomOverviewWidth = WebViewCore.DEFAULT_VIEWPORT_WIDTH;
@@ -4687,6 +4688,7 @@ public class WebView extends AbsoluteLayout
         mZoomCenterX = mLastTouchX;
         mZoomCenterY = mLastTouchY;
         mInZoomOverview = !mInZoomOverview;
+        mCallbackProxy.uiOnChangeViewingMode(mInZoomOverview);
         if (mInZoomOverview) {
             if (getSettings().getBuiltInZoomControls()) {
                 if (mZoomButtonsController.isVisible()) {
@@ -5033,6 +5035,14 @@ public class WebView extends AbsoluteLayout
                         if (useWideViewport && restoreState.mViewScale == 0) {
                             mInZoomOverview = ENABLE_DOUBLETAP_ZOOM
                                     && settings.getLoadWithOverviewMode();
+                        }
+                        mCallbackProxy.uiOnChangeViewingMode(true);
+                        if (!mInZoomOverview) {
+                            // We are going to start zoomed in.  However, we
+                            // truly want to show the title bar, and then hide
+                            // it once the page has loaded
+                            mCallbackProxy.uiChangeViewingModeOnFinishedLoad(
+                                    false, getOriginalUrl());
                         }
                         setNewZoomScale(mLastScale, false);
                         setContentScrollTo(restoreState.mScrollX,
