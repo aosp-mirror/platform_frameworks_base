@@ -25,6 +25,10 @@ LOCAL_SRC_FILES:=               \
 
 LOCAL_MODULE:= libcamerastub
 
+ifeq ($(TARGET_SIMULATOR),true)
+LOCAL_CFLAGS += -DSINGLE_PROCESS
+endif
+
 LOCAL_SHARED_LIBRARIES:= libui
 
 include $(BUILD_STATIC_LIBRARY)
@@ -48,7 +52,11 @@ LOCAL_SHARED_LIBRARIES:= \
 
 LOCAL_MODULE:= libcameraservice
 
-LOCAL_CFLAGS+=-DLOG_TAG=\"CameraService\"
+LOCAL_CFLAGS += -DLOG_TAG=\"CameraService\"
+
+ifeq ($(TARGET_SIMULATOR),true)
+LOCAL_CFLAGS += -DSINGLE_PROCESS
+endif
 
 ifeq ($(USE_CAMERA_STUB), true)
 LOCAL_STATIC_LIBRARIES += libcamerastub
