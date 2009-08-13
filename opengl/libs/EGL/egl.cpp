@@ -1363,34 +1363,32 @@ EGLSurface eglCreatePbufferFromClientBuffer(
 EGLBoolean eglLockSurfaceKHR(EGLDisplay dpy, EGLSurface surface,
         const EGLint *attrib_list)
 {
-    EGLBoolean result = EGL_FALSE;
     if (!validate_display_surface(dpy, surface))
-        return result;
+        return EGL_FALSE;
 
     egl_display_t const * const dp = get_display(dpy);
     egl_surface_t const * const s = get_surface(surface);
 
     if (s->cnx->hooks->egl.eglLockSurfaceKHR) {
-        result = s->cnx->hooks->egl.eglLockSurfaceKHR(
+        return s->cnx->hooks->egl.eglLockSurfaceKHR(
                 dp->dpys[s->impl], s->surface, attrib_list);
     }
-    return result;
+    return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 }
 
 EGLBoolean eglUnlockSurfaceKHR(EGLDisplay dpy, EGLSurface surface)
 {
-    EGLBoolean result = EGL_FALSE;
     if (!validate_display_surface(dpy, surface))
-        return result;
+        return EGL_FALSE;
 
     egl_display_t const * const dp = get_display(dpy);
     egl_surface_t const * const s = get_surface(surface);
 
     if (s->cnx->hooks->egl.eglUnlockSurfaceKHR) {
-        result = s->cnx->hooks->egl.eglUnlockSurfaceKHR(
+        return s->cnx->hooks->egl.eglUnlockSurfaceKHR(
                 dp->dpys[s->impl], s->surface);
     }
-    return result;
+    return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 }
 
 EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
@@ -1474,7 +1472,7 @@ EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR img)
 
      delete image;
 
-     return EGL_FALSE;
+     return EGL_TRUE;
 }
 
 
@@ -1493,7 +1491,7 @@ EGLBoolean eglSetSwapRectangleANDROID(EGLDisplay dpy, EGLSurface draw,
         return s->cnx->hooks->egl.eglSetSwapRectangleANDROID(dp->dpys[s->impl],
                 s->surface, left, top, width, height);
     }
-    return EGL_FALSE;
+    return setError(EGL_BAD_DISPLAY, NULL);
 }
 
 EGLClientBuffer eglGetRenderBufferANDROID(EGLDisplay dpy, EGLSurface draw)
@@ -1506,5 +1504,5 @@ EGLClientBuffer eglGetRenderBufferANDROID(EGLDisplay dpy, EGLSurface draw)
         return s->cnx->hooks->egl.eglGetRenderBufferANDROID(dp->dpys[s->impl],
                 s->surface);
     }
-    return 0;
+    return setError(EGL_BAD_DISPLAY, (EGLClientBuffer*)0);
 }
