@@ -88,6 +88,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     private int newNetworkType = 0;
     /* gsm roaming status solely based on TS 27.007 7.2 CREG */
     private boolean mGsmRoaming = false;
+    /* data roaming status solely based on TS 27.007 10.1.19 CGREG */
+    private boolean mDataRoaming = false;
+    private boolean newDataRoaming = false;
 
     private RegistrantList gprsAttachedRegistrants = new RegistrantList();
     private RegistrantList gprsDetachedRegistrants = new RegistrantList();
@@ -307,6 +310,10 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
     /*protected*/  void unregisterForPsRestrictedDisabled(Handler h) {
         psRestrictDisabledRegistrants.remove(h);
+    }
+
+    /*protected*/ boolean getDataRoaming() {
+        return mDataRoaming;
     }
 
     //***** Called from GSMPhone
@@ -666,6 +673,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                         }
                     }
                     newGPRSState = regCodeToServiceState(regState);
+                    newDataRoaming = regCodeIsRoaming(regState);
                     newNetworkType = type;
                 break;
 
@@ -693,6 +701,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
         if (pollingContext[0] == 0) {
             newSS.setRoaming(isRoamingBetweenOperators(mGsmRoaming, newSS));
+            // when both roaming indicators are true but not roaming between
+            // operators, roaming should set to false.
+            if (newDataRoaming && mGsmRoaming && !newSS.getRoaming()) {
+                newDataRoaming = false;
+            }
             pollStateDone();
         }
 
@@ -722,6 +735,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 newCellLoc.setStateInvalid();
                 setSignalStrengthDefaultValues();
                 mGotCountryCode = false;
+                newDataRoaming = false;
 
                 pollStateDone();
             break;
@@ -731,6 +745,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 newCellLoc.setStateInvalid();
                 setSignalStrengthDefaultValues();
                 mGotCountryCode = false;
+                newDataRoaming = false;
 
                 pollStateDone();
             break;
@@ -745,6 +760,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 newCellLoc.setStateInvalid();
                 setSignalStrengthDefaultValues();
                 mGotCountryCode = false;
+                newDataRoaming = false;
+                mDataRoaming = false;
 
                 //NOTE: pollStateDone() is not needed in this case
                 break;
@@ -829,9 +846,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
         boolean hasChanged = !newSS.equals(ss);
 
-        boolean hasRoamingOn = !ss.getRoaming() && newSS.getRoaming();
+        boolean hasRoamingOn = !mDataRoaming && newDataRoaming;
 
-        boolean hasRoamingOff = ss.getRoaming() && !newSS.getRoaming();
+        boolean hasRoamingOff = mDataRoaming && !newDataRoaming;
 
         boolean hasLocationChanged = !newCellLoc.equals(cellLoc);
 
@@ -848,6 +865,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
         gprsState = newGPRSState;
         networkType = newNetworkType;
+        mDataRoaming = newDataRoaming;
 
         newSS.setStateOutOfService(); // clean slate for next time
 
