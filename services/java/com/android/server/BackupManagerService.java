@@ -31,6 +31,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageInfo;
+import android.content.pm.PermissionInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
@@ -642,9 +643,12 @@ class BackupManagerService extends IBackupManager.Stub {
         List<PackageInfo> packages = mPackageManager.getInstalledPackages(flags);
         int N = packages.size();
         for (int a = N-1; a >= 0; a--) {
-            ApplicationInfo app = packages.get(a).applicationInfo;
+            PackageInfo pkg = packages.get(a);
+            ApplicationInfo app = pkg.applicationInfo;
             if (((app.flags&ApplicationInfo.FLAG_ALLOW_BACKUP) == 0)
-                    || app.backupAgentName == null) {
+                    || app.backupAgentName == null
+                    || (mPackageManager.checkPermission(android.Manifest.permission.BACKUP_DATA,
+                            pkg.packageName) != PackageManager.PERMISSION_GRANTED)) {
                 packages.remove(a);
             }
         }
@@ -898,6 +902,15 @@ class BackupManagerService extends IBackupManager.Stub {
         private void doQueuedBackups(IBackupTransport transport) {
             for (BackupRequest request : mQueue) {
                 Log.d(TAG, "starting agent for backup of " + request);
+
+                // Don't run backup, even if requested, if the target app does not have
+                // the requisite permission
+                if (mPackageManager.checkPermission(android.Manifest.permission.BACKUP_DATA,
+                        request.appInfo.packageName) != PackageManager.PERMISSION_GRANTED) {
+                    Log.w(TAG, "Skipping backup of unprivileged package "
+                            + request.appInfo.packageName);
+                    continue;
+                }
 
                 IBackupAgent agent = null;
                 int mode = (request.fullBackup)
@@ -1286,6 +1299,12 @@ class BackupManagerService extends IBackupManager.Stub {
             final String packageName = app.packageName;
 
             if (DEBUG) Log.d(TAG, "processOneRestore packageName=" + packageName);
+
+            // Don't restore to unprivileged packages
+            if (mPackageManager.checkPermission(android.Manifest.permission.BACKUP_DATA,
+                    packageName) != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Skipping restore of unprivileged package " + packageName);
+            }
 
             // !!! TODO: get the dirs from the transport
             File backupDataName = new File(mDataDir, packageName + ".restore");

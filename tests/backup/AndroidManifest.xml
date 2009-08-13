@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.backuptest">
+    <uses-permission android:name="android.permission.BACKUP_DATA" />
     <application android:backupAgent="BackupTestAgent">
         <activity android:name="BackupTestActivity" android:label="_BackupTest">
             <intent-filter>

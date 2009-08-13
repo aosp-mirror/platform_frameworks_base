@@ -1046,6 +1046,13 @@
         android:description="@string/permdesc_backup"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- Allows an application to participate in the backup and restore process
+         @hide -->
+    <permission android:name="android.permission.BACKUP_DATA"
+        android:label="@string/permlab_backup_data"
+        android:description="@string/permdesc_backup_data"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- Allows an application to tell the AppWidget service which application
          can access AppWidget's data.  The normal user flow is that a user
          picks an AppWidget to go into a particular host, thereby giving that

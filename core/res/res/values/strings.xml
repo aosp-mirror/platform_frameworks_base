@@ -552,6 +552,11 @@
     <string name="permdesc_backup">Allows the application to control the system's backup and restore mechanism.  Not for use by normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_backup_data">back up and restore the application's data</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_backup_data">Allows the application to participate in the system's backup and restore mechanism.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_internalSystemWindow">display unauthorized windows</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_internalSystemWindow">Allows the creation of

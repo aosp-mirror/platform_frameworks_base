@@ -2,6 +2,8 @@
         package="com.android.providers.settings"
         android:sharedUserId="android.uid.system">
 
+    <uses-permission android:name="android.permission.BACKUP_DATA" />
+
     <application android:allowClearUserData="false"
                  android:label="@string/app_label"
                  android:process="system"
