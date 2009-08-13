@@ -1053,7 +1053,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             cdmaDataConnectionDetachedRegistrants.notifyRegistrants();
         }
 
-        if (hasCdmaDataConnectionChanged) {
+        if (hasCdmaDataConnectionChanged || hasNetworkTypeChanged) {
             phone.notifyDataConnection(null);
         }
 
