@@ -2054,7 +2054,15 @@ class PowerManagerService extends IPowerManager.Stub
         if (event.values[0] == 0.0) {
             goToSleep(milliseconds);
         } else {
-            userActivity(milliseconds, false);
+            // proximity sensor negative events user activity.
+            // temporarily set mUserActivityAllowed to true so this will work
+            // even when the keyguard is on.
+            synchronized (mLocks) {
+                boolean savedActivityAllowed = mUserActivityAllowed;
+                mUserActivityAllowed = true;
+                userActivity(milliseconds, false);
+                mUserActivityAllowed = savedActivityAllowed;
+            }
         }
     }
 
