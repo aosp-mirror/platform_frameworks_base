@@ -233,22 +233,22 @@ public final class BearerData {
         public static TimeStamp fromByteArray(byte[] data) {
             TimeStamp ts = new TimeStamp();
             // C.S0015-B v2.0, 4.5.4: range is 1996-2095
-            int year = IccUtils.beBcdByteToInt(data[0]);
+            int year = IccUtils.cdmaBcdByteToInt(data[0]);
             if (year > 99 || year < 0) return null;
             ts.year = year >= 96 ? year + 1900 : year + 2000;
-            int month = IccUtils.beBcdByteToInt(data[1]);
+            int month = IccUtils.cdmaBcdByteToInt(data[1]);
             if (month < 1 || month > 12) return null;
             ts.month = month - 1;
-            int day = IccUtils.beBcdByteToInt(data[2]);
+            int day = IccUtils.cdmaBcdByteToInt(data[2]);
             if (day < 1 || day > 31) return null;
             ts.monthDay = day;
-            int hour = IccUtils.beBcdByteToInt(data[3]);
+            int hour = IccUtils.cdmaBcdByteToInt(data[3]);
             if (hour < 0 || hour > 23) return null;
             ts.hour = hour;
-            int minute = IccUtils.beBcdByteToInt(data[4]);
+            int minute = IccUtils.cdmaBcdByteToInt(data[4]);
             if (minute < 0 || minute > 59) return null;
             ts.minute = minute;
-            int second = IccUtils.beBcdByteToInt(data[5]);
+            int second = IccUtils.cdmaBcdByteToInt(data[5]);
             if (second < 0 || second > 59) return null;
             ts.second = second;
             return ts;
@@ -1153,7 +1153,7 @@ public final class BearerData {
         if (paramBits >= EXPECTED_PARAM_SIZE) {
             paramBits -= EXPECTED_PARAM_SIZE;
             decodeSuccess = true;
-            bData.numberOfMessages = IccUtils.beBcdByteToInt((byte)inStream.read(8));
+            bData.numberOfMessages = IccUtils.cdmaBcdByteToInt((byte)inStream.read(8));
         }
         if ((! decodeSuccess) || (paramBits > 0)) {
             Log.d(LOG_TAG, "NUMBER_OF_MESSAGES decode " +

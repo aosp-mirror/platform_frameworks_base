@@ -519,12 +519,12 @@ public class SmsMessage extends SmsMessageBase{
 
         long getSCTimestampMillis() {
             // TP-Service-Centre-Time-Stamp
-            int year = IccUtils.bcdByteToInt(pdu[cur++]);
-            int month = IccUtils.bcdByteToInt(pdu[cur++]);
-            int day = IccUtils.bcdByteToInt(pdu[cur++]);
-            int hour = IccUtils.bcdByteToInt(pdu[cur++]);
-            int minute = IccUtils.bcdByteToInt(pdu[cur++]);
-            int second = IccUtils.bcdByteToInt(pdu[cur++]);
+            int year = IccUtils.gsmBcdByteToInt(pdu[cur++]);
+            int month = IccUtils.gsmBcdByteToInt(pdu[cur++]);
+            int day = IccUtils.gsmBcdByteToInt(pdu[cur++]);
+            int hour = IccUtils.gsmBcdByteToInt(pdu[cur++]);
+            int minute = IccUtils.gsmBcdByteToInt(pdu[cur++]);
+            int second = IccUtils.gsmBcdByteToInt(pdu[cur++]);
 
             // For the timezone, the most significant bit of the
             // least signficant nibble is the sign byte
@@ -534,11 +534,9 @@ public class SmsMessage extends SmsMessageBase{
             byte tzByte = pdu[cur++];
 
             // Mask out sign bit.
-            int timezoneOffset = IccUtils
-                    .bcdByteToInt((byte) (tzByte & (~0x08)));
+            int timezoneOffset = IccUtils.gsmBcdByteToInt((byte) (tzByte & (~0x08)));
 
-            timezoneOffset = ((tzByte & 0x08) == 0) ? timezoneOffset
-                    : -timezoneOffset;
+            timezoneOffset = ((tzByte & 0x08) == 0) ? timezoneOffset : -timezoneOffset;
 
             Time time = new Time(Time.TIMEZONE_UTC);
 

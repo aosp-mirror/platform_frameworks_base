@@ -74,7 +74,7 @@ public class IccUtils {
      * exactly as received"
      */
     public static int
-    bcdByteToInt(byte b) {
+    gsmBcdByteToInt(byte b) {
         int ret = 0;
 
         // treat out-of-range BCD values as 0
@@ -89,11 +89,14 @@ public class IccUtils {
         return ret;
     }
 
-    /** Decodes BCD byte like {@link bcdByteToInt}, but the most significant BCD
-     *  digit is expected in the most significant nibble.
+    /**
+     * Decodes a CDMA style BCD byte like {@link gsmBcdByteToInt}, but
+     * opposite nibble format. The least significant BCD digit
+     * is in the least significant nibble and the most significant
+     * is in the most significant nibble.
      */
     public static int
-    beBcdByteToInt(byte b) {
+    cdmaBcdByteToInt(byte b) {
         int ret = 0;
 
         // treat out-of-range BCD values as 0
