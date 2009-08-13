@@ -56,7 +56,7 @@ public class Type extends BaseObj {
         mRS.nTypeDestroy(mID);
     }
 
-    public static Type createFromClass(RenderScript rs, Class c, int size, String scriptName) {
+    public static Type createFromClass(RenderScript rs, Class c, int size) {
         Element e = Element.createFromClass(rs, c);
         Builder b = new Builder(rs, e);
         b.add(Dimension.X, size);
@@ -91,9 +91,15 @@ public class Type extends BaseObj {
             rs.nTypeSetupFields(t, arTypes, arBits, fields);
         }
         t.mJavaClass = c;
+        return t;
+    }
+
+    public static Type createFromClass(RenderScript rs, Class c, int size, String scriptName) {
+        Type t = createFromClass(rs, c, size);
         t.setName(scriptName);
         return t;
     }
+
 
     public static class Builder {
         RenderScript mRS;

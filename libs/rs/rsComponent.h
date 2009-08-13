@@ -53,6 +53,7 @@ public:
     uint32_t getBits() const {return mBits;}
 
     uint32_t getGLType() const;
+    const char * getCType() const;
 
     const char * getComponentName() const {return mName.string();}
 

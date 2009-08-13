@@ -312,13 +312,17 @@ ScriptSetClearStencil {
 	param uint32_t stencil
 	}
 
-ScriptCAddType {
+ScriptSetType {
 	param RsType type
+	param uint32_t slot
+	param const char * name
 	}
 
-ScriptCSetRoot {
+ScriptSetRoot {
 	param bool isRoot
 	}
+
+
 
 ScriptCSetScript {
 	param void * codePtr

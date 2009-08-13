@@ -118,7 +118,7 @@ public class FountainRS {
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setScript(mRes, R.raw.fountain);
         sb.setRoot(true);
-        sb.addType(mSDType);
+        sb.setType(mSDType, 0);
         mScript = sb.create();
         mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 

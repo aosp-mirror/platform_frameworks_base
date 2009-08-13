@@ -42,6 +42,26 @@ Component::Component(
     }
 }
 
+const char * Component::getCType() const
+{
+    switch(mType) {
+    case FLOAT:
+        return "float";
+    case SIGNED:
+    case UNSIGNED:
+        switch(mBits) {
+        case 32:
+            return "int";
+        case 16:
+            return "short";
+        case 8:
+            return "char";
+        }
+        break;
+    }
+    return NULL;
+}
+
 Component::~Component()
 {
 }

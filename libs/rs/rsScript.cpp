@@ -76,6 +76,25 @@ void rsi_ScriptSetClearStencil(Context * rsc, RsScript vs, uint32_t v)
     s->mEnviroment.mClearStencil = v;
 }
 
+void rsi_ScriptSetType(Context * rsc, RsType vt, uint32_t slot, const char *name)
+{
+    ScriptCState *ss = &rsc->mScriptC;
+    const Type *t = static_cast<const Type *>(vt);
+    ss->mConstantBufferTypes[slot].set(t);
+    if (name) {
+        ss->mSlotNames[slot].setTo(name);
+    } else {
+        ss->mSlotNames[slot].setTo("");
+    }
+}
+
+void rsi_ScriptSetRoot(Context * rsc, bool isRoot)
+{
+    ScriptCState *ss = &rsc->mScriptC;
+    ss->mEnviroment.mIsRoot = isRoot;
+}
+
+
 }
 }
 
