@@ -70,6 +70,9 @@ class CallbackProxy extends Handler {
     private final WebBackForwardList mBackForwardList;
     // Used to call startActivity during url override.
     private final Context mContext;
+    // Stores the URL being loaded and the viewing mode to switch into when
+    // the URL finishes loading.
+    private ChangeViewModeOnFinishedLoad mChange;
 
     // Message Ids
     private static final int PAGE_STARTED                        = 100;
@@ -177,6 +180,37 @@ class CallbackProxy extends Handler {
     }
 
     /**
+     * Tell the host application that the WebView has changed viewing modes.
+     * @param toZoomedOut If true, the WebView has zoomed out so that the page
+     *          fits the screen.  If false, it is zoomed to the setting
+     *          specified by the user.
+     */
+    /* package */ void uiOnChangeViewingMode(boolean toZoomOverview) {
+        if (mWebChromeClient != null) {
+            mWebChromeClient.onChangeViewingMode(toZoomOverview);
+        }
+    }
+
+    private static class ChangeViewModeOnFinishedLoad {
+        boolean mToZoomOverView;
+        String mOriginalUrl;
+        ChangeViewModeOnFinishedLoad(boolean toZoomOverview,
+                String originalUrl) {
+            mToZoomOverView = toZoomOverview;
+            mOriginalUrl = originalUrl;
+        }
+    }
+
+    /**
+     * Keep track of the url and the viewing mode to change into.  If/when that
+     * url finishes loading, this will change the viewing mode.
+     */
+    /* package */ void uiChangeViewingModeOnFinishedLoad(
+            boolean toZoomOverview, String originalUrl) {
+        if (mWebChromeClient == null) return;
+        mChange = new ChangeViewModeOnFinishedLoad(toZoomOverview, originalUrl);
+    }
+    /**
      * Called by the UI side.  Calling overrideUrlLoading from the WebCore
      * side will post a message to call this method.
      */
@@ -236,6 +270,15 @@ class CallbackProxy extends Handler {
             case PAGE_FINISHED:
                 if (mWebViewClient != null) {
                     mWebViewClient.onPageFinished(mWebView, (String) msg.obj);
+                }
+                if (mChange != null) {
+                    if (mWebView.getOriginalUrl().equals(mChange.mOriginalUrl)) {
+                        uiOnChangeViewingMode(mChange.mToZoomOverView);
+                    } else {
+                        // The user has gone to a different page, so there is
+                        // no need to hang on to the old object.
+                        mChange = null;
+                    }
                 }
                 break;
                 

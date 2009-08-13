@@ -23,6 +23,15 @@ import android.view.View;
 public class WebChromeClient {
 
     /**
+     * Tell the host application that the WebView has changed viewing modes.
+     * @param toZoomedOut If true, the WebView has zoomed out so that the page
+     *          fits the screen.  If false, it is zoomed to the setting
+     *          specified by the user.
+     * @hide
+     */
+    public void onChangeViewingMode(boolean toZoomedOut) {}
+
+    /**
      * Tell the host application the current progress of loading a page.
      * @param view The WebView that initiated the callback.
      * @param newProgress Current page loading progress, represented by
