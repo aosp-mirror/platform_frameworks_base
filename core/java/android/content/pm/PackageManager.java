@@ -882,8 +882,8 @@ public abstract class PackageManager {
      * available.  It is functionally identical to determining the package
      * associated with the UIDs and checking their signatures.
      *
-     * @param pkg1 First UID whose signature will be compared.
-     * @param pkg2 Second UID whose signature will be compared.
+     * @param uid1 First UID whose signature will be compared.
+     * @param uid2 Second UID whose signature will be compared.
      * @return Returns an integer indicating whether there is a matching
      * signature: the value is >= 0 if there is a match (or neither package
      * is signed), or < 0 if there is not a match.  The match result can be
