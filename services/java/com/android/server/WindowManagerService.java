@@ -9489,6 +9489,7 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mFocusedApp="); pw.println(mFocusedApp);
             pw.print("  mInputMethodTarget="); pw.println(mInputMethodTarget);
             pw.print("  mInputMethodWindow="); pw.println(mInputMethodWindow);
+            pw.print("  mWallpaperTarget="); pw.println(mWallpaperTarget);
             pw.print("  mInTouchMode="); pw.println(mInTouchMode);
             pw.print("  mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);

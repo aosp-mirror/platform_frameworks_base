@@ -59,6 +59,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import com.android.internal.service.wallpaper.ImageWallpaper;
 import com.android.internal.util.FastXmlSerializer;
 
 class WallpaperManagerService extends IWallpaperManager.Stub {
@@ -172,12 +173,29 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         mWallpaperObserver.stopWatching();
     }
     
+    public void systemReady() {
+        synchronized (mLock) {
+            try {
+                bindWallpaperComponentLocked(mWallpaperComponent);
+            } catch (RuntimeException e) {
+                Log.w(TAG, "Failure starting previous wallpaper", e);
+                try {
+                    bindWallpaperComponentLocked(null);
+                } catch (RuntimeException e2) {
+                    Log.w(TAG, "Failure starting default wallpaper", e2);
+                    clearWallpaperComponentLocked();
+                }
+            }
+        }
+    }
+    
     public void clearWallpaper() {
         synchronized (mLock) {
             File f = WALLPAPER_FILE;
             if (f.exists()) {
                 f.delete();
             }
+            bindWallpaperComponentLocked(null);
         }
     }
 
@@ -231,7 +249,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         synchronized (mLock) {
             ParcelFileDescriptor pfd = updateWallpaperBitmapLocked(name);
             if (pfd != null) {
-                clearWallpaperComponentLocked();
+                bindWallpaperComponentLocked(null);
                 saveSettingsLocked();
             }
             return pfd;
@@ -256,16 +274,45 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         synchronized (mLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                ServiceInfo si = mContext.getPackageManager().getServiceInfo(name,
-                        PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS);
-                if (!android.Manifest.permission.BIND_WALLPAPER.equals(si.permission)) {
-                    throw new SecurityException("Selected service does not require "
-                            + android.Manifest.permission.BIND_WALLPAPER
-                            + ": " + name);
+                bindWallpaperComponentLocked(name);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+    
+    void bindWallpaperComponentLocked(ComponentName name) {
+        // Has the component changed?
+        if (mWallpaperConnection != null) {
+            if (mWallpaperComponent == null) {
+                if (name == null) {
+                    // Still using default wallpaper.
+                    return;
                 }
-                
+            } else if (mWallpaperComponent.equals(name)) {
+                // Changing to same wallpaper.
+                return;
+            }
+        }
+        
+        try {
+            ComponentName realName = name;
+            if (realName == null) {
+                // The default component is our static image wallpaper.
+                realName = new ComponentName("android",
+                        ImageWallpaper.class.getName());
+            }
+            ServiceInfo si = mContext.getPackageManager().getServiceInfo(realName,
+                    PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS);
+            if (!android.Manifest.permission.BIND_WALLPAPER.equals(si.permission)) {
+                throw new SecurityException("Selected service does not require "
+                        + android.Manifest.permission.BIND_WALLPAPER
+                        + ": " + realName);
+            }
+            
+            Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
+            if (name != null) {
                 // Make sure the selected service is actually a wallpaper service.
-                Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
                 List<ResolveInfo> ris = mContext.getPackageManager()
                         .queryIntentServices(intent, 0);
                 for (int i=0; i<ris.size(); i++) {
@@ -278,33 +325,31 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 }
                 if (ris != null) {
                     throw new SecurityException("Selected service is not a wallpaper: "
-                            + name);
+                            + realName);
                 }
-                
-                // Bind the service!
-                WallpaperConnection newConn = new WallpaperConnection();
-                intent.setComponent(name);
-                if (!mContext.bindService(intent, newConn,
-                        Context.BIND_AUTO_CREATE)) {
-                    throw new IllegalArgumentException("Unable to bind service: "
-                            + name);
-                }
-                
-                clearWallpaperComponentLocked();
-                mWallpaperComponent = null;
-                mWallpaperConnection = newConn;
-                try {
-                    if (DEBUG) Log.v(TAG, "Adding window token: " + newConn.mToken);
-                    mIWindowManager.addWindowToken(newConn.mToken,
-                            WindowManager.LayoutParams.TYPE_WALLPAPER);
-                } catch (RemoteException e) {
-                }
-                
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new IllegalArgumentException("Unknown component " + name);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
             }
+            
+            // Bind the service!
+            WallpaperConnection newConn = new WallpaperConnection();
+            intent.setComponent(realName);
+            if (!mContext.bindService(intent, newConn,
+                    Context.BIND_AUTO_CREATE)) {
+                throw new IllegalArgumentException("Unable to bind service: "
+                        + name);
+            }
+            
+            clearWallpaperComponentLocked();
+            mWallpaperComponent = name;
+            mWallpaperConnection = newConn;
+            try {
+                if (DEBUG) Log.v(TAG, "Adding window token: " + newConn.mToken);
+                mIWindowManager.addWindowToken(newConn.mToken,
+                        WindowManager.LayoutParams.TYPE_WALLPAPER);
+            } catch (RemoteException e) {
+            }
+            
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalArgumentException("Unknown component " + name);
         }
     }
     
@@ -327,7 +372,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             conn.mService.attach(conn, conn.mToken, mWidth, mHeight);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed attaching wallpaper; clearing", e);
-            clearWallpaperComponentLocked();
+            bindWallpaperComponentLocked(null);
         }
     }
     
