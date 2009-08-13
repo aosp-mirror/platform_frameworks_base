@@ -19,10 +19,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This is not instantiated - we just provide data for other classes to use
+ * Policy that governs which classes are preloaded.
  */
 public class Policy {
-    
+
     /**
      * No constructor - use static methods only
      */
@@ -31,18 +31,24 @@ public class Policy {
     /**
      * This location (in the build system) of the preloaded-classes file.
      */
-    private static final String PRELOADED_CLASS_FILE
+    static final String PRELOADED_CLASS_FILE
             = "frameworks/base/preloaded-classes";
 
     /**
      * Long running services. These are restricted in their contribution to the 
      * preloader because their launch time is less critical.
      */
+    // TODO: Generate this automatically from package manager.
     private static final Set<String> SERVICES = new HashSet<String>(Arrays.asList(
-            "system_server",
-            "com.google.process.content",
-            "android.process.media",
-            "com.google.process.gapps"
+        "system_server",
+        "com.google.process.content",
+        "android.process.media",
+        "com.android.phone",
+        "com.google.android.apps.maps.FriendService",
+        "com.google.android.apps.maps.LocationFriendService",
+        "com.google.android.googleapps",
+        "com.google.process.gapps",
+        "android.tts"
     ));
 
     /**
@@ -63,24 +69,15 @@ public class Policy {
     ));
 
     /**
-     * Returns the path/file name of the preloaded classes file that will be written 
-     * by WritePreloadedClassFile.
-     */
-    public static String getPreloadedClassFileName() {
-        return PRELOADED_CLASS_FILE;
-    }
-    
-    /**
-     * Reports if the given process name is a "long running" process or service
+     * Returns true if the given process name is a "long running" process or
+     * service.
      */
     public static boolean isService(String processName) {
         return SERVICES.contains(processName);
     }
-    
-    /**
-     * Reports if the given class should never be preloaded
-     */
-    public static boolean isPreloadableClass(String className) {
-        return !EXCLUDED_CLASSES.contains(className);
+
+    /**Reports if the given class should be preloaded. */
+    public static boolean isPreloadable(LoadedClass clazz) {
+        return clazz.systemClass && !EXCLUDED_CLASSES.contains(clazz.name);
     }
 }
