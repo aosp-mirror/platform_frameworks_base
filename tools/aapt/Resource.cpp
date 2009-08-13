@@ -475,10 +475,8 @@ static bool applyFileOverlay(const sp<AaptAssets>& assets,
                     }
                 } else {
                     // this group doesn't exist (a file that's only in the overlay)
-                    fprintf(stderr, "aapt: error: "
-                            "*** Resource file '%s' exists only in an overlay\n",
-                            overlaySet->keyAt(overlayIndex).string());
-                    return false;
+                    baseSet->add(overlaySet->keyAt(overlayIndex),
+                            overlaySet->valueAt(overlayIndex));
                 }
             }
             // this overlay didn't have resources for this type
