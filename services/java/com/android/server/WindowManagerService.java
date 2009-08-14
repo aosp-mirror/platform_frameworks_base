@@ -1194,6 +1194,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (!visible) w = null;
+        //if (mWallpaperTarget != w) {
+        //    Log.v(TAG, "New wallpaper target: " + w);
+        //}
         mWallpaperTarget = w;
         
         if (visible) {
@@ -6900,10 +6903,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (atoken != null) {
                 return mSurface != null && mPolicyVisibility && !mDestroying
                         && ((!mAttachedHidden && !atoken.hiddenRequested)
-                                || mAnimating || atoken.animating);
+                                || mAnimation != null || atoken.animation != null);
             } else {
                 return mSurface != null && mPolicyVisibility && !mDestroying
-                        && (!mAttachedHidden || mAnimating);
+                        && (!mAttachedHidden || mAnimation != null);
             }
         }
 
@@ -6913,10 +6916,11 @@ public class WindowManagerService extends IWindowManager.Stub
          */
         boolean isReadyForDisplay() {
             final AppWindowToken atoken = mAppToken;
-            final boolean animating = atoken != null ? atoken.animating : false;
+            final boolean animating = atoken != null
+                    ? (atoken.animation != null) : false;
             return mSurface != null && mPolicyVisibility && !mDestroying
                     && ((!mAttachedHidden && !mRootToken.hidden)
-                            || mAnimating || animating);
+                            || mAnimation != null || animating);
         }
 
         /** Is the window or its container currently animating? */
