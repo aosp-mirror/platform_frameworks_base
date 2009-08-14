@@ -396,6 +396,7 @@ public class MediaScanner
         private String mPath;
         private long mLastModified;
         private long mFileSize;
+        private String mWriter;
 
         public FileCacheEntry beginFile(String path, String mimeType, long lastModified, long fileSize) {
 
@@ -479,6 +480,7 @@ public class MediaScanner
             mDuration = 0;
             mPath = path;
             mLastModified = lastModified;
+            mWriter = null;
 
             return entry;
         }
@@ -593,6 +595,8 @@ public class MediaScanner
                 mTrack = (num * 1000) + (mTrack % 1000);
             } else if (name.equalsIgnoreCase("duration")) {
                 mDuration = parseSubstring(value, 0, 0);
+            } else if (name.equalsIgnoreCase("writer") || name.startsWith("writer;")) {
+                mWriter = value.trim();
             }
         }
 
