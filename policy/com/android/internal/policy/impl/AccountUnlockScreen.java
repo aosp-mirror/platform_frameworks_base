@@ -21,6 +21,10 @@ import com.android.internal.widget.LockPatternUtils;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.OperationCanceledException;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.AccountManagerCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -35,6 +39,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import java.io.IOException;
 
 /**
  * When the user forgets their password a bunch of times, we fall back on their
@@ -135,27 +141,31 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
     public void onClick(View v) {
         mCallback.pokeWakelock();
         if (v == mOk) {
-            if (checkPassword()) {
-                // clear out forgotten password
-                mLockPatternUtils.setPermanentlyLocked(false);
-
-                // launch the 'choose lock pattern' activity so
-                // the user can pick a new one if they want to
-                Intent intent = new Intent();
-                intent.setClassName(LOCK_PATTERN_PACKAGE, LOCK_PATTERN_CLASS);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(intent);
-
-                // close the keyguard
-                mCallback.keyguardDone(true);
-            } else {
-                mInstructions.setText(R.string.lockscreen_glogin_invalid_input);
-                mPassword.setText("");
-            }
+            asyncCheckPassword();
         }
 
         if (v == mEmergencyCall) {
             mCallback.takeEmergencyCallAction();
+        }
+    }
+
+    private void onCheckPasswordResult(boolean flag) {
+        if (flag) {
+            // clear out forgotten password
+            mLockPatternUtils.setPermanentlyLocked(false);
+
+            // launch the 'choose lock pattern' activity so
+            // the user can pick a new one if they want to
+            Intent intent = new Intent();
+            intent.setClassName(LOCK_PATTERN_PACKAGE, LOCK_PATTERN_CLASS);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+
+            // close the keyguard
+            mCallback.keyguardDone(true);
+        } else {
+            mInstructions.setText(R.string.lockscreen_glogin_invalid_input);
+            mPassword.setText("");
         }
     }
 
@@ -186,7 +196,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
      * find a single best match.
      */
     private Account findIntendedAccount(String username) {
-        Account[] accounts = AccountManager.get(mContext).blockingGetAccounts();
+        Account[] accounts = AccountManager.get(mContext).getAccounts();
 
         // Try to figure out which account they meant if they
         // typed only the username (and not the domain), or got
@@ -196,14 +206,14 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         int bestScore = 0;
         for (Account a: accounts) {
             int score = 0;
-            if (username.equals(a.mName)) {
+            if (username.equals(a.name)) {
                 score = 4;
-            } else if (username.equalsIgnoreCase(a.mName)) {
+            } else if (username.equalsIgnoreCase(a.name)) {
                 score = 3;
             } else if (username.indexOf('@') < 0) {
-                int i = a.mName.indexOf('@');
+                int i = a.name.indexOf('@');
                 if (i >= 0) {
-                    String aUsername = a.mName.substring(0, i);
+                    String aUsername = a.name.substring(0, i);
                     if (username.equals(aUsername)) {
                         score = 2;
                     } else if (username.equalsIgnoreCase(aUsername)) {
@@ -221,21 +231,26 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         return bestAccount;
     }
 
-    private boolean checkPassword() {
+    private void asyncCheckPassword() {
         final String login = mLogin.getText().toString();
         final String password = mPassword.getText().toString();
         Account account = findIntendedAccount(login);
         if (account == null) {
-            return false;
+            onCheckPasswordResult(false);
+            return;
         }
-        // TODO(fredq) change this to asynchronously issue the request and wait for the response (by
-        // supplying a callback rather than calling get() immediately)
-        try {
-            return AccountManager.get(mContext).confirmPassword(
-                    account, password, null /* callback */, null /* handler */).getResult();
-        } catch (android.accounts.OperationCanceledException e) {
-            // the request was canceled
-            return false;
-        }
+        AccountManager.get(mContext).confirmPassword(
+                account, password, new AccountManagerCallback<Boolean>() {
+            public void run(AccountManagerFuture<Boolean> future) {
+                boolean result = false;
+                try {
+                    result = future.getResult();
+                } catch (OperationCanceledException e) {
+                } catch (IOException e) {
+                } catch (AuthenticatorException e) {
+                }
+                onCheckPasswordResult(result);
+            }
+        }, null /* handler */);
     }
 }
