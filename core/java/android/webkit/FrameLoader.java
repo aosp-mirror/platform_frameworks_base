@@ -128,6 +128,18 @@ class FrameLoader {
     /* package */
     static boolean handleLocalFile(String url, LoadListener loadListener,
             WebSettings settings) {
+        // Attempt to decode the percent-encoded url before passing to the
+        // local loaders.
+        try {
+            url = new String(URLUtil.decode(url.getBytes()));
+        } catch (IllegalArgumentException e) {
+            loadListener.error(EventHandler.ERROR_BAD_URL,
+                    loadListener.getContext().getString(
+                            com.android.internal.R.string.httpErrorBadUrl));
+            // Return true here so we do not trigger an unsupported scheme
+            // error.
+            return true;
+        }
         if (URLUtil.isAssetUrl(url)) {
             FileLoader.requestUrl(url, loadListener, loadListener.getContext(),
                     true, settings.getAllowFileAccess());
