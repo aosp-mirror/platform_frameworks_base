@@ -321,6 +321,7 @@ enum {
     LABEL_ATTR = 0x01010001,
     ICON_ATTR = 0x01010002,
     MIN_SDK_VERSION_ATTR = 0x0101020c,
+    MAX_SDK_VERSION_ATTR = 0x01010271,
     REQ_TOUCH_SCREEN_ATTR = 0x01010227,
     REQ_KEYBOARD_TYPE_ATTR = 0x01010228,
     REQ_HARD_KEYBOARD_ATTR = 0x01010229,
@@ -584,6 +585,10 @@ int doDump(Bundle* bundle)
                         } else if (code != -1) {
                             targetSdk = code;
                             printf("sdkVersion:'%d'\n", code);
+                        }
+                        code = getIntegerAttribute(tree, MAX_SDK_VERSION_ATTR, NULL, -1);
+                        if (code != -1) {
+                            printf("maxSdkVersion:'%d'\n", code);
                         }
                         code = getIntegerAttribute(tree, TARGET_SDK_VERSION_ATTR, &error);
                         if (error != "") {
