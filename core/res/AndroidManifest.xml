@@ -1164,9 +1164,6 @@
 
         <service android:name="com.android.internal.service.wallpaper.ImageWallpaper"
                 android:permission="android.permission.BIND_WALLPAPER">
-            <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" />
-            </intent-filter>
         </service>
 
         <receiver android:name="com.android.server.BootReceiver" >
