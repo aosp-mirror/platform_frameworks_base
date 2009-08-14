@@ -329,8 +329,6 @@ public interface WindowManager extends ViewManager {
          * Default is normal.
          * 
          * @see #MEMORY_TYPE_NORMAL
-         * @see #MEMORY_TYPE_HARDWARE
-         * @see #MEMORY_TYPE_GPU
          * @see #MEMORY_TYPE_PUSH_BUFFERS
          */
         public int memoryType;
@@ -338,10 +336,16 @@ public interface WindowManager extends ViewManager {
         /** Memory type: The window's surface is allocated in main memory. */
         public static final int MEMORY_TYPE_NORMAL = 0;
         /** Memory type: The window's surface is configured to be accessible
-         * by DMA engines and hardware accelerators. */
+         * by DMA engines and hardware accelerators.
+         * @deprecated this is ignored, this value is set automatically when needed.
+         */
+        @Deprecated
         public static final int MEMORY_TYPE_HARDWARE = 1;
         /** Memory type: The window's surface is configured to be accessible
-         * by graphics accelerators. */
+         * by graphics accelerators. 
+         * @deprecated this is ignored, this value is set automatically when needed.
+         */
+        @Deprecated
         public static final int MEMORY_TYPE_GPU = 2;
         /** Memory type: The window's surface doesn't own its buffers and
          * therefore cannot be locked. Instead the buffers are pushed to

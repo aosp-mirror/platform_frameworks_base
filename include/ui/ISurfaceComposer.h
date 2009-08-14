@@ -40,8 +40,6 @@ public:
 
     enum { // (keep in sync with Surface.java)
         eHidden             = 0x00000004,
-        eGPU                = 0x00000008,
-        eHardware           = 0x00000010,
         eDestroyBackbuffer  = 0x00000020,
         eSecure             = 0x00000080,
         eNonPremultiplied   = 0x00000100,

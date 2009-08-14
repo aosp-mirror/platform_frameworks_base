@@ -91,9 +91,14 @@ public abstract class BaseSurfaceHolder implements SurfaceHolder {
 
     public void setType(int type) {
         switch (type) {
-        case SURFACE_TYPE_NORMAL:
         case SURFACE_TYPE_HARDWARE:
         case SURFACE_TYPE_GPU:
+            // these are deprecated, treat as "NORMAL"
+            type = SURFACE_TYPE_NORMAL;
+            break;
+        }
+        switch (type) {
+        case SURFACE_TYPE_NORMAL:
         case SURFACE_TYPE_PUSH_BUFFERS:
             if (mRequestedType != type) {
                 mRequestedType = type;

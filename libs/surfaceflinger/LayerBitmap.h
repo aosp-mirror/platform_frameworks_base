@@ -53,7 +53,6 @@ class Buffer : public SurfaceBuffer
 public:
     enum {
         DONT_CLEAR  = 0x00000001,
-        GPU         = 0x00000002,
         SECURE      = 0x00000004
     };
 
@@ -98,7 +97,6 @@ class LayerBitmap
 public:
     enum {
         DONT_CLEAR  = Buffer::DONT_CLEAR,
-        GPU         = Buffer::GPU,
         SECURE      = Buffer::SECURE
     };
     LayerBitmap();
