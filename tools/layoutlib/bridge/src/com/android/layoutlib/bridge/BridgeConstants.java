@@ -45,11 +45,12 @@ public class BridgeConstants {
     public final static String PREFIX_RESOURCE_REF = "@";
     public final static String PREFIX_ANDROID_THEME_REF = "?android:";
     public final static String PREFIX_THEME_REF = "?";
-    
+
     public final static String PREFIX_ANDROID = "android:";
-    
+
     public final static String RES_STYLE = "style";
     public final static String RES_ATTR = "attr";
+    public final static String RES_DIMEN = "dimen";
     public final static String RES_DRAWABLE = "drawable";
     public final static String RES_COLOR = "color";
     public final static String RES_LAYOUT = "layout";
