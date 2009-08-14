@@ -44,6 +44,7 @@ import android.provider.Settings;
 import android.provider.Settings.System;
 import android.util.Log;
 import android.view.VolumePanel;
+import android.os.SystemProperties;
 
 import com.android.internal.telephony.ITelephony;
 
@@ -53,6 +54,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 
 /**
  * The implementation of the volume manager service.
@@ -140,6 +142,19 @@ public class AudioService extends IAudioService.Stub {
         {4, -1}   // FX_FOCUS_RETURN
     };
 
+   /** @hide Maximum volume index values for audio streams */
+    private int[] MAX_STREAM_VOLUME = new int[] {
+        6,  // STREAM_VOICE_CALL
+        8,  // STREAM_SYSTEM
+        8,  // STREAM_RING
+        16, // STREAM_MUSIC
+        8,  // STREAM_ALARM
+        8,  // STREAM_NOTIFICATION
+        16, // STREAM_BLUETOOTH_SCO
+        8,  // STREAM_SYSTEM_ENFORCED
+        16, // STREAM_DTMF
+        16  // STREAM_TTS
+    };
     /* STREAM_VOLUME_ALIAS[] indicates for each stream if it uses the volume settings
      * of another stream: This avoids multiplying the volume settings for hidden
      * stream types that follow other stream behavior for volume settings
@@ -231,6 +246,12 @@ public class AudioService extends IAudioService.Stub {
     public AudioService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+
+       // Intialized volume
+        MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = SystemProperties.getInt(
+            "ro.config.vc_call_vol_steps",
+           MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]);
+
         mVolumePanel = new VolumePanel(context, this);
         mSettingsObserver = new SettingsObserver();
         mMode = AudioSystem.MODE_NORMAL;
@@ -249,6 +270,7 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
         intentFilter.addAction(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION);
         context.registerReceiver(mReceiver, intentFilter);
+
     }
 
     private void createAudioSystemThread() {
@@ -945,7 +967,7 @@ public class AudioService extends IAudioService.Stub {
             mStreamType = streamType;
 
             final ContentResolver cr = mContentResolver;
-            mIndexMax = AudioManager.MAX_STREAM_VOLUME[streamType];
+            mIndexMax = MAX_STREAM_VOLUME[streamType];
             mIndex = Settings.System.getInt(cr,
                                             mVolumeIndexSettingName,
                                             AudioManager.DEFAULT_STREAM_VOLUME[streamType]);
