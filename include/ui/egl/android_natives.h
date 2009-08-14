@@ -179,7 +179,7 @@ struct android_native_window_t
  *  reallocated.
  */
 
-inline int native_window_set_usage(
+static inline int native_window_set_usage(
         struct android_native_window_t* window, int usage)
 {
     return window->perform(window, NATIVE_WINDOW_SET_USAGE, usage);
