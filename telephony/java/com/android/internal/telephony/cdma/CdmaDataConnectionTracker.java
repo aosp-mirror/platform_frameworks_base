@@ -48,6 +48,7 @@ import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.RetryManager;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyEventLog;
 
 import java.util.ArrayList;
@@ -770,6 +771,10 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             reason = (String) ar.userObj;
         }
         setState(State.IDLE);
+
+        CdmaServiceStateTracker ssTracker = mCdmaPhone.mSST;
+        ssTracker.processPendingRadioPowerOffAfterDataOff();
+
         phone.notifyDataConnection(reason);
         if (retryAfterDisconnected(reason)) {
           trySetupData(reason);

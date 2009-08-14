@@ -116,6 +116,7 @@ public abstract class ServiceStateTracker extends Handler {
     protected static final int EVENT_NV_READY                          = 35;
     protected static final int EVENT_ERI_FILE_LOADED                   = 36;
     protected static final int EVENT_OTA_PROVISION_STATUS_CHANGE       = 37;
+    protected static final int EVENT_SET_RADIO_POWER_OFF               = 38;
 
     //***** Time Zones
     protected static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
