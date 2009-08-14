@@ -18,6 +18,7 @@ package com.android.dumprendertree;
 
 import android.os.Handler;
 import android.os.Message;
+import android.webkit.MockGeolocation;
 import android.webkit.WebStorage;
 
 import java.util.HashMap;
@@ -325,7 +326,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     }
 
     public void setWindowIsKey(boolean b) {
-        obtainMessage(LAYOUT_SET_WINDOW_KEY,b ? 1 : 0, 0).sendToTarget();
+        obtainMessage(LAYOUT_SET_WINDOW_KEY, b ? 1 : 0, 0).sendToTarget();
     }
 
     public void testRepaint() {
@@ -352,4 +353,15 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
         obtainMessage(LAYOUT_SET_CAN_OPEN_WINDOWS).sendToTarget();
     }
 
+    public void setMockGeolocationPosition(double latitude,
+                                           double longitude,
+                                           double accuracy) {
+        MockGeolocation.getInstance().setPosition(latitude,
+                                                  longitude,
+                                                  accuracy);
+    }
+
+    public void setMockGeolocationError(int code, String message) {
+        MockGeolocation.getInstance().setError(code, message);
+    }
 }
