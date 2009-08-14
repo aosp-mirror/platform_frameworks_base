@@ -677,6 +677,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     newGPRSState = regCodeToServiceState(regState);
                     newDataRoaming = regCodeIsRoaming(regState);
                     newNetworkType = type;
+                    newSS.setRadioTechnology(type);
                 break;
 
                 case EVENT_POLL_STATE_OPERATOR:
@@ -809,6 +810,15 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 break;
             case DATA_ACCESS_UMTS:
                 ret = "UMTS";
+                break;
+            case DATA_ACCESS_HSDPA:
+                ret = "HSDPA";
+                break;
+            case DATA_ACCESS_HSUPA:
+                ret = "HSUPA";
+                break;
+            case DATA_ACCESS_HSPA:
+                ret = "HSPA";
                 break;
             default:
                 Log.e(LOG_TAG, "Wrong network type: " + Integer.toString(type));
@@ -1288,7 +1298,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * that could support voice and data simultaniously.
      */
     boolean isConcurrentVoiceAndData() {
-        return (networkType == DATA_ACCESS_UMTS);
+        return (networkType >= DATA_ACCESS_UMTS);
     }
 
     /**
