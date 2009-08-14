@@ -36,7 +36,7 @@ public class MediaMetadataTest extends AndroidTestCase {
         FILE_PATH,CD_TRACK, ALBUM,
         ARTIST, AUTHOR, COMPOSER,
         DATE, GENRE, TITLE,
-        YEAR, DURATION, NUM_TRACKS
+        YEAR, DURATION, NUM_TRACKS, WRITER
     }
     
     public static enum MP3_TEST_FILE{
@@ -130,8 +130,6 @@ public class MediaMetadataTest extends AndroidTestCase {
         validateMetatData(non_mp3_test_file.AMRWB.ordinal(), MediaNames.META_DATA_OTHERS);
     }
     
-    //Bug# 1440173 - skip this test case now
-    @Suppress
     @MediumTest
     public static void testM4A1_Metadata() throws Exception {
         validateMetatData(non_mp3_test_file.M4A1.ordinal(), MediaNames.META_DATA_OTHERS);
@@ -254,6 +252,10 @@ public class MediaMetadataTest extends AndroidTestCase {
         Log.v(TAG, "Track : "+ value);
         assertEquals(TAG,meta_data_file[fileIndex][meta.NUM_TRACKS.ordinal()], value);
      
+        value = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_WRITER);
+        Log.v(TAG, "Writer : "+ value);
+        assertEquals(TAG,meta_data_file[fileIndex][meta.WRITER.ordinal()], value);
+
         retriever.release();        
     }
 }
