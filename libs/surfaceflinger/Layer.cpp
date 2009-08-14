@@ -596,7 +596,12 @@ Region Layer::post(uint32_t* previousSate, bool& recomputeVisibleRegions)
 Point Layer::getPhysicalSize() const
 {
     sp<const Buffer> front(frontBuffer().getBuffer());
-    return Point(front->getWidth(), front->getHeight());
+    Point size(front->getWidth(), front->getHeight());
+    if ((size.x | size.y) == 0) {
+        // if we don't have a buffer yet, just use the state's size.
+        size = LayerBase::getPhysicalSize();
+    }
+    return size;
 }
 
 void Layer::unlockPageFlip(
