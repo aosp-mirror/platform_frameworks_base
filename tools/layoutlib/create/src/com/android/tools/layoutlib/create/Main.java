@@ -40,7 +40,7 @@ public class Main {
         for (String path : osJarPath) {
             log.info("Input :      %1$s", path);
         }
-        
+
         try {
             AsmGenerator agen = new AsmGenerator(log, osDestJar[0],
                     new Class<?>[] {  // classes to inject in the final JAR
@@ -66,8 +66,10 @@ public class Main {
                         "android.graphics.ComposeShader",       "android.graphics._Original_ComposeShader",
                         "android.graphics.RadialGradient",      "android.graphics._Original_RadialGradient",
                         "android.graphics.SweepGradient",       "android.graphics._Original_SweepGradient",
+                        "android.os.ServiceManager",            "android.os._Original_ServiceManager",
                         "android.util.FloatMath",               "android.util._Original_FloatMath",
                         "android.view.SurfaceView",             "android.view._Original_SurfaceView",
+                        "android.view.accessibility.AccessibilityManager", "android.view.accessibility._Original_AccessibilityManager",
                     },
                     new String[] { // methods deleted from their return type.
                         "android.graphics.Paint", // class to delete method from
@@ -101,7 +103,7 @@ public class Main {
                         });
             aa.analyze();
             agen.generate();
-            
+
             // Throw an error if any class failed to get renamed by the generator
             //
             // IMPORTANT: if you're building the platform and you get this error message,
@@ -123,7 +125,7 @@ public class Main {
                 }
                 System.exit(1);
             }
-            
+
             System.exit(0);
         } catch (IOException e) {
             log.exception(e, "Failed to load jar");
@@ -158,7 +160,7 @@ public class Main {
                 return false;
             }
         }
-        
+
         if (osJarPath.isEmpty()) {
             log.error("Missing parameter: path to input jar");
             return false;
