@@ -153,20 +153,6 @@ public class AudioManager {
     @Deprecated public static final int NUM_STREAMS = AudioSystem.NUM_STREAMS;
 
 
-    /** @hide Maximum volume index values for audio streams */
-    public static final int[] MAX_STREAM_VOLUME = new int[] {
-        6,  // STREAM_VOICE_CALL
-        8,  // STREAM_SYSTEM
-        8,  // STREAM_RING
-        16, // STREAM_MUSIC
-        8,  // STREAM_ALARM
-        8,  // STREAM_NOTIFICATION
-        16, // STREAM_BLUETOOTH_SCO
-        8,  // STREAM_SYSTEM_ENFORCED
-        16, // STREAM_DTMF
-        16  // STREAM_TTS
-    };
-
     /**  @hide Default volume index values for audio streams */
     public static final int[] DEFAULT_STREAM_VOLUME = new int[] {
         4,  // STREAM_VOICE_CALL
