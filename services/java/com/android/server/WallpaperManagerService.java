@@ -38,6 +38,7 @@ import android.os.FileObserver;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.IWallpaperService;
@@ -68,10 +69,16 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
 
     Object mLock = new Object();
 
-    private static final File WALLPAPER_DIR = new File(
+    /**
+     * Minimum time between crashes of a wallpaper service for us to consider
+     * restarting it vs. just reverting to the static wallpaper.
+     */
+    static final long MIN_WALLPAPER_CRASH_TIME = 10000;
+    
+    static final File WALLPAPER_DIR = new File(
             "/data/data/com.android.settings/files");
-    private static final String WALLPAPER = "wallpaper";
-    private static final File WALLPAPER_FILE = new File(WALLPAPER_DIR, WALLPAPER);
+    static final String WALLPAPER = "wallpaper";
+    static final File WALLPAPER_FILE = new File(WALLPAPER_DIR, WALLPAPER);
 
     /**
      * List of callbacks registered they should each be notified
@@ -116,6 +123,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     String mName = "";
     ComponentName mWallpaperComponent;
     WallpaperConnection mWallpaperConnection;
+    long mLastDiedTime;
     
     class WallpaperConnection extends IWallpaperConnection.Stub
             implements ServiceConnection {
@@ -136,6 +144,14 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             synchronized (mLock) {
                 mService = null;
                 mEngine = null;
+                if (mWallpaperConnection == this) {
+                    Log.w(TAG, "Wallpaper service gone: " + mWallpaperComponent);
+                    if ((mLastDiedTime+MIN_WALLPAPER_CRASH_TIME)
+                            < SystemClock.uptimeMillis()) {
+                        Log.w(TAG, "Reverting to built-in wallpaper!");
+                        bindWallpaperComponentLocked(null);
+                    }
+                }
             }
         }
         
@@ -195,7 +211,12 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             if (f.exists()) {
                 f.delete();
             }
-            bindWallpaperComponentLocked(null);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                bindWallpaperComponentLocked(null);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
@@ -247,12 +268,17 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     public ParcelFileDescriptor setWallpaper(String name) {
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
         synchronized (mLock) {
-            ParcelFileDescriptor pfd = updateWallpaperBitmapLocked(name);
-            if (pfd != null) {
-                bindWallpaperComponentLocked(null);
-                saveSettingsLocked();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                ParcelFileDescriptor pfd = updateWallpaperBitmapLocked(name);
+                if (pfd != null) {
+                    bindWallpaperComponentLocked(null);
+                    saveSettingsLocked();
+                }
+                return pfd;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
-            return pfd;
         }
     }
 
@@ -341,6 +367,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             clearWallpaperComponentLocked();
             mWallpaperComponent = name;
             mWallpaperConnection = newConn;
+            mLastDiedTime = SystemClock.uptimeMillis();
             try {
                 if (DEBUG) Log.v(TAG, "Adding window token: " + newConn.mToken);
                 mIWindowManager.addWindowToken(newConn.mToken,

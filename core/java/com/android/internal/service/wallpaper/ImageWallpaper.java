@@ -59,6 +59,7 @@ public class ImageWallpaper extends WallpaperService {
     class WallpaperObserver extends BroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
             mEngine.updateWallpaper();
+            mEngine.drawFrame();
         }
     }
 
@@ -72,14 +73,7 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
-            mBackground = mWallpaperManager.getDrawable();
-            mBounds.left = mBounds.top = 0;
-            mBounds.right = mBackground.getIntrinsicWidth();
-            mBounds.bottom = mBackground.getIntrinsicHeight();
-            int offx = (getDesiredMinimumWidth() - mBounds.right) / 2;
-            int offy = (getDesiredMinimumHeight() - mBounds.bottom) / 2;
-            mBounds.offset(offx, offy);
-            mBackground.setBounds(mBounds);
+            updateWallpaper();
             surfaceHolder.setSizeFromLayout();
         }
 
@@ -131,6 +125,13 @@ public class ImageWallpaper extends WallpaperService {
         void updateWallpaper() {
             synchronized (mLock) {
                 mBackground = mWallpaperManager.getDrawable();
+                mBounds.left = mBounds.top = 0;
+                mBounds.right = mBackground.getIntrinsicWidth();
+                mBounds.bottom = mBackground.getIntrinsicHeight();
+                int offx = (getDesiredMinimumWidth() - mBounds.right) / 2;
+                int offy = (getDesiredMinimumHeight() - mBounds.bottom) / 2;
+                mBounds.offset(offx, offy);
+                mBackground.setBounds(mBounds);
             }
         }
     }
