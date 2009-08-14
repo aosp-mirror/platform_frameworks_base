@@ -67,8 +67,8 @@ public class ImageWallpaper extends WallpaperService {
         private final Object mLock = new Object();
         private final Rect mBounds = new Rect();
         Drawable mBackground;
-        int mXOffset;
-        int mYOffset;
+        float mXOffset;
+        float mYOffset;
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
@@ -85,8 +85,8 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onOffsetsChanged(float xOffset, float yOffset,
                 int xPixels, int yPixels) {
-            mXOffset = xPixels;
-            mYOffset = yPixels;
+            mXOffset = xOffset;
+            mYOffset = xOffset;
             drawFrame();
         }
 
@@ -110,11 +110,20 @@ public class ImageWallpaper extends WallpaperService {
             SurfaceHolder sh = getSurfaceHolder();
             Canvas c = sh.lockCanvas();
             if (c != null) {
-                //final Rect frame = sh.getSurfaceFrame();
+                final Rect frame = sh.getSurfaceFrame();
                 synchronized (mLock) {
                     final Drawable background = mBackground;
-                    //background.setBounds(frame);
-                    c.translate(mXOffset, mYOffset);
+                    final int dw = frame.width();
+                    final int dh = frame.height();
+                    final int bw = mBackground.getIntrinsicWidth();
+                    final int bh = mBackground.getIntrinsicHeight();
+                    final int availw = bw-dw;
+                    final int availh = bh-dh;
+                    int xPixels = availw > 0
+                            ? -(int)(availw*mXOffset+.5f) : -(int)(availw/2);
+                    int yPixels = availh > 0
+                            ? -(int)(availh*mYOffset+.5f) : -(int)(availh/2);
+                    c.translate(xPixels, yPixels);
                     c.drawColor(0xff000000);
                     background.draw(c);
                 }
@@ -128,9 +137,6 @@ public class ImageWallpaper extends WallpaperService {
                 mBounds.left = mBounds.top = 0;
                 mBounds.right = mBackground.getIntrinsicWidth();
                 mBounds.bottom = mBackground.getIntrinsicHeight();
-                int offx = (getDesiredMinimumWidth() - mBounds.right) / 2;
-                int offy = (getDesiredMinimumHeight() - mBounds.bottom) / 2;
-                mBounds.offset(offx, offy);
                 mBackground.setBounds(mBounds);
             }
         }

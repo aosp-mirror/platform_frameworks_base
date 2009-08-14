@@ -58,6 +58,7 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_UPDATE_SURFACE = 10000;
     private static final int MSG_VISIBILITY_CHANGED = 10010;
     private static final int MSG_WALLPAPER_OFFSETS = 10020;
+    private static final int MSG_WINDOW_RESIZED = 10030;
     
     /**
      * The actual implementation of a wallpaper.  A wallpaper service may
@@ -130,6 +131,13 @@ public abstract class WallpaperService extends Service {
         };
         
         final BaseIWindow mWindow = new BaseIWindow() {
+            public void resized(int w, int h, Rect coveredInsets,
+                    Rect visibleInsets, boolean reportDraw) {
+                Message msg = mCaller.obtainMessageI(MSG_WINDOW_RESIZED,
+                        reportDraw ? 1 : 0);
+                mCaller.sendMessage(msg);
+            }
+            
             public void dispatchAppVisibility(boolean visible) {
                 Message msg = mCaller.obtainMessageI(MSG_VISIBILITY_CHANGED,
                         visible ? 1 : 0);
@@ -238,7 +246,7 @@ public abstract class WallpaperService extends Service {
             
             final boolean creating = !mCreated;
             final boolean formatChanged = mFormat != mSurfaceHolder.getRequestedFormat();
-            final boolean sizeChanged = mWidth != myWidth || mHeight != myHeight;
+            boolean sizeChanged = mWidth != myWidth || mHeight != myHeight;
             final boolean typeChanged = mType != mSurfaceHolder.getRequestedType();
             if (force || creating || formatChanged || sizeChanged || typeChanged) {
 
@@ -286,8 +294,16 @@ public abstract class WallpaperService extends Service {
                     if (DEBUG) Log.i(TAG, "New surface: " + mSurfaceHolder.mSurface
                             + ", frame=" + mWinFrame);
                     
-                    mCurWidth = mWinFrame.width();
-                    mCurHeight = mWinFrame.height();
+                    int w = mWinFrame.width();
+                    if (mCurWidth != w) {
+                        sizeChanged = true;
+                        mCurWidth = w;
+                    }
+                    int h = mWinFrame.height();
+                    if (mCurHeight != h) {
+                        sizeChanged = true;
+                        mCurHeight = h;
+                    }
                     
                     mSurfaceHolder.mSurfaceLock.unlock();
 
@@ -312,7 +328,7 @@ public abstract class WallpaperService extends Service {
                                 }
                             }
                         }
-                        if (creating || formatChanged || sizeChanged) {
+                        if (force || creating || formatChanged || sizeChanged) {
                             onSurfaceChanged(mSurfaceHolder, mFormat,
                                     mCurWidth, mCurHeight);
                             if (callbacks != null) {
@@ -451,6 +467,16 @@ public abstract class WallpaperService extends Service {
                     final int availh = mReqHeight-mEngine.mCurHeight;
                     final int yPixels = availh > 0 ? -(int)(availh*yOffset+.5f) : 0;
                     mEngine.onOffsetsChanged(xOffset, yOffset, xPixels, yPixels);
+                } break;
+                case MSG_WINDOW_RESIZED: {
+                    final boolean reportDraw = message.arg1 != 0;
+                    mEngine.updateSurface(true);
+                    if (reportDraw) {
+                        try {
+                            mEngine.mSession.finishDrawing(mEngine.mWindow);
+                        } catch (RemoteException e) {
+                        }
+                    }
                 } break;
                 default :
                     Log.w(TAG, "Unknown message type " + message.what);

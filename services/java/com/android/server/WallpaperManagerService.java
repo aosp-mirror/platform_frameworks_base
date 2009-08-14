@@ -325,10 +325,10 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             ComponentName realName = name;
             if (realName == null) {
                 // The default component is our static image wallpaper.
-                //realName = new ComponentName("android",
-                //        ImageWallpaper.class.getName());
-                clearWallpaperComponentLocked();
-                return;
+                realName = new ComponentName("android",
+                        ImageWallpaper.class.getName());
+                //clearWallpaperComponentLocked();
+                //return;
             }
             ServiceInfo si = mContext.getPackageManager().getServiceInfo(realName,
                     PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS);

@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Log;
 import android.view.ViewRoot;
 
 import java.io.FileOutputStream;
@@ -82,7 +83,8 @@ public class WallpaperManager {
             try {
                 ParcelFileDescriptor fd = mService.getWallpaper(this);
                 if (fd != null) {
-                    Bitmap bm = BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor());
+                    Bitmap bm = BitmapFactory.decodeFileDescriptor(
+                            fd.getFileDescriptor(), null, null);
                     if (bm != null) {
                         // For now clear the density until we figure out how
                         // to deal with it for wallpapers.
