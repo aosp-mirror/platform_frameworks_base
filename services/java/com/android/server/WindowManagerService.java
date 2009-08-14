@@ -34,8 +34,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.MEMORY_TYPE_GPU;
-import static android.view.WindowManager.LayoutParams.MEMORY_TYPE_HARDWARE;
 import static android.view.WindowManager.LayoutParams.MEMORY_TYPE_PUSH_BUFFERS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -6386,11 +6384,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 int flags = 0;
-                if (mAttrs.memoryType == MEMORY_TYPE_HARDWARE) {
-                    flags |= Surface.HARDWARE;
-                } else if (mAttrs.memoryType == MEMORY_TYPE_GPU) {
-                    flags |= Surface.GPU;
-                } else if (mAttrs.memoryType == MEMORY_TYPE_PUSH_BUFFERS) {
+                if (mAttrs.memoryType == MEMORY_TYPE_PUSH_BUFFERS) {
                     flags |= Surface.PUSH_BUFFERS;
                 }
 

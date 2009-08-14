@@ -204,7 +204,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         // underlying surface is created and destroyed
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
-        holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
     }
 
     /**

@@ -130,8 +130,7 @@ status_t BootAnimation::readyToRun() {
 
     // create the native surface
     sp<SurfaceControl> control = session()->createSurface(
-            getpid(), 0, dinfo.w, dinfo.h, PIXEL_FORMAT_RGB_565,
-            ISurfaceComposer::eGPU);
+            getpid(), 0, dinfo.w, dinfo.h, PIXEL_FORMAT_RGB_565);
     session()->openTransaction();
     control->setLayer(0x40000000);
     session()->closeTransaction();

@@ -34,12 +34,18 @@ public class Surface implements Parcelable {
     /** Surface is created hidden */
     public static final int HIDDEN              = 0x00000004;
 
-    /** The surface is to be used by hardware accelerators or DMA engines */
+    /** The surface is to be used by hardware accelerators or DMA engines 
+     * @deprecated this is ignored, this value is set automatically when needed.
+     */
+    @Deprecated
     public static final int HARDWARE            = 0x00000010;
 
     /** Implies "HARDWARE", the surface is to be used by the GPU
      * additionally the backbuffer is never preserved for these
-     * surfaces. */
+     * surfaces. 
+     * @deprecated this is ignored, this value is set automatically when needed.
+     */
+    @Deprecated
     public static final int GPU                 = 0x00000028;
 
     /** The surface contains secure content, special measures will

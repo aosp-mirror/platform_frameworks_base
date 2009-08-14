@@ -109,9 +109,6 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     if (err) return err;
 
     uint32_t bufferFlags = 0;
-    if (flags & ISurfaceComposer::eGPU)
-        bufferFlags |= Buffer::GPU;
-
     if (flags & ISurfaceComposer::eSecure)
         bufferFlags |= Buffer::SECURE;
 

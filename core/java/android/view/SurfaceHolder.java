@@ -38,8 +38,6 @@ public interface SurfaceHolder {
      * Surface type.
      * 
      * @see #SURFACE_TYPE_NORMAL
-     * @see #SURFACE_TYPE_HARDWARE
-     * @see #SURFACE_TYPE_GPU
      * @see #SURFACE_TYPE_PUSH_BUFFERS
      */
     
@@ -47,9 +45,15 @@ public interface SurfaceHolder {
      * contiguous, cached/buffered RAM. */
     public static final int SURFACE_TYPE_NORMAL = MEMORY_TYPE_NORMAL;
     /** Surface type: creates a suited to be used with DMA engines and
-     * hardware accelerators. */
+     * hardware accelerators. 
+     * @deprecated this is ignored, this value is set automatically when needed.
+     */
+    @Deprecated
     public static final int SURFACE_TYPE_HARDWARE = MEMORY_TYPE_HARDWARE;
-    /** Surface type: creates a surface suited to be used with the GPU */
+    /** Surface type: creates a surface suited to be used with the GPU 
+     * @deprecated this is ignored, this value is set automatically when needed.
+     */
+    @Deprecated
     public static final int SURFACE_TYPE_GPU = MEMORY_TYPE_GPU;
     /** Surface type: creates a "push" surface, that is a surface that 
      * doesn't owns its buffers. With such a surface lockCanvas will fail. */
@@ -139,11 +143,7 @@ public interface SurfaceHolder {
     public boolean isCreating();
     
     /**
-     * Sets the surface's type. Surfaces intended to be used with OpenGL ES
-     * should be of SURFACE_TYPE_GPU, surfaces accessed by DMA engines and
-     * hardware accelerators should be of type SURFACE_TYPE_HARDWARE.
-     * Failing to set the surface's type appropriately could result in 
-     * degraded performance or failure. 
+     * Sets the surface's type. 
      * 
      * @param type The surface's memory type.
      */
