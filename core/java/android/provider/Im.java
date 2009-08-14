@@ -1620,6 +1620,9 @@ public class Im {
         /** specifies the last heartbeat interval received from the server */
         public static final String SETTING_HEARTBEAT_INTERVAL = "heartbeat_interval";
 
+        /** specifiy the JID resource used for Google Talk connection */
+        public static final String SETTING_JID_RESOURCE = "jid_resource";
+
         /**
          * Used for reliable message queue (RMQ). This is for storing the last rmq id received
          * from the GTalk server
@@ -1861,6 +1864,14 @@ public class Im {
             putLongValue(contentResolver, providerId, SETTING_HEARTBEAT_INTERVAL, interval);
         }
 
+        /**
+         * A convenience method to set the jid resource.
+         */
+        public static void setJidResource(ContentResolver contentResolver,
+                                          long providerId, String jidResource) {
+            putStringValue(contentResolver, providerId, SETTING_JID_RESOURCE, jidResource);
+        }
+
         public static class QueryMap extends ContentQueryMap {
             private ContentResolver mContentResolver;
             private long mProviderId;
@@ -2044,6 +2055,23 @@ public class Im {
              */
             public long getHeartbeatInterval() {
                 return getLong(SETTING_HEARTBEAT_INTERVAL, 0L /* an invalid default interval */);
+            }
+
+            /**
+             * Set the JID resource.
+             *
+             * @param jidResource the jid resource to be stored.
+             */
+            public void setJidResource(String jidResource) {
+                ProviderSettings.setJidResource(mContentResolver, mProviderId, jidResource);
+            }
+            /**
+             * Get the JID resource used for the Google Talk connection
+             *
+             * @return the JID resource stored.
+             */
+            public String getJidResource() {
+                return getString(SETTING_JID_RESOURCE, null);
             }
 
             /**

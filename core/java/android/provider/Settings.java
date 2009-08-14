@@ -413,8 +413,6 @@ public final class Settings {
 
     private static final String TAG = "Settings";
 
-    private static String sJidResource = null;
-
     public static class SettingNotFoundException extends AndroidException {
         public SettingNotFoundException(String msg) {
             super(msg);
@@ -3619,42 +3617,6 @@ public final class Settings {
             ResolveInfo info = packageManager.resolveActivity(intent, 0);
             return info != null ? info.loadLabel(packageManager) : "";
         }
-    }
-
-    /**
-     * Returns the GTalk JID resource associated with this device.
-     *
-     * @return  String  the JID resource of the device. It uses the device IMEI in the computation
-     * of the JID resource. If IMEI is not ready (i.e. telephony module not ready), we'll return
-     * an empty string.
-     * @hide
-     */
-    // TODO: we shouldn't not have a permenant Jid resource, as that's an easy target for
-    // spams. We should change it once a while, like when we resubscribe to the subscription feeds
-    // server.
-    // (also, should this live in GTalkService?)
-    public static synchronized String getJidResource() {
-        if (sJidResource != null) {
-            return sJidResource;
-        }
-
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance("SHA-1");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("this should never happen");
-        }
-
-        String deviceId = TelephonyManager.getDefault().getDeviceId();
-        if (TextUtils.isEmpty(deviceId)) {
-            return "";
-        }
-
-        byte[] hashedDeviceId = digest.digest(deviceId.getBytes());
-        String id = new String(Base64.encodeBase64(hashedDeviceId), 0, 12);
-        id = id.replaceAll("/", "_");
-        sJidResource = JID_RESOURCE_PREFIX + id;
-        return sJidResource;
     }
 
     /**
