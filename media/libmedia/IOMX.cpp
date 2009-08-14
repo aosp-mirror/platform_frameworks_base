@@ -18,6 +18,8 @@ enum {
     SEND_COMMAND,
     GET_PARAMETER,
     SET_PARAMETER,
+    GET_CONFIG,
+    SET_CONFIG,
     USE_BUFFER,
     ALLOC_BUFFER,
     ALLOC_BUFFER_WITH_BACKUP,
@@ -25,6 +27,7 @@ enum {
     OBSERVE_NODE,
     FILL_BUFFER,
     EMPTY_BUFFER,
+    GET_EXTENSION_INDEX,
     CREATE_RENDERER,
     OBSERVER_ON_MSG,
     RENDERER_RENDER,
@@ -147,6 +150,41 @@ public:
         return reply.readInt32();
     }
 
+    virtual status_t get_config(
+            node_id node, OMX_INDEXTYPE index,
+            void *params, size_t size) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
+        writeVoidStar(node, &data);
+        data.writeInt32(index);
+        data.writeInt32(size);
+        data.write(params, size);
+        remote()->transact(GET_CONFIG, data, &reply);
+
+        status_t err = reply.readInt32();
+        if (err != OK) {
+            return err;
+        }
+
+        reply.read(params, size);
+
+        return OK;
+    }
+
+    virtual status_t set_config(
+            node_id node, OMX_INDEXTYPE index,
+            const void *params, size_t size) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
+        writeVoidStar(node, &data);
+        data.writeInt32(index);
+        data.writeInt32(size);
+        data.write(params, size);
+        remote()->transact(SET_CONFIG, data, &reply);
+
+        return reply.readInt32();
+    }
+
     virtual status_t use_buffer(
             node_id node, OMX_U32 port_index, const sp<IMemory> &params,
             buffer_id *buffer) {
@@ -258,6 +296,27 @@ public:
         data.writeInt32(flags);
         data.writeInt64(timestamp);
         remote()->transact(EMPTY_BUFFER, data, &reply, IBinder::FLAG_ONEWAY);
+    }
+
+    virtual status_t get_extension_index(
+            node_id node,
+            const char *parameter_name,
+            OMX_INDEXTYPE *index) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
+        writeVoidStar(node, &data);
+        data.writeCString(parameter_name);
+
+        remote()->transact(GET_EXTENSION_INDEX, data, &reply);
+
+        status_t err = reply.readInt32();
+        if (err == OK) {
+            *index = static_cast<OMX_INDEXTYPE>(reply.readInt32());
+        } else {
+            *index = OMX_IndexComponentStartUnused;
+        }
+
+        return err;
     }
 
     virtual sp<IOMXRenderer> createRenderer(
@@ -394,6 +453,48 @@ status_t BnOMX::onTransact(
             return NO_ERROR;
         }
 
+        case GET_CONFIG:
+        {
+            CHECK_INTERFACE(IOMX, data, reply);
+
+            node_id node = readVoidStar(&data);
+            OMX_INDEXTYPE index = static_cast<OMX_INDEXTYPE>(data.readInt32());
+
+            size_t size = data.readInt32();
+
+            // XXX I am not happy with this but Parcel::readInplace didn't work.
+            void *params = malloc(size);
+            data.read(params, size);
+
+            status_t err = get_config(node, index, params, size);
+
+            reply->writeInt32(err);
+
+            if (err == OK) {
+                reply->write(params, size);
+            }
+
+            free(params);
+            params = NULL;
+
+            return NO_ERROR;
+        }
+
+        case SET_CONFIG:
+        {
+            CHECK_INTERFACE(IOMX, data, reply);
+
+            node_id node = readVoidStar(&data);
+            OMX_INDEXTYPE index = static_cast<OMX_INDEXTYPE>(data.readInt32());
+
+            size_t size = data.readInt32();
+            void *params = const_cast<void *>(data.readInplace(size));
+
+            reply->writeInt32(set_config(node, index, params, size));
+
+            return NO_ERROR;
+        }
+
         case USE_BUFFER:
         {
             CHECK_INTERFACE(IOMX, data, reply);
@@ -506,6 +607,25 @@ status_t BnOMX::onTransact(
                     flags, timestamp);
 
             return NO_ERROR;
+        }
+
+        case GET_EXTENSION_INDEX:
+        {
+            CHECK_INTERFACE(IOMX, data, reply);
+
+            node_id node = readVoidStar(&data);
+            const char *parameter_name = data.readCString();
+            
+            OMX_INDEXTYPE index;
+            status_t err = get_extension_index(node, parameter_name, &index);
+
+            reply->writeInt32(err);
+
+            if (err == OK) {
+                reply->writeInt32(index);
+            }
+
+            return OK;
         }
 
         case CREATE_RENDERER:

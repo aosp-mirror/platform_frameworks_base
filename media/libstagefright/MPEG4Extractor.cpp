@@ -42,10 +42,9 @@ namespace android {
 class MPEG4Source : public MediaSource {
 public:
     // Caller retains ownership of both "dataSource" and "sampleTable".
-    MPEG4Source(const sp<MetaData> &format, DataSource *dataSource,
-                SampleTable *sampleTable);
-
-    virtual ~MPEG4Source();
+    MPEG4Source(const sp<MetaData> &format,
+                const sp<DataSource> &dataSource,
+                const sp<SampleTable> &sampleTable);
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -55,11 +54,14 @@ public:
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL);
 
+protected:
+    virtual ~MPEG4Source();
+
 private:
     sp<MetaData> mFormat;
-    DataSource *mDataSource;
+    sp<DataSource> mDataSource;
     int32_t mTimescale;
-    SampleTable *mSampleTable;
+    sp<SampleTable> mSampleTable;
     uint32_t mCurrentSampleIndex;
 
     bool mIsAVC;
@@ -141,7 +143,7 @@ static const char *const FourCC2MIME(uint32_t fourcc) {
     }
 }
 
-MPEG4Extractor::MPEG4Extractor(DataSource *source)
+MPEG4Extractor::MPEG4Extractor(const sp<DataSource> &source)
     : mDataSource(source),
       mHaveMetadata(false),
       mFirstTrack(NULL),
@@ -153,39 +155,29 @@ MPEG4Extractor::~MPEG4Extractor() {
     while (track) {
         Track *next = track->next;
 
-        delete track->sampleTable;
-        track->sampleTable = NULL;
-
         delete track;
         track = next;
     }
     mFirstTrack = mLastTrack = NULL;
-
-    delete mDataSource;
-    mDataSource = NULL;
 }
 
-status_t MPEG4Extractor::countTracks(int *num_tracks) {
+size_t MPEG4Extractor::countTracks() {
     status_t err;
     if ((err = readMetaData()) != OK) {
-        return err;
+        return 0;
     }
 
-    *num_tracks = 0;
+    size_t n = 0;
     Track *track = mFirstTrack;
     while (track) {
-        ++*num_tracks;
+        ++n;
         track = track->next;
     }
 
-    return OK;
+    return n;
 }
 
-sp<MetaData> MPEG4Extractor::getTrackMetaData(int index) {
-    if (index < 0) {
-        return NULL;
-    }
-
+sp<MetaData> MPEG4Extractor::getTrackMetaData(size_t index) {
     status_t err;
     if ((err = readMetaData()) != OK) {
         return NULL;
@@ -701,39 +693,32 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
     return OK;
 }
 
-status_t MPEG4Extractor::getTrack(int index, MediaSource **source) {
-    *source = NULL;
-
-    if (index < 0) {
-        return ERROR_OUT_OF_RANGE;
-    }
-
+sp<MediaSource> MPEG4Extractor::getTrack(size_t index) {
     status_t err;
     if ((err = readMetaData()) != OK) {
-        return err;
+        return NULL;
     }
 
     Track *track = mFirstTrack;
     while (index > 0) {
         if (track == NULL) {
-            return ERROR_OUT_OF_RANGE;
+            return NULL;
         }
 
         track = track->next;
         --index;
     }
 
-    *source = new MPEG4Source(
+    return new MPEG4Source(
             track->meta, mDataSource, track->sampleTable);
-
-    return OK;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 MPEG4Source::MPEG4Source(
         const sp<MetaData> &format,
-        DataSource *dataSource, SampleTable *sampleTable)
+        const sp<DataSource> &dataSource,
+        const sp<SampleTable> &sampleTable)
     : mFormat(format),
       mDataSource(dataSource),
       mTimescale(0),
@@ -935,7 +920,8 @@ status_t MPEG4Source::read(
     return OK;
 }
 
-bool SniffMPEG4(DataSource *source, String8 *mimeType, float *confidence) {
+bool SniffMPEG4(
+        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
     uint8_t header[8];
 
     ssize_t n = source->read_at(4, header, sizeof(header));

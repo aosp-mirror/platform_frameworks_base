@@ -22,18 +22,21 @@
 
 #include <utils/Errors.h>
 #include <utils/List.h>
+#include <utils/RefBase.h>
 #include <utils/threads.h>
 
 namespace android {
 
 class String8;
 
-class DataSource {
+class DataSource : public RefBase {
 public:
     DataSource() {}
-    virtual ~DataSource() {}
 
     virtual ssize_t read_at(off_t offset, void *data, size_t size) = 0;
+
+    // Convenience methods:
+    bool getUInt16(off_t offset, uint16_t *x);
 
     // May return ERROR_UNSUPPORTED.
     virtual status_t getSize(off_t *size);
@@ -43,10 +46,13 @@ public:
     bool sniff(String8 *mimeType, float *confidence);
 
     typedef bool (*SnifferFunc)(
-            DataSource *source, String8 *mimeType, float *confidence);
+            const sp<DataSource> &source, String8 *mimeType, float *confidence);
 
     static void RegisterSniffer(SnifferFunc func);
     static void RegisterDefaultSniffers();
+
+protected:
+    virtual ~DataSource() {}
 
 private:
     static Mutex gSnifferMutex;

@@ -36,14 +36,10 @@ class OMXDecoder : public MediaSource,
                    public OMXObserver,
                    public MediaBufferObserver {
 public:
-    static OMXDecoder *Create(
+    static sp<OMXDecoder> Create(
             OMXClient *client, const sp<MetaData> &data,
-            bool createEncoder = false);
-
-    virtual ~OMXDecoder();
-
-    // Caller retains ownership of "source".
-    void setSource(MediaSource *source);
+            bool createEncoder,
+            const sp<MediaSource> &source);
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -60,6 +56,9 @@ public:
 
     // from MediaBufferObserver
     virtual void signalBufferReturned(MediaBuffer *buffer);
+
+protected:
+    virtual ~OMXDecoder();
 
 private:
     enum {
@@ -97,7 +96,7 @@ private:
     bool mIsEncoder;
     uint32_t mQuirks;
 
-    MediaSource *mSource;
+    sp<MediaSource> mSource;
     sp<MetaData> mOutputFormat;
 
     Mutex mLock;
@@ -135,7 +134,8 @@ private:
     OMXDecoder(OMXClient *client, IOMX::node_id node,
                const char *mime, const char *codec,
                bool is_encoder,
-               uint32_t quirks);
+               uint32_t quirks,
+               const sp<MediaSource> &source);
 
     void setPortStatus(OMX_U32 port_index, PortStatus status);
     PortStatus getPortStatus(OMX_U32 port_index) const;

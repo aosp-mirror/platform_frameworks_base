@@ -31,7 +31,7 @@ static const uint32_t kChunkOffsetType64 = FOURCC('c', 'o', '6', '4');
 static const uint32_t kSampleSizeType32 = FOURCC('s', 't', 's', 'z');
 static const uint32_t kSampleSizeTypeCompact = FOURCC('s', 't', 'z', '2');
 
-SampleTable::SampleTable(DataSource *source)
+SampleTable::SampleTable(const sp<DataSource> &source)
     : mDataSource(source),
       mChunkOffsetOffset(-1),
       mChunkOffsetType(0),

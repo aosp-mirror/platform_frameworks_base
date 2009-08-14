@@ -102,9 +102,10 @@ static const char *GetCodec(const CodecInfo *info, size_t numInfos,
 }
 
 // static
-OMXDecoder *OMXDecoder::Create(
+sp<OMXDecoder> OMXDecoder::Create(
         OMXClient *client, const sp<MetaData> &meta,
-        bool createEncoder) {
+        bool createEncoder,
+        const sp<MediaSource> &source) {
     const char *mime;
     bool success = meta->findCString(kKeyMIMEType, &mime);
     assert(success);
@@ -158,8 +159,9 @@ OMXDecoder *OMXDecoder::Create(
         quirks |= kRequiresLoadedToIdleAfterAllocation;
     }
 
-    OMXDecoder *decoder = new OMXDecoder(
-            client, node, mime, codec, createEncoder, quirks);
+    sp<OMXDecoder> decoder = new OMXDecoder(
+            client, node, mime, codec, createEncoder, quirks,
+            source);
 
     uint32_t type;
     const void *data;
@@ -213,7 +215,8 @@ OMXDecoder *OMXDecoder::Create(
 OMXDecoder::OMXDecoder(OMXClient *client, IOMX::node_id node,
                        const char *mime, const char *codec,
                        bool is_encoder,
-                       uint32_t quirks)
+                       uint32_t quirks,
+                       const sp<MediaSource> &source)
     : mClient(client),
       mOMX(mClient->interface()),
       mNode(node),
@@ -223,7 +226,7 @@ OMXDecoder::OMXDecoder(OMXClient *client, IOMX::node_id node,
       mIsAVC(!strcasecmp(mime, "video/avc")),
       mIsEncoder(is_encoder),
       mQuirks(quirks),
-      mSource(NULL),
+      mSource(source),
       mCodecSpecificDataIterator(mCodecSpecificData.begin()),
       mState(OMX_StateLoaded),
       mPortStatusMask(kPortStatusActive << 2 | kPortStatusActive),
@@ -237,6 +240,8 @@ OMXDecoder::OMXDecoder(OMXClient *client, IOMX::node_id node,
 
     mBuffers.push();  // input buffers
     mBuffers.push();  // output buffers
+
+    setup();
 }
 
 OMXDecoder::~OMXDecoder() {
@@ -261,15 +266,6 @@ OMXDecoder::~OMXDecoder() {
 
     free(mComponentName);
     mComponentName = NULL;
-}
-
-void OMXDecoder::setSource(MediaSource *source) {
-    Mutex::Autolock autoLock(mLock);
-
-    assert(mSource == NULL);
-
-    mSource = source;
-    setup();
 }
 
 status_t OMXDecoder::start(MetaData *) {
@@ -579,6 +575,10 @@ void OMXDecoder::setVideoInputFormat(
 
     OMX_COLOR_FORMATTYPE colorFormat =
         0 ? OMX_COLOR_FormatYCbYCr : OMX_COLOR_FormatCbYCrY;
+
+    if (!strncmp("OMX.qcom.video.encoder.", mComponentName, 23)) {
+        colorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+    }
 
     setVideoPortFormatType(
             kPortIndexInput, OMX_VIDEO_CodingUnused,
@@ -1621,7 +1621,7 @@ void OMXDecoder::postStart() {
 void OMXDecoder::postEmptyBufferDone(IOMX::buffer_id buffer) {
     omx_message msg;
     msg.type = omx_message::EMPTY_BUFFER_DONE;
-    msg.u.buffer_data.node = mNode;
+    msg.node = mNode;
     msg.u.buffer_data.buffer = buffer;
     postMessage(msg);
 }
@@ -1629,7 +1629,7 @@ void OMXDecoder::postEmptyBufferDone(IOMX::buffer_id buffer) {
 void OMXDecoder::postInitialFillBuffer(IOMX::buffer_id buffer) {
     omx_message msg;
     msg.type = omx_message::INITIAL_FILL_BUFFER;
-    msg.u.buffer_data.node = mNode;
+    msg.node = mNode;
     msg.u.buffer_data.buffer = buffer;
     postMessage(msg);
 }

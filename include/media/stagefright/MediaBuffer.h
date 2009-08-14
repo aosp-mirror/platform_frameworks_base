@@ -75,6 +75,8 @@ public:
     // MetaData.
     MediaBuffer *clone();
 
+    int refcount() const;
+
 protected:
     virtual ~MediaBuffer();
 
@@ -101,8 +103,6 @@ private:
 
     void setNextBuffer(MediaBuffer *buffer);
     MediaBuffer *nextBuffer();
-
-    int refcount() const;
 
     MediaBuffer(const MediaBuffer &);
     MediaBuffer &operator=(const MediaBuffer &);

@@ -35,7 +35,6 @@ class MediaBuffer;
 class MediaSource;
 class MemoryHeapPmem;
 class MetaData;
-class OMXDecoder;
 class Surface;
 class TimeSource;
 
@@ -71,16 +70,16 @@ private:
 
     OMXClient mClient;
 
-    MediaExtractor *mExtractor;
+    sp<MediaExtractor> mExtractor;
 
     TimeSource *mTimeSource;
 
-    MediaSource *mAudioSource;
-    OMXDecoder *mAudioDecoder;
+    sp<MediaSource> mAudioSource;
+    sp<MediaSource> mAudioDecoder;
     AudioPlayer *mAudioPlayer;
 
-    MediaSource *mVideoSource;
-    MediaSource *mVideoDecoder;
+    sp<MediaSource> mVideoSource;
+    sp<MediaSource> mVideoDecoder;
     int32_t mVideoWidth, mVideoHeight;
     int64_t mVideoPosition;
 
@@ -103,16 +102,13 @@ private:
     bool mSeeking;
     int64_t mSeekTimeUs;
 
-    size_t mFrameSize;
-    bool mUseSoftwareColorConversion;
-
     void init();
 
     static void *VideoWrapper(void *me);
     void videoEntry();
 
-    void setAudioSource(MediaSource *source);
-    void setVideoSource(MediaSource *source);
+    void setAudioSource(const sp<MediaSource> &source);
+    void setVideoSource(const sp<MediaSource> &source);
 
     MediaSource *makeShoutcastSource(const char *path);
 
