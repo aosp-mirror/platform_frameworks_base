@@ -25,7 +25,7 @@ extern "C" {
 
 /*****************************************************************************/
 
-struct android_native_buffer_t
+typedef struct android_native_buffer_t
 {
 #ifdef __cplusplus
     android_native_buffer_t() { 
@@ -48,7 +48,7 @@ struct android_native_buffer_t
     buffer_handle_t handle;
 
     void* reserved_proc[8];
-};
+} android_native_buffer_t;
 
 
 /*****************************************************************************/

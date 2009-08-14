@@ -43,7 +43,7 @@ struct android_native_buffer_t;
 
 // ---------------------------------------------------------------------------
 
-struct android_native_base_t
+typedef struct android_native_base_t
 {
     /* a magic value defined by the actual EGL native type */
     int magic;
@@ -54,9 +54,9 @@ struct android_native_base_t
     void* reserved[4];
 
     /* reference-counting interface */
-    void (*incRef)(struct android_native_base_t* base);
-    void (*decRef)(struct android_native_base_t* base);
-};
+    void (*incRef)(android_native_base_t* base);
+    void (*decRef)(android_native_base_t* base);
+} android_native_base_t;
 
 // ---------------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ enum {
     NATIVE_WINDOW_SET_USAGE = 0
 };
 
-struct android_native_window_t 
+typedef struct android_native_window_t 
 {
 #ifdef __cplusplus
     android_native_window_t()
@@ -108,7 +108,7 @@ struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*setSwapInterval)(struct android_native_window_t* window,
+    int     (*setSwapInterval)(android_native_window_t* window,
                 int interval);
     
     /*
@@ -118,7 +118,7 @@ struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*dequeueBuffer)(struct android_native_window_t* window, 
+    int     (*dequeueBuffer)(android_native_window_t* window, 
                 struct android_native_buffer_t** buffer);
 
     /*
@@ -128,7 +128,7 @@ struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*lockBuffer)(struct android_native_window_t* window,
+    int     (*lockBuffer)(android_native_window_t* window,
                 struct android_native_buffer_t* buffer);
    /*
     * hook called by EGL when modifications to the render buffer are done. 
@@ -138,7 +138,7 @@ struct android_native_window_t
     * 
     * Returns 0 on success or -errno on error.
     */
-    int     (*queueBuffer)(struct android_native_window_t* window,
+    int     (*queueBuffer)(android_native_window_t* window,
                 struct android_native_buffer_t* buffer);
 
     /*
@@ -146,7 +146,7 @@ struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*query)(struct android_native_window_t* window,
+    int     (*query)(android_native_window_t* window,
                 int what, int* value);
     
     /*
@@ -162,11 +162,11 @@ struct android_native_window_t
      *  
      */
     
-    int     (*perform)(struct android_native_window_t* window,
+    int     (*perform)(android_native_window_t* window,
                 int operation, ... );
     
     void* reserved_proc[3];
-};
+} android_native_window_t;
 
 
 /*
@@ -180,7 +180,7 @@ struct android_native_window_t
  */
 
 static inline int native_window_set_usage(
-        struct android_native_window_t* window, int usage)
+        android_native_window_t* window, int usage)
 {
     return window->perform(window, NATIVE_WINDOW_SET_USAGE, usage);
 }
@@ -189,7 +189,7 @@ static inline int native_window_set_usage(
 // ---------------------------------------------------------------------------
 
 /* FIXME: this is legacy for pixmaps */
-struct egl_native_pixmap_t
+typedef struct egl_native_pixmap_t
 {
     int32_t     version;    /* must be 32 */
     int32_t     width;
@@ -203,7 +203,7 @@ struct egl_native_pixmap_t
         int32_t     vstride;
     };
     int32_t     reserved;
-};
+} egl_native_pixmap_t;
 
 /*****************************************************************************/
 
