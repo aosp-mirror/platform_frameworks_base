@@ -146,16 +146,16 @@ public:
     static bool isValid(const sp<Surface>& surface) {
         return (surface != 0) && surface->isValid();
     }
-    bool isValid() {
-        return mToken>=0 && mClient!=0;
-    }
+
     static bool isSameSurface(
             const sp<Surface>& lhs, const sp<Surface>& rhs);
-    SurfaceID   ID() const      { return mToken; }
-    uint32_t    getFlags() const { return mFlags; }
+
+    bool        isValid();
+    SurfaceID   ID() const          { return mToken; }
+    uint32_t    getFlags() const    { return mFlags; }
     uint32_t    getIdentity() const { return mIdentity; }
 
-
+    // the lock/unlock APIs must be used from the same thread
     status_t    lock(SurfaceInfo* info, bool blocking = true);
     status_t    lock(SurfaceInfo* info, Region* dirty, bool blocking = true);
     status_t    unlockAndPost();
@@ -175,14 +175,18 @@ private:
     friend class SurfaceComposerClient;
     friend class SurfaceControl;
 
+    
     // camera and camcorder need access to the ISurface binder interface for preview
     friend class Camera;
     friend class MediaRecorder;
     // mediaplayer needs access to ISurface for display
     friend class MediaPlayer;
-    friend class Test;
     friend class IOMX;
-    const sp<ISurface>& getISurface() const { return mSurface; }
+    // this is just to be able to write some unit tests
+    friend class Test;
+
+    sp<SurfaceComposerClient> getClient() const;
+    sp<ISurface> getISurface() const;
 
     status_t getBufferLocked(int index, int usage);
    
@@ -210,24 +214,38 @@ private:
     status_t queueBuffer(const sp<SurfaceBuffer>& buffer);
 
     
-    alloc_device_t*             mAllocDevice;
+    void setUsage(uint32_t reqUsage);
+    
+    // constants
     sp<SurfaceComposerClient>   mClient;
     sp<ISurface>                mSurface;
-    sp<SurfaceBuffer>           mBuffers[2];
-    sp<SurfaceBuffer>           mLockedBuffer;
     SurfaceID                   mToken;
     uint32_t                    mIdentity;
-    uint32_t                    mWidth;
-    uint32_t                    mHeight;
-    uint32_t                    mUsage;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
-    mutable Region              mDirtyRegion;
-    mutable Region              mOldDirtyRegion;
-    mutable uint8_t             mBackbufferIndex;
-    mutable Mutex               mSurfaceLock;
-    Rect                        mSwapRectangle;
     BufferMapper&               mBufferMapper;
+
+    // protected by mSurfaceLock
+    Rect                        mSwapRectangle;
+    uint32_t                    mUsage;
+    bool                        mUsageChanged;
+    
+    // protected by mSurfaceLock. These are also used from lock/unlock
+    // but in that case, they must be called form the same thread.
+    sp<SurfaceBuffer>           mBuffers[2];
+    mutable Region              mDirtyRegion;
+    mutable uint8_t             mBackbufferIndex;
+
+    // must be used from the lock/unlock thread
+    sp<SurfaceBuffer>           mLockedBuffer;
+    mutable Region              mOldDirtyRegion;
+
+    // query() must be called from dequeueBuffer() thread
+    uint32_t                    mWidth;
+    uint32_t                    mHeight;
+
+    // Inherently thread-safe
+    mutable Mutex               mSurfaceLock;
 };
 
 }; // namespace android
