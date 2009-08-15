@@ -94,6 +94,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int EVENT_PS_RESTRICT_ENABLED = 32;
     protected static final int EVENT_PS_RESTRICT_DISABLED = 33;
     public static final int EVENT_CLEAN_UP_CONNECTION = 34;
+    protected static final int EVENT_CDMA_OTA_PROVISION = 35;
 
     //***** Constants
 
@@ -145,6 +146,9 @@ public abstract class DataConnectionTracker extends Handler {
     protected int netStatPollPeriod;
     protected int mNoRecvPollCount = 0;
     protected boolean netStatPollEnabled = false;
+
+    /** Manage the behavior of data retry after failure */
+    protected final RetryManager mRetryMgr = new RetryManager();
 
     // wifi connection status will be updated by sticky intent
     protected boolean mIsWifiConnected = false;
@@ -202,10 +206,13 @@ public abstract class DataConnectionTracker extends Handler {
         if (getDataOnRoamingEnabled() != enabled) {
             Settings.Secure.putInt(phone.getContext().getContentResolver(),
                 Settings.Secure.DATA_ROAMING, enabled ? 1 : 0);
+            if (phone.getServiceState().getRoaming()) {
+                if (enabled) {
+                    mRetryMgr.resetRetryCount();
+                }
+                sendMessage(obtainMessage(EVENT_ROAMING_ON));
+            }
         }
-        Message roamingMsg = phone.getServiceState().getRoaming() ?
-            obtainMessage(EVENT_ROAMING_ON) : obtainMessage(EVENT_ROAMING_OFF);
-        sendMessage(roamingMsg);
     }
 
     //Retrieve the data roaming setting from the shared preferences.
@@ -243,6 +250,9 @@ public abstract class DataConnectionTracker extends Handler {
                 break;
 
             case EVENT_ROAMING_OFF:
+                if (getDataOnRoamingEnabled() == false) {
+                    mRetryMgr.resetRetryCount();
+                }
                 onRoamingOff();
                 break;
 

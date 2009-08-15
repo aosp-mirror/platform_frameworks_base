@@ -96,8 +96,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private int mPdpResetCount = 0;
     private boolean mIsScreenOn = true;
 
-    private final RetryManager mRetryMgr = new RetryManager();
-
     /** Delay between APN attempts */
     protected static final int APN_DELAY_MILLIS = 5000;
 

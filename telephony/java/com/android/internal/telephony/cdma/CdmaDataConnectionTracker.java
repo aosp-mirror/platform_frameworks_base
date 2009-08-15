@@ -76,9 +76,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /** Currently active CdmaDataConnection */
     private CdmaDataConnection mActiveDataConnection;
 
-    /** Manage the behavior of data retry after failure */
-    private final RetryManager mRetryMgr = new RetryManager();
-
     /** Defined cdma connection profiles */
     private static final int EXTERNAL_NETWORK_DEFAULT_ID = 0;
     private static final int EXTERNAL_NETWORK_NUM_TYPES  = 1;
@@ -163,6 +160,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         p.mSST.registerForCdmaDataConnectionDetached(this, EVENT_CDMA_DATA_DETACHED, null);
         p.mSST.registerForRoamingOn(this, EVENT_ROAMING_ON, null);
         p.mSST.registerForRoamingOff(this, EVENT_ROAMING_OFF, null);
+        p.mCM.registerForCdmaOtaProvision(this, EVENT_CDMA_OTA_PROVISION, null);
 
         this.netstat = INetStatService.Stub.asInterface(ServiceManager.getService("netstat"));
 
@@ -210,6 +208,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         mCdmaPhone.mSST.unregisterForCdmaDataConnectionDetached(this);
         mCdmaPhone.mSST.unregisterForRoamingOn(this);
         mCdmaPhone.mSST.unregisterForRoamingOff(this);
+        phone.mCM.unregisterForCdmaOtaProvision(this);
 
         phone.getContext().unregisterReceiver(this.mIntentReceiver);
         destroyAllDataConnectionList();
@@ -849,6 +848,22 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
+    private void onCdmaOtaProvision(AsyncResult ar) {
+        if (ar.exception != null) {
+            int [] otaPrivision = (int [])ar.result;
+            if ((otaPrivision != null) && (otaPrivision.length > 1)) {
+                switch (otaPrivision[0]) {
+                case Phone.CDMA_OTA_PROVISION_STATUS_COMMITTED:
+                case Phone.CDMA_OTA_PROVISION_STATUS_OTAPA_STOPPED:
+                    mRetryMgr.resetRetryCount();
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+
     private void writeEventLogCdmaDataDrop() {
         CdmaCellLocation loc = (CdmaCellLocation)(phone.getCellLocation());
         int bsid = (loc != null) ? loc.getBaseStationId() : -1;
@@ -955,6 +970,10 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
             case EVENT_DATA_STATE_CHANGED:
                 onDataStateChanged((AsyncResult) msg.obj);
+                break;
+
+            case EVENT_CDMA_OTA_PROVISION:
+                onCdmaOtaProvision((AsyncResult) msg.obj);
                 break;
 
             default:
