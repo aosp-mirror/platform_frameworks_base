@@ -131,6 +131,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     private boolean isEriTextLoaded = false;
     private boolean isSubscriptionFromRuim = false;
 
+    private boolean mPendingRadioPowerOffAfterDataOff = false;
+
     // Registration Denied Reason, General/Authentication Failure, used only for debugging purposes
     private String mRegistrationDeniedReason;
 
@@ -520,6 +522,16 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             }
             break;
 
+        case EVENT_SET_RADIO_POWER_OFF:
+            synchronized(this) {
+                if (mPendingRadioPowerOffAfterDataOff) {
+                    if (DBG) log("EVENT_SET_RADIO_OFF, turn radio off now.");
+                    cm.setRadioPower(false, null);
+                    mPendingRadioPowerOffAfterDataOff = false;
+                }
+            }
+            break;
+
         default:
             Log.e(LOG_TAG, "Unhandled message with number: " + msg.what);
         break;
@@ -548,20 +560,23 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             msg.obj = CDMAPhone.REASON_RADIO_TURNED_OFF;
             dcTracker.sendMessage(msg);
 
-            // Poll data state up to 50 times, with a 100ms delay
-            // totaling 5 sec.
-            // TODO: change the 5 seconds wait from blocking to non-blocking.
-            for (int i = 0; i < 50; i++) {
-                DataConnectionTracker.State currentState = dcTracker.getState();
-                if (currentState != DataConnectionTracker.State.CONNECTED
-                        && currentState != DataConnectionTracker.State.DISCONNECTING) {
-                    if (DBG) log("Data shutdown complete.");
-                    break;
+            synchronized(this) {
+                if (!mPendingRadioPowerOffAfterDataOff) {
+                    DataConnectionTracker.State currentState = dcTracker.getState();
+                    if (currentState != DataConnectionTracker.State.CONNECTED
+                            && currentState != DataConnectionTracker.State.DISCONNECTING) {
+                        if (DBG) log("Data disconnected, turn off radio right away.");
+                        cm.setRadioPower(false, null);
+                    }
+                    else if (sendEmptyMessageDelayed(EVENT_SET_RADIO_POWER_OFF, 5000)) {
+                        if (DBG) log("Wait 5 sec for data to be disconnected, then turn off radio.");
+                        mPendingRadioPowerOffAfterDataOff = true;
+                    } else {
+                        Log.w(LOG_TAG, "Cannot send delayed Msg, turn off radio right away.");
+                        cm.setRadioPower(false, null);
+                    }
                 }
-                SystemClock.sleep(DATA_STATE_POLL_SLEEP_MS);
             }
-            // If it's on and available and we want it off..
-            cm.setRadioPower(false, null);
         } // Otherwise, we're in the desired state
     }
 
@@ -1581,5 +1596,23 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
      */
     public boolean isMinInfoReady() {
         return mIsMinInfoReady;
+    }
+
+    /**
+     * process the pending request to turn radio off after data is disconnected
+     *
+     * return true if there is pending request to process; false otherwise.
+     */
+    public boolean processPendingRadioPowerOffAfterDataOff() {
+        synchronized(this) {
+            if (mPendingRadioPowerOffAfterDataOff) {
+                if (DBG) log("Process pending request to turn radio off.");
+                removeMessages(EVENT_SET_RADIO_POWER_OFF);
+                cm.setRadioPower(false, null);
+                mPendingRadioPowerOffAfterDataOff = false;
+                return true;
+            }
+            return false;
+        }
     }
 }
