@@ -16,7 +16,6 @@
 
 package android.graphics;
 
-import com.android.layoutlib.bridge.BridgeCanvas;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -25,15 +24,15 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public final class Bitmap extends _Original_Bitmap {
-    
+
     private BufferedImage mImage;
 
     public Bitmap(File input) throws IOException {
         super(1, true, null);
-        
+
         mImage = ImageIO.read(input);
     }
-    
+
     Bitmap(BufferedImage image) {
         super(1, true, null);
         mImage = image;
@@ -42,9 +41,9 @@ public final class Bitmap extends _Original_Bitmap {
     public BufferedImage getImage() {
         return mImage;
     }
-    
+
     // ----- overriden methods
-    
+
     public enum Config {
         // these native values must match up with the enum in SkBitmap.h
         ALPHA_8     (2),
@@ -56,27 +55,26 @@ public final class Bitmap extends _Original_Bitmap {
             this.nativeInt = ni;
         }
         final int nativeInt;
-        
+
         /* package */ static Config nativeToConfig(int ni) {
             return sConfigs[ni];
         }
-        
+
         private static Config sConfigs[] = {
             null, null, ALPHA_8, null, RGB_565, ARGB_4444, ARGB_8888
         };
     }
 
-    
     @Override
     public int getWidth() {
         return mImage.getWidth();
     }
-    
+
     @Override
     public int getHeight() {
         return mImage.getHeight();
     }
-    
+
     /**
      * Returns an immutable bitmap from the source bitmap. The new bitmap may
      * be the same object as source, or a copy may have been made.
@@ -100,7 +98,7 @@ public final class Bitmap extends _Original_Bitmap {
                                       int width, int height) {
         return new Bitmap(source.mImage.getSubimage(x, y, width, height));
     }
-    
+
     /**
      * Returns an immutable bitmap from subset of the source bitmap,
      * transformed by the optional matrix.
@@ -158,7 +156,7 @@ public final class Bitmap extends _Original_Bitmap {
         neww = Math.round(deviceR.width());
         newh = Math.round(deviceR.height());
 
-        BridgeCanvas canvas = new BridgeCanvas(neww, newh);
+        Canvas canvas = new Canvas(neww, newh);
 
         canvas.translate(-deviceR.left, -deviceR.top);
         canvas.concat(m);
@@ -169,10 +167,10 @@ public final class Bitmap extends _Original_Bitmap {
         }
 
         canvas.drawBitmap(source, srcR, dstR, paint);
-        
+
         return new Bitmap(canvas.getImage());
     }
-    
+
     /**
      * Returns a mutable bitmap with the specified width and height.
      *
@@ -184,7 +182,7 @@ public final class Bitmap extends _Original_Bitmap {
     public static Bitmap createBitmap(int width, int height, Config config) {
         return new Bitmap(new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB));
     }
-    
+
     /**
      * Returns a immutable bitmap with the specified width and height, with each
      * pixel value set to the corresponding value in the colors array.
@@ -215,7 +213,7 @@ public final class Bitmap extends _Original_Bitmap {
             || (lastScanline + width > length)) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        
+
         // TODO: create an immutable bitmap...
         throw new UnsupportedOperationException();
     }
