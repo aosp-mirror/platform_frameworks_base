@@ -498,7 +498,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     protected void restartRadio() {
         Log.d(LOG_TAG, "************TURN OFF RADIO**************");
-        cleanUpConnection(true, Phone.REASON_RADIO_TURNED_OFF);
+        cleanUpConnection(true, Phone.REASON_CDMA_DATA_DETACHED);
         phone.mCM.setRadioPower(false, null);
         /* Note: no need to call setRadioPower(true).  Assuming the desired
          * radio power state is still ON (as tracked by ServiceStateTracker),
