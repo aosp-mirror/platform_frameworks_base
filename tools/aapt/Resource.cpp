@@ -472,11 +472,22 @@ static bool applyFileOverlay(const sp<AaptAssets>& assets,
                             // didn't find a match fall through and add it..
                         }
                         baseGroup->addFile(overlayFiles.valueAt(overlayGroupIndex));
+                        assets->addGroupEntry(overlayFiles.keyAt(overlayGroupIndex));
                     }
                 } else {
                     // this group doesn't exist (a file that's only in the overlay)
                     baseSet->add(overlaySet->keyAt(overlayIndex),
                             overlaySet->valueAt(overlayIndex));
+                    // make sure all flavors are defined in the resources.
+                    sp<AaptGroup> overlayGroup = overlaySet->valueAt(overlayIndex);
+                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > overlayFiles = 
+                            overlayGroup->getFiles();
+                    size_t overlayGroupSize = overlayFiles.size();
+                    for (size_t overlayGroupIndex = 0; 
+                            overlayGroupIndex<overlayGroupSize; 
+                            overlayGroupIndex++) {
+                        assets->addGroupEntry(overlayFiles.keyAt(overlayGroupIndex));
+                    }
                 }
             }
             // this overlay didn't have resources for this type
