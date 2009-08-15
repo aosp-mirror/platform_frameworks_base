@@ -33,72 +33,7 @@ import java.io.IOException;
  * @hide
  */
 public final class BluetoothServerSocket implements Closeable {
-    private final BluetoothSocket mSocket;
-
-    /**
-     * Construct a listening, secure RFCOMM server socket.
-     * The remote device connecting to this socket will be authenticated and
-     * communication on this socket will be encrypted.
-     * Call #accept to retrieve connections to this socket.
-     * @return An RFCOMM BluetoothServerSocket
-     * @throws IOException On error, for example Bluetooth not available, or
-     *                     insufficient permissions.
-     */
-    public static BluetoothServerSocket listenUsingRfcommOn(int port) throws IOException {
-        BluetoothServerSocket socket = new BluetoothServerSocket(
-                BluetoothSocket.TYPE_RFCOMM, true, true, port);
-        try {
-            socket.mSocket.bindListenNative();
-        } catch (IOException e) {
-            try {
-                socket.close();
-            } catch (IOException e2) { }
-            throw e;
-        }
-        return socket;
-    }
-
-    /**
-     * Construct an unencrypted, unauthenticated, RFCOMM server socket.
-     * Call #accept to retrieve connections to this socket.
-     * @return An RFCOMM BluetoothServerSocket
-     * @throws IOException On error, for example Bluetooth not available, or
-     *                     insufficient permissions.
-     */
-    public static BluetoothServerSocket listenUsingInsecureRfcommOn(int port) throws IOException {
-        BluetoothServerSocket socket = new BluetoothServerSocket(
-                BluetoothSocket.TYPE_RFCOMM, false, false, port);
-        try {
-            socket.mSocket.bindListenNative();
-        } catch (IOException e) {
-            try {
-                socket.close();
-            } catch (IOException e2) { }
-            throw e;
-        }
-        return socket;
-    }
-
-    /**
-     * Construct a SCO server socket.
-     * Call #accept to retrieve connections to this socket.
-     * @return A SCO BluetoothServerSocket
-     * @throws IOException On error, for example Bluetooth not available, or
-     *                     insufficient permissions.
-     */
-    public static BluetoothServerSocket listenUsingScoOn() throws IOException {
-        BluetoothServerSocket socket = new BluetoothServerSocket(
-                BluetoothSocket.TYPE_SCO, false, false, -1);
-        try {
-            socket.mSocket.bindListenNative();
-        } catch (IOException e) {
-            try {
-                socket.close();
-            } catch (IOException e2) { }
-            throw e;
-        }
-        return socket;
-    }
+    /*package*/ final BluetoothSocket mSocket;
 
     /**
      * Construct a socket for incoming connections.
@@ -109,7 +44,7 @@ public final class BluetoothServerSocket implements Closeable {
      * @throws IOException On error, for example Bluetooth not available, or
      *                     insufficient priveleges
      */
-    private BluetoothServerSocket(int type, boolean auth, boolean encrypt, int port)
+    /*package*/ BluetoothServerSocket(int type, boolean auth, boolean encrypt, int port)
             throws IOException {
         mSocket = new BluetoothSocket(type, -1, auth, encrypt, null, port);
     }

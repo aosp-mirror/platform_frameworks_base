@@ -1144,10 +1144,10 @@ public abstract class Context {
     public static final String SENSOR_SERVICE = "sensor";
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.bluetooth.BluetoothDevice} for interacting with Bluetooth.
+     * android.bluetooth.BluetoothAdapter} for using Bluetooth.
      *
      * @see #getSystemService
-     * @see android.bluetooth.BluetoothDevice
+     * @see android.bluetooth.BluetoothAdapter
      * @hide
      */
     public static final String BLUETOOTH_SERVICE = "bluetooth";

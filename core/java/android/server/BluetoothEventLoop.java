@@ -18,6 +18,7 @@ package android.server;
 
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothIntent;
@@ -46,8 +47,10 @@ class BluetoothEventLoop {
     private Thread mThread;
     private boolean mStarted;
     private boolean mInterrupted;
+
     private final HashMap<String, Integer> mPasskeyAgentRequestData;
-    private final BluetoothDeviceService mBluetoothService;
+    private final BluetoothService mBluetoothService;
+    private final BluetoothAdapter mAdapter;
     private final Context mContext;
 
     private static final int EVENT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 1;
@@ -84,10 +87,12 @@ class BluetoothEventLoop {
     static { classInitNative(); }
     private static native void classInitNative();
 
-    /* pacakge */ BluetoothEventLoop(Context context, BluetoothDeviceService bluetoothService) {
+    /* pacakge */ BluetoothEventLoop(Context context, BluetoothAdapter adapter,
+            BluetoothService bluetoothService) {
         mBluetoothService = bluetoothService;
         mContext = context;
         mPasskeyAgentRequestData = new HashMap();
+        mAdapter = adapter;
         initializeNativeDataNative();
     }
 
@@ -137,7 +142,7 @@ class BluetoothEventLoop {
         }
         if (classValue != null) {
             Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_FOUND_ACTION);
-            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            intent.putExtra(BluetoothIntent.DEVICE, mAdapter.getRemoteDevice(address));
             intent.putExtra(BluetoothIntent.CLASS, Integer.valueOf(classValue));
             intent.putExtra(BluetoothIntent.RSSI, rssiValue);
             intent.putExtra(BluetoothIntent.NAME, name);
@@ -158,7 +163,7 @@ class BluetoothEventLoop {
 
     private void onDeviceDisappeared(String address) {
         Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_DISAPPEARED_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
+        intent.putExtra(BluetoothIntent.DEVICE, mAdapter.getRemoteDevice(address));
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
     }
 
@@ -251,7 +256,7 @@ class BluetoothEventLoop {
             if (pairable == null || discoverable == null)
                 return;
 
-            int mode = BluetoothDeviceService.bluezStringToScanMode(
+            int mode = BluetoothService.bluezStringToScanMode(
                     pairable.equals("true"),
                     discoverable.equals("true"));
             if (mode >= 0) {
@@ -299,15 +304,16 @@ class BluetoothEventLoop {
             Log.e(TAG, "onDevicePropertyChanged: Address of the remote device in null");
             return;
         }
+        BluetoothDevice device = mAdapter.getRemoteDevice(address);
         if (name.equals("Name")) {
             Intent intent = new Intent(BluetoothIntent.REMOTE_NAME_UPDATED_ACTION);
-            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            intent.putExtra(BluetoothIntent.DEVICE, device);
             intent.putExtra(BluetoothIntent.NAME, propValues[1]);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
             mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
         } else if (name.equals("Class")) {
             Intent intent = new Intent(BluetoothIntent.REMOTE_DEVICE_CLASS_UPDATED_ACTION);
-            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            intent.putExtra(BluetoothIntent.DEVICE, device);
             intent.putExtra(BluetoothIntent.CLASS, propValues[1]);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
             mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
@@ -318,7 +324,7 @@ class BluetoothEventLoop {
             } else {
                 intent = new Intent(BluetoothIntent.REMOTE_DEVICE_DISCONNECTED_ACTION);
             }
-            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            intent.putExtra(BluetoothIntent.DEVICE, device);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
             mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
         } else if (name.equals("UUIDs")) {
@@ -351,7 +357,7 @@ class BluetoothEventLoop {
         address = address.toUpperCase();
         mPasskeyAgentRequestData.put(address, new Integer(nativeData));
 
-        if (mBluetoothService.getBluetoothState() == BluetoothDevice.BLUETOOTH_STATE_TURNING_OFF) {
+        if (mBluetoothService.getBluetoothState() == BluetoothAdapter.BLUETOOTH_STATE_TURNING_OFF) {
             // shutdown path
             mBluetoothService.cancelPairingUserInput(address);
             return null;
@@ -364,7 +370,7 @@ class BluetoothEventLoop {
         if (address == null) return;
 
         Intent intent = new Intent(BluetoothIntent.PAIRING_REQUEST_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
+        intent.putExtra(BluetoothIntent.DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothIntent.PASSKEY, passkey);
         intent.putExtra(BluetoothIntent.PAIRING_VARIANT,
                 BluetoothDevice.PAIRING_VARIANT_CONFIRMATION);
@@ -377,7 +383,7 @@ class BluetoothEventLoop {
         if (address == null) return;
 
         Intent intent = new Intent(BluetoothIntent.PAIRING_REQUEST_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
+        intent.putExtra(BluetoothIntent.DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothIntent.PAIRING_VARIANT, BluetoothDevice.PAIRING_VARIANT_PASSKEY);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
         return;
@@ -409,7 +415,7 @@ class BluetoothEventLoop {
            }
         }
         Intent intent = new Intent(BluetoothIntent.PAIRING_REQUEST_ACTION);
-        intent.putExtra(BluetoothIntent.ADDRESS, address);
+        intent.putExtra(BluetoothIntent.DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothIntent.PAIRING_VARIANT, BluetoothDevice.PAIRING_VARIANT_PIN);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
         return;
@@ -428,7 +434,8 @@ class BluetoothEventLoop {
                 (BluetoothUuid.isAudioSink(uuid) || BluetoothUuid.isAvrcpController(uuid)
                         || BluetoothUuid.isAdvAudioDist(uuid))) {
             BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
-            authorized = a2dp.getSinkPriority(address) > BluetoothA2dp.PRIORITY_OFF;
+            BluetoothDevice device = mAdapter.getRemoteDevice(address);
+            authorized = a2dp.getSinkPriority(device) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {
                 Log.i(TAG, "Allowing incoming A2DP / AVRCP connection from " + address);
             } else {

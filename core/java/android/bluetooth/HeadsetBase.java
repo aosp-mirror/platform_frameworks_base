@@ -31,7 +31,7 @@ import android.util.Log;
  *
  * @hide
  */
-public class HeadsetBase {
+public final class HeadsetBase {
     private static final String TAG = "Bluetooth HeadsetBase";
     private static final boolean DBG = false;
 
@@ -42,8 +42,9 @@ public class HeadsetBase {
 
     private static int sAtInputCount = 0;  /* TODO: Consider not using a static variable */
 
-    private final BluetoothDevice mBluetooth;
-    private final String mAddress;
+    private final BluetoothAdapter mAdapter;
+    private final BluetoothDevice mRemoteDevice;
+    private final String mAddress;  // for native code
     private final int mRfcommChannel;
     private int mNativeData;
     private Thread mEventThread;
@@ -73,12 +74,13 @@ public class HeadsetBase {
 
     private native void cleanupNativeDataNative();
 
-    public HeadsetBase(PowerManager pm, BluetoothDevice bluetooth, String address,
-                       int rfcommChannel) {
+    public HeadsetBase(PowerManager pm, BluetoothAdapter adapter, BluetoothDevice device,
+            int rfcommChannel) {
         mDirection = DIRECTION_OUTGOING;
         mConnectTimestamp = System.currentTimeMillis();
-        mBluetooth = bluetooth;
-        mAddress = address;
+        mAdapter = adapter;
+        mRemoteDevice = device;
+        mAddress = device.getAddress();
         mRfcommChannel = rfcommChannel;
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "HeadsetBase");
         mWakeLock.setReferenceCounted(false);
@@ -88,12 +90,13 @@ public class HeadsetBase {
     }
 
     /* Create from an already exisiting rfcomm connection */
-    public HeadsetBase(PowerManager pm, BluetoothDevice bluetooth, String address, int socketFd,
-            int rfcommChannel, Handler handler) {
+    public HeadsetBase(PowerManager pm, BluetoothAdapter adapter, BluetoothDevice device,
+            int socketFd, int rfcommChannel, Handler handler) {
         mDirection = DIRECTION_INCOMING;
         mConnectTimestamp = System.currentTimeMillis();
-        mBluetooth = bluetooth;
-        mAddress = address;
+        mAdapter = adapter;
+        mRemoteDevice = device;
+        mAddress = device.getAddress();
         mRfcommChannel = rfcommChannel;
         mEventThreadHandler = handler;
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "HeadsetBase");
@@ -252,12 +255,8 @@ public class HeadsetBase {
         return mEventThread != null;
     }
 
-    public String getAddress() {
-        return mAddress;
-    }
-
-    public String getName() {
-        return mBluetooth.getRemoteName(mAddress);
+    public BluetoothDevice getRemoteDevice() {
+        return mRemoteDevice;
     }
 
     public int getDirection() {

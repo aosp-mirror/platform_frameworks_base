@@ -88,8 +88,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/backup/IBackupManager.aidl \
 	core/java/android/backup/IRestoreObserver.aidl \
 	core/java/android/backup/IRestoreSession.aidl \
+	core/java/android/bluetooth/IBluetooth.aidl \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
-	core/java/android/bluetooth/IBluetoothDevice.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
 	core/java/android/bluetooth/IBluetoothPbap.aidl \
 	core/java/android/content/IContentService.aidl \

@@ -16,7 +16,7 @@
 
 #define DBUS_ADAPTER_IFACE BLUEZ_DBUS_BASE_IFC ".Adapter"
 #define DBUS_DEVICE_IFACE BLUEZ_DBUS_BASE_IFC ".Device"
-#define LOG_TAG "BluetoothDeviceService.cpp"
+#define LOG_TAG "BluetoothService.cpp"
 
 #include "android_bluetooth_common.h"
 #include "android_runtime/AndroidRuntime.h"
@@ -49,7 +49,7 @@ namespace android {
 
 #ifdef HAVE_BLUETOOTH
 // We initialize these variables when we load class
-// android.server.BluetoothDeviceService
+// android.server.BluetoothService
 static jfieldID field_mNativeData;
 static jfieldID field_mEventLoop;
 
@@ -732,9 +732,9 @@ static JNINativeMethod sMethods[] = {
             (void *)cancelPairingUserInputNative},
 };
 
-int register_android_server_BluetoothDeviceService(JNIEnv *env) {
+int register_android_server_BluetoothService(JNIEnv *env) {
     return AndroidRuntime::registerNativeMethods(env,
-                "android/server/BluetoothDeviceService", sMethods, NELEM(sMethods));
+                "android/server/BluetoothService", sMethods, NELEM(sMethods));
 }
 
 } /* namespace android */

@@ -25,7 +25,10 @@ import android.os.RemoteException;
 import android.os.IBinder;
 import android.util.Log;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Public API for controlling the Bluetooth A2DP Profile Service.
@@ -47,7 +50,7 @@ import java.util.List;
  *
  * @hide
  */
-public class BluetoothA2dp {
+public final class BluetoothA2dp {
     private static final String TAG = "BluetoothA2dp";
     private static final boolean DBG = false;
 
@@ -79,6 +82,7 @@ public class BluetoothA2dp {
     /** Default priority for a2dp devices that should not allow incoming
      * connections */
     public static final int PRIORITY_OFF = 0;
+
     private final IBluetoothA2dp mService;
     private final Context mContext;
 
@@ -89,6 +93,7 @@ public class BluetoothA2dp {
      */
     public BluetoothA2dp(Context c) {
         mContext = c;
+
         IBinder b = ServiceManager.getService(BluetoothA2dpService.BLUETOOTH_A2DP_SERVICE);
         if (b == null) {
             throw new RuntimeException("Bluetooth A2DP service not available!");
@@ -99,14 +104,14 @@ public class BluetoothA2dp {
     /** Initiate a connection to an A2DP sink.
      *  Listen for SINK_STATE_CHANGED_ACTION to find out when the
      *  connection is completed.
-     *  @param address Remote BT address.
+     *  @param device Remote BT device.
      *  @return Result code, negative indicates an immediate error.
      *  @hide
      */
-    public int connectSink(String address) {
-        if (DBG) log("connectSink(" + address + ")");
+    public int connectSink(BluetoothDevice device) {
+        if (DBG) log("connectSink(" + device + ")");
         try {
-            return mService.connectSink(address);
+            return mService.connectSink(device);
         } catch (RemoteException e) {
             Log.w(TAG, "", e);
             return BluetoothError.ERROR_IPC;
@@ -116,14 +121,14 @@ public class BluetoothA2dp {
     /** Initiate disconnect from an A2DP sink.
      *  Listen for SINK_STATE_CHANGED_ACTION to find out when
      *  disconnect is completed.
-     *  @param address Remote BT address.
+     *  @param device Remote BT device.
      *  @return Result code, negative indicates an immediate error.
      *  @hide
      */
-    public int disconnectSink(String address) {
-        if (DBG) log("disconnectSink(" + address + ")");
+    public int disconnectSink(BluetoothDevice device) {
+        if (DBG) log("disconnectSink(" + device + ")");
         try {
-            return mService.disconnectSink(address);
+            return mService.disconnectSink(device);
         } catch (RemoteException e) {
             Log.w(TAG, "", e);
             return BluetoothError.ERROR_IPC;
@@ -131,24 +136,25 @@ public class BluetoothA2dp {
     }
 
     /** Check if a specified A2DP sink is connected.
-     *  @param address Remote BT address.
+     *  @param device Remote BT device.
      *  @return True if connected (or playing), false otherwise and on error.
      *  @hide
      */
-    public boolean isSinkConnected(String address) {
-        if (DBG) log("isSinkConnected(" + address + ")");
-        int state = getSinkState(address);
+    public boolean isSinkConnected(BluetoothDevice device) {
+        if (DBG) log("isSinkConnected(" + device + ")");
+        int state = getSinkState(device);
         return state == STATE_CONNECTED || state == STATE_PLAYING;
     }
 
     /** Check if any A2DP sink is connected.
-     * @return a List of connected A2DP sinks, or null on error.
+     * @return a unmodifiable set of connected A2DP sinks, or null on error.
      * @hide
      */
-    public List<String> listConnectedSinks() {
-        if (DBG) log("listConnectedSinks()");
+    public Set<BluetoothDevice> getConnectedSinks() {
+        if (DBG) log("getConnectedSinks()");
         try {
-            return mService.listConnectedSinks();
+            return Collections.unmodifiableSet(
+                    new HashSet<BluetoothDevice>(Arrays.asList(mService.getConnectedSinks())));
         } catch (RemoteException e) {
             Log.w(TAG, "", e);
             return null;
@@ -156,14 +162,14 @@ public class BluetoothA2dp {
     }
 
     /** Get the state of an A2DP sink
-     *  @param address Remote BT address.
+     *  @param device Remote BT device.
      *  @return State code, or negative on error
      *  @hide
      */
-    public int getSinkState(String address) {
-        if (DBG) log("getSinkState(" + address + ")");
+    public int getSinkState(BluetoothDevice device) {
+        if (DBG) log("getSinkState(" + device + ")");
         try {
-            return mService.getSinkState(address);
+            return mService.getSinkState(device);
         } catch (RemoteException e) {
             Log.w(TAG, "", e);
             return BluetoothError.ERROR_IPC;
@@ -177,15 +183,15 @@ public class BluetoothA2dp {
      * Sinks with priority greater than zero will accept incoming connections
      * (if no sink is currently connected).
      * Priority for unpaired sink must be PRIORITY_NONE.
-     * @param address Paired sink
+     * @param device Paired sink
      * @param priority Integer priority, for example PRIORITY_AUTO or
      *                 PRIORITY_NONE
      * @return Result code, negative indicates an error
      */
-    public int setSinkPriority(String address, int priority) {
-        if (DBG) log("setSinkPriority(" + address + ", " + priority + ")");
+    public int setSinkPriority(BluetoothDevice device, int priority) {
+        if (DBG) log("setSinkPriority(" + device + ", " + priority + ")");
         try {
-            return mService.setSinkPriority(address, priority);
+            return mService.setSinkPriority(device, priority);
         } catch (RemoteException e) {
             Log.w(TAG, "", e);
             return BluetoothError.ERROR_IPC;
@@ -194,13 +200,13 @@ public class BluetoothA2dp {
 
     /**
      * Get priority of a2dp sink.
-     * @param address Sink
+     * @param device Sink
      * @return non-negative priority, or negative error code on error.
      */
-    public int getSinkPriority(String address) {
-        if (DBG) log("getSinkPriority(" + address + ")");
+    public int getSinkPriority(BluetoothDevice device) {
+        if (DBG) log("getSinkPriority(" + device + ")");
         try {
-            return mService.getSinkPriority(address);
+            return mService.getSinkPriority(device);
         } catch (RemoteException e) {
             Log.w(TAG, "", e);
             return BluetoothError.ERROR_IPC;
