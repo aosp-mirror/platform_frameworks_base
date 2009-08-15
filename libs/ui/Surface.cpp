@@ -382,9 +382,9 @@ sp<Surface> SurfaceControl::getSurface() const
 Surface::Surface(const sp<SurfaceControl>& surface)
     : mClient(surface->mClient), mSurface(surface->mSurface),
       mToken(surface->mToken), mIdentity(surface->mIdentity),
-      mWidth(surface->mWidth), mHeight(surface->mHeight),
       mFormat(surface->mFormat), mFlags(surface->mFlags),
-      mBufferMapper(BufferMapper::get())
+      mBufferMapper(BufferMapper::get()),
+      mWidth(surface->mWidth), mHeight(surface->mHeight)
 {
     init();
 }
@@ -426,8 +426,8 @@ void Surface::init()
     const_cast<uint32_t&>(android_native_window_t::flags) = 0;
     // be default we request a hardware surface
     mUsage = GRALLOC_USAGE_HW_RENDER;
+    mUsageChanged = true;
 }
-
 
 Surface::~Surface()
 {
@@ -446,11 +446,24 @@ Surface::~Surface()
     IPCThreadState::self()->flushCommands();
 }
 
+sp<SurfaceComposerClient> Surface::getClient() const {
+    return mClient;
+}
+
+sp<ISurface> Surface::getISurface() const {
+    return mSurface;
+}
+
+bool Surface::isValid() {
+    return mToken>=0 && mClient!=0;
+}
+
 status_t Surface::validate(per_client_cblk_t const* cblk) const
 {
+    sp<SurfaceComposerClient> client(getClient());
     if (mToken<0 || mClient==0) {
         LOGE("invalid token (%d, identity=%u) or client (%p)", 
-                mToken, mIdentity, mClient.get());
+                mToken, mIdentity, client.get());
         return NO_INIT;
     }
     if (cblk == 0) {
@@ -477,6 +490,7 @@ bool Surface::isSameSurface(
 {
     if (lhs == 0 || rhs == 0)
         return false;
+
     return lhs->mSurface->asBinder() == rhs->mSurface->asBinder();
 }
 
@@ -532,10 +546,9 @@ status_t Surface::dequeueBuffer(sp<SurfaceBuffer>* buffer)
 {
     android_native_buffer_t* out;
     status_t err = dequeueBuffer(&out);
-    *buffer = SurfaceBuffer::getSelf(out);
-    // reset the width/height with the what we get from the buffer
-    mWidth  = uint32_t(out->width);
-    mHeight = uint32_t(out->height);
+    if (err == NO_ERROR) {
+        *buffer = SurfaceBuffer::getSelf(out);
+    }
     return err;
 }
 
@@ -557,7 +570,8 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 
     Mutex::Autolock _l(mSurfaceLock);
 
-    per_client_cblk_t* const cblk = mClient->mControl;
+    sp<SurfaceComposerClient> client(getClient());
+    per_client_cblk_t* const cblk = client->mControl;
     status_t err = validate(cblk);
     if (err != NO_ERROR)
         return err;
@@ -572,14 +586,17 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 
     mBackbufferIndex = backIdx;
     layer_cblk_t* const lcblk = &(cblk->layers[index]);
-
     volatile const surface_info_t* const back = lcblk->surface + backIdx;
-    if (back->flags & surface_info_t::eNeedNewBuffer) {
+    if ((back->flags & surface_info_t::eNeedNewBuffer) || mUsageChanged) {
+        mUsageChanged = false;
         err = getBufferLocked(backIdx, mUsage);
     }
 
     if (err == NO_ERROR) {
         const sp<SurfaceBuffer>& backBuffer(mBuffers[backIdx]);
+        // reset the width/height with the what we get from the buffer
+        mWidth  = uint32_t(backBuffer->width);
+        mHeight = uint32_t(backBuffer->height);
         mDirtyRegion.set(backBuffer->width, backBuffer->height);
         *buffer = backBuffer.get();
     }
@@ -591,7 +608,8 @@ int Surface::lockBuffer(android_native_buffer_t* buffer)
 {
     Mutex::Autolock _l(mSurfaceLock);
 
-    per_client_cblk_t* const cblk = mClient->mControl;
+    sp<SurfaceComposerClient> client(getClient());
+    per_client_cblk_t* const cblk = client->mControl;
     status_t err = validate(cblk);
     if (err != NO_ERROR)
         return err;
@@ -604,7 +622,8 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
 {   
     Mutex::Autolock _l(mSurfaceLock);
 
-    per_client_cblk_t* const cblk = mClient->mControl;
+    sp<SurfaceComposerClient> client(getClient());
+    per_client_cblk_t* const cblk = client->mControl;
     status_t err = validate(cblk);
     if (err != NO_ERROR)
         return err;
@@ -620,7 +639,7 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
 
     uint32_t newstate = cblk->unlock_layer_and_post(size_t(index));
     if (!(newstate & eNextFlipPending))
-        mClient->signalServer();
+        client->signalServer();
 
     return NO_ERROR;
 }
@@ -646,13 +665,22 @@ int Surface::perform(int operation, va_list args)
     int res = NO_ERROR;
     switch (operation) {
         case NATIVE_WINDOW_SET_USAGE:
-            mUsage = va_arg(args, int);
+            setUsage( va_arg(args, int) );
             break;
         default:
             res = NAME_NOT_FOUND;
             break;
     }
     return res;
+}
+
+void Surface::setUsage(uint32_t reqUsage)
+{
+    Mutex::Autolock _l(mSurfaceLock);
+    if (mUsage != reqUsage) {
+        mUsageChanged = true;
+        mUsage = reqUsage;
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -663,11 +691,9 @@ status_t Surface::lock(SurfaceInfo* info, bool blocking) {
 
 status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking) 
 {
-    // FIXME: needs some locking here
-
     // we're intending to do software rendering from this point
-    mUsage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN;
-    
+    setUsage(GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
+
     sp<SurfaceBuffer> backBuffer;
     status_t err = dequeueBuffer(&backBuffer);
     if (err == NO_ERROR) {
@@ -679,7 +705,8 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
             Region scratch(bounds);
             Region& newDirtyRegion(dirtyIn ? *dirtyIn : scratch);
 
-            per_client_cblk_t* const cblk = mClient->mControl;
+            sp<SurfaceComposerClient> client(getClient());
+            per_client_cblk_t* const cblk = client->mControl;
             layer_cblk_t* const lcblk = &(cblk->layers[SurfaceID(mToken)]);
             volatile const surface_info_t* const back = lcblk->surface + mBackbufferIndex;
             if (back->flags & surface_info_t::eBufferDirty) {
@@ -725,8 +752,6 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
     
 status_t Surface::unlockAndPost() 
 {
-    // FIXME: needs some locking here
-
     if (mLockedBuffer == 0)
         return BAD_VALUE;
 
@@ -753,13 +778,17 @@ void Surface::_send_dirty_region(
 }
 
 void Surface::setSwapRectangle(const Rect& r) {
+    Mutex::Autolock _l(mSurfaceLock);
     mSwapRectangle = r;
 }
 
 status_t Surface::getBufferLocked(int index, int usage)
 {
+    sp<ISurface> s(mSurface);
+    if (s == 0) return NO_INIT;
+
     status_t err = NO_MEMORY;
-    sp<SurfaceBuffer> buffer = mSurface->getBuffer(usage);
+    sp<SurfaceBuffer> buffer = s->getBuffer(usage);
     LOGE_IF(buffer==0, "ISurface::getBuffer() returned NULL");
     if (buffer != 0) {
         sp<SurfaceBuffer>& currentBuffer(mBuffers[index]);
