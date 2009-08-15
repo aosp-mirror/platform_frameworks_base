@@ -85,6 +85,7 @@ class ServerThread extends Thread {
         HardwareService hardware = null;
         PowerManagerService power = null;
         BatteryService battery = null;
+        ConnectivityService connectivity = null;
         IPackageManager pm = null;
         Context context = null;
         WindowManagerService wm = null;
@@ -231,8 +232,8 @@ class ServerThread extends Thread {
 
             try {
                 Log.i(TAG, "Starting Connectivity Service.");
-                ServiceManager.addService(Context.CONNECTIVITY_SERVICE,
-                        ConnectivityService.getInstance(context));
+                connectivity = ConnectivityService.getInstance(context);
+                ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Connectivity Service", e);
             }
@@ -384,7 +385,8 @@ class ServerThread extends Thread {
         }
 
         if (wallpaper != null) wallpaper.systemReady();
-        battery.systemReady();
+        if (battery != null) battery.systemReady();
+        if (connectivity != null) connectivity.systemReady();
         Watchdog.getInstance().start();
 
         Looper.loop();

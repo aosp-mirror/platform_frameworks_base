@@ -100,6 +100,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     // a process dies
     private List mFeatureUsers;
 
+    private boolean mSystemReady;
+    private ArrayList<Intent> mDeferredBroadcasts;
+
     private class NetworkAttributes {
         /**
          * Class for holding settings read from resources.
@@ -820,7 +823,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 (newNet == null || !newNet.isAvailable() ? "" : " other=" +
                 newNet.getNetworkInfo().getTypeName()));
 
-        mContext.sendStickyBroadcast(intent);
+        sendStickyBroadcast(intent);
         /*
          * If the failover network is already connected, then immediately send
          * out a followup broadcast indicating successful failover
@@ -843,7 +846,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             intent.putExtra(ConnectivityManager.EXTRA_EXTRA_INFO,
                     info.getExtraInfo());
         }
-        mContext.sendStickyBroadcast(intent);
+        sendStickyBroadcast(intent);
     }
 
     /**
@@ -882,7 +885,33 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
             info.setFailover(false);
         }
-        mContext.sendStickyBroadcast(intent);
+        sendStickyBroadcast(intent);
+    }
+
+    private void sendStickyBroadcast(Intent intent) {
+        synchronized(this) {
+            if (mSystemReady) {
+                mContext.sendStickyBroadcast(intent);
+            } else {
+                if (mDeferredBroadcasts == null) {
+                    mDeferredBroadcasts = new ArrayList<Intent>();
+                }
+                mDeferredBroadcasts.add(intent);
+            }
+        }
+    }
+
+    void systemReady() {
+        synchronized(this) {
+            mSystemReady = true;
+            if (mDeferredBroadcasts != null) {
+                int count = mDeferredBroadcasts.size();
+                for (int i = 0; i < count; i++) {
+                    mContext.sendStickyBroadcast(mDeferredBroadcasts.get(i));
+                }
+                mDeferredBroadcasts = null;
+            }
+        }
     }
 
     private void handleConnect(NetworkInfo info) {
