@@ -482,6 +482,8 @@ public:
                      const sp<AaptFile>& file,
                      const String8& resType);
 
+    void addGroupEntry(const AaptGroupEntry& entry) { mGroupEntries.add(entry); }
+    
     ssize_t slurpFromArgs(Bundle* bundle);
 
     virtual ssize_t slurpFullTree(Bundle* bundle,
