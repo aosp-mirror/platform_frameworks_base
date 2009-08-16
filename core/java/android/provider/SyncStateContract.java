@@ -71,7 +71,7 @@ public class SyncStateContract {
         public static byte[] get(ContentProviderClient provider, Uri uri,
                 Account account) throws RemoteException {
             Cursor c = provider.query(uri, DATA_PROJECTION, SELECT_BY_ACCOUNT,
-                    new String[]{account.mName, account.mType}, null);
+                    new String[]{account.name, account.type}, null);
             try {
                 if (c.moveToNext()) {
                     return c.getBlob(c.getColumnIndexOrThrow(Columns.DATA));
@@ -96,8 +96,8 @@ public class SyncStateContract {
                 Account account, byte[] data) throws RemoteException {
             ContentValues values = new ContentValues();
             values.put(Columns.DATA, data);
-            values.put(Columns.ACCOUNT_NAME, account.mName);
-            values.put(Columns.ACCOUNT_TYPE, account.mType);
+            values.put(Columns.ACCOUNT_NAME, account.name);
+            values.put(Columns.ACCOUNT_TYPE, account.type);
             provider.insert(uri, values);
         }
 
@@ -116,8 +116,8 @@ public class SyncStateContract {
             values.put(Columns.DATA, data);
             return ContentProviderOperation
                     .newInsert(uri)
-                    .withValue(Columns.ACCOUNT_NAME, account.mName)
-                    .withValue(Columns.ACCOUNT_TYPE, account.mType)
+                    .withValue(Columns.ACCOUNT_NAME, account.name)
+                    .withValue(Columns.ACCOUNT_TYPE, account.type)
                     .withValues(values)
                     .build();
         }

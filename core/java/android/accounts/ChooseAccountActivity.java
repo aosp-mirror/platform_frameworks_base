@@ -45,7 +45,7 @@ public class ChooseAccountActivity extends ListActivity {
 
         String[] mAccountNames = new String[mAccounts.length];
         for (int i = 0; i < mAccounts.length; i++) {
-            mAccountNames[i] = ((Account) mAccounts[i]).mName;
+            mAccountNames[i] = ((Account) mAccounts[i]).name;
         }
 
         // Use an existing ListAdapter that will map an array
@@ -59,8 +59,8 @@ public class ChooseAccountActivity extends ListActivity {
         Account account = (Account) mAccounts[position];
         Log.d(TAG, "selected account " + account);
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.ACCOUNT_NAME_KEY, account.mName);
-        bundle.putString(Constants.ACCOUNT_TYPE_KEY, account.mType);
+        bundle.putString(Constants.ACCOUNT_NAME_KEY, account.name);
+        bundle.putString(Constants.ACCOUNT_TYPE_KEY, account.type);
         mResult = bundle;
         finish();
     }

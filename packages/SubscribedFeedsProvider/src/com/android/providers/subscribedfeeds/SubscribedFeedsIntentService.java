@@ -113,7 +113,7 @@ public class SubscribedFeedsIntentService extends IntentService {
             // TODO(fredq) fix the hardcoded type
             final Account account = new Account(accountName, "com.google.GAIA");
             c = context.getContentResolver().query(SubscribedFeeds.Feeds.CONTENT_URI,
-                    null, where, new String[]{account.mName, account.mType, feed}, null);
+                    null, where, new String[]{account.name, account.type, feed}, null);
             if (c.getCount() == 0) {
                 Log.w(TAG, "received tickle for non-existent feed: "
                         + "account " + accountName + ", feed " + feed);
@@ -171,12 +171,12 @@ public class SubscribedFeedsIntentService extends IntentService {
         try {
             ContentValues values = new ContentValues();
             for (Account account : accounts) {
-                values.put(SyncConstValue._SYNC_ACCOUNT, account.mName);
-                values.put(SyncConstValue._SYNC_ACCOUNT_TYPE, account.mType);
+                values.put(SyncConstValue._SYNC_ACCOUNT, account.name);
+                values.put(SyncConstValue._SYNC_ACCOUNT_TYPE, account.type);
                 contentResolver.update(SubscribedFeeds.Feeds.CONTENT_URI, values,
                         SubscribedFeeds.Feeds._SYNC_ACCOUNT + "=? AND "
                                 + SubscribedFeeds.Feeds._SYNC_ACCOUNT_TYPE + "=?",
-                        new String[] {account.mName, account.mType});
+                        new String[] {account.name, account.type});
             }
         } catch (SQLiteFullException e) {
             Log.w(TAG, "disk full while trying to mark the feeds as dirty, skipping");

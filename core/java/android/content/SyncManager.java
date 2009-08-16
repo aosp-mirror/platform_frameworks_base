@@ -596,7 +596,7 @@ class SyncManager implements OnAccountsUpdatedListener {
 
         for (String authority : syncableAuthorities) {
             for (Account account : accounts) {
-                if (mSyncAdapters.getServiceInfo(new SyncAdapterType(authority, account.mType))
+                if (mSyncAdapters.getServiceInfo(new SyncAdapterType(authority, account.type))
                         != null) {
                     scheduleSyncOperation(
                             new SyncOperation(account, source, authority, extras, delay));
@@ -1094,8 +1094,8 @@ class SyncManager implements OnAccountsUpdatedListener {
             for (int i=0; i<N; i++) {
                 SyncStorageEngine.PendingOperation op = ops.get(i);
                 pw.print("  #"); pw.print(i); pw.print(": account=");
-                pw.print(op.account.mName); pw.print(":");
-                pw.print(op.account.mType); pw.print(" authority=");
+                pw.print(op.account.name); pw.print(":");
+                pw.print(op.account.type); pw.print(" authority=");
                 pw.println(op.authority);
                 if (op.extras != null && op.extras.size() > 0) {
                     sb.setLength(0);
@@ -1125,8 +1125,8 @@ class SyncManager implements OnAccountsUpdatedListener {
                     
                     processedAccounts.add(curAccount);
                     
-                    pw.print("  Account "); pw.print(authority.account.mName);
-                            pw.print(" "); pw.print(authority.account.mType);
+                    pw.print("  Account "); pw.print(authority.account.name);
+                            pw.print(" "); pw.print(authority.account.type);
                             pw.println(":");
                     for (int j=i; j<N; j++) {
                         status = statuses.get(j);
@@ -1248,9 +1248,9 @@ class SyncManager implements OnAccountsUpdatedListener {
                         = mSyncStorageEngine.getAuthority(item.authorityId);
                 pw.print("  #"); pw.print(i+1); pw.print(": ");
                         if (authority != null) {
-                            pw.print(authority.account.mName);
+                            pw.print(authority.account.name);
                             pw.print(":");
-                            pw.print(authority.account.mType);
+                            pw.print(authority.account.type);
                             pw.print(" ");
                             pw.print(authority.authority);
                         } else {
@@ -1636,7 +1636,7 @@ class SyncManager implements OnAccountsUpdatedListener {
 
             // connect to the sync adapter
             SyncAdapterType syncAdapterType = new SyncAdapterType(op.authority,
-                    op.account.mType);
+                    op.account.type);
             RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
                     mSyncAdapters.getServiceInfo(syncAdapterType);
             if (syncAdapterInfo == null) {

@@ -21,6 +21,7 @@ import android.accounts.Account;
 import android.accounts.AuthenticatorDescription;
 import android.os.Bundle;
 
+
 /**
  * Central application service that provides account management.
  * @hide
@@ -29,10 +30,10 @@ interface IAccountManager {
     String getPassword(in Account account);
     String getUserData(in Account account, String key);
     AuthenticatorDescription[] getAuthenticatorTypes();
-    Account[] getAccounts();
-    Account[] getAccountsByType(String accountType);
+    Account[] getAccounts(String accountType);
+    void getAccountsByFeatures(in IAccountManagerResponse response, String accountType, in String[] features);
     boolean addAccount(in Account account, String password, in Bundle extras);
-    void removeAccount(in Account account);
+    void removeAccount(in IAccountManagerResponse response, in Account account);
     void invalidateAuthToken(String accountType, String authToken);
     String peekAuthToken(in Account account, String authTokenType);
     void setAuthToken(in Account account, String authTokenType, String authToken);
@@ -52,8 +53,6 @@ interface IAccountManager {
         boolean expectActivityLaunch);
     void confirmCredentials(in IAccountManagerResponse response, in Account account,
         boolean expectActivityLaunch);
-    void getAccountsByTypeAndFeatures(in IAccountManagerResponse response, String accountType,
-        in String[] features);
 
     /*
      * @deprecated
