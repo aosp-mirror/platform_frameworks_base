@@ -833,22 +833,24 @@ public final class CookieManager {
 
                 // "secure" is a known attribute doesn't use "=";
                 // while sites like live.com uses "secure="
-                if (length - index > SECURE_LENGTH
+                if (length - index >= SECURE_LENGTH
                         && cookieString.substring(index, index + SECURE_LENGTH).
                         equalsIgnoreCase(SECURE)) {
                     index += SECURE_LENGTH;
                     cookie.secure = true;
+                    if (index == length) break;
                     if (cookieString.charAt(index) == EQUAL) index++;
                     continue;
                 }
 
                 // "httponly" is a known attribute doesn't use "=";
                 // while sites like live.com uses "httponly="
-                if (length - index > HTTP_ONLY_LENGTH
+                if (length - index >= HTTP_ONLY_LENGTH
                         && cookieString.substring(index,
                             index + HTTP_ONLY_LENGTH).
                         equalsIgnoreCase(HTTP_ONLY)) {
                     index += HTTP_ONLY_LENGTH;
+                    if (index == length) break;
                     if (cookieString.charAt(index) == EQUAL) index++;
                     // FIXME: currently only parse the attribute
                     continue;
