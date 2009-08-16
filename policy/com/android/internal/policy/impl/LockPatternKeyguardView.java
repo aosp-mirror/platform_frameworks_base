@@ -152,7 +152,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             KeyguardWindowController controller) {
         super(context);
 
-        final boolean hasAccount = AccountManager.get(context).blockingGetAccounts().length > 0;
+        final boolean hasAccount = AccountManager.get(context).getAccounts().length > 0;
         boolean hasSAMLAccount = false;
         if (hasAccount) {
             /* If we have a SAML account which requires web login we can not use the
@@ -160,11 +160,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
              For now we will disable fallback screen in this case.
              Ultimately we could consider bringing up a web login from GLS
              but need to make sure that it will work in the "locked screen" mode. */
-
             try {
+                String[] features = new String[] {"saml"};
                 hasSAMLAccount =
-                    AccountManager.get(context).blockingGetAccountsWithTypeAndFeatures(
-                            "com.GOOGLE.GAIA", new String[] {"saml"}).length > 0;
+                    AccountManager.get(context).getAccountsByTypeAndFeatures(
+                            "com.google.GAIA", features, null, null).getResult().length > 0;
             } catch (Exception e) {
                 // We err on the side of caution.
                 // In case of error we assume we have a SAML account.
