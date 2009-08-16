@@ -1360,6 +1360,14 @@ public final class ContactsContract {
          * <P>Type: INTEGER</P>
          */
         public static final String DELETED = "deleted";
+
+        /**
+         * Whether this group should be synced if the SYNC_EVERYTHING settings
+         * is false for this group's account.
+         * <p>
+         * Type: INTEGER (boolean)
+         */
+        public static final String SHOULD_SYNC = "should_sync";
     }
 
     /**
