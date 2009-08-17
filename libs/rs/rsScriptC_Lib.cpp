@@ -465,6 +465,14 @@ static void SC_matrixTranslate(rsc_Matrix *mat, float x, float y, float z)
 }
 
 
+static void SC_vec2Rand(float *vec, float maxLen)
+{
+    float angle = SC_randf(PI * 2);
+    float len = SC_randf(maxLen);
+    vec[0] = len * sinf(angle);
+    vec[1] = len * cosf(angle);
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -780,6 +788,24 @@ static uint32_t SC_getHeight()
     return rsc->getHeight();
 }
 
+static uint32_t SC_colorFloatRGBAtoUNorm8(float r, float g, float b, float a)
+{
+    uint32_t c = 0;
+    c |= (uint32_t)(r * 255.f + 0.5f);
+    c |= ((uint32_t)(g * 255.f + 0.5f)) << 8;
+    c |= ((uint32_t)(b * 255.f + 0.5f)) << 16;
+    c |= ((uint32_t)(a * 255.f + 0.5f)) << 24;
+    return c;
+}
+
+static uint32_t SC_colorFloatRGBAto565(float r, float g, float b)
+{
+    uint32_t ir = (uint32_t)(r * 255.f + 0.5f);
+    uint32_t ig = (uint32_t)(g * 255.f + 0.5f);
+    uint32_t ib = (uint32_t)(b * 255.f + 0.5f);
+    return rs888to565(ir, ig, ib);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
 //////////////////////////////////////////////////////////////////////////////
@@ -937,6 +963,10 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "matrixTranslate", (void *)&SC_matrixTranslate,
         "void", "(float *mat, float x, float y, float z)" },
 
+    // vector
+    { "vec2Rand", (void *)&SC_vec2Rand,
+        "void", "(float *vec, float maxLen)" },
+
     // context
     { "bindProgramFragment", (void *)&SC_bindProgramFragment,
         "void", "(int)" },
@@ -998,6 +1028,12 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(int, int)" },
     { "uploadToBufferObject", (void *)&SC_uploadToBufferObject,
         "void", "(int)" },
+
+    { "colorFloatRGBAtoUNorm8", (void *)&SC_colorFloatRGBAtoUNorm8,
+        "int", "(float, float, float, float)" },
+    { "colorFloatRGBto565", (void *)&SC_colorFloatRGBAto565,
+        "int", "(float, float, float)" },
+
 
     { "getWidth", (void *)&SC_getWidth,
         "int", "()" },

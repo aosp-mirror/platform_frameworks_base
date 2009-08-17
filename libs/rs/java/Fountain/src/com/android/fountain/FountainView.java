@@ -61,13 +61,18 @@ public class FountainView extends RSSurfaceView {
     @Override
     public boolean onTouchEvent(MotionEvent ev)
     {
-        boolean ret = true;
         int act = ev.getAction();
         if (act == ev.ACTION_UP) {
-            ret = false;
+            mRender.newTouchPosition(0, 0, 0);
+            return false;
         }
-        mRender.newTouchPosition((int)ev.getX(), (int)ev.getY());
-        return ret;
+        float rate = (ev.getPressure() * 50.f);
+        rate *= rate;
+        if(rate > 2000.f) {
+            rate = 2000.f;
+        }
+        mRender.newTouchPosition((int)ev.getX(), (int)ev.getY(), (int)rate);
+        return true;
     }
 }
 

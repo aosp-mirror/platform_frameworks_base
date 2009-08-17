@@ -315,6 +315,7 @@ ScriptSetClearStencil {
 ScriptSetType {
 	param RsType type
 	param uint32_t slot
+	param bool isWritable
 	param const char * name
 	}
 
