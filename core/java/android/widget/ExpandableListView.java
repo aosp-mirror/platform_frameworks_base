@@ -33,6 +33,7 @@ import android.view.ContextMenu;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ExpandableListConnector.PositionMetadata;
 
 /**
@@ -916,7 +917,14 @@ public class ExpandableListView extends ListView {
 
     @Override
     ContextMenuInfo createContextMenuInfo(View view, int flatListPosition, long id) {
-        PositionMetadata pm = mConnector.getUnflattenedPos(flatListPosition);
+        // Adjust for and handle for header views
+        final int adjustedPosition = flatListPosition - getHeaderViewsCount();
+        if (adjustedPosition < 0) {
+            // Return normal info for header view context menus
+            return new AdapterContextMenuInfo(view, flatListPosition, id);
+        }
+
+        PositionMetadata pm = mConnector.getUnflattenedPos(adjustedPosition);
         ExpandableListPosition pos = pm.position;
         pm.recycle();
         
