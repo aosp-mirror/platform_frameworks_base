@@ -1637,8 +1637,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             break;
         case DISPATCH_POINTER: {
             MotionEvent event = (MotionEvent)msg.obj;
-
-            boolean didFinish;
+            boolean callWhenDone = msg.arg1 != 0;
+            
             if (event == null) {
                 try {
                     long timeBeforeGettingEvents;
@@ -1654,9 +1654,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     }
                 } catch (RemoteException e) {
                 }
-                didFinish = true;
-            } else {
-                didFinish = event.getAction() == MotionEvent.ACTION_OUTSIDE;
+                callWhenDone = false;
             }
             if (event != null && mTranslator != null) {
                 mTranslator.translateEventInScreenToAppWindow(event);
@@ -1728,7 +1726,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     }
                 }
             } finally {
-                if (!didFinish) {
+                if (callWhenDone) {
                     try {
                         sWindowSession.finishKey(mWindow);
                     } catch (RemoteException e) {
@@ -1743,7 +1741,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
         } break;
         case DISPATCH_TRACKBALL:
-            deliverTrackballEvent((MotionEvent)msg.obj);
+            deliverTrackballEvent((MotionEvent)msg.obj, msg.arg1 != 0);
             break;
         case DISPATCH_APP_VISIBILITY:
             handleAppVisibility(msg.arg1 != 0);
@@ -1985,16 +1983,13 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
 
-    private void deliverTrackballEvent(MotionEvent event) {
-        boolean didFinish;
+    private void deliverTrackballEvent(MotionEvent event, boolean callWhenDone) {
         if (event == null) {
             try {
                 event = sWindowSession.getPendingTrackballMove(mWindow);
             } catch (RemoteException e) {
             }
-            didFinish = true;
-        } else {
-            didFinish = false;
+            callWhenDone = false;
         }
 
         if (DEBUG_TRACKBALL) Log.v(TAG, "Motion event:" + event);
@@ -2012,7 +2007,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
         } finally {
             if (handled) {
-                if (!didFinish) {
+                if (callWhenDone) {
                     try {
                         sWindowSession.finishKey(mWindow);
                     } catch (RemoteException e) {
@@ -2128,7 +2123,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mLastTrackballTime = curTime;
             }
         } finally {
-            if (!didFinish) {
+            if (callWhenDone) {
                 try {
                     sWindowSession.finishKey(mWindow);
                 } catch (RemoteException e) {
@@ -2591,15 +2586,19 @@ public final class ViewRoot extends Handler implements ViewParent,
         sendMessageAtTime(msg, event.getEventTime());
     }
 
-    public void dispatchPointer(MotionEvent event, long eventTime) {
+    public void dispatchPointer(MotionEvent event, long eventTime,
+            boolean callWhenDone) {
         Message msg = obtainMessage(DISPATCH_POINTER);
         msg.obj = event;
+        msg.arg1 = callWhenDone ? 1 : 0;
         sendMessageAtTime(msg, eventTime);
     }
 
-    public void dispatchTrackball(MotionEvent event, long eventTime) {
+    public void dispatchTrackball(MotionEvent event, long eventTime,
+            boolean callWhenDone) {
         Message msg = obtainMessage(DISPATCH_TRACKBALL);
         msg.obj = event;
+        msg.arg1 = callWhenDone ? 1 : 0;
         sendMessageAtTime(msg, eventTime);
     }
 
@@ -2772,23 +2771,25 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
         }
 
-        public void dispatchPointer(MotionEvent event, long eventTime) {
+        public void dispatchPointer(MotionEvent event, long eventTime,
+                boolean callWhenDone) {
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {                
                 if (MEASURE_LATENCY) {
                     // Note: eventTime is in milliseconds
                     ViewRoot.lt.sample("* ViewRoot b4 dispatchPtr", System.nanoTime() - eventTime * 1000000);
                 }
-                viewRoot.dispatchPointer(event, eventTime);
+                viewRoot.dispatchPointer(event, eventTime, callWhenDone);
             } else {
                 new EventCompletion(mMainLooper, this, null, true, event);
             }
         }
 
-        public void dispatchTrackball(MotionEvent event, long eventTime) {
+        public void dispatchTrackball(MotionEvent event, long eventTime,
+                boolean callWhenDone) {
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {
-                viewRoot.dispatchTrackball(event, eventTime);
+                viewRoot.dispatchTrackball(event, eventTime, callWhenDone);
             } else {
                 new EventCompletion(mMainLooper, this, null, false, event);
             }

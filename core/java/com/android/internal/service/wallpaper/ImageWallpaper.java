@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -75,6 +76,7 @@ public class ImageWallpaper extends WallpaperService {
             super.onCreate(surfaceHolder);
             updateWallpaper();
             surfaceHolder.setSizeFromLayout();
+            //setTouchEventsEnabled(true);
         }
 
         @Override
@@ -82,6 +84,12 @@ public class ImageWallpaper extends WallpaperService {
             drawFrame();
         }
         
+        @Override
+        public void onTouchEvent(MotionEvent event) {
+            super.onTouchEvent(event);
+            Log.i("foo", "Touch event: " + event);
+        }
+
         @Override
         public void onOffsetsChanged(float xOffset, float yOffset,
                 int xPixels, int yPixels) {

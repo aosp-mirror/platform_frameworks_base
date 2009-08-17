@@ -481,7 +481,8 @@ public class SurfaceView extends View {
             }
         }
 
-        public void dispatchPointer(MotionEvent event, long eventTime) {
+        public void dispatchPointer(MotionEvent event, long eventTime,
+                boolean callWhenDone) {
             Log.w("SurfaceView", "Unexpected pointer event in surface: " + event);
             //if (mSession != null && mSurface != null) {
             //    try {
@@ -491,7 +492,8 @@ public class SurfaceView extends View {
             //}
         }
 
-        public void dispatchTrackball(MotionEvent event, long eventTime) {
+        public void dispatchTrackball(MotionEvent event, long eventTime,
+                boolean callWhenDone) {
             Log.w("SurfaceView", "Unexpected trackball event in surface: " + event);
             //if (mSession != null && mSurface != null) {
             //    try {

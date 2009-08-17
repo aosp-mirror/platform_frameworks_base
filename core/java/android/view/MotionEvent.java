@@ -552,6 +552,44 @@ public final class MotionEvent implements Parcelable {
     }
 
     /**
+     * Create a new MotionEvent, copying from an existing one, but not including
+     * any historical point information.
+     */
+    static public MotionEvent obtainNoHistory(MotionEvent o) {
+        MotionEvent ev = obtain();
+        ev.mDeviceId = o.mDeviceId;
+        ev.mEdgeFlags = o.mEdgeFlags;
+        ev.mDownTime = o.mDownTime;
+        ev.mEventTimeNano = o.mEventTimeNano;
+        ev.mAction = o.mAction;
+        ev.mNumPointers = o.mNumPointers;
+        ev.mRawX = o.mRawX;
+        ev.mRawY = o.mRawY;
+        ev.mMetaState = o.mMetaState;
+        ev.mXPrecision = o.mXPrecision;
+        ev.mYPrecision = o.mYPrecision;
+        
+        ev.mNumSamples = 1;
+        ev.mTimeSamples[0] = o.mTimeSamples[0];
+        
+        final int NP = (ev.mNumPointers=o.mNumPointers);
+        if (ev.mPointerIdentifiers.length >= NP) {
+            System.arraycopy(o.mPointerIdentifiers, 0, ev.mPointerIdentifiers, 0, NP);
+        } else {
+            ev.mPointerIdentifiers = (int[])o.mPointerIdentifiers.clone();
+        }
+        
+        final int ND = NP * NUM_SAMPLE_DATA;
+        if (ev.mDataSamples.length >= ND) {
+            System.arraycopy(o.mDataSamples, 0, ev.mDataSamples, 0, ND);
+        } else {
+            ev.mDataSamples = (float[])o.mDataSamples.clone();
+        }
+        
+        return ev;
+    }
+
+    /**
      * Recycle the MotionEvent, to be re-used by a later caller.  After calling
      * this function you must not ever touch the event again.
      */
