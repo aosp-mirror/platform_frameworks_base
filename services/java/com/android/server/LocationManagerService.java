@@ -1110,7 +1110,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         synchronized (mLock) {
             LocationProviderProxy proxy = mProvidersByName.get(provider);
-            if (provider == null) {
+            if (proxy == null) {
                 return false;
             }
     
