@@ -74,6 +74,7 @@ public:
     status_t            writeInt64(int64_t val);
     status_t            writeFloat(float val);
     status_t            writeDouble(double val);
+    status_t            writeIntPtr(intptr_t val);
     status_t            writeCString(const char* str);
     status_t            writeString8(const String8& str);
     status_t            writeString16(const String16& str);
@@ -109,6 +110,8 @@ public:
     status_t            readFloat(float *pArg) const;
     double              readDouble() const;
     status_t            readDouble(double *pArg) const;
+    intptr_t            readIntPtr() const;
+    status_t            readIntPtr(intptr_t *pArg) const;
 
     const char*         readCString() const;
     String8             readString8() const;
@@ -163,6 +166,14 @@ private:
     void                initState();
     void                scanForFds() const;
                         
+    template<class T>
+    status_t            readAligned(T *pArg) const;
+
+    template<class T>   T readAligned() const;
+
+    template<class T>
+    status_t            writeAligned(T val);
+
     status_t            mError;
     uint8_t*            mData;
     size_t              mDataSize;
