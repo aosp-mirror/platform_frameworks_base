@@ -56,6 +56,14 @@ public:
             node_id node, OMX_INDEXTYPE index,
             const void *params, size_t size) = 0;
 
+    virtual status_t get_config(
+            node_id node, OMX_INDEXTYPE index,
+            void *params, size_t size) = 0;
+
+    virtual status_t set_config(
+            node_id node, OMX_INDEXTYPE index,
+            const void *params, size_t size) = 0;
+
     virtual status_t use_buffer(
             node_id node, OMX_U32 port_index, const sp<IMemory> &params,
             buffer_id *buffer) = 0;
@@ -81,6 +89,11 @@ public:
             buffer_id buffer,
             OMX_U32 range_offset, OMX_U32 range_length,
             OMX_U32 flags, OMX_TICKS timestamp) = 0;
+
+    virtual status_t get_extension_index(
+            node_id node,
+            const char *parameter_name,
+            OMX_INDEXTYPE *index) = 0;
 
     virtual sp<IOMXRenderer> createRenderer(
             const sp<ISurface> &surface,
@@ -114,10 +127,11 @@ struct omx_message {
         QUIT_OBSERVER,
     } type;
 
+    IOMX::node_id node;
+
     union {
         // if type == EVENT
         struct {
-            IOMX::node_id node;
             OMX_EVENTTYPE event;
             OMX_U32 data1;
             OMX_U32 data2;
@@ -126,13 +140,11 @@ struct omx_message {
         // if type == EMPTY_BUFFER_DONE || type == FILL_BUFFER
         //    || type == INITIAL_FILL_BUFFER
         struct {
-            IOMX::node_id node;
             IOMX::buffer_id buffer;
         } buffer_data;
 
         // if type == EMPTY_BUFFER || type == FILL_BUFFER_DONE
         struct {
-            IOMX::node_id node;
             IOMX::buffer_id buffer;
             OMX_U32 range_offset;
             OMX_U32 range_length;
@@ -143,7 +155,6 @@ struct omx_message {
 
         // if type == SEND_COMMAND
         struct {
-            IOMX::node_id node;
             OMX_COMMANDTYPE cmd;
             OMX_S32 param;
         } send_command_data;

@@ -34,32 +34,28 @@
 #include <media/stagefright/MediaPlayerImpl.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MmapSource.h>
+#include <media/stagefright/OMXCodec.h>
 #include <media/stagefright/OMXDecoder.h>
 #include <media/stagefright/ShoutcastSource.h>
 #include <media/stagefright/TimeSource.h>
 #include <ui/PixelFormat.h>
 #include <ui/Surface.h>
 
+#define USE_OMX_CODEC   1
+
 namespace android {
 
 MediaPlayerImpl::MediaPlayerImpl(const char *uri)
     : mInitCheck(NO_INIT),
-      mExtractor(NULL), 
       mTimeSource(NULL),
-      mAudioSource(NULL),
-      mAudioDecoder(NULL),
       mAudioPlayer(NULL),
-      mVideoSource(NULL),
-      mVideoDecoder(NULL),
       mVideoWidth(0),
       mVideoHeight(0),
       mVideoPosition(0),
       mDuration(0),
       mPlaying(false),
       mPaused(false),
-      mSeeking(false),
-      mFrameSize(0),
-      mUseSoftwareColorConversion(false) {
+      mSeeking(false) {
     LOGI("MediaPlayerImpl(%s)", uri);
     DataSource::RegisterDefaultSniffers();
 
@@ -78,7 +74,7 @@ MediaPlayerImpl::MediaPlayerImpl(const char *uri)
         mVideoDecoder = CameraSource::Create();
 #endif
     } else {
-        DataSource *source = NULL;
+        sp<DataSource> source;
         if (!strncasecmp("file://", uri, 7)) {
             source = new MmapSource(uri + 7);
         } else if (!strncasecmp("http://", uri, 7)) {
@@ -103,22 +99,15 @@ MediaPlayerImpl::MediaPlayerImpl(const char *uri)
 
 MediaPlayerImpl::MediaPlayerImpl(int fd, int64_t offset, int64_t length)
     : mInitCheck(NO_INIT),
-      mExtractor(NULL), 
       mTimeSource(NULL),
-      mAudioSource(NULL),
-      mAudioDecoder(NULL),
       mAudioPlayer(NULL),
-      mVideoSource(NULL),
-      mVideoDecoder(NULL),
       mVideoWidth(0),
       mVideoHeight(0),
       mVideoPosition(0),
       mDuration(0),
       mPlaying(false),
       mPaused(false),
-      mSeeking(false),
-      mFrameSize(0),
-      mUseSoftwareColorConversion(false) {
+      mSeeking(false) {
     LOGI("MediaPlayerImpl(%d, %lld, %lld)", fd, offset, length);
     DataSource::RegisterDefaultSniffers();
 
@@ -147,23 +136,6 @@ status_t MediaPlayerImpl::initCheck() const {
 MediaPlayerImpl::~MediaPlayerImpl() {
     stop();
     setSurface(NULL);
-
-    LOGV("Shutting down audio.");
-    delete mAudioDecoder;
-    mAudioDecoder = NULL;
-
-    delete mAudioSource;
-    mAudioSource = NULL;
-
-    LOGV("Shutting down video.");
-    delete mVideoDecoder;
-    mVideoDecoder = NULL;
-
-    delete mVideoSource;
-    mVideoSource = NULL;
-
-    delete mExtractor;
-    mExtractor = NULL;
 
     if (mInitCheck == OK) {
         mClient.disconnect();
@@ -384,12 +356,11 @@ void MediaPlayerImpl::displayOrDiscardFrame(
 
 void MediaPlayerImpl::init() {
     if (mExtractor != NULL) {
-        int num_tracks;
-        assert(mExtractor->countTracks(&num_tracks) == OK);
+        size_t num_tracks = mExtractor->countTracks();
 
         mDuration = 0;
 
-        for (int i = 0; i < num_tracks; ++i) {
+        for (size_t i = 0; i < num_tracks; ++i) {
             const sp<MetaData> meta = mExtractor->getTrackMetaData(i);
             assert(meta != NULL);
 
@@ -411,10 +382,7 @@ void MediaPlayerImpl::init() {
                 continue;
             }
 
-            MediaSource *source;
-            if (mExtractor->getTrack(i, &source) != OK) {
-                continue;
-            }
+            sp<MediaSource> source = mExtractor->getTrack(i);
 
             int32_t units, scale;
             if (meta->findInt32(kKeyDuration, &units)
@@ -434,17 +402,22 @@ void MediaPlayerImpl::init() {
     }
 }
 
-void MediaPlayerImpl::setAudioSource(MediaSource *source) {
+void MediaPlayerImpl::setAudioSource(const sp<MediaSource> &source) {
     LOGI("setAudioSource");
     mAudioSource = source;
 
     sp<MetaData> meta = source->getFormat();
 
-    mAudioDecoder = OMXDecoder::Create(&mClient, meta);
-    mAudioDecoder->setSource(source);
+#if !USE_OMX_CODEC
+    mAudioDecoder = OMXDecoder::Create(
+            &mClient, meta, false /* createEncoder */, source);
+#else
+    mAudioDecoder = OMXCodec::Create(
+            mClient.interface(), meta, false /* createEncoder */, source);
+#endif
 }
 
-void MediaPlayerImpl::setVideoSource(MediaSource *source) {
+void MediaPlayerImpl::setVideoSource(const sp<MediaSource> &source) {
     LOGI("setVideoSource");
     mVideoSource = source;
 
@@ -456,8 +429,13 @@ void MediaPlayerImpl::setVideoSource(MediaSource *source) {
     success = meta->findInt32(kKeyHeight, &mVideoHeight);
     assert(success);
 
-    mVideoDecoder = OMXDecoder::Create(&mClient, meta);
-    ((OMXDecoder *)mVideoDecoder)->setSource(source);
+#if !USE_OMX_CODEC
+    mVideoDecoder = OMXDecoder::Create(
+            &mClient, meta, false /* createEncoder */, source);
+#else
+    mVideoDecoder = OMXCodec::Create(
+            mClient.interface(), meta, false /* createEncoder */, source);
+#endif
 
     if (mISurface.get() != NULL || mSurface.get() != NULL) {
         depopulateISurface();

@@ -29,22 +29,24 @@ class String8;
 class MPEG4Extractor : public MediaExtractor {
 public:
     // Extractor assumes ownership of "source".
-    MPEG4Extractor(DataSource *source);
-    ~MPEG4Extractor();
+    MPEG4Extractor(const sp<DataSource> &source);
 
-    status_t countTracks(int *num_tracks);
-    status_t getTrack(int index, MediaSource **source);
-    sp<MetaData> getTrackMetaData(int index);
+    size_t countTracks();
+    sp<MediaSource> getTrack(size_t index);
+    sp<MetaData> getTrackMetaData(size_t index);
+
+protected:
+    virtual ~MPEG4Extractor();
 
 private:
     struct Track {
         Track *next;
         sp<MetaData> meta;
         uint32_t timescale;
-        SampleTable *sampleTable;
+        sp<SampleTable> sampleTable;
     };
 
-    DataSource *mDataSource;
+    sp<DataSource> mDataSource;
     bool mHaveMetadata;
 
     Track *mFirstTrack, *mLastTrack;
@@ -58,7 +60,8 @@ private:
     MPEG4Extractor &operator=(const MPEG4Extractor &);
 };
 
-bool SniffMPEG4(DataSource *source, String8 *mimeType, float *confidence);
+bool SniffMPEG4(
+        const sp<DataSource> &source, String8 *mimeType, float *confidence);
 
 }  // namespace android
 

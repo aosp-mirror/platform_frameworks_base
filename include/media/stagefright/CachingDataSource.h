@@ -26,13 +26,15 @@ namespace android {
 
 class CachingDataSource : public DataSource {
 public:
-    // Assumes ownership of "source".
-    CachingDataSource(DataSource *source, size_t pageSize, int numPages);
-    virtual ~CachingDataSource();
+    CachingDataSource(
+            const sp<DataSource> &source, size_t pageSize, int numPages);
 
     status_t InitCheck() const;
 
     virtual ssize_t read_at(off_t offset, void *data, size_t size);
+
+protected:
+    virtual ~CachingDataSource();
 
 private:
     struct Page {
@@ -42,7 +44,7 @@ private:
         void *mData;
     };
 
-    DataSource *mSource;
+    sp<DataSource> mSource;
     void *mData;
     size_t mPageSize;
     Page *mFirst, *mLast;

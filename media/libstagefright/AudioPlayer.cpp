@@ -28,8 +28,7 @@
 namespace android {
 
 AudioPlayer::AudioPlayer(const sp<MediaPlayerBase::AudioSink> &audioSink)
-    : mSource(NULL),
-      mAudioTrack(NULL),
+    : mAudioTrack(NULL),
       mInputBuffer(NULL),
       mSampleRate(0),
       mLatencyUs(0),
@@ -48,7 +47,7 @@ AudioPlayer::~AudioPlayer() {
     }
 }
 
-void AudioPlayer::setSource(MediaSource *source) {
+void AudioPlayer::setSource(const sp<MediaSource> &source) {
     assert(mSource == NULL);
     mSource = source;
 }

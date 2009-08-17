@@ -165,7 +165,7 @@ static bool get_mp3_frame_size(
 }
 
 static bool Resync(
-        DataSource *source, uint32_t match_header,
+        const sp<DataSource> &source, uint32_t match_header,
         off_t *inout_pos, uint32_t *out_header) {
     // Everything must match except for
     // protection, bitrate, padding, private bits and mode extension.
@@ -281,10 +281,8 @@ static bool Resync(
 class MP3Source : public MediaSource {
 public:
     MP3Source(
-            const sp<MetaData> &meta, DataSource *source,
+            const sp<MetaData> &meta, const sp<DataSource> &source,
             off_t first_frame_pos, uint32_t fixed_header);
-
-    virtual ~MP3Source();
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -294,9 +292,12 @@ public:
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL);
 
+protected:
+    virtual ~MP3Source();
+
 private:
     sp<MetaData> mMeta;
-    DataSource *mDataSource;
+    sp<DataSource> mDataSource;
     off_t mFirstFramePos;
     uint32_t mFixedHeader;
     off_t mCurrentPos;
@@ -309,7 +310,7 @@ private:
     MP3Source &operator=(const MP3Source &);
 };
 
-MP3Extractor::MP3Extractor(DataSource *source)
+MP3Extractor::MP3Extractor(const sp<DataSource> &source)
     : mDataSource(source),
       mFirstFramePos(-1),
       mFixedHeader(0) {
@@ -347,28 +348,22 @@ MP3Extractor::MP3Extractor(DataSource *source)
 }
 
 MP3Extractor::~MP3Extractor() {
-    delete mDataSource;
-    mDataSource = NULL;
 }
 
-status_t MP3Extractor::countTracks(int *num_tracks) {
-    *num_tracks = mFirstFramePos < 0 ? 0 : 1;
-
-    return OK;
+size_t MP3Extractor::countTracks() {
+    return (mFirstFramePos < 0) ? 0 : 1;
 }
 
-status_t MP3Extractor::getTrack(int index, MediaSource **source) {
+sp<MediaSource> MP3Extractor::getTrack(size_t index) {
     if (mFirstFramePos < 0 || index != 0) {
-        return ERROR_OUT_OF_RANGE;
+        return NULL;
     }
 
-    *source = new MP3Source(
+    return new MP3Source(
             mMeta, mDataSource, mFirstFramePos, mFixedHeader);
-
-    return OK;
 }
 
-sp<MetaData> MP3Extractor::getTrackMetaData(int index) {
+sp<MetaData> MP3Extractor::getTrackMetaData(size_t index) {
     if (mFirstFramePos < 0 || index != 0) {
         return NULL;
     }
@@ -379,7 +374,7 @@ sp<MetaData> MP3Extractor::getTrackMetaData(int index) {
 ////////////////////////////////////////////////////////////////////////////////
 
 MP3Source::MP3Source(
-        const sp<MetaData> &meta, DataSource *source,
+        const sp<MetaData> &meta, const sp<DataSource> &source,
         off_t first_frame_pos, uint32_t fixed_header)
     : mMeta(meta),
       mDataSource(source),
@@ -509,7 +504,8 @@ status_t MP3Source::read(
     return OK;
 }
 
-bool SniffMP3(DataSource *source, String8 *mimeType, float *confidence) {
+bool SniffMP3(
+        const sp<DataSource> &source, String8 *mimeType, float *confidence) {
     off_t pos = 0;
     uint32_t header;
     if (!Resync(source, 0, &pos, &header)) {

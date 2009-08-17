@@ -25,7 +25,7 @@
 namespace android {
 
 CachingDataSource::CachingDataSource(
-        DataSource *source, size_t pageSize, int numPages)
+        const sp<DataSource> &source, size_t pageSize, int numPages)
     : mSource(source),
       mData(malloc(pageSize * numPages)),
       mPageSize(pageSize),
@@ -61,9 +61,6 @@ CachingDataSource::~CachingDataSource() {
 
     free(mData);
     mData = NULL;
-
-    delete mSource;
-    mSource = NULL;
 }
 
 status_t CachingDataSource::InitCheck() const {
@@ -78,7 +75,7 @@ ssize_t CachingDataSource::read_at(off_t offset, void *data, size_t size) {
         Page *page = mFirst;
         while (page != NULL) {
             if (page->mOffset >= 0 && offset >= page->mOffset
-                && offset < page->mOffset + page->mLength) {
+                && offset < page->mOffset + (off_t)page->mLength) {
                 break;
             }
             page = page->mNext;
@@ -102,7 +99,7 @@ ssize_t CachingDataSource::read_at(off_t offset, void *data, size_t size) {
                 return n;
             }
 
-            if (offset >= page->mOffset + page->mLength) {
+            if (offset >= page->mOffset + (off_t)page->mLength) {
                 break;
             }
         } else {

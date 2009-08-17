@@ -10,8 +10,7 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_C_INCLUDES:= \
 	frameworks/base/media/libstagefright \
-	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
-        $(TOP)/external/opencore/android
+	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
 
 LOCAL_CFLAGS += -Wno-multichar
 
@@ -31,8 +30,7 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_C_INCLUDES:= \
 	frameworks/base/media/libstagefright \
-	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
-        $(TOP)/external/opencore/android
+	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
 
 LOCAL_CFLAGS += -Wno-multichar
 
@@ -52,8 +50,7 @@ include $(BUILD_EXECUTABLE)
 # 
 # LOCAL_C_INCLUDES:= \
 # 	frameworks/base/media/libstagefright \
-# 	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
-#         $(TOP)/external/opencore/android
+# 	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
 # 
 # LOCAL_CFLAGS += -Wno-multichar
 # 

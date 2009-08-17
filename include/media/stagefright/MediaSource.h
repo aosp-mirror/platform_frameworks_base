@@ -27,9 +27,8 @@ namespace android {
 class MediaBuffer;
 class MetaData;
 
-struct MediaSource {
+struct MediaSource : public RefBase {
     MediaSource();
-    virtual ~MediaSource();
 
     // To be called before any other methods on this object, except
     // getFormat().
@@ -80,6 +79,9 @@ struct MediaSource {
         int64_t mSeekTimeUs;
         int64_t mLatenessUs;
     };
+
+protected:
+    virtual ~MediaSource();
 
 private:
     MediaSource(const MediaSource &);

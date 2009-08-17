@@ -44,6 +44,14 @@ public:
             node_id node, OMX_INDEXTYPE index,
             const void *params, size_t size);
 
+    virtual status_t get_config(
+            node_id node, OMX_INDEXTYPE index,
+            void *params, size_t size);
+
+    virtual status_t set_config(
+            node_id node, OMX_INDEXTYPE index,
+            const void *params, size_t size);
+
     virtual status_t use_buffer(
             node_id node, OMX_U32 port_index, const sp<IMemory> &params,
             buffer_id *buffer);
@@ -70,6 +78,11 @@ public:
             OMX_U32 range_offset, OMX_U32 range_length,
             OMX_U32 flags, OMX_TICKS timestamp);
 
+    virtual status_t get_extension_index(
+            node_id node,
+            const char *parameter_name,
+            OMX_INDEXTYPE *index);
+
     virtual sp<IOMXRenderer> createRenderer(
             const sp<ISurface> &surface,
             const char *componentName,
@@ -81,6 +94,9 @@ private:
     static OMX_CALLBACKTYPE kCallbacks;
 
     Mutex mLock;
+
+    struct CallbackDispatcher;
+    sp<CallbackDispatcher> mDispatcher;
 
     static OMX_ERRORTYPE OnEvent(
             OMX_IN OMX_HANDLETYPE hComponent,
