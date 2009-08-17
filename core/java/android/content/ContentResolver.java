@@ -1025,7 +1025,7 @@ public abstract class ContentResolver {
 
     /**
      * Set whether this account/provider is syncable.
-     * @param syncable, >0 denotes syncable, 0 means not syncable, <0 means unknown
+     * @param syncable >0 denotes syncable, 0 means not syncable, <0 means unknown
      */
     public void setIsSyncable(Account account, String authority, int syncable) {
         try {
