@@ -54,6 +54,18 @@ interface IContentService {
      */
     void setSyncAutomatically(in Account account, String providerName, boolean sync);
 
+    /**
+     * Check if this account/provider is syncable.
+     * @return >0 if it is syncable, 0 if not, and <0 if the state isn't known yet.
+     */
+    int getIsSyncable(in Account account, String providerName);
+
+    /**
+     * Set whether this account/provider is syncable.
+     * @param syncable, >0 denotes syncable, 0 means not syncable, <0 means unknown
+     */
+    void setIsSyncable(in Account account, String providerName, int syncable);
+
     void setMasterSyncAutomatically(boolean flag);
 
     boolean getMasterSyncAutomatically();
