@@ -484,7 +484,7 @@ public final class BearerData {
             Gsm7bitCodingResult result = new Gsm7bitCodingResult();
             result.data = new byte[fullData.length - 1];
             System.arraycopy(fullData, 1, result.data, 0, fullData.length - 1);
-            result.septets = fullData[0];
+            result.septets = fullData[0] & 0x00FF;
             return result;
         } catch (com.android.internal.telephony.EncodeException ex) {
             throw new CodingException("7bit GSM encode failed: " + ex);
@@ -498,6 +498,7 @@ public final class BearerData {
         int udhSeptets = ((udhBytes * 8) + 6) / 7;
         Gsm7bitCodingResult gcr = encode7bitGsm(uData.payloadStr, udhSeptets, force);
         uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
+        uData.msgEncodingSet = true;
         uData.numFields = gcr.septets;
         uData.payload = gcr.data;
         uData.payload[0] = (byte)udhData.length;
@@ -512,6 +513,8 @@ public final class BearerData {
         int udhCodeUnits = (udhBytes + 1) / 2;
         int udhPadding = udhBytes % 2;
         int payloadCodeUnits = payload.length / 2;
+        uData.msgEncoding = UserData.ENCODING_UNICODE_16;
+        uData.msgEncodingSet = true;
         uData.numFields = udhCodeUnits + payloadCodeUnits;
         uData.payload = new byte[uData.numFields * 2];
         uData.payload[0] = (byte)udhData.length;
@@ -606,14 +609,16 @@ public final class BearerData {
          * copies by passing outStream directly.
          */
         encodeUserDataPayload(bData.userData);
+        bData.hasUserDataHeader = bData.userData.userDataHeader != null;
+
         if (bData.userData.payload.length > SmsMessage.MAX_USER_DATA_BYTES) {
             throw new CodingException("encoded user data too large (" +
                                       bData.userData.payload.length +
                                       " > " + SmsMessage.MAX_USER_DATA_BYTES + " bytes)");
         }
 
-        /**
-         * XXX/TODO: figure out what the right answer is WRT padding bits
+        /*
+         * TODO(cleanup): figure out what the right answer is WRT paddingBits field
          *
          *   userData.paddingBits = (userData.payload.length * 8) - (userData.numFields * 7);
          *   userData.paddingBits = 0; // XXX this seems better, but why?

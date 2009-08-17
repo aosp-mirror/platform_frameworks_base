@@ -154,7 +154,7 @@ public class UserData {
         builder.append("{ msgEncoding=" + (msgEncodingSet ? msgEncoding : "unset"));
         builder.append(", msgType=" + msgType);
         builder.append(", paddingBits=" + paddingBits);
-        builder.append(", numFields=" + (int)numFields);
+        builder.append(", numFields=" + numFields);
         builder.append(", userDataHeader=" + userDataHeader);
         builder.append(", payload='" + HexDump.toHexString(payload) + "'");
         builder.append(", payloadStr='" + payloadStr + "'");
