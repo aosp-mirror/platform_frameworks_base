@@ -16,9 +16,6 @@
 
 package android.renderscript;
 
-import android.util.Config;
-import android.util.Log;
-
 import java.lang.reflect.Field;
 
 /**
@@ -193,9 +190,7 @@ public class Element extends BaseObj {
         void addEntry(Entry e) {
             if(mEntries.length >= mEntryCount) {
                 Entry[] en = new Entry[mEntryCount + 8];
-                for(int ct=0; ct < mEntries.length; ct++) {
-                    en[ct] = mEntries[ct];
-                }
+                System.arraycopy(mEntries, 0, en, 0, mEntries.length);
                 mEntries = en;
             }
             mEntries[mEntryCount] = e;
