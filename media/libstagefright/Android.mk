@@ -17,6 +17,7 @@ LOCAL_SRC_FILES:=                 \
         MediaSource.cpp           \
         MetaData.cpp              \
         MmapSource.cpp            \
+        OMXCodec.cpp              \
         SampleTable.cpp           \
         ShoutcastSource.cpp       \
         TimeSource.cpp            \

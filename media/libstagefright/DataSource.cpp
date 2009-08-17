@@ -22,6 +22,19 @@
 
 namespace android {
 
+bool DataSource::getUInt16(off_t offset, uint16_t *x) {
+    *x = 0;
+
+    uint8_t byte[2];
+    if (read_at(offset, byte, 2) != 2) {
+        return false;
+    }
+
+    *x = (byte[0] << 8) | byte[1];
+
+    return true;
+}
+
 status_t DataSource::getSize(off_t *size) {
     *size = 0;
 

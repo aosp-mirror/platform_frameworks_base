@@ -26,18 +26,18 @@ class DataSource;
 class MediaSource;
 class MetaData;
 
-class MediaExtractor {
+class MediaExtractor : public RefBase {
 public:
-    static MediaExtractor *Create(DataSource *source, const char *mime = NULL);
+    static sp<MediaExtractor> Create(
+            const sp<DataSource> &source, const char *mime = NULL);
 
-    virtual ~MediaExtractor() {}
-
-    virtual status_t countTracks(int *num_tracks) = 0;
-    virtual status_t getTrack(int index, MediaSource **source) = 0;
-    virtual sp<MetaData> getTrackMetaData(int index) = 0;
+    virtual size_t countTracks() = 0;
+    virtual sp<MediaSource> getTrack(size_t index) = 0;
+    virtual sp<MetaData> getTrackMetaData(size_t index) = 0;
 
 protected:
     MediaExtractor() {}
+    virtual ~MediaExtractor() {}
 
 private:
     MediaExtractor(const MediaExtractor &);

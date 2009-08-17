@@ -28,16 +28,17 @@ class String8;
 class MP3Extractor : public MediaExtractor {
 public:
     // Extractor assumes ownership of "source".
-    MP3Extractor(DataSource *source);
+    MP3Extractor(const sp<DataSource> &source);
 
-    ~MP3Extractor();
+    size_t countTracks();
+    sp<MediaSource> getTrack(size_t index);
+    sp<MetaData> getTrackMetaData(size_t index);
 
-    status_t countTracks(int *num_tracks);
-    status_t getTrack(int index, MediaSource **source);
-    sp<MetaData> getTrackMetaData(int index);
+protected:
+    virtual ~MP3Extractor();
 
 private:
-    DataSource *mDataSource;
+    sp<DataSource> mDataSource;
     off_t mFirstFramePos;
     sp<MetaData> mMeta;
     uint32_t mFixedHeader;
@@ -46,7 +47,8 @@ private:
     MP3Extractor &operator=(const MP3Extractor &);
 };
 
-bool SniffMP3(DataSource *source, String8 *mimeType, float *confidence);
+bool SniffMP3(
+        const sp<DataSource> &source, String8 *mimeType, float *confidence);
 
 }  // namespace android
 

@@ -132,7 +132,7 @@ bool OMXClient::onOMXMessage(const omx_message &msg) {
     }
 
     Mutex::Autolock autoLock(mLock);
-    ssize_t index = mObservers.indexOfKey(msg.u.buffer_data.node);
+    ssize_t index = mObservers.indexOfKey(msg.node);
 
     if (index >= 0) {
         mObservers.editValueAt(index)->postMessage(msg);

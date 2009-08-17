@@ -25,6 +25,7 @@
 #include <media/stagefright/MPEG4Writer.h>
 #include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXClient.h>
+#include <media/stagefright/OMXCodec.h>
 #include <media/stagefright/OMXDecoder.h>
 
 using namespace android;
@@ -32,18 +33,38 @@ using namespace android;
 class DummySource : public MediaSource {
 public:
     DummySource(int width, int height)
-        : mSize((width * height * 3) / 2) {
+        : mWidth(width),
+          mHeight(height),
+          mSize((width * height * 3) / 2) {
         mGroup.add_buffer(new MediaBuffer(mSize));
     }
 
-    virtual ::status_t getMaxSampleSize(size_t *max_size) {
-        *max_size = mSize;
-        return ::OK;
+    virtual sp<MetaData> getFormat() {
+        sp<MetaData> meta = new MetaData;
+        meta->setInt32(kKeyWidth, mWidth);
+        meta->setInt32(kKeyHeight, mHeight);
+        meta->setCString(kKeyMIMEType, "video/raw");
+
+        return meta;
     }
 
-    virtual ::status_t read(MediaBuffer **buffer) {
-        ::status_t err = mGroup.acquire_buffer(buffer);
-        if (err != ::OK) {
+    virtual status_t getMaxSampleSize(size_t *max_size) {
+        *max_size = mSize;
+        return OK;
+    }
+
+    virtual status_t start(MetaData *params) {
+        return OK;
+    }
+
+    virtual status_t stop() {
+        return OK;
+    }
+
+    virtual status_t read(
+            MediaBuffer **buffer, const MediaSource::ReadOptions *options) {
+        status_t err = mGroup.acquire_buffer(buffer);
+        if (err != OK) {
             return err;
         }
 
@@ -51,34 +72,34 @@ public:
         memset((*buffer)->data(), x, mSize);
         (*buffer)->set_range(0, mSize);
 
-        return ::OK;
+        return OK;
     }
+
+protected:
+    virtual ~DummySource() {}
 
 private:
     MediaBufferGroup mGroup;
+    int mWidth, mHeight;
     size_t mSize;
 
     DummySource(const DummySource &);
     DummySource &operator=(const DummySource &);
 };
 
-int main(int argc, char **argv) {
-    android::ProcessState::self()->startThreadPool();
+#define USE_OMX_CODEC   1
 
-#if 1
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s filename\n", argv[0]);
-        return 1;
-    }
+sp<MediaSource> createSource(const char *filename) {
+    sp<MediaSource> source;
 
-    MPEG4Extractor extractor(new MmapSource(argv[1]));
-    int num_tracks;
-    assert(extractor.countTracks(&num_tracks) == ::OK);
+    sp<MPEG4Extractor> extractor =
+        new MPEG4Extractor(new MmapSource(filename));
 
-    MediaSource *source = NULL;
+    size_t num_tracks = extractor->countTracks();
+
     sp<MetaData> meta;
-    for (int i = 0; i < num_tracks; ++i) {
-        meta = extractor.getTrackMetaData(i);
+    for (size_t i = 0; i < num_tracks; ++i) {
+        meta = extractor->getTrackMetaData(i);
         assert(meta.get() != NULL);
 
         const char *mime;
@@ -90,48 +111,75 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        if (extractor.getTrack(i, &source) != ::OK) {
-            source = NULL;
-            continue;
-        }
+        source = extractor->getTrack(i);
         break;
     }
 
-    if (source == NULL) {
-        fprintf(stderr, "Unable to find a suitable video track.\n");
+    return source;
+}
+
+int main(int argc, char **argv) {
+    android::ProcessState::self()->startThreadPool();
+
+#if 1
+    if (argc != 2) {
+        fprintf(stderr, "usage: %s filename\n", argv[0]);
         return 1;
     }
 
     OMXClient client;
     assert(client.connect() == android::OK);
 
-    OMXDecoder *decoder = OMXDecoder::Create(&client, meta);
-    decoder->setSource(source);
+#if 0
+    sp<MediaSource> source = createSource(argv[1]);
+
+    if (source == NULL) {
+        fprintf(stderr, "Unable to find a suitable video track.\n");
+        return 1;
+    }
+
+    sp<MetaData> meta = source->getFormat();
+
+#if USE_OMX_CODEC
+    sp<OMXCodec> decoder = OMXCodec::Create(
+            client.interface(), meta, false /* createEncoder */, source);
+#else
+    sp<OMXDecoder> decoder = OMXDecoder::Create(
+            &client, meta, false /* createEncoder */, source);
+#endif
 
     int width, height;
     bool success = meta->findInt32(kKeyWidth, &width);
     success = success && meta->findInt32(kKeyHeight, &height);
     assert(success);
+#else
+    int width = 320;
+    int height = 240;
+    sp<MediaSource> decoder = new DummySource(width, height);
+#endif
 
     sp<MetaData> enc_meta = new MetaData;
-    enc_meta->setCString(kKeyMIMEType, "video/3gpp");
-    // enc_meta->setCString(kKeyMIMEType, "video/mp4v-es");
+    // enc_meta->setCString(kKeyMIMEType, "video/3gpp");
+    enc_meta->setCString(kKeyMIMEType, "video/mp4v-es");
     enc_meta->setInt32(kKeyWidth, width);
     enc_meta->setInt32(kKeyHeight, height);
 
-    OMXDecoder *encoder =
-        OMXDecoder::Create(&client, enc_meta, true /* createEncoder */);
-
-    encoder->setSource(decoder);
-    // encoder->setSource(meta, new DummySource(width, height));
+#if USE_OMX_CODEC
+    sp<OMXCodec> encoder =
+        OMXCodec::Create(
+                client.interface(), enc_meta, true /* createEncoder */, decoder);
+#else
+    sp<OMXDecoder> encoder = OMXDecoder::Create(
+            &client, enc_meta, true /* createEncoder */, decoder);
+#endif
 
 #if 1
-    MPEG4Writer writer("/sdcard/output.mp4");
-    writer.addSource(enc_meta, encoder);
-    writer.start();
+    sp<MPEG4Writer> writer = new MPEG4Writer("/sdcard/output.mp4");
+    writer->addSource(enc_meta, encoder);
+    writer->start();
     sleep(20);
     printf("stopping now.\n");
-    writer.stop();
+    writer->stop();
 #else
     encoder->start();
 
@@ -146,16 +194,7 @@ int main(int argc, char **argv) {
     encoder->stop();
 #endif
 
-    delete encoder;
-    encoder = NULL;
-
-    delete decoder;
-    decoder = NULL;
-
     client.disconnect();
-
-    delete source;
-    source = NULL;
 #endif
 
 #if 0

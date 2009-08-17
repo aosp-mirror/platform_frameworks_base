@@ -32,7 +32,8 @@ namespace android {
 
 class MPEG4Writer::Track {
 public:
-    Track(MPEG4Writer *owner, const sp<MetaData> &meta, MediaSource *source);
+    Track(MPEG4Writer *owner,
+          const sp<MetaData> &meta, const sp<MediaSource> &source);
     ~Track();
 
     void start();
@@ -44,7 +45,7 @@ public:
 private:
     MPEG4Writer *mOwner;
     sp<MetaData> mMeta;
-    MediaSource *mSource;
+    sp<MediaSource> mSource;
     volatile bool mDone;
 
     pthread_t mThread;
@@ -83,7 +84,8 @@ MPEG4Writer::~MPEG4Writer() {
     mTracks.clear();
 }
 
-void MPEG4Writer::addSource(const sp<MetaData> &meta, MediaSource *source) {
+void MPEG4Writer::addSource(
+        const sp<MetaData> &meta, const sp<MediaSource> &source) {
     Track *track = new Track(this, meta, source);
     mTracks.push_back(track);
 }
@@ -255,7 +257,8 @@ void MPEG4Writer::write(const void *data, size_t size) {
 ////////////////////////////////////////////////////////////////////////////////
 
 MPEG4Writer::Track::Track(
-        MPEG4Writer *owner, const sp<MetaData> &meta, MediaSource *source)
+        MPEG4Writer *owner,
+        const sp<MetaData> &meta, const sp<MediaSource> &source)
     : mOwner(owner),
       mMeta(meta),
       mSource(source),

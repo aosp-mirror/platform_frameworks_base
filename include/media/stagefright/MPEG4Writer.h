@@ -30,13 +30,12 @@ class MediaBuffer;
 class MediaSource;
 class MetaData;
 
-class MPEG4Writer {
+class MPEG4Writer : public RefBase {
 public:
     MPEG4Writer(const char *filename);
-    ~MPEG4Writer();
 
     // Caller retains ownership of both meta and source.
-    void addSource(const sp<MetaData> &meta, MediaSource *source);
+    void addSource(const sp<MetaData> &meta, const sp<MediaSource> &source);
     void start();
     void stop();
 
@@ -49,6 +48,9 @@ public:
     void writeFourcc(const char *fourcc);
     void write(const void *data, size_t size);
     void endBox();
+
+protected:
+    virtual ~MPEG4Writer();
 
 private:
     class Track;

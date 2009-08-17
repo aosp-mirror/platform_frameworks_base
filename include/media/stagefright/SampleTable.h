@@ -22,17 +22,16 @@
 #include <stdint.h>
 
 #include <media/stagefright/MediaErrors.h>
+#include <utils/RefBase.h>
 #include <utils/threads.h>
 
 namespace android {
 
 class DataSource;
 
-class SampleTable {
+class SampleTable : public RefBase {
 public:
-    // Caller retains ownership of "source".
-    SampleTable(DataSource *source);
-    ~SampleTable();
+    SampleTable(const sp<DataSource> &source);
 
     // type can be 'stco' or 'co64'.
     status_t setChunkOffsetParams(
@@ -76,8 +75,11 @@ public:
     status_t findClosestSyncSample(
             uint32_t start_sample_index, uint32_t *sample_index);
 
+protected:
+    ~SampleTable();
+
 private:
-    DataSource *mDataSource;
+    sp<DataSource> mDataSource;
     Mutex mLock;
 
     off_t mChunkOffsetOffset;

@@ -27,7 +27,8 @@
 namespace android {
 
 // static
-MediaExtractor *MediaExtractor::Create(DataSource *source, const char *mime) {
+sp<MediaExtractor> MediaExtractor::Create(
+        const sp<DataSource> &source, const char *mime) {
     String8 tmp;
     if (mime == NULL) {
         float confidence;

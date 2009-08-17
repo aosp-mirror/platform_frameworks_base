@@ -31,10 +31,10 @@ class AudioTrack;
 class AudioPlayer : public TimeSource {
 public:
     AudioPlayer(const sp<MediaPlayerBase::AudioSink> &audioSink);
-    ~AudioPlayer();
+    virtual ~AudioPlayer();
 
     // Caller retains ownership of "source".
-    void setSource(MediaSource *source);
+    void setSource(const sp<MediaSource> &source);
 
     // Return time in us.
     virtual int64_t getRealTimeUs();
@@ -56,7 +56,7 @@ public:
     status_t seekTo(int64_t time_us);
 
 private:
-    MediaSource *mSource;
+    sp<MediaSource> mSource;
     AudioTrack *mAudioTrack;
 
     MediaBuffer *mInputBuffer;
