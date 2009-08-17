@@ -546,6 +546,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     private void initAbsListView() {
         // Setting focusable in touch mode will set the focusable property to true
+        setClickable(true);
         setFocusableInTouchMode(true);
         setWillNotDraw(false);
         setAlwaysDrawnWithCacheEnabled(false);
@@ -1433,6 +1434,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * this is a long press.
      */
     void keyPressed() {
+        if (!isEnabled() || !isClickable()) {
+            return;
+        }
+
         Drawable selector = mSelector;
         Rect selectorRect = mSelectorRect;
         if (selector != null && (isFocused() || touchModeDrawsInPressedState())
@@ -1450,8 +1455,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             Drawable d = selector.getCurrent();
             if (d != null && d instanceof TransitionDrawable) {
                 if (longClickable) {
-                    ((TransitionDrawable) d).startTransition(ViewConfiguration
-                            .getLongPressTimeout());
+                    ((TransitionDrawable) d).startTransition(
+                            ViewConfiguration.getLongPressTimeout());
                 } else {
                     ((TransitionDrawable) d).resetTransition();
                 }
@@ -1732,6 +1737,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
         case KeyEvent.KEYCODE_DPAD_CENTER:
@@ -1739,8 +1749,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (!isEnabled()) {
                 return true;
             }
-            // Long clickable items don't necessarily have to be clickable
-            if (isClickable() && (event.getRepeatCount() == 0) && isPressed() &&
+            if (isClickable() && isPressed() &&
                     mSelectedPosition >= 0 && mAdapter != null &&
                     mSelectedPosition < mAdapter.getCount()) {
 
