@@ -95,7 +95,6 @@ public class CDMAPhone extends PhoneBase {
     CdmaCallTracker mCT;
     CdmaSMSDispatcher mSMS;
     CdmaServiceStateTracker mSST;
-    CdmaDataConnectionTracker mDataConnection;
     RuimFileHandler mRuimFileHandler;
     RuimRecords mRuimRecords;
     RuimCard mRuimCard;
@@ -369,40 +368,9 @@ public class CDMAPhone extends PhoneBase {
         return mCT.backgroundCall;
     }
 
-    public String getGateway(String apnType) {
-        return mDataConnection.getGateway();
-    }
-
     public boolean handleInCallMmiCommands(String dialString) {
         Log.e(LOG_TAG, "method handleInCallMmiCommands is NOT supported in CDMA!");
         return false;
-    }
-
-    public int enableApnType(String type) {
-        // This request is mainly used to enable MMS APN
-        // In CDMA there is no need to enable/disable a different APN for MMS
-        Log.d(LOG_TAG, "Request to enableApnType("+type+")");
-        if (TextUtils.equals(type, Phone.APN_TYPE_MMS)) {
-            return Phone.APN_ALREADY_ACTIVE;
-        } else {
-            return Phone.APN_REQUEST_FAILED;
-        }
-    }
-
-    public int disableApnType(String type) {
-        // This request is mainly used to disable MMS APN
-        // In CDMA there is no need to enable/disable a different APN for MMS
-        Log.d(LOG_TAG, "Request to disableApnType("+type+")");
-        if (TextUtils.equals(type, Phone.APN_TYPE_MMS)) {
-            return Phone.APN_REQUEST_STARTED;
-        } else {
-            return Phone.APN_REQUEST_FAILED;
-        }
-    }
-
-    public String getActiveApn() {
-        Log.d(LOG_TAG, "Request to getActiveApn()");
-        return null;
     }
 
     public void
@@ -481,10 +449,6 @@ public class CDMAPhone extends PhoneBase {
         return false;
     }
 
-    public String getInterfaceName(String apnType) {
-        return mDataConnection.getInterfaceName();
-    }
-
     public CellLocation getCellLocation() {
         return mSST.cellLoc;
     }
@@ -512,10 +476,6 @@ public class CDMAPhone extends PhoneBase {
         return false;
     }
 
-    public boolean isDataConnectivityEnabled() {
-        return mDataConnection.getDataEnabled();
-    }
-
     public boolean isDataConnectivityPossible() {
         boolean noData = mDataConnection.getDataEnabled() &&
                 getDataConnectionState() == DataState.DISCONNECTED;
@@ -526,10 +486,6 @@ public class CDMAPhone extends PhoneBase {
 
     public void setLine1Number(String alphaTag, String number, Message onComplete) {
         Log.e(LOG_TAG, "setLine1Number: not possible in CDMA");
-    }
-
-    public String[] getDnsServers(String apnType) {
-        return mDataConnection.getDnsServers();
     }
 
     public IccCard getIccCard() {
@@ -582,10 +538,6 @@ public class CDMAPhone extends PhoneBase {
 
     public void unregisterForCallWaiting(Handler h) {
         mCT.unregisterForCallWaiting(h);
-    }
-
-    public String getIpAddress(String apnType) {
-        return mDataConnection.getIpAddress();
     }
 
     public void
@@ -699,14 +651,6 @@ public class CDMAPhone extends PhoneBase {
 
     public void getAvailableNetworks(Message response) {
         Log.e(LOG_TAG, "getAvailableNetworks: not possible in CDMA");
-    }
-
-    public String[] getActiveApnTypes() {
-        String[] result;
-        Log.d(LOG_TAG, "Request to getActiveApn()");
-        result = new String[1];
-        result[0] = Phone.APN_TYPE_DEFAULT;
-        return result;
     }
 
     public void setOutgoingCallerIdDisplay(int commandInterfaceCLIRMode, Message onComplete) {

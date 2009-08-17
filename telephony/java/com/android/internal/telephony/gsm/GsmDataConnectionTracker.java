@@ -63,8 +63,7 @@ import java.util.ArrayList;
  * {@hide}
  */
 public final class GsmDataConnectionTracker extends DataConnectionTracker {
-    private static final String LOG_TAG = "GSM";
-    private static final boolean DBG = true;
+    protected final String LOG_TAG = "GSM";
 
     private GSMPhone mGsmPhone;
     /**
@@ -119,30 +118,16 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private ApnSetting preferredApn = null;
 
+    /* Currently active APN */
+    protected ApnSetting mActiveApn;
+
     /**
      * pdpList holds all the PDP connection, i.e. IP Link in GPRS
      */
     private ArrayList<DataConnection> pdpList;
 
-    /** Currently requested APN type */
-    private String mRequestedApnType = Phone.APN_TYPE_DEFAULT;
-
-    /** Currently active APN */
-    private ApnSetting mActiveApn;
-
     /** Currently active PdpConnection */
     private PdpConnection mActivePdp;
-
-    private static int APN_INVALID_ID = -1;
-    private static int APN_DEFAULT_ID = 0;
-    private static int APN_MMS_ID = 1;
-    private static int APN_SUPL_ID = 2;
-    private static int APN_DUN_ID = 3;
-    private static int APN_HIPRI_ID = 4;
-    private static int APN_NUM_TYPES = 5;
-
-    private boolean[] dataEnabled = new boolean[APN_NUM_TYPES];
-    private int enabledCount = 0;
 
     /** Is packet service restricted by network */
     private boolean mIsPsRestricted = false;
@@ -293,7 +278,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if(DBG) Log.d(LOG_TAG, "GsmDataConnectionTracker finalized");
     }
 
-    void setState(State s) {
+    protected void setState(State s) {
         if (DBG) log ("setState: " + s);
         if (state != s) {
             if (s == State.INITING) { // request PDP context
@@ -317,7 +302,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
-    String[] getActiveApnTypes() {
+    public String[] getActiveApnTypes() {
         String[] result;
         if (mActiveApn != null) {
             result = mActiveApn.types;
@@ -334,87 +319,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             result = mActiveApn.apn;
         }
         return result;
-    }
-
-    protected int apnTypeToId(String type) {
-        if (TextUtils.equals(type, Phone.APN_TYPE_DEFAULT)) {
-            return APN_DEFAULT_ID;
-        } else if (TextUtils.equals(type, Phone.APN_TYPE_MMS)) {
-            return APN_MMS_ID;
-        } else if (TextUtils.equals(type, Phone.APN_TYPE_SUPL)) {
-            return APN_SUPL_ID;
-        } else if (TextUtils.equals(type, Phone.APN_TYPE_DUN)) {
-            return APN_DUN_ID;
-        } else if (TextUtils.equals(type, Phone.APN_TYPE_HIPRI)) {
-            return APN_HIPRI_ID;
-        } else {
-            return APN_INVALID_ID;
-        }
-    }
-
-    /**
-     * Ensure that we are connected to an APN of the specified type.
-     * @param type the APN type (currently the only valid values
-     * are {@link Phone#APN_TYPE_MMS} and {@link Phone#APN_TYPE_SUPL})
-     * @return the result of the operation. Success is indicated by
-     * a return value of either {@code Phone.APN_ALREADY_ACTIVE} or
-     * {@code Phone.APN_REQUEST_STARTED}. In the latter case, a broadcast
-     * will be sent by the ConnectivityManager when a connection to
-     * the APN has been established.
-     */
-    protected int enableApnType(String type) {
-        int id = apnTypeToId(type);
-        if (id == APN_INVALID_ID) {
-            return Phone.APN_REQUEST_FAILED;
-        }
-
-        // If already active, return
-        if(DBG) Log.d(LOG_TAG, "enableApnType("+type+"), isApnTypeActive = "
-                + isApnTypeActive(type) + " and state = " + state);
-        if (isApnTypeActive(type)) {
-            if (state == State.INITING) return Phone.APN_REQUEST_STARTED;
-            else if (state == State.CONNECTED) return Phone.APN_ALREADY_ACTIVE;
-        }
-
-        if (!isApnTypeAvailable(type)) {
-            return Phone.APN_TYPE_NOT_AVAILABLE;
-        }
-
-        setEnabled(id, true);
-        mRequestedApnType = type;
-        sendMessage(obtainMessage(EVENT_ENABLE_NEW_APN));
-        return Phone.APN_REQUEST_STARTED;
-    }
-
-    /**
-     * The APN of the specified type is no longer needed. Ensure that if
-     * use of the default APN has not been explicitly disabled, we are connected
-     * to the default APN.
-     * @param type the APN type. The only valid values are currently
-     * {@link Phone#APN_TYPE_MMS} and {@link Phone#APN_TYPE_SUPL}.
-     * @return
-     */
-    protected int disableApnType(String type) {
-        if (DBG) Log.d(LOG_TAG, "disableApnType("+type+")");
-        int id = apnTypeToId(type);
-        if (id == APN_INVALID_ID) {
-            return Phone.APN_REQUEST_FAILED;
-        }
-        if (isEnabled(id)) {
-            setEnabled(id, false);
-            if (isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
-                mRequestedApnType = Phone.APN_TYPE_DEFAULT;
-                if (dataEnabled[APN_DEFAULT_ID]) {
-                    return Phone.APN_ALREADY_ACTIVE;
-                } else {
-                    return Phone.APN_REQUEST_STARTED;
-                }
-            } else {
-                return Phone.APN_REQUEST_STARTED;
-            }
-        } else {
-            return Phone.APN_REQUEST_FAILED;
-        }
     }
 
     /**
@@ -439,12 +343,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return true;
     }
 
-    private boolean isApnTypeActive(String type) {
-        // TODO: to support simultaneous, mActiveApn can be a List instead.
+    @Override
+    protected boolean isApnTypeActive(String type) {
+        // TODO: support simultaneous with List instead
         return mActiveApn != null && mActiveApn.canHandleType(type);
     }
 
-    private boolean isApnTypeAvailable(String type) {
+    @Override
+    protected boolean isApnTypeAvailable(String type) {
         if (allApns != null) {
             for (ApnSetting apn : allApns) {
                 if (apn.canHandleType(type)) {
@@ -453,80 +359,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
         }
         return false;
-    }
-
-    private boolean isEnabled(int id) {
-        if (id != APN_INVALID_ID) {
-            return dataEnabled[id];
-        }
-        return false;
-    }
-
-    private void setEnabled(int id, boolean enable) {
-        if (DBG) Log.d(LOG_TAG, "setEnabled(" + id + ", " + enable + ')');
-        if (dataEnabled[id] != enable) {
-            dataEnabled[id] = enable;
-
-            if (enable) {
-                enabledCount++;
-            } else {
-                enabledCount--;
-            }
-
-            if (enabledCount == 0) {
-                setPrivateDataEnabled(false);
-            } else if (enabledCount == 1) {
-                setPrivateDataEnabled(true);
-            }
-        }
-    }
-
-    /**
-     * Prevent mobile data connections from being established,
-     * or once again allow mobile data connections. If the state
-     * toggles, then either tear down or set up data, as
-     * appropriate to match the new state.
-     * <p>This operation only affects the default APN, and if the same APN is
-     * currently being used for MMS traffic, the teardown will not happen
-     * even when {@code enable} is {@code false}.</p>
-     * @param enable indicates whether to enable ({@code true}) or disable ({@code false}) data
-     * @return {@code true} if the operation succeeded
-     */
-    public boolean setDataEnabled(boolean enable) {
-        if (DBG) Log.d(LOG_TAG, "setDataEnabled("+enable+")");
-        setEnabled(APN_DEFAULT_ID, enable);
-        return true;
-    }
-
-    private void setPrivateDataEnabled(boolean enable) {
-        if (DBG) Log.d(LOG_TAG, "setPrivateDataEnabled("+enable+")");
-        if (enable) {
-            sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
-        } else {
-            Message msg = obtainMessage(EVENT_CLEAN_UP_CONNECTION);
-            msg.arg1 = 1; // tearDown is true
-            msg.obj = Phone.REASON_DATA_DISABLED;
-            sendMessage(msg);
-        }
-    }
-
-    /**
-     * Report the current state of data connectivity (enabled or disabled) for
-     * the default APN.
-     * @return {@code false} if data connectivity has been explicitly disabled,
-     * {@code true} otherwise.
-     */
-    public boolean getDataEnabled() {
-        return dataEnabled[APN_DEFAULT_ID];
-    }
-
-    /**
-     * Report on whether data connectivity is enabled for any APN.
-     * @return {@code false} if data connectivity has been explicitly disabled,
-     * {@code true} otherwise.
-     */
-    public boolean getAnyDataEnabled() {
-        return (enabledCount != 0);
     }
 
     /**
@@ -744,7 +576,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return true;
     }
 
-    String getInterfaceName(String apnType) {
+    protected String getInterfaceName(String apnType) {
         if (mActivePdp != null
                 && (apnType == null || mActiveApn.canHandleType(apnType))) {
             return mActivePdp.getInterface();
@@ -760,7 +592,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return null;
     }
 
-    String getGateway(String apnType) {
+    public String getGateway(String apnType) {
         if (mActivePdp != null
                 && (apnType == null || mActiveApn.canHandleType(apnType))) {
             return mActivePdp.getGatewayAddress();

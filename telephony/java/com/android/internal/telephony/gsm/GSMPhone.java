@@ -102,7 +102,6 @@ public class GSMPhone extends PhoneBase {
     GsmCallTracker mCT;
     GsmServiceStateTracker mSST;
     GsmSMSDispatcher mSMS;
-    GsmDataConnectionTracker mDataConnection;
     SIMRecords mSIMRecords;
     SimCard mSimCard;
     StkService mStkService;
@@ -278,14 +277,6 @@ public class GSMPhone extends PhoneBase {
     public String
     getPhoneName() {
         return "GSM";
-    }
-
-    public String[] getActiveApnTypes() {
-        return mDataConnection.getActiveApnTypes();
-    }
-
-    public String getActiveApn() {
-        return mDataConnection.getActiveApnString();
     }
 
     public SignalStrength getSignalStrength() {
@@ -1145,36 +1136,8 @@ public class GSMPhone extends PhoneBase {
         return mDataConnection.setDataEnabled(true);
     }
 
-    public int enableApnType(String type) {
-        return mDataConnection.enableApnType(type);
-    }
-
-    public int disableApnType(String type) {
-        return mDataConnection.disableApnType(type);
-    }
-
     public boolean disableDataConnectivity() {
         return mDataConnection.setDataEnabled(false);
-    }
-
-    public String getInterfaceName(String apnType) {
-        return mDataConnection.getInterfaceName(apnType);
-    }
-
-    public String getIpAddress(String apnType) {
-        return mDataConnection.getIpAddress(apnType);
-    }
-
-    public String getGateway(String apnType) {
-        return mDataConnection.getGateway(apnType);
-    }
-
-    public String[] getDnsServers(String apnType) {
-        return mDataConnection.getDnsServers(apnType);
-    }
-
-    public boolean isDataConnectivityEnabled() {
-        return mDataConnection.getDataEnabled();
     }
 
     /**
@@ -1542,36 +1505,6 @@ public class GSMPhone extends PhoneBase {
                 }
             }
         }
-    }
-    /**
-     * simulateDataConnection
-     *
-     * simulates various data connection states. This messes with
-     * DataConnectionTracker's internal states, but doesn't actually change
-     * the underlying radio connection states.
-     *
-     * @param state Phone.DataState enum.
-     */
-    public void simulateDataConnection(Phone.DataState state) {
-        DataConnectionTracker.State dcState;
-
-        switch (state) {
-            case CONNECTED:
-                dcState = DataConnectionTracker.State.CONNECTED;
-                break;
-            case SUSPENDED:
-                dcState = DataConnectionTracker.State.CONNECTED;
-                break;
-            case DISCONNECTED:
-                dcState = DataConnectionTracker.State.FAILED;
-                break;
-            default:
-                dcState = DataConnectionTracker.State.CONNECTING;
-                break;
-        }
-
-        mDataConnection.setState(dcState);
-        notifyDataConnection(null);
     }
 
     /**

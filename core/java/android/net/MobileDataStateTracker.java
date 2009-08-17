@@ -49,7 +49,6 @@ public class MobileDataStateTracker extends NetworkStateTracker {
 
     private String mApnType;
     private boolean mEnabled;
-    private boolean mTeardownRequested;
 
     /**
      * Create a new MobileDataStateTracker
@@ -66,7 +65,6 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                 TelephonyManager.getDefault().getNetworkTypeName());
         mApnType = apnType;
         mPhoneService = null;
-        mTeardownRequested = false;
         if(netType == ConnectivityManager.TYPE_MOBILE) {
             mEnabled = true;
         } else {
@@ -81,7 +79,9 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                 "net.eth0.dns3",
                 "net.eth0.dns4",
                 "net.gprs.dns1",
-                "net.gprs.dns2"};
+                "net.gprs.dns2",
+                "net.ppp0.dns1",
+                "net.ppp0.dns2"};
 
     }
 
@@ -160,9 +160,9 @@ public class MobileDataStateTracker extends NetworkStateTracker {
 
                     switch (state) {
                     case DISCONNECTED:
-                        if(mTeardownRequested) {
+                        if(isTeardownRequested()) {
                             mEnabled = false;
-                            mTeardownRequested = false;
+                            setTeardownRequested(false);
                         }
 
                         setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
@@ -277,7 +277,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      */
     @Override
     public boolean teardown() {
-        mTeardownRequested = true;
+        setTeardownRequested(true);
         return (setEnableApn(mApnType, false) != Phone.APN_REQUEST_FAILED);
     }
 
@@ -286,7 +286,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      */
     public boolean reconnect() {
         mEnabled = true;
-        mTeardownRequested = false;
+        setTeardownRequested(false);
         mEnabled = (setEnableApn(mApnType, true) !=
                 Phone.APN_REQUEST_FAILED);
         return mEnabled;
