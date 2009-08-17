@@ -170,7 +170,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
                         // AbstractGDataSyncAdapter, which will put acore into a crash loop
                         ArrayList<Account> gaiaAccounts = new ArrayList<Account>();
                         for (Account acct: accounts) {
-                            if (acct.mType.equals("com.google.GAIA")) {
+                            if (acct.type.equals("com.google.GAIA")) {
                                 gaiaAccounts.add(acct);
                             }
                         }
@@ -693,7 +693,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
                 if (!accounts.containsKey(account)) {
                     int numDeleted;
                     numDeleted = db.delete(table, "_sync_account=? AND _sync_account_type=?",
-                            new String[]{account.mName, account.mType});
+                            new String[]{account.name, account.type});
                     if (Config.LOGV) {
                         Log.v(TAG, "deleted " + numDeleted
                                 + " records from table " + table
@@ -726,7 +726,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
             // remove the data in the synced tables
             for (String table : tables) {
                 db.delete(table, SYNC_ACCOUNT_WHERE_CLAUSE,
-                        new String[]{account.mName, account.mType});
+                        new String[]{account.name, account.type});
             }
             db.setTransactionSuccessful();
         } finally {

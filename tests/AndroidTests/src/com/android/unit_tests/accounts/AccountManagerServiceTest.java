@@ -28,7 +28,6 @@ import android.os.Bundle;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Map;
 
 public class AccountManagerServiceTest extends AndroidTestCase {
     @Override
@@ -48,9 +47,9 @@ public class AccountManagerServiceTest extends AndroidTestCase {
             if (object1 == object2) return 0;
             if (object1 == null) return 1;
             if (object2 == null) return -1;
-            int result = object1.mType.compareTo(object2.mType);
+            int result = object1.type.compareTo(object2.type);
             if (result != 0) return result;
-            return object1.mName.compareTo(object2.mName);
+            return object1.name.compareTo(object2.name);
         }
     }
 
@@ -62,16 +61,14 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         Account a12 = new Account("account1", "type2");
         Account a22 = new Account("account2", "type2");
         Account a32 = new Account("account3", "type2");
-        assertTrue(ams.addAccount(a11, "p11", null));
-        assertTrue(ams.addAccount(a12, "p12", null));
-        assertTrue(ams.addAccount(a21, "p21", null));
-        assertTrue(ams.addAccount(a22, "p22", null));
-        assertTrue(ams.addAccount(a31, "p31", null));
-        assertTrue(ams.addAccount(a32, "p32", null));
+        ams.addAccount(a11, "p11", null);
+        ams.addAccount(a12, "p12", null);
+        ams.addAccount(a21, "p21", null);
+        ams.addAccount(a22, "p22", null);
+        ams.addAccount(a31, "p31", null);
+        ams.addAccount(a32, "p32", null);
 
-        assertFalse("duplicate account insertion should fail", ams.addAccount(a32, "p", null));
-
-        Account[] accounts = ams.getAccounts();
+        Account[] accounts = ams.getAccounts(null);
         Arrays.sort(accounts, new AccountSorter());
         assertEquals(6, accounts.length);
         assertEquals(a11, accounts[0]);
@@ -88,7 +85,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals(a21, accounts[1]);
         assertEquals(a31, accounts[2]);
 
-        ams.removeAccount(a21);
+        ams.removeAccount(null, a21);
 
         accounts = ams.getAccountsByType("type1" );
         Arrays.sort(accounts, new AccountSorter());
@@ -101,8 +98,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         AccountManagerService ams = new AccountManagerService(getContext());
         Account a11 = new Account("account1", "type1");
         Account a12 = new Account("account1", "type2");
-        assertTrue(ams.addAccount(a11, "p11", null));
-        assertTrue(ams.addAccount(a12, "p12", null));
+        ams.addAccount(a11, "p11", null);
+        ams.addAccount(a12, "p12", null);
 
         assertEquals("p11", ams.getPassword(a11));
         assertEquals("p12", ams.getPassword(a12));
@@ -125,8 +122,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         u12.putString("a", "a_a12");
         u12.putString("b", "b_a12");
         u12.putString("c", "c_a12");
-        assertTrue(ams.addAccount(a11, "p11", u11));
-        assertTrue(ams.addAccount(a12, "p12", u12));
+        ams.addAccount(a11, "p11", u11);
+        ams.addAccount(a12, "p12", u12);
 
         assertEquals("a_a11", ams.getUserData(a11, "a"));
         assertEquals("b_a11", ams.getUserData(a11, "b"));
@@ -149,8 +146,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         AccountManagerService ams = new AccountManagerService(getContext());
         Account a11 = new Account("account1", "type1");
         Account a12 = new Account("account1", "type2");
-        assertTrue(ams.addAccount(a11, "p11", null));
-        assertTrue(ams.addAccount(a12, "p12", null));
+        ams.addAccount(a11, "p11", null);
+        ams.addAccount(a12, "p12", null);
 
         ams.setAuthToken(a11, "att1", "a11_att1");
         ams.setAuthToken(a11, "att2", "a11_att2");
@@ -167,7 +164,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals("a12_att3", ams.peekAuthToken(a12, "att3"));
 
         ams.setAuthToken(a11, "att3", "a11_att3b");
-        ams.invalidateAuthToken(a12.mType, "a12_att2");
+        ams.invalidateAuthToken(a12.type, "a12_att2");
 
         assertEquals("a11_att1", ams.peekAuthToken(a11, "att1"));
         assertEquals("a11_att2", ams.peekAuthToken(a11, "att2"));

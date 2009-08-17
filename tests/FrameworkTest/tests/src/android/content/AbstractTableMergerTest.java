@@ -74,8 +74,8 @@ public class AbstractTableMergerTest extends AndroidTestCase {
         if (syncVersion != null) values.put("_sync_version", syncVersion);
         if (syncId != null) values.put("_sync_id", syncId);
         if (syncAccount != null) {
-            values.put("_sync_account", syncAccount.mName);
-            values.put("_sync_account_type", syncAccount.mType);
+            values.put("_sync_account", syncAccount.name);
+            values.put("_sync_account_type", syncAccount.type);
         }
         values.put("_sync_local_id", syncLocalId);
         values.put("_sync_dirty", 0);
@@ -88,8 +88,8 @@ public class AbstractTableMergerTest extends AndroidTestCase {
         if (syncVersion != null) values.put("_sync_version", syncVersion);
         if (syncId != null) values.put("_sync_id", syncId);
         if (syncAccount != null) {
-            values.put("_sync_account", syncAccount.mName);
-            values.put("_sync_account_type", syncAccount.mType);
+            values.put("_sync_account", syncAccount.name);
+            values.put("_sync_account_type", syncAccount.type);
         }
         if (syncLocalId != null) values.put("_sync_local_id", syncLocalId);
         return values;

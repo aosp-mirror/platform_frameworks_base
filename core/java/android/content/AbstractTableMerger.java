@@ -174,7 +174,7 @@ public abstract class AbstractTableMerger
         Cursor diffsCursor = null;
         try {
             // load the local database entries, so we can merge them with the server
-            final String[] accountSelectionArgs = new String[]{account.mName, account.mType};
+            final String[] accountSelectionArgs = new String[]{account.name, account.type};
             localCursor = mDb.query(mTable, syncDirtyProjection,
                     SELECT_MARKED, accountSelectionArgs, null, null,
                     mTable + "." + _SYNC_ID);
@@ -487,7 +487,7 @@ public abstract class AbstractTableMerger
         try {
             if (deleteBySyncId) {
                 selectionArgs = new String[]{diffsCursor.getString(serverSyncIdColumn),
-                        account.mName, account.mType};
+                        account.name, account.type};
                 c = mDb.query(mTable, new String[]{BaseColumns._ID}, SELECT_BY_SYNC_ID_AND_ACCOUNT,
                         selectionArgs, null, null, null);
             } else {
@@ -534,7 +534,7 @@ public abstract class AbstractTableMerger
         SyncableContentProvider clientDiffs = mergeResult.tempContentProvider;
         if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "generating client updates");
 
-        final String[] accountSelectionArgs = new String[]{account.mName, account.mType};
+        final String[] accountSelectionArgs = new String[]{account.name, account.type};
 
         // Generate the client updates and insertions
         // Create a cursor for dirty records

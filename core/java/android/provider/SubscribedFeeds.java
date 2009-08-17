@@ -119,8 +119,8 @@ public class SubscribedFeeds {
             String authority, String service) {
         ContentValues values = new ContentValues();
         values.put(SubscribedFeeds.Feeds.FEED, feed);
-        values.put(SubscribedFeeds.Feeds._SYNC_ACCOUNT, account.mName);
-        values.put(SubscribedFeeds.Feeds._SYNC_ACCOUNT_TYPE, account.mType);
+        values.put(SubscribedFeeds.Feeds._SYNC_ACCOUNT, account.name);
+        values.put(SubscribedFeeds.Feeds._SYNC_ACCOUNT_TYPE, account.type);
         values.put(SubscribedFeeds.Feeds.AUTHORITY, authority);
         values.put(SubscribedFeeds.Feeds.SERVICE, service);
         return resolver.insert(SubscribedFeeds.Feeds.CONTENT_URI, values);
@@ -134,7 +134,7 @@ public class SubscribedFeeds {
         where.append(" AND " + SubscribedFeeds.Feeds.FEED + "=?");
         where.append(" AND " + SubscribedFeeds.Feeds.AUTHORITY + "=?");
         return resolver.delete(SubscribedFeeds.Feeds.CONTENT_URI,
-                where.toString(), new String[] {account.mName, account.mType, feed, authority});
+                where.toString(), new String[] {account.name, account.type, feed, authority});
     }
 
     public static int deleteFeeds(ContentResolver resolver,
@@ -144,7 +144,7 @@ public class SubscribedFeeds {
         where.append(" AND " + SubscribedFeeds.Feeds._SYNC_ACCOUNT_TYPE + "=?");
         where.append(" AND " + SubscribedFeeds.Feeds.AUTHORITY + "=?");
         return resolver.delete(SubscribedFeeds.Feeds.CONTENT_URI,
-                where.toString(), new String[] {account.mName, account.mType, authority});
+                where.toString(), new String[] {account.name, account.type, authority});
     }
 
     /**

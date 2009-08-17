@@ -188,6 +188,25 @@ public abstract class AbstractAccountAuthenticator {
                 response.onResult(result);
             }
         }
+
+        public void getAccountRemovalAllowed(IAccountAuthenticatorResponse response,
+                Account account) throws RemoteException {
+            checkBinderPermission();
+            try {
+                final Bundle result = AbstractAccountAuthenticator.this.getAccountRemovalAllowed(
+                    new AccountAuthenticatorResponse(response), account);
+                if (result != null) {
+                    response.onResult(result);
+                }
+            } catch (UnsupportedOperationException e) {
+                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                        "getAccountRemovalAllowed not supported");
+                return;
+            } catch (NetworkErrorException e) {
+                response.onError(Constants.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+                return;
+            }
+        }
     }
 
     private void checkBinderPermission() {
@@ -238,4 +257,10 @@ public abstract class AbstractAccountAuthenticator {
             Account account, String authTokenType, Bundle loginOptions);
     public abstract Bundle hasFeatures(AccountAuthenticatorResponse response,
             Account account, String[] features) throws NetworkErrorException;
+    public Bundle getAccountRemovalAllowed(AccountAuthenticatorResponse response,
+            Account account) throws NetworkErrorException {
+        final Bundle result = new Bundle();
+        result.putBoolean(Constants.BOOLEAN_RESULT_KEY, true);
+        return result;
+    }
 }

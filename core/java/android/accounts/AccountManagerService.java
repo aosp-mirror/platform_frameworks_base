@@ -214,10 +214,48 @@ public class AccountManagerService extends IAccountManager.Stub {
 
         long identityToken = clearCallingIdentity();
         try {
-            SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-            Cursor cursor = db.query(TABLE_ACCOUNTS, new String[]{ACCOUNTS_PASSWORD},
-                    ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
-                    new String[]{account.mName, account.mType}, null, null, null);
+            return readPasswordFromDatabase(account);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private String readPasswordFromDatabase(Account account) {
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_ACCOUNTS, new String[]{ACCOUNTS_PASSWORD},
+                ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
+                new String[]{account.name, account.type}, null, null, null);
+        try {
+            if (cursor.moveToNext()) {
+                return cursor.getString(0);
+            }
+            return null;
+        } finally {
+            cursor.close();
+        }
+    }
+
+    public String getUserData(Account account, String key) {
+        checkAuthenticateAccountsPermission(account);
+        long identityToken = clearCallingIdentity();
+        try {
+            return readUserDataFromDatabase(account, key);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private String readUserDataFromDatabase(Account account, String key) {
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        db.beginTransaction();
+        try {
+            long accountId = getAccountId(db, account);
+            if (accountId < 0) {
+                return null;
+            }
+            Cursor cursor = db.query(TABLE_EXTRAS, new String[]{EXTRAS_VALUE},
+                    EXTRAS_ACCOUNTS_ID + "=" + accountId + " AND " + EXTRAS_KEY + "=?",
+                    new String[]{key}, null, null, null);
             try {
                 if (cursor.moveToNext()) {
                     return cursor.getString(0);
@@ -227,37 +265,7 @@ public class AccountManagerService extends IAccountManager.Stub {
                 cursor.close();
             }
         } finally {
-            restoreCallingIdentity(identityToken);
-        }
-    }
-
-    public String getUserData(Account account, String key) {
-        checkAuthenticateAccountsPermission(account);
-        long identityToken = clearCallingIdentity();
-        try {
-            SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-            db.beginTransaction();
-            try {
-                long accountId = getAccountId(db, account);
-                if (accountId < 0) {
-                    return null;
-                }
-                Cursor cursor = db.query(TABLE_EXTRAS, new String[]{EXTRAS_VALUE},
-                        EXTRAS_ACCOUNTS_ID + "=" + accountId + " AND " + EXTRAS_KEY + "=?",
-                        new String[]{key}, null, null, null);
-                try {
-                    if (cursor.moveToNext()) {
-                        return cursor.getString(0);
-                    }
-                    return null;
-                } finally {
-                    cursor.close();
-                }
-            } finally {
-                db.endTransaction();
-            }
-        } finally {
-            restoreCallingIdentity(identityToken);
+            db.endTransaction();
         }
     }
 
@@ -280,39 +288,23 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
-    public Account[] getAccounts() {
-        checkReadAccountsPermission();
-        long identityToken = clearCallingIdentity();
-        try {
-            return getAccountsByType(null);
-        } finally {
-            restoreCallingIdentity(identityToken);
-        }
-    }
-
     public Account[] getAccountsByType(String accountType) {
-        checkReadAccountsPermission();
-        long identityToken = clearCallingIdentity();
-        try {
-            SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 
-            final String selection = accountType == null ? null : (ACCOUNTS_TYPE + "=?");
-            final String[] selectionArgs = accountType == null ? null : new String[]{accountType};
-            Cursor cursor = db.query(TABLE_ACCOUNTS, ACCOUNT_NAME_TYPE_PROJECTION,
-                    selection, selectionArgs, null, null, null);
-            try {
-                int i = 0;
-                Account[] accounts = new Account[cursor.getCount()];
-                while (cursor.moveToNext()) {
-                    accounts[i] = new Account(cursor.getString(1), cursor.getString(2));
-                    i++;
-                }
-                return accounts;
-            } finally {
-                cursor.close();
+        final String selection = accountType == null ? null : (ACCOUNTS_TYPE + "=?");
+        final String[] selectionArgs = accountType == null ? null : new String[]{accountType};
+        Cursor cursor = db.query(TABLE_ACCOUNTS, ACCOUNT_NAME_TYPE_PROJECTION,
+                selection, selectionArgs, null, null, null);
+        try {
+            int i = 0;
+            Account[] accounts = new Account[cursor.getCount()];
+            while (cursor.moveToNext()) {
+                accounts[i] = new Account(cursor.getString(1), cursor.getString(2));
+                i++;
             }
+            return accounts;
         } finally {
-            restoreCallingIdentity(identityToken);
+            cursor.close();
         }
     }
 
@@ -322,40 +314,44 @@ public class AccountManagerService extends IAccountManager.Stub {
         // fails if the account already exists
         long identityToken = clearCallingIdentity();
         try {
-            SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-            db.beginTransaction();
-            try {
-                long numMatches = DatabaseUtils.longForQuery(db,
-                        "select count(*) from " + TABLE_ACCOUNTS
-                                + " WHERE " + ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
-                        new String[]{account.mName, account.mType});
-                if (numMatches > 0) {
-                    return false;
-                }
-                ContentValues values = new ContentValues();
-                values.put(ACCOUNTS_NAME, account.mName);
-                values.put(ACCOUNTS_TYPE, account.mType);
-                values.put(ACCOUNTS_PASSWORD, password);
-                long accountId = db.insert(TABLE_ACCOUNTS, ACCOUNTS_NAME, values);
-                if (accountId < 0) {
-                    return false;
-                }
-                if (extras != null) {
-                    for (String key : extras.keySet()) {
-                        final String value = extras.getString(key);
-                        if (insertExtra(db, accountId, key, value) < 0) {
-                            return false;
-                        }
-                    }
-                }
-                db.setTransactionSuccessful();
-                sendAccountsChangedBroadcast();
-                return true;
-            } finally {
-                db.endTransaction();
-            }
+            return insertAccountIntoDatabase(account, password, extras);
         } finally {
             restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private boolean insertAccountIntoDatabase(Account account, String password, Bundle extras) {
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            long numMatches = DatabaseUtils.longForQuery(db,
+                    "select count(*) from " + TABLE_ACCOUNTS
+                            + " WHERE " + ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
+                    new String[]{account.name, account.type});
+            if (numMatches > 0) {
+                return false;
+            }
+            ContentValues values = new ContentValues();
+            values.put(ACCOUNTS_NAME, account.name);
+            values.put(ACCOUNTS_TYPE, account.type);
+            values.put(ACCOUNTS_PASSWORD, password);
+            long accountId = db.insert(TABLE_ACCOUNTS, ACCOUNTS_NAME, values);
+            if (accountId < 0) {
+                return false;
+            }
+            if (extras != null) {
+                for (String key : extras.keySet()) {
+                    final String value = extras.getString(key);
+                    if (insertExtra(db, accountId, key, value) < 0) {
+                        return false;
+                    }
+                }
+            }
+            db.setTransactionSuccessful();
+            sendAccountsChangedBroadcast();
+            return true;
+        } finally {
+            db.endTransaction();
         }
     }
 
@@ -367,17 +363,59 @@ public class AccountManagerService extends IAccountManager.Stub {
         return db.insert(TABLE_EXTRAS, EXTRAS_KEY, values);
     }
 
-    public void removeAccount(Account account) {
+    public void removeAccount(IAccountManagerResponse response, Account account) {
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-            db.delete(TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
-                    new String[]{account.mName, account.mType});
-            sendAccountsChangedBroadcast();
+            new RemoveAccountSession(response, account).bind();
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    private class RemoveAccountSession extends Session {
+        final Account mAccount;
+        public RemoveAccountSession(IAccountManagerResponse response, Account account) {
+            super(response, account.type, false /* expectActivityLaunch */);
+            mAccount = account;
+        }
+
+        protected String toDebugString(long now) {
+            return super.toDebugString(now) + ", removeAccount"
+                    + ", account " + mAccount;
+        }
+
+        public void run() throws RemoteException {
+            mAuthenticator.getAccountRemovalAllowed(this, mAccount);
+        }
+
+        public void onResult(Bundle result) {
+            if (result != null && result.containsKey(Constants.BOOLEAN_RESULT_KEY)
+                    && !result.containsKey(Constants.INTENT_KEY)) {
+                final boolean removalAllowed = result.getBoolean(Constants.BOOLEAN_RESULT_KEY);
+                if (removalAllowed) {
+                    removeAccount(mAccount);
+                }
+                IAccountManagerResponse response = getResponseAndClose();
+                if (response != null) {
+                    Bundle result2 = new Bundle();
+                    result2.putBoolean(Constants.BOOLEAN_RESULT_KEY, removalAllowed);
+                    try {
+                        response.onResult(result2);
+                    } catch (RemoteException e) {
+                        // ignore
+                    }
+                }
+            }
+            super.onResult(result);
+        }
+    }
+
+    private void removeAccount(Account account) {
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        db.delete(TABLE_ACCOUNTS, ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
+                new String[]{account.name, account.type});
+        sendAccountsChangedBroadcast();
     }
 
     public void invalidateAuthToken(String accountType, String authToken) {
@@ -398,6 +436,9 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     private void invalidateAuthToken(SQLiteDatabase db, String accountType, String authToken) {
+        if (authToken == null || accountType == null) {
+            return;
+        }
         Cursor cursor = db.rawQuery(
                 "SELECT " + TABLE_AUTHTOKENS + "." + AUTHTOKENS_ID
                         + ", " + TABLE_ACCOUNTS + "." + ACCOUNTS_NAME
@@ -488,7 +529,7 @@ public class AccountManagerService extends IAccountManager.Stub {
             values.put(ACCOUNTS_PASSWORD, password);
             mOpenHelper.getWritableDatabase().update(TABLE_ACCOUNTS, values,
                     ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
-                    new String[]{account.mName, account.mType});
+                    new String[]{account.name, account.type});
             sendAccountsChangedBroadcast();
         } finally {
             restoreCallingIdentity(identityToken);
@@ -509,37 +550,55 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
+    private void sendResult(IAccountManagerResponse response, Bundle bundle) {
+        if (response != null) {
+            try {
+                response.onResult(bundle);
+            } catch (RemoteException e) {
+                // if the caller is dead then there is no one to care about remote
+                // exceptions
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "failure while notifying response", e);
+                }
+            }
+        }
+    }
+
     public void setUserData(Account account, String key, String value) {
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
-            SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-            db.beginTransaction();
-            try {
-                long accountId = getAccountId(db, account);
-                if (accountId < 0) {
-                    return;
-                }
-                long extrasId = getExtrasId(db, accountId, key);
-                if (extrasId < 0 ) {
-                    extrasId = insertExtra(db, accountId, key, value);
-                    if (extrasId < 0) {
-                        return;
-                    }
-                } else {
-                    ContentValues values = new ContentValues();
-                    values.put(EXTRAS_VALUE, value);
-                    if (1 != db.update(TABLE_EXTRAS, values, EXTRAS_ID + "=" + extrasId, null)) {
-                        return;
-                    }
-
-                }
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-            }
+            writeUserdataIntoDatabase(account, key, value);
         } finally {
             restoreCallingIdentity(identityToken);
+        }
+    }
+
+    private void writeUserdataIntoDatabase(Account account, String key, String value) {
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            long accountId = getAccountId(db, account);
+            if (accountId < 0) {
+                return;
+            }
+            long extrasId = getExtrasId(db, accountId, key);
+            if (extrasId < 0 ) {
+                extrasId = insertExtra(db, accountId, key, value);
+                if (extrasId < 0) {
+                    return;
+                }
+            } else {
+                ContentValues values = new ContentValues();
+                values.put(EXTRAS_VALUE, value);
+                if (1 != db.update(TABLE_EXTRAS, values, EXTRAS_ID + "=" + extrasId, null)) {
+                    return;
+                }
+
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
     }
 
@@ -571,14 +630,14 @@ public class AccountManagerService extends IAccountManager.Stub {
                 if (authToken != null) {
                     Bundle result = new Bundle();
                     result.putString(Constants.AUTHTOKEN_KEY, authToken);
-                    result.putString(Constants.ACCOUNT_NAME_KEY, account.mName);
-                    result.putString(Constants.ACCOUNT_TYPE_KEY, account.mType);
+                    result.putString(Constants.ACCOUNT_NAME_KEY, account.name);
+                    result.putString(Constants.ACCOUNT_TYPE_KEY, account.type);
                     onResult(response, result);
                     return;
                 }
             }
 
-            new Session(response, account.mType, expectActivityLaunch) {
+            new Session(response, account.type, expectActivityLaunch) {
                 protected String toDebugString(long now) {
                     if (loginOptions != null) loginOptions.keySet();
                     return super.toDebugString(now) + ", getAuthToken"
@@ -651,7 +710,7 @@ public class AccountManagerService extends IAccountManager.Stub {
                 mContext.getText(R.string.permission_request_notification_subtitle);
         n.setLatestEventInfo(mContext,
                 mContext.getText(R.string.permission_request_notification_title),
-                String.format(subtitleFormatString.toString(), account.mName),
+                String.format(subtitleFormatString.toString(), account.name),
                 PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
         ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
                 .notify(getCredentialPermissionNotificationId(account, authTokenType, uid), n);
@@ -661,9 +720,9 @@ public class AccountManagerService extends IAccountManager.Stub {
             AccountAuthenticatorResponse response, String authTokenType, String authTokenLabel) {
         RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo =
                 mAuthenticatorCache.getServiceInfo(
-                        AuthenticatorDescription.newKey(account.mType));
+                        AuthenticatorDescription.newKey(account.type));
         if (serviceInfo == null) {
-            throw new IllegalArgumentException("unknown account type: " + account.mType);
+            throw new IllegalArgumentException("unknown account type: " + account.type);
         }
 
         final Context authContext;
@@ -671,7 +730,7 @@ public class AccountManagerService extends IAccountManager.Stub {
             authContext = mContext.createPackageContext(
                 serviceInfo.type.packageName, 0);
         } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalArgumentException("unknown account type: " + account.mType);
+            throw new IllegalArgumentException("unknown account type: " + account.type);
         }
 
         Intent intent = new Intent(mContext, GrantCredentialsPermissionActivity.class);
@@ -750,7 +809,7 @@ public class AccountManagerService extends IAccountManager.Stub {
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            new Session(response, account.mType, expectActivityLaunch) {
+            new Session(response, account.type, expectActivityLaunch) {
                 public void run() throws RemoteException {
                     mAuthenticator.confirmCredentials(this, account);
                 }
@@ -769,7 +828,7 @@ public class AccountManagerService extends IAccountManager.Stub {
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            new Session(response, account.mType, false /* expectActivityLaunch */) {
+            new Session(response, account.type, false /* expectActivityLaunch */) {
                 public void run() throws RemoteException {
                     mAuthenticator.confirmPassword(this, account, password);
                 }
@@ -789,7 +848,7 @@ public class AccountManagerService extends IAccountManager.Stub {
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            new Session(response, account.mType, expectActivityLaunch) {
+            new Session(response, account.type, expectActivityLaunch) {
                 public void run() throws RemoteException {
                     mAuthenticator.updateCredentials(this, account, authTokenType, loginOptions);
                 }
@@ -898,10 +957,21 @@ public class AccountManagerService extends IAccountManager.Stub {
                     + ", " + (mFeatures != null ? TextUtils.join(",", mFeatures) : null);
         }
     }
-    public void getAccountsByTypeAndFeatures(IAccountManagerResponse response,
+
+    public Account[] getAccounts(String type) {
+        checkReadAccountsPermission();
+        long identityToken = clearCallingIdentity();
+        try {
+            return getAccountsByType(type);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    public void getAccountsByFeatures(IAccountManagerResponse response,
             String type, String[] features) {
         checkReadAccountsPermission();
-        if (type == null) {
+        if (features != null && type == null) {
             if (response != null) {
                 try {
                     response.onError(Constants.ERROR_CODE_BAD_ARGUMENTS, "type is null");
@@ -913,6 +983,10 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
         long identityToken = clearCallingIdentity();
         try {
+            if (features == null || features.length == 0) {
+                getAccountsByType(type);
+                return;
+            }
             new GetAccountsByTypeAndFeatureSession(response, type, features).bind();
         } finally {
             restoreCallingIdentity(identityToken);
@@ -925,7 +999,7 @@ public class AccountManagerService extends IAccountManager.Stub {
 
     private long getAccountId(SQLiteDatabase db, Account account) {
         Cursor cursor = db.query(TABLE_ACCOUNTS, new String[]{ACCOUNTS_ID},
-                "name=? AND type=?", new String[]{account.mName, account.mType}, null, null, null);
+                "name=? AND type=?", new String[]{account.name, account.type}, null, null, null);
         try {
             if (cursor.moveToNext()) {
                 return cursor.getLong(0);
@@ -1401,7 +1475,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     private boolean permissionIsGranted(Account account, String authTokenType, int callerUid) {
-        final boolean fromAuthenticator = hasAuthenticatorUid(account.mType, callerUid);
+        final boolean fromAuthenticator = hasAuthenticatorUid(account.type, callerUid);
         final boolean hasExplicitGrants = hasExplicitlyGrantedPermission(account, authTokenType);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "checkGrantsOrCallingUidAgainstAuthenticator: caller uid "
@@ -1416,7 +1490,9 @@ public class AccountManagerService extends IAccountManager.Stub {
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo :
                 mAuthenticatorCache.getAllServices()) {
             if (serviceInfo.type.type.equals(accountType)) {
-                return serviceInfo.uid == callingUid;
+                return (serviceInfo.uid == callingUid) ||
+                        (mContext.getPackageManager().checkSignatures(serviceInfo.uid, callingUid)
+                                == PackageManager.SIGNATURE_MATCH);
             }
         }
         return false;
@@ -1428,7 +1504,7 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         String[] args = {String.valueOf(Binder.getCallingUid()), authTokenType,
-                account.mName, account.mType};
+                account.name, account.type};
         final boolean permissionGranted =
                 DatabaseUtils.longForQuery(db, COUNT_OF_MATCHING_GRANTS, args) != 0;
         if (!permissionGranted && isDebuggableMonkeyBuild) {
@@ -1444,7 +1520,7 @@ public class AccountManagerService extends IAccountManager.Stub {
 
     private void checkCallingUidAgainstAuthenticator(Account account) {
         final int uid = Binder.getCallingUid();
-        if (!hasAuthenticatorUid(account.mType, uid)) {
+        if (!hasAuthenticatorUid(account.type, uid)) {
             String msg = "caller uid " + uid + " is different than the authenticator's uid";
             Log.w(TAG, msg);
             throw new SecurityException(msg);

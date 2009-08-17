@@ -70,4 +70,9 @@ oneway interface IAccountAuthenticator {
      */
     void hasFeatures(in IAccountAuthenticatorResponse response, in Account account, 
         in String[] features);
+
+    /**
+     * Gets whether or not the account is allowed to be removed.
+     */
+    void getAccountRemovalAllowed(in IAccountAuthenticatorResponse response, in Account account);
 }
