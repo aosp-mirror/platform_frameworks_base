@@ -1100,6 +1100,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     public boolean sendExtraCommand(String provider, String command, Bundle extras) {
+        if (provider == null) {
+            // throw NullPointerException to remain compatible with previous implementation
+            throw new NullPointerException();
+        }
+
         // first check for permission to the provider
         checkPermissionsSafe(provider);
         // and check for ACCESS_LOCATION_EXTRA_COMMANDS
