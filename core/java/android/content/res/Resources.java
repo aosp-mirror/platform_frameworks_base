@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.pm.ApplicationInfo;
+import android.graphics.BitmapFactory;
 import android.graphics.Movie;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
@@ -1707,7 +1708,8 @@ public class Resources {
                         InputStream is = mAssets.openNonAsset(
                                 value.assetCookie, file, AssetManager.ACCESS_BUFFER);
         //                System.out.println("Opened file " + file + ": " + is);
-                        dr = Drawable.createFromResourceStream(this, value, is, file);
+                        dr = Drawable.createFromResourceStream(this, value, is,
+                                file, null);
                         is.close();
         //                System.out.println("Created stream: " + dr);
                     } catch (Exception e) {

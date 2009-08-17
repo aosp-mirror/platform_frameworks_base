@@ -73,7 +73,7 @@ public class BitmapFactory {
         public Bitmap.Config inPreferredConfig;
 
         /**
-         * If dither is true, the decoder will atttempt to dither the decoded
+         * If dither is true, the decoder will attempt to dither the decoded
          * image.
          */
         public boolean inDither;
@@ -452,6 +452,10 @@ public class BitmapFactory {
             bm = nativeDecodeStream(is, tempStorage, outPadding, opts);
         }
 
+        return finishDecode(bm, outPadding, opts);
+    }
+
+    private static Bitmap finishDecode(Bitmap bm, Rect outPadding, Options opts) {
         if (bm == null || opts == null) {
             return bm;
         }
@@ -487,7 +491,7 @@ public class BitmapFactory {
         
         return bm;
     }
-
+    
     /**
      * Decode an input stream into a bitmap. If the input stream is null, or
      * cannot be used to decode a bitmap, the function returns null.
@@ -507,7 +511,7 @@ public class BitmapFactory {
     /**
      * Decode a bitmap from the file descriptor. If the bitmap cannot be decoded
      * return null. The position within the descriptor will not be changed when
-     * this returns, so the descriptor can be used again as is.
+     * this returns, so the descriptor can be used again as-is.
      *
      * @param fd The file descriptor containing the bitmap data to decode
      * @param outPadding If not null, return the padding rect for the bitmap if
@@ -524,13 +528,15 @@ public class BitmapFactory {
                 int mappedlength = MemoryFile.getMappedSize(fd);
                 MemoryFile file = new MemoryFile(fd, mappedlength, "r");
                 InputStream is = file.getInputStream();
-                return decodeStream(is, outPadding, opts);
+                Bitmap bm = decodeStream(is, outPadding, opts);
+                return finishDecode(bm, outPadding, opts);
             }
         } catch (IOException ex) {
             // invalid filedescriptor, no need to call nativeDecodeFileDescriptor()
             return null;
         }
-        return nativeDecodeFileDescriptor(fd, outPadding, opts);
+        Bitmap bm = nativeDecodeFileDescriptor(fd, outPadding, opts);
+        return finishDecode(bm, outPadding, opts);
     }
 
     /**
