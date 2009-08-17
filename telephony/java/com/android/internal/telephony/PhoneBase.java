@@ -109,6 +109,7 @@ public abstract class PhoneBase implements Phone {
     public CommandsInterface mCM;
     protected IccFileHandler mIccFileHandler;
     boolean mDnsCheckDisabled = false;
+    public DataConnectionTracker mDataConnection;
 
     /**
      * Set a system property, unless we're in unit test mode
@@ -824,4 +825,71 @@ public abstract class PhoneBase implements Phone {
         // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
          Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
      }
+
+    public String getInterfaceName(String apnType) {
+        return mDataConnection.getInterfaceName(apnType);
+    }
+
+    public String getIpAddress(String apnType) {
+        return mDataConnection.getIpAddress(apnType);
+    }
+
+    public boolean isDataConnectivityEnabled() {
+        return mDataConnection.getDataEnabled();
+    }
+
+    public String getGateway(String apnType) {
+        return mDataConnection.getGateway(apnType);
+    }
+
+    public String[] getDnsServers(String apnType) {
+        return mDataConnection.getDnsServers(apnType);
+    }
+
+    public String[] getActiveApnTypes() {
+        return mDataConnection.getActiveApnTypes();
+    }
+
+    public String getActiveApn() {
+        return mDataConnection.getActiveApnString();
+    }
+
+    public int enableApnType(String type) {
+        return mDataConnection.enableApnType(type);
+    }
+
+    public int disableApnType(String type) {
+        return mDataConnection.disableApnType(type);
+    }
+
+    /**
+     * simulateDataConnection
+     *
+     * simulates various data connection states. This messes with
+     * DataConnectionTracker's internal states, but doesn't actually change
+     * the underlying radio connection states.
+     *
+     * @param state Phone.DataState enum.
+     */
+    public void simulateDataConnection(Phone.DataState state) {
+        DataConnectionTracker.State dcState;
+
+        switch (state) {
+            case CONNECTED:
+                dcState = DataConnectionTracker.State.CONNECTED;
+                break;
+            case SUSPENDED:
+                dcState = DataConnectionTracker.State.CONNECTED;
+                break;
+            case DISCONNECTED:
+                dcState = DataConnectionTracker.State.FAILED;
+                break;
+            default:
+                dcState = DataConnectionTracker.State.CONNECTING;
+                break;
+        }
+
+        mDataConnection.setState(dcState);
+        notifyDataConnection(null);
+    }
 }
