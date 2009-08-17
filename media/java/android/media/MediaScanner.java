@@ -720,6 +720,11 @@ public class MediaScanner
                         values.put(Images.Media.LATITUDE, latlng[0]);
                         values.put(Images.Media.LONGITUDE, latlng[1]);
                     }
+
+                    long time = ExifInterface.getDateTime(exifData);
+                    if (time != -1) {
+                        values.put(Images.Media.DATE_TAKEN, time);
+                    }
                 }
             }
 
