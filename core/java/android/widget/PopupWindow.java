@@ -817,6 +817,7 @@ public class PopupWindow {
      * @param p the layout parameters of the popup's content view
      */
     private void invokePopup(WindowManager.LayoutParams p) {
+        p.packageName = mContext.getPackageName();
         mWindowManager.addView(mPopupView, p);
     }
 
