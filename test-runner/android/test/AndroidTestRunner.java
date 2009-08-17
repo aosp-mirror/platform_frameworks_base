@@ -158,7 +158,7 @@ public class AndroidTestRunner extends BaseTestRunner {
             mTestResult.addListener(testListener);
         }
 
-        Context testContext = mInstrumentation.getContext();
+        Context testContext = mInstrumentation == null ? mContext : mInstrumentation.getContext();
         for (TestCase testCase : mTestCases) {
             setContextIfAndroidTestCase(testCase, mContext, testContext);
             setInstrumentationIfInstrumentationTestCase(testCase, mInstrumentation);
