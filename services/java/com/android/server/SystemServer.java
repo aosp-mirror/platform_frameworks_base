@@ -92,6 +92,7 @@ class ServerThread extends Thread {
         BluetoothDeviceService bluetooth = null;
         BluetoothA2dpService bluetoothA2dp = null;
         HeadsetObserver headset = null;
+        DockObserver dock = null;
 
         // Critical services...
         try {
@@ -323,6 +324,14 @@ class ServerThread extends Thread {
                 headset = new HeadsetObserver(context);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting HeadsetObserver", e);
+            }
+
+            try {
+                Log.i(TAG, "Starting DockObserver");
+                // Listen for dock station changes
+                dock = new DockObserver(context);
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure starting DockObserver", e);
             }
 
             try {
