@@ -2521,7 +2521,7 @@ public class Activity extends ContextThemeWrapper
      * no extra data is required.
      * @param globalSearch If false, this will only launch the search that has been specifically
      * defined by the application (which is usually defined as a local search).  If no default 
-     * search is defined in the current application or activity, no search will be launched.
+     * search is defined in the current application or activity, global search will be launched.
      * If true, this will always launch a platform-global (e.g. web-based) search instead.
      * 
      * @see android.app.SearchManager
