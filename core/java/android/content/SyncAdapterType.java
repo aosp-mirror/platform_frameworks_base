@@ -27,6 +27,7 @@ import android.os.Parcel;
 public class SyncAdapterType implements Parcelable {
     public final String authority;
     public final String accountType;
+    public final boolean isUserFacing = true; // TODO: implement logic to set this
 
     public SyncAdapterType(String authority, String accountType) {
         if (TextUtils.isEmpty(authority)) {

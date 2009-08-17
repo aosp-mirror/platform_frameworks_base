@@ -1015,7 +1015,7 @@ public abstract class ContentResolver {
      * Check if this account/provider is syncable.
      * @return >0 if it is syncable, 0 if not, and <0 if the state isn't known yet.
      */
-    public int getIsSyncable(Account account, String authority) {
+    public static int getIsSyncable(Account account, String authority) {
         try {
             return getContentService().getIsSyncable(account, authority);
         } catch (RemoteException e) {
@@ -1027,7 +1027,7 @@ public abstract class ContentResolver {
      * Set whether this account/provider is syncable.
      * @param syncable >0 denotes syncable, 0 means not syncable, <0 means unknown
      */
-    public void setIsSyncable(Account account, String authority, int syncable) {
+    public static void setIsSyncable(Account account, String authority, int syncable) {
         try {
             getContentService().setIsSyncable(account, authority, syncable);
         } catch (RemoteException e) {
