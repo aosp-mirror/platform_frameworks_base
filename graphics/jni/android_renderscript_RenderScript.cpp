@@ -825,15 +825,15 @@ nScriptSetTimeZone(JNIEnv *_env, jobject _this, jint script, jbyteArray timeZone
 }
 
 static void
-nScriptSetType(JNIEnv *_env, jobject _this, jint type, jstring _str, jint slot)
+nScriptSetType(JNIEnv *_env, jobject _this, jint type, jboolean writable, jstring _str, jint slot)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCAddType, con(%p), type(%p), slot(%i)", con, (RsType)type, slot);
+    LOG_API("nScriptCAddType, con(%p), type(%p), writable(%i), slot(%i)", con, (RsType)type, writable, slot);
     const char* n = NULL;
     if (_str) {
         n = _env->GetStringUTFChars(_str, NULL);
     }
-    rsScriptSetType((RsType)type, slot, n);
+    rsScriptSetType((RsType)type, slot, writable, n);
     if (n) {
         _env->ReleaseStringUTFChars(_str, n);
     }
@@ -1381,7 +1381,7 @@ static JNINativeMethod methods[] = {
 {"nScriptSetClearDepth",           "(IF)V",                                (void*)nScriptSetClearDepth },
 {"nScriptSetClearStencil",         "(II)V",                                (void*)nScriptSetClearStencil },
 {"nScriptSetTimeZone",             "(I[B)V",                               (void*)nScriptSetTimeZone },
-{"nScriptSetType",                 "(ILjava/lang/String;I)V",              (void*)nScriptSetType },
+{"nScriptSetType",                 "(IZLjava/lang/String;I)V",             (void*)nScriptSetType },
 {"nScriptSetRoot",                 "(Z)V",                                 (void*)nScriptSetRoot },
 
 {"nScriptCBegin",                  "()V",                                  (void*)nScriptCBegin },

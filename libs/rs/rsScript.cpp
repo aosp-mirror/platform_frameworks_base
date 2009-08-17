@@ -76,11 +76,12 @@ void rsi_ScriptSetClearStencil(Context * rsc, RsScript vs, uint32_t v)
     s->mEnviroment.mClearStencil = v;
 }
 
-void rsi_ScriptSetType(Context * rsc, RsType vt, uint32_t slot, const char *name)
+void rsi_ScriptSetType(Context * rsc, RsType vt, uint32_t slot, bool writable, const char *name)
 {
     ScriptCState *ss = &rsc->mScriptC;
     const Type *t = static_cast<const Type *>(vt);
     ss->mConstantBufferTypes[slot].set(t);
+    ss->mSlotWritable[slot] = writable;
     if (name) {
         ss->mSlotNames[slot].setTo(name);
     } else {

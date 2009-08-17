@@ -24,6 +24,7 @@ public class Script extends BaseObj {
 
     boolean mIsRoot;
     Type[] mTypes;
+    boolean[] mWritable;
 
     Script(int id, RenderScript rs) {
         super(rs);
@@ -67,11 +68,13 @@ public class Script extends BaseObj {
         boolean mIsRoot = false;
         Type[] mTypes;
         String[] mNames;
+        boolean[] mWritable;
 
         Builder(RenderScript rs) {
             mRS = rs;
             mTypes = new Type[MAX_SLOT];
             mNames = new String[MAX_SLOT];
+            mWritable = new boolean[MAX_SLOT];
         }
 
         public void setType(Type t, int slot) {
@@ -84,11 +87,15 @@ public class Script extends BaseObj {
             mNames[slot] = name;
         }
 
+        public void setType(boolean writable, int slot) {
+            mWritable[slot] = writable;
+        }
+
         void transferCreate() {
             mRS.nScriptSetRoot(mIsRoot);
             for(int ct=0; ct < mTypes.length; ct++) {
                 if(mTypes[ct] != null) {
-                    mRS.nScriptSetType(mTypes[ct].mID, mNames[ct], ct);
+                    mRS.nScriptSetType(mTypes[ct].mID, mWritable[ct], mNames[ct], ct);
                 }
             }
         }

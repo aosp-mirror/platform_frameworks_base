@@ -93,6 +93,7 @@ void ScriptCState::clear()
     for (uint32_t ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
         mConstantBufferTypes[ct].clear();
         mSlotNames[ct].setTo("");
+        mSlotWritable[ct] = false;
     }
 
     memset(&mEnviroment, 0, sizeof(mEnviroment));
@@ -341,6 +342,7 @@ RsScript rsi_ScriptCCreate(Context * rsc)
     for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
         s->mTypes[ct].set(ss->mConstantBufferTypes[ct].get());
         s->mSlotNames[ct] = ss->mSlotNames[ct];
+        s->mSlotWritable[ct] = ss->mSlotWritable[ct];
     }
 
     ss->clear();

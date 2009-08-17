@@ -61,6 +61,7 @@ public:
     ObjectBaseRef<Allocation> mSlots[MAX_SCRIPT_BANKS];
     ObjectBaseRef<const Type> mTypes[MAX_SCRIPT_BANKS];
     String8 mSlotNames[MAX_SCRIPT_BANKS];
+    bool mSlotWritable[MAX_SCRIPT_BANKS];
 
     virtual bool run(Context *, uint32_t launchID) = 0;
 };
