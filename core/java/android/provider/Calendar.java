@@ -473,6 +473,39 @@ public final class Calendar {
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String HAS_ATTENDEE_DATA = "hasAttendeeData";
+
+        /**
+         * Whether guests can modify the event.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String GUESTS_CAN_MODIFY = "guestsCanModify";
+
+        /**
+         * Whether guests can invite other guests.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String GUESTS_CAN_INVITE_OTHERS = "guestsCanInviteOthers";
+
+        /**
+         * Whether guests can see the list of attendees.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String GUESTS_CAN_SEE_GUESTS = "guestsCanSeeGuests";
+
+        /**
+         * Email of the organizer (owner) of the event.
+         * <P>Type: STRING</P>
+         */
+        public static final String ORGANIZER = "organizer";
+
+        /**
+         * Whether the user can invite others to the event.
+         * The GUESTS_CAN_INVITE_OTHERS is a setting that applies to an arbitrary guest,
+         * while CAN_INVITE_OTHERS indicates if the user can invite others (either through
+         * GUESTS_CAN_INVITE_OTHERS or because the user has modify access to the event).
+         * <P>Type: INTEGER (boolean, readonly)</P>
+         */
+        public static final String CAN_INVITE_OTHERS = "canInviteOthers";
     }
 
     /**
