@@ -70,6 +70,7 @@ public:
 
     ObjectBaseRef<const Type> mConstantBufferTypes[MAX_SCRIPT_BANKS];
     String8 mSlotNames[MAX_SCRIPT_BANKS];
+    bool mSlotWritable[MAX_SCRIPT_BANKS];
 
     void clear();
     void runCompiler(Context *rsc);

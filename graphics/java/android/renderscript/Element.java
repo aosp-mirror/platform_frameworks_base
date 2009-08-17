@@ -223,6 +223,52 @@ public class Element extends BaseObj {
             return this;
         }
 
+        public Builder addFloat(Element.DataKind dk) {
+            add(DataType.FLOAT, dk, false, 32, null);
+            return this;
+        }
+
+        public Builder addFloat(Element.DataKind dk, String name) {
+            add(DataType.FLOAT, dk, false, 32, name);
+            return this;
+        }
+
+        public Builder addFloatXY() {
+            add(DataType.FLOAT, DataKind.X, false, 32, null);
+            add(DataType.FLOAT, DataKind.Y, false, 32, null);
+            return this;
+        }
+
+        public Builder addFloatXYZ() {
+            add(DataType.FLOAT, DataKind.X, false, 32, null);
+            add(DataType.FLOAT, DataKind.Y, false, 32, null);
+            add(DataType.FLOAT, DataKind.Z, false, 32, null);
+            return this;
+        }
+
+        public Builder addFloatRGB() {
+            add(DataType.FLOAT, DataKind.RED, false, 32, null);
+            add(DataType.FLOAT, DataKind.GREEN, false, 32, null);
+            add(DataType.FLOAT, DataKind.BLUE, false, 32, null);
+            return this;
+        }
+
+        public Builder addFloatRGBA() {
+            add(DataType.FLOAT, DataKind.RED, false, 32, null);
+            add(DataType.FLOAT, DataKind.GREEN, false, 32, null);
+            add(DataType.FLOAT, DataKind.BLUE, false, 32, null);
+            add(DataType.FLOAT, DataKind.ALPHA, false, 32, null);
+            return this;
+        }
+
+        public Builder addUNorm8RGBA() {
+            add(DataType.UNSIGNED, DataKind.RED, true, 8, null);
+            add(DataType.UNSIGNED, DataKind.GREEN, true, 8, null);
+            add(DataType.UNSIGNED, DataKind.BLUE, true, 8, null);
+            add(DataType.UNSIGNED, DataKind.ALPHA, true, 8, null);
+            return this;
+        }
+
         static synchronized Element internalCreate(RenderScript rs, Builder b) {
             rs.nElementBegin();
             for (int ct=0; ct < b.mEntryCount; ct++) {
