@@ -162,8 +162,7 @@ public class SyncStorageEngine extends Handler {
             this.authority = authority;
             this.ident = ident;
             enabled = SYNC_ENABLED_DEFAULT;
-            // TODO: change the default to -1 when the syncadapters are changed to set this
-            syncable = 1;
+            syncable = -1; // default to "unknown"
         }
     }
     

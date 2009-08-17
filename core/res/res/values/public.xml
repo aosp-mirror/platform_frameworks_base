@@ -1130,17 +1130,17 @@
 
   <public type="style" name="Widget.ProgressBar.Inverse" id="0x0103005b" />
   <public type="style" name="Widget.ProgressBar.Large.Inverse" id="0x0103005c" />
-  <public type="style" name="Widget.ProgressBar.Small.Inverse" id="0x0103005d" /> 
+  <public type="style" name="Widget.ProgressBar.Small.Inverse" id="0x0103005d" />
 
   <public type="drawable" name="stat_sys_vp_phone_call" id="0x010800a7" />
   <public type="drawable" name="stat_sys_vp_phone_call_on_hold" id="0x010800a8" />
-  
+
   <public type="anim" name="anticipate_interpolator" id="0x010a0007" />
   <public type="anim" name="overshoot_interpolator" id="0x010a0008" />
   <public type="anim" name="anticipate_overshoot_interpolator" id="0x010a0009" />
   <public type="anim" name="bounce_interpolator" id="0x010a000a" />
   <public type="anim" name="linear_interpolator" id="0x010a000b" />
-  
+
 <!-- ===============================================================
      Resources added in Eclair.
      =============================================================== -->
@@ -1148,6 +1148,7 @@
 
   <public type="attr" name="accountType" />
   <public type="attr" name="contentAuthority" />
+  <public type="attr" name="userVisible" />
   <public type="attr" name="windowShowWallpaper" />
 
   <public type="style" name="Theme.Wallpaper" />

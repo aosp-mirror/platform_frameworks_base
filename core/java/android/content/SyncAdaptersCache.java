@@ -47,7 +47,9 @@ import android.util.AttributeSet;
             if (authority == null || accountType == null) {
                 return null;
             }
-            return new SyncAdapterType(authority, accountType);
+            final boolean userVisible =
+                    sa.getBoolean(com.android.internal.R.styleable.SyncAdapter_userVisible, true);
+            return new SyncAdapterType(authority, accountType, userVisible);
         } finally {
             sa.recycle();
         }

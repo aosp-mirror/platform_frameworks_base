@@ -197,7 +197,8 @@ public final class ContentService extends IContentService.Stub {
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                syncManager.scheduleSync(account, authority, extras, 0 /* no delay */);
+                syncManager.scheduleSync(account, authority, extras, 0 /* no delay */,
+                        false /* onlyThoseWithUnkownSyncableState */);
             }
         } finally {
             restoreCallingIdentity(identityToken);

@@ -361,7 +361,7 @@
         <!-- Small inverse ProgressBar style. This is a small circular progress bar. -->
         <attr name="progressBarStyleSmallInverse" format="reference" />
         <!-- Large inverse ProgressBar style. This is a large circular progress bar. -->
-        <attr name="progressBarStyleLargeInverse" format="reference" /> 
+        <attr name="progressBarStyleLargeInverse" format="reference" />
         <!-- Default SeekBar style. -->
         <attr name="seekBarStyle" format="reference" />
         <!-- Default RatingBar style. -->
@@ -2348,7 +2348,7 @@
         <attr name="pivotY" />
         <attr name="drawable" />
     </declare-styleable>
-    
+
     <declare-styleable name="InsetDrawable">
         <attr name="visible" />
         <attr name="drawable" />
@@ -2886,7 +2886,7 @@
              results for "bo", it would not be queried again for "bob".
              The default value is <code>false</code>. <i>Optional attribute.</i>. -->
         <attr name="queryAfterZeroResults" format="boolean" />
-        
+
         <!-- If provided, this string will be used to describe the searchable item in the
              searchable items settings within system search settings. <i>Optional
              attribute.</i> -->
@@ -3359,6 +3359,7 @@
         <!-- the authority of a content provider. -->
         <attr name="contentAuthority" format="string"/>
         <attr name="accountType"/>
+        <attr name="userVisible" format="boolean"/>
     </declare-styleable>
 
     <!-- =============================== -->

@@ -180,7 +180,8 @@ class SyncManager implements OnAccountsUpdatedListener {
     };
 
     public void onAccountsUpdated(Account[] accounts) {
-        final boolean hadAccountsAlready = mAccounts != null;
+        // remember if this was the first time this was called after an update
+        final boolean justBootedUp = mAccounts == null;
         mAccounts = accounts;
 
         // if a sync is in progress yet it is no longer in the accounts list,
@@ -200,10 +201,22 @@ class SyncManager implements OnAccountsUpdatedListener {
 
         mSyncStorageEngine.doDatabaseCleanup(accounts);
 
-        if (hadAccountsAlready && accounts.length > 0) {
-            // request a sync so that if the password was changed we will
-            // retry any sync that failed when it was wrong
-            scheduleSync(null, null, null, 0 /* no delay */);
+        if (accounts.length > 0) {
+            // If this is the first time this was called after a bootup then
+            // the accounts haven't really changed, instead they were just loaded
+            // from the AccountManager. Otherwise at least one of the accounts
+            // has a change.
+            //
+            // If there was a real account change then force a sync of all accounts.
+            // This is a bit of overkill, but at least it will end up retrying syncs
+            // that failed due to an authentication failure and thus will recover if the
+            // account change was a password update.
+            //
+            // If this was the bootup case then don't sync everything, instead only
+            // sync those that have an unknown syncable state, which will give them
+            // a chance to set their syncable state.
+            boolean onlyThoseWithUnkownSyncableState = !justBootedUp;
+            scheduleSync(null, null, null, 0 /* no delay */, onlyThoseWithUnkownSyncableState);
         }
     }
 
@@ -406,7 +419,7 @@ class SyncManager implements OnAccountsUpdatedListener {
 
         // perform a poll
         scheduleSync(null /* sync all syncable accounts */, null /* sync all syncable providers */,
-                new Bundle(), 0 /* no delay */);
+                new Bundle(), 0 /* no delay */, false /* onlyThoseWithUnkownSyncableState */);
     }
 
     private void writeSyncPollTime(long when) {
@@ -508,9 +521,10 @@ class SyncManager implements OnAccountsUpdatedListener {
 *          syncs of a specific provider. Can be null. Is ignored
 *          if the url is null.
      * @param delay how many milliseconds in the future to wait before performing this
+     * @param onlyThoseWithUnkownSyncableState
      */
     public void scheduleSync(Account requestedAccount, String requestedAuthority,
-            Bundle extras, long delay) {
+            Bundle extras, long delay, boolean onlyThoseWithUnkownSyncableState) {
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
         if (isLoggable) {
             Log.v(TAG, "scheduleSync:"
@@ -596,14 +610,22 @@ class SyncManager implements OnAccountsUpdatedListener {
 
         for (String authority : syncableAuthorities) {
             for (Account account : accounts) {
-                boolean isSyncable = mSyncStorageEngine.getIsSyncable(account, authority) > 0;
-                if (!isSyncable) {
+                int isSyncable = mSyncStorageEngine.getIsSyncable(account, authority);
+                if (isSyncable == 0) {
                     continue;
                 }
-                if (mSyncAdapters.getServiceInfo(new SyncAdapterType(authority, account.type))
+                if (onlyThoseWithUnkownSyncableState && isSyncable >= 0) {
+                    continue;
+                }
+                if (mSyncAdapters.getServiceInfo(SyncAdapterType.newKey(authority, account.type))
                         != null) {
+                    // make this an initialization sync if the isSyncable state is unknown
+                    Bundle extrasCopy = new Bundle(extras);
+                    if (isSyncable < 0) {
+                        extrasCopy.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
+                    }
                     scheduleSyncOperation(
-                            new SyncOperation(account, source, authority, extras, delay));
+                            new SyncOperation(account, source, authority, extrasCopy, delay));
                 }
             }
         }
@@ -616,7 +638,8 @@ class SyncManager implements OnAccountsUpdatedListener {
     public void scheduleLocalSync(Account account, String authority) {
         final Bundle extras = new Bundle();
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
-        scheduleSync(account, authority, extras, LOCAL_SYNC_DELAY);
+        scheduleSync(account, authority, extras, LOCAL_SYNC_DELAY,
+                false /* onlyThoseWithUnkownSyncableState */);
     }
 
     private IPackageManager getPackageManager() {
@@ -1588,11 +1611,18 @@ class SyncManager implements OnAccountsUpdatedListener {
                     final boolean syncAutomatically =
                             mSyncStorageEngine.getSyncAutomatically(op.account, op.authority)
                                     && mSyncStorageEngine.getMasterSyncAutomatically();
-                    boolean isSyncable =
-                            mSyncStorageEngine.getIsSyncable(op.account, op.authority) > 0;
                     boolean syncAllowed =
                             manualSync || (backgroundDataUsageAllowed && syncAutomatically);
-                    if (!syncAllowed || !isSyncable) {
+                    int isSyncable = mSyncStorageEngine.getIsSyncable(op.account, op.authority);
+                    if (isSyncable == 0) {
+                        // if not syncable, don't allow
+                        syncAllowed = false;
+                    } else if (isSyncable < 0) {
+                        // if the syncable state is unknown, only allow initialization syncs
+                        syncAllowed =
+                                op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false);
+                    }
+                    if (!syncAllowed) {
                         if (isLoggable) {
                             Log.v(TAG, "runStateIdle: sync off, dropping " + op);
                         }
@@ -1636,8 +1666,7 @@ class SyncManager implements OnAccountsUpdatedListener {
             }
 
             // connect to the sync adapter
-            SyncAdapterType syncAdapterType = new SyncAdapterType(op.authority,
-                    op.account.type);
+            SyncAdapterType syncAdapterType = SyncAdapterType.newKey(op.authority, op.account.type);
             RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
                     mSyncAdapters.getServiceInfo(syncAdapterType);
             if (syncAdapterInfo == null) {

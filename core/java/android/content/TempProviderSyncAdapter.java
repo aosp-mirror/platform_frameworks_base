@@ -13,6 +13,10 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.TimingLogger;
 import android.accounts.Account;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
+
+import java.io.IOException;
 
 /**
  * @hide
@@ -83,6 +87,9 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
      * is read only.
      */
     public abstract boolean isReadOnly();
+
+    public abstract boolean getIsSyncable(Account account)
+            throws IOException, AuthenticatorException, OperationCanceledException;
 
     /**
      * Get diffs from the server since the last completed sync and put them
@@ -173,6 +180,7 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
 
     private class SyncThread extends Thread {
         private final Account mAccount;
+        private final String mAuthority;
         private final Bundle mExtras;
         private final SyncContext mSyncContext;
         private volatile boolean mIsCanceled = false;
@@ -180,9 +188,10 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
         private long mInitialRxBytes;
         private final SyncResult mResult;
 
-        SyncThread(SyncContext syncContext, Account account, Bundle extras) {
+        SyncThread(SyncContext syncContext, Account account, String authority, Bundle extras) {
             super("SyncThread");
             mAccount = account;
+            mAuthority = authority;
             mExtras = extras;
             mSyncContext = syncContext;
             mResult = new SyncResult();
@@ -206,7 +215,7 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
             mInitialTxBytes = NetStat.getUidTxBytes(uid);
             mInitialRxBytes = NetStat.getUidRxBytes(uid);
             try {
-                sync(mSyncContext, mAccount, mExtras);
+                sync(mSyncContext, mAccount, mAuthority, mExtras);
             } catch (SQLException e) {
                 Log.e(TAG, "Sync failed", e);
                 mResult.databaseError = true;
@@ -220,12 +229,38 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
             }
         }
 
-        private void sync(SyncContext syncContext, Account account, Bundle extras) {
+        private void sync(SyncContext syncContext, Account account, String authority,
+                Bundle extras) {
             mIsCanceled = false;
 
             mProviderSyncStarted = false;
             mAdapterSyncStarted = false;
             String message = null;
+
+            // always attempt to initialize if the isSyncable state isn't set yet
+            int isSyncable = ContentResolver.getIsSyncable(account, authority);
+            if (isSyncable < 0) {
+                try {
+                    isSyncable = (getIsSyncable(account)) ? 1 : 0;
+                    ContentResolver.setIsSyncable(account, authority, isSyncable);
+                } catch (IOException e) {
+                    ++mResult.stats.numIoExceptions;
+                } catch (AuthenticatorException e) {
+                    ++mResult.stats.numParseExceptions;
+                } catch (OperationCanceledException e) {
+                    // do nothing
+                }
+            }
+
+            // if this is an initialization request then our work is done here
+            if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)) {
+                return;
+            }
+
+            // if we aren't syncable then get out
+            if (isSyncable <= 0) {
+                return;
+            }
 
             boolean manualSync = extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
 
@@ -517,13 +552,14 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
         EventLog.writeEvent(SyncAdapter.LOG_SYNC_DETAILS, TAG, bytesSent, bytesReceived, "");
     }
 
-    public void startSync(SyncContext syncContext, Account account, Bundle extras) {
+    public void startSync(SyncContext syncContext, Account account, String authority,
+            Bundle extras) {
         if (mSyncThread != null) {
             syncContext.onFinished(SyncResult.ALREADY_IN_PROGRESS);
             return;
         }
 
-        mSyncThread = new SyncThread(syncContext, account, extras);
+        mSyncThread = new SyncThread(syncContext, account, authority, extras);
         mSyncThread.start();
     }
 

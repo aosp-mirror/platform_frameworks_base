@@ -44,16 +44,23 @@ public abstract class AbstractThreadedSyncAdapter {
 
     /** Kernel event log tag.  Also listed in data/etc/event-log-tags. */
     public static final int LOG_SYNC_DETAILS = 2743;
+    private final boolean mAutoInitialize;
 
     /**
      * Creates an {@link AbstractThreadedSyncAdapter}.
-     * @param context the {@link Context} that this is running within.
+     * @param context the {@link android.content.Context} that this is running within.
+     * @param autoInitialize if true then sync requests that have
+     * {@link ContentResolver#SYNC_EXTRAS_INITIALIZE} set will be internally handled by
+     * {@link AbstractThreadedSyncAdapter} by calling
+     * {@link ContentResolver#setIsSyncable(android.accounts.Account, String, int)} with 1 if it
+     * is currently set to <0.
      */
-    public AbstractThreadedSyncAdapter(Context context) {
+    public AbstractThreadedSyncAdapter(Context context, boolean autoInitialize) {
         mContext = context;
         mISyncAdapterImpl = new ISyncAdapterImpl();
         mNumSyncStarts = new AtomicInteger(0);
         mSyncThread = null;
+        mAutoInitialize = autoInitialize;
     }
 
     class ISyncAdapterImpl extends ISyncAdapter.Stub {
@@ -66,6 +73,15 @@ public abstract class AbstractThreadedSyncAdapter {
             // check it and when we use it
             synchronized (this) {
                 if (mSyncThread == null) {
+                    if (mAutoInitialize
+                            && extras != null
+                            && extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)) {
+                        if (ContentResolver.getIsSyncable(account, authority) < 0) {
+                            ContentResolver.setIsSyncable(account, authority, 1);
+                        }
+                        syncContextClient.onFinished(new SyncResult());
+                        return;
+                    }
                     mSyncThread = new SyncThread(
                             "SyncAdapterThread-" + mNumSyncStarts.incrementAndGet(),
                             syncContextClient, authority, account, extras);
