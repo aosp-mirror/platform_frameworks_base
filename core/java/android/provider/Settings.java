@@ -2973,6 +2973,18 @@ public final class Settings {
                 "vending_pd_resend_frequency_ms";
 
         /**
+         * Size of buffer in bytes for Vending to use when reading cache files.
+         */
+        public static final String VENDING_DISK_INPUT_BUFFER_BYTES =
+                "vending_disk_input_buffer_bytes";
+
+        /**
+         * Size of buffer in bytes for Vending to use when writing cache files.
+         */
+        public static final String VENDING_DISK_OUTPUT_BUFFER_BYTES =
+                "vending_disk_output_buffer_bytes";
+
+        /**
          * Frequency in milliseconds at which we should cycle through the promoted applications
          * on the home screen or the categories page.
          */
