@@ -18,6 +18,9 @@ package android.media;
 
 import android.util.Log;
 
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +62,7 @@ public class ExifInterface {
     // The Exif tag names
     public static final String TAG_ORIENTATION = "Orientation";
 
-    public static final String TAG_DATE_TIME_ORIGINAL = "DateTimeOriginal";
+    public static final String TAG_DATETIME = "DateTime";
     public static final String TAG_MAKE = "Make";
     public static final String TAG_MODEL = "Model";
     public static final String TAG_FLASH = "Flash";
@@ -319,6 +322,28 @@ public class ExifInterface {
         }
 
         return latlng;
+    }
+
+    private static SimpleDateFormat sFormatter =
+            new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+
+    // Returns number of milliseconds since Jan. 1, 1970, midnight GMT.
+    // Returns -1 if the date time information if not available.
+    public static long getDateTime(HashMap<String, String> exifData) {
+        if (exifData == null) {
+            return -1;
+        }
+
+        String dateTimeString = exifData.get(ExifInterface.TAG_DATETIME);
+        if (dateTimeString == null) return -1;
+
+        ParsePosition pos = new ParsePosition(0);
+        try {
+            Date date = sFormatter.parse(dateTimeString, pos);
+            return date.getTime();
+        } catch (IllegalArgumentException ex) {
+            return -1;
+        }
     }
 
     public static float convertRationalLatLonToFloat(
