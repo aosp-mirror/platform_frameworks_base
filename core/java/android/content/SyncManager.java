@@ -589,22 +589,21 @@ class SyncManager implements OnAccountsUpdatedListener {
         // if the url was specified then replace the list of authorities with just this authority
         // or clear it if this authority isn't syncable
         if (requestedAuthority != null) {
-            final boolean isSyncable = syncableAuthorities.contains(requestedAuthority);
+            final boolean hasSyncAdapter = syncableAuthorities.contains(requestedAuthority);
             syncableAuthorities.clear();
-            if (isSyncable) syncableAuthorities.add(requestedAuthority);
+            if (hasSyncAdapter) syncableAuthorities.add(requestedAuthority);
         }
 
         for (String authority : syncableAuthorities) {
             for (Account account : accounts) {
+                boolean isSyncable = mSyncStorageEngine.getIsSyncable(account, authority) > 0;
+                if (!isSyncable) {
+                    continue;
+                }
                 if (mSyncAdapters.getServiceInfo(new SyncAdapterType(authority, account.type))
                         != null) {
                     scheduleSyncOperation(
                             new SyncOperation(account, source, authority, extras, delay));
-                    // TODO: remove this when Calendar supports multiple accounts. Until then
-                    // pretend that only the first account exists when syncing calendar.
-                    if ("calendar".equals(authority)) {
-                        break;
-                    }
                 }
             }
         }
@@ -1589,9 +1588,11 @@ class SyncManager implements OnAccountsUpdatedListener {
                     final boolean syncAutomatically =
                             mSyncStorageEngine.getSyncAutomatically(op.account, op.authority)
                                     && mSyncStorageEngine.getMasterSyncAutomatically();
+                    boolean isSyncable =
+                            mSyncStorageEngine.getIsSyncable(op.account, op.authority) > 0;
                     boolean syncAllowed =
                             manualSync || (backgroundDataUsageAllowed && syncAutomatically);
-                    if (!syncAllowed) {
+                    if (!syncAllowed || !isSyncable) {
                         if (isLoggable) {
                             Log.v(TAG, "runStateIdle: sync off, dropping " + op);
                         }

@@ -155,12 +155,15 @@ public class SyncStorageEngine extends Handler {
         final String authority;
         final int ident;
         boolean enabled;
+        int syncable;
 
         AuthorityInfo(Account account, String authority, int ident) {
             this.account = account;
             this.authority = authority;
             this.ident = ident;
             enabled = SYNC_ENABLED_DEFAULT;
+            // TODO: change the default to -1 when the syncadapters are changed to set this
+            syncable = 1;
         }
     }
     
@@ -387,6 +390,44 @@ public class SyncStorageEngine extends Handler {
         }
 
         if (!wasEnabled && sync) {
+            mContext.getContentResolver().requestSync(account, providerName, new Bundle());
+        }
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+    }
+
+    public int getIsSyncable(Account account, String providerName) {
+        synchronized (mAuthorities) {
+            if (account != null) {
+                AuthorityInfo authority = getAuthorityLocked(account, providerName,
+                        "getIsSyncable");
+                if (authority == null) {
+                    return -1;
+                }
+                return authority.syncable;
+            }
+
+            int i = mAuthorities.size();
+            while (i > 0) {
+                i--;
+                AuthorityInfo authority = mAuthorities.get(i);
+                if (authority.authority.equals(providerName)) {
+                    return authority.syncable;
+                }
+            }
+            return -1;
+        }
+    }
+
+    public void setIsSyncable(Account account, String providerName, int syncable) {
+        int oldState;
+        synchronized (mAuthorities) {
+            AuthorityInfo authority = getOrCreateAuthorityLocked(account, providerName, -1, false);
+            oldState = authority.syncable;
+            authority.syncable = syncable;
+            writeAccountInfoLocked();
+        }
+
+        if (oldState <= 0 && syncable > 0) {
             mContext.getContentResolver().requestSync(account, providerName, new Bundle());
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
@@ -1064,10 +1105,12 @@ public class SyncStorageEngine extends Handler {
                                         null, "authority");
                                 String enabled = parser.getAttributeValue(
                                         null, "enabled");
-                                AuthorityInfo authority = mAuthorities.get(id); 
+                                String syncable = parser.getAttributeValue(null, "syncable");
+                                AuthorityInfo authority = mAuthorities.get(id);
                                 if (DEBUG_FILE) Log.v(TAG, "Adding authority: account="
                                         + accountName + " auth=" + authorityName
-                                        + " enabled=" + enabled);
+                                        + " enabled=" + enabled
+                                        + " syncable=" + syncable);
                                 if (authority == null) {
                                     if (DEBUG_FILE) Log.v(TAG, "Creating entry");
                                     authority = getOrCreateAuthorityLocked(
@@ -1077,10 +1120,19 @@ public class SyncStorageEngine extends Handler {
                                 if (authority != null) {
                                     authority.enabled = enabled == null
                                             || Boolean.parseBoolean(enabled);
+                                    if ("unknown".equals(syncable)) {
+                                        authority.syncable = -1;
+                                    } else {
+                                        authority.syncable =
+                                                (syncable == null || Boolean.parseBoolean(enabled))
+                                                        ? 1
+                                                        : 0;
+                                    }
                                 } else {
                                     Log.w(TAG, "Failure adding authority: account="
                                             + accountName + " auth=" + authorityName
-                                            + " enabled=" + enabled);
+                                            + " enabled=" + enabled
+                                            + " syncable=" + syncable);
                                 }
                             }
                         }
@@ -1132,6 +1184,11 @@ public class SyncStorageEngine extends Handler {
                 out.attribute(null, "authority", authority.authority);
                 if (!authority.enabled) {
                     out.attribute(null, "enabled", "false");
+                }
+                if (authority.syncable < 0) {
+                    out.attribute(null, "syncable", "unknown");
+                } else if (authority.syncable == 0) {
+                    out.attribute(null, "syncable", "false");
                 }
                 out.endTag(null, "authority");
             }
@@ -1268,6 +1325,7 @@ public class SyncStorageEngine extends Handler {
                         AuthorityInfo authority = mAuthorities.get(i);
                         if (authority.authority.equals(provider)) {
                             authority.enabled = value == null || Boolean.parseBoolean(value);
+                            authority.syncable = 1;
                         }
                     }
                 }

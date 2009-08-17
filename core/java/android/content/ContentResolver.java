@@ -1012,6 +1012,31 @@ public abstract class ContentResolver {
     }
 
     /**
+     * Check if this account/provider is syncable.
+     * @return >0 if it is syncable, 0 if not, and <0 if the state isn't known yet.
+     */
+    public int getIsSyncable(Account account, String authority) {
+        try {
+            return getContentService().getIsSyncable(account, authority);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * Set whether this account/provider is syncable.
+     * @param syncable, >0 denotes syncable, 0 means not syncable, <0 means unknown
+     */
+    public void setIsSyncable(Account account, String authority, int syncable) {
+        try {
+            getContentService().setIsSyncable(account, authority, syncable);
+        } catch (RemoteException e) {
+            // exception ignored; if this is thrown then it means the runtime is in the midst of
+            // being restarted
+        }
+    }
+
+    /**
      * Gets the master auto-sync setting that applies to all the providers and accounts.
      * If this is false then the per-provider auto-sync setting is ignored.
      *

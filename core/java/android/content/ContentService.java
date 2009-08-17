@@ -272,6 +272,37 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    public int getIsSyncable(Account account, String providerName) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
+                "no permission to read the sync settings");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                return syncManager.getSyncStorageEngine().getIsSyncable(
+                        account, providerName);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+        return -1;
+    }
+
+    public void setIsSyncable(Account account, String providerName, int syncable) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
+                "no permission to write the sync settings");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                syncManager.getSyncStorageEngine().setIsSyncable(
+                        account, providerName, syncable);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
     public boolean getMasterSyncAutomatically() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
