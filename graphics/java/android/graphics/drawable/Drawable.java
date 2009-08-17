@@ -654,7 +654,7 @@ public abstract class Drawable {
      * Create a drawable from an inputstream
      */
     public static Drawable createFromStream(InputStream is, String srcName) {
-        return createFromResourceStream(null, null, is, srcName);
+        return createFromResourceStream(null, null, is, srcName, null);
     }
 
     /**
@@ -663,7 +663,7 @@ public abstract class Drawable {
      */
     public static Drawable createFromResourceStream(Resources res, TypedValue value,
             InputStream is, String srcName) {
-        return createFromResourceStream(res, value, is, srcName);
+        return createFromResourceStream(res, value, is, srcName, null);
     }
 
     /**
