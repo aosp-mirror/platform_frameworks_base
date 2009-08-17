@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
+package android.graphics;
 
 import com.android.layoutlib.api.ILayoutLog;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.DrawFilter;
-import android.graphics.LinearGradient;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Picture;
 import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
-import android.graphics.Shader;
 import android.graphics.Xfermode;
 import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
@@ -43,6 +35,7 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.Stack;
 
@@ -51,36 +44,59 @@ import javax.microedition.khronos.opengles.GL;
 /**
  * Re-implementation of the Canvas, 100% in java on top of a BufferedImage.
  */
-public class BridgeCanvas extends Canvas {
-    
+public class Canvas extends _Original_Canvas {
+
     private BufferedImage mBufferedImage;
     private final Stack<Graphics2D> mGraphicsStack = new Stack<Graphics2D>();
     private final ILayoutLog mLogger;
 
-    public BridgeCanvas(int width, int height, ILayoutLog logger) {
+    public Canvas() {
+        mLogger = null;
+        // the mBufferedImage will be taken from a bitmap in #setBitmap()
+    }
+
+    public Canvas(Bitmap bitmap) {
+        mLogger = null;
+        mBufferedImage = bitmap.getImage();
+        mGraphicsStack.push(mBufferedImage.createGraphics());
+    }
+
+    public Canvas(int nativeCanvas) {
+        mLogger = null;
+        throw new UnsupportedOperationException("Can't create Canvas(int)");
+    }
+
+    public Canvas(javax.microedition.khronos.opengles.GL gl) {
+        mLogger = null;
+        throw new UnsupportedOperationException("Can't create Canvas(javax.microedition.khronos.opengles.GL)");
+    }
+
+    // custom constructors for our use.
+    public Canvas(int width, int height, ILayoutLog logger) {
         mLogger = logger;
         mBufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         mGraphicsStack.push(mBufferedImage.createGraphics());
     }
-    
-    public BridgeCanvas(int width, int height) {
+
+    public Canvas(int width, int height) {
         this(width, height, null /* logger*/);
     }
-    
+
+    // custom mehtods
     public BufferedImage getImage() {
         return mBufferedImage;
     }
-    
-    Graphics2D getGraphics2d() {
+
+    public Graphics2D getGraphics2d() {
         return mGraphicsStack.peek();
     }
-    
-    void dispose() {
+
+    public void dispose() {
         while (mGraphicsStack.size() > 0) {
             mGraphicsStack.pop().dispose();
         }
     }
-    
+
     /**
      * Creates a new {@link Graphics2D} based on the {@link Paint} parameters.
      * <p/>The object must be disposed ({@link Graphics2D#dispose()}) after being used.
@@ -91,11 +107,11 @@ public class BridgeCanvas extends Canvas {
         g.setColor(new Color(paint.getColor()));
         int alpha = paint.getAlpha();
         float falpha = alpha / 255.f;
-        
+
         Xfermode xfermode = paint.getXfermode();
         if (xfermode instanceof PorterDuffXfermode) {
             PorterDuff.Mode mode = ((PorterDuffXfermode)xfermode).getMode();
-            
+
             setModeInGraphics(mode, g, falpha);
         } else {
             if (mLogger != null && xfermode != null) {
@@ -105,7 +121,7 @@ public class BridgeCanvas extends Canvas {
             }
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, falpha));
         }
-        
+
         Shader shader = paint.getShader();
         if (shader instanceof LinearGradient) {
             g.setPaint(((LinearGradient)shader).getPaint());
@@ -116,10 +132,10 @@ public class BridgeCanvas extends Canvas {
                         shader.getClass().getCanonicalName()));
             }
         }
-        
+
         return g;
     }
-    
+
     private void setModeInGraphics(PorterDuff.Mode mode, Graphics2D g, float falpha) {
         switch (mode) {
             case CLEAR:
@@ -168,14 +184,43 @@ public class BridgeCanvas extends Canvas {
                 break;
         }
     }
-    
+
+
     // --------------------
-    
+    // OVERRIDEN ENUMS
+    // This is needed since we rename Canvas into _Original_Canvas
+    // --------------------
+
+    public enum EdgeType {
+        BW(0),  //!< treat edges by just rounding to nearest pixel boundary
+        AA(1);  //!< treat edges by rounding-out, since they may be antialiased
+
+        EdgeType(int nativeInt) {
+            this.nativeInt = nativeInt;
+        }
+        final int nativeInt;
+    }
+
+
+    // --------------------
+    // OVERRIDEN METHODS
+    // --------------------
+
     @Override
     public void finalize() throws Throwable {
         // pass
     }
-    
+
+    /* (non-Javadoc)
+     * @see android.graphics.Canvas#setBitmap(android.graphics.Bitmap)
+     */
+    @Override
+    public void setBitmap(Bitmap bitmap) {
+        mBufferedImage = bitmap.getImage();
+        mGraphicsStack.push(mBufferedImage.createGraphics());
+    }
+
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#translate(float, float)
      */
@@ -183,7 +228,7 @@ public class BridgeCanvas extends Canvas {
     public void translate(float dx, float dy) {
         getGraphics2d().translate(dx, dy);
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#save()
      */
@@ -191,7 +236,7 @@ public class BridgeCanvas extends Canvas {
     public int save() {
         Graphics2D g = (Graphics2D)getGraphics2d().create();
         mGraphicsStack.push(g);
-        
+
         return mGraphicsStack.size() - 1;
     }
 
@@ -203,7 +248,7 @@ public class BridgeCanvas extends Canvas {
         // For now we ignore saveFlags
         return save();
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#restore()
      */
@@ -221,7 +266,7 @@ public class BridgeCanvas extends Canvas {
             mGraphicsStack.pop();
         }
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#getSaveCount()
      */
@@ -229,8 +274,8 @@ public class BridgeCanvas extends Canvas {
     public int getSaveCount() {
         return mGraphicsStack.size() - 1;
     }
-    
-    
+
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#clipRect(float, float, float, float, android.graphics.Region.Op)
      */
@@ -288,21 +333,34 @@ public class BridgeCanvas extends Canvas {
     public boolean clipRect(RectF rect) {
         return clipRect(rect.left, rect.top, rect.right, rect.bottom);
     }
-    
-    @Override
+
     public boolean quickReject(RectF rect, EdgeType type) {
         return false;
     }
 
     @Override
+    public boolean quickReject(RectF rect, _Original_Canvas.EdgeType type) {
+        throw new UnsupportedOperationException("CALL TO PARENT FORBIDDEN");
+    }
+
     public boolean quickReject(Path path, EdgeType type) {
         return false;
     }
 
     @Override
+    public boolean quickReject(Path path, _Original_Canvas.EdgeType type) {
+        throw new UnsupportedOperationException("CALL TO PARENT FORBIDDEN");
+    }
+
     public boolean quickReject(float left, float top, float right, float bottom,
                                EdgeType type) {
         return false;
+    }
+
+    @Override
+    public boolean quickReject(float left, float top, float right, float bottom,
+                               _Original_Canvas.EdgeType type) {
+        throw new UnsupportedOperationException("CALL TO PARENT FORBIDDEN");
     }
 
     /**
@@ -324,31 +382,31 @@ public class BridgeCanvas extends Canvas {
         }
         return false;
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#drawColor(int, android.graphics.PorterDuff.Mode)
      */
     @Override
     public void drawColor(int color, PorterDuff.Mode mode) {
         Graphics2D g = getGraphics2d();
-        
+
         // save old color
         Color c = g.getColor();
-        
+
         Composite composite = g.getComposite();
-        
+
         // get the alpha from the color
         int alpha = color >>> 24;
         float falpha = alpha / 255.f;
-        
+
         setModeInGraphics(mode, g, falpha);
-        
+
         g.setColor(new Color(color));
-        
+
         getGraphics2d().fillRect(0, 0, getWidth(), getHeight());
-        
+
         g.setComposite(composite);
-        
+
         // restore color
         g.setColor(c);
     }
@@ -360,7 +418,7 @@ public class BridgeCanvas extends Canvas {
     public void drawColor(int color) {
         drawColor(color, PorterDuff.Mode.SRC_OVER);
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#drawARGB(int, int, int, int)
      */
@@ -368,7 +426,7 @@ public class BridgeCanvas extends Canvas {
     public void drawARGB(int a, int r, int g, int b) {
         drawColor(a << 24 | r << 16 | g << 8 | b, PorterDuff.Mode.SRC_OVER);
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#drawRGB(int, int, int)
      */
@@ -377,7 +435,7 @@ public class BridgeCanvas extends Canvas {
         drawColor(0xFF << 24 | r << 16 | g << 8 | b, PorterDuff.Mode.SRC_OVER);
     }
 
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#getWidth()
      */
@@ -385,7 +443,7 @@ public class BridgeCanvas extends Canvas {
     public int getWidth() {
         return mBufferedImage.getWidth();
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#getHeight()
      */
@@ -401,7 +459,7 @@ public class BridgeCanvas extends Canvas {
     public void drawPaint(Paint paint) {
         drawColor(paint.getColor());
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#drawBitmap(android.graphics.Bitmap, float, float, android.graphics.Paint)
      */
@@ -417,7 +475,32 @@ public class BridgeCanvas extends Canvas {
      */
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
-        throw new UnsupportedOperationException();
+        boolean needsRestore = false;
+        if (matrix.isIdentity() == false) {
+            // create a new graphics and apply the matrix to it
+            save(); // this creates a new Graphics2D, and stores it for children call to use
+            needsRestore = true;
+            Graphics2D g = getGraphics2d(); // get the newly create Graphics2D
+
+            // get the Graphics2D current matrix
+            AffineTransform currentTx = g.getTransform();
+            // get the AffineTransform from the matrix
+            AffineTransform matrixTx = matrix.getTransform();
+
+            // combine them so that the matrix is applied after.
+            currentTx.preConcatenate(matrixTx);
+
+            // give it to the graphics as a new matrix replacing all previous transform
+            g.setTransform(currentTx);
+        }
+
+        // draw the bitmap
+        drawBitmap(bitmap, 0, 0, paint);
+
+        if (needsRestore) {
+            // remove the new graphics
+            restore();
+        }
     }
 
     /* (non-Javadoc)
@@ -456,39 +539,42 @@ public class BridgeCanvas extends Canvas {
             int height, boolean hasAlpha, Paint paint) {
         throw new UnsupportedOperationException();
     }
-    
+
     private void drawBitmap(Bitmap bitmap, int sleft, int stop, int sright, int sbottom, int dleft,
             int dtop, int dright, int dbottom, Paint paint) {
         BufferedImage image = bitmap.getImage();
-        
+
         Graphics2D g = getGraphics2d();
-        
+
         Composite c = null;
-        
-        if (paint.isFilterBitmap()) {
-            g = (Graphics2D)g.create();
-            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+        if (paint != null) {
+            if (paint.isFilterBitmap()) {
+                g = (Graphics2D)g.create();
+                g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                        RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            }
+
+            if (paint.getAlpha() != 0xFF) {
+                c = g.getComposite();
+                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+                        paint.getAlpha()/255.f));
+            }
         }
-        
-        if (paint.getAlpha() != 0xFF) {
-            c = g.getComposite();
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                    paint.getAlpha()/255.f));
-        }
-        
+
         g.drawImage(image, dleft, dtop, dright, dbottom,
                 sleft, stop, sright, sbottom, null);
 
-        if (paint.isFilterBitmap()) {
-            g.dispose();
-        }
-        
-        if (c != null) {
-            g.setComposite(c);
+        if (paint != null) {
+            if (paint.isFilterBitmap()) {
+                g.dispose();
+            }
+            if (c != null) {
+                g.setComposite(c);
+            }
         }
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#rotate(float, float, float)
      */
@@ -509,7 +595,7 @@ public class BridgeCanvas extends Canvas {
     public void rotate(float degrees) {
         getGraphics2d().rotate(Math.toRadians(degrees));
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#scale(float, float, float, float)
      */
@@ -528,19 +614,19 @@ public class BridgeCanvas extends Canvas {
     public void scale(float sx, float sy) {
         getGraphics2d().scale(sx, sy);
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#drawText(char[], int, int, float, float, android.graphics.Paint)
      */
     @Override
     public void drawText(char[] text, int index, int count, float x, float y, Paint paint) {
         Graphics2D g = getGraphics2d();
-        
+
         g = (Graphics2D)g.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
+
         g.setFont(paint.getFont());
-        
+
         // set the color. because this only handles RGB we have to handle the alpha separately
         g.setColor(new Color(paint.getColor()));
         int alpha = paint.getAlpha();
@@ -557,9 +643,9 @@ public class BridgeCanvas extends Canvas {
                 x -= m;
             }
         }
-        
+
         g.drawChars(text, index, count, (int)x, (int)y);
-        
+
         g.dispose();
     }
 
@@ -586,7 +672,7 @@ public class BridgeCanvas extends Canvas {
     public void drawText(String text, int start, int end, float x, float y, Paint paint) {
         drawText(text.toCharArray(), start, end - start, x, y, paint);
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#drawRect(android.graphics.RectF, android.graphics.Paint)
      */
@@ -594,7 +680,7 @@ public class BridgeCanvas extends Canvas {
     public void drawRect(RectF rect, Paint paint) {
         doDrawRect((int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(), paint);
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#drawRect(float, float, float, float, android.graphics.Paint)
      */
@@ -614,11 +700,11 @@ public class BridgeCanvas extends Canvas {
     private final void doDrawRect(int left, int top, int width, int height, Paint paint) {
         // get current graphisc
         Graphics2D g = getGraphics2d();
-        
+
         g = getNewGraphics(paint, g);
 
         Style style = paint.getStyle();
-        
+
         // draw
         if (style == Style.FILL || style == Style.FILL_AND_STROKE) {
             g.fillRect(left, top, width, height);
@@ -639,16 +725,16 @@ public class BridgeCanvas extends Canvas {
     public void drawRoundRect(RectF rect, float rx, float ry, Paint paint) {
         // get current graphisc
         Graphics2D g = getGraphics2d();
-        
+
         g = getNewGraphics(paint, g);
 
         Style style = paint.getStyle();
-        
+
         // draw
-        
+
         int arcWidth = (int)(rx * 2);
         int arcHeight = (int)(ry * 2);
-        
+
         if (style == Style.FILL || style == Style.FILL_AND_STROKE) {
             g.fillRoundRect((int)rect.left, (int)rect.top, (int)rect.width(), (int)rect.height(),
                     arcWidth, arcHeight);
@@ -671,7 +757,7 @@ public class BridgeCanvas extends Canvas {
     public void drawLine(float startX, float startY, float stopX, float stopY, Paint paint) {
         // get current graphisc
         Graphics2D g = getGraphics2d();
-        
+
         g = getNewGraphics(paint, g);
 
         g.drawLine((int)startX, (int)startY, (int)stopX, (int)stopY);
@@ -679,7 +765,7 @@ public class BridgeCanvas extends Canvas {
         // dispose Graphics2D object
         g.dispose();
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#drawLines(float[], int, int, android.graphics.Paint)
      */
@@ -687,7 +773,7 @@ public class BridgeCanvas extends Canvas {
     public void drawLines(float[] pts, int offset, int count, Paint paint) {
         // get current graphisc
         Graphics2D g = getGraphics2d();
-        
+
         g = getNewGraphics(paint, g);
 
         for (int i = 0 ; i < count ; i += 4) {
@@ -706,7 +792,7 @@ public class BridgeCanvas extends Canvas {
     public void drawLines(float[] pts, Paint paint) {
         drawLines(pts, 0, pts.length, paint);
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#drawCircle(float, float, float, android.graphics.Paint)
      */
@@ -714,11 +800,11 @@ public class BridgeCanvas extends Canvas {
     public void drawCircle(float cx, float cy, float radius, Paint paint) {
         // get current graphisc
         Graphics2D g = getGraphics2d();
-        
+
         g = getNewGraphics(paint, g);
 
         Style style = paint.getStyle();
-        
+
         int size = (int)(radius * 2);
 
         // draw
@@ -741,11 +827,11 @@ public class BridgeCanvas extends Canvas {
     public void drawOval(RectF oval, Paint paint) {
         // get current graphics
         Graphics2D g = getGraphics2d();
-        
+
         g = getNewGraphics(paint, g);
 
         Style style = paint.getStyle();
-        
+
         // draw
         if (style == Style.FILL || style == Style.FILL_AND_STROKE) {
             g.fillOval((int)oval.left, (int)oval.top, (int)oval.width(), (int)oval.height());
@@ -758,7 +844,7 @@ public class BridgeCanvas extends Canvas {
         // dispose Graphics2D object
         g.dispose();
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#drawPath(android.graphics.Path, android.graphics.Paint)
      */
@@ -766,11 +852,11 @@ public class BridgeCanvas extends Canvas {
     public void drawPath(Path path, Paint paint) {
         // get current graphics
         Graphics2D g = getGraphics2d();
-        
+
         g = getNewGraphics(paint, g);
 
         Style style = paint.getStyle();
-        
+
         // draw
         if (style == Style.FILL || style == Style.FILL_AND_STROKE) {
             g.fill(path.getAwtShape());
@@ -783,7 +869,7 @@ public class BridgeCanvas extends Canvas {
         // dispose Graphics2D object
         g.dispose();
     }
-    
+
     /* (non-Javadoc)
      * @see android.graphics.Canvas#setMatrix(android.graphics.Matrix)
      */
@@ -795,10 +881,10 @@ public class BridgeCanvas extends Canvas {
 
         // get the new current graphics
         Graphics2D g = getGraphics2d();
-        
+
         // and apply the matrix
         g.setTransform(matrix.getTransform());
-        
+
         if (mLogger != null && matrix.hasPerspective()) {
             mLogger.warning("android.graphics.Canvas#setMatrix(android.graphics.Matrix) only supports affine transformations in the Layout Editor.");
         }
@@ -1056,15 +1142,6 @@ public class BridgeCanvas extends Canvas {
     public int saveLayerAlpha(RectF bounds, int alpha, int saveFlags) {
         // TODO Auto-generated method stub
         return super.saveLayerAlpha(bounds, alpha, saveFlags);
-    }
-
-    /* (non-Javadoc)
-     * @see android.graphics.Canvas#setBitmap(android.graphics.Bitmap)
-     */
-    @Override
-    public void setBitmap(Bitmap bitmap) {
-        // TODO Auto-generated method stub
-        super.setBitmap(bitmap);
     }
 
     /* (non-Javadoc)

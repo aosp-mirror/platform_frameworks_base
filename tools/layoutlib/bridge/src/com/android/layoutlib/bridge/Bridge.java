@@ -31,6 +31,7 @@ import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface;
@@ -401,8 +402,7 @@ public final class Bridge implements ILayoutBridge {
             view.layout(0, screenOffset, screenWidth, screenHeight);
 
             // draw them
-            BridgeCanvas canvas = new BridgeCanvas(screenWidth, screenHeight - screenOffset,
-                    logger);
+            Canvas canvas = new Canvas(screenWidth, screenHeight - screenOffset, logger);
 
             root.draw(canvas);
             canvas.dispose();
