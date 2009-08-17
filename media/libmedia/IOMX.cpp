@@ -45,16 +45,6 @@ sp<IOMXRenderer> IOMX::createRenderer(
             displayWidth, displayHeight);
 }
 
-static void *readVoidStar(const Parcel *parcel) {
-    // FIX if sizeof(void *) != sizeof(int32)
-    return (void *)parcel->readInt32();
-}
-
-static void writeVoidStar(void *x, Parcel *parcel) {
-    // FIX if sizeof(void *) != sizeof(int32)
-    parcel->writeInt32((int32_t)x);
-}
-
 class BpOMX : public BpInterface<IOMX> {
 public:
     BpOMX(const sp<IBinder> &impl)
@@ -86,7 +76,7 @@ public:
 
         status_t err = reply.readInt32();
         if (err == OK) {
-            *node = readVoidStar(&reply);
+            *node = (void*)reply.readIntPtr();
         } else {
             *node = 0;
         }
@@ -97,7 +87,7 @@ public:
     virtual status_t free_node(node_id node) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         remote()->transact(FREE_NODE, data, &reply);
 
         return reply.readInt32();
@@ -107,7 +97,7 @@ public:
             node_id node, OMX_COMMANDTYPE cmd, OMX_S32 param) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         data.writeInt32(cmd);
         data.writeInt32(param);
         remote()->transact(SEND_COMMAND, data, &reply);
@@ -120,7 +110,7 @@ public:
             void *params, size_t size) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         data.writeInt32(index);
         data.writeInt32(size);
         data.write(params, size);
@@ -141,7 +131,7 @@ public:
             const void *params, size_t size) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         data.writeInt32(index);
         data.writeInt32(size);
         data.write(params, size);
@@ -155,7 +145,7 @@ public:
             void *params, size_t size) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         data.writeInt32(index);
         data.writeInt32(size);
         data.write(params, size);
@@ -176,7 +166,7 @@ public:
             const void *params, size_t size) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         data.writeInt32(index);
         data.writeInt32(size);
         data.write(params, size);
@@ -190,7 +180,7 @@ public:
             buffer_id *buffer) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         data.writeInt32(port_index);
         data.writeStrongBinder(params->asBinder());
         remote()->transact(USE_BUFFER, data, &reply);
@@ -202,7 +192,7 @@ public:
             return err;
         }
 
-        *buffer = readVoidStar(&reply);
+        *buffer = (void*)reply.readIntPtr();
 
         return err;
     }
@@ -212,7 +202,7 @@ public:
             buffer_id *buffer) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         data.writeInt32(port_index);
         data.writeInt32(size);
         remote()->transact(ALLOC_BUFFER, data, &reply);
@@ -224,7 +214,7 @@ public:
             return err;
         }
 
-        *buffer = readVoidStar(&reply);
+        *buffer = (void*)reply.readIntPtr();
 
         return err;
     }
@@ -234,7 +224,7 @@ public:
             buffer_id *buffer) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         data.writeInt32(port_index);
         data.writeStrongBinder(params->asBinder());
         remote()->transact(ALLOC_BUFFER_WITH_BACKUP, data, &reply);
@@ -246,7 +236,7 @@ public:
             return err;
         }
 
-        *buffer = readVoidStar(&reply);
+        *buffer = (void*)reply.readIntPtr();
 
         return err;
     }
@@ -255,9 +245,9 @@ public:
             node_id node, OMX_U32 port_index, buffer_id buffer) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         data.writeInt32(port_index);
-        writeVoidStar(buffer, &data);
+        data.writeIntPtr((intptr_t)buffer);
         remote()->transact(FREE_BUFFER, data, &reply);
 
         return reply.readInt32();
@@ -267,7 +257,7 @@ public:
             node_id node, const sp<IOMXObserver> &observer) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         data.writeStrongBinder(observer->asBinder());
         remote()->transact(OBSERVE_NODE, data, &reply);
 
@@ -277,8 +267,8 @@ public:
     virtual void fill_buffer(node_id node, buffer_id buffer) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
-        writeVoidStar(buffer, &data);
+        data.writeIntPtr((intptr_t)node);
+        data.writeIntPtr((intptr_t)buffer);
         remote()->transact(FILL_BUFFER, data, &reply, IBinder::FLAG_ONEWAY);
     }
 
@@ -289,8 +279,8 @@ public:
             OMX_U32 flags, OMX_TICKS timestamp) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
-        writeVoidStar(buffer, &data);
+        data.writeIntPtr((intptr_t)node);
+        data.writeIntPtr((intptr_t)buffer);
         data.writeInt32(range_offset);
         data.writeInt32(range_length);
         data.writeInt32(flags);
@@ -304,7 +294,7 @@ public:
             OMX_INDEXTYPE *index) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
-        writeVoidStar(node, &data);
+        data.writeIntPtr((intptr_t)node);
         data.writeCString(parameter_name);
 
         remote()->transact(GET_EXTENSION_INDEX, data, &reply);
@@ -379,7 +369,7 @@ status_t BnOMX::onTransact(
             status_t err = allocate_node(data.readCString(), &node);
             reply->writeInt32(err);
             if (err == OK) {
-                writeVoidStar(node, reply);
+                reply->writeIntPtr((intptr_t)node);
             }
                 
             return NO_ERROR;
@@ -389,7 +379,7 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
 
             reply->writeInt32(free_node(node));
                 
@@ -400,7 +390,7 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
 
             OMX_COMMANDTYPE cmd =
                 static_cast<OMX_COMMANDTYPE>(data.readInt32());
@@ -415,7 +405,7 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
             OMX_INDEXTYPE index = static_cast<OMX_INDEXTYPE>(data.readInt32());
 
             size_t size = data.readInt32();
@@ -442,7 +432,7 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
             OMX_INDEXTYPE index = static_cast<OMX_INDEXTYPE>(data.readInt32());
 
             size_t size = data.readInt32();
@@ -457,7 +447,7 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
             OMX_INDEXTYPE index = static_cast<OMX_INDEXTYPE>(data.readInt32());
 
             size_t size = data.readInt32();
@@ -484,7 +474,7 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
             OMX_INDEXTYPE index = static_cast<OMX_INDEXTYPE>(data.readInt32());
 
             size_t size = data.readInt32();
@@ -499,7 +489,7 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
             OMX_U32 port_index = data.readInt32();
             sp<IMemory> params =
                 interface_cast<IMemory>(data.readStrongBinder());
@@ -509,7 +499,7 @@ status_t BnOMX::onTransact(
             reply->writeInt32(err);
 
             if (err == OK) {
-                writeVoidStar(buffer, reply);
+                reply->writeIntPtr((intptr_t)buffer);
             }
 
             return NO_ERROR;
@@ -519,7 +509,7 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
             OMX_U32 port_index = data.readInt32();
             size_t size = data.readInt32();
 
@@ -528,7 +518,7 @@ status_t BnOMX::onTransact(
             reply->writeInt32(err);
 
             if (err == OK) {
-                writeVoidStar(buffer, reply);
+                reply->writeIntPtr((intptr_t)buffer);
             }
 
             return NO_ERROR;
@@ -538,7 +528,7 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
             OMX_U32 port_index = data.readInt32();
             sp<IMemory> params =
                 interface_cast<IMemory>(data.readStrongBinder());
@@ -550,7 +540,7 @@ status_t BnOMX::onTransact(
             reply->writeInt32(err);
 
             if (err == OK) {
-                writeVoidStar(buffer, reply);
+                reply->writeIntPtr((intptr_t)buffer);
             }
 
             return NO_ERROR;
@@ -560,9 +550,9 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
             OMX_U32 port_index = data.readInt32();
-            buffer_id buffer = readVoidStar(&data);
+            buffer_id buffer = (void*)data.readIntPtr();
             reply->writeInt32(free_buffer(node, port_index, buffer));
 
             return NO_ERROR;
@@ -572,7 +562,7 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
             sp<IOMXObserver> observer =
                 interface_cast<IOMXObserver>(data.readStrongBinder());
             reply->writeInt32(observe_node(node, observer));
@@ -584,8 +574,8 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
-            buffer_id buffer = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
+            buffer_id buffer = (void*)data.readIntPtr();
             fill_buffer(node, buffer);
 
             return NO_ERROR;
@@ -595,8 +585,8 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
-            buffer_id buffer = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
+            buffer_id buffer = (void*)data.readIntPtr();
             OMX_U32 range_offset = data.readInt32();
             OMX_U32 range_length = data.readInt32();
             OMX_U32 flags = data.readInt32();
@@ -613,7 +603,7 @@ status_t BnOMX::onTransact(
         {
             CHECK_INTERFACE(IOMX, data, reply);
 
-            node_id node = readVoidStar(&data);
+            node_id node = (void*)data.readIntPtr();
             const char *parameter_name = data.readCString();
             
             OMX_INDEXTYPE index;
@@ -711,7 +701,7 @@ public:
     virtual void render(IOMX::buffer_id buffer) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMXRenderer::getInterfaceDescriptor());
-        writeVoidStar(buffer, &data);
+        data.writeIntPtr((intptr_t)buffer);
 
         // NOTE: Do NOT make this a ONE_WAY call, it must be synchronous
         // so that the caller knows when to recycle the buffer.
@@ -728,7 +718,7 @@ status_t BnOMXRenderer::onTransact(
         {
             CHECK_INTERFACE(IOMXRenderer, data, reply);
 
-            IOMX::buffer_id buffer = readVoidStar(&data);
+            IOMX::buffer_id buffer = (void*)data.readIntPtr();
 
             render(buffer);
 

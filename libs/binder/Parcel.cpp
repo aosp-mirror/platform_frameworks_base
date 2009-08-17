@@ -562,54 +562,27 @@ restart_write:
 
 status_t Parcel::writeInt32(int32_t val)
 {
-    if ((mDataPos+sizeof(val)) <= mDataCapacity) {
-restart_write:
-        *reinterpret_cast<int32_t*>(mData+mDataPos) = val;
-        return finishWrite(sizeof(val));
-    }
-
-    status_t err = growData(sizeof(val));
-    if (err == NO_ERROR) goto restart_write;
-    return err;
+    return writeAligned(val);
 }
 
 status_t Parcel::writeInt64(int64_t val)
 {
-    if ((mDataPos+sizeof(val)) <= mDataCapacity) {
-restart_write:
-        *reinterpret_cast<int64_t*>(mData+mDataPos) = val;
-        return finishWrite(sizeof(val));
-    }
-
-    status_t err = growData(sizeof(val));
-    if (err == NO_ERROR) goto restart_write;
-    return err;
+    return writeAligned(val);
 }
 
 status_t Parcel::writeFloat(float val)
 {
-    if ((mDataPos+sizeof(val)) <= mDataCapacity) {
-restart_write:
-        *reinterpret_cast<float*>(mData+mDataPos) = val;
-        return finishWrite(sizeof(val));
-    }
-
-    status_t err = growData(sizeof(val));
-    if (err == NO_ERROR) goto restart_write;
-    return err;
+    return writeAligned(val);
 }
 
 status_t Parcel::writeDouble(double val)
 {
-    if ((mDataPos+sizeof(val)) <= mDataCapacity) {
-restart_write:
-        *reinterpret_cast<double*>(mData+mDataPos) = val;
-        return finishWrite(sizeof(val));
-    }
+    return writeAligned(val);
+}
 
-    status_t err = growData(sizeof(val));
-    if (err == NO_ERROR) goto restart_write;
-    return err;
+status_t Parcel::writeIntPtr(intptr_t val)
+{
+    return writeAligned(val);
 }
 
 status_t Parcel::writeCString(const char* str)
@@ -768,103 +741,98 @@ const void* Parcel::readInplace(size_t len) const
     return NULL;
 }
 
-status_t Parcel::readInt32(int32_t *pArg) const
-{
-    if ((mDataPos+sizeof(int32_t)) <= mDataSize) {
+template<class T>
+status_t Parcel::readAligned(T *pArg) const {
+    COMPILE_TIME_ASSERT_FUNCTION_SCOPE(PAD_SIZE(sizeof(T)) == sizeof(T));
+
+    if ((mDataPos+sizeof(T)) <= mDataSize) {
         const void* data = mData+mDataPos;
-        mDataPos += sizeof(int32_t);
-        *pArg =  *reinterpret_cast<const int32_t*>(data);
+        mDataPos += sizeof(T);
+        *pArg =  *reinterpret_cast<const T*>(data);
         return NO_ERROR;
     } else {
         return NOT_ENOUGH_DATA;
     }
 }
 
+template<class T>
+T Parcel::readAligned() const {
+    T result;
+    if (readAligned(&result) != NO_ERROR) {
+        result = 0;
+    }
+
+    return result;
+}
+
+template<class T>
+status_t Parcel::writeAligned(T val) {
+    COMPILE_TIME_ASSERT_FUNCTION_SCOPE(PAD_SIZE(sizeof(T)) == sizeof(T));
+
+    if ((mDataPos+sizeof(val)) <= mDataCapacity) {
+restart_write:
+        *reinterpret_cast<T*>(mData+mDataPos) = val;
+        return finishWrite(sizeof(val));
+    }
+
+    status_t err = growData(sizeof(val));
+    if (err == NO_ERROR) goto restart_write;
+    return err;
+}
+
+status_t Parcel::readInt32(int32_t *pArg) const
+{
+    return readAligned(pArg);
+}
+
 int32_t Parcel::readInt32() const
 {
-    if ((mDataPos+sizeof(int32_t)) <= mDataSize) {
-        const void* data = mData+mDataPos;
-        mDataPos += sizeof(int32_t);
-        LOGV("readInt32 Setting data pos of %p to %d\n", this, mDataPos);
-        return *reinterpret_cast<const int32_t*>(data);
-    }
-    return 0;
+    return readAligned<int32_t>();
 }
 
 
 status_t Parcel::readInt64(int64_t *pArg) const
 {
-    if ((mDataPos+sizeof(int64_t)) <= mDataSize) {
-        const void* data = mData+mDataPos;
-        mDataPos += sizeof(int64_t);
-        *pArg = *reinterpret_cast<const int64_t*>(data);
-        LOGV("readInt64 Setting data pos of %p to %d\n", this, mDataPos);
-        return NO_ERROR;
-    } else {
-        return NOT_ENOUGH_DATA;
-    }
+    return readAligned(pArg);
 }
 
 
 int64_t Parcel::readInt64() const
 {
-    if ((mDataPos+sizeof(int64_t)) <= mDataSize) {
-        const void* data = mData+mDataPos;
-        mDataPos += sizeof(int64_t);
-        LOGV("readInt64 Setting data pos of %p to %d\n", this, mDataPos);
-        return *reinterpret_cast<const int64_t*>(data);
-    }
-    return 0;
+    return readAligned<int64_t>();
 }
 
 status_t Parcel::readFloat(float *pArg) const
 {
-    if ((mDataPos+sizeof(float)) <= mDataSize) {
-        const void* data = mData+mDataPos;
-        mDataPos += sizeof(float);
-        LOGV("readFloat Setting data pos of %p to %d\n", this, mDataPos);
-        *pArg = *reinterpret_cast<const float*>(data);
-        return NO_ERROR;
-    } else {
-        return NOT_ENOUGH_DATA;
-    }
+    return readAligned(pArg);
 }
 
 
 float Parcel::readFloat() const
 {
-    if ((mDataPos+sizeof(float)) <= mDataSize) {
-        const void* data = mData+mDataPos;
-        mDataPos += sizeof(float);
-        LOGV("readFloat Setting data pos of %p to %d\n", this, mDataPos);
-        return *reinterpret_cast<const float*>(data);
-    }
-    return 0;
+    return readAligned<float>();
 }
 
 status_t Parcel::readDouble(double *pArg) const
 {
-    if ((mDataPos+sizeof(double)) <= mDataSize) {
-        const void* data = mData+mDataPos;
-        mDataPos += sizeof(double);
-        LOGV("readDouble Setting data pos of %p to %d\n", this, mDataPos);
-        *pArg = *reinterpret_cast<const double*>(data);
-        return NO_ERROR;
-    } else {
-        return NOT_ENOUGH_DATA;
-    }
+    return readAligned(pArg);
 }
 
 
 double Parcel::readDouble() const
 {
-    if ((mDataPos+sizeof(double)) <= mDataSize) {
-        const void* data = mData+mDataPos;
-        mDataPos += sizeof(double);
-        LOGV("readDouble Setting data pos of %p to %d\n", this, mDataPos);
-        return *reinterpret_cast<const double*>(data);
-    }
-    return 0;
+    return readAligned<double>();
+}
+
+status_t Parcel::readIntPtr(intptr_t *pArg) const
+{
+    return readAligned(pArg);
+}
+
+
+intptr_t Parcel::readIntPtr() const
+{
+    return readAligned<intptr_t>();
 }
 
 
