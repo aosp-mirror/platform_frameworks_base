@@ -1736,14 +1736,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         switch (keyCode) {
         case KeyEvent.KEYCODE_DPAD_CENTER:
         case KeyEvent.KEYCODE_ENTER:
-            if (isPressed() && mSelectedPosition >= 0 && mAdapter != null &&
+            if (!isEnabled()) {
+                return true;
+            }
+            // Long clickable items don't necessarily have to be clickable
+            if (isClickable() && (event.getRepeatCount() == 0) && isPressed() &&
+                    mSelectedPosition >= 0 && mAdapter != null &&
                     mSelectedPosition < mAdapter.getCount()) {
+
                 final View view = getChildAt(mSelectedPosition - mFirstPosition);
                 performItemClick(view, mSelectedPosition, mSelectedRowId);
                 setPressed(false);
                 if (view != null) view.setPressed(false);
                 return true;
             }
+            break;
         }
         return super.onKeyUp(keyCode, event);
     }
@@ -1892,6 +1899,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (!isEnabled()) {
+            // A disabled view that is clickable still consumes the touch
+            // events, it just doesn't respond to them.
+            return isClickable() || isLongClickable();
+        }
+
         if (mFastScroller != null) {
             boolean intercepted = mFastScroller.onTouchEvent(ev);
             if (intercepted) {
