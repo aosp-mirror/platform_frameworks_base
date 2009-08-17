@@ -54,8 +54,8 @@ typedef struct android_native_base_t
     void* reserved[4];
 
     /* reference-counting interface */
-    void (*incRef)(android_native_base_t* base);
-    void (*decRef)(android_native_base_t* base);
+    void (*incRef)(struct android_native_base_t* base);
+    void (*decRef)(struct android_native_base_t* base);
 } android_native_base_t;
 
 // ---------------------------------------------------------------------------
@@ -108,7 +108,7 @@ typedef struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*setSwapInterval)(android_native_window_t* window,
+    int     (*setSwapInterval)(struct android_native_window_t* window,
                 int interval);
     
     /*
@@ -118,7 +118,7 @@ typedef struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*dequeueBuffer)(android_native_window_t* window, 
+    int     (*dequeueBuffer)(struct android_native_window_t* window, 
                 struct android_native_buffer_t** buffer);
 
     /*
@@ -128,7 +128,7 @@ typedef struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*lockBuffer)(android_native_window_t* window,
+    int     (*lockBuffer)(struct android_native_window_t* window,
                 struct android_native_buffer_t* buffer);
    /*
     * hook called by EGL when modifications to the render buffer are done. 
@@ -138,7 +138,7 @@ typedef struct android_native_window_t
     * 
     * Returns 0 on success or -errno on error.
     */
-    int     (*queueBuffer)(android_native_window_t* window,
+    int     (*queueBuffer)(struct android_native_window_t* window,
                 struct android_native_buffer_t* buffer);
 
     /*
@@ -146,7 +146,7 @@ typedef struct android_native_window_t
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*query)(android_native_window_t* window,
+    int     (*query)(struct android_native_window_t* window,
                 int what, int* value);
     
     /*
@@ -162,7 +162,7 @@ typedef struct android_native_window_t
      *  
      */
     
-    int     (*perform)(android_native_window_t* window,
+    int     (*perform)(struct android_native_window_t* window,
                 int operation, ... );
     
     void* reserved_proc[3];
