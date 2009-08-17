@@ -1209,8 +1209,9 @@ public class WifiService extends IWifiManager.Stub {
                         ssid = "";
                     }
 
-                    // bssid is the hash key
-                    scanResult = mScanResultCache.get(bssid);
+                    // bssid + ssid is the hash key
+                    String key = bssid + ssid;
+                    scanResult = mScanResultCache.get(key);
                     if (scanResult != null) {
                         scanResult.level = level;
                         scanResult.SSID = ssid;
@@ -1222,7 +1223,7 @@ public class WifiService extends IWifiManager.Stub {
                             scanResult =
                                 new ScanResult(
                                     ssid, bssid, flags, level, frequency);
-                            mScanResultCache.put(bssid, scanResult);
+                            mScanResultCache.put(key, scanResult);
                         }
                     }
                 } else {
