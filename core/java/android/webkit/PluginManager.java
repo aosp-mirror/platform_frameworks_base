@@ -147,11 +147,6 @@ public class PluginManager {
             }
             directories.add(directory);
         }
-        // hack for gears for now
-        String gears = mContext.getDir("plugins", 0).getPath();
-        if (!directories.contains(gears)) {
-            directories.add(gears);
-        }
         return directories.toArray(new String[directories.size()]);
     }
 
