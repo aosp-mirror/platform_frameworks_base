@@ -4689,19 +4689,20 @@ public class WebView extends AbsoluteLayout
         mZoomCenterY = mLastTouchY;
         mInZoomOverview = !mInZoomOverview;
         mCallbackProxy.uiOnChangeViewingMode(mInZoomOverview);
-        if (mInZoomOverview) {
-            if (getSettings().getBuiltInZoomControls()) {
-                if (mZoomButtonsController.isVisible()) {
-                    mZoomButtonsController.setVisible(false);
-                }
-            } else {
-                if (mZoomControlRunnable != null) {
-                    mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                }
-                if (mZoomControls != null) {
-                    mZoomControls.hide();
-                }
+        // remove the zoom control after double tap
+        if (getSettings().getBuiltInZoomControls()) {
+            if (mZoomButtonsController.isVisible()) {
+                mZoomButtonsController.setVisible(false);
             }
+        } else {
+            if (mZoomControlRunnable != null) {
+                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
+            }
+            if (mZoomControls != null) {
+                mZoomControls.hide();
+            }
+        }
+        if (mInZoomOverview) {
             zoomWithPreview((float) getViewWidth() / mZoomOverviewWidth);
         } else {
             // mLastTouchX and mLastTouchY are the point in the current viewport
