@@ -27,8 +27,9 @@ import android.renderscript.Sampler;
 import android.renderscript.Element;
 import android.renderscript.SimpleMesh;
 import android.renderscript.Primitive;
+import android.renderscript.Type;
 import static android.renderscript.Sampler.Value.LINEAR;
-import static android.renderscript.Sampler.Value.CLAMP;
+import static android.renderscript.Sampler.Value.NEAREST;
 import static android.renderscript.Sampler.Value.WRAP;
 import static android.renderscript.ProgramStore.DepthFunc.*;
 import static android.renderscript.ProgramStore.BlendDstFunc;
@@ -44,31 +45,21 @@ import java.util.TimeZone;
 class GalaxyRS {
     private static final int GALAXY_RADIUS = 300;
     private static final int PARTICLES_COUNT = 12000;
-    private static final float GALAXY_HEIGHT = 0.1f;
 
     private static final int RSID_STATE = 0;
-    private static final int RSID_STATE_FRAMECOUNT = 0;
-    private static final int RSID_STATE_WIDTH = 1;
-    private static final int RSID_STATE_HEIGHT = 2;
-    private static final int RSID_STATE_PARTICLES_COUNT = 3;
-    private static final int RSID_STATE_GALAXY_RADIUS = 4;
 
-    private static final int TEXTURES_COUNT = 4;
+    private static final int TEXTURES_COUNT = 3;
     private static final int PARTICLES_TEXTURES_COUNT = 2;
     private static final int RSID_TEXTURE_SPACE = 0;
     private static final int RSID_TEXTURE_LIGHT1 = 1;
-    private static final int RSID_TEXTURE_LIGHT2 = 2;
-    private static final int RSID_TEXTURE_FLARES = 3;
+    private static final int RSID_TEXTURE_FLARES = 2;
 
     private static final int RSID_PARTICLES = 1;
-    private static final int PARTICLE_STRUCT_FIELDS_COUNT = 7;
+    private static final int PARTICLE_STRUCT_FIELDS_COUNT = 4;
     private static final int PARTICLE_STRUCT_ANGLE = 0;
     private static final int PARTICLE_STRUCT_DISTANCE = 1;
     private static final int PARTICLE_STRUCT_SPEED = 2;
-    private static final int PARTICLE_STRUCT_Z = 3;
-    private static final int PARTICLE_STRUCT_RADIUS = 4;
-    private static final int PARTICLE_STRUCT_U1 = 5;
-    private static final int PARTICLE_STRUCT_U2 = 6;
+    private static final int PARTICLE_STRUCT_RADIUS = 3;
 
     private static final int RSID_PARTICLES_BUFFER = 2;
 
@@ -92,10 +83,13 @@ class GalaxyRS {
 
     private Allocation[] mTextures;
 
+    private Type mStateType;
     private Allocation mState;
     private Allocation mParticles;
     private Allocation mParticlesBuffer;
     private SimpleMesh mParticlesMesh;
+
+    private final float[] mFloatData5 = new float[5];
 
     public GalaxyRS(int width, int height) {
         mWidth = width;
@@ -127,6 +121,7 @@ class GalaxyRS {
         mPfsLights.destroy();
         mParticlesMesh.destroy();
         mParticlesBuffer.destroy();
+        mStateType.destroy();
     }
 
     @Override
@@ -146,8 +141,10 @@ class GalaxyRS {
         loadTextures();
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
+        sb.setType(mStateType, "State", 0);
         sb.setScript(mResources, R.raw.galaxy);
         sb.setRoot(true);
+
         mScript = sb.create();
         mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         mScript.setTimeZone(TimeZone.getDefault().getID());
@@ -161,68 +158,105 @@ class GalaxyRS {
 
     private void createScriptStructures() {
         createState();
-        createParticles();
         createParticlesMesh();
+        createParticles();
     }
 
     private void createParticlesMesh() {
         final Element.Builder elementBuilder = new Element.Builder(mRS);
-        elementBuilder.add(Element.DataType.UNSIGNED, Element.DataKind.RED, true, 8);
-        elementBuilder.add(Element.DataType.UNSIGNED, Element.DataKind.GREEN, true, 8);
-        elementBuilder.add(Element.DataType.UNSIGNED, Element.DataKind.BLUE, true, 8);
-        elementBuilder.add(Element.DataType.UNSIGNED, Element.DataKind.ALPHA, true, 8);
-        elementBuilder.add(Element.DataType.FLOAT, Element.DataKind.X, false, 32);
-        elementBuilder.add(Element.DataType.FLOAT, Element.DataKind.Y, false, 32);
-        elementBuilder.add(Element.DataType.FLOAT, Element.DataKind.Z, false, 32);
-        elementBuilder.add(Element.DataType.FLOAT, Element.DataKind.S, false, 32);
-        elementBuilder.add(Element.DataType.FLOAT, Element.DataKind.T, false, 32);
+        elementBuilder.addUNorm8RGBA();
+        elementBuilder.addFloatXY();
+        elementBuilder.addFloatST();
         final Element vertexElement = elementBuilder.create();
 
         final SimpleMesh.Builder meshBuilder = new SimpleMesh.Builder(mRS);
         final int vertexSlot = meshBuilder.addVertexType(vertexElement, PARTICLES_COUNT * 3);
         meshBuilder.setPrimitive(Primitive.TRIANGLE);
         mParticlesMesh = meshBuilder.create();
-        mParticlesMesh.setName("MParticles");
+        mParticlesMesh.setName("ParticlesMesh");
 
         mParticlesBuffer = mParticlesMesh.createVertexAllocation(vertexSlot);
-        mParticlesBuffer.setName("BParticles");
+        mParticlesBuffer.setName("ParticlesBuffer");
         mParticlesMesh.bindVertexAllocation(mParticlesBuffer, 0);
+    }
+
+    static class GalaxyState {
+        public int frameCount;
+        public int width;
+        public int height;
+        public int particlesCount;
+        public int galaxyRadius;
+    }
+
+    private void createState() {
+        GalaxyState state = new GalaxyState();
+        state.width = mWidth;
+        state.height = mHeight;
+        state.particlesCount = PARTICLES_COUNT;
+        state.galaxyRadius = GALAXY_RADIUS;
+
+        mStateType = Type.createFromClass(mRS, GalaxyState.class, 1, "GalaxyState");
+        mState = Allocation.createTyped(mRS, mStateType);
+        mState.data(state);
     }
 
     private void createParticles() {
         final float[] particles = new float[PARTICLES_COUNT * PARTICLE_STRUCT_FIELDS_COUNT];
-        mParticles = Allocation.createSized(mRS, USER_FLOAT, particles.length);
+
+        int bufferIndex = 0;
+
         for (int i = 0; i < particles.length; i += PARTICLE_STRUCT_FIELDS_COUNT) {
-            createParticle(particles, i);
+            createParticle(particles, i, bufferIndex);
+            bufferIndex += 3;            
         }
+
+        mParticles = Allocation.createSized(mRS, USER_FLOAT, particles.length);
         mParticles.data(particles);
     }
 
-    private void createState() {
-        final int[] data = new int[5];
-
-        mState = Allocation.createSized(mRS, USER_I32, data.length);
-        data[RSID_STATE_FRAMECOUNT] = 0;
-        data[RSID_STATE_WIDTH] = mWidth;
-        data[RSID_STATE_HEIGHT] = mHeight;
-        data[RSID_STATE_PARTICLES_COUNT] = PARTICLES_COUNT;
-        data[RSID_STATE_GALAXY_RADIUS] = GALAXY_RADIUS;
-        mState.data(data);
-    }
-
     @SuppressWarnings({"PointlessArithmeticExpression"})
-    private void createParticle(float[] particles, int index) {
-        int sprite = random(PARTICLES_TEXTURES_COUNT);
+    private void createParticle(float[] particles, int index, int bufferIndex) {
         float d = abs(randomGauss()) * GALAXY_RADIUS / 2.0f;
 
         particles[index + PARTICLE_STRUCT_ANGLE] = random(0.0f, (float) (Math.PI * 2.0));
         particles[index + PARTICLE_STRUCT_DISTANCE] = d;
-        particles[index + PARTICLE_STRUCT_SPEED] = random(0.0015f, 0.0025f);
-        particles[index + PARTICLE_STRUCT_Z] = randomGauss() * GALAXY_HEIGHT *
-                (GALAXY_RADIUS - d) / (float) GALAXY_RADIUS;
-        particles[index + PARTICLE_STRUCT_RADIUS] = random(3.0f, 7.5f);
-        particles[index + PARTICLE_STRUCT_U1] = sprite / (float) PARTICLES_TEXTURES_COUNT;
-        particles[index + PARTICLE_STRUCT_U2] = (sprite + 1) / (float) PARTICLES_TEXTURES_COUNT;
+        particles[index + PARTICLE_STRUCT_SPEED] = random(0.0015f, 0.0025f) *
+                (0.5f + (0.5f * (float) GALAXY_RADIUS / d));
+        particles[index + PARTICLE_STRUCT_RADIUS] = random(1.0f, 2.1f);
+
+        int red, green, blue;
+        if (d < GALAXY_RADIUS / 3.0f) {
+            red = (int) (220 + (d / (float) GALAXY_RADIUS) * 35);
+            green = 220;
+            blue = 220;
+        } else {
+            red = 180;
+            green = 180;
+            blue = (int) constrain(140 + (d / (float) GALAXY_RADIUS) * 115, 140, 255);
+        }
+
+        final int color = 0xFF000000 | red | green << 8 | blue << 16;
+        final int sprite = random(PARTICLES_TEXTURES_COUNT);        
+        final float u1 = sprite / (float) PARTICLES_TEXTURES_COUNT;
+        final float u2 = (sprite + 1) / (float) PARTICLES_TEXTURES_COUNT;
+
+        final float[] floatData = mFloatData5;
+        final Allocation buffer = mParticlesBuffer;
+        
+        floatData[0] = Float.intBitsToFloat(color);
+        floatData[3] = u1;
+        floatData[4] = 1.0f;
+        buffer.subData1D(bufferIndex, 1, floatData);
+
+        bufferIndex++;
+        floatData[3] = u2;
+        floatData[4] = 1.0f;
+        buffer.subData1D(bufferIndex, 1, floatData);
+
+        bufferIndex++;
+        floatData[3] = u1 + (u2 - u1) / 2.0f;
+        floatData[4] = 0.0f;
+        buffer.subData1D(bufferIndex, 1, floatData);
     }
 
     private static float randomGauss() {
@@ -246,7 +280,6 @@ class GalaxyRS {
         final Allocation[] textures = mTextures;
         textures[RSID_TEXTURE_SPACE] = loadTexture(R.drawable.space, "TSpace");
         textures[RSID_TEXTURE_LIGHT1] = loadTextureARGB(R.drawable.light1, "TLight1");
-        textures[RSID_TEXTURE_LIGHT2] = loadTextureARGB(R.drawable.light2, "TLight2");
         textures[RSID_TEXTURE_FLARES] = loadTextureARGB(R.drawable.flares, "TFlares");
 
         final int count = textures.length;
@@ -286,10 +319,10 @@ class GalaxyRS {
         mPfBackground.bindSampler(mSampler, 0);
 
         sampleBuilder = new Sampler.Builder(mRS);
-        sampleBuilder.setMin(LINEAR);
-        sampleBuilder.setMag(LINEAR);
-        sampleBuilder.setWrapS(CLAMP);
-        sampleBuilder.setWrapT(CLAMP);
+        sampleBuilder.setMin(NEAREST);
+        sampleBuilder.setMag(NEAREST);
+        sampleBuilder.setWrapS(WRAP);
+        sampleBuilder.setWrapT(WRAP);
         mLightSampler = sampleBuilder.create();
 
         builder = new ProgramFragment.Builder(mRS, null, null);
@@ -303,9 +336,8 @@ class GalaxyRS {
     private void createProgramFragmentStore() {
         ProgramStore.Builder builder = new ProgramStore.Builder(mRS, null, null);
         builder.setDepthFunc(ALWAYS);
-        builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
+        builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ZERO);
         builder.setDitherEnable(false);
-        builder.setDepthMask(true);
         mPfsBackground = builder.create();
         mPfsBackground.setName("PFSBackground");
         
@@ -313,7 +345,6 @@ class GalaxyRS {
         builder.setDepthFunc(ALWAYS);
         builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
         builder.setDitherEnable(false);
-        builder.setDepthMask(true);
         mPfsLights = builder.create();
         mPfsLights.setName("PFSLights");
     }
@@ -324,7 +355,6 @@ class GalaxyRS {
         mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);        
 
         ProgramVertex.Builder builder = new ProgramVertex.Builder(mRS, null, null);
-        builder.setTextureMatrixEnable(true);
         mPvBackground = builder.create();
         mPvBackground.bindAllocation(mPvOrthoAlloc);
         mPvBackground.setName("PVBackground");
