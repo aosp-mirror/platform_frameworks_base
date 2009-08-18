@@ -30,6 +30,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.IWindowSession;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +60,7 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_VISIBILITY_CHANGED = 10010;
     private static final int MSG_WALLPAPER_OFFSETS = 10020;
     private static final int MSG_WINDOW_RESIZED = 10030;
+    private static final int MSG_TOUCH_EVENT = 10040;
     
     /**
      * The actual implementation of a wallpaper.  A wallpaper service may
@@ -87,6 +89,8 @@ public abstract class WallpaperService extends Service {
         int mType;
         int mCurWidth;
         int mCurHeight;
+        int mWindowFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        int mCurWindowFlags = mWindowFlags;
         boolean mDestroyReportNeeded;
         final Rect mVisibleInsets = new Rect();
         final Rect mWinFrame = new Rect();
@@ -100,6 +104,7 @@ public abstract class WallpaperService extends Service {
         boolean mOffsetMessageEnqueued;
         float mPendingXOffset;
         float mPendingYOffset;
+        MotionEvent mPendingMove;
         
         final BaseSurfaceHolder mSurfaceHolder = new BaseSurfaceHolder() {
 
@@ -131,6 +136,27 @@ public abstract class WallpaperService extends Service {
         };
         
         final BaseIWindow mWindow = new BaseIWindow() {
+            @Override
+            public boolean onDispatchPointer(MotionEvent event, long eventTime,
+                    boolean callWhenDone) {
+                synchronized (mLock) {
+                    if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        if (mPendingMove != null) {
+                            mCaller.removeMessages(MSG_TOUCH_EVENT, mPendingMove);
+                            mPendingMove.recycle();
+                        }
+                        mPendingMove = event;
+                    } else {
+                        mPendingMove = null;
+                    }
+                    Message msg = mCaller.obtainMessageO(MSG_TOUCH_EVENT,
+                            event);
+                    mCaller.sendMessage(msg);
+                }
+                return false;
+            }
+            
+            @Override
             public void resized(int w, int h, Rect coveredInsets,
                     Rect visibleInsets, boolean reportDraw) {
                 Message msg = mCaller.obtainMessageI(MSG_WINDOW_RESIZED,
@@ -138,6 +164,7 @@ public abstract class WallpaperService extends Service {
                 mCaller.sendMessage(msg);
             }
             
+            @Override
             public void dispatchAppVisibility(boolean visible) {
                 Message msg = mCaller.obtainMessageI(MSG_VISIBILITY_CHANGED,
                         visible ? 1 : 0);
@@ -185,6 +212,22 @@ public abstract class WallpaperService extends Service {
         }
         
         /**
+         * Control whether this wallpaper will receive raw touch events
+         * from the window manager as the user interacts with the window
+         * that is currently displaying the wallpaper.  By default they
+         * are turned off.  If enabled, the events will be received in
+         * {@link #onTouchEvent(MotionEvent)}.
+         */
+        public void setTouchEventsEnabled(boolean enabled) {
+            mWindowFlags = enabled
+                    ? (mWindowFlags&~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+                    : (mWindowFlags|WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            if (mCreated) {
+                updateSurface(false);
+            }
+        }
+        
+        /**
          * Called once to initialize the engine.  After returning, the
          * engine's surface will be created by the framework.
          */
@@ -205,6 +248,16 @@ public abstract class WallpaperService extends Service {
          * CPU while it is visible.</em>.
          */
         public void onVisibilityChanged(boolean visible) {
+        }
+        
+        /**
+         * Called as the user performs touch-screen interaction with the
+         * window that is currently showing this wallpaper.  Note that the
+         * events you receive here are driven by the actual application the
+         * user is interacting with, so if it is slow you will get viewer
+         * move events.
+         */
+        public void onTouchEvent(MotionEvent event) {
         }
         
         /**
@@ -248,7 +301,9 @@ public abstract class WallpaperService extends Service {
             final boolean formatChanged = mFormat != mSurfaceHolder.getRequestedFormat();
             boolean sizeChanged = mWidth != myWidth || mHeight != myHeight;
             final boolean typeChanged = mType != mSurfaceHolder.getRequestedType();
-            if (force || creating || formatChanged || sizeChanged || typeChanged) {
+            final boolean flagsChanged = mCurWindowFlags != mWindowFlags;
+            if (force || creating || formatChanged || sizeChanged || typeChanged
+                    || flagsChanged) {
 
                 if (DEBUG) Log.i(TAG, "Changes: creating=" + creating
                         + " format=" + formatChanged + " size=" + sizeChanged);
@@ -259,20 +314,19 @@ public abstract class WallpaperService extends Service {
                     mFormat = mSurfaceHolder.getRequestedFormat();
                     mType = mSurfaceHolder.getRequestedType();
 
-                    // Scaling/Translate window's layout here because mLayout is not used elsewhere.
-                    
-                    // Places the window relative
                     mLayout.x = 0;
                     mLayout.y = 0;
                     mLayout.width = myWidth;
                     mLayout.height = myHeight;
                     
                     mLayout.format = mFormat;
-                    mLayout.flags |=WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                                  | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                                  | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                                  | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                                  ;
+                    
+                    mCurWindowFlags = mWindowFlags;
+                    mLayout.flags = mWindowFlags
+                            | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                            | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                            ;
 
                     mLayout.memoryType = mType;
                     mLayout.token = mWindowToken;
@@ -477,6 +531,16 @@ public abstract class WallpaperService extends Service {
                         } catch (RemoteException e) {
                         }
                     }
+                } break;
+                case MSG_TOUCH_EVENT: {
+                    MotionEvent ev = (MotionEvent)message.obj;
+                    synchronized (mEngine.mLock) {
+                        if (mEngine.mPendingMove == ev) {
+                            mEngine.mPendingMove = null;
+                        }
+                    }
+                    mEngine.onTouchEvent(ev);
+                    ev.recycle();
                 } break;
                 default :
                     Log.w(TAG, "Unknown message type " + message.what);

@@ -97,6 +97,14 @@ public class HandlerCaller {
         return mH.hasMessages(what);
     }
     
+    public void removeMessages(int what) {
+        mH.removeMessages(what);
+    }
+    
+    public void removeMessages(int what, Object obj) {
+        mH.removeMessages(what, obj);
+    }
+    
     public void sendMessage(Message msg) {
         mH.sendMessage(msg);
     }

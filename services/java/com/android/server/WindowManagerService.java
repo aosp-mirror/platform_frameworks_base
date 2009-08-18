@@ -1247,7 +1247,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState wallpaper = token.windows.get(curWallpaperIndex);
                 
                 if (visible) {
-                    updateWallpaperOffsetLocked(w, wallpaper, dw, dh);                        
+                    updateWallpaperOffsetLocked(mWallpaperTarget,
+                            wallpaper, dw, dh);                        
                 }
                 
                 // First, make sure the client has the current visibility
@@ -1387,6 +1388,32 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         return changed;
+    }
+    
+    void sendPointerToWallpaperLocked(WindowState srcWin,
+            MotionEvent pointer, long eventTime) {
+        int curTokenIndex = mWallpaperTokens.size();
+        while (curTokenIndex > 0) {
+            curTokenIndex--;
+            WindowToken token = mWallpaperTokens.get(curTokenIndex);
+            int curWallpaperIndex = token.windows.size();
+            while (curWallpaperIndex > 0) {
+                curWallpaperIndex--;
+                WindowState wallpaper = token.windows.get(curWallpaperIndex);
+                if ((wallpaper.mAttrs.flags &
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
+                    continue;
+                }
+                try {
+                    MotionEvent ev = MotionEvent.obtainNoHistory(pointer);
+                    ev.offsetLocation(srcWin.mFrame.left-wallpaper.mFrame.left,
+                            srcWin.mFrame.top-wallpaper.mFrame.top);
+                    wallpaper.mClient.dispatchPointer(ev, eventTime, false);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failure sending pointer to wallpaper", e);
+                }
+            }
+        }
     }
     
     public int addWindow(Session session, IWindow client,
@@ -1677,6 +1704,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void removeWindowInnerLocked(Session session, WindowState win) {
+        mKeyWaiter.finishedKey(session, win.mClient, true,
+                KeyWaiter.RETURN_NOTHING);
         mKeyWaiter.releasePendingPointerLocked(win.mSession);
         mKeyWaiter.releasePendingTrackballLocked(win.mSession);
 
@@ -4343,7 +4372,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             final Rect frame = out.mFrame;
                             oev.offsetLocation(-(float)frame.left, -(float)frame.top);
                             try {
-                                out.mClient.dispatchPointer(oev, eventTime);
+                                out.mClient.dispatchPointer(oev, eventTime, false);
                             } catch (android.os.RemoteException e) {
                                 Log.i(TAG, "WINDOW DIED during outside motion dispatch: " + out);
                             }
@@ -4356,6 +4385,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 final Rect frame = target.mFrame;
                 ev.offsetLocation(-(float)frame.left, -(float)frame.top);
                 mKeyWaiter.bindTargetWindowLocked(target);
+                
+                // If we are on top of the wallpaper, then the wallpaper also
+                // gets to see this movement.
+                if (mWallpaperTarget == target) {
+                    sendPointerToWallpaperLocked(target, ev, eventTime);
+                }
             }
         }
 
@@ -4370,7 +4405,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 lt.sample("6 before svr->client ipc ", System.nanoTime() - eventTimeNano);
             }
 
-            target.mClient.dispatchPointer(ev, eventTime);
+            target.mClient.dispatchPointer(ev, eventTime, true);
 
             if (MEASURE_LATENCY) {
                 lt.sample("7 after  svr->client ipc ", System.nanoTime() - eventTimeNano);
@@ -4446,7 +4481,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         try {
-            focus.mClient.dispatchTrackball(ev, eventTime);
+            focus.mClient.dispatchTrackball(ev, eventTime, true);
             return INJECT_SUCCEEDED;
         } catch (android.os.RemoteException e) {
             Log.i(TAG, "WINDOW DIED during key dispatch: " + focus);
@@ -5221,14 +5256,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 return null;
             }
 
+            MotionEvent res = null;
+            QueuedEvent qev = null;
+            WindowState win = null;
+            
             synchronized (this) {
                 if (DEBUG_INPUT) Log.v(
                     TAG, "finishedKey: client=" + client.asBinder()
                     + ", force=" + force + ", last=" + mLastBinder
                     + " (token=" + (mLastWin != null ? mLastWin.mToken : null) + ")");
 
-                QueuedEvent qev = null;
-                WindowState win = null;
                 if (returnWhat == RETURN_PENDING_POINTER) {
                     qev = session.mPendingPointerMove;
                     win = session.mPendingPointerWindow;
@@ -5258,17 +5295,25 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 if (qev != null) {
-                    MotionEvent res = (MotionEvent)qev.event;
+                    res = (MotionEvent)qev.event;
                     if (DEBUG_INPUT) Log.v(TAG,
                             "Returning pending motion: " + res);
                     mQueue.recycleEvent(qev);
                     if (win != null && returnWhat == RETURN_PENDING_POINTER) {
                         res.offsetLocation(-win.mFrame.left, -win.mFrame.top);
                     }
-                    return res;
                 }
-                return null;
             }
+            
+            if (res != null && returnWhat == RETURN_PENDING_POINTER) {
+                synchronized (mWindowMap) {
+                    if (mWallpaperTarget == win) {
+                        sendPointerToWallpaperLocked(win, res, res.getEventTime());
+                    }
+                }
+            }
+            
+            return res;
         }
 
         void tickle() {

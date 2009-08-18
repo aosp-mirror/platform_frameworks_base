@@ -32,23 +32,47 @@ public class BaseIWindow extends IWindow.Stub {
         }
     }
 
-    public void dispatchPointer(MotionEvent event, long eventTime) {
+    public boolean onDispatchPointer(MotionEvent event, long eventTime,
+            boolean callWhenDone) {
+        event.recycle();
+        return false;
+    }
+    
+    public void dispatchPointer(MotionEvent event, long eventTime,
+            boolean callWhenDone) {
         try {
             if (event == null) {
                 event = mSession.getPendingPointerMove(this);
-            } else if (event.getAction() != MotionEvent.ACTION_OUTSIDE) {
-                mSession.finishKey(this);
+                onDispatchPointer(event, eventTime, false);
+            } else if (callWhenDone) {
+                if (!onDispatchPointer(event, eventTime, true)) {
+                    mSession.finishKey(this);
+                }
+            } else {
+                onDispatchPointer(event, eventTime, false);
             }
         } catch (RemoteException ex) {
         }
     }
 
-    public void dispatchTrackball(MotionEvent event, long eventTime) {
+    public boolean onDispatchTrackball(MotionEvent event, long eventTime,
+            boolean callWhenDone) {
+        event.recycle();
+        return false;
+    }
+    
+    public void dispatchTrackball(MotionEvent event, long eventTime,
+            boolean callWhenDone) {
         try {
             if (event == null) {
                 event = mSession.getPendingTrackballMove(this);
-            } else if (event.getAction() != MotionEvent.ACTION_OUTSIDE) {
-                mSession.finishKey(this);
+                onDispatchTrackball(event, eventTime, false);
+            } else if (callWhenDone) {
+                if (!onDispatchTrackball(event, eventTime, true)) {
+                    mSession.finishKey(this);
+                }
+            } else {
+                onDispatchTrackball(event, eventTime, false);
             }
         } catch (RemoteException ex) {
         }

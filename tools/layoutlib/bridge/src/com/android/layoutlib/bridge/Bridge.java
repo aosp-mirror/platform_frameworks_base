@@ -1021,12 +1021,12 @@ public final class Bridge implements ILayoutBridge {
         }
 
         @SuppressWarnings("unused")
-        public void dispatchPointer(MotionEvent arg0, long arg1) throws RemoteException {
+        public void dispatchPointer(MotionEvent arg0, long arg1, boolean arg2) throws RemoteException {
             // pass for now.
         }
 
         @SuppressWarnings("unused")
-        public void dispatchTrackball(MotionEvent arg0, long arg1) throws RemoteException {
+        public void dispatchTrackball(MotionEvent arg0, long arg1, boolean arg2) throws RemoteException {
             // pass for now.
         }
 
