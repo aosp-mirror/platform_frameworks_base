@@ -978,10 +978,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         } else if (mBtHeadset != null) {
             return getCurrentBluetoothPingCount() - mBluetoothPingStart;
         }
-        return -1;
+        return 0;
     }
 
     public void setBtHeadset(BluetoothHeadset headset) {
+        if (headset != null && mBtHeadset == null && isOnBattery() && mBluetoothPingStart == -1) {
+            mBluetoothPingStart = getCurrentBluetoothPingCount();
+        }
         mBtHeadset = headset;
     }
 

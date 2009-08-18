@@ -260,6 +260,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteBluetoothOnLocked();
+            mStats.setBtHeadset(new android.bluetooth.BluetoothHeadset(mContext, null));
         }
     }
     
