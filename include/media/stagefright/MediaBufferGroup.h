@@ -18,6 +18,7 @@
 
 #define MEDIA_BUFFER_GROUP_H_
 
+#include <media/stagefright/MediaBuffer.h>
 #include <utils/Errors.h>
 #include <utils/threads.h>
 
