@@ -18,7 +18,7 @@ package com.android.server.status;
 
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothA2dp;
-import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothIntent;
@@ -473,10 +473,10 @@ public class StatusBarPolicy {
         mBluetoothData = IconData.makeIcon("bluetooth",
                 null, com.android.internal.R.drawable.stat_sys_data_bluetooth, 0, 0);
         mBluetoothIcon = service.addIcon(mBluetoothData, null);
-        BluetoothDevice bluetooth =
-                (BluetoothDevice) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
-        if (bluetooth != null) {
-            mBluetoothEnabled = bluetooth.isEnabled();
+        BluetoothAdapter adapter =
+                (BluetoothAdapter) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+        if (adapter != null) {
+            mBluetoothEnabled = adapter.isEnabled();
         } else {
             mBluetoothEnabled = false;
         }
@@ -1083,7 +1083,7 @@ public class StatusBarPolicy {
         if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION)) {
             int state = intent.getIntExtra(BluetoothIntent.BLUETOOTH_STATE,
                                            BluetoothError.ERROR);
-            mBluetoothEnabled = state == BluetoothDevice.BLUETOOTH_STATE_ON;
+            mBluetoothEnabled = state == BluetoothAdapter.BLUETOOTH_STATE_ON;
         } else if (action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION)) {
             mBluetoothHeadsetState = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
                     BluetoothHeadset.STATE_ERROR);

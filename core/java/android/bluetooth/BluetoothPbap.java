@@ -73,11 +73,11 @@ public class BluetoothPbap {
 
     /** There was an error trying to obtain the state */
     public static final int STATE_ERROR        = -1;
-    /** No Pce currently connected */
+    /** No client currently connected */
     public static final int STATE_DISCONNECTED = 0;
     /** Connection attempt in progress */
     public static final int STATE_CONNECTING   = 1;
-    /** A Pce is currently connected */
+    /** Client is currently connected */
     public static final int STATE_CONNECTED    = 2;
 
     public static final int RESULT_FAILURE = 0;
@@ -159,16 +159,16 @@ public class BluetoothPbap {
     }
 
     /**
-     * Get the Bluetooth address of the current Pce.
-     * @return The Bluetooth address, or null if not in connected or connecting
-     *         state, or if this proxy object is not connected to the Pbap
-     *         service.
+     * Get the currently connected remote Bluetooth device (PCE).
+     * @return The remote Bluetooth device, or null if not in connected or
+     *         connecting state, or if this proxy object is not connected to
+     *         the Pbap service.
      */
-    public String getPceAddress() {
-        if (DBG) log("getPceAddress()");
+    public BluetoothDevice getClient() {
+        if (DBG) log("getClient()");
         if (mService != null) {
             try {
-                return mService.getPceAddress();
+                return mService.getClient();
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
         } else {
             Log.w(TAG, "Proxy not attached to service");
@@ -178,15 +178,15 @@ public class BluetoothPbap {
     }
 
     /**
-     * Returns true if the specified Pcs is connected (does not include
-     * connecting). Returns false if not connected, or if this proxy object
-     * if not currently connected to the Pbap service.
+     * Returns true if the specified Bluetooth device is connected (does not
+     * include connecting). Returns false if not connected, or if this proxy
+     * object is not currently connected to the Pbap service.
      */
-    public boolean isConnected(String address) {
-        if (DBG) log("isConnected(" + address + ")");
+    public boolean isConnected(BluetoothDevice device) {
+        if (DBG) log("isConnected(" + device + ")");
         if (mService != null) {
             try {
-                return mService.isConnected(address);
+                return mService.isConnected(device);
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
         } else {
             Log.w(TAG, "Proxy not attached to service");
@@ -196,15 +196,15 @@ public class BluetoothPbap {
     }
 
     /**
-     * Disconnects the current Pce. Currently this call blocks, it may soon
-     * be made asynchornous. Returns false if this proxy object is
+     * Disconnects the current Pbap client (PCE). Currently this call blocks,
+     * it may soon be made asynchornous. Returns false if this proxy object is
      * not currently connected to the Pbap service.
      */
-    public boolean disconnectPce() {
-        if (DBG) log("disconnectPce()");
+    public boolean disconnect() {
+        if (DBG) log("disconnect()");
         if (mService != null) {
             try {
-                mService.disconnectPce();
+                mService.disconnect();
                 return true;
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
         } else {

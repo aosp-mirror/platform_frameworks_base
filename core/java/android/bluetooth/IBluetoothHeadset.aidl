@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.bluetooth.BluetoothDevice;
+
 /**
  * System private API for Bluetooth Headset service
  *
@@ -23,13 +25,13 @@ package android.bluetooth;
  */
 interface IBluetoothHeadset {
     int getState();
-    String getHeadsetAddress();
-    boolean connectHeadset(in String address);
+    BluetoothDevice getCurrentHeadset();
+    boolean connectHeadset(in BluetoothDevice device);
     void disconnectHeadset();
-    boolean isConnected(in String address);
+    boolean isConnected(in BluetoothDevice device);
     boolean startVoiceRecognition();
     boolean stopVoiceRecognition();
-    boolean setPriority(in String address, int priority);
-    int getPriority(in String address);
+    boolean setPriority(in BluetoothDevice device, int priority);
+    int getPriority(in BluetoothDevice device);
     int getBatteryUsageHint();
 }

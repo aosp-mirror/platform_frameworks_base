@@ -42,6 +42,7 @@ public final class BluetoothSocket implements Closeable {
 
     private final int mType;  /* one of TYPE_RFCOMM etc */
     private final int mPort;  /* RFCOMM channel or L2CAP psm */
+    private final BluetoothDevice mDevice;    /* remote device */
     private final String mAddress;    /* remote address */
     private final boolean mAuth;
     private final boolean mEncrypt;
@@ -51,68 +52,27 @@ public final class BluetoothSocket implements Closeable {
     private int mSocketData;    /* used by native code only */
 
     /**
-     * Construct a secure RFCOMM socket ready to start an outgoing connection.
-     * Call #connect on the returned #BluetoothSocket to begin the connection.
-     * The remote device will be authenticated and communication on this socket
-     * will be encrypted.
-     * @param address remote Bluetooth address that this socket can connect to
-     * @param port    remote port
-     * @return an RFCOMM BluetoothSocket
-     * @throws IOException on error, for example Bluetooth not available, or
-     *                     insufficient permissions.
-     */
-    public static BluetoothSocket createRfcommSocket(String address, int port)
-            throws IOException {
-        return new BluetoothSocket(TYPE_RFCOMM, -1, true, true, address, port);
-    }
-
-    /**
-     * Construct an insecure RFCOMM socket ready to start an outgoing
-     * connection.
-     * Call #connect on the returned #BluetoothSocket to begin the connection.
-     * The remote device will not be authenticated and communication on this
-     * socket will not be encrypted.
-     * @param address remote Bluetooth address that this socket can connect to
-     * @param port    remote port
-     * @return An RFCOMM BluetoothSocket
-     * @throws IOException On error, for example Bluetooth not available, or
-     *                     insufficient permissions.
-     */
-    public static BluetoothSocket createInsecureRfcommSocket(String address, int port)
-            throws IOException {
-        return new BluetoothSocket(TYPE_RFCOMM, -1, false, false, address, port);
-    }
-
-    /**
-     * Construct a SCO socket ready to start an outgoing connection.
-     * Call #connect on the returned #BluetoothSocket to begin the connection.
-     * @param address remote Bluetooth address that this socket can connect to
-     * @return a SCO BluetoothSocket
-     * @throws IOException on error, for example Bluetooth not available, or
-     *                     insufficient permissions.
-     */
-    public static BluetoothSocket createScoSocket(String address, int port)
-            throws IOException {
-        return new BluetoothSocket(TYPE_SCO, -1, true, true, address, port);
-    }
-
-    /**
-     * Construct a Bluetooth.
+     * Construct a BluetoothSocket.
      * @param type    type of socket
      * @param fd      fd to use for connected socket, or -1 for a new socket
      * @param auth    require the remote device to be authenticated
      * @param encrypt require the connection to be encrypted
-     * @param address remote Bluetooth address that this socket can connect to
+     * @param device  remote device that this socket can connect to
      * @param port    remote port
      * @throws IOException On error, for example Bluetooth not available, or
      *                     insufficient priveleges
      */
-    /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt, String address,
-            int port) throws IOException {
+    /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt,
+            BluetoothDevice device, int port) throws IOException {
         mType = type;
         mAuth = auth;
         mEncrypt = encrypt;
-        mAddress = address;
+        mDevice = device;
+        if (device == null) {
+            mAddress = null;
+        } else {
+            mAddress = device.getAddress();
+        }
         mPort = port;
         if (fd == -1) {
             initSocketNative();
@@ -121,6 +81,22 @@ public final class BluetoothSocket implements Closeable {
         }
         mInputStream = new BluetoothInputStream(this);
         mOutputStream = new BluetoothOutputStream(this);
+    }
+
+    /**
+     * Construct a BluetoothSocket from address.
+     * @param type    type of socket
+     * @param fd      fd to use for connected socket, or -1 for a new socket
+     * @param auth    require the remote device to be authenticated
+     * @param encrypt require the connection to be encrypted
+     * @param address remote device that this socket can connect to
+     * @param port    remote port
+     * @throws IOException On error, for example Bluetooth not available, or
+     *                     insufficient priveleges
+     */
+    private BluetoothSocket(int type, int fd, boolean auth, boolean encrypt, String address,
+            int port) throws IOException {
+        this(type, fd, auth, encrypt, new BluetoothDevice(address), port);
     }
 
     @Override
@@ -154,12 +130,12 @@ public final class BluetoothSocket implements Closeable {
     }
 
     /**
-     * Return the address we are connecting, or connected, to.
-     * @return Bluetooth address, or null if this socket has not yet attempted
+     * Return the remote device we are connecting, or connected, to.
+     * @return remote device, or null if this socket has not yet attempted
      *         or established a connection.
      */
-    public String getAddress() {
-        return mAddress;
+    public BluetoothDevice getRemoteDevice() {
+        return mDevice;
     }
 
     /**

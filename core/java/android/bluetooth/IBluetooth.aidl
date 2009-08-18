@@ -21,7 +21,7 @@ package android.bluetooth;
  *
  * {@hide}
  */
-interface IBluetoothDevice
+interface IBluetooth
 {
     boolean isEnabled();
     int getBluetoothState();

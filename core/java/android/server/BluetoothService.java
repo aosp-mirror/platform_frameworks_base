@@ -16,7 +16,7 @@
 
 /**
  * TODO: Move this to
- * java/services/com/android/server/BluetoothDeviceService.java
+ * java/services/com/android/server/BluetoothService.java
  * and make the contructor package private again.
  *
  * @hide
@@ -25,11 +25,12 @@
 package android.server;
 
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothIntent;
-import android.bluetooth.IBluetoothDevice;
+import android.bluetooth.IBluetooth;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -55,8 +56,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class BluetoothDeviceService extends IBluetoothDevice.Stub {
-    private static final String TAG = "BluetoothDeviceService";
+public class BluetoothService extends IBluetooth.Stub {
+    private static final String TAG = "BluetoothService";
     private static final boolean DBG = true;
 
     private int mNativeData;
@@ -65,11 +66,11 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private boolean mIsAirplaneSensitive;
     private int mBluetoothState;
     private boolean mRestart = false;  // need to call enable() after disable()
-
-    private final BondState mBondState = new BondState();  // local cache of bondings
     private boolean mIsDiscovering;
-    private final IBatteryStats mBatteryStats;
 
+    private BluetoothAdapter mAdapter;  // constant after init()
+    private final BondState mBondState = new BondState();  // local cache of bondings
+    private final IBatteryStats mBatteryStats;
     private final Context mContext;
 
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
@@ -78,14 +79,14 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     private static final int MESSAGE_REGISTER_SDP_RECORDS = 1;
     private static final int MESSAGE_FINISH_DISABLE = 2;
 
-    private Map<String, String> mProperties;
-    private HashMap <String, Map<String, String>> mRemoteDeviceProperties;
+    private final Map<String, String> mAdapterProperties;
+    private final HashMap <String, Map<String, String>> mDeviceProperties;
 
     static {
         classInitNative();
     }
 
-    public BluetoothDeviceService(Context context) {
+    public BluetoothService(Context context) {
         mContext = context;
 
         // Need to do this in place of:
@@ -93,11 +94,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         // Since we can not import BatteryStatsService from here. This class really needs to be
         // moved to java/services/com/android/server/
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
-    }
 
-    /** Must be called after construction, and before any other method.
-     */
-    public synchronized void init() {
         initializeNativeDataNative();
 
         if (isEnabledNative() == 1) {
@@ -105,12 +102,16 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             disableNative();
         }
 
-        setBluetoothState(BluetoothDevice.BLUETOOTH_STATE_OFF);
+        mBluetoothState = BluetoothAdapter.BLUETOOTH_STATE_OFF;
         mIsDiscovering = false;
-        mEventLoop = new BluetoothEventLoop(mContext, this);
+        mAdapterProperties = new HashMap<String, String>();
+        mDeviceProperties = new HashMap<String, Map<String,String>>();
         registerForAirplaneMode();
-        mProperties = new HashMap<String, String>();
-        mRemoteDeviceProperties = new HashMap<String, Map<String,String>>();
+    }
+
+    public synchronized void initAfterRegistration() {
+        mAdapter = (BluetoothAdapter) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+        mEventLoop = new BluetoothEventLoop(mContext, mAdapter, this);
     }
 
     @Override
@@ -127,7 +128,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
     public boolean isEnabled() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothState == BluetoothDevice.BLUETOOTH_STATE_ON;
+        return mBluetoothState == BluetoothAdapter.BLUETOOTH_STATE_ON;
     }
 
     public int getBluetoothState() {
@@ -152,9 +153,9 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
 
         switch (mBluetoothState) {
-        case BluetoothDevice.BLUETOOTH_STATE_OFF:
+        case BluetoothAdapter.BLUETOOTH_STATE_OFF:
             return true;
-        case BluetoothDevice.BLUETOOTH_STATE_ON:
+        case BluetoothAdapter.BLUETOOTH_STATE_ON:
             break;
         default:
             return false;
@@ -162,11 +163,11 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         if (mEnableThread != null && mEnableThread.isAlive()) {
             return false;
         }
-        setBluetoothState(BluetoothDevice.BLUETOOTH_STATE_TURNING_OFF);
+        setBluetoothState(BluetoothAdapter.BLUETOOTH_STATE_TURNING_OFF);
 
         // Allow 3 seconds for profiles to gracefully disconnect
         // TODO: Introduce a callback mechanism so that each profile can notify
-        // BluetoothDeviceService when it is done shutting down
+        // BluetoothService when it is done shutting down
         mHandler.sendMessageDelayed(
                 mHandler.obtainMessage(MESSAGE_FINISH_DISABLE, saveSetting ? 1 : 0, 0), 3000);
         return true;
@@ -174,7 +175,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
 
     private synchronized void finishDisable(boolean saveSetting) {
-        if (mBluetoothState != BluetoothDevice.BLUETOOTH_STATE_TURNING_OFF) {
+        if (mBluetoothState != BluetoothAdapter.BLUETOOTH_STATE_TURNING_OFF) {
             return;
         }
         mEventLoop.stop();
@@ -189,17 +190,17 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
         // update mode
         Intent intent = new Intent(BluetoothIntent.SCAN_MODE_CHANGED_ACTION);
-        intent.putExtra(BluetoothIntent.SCAN_MODE, BluetoothDevice.SCAN_MODE_NONE);
+        intent.putExtra(BluetoothIntent.SCAN_MODE, BluetoothAdapter.SCAN_MODE_NONE);
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
         mIsDiscovering = false;
-        mProperties.clear();
+        mAdapterProperties.clear();
 
         if (saveSetting) {
             persistBluetoothOnSetting(false);
         }
 
-        setBluetoothState(BluetoothDevice.BLUETOOTH_STATE_OFF);
+        setBluetoothState(BluetoothAdapter.BLUETOOTH_STATE_OFF);
 
         // Log bluetooth off to battery stats.
         long ident = Binder.clearCallingIdentity();
@@ -236,13 +237,13 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         if (mIsAirplaneSensitive && isAirplaneModeOn()) {
             return false;
         }
-        if (mBluetoothState != BluetoothDevice.BLUETOOTH_STATE_OFF) {
+        if (mBluetoothState != BluetoothAdapter.BLUETOOTH_STATE_OFF) {
             return false;
         }
         if (mEnableThread != null && mEnableThread.isAlive()) {
             return false;
         }
-        setBluetoothState(BluetoothDevice.BLUETOOTH_STATE_TURNING_ON);
+        setBluetoothState(BluetoothAdapter.BLUETOOTH_STATE_TURNING_ON);
         mEnableThread = new EnableThread(saveSetting);
         mEnableThread.start();
         return true;
@@ -250,7 +251,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
     /** Forcibly restart Bluetooth if it is on */
     /* package */ synchronized void restart() {
-        if (mBluetoothState != BluetoothDevice.BLUETOOTH_STATE_ON) {
+        if (mBluetoothState != BluetoothAdapter.BLUETOOTH_STATE_ON) {
             return;
         }
         mRestart = true;
@@ -356,8 +357,8 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             mEnableThread = null;
 
             setBluetoothState(res ?
-                              BluetoothDevice.BLUETOOTH_STATE_ON :
-                              BluetoothDevice.BLUETOOTH_STATE_OFF);
+                              BluetoothAdapter.BLUETOOTH_STATE_ON :
+                              BluetoothAdapter.BLUETOOTH_STATE_OFF);
 
             if (res) {
                 // Update mode
@@ -410,7 +411,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
                         ));
 
         public synchronized void loadBondState() {
-            if (mBluetoothState != BluetoothDevice.BLUETOOTH_STATE_TURNING_ON) {
+            if (mBluetoothState != BluetoothAdapter.BLUETOOTH_STATE_TURNING_ON) {
                 return;
             }
             String []bonds = null;
@@ -442,7 +443,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             if (DBG) log(address + " bond state " + oldState + " -> " + state + " (" +
                          reason + ")");
             Intent intent = new Intent(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
-            intent.putExtra(BluetoothIntent.ADDRESS, address);
+            intent.putExtra(BluetoothIntent.DEVICE, mAdapter.getRemoteDevice(address));
             intent.putExtra(BluetoothIntent.BOND_STATE, state);
             intent.putExtra(BluetoothIntent.BOND_PREVIOUS_STATE, oldState);
             if (state == BluetoothDevice.BOND_NOT_BONDED) {
@@ -539,7 +540,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
     /*package*/synchronized void getAllProperties() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        mProperties.clear();
+        mAdapterProperties.clear();
 
         String properties[] = (String [])getAdapterPropertiesNative();
         // The String Array consists of key-value pairs.
@@ -568,17 +569,17 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             } else {
                 newValue = properties[++i];
             }
-            mProperties.put(name, newValue);
+            mAdapterProperties.put(name, newValue);
         }
 
         // Add adapter object path property.
         String adapterPath = getAdapterPathNative();
         if (adapterPath != null)
-            mProperties.put("ObjectPath", adapterPath + "/dev_");
+            mAdapterProperties.put("ObjectPath", adapterPath + "/dev_");
     }
 
     /* package */ synchronized void setProperty(String name, String value) {
-        mProperties.put(name, value);
+        mAdapterProperties.put(name, value);
     }
 
     public synchronized boolean setName(String name) {
@@ -646,10 +647,10 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     }
 
     /*package*/ synchronized String getProperty (String name) {
-        if (!mProperties.isEmpty())
-            return mProperties.get(name);
+        if (!mAdapterProperties.isEmpty())
+            return mAdapterProperties.get(name);
         getAllProperties();
-        return mProperties.get(name);
+        return mAdapterProperties.get(name);
     }
 
     public synchronized String getAddress() {
@@ -678,7 +679,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return null;
         }
-        Map <String, String> properties = mRemoteDeviceProperties.get(address);
+        Map <String, String> properties = mDeviceProperties.get(address);
         if (properties != null) return properties.get("Name");
         return null;
     }
@@ -805,7 +806,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     }
 
     /*package*/ boolean isRemoteDeviceInCache(String address) {
-        return (mRemoteDeviceProperties.get(address) != null);
+        return (mDeviceProperties.get(address) != null);
     }
 
     /*package*/ String[] getRemoteDeviceProperties(String address) {
@@ -814,7 +815,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
     }
 
     /*package*/ synchronized String getRemoteDeviceProperty(String address, String property) {
-        Map<String, String> properties = mRemoteDeviceProperties.get(address);
+        Map<String, String> properties = mDeviceProperties.get(address);
         if (properties != null) {
             return properties.get(property);
         } else {
@@ -835,7 +836,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         /*
          * We get a DeviceFound signal every time RSSI changes or name changes.
          * Don't create a new Map object every time */
-        Map<String, String> propertyValues = mRemoteDeviceProperties.get(address);
+        Map<String, String> propertyValues = mDeviceProperties.get(address);
         if (propertyValues != null) {
             propertyValues.clear();
         } else {
@@ -864,19 +865,19 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             }
             propertyValues.put(name, newValue);
         }
-        mRemoteDeviceProperties.put(address, propertyValues);
+        mDeviceProperties.put(address, propertyValues);
     }
 
     /* package */ void removeRemoteDeviceProperties(String address) {
-        mRemoteDeviceProperties.remove(address);
+        mDeviceProperties.remove(address);
     }
 
     /* package */ synchronized void setRemoteDeviceProperty(String address, String name,
                                                               String value) {
-        Map <String, String> propVal = mRemoteDeviceProperties.get(address);
+        Map <String, String> propVal = mDeviceProperties.get(address);
         if (propVal != null) {
             propVal.put(name, value);
-            mRemoteDeviceProperties.put(address, propVal);
+            mDeviceProperties.put(address, propVal);
         } else {
             Log.e(TAG, "setRemoteDeviceProperty for a device not in cache:" + address);
         }
@@ -1059,16 +1060,16 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         pw.println("\nmIsAirplaneSensitive = " + mIsAirplaneSensitive + "\n");
 
         switch(mBluetoothState) {
-        case BluetoothDevice.BLUETOOTH_STATE_OFF:
+        case BluetoothAdapter.BLUETOOTH_STATE_OFF:
             pw.println("\nBluetooth OFF\n");
             return;
-        case BluetoothDevice.BLUETOOTH_STATE_TURNING_ON:
+        case BluetoothAdapter.BLUETOOTH_STATE_TURNING_ON:
             pw.println("\nBluetooth TURNING ON\n");
             return;
-        case BluetoothDevice.BLUETOOTH_STATE_TURNING_OFF:
+        case BluetoothAdapter.BLUETOOTH_STATE_TURNING_OFF:
             pw.println("\nBluetooth TURNING OFF\n");
             return;
-        case BluetoothDevice.BLUETOOTH_STATE_ON:
+        case BluetoothAdapter.BLUETOOTH_STATE_ON:
             pw.println("\nBluetooth ON\n");
         }
 
@@ -1079,7 +1080,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
         BluetoothHeadset headset = new BluetoothHeadset(mContext, null);
 
         pw.println("\n--Known devices--");
-        for (String address : mRemoteDeviceProperties.keySet()) {
+        for (String address : mDeviceProperties.keySet()) {
             pw.printf("%s %10s (%d) %s\n", address,
                        toBondStateString(mBondState.getBondState(address)),
                        mBondState.getAttempt(address),
@@ -1113,7 +1114,7 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
             pw.println("getState() = STATE_ERROR");
             break;
         }
-        pw.println("getHeadsetAddress() = " + headset.getHeadsetAddress());
+        pw.println("getCurrentHeadset() = " + headset.getCurrentHeadset());
         pw.println("getBatteryUsageHint() = " + headset.getBatteryUsageHint());
 
         headset.close();
@@ -1121,20 +1122,20 @@ public class BluetoothDeviceService extends IBluetoothDevice.Stub {
 
     /* package */ static int bluezStringToScanMode(boolean pairable, boolean discoverable) {
         if (pairable && discoverable)
-            return BluetoothDevice.SCAN_MODE_CONNECTABLE_DISCOVERABLE;
+            return BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE;
         else if (pairable && !discoverable)
-            return BluetoothDevice.SCAN_MODE_CONNECTABLE;
+            return BluetoothAdapter.SCAN_MODE_CONNECTABLE;
         else
-            return BluetoothDevice.SCAN_MODE_NONE;
+            return BluetoothAdapter.SCAN_MODE_NONE;
     }
 
     /* package */ static String scanModeToBluezString(int mode) {
         switch (mode) {
-        case BluetoothDevice.SCAN_MODE_NONE:
+        case BluetoothAdapter.SCAN_MODE_NONE:
             return "off";
-        case BluetoothDevice.SCAN_MODE_CONNECTABLE:
+        case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
             return "connectable";
-        case BluetoothDevice.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
+        case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
             return "discoverable";
         }
         return null;

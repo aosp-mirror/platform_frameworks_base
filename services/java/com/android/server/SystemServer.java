@@ -36,7 +36,7 @@ import android.os.*;
 import android.provider.Contacts.People;
 import android.provider.Settings;
 import android.server.BluetoothA2dpService;
-import android.server.BluetoothDeviceService;
+import android.server.BluetoothService;
 import android.server.search.SearchManagerService;
 import android.util.EventLog;
 import android.util.Log;
@@ -89,7 +89,7 @@ class ServerThread extends Thread {
         IPackageManager pm = null;
         Context context = null;
         WindowManagerService wm = null;
-        BluetoothDeviceService bluetooth = null;
+        BluetoothService bluetooth = null;
         BluetoothA2dpService bluetoothA2dp = null;
         HeadsetObserver headset = null;
         DockObserver dock = null;
@@ -176,9 +176,9 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.BLUETOOTH_SERVICE, null);
             } else {
                 Log.i(TAG, "Starting Bluetooth Service.");
-                bluetooth = new BluetoothDeviceService(context);
-                bluetooth.init();
+                bluetooth = new BluetoothService(context);
                 ServiceManager.addService(Context.BLUETOOTH_SERVICE, bluetooth);
+                bluetooth.initAfterRegistration();
                 bluetoothA2dp = new BluetoothA2dpService(context, bluetooth);
                 ServiceManager.addService(BluetoothA2dpService.BLUETOOTH_A2DP_SERVICE,
                                           bluetoothA2dp);

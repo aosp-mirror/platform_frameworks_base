@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +16,25 @@
 
 package android.bluetooth;
 
+import android.content.Context;
+import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 /**
- * The Android Bluetooth API is not finalized, and *will* change. Use at your
- * own risk.
+ * Represents a remote Bluetooth device.
  *
- * Manages the local Bluetooth device. Scan for devices, create bondings,
- * power up and down the adapter.
- *
+ * TODO: unhide
  * @hide
  */
-public class BluetoothDevice {
-
-    public static final int BLUETOOTH_STATE_OFF = 0;
-    public static final int BLUETOOTH_STATE_TURNING_ON = 1;
-    public static final int BLUETOOTH_STATE_ON = 2;
-    public static final int BLUETOOTH_STATE_TURNING_OFF = 3;
-
-    /** Inquiry scan and page scan are both off.
-     *  Device is neither discoverable nor connectable */
-    public static final int SCAN_MODE_NONE = 0;
-    /** Page scan is on, inquiry scan is off.
-     *  Device is connectable, but not discoverable */
-    public static final int SCAN_MODE_CONNECTABLE = 1;
-    /** Page scan and inquiry scan are on.
-     *  Device is connectable and discoverable */
-    public static final int SCAN_MODE_CONNECTABLE_DISCOVERABLE = 3;
-
-    public static final int RESULT_FAILURE = -1;
-    public static final int RESULT_SUCCESS = 0;
+public final class BluetoothDevice implements Parcelable {
+    private static final String TAG = "BluetoothDevice";
 
     /** We do not have a link key for the remote device, and are therefore not
      * bonded */
@@ -81,84 +67,81 @@ public class BluetoothDevice {
     /* The user will be prompted to confirm the passkey displayed on the screen */
     public static final int PAIRING_VARIANT_CONFIRMATION = 2;
 
+    private static final int ADDRESS_LENGTH = 17;
 
-    private static final String TAG = "BluetoothDevice";
+    private static IBluetooth sService;  /* Guarenteed constant after first object constructed */
 
-    private final IBluetoothDevice mService;
+    private final String mAddress;
+
     /**
-     * @hide - hide this because it takes a parameter of type
-     * IBluetoothDevice, which is a System private class.
-     * Also note that Context.getSystemService is a factory that
-     * returns a BlueToothDevice. That is the right way to get
-     * a BluetoothDevice.
+     * Create a new BluetoothDevice
+     * Bluetooth MAC address must be upper case, such as "00:11:22:33:AA:BB",
+     * and is validated in this constructor.
+     * @param address valid Bluetooth MAC address
+     * @throws RuntimeException Bluetooth is not available on this platform
+     * @throws IllegalArgumentException address is invalid
+     * @hide
      */
-    public BluetoothDevice(IBluetoothDevice service) {
-        mService = service;
+    /*package*/ BluetoothDevice(String address) {
+        synchronized (BluetoothDevice.class) {
+            if (sService == null) {
+                IBinder b = ServiceManager.getService(Context.BLUETOOTH_SERVICE);
+                if (b == null) {
+                    throw new RuntimeException("Bluetooth service not available");
+                }
+                sService = IBluetooth.Stub.asInterface(b);
+            }
+        }
+
+        if (!checkBluetoothAddress(address)) {
+            throw new IllegalArgumentException(address + " is not a valid Bluetooth address");
+        }
+
+        mAddress = address;
     }
 
-    /**
-     * Is Bluetooth currently turned on.
-     *
-     * @return true if Bluetooth enabled, false otherwise.
-     */
-    public boolean isEnabled() {
-        try {
-            return mService.isEnabled();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof BluetoothDevice) {
+            return mAddress.equals(((BluetoothDevice)o).getAddress());
+        }
         return false;
     }
 
-    /**
-     * Get the current state of Bluetooth.
-     *
-     * @return One of BLUETOOTH_STATE_ or BluetoothError.ERROR.
-     */
-    public int getBluetoothState() {
-        try {
-            return mService.getBluetoothState();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothError.ERROR;
+    @Override
+    public int hashCode() {
+        return mAddress.hashCode();
     }
 
-    /**
-     * Enable the Bluetooth device.
-     * Turn on the underlying hardware.
-     * This is an asynchronous call,
-     * BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION can be used to check if
-     * and when the device is sucessfully enabled.
-     * @return false if we cannot enable the Bluetooth device. True does not
-     * imply the device was enabled, it only implies that so far there were no
-     * problems.
-     */
-    public boolean enable() {
-        try {
-            return mService.enable();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
+    @Override
+    public String toString() {
+        return mAddress;
     }
 
-    /**
-     * Disable the Bluetooth device.
-     * This turns off the underlying hardware.
-     *
-     * @return true if successful, false otherwise.
-     */
-    public boolean disable() {
-        try {
-            return mService.disable(true);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Parcelable.Creator<BluetoothDevice> CREATOR =
+            new Parcelable.Creator<BluetoothDevice>() {
+        public BluetoothDevice createFromParcel(Parcel in) {
+            return new BluetoothDevice(in.readString());
+        }
+        public BluetoothDevice[] newArray(int size) {
+            return new BluetoothDevice[size];
+        }
+    };
+
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(mAddress);
     }
 
     public String getAddress() {
-        try {
-            return mService.getAddress();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
+        return mAddress;
     }
 
     /**
-     * Get the friendly Bluetooth name of this device.
+     * Get the friendly Bluetooth name of this remote device.
      *
      * This name is visible to remote Bluetooth devices. Currently it is only
      * possible to retrieve the Bluetooth name when Bluetooth is enabled.
@@ -167,95 +150,9 @@ public class BluetoothDevice {
      */
     public String getName() {
         try {
-            return mService.getName();
+            return sService.getRemoteName(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
-    }
-
-    /**
-     * Set the friendly Bluetooth name of this device.
-     *
-     * This name is visible to remote Bluetooth devices. The Bluetooth Service
-     * is responsible for persisting this name.
-     *
-     * @param name the name to set
-     * @return     true, if the name was successfully set. False otherwise.
-     */
-    public boolean setName(String name) {
-        try {
-            return mService.setName(name);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    /**
-     * Get the current scan mode.
-     * Used to determine if the local device is connectable and/or discoverable
-     * @return Scan mode, one of SCAN_MODE_* or an error code
-     */
-    public int getScanMode() {
-        try {
-            return mService.getScanMode();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothError.ERROR_IPC;
-    }
-
-    /**
-     * Set the current scan mode.
-     * Used to make the local device connectable and/or discoverable
-     * @param scanMode One of SCAN_MODE_*
-     */
-    public void setScanMode(int scanMode) {
-        try {
-            mService.setScanMode(scanMode);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-    }
-
-    public int getDiscoverableTimeout() {
-        try {
-            return mService.getDiscoverableTimeout();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return -1;
-    }
-    public void setDiscoverableTimeout(int timeout) {
-        try {
-            mService.setDiscoverableTimeout(timeout);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-    }
-
-    public boolean startDiscovery() {
-        try {
-            return mService.startDiscovery();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    public void cancelDiscovery() {
-        try {
-            mService.cancelDiscovery();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-    }
-
-    public boolean isDiscovering() {
-        try {
-            return mService.isDiscovering();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    /**
-     * Removes the remote device and the pairing information associated
-     * with it.
-     *
-     * @param address the Bluetooth hardware address you want to disconnect.
-     * @return true if the device was disconnected, false otherwise and on
-     *         error.
-     */
-    public boolean removeBond(String address) {
-        try {
-            return mService.removeBond(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
     }
 
     /**
@@ -268,9 +165,9 @@ public class BluetoothDevice {
      * @return false If there was an immediate problem creating the bonding,
      *         true otherwise.
      */
-    public boolean createBond(String address) {
+    public boolean createBond() {
         try {
-            return mService.createBond(address);
+            return sService.createBond(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -278,41 +175,25 @@ public class BluetoothDevice {
     /**
      * Cancel an in-progress bonding request started with createBond.
      */
-    public boolean cancelBondProcess(String address) {
+    public boolean cancelBondProcess() {
         try {
-            return mService.cancelBondProcess(address);
+            return sService.cancelBondProcess(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
 
     /**
-     * List remote devices that are bonded (paired) to the local device.
+     * Removes the remote device and the pairing information associated
+     * with it.
      *
-     * Bonding (pairing) is the process by which the user enters a pin code for
-     * the device, which generates a shared link key, allowing for
-     * authentication and encryption of future connections. In Android we
-     * require bonding before RFCOMM or SCO connections can be made to a remote
-     * device.
-     *
-     * This function lists which remote devices we have a link key for. It does
-     * not cause any RF transmission, and does not check if the remote device
-     * still has it's link key with us. If the other side no longer has its
-     * link key then the RFCOMM or SCO connection attempt will result in an
-     * error.
-     *
-     * This function does not check if the remote device is in range.
-     *
-     * Remote devices that have an in-progress bonding attempt are not
-     * returned.
-     *
-     * @return bluetooth hardware addresses of remote devices that are
-     *         bonded. Array size is 0 if no devices are bonded. Null on error.
+     * @return true if the device was disconnected, false otherwise and on
+     *         error.
      */
-    public String[] listBonds() {
+    public boolean removeBond() {
         try {
-            return mService.listBonds();
+            return sService.removeBond(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
+        return false;
     }
 
     /**
@@ -325,67 +206,100 @@ public class BluetoothDevice {
      * @param address Bluetooth hardware address of the remote device to check.
      * @return Result code
      */
-    public int getBondState(String address) {
+    public int getBondState() {
         try {
-            return mService.getBondState(address);
+            return sService.getBondState(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return BluetoothError.ERROR_IPC;
     }
 
-    public String getRemoteName(String address) {
+    public int getBluetoothClass() {
         try {
-            return mService.getRemoteName(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-
-    public int getRemoteClass(String address) {
-        try {
-            return mService.getRemoteClass(address);
+            return sService.getRemoteClass(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return BluetoothError.ERROR_IPC;
     }
 
-     public String[] getRemoteUuids(String address) {
+     public String[] getUuids() {
         try {
-            return mService.getRemoteUuids(address);
+            return sService.getRemoteUuids(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
 
-    public int getRemoteServiceChannel(String address, String uuid) {
+    public int getServiceChannel(String uuid) {
          try {
-             return mService.getRemoteServiceChannel(address, uuid);
+             return sService.getRemoteServiceChannel(mAddress, uuid);
          } catch (RemoteException e) {Log.e(TAG, "", e);}
          return BluetoothError.ERROR_IPC;
     }
 
-    public boolean setPin(String address, byte[] pin) {
+    public boolean setPin(byte[] pin) {
         try {
-            return mService.setPin(address, pin);
+            return sService.setPin(mAddress, pin);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
 
-    public boolean setPasskey(String address, int passkey) {
+    public boolean setPasskey(int passkey) {
         try {
-            return mService.setPasskey(address, passkey);
+            return sService.setPasskey(mAddress, passkey);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
 
-    public boolean setPairingConfirmation(String address, boolean confirm) {
+    public boolean setPairingConfirmation(boolean confirm) {
         try {
-            return mService.setPairingConfirmation(address, confirm);
+            return sService.setPairingConfirmation(mAddress, confirm);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
 
-    public boolean cancelPairingUserInput(String address) {
+    public boolean cancelPairingUserInput() {
         try {
-            return mService.cancelPairingUserInput(address);
+            return sService.cancelPairingUserInput(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
+    }
+
+    /**
+     * Construct a secure RFCOMM socket ready to start an outgoing connection.
+     * Call #connect on the returned #BluetoothSocket to begin the connection.
+     * The remote device will be authenticated and communication on this socket
+     * will be encrypted.
+     * @param port    remote port
+     * @return an RFCOMM BluetoothSocket
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions.
+     */
+    public BluetoothSocket createRfcommSocket(int port) throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, port);
+    }
+
+    /**
+     * Construct an insecure RFCOMM socket ready to start an outgoing
+     * connection.
+     * Call #connect on the returned #BluetoothSocket to begin the connection.
+     * The remote device will not be authenticated and communication on this
+     * socket will not be encrypted.
+     * @param port    remote port
+     * @return An RFCOMM BluetoothSocket
+     * @throws IOException On error, for example Bluetooth not available, or
+     *                     insufficient permissions.
+     */
+    public BluetoothSocket createInsecureRfcommSocket(int port) throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, false, false, this, port);
+    }
+
+    /**
+     * Construct a SCO socket ready to start an outgoing connection.
+     * Call #connect on the returned #BluetoothSocket to begin the connection.
+     * @return a SCO BluetoothSocket
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions.
+     */
+    public BluetoothSocket createScoSocket() throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_SCO, -1, true, true, this, -1);
     }
 
     /**
@@ -413,7 +327,6 @@ public class BluetoothDevice {
         return pinBytes;
     }
 
-    private static final int ADDRESS_LENGTH = 17;
     /** Sanity check a bluetooth address, such as "00:43:A8:23:10:F0" */
     public static boolean checkBluetoothAddress(String address) {
         if (address == null || address.length() != ADDRESS_LENGTH) {

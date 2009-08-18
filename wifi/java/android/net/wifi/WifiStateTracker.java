@@ -39,6 +39,7 @@ import android.util.Log;
 import android.util.Config;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothA2dp;
 import android.content.ContentResolver;
@@ -49,6 +50,7 @@ import com.android.internal.app.IBatteryStats;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 import java.net.UnknownHostException;
 
 /**
@@ -645,10 +647,10 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     private void checkIsBluetoothPlaying() {
         boolean isBluetoothPlaying = false;
-        List<String> connected = mBluetoothA2dp.listConnectedSinks();
+        Set<BluetoothDevice> connected = mBluetoothA2dp.getConnectedSinks();
 
-        for (String address : connected) {
-            if (mBluetoothA2dp.getSinkState(address) == BluetoothA2dp.STATE_PLAYING) {
+        for (BluetoothDevice device : connected) {
+            if (mBluetoothA2dp.getSinkState(device) == BluetoothA2dp.STATE_PLAYING) {
                 isBluetoothPlaying = true;
                 break;
             }

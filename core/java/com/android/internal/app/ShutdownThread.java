@@ -21,8 +21,8 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.ProgressDialog;
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.IBluetoothDevice;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.IBluetooth;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -179,13 +179,13 @@ public final class ShutdownThread extends Thread {
         
         final ITelephony phone =
                 ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
-        final IBluetoothDevice bluetooth =
-                IBluetoothDevice.Stub.asInterface(ServiceManager.checkService(
+        final IBluetooth bluetooth =
+                IBluetooth.Stub.asInterface(ServiceManager.checkService(
                         Context.BLUETOOTH_SERVICE));
         
         try {
             bluetoothOff = bluetooth == null ||
-                           bluetooth.getBluetoothState() == BluetoothDevice.BLUETOOTH_STATE_OFF;
+                           bluetooth.getBluetoothState() == BluetoothAdapter.BLUETOOTH_STATE_OFF;
             if (!bluetoothOff) {
                 Log.w(TAG, "Disabling Bluetooth...");
                 bluetooth.disable(false);  // disable but don't persist new state
@@ -213,7 +213,7 @@ public final class ShutdownThread extends Thread {
             if (!bluetoothOff) {
                 try {
                     bluetoothOff =
-                            bluetooth.getBluetoothState() == BluetoothDevice.BLUETOOTH_STATE_OFF;
+                            bluetooth.getBluetoothState() == BluetoothAdapter.BLUETOOTH_STATE_OFF;
                 } catch (RemoteException ex) {
                     Log.e(TAG, "RemoteException during bluetooth shutdown", ex);
                     bluetoothOff = true;

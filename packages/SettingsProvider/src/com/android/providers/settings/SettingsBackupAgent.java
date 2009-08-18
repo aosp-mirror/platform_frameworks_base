@@ -30,7 +30,7 @@ import java.util.zip.CRC32;
 import android.backup.BackupDataInput;
 import android.backup.BackupDataOutput;
 import android.backup.BackupHelperAgent;
-import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -393,7 +393,7 @@ public class SettingsBackupAgent extends BackupHelperAgent {
     }
 
     private void enableBluetooth(boolean enable) {
-        BluetoothDevice bt = (BluetoothDevice) getSystemService(Context.BLUETOOTH_SERVICE);
+        BluetoothAdapter bt = (BluetoothAdapter) getSystemService(Context.BLUETOOTH_SERVICE);
         if (bt != null) {
             if (!enable) {
                 bt.disable();

@@ -9,24 +9,22 @@ import android.util.Log;
 /**
  * Listen's for incoming RFCOMM connection for the headset / handsfree service.
  *
- * This class is planned for deletion, in favor of a generic Rfcomm class.
+ * TODO: Use the new generic BluetoothSocket class instead of this legacy code
  *
  * @hide
  */
-public class BluetoothAudioGateway {
+public final class BluetoothAudioGateway {
     private static final String TAG = "BT Audio Gateway";
     private static final boolean DBG = false;
 
     private int mNativeData;
     static { classInitNative(); }
 
-    private BluetoothDevice mBluetooth;
-
     /* in */
     private int mHandsfreeAgRfcommChannel = -1;
     private int mHeadsetAgRfcommChannel   = -1;
 
-    /* out */
+    /* out - written by native code */
     private String mConnectingHeadsetAddress;
     private int mConnectingHeadsetRfcommChannel; /* -1 when not connected */
     private int mConnectingHeadsetSocketFd;
@@ -35,17 +33,18 @@ public class BluetoothAudioGateway {
     private int mConnectingHandsfreeSocketFd;
     private int mTimeoutRemainingMs; /* in/out */
 
+    private final BluetoothAdapter mAdapter;
+
     public static final int DEFAULT_HF_AG_CHANNEL = 10;
     public static final int DEFAULT_HS_AG_CHANNEL = 11;
 
-    public BluetoothAudioGateway(BluetoothDevice bluetooth) {
-        this(bluetooth, DEFAULT_HF_AG_CHANNEL, DEFAULT_HS_AG_CHANNEL);
+    public BluetoothAudioGateway(BluetoothAdapter adapter) {
+        this(adapter, DEFAULT_HF_AG_CHANNEL, DEFAULT_HS_AG_CHANNEL);
     }
 
-    public BluetoothAudioGateway(BluetoothDevice bluetooth,
-                                 int handsfreeAgRfcommChannel,
-                                 int headsetAgRfcommChannel) {
-        mBluetooth = bluetooth;
+    public BluetoothAudioGateway(BluetoothAdapter adapter, int handsfreeAgRfcommChannel,
+                int headsetAgRfcommChannel) {
+        mAdapter = adapter;
         mHandsfreeAgRfcommChannel = handsfreeAgRfcommChannel;
         mHeadsetAgRfcommChannel = headsetAgRfcommChannel;
         initializeNativeDataNative();
@@ -58,18 +57,17 @@ public class BluetoothAudioGateway {
     private Handler mCallback;
 
     public class IncomingConnectionInfo {
-        IncomingConnectionInfo(BluetoothDevice bluetooth, String address, int socketFd,
-                               int rfcommChan) {
-            mBluetooth = bluetooth;
-            mAddress = address;
+        public BluetoothAdapter mAdapter;
+        public BluetoothDevice mRemoteDevice;
+        public int mSocketFd;
+        public int mRfcommChan;
+        IncomingConnectionInfo(BluetoothAdapter adapter, BluetoothDevice remoteDevice,
+                int socketFd, int rfcommChan) {
+            mAdapter = adapter;
+            mRemoteDevice = remoteDevice;
             mSocketFd = socketFd;
             mRfcommChan = rfcommChan;
         }
-
-        public BluetoothDevice mBluetooth;
-        public String mAddress;
-        public int mSocketFd;
-        public int mRfcommChan;
     }
 
     public static final int MSG_INCOMING_HEADSET_CONNECTION   = 100;
@@ -111,12 +109,11 @@ public class BluetoothAudioGateway {
                                           mConnectingHeadsetRfcommChannel);
                                     Message msg = Message.obtain(mCallback);
                                     msg.what = MSG_INCOMING_HEADSET_CONNECTION;
-                                    msg.obj = 
-                                        new IncomingConnectionInfo(
-                                            mBluetooth, 
-                                            mConnectingHeadsetAddress,
-                                            mConnectingHeadsetSocketFd,
-                                            mConnectingHeadsetRfcommChannel);
+                                    msg.obj = new IncomingConnectionInfo(
+                                        mAdapter,
+                                        mAdapter.getRemoteDevice(mConnectingHeadsetAddress),
+                                        mConnectingHeadsetSocketFd,
+                                        mConnectingHeadsetRfcommChannel);
                                     msg.sendToTarget();
                                 }
                                 if (mConnectingHandsfreeRfcommChannel >= 0) {
@@ -126,12 +123,11 @@ public class BluetoothAudioGateway {
                                     Message msg = Message.obtain();
                                     msg.setTarget(mCallback);
                                     msg.what = MSG_INCOMING_HANDSFREE_CONNECTION;
-                                    msg.obj = 
-                                        new IncomingConnectionInfo(
-                                            mBluetooth,
-                                            mConnectingHandsfreeAddress,
-                                            mConnectingHandsfreeSocketFd,
-                                            mConnectingHandsfreeRfcommChannel);
+                                    msg.obj = new IncomingConnectionInfo(
+                                        mAdapter,
+                                        mAdapter.getRemoteDevice(mConnectingHandsfreeAddress),
+                                        mConnectingHandsfreeSocketFd,
+                                        mConnectingHandsfreeRfcommChannel);
                                     msg.sendToTarget();
                                 }
                             }

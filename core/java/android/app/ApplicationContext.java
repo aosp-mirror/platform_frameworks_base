@@ -22,8 +22,8 @@ import com.google.android.collect.Maps;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.IBluetoothDevice;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.IBluetooth;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -158,8 +158,6 @@ class ApplicationContext extends Context {
     private static ConnectivityManager sConnectivityManager;
     private static WifiManager sWifiManager;
     private static LocationManager sLocationManager;
-    private static boolean sIsBluetoothDeviceCached = false;
-    private static BluetoothDevice sBluetoothDevice;
     private static final HashMap<File, SharedPreferencesImpl> sSharedPrefs =
             new HashMap<File, SharedPreferencesImpl>();
 
@@ -184,6 +182,8 @@ class ApplicationContext extends Context {
     private StatusBarManager mStatusBarManager = null;
     private TelephonyManager mTelephonyManager = null;
     private ClipboardManager mClipboardManager = null;
+    private boolean mIsBluetoothAdapterCached = false;
+    private BluetoothAdapter mBluetoothAdapter;
     private boolean mRestricted;
 
     private final Object mSync = new Object();
@@ -830,7 +830,7 @@ class ApplicationContext extends Context {
         } else if (SENSOR_SERVICE.equals(name)) {
             return getSensorManager();
         } else if (BLUETOOTH_SERVICE.equals(name)) {
-            return getBluetoothDevice();
+            return getBluetoothAdapter();
         } else if (VIBRATOR_SERVICE.equals(name)) {
             return getVibrator();
         } else if (STATUS_BAR_SERVICE.equals(name)) {
@@ -980,21 +980,16 @@ class ApplicationContext extends Context {
         return mSearchManager;
     }
 
-    private BluetoothDevice getBluetoothDevice() {
-        if (sIsBluetoothDeviceCached) {
-            return sBluetoothDevice;
-        }
-        synchronized (sSync) {
+    private synchronized BluetoothAdapter getBluetoothAdapter() {
+        if (!mIsBluetoothAdapterCached) {
+            mIsBluetoothAdapterCached = true;
             IBinder b = ServiceManager.getService(BLUETOOTH_SERVICE);
-            if (b == null) {
-                sBluetoothDevice = null;
-            } else {
-                IBluetoothDevice service = IBluetoothDevice.Stub.asInterface(b);
-                sBluetoothDevice = new BluetoothDevice(service);
+            if (b != null) {
+                IBluetooth service = IBluetooth.Stub.asInterface(b);
+                mBluetoothAdapter = new BluetoothAdapter(service);
             }
-            sIsBluetoothDeviceCached = true;
         }
-        return sBluetoothDevice;
+        return mBluetoothAdapter;
     }
 
     private SensorManager getSensorManager() {

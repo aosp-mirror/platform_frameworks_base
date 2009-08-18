@@ -31,8 +31,8 @@ import android.annotation.SdkConstant.SdkConstantType;
 public interface BluetoothIntent {
     public static final String SCAN_MODE =
         "android.bluetooth.intent.SCAN_MODE";
-    public static final String ADDRESS =
-        "android.bluetooth.intent.ADDRESS";
+    public static final String DEVICE =
+        "android.bluetooth.intent.DEVICE";
     public static final String NAME =
         "android.bluetooth.intent.NAME";
     public static final String ALIAS =
