@@ -686,7 +686,6 @@ public final class ViewRoot extends Handler implements ViewParent,
             attachInfo.mKeepScreenOn = false;
             viewVisibilityChanged = false;
             host.dispatchAttachedToWindow(attachInfo, 0);
-            getRunQueue().executeActions(attachInfo.mHandler);
             //Log.i(TAG, "Screen on initialized: " + attachInfo.mKeepScreenOn);
 
         } else {
@@ -719,6 +718,10 @@ public final class ViewRoot extends Handler implements ViewParent,
         boolean insetsChanged = false;
 
         if (mLayoutRequested) {
+            // Execute enqueued actions on every layout in case a view that was detached
+            // enqueued an action after being detached
+            getRunQueue().executeActions(attachInfo.mHandler);
+
             if (mFirst) {
                 host.fitSystemWindows(mAttachInfo.mContentInsets);
                 // make sure touch mode code executes by setting cached value
@@ -3142,7 +3145,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     handler.postDelayed(handlerAction.action, handlerAction.delay);
                 }
 
-                mActions.clear();
+                actions.clear();
             }
         }
 
@@ -3156,7 +3159,6 @@ public final class ViewRoot extends Handler implements ViewParent,
                 if (o == null || getClass() != o.getClass()) return false;
 
                 HandlerAction that = (HandlerAction) o;
-
                 return !(action != null ? !action.equals(that.action) : that.action != null);
 
             }
