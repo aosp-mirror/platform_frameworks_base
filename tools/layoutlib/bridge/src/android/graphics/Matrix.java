@@ -17,6 +17,7 @@
 package android.graphics;
 
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 
 
 /**
@@ -747,7 +748,24 @@ public class Matrix extends _Original_Matrix {
      * inverted, ignore inverse and return false.
      */
     public boolean invert(Matrix inverse) {
-        throw new UnsupportedOperationException("STUB NEEDED");
+        if (inverse == null) {
+            return false;
+        }
+
+        try {
+            AffineTransform affineTransform = getTransform();
+            AffineTransform inverseTransform = affineTransform.createInverse();
+            inverse.mValues[0] = (float)inverseTransform.getScaleX();
+            inverse.mValues[1] = (float)inverseTransform.getShearX();
+            inverse.mValues[2] = (float)inverseTransform.getTranslateX();
+            inverse.mValues[3] = (float)inverseTransform.getScaleX();
+            inverse.mValues[4] = (float)inverseTransform.getShearY();
+            inverse.mValues[5] = (float)inverseTransform.getTranslateY();
+
+            return true;
+        } catch (NoninvertibleTransformException e) {
+            return false;
+        }
     }
 
     @Override
@@ -770,7 +788,19 @@ public class Matrix extends _Original_Matrix {
     public void mapPoints(float[] dst, int dstIndex, float[] src, int srcIndex,
                           int pointCount) {
         checkPointArrays(src, srcIndex, dst, dstIndex, pointCount);
-        throw new UnsupportedOperationException("STUB NEEDED");
+
+        for (int i = 0 ; i < pointCount ; i++) {
+            // just in case we are doing in place, we better put this in temp vars
+            float x = mValues[0] * src[i + srcIndex] +
+                      mValues[1] * src[i + srcIndex + 1] +
+                      mValues[2];
+            float y = mValues[3] * src[i + srcIndex] +
+                      mValues[4] * src[i + srcIndex + 1] +
+                      mValues[5];
+
+            dst[i + dstIndex]     = x;
+            dst[i + dstIndex + 1] = y;
+        }
     }
 
     /**
@@ -858,7 +888,26 @@ public class Matrix extends _Original_Matrix {
         if (dst == null || src == null) {
             throw new NullPointerException();
         }
-        throw new UnsupportedOperationException("STUB NEEDED");
+
+        // array with 4 corners
+        float[] corners = new float[] {
+                src.left, src.top,
+                src.right, src.top,
+                src.right, src.bottom,
+                src.left, src.bottom,
+        };
+
+        // apply the transform to them.
+        mapPoints(corners);
+
+        // now put the result in the rect. We take the min/max of Xs and min/max of Ys
+        dst.left = Math.min(Math.min(corners[0], corners[2]), Math.min(corners[4], corners[6]));
+        dst.right = Math.max(Math.max(corners[0], corners[2]), Math.max(corners[4], corners[6]));
+
+        dst.top = Math.min(Math.min(corners[1], corners[3]), Math.min(corners[5], corners[7]));
+        dst.bottom = Math.max(Math.max(corners[1], corners[3]), Math.max(corners[5], corners[7]));
+
+        return rectStaysRect();
     }
 
     /**
