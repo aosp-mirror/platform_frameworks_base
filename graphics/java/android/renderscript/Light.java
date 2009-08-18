@@ -29,11 +29,6 @@ public class Light extends BaseObj {
         mID = id;
     }
 
-    public void destroy() {
-        mRS.nLightDestroy(mID);
-        mID = 0;
-    }
-
     public void setColor(float r, float g, float b) {
         mRS.nLightSetColor(mID, r, g, b);
     }

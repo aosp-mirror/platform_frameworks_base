@@ -138,19 +138,12 @@ RsSampler rsi_SamplerCreate(Context *rsc)
     SamplerState * ss = &rsc->mStateSampler;
 
 
-    Sampler * s = new Sampler(ss->mMagFilter, 
-                              ss->mMinFilter, 
-                              ss->mWrapS, 
+    Sampler * s = new Sampler(ss->mMagFilter,
+                              ss->mMinFilter,
+                              ss->mWrapS,
                               ss->mWrapT,
                               ss->mWrapR);
     return s;
-}
-
-void rsi_SamplerDestroy(Context *rsc, RsSampler vs)
-{
-    Sampler * s = static_cast<Sampler *>(vs);
-    s->decRef();
-
 }
 
 

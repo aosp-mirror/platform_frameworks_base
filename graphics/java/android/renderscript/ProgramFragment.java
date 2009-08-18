@@ -45,14 +45,6 @@ public class ProgramFragment extends BaseObj {
         mID = id;
     }
 
-    public void destroy() {
-        if(mDestroyed) {
-            throw new IllegalStateException("Object already destroyed.");
-        }
-        mDestroyed = true;
-        mRS.nProgramFragmentStoreDestroy(mID);
-    }
-
     public void bindTexture(Allocation va, int slot)
         throws IllegalArgumentException {
         if((slot < 0) || (slot >= MAX_SLOT)) {

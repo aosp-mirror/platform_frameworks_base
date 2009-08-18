@@ -31,14 +31,6 @@ public class Script extends BaseObj {
         mID = id;
     }
 
-    public void destroy() {
-        if(mDestroyed) {
-            throw new IllegalStateException("Object already destroyed.");
-        }
-        mDestroyed = true;
-        mRS.nScriptDestroy(mID);
-    }
-
     public void bindAllocation(Allocation va, int slot) {
         mRS.nScriptBindAllocation(mID, va.mID, slot);
     }

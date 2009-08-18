@@ -82,7 +82,7 @@ void LightState::clear()
 
 
 ////////////////////////////////////////////////////
-// 
+//
 
 namespace android {
 namespace renderscript {
@@ -108,12 +108,6 @@ RsLight rsi_LightCreate(Context *rsc)
                          rsc->mStateLight.mIsMono);
     l->incRef();
     return l;
-}
-
-void rsi_LightDestroy(Context *rsc, RsLight vl)
-{
-    Light *l = static_cast<Light *>(vl);
-    l->decRef();
 }
 
 void rsi_LightSetColor(Context *rsc, RsLight vl, float r, float g, float b)

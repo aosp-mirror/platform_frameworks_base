@@ -261,17 +261,6 @@ void rsi_ProgramFragmentStoreDither(Context *rsc, bool enable)
     rsc->mStateFragmentStore.mPFS->setDitherEnable(enable);
 }
 
-void rsi_ProgramFragmentStoreDestroy(Context *rsc, RsProgramFragmentStore vpfs)
-{
-    ProgramFragmentStore *pfs = (ProgramFragmentStore *)vpfs;
-    if (pfs->getName()) {
-        rsc->removeName(pfs);
-    }
-    pfs->decRef();
-}
-
-
-
 
 }
 }

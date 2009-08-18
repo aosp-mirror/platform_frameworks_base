@@ -47,14 +47,6 @@ public class Allocation extends BaseObj {
         mRS.nAllocationUploadToTexture(mID, baseMipLevel);
     }
 
-    public void destroy() {
-        if(mDestroyed) {
-            throw new IllegalStateException("Object already destroyed.");
-        }
-        mDestroyed = true;
-        mRS.nAllocationDestroy(mID);
-    }
-
     public void data(int[] d) {
         mRS.nAllocationData(mID, d);
     }
@@ -98,11 +90,6 @@ public class Allocation extends BaseObj {
             mID = id;
         }
 
-        public void destroy() {
-            mRS.nAdapter1DDestroy(mID);
-            mID = 0;
-        }
-
         public void setConstraint(Dimension dim, int value) {
             mRS.nAdapter1DSetConstraint(mID, dim.mID, value);
         }
@@ -137,11 +124,6 @@ public class Allocation extends BaseObj {
         Adapter2D(int id, RenderScript rs) {
             super(rs);
             mID = id;
-        }
-
-        public void destroy() {
-            mRS.nAdapter2DDestroy(mID);
-            mID = 0;
         }
 
         public void setConstraint(Dimension dim, int value) {
@@ -251,7 +233,7 @@ public class Allocation extends BaseObj {
         Allocation alloc = createTyped(rs, t);
         t.destroy();
         return alloc;
-    } 
+    }
 */
 }
 
