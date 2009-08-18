@@ -930,6 +930,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int RESUME_TOP_ACTIVITY_MSG = 19;
     static final int PROC_START_TIMEOUT_MSG = 20;
     static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 21;
+    static final int KILL_APPLICATION_MSG = 22;
 
     AlertDialog mUidAlert;
 
@@ -1159,6 +1160,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     doPendingActivityLaunchesLocked(true);
                 }
             }
+            case KILL_APPLICATION_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    int uid = msg.arg1;
+                    boolean restart = (msg.arg2 == 1);
+                    String pkg = (String) msg.obj;
+                    uninstallPackageLocked(pkg, uid, restart);
+                }
+            } break;
             }
         }
     };
@@ -4810,7 +4819,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         int callerUid = Binder.getCallingUid();
         // Only the system server can kill an application
         if (callerUid == Process.SYSTEM_UID) {
-            uninstallPackageLocked(pkg, uid, false);
+            // Post an aysnc message to kill the application
+            Message msg = mHandler.obtainMessage(KILL_APPLICATION_MSG);
+            msg.arg1 = uid;
+            msg.arg2 = 0;
+            msg.obj = pkg;
+            mHandler.dispatchMessage(msg);
         } else {
             throw new SecurityException(callerUid + " cannot kill pkg: " +
                     pkg);
