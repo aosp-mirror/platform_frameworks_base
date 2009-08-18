@@ -32,6 +32,10 @@ AssignName {
 	param size_t len
 	}
 
+ObjDestroy {
+	param void *obj
+	}
+
 ElementBegin {
 }
 
@@ -56,10 +60,6 @@ ElementGetPredefined {
 	ret RsElement
 	}
 
-ElementDestroy {
-	param RsElement ve
-	}
-
 TypeBegin {
 	param RsElement type
 	}
@@ -71,10 +71,6 @@ TypeAdd {
 
 TypeCreate {
 	ret RsType
-	}
-
-TypeDestroy {
-	param RsType p
 	}
 
 AllocationCreateTyped {
@@ -130,10 +126,6 @@ AllocationUploadToBufferObject {
 	param RsAllocation alloc
 	}
 
-AllocationDestroy {
-	param RsAllocation alloc
-	}
-
 
 AllocationData {
 	param RsAllocation va
@@ -170,10 +162,6 @@ Adapter1DBindAllocation {
 	param RsAllocation alloc
 	}
 
-Adapter1DDestroy {
-	param RsAdapter1D adapter
-	}
-
 Adapter1DSetConstraint {
 	param RsAdapter1D adapter
 	param RsDimension dim
@@ -199,10 +187,6 @@ Adapter2DCreate {
 Adapter2DBindAllocation {
 	param RsAdapter2D adapt
 	param RsAllocation alloc
-	}
-
-Adapter2DDestroy {
-	param RsAdapter2D adapter
 	}
 
 Adapter2DSetConstraint {
@@ -237,9 +221,6 @@ SamplerCreate {
 	ret RsSampler
 	}
 
-SamplerDestroy {
-	param RsSampler s
-	}
 
 TriangleMeshBegin {
 	param RsElement vertex
@@ -260,9 +241,6 @@ TriangleMeshCreate {
 	ret RsTriangleMesh
 	}
 
-TriangleMeshDestroy {
-	param RsTriangleMesh mesh
-	}
 
 TriangleMeshRender {
 	param RsTriangleMesh vtm
@@ -274,9 +252,6 @@ TriangleMeshRenderRange {
 	param uint32_t count
 	}
 
-ScriptDestroy {
-	param RsScript script
-	}
 
 ScriptBindAllocation {
 	param RsScript vtm
@@ -381,9 +356,6 @@ ProgramFragmentStoreCreate {
 	ret RsProgramFragmentStore
 	}
 
-ProgramFragmentStoreDestroy {
-	param RsProgramFragmentStore pfs
-	}
 
 
 ProgramFragmentBegin {
@@ -420,10 +392,6 @@ ProgramFragmentSetTexEnable {
 
 ProgramFragmentCreate {
 	ret RsProgramFragment
-	}
-
-ProgramFragmentDestroy {
-	param RsProgramFragment pf
 	}
 
 
@@ -464,9 +432,6 @@ LightCreate {
 	ret RsLight light
 	}
 
-LightDestroy {
-	param RsLight light
-	}
 
 LightSetPosition {
 	param RsLight light
@@ -498,9 +463,6 @@ SimpleMeshCreate {
 	param uint32_t primType
 	}
 
-SimpleMeshDestroy {
-	param RsSimpleMesh mesh
-	}
 
 SimpleMeshBindIndex {
 	param RsSimpleMesh mesh

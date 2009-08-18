@@ -135,12 +135,6 @@ void rsi_SimpleMeshBindPrimitive(Context *rsc, RsSimpleMesh mv, RsAllocation va)
     sm->mPrimitiveBuffer.set((Allocation *)va);
 }
 
-void rsi_SimpleMeshDestroy(Context *rsc, RsSimpleMesh vtm)
-{
-    SimpleMesh * tm = static_cast<SimpleMesh *>(vtm);
-    tm->decRef();
-}
-
 
 
 

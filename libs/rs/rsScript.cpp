@@ -37,12 +37,6 @@ namespace android {
 namespace renderscript {
 
 
-void rsi_ScriptDestroy(Context * rsc, RsScript vs)
-{
-    Script *s = static_cast<Script *>(vs);
-    s->decRef();
-}
-
 void rsi_ScriptBindAllocation(Context * rsc, RsScript vs, RsAllocation va, uint32_t slot)
 {
     Script *s = static_cast<Script *>(vs);

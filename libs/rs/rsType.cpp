@@ -177,9 +177,16 @@ void Type::makeGLComponents()
             mGL.mColor.size = 3;
             break;
         case Component::ALPHA:
-            rsAssert(mGL.mColor.size == 3);
-            rsAssert(mGL.mColor.type == c->getGLType());
-            mGL.mColor.size = 4;
+            // Can be RGBA or A at this point
+            if (mGL.mColor.size > 0) {
+                rsAssert(mGL.mColor.size == 3);
+                rsAssert(mGL.mColor.type == c->getGLType());
+                mGL.mColor.size = 4;
+            } else {
+                mGL.mColor.size = 1;
+                mGL.mColor.offset = mElement->getComponentOffsetBytes(ct);
+                mGL.mColor.type = c->getGLType();
+            }
         break;
 
         case Component::NX:
@@ -352,11 +359,6 @@ RsType rsi_TypeCreate(Context *rsc)
     return st;
 }
 
-void rsi_TypeDestroy(Context *rsc, RsType vst)
-{
-    Type * st = static_cast<Type *>(vst);
-    st->decRef();
-}
 
 }
 }

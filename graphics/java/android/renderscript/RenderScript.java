@@ -74,6 +74,7 @@ public class RenderScript {
     native void nContextAddDefineF(String name, float value);
 
     native void nAssignName(int obj, byte[] name);
+    native void nObjDestroy(int id);
     native int  nFileOpen(byte[] name);
 
     native void nElementBegin();
@@ -81,12 +82,10 @@ public class RenderScript {
     native void nElementAdd(int kind, int type, int norm, int bits, String s);
     native int  nElementCreate();
     native int  nElementGetPredefined(int predef);
-    native void nElementDestroy(int obj);
 
     native void nTypeBegin(int elementID);
     native void nTypeAdd(int dim, int val);
     native int  nTypeCreate();
-    native void nTypeDestroy(int id);
     native void nTypeFinalDestroy(Type t);
     native void nTypeSetupFields(Type t, int[] types, int[] bits, Field[] IDs);
 
@@ -97,7 +96,6 @@ public class RenderScript {
     native int  nAllocationCreateFromBitmapBoxed(int dstFmt, boolean genMips, Bitmap bmp);
 
     native void nAllocationUploadToTexture(int alloc, int baseMioLevel);
-    native void nAllocationDestroy(int alloc);
     native void nAllocationData(int id, int[] d);
     native void nAllocationData(int id, float[] d);
     native void nAllocationSubData1D(int id, int off, int count, int[] d);
@@ -108,7 +106,6 @@ public class RenderScript {
     native void nAllocationRead(int id, float[] d);
     native void nAllocationDataFromObject(int id, Type t, Object o);
 
-    native void nTriangleMeshDestroy(int id);
     native void nTriangleMeshBegin(int vertex, int index);
     native void nTriangleMeshAddVertex_XY (float x, float y);
     native void nTriangleMeshAddVertex_XYZ (float x, float y, float z);
@@ -118,7 +115,6 @@ public class RenderScript {
     native void nTriangleMeshAddTriangle(int i1, int i2, int i3);
     native int  nTriangleMeshCreate();
 
-    native void nAdapter1DDestroy(int id);
     native void nAdapter1DBindAllocation(int ad, int alloc);
     native void nAdapter1DSetConstraint(int ad, int dim, int value);
     native void nAdapter1DData(int ad, int[] d);
@@ -127,7 +123,6 @@ public class RenderScript {
     native void nAdapter1DSubData(int ad, int off, int count, float[] d);
     native int  nAdapter1DCreate();
 
-    native void nAdapter2DDestroy(int id);
     native void nAdapter2DBindAllocation(int ad, int alloc);
     native void nAdapter2DSetConstraint(int ad, int dim, int value);
     native void nAdapter2DData(int ad, int[] d);
@@ -136,7 +131,6 @@ public class RenderScript {
     native void nAdapter2DSubData(int ad, int xoff, int yoff, int w, int h, float[] d);
     native int  nAdapter2DCreate();
 
-    native void nScriptDestroy(int script);
     native void nScriptBindAllocation(int script, int alloc, int slot);
     native void nScriptSetClearColor(int script, float r, float g, float b, float a);
     native void nScriptSetClearDepth(int script, float depth);
@@ -151,7 +145,6 @@ public class RenderScript {
     native void nScriptCAddDefineI32(String name, int value);
     native void nScriptCAddDefineF(String name, float value);
 
-    native void nSamplerDestroy(int sampler);
     native void nSamplerBegin();
     native void nSamplerSet(int param, int value);
     native int  nSamplerCreate();
@@ -163,7 +156,6 @@ public class RenderScript {
     native void nProgramFragmentStoreBlendFunc(int src, int dst);
     native void nProgramFragmentStoreDither(boolean enable);
     native int  nProgramFragmentStoreCreate();
-    native void nProgramFragmentStoreDestroy(int pgm);
 
     native void nProgramFragmentBegin(int in, int out);
     native void nProgramFragmentBindTexture(int vpf, int slot, int a);
@@ -172,9 +164,7 @@ public class RenderScript {
     native void nProgramFragmentSetEnvMode(int slot, int env);
     native void nProgramFragmentSetTexEnable(int slot, boolean enable);
     native int  nProgramFragmentCreate();
-    native void nProgramFragmentDestroy(int pgm);
 
-    native void nProgramVertexDestroy(int pv);
     native void nProgramVertexBindAllocation(int pv, int mID);
     native void nProgramVertexBegin(int inID, int outID);
     native void nProgramVertexSetTextureMatrixEnable(boolean enable);
@@ -185,16 +175,13 @@ public class RenderScript {
     native void nLightSetIsMono(boolean isMono);
     native void nLightSetIsLocal(boolean isLocal);
     native int  nLightCreate();
-    native void nLightDestroy(int l);
     native void nLightSetColor(int l, float r, float g, float b);
     native void nLightSetPosition(int l, float x, float y, float z);
 
-    native void nSimpleMeshDestroy(int id);
     native int  nSimpleMeshCreate(int batchID, int idxID, int[] vtxID, int prim);
     native void nSimpleMeshBindVertex(int id, int alloc, int slot);
     native void nSimpleMeshBindIndex(int id, int alloc);
 
-    native void nAnimationDestroy(int id);
     native void nAnimationBegin(int attribCount, int keyframeCount);
     native void nAnimationAdd(float time, float[] attribs);
     native int  nAnimationCreate();
@@ -228,11 +215,6 @@ public class RenderScript {
         TriangleMesh(int id) {
             super(RenderScript.this);
             mID = id;
-        }
-
-        public void destroy() {
-            nTriangleMeshDestroy(mID);
-            mID = 0;
         }
     }
 
@@ -277,11 +259,6 @@ public class RenderScript {
         File(int id) {
             super(RenderScript.this);
             mID = id;
-        }
-
-        public void destroy() {
-            //nLightDestroy(mID);
-            mID = 0;
         }
     }
 

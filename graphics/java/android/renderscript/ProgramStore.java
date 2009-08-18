@@ -80,14 +80,6 @@ public class ProgramStore extends BaseObj {
         mID = id;
     }
 
-    public void destroy() {
-        if(mDestroyed) {
-            throw new IllegalStateException("Object already destroyed.");
-        }
-        mDestroyed = true;
-        mRS.nProgramFragmentStoreDestroy(mID);
-    }
-
 
 
     public static class Builder {

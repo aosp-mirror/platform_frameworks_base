@@ -48,14 +48,6 @@ public class Type extends BaseObj {
         super.finalize();
     }
 
-    public void destroy() {
-        if(mDestroyed) {
-            throw new IllegalStateException("Object already destroyed.");
-        }
-        mDestroyed = true;
-        mRS.nTypeDestroy(mID);
-    }
-
     public static Type createFromClass(RenderScript rs, Class c, int size) {
         Element e = Element.createFromClass(rs, c);
         Builder b = new Builder(rs, e);

@@ -416,12 +416,6 @@ RsElement rsi_ElementCreate(Context *rsc)
     return se;
 }
 
-void rsi_ElementDestroy(Context *rsc, RsElement vse)
-{
-    Element * se = static_cast<Element *>(vse);
-    se->decRef();
-}
-
 
 }
 }

@@ -76,12 +76,6 @@ RsAdapter1D rsi_Adapter1DCreate(Context *rsc)
     return a;
 }
 
-void rsi_Adapter1DDestroy(Context *rsc, RsAdapter1D va)
-{
-    Adapter1D * a = static_cast<Adapter1D *>(va);
-    a->decRef();
-}
-
 void rsi_Adapter1DBindAllocation(Context *rsc, RsAdapter1D va, RsAllocation valloc)
 {
     Adapter1D * a = static_cast<Adapter1D *>(va);
@@ -193,12 +187,6 @@ RsAdapter2D rsi_Adapter2DCreate(Context *rsc)
     Adapter2D *a = new Adapter2D();
     a->incRef();
     return a;
-}
-
-void rsi_Adapter2DDestroy(Context *rsc, RsAdapter2D va)
-{
-    Adapter2D * a = static_cast<Adapter2D *>(va);
-    a->decRef();
 }
 
 void rsi_Adapter2DBindAllocation(Context *rsc, RsAdapter2D va, RsAllocation valloc)
