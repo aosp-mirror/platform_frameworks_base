@@ -498,10 +498,10 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                         sentSinceLastRecv = 0;
                         newActivity = Activity.DATAIN;
                     } else if (sent == 0 && received == 0) {
-                        newActivity = Activity.NONE;
+                        newActivity = (activity == Activity.DORMANT) ? activity : Activity.NONE;
                     } else {
                         sentSinceLastRecv = 0;
-                        newActivity = Activity.NONE;
+                        newActivity = (activity == Activity.DORMANT) ? activity : Activity.NONE;
                     }
 
                     if (activity != newActivity) {
