@@ -84,11 +84,6 @@ bool Context::runScript(Script *s, uint32_t launchID)
 
 bool Context::runRootScript()
 {
-#if RS_LOG_TIMES
-    struct timespec beginTime;
-    clock_gettime(CLOCK_MONOTONIC, &beginTime);
-#endif
-
     rsAssert(mRootScript->mEnviroment.mIsRoot);
 
     //glColor4f(1,1,1,1);
@@ -116,9 +111,10 @@ bool Context::runRootScript()
     struct timespec endTime;
     clock_gettime(CLOCK_MONOTONIC, &endTime);
 
-    int t1 = ((unsigned long)startTime.tv_nsec - (unsigned long)beginTime.tv_nsec) / 1000 / 1000;
-    int t2 = ((unsigned long)endTime.tv_nsec - (unsigned long)startTime.tv_nsec) / 1000 / 1000;
-    LOGE("times  %i,  %i", t1, t2);
+    uint64_t t1 = endTime.tv_nsec + ((uint64_t)endTime.tv_sec * 1000 * 1000 * 1000);
+    uint64_t t2 = startTime.tv_nsec + ((uint64_t)startTime.tv_sec * 1000 * 1000 * 1000);
+    int t3 = (int)((t1 - t2) / 1000 / 1000);
+    LOGE("times  %i", t3);
 #endif
 
     return ret;
@@ -143,7 +139,6 @@ void * Context::threadProc(void *vrsc)
 {
      Context *rsc = static_cast<Context *>(vrsc);
 
-     gIO = new ThreadIO();
      rsc->initEGL();
 
      ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
@@ -168,7 +163,7 @@ void * Context::threadProc(void *vrsc)
      rsc->mRunning = true;
      bool mDraw = true;
      while (!rsc->mExit) {
-         mDraw |= gIO->playCoreCommands(rsc, !mDraw);
+         mDraw |= rsc->mIO.playCoreCommands(rsc, !mDraw);
          mDraw &= (rsc->mRootScript.get() != NULL);
 
          if (mDraw) {

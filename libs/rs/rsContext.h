@@ -21,6 +21,7 @@
 
 #include <ui/Surface.h>
 
+#include "rsThreadIO.h"
 #include "rsType.h"
 #include "rsMatrix.h"
 #include "rsAllocation.h"
@@ -114,6 +115,9 @@ public:
 
     uint32_t getWidth() const {return mWidth;}
     uint32_t getHeight() const {return mHeight;}
+
+
+    ThreadIO mIO;
 
 protected:
     Device *mDev;

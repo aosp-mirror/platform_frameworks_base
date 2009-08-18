@@ -74,7 +74,7 @@ nAssignName(JNIEnv *_env, jobject _this, jint obj, jbyteArray str)
 
     jint len = _env->GetArrayLength(str);
     jbyte * cptr = (jbyte *) _env->GetPrimitiveArrayCritical(str, 0);
-    rsAssignName((void *)obj, (const char *)cptr, len);
+    rsAssignName(con, (void *)obj, (const char *)cptr, len);
     _env->ReleasePrimitiveArrayCritical(str, cptr, JNI_ABORT);
 }
 
@@ -87,7 +87,7 @@ nFileOpen(JNIEnv *_env, jobject _this, jbyteArray str)
 
     jint len = _env->GetArrayLength(str);
     jbyte * cptr = (jbyte *) _env->GetPrimitiveArrayCritical(str, 0);
-    jint ret = (jint)rsFileOpen((const char *)cptr, len);
+    jint ret = (jint)rsFileOpen(con, (const char *)cptr, len);
     _env->ReleasePrimitiveArrayCritical(str, cptr, JNI_ABORT);
     return ret;
 }
@@ -141,7 +141,7 @@ nElementBegin(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nElementBegin, con(%p)", con);
-    rsElementBegin();
+    rsElementBegin(con);
 }
 
 static void
@@ -149,7 +149,7 @@ nElementAddPredefined(JNIEnv *_env, jobject _this, jint predef)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nElementAddPredefined, con(%p), predef(%i)", con, predef);
-    rsElementAddPredefined((RsElementPredefined)predef);
+    rsElementAddPredefined(con, (RsElementPredefined)predef);
 }
 
 static void
@@ -161,7 +161,7 @@ nElementAdd(JNIEnv *_env, jobject _this, jint kind, jint type, jint norm, jint b
         n = _env->GetStringUTFChars(name, NULL);
     }
     LOG_API("nElementAdd, con(%p), kind(%i), type(%i), norm(%i), bits(%i)", con, kind, type, norm, bits);
-    rsElementAdd((RsDataKind)kind, (RsDataType)type, norm != 0, (size_t)bits, n);
+    rsElementAdd(con, (RsDataKind)kind, (RsDataType)type, norm != 0, (size_t)bits, n);
     if (n) {
         _env->ReleaseStringUTFChars(name, n);
     }
@@ -172,7 +172,7 @@ nElementCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nElementCreate, con(%p)", con);
-    return (jint)rsElementCreate();
+    return (jint)rsElementCreate(con);
 }
 
 static jint
@@ -180,7 +180,7 @@ nElementGetPredefined(JNIEnv *_env, jobject _this, jint predef)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nElementGetPredefined, con(%p) predef(%i)", con, predef);
-    return (jint)rsElementGetPredefined((RsElementPredefined)predef);
+    return (jint)rsElementGetPredefined(con, (RsElementPredefined)predef);
 }
 
 static void
@@ -188,7 +188,7 @@ nElementDestroy(JNIEnv *_env, jobject _this, jint e)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nElementDestroy, con(%p) e(%p)", con, (RsElement)e);
-    rsElementDestroy((RsElement)e);
+    rsElementDestroy(con, (RsElement)e);
 }
 
 // -----------------------------------
@@ -198,7 +198,7 @@ nTypeBegin(JNIEnv *_env, jobject _this, jint eID)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTypeBegin, con(%p) e(%p)", con, (RsElement)eID);
-    rsTypeBegin((RsElement)eID);
+    rsTypeBegin(con, (RsElement)eID);
 }
 
 static void
@@ -206,7 +206,7 @@ nTypeAdd(JNIEnv *_env, jobject _this, jint dim, jint val)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTypeAdd, con(%p) dim(%i), val(%i)", con, dim, val);
-    rsTypeAdd((RsDimension)dim, val);
+    rsTypeAdd(con, (RsDimension)dim, val);
 }
 
 static jint
@@ -214,7 +214,7 @@ nTypeCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTypeCreate, con(%p)", con);
-    return (jint)rsTypeCreate();
+    return (jint)rsTypeCreate(con);
 }
 
 static void
@@ -222,7 +222,7 @@ nTypeDestroy(JNIEnv *_env, jobject _this, jint eID)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTypeDestroy, con(%p), t(%p)", con, (RsType)eID);
-    rsTypeDestroy((RsType)eID);
+    rsTypeDestroy(con, (RsType)eID);
 }
 
 static void * SF_LoadInt(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
@@ -317,7 +317,7 @@ nAllocationCreateTyped(JNIEnv *_env, jobject _this, jint e)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAllocationCreateTyped, con(%p), e(%p)", con, (RsElement)e);
-    return (jint) rsAllocationCreateTyped((RsElement)e);
+    return (jint) rsAllocationCreateTyped(con, (RsElement)e);
 }
 
 static jint
@@ -325,7 +325,7 @@ nAllocationCreatePredefSized(JNIEnv *_env, jobject _this, jint predef, jint coun
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAllocationCreatePredefSized, con(%p), predef(%i), count(%i)", con, predef, count);
-    return (jint) rsAllocationCreatePredefSized((RsElementPredefined)predef, count);
+    return (jint) rsAllocationCreatePredefSized(con, (RsElementPredefined)predef, count);
 }
 
 static jint
@@ -333,7 +333,7 @@ nAllocationCreateSized(JNIEnv *_env, jobject _this, jint e, jint count)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAllocationCreateSized, con(%p), e(%p), count(%i)", con, (RsElement)e, count);
-    return (jint) rsAllocationCreateSized((RsElement)e, count);
+    return (jint) rsAllocationCreateSized(con, (RsElement)e, count);
 }
 
 static void
@@ -341,7 +341,7 @@ nAllocationUploadToTexture(JNIEnv *_env, jobject _this, jint a, jint mip)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAllocationUploadToTexture, con(%p), a(%p), mip(%i)", con, (RsAllocation)a, mip);
-    rsAllocationUploadToTexture((RsAllocation)a, mip);
+    rsAllocationUploadToTexture(con, (RsAllocation)a, mip);
 }
 
 static RsElementPredefined SkBitmapToPredefined(SkBitmap::Config cfg)
@@ -380,7 +380,7 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jint dstFmt, jboolean g
         const int w = bitmap.width();
         const int h = bitmap.height();
         const void* ptr = bitmap.getPixels();
-        jint id = (jint)rsAllocationCreateFromBitmap(w, h, (RsElementPredefined)dstFmt, e, genMips, ptr);
+        jint id = (jint)rsAllocationCreateFromBitmap(con, w, h, (RsElementPredefined)dstFmt, e, genMips, ptr);
         bitmap.unlockPixels();
         return id;
     }
@@ -403,7 +403,7 @@ nAllocationCreateFromBitmapBoxed(JNIEnv *_env, jobject _this, jint dstFmt, jbool
         const int w = bitmap.width();
         const int h = bitmap.height();
         const void* ptr = bitmap.getPixels();
-        jint id = (jint)rsAllocationCreateFromBitmapBoxed(w, h, (RsElementPredefined)dstFmt, e, genMips, ptr);
+        jint id = (jint)rsAllocationCreateFromBitmapBoxed(con, w, h, (RsElementPredefined)dstFmt, e, genMips, ptr);
         bitmap.unlockPixels();
         return id;
     }
@@ -416,7 +416,7 @@ nAllocationDestroy(JNIEnv *_env, jobject _this, jint a)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAllocationDestroy, con(%p), a(%p)", con, (RsAllocation)a);
-    rsAllocationDestroy((RsAllocation)a);
+    rsAllocationDestroy(con, (RsAllocation)a);
 }
 
 static void
@@ -426,7 +426,7 @@ nAllocationData_i(JNIEnv *_env, jobject _this, jint alloc, jintArray data)
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationData_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAllocationData((RsAllocation)alloc, ptr);
+    rsAllocationData(con, (RsAllocation)alloc, ptr);
     _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -437,7 +437,7 @@ nAllocationData_f(JNIEnv *_env, jobject _this, jint alloc, jfloatArray data)
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationData_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAllocationData((RsAllocation)alloc, ptr);
+    rsAllocationData(con, (RsAllocation)alloc, ptr);
     _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -448,7 +448,7 @@ nAllocationSubData1D_i(JNIEnv *_env, jobject _this, jint alloc, jint offset, jin
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation1DSubData_i, con(%p), adapter(%p), offset(%i), count(%i), len(%i)", con, (RsAllocation)alloc, offset, count, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAllocation1DSubData((RsAllocation)alloc, offset, count, ptr);
+    rsAllocation1DSubData(con, (RsAllocation)alloc, offset, count, ptr);
     _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -459,7 +459,7 @@ nAllocationSubData1D_f(JNIEnv *_env, jobject _this, jint alloc, jint offset, jin
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation1DSubData_f, con(%p), adapter(%p), offset(%i), count(%i), len(%i)", con, (RsAllocation)alloc, offset, count, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAllocation1DSubData((RsAllocation)alloc, offset, count, ptr);
+    rsAllocation1DSubData(con, (RsAllocation)alloc, offset, count, ptr);
     _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -470,7 +470,7 @@ nAllocationSubData2D_i(JNIEnv *_env, jobject _this, jint alloc, jint xoff, jint 
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation2DSubData_i, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, w, h, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAllocation2DSubData((RsAllocation)alloc, xoff, yoff, w, h, ptr);
+    rsAllocation2DSubData(con, (RsAllocation)alloc, xoff, yoff, w, h, ptr);
     _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -481,7 +481,7 @@ nAllocationSubData2D_f(JNIEnv *_env, jobject _this, jint alloc, jint xoff, jint 
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation2DSubData_i, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, w, h, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAllocation2DSubData((RsAllocation)alloc, xoff, yoff, w, h, ptr);
+    rsAllocation2DSubData(con, (RsAllocation)alloc, xoff, yoff, w, h, ptr);
     _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -492,7 +492,7 @@ nAllocationRead_i(JNIEnv *_env, jobject _this, jint alloc, jintArray data)
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAllocationRead((RsAllocation)alloc, ptr);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr);
     _env->ReleaseIntArrayElements(data, ptr, JNI_COMMIT);
 }
 
@@ -503,7 +503,7 @@ nAllocationRead_f(JNIEnv *_env, jobject _this, jint alloc, jfloatArray data)
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationRead_f, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAllocationRead((RsAllocation)alloc, ptr);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr);
     _env->ReleaseFloatArrayElements(data, ptr, JNI_COMMIT);
 }
 
@@ -523,7 +523,7 @@ nAllocationDataFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _type
         const TypeFieldCache *tfc = &tc->fields[ct];
         buf = tfc->ptr(_env, _o, tfc->field, buf);
     }
-    rsAllocationData((RsAllocation)alloc, bufAlloc);
+    rsAllocationData(con, (RsAllocation)alloc, bufAlloc);
     const uint32_t * tmp = (const uint32_t *)bufAlloc;
     free(bufAlloc);
 }
@@ -535,7 +535,7 @@ nTriangleMeshDestroy(JNIEnv *_env, jobject _this, jint tm)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTriangleMeshDestroy, con(%p), tm(%p)", con, (RsAllocation)tm);
-    rsTriangleMeshDestroy((RsTriangleMesh)tm);
+    rsTriangleMeshDestroy(con, (RsTriangleMesh)tm);
 }
 
 static void
@@ -543,7 +543,7 @@ nTriangleMeshBegin(JNIEnv *_env, jobject _this, jint v, jint i)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTriangleMeshBegin, con(%p), vertex(%p), index(%p)", con, (RsElement)v, (RsElement)i);
-    rsTriangleMeshBegin((RsElement)v, (RsElement)i);
+    rsTriangleMeshBegin(con, (RsElement)v, (RsElement)i);
 }
 
 static void
@@ -552,7 +552,7 @@ nTriangleMeshAddVertex_XY(JNIEnv *_env, jobject _this, jfloat x, jfloat y)
     float v[] = {x, y};
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTriangleMeshAddVertex_XY, con(%p), x(%f), y(%f)", con, x, y);
-    rsTriangleMeshAddVertex(v);
+    rsTriangleMeshAddVertex(con, v);
 }
 
 static void
@@ -561,7 +561,7 @@ nTriangleMeshAddVertex_XYZ(JNIEnv *_env, jobject _this, jfloat x, jfloat y, jflo
     float v[] = {x, y, z};
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTriangleMeshAddVertex_XYZ, con(%p), x(%f), y(%f), z(%f)", con, x, y, z);
-    rsTriangleMeshAddVertex(v);
+    rsTriangleMeshAddVertex(con, v);
 }
 
 static void
@@ -570,7 +570,7 @@ nTriangleMeshAddVertex_XY_ST(JNIEnv *_env, jobject _this, jfloat x, jfloat y, jf
     float v[] = {s, t, x, y};
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTriangleMeshAddVertex_XY_ST, con(%p), x(%f), y(%f), s(%f), t(%f)", con, x, y, s, t);
-    rsTriangleMeshAddVertex(v);
+    rsTriangleMeshAddVertex(con, v);
 }
 
 static void
@@ -579,7 +579,7 @@ nTriangleMeshAddVertex_XYZ_ST(JNIEnv *_env, jobject _this, jfloat x, jfloat y, j
     float v[] = {s, t, x, y, z};
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTriangleMeshAddVertex_XYZ_ST, con(%p), x(%f), y(%f), z(%f), s(%f), t(%f)", con, x, y, z, s, t);
-    rsTriangleMeshAddVertex(v);
+    rsTriangleMeshAddVertex(con, v);
 }
 
 static void
@@ -588,7 +588,7 @@ nTriangleMeshAddVertex_XYZ_ST_NORM(JNIEnv *_env, jobject _this, jfloat x, jfloat
     float v[] = {nx, ny, nz, s, t, x, y, z};
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTriangleMeshAddVertex_XYZ_ST, con(%p), x(%f), y(%f), z(%f), s(%f), t(%f)", con, x, y, z, s, t);
-    rsTriangleMeshAddVertex(v);
+    rsTriangleMeshAddVertex(con, v);
 }
 
 static void
@@ -596,7 +596,7 @@ nTriangleMeshAddTriangle(JNIEnv *_env, jobject _this, jint i1, jint i2, jint i3)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTriangleMeshAddTriangle, con(%p), i1(%i), i2(%i), i3(%i)", con, i1, i2, i3);
-    rsTriangleMeshAddTriangle(i1, i2, i3);
+    rsTriangleMeshAddTriangle(con, i1, i2, i3);
 }
 
 static jint
@@ -604,7 +604,7 @@ nTriangleMeshCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTriangleMeshCreate, con(%p)", con);
-    return (jint) rsTriangleMeshCreate();
+    return (jint) rsTriangleMeshCreate(con);
 }
 
 // -----------------------------------
@@ -614,7 +614,7 @@ nAdapter1DDestroy(JNIEnv *_env, jobject _this, jint adapter)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAdapter1DDestroy, con(%p), adapter(%p)", con, (RsAdapter1D)adapter);
-    rsAdapter1DDestroy((RsAdapter1D)adapter);
+    rsAdapter1DDestroy(con, (RsAdapter1D)adapter);
 }
 
 static void
@@ -622,7 +622,7 @@ nAdapter1DBindAllocation(JNIEnv *_env, jobject _this, jint adapter, jint alloc)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAdapter1DBindAllocation, con(%p), adapter(%p), alloc(%p)", con, (RsAdapter1D)adapter, (RsAllocation)alloc);
-    rsAdapter1DBindAllocation((RsAdapter1D)adapter, (RsAllocation)alloc);
+    rsAdapter1DBindAllocation(con, (RsAdapter1D)adapter, (RsAllocation)alloc);
 }
 
 static void
@@ -630,7 +630,7 @@ nAdapter1DSetConstraint(JNIEnv *_env, jobject _this, jint adapter, jint dim, jin
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAdapter1DSetConstraint, con(%p), adapter(%p), dim(%i), value(%i)", con, (RsAdapter1D)adapter, dim, value);
-    rsAdapter1DSetConstraint((RsAdapter1D)adapter, (RsDimension)dim, value);
+    rsAdapter1DSetConstraint(con, (RsAdapter1D)adapter, (RsDimension)dim, value);
 }
 
 static void
@@ -640,7 +640,7 @@ nAdapter1DData_i(JNIEnv *_env, jobject _this, jint adapter, jintArray data)
     jint len = _env->GetArrayLength(data);
     LOG_API("nAdapter1DData_i, con(%p), adapter(%p), len(%i)", con, (RsAdapter1D)adapter, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAdapter1DData((RsAdapter1D)adapter, ptr);
+    rsAdapter1DData(con, (RsAdapter1D)adapter, ptr);
     _env->ReleaseIntArrayElements(data, ptr, 0/*JNI_ABORT*/);
 }
 
@@ -651,7 +651,7 @@ nAdapter1DSubData_i(JNIEnv *_env, jobject _this, jint adapter, jint offset, jint
     jint len = _env->GetArrayLength(data);
     LOG_API("nAdapter1DSubData_i, con(%p), adapter(%p), offset(%i), count(%i), len(%i)", con, (RsAdapter1D)adapter, offset, count, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAdapter1DSubData((RsAdapter1D)adapter, offset, count, ptr);
+    rsAdapter1DSubData(con, (RsAdapter1D)adapter, offset, count, ptr);
     _env->ReleaseIntArrayElements(data, ptr, 0/*JNI_ABORT*/);
 }
 
@@ -662,7 +662,7 @@ nAdapter1DData_f(JNIEnv *_env, jobject _this, jint adapter, jfloatArray data)
     jint len = _env->GetArrayLength(data);
     LOG_API("nAdapter1DData_f, con(%p), adapter(%p), len(%i)", con, (RsAdapter1D)adapter, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAdapter1DData((RsAdapter1D)adapter, ptr);
+    rsAdapter1DData(con, (RsAdapter1D)adapter, ptr);
     _env->ReleaseFloatArrayElements(data, ptr, 0/*JNI_ABORT*/);
 }
 
@@ -673,7 +673,7 @@ nAdapter1DSubData_f(JNIEnv *_env, jobject _this, jint adapter, jint offset, jint
     jint len = _env->GetArrayLength(data);
     LOG_API("nAdapter1DSubData_f, con(%p), adapter(%p), offset(%i), count(%i), len(%i)", con, (RsAdapter1D)adapter, offset, count, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAdapter1DSubData((RsAdapter1D)adapter, offset, count, ptr);
+    rsAdapter1DSubData(con, (RsAdapter1D)adapter, offset, count, ptr);
     _env->ReleaseFloatArrayElements(data, ptr, 0/*JNI_ABORT*/);
 }
 
@@ -682,7 +682,7 @@ nAdapter1DCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAdapter1DCreate, con(%p)", con);
-    return (jint)rsAdapter1DCreate();
+    return (jint)rsAdapter1DCreate(con);
 }
 
 // -----------------------------------
@@ -692,7 +692,7 @@ nAdapter2DDestroy(JNIEnv *_env, jobject _this, jint adapter)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAdapter2DDestroy, con(%p), adapter(%p)", con, (RsAdapter2D)adapter);
-    rsAdapter2DDestroy((RsAdapter2D)adapter);
+    rsAdapter2DDestroy(con, (RsAdapter2D)adapter);
 }
 
 static void
@@ -700,7 +700,7 @@ nAdapter2DBindAllocation(JNIEnv *_env, jobject _this, jint adapter, jint alloc)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAdapter2DBindAllocation, con(%p), adapter(%p), alloc(%p)", con, (RsAdapter2D)adapter, (RsAllocation)alloc);
-    rsAdapter2DBindAllocation((RsAdapter2D)adapter, (RsAllocation)alloc);
+    rsAdapter2DBindAllocation(con, (RsAdapter2D)adapter, (RsAllocation)alloc);
 }
 
 static void
@@ -708,7 +708,7 @@ nAdapter2DSetConstraint(JNIEnv *_env, jobject _this, jint adapter, jint dim, jin
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAdapter2DSetConstraint, con(%p), adapter(%p), dim(%i), value(%i)", con, (RsAdapter2D)adapter, dim, value);
-    rsAdapter2DSetConstraint((RsAdapter2D)adapter, (RsDimension)dim, value);
+    rsAdapter2DSetConstraint(con, (RsAdapter2D)adapter, (RsDimension)dim, value);
 }
 
 static void
@@ -718,7 +718,7 @@ nAdapter2DData_i(JNIEnv *_env, jobject _this, jint adapter, jintArray data)
     jint len = _env->GetArrayLength(data);
     LOG_API("nAdapter2DData_i, con(%p), adapter(%p), len(%i)", con, (RsAdapter2D)adapter, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAdapter2DData((RsAdapter2D)adapter, ptr);
+    rsAdapter2DData(con, (RsAdapter2D)adapter, ptr);
     _env->ReleaseIntArrayElements(data, ptr, 0/*JNI_ABORT*/);
 }
 
@@ -729,7 +729,7 @@ nAdapter2DData_f(JNIEnv *_env, jobject _this, jint adapter, jfloatArray data)
     jint len = _env->GetArrayLength(data);
     LOG_API("nAdapter2DData_f, con(%p), adapter(%p), len(%i)", con, (RsAdapter2D)adapter, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAdapter2DData((RsAdapter2D)adapter, ptr);
+    rsAdapter2DData(con, (RsAdapter2D)adapter, ptr);
     _env->ReleaseFloatArrayElements(data, ptr, 0/*JNI_ABORT*/);
 }
 
@@ -741,7 +741,7 @@ nAdapter2DSubData_i(JNIEnv *_env, jobject _this, jint adapter, jint xoff, jint y
     LOG_API("nAdapter2DSubData_i, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)",
             con, (RsAdapter2D)adapter, xoff, yoff, w, h, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAdapter2DSubData((RsAdapter2D)adapter, xoff, yoff, w, h, ptr);
+    rsAdapter2DSubData(con, (RsAdapter2D)adapter, xoff, yoff, w, h, ptr);
     _env->ReleaseIntArrayElements(data, ptr, 0/*JNI_ABORT*/);
 }
 
@@ -753,7 +753,7 @@ nAdapter2DSubData_f(JNIEnv *_env, jobject _this, jint adapter, jint xoff, jint y
     LOG_API("nAdapter2DSubData_f, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)",
             con, (RsAdapter2D)adapter, xoff, yoff, w, h, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAdapter2DSubData((RsAdapter1D)adapter, xoff, yoff, w, h, ptr);
+    rsAdapter2DSubData(con, (RsAdapter1D)adapter, xoff, yoff, w, h, ptr);
     _env->ReleaseFloatArrayElements(data, ptr, 0/*JNI_ABORT*/);
 }
 
@@ -762,7 +762,7 @@ nAdapter2DCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAdapter2DCreate, con(%p)", con);
-    return (jint)rsAdapter2DCreate();
+    return (jint)rsAdapter2DCreate(con);
 }
 
 // -----------------------------------
@@ -772,7 +772,7 @@ nScriptDestroy(JNIEnv *_env, jobject _this, jint script)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nScriptDestroy, con(%p), script(%p)", con, (RsScript)script);
-    rsScriptDestroy((RsScript)script);
+    rsScriptDestroy(con, (RsScript)script);
 }
 
 static void
@@ -780,7 +780,7 @@ nScriptBindAllocation(JNIEnv *_env, jobject _this, jint script, jint alloc, jint
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nScriptBindAllocation, con(%p), script(%p), alloc(%p), slot(%i)", con, (RsScript)script, (RsAllocation)alloc, slot);
-    rsScriptBindAllocation((RsScript)script, (RsAllocation)alloc, slot);
+    rsScriptBindAllocation(con, (RsScript)script, (RsAllocation)alloc, slot);
 }
 
 static void
@@ -788,7 +788,7 @@ nScriptSetClearColor(JNIEnv *_env, jobject _this, jint script, jfloat r, jfloat 
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nScriptSetClearColor, con(%p), s(%p), r(%f), g(%f), b(%f), a(%f)", con, script, r, g, b, a);
-    rsScriptSetClearColor((RsScript)script, r, g, b, a);
+    rsScriptSetClearColor(con, (RsScript)script, r, g, b, a);
 }
 
 static void
@@ -796,7 +796,7 @@ nScriptSetClearDepth(JNIEnv *_env, jobject _this, jint script, jfloat d)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nScriptCSetClearDepth, con(%p), s(%p), depth(%f)", con, script, d);
-    rsScriptSetClearDepth((RsScript)script, d);
+    rsScriptSetClearDepth(con, (RsScript)script, d);
 }
 
 static void
@@ -804,7 +804,7 @@ nScriptSetClearStencil(JNIEnv *_env, jobject _this, jint script, jint stencil)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nScriptCSetClearStencil, con(%p), s(%p), stencil(%i)", con, script, stencil);
-    rsScriptSetClearStencil((RsScript)script, stencil);
+    rsScriptSetClearStencil(con, (RsScript)script, stencil);
 }
 
 static void
@@ -817,7 +817,7 @@ nScriptSetTimeZone(JNIEnv *_env, jobject _this, jint script, jbyteArray timeZone
     jbyte* timeZone_ptr;
     timeZone_ptr = (jbyte *) _env->GetPrimitiveArrayCritical(timeZone, (jboolean *)0);
 
-    rsScriptSetTimeZone((RsScript)script, (const char *)timeZone_ptr, length);
+    rsScriptSetTimeZone(con, (RsScript)script, (const char *)timeZone_ptr, length);
 
     if (timeZone_ptr) {
         _env->ReleasePrimitiveArrayCritical(timeZone, timeZone_ptr, 0);
@@ -833,7 +833,7 @@ nScriptSetType(JNIEnv *_env, jobject _this, jint type, jboolean writable, jstrin
     if (_str) {
         n = _env->GetStringUTFChars(_str, NULL);
     }
-    rsScriptSetType((RsType)type, slot, writable, n);
+    rsScriptSetType(con, (RsType)type, slot, writable, n);
     if (n) {
         _env->ReleaseStringUTFChars(_str, n);
     }
@@ -844,7 +844,7 @@ nScriptSetRoot(JNIEnv *_env, jobject _this, jboolean isRoot)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nScriptCSetRoot, con(%p), isRoot(%i)", con, isRoot);
-    rsScriptSetRoot(isRoot);
+    rsScriptSetRoot(con, isRoot);
 }
 
 // -----------------------------------
@@ -854,7 +854,7 @@ nScriptCBegin(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nScriptCBegin, con(%p)", con);
-    rsScriptCBegin();
+    rsScriptCBegin(con);
 }
 
 static void
@@ -892,7 +892,7 @@ nScriptCSetScript(JNIEnv *_env, jobject _this, jbyteArray scriptRef,
         _env->GetPrimitiveArrayCritical(scriptRef, (jboolean *)0);
     script_ptr = script_base + offset;
 
-    rsScriptCSetText((const char *)script_ptr, length);
+    rsScriptCSetText(con, (const char *)script_ptr, length);
 
 exit:
     if (script_base) {
@@ -906,7 +906,7 @@ nScriptCCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nScriptCCreate, con(%p)", con);
-    return (jint)rsScriptCCreate();
+    return (jint)rsScriptCCreate(con);
 }
 
 static void
@@ -915,7 +915,7 @@ nScriptCAddDefineI32(JNIEnv *_env, jobject _this, jstring name, jint value)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     const char* n = _env->GetStringUTFChars(name, NULL);
     LOG_API("nScriptCAddDefineI32, con(%p) name(%s) value(%d)", con, n, value);
-    rsScriptCSetDefineI32(n, value);
+    rsScriptCSetDefineI32(con, n, value);
     _env->ReleaseStringUTFChars(name, n);
 }
 
@@ -925,7 +925,7 @@ nScriptCAddDefineF(JNIEnv *_env, jobject _this, jstring name, jfloat value)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     const char* n = _env->GetStringUTFChars(name, NULL);
     LOG_API("nScriptCAddDefineF, con(%p) name(%s) value(%f)", con, n, value);
-    rsScriptCSetDefineF(n, value);
+    rsScriptCSetDefineF(con, n, value);
     _env->ReleaseStringUTFChars(name, n);
 }
 
@@ -936,7 +936,7 @@ nProgramFragmentStoreBegin(JNIEnv *_env, jobject _this, jint in, jint out)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentStoreBegin, con(%p), in(%p), out(%p)", con, (RsElement)in, (RsElement)out);
-    rsProgramFragmentStoreBegin((RsElement)in, (RsElement)out);
+    rsProgramFragmentStoreBegin(con, (RsElement)in, (RsElement)out);
 }
 
 static void
@@ -944,7 +944,7 @@ nProgramFragmentStoreDepthFunc(JNIEnv *_env, jobject _this, jint func)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentStoreDepthFunc, con(%p), func(%i)", con, func);
-    rsProgramFragmentStoreDepthFunc((RsDepthFunc)func);
+    rsProgramFragmentStoreDepthFunc(con, (RsDepthFunc)func);
 }
 
 static void
@@ -952,7 +952,7 @@ nProgramFragmentStoreDepthMask(JNIEnv *_env, jobject _this, jboolean enable)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentStoreDepthMask, con(%p), enable(%i)", con, enable);
-    rsProgramFragmentStoreDepthMask(enable);
+    rsProgramFragmentStoreDepthMask(con, enable);
 }
 
 static void
@@ -960,7 +960,7 @@ nProgramFragmentStoreColorMask(JNIEnv *_env, jobject _this, jboolean r, jboolean
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentStoreColorMask, con(%p), r(%i), g(%i), b(%i), a(%i)", con, r, g, b, a);
-    rsProgramFragmentStoreColorMask(r, g, b, a);
+    rsProgramFragmentStoreColorMask(con, r, g, b, a);
 }
 
 static void
@@ -968,7 +968,7 @@ nProgramFragmentStoreBlendFunc(JNIEnv *_env, jobject _this, int src, int dst)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentStoreBlendFunc, con(%p), src(%i), dst(%i)", con, src, dst);
-    rsProgramFragmentStoreBlendFunc((RsBlendSrcFunc)src, (RsBlendDstFunc)dst);
+    rsProgramFragmentStoreBlendFunc(con, (RsBlendSrcFunc)src, (RsBlendDstFunc)dst);
 }
 
 static void
@@ -976,7 +976,7 @@ nProgramFragmentStoreDither(JNIEnv *_env, jobject _this, jboolean enable)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentStoreDither, con(%p), enable(%i)", con, enable);
-    rsProgramFragmentStoreDither(enable);
+    rsProgramFragmentStoreDither(con, enable);
 }
 
 static jint
@@ -985,7 +985,7 @@ nProgramFragmentStoreCreate(JNIEnv *_env, jobject _this)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentStoreCreate, con(%p)", con);
 
-    return (jint)rsProgramFragmentStoreCreate();
+    return (jint)rsProgramFragmentStoreCreate(con);
 }
 
 static void
@@ -993,7 +993,7 @@ nProgramFragmentStoreDestroy(JNIEnv *_env, jobject _this, jint pgm)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentStoreDestroy, con(%p), pgm(%i)", con, pgm);
-    rsProgramFragmentStoreDestroy((RsProgramFragmentStore)pgm);
+    rsProgramFragmentStoreDestroy(con, (RsProgramFragmentStore)pgm);
 }
 
 // ---------------------------------------------------------------------------
@@ -1003,7 +1003,7 @@ nProgramFragmentBegin(JNIEnv *_env, jobject _this, jint in, jint out)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentBegin, con(%p), in(%p), out(%p)", con, (RsElement)in, (RsElement)out);
-    rsProgramFragmentBegin((RsElement)in, (RsElement)out);
+    rsProgramFragmentBegin(con, (RsElement)in, (RsElement)out);
 }
 
 static void
@@ -1011,7 +1011,7 @@ nProgramFragmentBindTexture(JNIEnv *_env, jobject _this, jint vpf, jint slot, ji
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentBindTexture, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
-    rsProgramFragmentBindTexture((RsProgramFragment)vpf, slot, (RsAllocation)a);
+    rsProgramFragmentBindTexture(con, (RsProgramFragment)vpf, slot, (RsAllocation)a);
 }
 
 static void
@@ -1019,7 +1019,7 @@ nProgramFragmentBindSampler(JNIEnv *_env, jobject _this, jint vpf, jint slot, ji
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentBindSampler, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramFragment)vpf, slot, (RsSampler)a);
-    rsProgramFragmentBindSampler((RsProgramFragment)vpf, slot, (RsSampler)a);
+    rsProgramFragmentBindSampler(con, (RsProgramFragment)vpf, slot, (RsSampler)a);
 }
 
 static void
@@ -1027,7 +1027,7 @@ nProgramFragmentSetType(JNIEnv *_env, jobject _this, jint slot, jint vt)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentSetType, con(%p), slot(%i), vt(%p)", con, slot, (RsType)vt);
-    rsProgramFragmentSetType(slot, (RsType)vt);
+    rsProgramFragmentSetType(con, slot, (RsType)vt);
 }
 
 static void
@@ -1035,7 +1035,7 @@ nProgramFragmentSetEnvMode(JNIEnv *_env, jobject _this, jint slot, jint env)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentSetEnvMode, con(%p), slot(%i), vt(%i)", con, slot, env);
-    rsProgramFragmentSetEnvMode(slot, (RsTexEnvMode)env);
+    rsProgramFragmentSetEnvMode(con, slot, (RsTexEnvMode)env);
 }
 
 static void
@@ -1043,7 +1043,7 @@ nProgramFragmentSetTexEnable(JNIEnv *_env, jobject _this, jint slot, jboolean en
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentSetTexEnable, con(%p), slot(%i), enable(%i)", con, slot, enable);
-    rsProgramFragmentSetTexEnable(slot, enable);
+    rsProgramFragmentSetTexEnable(con, slot, enable);
 }
 
 static jint
@@ -1051,7 +1051,7 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, jint slot, jboolean enable)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentCreate, con(%p)", con);
-    return (jint)rsProgramFragmentCreate();
+    return (jint)rsProgramFragmentCreate(con);
 }
 
 static void
@@ -1059,7 +1059,7 @@ nProgramFragmentDestroy(JNIEnv *_env, jobject _this, jint pgm)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentDestroy, con(%p), pgm(%i)", con, pgm);
-    rsProgramFragmentDestroy((RsProgramFragment)pgm);
+    rsProgramFragmentDestroy(con, (RsProgramFragment)pgm);
 }
 
 // ---------------------------------------------------------------------------
@@ -1069,7 +1069,7 @@ nProgramVertexBegin(JNIEnv *_env, jobject _this, jint in, jint out)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramVertexBegin, con(%p), in(%p), out(%p)", con, (RsElement)in, (RsElement)out);
-    rsProgramVertexBegin((RsElement)in, (RsElement)out);
+    rsProgramVertexBegin(con, (RsElement)in, (RsElement)out);
 }
 
 static void
@@ -1077,7 +1077,7 @@ nProgramVertexBindAllocation(JNIEnv *_env, jobject _this, jint vpv, jint a)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramVertexBindAllocation, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramVertex)vpv, slot, (RsAllocation)a);
-    rsProgramVertexBindAllocation((RsProgramFragment)vpv, (RsAllocation)a);
+    rsProgramVertexBindAllocation(con, (RsProgramFragment)vpv, (RsAllocation)a);
 }
 
 static void
@@ -1085,7 +1085,7 @@ nProgramVertexSetTextureMatrixEnable(JNIEnv *_env, jobject _this, jboolean enabl
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramVertexSetTextureMatrixEnable, con(%p), enable(%i)", con, enable);
-    rsProgramVertexSetTextureMatrixEnable(enable);
+    rsProgramVertexSetTextureMatrixEnable(con, enable);
 }
 
 static void
@@ -1093,7 +1093,7 @@ nProgramVertexAddLight(JNIEnv *_env, jobject _this, jint light)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramVertexAddLight, con(%p), light(%p)", con, (RsLight)light);
-    rsProgramVertexAddLight((RsLight)light);
+    rsProgramVertexAddLight(con, (RsLight)light);
 }
 
 static jint
@@ -1101,7 +1101,7 @@ nProgramVertexCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramVertexCreate, con(%p)", con);
-    return (jint)rsProgramVertexCreate();
+    return (jint)rsProgramVertexCreate(con);
 }
 
 static void
@@ -1109,7 +1109,7 @@ nProgramVertexDestroy(JNIEnv *_env, jobject _this, jint pgm)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nProgramFragmentDestroy, con(%p), pgm(%i)", con, pgm);
-    rsProgramFragmentDestroy((RsProgramFragment)pgm);
+    rsProgramFragmentDestroy(con, (RsProgramFragment)pgm);
 }
 
 
@@ -1122,7 +1122,7 @@ nContextBindRootScript(JNIEnv *_env, jobject _this, jint script)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nContextBindRootScript, con(%p), script(%p)", con, (RsScript)script);
-    rsContextBindRootScript((RsScript)script);
+    rsContextBindRootScript(con, (RsScript)script);
 }
 
 static void
@@ -1130,7 +1130,7 @@ nContextBindProgramFragmentStore(JNIEnv *_env, jobject _this, jint pfs)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nContextBindProgramFragmentStore, con(%p), pfs(%p)", con, (RsProgramFragmentStore)pfs);
-    rsContextBindProgramFragmentStore((RsProgramFragmentStore)pfs);
+    rsContextBindProgramFragmentStore(con, (RsProgramFragmentStore)pfs);
 }
 
 static void
@@ -1138,7 +1138,7 @@ nContextBindProgramFragment(JNIEnv *_env, jobject _this, jint pf)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nContextBindProgramFragment, con(%p), pf(%p)", con, (RsProgramFragment)pf);
-    rsContextBindProgramFragment((RsProgramFragment)pf);
+    rsContextBindProgramFragment(con, (RsProgramFragment)pf);
 }
 
 static void
@@ -1146,7 +1146,7 @@ nContextBindProgramVertex(JNIEnv *_env, jobject _this, jint pf)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nContextBindProgramVertex, con(%p), pf(%p)", con, (RsProgramVertex)pf);
-    rsContextBindProgramVertex((RsProgramVertex)pf);
+    rsContextBindProgramVertex(con, (RsProgramVertex)pf);
 }
 
 static void
@@ -1155,7 +1155,7 @@ nContextAddDefineI32(JNIEnv *_env, jobject _this, jstring name, jint value)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     const char* n = _env->GetStringUTFChars(name, NULL);
     LOG_API("nScriptCAddDefineI32, con(%p) name(%s) value(%d)", con, n, value);
-    rsContextSetDefineI32(n, value);
+    rsContextSetDefineI32(con, n, value);
     _env->ReleaseStringUTFChars(name, n);
 }
 
@@ -1165,7 +1165,7 @@ nContextAddDefineF(JNIEnv *_env, jobject _this, jstring name, jfloat value)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     const char* n = _env->GetStringUTFChars(name, NULL);
     LOG_API("nScriptCAddDefineF, con(%p) name(%s) value(%f)", con, n, value);
-    rsContextSetDefineF(n, value);
+    rsContextSetDefineF(con, n, value);
     _env->ReleaseStringUTFChars(name, n);
 }
 
@@ -1177,7 +1177,7 @@ nSamplerDestroy(JNIEnv *_env, jobject _this, jint s)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nSamplerDestroy, con(%p), sampler(%p)", con, (RsSampler)s);
-    rsSamplerDestroy((RsSampler)s);
+    rsSamplerDestroy(con, (RsSampler)s);
 }
 
 static void
@@ -1185,7 +1185,7 @@ nSamplerBegin(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nSamplerBegin, con(%p)", con);
-    rsSamplerBegin();
+    rsSamplerBegin(con);
 }
 
 static void
@@ -1193,7 +1193,7 @@ nSamplerSet(JNIEnv *_env, jobject _this, jint p, jint v)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nSamplerSet, con(%p), param(%i), value(%i)", con, p, v);
-    rsSamplerSet((RsSamplerParam)p, (RsSamplerValue)v);
+    rsSamplerSet(con, (RsSamplerParam)p, (RsSamplerValue)v);
 }
 
 static jint
@@ -1201,7 +1201,7 @@ nSamplerCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nSamplerCreate, con(%p)", con);
-    return (jint)rsSamplerCreate();
+    return (jint)rsSamplerCreate(con);
 }
 
 // ---------------------------------------------------------------------------
@@ -1211,7 +1211,7 @@ nLightBegin(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nLightBegin, con(%p)", con);
-    rsLightBegin();
+    rsLightBegin(con);
 }
 
 static void
@@ -1219,7 +1219,7 @@ nLightSetIsMono(JNIEnv *_env, jobject _this, jboolean isMono)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nLightSetIsMono, con(%p), isMono(%i)", con, isMono);
-    rsLightSetMonochromatic(isMono);
+    rsLightSetMonochromatic(con, isMono);
 }
 
 static void
@@ -1227,7 +1227,7 @@ nLightSetIsLocal(JNIEnv *_env, jobject _this, jboolean isLocal)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nLightSetIsLocal, con(%p), isLocal(%i)", con, isLocal);
-    rsLightSetLocal(isLocal);
+    rsLightSetLocal(con, isLocal);
 }
 
 static jint
@@ -1235,7 +1235,7 @@ nLightCreate(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nLightCreate, con(%p)", con);
-    return (jint)rsLightCreate();
+    return (jint)rsLightCreate(con);
 }
 
 static void
@@ -1243,7 +1243,7 @@ nLightDestroy(JNIEnv *_env, jobject _this, jint light)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nLightDestroy, con(%p), light(%p)", con, (RsLight)light);
-    rsLightDestroy((RsLight)light);
+    rsLightDestroy(con, (RsLight)light);
 }
 
 static void
@@ -1251,7 +1251,7 @@ nLightSetColor(JNIEnv *_env, jobject _this, jint light, float r, float g, float 
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nLightSetColor, con(%p), light(%p), r(%f), g(%f), b(%f)", con, (RsLight)light, r, g, b);
-    rsLightSetColor((RsLight)light, r, g, b);
+    rsLightSetColor(con, (RsLight)light, r, g, b);
 }
 
 static void
@@ -1259,7 +1259,7 @@ nLightSetPosition(JNIEnv *_env, jobject _this, jint light, float x, float y, flo
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nLightSetPosition, con(%p), light(%p), x(%f), y(%f), z(%f)", con, (RsLight)light, x, y, z);
-    rsLightSetPosition((RsLight)light, x, y, z);
+    rsLightSetPosition(con, (RsLight)light, x, y, z);
 }
 
 // ---------------------------------------------------------------------------
@@ -1269,7 +1269,7 @@ nSimpleMeshDestroy(JNIEnv *_env, jobject _this, jint s)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nSimpleMeshDestroy, con(%p), SimpleMesh(%p)", con, (RsSimpleMesh)s);
-    rsSimpleMeshDestroy((RsSimpleMesh)s);
+    rsSimpleMeshDestroy(con, (RsSimpleMesh)s);
 }
 
 static jint
@@ -1280,7 +1280,7 @@ nSimpleMeshCreate(JNIEnv *_env, jobject _this, jint batchID, jint indexID, jintA
     LOG_API("nSimpleMeshCreate, con(%p), batchID(%i), indexID(%i), vtxIDs.len(%i), primID(%i)",
             con, batchID, indexID, len, primID);
     jint *ptr = _env->GetIntArrayElements(vtxIDs, NULL);
-    int id = (int)rsSimpleMeshCreate((void *)batchID, (void *)indexID, (void **)ptr, len, primID);
+    int id = (int)rsSimpleMeshCreate(con, (void *)batchID, (void *)indexID, (void **)ptr, len, primID);
     _env->ReleaseIntArrayElements(vtxIDs, ptr, 0/*JNI_ABORT*/);
     return id;
 }
@@ -1290,7 +1290,7 @@ nSimpleMeshBindVertex(JNIEnv *_env, jobject _this, jint s, jint alloc, jint slot
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nSimpleMeshBindVertex, con(%p), SimpleMesh(%p), Alloc(%p), slot(%i)", con, (RsSimpleMesh)s, (RsAllocation)alloc, slot);
-    rsSimpleMeshBindVertex((RsSimpleMesh)s, (RsAllocation)alloc, slot);
+    rsSimpleMeshBindVertex(con, (RsSimpleMesh)s, (RsAllocation)alloc, slot);
 }
 
 static void
@@ -1298,7 +1298,7 @@ nSimpleMeshBindIndex(JNIEnv *_env, jobject _this, jint s, jint alloc)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nSimpleMeshBindIndex, con(%p), SimpleMesh(%p), Alloc(%p)", con, (RsSimpleMesh)s, (RsAllocation)alloc);
-    rsSimpleMeshBindIndex((RsSimpleMesh)s, (RsAllocation)alloc);
+    rsSimpleMeshBindIndex(con, (RsSimpleMesh)s, (RsAllocation)alloc);
 }
 
 // ---------------------------------------------------------------------------
