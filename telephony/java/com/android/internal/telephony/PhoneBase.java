@@ -760,6 +760,16 @@ public abstract class PhoneBase implements Phone {
         Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
     }
 
+    public void registerForEcmTimerReset(Handler h, int what, Object obj) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void unregisterForEcmTimerReset(Handler h) {
+        // This function should be overridden by the class CDMAPhone. Not implemented in GSMPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
     public void registerForSignalInfo(Handler h, int what, Object obj) {
         mCM.registerForSignalInfo(h, what, obj);
     }

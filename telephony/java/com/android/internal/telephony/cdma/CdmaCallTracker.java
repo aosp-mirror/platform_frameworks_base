@@ -72,7 +72,7 @@ public final class CdmaCallTracker extends CallTracker {
 
     CdmaConnection pendingMO;
     boolean hangupPendingMO;
-    boolean pendingCallInECM=false;
+    boolean pendingCallInEcm=false;
     CDMAPhone phone;
 
     boolean desiredMute = false;    // false = mute off
@@ -80,6 +80,7 @@ public final class CdmaCallTracker extends CallTracker {
     int pendingCallClirMode;
     Phone.State state = Phone.State.IDLE;
 
+    private boolean mIsEcmTimerCanceled = false;
 
 //    boolean needsPoll;
 
@@ -182,6 +183,14 @@ public final class CdmaCallTracker extends CallTracker {
             throw new CallStateException("cannot dial in current state");
         }
 
+        String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
+        boolean isPhoneInEcmMode = inEcm.equals("true");
+        boolean isEmergencyCall = PhoneNumberUtils.isEmergencyNumber(dialString);
+
+        // Cancel Ecm timer if a second emergency call is originating in Ecm mode
+        if (isPhoneInEcmMode && isEmergencyCall) {
+            handleEcmTimer(phone.CANCEL_ECM_TIMER);
+        }
 
         // We are initiating a call therefore even if we previously
         // didn't know the state (i.e. Generic was true) we now know
@@ -210,14 +219,14 @@ public final class CdmaCallTracker extends CallTracker {
             // Always unmute when initiating a new call
             setMute(false);
 
-            String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
-            if(inEcm.equals("false")) {
+            // In Ecm mode, if another emergency call is dialed, Ecm mode will not exit.
+            if(!isPhoneInEcmMode || (isPhoneInEcmMode && isEmergencyCall)) {
                 cm.dial(pendingMO.address, clirMode, obtainCompleteMessage());
             } else {
                 phone.exitEmergencyCallbackMode();
                 phone.setOnEcbModeExitResponse(this,EVENT_EXIT_ECM_RESPONSE_CDMA, null);
                 pendingCallClirMode=clirMode;
-                pendingCallInECM=true;
+                pendingCallInEcm=true;
             }
         }
 
@@ -479,6 +488,11 @@ public final class CdmaCallTracker extends CallTracker {
                     // Someone has already asked to hangup this call
                     if (hangupPendingMO) {
                         hangupPendingMO = false;
+                        // Re-start Ecm timer when an uncompleted emergency call ends
+                        if (mIsEcmTimerCanceled) {
+                            handleEcmTimer(phone.RESTART_ECM_TIMER);
+                        }
+
                         try {
                             if (Phone.DEBUG_PHONE) log(
                                     "poll: hangupPendingMO, hangup conn " + i);
@@ -532,6 +546,12 @@ public final class CdmaCallTracker extends CallTracker {
                     }
                 }
                 foregroundCall.setGeneric(false);
+
+                // Re-start Ecm timer when the connected emergency call ends
+                if (mIsEcmTimerCanceled) {
+                    handleEcmTimer(phone.RESTART_ECM_TIMER);
+                }
+
                 // Dropped connections are removed from the CallTracker
                 // list but kept in the Call list
                 connections[i] = null;
@@ -571,8 +591,8 @@ public final class CdmaCallTracker extends CallTracker {
             droppedDuringPoll.add(pendingMO);
             pendingMO = null;
             hangupPendingMO = false;
-            if( pendingCallInECM) {
-                pendingCallInECM = false;
+            if( pendingCallInEcm) {
+                pendingCallInEcm = false;
             }
         }
 
@@ -941,9 +961,9 @@ public final class CdmaCallTracker extends CallTracker {
 
             case EVENT_EXIT_ECM_RESPONSE_CDMA:
                //no matter the result, we still do the same here
-               if (pendingCallInECM) {
+               if (pendingCallInEcm) {
                    cm.dial(pendingMO.address, pendingCallClirMode, obtainCompleteMessage());
-                   pendingCallInECM = false;
+                   pendingCallInEcm = false;
                }
                phone.unsetOnEcbModeExitResponse(this);
             break;
@@ -968,6 +988,19 @@ public final class CdmaCallTracker extends CallTracker {
             default:{
                throw new RuntimeException("unexpected event not handled");
             }
+        }
+    }
+
+    /**
+     * Handle Ecm timer to be canceled or re-started
+     */
+    private void handleEcmTimer(int action) {
+        phone.handleTimerInEmergencyCallbackMode(action);
+        switch(action) {
+        case CDMAPhone.CANCEL_ECM_TIMER: mIsEcmTimerCanceled = true; break;
+        case CDMAPhone.RESTART_ECM_TIMER: mIsEcmTimerCanceled = false; break;
+        default:
+            Log.e(LOG_TAG, "handleEcmTimer, unsupported action " + action);
         }
     }
 

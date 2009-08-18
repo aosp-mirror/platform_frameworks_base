@@ -28,6 +28,8 @@ import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.Registrant;
 import android.os.RegistrantList;
 import android.os.RemoteException;
@@ -72,8 +74,7 @@ import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OP
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,9 +88,13 @@ public class CDMAPhone extends PhoneBase {
 
     // Default Emergency Callback Mode exit timer
     private static final int DEFAULT_ECM_EXIT_TIMER_VALUE = 300000;
+
     static final String VM_COUNT_CDMA = "vm_count_key_cdma";
     private static final String VM_NUMBER_CDMA = "vm_number_key_cdma";
     private String mVmNumber = null;
+
+    static final int RESTART_ECM_TIMER = 0; // restart Ecm timer
+    static final int CANCEL_ECM_TIMER = 1; // cancel Ecm timer
 
     //***** Instance Variables
     CdmaCallTracker mCT;
@@ -103,6 +108,7 @@ public class CDMAPhone extends PhoneBase {
     RuimSmsInterfaceManager mRuimSmsInterfaceManager;
     PhoneSubInfo mSubInfo;
     EriManager mEriManager;
+    WakeLock mWakeLock;
 
     // mNvLoadedRegistrants are informed after the EVENT_NV_READY
     private RegistrantList mNvLoadedRegistrants = new RegistrantList();
@@ -110,17 +116,20 @@ public class CDMAPhone extends PhoneBase {
     // mEriFileLoadedRegistrants are informed after the ERI text has been loaded
     private RegistrantList mEriFileLoadedRegistrants = new RegistrantList();
 
-    // mECMExitRespRegistrant is informed after the phone has been exited
+    // mEcmTimerResetRegistrants are informed after Ecm timer is canceled or re-started
+    private RegistrantList mEcmTimerResetRegistrants = new RegistrantList();
+
+    // mEcmExitRespRegistrant is informed after the phone has been exited
     //the emergency callback mode
     //keep track of if phone is in emergency callback mode
-    private boolean mIsPhoneInECMState;
-    private Registrant mECMExitRespRegistrant;
+    private boolean mIsPhoneInEcmState;
+    private Registrant mEcmExitRespRegistrant;
     private String mEsn;
     private String mMeid;
     // string to define how the carrier specifies its own ota sp number
     private String mCarrierOtaSpNumSchema;
 
-    // A runnable which is used to automatically exit from ECM after a period of time.
+    // A runnable which is used to automatically exit from Ecm after a period of time.
     private Runnable mExitEcmRunnable = new Runnable() {
         public void run() {
             exitEmergencyCallbackMode();
@@ -165,6 +174,9 @@ public class CDMAPhone extends PhoneBase {
         mCM.registerForNVReady(h, EVENT_NV_READY, null);
         mCM.setEmergencyCallbackMode(h, EVENT_EMERGENCY_CALLBACK_MODE_ENTER, null);
 
+        PowerManager pm
+            = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,LOG_TAG);
 
         //Change the system setting
         SystemProperties.set(TelephonyProperties.CURRENT_ACTIVE_PHONE,
@@ -172,7 +184,7 @@ public class CDMAPhone extends PhoneBase {
 
         // This is needed to handle phone process crashes
         String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
-        mIsPhoneInECMState = inEcm.equals("true");
+        mIsPhoneInEcmState = inEcm.equals("true");
 
         // get the string that specifies the carrier OTA Sp number
         mCarrierOtaSpNumSchema = SystemProperties.get(
@@ -244,6 +256,10 @@ public class CDMAPhone extends PhoneBase {
 
     protected void finalize() {
         if(DBG) Log.d(LOG_TAG, "CDMAPhone finalized");
+        if (mWakeLock.isHeld()) {
+            Log.e(LOG_TAG, "UNEXPECTED; mWakeLock is held when finalizing.");
+            mWakeLock.release();
+        }
     }
 
 
@@ -525,11 +541,11 @@ public class CDMAPhone extends PhoneBase {
     }
 
     public void setOnEcbModeExitResponse(Handler h, int what, Object obj) {
-        mECMExitRespRegistrant = new Registrant (h, what, obj);
+        mEcmExitRespRegistrant = new Registrant (h, what, obj);
     }
 
     public void unsetOnEcbModeExitResponse(Handler h) {
-        mECMExitRespRegistrant.clear();
+        mEcmExitRespRegistrant.clear();
     }
 
     public void registerForCallWaiting(Handler h, int what, Object obj) {
@@ -729,7 +745,7 @@ public class CDMAPhone extends PhoneBase {
     public boolean enableDataConnectivity() {
 
         // block data activities when phone is in emergency callback mode
-        if (mIsPhoneInECMState) {
+        if (mIsPhoneInEcmState) {
             Intent intent = new Intent(TelephonyIntents.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS);
             ActivityManagerNative.broadcastStickyIntent(intent, null);
             return false;
@@ -826,8 +842,9 @@ public class CDMAPhone extends PhoneBase {
     void sendEmergencyCallbackModeChange(){
         //Send an Intent
         Intent intent = new Intent(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
-        intent.putExtra(PHONE_IN_ECM_STATE, mIsPhoneInECMState);
+        intent.putExtra(PHONE_IN_ECM_STATE, mIsPhoneInEcmState);
         ActivityManagerNative.broadcastStickyIntent(intent,null);
+        if (DBG) Log.d(LOG_TAG, "sendEmergencyCallbackModeChange");
     }
 
     /*package*/ void
@@ -859,15 +876,21 @@ public class CDMAPhone extends PhoneBase {
 
     @Override
     public void exitEmergencyCallbackMode() {
+        if (mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
         // Send a message which will invoke handleExitEmergencyCallbackMode
         mCM.exitEmergencyCallbackMode(h.obtainMessage(EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE));
     }
 
     private void handleEnterEmergencyCallbackMode(Message msg) {
-        Log.d(LOG_TAG, "Event EVENT_EMERGENCY_CALLBACK_MODE Received");
-        // if phone is not in ECM mode, and it's changed to ECM mode
-        if (mIsPhoneInECMState == false) {
-            mIsPhoneInECMState = true;
+        if (DBG) {
+            Log.d(LOG_TAG, "handleEnterEmergencyCallbackMode,mIsPhoneInEcmState= "
+                    + mIsPhoneInEcmState);
+        }
+        // if phone is not in Ecm mode, and it's changed to Ecm mode
+        if (mIsPhoneInEcmState == false) {
+            mIsPhoneInEcmState = true;
             // notify change
             sendEmergencyCallbackModeChange();
             setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE, "true");
@@ -877,23 +900,27 @@ public class CDMAPhone extends PhoneBase {
             long delayInMillis = SystemProperties.getLong(
                     TelephonyProperties.PROPERTY_ECM_EXIT_TIMER, DEFAULT_ECM_EXIT_TIMER_VALUE);
             h.postDelayed(mExitEcmRunnable, delayInMillis);
+            // We don't want to go to sleep while in Ecm
+            mWakeLock.acquire();
         }
     }
 
     private void handleExitEmergencyCallbackMode(Message msg) {
-        Log.d(LOG_TAG, "Event EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE Received");
         AsyncResult ar = (AsyncResult)msg.obj;
-
-        // Remove pending exit ECM runnable, if any
+        if (DBG) {
+            Log.d(LOG_TAG, "handleExitEmergencyCallbackMode,ar.exception , mIsPhoneInEcmState "
+                    + ar.exception + mIsPhoneInEcmState);
+        }
+        // Remove pending exit Ecm runnable, if any
         h.removeCallbacks(mExitEcmRunnable);
 
-        if (mECMExitRespRegistrant != null) {
-            mECMExitRespRegistrant.notifyRegistrant(ar);
+        if (mEcmExitRespRegistrant != null) {
+            mEcmExitRespRegistrant.notifyRegistrant(ar);
         }
         // if exiting ecm success
         if (ar.exception == null) {
-            if (mIsPhoneInECMState) {
-                mIsPhoneInECMState = false;
+            if (mIsPhoneInEcmState) {
+                mIsPhoneInEcmState = false;
                 setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE, "false");
             }
             // send an Intent
@@ -901,6 +928,42 @@ public class CDMAPhone extends PhoneBase {
             // Re-initiate data connection
             mDataConnection.setDataEnabled(true);
         }
+    }
+
+    /**
+     * Handle to cancel or restart Ecm timer in emergency call back mode
+     * if action is CANCEL_ECM_TIMER, cancel Ecm timer and notify apps the timer is canceled;
+     * otherwise, restart Ecm timer and notify apps the timer is restarted.
+     */
+    void handleTimerInEmergencyCallbackMode(int action) {
+        switch(action) {
+        case CANCEL_ECM_TIMER:
+            h.removeCallbacks(mExitEcmRunnable);
+            mEcmTimerResetRegistrants.notifyResult(new Boolean(true));
+            break;
+        case RESTART_ECM_TIMER:
+            long delayInMillis = SystemProperties.getLong(
+                    TelephonyProperties.PROPERTY_ECM_EXIT_TIMER, DEFAULT_ECM_EXIT_TIMER_VALUE);
+            h.postDelayed(mExitEcmRunnable, delayInMillis);
+            mEcmTimerResetRegistrants.notifyResult(new Boolean(false));
+            break;
+        default:
+            Log.e(LOG_TAG, "handleTimerInEmergencyCallbackMode, unsupported action " + action);
+        }
+    }
+
+    /**
+     * Registration point for Ecm timer reset
+     * @param h handler to notify
+     * @param what User-defined message code
+     * @param obj placed in Message.obj
+     */
+    public void registerForEcmTimerReset(Handler h, int what, Object obj) {
+        mEcmTimerResetRegistrants.addUnique(h, what, obj);
+    }
+
+    public void unregisterForEcmTimerReset(Handler h) {
+        mEcmTimerResetRegistrants.remove(h);
     }
 
     //***** Inner Classes
