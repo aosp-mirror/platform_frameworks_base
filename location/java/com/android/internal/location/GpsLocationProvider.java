@@ -27,6 +27,7 @@ import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
 import android.location.ILocationManager;
 import android.location.ILocationProvider;
+import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
@@ -46,14 +47,18 @@ import android.util.SparseIntArray;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.location.GpsNetInitiatedHandler;
+import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringBufferInputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Map.Entry;
 
 /**
  * A GPS implementation of LocationProvider used by LocationManager.
@@ -214,6 +219,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private String mAGpsApn;
     private int mAGpsDataConnectionState;
     private final ConnectivityManager mConnMgr;
+    private final GpsNetInitiatedHandler mNIHandler; 
 
     // Wakelocks
     private final static String WAKELOCK_KEY = "GpsLocationProvider";
@@ -324,6 +330,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     public GpsLocationProvider(Context context, ILocationManager locationManager) {
         mContext = context;
         mLocationManager = locationManager;
+        mNIHandler= new GpsNetInitiatedHandler(context, this);
 
         // Create a wake lock
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -1047,6 +1054,96 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         }
     }
 
+    //=============================================================
+    // NI Client support
+	//=============================================================
+    private final INetInitiatedListener mNetInitiatedListener = new INetInitiatedListener.Stub() {
+    	// Sends a response for an NI reqeust to HAL.
+    	public boolean sendNiResponse(int notificationId, int userResponse)
+    	{
+        	// TODO Add Permission check
+    		
+    		StringBuilder extrasBuf = new StringBuilder();
+
+    		if (Config.LOGD) Log.d(TAG, "sendNiResponse, notifId: " + notificationId +
+    				", response: " + userResponse);
+    		
+    		native_send_ni_response(notificationId, userResponse);
+    		
+    		return true;
+    	}        
+    };
+        
+    public INetInitiatedListener getNetInitiatedListener() {
+        return mNetInitiatedListener;
+    }
+
+    // Called by JNI function to report an NI request.
+	@SuppressWarnings("deprecation")
+	public void reportNiNotification(
+        	int notificationId,
+        	int niType,
+        	int notifyFlags,
+        	int timeout,
+        	int defaultResponse,
+        	String requestorId,
+        	String text,
+        	int requestorIdEncoding,
+        	int textEncoding,
+        	String extras  // Encoded extra data
+        )
+	{
+		Log.i(TAG, "reportNiNotification: entered");
+		Log.i(TAG, "notificationId: " + notificationId +
+				", niType: " + niType +
+				", notifyFlags: " + notifyFlags +
+				", timeout: " + timeout +
+				", defaultResponse: " + defaultResponse);
+		
+		Log.i(TAG, "requestorId: " + requestorId +
+				", text: " + text +
+				", requestorIdEncoding: " + requestorIdEncoding +
+				", textEncoding: " + textEncoding);
+		
+		GpsNiNotification notification = new GpsNiNotification();
+		
+		notification.notificationId = notificationId;
+		notification.niType = niType;
+		notification.needNotify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_NOTIFY) != 0;
+		notification.needVerify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_VERIFY) != 0;
+		notification.privacyOverride = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_PRIVACY_OVERRIDE) != 0;
+		notification.timeout = timeout;
+		notification.defaultResponse = defaultResponse;
+		notification.requestorId = requestorId;
+		notification.text = text;
+		notification.requestorIdEncoding = requestorIdEncoding;
+		notification.textEncoding = textEncoding;
+		
+		// Process extras, assuming the format is
+		// one of more lines of "key = value"
+		Bundle bundle = new Bundle();
+		
+		if (extras == null) extras = "";
+		Properties extraProp = new Properties();
+		
+		try {
+			extraProp.load(new StringBufferInputStream(extras));
+		}
+		catch (IOException e)
+		{
+			Log.e(TAG, "reportNiNotification cannot parse extras data: " + extras);
+		}
+		
+		for (Entry<Object, Object> ent : extraProp.entrySet())
+		{
+			bundle.putString((String) ent.getKey(), (String) ent.getValue());
+		}		
+		
+		notification.extras = bundle;
+		
+		mNIHandler.handleNiNotification(notification);		
+	}
+
     private class GpsEventThread extends Thread {
 
         public GpsEventThread() {
@@ -1252,4 +1349,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private native void native_agps_data_conn_closed();
     private native void native_agps_data_conn_failed();
     private native void native_set_agps_server(int type, String hostname, int port);
+
+    // Network-initiated (NI) Support
+    private native void native_send_ni_response(int notificationId, int userResponse);
 }

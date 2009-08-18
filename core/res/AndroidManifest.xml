@@ -1163,6 +1163,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name="com.android.internal.app.NetInitiatedActivity"
+                android:theme="@style/Theme.Dialog.Alert"
+                android:excludeFromRecents="true">
+        </activity>
 
         <service android:name="com.android.server.LoadAverageService"
                 android:exported="true" />
