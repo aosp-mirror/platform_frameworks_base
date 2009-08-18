@@ -272,15 +272,16 @@ static status_t preProcessImages(Bundle* bundle, const sp<AaptAssets>& assets,
     ResourceDirIterator it(set, String8("drawable"));
     Vector<sp<AaptFile> > newNameFiles;
     Vector<String8> newNamePaths;
+    bool hasErrors = false;
     ssize_t res;
     while ((res=it.next()) == NO_ERROR) {
         res = preProcessImage(bundle, assets, it.getFile(), NULL);
-        if (res != NO_ERROR) {
-            return res;
+        if (res < NO_ERROR) {
+            hasErrors = true;
         }
     }
 
-    return NO_ERROR;
+    return (hasErrors || (res < NO_ERROR)) ? UNKNOWN_ERROR : NO_ERROR;
 }
 
 status_t postProcessImages(const sp<AaptAssets>& assets,
@@ -288,15 +289,16 @@ status_t postProcessImages(const sp<AaptAssets>& assets,
                            const sp<ResourceTypeSet>& set)
 {
     ResourceDirIterator it(set, String8("drawable"));
+    bool hasErrors = false;
     ssize_t res;
     while ((res=it.next()) == NO_ERROR) {
         res = postProcessImage(assets, table, it.getFile());
-        if (res != NO_ERROR) {
-            return res;
+        if (res < NO_ERROR) {
+            hasErrors = true;
         }
     }
 
-    return res < NO_ERROR ? res : (status_t)NO_ERROR;
+    return (hasErrors || (res < NO_ERROR)) ? UNKNOWN_ERROR : NO_ERROR;
 }
 
 static void collect_files(const sp<AaptDir>& dir,
