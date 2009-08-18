@@ -50,7 +50,7 @@ namespace android {
 #define VERSION_MAJOR 1
 #define VERSION_MINOR 4
 static char const * const gVendorString     = "Android";
-static char const * const gVersionString    = "1.31 Android META-EGL";
+static char const * const gVersionString    = "1.4 Android META-EGL";
 static char const * const gClientApiString  = "OpenGL ES";
 static char const * const gExtensionString  = 
         "EGL_KHR_image "
@@ -326,32 +326,6 @@ static void(*findProcAddress(const char* name,
 
 // ----------------------------------------------------------------------------
 
-/*
- * To "loose" the GPU, use something like
- *    gEGLImpl[IMPL_HARDWARE].hooks = &gHooks[IMPL_CONTEXT_LOST];
- * 
- */
-
-static int gl_context_lost() {
-    setGlThreadSpecific(&gHooks[IMPL_CONTEXT_LOST]);
-    return 0;
-}
-static int egl_context_lost() {
-    setGlThreadSpecific(&gHooks[IMPL_CONTEXT_LOST]);
-    return EGL_FALSE;
-}
-static EGLBoolean egl_context_lost_swap_buffers(void*, void*) {
-    usleep(100000); // don't use all the CPU
-    setGlThreadSpecific(&gHooks[IMPL_CONTEXT_LOST]);
-    return EGL_FALSE;
-}
-static GLint egl_context_lost_get_error() {
-    return EGL_CONTEXT_LOST;
-}
-static int ext_context_lost() {
-    return 0;
-}
-
 static void gl_no_context() {
     tls_t* tls = getTLS();
     if (tls->logCallWithNoContext == EGL_TRUE) {
@@ -471,87 +445,82 @@ EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image)
     return i->images[c->impl];
 }
 
+// ----------------------------------------------------------------------------
 
-EGLDisplay egl_init_displays(NativeDisplayType display)
+// this mutex protects:
+//    d->dpys[]
+//    egl_init_drivers_locked()
+//
+static pthread_mutex_t gInitDriverMutex = PTHREAD_MUTEX_INITIALIZER;
+
+EGLBoolean egl_init_drivers_locked()
 {
     if (sEarlyInitState) {
-        return EGL_NO_DISPLAY;
+        // initialized by static ctor. should be set here.
+        return EGL_FALSE;
     }
-
-    uint32_t index = uint32_t(display);
-    if (index >= NUM_DISPLAYS) {
-        return EGL_NO_DISPLAY;
-    }
-    
-    EGLDisplay dpy = EGLDisplay(uintptr_t(display) + 1LU);
-    egl_display_t* d = &gDisplay[index];
 
     // get our driver loader
-    Loader& loader(Loader::getInstance());    
+    Loader& loader(Loader::getInstance());
     
-    // dynamically load all our EGL implementations for that display
-    // and call into the real eglGetGisplay()
-    egl_connection_t* cnx = &gEGLImpl[IMPL_SOFTWARE];
+    // dynamically load all our EGL implementations for all displays
+    // and retrieve the corresponding EGLDisplay
+    // if that fails, don't use this driver.
+    // TODO: currently we only deal with EGL_DEFAULT_DISPLAY
+    egl_connection_t* cnx;
+    egl_display_t* d = &gDisplay[0];
+
+    cnx = &gEGLImpl[IMPL_SOFTWARE];
     if (cnx->dso == 0) {
         cnx->hooks = &gHooks[IMPL_SOFTWARE];
-        cnx->dso = loader.open(display, 0, cnx->hooks);
-    }
-    if (cnx->dso && d->dpys[IMPL_SOFTWARE]==EGL_NO_DISPLAY) {
-        d->dpys[IMPL_SOFTWARE] = cnx->hooks->egl.eglGetDisplay(display);
-        LOGE_IF(d->dpys[IMPL_SOFTWARE]==EGL_NO_DISPLAY,
-                "No EGLDisplay for software EGL!");
+        cnx->dso = loader.open(EGL_DEFAULT_DISPLAY, 0, cnx->hooks);
+        if (cnx->dso) {
+            EGLDisplay dpy = cnx->hooks->egl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+            LOGE_IF(dpy==EGL_NO_DISPLAY, "No EGLDisplay for software EGL!");
+            d->dpys[IMPL_SOFTWARE] = dpy; 
+            if (dpy == EGL_NO_DISPLAY) {
+                loader.close(cnx->dso);
+                cnx->dso = NULL;
+            }
+        }
     }
 
     cnx = &gEGLImpl[IMPL_HARDWARE];
-    if (cnx->dso == 0 && cnx->unavailable == 0) {
+    if (cnx->dso == 0) {
         char value[PROPERTY_VALUE_MAX];
         property_get("debug.egl.hw", value, "1");
         if (atoi(value) != 0) {
             cnx->hooks = &gHooks[IMPL_HARDWARE];
-            cnx->dso = loader.open(display, 1, cnx->hooks);
+            cnx->dso = loader.open(EGL_DEFAULT_DISPLAY, 1, cnx->hooks);
+            if (cnx->dso) {
+                EGLDisplay dpy = cnx->hooks->egl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+                LOGE_IF(dpy==EGL_NO_DISPLAY, "No EGLDisplay for hardware EGL!");
+                d->dpys[IMPL_HARDWARE] = dpy; 
+                if (dpy == EGL_NO_DISPLAY) {
+                    loader.close(cnx->dso);
+                    cnx->dso = NULL;
+                }
+            }
         } else {
             LOGD("3D hardware acceleration is disabled");
         }
     }
-    if (cnx->dso && d->dpys[IMPL_HARDWARE]==EGL_NO_DISPLAY) {
-        android_memset32(
-                (uint32_t*)(void*)&gHooks[IMPL_CONTEXT_LOST].gl,
-                (uint32_t)((void*)gl_context_lost),
-                sizeof(gHooks[IMPL_CONTEXT_LOST].gl));
-        android_memset32(
-                (uint32_t*)(void*)&gHooks[IMPL_CONTEXT_LOST].egl,
-                (uint32_t)((void*)egl_context_lost),
-                sizeof(gHooks[IMPL_CONTEXT_LOST].egl));
-        android_memset32(
-                (uint32_t*)(void*)&gHooks[IMPL_CONTEXT_LOST].ext,
-                (uint32_t)((void*)ext_context_lost),
-                sizeof(gHooks[IMPL_CONTEXT_LOST].ext));
-
-        gHooks[IMPL_CONTEXT_LOST].egl.eglSwapBuffers =
-                egl_context_lost_swap_buffers;
-        
-        gHooks[IMPL_CONTEXT_LOST].egl.eglGetError =
-                egl_context_lost_get_error;
-
-        gHooks[IMPL_CONTEXT_LOST].egl.eglTerminate =
-                gHooks[IMPL_HARDWARE].egl.eglTerminate;
-        
-        d->dpys[IMPL_HARDWARE] = cnx->hooks->egl.eglGetDisplay(display);
-        if (d->dpys[IMPL_HARDWARE] == EGL_NO_DISPLAY) {
-            LOGE("h/w accelerated eglGetDisplay() failed (%s)",
-                    egl_strerror(cnx->hooks->egl.eglGetError()));
-            
-            loader.close(cnx->dso);
-            cnx->dso = 0;
-            // in case of failure, we want to make sure we don't try again
-            // as it's expensive.
-            cnx->unavailable = 1;
-        }
+    
+    if (!gEGLImpl[IMPL_SOFTWARE].dso && !gEGLImpl[IMPL_HARDWARE].dso) {
+        return EGL_FALSE;
     }
 
-    return dpy;
+    return EGL_TRUE;
 }
 
+EGLBoolean egl_init_drivers()
+{
+    EGLBoolean res;
+    pthread_mutex_lock(&gInitDriverMutex);
+    res = egl_init_drivers_locked();
+    pthread_mutex_unlock(&gInitDriverMutex);
+    return res;
+}
 
 // ----------------------------------------------------------------------------
 }; // namespace android
@@ -561,7 +530,17 @@ using namespace android;
 
 EGLDisplay eglGetDisplay(NativeDisplayType display)
 {
-    return egl_init_displays(display);
+    uint32_t index = uint32_t(display);
+    if (index >= NUM_DISPLAYS) {
+        return setError(EGL_BAD_PARAMETER, EGL_NO_DISPLAY);
+    }
+
+    if (egl_init_drivers() == EGL_FALSE) {
+        return setError(EGL_BAD_PARAMETER, EGL_NO_DISPLAY);
+    }
+    
+    EGLDisplay dpy = EGLDisplay(uintptr_t(display) + 1LU);
+    return dpy;
 }
 
 // ----------------------------------------------------------------------------
@@ -648,31 +627,25 @@ EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
 
 EGLBoolean eglTerminate(EGLDisplay dpy)
 {
+    // NOTE: don't unload the drivers b/c some APIs can be called
+    // after eglTerminate() has been called. eglTerminate() only
+    // terminates an EGLDisplay, not a EGL itself.
+
     egl_display_t* const dp = get_display(dpy);
     if (!dp) return setError(EGL_BAD_DISPLAY, EGL_FALSE);
     if (android_atomic_dec(&dp->refs) != 1)
         return EGL_TRUE;
-        
-    Loader& loader(Loader::getInstance());    
 
     EGLBoolean res = EGL_FALSE;
     for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
             cnx->hooks->egl.eglTerminate(dp->dpys[i]);
-            
-            /* REVISIT: it's unclear what to do if eglTerminate() fails,
-             * on one end we shouldn't care, on the other end if it fails
-             * it might not be safe to call dlclose() (there could be some
-             * threads around). */
-            
+            // REVISIT: it's unclear what to do if eglTerminate() fails
             free(dp->configs[i]);
             free((void*)dp->queryString[i].extensions);
             dp->numConfigs[i] = 0;
             dp->dpys[i] = EGL_NO_DISPLAY;
-
-            loader.close(cnx->dso);
-            cnx->dso = 0;
             res = EGL_TRUE;
         }
     }
@@ -1022,12 +995,18 @@ EGLBoolean eglQueryContext( EGLDisplay dpy, EGLContext ctx,
 
 EGLContext eglGetCurrentContext(void)
 {
+    // could be called before eglInitialize(), but we wouldn't have a context
+    // then, and this function would correctly return EGL_NO_CONTEXT.
+
     EGLContext ctx = getContext();
     return ctx;
 }
 
 EGLSurface eglGetCurrentSurface(EGLint readdraw)
 {
+    // could be called before eglInitialize(), but we wouldn't have a context
+    // then, and this function would correctly return EGL_NO_SURFACE.
+
     EGLContext ctx = getContext();
     if (ctx) {
         egl_context_t const * const c = get_context(ctx);
@@ -1043,6 +1022,9 @@ EGLSurface eglGetCurrentSurface(EGLint readdraw)
 
 EGLDisplay eglGetCurrentDisplay(void)
 {
+    // could be called before eglInitialize(), but we wouldn't have a context
+    // then, and this function would correctly return EGL_NO_DISPLAY.
+
     EGLContext ctx = getContext();
     if (ctx) {
         egl_context_t const * const c = get_context(ctx);
@@ -1054,6 +1036,9 @@ EGLDisplay eglGetCurrentDisplay(void)
 
 EGLBoolean eglWaitGL(void)
 {
+    // could be called before eglInitialize(), but we wouldn't have a context
+    // then, and this function would return GL_TRUE, which isn't wrong.
+
     EGLBoolean res = EGL_TRUE;
     EGLContext ctx = getContext();
     if (ctx) {
@@ -1071,6 +1056,9 @@ EGLBoolean eglWaitGL(void)
 
 EGLBoolean eglWaitNative(EGLint engine)
 {
+    // could be called before eglInitialize(), but we wouldn't have a context
+    // then, and this function would return GL_TRUE, which isn't wrong.
+    
     EGLBoolean res = EGL_TRUE;
     EGLContext ctx = getContext();
     if (ctx) {
@@ -1107,9 +1095,11 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
     // eglGetProcAddress() could be the very first function called
     // in which case we must make sure we've initialized ourselves, this
     // happens the first time egl_get_display() is called.
-    
-    if (egl_init_displays(EGL_DEFAULT_DISPLAY) == EGL_NO_DISPLAY)
-        return NULL;
+
+    if (egl_init_drivers() == EGL_FALSE) {
+        setError(EGL_BAD_PARAMETER, NULL);
+        return  NULL;
+    }
 
     __eglMustCastToProperFunctionPointerType addr;
     addr = findProcAddress(procname, gExtentionMap, NELEM(gExtentionMap));
@@ -1275,6 +1265,8 @@ EGLBoolean eglSwapInterval(EGLDisplay dpy, EGLint interval)
 
 EGLBoolean eglWaitClient(void)
 {
+    // could be called before eglInitialize(), but we wouldn't have a context
+    // then, and this function would return GL_TRUE, which isn't wrong.
     EGLBoolean res = EGL_TRUE;
     EGLContext ctx = getContext();
     if (ctx) {
@@ -1296,6 +1288,10 @@ EGLBoolean eglWaitClient(void)
 
 EGLBoolean eglBindAPI(EGLenum api)
 {
+    if (egl_init_drivers() == EGL_FALSE) {
+        return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+    }
+
     // bind this API on all EGLs
     EGLBoolean res = EGL_TRUE;
     for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
@@ -1313,6 +1309,10 @@ EGLBoolean eglBindAPI(EGLenum api)
 
 EGLenum eglQueryAPI(void)
 {
+    if (egl_init_drivers() == EGL_FALSE) {
+        return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+    }
+
     for (int i=0 ; i<IMPL_NUM_DRIVERS_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
