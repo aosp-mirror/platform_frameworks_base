@@ -4818,7 +4818,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             msg.arg1 = uid;
             msg.arg2 = 0;
             msg.obj = pkg;
-            mHandler.dispatchMessage(msg);
+            mHandler.sendMessage(msg);
         } else {
             throw new SecurityException(callerUid + " cannot kill pkg: " +
                     pkg);
