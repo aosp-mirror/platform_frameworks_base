@@ -39,9 +39,6 @@ import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
 
-import java.io.FileNotFoundException;
-import java.io.FileDescriptor;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -551,8 +548,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             ComponentName className = ComponentName.readFromParcel(data);
             IBinder token = data.readStrongBinder();
-            boolean isForeground = data.readInt() != 0;
-            setServiceForeground(className, token, isForeground);
+            int id = data.readInt();
+            Notification notification = null;
+            if (data.readInt() != 0) {
+                notification = Notification.CREATOR.createFromParcel(data);
+            }
+            boolean removeNotification = data.readInt() != 0;
+            setServiceForeground(className, token, id, notification, removeNotification);
             reply.writeNoException();
             return true;
         }
@@ -1664,13 +1666,20 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
     public void setServiceForeground(ComponentName className, IBinder token,
-            boolean isForeground) throws RemoteException {
+            int id, Notification notification, boolean removeNotification) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         ComponentName.writeToParcel(className, data);
         data.writeStrongBinder(token);
-        data.writeInt(isForeground ? 1 : 0);
+        data.writeInt(id);
+        if (notification != null) {
+            data.writeInt(1);
+            notification.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        data.writeInt(removeNotification ? 1 : 0);
         mRemote.transact(SET_SERVICE_FOREGROUND_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

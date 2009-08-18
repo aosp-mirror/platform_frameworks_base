@@ -61,7 +61,8 @@ public class NotificationManager
 
     private static INotificationManager sService;
 
-    static private INotificationManager getService()
+    /** @hide */
+    static public INotificationManager getService()
     {
         if (sService != null) {
             return sService;

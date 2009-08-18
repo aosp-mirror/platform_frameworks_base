@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -304,24 +305,52 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     }
     
     /**
-     * Control whether this service is considered to be a foreground service.
+     * @deprecated This is a now a no-op, use
+     * {@link #startForeground(int, Notification)} instead.
+     */
+    @Deprecated
+    public final void setForeground(boolean isForeground) {
+        Log.w(TAG, "setForeground: ignoring old API call on " + getClass().getName());
+    }
+    
+    /**
+     * Make this service run in the foreground, supplying the ongoing
+     * notification to be shown to the user while in this state.
      * By default services are background, meaning that if the system needs to
      * kill them to reclaim more memory (such as to display a large page in a
      * web browser), they can be killed without too much harm.  You can set this
-     * flag if killing your service would be disruptive to the user: such as
+     * flag if killing your service would be disruptive to the user, such as
      * if your service is performing background music playback, so the user
      * would notice if their music stopped playing.
      * 
-     * @param isForeground Determines whether this service is considered to
-     * be foreground (true) or background (false).
+     * @param id The identifier for this notification as per
+     * {@link NotificationManager#notify(int, Notification)
+     * NotificationManager.notify(int, Notification)}.
+     * @param notification The Notification to be displayed.
+     * 
+     * @see #stopForeground(boolean)
      */
-    public final void setForeground(boolean isForeground) {
-        if (mActivityManager == null) {
-            return;
-        }
+    public final void startForeground(int id, Notification notification) {
         try {
             mActivityManager.setServiceForeground(
-                    new ComponentName(this, mClassName), mToken, isForeground);
+                    new ComponentName(this, mClassName), mToken, id,
+                    notification, true);
+        } catch (RemoteException ex) {
+        }
+    }
+    
+    /**
+     * Remove this service from foreground state, allowing it to be killed if
+     * more memory is needed.
+     * @param keepNotification If true, the notification previously provided
+     * to {@link #startForeground} will remain displayed.
+     * @see #startForeground(int, Notification)
+     */
+    public final void stopForeground(boolean removeNotification) {
+        try {
+            mActivityManager.setServiceForeground(
+                    new ComponentName(this, mClassName), mToken, 0, null,
+                    removeNotification);
         } catch (RemoteException ex) {
         }
     }
