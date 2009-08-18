@@ -91,7 +91,7 @@ public class PluginManager {
                 .sendToTarget();
     }
 
-    String[] getPluginDirecoties() {
+    String[] getPluginDirectories() {
         ArrayList<String> directories = new ArrayList<String>();
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> plugins = pm.queryIntentServices(new Intent(
@@ -147,6 +147,7 @@ public class PluginManager {
             }
             directories.add(directory);
         }
+
         return directories.toArray(new String[directories.size()]);
     }
 

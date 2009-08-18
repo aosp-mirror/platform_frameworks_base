@@ -90,7 +90,7 @@ final class JWebCoreJavaBridge extends Handler {
                 break;
             case REFRESH_PLUGINS:
                 nativeUpdatePluginDirectories(PluginManager.getInstance(null)
-                        .getPluginDirecoties(), ((Boolean) msg.obj)
+                        .getPluginDirectories(), ((Boolean) msg.obj)
                         .booleanValue());
                 break;
         }
@@ -182,7 +182,7 @@ final class JWebCoreJavaBridge extends Handler {
      * Returns an array of plugin directoies
      */
     private String[] getPluginDirectories() {
-        return PluginManager.getInstance(null).getPluginDirecoties();
+        return PluginManager.getInstance(null).getPluginDirectories();
     }
 
     /**
