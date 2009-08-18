@@ -16,18 +16,13 @@
 
 #include <sys/time.h>
 
-#include <pthread.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
 #include <media/IMediaPlayerService.h>
-#include <media/stagefright/AudioPlayer.h>
-#include <media/stagefright/CachingDataSource.h>
-#include <media/stagefright/ESDS.h>
-#include <media/stagefright/FileSource.h>
-#include <media/stagefright/MediaBuffer.h>
-#include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaPlayerImpl.h>
 #include <media/stagefright/MediaExtractor.h>
@@ -38,245 +33,11 @@
 #include <media/stagefright/OMXCodec.h>
 #include <media/stagefright/OMXDecoder.h>
 
-#include "WaveWriter.h"
+#include "JPEGSource.h"
 
 using namespace android;
 
-////////////////////////////////////////////////////////////////////////////////
-
-struct JPEGSource : public MediaSource {
-    // Assumes ownership of "source".
-    JPEGSource(const sp<DataSource> &source);
-
-    virtual status_t start(MetaData *params = NULL);
-    virtual status_t stop();
-    virtual sp<MetaData> getFormat();
-
-    virtual status_t read(
-            MediaBuffer **buffer, const ReadOptions *options = NULL);
-
-protected:
-    virtual ~JPEGSource();
-
-private:
-    sp<DataSource> mSource;
-    MediaBufferGroup *mGroup;
-    bool mStarted;
-    off_t mSize;
-    int32_t mWidth, mHeight;
-    off_t mOffset;
-
-    status_t parseJPEG();
-
-    JPEGSource(const JPEGSource &);
-    JPEGSource &operator=(const JPEGSource &);
-};
-
-JPEGSource::JPEGSource(const sp<DataSource> &source)
-    : mSource(source),
-      mGroup(NULL),
-      mStarted(false),
-      mSize(0),
-      mWidth(0),
-      mHeight(0),
-      mOffset(0) {
-    CHECK_EQ(parseJPEG(), OK);
-}
-
-JPEGSource::~JPEGSource() {
-    if (mStarted) {
-        stop();
-    }
-}
-
-status_t JPEGSource::start(MetaData *) {
-    if (mStarted) {
-        return UNKNOWN_ERROR;
-    }
-
-    if (mSource->getSize(&mSize) != OK) {
-        return UNKNOWN_ERROR;
-    }
-
-    mGroup = new MediaBufferGroup;
-    mGroup->add_buffer(new MediaBuffer(mSize));
-
-    mOffset = 0;
-
-    mStarted = true;
-    
-    return OK;
-}
-
-status_t JPEGSource::stop() {
-    if (!mStarted) {
-        return UNKNOWN_ERROR;
-    }
-
-    delete mGroup;
-    mGroup = NULL;
-
-    mStarted = false;
-
-    return OK;
-}
-
-sp<MetaData> JPEGSource::getFormat() {
-    sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, "image/jpeg");
-    meta->setInt32(kKeyWidth, mWidth);
-    meta->setInt32(kKeyHeight, mHeight);
-
-    return meta;
-}
-
-status_t JPEGSource::read(
-        MediaBuffer **out, const ReadOptions *options) {
-    *out = NULL;
-
-    int64_t seekTimeUs;
-    if (options != NULL && options->getSeekTo(&seekTimeUs)) {
-        return UNKNOWN_ERROR;
-    }
-
-    MediaBuffer *buffer;
-    mGroup->acquire_buffer(&buffer);
-
-    ssize_t n = mSource->read_at(mOffset, buffer->data(), mSize - mOffset);
-
-    if (n <= 0) {
-        buffer->release();
-        buffer = NULL;
-
-        return UNKNOWN_ERROR;
-    }
-
-    buffer->set_range(0, n);
-
-    mOffset += n;
-
-    *out = buffer;
-
-    return OK;
-}
-
-#define JPEG_SOF0  0xC0            /* nStart Of Frame N*/
-#define JPEG_SOF1  0xC1            /* N indicates which compression process*/
-#define JPEG_SOF2  0xC2            /* Only SOF0-SOF2 are now in common use*/
-#define JPEG_SOF3  0xC3
-#define JPEG_SOF5  0xC5            /* NB: codes C4 and CC are NOT SOF markers*/
-#define JPEG_SOF6  0xC6
-#define JPEG_SOF7  0xC7
-#define JPEG_SOF9  0xC9
-#define JPEG_SOF10 0xCA
-#define JPEG_SOF11 0xCB
-#define JPEG_SOF13 0xCD
-#define JPEG_SOF14 0xCE
-#define JPEG_SOF15 0xCF
-#define JPEG_SOI   0xD8            /* nStart Of Image (beginning of datastream)*/
-#define JPEG_EOI   0xD9            /* End Of Image (end of datastream)*/
-#define JPEG_SOS   0xDA            /* nStart Of Scan (begins compressed data)*/
-#define JPEG_JFIF  0xE0            /* Jfif marker*/
-#define JPEG_EXIF  0xE1            /* Exif marker*/
-#define JPEG_COM   0xFE            /* COMment */
-#define JPEG_DQT   0xDB
-#define JPEG_DHT   0xC4
-#define JPEG_DRI   0xDD
-
-status_t JPEGSource::parseJPEG() {
-    mWidth = 0;
-    mHeight = 0;
-
-    off_t i = 0;
-
-    uint16_t soi;
-    if (!mSource->getUInt16(i, &soi)) {
-        return ERROR_IO;
-    }
-
-    i += 2;
-
-    if (soi != 0xffd8) {
-        return UNKNOWN_ERROR;
-    }
-
-    for (;;) {
-        uint8_t marker;
-        if (mSource->read_at(i++, &marker, 1) != 1) {
-            return ERROR_IO;
-        }
-
-        CHECK_EQ(marker, 0xff);
-
-        if (mSource->read_at(i++, &marker, 1) != 1) {
-            return ERROR_IO;
-        }
-
-        CHECK(marker != 0xff);
-
-        uint16_t chunkSize;
-        if (!mSource->getUInt16(i, &chunkSize)) {
-            return ERROR_IO;
-        }
-
-        i += 2;
-
-        if (chunkSize < 2) {
-            return UNKNOWN_ERROR;
-        }
-
-        switch (marker) {
-            case JPEG_SOS:
-            {
-                return (mWidth > 0 && mHeight > 0) ? OK : UNKNOWN_ERROR;
-            }
-
-            case JPEG_EOI:
-            {
-                return UNKNOWN_ERROR;
-            }
-
-            case JPEG_SOF0: 
-            case JPEG_SOF1: 
-            case JPEG_SOF3: 
-            case JPEG_SOF5: 
-            case JPEG_SOF6: 
-            case JPEG_SOF7: 
-            case JPEG_SOF9: 
-            case JPEG_SOF10:
-            case JPEG_SOF11:
-            case JPEG_SOF13:
-            case JPEG_SOF14:
-            case JPEG_SOF15:
-            {
-                uint16_t width, height;
-                if (!mSource->getUInt16(i + 1, &height)
-                    || !mSource->getUInt16(i + 3, &width)) {
-                    return ERROR_IO;
-                }
-
-                mWidth = width;
-                mHeight = height;
-
-                i += chunkSize - 2;
-                break;
-            }
-
-            default:
-            {
-                // Skip chunk
-
-                i += chunkSize - 2;
-
-                break;
-            }
-        }
-    }
-
-    return OK;
-}
-
-////////////////////////////////////////////////////////////////////////////////
+static long gNumRepetitions;
 
 static int64_t getNowUs() {
     struct timeval tv;
@@ -304,20 +65,38 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
     decoder->start();
 
+    int n = 0;
     int64_t startTime = getNowUs();
 
-    int n = 0;
-    MediaBuffer *buffer;
-    status_t err;
-    while ((err = decoder->read(&buffer)) == OK) {
-        if ((++n % 16) == 0) {
-            printf(".");
-            fflush(stdout);
+    long numIterationsLeft = gNumRepetitions;
+    MediaSource::ReadOptions options;
+    while (numIterationsLeft-- > 0) {
+        MediaBuffer *buffer;
+
+        for (;;) {
+            status_t err = decoder->read(&buffer, &options);
+            options.clearSeekTo();
+
+            if (err != OK) {
+                CHECK_EQ(buffer, NULL);
+                break;
+            }
+
+            if ((n++ % 16) == 0) {
+                printf(".");
+                fflush(stdout);
+            }
+
+            buffer->release();
+            buffer = NULL;
         }
 
-        buffer->release();
-        buffer = NULL;
+        printf("$");
+        fflush(stdout);
+
+        options.setSeekTo(0);
     }
+
     decoder->stop();
     printf("\n");
 
@@ -327,11 +106,64 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     printf("decoded a total of %d frame(s).\n", n);
 }
 
+static void usage(const char *me) {
+    fprintf(stderr, "usage: %s\n", me);
+    fprintf(stderr, "       -h(elp)\n");
+    fprintf(stderr, "       -a(udio)\n");
+    fprintf(stderr, "       -n repetitions\n");
+    fprintf(stderr, "       -l(ist) components\n");
+}
+
 int main(int argc, char **argv) {
     android::ProcessState::self()->startThreadPool();
 
     bool audioOnly = false;
-    if (argc > 1 && !strcmp(argv[1], "--list")) {
+    bool listComponents = false;
+    gNumRepetitions = 1;
+
+    int res;
+    while ((res = getopt(argc, argv, "han:l")) >= 0) {
+        switch (res) {
+            case 'a':
+            {
+                audioOnly = true;
+                break;
+            }
+
+            case 'l':
+            {
+                listComponents = true;
+                break;
+            }
+
+            case 'n':
+            {
+                char *end;
+                long x = strtol(optarg, &end, 10);
+
+                if (*end != '\0' || end == optarg || x <= 0) {
+                    x = 1;
+                }
+
+                gNumRepetitions = x;
+                break;
+            }
+
+            case '?':
+            case 'h':
+            default:
+            {
+                usage(argv[0]);
+                exit(1);
+                break;
+            }
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if (listComponents) {
         sp<IServiceManager> sm = defaultServiceManager();
         sp<IBinder> binder = sm->getService(String16("media.player"));
         sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
@@ -348,12 +180,6 @@ int main(int argc, char **argv) {
              it != list.end(); ++it) {
             printf("%s\n", (*it).string());
         }
-
-        return 0;
-    } else if (argc > 1 && !strcmp(argv[1], "--audio")) {
-        audioOnly = true;
-        ++argv;
-        --argc;
     }
 
     DataSource::RegisterDefaultSniffers();
@@ -361,45 +187,49 @@ int main(int argc, char **argv) {
     OMXClient client;
     status_t err = client.connect();
 
-    sp<MmapSource> dataSource = new MmapSource(argv[1]);
+    for (int k = 0; k < argc; ++k) {
+        const char *filename = argv[k];
 
-    bool isJPEG = false;
+        sp<MmapSource> dataSource = new MmapSource(filename);
 
-    size_t len = strlen(argv[1]);
-    if (len >= 4 && !strcasecmp(argv[1] + len - 4, ".jpg")) {
-        isJPEG = true;
-    }
+        bool isJPEG = false;
 
-    sp<MediaSource> mediaSource;
-
-    if (isJPEG) {
-        mediaSource = new JPEGSource(dataSource);
-    } else {
-        sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
-
-        size_t numTracks = extractor->countTracks();
-
-        sp<MetaData> meta;
-        size_t i;
-        for (i = 0; i < numTracks; ++i) {
-            meta = extractor->getTrackMetaData(i);
-
-            const char *mime;
-            meta->findCString(kKeyMIMEType, &mime);
-
-            if (audioOnly && !strncasecmp(mime, "audio/", 6)) {
-                break;
-            }
-
-            if (!audioOnly && !strncasecmp(mime, "video/", 6)) {
-                break;
-            }
+        size_t len = strlen(filename);
+        if (len >= 4 && !strcasecmp(filename + len - 4, ".jpg")) {
+            isJPEG = true;
         }
 
-        mediaSource = extractor->getTrack(i);
-    }
+        sp<MediaSource> mediaSource;
 
-    playSource(&client, mediaSource);
+        if (isJPEG) {
+            mediaSource = new JPEGSource(dataSource);
+        } else {
+            sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
+
+            size_t numTracks = extractor->countTracks();
+
+            sp<MetaData> meta;
+            size_t i;
+            for (i = 0; i < numTracks; ++i) {
+                meta = extractor->getTrackMetaData(i);
+
+                const char *mime;
+                meta->findCString(kKeyMIMEType, &mime);
+
+                if (audioOnly && !strncasecmp(mime, "audio/", 6)) {
+                    break;
+                }
+
+                if (!audioOnly && !strncasecmp(mime, "video/", 6)) {
+                    break;
+                }
+            }
+
+            mediaSource = extractor->getTrack(i);
+        }
+
+        playSource(&client, mediaSource);
+    }
 
     client.disconnect();
 
