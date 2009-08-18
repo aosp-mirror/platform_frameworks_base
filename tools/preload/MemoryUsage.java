@@ -34,8 +34,8 @@ class MemoryUsage implements Serializable {
     static final MemoryUsage NOT_AVAILABLE = new MemoryUsage();
     
     static int errorCount = 0;
-    static final int MAXIMUM_ERRORS = 10;        // give up after this many fails
 
+    // These values are in 1kB increments (not 4kB like you'd expect).
     final int nativeSharedPages;
     final int javaSharedPages;
     final int otherSharedPages;
@@ -123,15 +123,24 @@ class MemoryUsage implements Serializable {
         return allocSize - freedSize;
     }
 
+    int totalHeap() {
+        return javaHeapSize() + (int) nativeHeapSize;
+    }
+
     int javaPagesInK() {
-        return (javaSharedPages + javaPrivatePages) * 4;
+        return javaSharedPages + javaPrivatePages;
     }
 
     int nativePagesInK() {
-        return (nativeSharedPages + nativePrivatePages) * 4;
+        return nativeSharedPages + nativePrivatePages;
     }
     int otherPagesInK() {
-        return (otherSharedPages + otherPrivatePages) * 4;
+        return otherSharedPages + otherPrivatePages;
+    }
+
+    int totalPages() {
+        return javaSharedPages + javaPrivatePages + nativeSharedPages +
+                nativePrivatePages + otherSharedPages + otherPrivatePages;
     }
 
     /**
@@ -163,13 +172,6 @@ class MemoryUsage implements Serializable {
      * Measures memory usage for the given class.
      */
     static MemoryUsage forClass(String className) {
-        
-        // This is a coarse approximation for determining that no device is connected,
-        // or that the communication protocol has changed, but we'll keep going and stop whining.
-        if (errorCount >= MAXIMUM_ERRORS) {
-            return NOT_AVAILABLE;
-        }
-        
         MeasureWithTimeout measurer = new MeasureWithTimeout(className);
 
         new Thread(measurer).start();
@@ -279,5 +281,18 @@ class MemoryUsage implements Serializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /** Measures memory usage information and stores it in the model. */
+    public static void main(String[] args) throws IOException,
+            ClassNotFoundException {
+        Root root = Root.fromFile(args[0]);
+        root.baseline = baseline();
+        for (LoadedClass loadedClass : root.loadedClasses.values()) {
+            if (loadedClass.systemClass) {
+                loadedClass.measureMemoryUsage();
+            }
+        }
+        root.toFile(args[0]);
     }
 }
