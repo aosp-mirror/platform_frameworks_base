@@ -39,6 +39,7 @@ import android.app.IInstrumentationWatcher;
 import android.app.IServiceConnection;
 import android.app.IThumbnailReceiver;
 import android.app.Instrumentation;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.ResultInfo;
 import android.backup.IBackupManager;
@@ -9936,6 +9937,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             ensurePackageDexOpt(r.serviceInfo.packageName);
             app.thread.scheduleCreateService(r, r.serviceInfo);
+            r.postNotification();
             created = true;
         } finally {
             if (!created) {
@@ -9970,6 +9972,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (!mRestartingServices.contains(r)) {
             mRestartingServices.add(r);
         }
+        r.cancelNotification();
         mHandler.removeCallbacks(r.restarter);
         mHandler.postDelayed(r.restarter, r.restartDelay);
         r.nextRestartTime = SystemClock.uptimeMillis() + r.restartDelay;
@@ -10138,13 +10141,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
+        r.cancelNotification();
+        r.isForeground = false;
+        r.foregroundId = 0;
+        r.foregroundNoti = null;
+        
         if (r.app != null) {
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.stopLaunchedLocked();
             }
             r.app.services.remove(r);
             if (r.app.thread != null) {
-                updateServiceForegroundLocked(r.app, false);
                 try {
                     Log.i(TAG, "Stopping service: " + r.shortName);
                     bumpServiceExecutingLocked(r);
@@ -10156,6 +10163,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             + r.shortName, e);
                     serviceDoneExecutingLocked(r, true);
                 }
+                updateServiceForegroundLocked(r.app, false);
             } else {
                 if (DEBUG_SERVICE) Log.v(
                     TAG, "Removed service that has no process: " + r.shortName);
@@ -10334,19 +10342,44 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     public void setServiceForeground(ComponentName className, IBinder token,
-            boolean isForeground) {
+            int id, Notification notification, boolean removeNotification) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
         synchronized(this) {
             ServiceRecord r = findServiceLocked(className, token);
             if (r != null) {
-                if (r.isForeground != isForeground) {
-                    final long origId = Binder.clearCallingIdentity();
-                    r.isForeground = isForeground;
+                if (id != 0) {
+                    if (notification == null) {
+                        throw new IllegalArgumentException("null notification");
+                    }
+                    if (r.foregroundId != id) {
+                        r.cancelNotification();
+                        r.foregroundId = id;
+                    }
+                    notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
+                    r.foregroundNoti = notification;
+                    r.isForeground = true;
+                    r.postNotification();
                     if (r.app != null) {
                         updateServiceForegroundLocked(r.app, true);
                     }
-                    Binder.restoreCallingIdentity(origId);
+                } else {
+                    if (r.isForeground) {
+                        r.isForeground = false;
+                        if (r.app != null) {
+                            updateServiceForegroundLocked(r.app, true);
+                        }
+                    }
+                    if (removeNotification) {
+                        r.cancelNotification();
+                        r.foregroundId = 0;
+                        r.foregroundNoti = null;
+                    }
                 }
             }
+        }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 

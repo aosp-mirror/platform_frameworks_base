@@ -18,12 +18,16 @@ package com.android.server.am;
 
 import com.android.internal.os.BatteryStatsImpl;
 
+import android.app.INotificationManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.SystemClock;
 
 import java.io.PrintWriter;
@@ -63,8 +67,10 @@ class ServiceRecord extends Binder {
     final List<Intent> startArgs = new ArrayList<Intent>();
                             // start() arguments that haven't yet been delivered.
 
-    ProcessRecord app;  // where this service is running or null.
-    boolean isForeground;   // asked to run as a foreground service?
+    ProcessRecord app;      // where this service is running or null.
+    boolean isForeground;   // is service currently in foreground mode?
+    int foregroundId;       // Notification ID of last foreground req.
+    Notification foregroundNoti; // Notification record of foreground state.
     long lastActivity;      // last time there was some activity on the service.
     boolean startRequested; // someone explicitly called start?
     int lastStartId;        // identifier of most recent start request.
@@ -92,18 +98,26 @@ class ServiceRecord extends Binder {
                 if (!resDir.equals(baseDir)) pw.print(" resDir="); pw.print(resDir);
                 pw.print(" dataDir="); pw.println(dataDir);
         pw.print(prefix); pw.print("app="); pw.println(app);
-        pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
-                pw.print(" lastActivity="); pw.println(lastActivity);
-        pw.print(prefix); pw.print("startRequested="); pw.print(startRequested);
-                pw.print(" startId="); pw.print(lastStartId);
-                pw.print(" executeNesting="); pw.print(executeNesting);
+        if (isForeground || foregroundId != 0) {
+            pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
+                    pw.print(" foregroundId="); pw.print(foregroundId);
+                    pw.print(" foregroundNoti="); pw.println(foregroundNoti);
+        }
+        pw.print(prefix); pw.print("lastActivity="); pw.print(lastActivity);
                 pw.print(" executingStart="); pw.print(executingStart);
-                pw.print(" crashCount="); pw.println(crashCount);
-        pw.print(prefix); pw.print("totalRestartCount="); pw.print(totalRestartCount);
-                pw.print(" restartCount="); pw.print(restartCount);
-                pw.print(" restartDelay="); pw.print(restartDelay);
-                pw.print(" restartTime="); pw.print(restartTime);
-                pw.print(" nextRestartTime="); pw.println(nextRestartTime);
+                pw.print(" restartTime="); pw.println(restartTime);
+        if (startRequested || lastStartId != 0) {
+            pw.print(prefix); pw.print("startRequested="); pw.print(startRequested);
+                    pw.print(" lastStartId="); pw.println(lastStartId);
+        }
+        if (executeNesting != 0 || crashCount != 0 || restartCount != 0
+                || restartDelay != 0 || nextRestartTime != 0) {
+            pw.print(prefix); pw.print("executeNesting="); pw.print(executeNesting);
+                    pw.print(" restartCount="); pw.print(restartCount);
+                    pw.print(" restartDelay="); pw.print(restartDelay);
+                    pw.print(" nextRestartTime="); pw.print(nextRestartTime);
+                    pw.print(" crashCount="); pw.println(crashCount);
+        }
         if (bindings.size() > 0) {
             Iterator<IntentBindRecord> it = bindings.values().iterator();
             while (it.hasNext()) {
@@ -164,6 +178,32 @@ class ServiceRecord extends Binder {
         restartCount = 0;
         restartDelay = 0;
         restartTime = 0;
+    }
+    
+    public void postNotification() {
+        if (foregroundId != 0 && foregroundNoti != null) {
+            INotificationManager inm = NotificationManager.getService();
+            if (inm != null) {
+                try {
+                    int[] outId = new int[1];
+                    inm.enqueueNotification(packageName, foregroundId,
+                            foregroundNoti, outId);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+    }
+    
+    public void cancelNotification() {
+        if (foregroundId != 0) {
+            INotificationManager inm = NotificationManager.getService();
+            if (inm != null) {
+                try {
+                    inm.cancelNotification(packageName, foregroundId);
+                } catch (RemoteException e) {
+                }
+            }
+        }
     }
     
     public String toString() {
