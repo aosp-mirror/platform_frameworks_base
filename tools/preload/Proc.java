@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Collections;
 import java.io.Serializable;
 
 /**
@@ -29,11 +27,6 @@ import java.io.Serializable;
 class Proc implements Serializable {
 
     private static final long serialVersionUID = 0;
-
-    /**
-     * Default percentage of time to cut off of app class loading times.
-     */
-    static final int PERCENTAGE_TO_PRELOAD = 75;
 
     /** Parent process. */
     final Proc parent;
@@ -80,72 +73,11 @@ class Proc implements Serializable {
     }
 
     /**
-     * Returns the percentage of time we should cut by preloading for this
-     * app.
+     * Returns true if this process comes from the zygote.
      */
-    int percentageToPreload() {
-        return PERCENTAGE_TO_PRELOAD;
-    }
-
-    /**
-     * Returns a list of classes which should be preloaded.
-     */
-    List<LoadedClass> highestRankedClasses() {
-        if (!isApplication() || Policy.isService(this.name)) {
-            return Collections.emptyList();
-        }
-
-        // Sort by rank.
-        Operation[] ranked = new Operation[operations.size()];
-        ranked = operations.toArray(ranked);
-        Arrays.sort(ranked, new ClassRank());
-
-        // The percentage of time to save by preloading.
-        int timeToSave = totalTimeMicros() * percentageToPreload() / 100;
-        int timeSaved = 0;
-
-        int count = 0;
-        List<LoadedClass> highest = new ArrayList<LoadedClass>();
-        for (Operation operation : ranked) {
-            if (timeSaved >= timeToSave || count++ > 100) {
-                break;
-            }
-
-            if (!Policy.isPreloadableClass(operation.loadedClass.name)) {
-                continue;
-            }
-            
-            if (!operation.loadedClass.systemClass) {
-                continue;
-            }
-    
-            highest.add(operation.loadedClass);
-            timeSaved += operation.medianExclusiveTimeMicros();
-        }
-
-        return highest;
-    }
-
-    /**
-     * Total time spent class loading and initializing.
-     */
-    int totalTimeMicros() {
-        int totalTime = 0;
-        for (Operation operation : operations) {
-            totalTime += operation.medianExclusiveTimeMicros();
-        }
-        return totalTime;
-    }
-
-    /** 
-     * Returns true if this process is an app.
-     */
-    public boolean isApplication() {
-        if (name.equals("com.android.development")) {
-            return false;
-        }
-
-        return parent != null && parent.name.equals("zygote");
+    public boolean fromZygote() {
+        return parent != null && parent.name.equals("zygote")
+                && !name.equals("com.android.development");
     }
 
     /**

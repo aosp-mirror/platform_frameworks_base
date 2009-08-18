@@ -51,7 +51,7 @@ class LoadedClass implements Serializable, Comparable<LoadedClass> {
     }
 
     void measureMemoryUsage() {
-//        this.memoryUsage = MemoryUsage.forClass(name);
+        this.memoryUsage = MemoryUsage.forClass(name);
     }
 
     int mlt = -1;
@@ -74,6 +74,10 @@ class LoadedClass implements Serializable, Comparable<LoadedClass> {
         }
 
         return mit = calculateMedian(initializations);
+    }
+
+    int medianTimeMicros() {
+        return medianInitTimeMicros() + medianLoadTimeMicros();
     }
 
     /** Calculates the median duration for a list of operations. */
@@ -99,18 +103,18 @@ class LoadedClass implements Serializable, Comparable<LoadedClass> {
         }
     }
 
-    /** Returns names of apps that loaded this class. */
-    Set<String> applicationNames() {
-        Set<String> appNames = new HashSet<String>();
-        addProcessNames(loads, appNames);
-        addProcessNames(initializations, appNames);
-        return appNames;
+    /** Returns names of processes that loaded this class. */
+    Set<String> processNames() {
+        Set<String> names = new HashSet<String>();
+        addProcessNames(loads, names);
+        addProcessNames(initializations, names);
+        return names;
     }
 
-    private void addProcessNames(List<Operation> ops, Set<String> appNames) {
+    private void addProcessNames(List<Operation> ops, Set<String> names) {
         for (Operation operation : ops) {
-            if (operation.process.isApplication()) {
-                appNames.add(operation.process.name);
+            if (operation.process.fromZygote()) {
+                names.add(operation.process.name);
             }
         }
     }
@@ -122,32 +126,5 @@ class LoadedClass implements Serializable, Comparable<LoadedClass> {
     @Override
     public String toString() {
         return name;
-    }
-
-    /**
-     * Returns true if this class's initialization causes the given class to
-     * initialize.
-     */
-    public boolean initializes(LoadedClass clazz, Set<LoadedClass> visited) {
-        // Avoid infinite recursion.
-        if (!visited.add(this)) {
-            return false;
-        }
-
-        if (clazz == this) {
-            return true;
-        }
-
-        for (Operation initialization : initializations) {
-            if (initialization.loadedClass.initializes(clazz, visited)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public boolean isPreloadable() {
-        return systemClass && Policy.isPreloadableClass(name);
     }
 }
