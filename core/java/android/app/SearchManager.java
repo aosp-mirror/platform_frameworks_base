@@ -29,6 +29,7 @@ import android.os.ServiceManager;
 import android.server.search.SearchableInfo;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.text.TextUtils;
 
 import java.util.List;
 
@@ -1622,7 +1623,17 @@ public class SearchManager
 
     private final Context mContext;
 
+    /**
+     * compact representation of the activity associated with this search manager so
+     * we can say who we are when starting search.  the search managerservice, in turn,
+     * uses this to properly handle the back stack.
+     */
     private int mIdent;
+
+    /**
+     * The package associated with this seach manager.
+     */
+    private String mAssociatedPackage;
     
     // package private since they are used by the inner class SearchManagerCallback
     /* package */ final Handler mHandler;
@@ -1642,11 +1653,15 @@ public class SearchManager
         return mIdent != 0;
     }
     
-    /*package*/ void setIdent(int ident) {
+    /*package*/ void setIdent(int ident, ComponentName component) {
         if (mIdent != 0) {
             throw new IllegalStateException("mIdent already set");
         }
+        if (component == null) {
+            throw new IllegalArgumentException("component must be non-null");
+        }
         mIdent = ident;
+        mAssociatedPackage = component.getPackageName();
     }
     
     /**
@@ -1696,12 +1711,55 @@ public class SearchManager
                             boolean globalSearch) {
         if (mIdent == 0) throw new IllegalArgumentException(
                 "Called from outside of an Activity context");
+        if (!globalSearch && !mAssociatedPackage.equals(launchActivity.getPackageName())) {
+            Log.w(TAG, "invoking app search on a different package " +
+                    "not associated with this search manager");
+        }
         try {
             // activate the search manager and start it up!
             mService.startSearch(initialQuery, selectInitialQuery, launchActivity, appSearchData,
                     globalSearch, mSearchManagerCallback, mIdent);
         } catch (RemoteException ex) {
-            Log.e(TAG, "startSearch() failed: " + ex);
+            Log.e(TAG, "startSearch() failed.", ex);
+        }
+    }
+
+    /**
+     * Similar to {@link #startSearch} but actually fires off the search query after invoking
+     * the search dialog.  Made available for testing purposes.
+     *
+     * @param query The query to trigger.  If empty, request will be ignored.
+     * @param launchActivity The ComponentName of the activity that has launched this search.
+     * @param appSearchData An application can insert application-specific
+     * context here, in order to improve quality or specificity of its own
+     * searches.  This data will be returned with SEARCH intent(s).  Null if
+     * no extra data is required.
+     * @param globalSearch If false, this will only launch the search that has been specifically
+     * defined by the application (which is usually defined as a local search).  If no default
+     * search is defined in the current application or activity, no search will be launched.
+     * If true, this will always launch a platform-global (e.g. web-based) search instead.
+     *
+     * @see #startSearch
+     */
+    public void triggerSearch(String query,
+                              ComponentName launchActivity,
+                              Bundle appSearchData,
+                              boolean globalSearch) {
+        if (mIdent == 0) throw new IllegalArgumentException(
+                "Called from outside of an Activity context");
+        if (!mAssociatedPackage.equals(launchActivity.getPackageName())) {
+            throw new IllegalArgumentException("invoking app search on a different package " +
+                    "not associated with this search manager");
+        }
+        if (query == null || TextUtils.getTrimmedLength(query) == 0) {
+            Log.w(TAG, "triggerSearch called with empty query, ignoring.");
+            return;
+        }
+        try {
+            mService.triggerSearch(query, launchActivity, appSearchData, mSearchManagerCallback,
+                    globalSearch, mIdent);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "triggerSearch() failed.", ex);
         }
     }
 

@@ -58,6 +58,7 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     // data[KEY_INITIAL_QUERY]: initial query
     // data[KEY_LAUNCH_ACTIVITY]: launch activity
     // data[KEY_APP_SEARCH_DATA]: app search data
+    // data[KEY_TRIGGER]: 0 = false, 1 = true
     private static final int MSG_START_SEARCH = 1;
     // Takes no arguments
     private static final int MSG_STOP_SEARCH = 2;
@@ -69,7 +70,8 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
     private static final String KEY_INITIAL_QUERY = "q";
     private static final String KEY_LAUNCH_ACTIVITY = "a";
     private static final String KEY_APP_SEARCH_DATA = "d";
-    private static final String KEY_IDENT= "i";
+    private static final String KEY_IDENT = "i";
+    private static final String KEY_TRIGGER = "t";
 
     // Context used for getting search UI resources
     private final Context mContext;
@@ -173,7 +175,8 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
             final Bundle appSearchData,
             final boolean globalSearch,
             final ISearchManagerCallback searchManagerCallback,
-            int ident) {
+            int ident,
+            boolean trigger) {
         if (DBG) debug("startSearch()");
         Message msg = Message.obtain();
         msg.what = MSG_START_SEARCH;
@@ -185,6 +188,7 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
         msgData.putParcelable(KEY_LAUNCH_ACTIVITY, launchActivity);
         msgData.putBundle(KEY_APP_SEARCH_DATA, appSearchData);
         msgData.putInt(KEY_IDENT, ident);
+        msgData.putInt(KEY_TRIGGER, trigger ? 1 : 0);
         mSearchUiThread.sendMessage(msg);
         // be a little more eager in setting this so isVisible will return the correct value if
         // called immediately after startSearch
@@ -268,8 +272,9 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
             boolean globalSearch = msg.arg2 != 0;
             ISearchManagerCallback searchManagerCallback = (ISearchManagerCallback) msg.obj;
             int ident = msgData.getInt(KEY_IDENT);
+            boolean trigger = msgData.getInt(KEY_TRIGGER) != 0;
             performStartSearch(initialQuery, selectInitialQuery, launchActivity,
-                    appSearchData, globalSearch, searchManagerCallback, ident);
+                    appSearchData, globalSearch, searchManagerCallback, ident, trigger);
         }
 
     }
@@ -284,7 +289,8 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
             Bundle appSearchData,
             boolean globalSearch,
             ISearchManagerCallback searchManagerCallback,
-            int ident) {
+            int ident,
+            boolean trigger) {
         if (DBG) debug("performStartSearch()");
 
         registerBroadcastReceiver();
@@ -301,6 +307,9 @@ implements DialogInterface.OnCancelListener, DialogInterface.OnDismissListener {
         mSearchDialog.show(initialQuery, selectInitialQuery, launchActivity, appSearchData,
                 globalSearch);
         mVisible = true;
+        if (trigger) {
+            mSearchDialog.launchQuerySearch();
+        }
     }
 
     /**

@@ -233,7 +233,31 @@ public class SearchManagerService extends ISearchManager.Stub {
                 appSearchData,
                 globalSearch,
                 searchManagerCallback,
-                ident);
+                ident,
+                false); // don't trigger
+    }
+
+    /**
+     * Launches the search UI and triggers the search, as if the user had clicked on the
+     * search button within the dialog.
+     *
+     * @see SearchManager#triggerSearch(String, android.content.ComponentName, android.os.Bundle)
+     */
+    public void triggerSearch(String query,
+            ComponentName launchActivity,
+            Bundle appSearchData,
+            ISearchManagerCallback searchManagerCallback,
+            boolean globalSearch,
+            int ident) {
+        getSearchDialog().startSearch(
+                query,
+                false,
+                launchActivity,
+                appSearchData,
+                globalSearch,
+                searchManagerCallback,
+                ident,
+                true); // triger search after launching
     }
 
     /**

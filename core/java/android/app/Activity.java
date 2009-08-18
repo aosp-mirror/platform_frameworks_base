@@ -2536,6 +2536,25 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Similar to {@link #startSearch}, but actually fires off the search query after invoking
+     * the search dialog.  Made available for testing purposes.
+     *
+     * @param query The query to trigger.  If empty, the request will be ignored.
+     * @param appSearchData An application can insert application-specific
+     * context here, in order to improve quality or specificity of its own
+     * searches.  This data will be returned with SEARCH intent(s).  Null if
+     * no extra data is required.
+     * @param globalSearch If false, this will only launch the search that has been specifically
+     * defined by the application (which is usually defined as a local search).  If no default
+     * search is defined in the current application or activity, no search will be launched.
+     * If true, this will always launch a platform-global (e.g. web-based) search instead.
+     */
+    public void triggerSearch(String query, Bundle appSearchData, boolean globalSearch) {
+        ensureSearchManager();
+        mSearchManager.triggerSearch(query, getComponentName(), appSearchData, globalSearch);
+    }
+
+    /**
      * Request that key events come to this activity. Use this if your
      * activity has no views with focus, but the activity still wants
      * a chance to process key events.
@@ -3256,7 +3275,7 @@ public class Activity extends ContextThemeWrapper
                 throw new IllegalArgumentException("no ident");
             }
         }
-        mSearchManager.setIdent(ident);
+        mSearchManager.setIdent(ident, getComponentName());
     }
     
     @Override

@@ -1120,7 +1120,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     /**
      * Launch a search for the text in the query text field.
      */
-    protected void launchQuerySearch()  {
+    public void launchQuerySearch()  {
         launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null);
     }
 
