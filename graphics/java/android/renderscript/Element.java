@@ -245,6 +245,12 @@ public class Element extends BaseObj {
             add(DataType.FLOAT, DataKind.Z, false, 32, null);
             return this;
         }
+        
+        public Builder addFloatST() {
+            add(DataType.FLOAT, DataKind.S, false, 32, null);
+            add(DataType.FLOAT, DataKind.T, false, 32, null);
+            return this;
+        }
 
         public Builder addFloatRGB() {
             add(DataType.FLOAT, DataKind.RED, false, 32, null);
