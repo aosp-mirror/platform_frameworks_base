@@ -5065,6 +5065,15 @@ class PackageManagerService extends IPackageManager.Stub {
             pw.println("Settings parse messages:");
             pw.println(mSettings.mReadMessages.toString());
         }
+
+        synchronized (mProviders) {
+            pw.println(" ");
+            pw.println("Registered ContentProviders:");
+            for (PackageParser.Provider p : mProviders.values()) {
+                pw.println("  ["); pw.println(p.info.authority); pw.println("]: ");
+                        pw.println(p.toString());
+            }
+        }
     }
 
     static final class BasePermission {
