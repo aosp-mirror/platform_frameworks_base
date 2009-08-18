@@ -1778,12 +1778,27 @@ final class WebViewCore {
 
         mBrowserFrame.didFirstLayout();
 
-        // reset the scroll position as it is a new page now
-        mWebkitScrollX = mWebkitScrollY = 0;
+        if (mWebView == null) return;
 
-        // for non-standard load, we only adjust scale if mRestoredScale > 0
-        if (mWebView == null || (mRestoredScale == 0 && !standardLoad)) return;
+        setupViewport(standardLoad || mRestoredScale > 0);
 
+        // reset the scroll position, the restored offset and scales
+        mWebkitScrollX = mWebkitScrollY = mRestoredX = mRestoredY
+                = mRestoredScale = mRestoredScreenWidthScale = 0;
+    }
+
+    // called by JNI
+    private void updateViewport() {
+        // if updateViewport is called before first layout, wait until first
+        // layout to update the viewport. In the rare case, this is called after
+        // first layout, force an update as we have just parsed the viewport
+        // meta tag.
+        if (mBrowserFrame.firstLayoutDone()) {
+            setupViewport(true);
+        }
+    }
+
+    private void setupViewport(boolean updateRestoreState) {
         // set the viewport settings from WebKit
         setViewportSettingsFromNative();
 
@@ -1833,6 +1848,9 @@ final class WebViewCore {
                 && mViewportInitialScale == WebView.DEFAULT_SCALE_PERCENT) {
             mViewportWidth = 0;
         }
+
+        // if mViewportWidth is 0, it means device-width, always update.
+        if (mViewportWidth != 0 && !updateRestoreState) return;
 
         // now notify webview
         int webViewWidth = Math.round(mCurrentViewWidth * mCurrentViewScale);
@@ -1884,25 +1902,29 @@ final class WebViewCore {
             data.mScale = -1.0f;
             mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
                     EventHub.VIEW_SIZE_CHANGED, data));
-        } else if (mSettings.getUseWideViewPort() && mCurrentViewWidth > 0) {
-            WebView.ViewSizeData data = new WebView.ViewSizeData();
-            // mViewScale as 0 means it is in zoom overview mode. So we don't
-            // know the exact scale. If mRestoredScale is non-zero, use it;
-            // otherwise just use mTextWrapScale as the initial scale.
-            data.mScale = mRestoreState.mViewScale == 0
-                    ? (mRestoredScale > 0 ? mRestoredScale
-                            : mRestoreState.mTextWrapScale)
-                    : mRestoreState.mViewScale;
-            data.mWidth = Math.round(webViewWidth / data.mScale);
-            data.mHeight = mCurrentViewHeight * data.mWidth
-                    / mCurrentViewWidth;
-            data.mTextWrapWidth = Math.round(webViewWidth
-                    / mRestoreState.mTextWrapScale);
-            mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
-                    EventHub.VIEW_SIZE_CHANGED, data));
+        } else if (mSettings.getUseWideViewPort()) {
+            if (mCurrentViewWidth == 0) {
+                // Trick to ensure VIEW_SIZE_CHANGED will be sent from WebView
+                // to WebViewCore
+                mWebView.mLastWidthSent = 0;
+            } else {
+                WebView.ViewSizeData data = new WebView.ViewSizeData();
+                // mViewScale as 0 means it is in zoom overview mode. So we don't
+                // know the exact scale. If mRestoredScale is non-zero, use it;
+                // otherwise just use mTextWrapScale as the initial scale.
+                data.mScale = mRestoreState.mViewScale == 0
+                        ? (mRestoredScale > 0 ? mRestoredScale
+                                : mRestoreState.mTextWrapScale)
+                        : mRestoreState.mViewScale;
+                data.mWidth = Math.round(webViewWidth / data.mScale);
+                data.mHeight = mCurrentViewHeight * data.mWidth
+                        / mCurrentViewWidth;
+                data.mTextWrapWidth = Math.round(webViewWidth
+                        / mRestoreState.mTextWrapScale);
+                mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
+                        EventHub.VIEW_SIZE_CHANGED, data));
+            }
         }
-        // reset restored offset, scale
-        mRestoredX = mRestoredY = mRestoredScale = mRestoredScreenWidthScale = 0;
     }
 
     // called by JNI
