@@ -103,8 +103,10 @@ void printFuncDecl(FILE *f, const ApiEntry *api, const char *prefix, int addCont
     fprintf(f, " %s%s (", prefix, api->name);
     if (addContext) {
         fprintf(f, "Context *");
+    } else {
+        fprintf(f, "RsContext rsc");
     }
-    printArgList(f, api, addContext);
+    printArgList(f, api, 1);
     fprintf(f, ")");
 }
 
@@ -147,7 +149,7 @@ void printApiCpp(FILE *f)
 
         printFuncDecl(f, api, "rs", 0);
         fprintf(f, "\n{\n");
-        fprintf(f, "    ThreadIO *io = gIO;\n");
+        fprintf(f, "    ThreadIO *io = &((Context *)rsc)->mIO;\n");
         //fprintf(f, "    LOGE(\"add command %s\\n\");\n", api->name);
         fprintf(f, "    RS_CMD_%s *cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(sizeof(RS_CMD_%s)));\n", api->name, api->name, api->name);
         fprintf(f, "    uint32_t size = sizeof(RS_CMD_%s);\n", api->name);
@@ -200,7 +202,7 @@ void printPlaybackCpp(FILE *f)
         fprintf(f, "    const RS_CMD_%s *cmd = static_cast<const RS_CMD_%s *>(vp);\n", api->name, api->name);
         fprintf(f, "    ");
         if (api->ret.typeName[0]) {
-            fprintf(f, "gIO->mToCoreRet = (intptr_t)");
+            fprintf(f, "con->mIO.mToCoreRet = (intptr_t)");
         }
         fprintf(f, "rsi_%s(con", api->name);
         for(ct2=0; ct2 < api->paramCount; ct2++) {

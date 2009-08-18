@@ -43,9 +43,6 @@ public:
 
 };
 
-extern ThreadIO *gIO;
-
-
 
 }
 }
