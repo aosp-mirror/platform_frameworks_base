@@ -497,6 +497,24 @@ public final class BridgeResources extends Resources {
     }
 
     @Override
+    public InputStream openRawResource(int id, TypedValue value) throws NotFoundException {
+        getValue(id, value, true);
+
+        File f = new File(value.string.toString());
+        if (f.isFile()) {
+            try {
+                return new FileInputStream(f);
+            } catch (FileNotFoundException e) {
+                NotFoundException exception = new NotFoundException();
+                exception.initCause(e);
+                throw exception;
+            }
+        }
+
+        throw new NotFoundException();
+    }
+
+    @Override
     public AssetFileDescriptor openRawResourceFd(int id) throws NotFoundException {
         throw new UnsupportedOperationException();
     }
