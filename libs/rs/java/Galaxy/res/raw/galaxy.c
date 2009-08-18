@@ -30,7 +30,7 @@
 
 #define PARTICLES_TEXTURES_COUNT 2
 
-#define ELLIPSE_RATIO 0.86f
+#define ELLIPSE_RATIO 0.892f
 #define ELLIPSE_TWIST 0.02333333333f
 
 void drawSpace(int width, int height) {
@@ -47,15 +47,18 @@ void drawSpace(int width, int height) {
 }
 
 void drawLights(int width, int height) {
-    float x = (width - 512.0f) / 2.0f;
-    float y = (height - 512.0f) / 2.0f;
+    float x = (width - 512.0f) * 0.5f;
+    float y = (height - 512.0f) * 0.5f;
+    
+    // increase the size of the texture by 5% on each side
+    x -= 512.0f * 0.05f;
 
     bindProgramFragment(NAMED_PFBackground);
     bindTexture(NAMED_PFBackground, 0, NAMED_TLight1);
-    drawQuad(x + 512.0f, y         , 0.0f,
-             x         , y         , 0.0f,
-             x         , y + 512.0f, 0.0f,
-             x + 512.0f, y + 512.0f, 0.0f);
+    drawQuad(x + 512.0f * 1.1f, y         , 0.0f,
+             x                , y         , 0.0f,
+             x                , y + 512.0f, 0.0f,
+             x + 512.0f * 1.1f, y + 512.0f, 0.0f);
 }
 
 void drawParticle(float *particle, int index, float *particleBuffer, int bufferIndex,
@@ -67,11 +70,11 @@ void drawParticle(float *particle, int index, float *particleBuffer, int bufferI
     float r = particle[index + PARTICLE_STRUCT_RADIUS];
 
     float a = angle + speed;
-    float x = distance * sinf(a);
-    float y = distance * cosf(a) * ELLIPSE_RATIO;
+    float x = distance * sinf_fast(a);
+    float y = distance * cosf_fast(a) * ELLIPSE_RATIO;
     float z = distance * ELLIPSE_TWIST;
-    float s = cosf(z);
-    float t = sinf(z);
+    float s = cosf_fast(z);
+    float t = sinf_fast(z);
 
     float sX = t * x + s * y + w;
     float sY = s * x - t * y + h;
@@ -87,7 +90,7 @@ void drawParticle(float *particle, int index, float *particleBuffer, int bufferI
 
     // upper middle vertex of the particle's triangle
     bufferIndex += PARTICLE_BUFFER_COMPONENTS_COUNT;
-    particleBuffer[bufferIndex + 1] = sX;     // X
+    particleBuffer[bufferIndex + 1] = sX;         // X
     particleBuffer[bufferIndex + 2] = sY - r;     // Y
 
     particle[index + PARTICLE_STRUCT_ANGLE] = a;
