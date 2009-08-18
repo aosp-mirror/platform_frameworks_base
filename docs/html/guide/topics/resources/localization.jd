@@ -1,0 +1,644 @@
+page.title=Localization
+parent.title=Resources and Assets
+parent.link=index.html
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+
+<h2>Localization quickview</h2>
+
+<ul>
+  <li>Android lets you create different resource sets for different locales.</li>
+  <li>When your application runs, Android will load the resource set
+that match the device's locale.</li>
+  <li>If locale-specific resources are not available, Android falls back to
+defaults.</li>
+  <li>The emulator has features for testing localized apps. </li>
+</ul>
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#resource-switching">Overview: Resource-Switching in Android</a>
+
+</li>
+<ol><li><a href="#defaults-r-important">Why Default Resources Are Important</a></li></ol>
+<li><a href="#using-framework">Using Resources for Localization</a>
+  <ol>
+  <li><a href="#creating-defaults">How to Create Default Resources</a></li><li>
+    <a href="#creating-alternates">How to Create Alternate Resources</a></li>
+    <li><a href="#resource-precedence">Which Resources Take Precedence?</a></li>
+    <li><a href="#referring-to-resources">Referring to Resources in Java</a></li>
+
+    </ol>
+</li>
+<li><a href="#strategies">Localization Strategies</a></li>
+<li><a href="#testing">Testing Localized Applications</a></li>
+  <ol>
+  <li><a href="#device">Testing on a Device</a></li>
+  <li><a href="#emulator">Testing on an Emulator</a></li>
+  <li><a href="#test-for-default">Testing for Default Resources</a></li>
+  </ol>
+<li><a href="#publishing">Publishing</a></li>
+<li><a href="#checklist">Localization Checklists</a></li>
+  <ol>
+  <li><a href="#planning-checklist">Planning and Design Checklist</a></li>
+  <li><a href="#content-checklist">Content Checklist</a></li>
+  <li><a href="#testing-checklist">Testing and Publishing Checklist</a></li>
+  </ol>
+</ol>
+
+<h2>See also</h2>
+  <ol>
+  <li><a
+href="{@docRoot}guide/tutorials/localization/index.html">Hello, L10N Tutorial</a></li>
+    <li><a href="resources-i18n.html">Resources</a></li>
+    <li><a href="{@docRoot}guide/topics/ui/declaring-layout.html">Declaring Layout</a></li>
+    <li><a href="{@docRoot}reference/android/app/Activity.html#ActivityLifecycle">Activity Lifecycle</a></li>
+</ol>
+</div>
+</div>
+
+<p>Android will run on many  devices in many  regions. To reach the most users,
+your application should handle text, audio files, numbers, currency, and
+graphics in ways appropriate to the locales where your application will be used.
+</p>
+
+<p>This document describes best practices for localizing Android
+applications. The principles apply whether you are developing your application  
+using ADT with Eclipse, Ant-based tools, or any other IDE. </p>
+
+<p>You should already have a working knowledge of Java and be  familiar with
+Android resource loading, the declaration of user interface elements in XML,
+development considerations such as Activity lifecycle, and general principles of
+internationalization and localization. </p>
+
+<p>It is good practice to use the Android resource framework to separate the
+localized aspects of your application as much as possible from the core Java
+functionality:</p>
+
+<ul>
+  <li>You can put most or all of the <em>contents</em> of your application's
+user interface into resource files, as described in this document and in <a
+href="index.html">Resources</a>. </li>
+  <li>The <em>behavior</em> of the user interface, on the other hand, is driven
+by your Java code. 
+    For example, if users input data that needs to be formatted or sorted
+differently depending on locale, then you would use Java to handle the data
+programmatically. This document does not cover how to  localize your Java code.
+</li>
+</ul>
+
+<p>The <a
+href="{@docRoot}guide/tutorials/localization/index.html">Hello, L10N
+</a> tutorial takes you through the steps of creating a simple localized
+application that uses  locale-specific resources in the way described in this
+document. </p>
+
+
+<h2 id="resource-switching">Overview: Resource-Switching in Android</h2>
+
+<p>Resources are text strings, layouts, sounds, graphics, and any other static
+data that your  Android application  needs. An application can include multiple
+sets of resources, each customized for a different device configuration. When a
+user runs the application,  Android    automatically selects and loads the 
+resources that best match the device.</p>
+
+<p>(This document focuses on localization and locale. For a complete description
+of resource-switching and all the types of configurations that you can
+specify &#8212; screen orientation, touchscreen type, and so on &#8212; see <a
+href="resources-i18n.html#AlternateResources">Alternate Resources</a>.)</p>
+
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr border="0">
+    <td width="180" style="border: 0pt none ;"><p class="special-note">
+    <strong>When you write your application:</strong>
+    <br><br>
+    You create a set of default resources, plus alternates to be used in
+    different locales.</p></td>
+    <td style="border: 0pt none; padding:0">
+    <p style="border:0; padding:0"><img src="../../../images/resources/right-arrow.png" alt="right-arrow" 
+    width="51" height="17"></p></td>
+    <td width="180" style="border: 0pt none ;"><p class="special-note">
+    <strong>When a user runs your application:</strong>
+    <br><br>The Android system selects which resources to load, based on the
+    device's locale.</p></td>
+  </tr>
+</table>
+
+<p>When you write your application, you create default and alternate resources
+for your application to use. To create  resources, you place files within
+specially named subdirectories of the project's <code>res/</code> directory.
+</p>
+
+
+
+<h3 id="defaults-r-important">Why Default Resources Are Important</h3>
+
+<p>Whenever the application runs in a locale for which you have not provided
+locale-specific text,  Android will load the default strings from
+<code>res/values/strings.xml</code>. If this default  file is absent, or if it 
+is missing a string that your application needs, then your application will not run 
+and will show an error. 
+The example below illustrates what can happen when the default text file is incomplete. </p>
+
+<p><em>Example:</em>
+<p>An application's Java code refers to just two strings, <code>text_a</code> and 
+	<code>text_b</code>. This application includes a localized resource file 
+	(<code>res/values-en/strings.xml</code>) that defines <code>text_a</code> and 
+	<code>text_b</code> in English. This application also includes a default 
+	resource file (<code>res/values/strings.xml</code>) that includes a
+definition for <code>text_a</code>, but not for <code>text_b</code>:
+<ul>
+  <li>This application might compile without a problem. An IDE such as Eclipse 
+  	will not highlight any errors if a resource is missing.</li>
+  <li>When this application is launched on a device with locale set to English, 
+  	the application  might run without a problem, because 
+  	<code>res/values-en/strings.xml</code> contains both of the needed text 
+  	strings.</li>
+  <li>However, <strong>the user  will see an error message and a Force Close 
+  	button</strong> when this application is launched on a device set to a 
+  	language other than English. The application will not load.</li>
+</ul>
+
+
+<p>To prevent this situation, make sure that a <code>res/values/strings.xml</code> 
+	file exists and that it defines every needed string. The situation applies to 
+	all types of resources, not just strings: You 
+	need to create a  set of default resource files containing all 
+	the resources that your application calls upon &#8212; layouts, drawables, 
+	animations, etc. For information about testing, see <a href="#test-for-default">
+	Testing for Default Resources</a>.</p>
+
+<h2 id="using-framework">Using Resources for Localization</h2>
+
+<h3 id="creating-defaults">How to Create Default Resources</h3>
+
+<p>Put the application's default text in
+a file with the following location and name:</p>
+<p><code>&nbsp;&nbsp;&nbsp;&nbsp;res/values/strings.xml</code> (required directory)</p>
+
+<p>The text strings in <code>res/values/strings.xml</code> should  use the
+default language, which is the language that you expect most of your application's users to
+speak.  </p>
+
+<p>The default resource set must also include any default drawables and layouts, 
+	and can include other types of resources such as animations. 
+<br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;res/drawable/</code>(required directory holding at least
+  one graphic file, for the application's icon in the Market)<br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;res/layout/</code> (required directory holding an XML
+  file that defines the default layout)<br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;res/anim/</code> (required if you have any 
+  <code>res/anim-<em>&lt;qualifiers&gt;</em></code> folders)<br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;res/xml/</code> (required if you have any 
+  <code>res/xml-<em>&lt;qualifiers&gt;</em></code> folders)<br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;res/raw/</code> (required if you have any 
+  <code>res/raw-<em>&lt;qualifiers&gt;</em></code> folders)
+</p>
+
+<p class="note"><strong>Tip:</strong> In your code, examine each reference to 
+	an Android resource. Make sure that a default resource is defined for each
+	one. Also make sure that the default string file is complete: A <em>
+	localized</em> string file can contain a subset of the strings, but the 
+	<em>default</em> string file must contain them all. 
+</p>
+
+<h3 id="creating-alternates">How to Create Alternate Resources</h3>
+
+<p>A large part of localizing an application is providing alternate text for
+different languages. In some cases you will also provide alternate graphics,
+sounds, layouts, and other locale-specific resources. </p>
+
+<p>An application can specify many <code>res/<em>&lt;qualifiers&gt;</em>/</code>
+directories, each with different qualifiers. To create an alternate resource for 
+a different locale, you use a qualifier that specifies a language or a 
+language-region combination. (The name of a resource directory must conform 
+to the naming scheme described in 
+<a href="resources-i18n.html#AlternateResources">Alternate Resources</a>, 
+or else it will not compile.)</p>
+
+<p><em>Example:</em></p>
+
+<p>Suppose that your application's default language is English. Suppose also
+that you want to localize all the text in your application to French, and most
+of the text in your application (everything except the application's title) to
+Japanese. In this case, you could create three alternate <code>strings.xml</code>
+files, each stored in a locale-specific resource directory:</p>
+
+<ol>
+  <li><code>res/values/strings.xml</code><br>
+    Contains  English text for all  the strings that the application uses,
+including text for a string named <code>title</code>.</li>
+  <li><code>res/values-fr/strings.xml</code><br>
+    Contain French text for all  the strings, including <code>title</code>.</li>
+  <li><code>res/values-ja/strings.xml</code><br>
+    Contain Japanese text for all  the strings <em>except</em>
+<code>title</code>.<br>
+  <code></code></li>
+</ol>
+
+<p>If your Java code refers to <code>R.string.title</code>,  here is what will
+happen at runtime:</p>
+
+<ul>
+  <li>If the device is set to any language other than French, Android will load
+<code>title</code> from the <code>res/values/strings.xml</code> file.</li>
+  <li>If the device is set to French, Android will load <code>title</code> from
+the <code>res/values-fr/strings.xml</code> file.</li>
+</ul>
+
+<p>Notice that if the device is set to Japanese, Android will look for
+<code>title</code> in the <code>res/values-ja/strings.xml</code> file. But
+because no such string is included in that file, Android will fall back to the
+default, and will load  <code>title</code> in English from the
+<code>res/values/strings.xml</code> file.  </p>
+
+<h3 id="resource-precedence">Which Resources Take Precedence?</h3>
+
+<p> If multiple resource files match a device's configuration, Android follows a
+set of rules in deciding which file to use. Among the qualifiers that can be
+specified in a resource directory name, <strong>locale almost always takes
+precedence</strong>. </p>
+<p><em>Example:</em></p>
+
+<p>Assume that an application  includes a default set of graphics and two other
+sets of graphics, each optimized for a different device setup:</p>
+
+<ul>
+  <li><code>res/drawable/</code><br>
+    Contains
+  default graphics.</li>
+  <li><code>res/drawable-small-land-stylus/</code><br>
+  Contains  graphics optimized for use with a device that expects input from a 
+  stylus and has a QVGA low-density screen in landscape orientation.</li>
+  <li><code>res/drawable-ja/</code> <br>
+  Contains  graphics optimized for use with Japanese.</li>
+</ul>
+
+<p>If the application runs on a device that is configured to use Japanese,
+Android will load graphics from  <code>res/drawable-ja/</code>, even if the
+device happens to be one that expects input from a stylus and has a QVGA 
+low-density screen in landscape orientation.</p>
+
+<p class="note"><strong>Exception:</strong> The only qualifiers that take
+precedence over locale in the selection process are MCC and MNC (mobile country
+code and mobile network code). </p>
+
+<p><em>Example:</em></p>
+
+<p>Assume that you have the following situation:</p>
+
+<ul>
+  <li>The application code calls for <code>R.string.text_a</code></li>
+  <li>Two relevant resource files are available:
+    <ul>
+      <li><code>res/values-mcc404/strings.xml</code>, which includes
+<code>text_a</code> in the application's default language, in this case
+English.</li>
+      <li><code>res/values-hi/strings.xml</code>, which includes
+<code>text_a</code> in Hindi.</li>
+    </ul>
+  </li>
+  <li>The application is running on a device that has the following
+configuration:
+    <ul>
+      <li>The SIM card is connected to a mobile network in India (MCC 404).</li>
+      <li>The language is set to Hindi (<code>hi</code>).</li>
+    </ul>
+  </li>
+</ul>
+
+<p>Android will load <code>text_a</code> from
+<code>res/values-mcc404/strings.xml</code> (in English), even if the device is
+configured for Hindi. That is because in the resource-selection process, Android
+will prefer an MCC match over a language match. </p>
+
+<p>The selection process is not always as straightforward as these examples
+suggest. Please read  <a href="resources-i18n.html#best-match">How Android finds
+the best matching directory</a> for a more nuanced description of the
+process. All the qualifiers are described and listed in order of
+precedence in <a href="resources-i18n.html#table2">Table 2 in the Resources
+document</a>.</p>
+
+<h3 id="referring-to-resources">Referring to Resources in Java</h3>
+
+<p>In your application's Java code, you refer to  resources using the syntax
+<code>R.<em>resource_type</em>.<em>resource_name</em></code> or
+<code>android.R.<em>resource_type</em>.<em>resource_name</em></code><em>.</em>
+For more about this, see <a href="resources-i18n.html#ResourcesInCode">Using
+Resources in Code</a>.</p>
+
+<h2 id="strategies">Localization Strategies</h2>
+
+<h4 id="failing2">Design your application  to work in any locale</h4>
+
+<p>You cannot assume anything about the device on which a user will
+run your application. The device might have hardware that you were not
+anticipating, or it might be set to a locale that you did not plan for or that 
+you cannot test. Design your application so that it will function normally or fail gracefully no 
+matter what device it runs on.</p>
+
+<p class="note"><strong>Important:</strong> Make sure that your application
+includes a full set of default resources.</p> <p>Make sure to include
+<code>res/drawable/</code> and a <code>res/values/</code> folders (without any
+additional modifiers in the folder names) that contain all the images and text
+that your application will need. </p>
+
+<p>If an application is missing even one default resource, it will not run on a 
+	device that is set to an unsupported locale. For example, the 
+	<code>res/values/strings.xml</code> default file might lack one string that 
+	the application needs: When the application runs in an unsupported locale and 
+	attempts to load <code>res/values/strings.xml</code>, the user will see an 
+	error message and a Force Close button. An IDE such as Eclipse will not 
+	highlight this kind of error, and you will not see the problem when you 
+	test the application on a device or emulator that is set to a supported locale.</p>
+
+<p>For more information, see <a href="#test-for-default">Testing for Default Resources</a>.</p>
+
+<h4>Design a flexible layout</h4>
+
+<p> If you need to rearrange your layout to fit a certain language (for example
+German with its long words), you can create an alternate layout for that
+language (for example <code>res/layout-de/main.xml</code>). However, doing this
+can make your application harder to maintain.  It is better to create a single
+layout that is more flexible.</p>
+
+<p>Another typical situation is a language that requires something different in
+its layout. For example, you might have a contact form that should include  two
+name fields when the application runs in Japanese, but three name fields when
+the application  runs in some other language. You could handle this in either of
+two ways:</p>
+
+<ul>
+  <li>Create  one  layout with a field that you can programmatically enable or
+disable, based on the language, or</li>
+  <li>Have the main layout include another layout that  includes the changeable
+field. The second layout can have different configurations for different
+languages.</li>
+</ul>
+
+<h4>Avoid creating more resource files and text strings than you need</h4>
+
+<p>You probably do not need to create a locale-specific
+alternative for every resource in your application. For example, the layout
+defined in the <code>res/layout/main.xml</code> file might work in any locale,
+in which case there would be no need to create any alternate layout files.
+</p>
+
+<p>Also, you might not need to create alternate text for every
+string. For example, assume the following:</p>
+
+<ul>
+  <li>Your application's default language is American
+English. Every string that the application uses is defined, using American
+English spellings, in <code>res/values/strings.xml</code>. </li>
+
+  <li>For  a few important phrases, you want to provide
+British English spelling. You want these alternate strings to be used when your
+application runs on a device in the United Kingdom. </li>
+</ul>
+
+<p>To do this, you could create a small file called
+<code>res/values-en-rGB/strings.xml</code> that includes only the strings that
+should be different when the application  runs in the U.K. For all the rest of
+the strings, the application will fall back to the defaults and use what is
+defined in <code>res/values/strings.xml</code>.</p>
+
+<h4>Use the Android Context object for manual locale lookup</h4>
+
+<p>You can look up the locale using the {@link android.content.Context} object
+that Android makes available:</p>
+
+<pre>String locale = context.getResources().getConfiguration().locale.getDisplayName();</pre>
+
+<h2 id="testing">Testing Localized Applications</h2>
+
+<h3 id="device">Testing on a Device</h3>
+<p>Keep in mind that the device you are testing may be significantly different from 
+	the devices available to consumers in other geographies. The locales available 
+	on your device may differ from those available on other devices. Also, the 
+	resolution and density of the device screen may differ, which could affect 
+	the display of strings and drawables in your UI.</p>
+
+<p>To change the locale on a device, use  the Settings application  (Home &gt;
+Menu &gt; Settings &gt; Locale &amp; text &gt; Select locale). </p>
+
+<h3 id="emulator">Testing on an Emulator</h3>
+
+<p>For details about using the emulator, see See <a
+href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a>.</p>
+<h4>Creating and using a custom locale</h4>
+
+<p>A &quot;custom&quot; locale is a language/region combination that the
+Android system image does not explicitly support. (For a list of supported 
+locales, see the <a href="{@docRoot}sdk/android-{@sdkCurrentVersion}.html">Android
+Version Notes</a>.) You can test how your application will run in a custom
+locale by creating a custom locale in the emulator. There are two ways to do
+this:</p>
+
+<ul>
+  <li>Use the Custom Locale application, which is accessible from the
+Application tab. (After you create a custom locale, switch to it by 
+pressing and holding the locale name.)</li>
+  <li>Change to a custom locale from the adb shell, as described below.</li>
+</ul>
+
+<p>When you set the emulator to a locale that is not available in the Android
+system image, the system itself will display in its default language. Your
+application, however, should localize properly.</p>
+
+<h4>Changing the emulator locale from the adb shell</h4>
+
+<p>To change the locale in the emulator by using the adb shell. </p>
+
+<ol>
+  <li>Pick the locale you want to test and determine its language and region codes, for
+example <code>fr</code> for French and <code>CA</code> for Canada.<br>
+  </li>
+  <li>Launch an emulator.</li>
+  <li>From a command-line shell on the host computer, run the following
+command:<br>
+    <code>adb shell</code><br>
+  or if you have a device attached, specify that you want the emulator by adding
+the <code>-e</code> option:<br>
+  <code>adb -e shell</code></li>
+  <li>At  the  adb shell prompt (<code>#</code>), run this command: <br>
+    <code>setprop persist.sys.language  [<em>language code</em>];setprop
+persist.sys.country [<em>country  code</em>];stop;sleep 5;start <br>
+    </code>Replace bracketed sections with the  appropriate codes from Step
+1.</li>
+</ol>
+
+<p>For instance, to test in Canadian French:</p>
+
+<p><code>setprop persist.sys.language  fr;setprop persist.sys.country
+CA;stop;sleep 5;start </code></p>
+
+<p>This will cause the emulator  to restart. (It will look like a full reboot,
+but it is not.) Once the Home screen appears again, re-launch your application (for
+example, click the Run icon in Eclipse), and the application will launch with
+the new locale. </p>
+
+<h3 id="test-for-default">Testing for Default Resources</h3>
+<p>Here's how to test whether an application includes every string resource that it needs:  </p>
+<ol><li>Set the emulator or device to a language that your application does not 
+	support. For example, if the application has French strings in 
+	<code>res/values-fr/</code> but does not have any Spanish strings in 
+	<code>res/values-es/</code>, then set the emulator's locale to Spanish. 
+	(You can use the Custom Locale application to set the emulator to an 
+	unsupported locale.)</li>
+	<li>Run the application.</li>  
+<li>If the application shows an error message and a Force Close button, it might 
+	be looking for a string that is not available. Make sure that your 
+	<code>res/values/strings.xml</code> file includes a definition for 
+	every string that the application uses.</li>
+</ol> 
+</p> 
+
+<p>If the test is successful, repeat it for other types of 
+	configurations. For example, if the application has a layout file called 
+	<code>res/layout-land/main.xml</code> but does not contain a file called 
+	<code>res/layout-port/main.xml</code>, then set the emulator or device to 
+	portrait orientation and see if the application will run. 
+
+<h2 id="publishing">Publishing Localized Applications</h2>
+
+<p>The Android Market is
+  the main application distribution system for Android devices. To publish a 
+  localized application, you need to sign your application, version it, and go
+through all the other steps described in <a
+href="{@docRoot}guide/publishing/preparing.html">Preparing to Publish</a>. </p>
+
+<p>If you split your application in several .apk files, each targeted to a
+different locale, follow these guidelines:</p>
+
+<ul>
+  <li>Sign each .apk file with the same certificate. For more about this, see <a
+href="{@docRoot}guide/publishing/app-signing.html#strategies">Signing
+Strategies</a>. </li>
+  <li>Give each .apk file a different application name. Currently it is
+impossible to put two applications into the Android Market that have exactly the
+same name.</li>
+<li>Include a complete set of default resources in each .apk file.</li>
+</ul>
+
+<h2 id="checklist">Localization Checklists</h2>
+
+<p>These  checklists summarize the process of localizing an Android application.
+Not everything on these lists will apply to every application.</p>
+
+<h3 id="planning-checklist">Planning and Design Checklist</h3>
+
+<table  width="100%" border="0" cellpadding="5" cellspacing="0">
+  <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td>Choose a localization strategy. Which countries and which languages will
+your application support? What is your application's default country and
+language? How will your application behave when it does not have specific
+resources available for a given locale?</td>
+  </tr>
+  <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td><p>Identify everything in your application   that will need to be
+localized: </p>
+      <ul>
+        <li>Consider  specific details of your application &#8212; text,  images, 
+sounds, music, numbers, money, dates and times. You might not need to localize
+everything. For example, you don't need to localize text that the user never
+sees, or images that are culturally neutral, or icons that convey the same
+meaning in every locale. </li>
+        <li>Consider broad themes. For example, if you hope to sell your
+application in two very culturally different markets, you might want to design
+your UI and present your application in an entirely different way for each
+locale.</li>
+    </ul></td>
+  </tr>
+  <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td><p>Design your Java code to externalize resources wherever possible:</p>
+      <ul>
+        <li>Use <code>R.string</code> and <code>strings.xml</code> files instead
+of hard-coded strings or string constants. </li>
+        <li>Use <code>R.drawable</code> and <code>R.layout</code> instead of 
+hard-coded drawables or layouts. </li>
+    </ul></td>
+  </tr>
+</table>
+<h3 id="content-checklist">Content Checklist</h3>
+<table border="0" cellspacing="0" cellpadding="5"  width="100%">
+  <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td>Create a full set of default resources in <code>res/values/</code> and
+other <code>res/</code> folders, as described in <a
+href="#creating-defaults">Creating Default Resources</a>.</td>
+  </tr>
+  <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td>Obtain reliable translations of  the static text, including menu text,
+button names, error messages, and help text. Place the translated strings in
+<code>res/values-<em>&lt;qualifiers&gt;</em>/strings.xml</code> files. </td>
+  </tr>
+  <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td>Make sure that your application correctly formats dynamic text (for
+example numbers and dates) for each supported locale. Make sure that your
+application handles word breaks, punctuation, and alphabetical sorting correctly
+for each supported language.</td>
+  </tr>
+  <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td>If necessary, create locale-specific versions of your graphics and
+layout, and place them in <code>res/drawable-<em>&lt;qualifiers&gt;</em>/</code> and
+<code>res/layout-<em>&lt;qualifiers&gt;</em>/</code> folders.</td>
+  </tr>
+  <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td>Create any other localized content that your application requires; for
+example, create recordings of sound files for each language, as needed.</td>
+  </tr>
+</table>
+<h3 id="testing-checklist">Testing and Publishing Checklist</h3>
+    <table border="0" cellspacing="0" cellpadding="5" width="100%">
+  <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td>Test your application for each supported locale. If possible, have a
+person who is native to each locale test your application and give you
+feedback.</td>
+  </tr>
+  <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td>Test the default resources by loading a locale that is not available on 
+    	the device or emulator. For instructions, see <a href="#test-for-default">
+    		Testing for Default Resources</a>.  </td>
+  </tr>
+    <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td>Test the localized strings in both landscape and portrait display modes.</td>
+  </tr>
+    <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td>Sign your application and create your final build or builds.</td>
+  </tr>
+  <tr>
+    <td valign="top" align="center"><img src="../../../images/resources/arrow.png" alt="arrow" width="26"
+border="0"></td>
+    <td>Upload your .apk file or files to Market, selecting the appropriate
+languages as
+    you upload. (For more details, see <a
+href="{@docRoot}guide/publishing/publishing.html">Publishing Your
+Applications</a>.)</td>
+  </tr>
+</table>

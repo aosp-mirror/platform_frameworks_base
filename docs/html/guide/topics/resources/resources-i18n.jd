@@ -685,7 +685,7 @@ MyApp/res/drawable-en-port/
 </ol>
 <p class="note"><strong>Tip:</strong> The <em>precedence</em> of the qualifiers is more important than the number of qualifiers that exactly match the device. For example, in step 4 above, the last choice on the list includes three qualifiers that exactly match the device (orientation, touchscreen type, and input method), while <code>drawable-en</code> has only one parameter that matches (language). However, language has a higher precedence, so <code>drawable-port-notouch-12key</code> is out.</p>
 <p>This flowchart summarizes how Android selects resource directories to load.</p>
-<p><img src="res-selection-flowchart.png" alt="resource-selection" width="461" height="471" style="margin:15px"></p>
+<p><img src="../../../images/resources/res-selection-flowchart.png" alt="resource-selection" width="461" height="471" style="margin:15px"></p>
 <h3>Terminology</h3>
 <p>The resource system brings a number of different pieces together to
 form the final complete resource functionality.  To help understand the
