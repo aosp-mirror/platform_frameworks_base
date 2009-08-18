@@ -35,6 +35,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
@@ -48,6 +49,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Power;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Vibrator;
@@ -257,7 +259,8 @@ class NotificationManagerService extends INotificationManager.Stub
         }
 
         public void onNotificationClick(String pkg, int id) {
-            cancelNotification(pkg, id, Notification.FLAG_AUTO_CANCEL);
+            cancelNotification(pkg, id, Notification.FLAG_AUTO_CANCEL,
+                    Notification.FLAG_FOREGROUND_SERVICE);
         }
 
         public void onPanelRevealed() {
@@ -326,7 +329,7 @@ class NotificationManagerService extends INotificationManager.Stub
                 if (pkgName == null) {
                     return;
                 }
-                cancelAllNotifications(pkgName);
+                cancelAllNotificationsInt(pkgName, 0, 0);
             }
         }
     };
@@ -580,6 +583,8 @@ class NotificationManagerService extends INotificationManager.Stub
     // ============================================================================
     public void enqueueNotification(String pkg, int id, Notification notification, int[] idOut)
     {
+        checkIncomingCall(pkg);
+        
         // This conditional is a dirty hack to limit the logging done on
         //     behalf of the download manager without affecting other apps.
         if (!pkg.equals("com.android.providers.downloads")
@@ -612,7 +617,20 @@ class NotificationManagerService extends INotificationManager.Stub
             } else {
                 old = mNotificationList.remove(index);
                 mNotificationList.add(index, r);
+                // Make sure we don't lose the foreground service state.
+                if (old != null) {
+                    notification.flags |=
+                        old.notification.flags&Notification.FLAG_FOREGROUND_SERVICE;
+                }
             }
+            
+            // Ensure if this is a foreground service that the proper additional
+            // flags are set.
+            if ((notification.flags&Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+                notification.flags |= Notification.FLAG_ONGOING_EVENT
+                        | Notification.FLAG_NO_CLEAR;
+            }
+            
             if (notification.icon != 0) {
                 IconData icon = IconData.makeIcon(null, pkg, notification.icon,
                                                     notification.iconLevel,
@@ -807,9 +825,11 @@ class NotificationManagerService extends INotificationManager.Stub
     }
 
     /**
-     * Cancels a notification ONLY if it has all of the {@code mustHaveFlags}. 
+     * Cancels a notification ONLY if it has all of the {@code mustHaveFlags}
+     * and none of the {@code mustNotHaveFlags}. 
      */
-    private void cancelNotification(String pkg, int id, int mustHaveFlags) {
+    private void cancelNotification(String pkg, int id, int mustHaveFlags,
+            int mustNotHaveFlags) {
         EventLog.writeEvent(EVENT_LOG_CANCEL, pkg, id, mustHaveFlags);
 
         synchronized (mNotificationList) {
@@ -820,6 +840,9 @@ class NotificationManagerService extends INotificationManager.Stub
                 r = mNotificationList.get(index);
                 
                 if ((r.notification.flags & mustHaveFlags) != mustHaveFlags) {
+                    return;
+                }
+                if ((r.notification.flags & mustNotHaveFlags) != 0) {
                     return;
                 }
                 
@@ -835,7 +858,8 @@ class NotificationManagerService extends INotificationManager.Stub
      * Cancels all notifications from a given package that have all of the
      * {@code mustHaveFlags}.
      */
-    private void cancelAllNotificationsInt(String pkg, int mustHaveFlags) {
+    void cancelAllNotificationsInt(String pkg, int mustHaveFlags,
+            int mustNotHaveFlags) {
         EventLog.writeEvent(EVENT_LOG_CANCEL_ALL, pkg, mustHaveFlags);
 
         synchronized (mNotificationList) {
@@ -844,6 +868,9 @@ class NotificationManagerService extends INotificationManager.Stub
             for (int i = N-1; i >= 0; --i) {
                 NotificationRecord r = mNotificationList.get(i);
                 if ((r.notification.flags & mustHaveFlags) != mustHaveFlags) {
+                    continue;
+                }
+                if ((r.notification.flags & mustNotHaveFlags) != 0) {
                     continue;
                 }
                 if (!r.pkg.equals(pkg)) {
@@ -860,17 +887,40 @@ class NotificationManagerService extends INotificationManager.Stub
     }
 
     
-    public void cancelNotification(String pkg, int id)
-    {
-        cancelNotification(pkg, id, 0);
+    public void cancelNotification(String pkg, int id) {
+        checkIncomingCall(pkg);
+        // Don't allow client applications to cancel foreground service notis.
+        cancelNotification(pkg, id, 0,
+                Binder.getCallingUid() == Process.SYSTEM_UID
+                ? 0 : Notification.FLAG_FOREGROUND_SERVICE);
     }
 
-    public void cancelAllNotifications(String pkg)
-    {
-        cancelAllNotificationsInt(pkg, 0);
+    public void cancelAllNotifications(String pkg) {
+        checkIncomingCall(pkg);
+        
+        // Calling from user space, don't allow the canceling of actively
+        // running foreground services.
+        cancelAllNotificationsInt(pkg, 0, Notification.FLAG_FOREGROUND_SERVICE);
     }
 
-    public void cancelAll() {
+    void checkIncomingCall(String pkg) {
+        int uid = Binder.getCallingUid();
+        if (uid == Process.SYSTEM_UID || uid == 0) {
+            return;
+        }
+        try {
+            ApplicationInfo ai = mContext.getPackageManager().getApplicationInfo(
+                    pkg, 0);
+            if (ai.uid != uid) {
+                throw new SecurityException("Calling uid " + uid + " gave package"
+                        + pkg + " which is owned by uid " + ai.uid);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new SecurityException("Unknown package " + pkg);
+        }
+    }
+    
+    void cancelAll() {
         synchronized (mNotificationList) {
             final int N = mNotificationList.size();
             for (int i=N-1; i>=0; i--) {

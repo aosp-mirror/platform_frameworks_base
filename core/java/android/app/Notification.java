@@ -257,6 +257,13 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_NO_CLEAR           = 0x00000020;
 
+    /**
+     * Bit to be bitwise-ored into the {@link #flags} field that should be
+     * set if this notification represents a currently running service.  This
+     * will normally be set for you by {@link Service#startForeground}.
+     */
+    public static final int FLAG_FOREGROUND_SERVICE = 0x00000040;
+
     public int flags;
 
     /**
