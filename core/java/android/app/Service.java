@@ -342,8 +342,9 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     /**
      * Remove this service from foreground state, allowing it to be killed if
      * more memory is needed.
-     * @param keepNotification If true, the notification previously provided
-     * to {@link #startForeground} will remain displayed.
+     * @param removeNotification If true, the notification previously provided
+     * to {@link #startForeground} will be removed.  Otherwise it will remain
+     * until a later call removes it (or the service is destroyed).
      * @see #startForeground(int, Notification)
      */
     public final void stopForeground(boolean removeNotification) {
