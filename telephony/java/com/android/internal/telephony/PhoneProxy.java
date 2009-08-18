@@ -323,6 +323,14 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.unregisterForSubscriptionInfoReady(h);
     }
 
+    public void registerForEcmTimerReset(Handler h, int what, Object obj) {
+        mActivePhone.registerForEcmTimerReset(h,what,obj);
+    }
+
+    public void unregisterForEcmTimerReset(Handler h) {
+        mActivePhone.unregisterForEcmTimerReset(h);
+    }
+
     public boolean getIccRecordsLoaded() {
         return mActivePhone.getIccRecordsLoaded();
     }
