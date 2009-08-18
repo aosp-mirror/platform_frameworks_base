@@ -170,6 +170,44 @@ static void SC_storeMatrix(uint32_t bank, uint32_t offset, const rsc_Matrix *m)
 #define DEG_TO_RAD PI / 180.0f
 #define RAD_TO_DEG 180.0f / PI
 
+static float SC_sinf_fast(float x)
+{
+    const float A =   1.0f / (2.0f * M_PI);
+    const float B = -16.0f;
+    const float C =   8.0f;
+    
+    // scale angle for easy argument reduction
+    x *= A;
+    
+    if (fabsf(x) >= 0.5f) {
+        // argument reduction
+        x = x - ceilf(x + 0.5f) + 1.0f;
+    }
+    
+    const float y = B * x * fabsf(x) + C * x;
+    return 0.2215f * (y * fabsf(y) - y) + y;
+}
+
+static float SC_cosf_fast(float x)
+{
+    x += float(M_PI / 2);
+
+    const float A =   1.0f / (2.0f * M_PI);
+    const float B = -16.0f;
+    const float C =   8.0f;
+    
+    // scale angle for easy argument reduction
+    x *= A;
+    
+    if (fabsf(x) >= 0.5f) {
+        // argument reduction
+        x = x - ceilf(x + 0.5f) + 1.0f;
+    }
+    
+    const float y = B * x * fabsf(x) + C * x;
+    return 0.2215f * (y * fabsf(y) - y) + y;
+}
+
 static float SC_randf(float max)
 {
     float r = (float)rand();
@@ -845,6 +883,10 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "abs", (void *)&abs,
         "int", "(int)" },
     { "absf", (void *)&fabs,
+        "float", "(float)" },
+    { "sinf_fast", (void *)&SC_sinf_fast,
+        "float", "(float)" },
+    { "cosf_fast", (void *)&SC_cosf_fast,
         "float", "(float)" },
     { "sinf", (void *)&sinf,
         "float", "(float)" },

@@ -49,7 +49,6 @@ class GalaxyRS {
     private static final int RSID_STATE = 0;
 
     private static final int TEXTURES_COUNT = 3;
-    private static final int PARTICLES_TEXTURES_COUNT = 2;
     private static final int RSID_TEXTURE_SPACE = 0;
     private static final int RSID_TEXTURE_LIGHT1 = 1;
     private static final int RSID_TEXTURE_FLARES = 2;
@@ -216,13 +215,15 @@ class GalaxyRS {
 
     @SuppressWarnings({"PointlessArithmeticExpression"})
     private void createParticle(float[] particles, int index, int bufferIndex) {
-        float d = abs(randomGauss()) * GALAXY_RADIUS / 2.0f;
+        float d = abs(randomGauss()) * GALAXY_RADIUS / 2.0f + random(-4.0f, 4.0f);
+        float z = randomGauss() * 0.5f * 0.8f * ((GALAXY_RADIUS - d) / (float) GALAXY_RADIUS);
+        z += 1.0f;
 
         particles[index + PARTICLE_STRUCT_ANGLE] = random(0.0f, (float) (Math.PI * 2.0));
         particles[index + PARTICLE_STRUCT_DISTANCE] = d;
         particles[index + PARTICLE_STRUCT_SPEED] = random(0.0015f, 0.0025f) *
-                (0.5f + (0.5f * (float) GALAXY_RADIUS / d));
-        particles[index + PARTICLE_STRUCT_RADIUS] = random(1.0f, 2.1f);
+                (0.5f + (0.5f * (float) GALAXY_RADIUS / d)) * 0.7f;
+        particles[index + PARTICLE_STRUCT_RADIUS] = z * random(1.2f, 2.1f);
 
         int red, green, blue;
         if (d < GALAXY_RADIUS / 3.0f) {
@@ -234,27 +235,24 @@ class GalaxyRS {
             green = 180;
             blue = (int) constrain(140 + (d / (float) GALAXY_RADIUS) * 115, 140, 255);
         }
-
-        final int color = 0xFF000000 | red | green << 8 | blue << 16;
-        final int sprite = random(PARTICLES_TEXTURES_COUNT);        
-        final float u1 = sprite / (float) PARTICLES_TEXTURES_COUNT;
-        final float u2 = (sprite + 1) / (float) PARTICLES_TEXTURES_COUNT;
+        
+        final int color = red | green << 8 | blue << 16 | 0xff000000;
 
         final float[] floatData = mFloatData5;
         final Allocation buffer = mParticlesBuffer;
         
         floatData[0] = Float.intBitsToFloat(color);
-        floatData[3] = u1;
+        floatData[3] = 0.0f;
         floatData[4] = 1.0f;
         buffer.subData1D(bufferIndex, 1, floatData);
 
         bufferIndex++;
-        floatData[3] = u2;
+        floatData[3] = 1.0f;
         floatData[4] = 1.0f;
         buffer.subData1D(bufferIndex, 1, floatData);
 
         bufferIndex++;
-        floatData[3] = u1 + (u2 - u1) / 2.0f;
+        floatData[3] = 0.5f;
         floatData[4] = 0.0f;
         buffer.subData1D(bufferIndex, 1, floatData);
     }
