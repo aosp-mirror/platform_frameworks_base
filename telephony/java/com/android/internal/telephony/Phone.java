@@ -434,6 +434,20 @@ public interface Phone {
     void unregisterForMmiComplete(Handler h);
 
     /**
+     * Registration point for Ecm timer reset
+     * @param h handler to notify
+     * @param what user-defined message code
+     * @param obj placed in Message.obj
+     */
+    public void registerForEcmTimerReset(Handler h, int what, Object obj);
+
+    /**
+     * Unregister for notification for Ecm timer reset
+     * @param h Handler to be removed from the registrant list.
+     */
+    public void unregisterForEcmTimerReset(Handler h);
+
+    /**
      * Returns a list of MMI codes that are pending. (They have initiated
      * but have not yet completed).
      * Presently there is only ever one.
