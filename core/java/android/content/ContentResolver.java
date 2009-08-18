@@ -52,17 +52,28 @@ public abstract class ContentResolver {
      * @deprecated instead use
      * {@link #requestSync(android.accounts.Account, String, android.os.Bundle)}
      */
+    @Deprecated
     public static final String SYNC_EXTRAS_ACCOUNT = "account";
     public static final String SYNC_EXTRAS_EXPEDITED = "expedited";
     /**
      * @deprecated instead use
      * {@link #SYNC_EXTRAS_MANUAL}
      */
+    @Deprecated
     public static final String SYNC_EXTRAS_FORCE = "force";
     public static final String SYNC_EXTRAS_MANUAL = "force";
     public static final String SYNC_EXTRAS_UPLOAD = "upload";
     public static final String SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS = "deletions_override";
     public static final String SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS = "discard_deletions";
+
+    /**
+     * Set by the SyncManager to request that the SyncAdapter initialize itself for
+     * the given account/authority pair. One required initialization step is to
+     * ensure that {@link #setIsSyncable(android.accounts.Account, String, int)} has been
+     * called with a >= 0 value. When this flag is set the SyncAdapter does not need to
+     * do a full sync, though it is allowed to do so.
+     */
+    public static final String SYNC_EXTRAS_INITIALIZE = "initialize";
 
     public static final String SCHEME_CONTENT = "content";
     public static final String SCHEME_ANDROID_RESOURCE = "android.resource";
@@ -1094,8 +1105,7 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Returns the status that matches the authority. If there are multiples accounts for
-     * the authority, the one with the latest "lastSuccessTime" status is returned.
+     * Returns the status that matches the authority.
      * @param account the account whose setting we are querying
      * @param authority the provider whose behavior is being queried
      * @return the SyncStatusInfo for the authority, or null if none exists

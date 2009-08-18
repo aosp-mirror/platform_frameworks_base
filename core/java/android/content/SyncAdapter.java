@@ -32,7 +32,7 @@ public abstract class SyncAdapter {
     class Transport extends ISyncAdapter.Stub {
         public void startSync(ISyncContext syncContext, String authority, Account account,
                 Bundle extras) throws RemoteException {
-            SyncAdapter.this.startSync(new SyncContext(syncContext), account, extras);
+            SyncAdapter.this.startSync(new SyncContext(syncContext), account, authority, extras);
         }
 
         public void cancelSync(ISyncContext syncContext) throws RemoteException {
@@ -58,9 +58,11 @@ public abstract class SyncAdapter {
      * @param syncContext the ISyncContext used to indicate the progress of the sync. When
      *   the sync is finished (successfully or not) ISyncContext.onFinished() must be called.
      * @param account the account that should be synced
+     * @param authority the authority if the sync request
      * @param extras SyncAdapter-specific parameters
      */
-    public abstract void startSync(SyncContext syncContext, Account account, Bundle extras);
+    public abstract void startSync(SyncContext syncContext, Account account, String authority, 
+            Bundle extras);
 
     /**
      * Cancel the most recently initiated sync. Due to race conditions, this may arrive
