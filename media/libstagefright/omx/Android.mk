@@ -15,10 +15,14 @@ LOCAL_SRC_FILES:=                 \
 LOCAL_SHARED_LIBRARIES :=       \
         libbinder               \
         libmedia                \
-	libutils                \
+        libutils                \
         libui                   \
         libcutils               \
         libopencore_common
+
+ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
+        LOCAL_LDLIBS += -lpthread
+endif
 
 LOCAL_PRELINK_MODULE:= false
 
