@@ -595,7 +595,7 @@ public abstract class IccCard {
 
         // this is common for all radio technologies
         if (!mIccCardStatus.getCardState().isCardPresent()) {
-            return IccCard.State.NOT_READY;
+            return IccCard.State.ABSENT;
         }
 
         RadioState currentRadioState = mPhone.mCM.getRadioState();
