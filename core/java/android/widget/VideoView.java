@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.Metadata;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.net.Uri;
@@ -34,7 +35,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.MediaController.MediaPlayerControl;
+import android.widget.MediaController.*;
 
 import java.io.IOException;
 
@@ -81,6 +82,9 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     private int         mCurrentBufferPercentage;
     private OnErrorListener mOnErrorListener;
     private int         mSeekWhenPrepared;  // recording the seek position while preparing
+    private boolean     mCanPause;
+    private boolean     mCanSeekBack;
+    private boolean     mCanSeekForward;
 
     public VideoView(Context context) {
         super(context);
@@ -259,6 +263,17 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     MediaPlayer.OnPreparedListener mPreparedListener = new MediaPlayer.OnPreparedListener() {
         public void onPrepared(MediaPlayer mp) {
             mCurrentState = STATE_PREPARED;
+
+            // Get the capabilities of the player for this stream
+            Metadata data = mp.getMetadata(MediaPlayer.METADATA_ALL,
+                                      MediaPlayer.BYPASS_METADATA_FILTER);
+            mCanPause = !data.has(Metadata.PAUSE_AVAILABLE)
+                    || data.getBoolean(Metadata.PAUSE_AVAILABLE);
+            mCanSeekBack = !data.has(Metadata.SEEK_BACKWARD_AVAILABLE)
+                    || data.getBoolean(Metadata.SEEK_BACKWARD_AVAILABLE);
+            mCanSeekForward = !data.has(Metadata.SEEK_FORWARD_AVAILABLE)
+                    || data.getBoolean(Metadata.SEEK_FORWARD_AVAILABLE);
+
             if (mOnPreparedListener != null) {
                 mOnPreparedListener.onPrepared(mMediaPlayer);
             }
@@ -267,6 +282,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             }
             mVideoWidth = mp.getVideoWidth();
             mVideoHeight = mp.getVideoHeight();
+
             int seekToPosition = mSeekWhenPrepared;  // mSeekWhenPrepared may be changed after seekTo() call
             if (seekToPosition != 0) {
                 seekTo(seekToPosition);
@@ -579,5 +595,17 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
                 mCurrentState != STATE_ERROR &&
                 mCurrentState != STATE_IDLE &&
                 mCurrentState != STATE_PREPARING);
+    }
+
+    public boolean canPause() {
+        return mCanPause;
+    }
+
+    public boolean canSeekBackward() {
+        return mCanSeekBack;
+    }
+
+    public boolean canSeekForward() {
+        return mCanSeekForward;
     }
 }

@@ -250,6 +250,29 @@ public class MediaController extends FrameLayout {
     }
 
     /**
+     * Disable pause or seek buttons if the stream cannot be paused or seeked.
+     * This requires the control interface to be a MediaPlayerControlExt
+     */
+    private void disableUnsupportedButtons() {
+        try {
+            if (mPauseButton != null && !mPlayer.canPause()) {
+                mPauseButton.setEnabled(false);
+            }
+            if (mRewButton != null && !mPlayer.canSeekBackward()) {
+                mRewButton.setEnabled(false);
+            }
+            if (mFfwdButton != null && !mPlayer.canSeekForward()) {
+                mFfwdButton.setEnabled(false);
+            }
+        } catch (IncompatibleClassChangeError ex) {
+            // We were given an old version of the interface, that doesn't have
+            // the canPause/canSeekXYZ methods. This is OK, it just means we
+            // assume the media can be paused and seeked, and so we don't disable
+            // the buttons.
+        }
+    }
+    
+    /**
      * Show the controller on screen. It will go away
      * automatically after 'timeout' milliseconds of inactivity.
      * @param timeout The timeout in milliseconds. Use 0 to show
@@ -259,6 +282,7 @@ public class MediaController extends FrameLayout {
 
         if (!mShowing && mAnchor != null) {
             setProgress();
+            disableUnsupportedButtons();
 
             int [] anchorpos = new int[2];
             mAnchor.getLocationOnScreen(anchorpos);
@@ -421,17 +445,13 @@ public class MediaController extends FrameLayout {
     };
 
     private void updatePausePlay() {
-        if (mRoot == null)
-            return;
-
-        ImageButton button = (ImageButton) mRoot.findViewById(com.android.internal.R.id.pause);
-        if (button == null)
+        if (mRoot == null || mPauseButton == null)
             return;
 
         if (mPlayer.isPlaying()) {
-            button.setImageResource(com.android.internal.R.drawable.ic_media_pause);
+            mPauseButton.setImageResource(com.android.internal.R.drawable.ic_media_pause);
         } else {
-            button.setImageResource(com.android.internal.R.drawable.ic_media_play);
+            mPauseButton.setImageResource(com.android.internal.R.drawable.ic_media_play);
         }
     }
 
@@ -516,7 +536,7 @@ public class MediaController extends FrameLayout {
         if (mProgress != null) {
             mProgress.setEnabled(enabled);
         }
-
+        disableUnsupportedButtons();
         super.setEnabled(enabled);
     }
 
@@ -579,5 +599,8 @@ public class MediaController extends FrameLayout {
         void    seekTo(int pos);
         boolean isPlaying();
         int     getBufferPercentage();
-    };
+        boolean canPause();
+        boolean canSeekBackward();
+        boolean canSeekForward();
+    }
 }
