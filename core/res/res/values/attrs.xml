@@ -3410,6 +3410,7 @@
         <attr name="contentAuthority" format="string"/>
         <attr name="accountType"/>
         <attr name="userVisible" format="boolean"/>
+        <attr name="supportsUploading" format="boolean"/>
     </declare-styleable>
 
     <!-- =============================== -->

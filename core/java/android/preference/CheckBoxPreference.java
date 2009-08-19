@@ -149,14 +149,12 @@ public class CheckBoxPreference extends Preference {
      * @param checked The checked state.
      */
     public void setChecked(boolean checked) {
-
-        mChecked = checked;
-
-        persistBoolean(checked);
-
-        notifyDependencyChange(shouldDisableDependents());
-        
-        notifyChanged();
+        if (mChecked != checked) {
+            mChecked = checked;
+            persistBoolean(checked);
+            notifyDependencyChange(shouldDisableDependents());
+            notifyChanged();
+        }
     }
 
     /**
