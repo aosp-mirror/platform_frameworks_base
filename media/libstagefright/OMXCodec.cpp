@@ -30,6 +30,7 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXCodec.h>
+#include <media/stagefright/Utils.h>
 #include <utils/Vector.h>
 
 #include <OMX_Audio.h>
@@ -116,6 +117,39 @@ static const char *GetCodec(const CodecInfo *info, size_t numInfos,
     return NULL;
 }
 
+enum {
+    kAVCProfileBaseline      = 0x42,
+    kAVCProfileMain          = 0x4d,
+    kAVCProfileExtended      = 0x58,
+    kAVCProfileHigh          = 0x64,
+    kAVCProfileHigh10        = 0x6e,
+    kAVCProfileHigh422       = 0x7a,
+    kAVCProfileHigh444       = 0xf4,
+    kAVCProfileCAVLC444Intra = 0x2c
+};
+
+static const char *AVCProfileToString(uint8_t profile) {
+    switch (profile) {
+        case kAVCProfileBaseline:
+            return "Baseline";
+        case kAVCProfileMain:
+            return "Main";
+        case kAVCProfileExtended:
+            return "Extended";
+        case kAVCProfileHigh:
+            return "High";
+        case kAVCProfileHigh10:
+            return "High 10";
+        case kAVCProfileHigh422:
+            return "High 422";
+        case kAVCProfileHigh444:
+            return "High 444";
+        case kAVCProfileCAVLC444Intra:
+            return "CAVLC 444 Intra";
+        default:   return "Unknown";
+    }
+}
+
 // static
 sp<OMXCodec> OMXCodec::Create(
         const sp<IOMX> &omx,
@@ -189,15 +223,34 @@ sp<OMXCodec> OMXCodec::Create(
     } else if (meta->findData(kKeyAVCC, &type, &data, &size)) {
         printf("found avcc of size %d\n", size);
 
-        const uint8_t *ptr = (const uint8_t *)data + 6;
+        // Parse the AVCDecoderConfigurationRecord
+
+        const uint8_t *ptr = (const uint8_t *)data;
+
+        CHECK(size >= 7);
+        CHECK_EQ(ptr[0], 1);  // configurationVersion == 1
+        uint8_t profile = ptr[1];
+        uint8_t level = ptr[3];
+
+        CHECK((ptr[4] >> 2) == 0x3f);  // reserved
+
+        size_t lengthSize = 1 + (ptr[4] & 3);
+
+        // commented out check below as H264_QVGA_500_NO_AUDIO.3gp
+        // violates it...
+        // CHECK((ptr[5] >> 5) == 7);  // reserved
+
+        size_t numSeqParameterSets = ptr[5] & 31;
+
+        ptr += 6;
         size -= 6;
-        while (size >= 2) {
-            size_t length = ptr[0] << 8 | ptr[1];
+
+        for (size_t i = 0; i < numSeqParameterSets; ++i) {
+            CHECK(size >= 2);
+            size_t length = U16_AT(ptr);
 
             ptr += 2;
             size -= 2;
-
-            // printf("length = %d, size = %d\n", length, size);
 
             CHECK(size >= length);
 
@@ -205,13 +258,37 @@ sp<OMXCodec> OMXCodec::Create(
 
             ptr += length;
             size -= length;
+        }
 
-            if (size <= 1) {
-                break;
-            }
+        CHECK(size >= 1);
+        size_t numPictureParameterSets = *ptr;
+        ++ptr;
+        --size;
 
-            ptr++;  // XXX skip trailing 0x01 byte???
-            --size;
+        for (size_t i = 0; i < numPictureParameterSets; ++i) {
+            CHECK(size >= 2);
+            size_t length = U16_AT(ptr);
+
+            ptr += 2;
+            size -= 2;
+
+            CHECK(size >= length);
+
+            codec->addCodecSpecificData(ptr, length);
+
+            ptr += length;
+            size -= length;
+        }
+
+        LOGI("AVC profile = %d (%s), level = %d",
+             (int)profile, AVCProfileToString(profile), (int)level / 10);
+
+        if (!strcmp(componentName, "OMX.TI.Video.Decoder")
+            && (profile != kAVCProfileBaseline || level > 39)) {
+            // This stream exceeds the decoder's capabilities.
+
+            LOGE("Profile and/or level exceed the decoder's capabilities.");
+            return NULL;
         }
     }
 
@@ -529,7 +606,7 @@ void OMXCodec::setVideoOutputFormat(
 
 OMXCodec::OMXCodec(
         const sp<IOMX> &omx, IOMX::node_id node, uint32_t quirks,
-        bool isEncoder, 
+        bool isEncoder,
         const char *mime,
         const char *componentName,
         const sp<MediaSource> &source)
@@ -569,7 +646,7 @@ OMXCodec::~OMXCodec() {
 
     free(mComponentName);
     mComponentName = NULL;
-    
+
     free(mMIME);
     mMIME = NULL;
 }
@@ -772,7 +849,7 @@ void OMXCodec::on_message(const omx_message &msg) {
                 mBufferFilled.signal();
             } else if (mPortStatus[kPortIndexOutput] != SHUTTING_DOWN) {
                 CHECK_EQ(mPortStatus[kPortIndexOutput], ENABLED);
-                
+
                 MediaBuffer *buffer = info->mMediaBuffer;
 
                 buffer->set_range(
@@ -1383,7 +1460,7 @@ void OMXCodec::setImageOutputFormat(
     CHECK_EQ(def.eDomain, OMX_PortDomainImage);
 
     OMX_IMAGE_PORTDEFINITIONTYPE *imageDef = &def.format.image;
-    
+
     CHECK_EQ(imageDef->eCompressionFormat, OMX_IMAGE_CodingUnused);
     imageDef->eColorFormat = format;
     imageDef->nFrameWidth = width;
@@ -1460,7 +1537,7 @@ status_t OMXCodec::start(MetaData *) {
     if (mState != LOADED) {
         return UNKNOWN_ERROR;
     }
-    
+
     sp<MetaData> params = new MetaData;
     if (mQuirks & kWantsNALFragments) {
         params->setInt32(kKeyWantsNALFragments, true);
@@ -1630,7 +1707,7 @@ static const char *colorFormatString(OMX_COLOR_FORMATTYPE type) {
         "OMX_COLOR_Format16bitBGR565",
         "OMX_COLOR_Format18bitRGB666",
         "OMX_COLOR_Format18bitARGB1665",
-        "OMX_COLOR_Format19bitARGB1666", 
+        "OMX_COLOR_Format19bitARGB1666",
         "OMX_COLOR_Format24bitRGB888",
         "OMX_COLOR_Format24bitBGR888",
         "OMX_COLOR_Format24bitARGB1887",
@@ -1653,11 +1730,11 @@ static const char *colorFormatString(OMX_COLOR_FORMATTYPE type) {
         "OMX_COLOR_FormatRawBayer8bit",
         "OMX_COLOR_FormatRawBayer10bit",
         "OMX_COLOR_FormatRawBayer8bitcompressed",
-        "OMX_COLOR_FormatL2", 
-        "OMX_COLOR_FormatL4", 
-        "OMX_COLOR_FormatL8", 
-        "OMX_COLOR_FormatL16", 
-        "OMX_COLOR_FormatL24", 
+        "OMX_COLOR_FormatL2",
+        "OMX_COLOR_FormatL4",
+        "OMX_COLOR_FormatL8",
+        "OMX_COLOR_FormatL16",
+        "OMX_COLOR_FormatL24",
         "OMX_COLOR_FormatL32",
         "OMX_COLOR_FormatYUV420PackedSemiPlanar",
         "OMX_COLOR_FormatYUV422PackedSemiPlanar",
