@@ -60,8 +60,13 @@ class BaseObj {
     protected void finalize() throws Throwable
     {
         if (!mDestroyed) {
+            if(mID != 0) {
+                mRS.nObjDestroyOOB(mID);
+            }
+            mID = 0;
+            mDestroyed = true;
             Log.v(RenderScript.LOG_TAG,
-                  getClass() + " finalized without having released the RS reference.");
+                  getClass() + " auto finalizing object without having released the RS reference.");
         }
         super.finalize();
     }

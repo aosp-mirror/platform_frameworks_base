@@ -51,6 +51,7 @@ void rsDeviceDestroy(RsDevice);
 
 RsContext rsContextCreate(RsDevice, void *, uint32_t version);
 void rsContextDestroy(RsContext);
+void rsObjDestroyOOB(RsContext, void *);
 
 #define RS_MAX_TEXTURE 2
 

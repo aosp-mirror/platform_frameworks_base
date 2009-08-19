@@ -75,6 +75,7 @@ public class RenderScript {
 
     native void nAssignName(int obj, byte[] name);
     native void nObjDestroy(int id);
+    native void nObjDestroyOOB(int id);
     native int  nFileOpen(byte[] name);
 
     native void nElementBegin();
