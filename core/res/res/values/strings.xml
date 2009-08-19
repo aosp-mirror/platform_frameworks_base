@@ -1350,7 +1350,7 @@
 
     <!-- When the battery is low, this is the label of the button to go to the
          power usage activity to find out what drained the battery. -->
-    <string name="battery_low_why">Why?</string>
+    <string name="battery_low_why">Battery use</string>
 
     <!-- Title of the alert when something went wrong in the factory test. -->
     <string name="factorytest_failed">Factory test failed</string>
