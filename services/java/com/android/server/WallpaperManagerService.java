@@ -65,7 +65,7 @@ import com.android.internal.util.FastXmlSerializer;
 
 class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperService";
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     Object mLock = new Object();
 
