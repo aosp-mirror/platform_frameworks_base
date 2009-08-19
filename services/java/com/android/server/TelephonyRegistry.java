@@ -535,9 +535,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             intent.putExtra(Phone.STATE_CHANGE_REASON_KEY, reason);
         }
         intent.putExtra(Phone.DATA_APN_KEY, apn);
-        String types = apnTypes[0];
-        for (int i = 1; i < apnTypes.length; i++) {
-            types = types+","+apnTypes[i];
+        String types = new String("");
+        if (apnTypes.length > 0) {
+            types = apnTypes[0];
+            for (int i = 1; i < apnTypes.length; i++) {
+                types = types+","+apnTypes[i];
+            }
         }
         intent.putExtra(Phone.DATA_APN_TYPES_KEY, types);
         intent.putExtra(Phone.DATA_IFACE_NAME_KEY, interfaceName);
