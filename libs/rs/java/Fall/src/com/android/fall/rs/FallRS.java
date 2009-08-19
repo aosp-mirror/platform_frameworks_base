@@ -26,6 +26,7 @@ import android.renderscript.Allocation;
 import android.renderscript.Sampler;
 import android.renderscript.Element;
 import android.renderscript.Light;
+import android.renderscript.Type;
 import static android.renderscript.Sampler.Value.LINEAR;
 import static android.renderscript.Sampler.Value.WRAP;
 import static android.renderscript.ProgramStore.DepthFunc.*;
@@ -43,18 +44,7 @@ class FallRS {
     private static final int MESH_RESOLUTION = 48;
 
     private static final int RSID_STATE = 0;
-    private static final int RSID_STATE_FRAMECOUNT = 0;
-    private static final int RSID_STATE_WIDTH = 1;
-    private static final int RSID_STATE_HEIGHT = 2;
-    private static final int RSID_STATE_MESH_WIDTH = 3;
-    private static final int RSID_STATE_MESH_HEIGHT = 4;
-    private static final int RSID_STATE_RIPPLE_MAP_SIZE = 5;
-    private static final int RSID_STATE_RIPPLE_INDEX = 6;
-    private static final int RSID_STATE_DROP_X = 7;
-    private static final int RSID_STATE_DROP_Y = 8;
-    private static final int RSID_STATE_RUNNING = 9;
-    private static final int RSID_STATE_LEAVES_COUNT = 10;
-
+    
     private static final int TEXTURES_COUNT = 3;
     private static final int LEAVES_TEXTURES_COUNT = 4;
     private static final int RSID_TEXTURE_RIVERBED = 0;
@@ -80,12 +70,8 @@ class FallRS {
     private static final int LEAF_STRUCT_DELTAX = 9;
     private static final int LEAF_STRUCT_DELTAY = 10;
 
-    private static final int RSID_GL_STATE = 4;    
-    private static final int RSID_STATE_GL_WIDTH = 0;
-    private static final int RSID_STATE_GL_HEIGHT = 1;
-    
-    private boolean mIsRunning = true;    
-    
+    private static final int RSID_DROP = 4;    
+
     private Resources mResources;
     private RenderScript mRS;
 
@@ -94,33 +80,34 @@ class FallRS {
     private final int mWidth;
     private final int mHeight;
 
-    private ScriptC mScript;
-    private Sampler mSampler;
+    @SuppressWarnings({"FieldCanBeLocal"})
     private ProgramFragment mPfBackground;
+    @SuppressWarnings({"FieldCanBeLocal"})
     private ProgramFragment mPfLighting;
+    @SuppressWarnings({"FieldCanBeLocal"})
     private ProgramFragment mPfSky;
+    @SuppressWarnings({"FieldCanBeLocal"})
     private ProgramStore mPfsBackground;
+    @SuppressWarnings({"FieldCanBeLocal"})
     private ProgramStore mPfsLeaf;
+    @SuppressWarnings({"FieldCanBeLocal"})
     private ProgramVertex mPvLight;
+    @SuppressWarnings({"FieldCanBeLocal"})
     private ProgramVertex mPvSky;
-    private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
-    private Light mLight;
-
-    private Allocation[] mTextures;
 
     private Allocation mState;
-    private RenderScript.TriangleMesh mMesh;
+    private Allocation mDropState;
+    private DropState mDrop;
+    private Type mStateType;
+    private Type mDropType;
     private int mMeshWidth;
-    private int mMeshHeight;
 
+    private int mMeshHeight;
     private Allocation mRippleMap;
     private Allocation mRefractionMap;
+
     private Allocation mLeaves;
-
-    private Allocation mGlState;
     private float mGlHeight;
-
-    private final int[] mIntData2 = new int[2];
 
     public FallRS(int width, int height) {
         mWidth = width;
@@ -135,38 +122,6 @@ class FallRS {
         initRS();
     }
 
-    public void destroy() {
-        mScript.destroy();
-        mSampler.destroy();
-        mPfBackground.destroy();
-        mPfsBackground.destroy();
-        mPvLight.destroy();
-        mPvOrthoAlloc.mAlloc.destroy();
-        for (Allocation a : mTextures) {
-            a.destroy();
-        }
-        mState.destroy();
-        mMesh.destroy();
-        mLight.destroy();
-        mRippleMap.destroy();
-        mRefractionMap.destroy();
-        mPvSky.destroy();
-        mPfLighting.destroy();
-        mLeaves.destroy();
-        mPfsLeaf.destroy();
-        mPfSky.destroy();
-        mGlState.destroy();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            destroy();
-        } finally {
-            super.finalize();
-        }
-    }
-
     private void initRS() {
         createProgramVertex();
         createProgramFragmentStore();
@@ -176,19 +131,22 @@ class FallRS {
         loadTextures();
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
+        sb.setType(mStateType, "State", RSID_STATE);
+        sb.setType(mDropType, "Drop", RSID_DROP);
         sb.setScript(mResources, R.raw.fall);
         sb.setRoot(true);
-        mScript = sb.create();
-        mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        mScript.setTimeZone(TimeZone.getDefault().getID());
 
-        mScript.bindAllocation(mState, RSID_STATE);
-        mScript.bindAllocation(mRippleMap, RSID_RIPPLE_MAP);
-        mScript.bindAllocation(mRefractionMap, RSID_REFRACTION_MAP);
-        mScript.bindAllocation(mLeaves, RSID_LEAVES);
-        mScript.bindAllocation(mGlState, RSID_GL_STATE);
+        ScriptC script = sb.create();
+        script.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        script.setTimeZone(TimeZone.getDefault().getID());
 
-        mRS.contextBindRootScript(mScript);
+        script.bindAllocation(mState, RSID_STATE);
+        script.bindAllocation(mRippleMap, RSID_RIPPLE_MAP);
+        script.bindAllocation(mRefractionMap, RSID_REFRACTION_MAP);
+        script.bindAllocation(mLeaves, RSID_LEAVES);
+        script.bindAllocation(mDropState, RSID_DROP);
+
+        mRS.contextBindRootScript(script);
     }
 
     private void createMesh() {
@@ -238,8 +196,8 @@ class FallRS {
             }
         }
 
-        mMesh = rs.triangleMeshCreate();
-        mMesh.setName("mesh");
+        RenderScript.TriangleMesh mesh = rs.triangleMeshCreate();
+        mesh.setName("WaterMesh");
 
         mMeshWidth = wResolution + 1;
         mMeshHeight = hResolution + 1;
@@ -249,7 +207,6 @@ class FallRS {
         final int rippleMapSize = (mMeshWidth + 2) * (mMeshHeight + 2);
 
         createState(rippleMapSize);
-        createGlState();
         createRippleMap(rippleMapSize);
         createRefractionMap();
         createLeaves();
@@ -281,29 +238,53 @@ class FallRS {
         mRippleMap.data(rippleMap);
     }
 
-    private void createGlState() {
-        final float[] meshState = new float[2];
-        mGlState = Allocation.createSized(mRS, USER_FLOAT, meshState.length);
-        meshState[RSID_STATE_GL_WIDTH] = 2.0f;
-        meshState[RSID_STATE_GL_HEIGHT] = mGlHeight;
-        mGlState.data(meshState);
+    static class WorldState {
+        public int frameCount;
+        public int width;
+        public int height;
+        public int meshWidth;
+        public int meshHeight;
+        public int rippleMapSize;
+        public int rippleIndex;
+        public int leavesCount;
+        public float glWidth;
+        public float glHeight;
+        public float skyOffsetX;
+        public float skyOffsetY;
+        public float skySpeedX;
+        public float skySpeedY;
+    }
+    
+    static class DropState {
+        public int dropX;
+        public int dropY;
     }
 
     private void createState(int rippleMapSize) {
-        final int[] data = new int[11];
-        mState = Allocation.createSized(mRS, USER_I32, data.length);
-        data[RSID_STATE_FRAMECOUNT] = 0;
-        data[RSID_STATE_WIDTH] = mWidth;
-        data[RSID_STATE_HEIGHT] = mHeight;
-        data[RSID_STATE_MESH_WIDTH] = mMeshWidth;
-        data[RSID_STATE_MESH_HEIGHT] = mMeshHeight;
-        data[RSID_STATE_RIPPLE_MAP_SIZE] = rippleMapSize;
-        data[RSID_STATE_RIPPLE_INDEX] = 0;
-        data[RSID_STATE_DROP_X] = -1;
-        data[RSID_STATE_DROP_Y] = -1;
-        data[RSID_STATE_RUNNING] = 1;
-        data[RSID_STATE_LEAVES_COUNT] = LEAVES_COUNT;
-        mState.data(data);
+        WorldState worldState = new WorldState();
+        worldState.width = mWidth;
+        worldState.height = mHeight;
+        worldState.meshWidth = mMeshWidth;
+        worldState.meshHeight = mMeshHeight;
+        worldState.rippleMapSize = rippleMapSize;
+        worldState.rippleIndex = 0;
+        worldState.leavesCount = LEAVES_COUNT;
+        worldState.glWidth = 2.0f;
+        worldState.glHeight = mGlHeight;
+        worldState.skySpeedX = random(-0.001f, 0.001f);
+        worldState.skySpeedY = random(0.00008f, 0.0002f);
+
+        mStateType = Type.createFromClass(mRS, WorldState.class, 1, "WorldState");
+        mState = Allocation.createTyped(mRS, mStateType);
+        mState.data(worldState);
+        
+        mDrop = new DropState();
+        mDrop.dropX = -1;
+        mDrop.dropY = -1;
+        
+        mDropType = Type.createFromClass(mRS, DropState.class, 1, "DropState");
+        mDropState = Allocation.createTyped(mRS, mDropType);
+        mDropState.data(mDrop);
     }
 
     private void createLeaf(float[] leaves, int index) {
@@ -323,9 +304,7 @@ class FallRS {
     }
 
     private void loadTextures() {
-        mTextures = new Allocation[TEXTURES_COUNT];
-
-        final Allocation[] textures = mTextures;
+        final Allocation[] textures = new Allocation[TEXTURES_COUNT];
         textures[RSID_TEXTURE_RIVERBED] = loadTexture(R.drawable.riverbed, "TRiverbed");
         textures[RSID_TEXTURE_LEAVES] = loadTextureARGB(R.drawable.leaves, "TLeaves");
         textures[RSID_TEXTURE_SKY] = loadTextureARGB(R.drawable.sky, "TSky");
@@ -357,27 +336,27 @@ class FallRS {
         sampleBuilder.setMag(LINEAR);
         sampleBuilder.setWrapS(WRAP);
         sampleBuilder.setWrapT(WRAP);
-        mSampler = sampleBuilder.create();
+        Sampler sampler = sampleBuilder.create();
 
         ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS, null, null);
         builder.setTexEnable(true, 0);
         builder.setTexEnvMode(REPLACE, 0);
         mPfBackground = builder.create();
         mPfBackground.setName("PFBackground");
-        mPfBackground.bindSampler(mSampler, 0);
+        mPfBackground.bindSampler(sampler, 0);
 
         builder = new ProgramFragment.Builder(mRS, null, null);
         builder.setTexEnable(false, 0);
         mPfLighting = builder.create();
         mPfLighting.setName("PFLighting");
-        mPfLighting.bindSampler(mSampler, 0);
+        mPfLighting.bindSampler(sampler, 0);
         
         builder = new ProgramFragment.Builder(mRS, null, null);
         builder.setTexEnable(true, 0);
         builder.setTexEnvMode(MODULATE, 0);
         mPfSky = builder.create();
         mPfSky.setName("PFSky");
-        mPfSky.bindSampler(mSampler, 0);
+        mPfSky.bindSampler(sampler, 0);
     }
 
     private void createProgramFragmentStore() {
@@ -399,33 +378,28 @@ class FallRS {
     }
 
     private void createProgramVertex() {
-        mPvOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
-        mPvOrthoAlloc.setupProjectionNormalized(mWidth, mHeight);
+        ProgramVertex.MatrixAllocation pvOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
+        pvOrthoAlloc.setupProjectionNormalized(mWidth, mHeight);
 
-        mLight = new Light.Builder(mRS).create();
-        mLight.setPosition(0.0f, 2.0f, -8.0f);
+        Light light = new Light.Builder(mRS).create();
+        light.setPosition(0.0f, 2.0f, -8.0f);
 
         ProgramVertex.Builder builder = new ProgramVertex.Builder(mRS, null, null);
-        builder.setTextureMatrixEnable(true);
-        builder.addLight(mLight);
+        builder.addLight(light);
         mPvLight = builder.create();
-        mPvLight.bindAllocation(mPvOrthoAlloc);
+        mPvLight.bindAllocation(pvOrthoAlloc);
         mPvLight.setName("PVLight");
         
         builder = new ProgramVertex.Builder(mRS, null, null);
+        builder.setTextureMatrixEnable(true);
         mPvSky = builder.create();
-        mPvSky.bindAllocation(mPvOrthoAlloc);
+        mPvSky.bindAllocation(pvOrthoAlloc);
         mPvSky.setName("PVSky");
     }
 
     void addDrop(float x, float y) {
-        mIntData2[0] = (int) ((x / mWidth) * mMeshWidth);
-        mIntData2[1] = (int) ((y / mHeight) * mMeshHeight);
-        mState.subData1D(RSID_STATE_DROP_X, 2, mIntData2);
-    }
-    
-    void togglePause() {
-        mIsRunning = !mIsRunning;
-        mState.subData1D(RSID_STATE_RUNNING, 1, new int[] { mIsRunning ? 1 : 0 });
+        mDrop.dropX = (int) ((x / mWidth) * mMeshWidth);
+        mDrop.dropY = (int) ((y / mHeight) * mMeshHeight);
+        mDropState.data(mDrop);
     }
 }
