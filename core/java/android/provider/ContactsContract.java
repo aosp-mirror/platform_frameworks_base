@@ -19,14 +19,20 @@ package android.provider;
 import android.accounts.Account;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.text.TextUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 /**
  * The contract between the contacts provider and applications. Contains definitions
@@ -298,6 +304,55 @@ public final class ContactsContract {
              * The directory twig for this sub-table
              */
             public static final String CONTENT_DIRECTORY = "suggestions";
+        }
+
+        /**
+         * Returns a URI that can be used to retrieve the contact's default photo.
+         *
+         * @param contactUri the contact whose photo should be used
+         */
+        public static Uri getPhotoUri(ContentResolver cr, Uri contactUri) {
+            long photoId = -1;
+            Cursor cursor = cr.query(contactUri, new String[]{Contacts.PHOTO_ID}, null, null, null);
+            try {
+                if (!cursor.moveToNext()) {
+                    return null;
+                }
+
+                if (cursor.isNull(0)) {
+                    return null;
+                }
+
+                photoId = cursor.getLong(0);
+            } finally {
+                cursor.close();
+            }
+
+            return ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, photoId);
+        }
+
+        /**
+         * Opens an InputStream for the person's default photo and returns the
+         * photo as a Bitmap stream.
+         *
+         * @param contactUri the contact whose photo should be used
+         */
+        public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri) {
+            Uri photoUri = getPhotoUri(cr, contactUri);
+            Cursor cursor = cr.query(photoUri,
+                    new String[]{ContactsContract.CommonDataKinds.Photo.PHOTO}, null, null, null);
+            try {
+                if (!cursor.moveToNext()) {
+                    return null;
+                }
+                byte[] data = cursor.getBlob(0);
+                if (data == null) {
+                    return null;
+                }
+                return new ByteArrayInputStream(data);
+            } finally {
+                cursor.close();
+            }
         }
     }
 

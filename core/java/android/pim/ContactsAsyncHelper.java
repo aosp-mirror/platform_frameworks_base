@@ -27,8 +27,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.Contacts;
-import android.provider.Contacts.People;
+import android.provider.ContactsContract.Contacts;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -39,35 +38,35 @@ import java.io.InputStream;
  * Helper class for async access of images.
  */
 public class ContactsAsyncHelper extends Handler {
-    
+
     private static final boolean DBG = false;
     private static final String LOG_TAG = "ContactsAsyncHelper";
-    
+
     /**
      * Interface for a WorkerHandler result return.
      */
     public interface OnImageLoadCompleteListener {
         /**
          * Called when the image load is complete.
-         * 
+         *
          * @param imagePresent true if an image was found
-         */  
+         */
         public void onImageLoadComplete(int token, Object cookie, ImageView iView,
                 boolean imagePresent);
     }
-     
+
     // constants
     private static final int EVENT_LOAD_IMAGE = 1;
     private static final int DEFAULT_TOKEN = -1;
-    
+
     // static objects
     private static Handler sThreadHandler;
     private static ContactsAsyncHelper sInstance;
-    
+
     static {
         sInstance = new ContactsAsyncHelper();
     }
-    
+
     private static final class WorkerArgs {
         public Context context;
         public ImageView view;
@@ -78,12 +77,12 @@ public class ContactsAsyncHelper extends Handler {
         public OnImageLoadCompleteListener listener;
         public CallerInfo info;
     }
-    
+
     /**
-     * public inner class to help out the ContactsAsyncHelper callers 
-     * with tracking the state of the CallerInfo Queries and image 
+     * public inner class to help out the ContactsAsyncHelper callers
+     * with tracking the state of the CallerInfo Queries and image
      * loading.
-     * 
+     *
      * Logic contained herein is used to remove the race conditions
      * that exist as the CallerInfo queries run and mix with the image
      * loads, which then mix with the Phone state changes.
@@ -94,11 +93,11 @@ public class ContactsAsyncHelper extends Handler {
         public static final int DISPLAY_UNDEFINED = 0;
         public static final int DISPLAY_IMAGE = -1;
         public static final int DISPLAY_DEFAULT = -2;
-        
+
         // State of the image on the imageview.
         private CallerInfo mCurrentCallerInfo;
         private int displayMode;
-        
+
         public ImageTracker() {
             mCurrentCallerInfo = null;
             displayMode = DISPLAY_UNDEFINED;
@@ -107,17 +106,17 @@ public class ContactsAsyncHelper extends Handler {
         /**
          * Used to see if the requested call / connection has a
          * different caller attached to it than the one we currently
-         * have in the CallCard. 
+         * have in the CallCard.
          */
         public boolean isDifferentImageRequest(CallerInfo ci) {
             // note, since the connections are around for the lifetime of the
-            // call, and the CallerInfo-related items as well, we can 
+            // call, and the CallerInfo-related items as well, we can
             // definitely use a simple != comparison.
             return (mCurrentCallerInfo != ci);
         }
-        
+
         public boolean isDifferentImageRequest(Connection connection) {
-            // if the connection does not exist, see if the 
+            // if the connection does not exist, see if the
             // mCurrentCallerInfo is also null to match.
             if (connection == null) {
                 if (DBG) Log.d(LOG_TAG, "isDifferentImageRequest: connection is null");
@@ -133,57 +132,58 @@ public class ContactsAsyncHelper extends Handler {
             }
             return runQuery;
         }
-        
+
         /**
-         * Simple setter for the CallerInfo object. 
+         * Simple setter for the CallerInfo object.
          */
         public void setPhotoRequest(CallerInfo ci) {
-            mCurrentCallerInfo = ci; 
+            mCurrentCallerInfo = ci;
         }
-        
+
         /**
-         * Convenience method used to retrieve the URI 
-         * representing the Photo file recorded in the attached 
-         * CallerInfo Object. 
+         * Convenience method used to retrieve the URI
+         * representing the Photo file recorded in the attached
+         * CallerInfo Object.
          */
         public Uri getPhotoUri() {
             if (mCurrentCallerInfo != null) {
-                return ContentUris.withAppendedId(People.CONTENT_URI, 
+                return ContentUris.withAppendedId(Contacts.CONTENT_URI,
                         mCurrentCallerInfo.person_id);
             }
-            return null; 
+            return null;
         }
-        
+
         /**
-         * Simple setter for the Photo state. 
+         * Simple setter for the Photo state.
          */
         public void setPhotoState(int state) {
             displayMode = state;
         }
-        
+
         /**
-         * Simple getter for the Photo state. 
+         * Simple getter for the Photo state.
          */
         public int getPhotoState() {
             return displayMode;
         }
     }
-    
+
     /**
-     * Thread worker class that handles the task of opening the stream and loading 
+     * Thread worker class that handles the task of opening the stream and loading
      * the images.
      */
     private class WorkerHandler extends Handler {
         public WorkerHandler(Looper looper) {
             super(looper);
         }
-        
+
+        @Override
         public void handleMessage(Message msg) {
             WorkerArgs args = (WorkerArgs) msg.obj;
-            
+
             switch (msg.arg1) {
                 case EVENT_LOAD_IMAGE:
-                    InputStream inputStream = Contacts.People.openContactPhotoInputStream(
+                    InputStream inputStream = Contacts.openContactPhotoInputStream(
                             args.context.getContentResolver(), args.uri);
                     if (inputStream != null) {
                         args.result = Drawable.createFromStream(inputStream, args.uri.toString());
@@ -192,22 +192,22 @@ public class ContactsAsyncHelper extends Handler {
                                 " token: " + msg.what + " image URI: " + args.uri);
                     } else {
                         args.result = null;
-                        if (DBG) Log.d(LOG_TAG, "Problem with image: " + msg.arg1 + 
-                                " token: " + msg.what + " image URI: " + args.uri + 
+                        if (DBG) Log.d(LOG_TAG, "Problem with image: " + msg.arg1 +
+                                " token: " + msg.what + " image URI: " + args.uri +
                                 ", using default image.");
                     }
                     break;
                 default:
             }
-            
-            // send the reply to the enclosing class. 
+
+            // send the reply to the enclosing class.
             Message reply = ContactsAsyncHelper.this.obtainMessage(msg.what);
             reply.arg1 = msg.arg1;
             reply.obj = msg.obj;
             reply.sendToTarget();
         }
     }
-    
+
     /**
      * Private constructor for static class
      */
@@ -216,14 +216,14 @@ public class ContactsAsyncHelper extends Handler {
         thread.start();
         sThreadHandler = new WorkerHandler(thread.getLooper());
     }
-    
+
     /**
      * Convenience method for calls that do not want to deal with listeners and tokens.
      */
-    public static final void updateImageViewWithContactPhotoAsync(Context context, 
+    public static final void updateImageViewWithContactPhotoAsync(Context context,
             ImageView imageView, Uri person, int placeholderImageResource) {
         // Added additional Cookie field in the callee.
-        updateImageViewWithContactPhotoAsync (null, DEFAULT_TOKEN, null, null, context, 
+        updateImageViewWithContactPhotoAsync (null, DEFAULT_TOKEN, null, null, context,
                 imageView, person, placeholderImageResource);
     }
 
@@ -231,24 +231,24 @@ public class ContactsAsyncHelper extends Handler {
      * Convenience method for calls that do not want to deal with listeners and tokens, but have
      * a CallerInfo object to cache the image to.
      */
-    public static final void updateImageViewWithContactPhotoAsync(CallerInfo info, Context context, 
+    public static final void updateImageViewWithContactPhotoAsync(CallerInfo info, Context context,
             ImageView imageView, Uri person, int placeholderImageResource) {
         // Added additional Cookie field in the callee.
-        updateImageViewWithContactPhotoAsync (info, DEFAULT_TOKEN, null, null, context, 
+        updateImageViewWithContactPhotoAsync (info, DEFAULT_TOKEN, null, null, context,
                 imageView, person, placeholderImageResource);
     }
 
-    
+
     /**
      * Start an image load, attach the result to the specified CallerInfo object.
      * Note, when the query is started, we make the ImageView INVISIBLE if the
      * placeholderImageResource value is -1.  When we're given a valid (!= -1)
      * placeholderImageResource value, we make sure the image is visible.
      */
-    public static final void updateImageViewWithContactPhotoAsync(CallerInfo info, int token, 
-            OnImageLoadCompleteListener listener, Object cookie, Context context, 
+    public static final void updateImageViewWithContactPhotoAsync(CallerInfo info, int token,
+            OnImageLoadCompleteListener listener, Object cookie, Context context,
             ImageView imageView, Uri person, int placeholderImageResource) {
-        
+
         // in case the source caller info is null, the URI will be null as well.
         // just update using the placeholder image in this case.
         if (person == null) {
@@ -257,10 +257,10 @@ public class ContactsAsyncHelper extends Handler {
             imageView.setImageResource(placeholderImageResource);
             return;
         }
-        
+
         // Added additional Cookie field in the callee to handle arguments
         // sent to the callback function.
-        
+
         // setup arguments
         WorkerArgs args = new WorkerArgs();
         args.cookie = cookie;
@@ -270,15 +270,15 @@ public class ContactsAsyncHelper extends Handler {
         args.defaultResource = placeholderImageResource;
         args.listener = listener;
         args.info = info;
-        
+
         // setup message arguments
         Message msg = sThreadHandler.obtainMessage(token);
         msg.arg1 = EVENT_LOAD_IMAGE;
         msg.obj = args;
-        
-        if (DBG) Log.d(LOG_TAG, "Begin loading image: " + args.uri + 
+
+        if (DBG) Log.d(LOG_TAG, "Begin loading image: " + args.uri +
                 ", displaying default image for now.");
-        
+
         // set the default image first, when the query is complete, we will
         // replace the image with the correct one.
         if (placeholderImageResource != -1) {
@@ -287,11 +287,11 @@ public class ContactsAsyncHelper extends Handler {
         } else {
             imageView.setVisibility(View.INVISIBLE);
         }
-        
+
         // notify the thread to begin working
         sThreadHandler.sendMessage(msg);
     }
-    
+
     /**
      * Called when loading is done.
      */
@@ -316,21 +316,21 @@ public class ContactsAsyncHelper extends Handler {
                     args.view.setVisibility(View.VISIBLE);
                     args.view.setImageResource(args.defaultResource);
                 }
-                
+
                 // Note that the data is cached.
                 if (args.info != null) {
                     args.info.isCachedPhotoCurrent = true;
                 }
-                
+
                 // notify the listener if it is there.
                 if (args.listener != null) {
-                    if (DBG) Log.d(LOG_TAG, "Notifying listener: " + args.listener.toString() + 
+                    if (DBG) Log.d(LOG_TAG, "Notifying listener: " + args.listener.toString() +
                             " image: " + args.uri + " completed");
                     args.listener.onImageLoadComplete(msg.what, args.cookie, args.view,
                             imagePresent);
                 }
                 break;
-            default:    
+            default:
         }
     }
 }
