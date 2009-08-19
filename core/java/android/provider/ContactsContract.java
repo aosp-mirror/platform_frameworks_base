@@ -1557,14 +1557,6 @@ public final class ContactsContract {
         public static final String SHOULD_SYNC = "should_sync";
 
         /**
-         * Overriding flag indicating if contacts from this source should be
-         * visible in any user interface.
-         * <p>
-         * Type: INTEGER (boolean)
-         */
-        public static final String SOURCE_VISIBLE = "source_visible";
-
-        /**
          * Flag indicating if contacts without any {@link GroupMembership}
          * entries should be visible in any user interface.
          * <p>
