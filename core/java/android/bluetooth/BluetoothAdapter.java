@@ -27,34 +27,54 @@ import java.util.HashSet;
 /**
  * Represents the local Bluetooth adapter.
  *
- * @hide
+ * <p>Use {@link android.content.Context#getSystemService} with {@link
+ * android.content.Context#BLUETOOTH_SERVICE} to get the default local
+ * Bluetooth adapter. On most Android devices there is only one local
+ * Bluetotoh adapter.
+ *
+ * <p>Use the {@link BluetoothDevice} class for operations on remote Bluetooth
+ * devices.
+ *
+ * <p>TODO: unhide more of this class
  */
 public final class BluetoothAdapter {
     private static final String TAG = "BluetoothAdapter";
 
+    /** @hide */
     public static final int BLUETOOTH_STATE_OFF = 0;
+    /** @hide */
     public static final int BLUETOOTH_STATE_TURNING_ON = 1;
+    /** @hide */
     public static final int BLUETOOTH_STATE_ON = 2;
+    /** @hide */
     public static final int BLUETOOTH_STATE_TURNING_OFF = 3;
 
     /** Inquiry scan and page scan are both off.
-     *  Device is neither discoverable nor connectable */
+     *  Device is neither discoverable nor connectable
+     *  @hide */
     public static final int SCAN_MODE_NONE = 0;
     /** Page scan is on, inquiry scan is off.
-     *  Device is connectable, but not discoverable */
+     *  Device is connectable, but not discoverable
+     *  @hide*/
     public static final int SCAN_MODE_CONNECTABLE = 1;
     /** Page scan and inquiry scan are on.
-     *  Device is connectable and discoverable */
+     *  Device is connectable and discoverable
+     *  @hide*/
     public static final int SCAN_MODE_CONNECTABLE_DISCOVERABLE = 3;
 
+    /** @hide */
     public static final int RESULT_FAILURE = -1;
+    /** @hide */
     public static final int RESULT_SUCCESS = 0;
 
-    /* The user will be prompted to enter a pin */
+    /** The user will be prompted to enter a pin
+     * @hide */
     public static final int PAIRING_VARIANT_PIN = 0;
-    /* The user will be prompted to enter a passkey */
+    /** The user will be prompted to enter a passkey
+     * @hide */
     public static final int PAIRING_VARIANT_PASSKEY = 1;
-    /* The user will be prompted to confirm the passkey displayed on the screen */
+    /** The user will be prompted to confirm the passkey displayed on the screen
+     * @hide */
     public static final int PAIRING_VARIANT_CONFIRMATION = 2;
 
     private final IBluetooth mService;
@@ -71,9 +91,14 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Get the remote BluetoothDevice associated with the given MAC address.
-     * Bluetooth MAC address must be upper case, such as "00:11:22:33:AA:BB".
+     * Get a {@link BluetoothDevice} object for the given Bluetooth hardware
+     * address.
+     * <p>Valid Bluetooth hardware addresses must be upper case, in a format
+     * such as "00:11:22:33:AA:BB".
+     * <p>A {@link BluetoothDevice} will always be returned for a valid
+     * hardware address, even if this adapter has never seen that device.
      * @param address valid Bluetooth MAC address
+     * @throws IllegalArgumentException if address is invalid
      */
     public BluetoothDevice getRemoteDevice(String address) {
         return new BluetoothDevice(address);
@@ -83,6 +108,7 @@ public final class BluetoothAdapter {
      * Is Bluetooth currently turned on.
      *
      * @return true if Bluetooth enabled, false otherwise.
+     * @hide
      */
     public boolean isEnabled() {
         try {
@@ -95,6 +121,7 @@ public final class BluetoothAdapter {
      * Get the current state of Bluetooth.
      *
      * @return One of BLUETOOTH_STATE_ or BluetoothError.ERROR.
+     * @hide
      */
     public int getBluetoothState() {
         try {
@@ -112,6 +139,7 @@ public final class BluetoothAdapter {
      * @return false if we cannot enable the Bluetooth device. True does not
      * imply the device was enabled, it only implies that so far there were no
      * problems.
+     * @hide
      */
     public boolean enable() {
         try {
@@ -125,6 +153,7 @@ public final class BluetoothAdapter {
      * This turns off the underlying hardware.
      *
      * @return true if successful, false otherwise.
+     * @hide
      */
     public boolean disable() {
         try {
@@ -133,6 +162,7 @@ public final class BluetoothAdapter {
         return false;
     }
 
+    /** @hide */
     public String getAddress() {
         try {
             return mService.getAddress();
@@ -147,6 +177,7 @@ public final class BluetoothAdapter {
      * possible to retrieve the Bluetooth name when Bluetooth is enabled.
      *
      * @return the Bluetooth name, or null if there was a problem.
+     * @hide
      */
     public String getName() {
         try {
@@ -163,6 +194,7 @@ public final class BluetoothAdapter {
      *
      * @param name the name to set
      * @return     true, if the name was successfully set. False otherwise.
+     * @hide
      */
     public boolean setName(String name) {
         try {
@@ -175,6 +207,7 @@ public final class BluetoothAdapter {
      * Get the current scan mode.
      * Used to determine if the local device is connectable and/or discoverable
      * @return Scan mode, one of SCAN_MODE_* or an error code
+     * @hide
      */
     public int getScanMode() {
         try {
@@ -187,6 +220,7 @@ public final class BluetoothAdapter {
      * Set the current scan mode.
      * Used to make the local device connectable and/or discoverable
      * @param scanMode One of SCAN_MODE_*
+     * @hide
      */
     public void setScanMode(int scanMode) {
         try {
@@ -194,6 +228,7 @@ public final class BluetoothAdapter {
         } catch (RemoteException e) {Log.e(TAG, "", e);}
     }
 
+    /** @hide */
     public int getDiscoverableTimeout() {
         try {
             return mService.getDiscoverableTimeout();
@@ -201,12 +236,14 @@ public final class BluetoothAdapter {
         return -1;
     }
 
+    /** @hide */
     public void setDiscoverableTimeout(int timeout) {
         try {
             mService.setDiscoverableTimeout(timeout);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
     }
 
+    /** @hide */
     public boolean startDiscovery() {
         try {
             return mService.startDiscovery();
@@ -214,12 +251,14 @@ public final class BluetoothAdapter {
         return false;
     }
 
+    /** @hide */
     public void cancelDiscovery() {
         try {
             mService.cancelDiscovery();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
     }
 
+    /** @hide */
     public boolean isDiscovering() {
         try {
             return mService.isDiscovering();
@@ -248,6 +287,7 @@ public final class BluetoothAdapter {
      * returned.
      *
      * @return unmodifiable set of bonded devices, or null on error
+     * @hide
      */
     public Set<BluetoothDevice> getBondedDevices() {
         try {
@@ -257,17 +297,20 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Construct a listening, secure RFCOMM server socket.
-     * The remote device connecting to this socket will be authenticated and
+     * Create a listening, secure RFCOMM Bluetooth socket.
+     * <p>A remote device connecting to this socket will be authenticated and
      * communication on this socket will be encrypted.
-     * Call #accept to retrieve connections to this socket.
-     * @return An RFCOMM BluetoothServerSocket
-     * @throws IOException On error, for example Bluetooth not available, or
-     *                     insufficient permissions.
+     * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
+     * connections to listening {@link BluetoothServerSocket}.
+     * <p>Valid RFCOMM channels are in range 1 to 30.
+     * @param channel RFCOMM channel to listen on
+     * @return a listening RFCOMM BluetoothServerSocket
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions, or channel in use.
      */
-    public BluetoothServerSocket listenUsingRfcommOn(int port) throws IOException {
+    public BluetoothServerSocket listenUsingRfcommOn(int channel) throws IOException {
         BluetoothServerSocket socket = new BluetoothServerSocket(
-                BluetoothSocket.TYPE_RFCOMM, true, true, port);
+                BluetoothSocket.TYPE_RFCOMM, true, true, channel);
         try {
             socket.mSocket.bindListenNative();
         } catch (IOException e) {
@@ -285,6 +328,7 @@ public final class BluetoothAdapter {
      * @return An RFCOMM BluetoothServerSocket
      * @throws IOException On error, for example Bluetooth not available, or
      *                     insufficient permissions.
+     * @hide
      */
     public BluetoothServerSocket listenUsingInsecureRfcommOn(int port) throws IOException {
         BluetoothServerSocket socket = new BluetoothServerSocket(
@@ -306,6 +350,7 @@ public final class BluetoothAdapter {
      * @return A SCO BluetoothServerSocket
      * @throws IOException On error, for example Bluetooth not available, or
      *                     insufficient permissions.
+     * @hide
      */
     public static BluetoothServerSocket listenUsingScoOn() throws IOException {
         BluetoothServerSocket socket = new BluetoothServerSocket(

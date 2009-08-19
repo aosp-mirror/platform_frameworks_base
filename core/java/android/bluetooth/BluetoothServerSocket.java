@@ -20,17 +20,31 @@ import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * Server (listening) Bluetooth Socket.
+ * A listening Bluetooth socket.
  *
- * Currently only supports RFCOMM sockets.
+ * <p>The interface for Bluetooth Sockets is similar to that of TCP sockets:
+ * {@link java.net.Socket} and {@link java.net.ServerSocket}. On the server
+ * side, use a {@link BluetoothServerSocket} to create a listening server
+ * socket. It will return a new, connected {@link BluetoothSocket} on an
+ * accepted connection. On the client side, use the same
+ * {@link BluetoothSocket} object to both intiate the outgoing connection,
+ * and to manage the connected socket.
  *
- * RFCOMM is a connection orientated, streaming transport over Bluetooth. It is
- * also known as the Serial Port Profile (SPP).
+ * <p>The most common type of Bluetooth Socket is RFCOMM. RFCOMM is a
+ * connection orientated, streaming transport over Bluetooth. It is also known
+ * as the Serial Port Profile (SPP).
  *
- * TODO: Consider exposing L2CAP sockets.
- * TODO: Clean up javadoc grammer and formatting.
- * TODO: Remove @hide
- * @hide
+ * <p>Use {@link BluetoothDevice#createRfcommSocket} to create a new {@link
+ * BluetoothSocket} ready for an outgoing connection to a remote
+ * {@link BluetoothDevice}.
+ *
+ * <p>Use {@link BluetoothAdapter#listenUsingRfcommOn} to create a listening
+ * {@link BluetoothServerSocket} ready for incoming connections to the local
+ * {@link BluetoothAdapter}.
+ *
+ * <p>{@link BluetoothSocket} and {@link BluetoothServerSocket} are thread
+ * safe. In particular, {@link #close} will always immediately abort ongoing
+ * operations and close the socket.
  */
 public final class BluetoothServerSocket implements Closeable {
     /*package*/ final BluetoothSocket mSocket;
@@ -51,11 +65,13 @@ public final class BluetoothServerSocket implements Closeable {
 
     /**
      * Block until a connection is established.
-     * Returns a connected #BluetoothSocket. This server socket can be reused
-     * for subsequent incoming connections by calling #accept repeatedly.
-     * #close can be used to abort this call from another thread.
-     * @return A connected #BluetoothSocket
-     * @throws IOException On error, for example this call was aborted
+     * <p>Returns a connected {@link BluetoothSocket} on successful connection.
+     * <p>Once this call returns, it can be called again to accept subsequent
+     * incoming connections.
+     * <p>{@link #close} can be used to abort this call from another thread.
+     * @return a connected {@link BluetoothSocket}
+     * @throws IOException on error, for example this call was aborted, or
+     *                     timeout
      */
     public BluetoothSocket accept() throws IOException {
         return accept(-1);
@@ -63,11 +79,12 @@ public final class BluetoothServerSocket implements Closeable {
 
     /**
      * Block until a connection is established, with timeout.
-     * Returns a connected #BluetoothSocket. This server socket can be reused
-     * for subsequent incoming connections by calling #accept repeatedly.
-     * #close can be used to abort this call from another thread.
-     * @return A connected #BluetoothSocket
-     * @throws IOException On error, for example this call was aborted, or
+     * <p>Returns a connected {@link BluetoothSocket} on successful connection.
+     * <p>Once this call returns, it can be called again to accept subsequent
+     * incoming connections.
+     * <p>{@link #close} can be used to abort this call from another thread.
+     * @return a connected {@link BluetoothSocket}
+     * @throws IOException on error, for example this call was aborted, or
      *                     timeout
      */
     public BluetoothSocket accept(int timeout) throws IOException {
@@ -75,8 +92,8 @@ public final class BluetoothServerSocket implements Closeable {
     }
 
     /**
-     * Closes this socket.
-     * This will cause other blocking calls on this socket to immediately
+     * Immediately close this socket, and release all associated resources.
+     * <p>Causes blocked calls on this socket in other threads to immediately
      * throw an IOException.
      */
     public void close() throws IOException {
