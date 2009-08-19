@@ -51,11 +51,6 @@ public class Sampler extends BaseObj {
         mID = id;
     }
 
-    public void destroy() {
-        mRS.nSamplerDestroy(mID);
-        mID = 0;
-    }
-
     public static class Builder {
         RenderScript mRS;
         Value mMin;

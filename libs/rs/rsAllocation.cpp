@@ -201,10 +201,6 @@ void rsi_AllocationUploadToBufferObject(Context *rsc, RsAllocation va)
     alloc->uploadToBufferObject();
 }
 
-void rsi_AllocationDestroy(Context *rsc, RsAllocation)
-{
-}
-
 static void mip565(const Adapter2D &out, const Adapter2D &in)
 {
     uint32_t w = out.getDimX();

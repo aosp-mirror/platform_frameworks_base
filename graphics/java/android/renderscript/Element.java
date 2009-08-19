@@ -138,11 +138,7 @@ public class Element extends BaseObj {
         if(mIsPredefined) {
             throw new IllegalStateException("Attempting to destroy a predefined Element.");
         }
-        if(mDestroyed) {
-            throw new IllegalStateException("Object already destroyed.");
-        }
-        mDestroyed = true;
-        mRS.nElementDestroy(mID);
+        super.destroy();
     }
 
     public static Element createFromClass(RenderScript rs, Class c) {

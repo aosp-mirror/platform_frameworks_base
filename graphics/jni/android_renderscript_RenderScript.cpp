@@ -78,6 +78,14 @@ nAssignName(JNIEnv *_env, jobject _this, jint obj, jbyteArray str)
     _env->ReleasePrimitiveArrayCritical(str, cptr, JNI_ABORT);
 }
 
+static void
+nObjDestroy(JNIEnv *_env, jobject _this, jint obj)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nObjDestroy, con(%p) obj(%p)", con, (void *)obj);
+    rsObjDestroy(con, (void *)obj);
+}
+
 
 static jint
 nFileOpen(JNIEnv *_env, jobject _this, jbyteArray str)
@@ -183,14 +191,6 @@ nElementGetPredefined(JNIEnv *_env, jobject _this, jint predef)
     return (jint)rsElementGetPredefined(con, (RsElementPredefined)predef);
 }
 
-static void
-nElementDestroy(JNIEnv *_env, jobject _this, jint e)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nElementDestroy, con(%p) e(%p)", con, (RsElement)e);
-    rsElementDestroy(con, (RsElement)e);
-}
-
 // -----------------------------------
 
 static void
@@ -215,14 +215,6 @@ nTypeCreate(JNIEnv *_env, jobject _this)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nTypeCreate, con(%p)", con);
     return (jint)rsTypeCreate(con);
-}
-
-static void
-nTypeDestroy(JNIEnv *_env, jobject _this, jint eID)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nTypeDestroy, con(%p), t(%p)", con, (RsType)eID);
-    rsTypeDestroy(con, (RsType)eID);
 }
 
 static void * SF_LoadInt(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
@@ -412,14 +404,6 @@ nAllocationCreateFromBitmapBoxed(JNIEnv *_env, jobject _this, jint dstFmt, jbool
 
 
 static void
-nAllocationDestroy(JNIEnv *_env, jobject _this, jint a)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nAllocationDestroy, con(%p), a(%p)", con, (RsAllocation)a);
-    rsAllocationDestroy(con, (RsAllocation)a);
-}
-
-static void
 nAllocationData_i(JNIEnv *_env, jobject _this, jint alloc, jintArray data)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -531,14 +515,6 @@ nAllocationDataFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _type
 // -----------------------------------
 
 static void
-nTriangleMeshDestroy(JNIEnv *_env, jobject _this, jint tm)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nTriangleMeshDestroy, con(%p), tm(%p)", con, (RsAllocation)tm);
-    rsTriangleMeshDestroy(con, (RsTriangleMesh)tm);
-}
-
-static void
 nTriangleMeshBegin(JNIEnv *_env, jobject _this, jint v, jint i)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -608,14 +584,6 @@ nTriangleMeshCreate(JNIEnv *_env, jobject _this)
 }
 
 // -----------------------------------
-
-static void
-nAdapter1DDestroy(JNIEnv *_env, jobject _this, jint adapter)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nAdapter1DDestroy, con(%p), adapter(%p)", con, (RsAdapter1D)adapter);
-    rsAdapter1DDestroy(con, (RsAdapter1D)adapter);
-}
 
 static void
 nAdapter1DBindAllocation(JNIEnv *_env, jobject _this, jint adapter, jint alloc)
@@ -688,14 +656,6 @@ nAdapter1DCreate(JNIEnv *_env, jobject _this)
 // -----------------------------------
 
 static void
-nAdapter2DDestroy(JNIEnv *_env, jobject _this, jint adapter)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nAdapter2DDestroy, con(%p), adapter(%p)", con, (RsAdapter2D)adapter);
-    rsAdapter2DDestroy(con, (RsAdapter2D)adapter);
-}
-
-static void
 nAdapter2DBindAllocation(JNIEnv *_env, jobject _this, jint adapter, jint alloc)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -766,14 +726,6 @@ nAdapter2DCreate(JNIEnv *_env, jobject _this)
 }
 
 // -----------------------------------
-
-static void
-nScriptDestroy(JNIEnv *_env, jobject _this, jint script)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptDestroy, con(%p), script(%p)", con, (RsScript)script);
-    rsScriptDestroy(con, (RsScript)script);
-}
 
 static void
 nScriptBindAllocation(JNIEnv *_env, jobject _this, jint script, jint alloc, jint slot)
@@ -988,14 +940,6 @@ nProgramFragmentStoreCreate(JNIEnv *_env, jobject _this)
     return (jint)rsProgramFragmentStoreCreate(con);
 }
 
-static void
-nProgramFragmentStoreDestroy(JNIEnv *_env, jobject _this, jint pgm)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentStoreDestroy, con(%p), pgm(%i)", con, pgm);
-    rsProgramFragmentStoreDestroy(con, (RsProgramFragmentStore)pgm);
-}
-
 // ---------------------------------------------------------------------------
 
 static void
@@ -1054,14 +998,6 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, jint slot, jboolean enable)
     return (jint)rsProgramFragmentCreate(con);
 }
 
-static void
-nProgramFragmentDestroy(JNIEnv *_env, jobject _this, jint pgm)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentDestroy, con(%p), pgm(%i)", con, pgm);
-    rsProgramFragmentDestroy(con, (RsProgramFragment)pgm);
-}
-
 // ---------------------------------------------------------------------------
 
 static void
@@ -1103,15 +1039,6 @@ nProgramVertexCreate(JNIEnv *_env, jobject _this)
     LOG_API("nProgramVertexCreate, con(%p)", con);
     return (jint)rsProgramVertexCreate(con);
 }
-
-static void
-nProgramVertexDestroy(JNIEnv *_env, jobject _this, jint pgm)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentDestroy, con(%p), pgm(%i)", con, pgm);
-    rsProgramFragmentDestroy(con, (RsProgramFragment)pgm);
-}
-
 
 
 
@@ -1173,14 +1100,6 @@ nContextAddDefineF(JNIEnv *_env, jobject _this, jstring name, jfloat value)
 // ---------------------------------------------------------------------------
 
 static void
-nSamplerDestroy(JNIEnv *_env, jobject _this, jint s)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nSamplerDestroy, con(%p), sampler(%p)", con, (RsSampler)s);
-    rsSamplerDestroy(con, (RsSampler)s);
-}
-
-static void
 nSamplerBegin(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -1239,14 +1158,6 @@ nLightCreate(JNIEnv *_env, jobject _this)
 }
 
 static void
-nLightDestroy(JNIEnv *_env, jobject _this, jint light)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nLightDestroy, con(%p), light(%p)", con, (RsLight)light);
-    rsLightDestroy(con, (RsLight)light);
-}
-
-static void
 nLightSetColor(JNIEnv *_env, jobject _this, jint light, float r, float g, float b)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -1263,14 +1174,6 @@ nLightSetPosition(JNIEnv *_env, jobject _this, jint light, float x, float y, flo
 }
 
 // ---------------------------------------------------------------------------
-
-static void
-nSimpleMeshDestroy(JNIEnv *_env, jobject _this, jint s)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nSimpleMeshDestroy, con(%p), SimpleMesh(%p)", con, (RsSimpleMesh)s);
-    rsSimpleMeshDestroy(con, (RsSimpleMesh)s);
-}
 
 static jint
 nSimpleMeshCreate(JNIEnv *_env, jobject _this, jint batchID, jint indexID, jintArray vtxIDs, jint primID)
@@ -1313,6 +1216,7 @@ static JNINativeMethod methods[] = {
 {"nContextCreate",                 "(ILandroid/view/Surface;I)I",          (void*)nContextCreate },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
 {"nAssignName",                    "(I[B)V",                               (void*)nAssignName },
+{"nObjDestroy",                    "(I)V",                                 (void*)nObjDestroy },
 
 {"nFileOpen",                      "([B)I",                                (void*)nFileOpen },
 
@@ -1321,12 +1225,10 @@ static JNINativeMethod methods[] = {
 {"nElementAdd",                    "(IIIILjava/lang/String;)V",            (void*)nElementAdd },
 {"nElementCreate",                 "()I",                                  (void*)nElementCreate },
 {"nElementGetPredefined",          "(I)I",                                 (void*)nElementGetPredefined },
-{"nElementDestroy",                "(I)V",                                 (void*)nElementDestroy },
 
 {"nTypeBegin",                     "(I)V",                                 (void*)nTypeBegin },
 {"nTypeAdd",                       "(II)V",                                (void*)nTypeAdd },
 {"nTypeCreate",                    "()I",                                  (void*)nTypeCreate },
-{"nTypeDestroy",                   "(I)V",                                 (void*)nTypeDestroy },
 {"nTypeFinalDestroy",              "(Landroid/renderscript/Type;)V",       (void*)nTypeFinalDestroy },
 {"nTypeSetupFields",               "(Landroid/renderscript/Type;[I[I[Ljava/lang/reflect/Field;)V", (void*)nTypeSetupFields },
 
@@ -1336,7 +1238,6 @@ static JNINativeMethod methods[] = {
 {"nAllocationCreateFromBitmap",    "(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
 {"nAllocationCreateFromBitmapBoxed","(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmapBoxed },
 {"nAllocationUploadToTexture",     "(II)V",                                (void*)nAllocationUploadToTexture },
-{"nAllocationDestroy",             "(I)V",                                 (void*)nAllocationDestroy },
 {"nAllocationData",                "(I[I)V",                               (void*)nAllocationData_i },
 {"nAllocationData",                "(I[F)V",                               (void*)nAllocationData_f },
 {"nAllocationSubData1D",           "(III[I)V",                             (void*)nAllocationSubData1D_i },
@@ -1347,7 +1248,6 @@ static JNINativeMethod methods[] = {
 {"nAllocationRead",                "(I[F)V",                               (void*)nAllocationRead_f },
 {"nAllocationDataFromObject",      "(ILandroid/renderscript/Type;Ljava/lang/Object;)V",   (void*)nAllocationDataFromObject },
 
-{"nTriangleMeshDestroy",           "(I)V",                                 (void*)nTriangleMeshDestroy },
 {"nTriangleMeshBegin",             "(II)V",                                (void*)nTriangleMeshBegin },
 {"nTriangleMeshAddVertex_XY",      "(FF)V",                                (void*)nTriangleMeshAddVertex_XY },
 {"nTriangleMeshAddVertex_XYZ",     "(FFF)V",                               (void*)nTriangleMeshAddVertex_XYZ },
@@ -1357,7 +1257,6 @@ static JNINativeMethod methods[] = {
 {"nTriangleMeshAddTriangle",       "(III)V",                               (void*)nTriangleMeshAddTriangle },
 {"nTriangleMeshCreate",            "()I",                                  (void*)nTriangleMeshCreate },
 
-{"nAdapter1DDestroy",              "(I)V",                                 (void*)nAdapter1DDestroy },
 {"nAdapter1DBindAllocation",       "(II)V",                                (void*)nAdapter1DBindAllocation },
 {"nAdapter1DSetConstraint",        "(III)V",                               (void*)nAdapter1DSetConstraint },
 {"nAdapter1DData",                 "(I[I)V",                               (void*)nAdapter1DData_i },
@@ -1366,7 +1265,6 @@ static JNINativeMethod methods[] = {
 {"nAdapter1DSubData",              "(III[F)V",                             (void*)nAdapter1DSubData_f },
 {"nAdapter1DCreate",               "()I",                                  (void*)nAdapter1DCreate },
 
-{"nAdapter2DDestroy",              "(I)V",                                 (void*)nAdapter2DDestroy },
 {"nAdapter2DBindAllocation",       "(II)V",                                (void*)nAdapter2DBindAllocation },
 {"nAdapter2DSetConstraint",        "(III)V",                               (void*)nAdapter2DSetConstraint },
 {"nAdapter2DData",                 "(I[I)V",                               (void*)nAdapter2DData_i },
@@ -1375,7 +1273,6 @@ static JNINativeMethod methods[] = {
 {"nAdapter2DSubData",              "(IIIII[F)V",                           (void*)nAdapter2DSubData_f },
 {"nAdapter2DCreate",               "()I",                                  (void*)nAdapter2DCreate },
 
-{"nScriptDestroy",                 "(I)V",                                 (void*)nScriptDestroy },
 {"nScriptBindAllocation",          "(III)V",                               (void*)nScriptBindAllocation },
 {"nScriptSetClearColor",           "(IFFFF)V",                             (void*)nScriptSetClearColor },
 {"nScriptSetClearDepth",           "(IF)V",                                (void*)nScriptSetClearDepth },
@@ -1397,7 +1294,6 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentStoreBlendFunc", "(II)V",                                (void*)nProgramFragmentStoreBlendFunc },
 {"nProgramFragmentStoreDither",    "(Z)V",                                 (void*)nProgramFragmentStoreDither },
 {"nProgramFragmentStoreCreate",    "()I",                                  (void*)nProgramFragmentStoreCreate },
-{"nProgramFragmentStoreDestroy",   "(I)V",                                 (void*)nProgramFragmentStoreDestroy },
 
 {"nProgramFragmentBegin",          "(II)V",                                (void*)nProgramFragmentBegin },
 {"nProgramFragmentBindTexture",    "(III)V",                               (void*)nProgramFragmentBindTexture },
@@ -1406,9 +1302,7 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentSetEnvMode",     "(II)V",                                (void*)nProgramFragmentSetEnvMode },
 {"nProgramFragmentSetTexEnable",   "(IZ)V",                                (void*)nProgramFragmentSetTexEnable },
 {"nProgramFragmentCreate",         "()I",                                  (void*)nProgramFragmentCreate },
-{"nProgramFragmentDestroy",        "(I)V",                                 (void*)nProgramFragmentDestroy },
 
-{"nProgramVertexDestroy",          "(I)V",                                 (void*)nProgramVertexDestroy },
 {"nProgramVertexBindAllocation",   "(II)V",                                (void*)nProgramVertexBindAllocation },
 {"nProgramVertexBegin",            "(II)V",                                (void*)nProgramVertexBegin },
 {"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
@@ -1419,7 +1313,6 @@ static JNINativeMethod methods[] = {
 {"nLightSetIsMono",                "(Z)V",                                 (void*)nLightSetIsMono },
 {"nLightSetIsLocal",               "(Z)V",                                 (void*)nLightSetIsLocal },
 {"nLightCreate",                   "()I",                                  (void*)nLightCreate },
-{"nLightDestroy",                  "(I)V",                                 (void*)nLightDestroy },
 {"nLightSetColor",                 "(IFFF)V",                              (void*)nLightSetColor },
 {"nLightSetPosition",              "(IFFF)V",                              (void*)nLightSetPosition },
 
@@ -1428,12 +1321,10 @@ static JNINativeMethod methods[] = {
 {"nContextBindProgramFragment",    "(I)V",                                 (void*)nContextBindProgramFragment },
 {"nContextBindProgramVertex",      "(I)V",                                 (void*)nContextBindProgramVertex },
 
-{"nSamplerDestroy",                "(I)V",                                 (void*)nSamplerDestroy },
 {"nSamplerBegin",                  "()V",                                  (void*)nSamplerBegin },
 {"nSamplerSet",                    "(II)V",                                (void*)nSamplerSet },
 {"nSamplerCreate",                 "()I",                                  (void*)nSamplerCreate },
 
-{"nSimpleMeshDestroy",             "(I)V",                                 (void*)nSimpleMeshDestroy },
 {"nSimpleMeshCreate",              "(II[II)I",                             (void*)nSimpleMeshCreate },
 {"nSimpleMeshBindVertex",          "(III)V",                               (void*)nSimpleMeshBindVertex },
 {"nSimpleMeshBindIndex",           "(II)V",                                (void*)nSimpleMeshBindIndex },

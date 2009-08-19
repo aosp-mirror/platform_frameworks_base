@@ -395,6 +395,13 @@ void rsi_AssignName(Context *rsc, void * obj, const char *name, uint32_t len)
     rsc->assignName(ob, name, len);
 }
 
+void rsi_ObjDestroy(Context *rsc, void *obj)
+{
+    ObjectBase *ob = static_cast<ObjectBase *>(obj);
+    rsc->removeName(ob);
+    ob->decRef();
+}
+
 void rsi_ContextSetDefineF(Context *rsc, const char* name, float value)
 {
     rsc->addInt32Define(name, value);

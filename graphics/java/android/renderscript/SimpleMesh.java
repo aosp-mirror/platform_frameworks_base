@@ -34,14 +34,6 @@ public class SimpleMesh extends BaseObj {
         mID = id;
     }
 
-    public void destroy() {
-        if(mDestroyed) {
-            throw new IllegalStateException("Object already destroyed.");
-        }
-        mDestroyed = true;
-        mRS.nSimpleMeshDestroy(mID);
-    }
-
     public void bindVertexAllocation(Allocation a, int slot) {
         mRS.nSimpleMeshBindVertex(mID, a.mID, slot);
     }

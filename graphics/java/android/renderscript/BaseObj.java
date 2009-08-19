@@ -61,9 +61,18 @@ class BaseObj {
     {
         if (!mDestroyed) {
             Log.v(RenderScript.LOG_TAG,
-                  "Element finalized without having released the RS reference.");
+                  getClass() + " finalized without having released the RS reference.");
         }
         super.finalize();
     }
+
+    public void destroy() {
+        if(mDestroyed) {
+            throw new IllegalStateException("Object already destroyed.");
+        }
+        mDestroyed = true;
+        mRS.nObjDestroy(mID);
+    }
+
 }
 
