@@ -72,8 +72,6 @@ public:
 
     ScriptCState mScriptC;
 
-    static Context * getContext() {return gCon;}
-
     void swapBuffers();
     void setRootScript(Script *);
     void setVertex(ProgramVertex *);
@@ -120,6 +118,20 @@ public:
     ThreadIO mIO;
     void objDestroyAdd(ObjectBase *);
 
+    // Timers
+    enum Timers {
+        RS_TIMER_IDLE,
+        RS_TIMER_INTERNAL,
+        RS_TIMER_SCRIPT,
+        RS_TIMER_CLEAR_SWAP,
+        _RS_TIMER_TOTAL
+    };
+    uint64_t getTime() const;
+    void timerInit();
+    void timerReset();
+    void timerSet(Timers);
+    void timerPrint();
+
 protected:
     Device *mDev;
 
@@ -164,13 +176,15 @@ private:
 
     static void * threadProc(void *);
 
-    // todo: put in TLS
-    static Context *gCon;
     Surface *mWndSurface;
 
     Vector<ObjectBase *> mNames;
     KeyedVector<String8,int> mInt32Defines;
     KeyedVector<String8,float> mFloatDefines;
+
+    uint64_t mTimers[_RS_TIMER_TOTAL];
+    Timers mTimerActive;
+    uint64_t mTimeLast;
 };
 
 
