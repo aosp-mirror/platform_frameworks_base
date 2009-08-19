@@ -118,6 +118,7 @@ public:
 
 
     ThreadIO mIO;
+    void objDestroyAdd(ObjectBase *);
 
 protected:
     Device *mDev;
@@ -141,6 +142,17 @@ protected:
     ObjectBaseRef<ProgramFragment> mFragment;
     ObjectBaseRef<ProgramVertex> mVertex;
     ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
+
+
+    struct ObjDestroyOOB {
+        pthread_mutex_t mMutex;
+        Vector<ObjectBase *> mDestroyList;
+        bool mNeedToEmpty;
+    };
+    ObjDestroyOOB mObjDestroy;
+    bool objDestroyOOBInit();
+    void objDestroyOOBRun();
+    void objDestroyOOBDestroy();
 
 private:
     Context();
