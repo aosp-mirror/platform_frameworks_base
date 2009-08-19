@@ -27,7 +27,7 @@ import android.renderscript.Sampler;
 import android.renderscript.Element;
 import android.renderscript.Light;
 import static android.renderscript.Sampler.Value.LINEAR;
-import static android.renderscript.Sampler.Value.CLAMP;
+import static android.renderscript.Sampler.Value.WRAP;
 import static android.renderscript.ProgramStore.DepthFunc.*;
 import static android.renderscript.ProgramStore.BlendDstFunc;
 import static android.renderscript.ProgramStore.BlendSrcFunc;
@@ -101,8 +101,8 @@ class FallRS {
     private ProgramFragment mPfSky;
     private ProgramStore mPfsBackground;
     private ProgramStore mPfsLeaf;
-    private ProgramVertex mPvBackground;
-    private ProgramVertex mPvLines;
+    private ProgramVertex mPvLight;
+    private ProgramVertex mPvSky;
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
     private Light mLight;
 
@@ -119,6 +119,8 @@ class FallRS {
 
     private Allocation mGlState;
     private float mGlHeight;
+
+    private final int[] mIntData2 = new int[2];
 
     public FallRS(int width, int height) {
         mWidth = width;
@@ -138,7 +140,7 @@ class FallRS {
         mSampler.destroy();
         mPfBackground.destroy();
         mPfsBackground.destroy();
-        mPvBackground.destroy();
+        mPvLight.destroy();
         mPvOrthoAlloc.mAlloc.destroy();
         for (Allocation a : mTextures) {
             a.destroy();
@@ -148,7 +150,7 @@ class FallRS {
         mLight.destroy();
         mRippleMap.destroy();
         mRefractionMap.destroy();
-        mPvLines.destroy();
+        mPvSky.destroy();
         mPfLighting.destroy();
         mLeaves.destroy();
         mPfsLeaf.destroy();
@@ -353,8 +355,8 @@ class FallRS {
         Sampler.Builder sampleBuilder = new Sampler.Builder(mRS);
         sampleBuilder.setMin(LINEAR);
         sampleBuilder.setMag(LINEAR);
-        sampleBuilder.setWrapS(CLAMP);
-        sampleBuilder.setWrapT(CLAMP);
+        sampleBuilder.setWrapS(WRAP);
+        sampleBuilder.setWrapT(WRAP);
         mSampler = sampleBuilder.create();
 
         ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS, null, null);
@@ -406,20 +408,20 @@ class FallRS {
         ProgramVertex.Builder builder = new ProgramVertex.Builder(mRS, null, null);
         builder.setTextureMatrixEnable(true);
         builder.addLight(mLight);
-        mPvBackground = builder.create();
-        mPvBackground.bindAllocation(mPvOrthoAlloc);
-        mPvBackground.setName("PVBackground");
+        mPvLight = builder.create();
+        mPvLight.bindAllocation(mPvOrthoAlloc);
+        mPvLight.setName("PVLight");
         
         builder = new ProgramVertex.Builder(mRS, null, null);
-        mPvLines = builder.create();
-        mPvLines.bindAllocation(mPvOrthoAlloc);
-        mPvLines.setName("PVLines");
+        mPvSky = builder.create();
+        mPvSky.bindAllocation(mPvOrthoAlloc);
+        mPvSky.setName("PVSky");
     }
 
     void addDrop(float x, float y) {
-        mState.subData1D(RSID_STATE_DROP_X, 2, new int[] {
-                (int) ((x / mWidth) * mMeshWidth), (int) ((y / mHeight) * mMeshHeight)
-        });
+        mIntData2[0] = (int) ((x / mWidth) * mMeshWidth);
+        mIntData2[1] = (int) ((y / mHeight) * mMeshHeight);
+        mState.subData1D(RSID_STATE_DROP_X, 2, mIntData2);
     }
     
     void togglePause() {
