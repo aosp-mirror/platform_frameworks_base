@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #pragma version(1)
-#pragma stateVertex(PVBackground)
+#pragma stateVertex(PVLines)
 #pragma stateFragment(PFBackground)
 #pragma stateFragmentStore(PFSBackground)
 
@@ -66,15 +66,15 @@ int offset(int x, int y, int width) {
     return x + 1 + (y + 1) * (width + 2);
 }
 
-void drop(int x, int y, int r) {
+void dropWithStrength(int x, int y, int r, int s) {
     int width = loadI32(RSID_STATE, RSID_MESH_WIDTH);
     int height = loadI32(RSID_STATE, RSID_MESH_HEIGHT);
 
     if (x < r) x = r;
     if (y < r) y = r;
     if (x >= width - r) x = width - r - 1;
-    if (y >= height - r) x = height - r - 1;
-    
+    if (y >= height - r) y = height - r - 1;
+
     x = width - x;
 
     int rippleMapSize = loadI32(RSID_STATE, RSID_RIPPLE_MAP_SIZE);
@@ -93,7 +93,7 @@ void drop(int x, int y, int r) {
         for ( ; w < r; w++) {
             int squ = w * w;
             if (squ + sqv < sqr) {
-                int v = -sqrtf((sqr - (squ + sqv)) << 16);
+                int v = -sqrtf((sqr - (squ + sqv)) << 16) / s;
                 current[yn + x + w] = v;
                 current[yp + x + w] = v;
                 current[yn + x - w] = v;
@@ -101,6 +101,10 @@ void drop(int x, int y, int r) {
             }
         }
     }
+}
+
+void drop(int x, int y, int r) {
+    dropWithStrength(x, y, r, 1);
 }
 
 void updateRipples() {
@@ -134,8 +138,7 @@ void updateRipples() {
     }
 }
 
-int refraction(int d, int wave) {
-    int* map = loadArrayI32(RSID_REFRACTION_MAP, 0);
+int refraction(int d, int wave, int *map) {
     int i = d;
     if (i < 0) i = -i;
     if (i > 512) i = 512;
@@ -158,6 +161,7 @@ void generateRipples() {
     int b = width + 2;
 
     int* current = loadArrayI32(RSID_RIPPLE_MAP, index * rippleMapSize + origin);
+    int *map = loadArrayI32(RSID_REFRACTION_MAP, 0);
     float *vertices = loadTriangleMeshVerticesF(NAMED_mesh);
 
     int h = height - 1;
@@ -170,12 +174,12 @@ void generateRipples() {
             int dx = nextWave - wave;
             int dy = current[b] - wave;
 
-            int offsetx = refraction(dx, wave) >> 16;
+            int offsetx = refraction(dx, wave, map) >> 16;
             int u = (width - w) + offsetx;
             u &= ~(u >> 31);
             if (u >= width) u = width - 1;
 
-            int offsety = refraction(dy, wave) >> 16;
+            int offsety = refraction(dy, wave, map) >> 16;
             int v = (height - h) + offsety;
             v &= ~(v >> 31);
             if (v >= height) v = height - 1;
@@ -324,7 +328,7 @@ float averageZ(float x1, float x2, float y1, float y2, float* vertices,
         }
     }
 
-    return 75.0f * z / vertexCount;
+    return 55.0f * z / vertexCount;
 }
 
 void drawLeaf(int index, int frameCount, float* vertices, int meshWidth, int meshHeight,
@@ -389,6 +393,10 @@ void drawLeaf(int index, int frameCount, float* vertices, int meshWidth, int mes
             spin /= 4.0f;
             leafStruct[LEAF_STRUCT_SPIN] = spin;
             leafStruct[LEAF_STRUCT_RIPPLED] = 1.0f;
+        } else {
+            dropWithStrength(((x + glWidth / 2.0f) / glWidth) * meshWidth,
+                meshHeight - ((y + glHeight / 2.0f) / glHeight) * meshHeight,
+                2, 5);
         }
         leafStruct[LEAF_STRUCT_X] = x + leafStruct[LEAF_STRUCT_DELTAX];
         leafStruct[LEAF_STRUCT_Y] = y + leafStruct[LEAF_STRUCT_DELTAY];
@@ -411,15 +419,15 @@ void drawLeaf(int index, int frameCount, float* vertices, int meshWidth, int mes
         leafStruct[LEAF_STRUCT_SPIN] = degf(randf2(-0.02f, 0.02f)) / 4.0f;
         leafStruct[LEAF_STRUCT_U1] = sprite / (float) LEAVES_TEXTURES_COUNT;
         leafStruct[LEAF_STRUCT_U2] = (sprite + 1) / (float) LEAVES_TEXTURES_COUNT;
-        leafStruct[LEAF_STRUCT_DELTAX] = randf2(-0.02f, 0.02f) / 100.0f;
-        leafStruct[LEAF_STRUCT_DELTAY] = -0.08f * randf2(0.9f, 1.1f) / 100.0f;
+        leafStruct[LEAF_STRUCT_DELTAX] = randf2(-0.02f, 0.02f) / 60.0f;
+        leafStruct[LEAF_STRUCT_DELTAY] = -0.08f * randf2(0.9f, 1.1f) / 60.0f;
     }
 }
 
 void drawLeaves(int frameCount) {
-    bindProgramFragment(NAMED_PFLeaf);
+    bindProgramFragment(NAMED_PFBackground);
     bindProgramFragmentStore(NAMED_PFSLeaf);
-    bindTexture(NAMED_PFLeaf, 0, NAMED_TLeaves);
+    bindTexture(NAMED_PFBackground, 0, NAMED_TLeaves);
 
     int leavesCount = loadI32(RSID_STATE, RSID_LEAVES_COUNT);
     int count = leavesCount * LEAF_STRUCT_FIELDS_COUNT;
@@ -434,6 +442,10 @@ void drawLeaves(int frameCount) {
     for ( ; i < count; i += LEAF_STRUCT_FIELDS_COUNT) {
         drawLeaf(i, frameCount, vertices, width, height, glWidth, glHeight);
     }
+    
+    float matrix[16];
+    matrixLoadIdentity(matrix);
+    vpLoadModelMatrix(matrix);
 }
 
 int main(int index) {
@@ -454,20 +466,25 @@ int main(int index) {
         updateTriangleMesh(NAMED_mesh);
     }
 
-    float matrix[16];
-    matrixLoadIdentity(matrix);
-    vpLoadModelMatrix(matrix);
-
     bindTexture(NAMED_PFBackground, 0, NAMED_TRiverbed);
+    drawTriangleMesh(NAMED_mesh);
+
+    color(1.0f, 1.0f, 1.0f, 0.7f);
+    bindProgramFragment(NAMED_PFSky);
+    bindProgramFragmentStore(NAMED_PFSLeaf);
+    bindTexture(NAMED_PFSky, 0, NAMED_TSky);
     drawTriangleMesh(NAMED_mesh);
 
     ambient(0.0f, 0.0f, 0.0f, 1.0f);
     diffuse(0.0f, 0.0f, 0.0f, 1.0f);
     specular(0.44f, 0.44f, 0.44f, 1.0f);
     shininess(40.0f);
+    bindProgramFragmentStore(NAMED_PFSBackground);
     bindProgramFragment(NAMED_PFLighting);
+    bindProgramVertex(NAMED_PVBackground);
     drawTriangleMesh(NAMED_mesh);
 
+    bindProgramVertex(NAMED_PVLines);
     drawLeaves(frameCount);
 
     if (!isRunning) {

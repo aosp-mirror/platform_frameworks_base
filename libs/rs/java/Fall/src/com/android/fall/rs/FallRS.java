@@ -55,10 +55,11 @@ class FallRS {
     private static final int RSID_STATE_RUNNING = 9;
     private static final int RSID_STATE_LEAVES_COUNT = 10;
 
-    private static final int TEXTURES_COUNT = 2;
+    private static final int TEXTURES_COUNT = 3;
     private static final int LEAVES_TEXTURES_COUNT = 4;
     private static final int RSID_TEXTURE_RIVERBED = 0;
     private static final int RSID_TEXTURE_LEAVES = 1;
+    private static final int RSID_TEXTURE_SKY = 2;
 
     private static final int RSID_RIPPLE_MAP = 1;
     
@@ -97,7 +98,7 @@ class FallRS {
     private Sampler mSampler;
     private ProgramFragment mPfBackground;
     private ProgramFragment mPfLighting;
-    private ProgramFragment mPfLeaf;
+    private ProgramFragment mPfSky;
     private ProgramStore mPfsBackground;
     private ProgramStore mPfsLeaf;
     private ProgramVertex mPvBackground;
@@ -151,7 +152,7 @@ class FallRS {
         mPfLighting.destroy();
         mLeaves.destroy();
         mPfsLeaf.destroy();
-        mPfLeaf.destroy();
+        mPfSky.destroy();
         mGlState.destroy();
     }
 
@@ -275,6 +276,7 @@ class FallRS {
     private void createRippleMap(int rippleMapSize) {
         final int[] rippleMap = new int[rippleMapSize * 2];
         mRippleMap = Allocation.createSized(mRS, USER_I32, rippleMap.length);
+        mRippleMap.data(rippleMap);
     }
 
     private void createGlState() {
@@ -314,8 +316,8 @@ class FallRS {
         leaves[index + LEAF_STRUCT_U2] = (sprite + 1) / (float) LEAVES_TEXTURES_COUNT;
         leaves[index + LEAF_STRUCT_ALTITUDE] = -1.0f;
         leaves[index + LEAF_STRUCT_RIPPLED] = 1.0f;
-        leaves[index + LEAF_STRUCT_DELTAX] = random(-0.02f, 0.02f) / 100.0f;
-        leaves[index + LEAF_STRUCT_DELTAY] = -0.08f * random(0.9f, 1.1f) / 100.0f;
+        leaves[index + LEAF_STRUCT_DELTAX] = random(-0.02f, 0.02f) / 60.0f;
+        leaves[index + LEAF_STRUCT_DELTAY] = -0.08f * random(0.9f, 1.1f) / 60.0f;
     }
 
     private void loadTextures() {
@@ -324,6 +326,7 @@ class FallRS {
         final Allocation[] textures = mTextures;
         textures[RSID_TEXTURE_RIVERBED] = loadTexture(R.drawable.riverbed, "TRiverbed");
         textures[RSID_TEXTURE_LEAVES] = loadTextureARGB(R.drawable.leaves, "TLeaves");
+        textures[RSID_TEXTURE_SKY] = loadTextureARGB(R.drawable.sky, "TSky");
 
         final int count = textures.length;
         for (int i = 0; i < count; i++) {
@@ -369,17 +372,17 @@ class FallRS {
         
         builder = new ProgramFragment.Builder(mRS, null, null);
         builder.setTexEnable(true, 0);
-        builder.setTexEnvMode(REPLACE, 0);
-        mPfLeaf = builder.create();
-        mPfLeaf.setName("PFLeaf");
-        mPfLeaf.bindSampler(mSampler, 0);
+        builder.setTexEnvMode(MODULATE, 0);
+        mPfSky = builder.create();
+        mPfSky.setName("PFSky");
+        mPfSky.bindSampler(mSampler, 0);
     }
 
     private void createProgramFragmentStore() {
         ProgramStore.Builder builder = new ProgramStore.Builder(mRS, null, null);
         builder.setDepthFunc(ALWAYS);
         builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
-        builder.setDitherEnable(true);
+        builder.setDitherEnable(false);
         builder.setDepthMask(true);
         mPfsBackground = builder.create();
         mPfsBackground.setName("PFSBackground");
@@ -387,7 +390,7 @@ class FallRS {
         builder = new ProgramStore.Builder(mRS, null, null);
         builder.setDepthFunc(ALWAYS);
         builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
-        builder.setDitherEnable(true);
+        builder.setDitherEnable(false);
         builder.setDepthMask(true);
         mPfsLeaf = builder.create();
         mPfsLeaf.setName("PFSLeaf");
