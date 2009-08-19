@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #pragma version(1)
-#pragma stateVertex(PVLines)
+#pragma stateVertex(PVSky)
 #pragma stateFragment(PFBackground)
 #pragma stateFragmentStore(PFSBackground)
 
@@ -276,32 +276,6 @@ void generateRipples() {
     }
 }
 
-void drawNormals() {
-    int width = loadI32(RSID_STATE, RSID_MESH_WIDTH);
-    int height = loadI32(RSID_STATE, RSID_MESH_HEIGHT);
-
-    float *vertices = loadTriangleMeshVerticesF(NAMED_mesh);
-
-    bindProgramVertex(NAMED_PVLines);
-    color(1.0f, 0.0f, 0.0f, 1.0f);
-
-    int y = 0;
-    for ( ; y < height; y++) {
-        int yOffset = y * width;
-        int x = 0;
-        for ( ; x < width; x++) {
-            int offset = (yOffset + x) * 8;
-            float vx = vertices[offset + 5];
-            float vy = vertices[offset + 6];
-            float vz = vertices[offset + 7];
-            float nx = vertices[offset + 0];
-            float ny = vertices[offset + 1];
-            float nz = vertices[offset + 2];
-            drawLine(vx, vy, vz, vx + nx / 10.0f, vy + ny / 10.0f, vz + nz / 10.0f);
-        }
-    }
-}
-
 float averageZ(float x1, float x2, float y1, float y2, float* vertices,
         int meshWidth, int meshHeight, float glWidth, float glHeight) {
 
@@ -481,15 +455,11 @@ int main(int index) {
     shininess(40.0f);
     bindProgramFragmentStore(NAMED_PFSBackground);
     bindProgramFragment(NAMED_PFLighting);
-    bindProgramVertex(NAMED_PVBackground);
+    bindProgramVertex(NAMED_PVLight);
     drawTriangleMesh(NAMED_mesh);
 
-    bindProgramVertex(NAMED_PVLines);
+    bindProgramVertex(NAMED_PVSky);
     drawLeaves(frameCount);
-
-    if (!isRunning) {
-        drawNormals();
-    }
 
     frameCount++;
     storeI32(RSID_STATE, RSID_FRAME_COUNT, frameCount);
