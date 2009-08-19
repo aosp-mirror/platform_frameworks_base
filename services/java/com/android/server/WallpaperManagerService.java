@@ -392,6 +392,12 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 }
             }
             mContext.unbindService(mWallpaperConnection);
+            try {
+                if (DEBUG) Log.v(TAG, "Removing window token: "
+                        + mWallpaperConnection.mToken);
+                mIWindowManager.removeWindowToken(mWallpaperConnection.mToken);
+            } catch (RemoteException e) {
+            }
             mWallpaperConnection = null;
         }
     }

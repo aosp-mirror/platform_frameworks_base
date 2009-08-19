@@ -1205,6 +1205,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // The window is visible to the compositor...  but is it visible
             // to the user?  That is what the wallpaper cares about.
             visible = !w.mObscured;
+            if (DEBUG_WALLPAPER) Log.v(TAG, "Wallpaper visibility: " + visible);
             
             // If the wallpaper target is animating, we may need to copy
             // its layer adjustment.
@@ -1354,6 +1355,9 @@ public class WindowManagerService extends IWindowManager.Stub
         
         if (rawChanged) {
             try {
+                if (DEBUG_WALLPAPER) Log.v(TAG, "Report new wp offset "
+                        + wallpaperWin + " x=" + wallpaperWin.mWallpaperX
+                        + " y=" + wallpaperWin.mWallpaperY);
                 wallpaperWin.mClient.dispatchWallpaperOffsets(
                         wallpaperWin.mWallpaperX, wallpaperWin.mWallpaperY);
             } catch (RemoteException e) {
@@ -1388,6 +1392,39 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         return changed;
+    }
+    
+    void updateWallpaperVisibilityLocked() {
+        final boolean visible = mWallpaperTarget != null
+                && !mWallpaperTarget.mObscured;
+        final int dw = mDisplay.getWidth();
+        final int dh = mDisplay.getHeight();
+        
+        int curTokenIndex = mWallpaperTokens.size();
+        while (curTokenIndex > 0) {
+            curTokenIndex--;
+            WindowToken token = mWallpaperTokens.get(curTokenIndex);
+            int curWallpaperIndex = token.windows.size();
+            while (curWallpaperIndex > 0) {
+                curWallpaperIndex--;
+                WindowState wallpaper = token.windows.get(curWallpaperIndex);
+                if (visible) {
+                    updateWallpaperOffsetLocked(mWallpaperTarget,
+                            wallpaper, dw, dh);                        
+                }
+                
+                if (wallpaper.mWallpaperVisible != visible) {
+                    wallpaper.mWallpaperVisible = visible;
+                    try {
+                        if (DEBUG_VISIBILITY || DEBUG_WALLPAPER) Log.v(TAG,
+                                "Setting visibility of wallpaper " + wallpaper
+                                + ": " + visible);
+                        wallpaper.mClient.dispatchAppVisibility(visible);
+                    } catch (RemoteException e) {
+                    }
+                }
+            }
+        }
     }
     
     void sendPointerToWallpaperLocked(WindowState srcWin,
@@ -1727,11 +1764,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mInputMethodDialogs.remove(win);
         }
 
-        if (win.mAttrs.type == TYPE_WALLPAPER ||
-                (win.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
-            adjustWallpaperWindowsLocked();
-        }
-        
         final WindowToken token = win.mToken;
         final AppWindowToken atoken = win.mAppToken;
         token.windows.remove(win);
@@ -1769,6 +1801,11 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        if (win.mAttrs.type == TYPE_WALLPAPER ||
+                (win.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
+            adjustWallpaperWindowsLocked();
+        }
+        
         if (!mInLayout) {
             assignLayersLocked();
             mLayoutNeeded = true;
@@ -6323,6 +6360,8 @@ public class WindowManagerService extends IWindowManager.Stub
             visible.set(vf);
 
             final Rect frame = mFrame;
+            final int fw = frame.width();
+            final int fh = frame.height();
 
             //System.out.println("In: w=" + w + " h=" + h + " container=" +
             //                   container + " x=" + mAttrs.x + " y=" + mAttrs.y);
@@ -6359,6 +6398,12 @@ public class WindowManagerService extends IWindowManager.Stub
             visibleInsets.right = frame.right-visible.right;
             visibleInsets.bottom = frame.bottom-visible.bottom;
 
+            if (mIsWallpaper && (fw != frame.width() || fh != frame.height())
+                    && mWallpaperTarget != null) {
+                updateWallpaperOffsetLocked(mWallpaperTarget, this,
+                        mDisplay.getWidth(), mDisplay.getHeight());
+            }
+            
             if (localLOGV) {
                 //if ("com.google.android.youtube".equals(mAttrs.packageName)
                 //        && mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
@@ -6507,7 +6552,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Surface.openTransaction();
                 try {
                     try {
-                        mSurface.setPosition(mFrame.left, mFrame.top);
+                        mSurface.setPosition(mFrame.left + mXOffset,
+                                mFrame.top + mYOffset);
                         mSurface.setLayer(mAnimLayer);
                         mSurface.hide();
                         if ((mAttrs.flags&WindowManager.LayoutParams.FLAG_DITHER) != 0) {
@@ -8900,6 +8946,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     focusDisplayed = true;
                 }
 
+                final boolean obscuredChanged = w.mObscured != obscured;
+                
                 // Update effect.
                 if (!(w.mObscured=obscured)) {
                     if (w.mSurface != null) {
@@ -9000,6 +9048,13 @@ public class WindowManagerService extends IWindowManager.Stub
                             mBlurSurface.setLayer(w.mAnimLayer-2);
                         }
                     }
+                }
+                
+                if (obscuredChanged && mWallpaperTarget == w) {
+                    // This is the wallpaper target and its obscured state
+                    // changed... make sure the current wallaper's visibility
+                    // has been updated accordingly.
+                    updateWallpaperVisibilityLocked();
                 }
             }
             
