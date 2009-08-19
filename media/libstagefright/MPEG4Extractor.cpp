@@ -19,9 +19,6 @@
 
 #include <arpa/inet.h>
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <ctype.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -31,6 +28,7 @@
 #include <media/stagefright/MPEG4Extractor.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/SampleTable.h>
@@ -70,10 +68,8 @@ private:
     MediaBufferGroup *mGroup;
 
     MediaBuffer *mBuffer;
-    size_t mBufferOffset;
-    size_t mBufferSizeRemaining;
 
-    bool mNeedsNALFraming;
+    bool mWantsNALFragments;
 
     uint8_t *mSrcBuffer;
 
@@ -138,7 +134,7 @@ static const char *const FourCC2MIME(uint32_t fourcc) {
             return "video/avc";
 
         default:
-            assert(!"should not be here.");
+            CHECK(!"should not be here.");
             return NULL;
     }
 }
@@ -279,7 +275,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                     return err;
                 }
             }
-            assert(*offset == stop_offset);
+            CHECK_EQ(*offset, stop_offset);
 
             if (chunk_type == FOURCC('m', 'o', 'o', 'v')) {
                 mHaveMetadata = true;
@@ -291,7 +287,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
         case FOURCC('t', 'k', 'h', 'd'):
         {
-            assert(chunk_data_size >= 4);
+            CHECK(chunk_data_size >= 4);
 
             uint8_t version;
             if (mDataSource->read_at(data_offset, &version, 1) < 1) {
@@ -444,7 +440,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             }
 
             uint8_t buffer[8];
-            assert(chunk_data_size >= (off_t)sizeof(buffer));
+            CHECK(chunk_data_size >= (off_t)sizeof(buffer));
             if (mDataSource->read_at(
                         data_offset, buffer, 8) < 8) {
                 return ERROR_IO;
@@ -470,7 +466,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                     return err;
                 }
             }
-            assert(*offset == stop_offset);
+            CHECK_EQ(*offset, stop_offset);
             break;
         }
 
@@ -518,7 +514,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                     return err;
                 }
             }
-            assert(*offset == stop_offset);
+            CHECK_EQ(*offset, stop_offset);
             break;
         }
 
@@ -560,7 +556,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                     return err;
                 }
             }
-            assert(*offset == stop_offset);
+            CHECK_EQ(*offset, stop_offset);
             break;
         }
 
@@ -728,16 +724,14 @@ MPEG4Source::MPEG4Source(
       mStarted(false),
       mGroup(NULL),
       mBuffer(NULL),
-      mBufferOffset(0),
-      mBufferSizeRemaining(0),
-      mNeedsNALFraming(false),
+      mWantsNALFragments(false),
       mSrcBuffer(NULL) {
     const char *mime;
     bool success = mFormat->findCString(kKeyMIMEType, &mime);
-    assert(success);
+    CHECK(success);
 
     success = mFormat->findInt32(kKeyTimeScale, &mTimescale);
-    assert(success);
+    CHECK(success);
 
     mIsAVC = !strcasecmp(mime, "video/avc");
 }
@@ -749,21 +743,21 @@ MPEG4Source::~MPEG4Source() {
 }
 
 status_t MPEG4Source::start(MetaData *params) {
-    assert(!mStarted);
+    CHECK(!mStarted);
 
     int32_t val;
-    if (mIsAVC && params && params->findInt32(kKeyNeedsNALFraming, &val)
+    if (params && params->findInt32(kKeyWantsNALFragments, &val)
         && val != 0) {
-        mNeedsNALFraming = true;
+        mWantsNALFragments = true;
     } else {
-        mNeedsNALFraming = false;
+        mWantsNALFragments = false;
     }
 
     mGroup = new MediaBufferGroup;
 
     size_t max_size;
     status_t err = mSampleTable->getMaxSampleSize(&max_size);
-    assert(err == OK);
+    CHECK_EQ(err, OK);
 
     // Assume that a given buffer only contains at most 10 fragments,
     // each fragment originally prefixed with a 2 byte length will
@@ -779,7 +773,7 @@ status_t MPEG4Source::start(MetaData *params) {
 }
 
 status_t MPEG4Source::stop() {
-    assert(mStarted);
+    CHECK(mStarted);
 
     if (mBuffer != NULL) {
         mBuffer->release();
@@ -804,7 +798,7 @@ sp<MetaData> MPEG4Source::getFormat() {
 
 status_t MPEG4Source::read(
         MediaBuffer **out, const ReadOptions *options) {
-    assert(mStarted);
+    CHECK(mStarted);
 
     *out = NULL;
 
@@ -830,38 +824,124 @@ status_t MPEG4Source::read(
 
     off_t offset;
     size_t size;
-    status_t err = mSampleTable->getSampleOffsetAndSize(
-            mCurrentSampleIndex, &offset, &size);
-
-    if (err != OK) {
-        return err;
-    }
-
     uint32_t dts;
-    err = mSampleTable->getDecodingTime(mCurrentSampleIndex, &dts);
+    bool newBuffer = false;
+    if (mBuffer == NULL) {
+        newBuffer = true;
 
-    if (err != OK) {
-        return err;
+        status_t err = mSampleTable->getSampleOffsetAndSize(
+                mCurrentSampleIndex, &offset, &size);
+
+        if (err != OK) {
+            return err;
+        }
+
+        err = mSampleTable->getDecodingTime(mCurrentSampleIndex, &dts);
+
+        if (err != OK) {
+            return err;
+        }
+
+        err = mGroup->acquire_buffer(&mBuffer);
+        if (err != OK) {
+            CHECK_EQ(mBuffer, NULL);
+            return err;
+        }
     }
 
-    err = mGroup->acquire_buffer(&mBuffer);
-    if (err != OK) {
-        assert(mBuffer == NULL);
-        return err;
-    }
+    if (!mIsAVC || mWantsNALFragments) {
+        if (newBuffer) {
+            ssize_t num_bytes_read =
+                mDataSource->read_at(offset, (uint8_t *)mBuffer->data(), size);
 
-    if (!mIsAVC || !mNeedsNALFraming) {
+            if (num_bytes_read < (ssize_t)size) {
+                mBuffer->release();
+                mBuffer = NULL;
+
+                return ERROR_IO;
+            }
+
+            mBuffer->set_range(0, size);
+            mBuffer->meta_data()->clear();
+            mBuffer->meta_data()->setInt32(kKeyTimeUnits, dts);
+            mBuffer->meta_data()->setInt32(kKeyTimeScale, mTimescale);
+            ++mCurrentSampleIndex;
+        }
+
+        if (!mIsAVC) {
+            *out = mBuffer;
+            mBuffer = NULL;
+
+            return OK;
+        }
+
+        // Each NAL unit is split up into its constituent fragments and
+        // each one of them returned in its own buffer.
+
+        CHECK(mBuffer->range_length() >= 2);
+
+        const uint8_t *src =
+            (const uint8_t *)mBuffer->data() + mBuffer->range_offset();
+
+        size_t nal_size = U16_AT(src);
+
+        CHECK(mBuffer->range_length() >= 2 + nal_size);
+
+        MediaBuffer *clone = mBuffer->clone();
+        clone->set_range(mBuffer->range_offset() + 2, nal_size);
+
+        mBuffer->set_range(
+                mBuffer->range_offset() + 2 + nal_size,
+                mBuffer->range_length() - 2 - nal_size);
+
+        if (mBuffer->range_length() == 0) {
+            mBuffer->release();
+            mBuffer = NULL;
+        }
+
+        *out = clone;
+
+        return OK;
+    } else {
+        // Whole NAL units are returned but each fragment is prefixed by
+        // the start code (0x00 00 00 01).
+
         ssize_t num_bytes_read =
-            mDataSource->read_at(offset, (uint8_t *)mBuffer->data(), size);
+            mDataSource->read_at(offset, mSrcBuffer, size);
 
         if (num_bytes_read < (ssize_t)size) {
             mBuffer->release();
             mBuffer = NULL;
 
-            return err;
+            return ERROR_IO;
         }
 
-        mBuffer->set_range(0, size);
+        uint8_t *dstData = (uint8_t *)mBuffer->data();
+        size_t srcOffset = 0;
+        size_t dstOffset = 0;
+        while (srcOffset < size) {
+            CHECK(srcOffset + 1 < size);
+            size_t nalLength =
+                (mSrcBuffer[srcOffset] << 8) | mSrcBuffer[srcOffset + 1];
+            CHECK(srcOffset + 1 + nalLength < size);
+            srcOffset += 2;
+
+            if (nalLength == 0) {
+                continue;
+            }
+
+            CHECK(dstOffset + 4 <= mBuffer->size());
+
+            dstData[dstOffset++] = 0;
+            dstData[dstOffset++] = 0;
+            dstData[dstOffset++] = 0;
+            dstData[dstOffset++] = 1;
+            memcpy(&dstData[dstOffset], &mSrcBuffer[srcOffset], nalLength);
+            srcOffset += nalLength;
+            dstOffset += nalLength;
+        }
+
+        mBuffer->set_range(0, dstOffset);
         mBuffer->meta_data()->clear();
         mBuffer->meta_data()->setInt32(kKeyTimeUnits, dts);
         mBuffer->meta_data()->setInt32(kKeyTimeScale, mTimescale);
@@ -872,52 +952,6 @@ status_t MPEG4Source::read(
 
         return OK;
     }
-
-    ssize_t num_bytes_read =
-        mDataSource->read_at(offset, mSrcBuffer, size);
-
-    if (num_bytes_read < (ssize_t)size) {
-        mBuffer->release();
-        mBuffer = NULL;
-
-        return err;
-    }
-
-    uint8_t *dstData = (uint8_t *)mBuffer->data();
-    size_t srcOffset = 0;
-    size_t dstOffset = 0;
-    while (srcOffset < size) {
-        assert(srcOffset + 1 < size);
-        size_t nalLength =
-            (mSrcBuffer[srcOffset] << 8) | mSrcBuffer[srcOffset + 1];
-        assert(srcOffset + 1 + nalLength < size);
-        srcOffset += 2;
-
-        if (nalLength == 0) {
-            continue;
-        }
-
-        assert(dstOffset + 4 <= mBuffer->size());
-
-        dstData[dstOffset++] = 0;
-        dstData[dstOffset++] = 0;
-        dstData[dstOffset++] = 0;
-        dstData[dstOffset++] = 1;
-        memcpy(&dstData[dstOffset], &mSrcBuffer[srcOffset], nalLength);
-        srcOffset += nalLength;
-        dstOffset += nalLength;
-    }
-
-    mBuffer->set_range(0, dstOffset);
-    mBuffer->meta_data()->clear();
-    mBuffer->meta_data()->setInt32(kKeyTimeUnits, dts);
-    mBuffer->meta_data()->setInt32(kKeyTimeScale, mTimescale);
-    ++mCurrentSampleIndex;
-
-    *out = mBuffer;
-    mBuffer = NULL;
-
-    return OK;
 }
 
 bool SniffMPEG4(
