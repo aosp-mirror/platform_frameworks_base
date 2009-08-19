@@ -20,9 +20,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.provider.Contacts;
-import android.provider.Contacts.People;
-import android.provider.Contacts.Phones;
+import android.provider.ContactsContract.PhoneLookup;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
 import android.telephony.TelephonyManager;
 import android.telephony.PhoneNumberUtils;
@@ -134,44 +133,39 @@ public class CallerInfo {
                 int columnIndex;
 
                 // Look for the name
-                columnIndex = cursor.getColumnIndex(People.NAME);
+                columnIndex = cursor.getColumnIndex(PhoneLookup.DISPLAY_NAME);
                 if (columnIndex != -1) {
                     info.name = cursor.getString(columnIndex);
                 }
 
                 // Look for the number
-                columnIndex = cursor.getColumnIndex(Phones.NUMBER);
+                columnIndex = cursor.getColumnIndex(PhoneLookup.NUMBER);
                 if (columnIndex != -1) {
                     info.phoneNumber = cursor.getString(columnIndex);
                 }
 
                 // Look for the label/type combo
-                columnIndex = cursor.getColumnIndex(Phones.LABEL);
+                columnIndex = cursor.getColumnIndex(PhoneLookup.LABEL);
                 if (columnIndex != -1) {
-                    int typeColumnIndex = cursor.getColumnIndex(Phones.TYPE);
+                    int typeColumnIndex = cursor.getColumnIndex(PhoneLookup.TYPE);
                     if (typeColumnIndex != -1) {
                         info.numberType = cursor.getInt(typeColumnIndex);
                         info.numberLabel = cursor.getString(columnIndex);
-                        info.phoneLabel = Contacts.Phones.getDisplayLabel(context,
+                        info.phoneLabel = Phone.getDisplayLabel(context,
                                 info.numberType, info.numberLabel)
                                 .toString();
                     }
                 }
 
                 // Look for the person ID
-                columnIndex = cursor.getColumnIndex(Phones.PERSON_ID);
+                columnIndex = cursor.getColumnIndex(PhoneLookup._ID);
                 if (columnIndex != -1) {
                     info.person_id = cursor.getLong(columnIndex);
-                } else {
-                    columnIndex = cursor.getColumnIndex(People._ID);
-                    if (columnIndex != -1) {
-                        info.person_id = cursor.getLong(columnIndex);
-                    }
                 }
 
                 // look for the custom ringtone, create from the string stored
                 // in the database.
-                columnIndex = cursor.getColumnIndex(People.CUSTOM_RINGTONE);
+                columnIndex = cursor.getColumnIndex(PhoneLookup.CUSTOM_RINGTONE);
                 if ((columnIndex != -1) && (cursor.getString(columnIndex) != null)) {
                     info.contactRingtoneUri = Uri.parse(cursor.getString(columnIndex));
                 } else {
@@ -180,7 +174,7 @@ public class CallerInfo {
 
                 // look for the send to voicemail flag, set it to true only
                 // under certain circumstances.
-                columnIndex = cursor.getColumnIndex(People.SEND_TO_VOICEMAIL);
+                columnIndex = cursor.getColumnIndex(PhoneLookup.SEND_TO_VOICEMAIL);
                 info.shouldSendToVoicemail = (columnIndex != -1) &&
                         ((cursor.getInt(columnIndex)) == 1);
                 info.contactExists = true;
@@ -256,8 +250,7 @@ public class CallerInfo {
             }
         }
 
-        Uri contactUri = Uri.withAppendedPath(Contacts.Phones.CONTENT_FILTER_URL,
-                                              Uri.encode(number));
+        Uri contactUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, number);
 
         CallerInfo info = getCallerInfo(context, contactUri);
 
