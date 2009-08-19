@@ -25,7 +25,6 @@
 using namespace android;
 using namespace android::renderscript;
 
-Context * Context::gCon = NULL;
 pthread_key_t Context::gThreadTLSKey = 0;
 
 void Context::initEGL()
@@ -84,6 +83,9 @@ bool Context::runScript(Script *s, uint32_t launchID)
 
 bool Context::runRootScript()
 {
+#if RS_LOG_TIMES
+    timerSet(RS_TIMER_CLEAR_SWAP);
+#endif
     rsAssert(mRootScript->mEnviroment.mIsRoot);
 
     //glColor4f(1,1,1,1);
@@ -102,22 +104,53 @@ bool Context::runRootScript()
     glClear(GL_DEPTH_BUFFER_BIT);
 
 #if RS_LOG_TIMES
-    struct timespec startTime;
-    clock_gettime(CLOCK_MONOTONIC, &startTime);
+    timerSet(RS_TIMER_SCRIPT);
 #endif
     bool ret = runScript(mRootScript.get(), 0);
-
-#if RS_LOG_TIMES
-    struct timespec endTime;
-    clock_gettime(CLOCK_MONOTONIC, &endTime);
-
-    uint64_t t1 = endTime.tv_nsec + ((uint64_t)endTime.tv_sec * 1000 * 1000 * 1000);
-    uint64_t t2 = startTime.tv_nsec + ((uint64_t)startTime.tv_sec * 1000 * 1000 * 1000);
-    int t3 = (int)((t1 - t2) / 1000 / 1000);
-    LOGE("times  %i", t3);
-#endif
-
     return ret;
+}
+
+uint64_t Context::getTime() const
+{
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return t.tv_nsec + ((uint64_t)t.tv_sec * 1000 * 1000 * 1000);
+}
+
+void Context::timerReset()
+{
+    for (int ct=0; ct < _RS_TIMER_TOTAL; ct++) {
+        mTimers[ct] = 0;
+    }
+}
+
+void Context::timerInit()
+{
+    mTimeLast = getTime();
+    mTimerActive = RS_TIMER_INTERNAL;
+    timerReset();
+}
+
+void Context::timerSet(Timers tm)
+{
+    uint64_t last = mTimeLast;
+    mTimeLast = getTime();
+    mTimers[mTimerActive] += mTimeLast - last;
+    mTimerActive = tm;
+}
+
+void Context::timerPrint()
+{
+    double total = 0;
+    for (int ct = 0; ct < _RS_TIMER_TOTAL; ct++) {
+        total += mTimers[ct];
+    }
+
+    LOGV("RS Time Data: Idle %2.1f (%lli),  Internal %2.1f (%lli),  Script %2.1f (%lli),  Clear & Swap %2.1f (%lli)",
+         100.0 * mTimers[RS_TIMER_IDLE] / total, mTimers[RS_TIMER_IDLE] / 1000000,
+         100.0 * mTimers[RS_TIMER_INTERNAL] / total, mTimers[RS_TIMER_INTERNAL] / 1000000,
+         100.0 * mTimers[RS_TIMER_SCRIPT] / total, mTimers[RS_TIMER_SCRIPT] / 1000000,
+         100.0 * mTimers[RS_TIMER_CLEAR_SWAP] / total, mTimers[RS_TIMER_CLEAR_SWAP] / 1000000);
 }
 
 void Context::setupCheck()
@@ -168,9 +201,19 @@ void * Context::threadProc(void *vrsc)
 
          if (mDraw) {
              mDraw = rsc->runRootScript();
+#if RS_LOG_TIMES
+             rsc->timerSet(RS_TIMER_CLEAR_SWAP);
+#endif
              eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
+#if RS_LOG_TIMES
+             rsc->timerSet(RS_TIMER_INTERNAL);
+             rsc->timerPrint();
+             rsc->timerReset();
+#endif
          }
-         rsc->objDestroyOOBRun();
+         if (rsc->mObjDestroy.mNeedToEmpty) {
+             rsc->objDestroyOOBRun();
+         }
      }
 
      glClearColor(0,0,0,0);
@@ -187,9 +230,6 @@ Context::Context(Device *dev, Surface *sur)
     mDev = dev;
     mRunning = false;
     mExit = false;
-
-    // see comment in header
-    gCon = this;
 
     int status;
     pthread_attr_t threadAttr;
@@ -213,6 +253,7 @@ Context::Context(Device *dev, Surface *sur)
     mWndSurface = sur;
 
     objDestroyOOBInit();
+    timerInit();
 
     LOGV("RS Launching thread");
     status = pthread_create(&mThreadId, &threadAttr, threadProc, this);
