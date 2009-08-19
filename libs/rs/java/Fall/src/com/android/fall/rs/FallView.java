@@ -42,20 +42,6 @@ class FallView extends RSSurfaceView {
     }
 
     @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        if (mRender != null) mRender.destroy();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
-                keyCode == KeyEvent.KEYCODE_MENU) {
-            mRender.togglePause();
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:

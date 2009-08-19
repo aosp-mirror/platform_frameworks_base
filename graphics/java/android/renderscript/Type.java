@@ -18,10 +18,6 @@ package android.renderscript;
 
 import java.lang.reflect.Field;
 
-import android.renderscript.Element;
-import android.util.Config;
-import android.util.Log;
-
 /**
  * @hide
  *
@@ -113,9 +109,7 @@ public class Type extends BaseObj {
         public void add(Dimension d, int value) {
             if(mEntries.length >= mEntryCount) {
                 Entry[] en = new Entry[mEntryCount + 8];
-                for(int ct=0; ct < mEntries.length; ct++) {
-                    en[ct] = mEntries[ct];
-                }
+                System.arraycopy(mEntries, 0, en, 0, mEntries.length);
                 mEntries = en;
             }
             mEntries[mEntryCount] = new Entry();
