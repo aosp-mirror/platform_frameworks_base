@@ -49,6 +49,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
 
     private String mApnType;
     private boolean mEnabled;
+    private BroadcastReceiver mStateReceiver;
 
     /**
      * Create a new MobileDataStateTracker
@@ -94,7 +95,8 @@ public class MobileDataStateTracker extends NetworkStateTracker {
         filter.addAction(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
         filter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
 
-        Intent intent = mContext.registerReceiver(new MobileDataStateReceiver(), filter);
+        mStateReceiver = new MobileDataStateReceiver();
+        Intent intent = mContext.registerReceiver(mStateReceiver, filter);
         if (intent != null)
             mMobileDataState = getMobileDataState(intent);
         else
@@ -130,74 +132,84 @@ public class MobileDataStateTracker extends NetworkStateTracker {
 
     private class MobileDataStateReceiver extends BroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(TelephonyIntents.
-                    ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
-                Phone.DataState state = getMobileDataState(intent);
-                String reason =
-                        intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
-                String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+            synchronized(this) {
+                if (intent.getAction().equals(TelephonyIntents.
+                        ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
+                    Phone.DataState state = getMobileDataState(intent);
+                    String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
+                    String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+                    String apnTypeList = intent.getStringExtra(Phone.DATA_APN_TYPES_KEY);
 
-                String apnTypeList =
-                        intent.getStringExtra(Phone.DATA_APN_TYPES_KEY);
+                    boolean unavailable = intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY,
+                            false);
+                    if (DBG) Log.d(TAG, mApnType + " Received " + intent.getAction() +
+                            " broadcast - state = " + state + ", unavailable = " + unavailable +
+                            ", reason = " + (reason == null ? "(unspecified)" : reason));
 
-                boolean unavailable = intent.getBooleanExtra(
-                        Phone.NETWORK_UNAVAILABLE_KEY, false);
-                if (DBG) Log.d(TAG, mApnType + " Received "
-                        + intent.getAction() + " broadcast - state = "
-                        + state + ", unavailable = " + unavailable
-                        + ", reason = "
-                        + (reason == null ? "(unspecified)" : reason));
-
-                if ((!isApnTypeIncluded(apnTypeList)) || mEnabled == false) {
-                    if (DBG) Log.e(TAG, "  dropped - mEnabled = "+mEnabled);
-                    return;
-                }
-
-
-                mNetworkInfo.setIsAvailable(!unavailable);
-                if (mMobileDataState != state) {
-                    mMobileDataState = state;
-
-                    switch (state) {
-                    case DISCONNECTED:
-                        if(isTeardownRequested()) {
-                            mEnabled = false;
-                            setTeardownRequested(false);
+                    if (isApnTypeIncluded(apnTypeList)) {
+                        if (mEnabled == false) {
+                            // if we're not enabled but the APN Type is supported by this connection
+                            // we should record the interface name if one's provided.  If the user
+                            // turns on this network we will need the interfacename but won't get
+                            // a fresh connected message - TODO fix this..
+                            if (mInterfaceName == null && state == Phone.DataState.CONNECTED) {
+                                mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
+                            } else if (state == Phone.DataState.DISCONNECTED) {
+                                mInterfaceName = null;
+                            }
+                            if (DBG) Log.d(TAG, "  dropped - mEnabled = false");
+                            return;
                         }
-
-                        setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
-                        if (mInterfaceName != null) {
-                            NetworkUtils.resetConnections(mInterfaceName);
-                        }
-                        mInterfaceName = null;
-                        mDefaultGatewayAddr = 0;
-                        break;
-                    case CONNECTING:
-                        setDetailedState(DetailedState.CONNECTING, reason, apnName);
-                        break;
-                    case SUSPENDED:
-                        setDetailedState(DetailedState.SUSPENDED, reason, apnName);
-                        break;
-                    case CONNECTED:
-                        mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
-                        if (mInterfaceName == null) {
-                            Log.d(TAG, "CONNECTED event did not supply interface name.");
-                        }
-                        setDetailedState(DetailedState.CONNECTED, reason, apnName);
-                        break;
+                    } else {
+                        if (DBG) Log.d(TAG, "  dropped - wrong Apn");
+                        return;
                     }
+
+                    mNetworkInfo.setIsAvailable(!unavailable);
+                    if (mMobileDataState != state) {
+                        mMobileDataState = state;
+                        switch (state) {
+                            case DISCONNECTED:
+                                if(isTeardownRequested()) {
+                                    mEnabled = false;
+                                    setTeardownRequested(false);
+                                }
+
+                                setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
+                                if (mInterfaceName != null) {
+                                    NetworkUtils.resetConnections(mInterfaceName);
+                                }
+                                mInterfaceName = null;
+                                mDefaultGatewayAddr = 0;
+                                break;
+                            case CONNECTING:
+                                setDetailedState(DetailedState.CONNECTING, reason, apnName);
+                                break;
+                            case SUSPENDED:
+                                setDetailedState(DetailedState.SUSPENDED, reason, apnName);
+                                break;
+                            case CONNECTED:
+                                mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
+                                if (mInterfaceName == null) {
+                                    Log.d(TAG, "CONNECTED event did not supply interface name.");
+                                }
+                                setDetailedState(DetailedState.CONNECTED, reason, apnName);
+                                break;
+                        }
+                    }
+                } else if (intent.getAction().
+                        equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {
+                    mEnabled = false;
+                    String reason = intent.getStringExtra(Phone.FAILURE_REASON_KEY);
+                    String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+                    if (DBG) Log.d(TAG, "Received " + intent.getAction() + " broadcast" +
+                            reason == null ? "" : "(" + reason + ")");
+                    setDetailedState(DetailedState.FAILED, reason, apnName);
                 }
-            } else if (intent.getAction().equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {
-                mEnabled = false;
-                String reason = intent.getStringExtra(Phone.FAILURE_REASON_KEY);
-                String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
-                if (DBG) Log.d(TAG, "Received " + intent.getAction() + " broadcast" +
-                    reason == null ? "" : "(" + reason + ")");
-                setDetailedState(DetailedState.FAILED, reason, apnName);
+                TelephonyManager tm = TelephonyManager.getDefault();
+                setRoamingStatus(tm.isNetworkRoaming());
+                setSubtype(tm.getNetworkType(), tm.getNetworkTypeName());
             }
-            TelephonyManager tm = TelephonyManager.getDefault();
-            setRoamingStatus(tm.isNetworkRoaming());
-            setSubtype(tm.getNetworkType(), tm.getNetworkTypeName());
         }
     }
 
@@ -285,10 +297,33 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      * Re-enable mobile data connectivity after a {@link #teardown()}.
      */
     public boolean reconnect() {
-        mEnabled = true;
         setTeardownRequested(false);
-        mEnabled = (setEnableApn(mApnType, true) !=
-                Phone.APN_REQUEST_FAILED);
+        switch (setEnableApn(mApnType, true)) {
+            case Phone.APN_ALREADY_ACTIVE:
+                mEnabled = true;
+                //send out a connected message
+                Intent intent = new Intent(TelephonyIntents.
+                        ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
+                intent.putExtra(Phone.STATE_KEY, Phone.DataState.CONNECTED.toString());
+                intent.putExtra(Phone.STATE_CHANGE_REASON_KEY, Phone.REASON_APN_CHANGED);
+                intent.putExtra(Phone.DATA_APN_TYPES_KEY, mApnType);
+                intent.putExtra(Phone.DATA_IFACE_NAME_KEY, mInterfaceName);
+                intent.putExtra(Phone.NETWORK_UNAVAILABLE_KEY, false);
+                if (mStateReceiver != null) mStateReceiver.onReceive(mContext, intent);
+                break;
+            case Phone.APN_REQUEST_STARTED:
+                mEnabled = true;
+                // no need to do anything - we're already due some status update intents
+                break;
+            case Phone.APN_REQUEST_FAILED:
+            case Phone.APN_TYPE_NOT_AVAILABLE:
+                mEnabled = false;
+                break;
+            default:
+                Log.e(TAG, "Error in reconnect - unexpected response.");
+                mEnabled = false;
+                break;
+        }
         return mEnabled;
     }
 
