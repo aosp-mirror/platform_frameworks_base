@@ -322,6 +322,7 @@ public class AppWidgetHostView extends FrameLayout {
             if (mInfo != null) {
                 Context theirContext = mContext.createPackageContext(
                         mInfo.provider.getPackageName(), Context.CONTEXT_RESTRICTED);
+                mRemoteContext = theirContext;
                 LayoutInflater inflater = (LayoutInflater)
                         theirContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 inflater = inflater.cloneInContext(theirContext);
@@ -336,8 +337,8 @@ public class AppWidgetHostView extends FrameLayout {
             exception = e;
         }
         
-        if (exception != null && LOGD) {
-            Log.w(TAG, "Error inflating AppWidget " + mInfo, exception);
+        if (exception != null) {
+            Log.w(TAG, "Error inflating AppWidget " + mInfo + ": " + exception.toString());
         }
         
         if (defaultView == null) {
