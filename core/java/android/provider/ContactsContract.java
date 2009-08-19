@@ -19,12 +19,14 @@ package android.provider;
 import android.accounts.Account;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
+import android.text.TextUtils;
 
 /**
  * The contract between the contacts provider and applications. Contains definitions
@@ -296,17 +298,6 @@ public final class ContactsContract {
              * The directory twig for this sub-table
              */
             public static final String CONTENT_DIRECTORY = "suggestions";
-
-            /**
-             * An optional query parameter that can be supplied to limit the number of returned
-             * suggestions.
-             * <p>
-             * Type: INTEGER
-             *
-             * @deprecated Please use the "limit" parameter
-             */
-            @Deprecated
-            public static final String MAX_SUGGESTIONS = "max_suggestions";
         }
     }
 
@@ -541,13 +532,33 @@ public final class ContactsContract {
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/data";
     }
 
+    private interface PhoneLookupColumns {
+        /**
+         * The phone number as the user entered it.
+         * <P>Type: TEXT</P>
+         */
+        public static final String NUMBER = "number";
+
+        /**
+         * The type of phone number, for example Home or Work.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String TYPE = "type";
+
+        /**
+         * The user defined label for the phone number.
+         * <P>Type: TEXT</P>
+         */
+        public static final String LABEL = "label";
+    }
+
     /**
      * A table that represents the result of looking up a phone number, for
-     * example for caller ID. The table joins that data row for the phone number
-     * with the raw contact that owns the number. To perform a lookup you must
-     * append the number you want to find to {@link #CONTENT_FILTER_URI}.
+     * example for caller ID. To perform a lookup you must append the number you
+     * want to find to {@link #CONTENT_FILTER_URI}.
      */
-    public static final class PhoneLookup implements BaseColumns, DataColumns, ContactsColumns {
+    public static final class PhoneLookup implements BaseColumns, PhoneLookupColumns,
+            ContactsColumns, ContactOptionsColumns {
         /**
          * This utility class cannot be instantiated
          */
@@ -881,6 +892,32 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String NUMBER = DATA;
+
+            public static final CharSequence getDisplayLabel(Context context, int type,
+                    CharSequence label, CharSequence[] labelArray) {
+                CharSequence display = "";
+
+                if (type != Phone.TYPE_CUSTOM) {
+                    CharSequence[] labels = labelArray != null? labelArray
+                            : context.getResources().getTextArray(
+                                    com.android.internal.R.array.phoneTypes);
+                    try {
+                        display = labels[type - 1];
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        display = labels[Phone.TYPE_CUSTOM];
+                    }
+                } else {
+                    if (!TextUtils.isEmpty(label)) {
+                        display = label;
+                    }
+                }
+                return display;
+            }
+
+            public static final CharSequence getDisplayLabel(Context context, int type,
+                    CharSequence label) {
+                return getDisplayLabel(context, type, label, null);
+            }
         }
 
         /**
