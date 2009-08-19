@@ -76,7 +76,7 @@ private:
     };
 
     enum Quirks {
-        kWantsRawNALFrames                   = 1,
+        kWantsNALFragments                   = 1,
         kDoesntReturnBuffersOnDisable        = 2,
         kDoesntFlushOnExecutingToIdle        = 4,
         kDoesntProperlyFlushAllPortsAtOnce   = 8,

@@ -70,6 +70,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
     long numIterationsLeft = gNumRepetitions;
     MediaSource::ReadOptions options;
+
     while (numIterationsLeft-- > 0) {
         MediaBuffer *buffer;
 

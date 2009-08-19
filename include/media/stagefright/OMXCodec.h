@@ -79,7 +79,7 @@ private:
 
     enum Quirks {
         kNeedsFlushBeforeDisable             = 1,
-        kWantsRawNALFrames                   = 2,
+        kWantsNALFragments                   = 2,
         kRequiresLoadedToIdleAfterAllocation = 4,
         kRequiresAllocateBufferOnInputPorts  = 8,
     };

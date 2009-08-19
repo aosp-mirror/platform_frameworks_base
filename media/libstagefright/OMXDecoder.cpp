@@ -139,7 +139,7 @@ sp<OMXDecoder> OMXDecoder::Create(
 
     uint32_t quirks = 0;
     if (!strcmp(codec, "OMX.PV.avcdec")) {
-        quirks |= kWantsRawNALFrames;
+        quirks |= kWantsNALFragments;
     }
     if (!strcmp(codec, "OMX.TI.AAC.decode")
         || !strcmp(codec, "OMX.TI.MP3.decode")) {
@@ -274,8 +274,8 @@ status_t OMXDecoder::start(MetaData *) {
     // mDealer->dump("Decoder Dealer");
 
     sp<MetaData> params = new MetaData;
-    if (mIsAVC && !(mQuirks & kWantsRawNALFrames)) {
-        params->setInt32(kKeyNeedsNALFraming, true);
+    if (mQuirks & kWantsNALFragments) {
+        params->setInt32(kKeyWantsNALFragments, true);
     }
 
     status_t err = mSource->start(params.get());
@@ -1331,7 +1331,7 @@ void OMXDecoder::onRealEmptyBufferDone(IOMX::buffer_id buffer) {
 
         size_t range_length = 0;
 
-        if (mIsAVC && !(mQuirks & kWantsRawNALFrames)) {
+        if (mIsAVC && !(mQuirks & kWantsNALFragments)) {
             assert((*mCodecSpecificDataIterator).size + 4 <= mem->size());
 
             memcpy(mem->pointer(), kNALStartCode, 4);

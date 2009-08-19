@@ -152,7 +152,7 @@ sp<OMXCodec> OMXCodec::Create(
 
     uint32_t quirks = 0;
     if (!strcmp(componentName, "OMX.PV.avcdec")) {
-        quirks |= kWantsRawNALFrames;
+        quirks |= kWantsNALFragments;
     }
     if (!strcmp(componentName, "OMX.TI.MP3.decode")) {
         quirks |= kNeedsFlushBeforeDisable;
@@ -554,7 +554,7 @@ OMXCodec::OMXCodec(
 }
 
 OMXCodec::~OMXCodec() {
-    CHECK_EQ(mState, LOADED);
+    CHECK(mState == LOADED || mState == ERROR);
 
     status_t err = mOMX->observe_node(mNode, NULL);
     CHECK_EQ(err, OK);
@@ -1149,8 +1149,8 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
         size_t size = specific->mSize;
 
-        if (!strcasecmp(mMIME, "video/avc")
-            && !(mQuirks & kWantsRawNALFrames)) {
+        if (!strcasecmp("video/avc", mMIME)
+                && !(mQuirks & kWantsNALFragments)) {
             static const uint8_t kNALStartCode[4] =
                     { 0x00, 0x00, 0x00, 0x01 };
 
@@ -1462,8 +1462,8 @@ status_t OMXCodec::start(MetaData *) {
     }
     
     sp<MetaData> params = new MetaData;
-    if (!strcasecmp(mMIME, "video/avc") && !(mQuirks & kWantsRawNALFrames)) {
-        params->setInt32(kKeyNeedsNALFraming, true);
+    if (mQuirks & kWantsNALFragments) {
+        params->setInt32(kKeyWantsNALFragments, true);
     }
     status_t err = mSource->start(params.get());
 
