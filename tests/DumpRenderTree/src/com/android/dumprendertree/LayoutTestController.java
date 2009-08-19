@@ -62,4 +62,7 @@ public interface LayoutTestController {
     // For storage tests
     public void dumpDatabaseCallbacks();
     public void setCanOpenWindows();
+
+    // For Geolocation tests
+    public void setGeolocationPermission(boolean allow);
 }
