@@ -67,8 +67,6 @@ public class FountainRS {
 
     private RenderScript mRS;
     private Allocation mIntAlloc;
-    private Allocation mPartAlloc;
-    private Script mScript;
     private SimpleMesh mSM;
     private SomeData mSD;
     private Type mSDType;
@@ -94,9 +92,9 @@ public class FountainRS {
         mSM = smb.create();
         mSM.setName("PartMesh");
 
-        mPartAlloc = mSM.createVertexAllocation(vtxSlot);
-        mPartAlloc.setName("PartBuffer");
-        mSM.bindVertexAllocation(mPartAlloc, 0);
+        Allocation partAlloc = mSM.createVertexAllocation(vtxSlot);
+        partAlloc.setName("PartBuffer");
+        mSM.bindVertexAllocation(partAlloc, 0);
 
         // All setup of named objects should be done by this point
         // because we are about to compile the script.
@@ -104,12 +102,12 @@ public class FountainRS {
         sb.setScript(mRes, R.raw.fountain);
         sb.setRoot(true);
         sb.setType(mSDType, "Control", 0);
-        mScript = sb.create();
-        mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        Script script = sb.create();
+        script.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-        mScript.bindAllocation(mIntAlloc, 0);
-        mScript.bindAllocation(mPartAlloc, 1);
-        mRS.contextBindRootScript(mScript);
+        script.bindAllocation(mIntAlloc, 0);
+        script.bindAllocation(partAlloc, 1);
+        mRS.contextBindRootScript(script);
     }
 
 }

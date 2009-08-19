@@ -86,6 +86,15 @@ nObjDestroy(JNIEnv *_env, jobject _this, jint obj)
     rsObjDestroy(con, (void *)obj);
 }
 
+static void
+nObjDestroyOOB(JNIEnv *_env, jobject _this, jint obj)
+{
+    // This function only differs from nObjDestroy in that it calls the
+    // special Out Of Band version of ObjDestroy which is thread safe.
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nObjDestroyOOB, con(%p) obj(%p)", con, (void *)obj);
+    rsObjDestroyOOB(con, (void *)obj);
+}
 
 static jint
 nFileOpen(JNIEnv *_env, jobject _this, jbyteArray str)
@@ -1217,6 +1226,7 @@ static JNINativeMethod methods[] = {
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
 {"nAssignName",                    "(I[B)V",                               (void*)nAssignName },
 {"nObjDestroy",                    "(I)V",                                 (void*)nObjDestroy },
+{"nObjDestroyOOB",                 "(I)V",                                 (void*)nObjDestroyOOB },
 
 {"nFileOpen",                      "([B)I",                                (void*)nFileOpen },
 

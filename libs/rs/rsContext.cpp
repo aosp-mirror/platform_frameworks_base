@@ -170,12 +170,14 @@ void * Context::threadProc(void *vrsc)
              mDraw = rsc->runRootScript();
              eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
          }
+         rsc->objDestroyOOBRun();
      }
 
      glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
      eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
      eglTerminate(rsc->mDisplay);
+     rsc->objDestroyOOBRun();
      return NULL;
 }
 
@@ -210,6 +212,8 @@ Context::Context(Device *dev, Surface *sur)
 
     mWndSurface = sur;
 
+    objDestroyOOBInit();
+
     LOGV("RS Launching thread");
     status = pthread_create(&mThreadId, &threadAttr, threadProc, this);
     if (status) {
@@ -229,11 +233,14 @@ Context::~Context()
     void *res;
 
     int status = pthread_join(mThreadId, &res);
+    objDestroyOOBRun();
 
     if (mDev) {
         mDev->removeContext(this);
         pthread_key_delete(gThreadTLSKey);
     }
+
+    objDestroyOOBDestroy();
 }
 
 void Context::swapBuffers()
@@ -345,6 +352,62 @@ void Context::appendVarDefines(String8 *str) const
     }
 }
 
+bool Context::objDestroyOOBInit()
+{
+    int status = pthread_mutex_init(&mObjDestroy.mMutex, NULL);
+    if (status) {
+        LOGE("Context::ObjDestroyOOBInit mutex init failure");
+        return false;
+    }
+    return true;
+}
+
+void Context::objDestroyOOBRun()
+{
+    if (mObjDestroy.mNeedToEmpty) {
+        int status = pthread_mutex_lock(&mObjDestroy.mMutex);
+        if (status) {
+            LOGE("Context::ObjDestroyOOBRun: error %i locking for OOBRun.", status);
+            return;
+        }
+
+        for (size_t ct = 0; ct < mObjDestroy.mDestroyList.size(); ct++) {
+            mObjDestroy.mDestroyList[ct]->decRef();
+        }
+        mObjDestroy.mDestroyList.clear();
+        mObjDestroy.mNeedToEmpty = false;
+
+        status = pthread_mutex_unlock(&mObjDestroy.mMutex);
+        if (status) {
+            LOGE("Context::ObjDestroyOOBRun: error %i unlocking for set condition.", status);
+        }
+    }
+}
+
+void Context::objDestroyOOBDestroy()
+{
+    rsAssert(!mObjDestroy.mNeedToEmpty);
+    pthread_mutex_destroy(&mObjDestroy.mMutex);
+}
+
+void Context::objDestroyAdd(ObjectBase *obj)
+{
+    int status = pthread_mutex_lock(&mObjDestroy.mMutex);
+    if (status) {
+        LOGE("Context::ObjDestroyOOBRun: error %i locking for OOBRun.", status);
+        return;
+    }
+
+    mObjDestroy.mNeedToEmpty = true;
+    mObjDestroy.mDestroyList.add(obj);
+
+    status = pthread_mutex_unlock(&mObjDestroy.mMutex);
+    if (status) {
+        LOGE("Context::ObjDestroyOOBRun: error %i unlocking for set condition.", status);
+    }
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -427,5 +490,11 @@ void rsContextDestroy(RsContext vrsc)
 {
     Context * rsc = static_cast<Context *>(vrsc);
     delete rsc;
+}
+
+void rsObjDestroyOOB(RsContext vrsc, void *obj)
+{
+    Context * rsc = static_cast<Context *>(vrsc);
+    rsc->objDestroyAdd(static_cast<ObjectBase *>(obj));
 }
 
