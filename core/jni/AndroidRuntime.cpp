@@ -525,6 +525,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char dexoptFlagsBuf[PROPERTY_VALUE_MAX];
     char enableAssertBuf[sizeof("-ea:")-1 + PROPERTY_VALUE_MAX];
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
+    char heapsizeOptsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
     bool checkJni = false;
     bool checkDexSum = false;
@@ -597,16 +598,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     mOptions.add(opt);
     //options[curOpt++].optionString = "-verbose:class";
 
-#ifdef CUSTOM_RUNTIME_HEAP_MAX
-#define __make_max_heap_opt(val) #val
-#define _make_max_heap_opt(val) "-Xmx" __make_max_heap_opt(val)
-    opt.optionString = _make_max_heap_opt(CUSTOM_RUNTIME_HEAP_MAX);
-#undef __make_max_heap_opt
-#undef _make_max_heap_opt
-#else
-    /* limit memory use to 16MB */
-    opt.optionString = "-Xmx16m";
-#endif
+    strcpy(heapsizeOptsBuf, "-Xmx");
+    property_get("dalvik.vm.heapsize", heapsizeOptsBuf+4, "16m");
+    //LOGI("Heap size: %s", heapsizeOptsBuf);
+    opt.optionString = heapsizeOptsBuf;
     mOptions.add(opt);
 
     /*
