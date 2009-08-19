@@ -419,6 +419,12 @@ public class SyncStorageEngine extends Handler {
 
     public void setIsSyncable(Account account, String providerName, int syncable) {
         int oldState;
+        if (syncable > 1) {
+            syncable = 1;
+        } else if (syncable < -1) {
+            syncable = -1;
+        }
+        Log.d(TAG, "setIsSyncable: " + account + ", provider " + providerName + " -> " + syncable);
         synchronized (mAuthorities) {
             AuthorityInfo authority = getOrCreateAuthorityLocked(account, providerName, -1, false);
             oldState = authority.syncable;
@@ -989,14 +995,18 @@ public class SyncStorageEngine extends Handler {
         AccountInfo account = mAccounts.get(accountName);
         if (account == null) {
             if (tag != null) {
-                Log.w(TAG, tag + ": unknown account " + accountName);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, tag + ": unknown account " + accountName);
+                }
             }
             return null;
         }
         AuthorityInfo authority = account.authorities.get(authorityName);
         if (authority == null) {
             if (tag != null) {
-                Log.w(TAG, tag + ": unknown authority " + authorityName);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, tag + ": unknown authority " + authorityName);
+                }
             }
             return null;
         }
@@ -1024,6 +1034,8 @@ public class SyncStorageEngine extends Handler {
                     ident++;
                 }
             }
+            Log.d(TAG, "created a new AuthorityInfo for " + accountName
+                    + ", provider " + authorityName);
             authority = new AuthorityInfo(accountName, authorityName, ident);
             account.authorities.put(authorityName, authority);
             mAuthorities.put(ident, authority);
