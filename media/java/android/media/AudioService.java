@@ -1391,21 +1391,26 @@ public class AudioService extends IAudioService.Stub {
             } else if (action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION)) {
                 int state = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
                                                BluetoothHeadset.STATE_ERROR);
-                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothIntent.DEVICE);
-                String address = btDevice.getAddress();
                 int device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
-                int btClass = btDevice.getBluetoothClass();
-                if (BluetoothClass.Device.Major.getDeviceMajor(btClass) == BluetoothClass.Device.Major.AUDIO_VIDEO) {
-                    switch (BluetoothClass.Device.getDevice(btClass)) {
-                    case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
-                    case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
-                        device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
-                        break;
-                    case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
-                        device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
-                        break;
-                    default:
-                        break;
+                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothIntent.DEVICE);
+                String address = null;
+                int btClass = BluetoothClass.ERROR;
+                if (btDevice != null) {
+                    address = btDevice.getAddress();
+                    btClass = btDevice.getBluetoothClass();
+                    if (BluetoothClass.Device.Major.getDeviceMajor(btClass) ==
+                                BluetoothClass.Device.Major.AUDIO_VIDEO) {
+                        switch (BluetoothClass.Device.getDevice(btClass)) {
+                        case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+                        case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
+                            device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
+                            break;
+                        case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
+                            device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
+                            break;
+                        default:
+                            break;
+                        }
                     }
                 }
 
