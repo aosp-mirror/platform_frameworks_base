@@ -16,15 +16,15 @@
 
 package android.provider;
 
-import android.content.Intent;
+import android.accounts.Account;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
-import android.accounts.Account;
 import android.os.RemoteException;
+import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 
 /**
  * The contract between the contacts provider and applications. Contains definitions
@@ -1287,6 +1287,7 @@ public final class ContactsContract {
         }
     }
 
+    // TODO: make this private before unhiding
     public interface GroupsColumns {
         /**
          * The display title of this group.
@@ -1346,7 +1347,7 @@ public final class ContactsContract {
          * Flag indicating if the contacts belonging to this group should be
          * visible in any user interface.
          * <p>
-         * Type: INTEGER
+         * Type: INTEGER (boolean)
          */
         public static final String GROUP_VISIBLE = "group_visible";
 
@@ -1481,6 +1482,100 @@ public final class ContactsContract {
          * A reference to the {@link RawContacts#_ID} of the raw contact that the rule applies to.
          */
         public static final String RAW_CONTACT_ID = "raw_contact_id";
+    }
+
+    private interface SettingsColumns {
+        /**
+         * The name of the account instance to which this row belongs.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACCOUNT_NAME = "account_name";
+
+        /**
+         * The type of account to which this row belongs, which when paired with
+         * {@link #ACCOUNT_NAME} identifies a specific account.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACCOUNT_TYPE = "account_type";
+
+        /**
+         * Setting to indicate how this source handles {@link #SHOULD_SYNC} and
+         * {@link Groups#SHOULD_SYNC} flags. This mode should be one of
+         * {@link Settings#SYNC_MODE_EVERYTHING},
+         * {@link Settings#SYNC_MODE_UNGROUPED}, or
+         * {@link Settings#SYNC_MODE_UNSUPPORTED}.
+         * <p>
+         * Type: INTEGER
+         */
+        public static final String SHOULD_SYNC_MODE = "should_sync_mode";
+
+        /**
+         * When modes is {@link Settings#SYNC_MODE_EVERYTHING}, this flag
+         * overrides any children {@link Groups#SHOULD_SYNC} when set. When mode
+         * is {@link Settings#SYNC_MODE_UNGROUPED}, this flag indicates the
+         * syncing behavior for contacts not belonging to any group.
+         * <p>
+         * Type: INTEGER (boolean)
+         */
+        public static final String SHOULD_SYNC = "should_sync";
+
+        /**
+         * Flag indicating if the contacts from this source, but that don't have
+         * any specific {@link GroupMembership} entries should be visible in any
+         * user interface.
+         * <p>
+         * Type: INTEGER (boolean)
+         */
+        public static final String UNGROUPED_VISIBLE = "ungrouped_visible";
+    }
+
+    /**
+     * Contacts-specific settings for various {@link Account}.
+     */
+    public static final class Settings implements BaseColumns, SettingsColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Settings() {
+        }
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, "settings");
+
+        /**
+         * The MIME-type of {@link #CONTENT_URI} providing a directory of
+         * settings.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/setting";
+
+        /**
+         * The MIME-type of {@link #CONTENT_URI} providing a single setting.
+         */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/setting";
+
+        /**
+         * Mode for {@link #SHOULD_SYNC_MODE} that indicates this data source
+         * doesn't support per-group {@link Groups#SHOULD_SYNC} flags.
+         */
+        public static final int SYNC_MODE_UNSUPPORTED = 0;
+
+        /**
+         * Mode for {@link #SHOULD_SYNC_MODE} that indicates this data source
+         * fully supports per-group {@link Groups#SHOULD_SYNC} flags and assumes
+         * that {@link #SHOULD_SYNC} refers to contacts without any
+         * {@link GroupMembership}.
+         */
+        public static final int SYNC_MODE_UNGROUPED = 1;
+
+        /**
+         * Mode for {@link #SHOULD_SYNC_MODE} that indicates this data source
+         * fully supports per-group {@link Groups#SHOULD_SYNC} flags but assumes
+         * that {@link #SHOULD_SYNC} overrides per-group flags when set.
+         */
+        public static final int SYNC_MODE_EVERYTHING = 2;
     }
 
     /**
