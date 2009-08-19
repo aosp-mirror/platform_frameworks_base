@@ -223,7 +223,7 @@ public abstract class WallpaperService extends Service {
                     ? (mWindowFlags&~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                     : (mWindowFlags|WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             if (mCreated) {
-                updateSurface(false);
+                updateSurface(false, false);
             }
         }
         
@@ -291,7 +291,7 @@ public abstract class WallpaperService extends Service {
         public void onSurfaceDestroyed(SurfaceHolder holder) {
         }
 
-        void updateSurface(boolean force) {
+        void updateSurface(boolean forceRelayout, boolean forceReport) {
             int myWidth = mSurfaceHolder.getRequestedWidth();
             if (myWidth <= 0) myWidth = ViewGroup.LayoutParams.FILL_PARENT;
             int myHeight = mSurfaceHolder.getRequestedHeight();
@@ -302,8 +302,8 @@ public abstract class WallpaperService extends Service {
             boolean sizeChanged = mWidth != myWidth || mHeight != myHeight;
             final boolean typeChanged = mType != mSurfaceHolder.getRequestedType();
             final boolean flagsChanged = mCurWindowFlags != mWindowFlags;
-            if (force || creating || formatChanged || sizeChanged || typeChanged
-                    || flagsChanged) {
+            if (forceRelayout || creating || formatChanged || sizeChanged
+                    || typeChanged || flagsChanged) {
 
                 if (DEBUG) Log.i(TAG, "Changes: creating=" + creating
                         + " format=" + formatChanged + " size=" + sizeChanged);
@@ -382,7 +382,14 @@ public abstract class WallpaperService extends Service {
                                 }
                             }
                         }
-                        if (force || creating || formatChanged || sizeChanged) {
+                        if (forceReport || creating || formatChanged || sizeChanged) {
+                            if (DEBUG) {
+                                RuntimeException e = new RuntimeException();
+                                e.fillInStackTrace();
+                                Log.w(TAG, "forceReport=" + forceReport + " creating=" + creating
+                                        + " formatChanged=" + formatChanged
+                                        + " sizeChanged=" + sizeChanged, e);
+                            }
                             onSurfaceChanged(mSurfaceHolder, mFormat,
                                     mCurWidth, mCurHeight);
                             if (callbacks != null) {
@@ -408,6 +415,7 @@ public abstract class WallpaperService extends Service {
         }
         
         void attach(IWallpaperEngineWrapper wrapper) {
+            if (DEBUG) Log.v(TAG, "attach: " + this + " wrapper=" + wrapper);
             mIWallpaperEngine = wrapper;
             mCaller = wrapper.mCaller;
             mConnection = wrapper.mConnection;
@@ -423,7 +431,7 @@ public abstract class WallpaperService extends Service {
             onCreate(mSurfaceHolder);
             
             mInitializing = false;
-            updateSurface(false);
+            updateSurface(false, false);
         }
         
         void detach() {
@@ -499,7 +507,7 @@ public abstract class WallpaperService extends Service {
                     return;
                 }
                 case MSG_UPDATE_SURFACE:
-                    mEngine.updateSurface(false);
+                    mEngine.updateSurface(true, false);
                     break;
                 case MSG_VISIBILITY_CHANGED:
                     if (DEBUG) Log.v(TAG, "Visibility change in " + mEngine
@@ -524,7 +532,7 @@ public abstract class WallpaperService extends Service {
                 } break;
                 case MSG_WINDOW_RESIZED: {
                     final boolean reportDraw = message.arg1 != 0;
-                    mEngine.updateSurface(true);
+                    mEngine.updateSurface(true, false);
                     if (reportDraw) {
                         try {
                             mEngine.mSession.finishDrawing(mEngine.mWindow);
