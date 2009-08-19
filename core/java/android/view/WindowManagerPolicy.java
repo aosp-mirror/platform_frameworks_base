@@ -344,6 +344,12 @@ public interface WindowManagerPolicy {
     public final int TRANSIT_TASK_TO_FRONT = 10;
     /** A window in an existing task is being put below all other tasks. */
     public final int TRANSIT_TASK_TO_BACK = 11;
+    /** A window in a new activity is being opened on top of an existing one,
+     * and both are on top of the wallpaper. */
+    public final int TRANSIT_WALLPAPER_ACTIVITY_OPEN = 12;
+    /** The window in the top-most activity is being closed to reveal the
+     * previous activity, and both are on top of he wallpaper. */
+    public final int TRANSIT_WALLPAPER_ACTIVITY_CLOSE = 13;
     
     /** Screen turned off because of power button */
     public final int OFF_BECAUSE_OF_USER = 1;
