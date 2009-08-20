@@ -302,7 +302,7 @@ sp<OMXCodec> OMXCodec::Create(
         int32_t width, height;
         bool success = meta->findInt32(kKeyWidth, &width);
         success = success && meta->findInt32(kKeyHeight, &height);
-        assert(success);
+        CHECK(success);
 
         if (createEncoder) {
             codec->setVideoInputFormat(mime, width, height);
@@ -321,9 +321,16 @@ sp<OMXCodec> OMXCodec::Create(
         int32_t width, height;
         bool success = meta->findInt32(kKeyWidth, &width);
         success = success && meta->findInt32(kKeyHeight, &height);
-        assert(success);
+
+        int32_t compressedSize;
+        success = success && meta->findInt32(
+                kKeyCompressedSize, &compressedSize);
+
+        CHECK(success);
+        CHECK(compressedSize > 0);
 
         codec->setImageOutputFormat(format, width, height);
+        codec->setJPEGInputFormat(width, height, (OMX_U32)compressedSize);
     }
 
     codec->initOutputFormat(meta);
@@ -355,7 +362,7 @@ status_t OMXCodec::setVideoPortFormatType(
         }
 
         // The following assertion is violated by TI's video decoder.
-        // assert(format.nIndex == index);
+        // CHECK_EQ(format.nIndex, index);
 
 #if 1
         LOGI("portIndex: %ld, index: %ld, eCompressionFormat=%d eColorFormat=%d",
@@ -618,7 +625,6 @@ OMXCodec::OMXCodec(
       mComponentName(strdup(componentName)),
       mSource(source),
       mCodecSpecificDataIndex(0),
-      mDealer(new MemoryDealer(5 * 1024 * 1024)),
       mState(LOADED),
       mSignalledEOS(false),
       mNoMoreOutputData(false),
@@ -716,8 +722,11 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         return err;
     }
 
+    size_t totalSize = def.nBufferCountActual * def.nBufferSize;
+    mDealer[portIndex] = new MemoryDealer(totalSize);
+
     for (OMX_U32 i = 0; i < def.nBufferCountActual; ++i) {
-        sp<IMemory> mem = mDealer->allocate(def.nBufferSize);
+        sp<IMemory> mem = mDealer[portIndex]->allocate(def.nBufferSize);
         CHECK(mem.get() != NULL);
 
         IOMX::buffer_id buffer;
@@ -1491,23 +1500,33 @@ void OMXCodec::setImageOutputFormat(
             break;
     }
 
+    def.nBufferCountActual = def.nBufferCountMin;
+
     err = mOMX->set_parameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     CHECK_EQ(err, OK);
+}
 
-    ////
-
+void OMXCodec::setJPEGInputFormat(
+        OMX_U32 width, OMX_U32 height, OMX_U32 compressedSize) {
+    OMX_PARAM_PORTDEFINITIONTYPE def;
+    def.nSize = sizeof(def);
+    def.nVersion.s.nVersionMajor = 1;
+    def.nVersion.s.nVersionMinor = 1;
     def.nPortIndex = kPortIndexInput;
 
-    err = mOMX->get_parameter(
+    status_t err = mOMX->get_parameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     CHECK_EQ(err, OK);
+
+    CHECK_EQ(def.eDomain, OMX_PortDomainImage);
+    OMX_IMAGE_PORTDEFINITIONTYPE *imageDef = &def.format.image;
 
     CHECK_EQ(imageDef->eCompressionFormat, OMX_IMAGE_CodingJPEG);
     imageDef->nFrameWidth = width;
     imageDef->nFrameHeight = height;
 
-    def.nBufferSize = 128 * 1024;
+    def.nBufferSize = compressedSize;
     def.nBufferCountActual = def.nBufferCountMin;
 
     err = mOMX->set_parameter(
@@ -1558,7 +1577,7 @@ status_t OMXCodec::start(MetaData *) {
 }
 
 status_t OMXCodec::stop() {
-    LOGI("stop");
+    LOGV("stop");
 
     Mutex::Autolock autoLock(mLock);
 

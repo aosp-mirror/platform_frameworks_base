@@ -60,6 +60,7 @@ JPEGSource::JPEGSource(const sp<DataSource> &source)
       mHeight(0),
       mOffset(0) {
     CHECK_EQ(parseJPEG(), OK);
+    CHECK(mSource->getSize(&mSize) == OK);
 }
 
 JPEGSource::~JPEGSource() {
@@ -70,10 +71,6 @@ JPEGSource::~JPEGSource() {
 
 status_t JPEGSource::start(MetaData *) {
     if (mStarted) {
-        return UNKNOWN_ERROR;
-    }
-
-    if (mSource->getSize(&mSize) != OK) {
         return UNKNOWN_ERROR;
     }
 
@@ -105,6 +102,7 @@ sp<MetaData> JPEGSource::getFormat() {
     meta->setCString(kKeyMIMEType, "image/jpeg");
     meta->setInt32(kKeyWidth, mWidth);
     meta->setInt32(kKeyHeight, mHeight);
+    meta->setInt32(kKeyCompressedSize, mSize);
 
     return meta;
 }
