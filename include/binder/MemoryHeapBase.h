@@ -42,7 +42,7 @@ public:
      * maps the memory referenced by fd. but DOESN'T take ownership
      * of the filedescriptor (it makes a copy with dup()
      */
-    MemoryHeapBase(int fd, size_t size, uint32_t flags = 0);
+    MemoryHeapBase(int fd, size_t size, uint32_t flags = 0, uint32_t offset = 0);
     
     /*
      * maps memory from the given device
@@ -82,7 +82,7 @@ protected:
             int flags = 0, const char* device = NULL);    
 
 private:
-    status_t mapfd(int fd, size_t size);
+    status_t mapfd(int fd, size_t size, uint32_t offset = 0);
 
     int         mFD;
     size_t      mSize;

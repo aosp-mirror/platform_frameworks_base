@@ -78,13 +78,13 @@ MemoryHeapBase::MemoryHeapBase(const char* device, size_t size, uint32_t flags)
     }
 }
 
-MemoryHeapBase::MemoryHeapBase(int fd, size_t size, uint32_t flags)
+MemoryHeapBase::MemoryHeapBase(int fd, size_t size, uint32_t flags, uint32_t offset)
     : mFD(-1), mSize(0), mBase(MAP_FAILED), mFlags(flags),
       mDevice(0), mNeedUnmap(false)
 {
     const size_t pagesize = getpagesize();
     size = ((size + pagesize-1) & ~(pagesize-1));
-    mapfd(dup(fd), size);
+    mapfd(dup(fd), size, offset);
 }
 
 status_t MemoryHeapBase::init(int fd, void *base, int size, int flags, const char* device)
@@ -100,7 +100,7 @@ status_t MemoryHeapBase::init(int fd, void *base, int size, int flags, const cha
     return NO_ERROR;
 }
 
-status_t MemoryHeapBase::mapfd(int fd, size_t size)
+status_t MemoryHeapBase::mapfd(int fd, size_t size, uint32_t offset)
 {
     if (size == 0) {
         // try to figure out the size automatically
@@ -121,7 +121,7 @@ status_t MemoryHeapBase::mapfd(int fd, size_t size)
 
     if ((mFlags & DONT_MAP_LOCALLY) == 0) {
         void* base = (uint8_t*)mmap(0, size,
-                PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+                PROT_READ|PROT_WRITE, MAP_SHARED, fd, offset);
         if (base == MAP_FAILED) {
             LOGE("mmap(fd=%d, size=%u) failed (%s)",
                     fd, uint32_t(size), strerror(errno));
