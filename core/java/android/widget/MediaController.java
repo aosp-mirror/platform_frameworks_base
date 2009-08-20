@@ -282,6 +282,9 @@ public class MediaController extends FrameLayout {
 
         if (!mShowing && mAnchor != null) {
             setProgress();
+            if (mPauseButton != null) {
+                mPauseButton.requestFocus();
+            }
             disableUnsupportedButtons();
 
             int [] anchorpos = new int[2];
@@ -416,6 +419,9 @@ public class MediaController extends FrameLayout {
                 keyCode ==  KeyEvent.KEYCODE_SPACE)) {
             doPauseResume();
             show(sDefaultTimeout);
+            if (mPauseButton != null) {
+                mPauseButton.requestFocus();
+            }
             return true;
         } else if (keyCode ==  KeyEvent.KEYCODE_MEDIA_STOP) {
             if (mPlayer.isPlaying()) {
