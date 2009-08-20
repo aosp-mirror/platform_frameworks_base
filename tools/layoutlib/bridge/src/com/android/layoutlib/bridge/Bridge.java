@@ -312,11 +312,29 @@ public final class Bridge implements ILayoutBridge {
     }
 
     /*
+     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
      * (non-Javadoc)
      * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
      */
     public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
             int screenWidth, int screenHeight, int density, float xdpi, float ydpi,
+            String themeName, boolean isProjectTheme,
+            Map<String, Map<String, IResourceValue>> projectResources,
+            Map<String, Map<String, IResourceValue>> frameworkResources,
+            IProjectCallback customViewLoader, ILayoutLog logger) {
+        return computeLayout(layoutDescription, projectKey,
+                screenWidth, screenHeight, false /* renderFullHeight */,
+                density, xdpi, ydpi, themeName, isProjectTheme,
+                projectResources, frameworkResources, customViewLoader, logger);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, boolean, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
+     */
+    public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
+            int screenWidth, int screenHeight, boolean renderFullHeight,
+            int density, float xdpi, float ydpi,
             String themeName, boolean isProjectTheme,
             Map<String, Map<String, IResourceValue>> projectResources,
             Map<String, Map<String, IResourceValue>> frameworkResources,
@@ -393,15 +411,33 @@ public final class Bridge implements ILayoutBridge {
                 root.setBackgroundDrawable(d);
             }
 
-            int w_spec = MeasureSpec.makeMeasureSpec(screenWidth, MeasureSpec.EXACTLY);
-            int h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
-                    MeasureSpec.EXACTLY);
-
             // measure the views
+            int w_spec = MeasureSpec.makeMeasureSpec(screenWidth, MeasureSpec.EXACTLY);
+            int h_spec;
+
+            if (renderFullHeight) {
+                // measure the full height needed by the layout.
+                h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
+                        MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
+                view.measure(w_spec, h_spec);
+
+                int neededHeight = root.getChildAt(0).getMeasuredHeight();
+
+                if (neededHeight > screenHeight - screenOffset) {
+                    screenHeight = neededHeight + screenOffset;
+                }
+            }
+
+            // remeasure with only the size we need
+            // This must always be done before the call to layout
+            h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
+                    MeasureSpec.EXACTLY);
             view.measure(w_spec, h_spec);
+
+            // now do the layout.
             view.layout(0, screenOffset, screenWidth, screenHeight);
 
-            // draw them
+            // draw the views
             Canvas canvas = new Canvas(screenWidth, screenHeight - screenOffset, logger);
 
             root.draw(canvas);
@@ -1017,7 +1053,7 @@ public final class Bridge implements ILayoutBridge {
         public void setWallpaperPosition(IBinder window, float x, float y) {
             // pass for now.
         }
-        
+
         public IBinder asBinder() {
             // pass for now.
             return null;
