@@ -97,11 +97,9 @@ status_t Buffer::initSize(uint32_t w, uint32_t h, uint32_t reqUsage)
     err = allocator.alloc(w, h, format, usage, &handle, &stride);
     
     if (err == NO_ERROR) {
-        if (err == NO_ERROR) {
-            width  = w;
-            height = h;
-            mVStride = 0;
-        }
+        width  = w;
+        height = h;
+        mVStride = 0;
     }
 
     return err;
