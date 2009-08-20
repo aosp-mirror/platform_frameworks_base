@@ -25,7 +25,9 @@ page.title=&lt;provider&gt;
 
 <dt>can contain:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></code>
-<br/><code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code></dd>
+<br/><code><a href="{@docRoot}guide/topics/manifest/grant-uri-permission-element.html">&lt;grant-uri-permission&gt;</a></code>
+<br/><code><a href="{@docRoot}guide/topics/manifest/path-permission-element.html">&lt;path-permission /&gt;</a></code>
+</dd>
 
 <dt>description:</dt>
 <dd>Declares a content provider &mdash; a subclass of 
