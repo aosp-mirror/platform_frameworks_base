@@ -730,14 +730,6 @@ sp<LayerBaseClient> LayerBaseClient::Surface::getOwner() const {
     return owner;
 }
 
-
-void LayerBaseClient::Surface::getSurfaceData(
-        ISurfaceFlingerClient::surface_data_t* params) const 
-{
-    params->token = mToken;
-    params->identity = mIdentity;
-}
-
 status_t LayerBaseClient::Surface::onTransact(
         uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {

@@ -195,8 +195,8 @@ private:
 
     sp<LayerBaseClient> createNormalSurfaceLocked(
             const sp<Client>& client, DisplayID display,
-            int32_t id, uint32_t w, uint32_t h, 
-            PixelFormat format, uint32_t flags);
+            int32_t id, uint32_t w, uint32_t h, uint32_t flags,
+            PixelFormat& format);
 
     sp<LayerBaseClient> createBlurSurfaceLocked(
             const sp<Client>& client, DisplayID display,

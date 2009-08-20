@@ -197,7 +197,8 @@ SurfaceControl::SurfaceControl(
         uint32_t w, uint32_t h, PixelFormat format, uint32_t flags)
     : mClient(client), mSurface(surface),
       mToken(data.token), mIdentity(data.identity),
-      mWidth(w), mHeight(h), mFormat(format), mFlags(flags)
+      mWidth(data.width), mHeight(data.height), mFormat(data.format),
+      mFlags(flags)
 {
 }
         
