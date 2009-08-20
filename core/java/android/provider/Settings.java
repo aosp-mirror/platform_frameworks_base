@@ -3390,6 +3390,13 @@ public final class Settings {
                 "google_calendar_sync_window_days";
 
         /**
+         * How often to update the calendar sync window.
+         * The window will be advanced every n days.
+         */
+        public static final String GOOGLE_CALENDAR_SYNC_WINDOW_UPDATE_DAYS =
+                "google_calendar_sync_window_update_days";
+
+        /**
          * @deprecated
          * @hide
          */
