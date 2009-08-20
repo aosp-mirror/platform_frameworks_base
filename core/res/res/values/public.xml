@@ -1159,4 +1159,5 @@
   <public type="style" name="Theme.Wallpaper.NoTitleBar" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar.Fullscreen" />
 
+  <public type="attr" name="supportsUploading" />
 </resources>

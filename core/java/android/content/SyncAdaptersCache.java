@@ -49,7 +49,10 @@ import android.util.AttributeSet;
             }
             final boolean userVisible =
                     sa.getBoolean(com.android.internal.R.styleable.SyncAdapter_userVisible, true);
-            return new SyncAdapterType(authority, accountType, userVisible);
+            final boolean supportsUploading =
+                    sa.getBoolean(com.android.internal.R.styleable.SyncAdapter_supportsUploading,
+                            true);
+            return new SyncAdapterType(authority, accountType, userVisible, supportsUploading);
         } finally {
             sa.recycle();
         }

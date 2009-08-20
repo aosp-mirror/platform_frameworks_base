@@ -526,13 +526,6 @@ class SyncManager implements OnAccountsUpdatedListener {
     public void scheduleSync(Account requestedAccount, String requestedAuthority,
             Bundle extras, long delay, boolean onlyThoseWithUnkownSyncableState) {
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
-        if (isLoggable) {
-            Log.v(TAG, "scheduleSync:"
-                    + " delay " + delay
-                    + ", account " + requestedAccount
-                    + ", authority " + requestedAuthority
-                    + ", extras " + ((extras == null) ? "(null)" : extras));
-        }
 
         if (!isSyncEnabled()) {
             if (isLoggable) {
@@ -617,12 +610,26 @@ class SyncManager implements OnAccountsUpdatedListener {
                 if (onlyThoseWithUnkownSyncableState && isSyncable >= 0) {
                     continue;
                 }
-                if (mSyncAdapters.getServiceInfo(SyncAdapterType.newKey(authority, account.type))
-                        != null) {
+                final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
+                        mSyncAdapters.getServiceInfo(
+                                SyncAdapterType.newKey(authority, account.type));
+                if (syncAdapterInfo != null) {
+                    if (!syncAdapterInfo.type.supportsUploading() && uploadOnly) {
+                        continue;
+                    }
                     // make this an initialization sync if the isSyncable state is unknown
-                    Bundle extrasCopy = new Bundle(extras);
+                    Bundle extrasCopy = extras;
                     if (isSyncable < 0) {
+                        extrasCopy = new Bundle(extras);
                         extrasCopy.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
+                    }
+                    if (isLoggable) {
+                        Log.v(TAG, "scheduleSync:"
+                                + " delay " + delay
+                                + ", source " + source
+                                + ", account " + account
+                                + ", authority " + authority
+                                + ", extras " + extrasCopy);
                     }
                     scheduleSyncOperation(
                             new SyncOperation(account, source, authority, extrasCopy, delay));
