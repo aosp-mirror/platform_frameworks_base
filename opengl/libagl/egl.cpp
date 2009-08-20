@@ -141,7 +141,8 @@ struct egl_surface_t
 
                 egl_surface_t(EGLDisplay dpy, EGLConfig config, int32_t depthFormat);
     virtual     ~egl_surface_t();
-    virtual     bool    isValid() const = 0;
+                bool    isValid() const;
+    virtual     bool    initCheck() const = 0;
 
     virtual     EGLBoolean  bindDrawSurface(ogles_context_t* gl) = 0;
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl) = 0;
@@ -175,6 +176,11 @@ egl_surface_t::~egl_surface_t()
     magic = 0;
     free(depth.data);
 }
+bool egl_surface_t::isValid() const {
+    LOGE_IF(magic != MAGIC, "invalid EGLSurface (%p)", this);
+    return magic == MAGIC; 
+}
+
 EGLBoolean egl_surface_t::swapBuffers() {
     return EGL_FALSE;
 }
@@ -208,9 +214,9 @@ struct egl_window_surface_v2_t : public egl_surface_t
             int32_t depthFormat,
             android_native_window_t* window);
 
-     ~egl_window_surface_v2_t();
+    ~egl_window_surface_v2_t();
 
-    virtual     bool        isValid() const { return nativeWindow->common.magic == ANDROID_NATIVE_WINDOW_MAGIC; }
+    virtual     bool        initCheck() const { return true; } // TODO: report failure if ctor fails
     virtual     EGLBoolean  swapBuffers();
     virtual     EGLBoolean  bindDrawSurface(ogles_context_t* gl);
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl);
@@ -704,7 +710,7 @@ struct egl_pixmap_surface_t : public egl_surface_t
 
     virtual ~egl_pixmap_surface_t() { }
 
-    virtual     bool        isValid() const { return nativePixmap.version == sizeof(egl_native_pixmap_t); }
+    virtual     bool        initCheck() const { return !depth.format || depth.data!=0; } 
     virtual     EGLBoolean  bindDrawSurface(ogles_context_t* gl);
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl);
     virtual     EGLint      getWidth() const    { return nativePixmap.width;  }
@@ -726,7 +732,6 @@ egl_pixmap_surface_t::egl_pixmap_surface_t(EGLDisplay dpy,
         depth.data    = (GGLubyte*)malloc(depth.stride*depth.height*2);
         if (depth.data == 0) {
             setError(EGL_BAD_ALLOC, EGL_NO_SURFACE);
-            return;
         }
     }
 }
@@ -768,7 +773,7 @@ struct egl_pbuffer_surface_t : public egl_surface_t
 
     virtual ~egl_pbuffer_surface_t();
 
-    virtual     bool        isValid() const { return pbuffer.data != 0; }
+    virtual     bool        initCheck() const   { return pbuffer.data != 0; }
     virtual     EGLBoolean  bindDrawSurface(ogles_context_t* gl);
     virtual     EGLBoolean  bindReadSurface(ogles_context_t* gl);
     virtual     EGLint      getWidth() const    { return pbuffer.width;  }
@@ -1196,6 +1201,11 @@ static EGLSurface createWindowSurface(EGLDisplay dpy, EGLConfig config,
     if (!(surfaceType & EGL_WINDOW_BIT))
         return setError(EGL_BAD_MATCH, EGL_NO_SURFACE);
 
+    if (static_cast<android_native_window_t*>(window)->common.magic !=
+            ANDROID_NATIVE_WINDOW_MAGIC) {
+        return setError(EGL_BAD_NATIVE_WINDOW, EGL_NO_SURFACE);
+    }
+        
     EGLint configID;
     if (getConfigAttrib(dpy, config, EGL_CONFIG_ID, &configID) == EGL_FALSE)
         return EGL_FALSE;
@@ -1241,7 +1251,7 @@ static EGLSurface createWindowSurface(EGLDisplay dpy, EGLConfig config,
     surface = new egl_window_surface_v2_t(dpy, config, depthFormat,
             static_cast<android_native_window_t*>(window));
 
-    if (!surface->isValid()) {
+    if (!surface->initCheck()) {
         // there was a problem in the ctor, the error
         // flag has been set.
         delete surface;
@@ -1265,6 +1275,11 @@ static EGLSurface createPixmapSurface(EGLDisplay dpy, EGLConfig config,
     if (!(surfaceType & EGL_PIXMAP_BIT))
         return setError(EGL_BAD_MATCH, EGL_NO_SURFACE);
 
+    if (static_cast<egl_native_pixmap_t*>(pixmap)->version != 
+            sizeof(egl_native_pixmap_t)) {
+        return setError(EGL_BAD_NATIVE_PIXMAP, EGL_NO_SURFACE);
+    }
+    
     EGLint configID;
     if (getConfigAttrib(dpy, config, EGL_CONFIG_ID, &configID) == EGL_FALSE)
         return EGL_FALSE;
@@ -1307,7 +1322,7 @@ static EGLSurface createPixmapSurface(EGLDisplay dpy, EGLConfig config,
         new egl_pixmap_surface_t(dpy, config, depthFormat,
                 static_cast<egl_native_pixmap_t*>(pixmap));
 
-    if (!surface->isValid()) {
+    if (!surface->initCheck()) {
         // there was a problem in the ctor, the error
         // flag has been set.
         delete surface;
@@ -1375,7 +1390,7 @@ static EGLSurface createPbufferSurface(EGLDisplay dpy, EGLConfig config,
     egl_surface_t* surface =
         new egl_pbuffer_surface_t(dpy, config, depthFormat, w, h, pixelFormat);
 
-    if (!surface->isValid()) {
+    if (!surface->initCheck()) {
         // there was a problem in the ctor, the error
         // flag has been set.
         delete surface;
@@ -1590,7 +1605,7 @@ EGLBoolean eglDestroySurface(EGLDisplay dpy, EGLSurface eglSurface)
         return setError(EGL_BAD_DISPLAY, EGL_FALSE);
     if (eglSurface != EGL_NO_SURFACE) {
         egl_surface_t* surface( static_cast<egl_surface_t*>(eglSurface) );
-        if (surface->magic != egl_surface_t::MAGIC)
+        if (!surface->isValid())
             return setError(EGL_BAD_SURFACE, EGL_FALSE);
         if (surface->dpy != dpy)
             return setError(EGL_BAD_DISPLAY, EGL_FALSE);
@@ -1610,6 +1625,8 @@ EGLBoolean eglQuerySurface( EGLDisplay dpy, EGLSurface eglSurface,
     if (egl_display_t::is_valid(dpy) == EGL_FALSE)
         return setError(EGL_BAD_DISPLAY, EGL_FALSE);
     egl_surface_t* surface = static_cast<egl_surface_t*>(eglSurface);
+    if (!surface->isValid())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
     if (surface->dpy != dpy)
         return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 
@@ -1702,9 +1719,19 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
         return setError(EGL_BAD_DISPLAY, EGL_FALSE);
     if (draw) {
         egl_surface_t* s = (egl_surface_t*)draw;
+        if (!s->isValid())
+            return setError(EGL_BAD_SURFACE, EGL_FALSE);
         if (s->dpy != dpy)
             return setError(EGL_BAD_DISPLAY, EGL_FALSE);
-        // TODO: check that draw and read are compatible with the context
+        // TODO: check that draw is compatible with the context
+    }
+    if (read && read!=draw) {
+        egl_surface_t* s = (egl_surface_t*)read;
+        if (!s->isValid())
+            return setError(EGL_BAD_SURFACE, EGL_FALSE);
+        if (s->dpy != dpy)
+            return setError(EGL_BAD_DISPLAY, EGL_FALSE);
+        // TODO: check that read is compatible with the context
     }
 
     EGLContext current_ctx = EGL_NO_CONTEXT;
@@ -1737,7 +1764,8 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
             egl_surface_t* r = (egl_surface_t*)read;
             
             if (c->draw) {
-                reinterpret_cast<egl_surface_t*>(c->draw)->disconnect();
+                egl_surface_t* s = reinterpret_cast<egl_surface_t*>(c->draw);
+                s->disconnect();
             }
             if (c->read) {
                 // FIXME: unlock/disconnect the read surface too 
@@ -1860,6 +1888,8 @@ EGLBoolean eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
         return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 
     egl_surface_t* d = static_cast<egl_surface_t*>(draw);
+    if (!d->isValid())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
     if (d->dpy != dpy)
         return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 
@@ -2073,6 +2103,8 @@ EGLBoolean eglSetSwapRectangleANDROID(EGLDisplay dpy, EGLSurface draw,
         return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 
     egl_surface_t* d = static_cast<egl_surface_t*>(draw);
+    if (!d->isValid())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
     if (d->dpy != dpy)
         return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 
@@ -2088,6 +2120,8 @@ EGLClientBuffer eglGetRenderBufferANDROID(EGLDisplay dpy, EGLSurface draw)
         return setError(EGL_BAD_DISPLAY, (EGLClientBuffer)0);
 
     egl_surface_t* d = static_cast<egl_surface_t*>(draw);
+    if (!d->isValid())
+        return setError(EGL_BAD_SURFACE, (EGLClientBuffer)0);
     if (d->dpy != dpy)
         return setError(EGL_BAD_DISPLAY, (EGLClientBuffer)0);
 
