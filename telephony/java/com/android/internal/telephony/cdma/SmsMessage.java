@@ -29,6 +29,7 @@ import com.android.internal.telephony.cdma.sms.BearerData;
 import com.android.internal.telephony.cdma.sms.CdmaSmsAddress;
 import com.android.internal.telephony.cdma.sms.SmsEnvelope;
 import com.android.internal.telephony.cdma.sms.UserData;
+import com.android.internal.util.HexDump;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -542,7 +543,11 @@ public class SmsMessage extends SmsMessageBase {
             return;
         }
         mBearerData = BearerData.decode(mEnvelope.bearerData);
-        if (DBG_SMS) Log.d(LOG_TAG, "MT (decoded) BearerData = " + mBearerData);
+        if (DBG_SMS) {
+            Log.d(LOG_TAG, "MT raw BearerData = '" +
+                      HexDump.toHexString(mEnvelope.bearerData) + "'");
+            Log.d(LOG_TAG, "MT (decoded) BearerData = " + mBearerData);
+        }
         messageRef = mBearerData.messageId;
         if (mBearerData.userData != null) {
             userData = mBearerData.userData.payload;
@@ -648,7 +653,10 @@ public class SmsMessage extends SmsMessageBase {
         bearerData.userData = userData;
 
         byte[] encodedBearerData = BearerData.encode(bearerData);
-        if (DBG_SMS) Log.d(LOG_TAG, "MO (encoded) BearerData = " + bearerData);
+        if (DBG_SMS) {
+            Log.d(LOG_TAG, "MO (encoded) BearerData = " + bearerData);
+            Log.d(LOG_TAG, "MO raw BearerData = '" + HexDump.toHexString(encodedBearerData) + "'");
+        }
         if (encodedBearerData == null) return null;
 
         int teleservice = bearerData.hasUserDataHeader ?
