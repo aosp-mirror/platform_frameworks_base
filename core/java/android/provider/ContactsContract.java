@@ -312,23 +312,30 @@ public final class ContactsContract {
          * @param contactUri the contact whose photo should be used
          */
         public static Uri getPhotoUri(ContentResolver cr, Uri contactUri) {
-            long photoId = -1;
-            Cursor cursor = cr.query(contactUri, new String[]{Contacts.PHOTO_ID}, null, null, null);
+
+            // TODO remove try/catch block as soon as eclair-dev is merged in eclair
             try {
-                if (!cursor.moveToNext()) {
-                    return null;
+                long photoId = -1;
+                Cursor cursor = cr.query(contactUri, new String[] {Contacts.PHOTO_ID},
+                        null, null, null);
+                try {
+                    if (!cursor.moveToNext()) {
+                        return null;
+                    }
+
+                    if (cursor.isNull(0)) {
+                        return null;
+                    }
+
+                    photoId = cursor.getLong(0);
+                } finally {
+                    cursor.close();
                 }
 
-                if (cursor.isNull(0)) {
-                    return null;
-                }
-
-                photoId = cursor.getLong(0);
-            } finally {
-                cursor.close();
+                return ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, photoId);
+            } catch (Exception e) {
+                return null;
             }
-
-            return ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, photoId);
         }
 
         /**
@@ -339,6 +346,9 @@ public final class ContactsContract {
          */
         public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri) {
             Uri photoUri = getPhotoUri(cr, contactUri);
+            if (photoUri == null) {
+                return null;
+            }
             Cursor cursor = cr.query(photoUri,
                     new String[]{ContactsContract.CommonDataKinds.Photo.PHOTO}, null, null, null);
             try {
