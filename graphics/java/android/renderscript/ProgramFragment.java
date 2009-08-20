@@ -68,6 +68,7 @@ public class ProgramFragment extends BaseObj {
         RenderScript mRS;
         Element mIn;
         Element mOut;
+        boolean mPointSpriteEnable;
 
         private class Slot {
             Type mType;
@@ -85,6 +86,7 @@ public class ProgramFragment extends BaseObj {
             mIn = in;
             mOut = out;
             mSlots = new Slot[MAX_SLOT];
+            mPointSpriteEnable = false;
             for(int ct=0; ct < MAX_SLOT; ct++) {
                 mSlots[ct] = new Slot();
             }
@@ -117,6 +119,9 @@ public class ProgramFragment extends BaseObj {
             mSlots[slot].mEnv = env;
         }
 
+        public void setPointSpriteTexCoordinateReplacement(boolean enable) {
+            mPointSpriteEnable = enable;
+        }
 
         static synchronized ProgramFragment internalCreate(RenderScript rs, Builder b) {
             int inID = 0;
@@ -127,20 +132,17 @@ public class ProgramFragment extends BaseObj {
             if (b.mOut != null) {
                 outID = b.mOut.mID;
             }
-            rs.nProgramFragmentBegin(inID, outID);
+            rs.nProgramFragmentBegin(inID, outID, b.mPointSpriteEnable);
             for(int ct=0; ct < MAX_SLOT; ct++) {
                 if(b.mSlots[ct].mTexEnable) {
                     Slot s = b.mSlots[ct];
+                    int typeID = 0;
                     if(s.mType != null) {
-                        rs.nProgramFragmentSetType(ct, s.mType.mID);
+                        typeID = s.mType.mID;
                     }
-                    rs.nProgramFragmentSetTexEnable(ct, true);
-                    if(s.mEnv != null) {
-                        rs.nProgramFragmentSetEnvMode(ct, s.mEnv.mID);
-                    }
+                    rs.nProgramFragmentSetSlot(ct, true, s.mEnv.mID, typeID);
                 }
             }
-
 
             int id = rs.nProgramFragmentCreate();
             return new ProgramFragment(id, rs);

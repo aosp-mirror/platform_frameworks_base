@@ -361,6 +361,7 @@ ProgramFragmentStoreCreate {
 ProgramFragmentBegin {
 	param RsElement in
 	param RsElement out
+	param bool pointSpriteEnable
 	}
 
 ProgramFragmentBindTexture {
@@ -375,19 +376,11 @@ ProgramFragmentBindSampler {
 	param RsSampler s
 	}
 
-ProgramFragmentSetType {
-	param uint32_t slot
-	param RsType t
-	}
-
-ProgramFragmentSetEnvMode {
-	param uint32_t slot
-	param RsTexEnvMode env
-	}
-
-ProgramFragmentSetTexEnable {
+ProgramFragmentSetSlot {
 	param uint32_t slot
 	param bool enable
+	param RsTexEnvMode env
+	param RsType t
 	}
 
 ProgramFragmentCreate {

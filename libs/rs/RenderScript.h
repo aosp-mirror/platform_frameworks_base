@@ -80,7 +80,8 @@ enum RsDataKind {
     RS_KIND_NX,
     RS_KIND_NY,
     RS_KIND_NZ,
-    RS_KIND_INDEX
+    RS_KIND_INDEX,
+    RS_KIND_POINT_SIZE
 };
 
 enum RsElementPredefined {

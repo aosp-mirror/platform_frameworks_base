@@ -24,7 +24,7 @@ using namespace android::renderscript;
 Component::Component()
 {
     mType = FLOAT;
-    mKind = NONE;
+    mKind = USER;
     mIsNormalized = false;
     mBits = 0;
 }

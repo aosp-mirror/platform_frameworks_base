@@ -230,6 +230,13 @@ void Type::makeGLComponents()
             mGL.mTex[texNum].size = 4;
         break;
 
+        case Component::POINT_SIZE:
+            rsAssert(!mGL.mPointSize.size);
+            mGL.mPointSize.size = 1;
+            mGL.mPointSize.offset = mElement->getComponentOffsetBytes(ct);
+            mGL.mPointSize.type = c->getGLType();
+        break;
+
         default:
             break;
         }
@@ -279,6 +286,13 @@ void Type::enableGLVertexBuffer() const
         }
     }
     glClientActiveTexture(GL_TEXTURE0);
+
+    if (mGL.mPointSize.size) {
+        glEnableClientState(GL_POINT_SIZE_ARRAY_OES);
+        glPointSizePointerOES(mGL.mPointSize.type,
+                              stride,
+                              (void *)mGL.mPointSize.offset);
+    }
 
 }
 

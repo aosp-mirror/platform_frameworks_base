@@ -199,6 +199,7 @@ RsTriangleMesh rsi_TriangleMeshCreate(Context *rsc)
     memcpy(tm->mIndexData, tmc->mIndexData.array(), tm->mIndexDataSize);
     tm->analyzeElement();
 
+    tm->incRef();
     return tm;
 }
 
@@ -248,16 +249,16 @@ void rsi_TriangleMeshRenderRange(Context *rsc, RsTriangleMesh vtm, uint32_t firs
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
 
     glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(tm->mSizeCoord, 
-                    GL_FLOAT, 
-                    tm->mVertexElement->getSizeBytes(), 
+    glVertexPointer(tm->mSizeCoord,
+                    GL_FLOAT,
+                    tm->mVertexElement->getSizeBytes(),
                     (void *)tm->mVertexElement->getComponentOffsetBytes(tm->mOffsetCoord));
 
     if (tm->mSizeTex) {
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glTexCoordPointer(tm->mSizeTex, 
-                          GL_FLOAT, 
-                          tm->mVertexElement->getSizeBytes(), 
+        glTexCoordPointer(tm->mSizeTex,
+                          GL_FLOAT,
+                          tm->mVertexElement->getSizeBytes(),
                           (void *)tm->mVertexElement->getComponentOffsetBytes(tm->mOffsetTex));
     } else {
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -265,8 +266,8 @@ void rsi_TriangleMeshRenderRange(Context *rsc, RsTriangleMesh vtm, uint32_t firs
 
     if (tm->mSizeNorm) {
         glEnableClientState(GL_NORMAL_ARRAY);
-        glNormalPointer(GL_FLOAT, 
-                        tm->mVertexElement->getSizeBytes(), 
+        glNormalPointer(GL_FLOAT,
+                        tm->mVertexElement->getSizeBytes(),
                         (void *)tm->mVertexElement->getComponentOffsetBytes(tm->mOffsetNorm));
     } else {
         glDisableClientState(GL_NORMAL_ARRAY);
