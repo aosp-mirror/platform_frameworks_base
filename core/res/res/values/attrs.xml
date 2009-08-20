@@ -937,18 +937,68 @@
         <attr name="windowShowAnimation" format="reference" />
         <!-- The animation used when a window is going from VISIBLE to INVISIBLE. -->
         <attr name="windowHideAnimation" format="reference" />
+        
+        <!--  When opening a new activity, this is the animation that is
+              run on the next activity (which is entering the screen). -->
         <attr name="activityOpenEnterAnimation" format="reference" />
+        <!--  When opening a new activity, this is the animation that is
+              run on the previous activity (which is exiting the screen). -->
         <attr name="activityOpenExitAnimation" format="reference" />
+        <!--  When closing the current activity, this is the animation that is
+              run on the next activity (which is entering the screen). -->
         <attr name="activityCloseEnterAnimation" format="reference" />
+        <!--  When closing the current activity, this is the animation that is
+              run on the current activity (which is exiting the screen). -->
         <attr name="activityCloseExitAnimation" format="reference" />
+        <!--  When opening an activity in a new task, this is the animation that is
+              run on the activity of the new task (which is entering the screen). -->
         <attr name="taskOpenEnterAnimation" format="reference" />
+        <!--  When opening an activity in a new task, this is the animation that is
+              run on the activity of the old task (which is exiting the screen). -->
         <attr name="taskOpenExitAnimation" format="reference" />
+        <!--  When closing the last activity of a task, this is the animation that is
+              run on the activity of the next task (which is entering the screen). -->
         <attr name="taskCloseEnterAnimation" format="reference" />
+        <!--  When opening an activity in a new task, this is the animation that is
+              run on the activity of the old task (which is exiting the screen). -->
         <attr name="taskCloseExitAnimation" format="reference" />
+        <!--  When bringing an existing task to the foreground, this is the
+              animation that is run on the top activity of the task being brought
+              to the foreground (which is entering the screen). -->
         <attr name="taskToFrontEnterAnimation" format="reference" />
+        <!--  When bringing an existing task to the foreground, this is the
+              animation that is run on the current foreground activity
+              (which is exiting the screen). -->
         <attr name="taskToFrontExitAnimation" format="reference" />
+        <!--  When sending the current task to the background, this is the
+              animation that is run on the top activity of the task behind
+              it (which is entering the screen). -->
         <attr name="taskToBackEnterAnimation" format="reference" />
+        <!--  When sending the current task to the background, this is the
+              animation that is run on the top activity of the current task
+              (which is exiting the screen). -->
         <attr name="taskToBackExitAnimation" format="reference" />
+        
+        <!--  When opening a new activity that is on top of the wallpaper
+              when the current activity is also on top of the wallpaper,
+              this is the animation that is run on the new activity
+              (which is entering the screen). -->
+        <attr name="wallpaperActivityOpenEnterAnimation" format="reference" />
+        <!--  When opening a new activity that is on top of the wallpaper
+              when the current activity is also on top of the wallpaper,
+              this is the animation that is run on the current activity
+              (which is exiting the screen). -->
+        <attr name="wallpaperActivityOpenExitAnimation" format="reference" />
+        <!--  When closing a foreround activity that is on top of the wallpaper
+              when the previous activity is also on top of the wallpaper,
+              this is the animation that is run on the previous activity
+              (which is entering the screen). -->
+        <attr name="wallpaperActivityCloseEnterAnimation" format="reference" />
+        <!--  When closing a foreround activity that is on top of the wallpaper
+              when the previous activity is also on top of the wallpaper,
+              this is the animation that is run on the current activity
+              (which is exiting the screen). -->
+        <attr name="wallpaperActivityCloseExitAnimation" format="reference" />
     </declare-styleable>
 
     <!-- ============================= -->

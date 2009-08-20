@@ -405,6 +405,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // If non-null, this is the currently visible window that is associated
     // with the wallpaper.
     WindowState mWallpaperTarget = null;
+    WindowState mUpcomingWallpaperTarget = null;
     int mWallpaperAnimLayerAdjustment;
     
     AppWindowToken mFocusedApp = null;
@@ -1178,60 +1179,136 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean adjustWallpaperWindowsLocked() {
         boolean changed = false;
         
+        mUpcomingWallpaperTarget = null;
+        
         // First find top-most window that has asked to be on top of the
         // wallpaper; all wallpapers go behind it.
         final ArrayList localmWindows = mWindows;
         int N = localmWindows.size();
         WindowState w = null;
+        WindowState foundW = null;
+        int foundI = 0;
+        AppWindowToken topToken = null;
+        AppWindowToken behindToken = null;
         int i = N;
-        boolean visible = false;
         while (i > 0) {
             i--;
             w = (WindowState)localmWindows.get(i);
+            if (topToken != null) {
+                if (w.mAppToken == topToken) {
+                    continue;
+                }
+                if (w.mAppToken != null) {
+                    if (behindToken == null) {
+                        // We need to look through for what is behind the
+                        // potential new wallpaper target...  skip all tokens
+                        // that are hidden and not animating, since they can't
+                        // be involved with the transition.
+                        if (w.mAppToken.hidden && w.mAppToken.animation == null) {
+                            continue;
+                        }
+                        behindToken = w.mAppToken;
+                    }
+                    if (w.mAppToken != behindToken) {
+                        break;
+                    }
+                }
+            }
             if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isReadyForDisplay()
                     && !w.mDrawPending && !w.mCommitDrawPending) {
-                visible = true;
+                if (behindToken != null && w.mAppToken == behindToken) {
+                    // We had previously found a wallpaper window that was
+                    // animating, and now we found one behind it.  We could
+                    // be doing an animation between two windows on top of
+                    // the wallpaper!
+                    if (mWallpaperTarget == w || mWallpaperTarget == foundW) {
+                        // Retain the current wallpaper target (don't move
+                        // the wallpaper yet), but note the window that is
+                        // going to become the wallpaper target so that
+                        // others know about this special state.
+                        if (DEBUG_WALLPAPER) Log.v(TAG,
+                                "Switching wallpaper activities: cur#" + i + "="
+                                + w + " upcoming#" + foundI + "=" + foundW);
+                        mUpcomingWallpaperTarget = foundW;
+                        foundW = w;
+                        foundI = i;
+                        break;
+                    }
+                }
+                foundW = w;
+                foundI = i;
+                if (w.mAppToken != null && w.mAppToken.animation != null) {
+                    // If this app token is animating, we want to keep the
+                    // wallpaper below it if it is animating on top of another
+                    // app with a wallpaper.
+                    topToken = w.mAppToken;
+                    continue;
+                }
                 break;
             }
         }
 
-        if (!visible) w = null;
-        if (DEBUG_WALLPAPER && mWallpaperTarget != w) {
-            Log.v(TAG, "New wallpaper target: " + w);
+        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+            // If we are currently waiting for an app transition, and either
+            // the current target or the next target are involved with it,
+            // then hold off on doing anything with the wallpaper.
+            // Note that we are checking here for just whether the target
+            // is part of an app token...  which is potentially overly aggressive
+            // (the app token may not be involved in the transition), but good
+            // enough (we'll just wait until whatever transition is pending
+            // executes).
+            if (mWallpaperTarget != null && mWallpaperTarget.mAppToken != null) {
+                return false;
+            }
+            if (foundW != null && foundW.mAppToken != null) {
+                return false;
+            }
+            if (mUpcomingWallpaperTarget != null && mUpcomingWallpaperTarget.mAppToken != null) {
+                return false;
+            }
         }
-        mWallpaperTarget = w;
         
+        if (mWallpaperTarget != foundW) {
+            mWallpaperTarget = foundW;
+            if (DEBUG_WALLPAPER) {
+                Log.v(TAG, "New wallpaper target: " + foundW);
+            }
+        }
+        
+        boolean visible = foundW != null;
         if (visible) {
             // The window is visible to the compositor...  but is it visible
             // to the user?  That is what the wallpaper cares about.
-            visible = !w.mObscured;
+            visible = !foundW.mObscured;
             if (DEBUG_WALLPAPER) Log.v(TAG, "Wallpaper visibility: " + visible);
             
             // If the wallpaper target is animating, we may need to copy
-            // its layer adjustment.
-            mWallpaperAnimLayerAdjustment = w.mAppToken != null
-                    ? w.mAppToken.animLayerAdjustment : 0;
+            // its layer adjustment.  Only do this if we are not transfering
+            // between two wallpaper targets.
+            mWallpaperAnimLayerAdjustment =
+                    (mUpcomingWallpaperTarget == null && foundW.mAppToken != null)
+                    ? foundW.mAppToken.animLayerAdjustment : 0;
             
             // Now w is the window we are supposed to be behind...  but we
             // need to be sure to also be behind any of its attached windows,
             // AND any starting window associated with it.
-            while (i > 0) {
-                WindowState wb = (WindowState)localmWindows.get(i-1);
-                if (wb.mAttachedWindow != w &&
+            while (foundI > 0) {
+                WindowState wb = (WindowState)localmWindows.get(foundI-1);
+                if (wb.mAttachedWindow != foundW &&
                         (wb.mAttrs.type != TYPE_APPLICATION_STARTING ||
-                                wb.mToken != w.mToken)) {
+                                wb.mToken != foundW.mToken)) {
                     // This window is not related to the previous one in any
                     // interesting way, so stop here.
                     break;
                 }
-                w = wb;
-                i--;
+                foundW = wb;
+                foundI--;
             }
         }
         
         // Okay i is the position immediately above the wallpaper.  Look at
         // what is below it for later.
-        w = i > 0 ? (WindowState)localmWindows.get(i-1) : null;
+        foundW = foundI > 0 ? (WindowState)localmWindows.get(foundI-1) : null;
         
         final int dw = mDisplay.getWidth();
         final int dh = mDisplay.getHeight();
@@ -1271,9 +1348,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 
                 // First, if this window is at the current index, then all
                 // is well.
-                if (wallpaper == w) {
-                    i--;
-                    w = i > 0 ? (WindowState)localmWindows.get(i-1) : null;
+                if (wallpaper == foundW) {
+                    foundI--;
+                    foundW = foundI > 0
+                            ? (WindowState)localmWindows.get(foundI-1) : null;
                     continue;
                 }
                 
@@ -1283,16 +1361,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 int oldIndex = localmWindows.indexOf(wallpaper);
                 if (oldIndex >= 0) {
                     localmWindows.remove(oldIndex);
-                    if (oldIndex < i) {
-                        i--;
+                    if (oldIndex < foundI) {
+                        foundI--;
                     }
                 }
                 
                 // Now stick it in.
                 if (DEBUG_WALLPAPER) Log.v(TAG, "Moving wallpaper " + wallpaper
-                        + " from " + oldIndex + " to " + i);
+                        + " from " + oldIndex + " to " + foundI);
                 
-                localmWindows.add(i, wallpaper);
+                localmWindows.add(foundI, wallpaper);
                 changed = true;
             }
         }
@@ -2245,6 +2323,16 @@ public class WindowManagerService extends IWindowManager.Stub
                         animAttr = enter
                                 ? com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation
                                 : com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_WALLPAPER_ACTIVITY_OPEN:
+                        animAttr = enter
+                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperActivityOpenEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_wallpaperActivityOpenExitAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_WALLPAPER_ACTIVITY_CLOSE:
+                        animAttr = enter
+                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperActivityCloseEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_wallpaperActivityCloseExitAnimation;
                         break;
                 }
                 a = loadAnimation(lp, animAttr);
@@ -6874,7 +6962,8 @@ public class WindowManagerService extends IWindowManager.Stub
             
             // Wallpapers are animated based on the "real" window they
             // are currently targeting.
-            if (mAttrs.type == TYPE_WALLPAPER && mWallpaperTarget != null) {
+            if (mAttrs.type == TYPE_WALLPAPER && mUpcomingWallpaperTarget == null
+                    && mWallpaperTarget != null) {
                 if (mWallpaperTarget.mHasLocalTransformation) {
                     attachedTransformation = mWallpaperTarget.mTransformation;
                 }
@@ -7511,7 +7600,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (w == mInputMethodTarget) {
                     setInputMethodAnimLayerAdjustment(adj);
                 }
-                if (w == mWallpaperTarget) {
+                if (w == mWallpaperTarget && mUpcomingWallpaperTarget == null) {
                     setWallpaperAnimLayerAdjustmentLocked(adj);
                 }
             }
@@ -8636,6 +8725,60 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
 
+                        boolean wallpaperMoved = adjustWallpaperWindowsLocked();
+                        if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
+                                "Old wallpaper target=" + mWallpaperTarget
+                                + ", upcoming target=" + mUpcomingWallpaperTarget);
+                        if (mUpcomingWallpaperTarget != mWallpaperTarget &&
+                                mUpcomingWallpaperTarget != null &&
+                                mWallpaperTarget != null) {
+                            // Need to determine if both the closing and
+                            // opening app token sets are wallpaper targets,
+                            // in which case special animations are needed
+                            // (since the wallpaper needs to stay static
+                            // behind them).
+                            int found = 0;
+                            NN = mOpeningApps.size();
+                            for (i=0; i<NN; i++) {
+                                AppWindowToken wtoken = mOpeningApps.get(i);
+                                if (mUpcomingWallpaperTarget.mAppToken == wtoken) {
+                                    found |= 1;
+                                }
+                                if (mWallpaperTarget.mAppToken == wtoken) {
+                                    found |= 1;
+                                }
+                            }
+                            NN = mClosingApps.size();
+                            for (i=0; i<NN; i++) {
+                                AppWindowToken wtoken = mClosingApps.get(i);
+                                if (mUpcomingWallpaperTarget.mAppToken == wtoken) {
+                                    found |= 2;
+                                }
+                                if (mWallpaperTarget.mAppToken == wtoken) {
+                                    found |= 2;
+                                }
+                            }
+                            
+                            if (found == 3) {
+                                if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
+                                        "Wallpaper animation!");
+                                switch (transit) {
+                                    case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
+                                    case WindowManagerPolicy.TRANSIT_TASK_OPEN:
+                                    case WindowManagerPolicy.TRANSIT_TASK_TO_FRONT:
+                                        transit = WindowManagerPolicy.TRANSIT_WALLPAPER_ACTIVITY_OPEN;
+                                        break;
+                                    case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
+                                    case WindowManagerPolicy.TRANSIT_TASK_CLOSE:
+                                    case WindowManagerPolicy.TRANSIT_TASK_TO_BACK:
+                                        transit = WindowManagerPolicy.TRANSIT_WALLPAPER_ACTIVITY_CLOSE;
+                                        break;
+                                }
+                                if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
+                                        "New transit: " + transit);
+                            }
+                        }
+                        
                         // We need to figure out which animation to use...
                         WindowManager.LayoutParams lp = findAnimations(mAppTokens,
                                 mOpeningApps, mClosingApps);
@@ -8671,7 +8814,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         // This has changed the visibility of windows, so perform
                         // a new layout to get them all up-to-date.
                         mLayoutNeeded = true;
-                        adjustWallpaperWindowsLocked();
                         if (!moveInputMethodWindowsIfNeededLocked(true)) {
                             assignLayersLocked();
                         }

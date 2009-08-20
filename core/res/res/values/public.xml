@@ -1150,6 +1150,10 @@
   <public type="attr" name="contentAuthority" />
   <public type="attr" name="userVisible" />
   <public type="attr" name="windowShowWallpaper" />
+  <public type="attr" name="wallpaperActivityOpenEnterAnimation" />
+  <public type="attr" name="wallpaperActivityOpenExitAnimation" />
+  <public type="attr" name="wallpaperActivityCloseEnterAnimation" />
+  <public type="attr" name="wallpaperActivityCloseExitAnimation" />
 
   <public type="style" name="Theme.Wallpaper" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar" />
