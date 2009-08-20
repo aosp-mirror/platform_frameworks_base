@@ -68,17 +68,18 @@ void dropWithStrength(int x, int y, int r, int s) {
 
     int* current = loadArrayI32(RSID_RIPPLE_MAP, index * rippleMapSize + origin);
     int sqr = r * r;
+    float invs = 1.0f / s;
 
     int h = 0;
-    for ( ; h < r; h++) {
+    for ( ; h < r; h += 1) {
         int sqv = h * h;
         int yn = origin + (y - h) * (width + 2);
         int yp = origin + (y + h) * (width + 2);
         int w = 0;
-        for ( ; w < r; w++) {
+        for ( ; w < r; w += 1) {
             int squ = w * w;
             if (squ + sqv < sqr) {
-                int v = -sqrtf((sqr - (squ + sqv)) << 16) / s;
+                int v = -sqrtf((sqr - (squ + sqv)) << 16) * invs;
                 current[yn + x + w] = v;
                 current[yp + x + w] = v;
                 current[yn + x - w] = v;
@@ -110,16 +111,16 @@ void updateRipples() {
     while (h) {
         int w = width;
         while (w) {
-            int droplet = ((current[-b] + current[b] + current[-a] + current[a]) >> 1) - next[0];
+            int droplet = ((current[-b] + current[b] + current[-a] + current[a]) >> 1) - *next;
             droplet -= (droplet >> DAMP);
-            next[0] = droplet;
-            current++;
-            next++;
-            w--;
+            *next = droplet;
+            current += 1;
+            next += 1;
+            w -= 1;
         }
         current += 2;
         next += 2;
-        h--;
+        h -= 1;
     }
 }
 
@@ -149,10 +150,14 @@ void generateRipples() {
     int *map = loadArrayI32(RSID_REFRACTION_MAP, 0);
     float *vertices = loadTriangleMeshVerticesF(NAMED_WaterMesh);
 
+    float fw = (float) width;
+    float fh = (float) height;
+    float fy = (1.0f / 512.0f) * (1.0f / RIPPLE_HEIGHT);
+
     int h = height - 1;
     while (h >= 0) {
         int w = width - 1;
-        int wave = current[0];
+        int wave = *current;
         int offset = h * width;
         while (w >= 0) {
             int nextWave = current[1];
@@ -169,40 +174,47 @@ void generateRipples() {
             v &= ~(v >> 31);
             if (v >= height) v = height - 1;
 
-            vertices[(offset + w) * 8 + 3] = u / (float) width;
-            vertices[(offset + w) * 8 + 4] = v / (float) height;
+            int index = (offset + w) << 3;
+            vertices[index + 3] = u / fw;
+            vertices[index + 4] = v / fh;
 
             // Update Z coordinate of the vertex
-            vertices[(offset + w) * 8 + 7] = (dy / 512.0f) / RIPPLE_HEIGHT;
+            vertices[index + 7] = dy * fy;
             
-            w--;
-            current++;
+            w -= 1;
+            current += 1;
             wave = nextWave;
         }
-        h--;
+        h -= 1;
         current += 2;
     }
 
     // Compute the normals for lighting
     int y = 0;
-    for ( ; y < height; y++) {
+    int w8 = width << 3;
+    for ( ; y < height; y += 1) {
         int x = 0;
         int yOffset = y * width;
-        for ( ; x < width; x++) {
+        for ( ; x < width; x += 1) {
+            int o = (yOffset + x) << 3;
+            int o1 = o + 8;
+            int ow = o + w8;
+            int ow1 = ow + 8;
+
             // V1
-            float v1x = vertices[(yOffset + x) * 8 + 5];
-            float v1y = vertices[(yOffset + x) * 8 + 6];
-            float v1z = vertices[(yOffset + x) * 8 + 7];
+            float v1x = vertices[o + 5];
+            float v1y = vertices[o + 6];
+            float v1z = vertices[o + 7];
 
             // V2
-            float v2x = vertices[(yOffset + x + 1) * 8 + 5];
-            float v2y = vertices[(yOffset + x + 1) * 8 + 6];
-            float v2z = vertices[(yOffset + x + 1) * 8 + 7];
+            float v2x = vertices[o1 + 5];
+            float v2y = vertices[o1 + 6];
+            float v2z = vertices[o1 + 7];
             
             // V3
-            float v3x = vertices[(yOffset + width + x) * 8 + 5];
-            float v3y = vertices[(yOffset + width + x) * 8 + 6];
-            float v3z = vertices[(yOffset + width + x) * 8 + 7];
+            float v3x = vertices[ow + 5];
+            float v3y = vertices[ow + 6];
+            float v3z = vertices[ow + 7];
 
             // N1
             float n1x = v2x - v1x;
@@ -220,15 +232,15 @@ void generateRipples() {
             float n3z = n1x * n2y - n1y * n2x;
 
             // Normalize
-            float len = magf3(n3x, n3y, n3z);
-            n3x /= len;
-            n3y /= len;
-            n3z /= len;
+            float len = 1.0f / magf3(n3x, n3y, n3z);
+            n3x *= len;
+            n3y *= len;
+            n3z *= len;
             
             // V2
-            v2x = vertices[(yOffset + width + x + 1) * 8 + 5];
-            v2y = vertices[(yOffset + width + x + 1) * 8 + 6];
-            v2z = vertices[(yOffset + width + x + 1) * 8 + 7];
+            v2x = vertices[ow1 + 5];
+            v2y = vertices[ow1 + 6];
+            v2z = vertices[ow1 + 7];
 
             // N1
             n1x = v2x - v1x;
@@ -241,22 +253,22 @@ void generateRipples() {
             n2z = v3z - v1z;
 
             // Average of previous normal and N1 x N2
-            n3x = n3x / 2.0f + (n1y * n2z - n1z * n2y) / 2.0f;
-            n3y = n3y / 2.0f + (n1z * n2x - n1x * n2z) / 2.0f;
-            n3z = n3z / 2.0f + (n1x * n2y - n1y * n2x) / 2.0f;
+            n3x = n3x * 0.5f + (n1y * n2z - n1z * n2y) * 0.5f;
+            n3y = n3y * 0.5f + (n1z * n2x - n1x * n2z) * 0.5f;
+            n3z = n3z * 0.5f + (n1x * n2y - n1y * n2x) * 0.5f;
 
             // Normalize
-            len = magf3(n3x, n3y, n3z);
-            n3x /= len;
-            n3y /= len;
-            n3z /= len;
+            len = 1.0f / magf3(n3x, n3y, n3z);
+            n3x *= len;
+            n3y *= len;
+            n3z *= len;
 
-            vertices[(yOffset + x) * 8 + 0] = n3x;
-            vertices[(yOffset + x) * 8 + 1] = n3y;
-            vertices[(yOffset + x) * 8 + 2] = -n3z;
+            vertices[o + 0] = n3x;
+            vertices[o + 1] = n3y;
+            vertices[o + 2] = -n3z;
             
             // reset Z
-            //vertices[(yOffset + x) * 8 + 7] = 0.0f;
+            //vertices[(yOffset + x) << 3 + 7] = 0.0f;
         }
     }
 }
@@ -278,12 +290,12 @@ float averageZ(float x1, float x2, float y1, float y2, float* vertices,
     int vertexCount = 0;
 
     int y = quadY1;
-    for ( ; y < quadY2; y++) {
+    for ( ; y < quadY2; y += 1) {
         int x = quadX1;
         int yOffset = y * meshWidth;
-        for ( ; x < quadX2; x++) {
-            z += vertices[(yOffset + x) * 8 + 7];
-            vertexCount++;
+        for ( ; x < quadX2; x += 1) {
+            z += vertices[(yOffset + x) << 3 + 7];
+            vertexCount += 1;
         }
     }
 
@@ -346,8 +358,8 @@ void drawLeaf(int index, float* vertices, int meshWidth, int meshHeight,
     if (a <= 0.0f) {
         float rippled = leafStruct[LEAF_STRUCT_RIPPLED];
         if (rippled < 0.0f) {
-            drop(((x + glWidth / 2.0f) / glWidth) * meshWidth,
-                 meshHeight - ((y + glHeight / 2.0f) / glHeight) * meshHeight,
+            drop(((x + glWidth * 0.5f) / glWidth) * meshWidth,
+                 meshHeight - ((y + glHeight * 0.5f) / glHeight) * meshHeight,
                  DROP_RADIUS);
             spin /= 4.0f;
             leafStruct[LEAF_STRUCT_SPIN] = spin;
@@ -465,19 +477,20 @@ void drawNormals() {
 
     color(1.0f, 0.0f, 0.0f, 1.0f);
 
+    float scale = 1.0f / 10.0f;
     int y = 0;
-    for ( ; y < height; y++) {
+    for ( ; y < height; y += 1) {
         int yOffset = y * width;
         int x = 0;
-        for ( ; x < width; x++) {
-            int offset = (yOffset + x) * 8;
+        for ( ; x < width; x += 1) {
+            int offset = (yOffset + x) << 3;
             float vx = vertices[offset + 5];
             float vy = vertices[offset + 6];
             float vz = vertices[offset + 7];
             float nx = vertices[offset + 0];
             float ny = vertices[offset + 1];
             float nz = vertices[offset + 2];
-            drawLine(vx, vy, vz, vx + nx / 10.0f, vy + ny / 10.0f, vz + nz / 10.0f);
+            drawLine(vx, vy, vz, vx + nx * scale, vy + ny * scale, vz + nz * scale);
         }
     }
 }
