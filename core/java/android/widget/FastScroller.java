@@ -55,7 +55,7 @@ class FastScroller {
     private int mThumbY;
 
     private RectF mOverlayPos;
-    private int mOverlaySize = 104;
+    private int mOverlaySize;
 
     private AbsListView mList;
     private boolean mScrollCompleted;
@@ -119,10 +119,10 @@ class FastScroller {
     
     private void useThumbDrawable(Context context, Drawable drawable) {
         mThumbDrawable = drawable;
-        mThumbW = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                64, context.getResources().getDisplayMetrics());
-        mThumbH = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                52, context.getResources().getDisplayMetrics());
+        mThumbW = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.fastscroll_thumb_width);
+        mThumbH = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.fastscroll_thumb_height);
         mChangedBounds = true;
     }
 
@@ -138,7 +138,9 @@ class FastScroller {
         mScrollCompleted = true;
 
         getSectionsFromIndexer();
-        
+
+        mOverlaySize = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.fastscroll_overlay_size);
         mOverlayPos = new RectF();
         mScrollFade = new ScrollFade();
         mPaint = new Paint();
