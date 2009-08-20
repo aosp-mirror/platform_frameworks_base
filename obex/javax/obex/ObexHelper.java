@@ -897,6 +897,11 @@ public final class ObexHelper {
             if (lower < 0) {
                 lower += 256;
             }
+            // If upper and lower both equal 0, it should be the end of string.
+            // Ignore left bytes from array to avoid potential issues
+            if (upper == 0 && lower == 0) {
+                return new String(c, 0, i);
+            }
 
             c[i] = (char)((upper << 8) | lower);
         }

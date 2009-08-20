@@ -168,7 +168,7 @@ public final class ServerSession extends ObexSession implements Runnable {
             } else {
                 response = validateResponseCode(mListener.onPut(op));
             }
-            if (response != ResponseCodes.OBEX_HTTP_OK) {
+            if (response != ResponseCodes.OBEX_HTTP_OK && !op.isAborted) {
                 op.sendReply(response);
             } else if (!op.isAborted) {
                 // wait for the final bit
