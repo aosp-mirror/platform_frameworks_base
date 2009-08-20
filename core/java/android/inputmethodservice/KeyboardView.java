@@ -1037,6 +1037,10 @@ public class KeyboardView extends View implements View.OnClickListener {
                         me.getX(), me.getY(), me.getMetaState());
                 result = onModifiedTouchEvent(down);
                 down.recycle();
+                // If it's an up action, then deliver the up as well.
+                if (me.getAction() == MotionEvent.ACTION_UP) {
+                    result = onModifiedTouchEvent(me);
+                }
             } else {
                 // Send an up event for the last pointer
                 MotionEvent up = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP,
@@ -1067,7 +1071,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mGestureDetector.onTouchEvent(me)) {
             showPreview(NOT_A_KEY);
             mHandler.removeMessages(MSG_REPEAT);
-            mHandler.removeMessages(MSG_LONGPRESS);            
+            mHandler.removeMessages(MSG_LONGPRESS);
             return true;
         }
         
@@ -1116,7 +1120,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                         if (keyIndex == mCurrentKey) {
                             mCurrentKeyTime += eventTime - mLastMoveTime;
                             continueLongPress = true;
-                        } else {
+                        } else if (mRepeatKeyIndex == NOT_A_KEY) {
                             resetMultiTap();
                             mLastKey = mCurrentKey;
                             mLastCodeX = mLastX;
@@ -1126,10 +1130,6 @@ public class KeyboardView extends View implements View.OnClickListener {
                             mCurrentKey = keyIndex;
                             mCurrentKeyTime = 0;
                         }
-                    }
-                    if (keyIndex != mRepeatKeyIndex) {
-                        mHandler.removeMessages(MSG_REPEAT);
-                        mRepeatKeyIndex = NOT_A_KEY;
                     }
                 }
                 if (!continueLongPress) {
@@ -1141,7 +1141,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                         mHandler.sendMessageDelayed(msg, LONGPRESS_TIMEOUT);
                     }
                 }
-                showPreview(keyIndex);
+                showPreview(mCurrentKey);
                 break;
 
             case MotionEvent.ACTION_UP:
