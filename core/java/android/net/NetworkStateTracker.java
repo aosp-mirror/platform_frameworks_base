@@ -48,7 +48,7 @@ public abstract class NetworkStateTracker extends Handler {
     private boolean mDefaultRouteSet;
     private boolean mTeardownRequested;
 
-    private static boolean DBG = Config.LOGV;
+    private static boolean DBG = true;
     private static final String TAG = "NetworkStateTracker";
 
     public static final int EVENT_STATE_CHANGED = 1;

@@ -357,6 +357,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         for (int t=0; t <= ConnectivityManager.MAX_RADIO_TYPE; t++) {
             if (t != mNetworkPreference &&
                     mNetTrackers[t].getNetworkInfo().isConnected()) {
+                if (DBG) {
+                    Log.d(TAG, "tearing down " +
+                            mNetTrackers[t].getNetworkInfo() +
+                            " in enforcePreference");
+                }
                 teardown(mNetTrackers[t]);
             }
         }
@@ -1232,6 +1237,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         NetworkInfo i = net.getNetworkInfo();
                         if (i.isConnected() &&
                                 !mNetAttributes[i.getType()].isDefault()) {
+                            if (DBG) {
+                                Log.d(TAG, "tearing down " + i +
+                                        " to restore the default network");
+                            }
                             teardown(net);
                         }
                     }
