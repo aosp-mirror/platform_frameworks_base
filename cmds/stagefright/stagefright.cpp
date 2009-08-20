@@ -23,6 +23,8 @@
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
 #include <media/IMediaPlayerService.h>
+#include <media/stagefright/CachingDataSource.h>
+#include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaPlayerImpl.h>
 #include <media/stagefright/MediaExtractor.h>
@@ -191,7 +193,13 @@ int main(int argc, char **argv) {
     for (int k = 0; k < argc; ++k) {
         const char *filename = argv[k];
 
-        sp<MmapSource> dataSource = new MmapSource(filename);
+        sp<DataSource> dataSource;
+        if (!strncasecmp("http://", filename, 7)) {
+            dataSource = new HTTPDataSource(filename);
+            dataSource = new CachingDataSource(dataSource, 64 * 1024, 10);
+        } else {
+            dataSource = new MmapSource(filename);
+        }
 
         bool isJPEG = false;
 
