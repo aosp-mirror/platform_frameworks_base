@@ -108,7 +108,7 @@ private:
     Vector<CodecSpecificData *> mCodecSpecificData;
     size_t mCodecSpecificDataIndex;
 
-    sp<MemoryDealer> mDealer;
+    sp<MemoryDealer> mDealer[2];
 
     State mState;
     Vector<BufferInfo> mPortBuffers[2];
@@ -147,6 +147,9 @@ private:
 
     void setImageOutputFormat(
             OMX_COLOR_FORMATTYPE format, OMX_U32 width, OMX_U32 height);
+
+    void setJPEGInputFormat(
+            OMX_U32 width, OMX_U32 height, OMX_U32 compressedSize);
 
     status_t allocateBuffers();
     status_t allocateBuffersOnPort(OMX_U32 portIndex);
