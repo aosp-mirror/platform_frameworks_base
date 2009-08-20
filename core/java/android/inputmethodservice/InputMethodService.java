@@ -1992,8 +1992,9 @@ public class InputMethodService extends AbstractInputMethodService {
             req.flags = InputConnection.GET_TEXT_WITH_STYLES;
             req.hintMaxLines = 10;
             req.hintMaxChars = 10000;
-            mExtractedText = getCurrentInputConnection().getExtractedText(req,
-                    InputConnection.GET_EXTRACTED_TEXT_MONITOR);
+            InputConnection ic = getCurrentInputConnection();
+            mExtractedText = ic == null? null
+                    : ic.getExtractedText(req, InputConnection.GET_EXTRACTED_TEXT_MONITOR);
             
             final EditorInfo ei = getCurrentInputEditorInfo();
             
