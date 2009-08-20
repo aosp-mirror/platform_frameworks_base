@@ -1148,7 +1148,6 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.bluetooth.BluetoothAdapter
-     * @hide
      */
     public static final String BLUETOOTH_SERVICE = "bluetooth";
     /**

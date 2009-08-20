@@ -22,20 +22,34 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Represents a connected or connecting Bluetooth Socket.
+ * A connected or connecting Bluetooth socket.
  *
- * Currently only supports RFCOMM sockets.
+ * <p>The interface for Bluetooth Sockets is similar to that of TCP sockets:
+ * {@link java.net.Socket} and {@link java.net.ServerSocket}. On the server
+ * side, use a {@link BluetoothServerSocket} to create a listening server
+ * socket. It will return a new, connected {@link BluetoothSocket} on an
+ * accepted connection. On the client side, use the same
+ * {@link BluetoothSocket} object to both intiate the outgoing connection,
+ * and to manage the connected socket.
  *
- * RFCOMM is a connection orientated, streaming transport over Bluetooth. It is
- * also known as the Serial Port Profile (SPP).
+ * <p>The most common type of Bluetooth Socket is RFCOMM. RFCOMM is a
+ * connection orientated, streaming transport over Bluetooth. It is also known
+ * as the Serial Port Profile (SPP).
  *
- * TODO: Consider exposing L2CAP sockets.
- * TODO: Clean up javadoc grammer and formatting.
- * TODO: Remove @hide
- * @hide
+ * <p>Use {@link BluetoothDevice#createRfcommSocket} to create a new {@link
+ * BluetoothSocket} ready for an outgoing connection to a remote
+ * {@link BluetoothDevice}.
+ *
+ * <p>Use {@link BluetoothAdapter#listenUsingRfcommOn} to create a listening
+ * {@link BluetoothServerSocket} ready for incoming connections to the local
+ * {@link BluetoothAdapter}.
+ *
+ * <p>{@link BluetoothSocket} and {@link BluetoothServerSocket} are thread
+ * safe. In particular, {@link #close} will always immediately abort ongoing
+ * operations and close the socket.
  */
 public final class BluetoothSocket implements Closeable {
-    /** Keep TYPE_RFCOMM etc in sync with BluetoothSocket.cpp */
+    /** Keep TYPE_ fields in sync with BluetoothSocket.cpp */
     /*package*/ static final int TYPE_RFCOMM = 1;
     /*package*/ static final int TYPE_SCO = 2;
     /*package*/ static final int TYPE_L2CAP = 3;
@@ -99,6 +113,7 @@ public final class BluetoothSocket implements Closeable {
         this(type, fd, auth, encrypt, new BluetoothDevice(address), port);
     }
 
+    /** @hide */
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -110,19 +125,19 @@ public final class BluetoothSocket implements Closeable {
 
     /**
      * Attempt to connect to a remote device.
-     * This method will block until a connection is made or the connection
+     * <p>This method will block until a connection is made or the connection
      * fails. If this method returns without an exception then this socket
-     * is now connected. #close can be used to abort this call from another
-     * thread.
-     * @throws IOException On error, for example connection failure
+     * is now connected.
+     * <p>{@link #close} can be used to abort this call from another thread.
+     * @throws IOException on error, for example connection failure
      */
     public void connect() throws IOException {
         connectNative();
     }
 
     /**
-     * Closes this socket.
-     * This will cause other blocking calls on this socket to immediately
+     * Immediately close this socket, and release all associated resources.
+     * <p>Causes blocked calls on this socket in other threads to immediately
      * throw an IOException.
      */
     public void close() throws IOException {
@@ -130,9 +145,8 @@ public final class BluetoothSocket implements Closeable {
     }
 
     /**
-     * Return the remote device we are connecting, or connected, to.
-     * @return remote device, or null if this socket has not yet attempted
-     *         or established a connection.
+     * Get the remote device this socket is connecting, or connected, to.
+     * @return remote device
      */
     public BluetoothDevice getRemoteDevice() {
         return mDevice;
@@ -140,7 +154,7 @@ public final class BluetoothSocket implements Closeable {
 
     /**
      * Get the input stream associated with this socket.
-     * The input stream will be returned even if the socket is not yet
+     * <p>The input stream will be returned even if the socket is not yet
      * connected, but operations on that stream will throw IOException until
      * the associated socket is connected.
      * @return InputStream
@@ -151,7 +165,7 @@ public final class BluetoothSocket implements Closeable {
 
     /**
      * Get the output stream associated with this socket.
-     * The output stream will be returned even if the socket is not yet
+     * <p>The output stream will be returned even if the socket is not yet
      * connected, but operations on that stream will throw IOException until
      * the associated socket is connected.
      * @return OutputStream
