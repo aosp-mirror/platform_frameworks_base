@@ -42,9 +42,11 @@ import static android.util.MathUtils.*;
 
 import java.util.TimeZone;
 
+@SuppressWarnings({"FieldCanBeLocal"})
 class GalaxyRS {
     private static final int GALAXY_RADIUS = 300;
     private static final int PARTICLES_COUNT = 12000;
+    private static final float ELLIPSE_TWIST = 0.023333333f;
 
     private static final int RSID_STATE = 0;
 
@@ -54,11 +56,13 @@ class GalaxyRS {
     private static final int RSID_TEXTURE_FLARES = 2;
 
     private static final int RSID_PARTICLES = 1;
-    private static final int PARTICLE_STRUCT_FIELDS_COUNT = 4;
+    private static final int PARTICLE_STRUCT_FIELDS_COUNT = 6;
     private static final int PARTICLE_STRUCT_ANGLE = 0;
     private static final int PARTICLE_STRUCT_DISTANCE = 1;
     private static final int PARTICLE_STRUCT_SPEED = 2;
     private static final int PARTICLE_STRUCT_RADIUS = 3;
+    private static final int PARTICLE_STRUCT_S = 4;
+    private static final int PARTICLE_STRUCT_T = 5;
 
     private static final int RSID_PARTICLES_BUFFER = 2;
 
@@ -101,35 +105,6 @@ class GalaxyRS {
         mRS = rs;
         mResources = res;
         initRS();
-    }
-
-    public void destroy() {
-        mScript.destroy();
-        mSampler.destroy();
-        mLightSampler.destroy();
-        mPfBackground.destroy();
-        mPfsBackground.destroy();
-        mPvBackground.destroy();
-        mPvOrthoAlloc.mAlloc.destroy();
-        for (Allocation a : mTextures) {
-            a.destroy();
-        }
-        mState.destroy();
-        mPfLighting.destroy();
-        mParticles.destroy();
-        mPfsLights.destroy();
-        mParticlesMesh.destroy();
-        mParticlesBuffer.destroy();
-        mStateType.destroy();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            destroy();
-        } finally {
-            super.finalize();
-        }
     }
 
     private void initRS() {
@@ -218,13 +193,16 @@ class GalaxyRS {
         float d = abs(randomGauss()) * GALAXY_RADIUS / 2.0f + random(-4.0f, 4.0f);
         float z = randomGauss() * 0.5f * 0.8f * ((GALAXY_RADIUS - d) / (float) GALAXY_RADIUS);
         z += 1.0f;
+        float p = d * ELLIPSE_TWIST;
 
         particles[index + PARTICLE_STRUCT_ANGLE] = random(0.0f, (float) (Math.PI * 2.0));
         particles[index + PARTICLE_STRUCT_DISTANCE] = d;
         particles[index + PARTICLE_STRUCT_SPEED] = random(0.0015f, 0.0025f) *
                 (0.5f + (0.5f * (float) GALAXY_RADIUS / d)) * 0.7f;
         particles[index + PARTICLE_STRUCT_RADIUS] = z * random(1.2f, 2.1f);
-
+        particles[index + PARTICLE_STRUCT_S] = (float) Math.cos(p);
+        particles[index + PARTICLE_STRUCT_T] = (float) Math.sin(p);
+        
         int red, green, blue;
         if (d < GALAXY_RADIUS / 3.0f) {
             red = (int) (220 + (d / (float) GALAXY_RADIUS) * 35);
