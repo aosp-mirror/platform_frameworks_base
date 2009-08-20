@@ -118,6 +118,7 @@ protected:
         VertexComponent_t mNorm;
         VertexComponent_t mColor;
         VertexComponent_t mTex[RS_MAX_TEXTURE];
+        VertexComponent_t mPointSize;
     };
     GLState_t mGL;
     void makeGLComponents();

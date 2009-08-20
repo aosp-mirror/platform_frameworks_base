@@ -952,11 +952,11 @@ nProgramFragmentStoreCreate(JNIEnv *_env, jobject _this)
 // ---------------------------------------------------------------------------
 
 static void
-nProgramFragmentBegin(JNIEnv *_env, jobject _this, jint in, jint out)
+nProgramFragmentBegin(JNIEnv *_env, jobject _this, jint in, jint out, jboolean pointSpriteEnable)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentBegin, con(%p), in(%p), out(%p)", con, (RsElement)in, (RsElement)out);
-    rsProgramFragmentBegin(con, (RsElement)in, (RsElement)out);
+    LOG_API("nProgramFragmentBegin, con(%p), in(%p), out(%p) PointSprite(%i)", con, (RsElement)in, (RsElement)out, pointSpriteEnable);
+    rsProgramFragmentBegin(con, (RsElement)in, (RsElement)out, pointSpriteEnable);
 }
 
 static void
@@ -976,27 +976,11 @@ nProgramFragmentBindSampler(JNIEnv *_env, jobject _this, jint vpf, jint slot, ji
 }
 
 static void
-nProgramFragmentSetType(JNIEnv *_env, jobject _this, jint slot, jint vt)
+nProgramFragmentSetSlot(JNIEnv *_env, jobject _this, jint slot, jboolean enable, jint env, jint vt)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentSetType, con(%p), slot(%i), vt(%p)", con, slot, (RsType)vt);
-    rsProgramFragmentSetType(con, slot, (RsType)vt);
-}
-
-static void
-nProgramFragmentSetEnvMode(JNIEnv *_env, jobject _this, jint slot, jint env)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentSetEnvMode, con(%p), slot(%i), vt(%i)", con, slot, env);
-    rsProgramFragmentSetEnvMode(con, slot, (RsTexEnvMode)env);
-}
-
-static void
-nProgramFragmentSetTexEnable(JNIEnv *_env, jobject _this, jint slot, jboolean enable)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramFragmentSetTexEnable, con(%p), slot(%i), enable(%i)", con, slot, enable);
-    rsProgramFragmentSetTexEnable(con, slot, enable);
+    LOG_API("nProgramFragmentSetType, con(%p), slot(%i), enable(%i), env(%i), vt(%p)", con, slot, enable, env, (RsType)vt);
+    rsProgramFragmentSetSlot(con, slot, enable, (RsTexEnvMode)env, (RsType)vt);
 }
 
 static jint
@@ -1305,12 +1289,10 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentStoreDither",    "(Z)V",                                 (void*)nProgramFragmentStoreDither },
 {"nProgramFragmentStoreCreate",    "()I",                                  (void*)nProgramFragmentStoreCreate },
 
-{"nProgramFragmentBegin",          "(II)V",                                (void*)nProgramFragmentBegin },
+{"nProgramFragmentBegin",          "(IIZ)V",                               (void*)nProgramFragmentBegin },
 {"nProgramFragmentBindTexture",    "(III)V",                               (void*)nProgramFragmentBindTexture },
 {"nProgramFragmentBindSampler",    "(III)V",                               (void*)nProgramFragmentBindSampler },
-{"nProgramFragmentSetType",        "(II)V",                                (void*)nProgramFragmentSetType },
-{"nProgramFragmentSetEnvMode",     "(II)V",                                (void*)nProgramFragmentSetEnvMode },
-{"nProgramFragmentSetTexEnable",   "(IZ)V",                                (void*)nProgramFragmentSetTexEnable },
+{"nProgramFragmentSetSlot",        "(IZII)V",                              (void*)nProgramFragmentSetSlot },
 {"nProgramFragmentCreate",         "()I",                                  (void*)nProgramFragmentCreate },
 
 {"nProgramVertexBindAllocation",   "(II)V",                                (void*)nProgramVertexBindAllocation },

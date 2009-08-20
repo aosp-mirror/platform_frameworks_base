@@ -34,13 +34,13 @@ public:
     };
 
     enum DataKind {
-        NONE,
+        USER,
         RED, GREEN, BLUE, ALPHA, LUMINANCE, INTENSITY,
         X, Y, Z, W,
         S, T, Q, R,
         NX, NY, NZ,
         INDEX,
-        USER
+        POINT_SIZE
     };
 
 

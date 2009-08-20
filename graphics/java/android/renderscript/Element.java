@@ -111,7 +111,8 @@ public class Element extends BaseObj {
         NX (15),
         NY (16),
         NZ (17),
-        INDEX (18);
+        INDEX (18),
+        POINT_SIZE(19);
 
         int mID;
         DataKind(int id) {
@@ -241,10 +242,15 @@ public class Element extends BaseObj {
             add(DataType.FLOAT, DataKind.Z, false, 32, null);
             return this;
         }
-        
+
         public Builder addFloatST() {
             add(DataType.FLOAT, DataKind.S, false, 32, null);
             add(DataType.FLOAT, DataKind.T, false, 32, null);
+            return this;
+        }
+
+        public Builder addFloatPointSize() {
+            add(DataType.FLOAT, DataKind.POINT_SIZE, false, 32, null);
             return this;
         }
 
