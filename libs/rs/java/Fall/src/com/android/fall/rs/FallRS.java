@@ -177,22 +177,37 @@ class FallRS {
         hResolution += 2;        
         
         for (int y = 0; y <= hResolution; y++) {
+            final boolean shift = (y & 0x1) == 0;
             final float yOffset = y * quadHeight - glHeight / 2.0f - quadHeight;
             final float t = 1.0f - y / (float) hResolution;
             for (int x = 0; x <= wResolution; x++) {
-                rs.triangleMeshAddVertex_XYZ_ST_NORM(
-                        -1.0f + x * quadWidth - quadWidth, yOffset, 0.0f,
-                        x / (float) wResolution, t,
-                        0.0f, 0.0f, -1.0f);
+                if (shift) {
+                    rs.triangleMeshAddVertex_XYZ_ST_NORM(
+                            -1.0f + x * quadWidth - quadWidth, yOffset, 0.0f,
+                            x / (float) wResolution, t,
+                            0.0f, 0.0f, -1.0f);
+                } else {
+                    rs.triangleMeshAddVertex_XYZ_ST_NORM(
+                            -1.0f + x * quadWidth - quadWidth * 0.5f, yOffset, 0.0f,
+                            x / (float) wResolution, t,
+                            0.0f, 0.0f, -1.0f);
+                }
             }
         }
 
         for (int y = 0; y < hResolution; y++) {
+            final boolean shift = (y & 0x1) == 0;
+            final int yOffset = y * (wResolution + 1);
             for (int x = 0; x < wResolution; x++) {
-                final int index = y * (wResolution + 1) + x;
+                final int index = yOffset + x;
                 final int iWR1 = index + wResolution + 1;
-                rs.triangleMeshAddTriangle(index, index + 1, iWR1);
-                rs.triangleMeshAddTriangle(index + 1, iWR1, iWR1 + 1);
+                if (shift) {
+                    rs.triangleMeshAddTriangle(index, index + 1, iWR1);
+                    rs.triangleMeshAddTriangle(index + 1, iWR1 + 1, iWR1);
+                } else {
+                    rs.triangleMeshAddTriangle(index, iWR1 + 1, iWR1);
+                    rs.triangleMeshAddTriangle(index, index + 1, iWR1 + 1);
+                }
             }
         }
 
