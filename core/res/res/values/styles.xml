@@ -66,6 +66,10 @@
         <item name="taskToFrontExitAnimation">@anim/task_open_exit</item>
         <item name="taskToBackEnterAnimation">@anim/task_close_enter</item>
         <item name="taskToBackExitAnimation">@anim/task_close_exit</item>
+        <item name="wallpaperActivityOpenEnterAnimation">@anim/wallpaper_activity_open_enter</item>
+        <item name="wallpaperActivityOpenExitAnimation">@anim/wallpaper_activity_open_exit</item>
+        <item name="wallpaperActivityCloseEnterAnimation">@anim/wallpaper_activity_close_enter</item>
+        <item name="wallpaperActivityCloseExitAnimation">@anim/wallpaper_activity_close_exit</item>
     </style>
 
     <!-- Standard animations for a non-full-screen window or activity. -->
@@ -130,8 +134,7 @@
         <item name="windowExitAnimation">@anim/slide_out_down</item>
     </style>
 
-    <!-- Window animations that are applied to input method overlay windows.
-         {@hide Pending API council approval} -->
+    <!-- Window animations that are applied to input method overlay windows. -->
     <style name="Animation.InputMethod">
         <item name="windowEnterAnimation">@anim/input_method_enter</item>
         <item name="windowExitAnimation">@anim/input_method_exit</item>
@@ -151,8 +154,7 @@
         <item name="windowExitAnimation">@anim/search_bar_exit</item>
     </style>
 
-    <!-- Window animations that are applied to the zoom buttons overlay window.
-         {@hide Pending API council approval} -->
+    <!-- Window animations that are applied to the zoom buttons overlay window. -->
     <style name="Animation.ZoomButtons">
         <item name="windowEnterAnimation">@anim/fade_in</item>
         <item name="windowExitAnimation">@anim/fade_out</item>
