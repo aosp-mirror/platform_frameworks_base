@@ -318,10 +318,8 @@
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"Umožňuje aplikaci sdělit systému, které aplikace mohou používat které widgety. Aplikace s tímto oprávněním mohou zpřístupnit osobní údaje jiným aplikacím. Není určeno pro běžné aplikace."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"změna stavu telefonu"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Umožňuje aplikaci ovládat telefonní funkce zařízení. Aplikace s tímto oprávněním může přepínat sítě nebo zapnout či vypnout bezdrátové připojení telefonu bez vašeho svolení."</string>
-    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"čtení stavu a identity telefonu"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Umožňuje aplikaci získat přístup k telefonním funkcím zařízení. Aplikace s tímto oprávněním mohou určit telefonní a sériové číslo tohoto telefonu, zda zrovna probíhá hovor, volané telefonní číslo a podobně."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"zabránění přechodu telefonu do režimu spánku"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"Umožňuje aplikaci zabránit přechodu telefonu do režimu spánku."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"zapnutí či vypnutí telefonu"</string>

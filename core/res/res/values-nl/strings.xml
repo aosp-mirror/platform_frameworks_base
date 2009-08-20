@@ -318,10 +318,8 @@
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"Hiermee kan een toepassing het systeem melden welke widgets door welke toepassing kunnen worden gebruikt. Met deze toestemming kunnen toepassingen andere toepassingen toegang geven tot persoonlijke gegevens. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"telefoonstatus wijzigen"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Hiermee kan de toepassing de telefoonfuncties van het apparaat beheren. Een toepassing met deze machtiging kan schakelen tussen netwerken, de radio van de telefoon in- of uitschakelen en dergelijke zonder dat u hiervan op de hoogte wordt gesteld."</string>
-    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"telefoonstatus en -identiteit lezen"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Hiermee krijgt de toepassing toegang tot de telefoonfuncties van het apparaat. Een toepassing met de betreffende machtiging kan het telefoonnummer en serienummer van deze telefoon achterhalen, bepalen of een oproep actief is, het gekozen nummer achterhalen en dergelijke."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"voorkomen dat telefoon overschakelt naar slaapmodus"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"Hiermee kan een toepassing voorkomen dat de telefoon overschakelt naar de slaapmodus."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"telefoon in- of uitschakelen"</string>

@@ -318,10 +318,8 @@
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"Permite que una aplicación indique al sistema los widgets que puede utilizar cada aplicación. Se trata de un permiso que no pueden utilizar las aplicaciones normales y que permite que una aplicación conceda acceso a datos personales a otras aplicaciones."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"modificar estado del teléfono"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Permite que la aplicación controle las funciones de teléfono del dispositivo. Una aplicación con este permiso puede cambiar redes, activar y desactivar la señal móvil, etc., sin necesidad de notificar al usuario."</string>
-    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"leer la identidad y el estado del teléfono"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Permite que la aplicación acceda a las funciones de teléfono del dispositivo. Una aplicación con este permiso puede determinar el número de teléfono y el número de serie de este teléfono, si una llamada está activa, el número al que está vinculada esa llamada, etc."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"impedir que el teléfono entre en modo de suspensión"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"Permite que una aplicación impida que el teléfono entre en modo de suspensión."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"encender o apagar el teléfono"</string>

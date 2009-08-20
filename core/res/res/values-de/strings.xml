@@ -318,10 +318,8 @@
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"Ermöglicht der Anwendung, dem System zu melden, welche Widgets von welcher Anwendung verwendet werden können. Mit dieser Berechtigung können Anwendungen anderen Anwendungen Zugriff auf persönliche Daten gewähren. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"Telefonstatus ändern"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Ermöglicht einer Anwendung, die Telefonfunktionen des Gerätes zu steuern. Eine Anwendung mit dieser Berechtigung kann unter anderem das Netzwerk wechseln oder die Mobilfunkverbindung des Telefons ein- und ausschalten, ohne Sie darüber zu informieren."</string>
-    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"Telefonstatus lesen und identifizieren"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Ermöglicht der Anwendung, auf die Telefonfunktionen des Gerätes zuzugreifen. Eine Anwendung mit dieser Berechtigung kann unter anderem bestimmen, welche Telefonnummer dieses Telefon verwendet, ob ein Anruf aktiv ist oder mit welcher Nummer der Anrufer verbunden ist."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"Standby-Modus deaktivieren"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"Ermöglicht einer Anwendung, den Standby-Modus des Telefons zu deaktivieren."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"Gerät ein- oder ausschalten"</string>

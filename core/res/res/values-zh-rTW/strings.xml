@@ -318,10 +318,8 @@
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"允許應用程式告知系統哪個應用程式可以使用哪些小工具。開啟此權限後，應用程式會讓其他程式使用個人資料，但一般應用程式不適合使用此功能。"</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"修改手機狀態"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"允許應用程式控制電話功能。擁有此權限的程式可自行切換網路、開關無線通訊功能。"</string>
-    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"讀取手機狀態和識別碼"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"允許應用程式存取裝置的電話功能資料。獲得此權限的應用程式可取得手機的號碼和序號、是否在通話中，以及通話另一方的電話號碼等資料。"</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"防止手機進入待命狀態"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"允許應用程式防止手機進入待命。"</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"開啟或關閉電源"</string>
