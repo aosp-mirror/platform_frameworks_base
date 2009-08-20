@@ -456,16 +456,19 @@ public abstract class DataConnectionTracker extends Handler {
         if (dataEnabled[id] != enable) {
             dataEnabled[id] = enable;
 
+            // count the total number of enabled APN's
+            // if we just enabled the first APN, start our Data connection,
+            // if we disabled the last, stop our data connection
             if (enable) {
                 enabledCount++;
+                if (enabledCount == 1) {
+                    setPrivateDataEnabled(true);
+                }
             } else {
                 enabledCount--;
-            }
-
-            if (enabledCount == 0) {
-                setPrivateDataEnabled(false);
-            } else if (enabledCount == 1) {
-                setPrivateDataEnabled(true);
+                if (enabledCount == 0) {
+                    setPrivateDataEnabled(false);
+                }
             }
         }
     }

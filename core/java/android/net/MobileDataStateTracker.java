@@ -143,8 +143,9 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                     boolean unavailable = intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY,
                             false);
                     if (DBG) Log.d(TAG, mApnType + " Received " + intent.getAction() +
-                            " broadcast - state = " + state + ", unavailable = " + unavailable +
-                            ", reason = " + (reason == null ? "(unspecified)" : reason));
+                            " broadcast - state = " + state + ", oldstate = " + mMobileDataState +
+                            ", unavailable = " + unavailable + ", reason = " +
+                            (reason == null ? "(unspecified)" : reason));
 
                     if (isApnTypeIncluded(apnTypeList)) {
                         if (mEnabled == false) {
@@ -152,10 +153,12 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                             // we should record the interface name if one's provided.  If the user
                             // turns on this network we will need the interfacename but won't get
                             // a fresh connected message - TODO fix this..
-                            if (mInterfaceName == null && state == Phone.DataState.CONNECTED) {
+                            if (state == Phone.DataState.CONNECTED) {
+                                if (DBG) Log.d(TAG, "replacing old mInterfaceName (" +
+                                        mInterfaceName + ") with " +
+                                        intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY) +
+                                        " for " + mApnType);
                                 mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
-                            } else if (state == Phone.DataState.DISCONNECTED) {
-                                mInterfaceName = null;
                             }
                             if (DBG) Log.d(TAG, "  dropped - mEnabled = false");
                             return;
@@ -179,6 +182,8 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                                 if (mInterfaceName != null) {
                                     NetworkUtils.resetConnections(mInterfaceName);
                                 }
+                                if (DBG) Log.d(TAG, "clearing mInterfaceName for "+ mApnType +
+                                        " as it DISCONNECTED");
                                 mInterfaceName = null;
                                 mDefaultGatewayAddr = 0;
                                 break;
@@ -301,6 +306,8 @@ public class MobileDataStateTracker extends NetworkStateTracker {
         switch (setEnableApn(mApnType, true)) {
             case Phone.APN_ALREADY_ACTIVE:
                 mEnabled = true;
+                // need to set self to CONNECTING so the below message is handled.
+                mMobileDataState = Phone.DataState.CONNECTING;
                 //send out a connected message
                 Intent intent = new Intent(TelephonyIntents.
                         ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
@@ -412,10 +419,11 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      */
     @Override
     public boolean requestRouteToHost(int hostAddress) {
+        if (DBG) {
+            Log.d(TAG, "Requested host route to " + Integer.toHexString(hostAddress) +
+                    " for " + mApnType + "(" + mInterfaceName + ")");
+        }
         if (mInterfaceName != null && hostAddress != -1) {
-            if (DBG) {
-                Log.d(TAG, "Requested host route to " + Integer.toHexString(hostAddress));
-            }
             return NetworkUtils.addHostRoute(mInterfaceName, hostAddress) == 0;
         } else {
             return false;
