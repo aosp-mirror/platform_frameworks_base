@@ -110,7 +110,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
     
     // wallpaper is at the bottom, though the window manager may move it.
-    static final int WALLPAPER_LAYER = 1;
+    static final int WALLPAPER_LAYER = 2;
     static final int APPLICATION_LAYER = 2;
     static final int PHONE_LAYER = 3;
     static final int SEARCH_BAR_LAYER = 4;
