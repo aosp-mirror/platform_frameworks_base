@@ -116,7 +116,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
 
     //Projection used for looking up contact id from phone number
     protected static final String[] PHONE_LOOKUP_PROJECTION = new String[] {
-        RawContacts.CONTACT_ID,
+        PhoneLookup._ID,
     };
     protected static final int PHONE_LOOKUP_CONTACT_ID_COLUMN_INDEX = 0;
 
