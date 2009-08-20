@@ -64,11 +64,16 @@ SurfaceBuffer::SurfaceBuffer(const Parcel& data)
 {
     // we own the handle in this case
     width  = data.readInt32();
-    height = data.readInt32();
-    stride = data.readInt32();
-    format = data.readInt32();
-    usage  = data.readInt32();
-    handle = data.readNativeHandle();
+    if (width < 0) {
+        width = height = stride = format = usage = 0;
+        handle = 0;
+    } else {
+        height = data.readInt32();
+        stride = data.readInt32();
+        format = data.readInt32();
+        usage  = data.readInt32();
+        handle = data.readNativeHandle();
+    }
 }
 
 SurfaceBuffer::~SurfaceBuffer()
@@ -108,16 +113,25 @@ status_t SurfaceBuffer::unlock()
 status_t SurfaceBuffer::writeToParcel(Parcel* reply, 
         android_native_buffer_t const* buffer)
 {
-    if (buffer == NULL) {
+    if (buffer == NULL)
         return BAD_VALUE;
+
+    if (buffer->width < 0 || buffer->height < 0)
+        return BAD_VALUE;
+
+    status_t err = NO_ERROR;
+    if (buffer->handle == NULL) {
+        // this buffer doesn't have a handle
+        reply->writeInt32(NO_MEMORY);
+    } else {
+        reply->writeInt32(buffer->width);
+        reply->writeInt32(buffer->height);
+        reply->writeInt32(buffer->stride);
+        reply->writeInt32(buffer->format);
+        reply->writeInt32(buffer->usage);
+        err = reply->writeNativeHandle(buffer->handle);
     }
-    reply->writeInt32(buffer->width);
-    reply->writeInt32(buffer->height);
-    reply->writeInt32(buffer->stride);
-    reply->writeInt32(buffer->format);
-    reply->writeInt32(buffer->usage);
-    reply->writeNativeHandle(buffer->handle);
-    return NO_ERROR;
+    return err;
 }
 
 // ----------------------------------------------------------------------
@@ -434,7 +448,7 @@ Surface::~Surface()
     // this is a client-side operation, the surface is destroyed, unmap
     // its buffers in this process.
     for (int i=0 ; i<2 ; i++) {
-        if (mBuffers[i] != 0) {
+        if (mBuffers[i] != 0 && mBuffers[i]->handle != 0) {
             getBufferMapper().unregisterBuffer(mBuffers[i]->handle);
         }
     }
@@ -590,17 +604,24 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
     if ((back->flags & surface_info_t::eNeedNewBuffer) || mUsageChanged) {
         mUsageChanged = false;
         err = getBufferLocked(backIdx, mUsage);
+        if (err == NO_ERROR) {
+            // reset the width/height with the what we get from the buffer
+            const sp<SurfaceBuffer>& backBuffer(mBuffers[backIdx]);
+            mWidth  = uint32_t(backBuffer->width);
+            mHeight = uint32_t(backBuffer->height);
+        }
     }
 
     if (err == NO_ERROR) {
         const sp<SurfaceBuffer>& backBuffer(mBuffers[backIdx]);
-        // reset the width/height with the what we get from the buffer
-        mWidth  = uint32_t(backBuffer->width);
-        mHeight = uint32_t(backBuffer->height);
-        mDirtyRegion.set(backBuffer->width, backBuffer->height);
-        *buffer = backBuffer.get();
+        if (backBuffer != 0) {
+            mDirtyRegion.set(backBuffer->width, backBuffer->height);
+            *buffer = backBuffer.get();
+        } else {
+            err = NO_MEMORY;
+        }
     }
-  
+
     return err;
 }
 
@@ -716,7 +737,8 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
             } else {
                 newDirtyRegion.andSelf(bounds);
                 const sp<SurfaceBuffer>& frontBuffer(mBuffers[1-mBackbufferIndex]);
-                if (backBuffer->width  == frontBuffer->width && 
+                if (frontBuffer !=0 &&
+                    backBuffer->width  == frontBuffer->width && 
                     backBuffer->height == frontBuffer->height &&
                     !(lcblk->flags & eNoCopyBack)) 
                 {
@@ -788,18 +810,24 @@ status_t Surface::getBufferLocked(int index, int usage)
     if (s == 0) return NO_INIT;
 
     status_t err = NO_MEMORY;
+
+    // free the current buffer
+    sp<SurfaceBuffer>& currentBuffer(mBuffers[index]);
+    if (currentBuffer != 0) {
+        getBufferMapper().unregisterBuffer(currentBuffer->handle);
+        currentBuffer.clear();
+    }
+
     sp<SurfaceBuffer> buffer = s->getBuffer(usage);
     LOGE_IF(buffer==0, "ISurface::getBuffer() returned NULL");
-    if (buffer != 0) {
-        sp<SurfaceBuffer>& currentBuffer(mBuffers[index]);
-        if (currentBuffer != 0) {
-            getBufferMapper().unregisterBuffer(currentBuffer->handle);
-            currentBuffer.clear();
-        }
-        err = getBufferMapper().registerBuffer(buffer->handle);
-        LOGW_IF(err, "registerBuffer(...) failed %d (%s)", err, strerror(-err));
-        if (err == NO_ERROR) {
-            currentBuffer = buffer;
+    if (buffer != 0) { // this should never happen by construction
+        if (buffer->handle != NULL) { 
+            err = getBufferMapper().registerBuffer(buffer->handle);
+            LOGW_IF(err, "registerBuffer(...) failed %d (%s)",
+                    err, strerror(-err));
+            if (err == NO_ERROR) {
+                currentBuffer = buffer;
+            }
         }
     }
     return err; 

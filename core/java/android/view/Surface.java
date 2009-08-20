@@ -246,7 +246,7 @@ public class Surface implements Parcelable {
     };
 
     /**
-     * Sets the display metrics used to provide canva's width/height in comaptibility mode.
+     * Sets the display metrics used to provide canva's width/height in compatibility mode.
      */
     void setCompatibleDisplayMetrics(DisplayMetrics metrics, Translator translator) {
         mCompatibleDisplayMetrics = metrics;
@@ -275,7 +275,8 @@ public class Surface implements Parcelable {
     public native   void clear();
     
     /** draw into a surface */
-    public Canvas lockCanvas(Rect dirty) throws OutOfResourcesException {
+    public Canvas lockCanvas(Rect dirty) throws OutOfResourcesException, IllegalArgumentException
+    {
         /* the dirty rectangle may be expanded to the surface's size, if
          * for instance it has been resized or if the bits were lost, since
          * the last call.
