@@ -67,6 +67,7 @@ import static android.telephony.SmsMessage.MessageClass;
  */
 public class SmsMessage extends SmsMessageBase {
     static final String LOG_TAG = "CDMA";
+    private final static Boolean DBG_SMS = false;
 
     /**
      *  Status of a previously submitted SMS.
@@ -541,6 +542,7 @@ public class SmsMessage extends SmsMessageBase {
             return;
         }
         mBearerData = BearerData.decode(mEnvelope.bearerData);
+        if (DBG_SMS) Log.d(LOG_TAG, "MT (decoded) BearerData = " + mBearerData);
         messageRef = mBearerData.messageId;
         if (mBearerData.userData != null) {
             userData = mBearerData.userData.payload;
@@ -644,13 +646,13 @@ public class SmsMessage extends SmsMessageBase {
         bearerData.reportReq = false;
 
         bearerData.userData = userData;
-        bearerData.hasUserDataHeader = (userData.userDataHeader != null);
+
+        byte[] encodedBearerData = BearerData.encode(bearerData);
+        if (DBG_SMS) Log.d(LOG_TAG, "MO (encoded) BearerData = " + bearerData);
+        if (encodedBearerData == null) return null;
 
         int teleservice = bearerData.hasUserDataHeader ?
                 SmsEnvelope.TELESERVICE_WEMT : SmsEnvelope.TELESERVICE_WMT;
-
-        byte[] encodedBearerData = BearerData.encode(bearerData);
-        if (encodedBearerData == null) return null;
 
         SmsEnvelope envelope = new SmsEnvelope();
         envelope.messageType = SmsEnvelope.MESSAGE_TYPE_POINT_TO_POINT;
