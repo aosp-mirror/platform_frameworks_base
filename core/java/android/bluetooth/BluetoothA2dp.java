@@ -213,31 +213,6 @@ public final class BluetoothA2dp {
         }
     }
 
-    /**
-     * Check class bits for possible A2DP Sink support.
-     * This is a simple heuristic that tries to guess if a device with the
-     * given class bits might be a A2DP Sink. It is not accurate for all
-     * devices. It tries to err on the side of false positives.
-     * @return True if this device might be a A2DP sink
-     */
-    public static boolean doesClassMatchSink(int btClass) {
-        if (BluetoothClass.Service.hasService(btClass, BluetoothClass.Service.RENDER)) {
-            return true;
-        }
-        // By the A2DP spec, sinks must indicate the RENDER service.
-        // However we found some that do not (Chordette). So lets also
-        // match on some other class bits.
-        switch (BluetoothClass.Device.getDevice(btClass)) {
-        case BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO:
-        case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
-        case BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER:
-        case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
-            return true;
-        default:
-            return false;
-        }
-    }
-
     /** Helper for converting a state to a string.
      * For debug use only - strings are not internationalized.
      * @hide
