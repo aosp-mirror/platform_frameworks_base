@@ -64,10 +64,10 @@ public abstract class AbsSeekBar extends ProgressBar {
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.SeekBar, defStyle, 0);
         Drawable thumb = a.getDrawable(com.android.internal.R.styleable.SeekBar_thumb);
-        setThumb(thumb);
+        setThumb(thumb); // will guess mThumbOffset if thumb != null...
+        // ...but allow layout to override this
         int thumbOffset =
-                a.getDimensionPixelOffset(com.android.internal.R.styleable.SeekBar_thumbOffset, 0);
-        setThumbOffset(thumbOffset);
+                a.getDimensionPixelOffset(com.android.internal.R.styleable.SeekBar_thumbOffset, getThumbOffset());
         a.recycle();
 
         a = context.obtainStyledAttributes(attrs,
@@ -77,13 +77,21 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     /**
-     * Sets the thumb that will be drawn at the end of the progress meter within the SeekBar
+     * Sets the thumb that will be drawn at the end of the progress meter within the SeekBar.
+     * <p>
+     * If the thumb is a valid drawable (i.e. not null), half its width will be
+     * used as the new thumb offset (@see #setThumbOffset(int)).
      * 
      * @param thumb Drawable representing the thumb
      */
     public void setThumb(Drawable thumb) {
         if (thumb != null) {
             thumb.setCallback(this);
+
+            // Assuming the thumb drawable is symmetric, set the thumb offset
+            // such that the thumb will hang halfway off either edge of the
+            // progress bar.
+            mThumbOffset = (int)thumb.getIntrinsicWidth() / 2;
         }
         mThumb = thumb;
         invalidate();
