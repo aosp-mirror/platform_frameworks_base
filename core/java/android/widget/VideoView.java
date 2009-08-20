@@ -267,12 +267,17 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             // Get the capabilities of the player for this stream
             Metadata data = mp.getMetadata(MediaPlayer.METADATA_ALL,
                                       MediaPlayer.BYPASS_METADATA_FILTER);
-            mCanPause = !data.has(Metadata.PAUSE_AVAILABLE)
-                    || data.getBoolean(Metadata.PAUSE_AVAILABLE);
-            mCanSeekBack = !data.has(Metadata.SEEK_BACKWARD_AVAILABLE)
-                    || data.getBoolean(Metadata.SEEK_BACKWARD_AVAILABLE);
-            mCanSeekForward = !data.has(Metadata.SEEK_FORWARD_AVAILABLE)
-                    || data.getBoolean(Metadata.SEEK_FORWARD_AVAILABLE);
+
+            if (data != null) {
+                mCanPause = !data.has(Metadata.PAUSE_AVAILABLE)
+                        || data.getBoolean(Metadata.PAUSE_AVAILABLE);
+                mCanSeekBack = !data.has(Metadata.SEEK_BACKWARD_AVAILABLE)
+                        || data.getBoolean(Metadata.SEEK_BACKWARD_AVAILABLE);
+                mCanSeekForward = !data.has(Metadata.SEEK_FORWARD_AVAILABLE)
+                        || data.getBoolean(Metadata.SEEK_FORWARD_AVAILABLE);
+            } else {
+                mCanPause = mCanSeekForward = mCanSeekForward = true;
+            }
 
             if (mOnPreparedListener != null) {
                 mOnPreparedListener.onPrepared(mMediaPlayer);
