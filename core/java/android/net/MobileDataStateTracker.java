@@ -316,6 +316,12 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                 // no need to do anything - we're already due some status update intents
                 break;
             case Phone.APN_REQUEST_FAILED:
+                if (mPhoneService == null && mApnType == Phone.APN_TYPE_DEFAULT) {
+                    // on startup we may try to talk to the phone before it's ready
+                    // just leave mEnabled as it is for the default apn.
+                    return false;
+                }
+                // else fall through
             case Phone.APN_TYPE_NOT_AVAILABLE:
                 mEnabled = false;
                 break;
