@@ -321,10 +321,9 @@ public:
     class Surface : public BnSurface 
     {
     public:
+        int32_t getToken() const { return mToken; }
+        int32_t getIdentity() const { return mIdentity; }
         
-        virtual void getSurfaceData(
-                ISurfaceFlingerClient::surface_data_t* params) const;
-
     protected:
         Surface(const sp<SurfaceFlinger>& flinger, 
                 SurfaceID id, int identity, 

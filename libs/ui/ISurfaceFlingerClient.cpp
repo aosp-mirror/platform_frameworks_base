@@ -189,8 +189,11 @@ status_t BnSurfaceFlingerClient::onTransact(
 
 status_t ISurfaceFlingerClient::surface_data_t::readFromParcel(const Parcel& parcel)
 {
-    token = parcel.readInt32();
-    identity  = parcel.readInt32();
+    token    = parcel.readInt32();
+    identity = parcel.readInt32();
+    width    = parcel.readInt32();
+    height   = parcel.readInt32();
+    format   = parcel.readInt32();
     return NO_ERROR;
 }
 
@@ -198,6 +201,9 @@ status_t ISurfaceFlingerClient::surface_data_t::writeToParcel(Parcel* parcel) co
 {
     parcel->writeInt32(token);
     parcel->writeInt32(identity);
+    parcel->writeInt32(width);
+    parcel->writeInt32(height);
+    parcel->writeInt32(format);
     return NO_ERROR;
 }
 

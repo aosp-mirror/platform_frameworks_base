@@ -1239,9 +1239,11 @@ sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
     switch (flags & eFXSurfaceMask) {
         case eFXSurfaceNormal:
             if (UNLIKELY(flags & ePushBuffers)) {
-                layer = createPushBuffersSurfaceLocked(client, d, id, w, h, flags);
+                layer = createPushBuffersSurfaceLocked(client, d, id,
+                        w, h, flags);
             } else {
-                layer = createNormalSurfaceLocked(client, d, id, w, h, format, flags);
+                layer = createNormalSurfaceLocked(client, d, id,
+                        w, h, flags, format);
             }
             break;
         case eFXSurfaceBlur:
@@ -1255,8 +1257,13 @@ sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
     if (layer != 0) {
         setTransactionFlags(eTransactionNeeded);
         surfaceHandle = layer->getSurface();
-        if (surfaceHandle != 0)
-            surfaceHandle->getSurfaceData(params);
+        if (surfaceHandle != 0) { 
+            params->token = surfaceHandle->getToken();
+            params->identity = surfaceHandle->getIdentity();
+            params->width = w;
+            params->height = h;
+            params->format = format;
+        }
     }
 
     return surfaceHandle;
@@ -1264,7 +1271,8 @@ sp<ISurface> SurfaceFlinger::createSurface(ClientID clientId, int pid,
 
 sp<LayerBaseClient> SurfaceFlinger::createNormalSurfaceLocked(
         const sp<Client>& client, DisplayID display,
-        int32_t id, uint32_t w, uint32_t h, PixelFormat format, uint32_t flags)
+        int32_t id, uint32_t w, uint32_t h, uint32_t flags,
+        PixelFormat& format)
 {
     // initialize the surfaces
     switch (format) { // TODO: take h/w into account
