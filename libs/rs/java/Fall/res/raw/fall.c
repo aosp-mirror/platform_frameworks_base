@@ -240,7 +240,7 @@ void generateRipples() {
             n2y = v3y - v1y;
             n2z = v3z - v1z;
 
-            // Avegare of previous normal and N1 x N2
+            // Average of previous normal and N1 x N2
             n3x = n3x / 2.0f + (n1y * n2z - n1z * n2y) / 2.0f;
             n3y = n3y / 2.0f + (n1z * n2x - n1x * n2z) / 2.0f;
             n3z = n3z / 2.0f + (n1x * n2y - n1y * n2x) / 2.0f;
@@ -264,10 +264,10 @@ void generateRipples() {
 float averageZ(float x1, float x2, float y1, float y2, float* vertices,
         int meshWidth, int meshHeight, float glWidth, float glHeight) {
 
-    x1 = ((x1 + glWidth / 2.0f) / glWidth) * meshWidth;
-    x2 = ((x2 + glWidth / 2.0f) / glWidth) * meshWidth;
-    y1 = ((y1 + glHeight / 2.0f) / glHeight) * meshHeight;
-    y2 = ((y2 + glHeight / 2.0f) / glHeight) * meshHeight;
+    x1 = ((x1 + glWidth * 0.5f) / glWidth) * meshWidth;
+    x2 = ((x2 + glWidth * 0.5f) / glWidth) * meshWidth;
+    y1 = ((y1 + glHeight * 0.5f) / glHeight) * meshHeight;
+    y2 = ((y2 + glHeight * 0.5f) / glHeight) * meshHeight;
 
     int quadX1 = clamp(x1, 0, meshWidth);
     int quadX2 = clamp(x2, 0, meshWidth);
@@ -319,10 +319,10 @@ void drawLeaf(int index, float* vertices, int meshWidth, int meshHeight,
     if (a > 0.0f) {
         tz = -a;
     } else {
-        z1 = averageZ(x1, x, y1, y, vertices, meshWidth, meshHeight, glWidth, glHeight);
-        z2 = averageZ(x, x2, y1, y, vertices, meshWidth, meshHeight, glWidth, glHeight);
-        z3 = averageZ(x, x2, y, y2, vertices, meshWidth, meshHeight, glWidth, glHeight);
-        z4 = averageZ(x1, x, y, y2, vertices, meshWidth, meshHeight, glWidth, glHeight);
+//        z1 = averageZ(x1, x, y1, y, vertices, meshWidth, meshHeight, glWidth, glHeight);
+//        z2 = averageZ(x, x2, y1, y, vertices, meshWidth, meshHeight, glWidth, glHeight);
+//        z3 = averageZ(x, x2, y, y2, vertices, meshWidth, meshHeight, glWidth, glHeight);
+//        z4 = averageZ(x1, x, y, y2, vertices, meshWidth, meshHeight, glWidth, glHeight);
     }
 
     x1 -= x;
@@ -454,6 +454,34 @@ void drawLighting() {
     drawTriangleMesh(NAMED_WaterMesh);
 }
 
+void drawNormals() {
+    int width = State_meshWidth;
+    int height = State_meshHeight;
+
+    float *vertices = loadTriangleMeshVerticesF(NAMED_WaterMesh);
+
+    bindProgramVertex(NAMED_PVSky);
+    bindProgramFragment(NAMED_PFLighting);
+
+    color(1.0f, 0.0f, 0.0f, 1.0f);
+
+    int y = 0;
+    for ( ; y < height; y++) {
+        int yOffset = y * width;
+        int x = 0;
+        for ( ; x < width; x++) {
+            int offset = (yOffset + x) * 8;
+            float vx = vertices[offset + 5];
+            float vy = vertices[offset + 6];
+            float vz = vertices[offset + 7];
+            float nx = vertices[offset + 0];
+            float ny = vertices[offset + 1];
+            float nz = vertices[offset + 2];
+            drawLine(vx, vy, vz, vx + nx / 10.0f, vy + ny / 10.0f, vz + nz / 10.0f);
+        }
+    }
+}
+
 int main(int index) {
     int dropX = Drop_dropX;
     if (dropX != -1) {
@@ -471,6 +499,7 @@ int main(int index) {
     drawSky();
     drawLighting();
     drawLeaves();
+    //drawNormals();
 
     return 1;
 }

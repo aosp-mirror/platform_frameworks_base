@@ -19,11 +19,13 @@
 
 #define RSID_PARTICLES 1
 
-#define PARTICLE_STRUCT_FIELDS_COUNT 4
+#define PARTICLE_STRUCT_FIELDS_COUNT 6
 #define PARTICLE_STRUCT_ANGLE 0
 #define PARTICLE_STRUCT_DISTANCE 1
 #define PARTICLE_STRUCT_SPEED 2
 #define PARTICLE_STRUCT_RADIUS 3
+#define PARTICLE_STRUCT_S 4
+#define PARTICLE_STRUCT_T 5
 
 #define RSID_PARTICLES_BUFFER 2
 #define PARTICLE_BUFFER_COMPONENTS_COUNT 5
@@ -31,19 +33,14 @@
 #define PARTICLES_TEXTURES_COUNT 2
 
 #define ELLIPSE_RATIO 0.892f
-#define ELLIPSE_TWIST 0.02333333333f
 
 void drawSpace(int width, int height) {
     bindTexture(NAMED_PFBackground, 0, NAMED_TSpace);
     drawQuadTexCoords(
-            0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f,
-            width, 0.0f, 0.0f,
-            2.0f, 1.0f,
-            width, height, 0.0f,
-            2.0f, 0.0f,
-            0.0f, height, 0.0f,
-            0.0f, 0.0f);
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            width, 0.0f, 0.0f, 2.0f, 1.0f,
+            width, height, 0.0f, 2.0f, 0.0f,
+            0.0f, height, 0.0f, 0.0f, 0.0f);
 }
 
 void drawLights(int width, int height) {
@@ -61,39 +58,34 @@ void drawLights(int width, int height) {
              x + 512.0f * 1.1f, y + 512.0f, 0.0f);
 }
 
-void drawParticle(float *particle, int index, float *particleBuffer, int bufferIndex,
-        float w, float h) {
-
-    float distance = particle[index + PARTICLE_STRUCT_DISTANCE];
-    float angle = particle[index + PARTICLE_STRUCT_ANGLE];
-    float speed = particle[index + PARTICLE_STRUCT_SPEED];
-    float r = particle[index + PARTICLE_STRUCT_RADIUS];
+void drawParticle(float *particle, float *particleBuffer, float w, float h) {
+    float distance = particle[PARTICLE_STRUCT_DISTANCE];
+    float angle = particle[PARTICLE_STRUCT_ANGLE];
+    float speed = particle[PARTICLE_STRUCT_SPEED];
+    float r = particle[PARTICLE_STRUCT_RADIUS];
 
     float a = angle + speed;
     float x = distance * sinf_fast(a);
     float y = distance * cosf_fast(a) * ELLIPSE_RATIO;
-    float z = distance * ELLIPSE_TWIST;
-    float s = cosf_fast(z);
-    float t = sinf_fast(z);
+    float s = particle[PARTICLE_STRUCT_S];
+    float t = particle[PARTICLE_STRUCT_T];
 
     float sX = t * x + s * y + w;
     float sY = s * x - t * y + h;
 
     // lower left vertex of the particle's triangle
-    particleBuffer[bufferIndex + 1] = sX - r;     // X
-    particleBuffer[bufferIndex + 2] = sY + r;     // Y
+    particleBuffer[1] = sX - r;     // X
+    particleBuffer[2] = sY + r;     // Y
 
     // lower right vertex of the particle's triangle
-    bufferIndex += PARTICLE_BUFFER_COMPONENTS_COUNT;
-    particleBuffer[bufferIndex + 1] = sX + r;     // X
-    particleBuffer[bufferIndex + 2] = sY + r;     // Y
+    particleBuffer[6] = sX + r;     // X
+    particleBuffer[7] = sY + r;     // Y
 
     // upper middle vertex of the particle's triangle
-    bufferIndex += PARTICLE_BUFFER_COMPONENTS_COUNT;
-    particleBuffer[bufferIndex + 1] = sX;         // X
-    particleBuffer[bufferIndex + 2] = sY - r;     // Y
+    particleBuffer[11] = sX;         // X
+    particleBuffer[12] = sY - r;     // Y
 
-    particle[index + PARTICLE_STRUCT_ANGLE] = a;
+    particle[PARTICLE_STRUCT_ANGLE] = a;
 }
 
 void drawParticles(int width, int height) {
@@ -103,7 +95,6 @@ void drawParticles(int width, int height) {
 
     int radius = State_galaxyRadius;
     int particlesCount = State_particlesCount;
-    int count = particlesCount * PARTICLE_STRUCT_FIELDS_COUNT;
 
     float *particle = loadArrayF(RSID_PARTICLES, 0);
     float *particleBuffer = loadArrayF(RSID_PARTICLES_BUFFER, 0);
@@ -112,11 +103,11 @@ void drawParticles(int width, int height) {
     float h = height * 0.5f;
 
     int i = 0;
-    int bufferIndex = 0;
-    for ( ; i < count; i += PARTICLE_STRUCT_FIELDS_COUNT) {
-        drawParticle(particle, i, particleBuffer, bufferIndex, w, h);
-        // each particle is a triangle (3 vertices) of 6 properties (ABGR, X, Y, Z, S, T)
-        bufferIndex += 3 * PARTICLE_BUFFER_COMPONENTS_COUNT;
+    for ( ; i < particlesCount; i++) {
+        drawParticle(particle, particleBuffer, w, h);
+        particle += PARTICLE_STRUCT_FIELDS_COUNT;
+        // each particle is a triangle (3 vertices) of 5 properties (ABGR, X, Y, S, T)
+        particleBuffer += 3 * PARTICLE_BUFFER_COMPONENTS_COUNT;
     }
 
     uploadToBufferObject(NAMED_ParticlesBuffer);

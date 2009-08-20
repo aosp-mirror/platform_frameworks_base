@@ -22,8 +22,6 @@ import android.renderscript.RenderScript;
 import android.renderscript.RSSurfaceView;
 
 class GalaxyView extends RSSurfaceView {
-    private GalaxyRS mRender;
-
     public GalaxyView(Context context) {
         super(context);
         setFocusable(true);
@@ -34,12 +32,7 @@ class GalaxyView extends RSSurfaceView {
         super.surfaceChanged(holder, format, w, h);
 
         RenderScript RS = createRenderScript();
-        mRender = new GalaxyRS(w, h);
-        mRender.init(RS, getResources());
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        if (mRender != null) mRender.destroy();
+        GalaxyRS render = new GalaxyRS(w, h);
+        render.init(RS, getResources());
     }
 }
