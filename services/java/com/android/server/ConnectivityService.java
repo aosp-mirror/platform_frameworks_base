@@ -513,7 +513,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     mNetRequestersPids[usedNetworkType].add(currentPid);
                 }
 
-                if (ni.isConnectedOrConnecting() == true) {
+                if ((ni.isConnectedOrConnecting() == true) &&
+                        !network.isTeardownRequested()) {
                     if (ni.isConnected() == true) {
                         // add the pid-specific dns
                         handleDnsConfigurationChange();
@@ -686,6 +687,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 ++numConnectedNets;
             }
         }
+        if (DBG) Log.d(TAG, "numConnectedNets returning "+numConnectedNets);
         return numConnectedNets;
     }
 
@@ -792,7 +794,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (newNet.isAvailable()) {
                     NetworkInfo switchTo = newNet.getNetworkInfo();
                     switchTo.setFailover(true);
-                    if (!switchTo.isConnectedOrConnecting()) {
+                    if (!switchTo.isConnectedOrConnecting() ||
+                            newNet.isTeardownRequested()) {
                         newNet.reconnect();
                     }
                     if (DBG) {
