@@ -45,6 +45,7 @@ enum {
     kKeyPlatformPrivate   = 'priv',
     kKeyDecoderComponent  = 'decC',
     kKeyBufferID          = 'bfID',
+    kKeyCompressedSize    = 'cmpS',
 };
 
 enum {
