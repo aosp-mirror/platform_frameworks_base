@@ -1094,7 +1094,9 @@
   <public type="attr" name="tension" id="0x0101026a" />
   <public type="attr" name="extraTension" id="0x0101026b" />
   <public type="attr" name="anyDensity" id="0x0101026c" />
+  <!-- {@hide} -->
   <public type="attr" name="searchSuggestThreshold" id="0x0101026d" />
+  <!-- {@hide} -->
   <public type="attr" name="includeInGlobalSearch" id="0x0101026e" />
   <public type="attr" name="onClick" id="0x0101026f" />
   <public type="attr" name="targetSdkVersion" id="0x01010270" />
@@ -1115,6 +1117,7 @@
   <public type="attr" name="backupAgent" id="0x0101027f" />
   <public type="attr" name="allowBackup" id="0x01010280" />
   <public type="attr" name="glEsVersion" id="0x01010281" />
+  <!-- {@hide} -->
   <public type="attr" name="queryAfterZeroResults" id="0x01010282" />
   <public type="attr" name="dropDownHeight" id="0x01010283" />
   <public type="attr" name="smallScreens" id="0x01010284" />
@@ -1123,6 +1126,7 @@
   <public type="attr" name="progressBarStyleInverse" id="0x01010287" />
   <public type="attr" name="progressBarStyleSmallInverse" id="0x01010288" />
   <public type="attr" name="progressBarStyleLargeInverse" id="0x01010289" />
+  <!-- {@hide} -->
   <public type="attr" name="searchSettingsDescription" id="0x0101028a" />
   <public type="attr" name="textColorPrimaryInverseDisableOnly" id="0x0101028b" />
   <public type="attr" name="autoUrlDetect" id="0x0101028c" />
