@@ -20,7 +20,6 @@ import android.accounts.Account;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -28,8 +27,6 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
-import android.provider.ContactsContract.Contacts.Photo;
 import android.text.TextUtils;
 
 import java.io.ByteArrayInputStream;
@@ -193,15 +190,24 @@ public final class ContactsContract {
 
         /**
          * Lookup value that reflects the {@link Groups#GROUP_VISIBLE} state of
-         * any {@link GroupMembership} for this contact.
+         * any {@link CommonDataKinds.GroupMembership} for this contact.
          */
         public static final String IN_VISIBLE_GROUP = "in_visible_group";
 
         /**
          * Contact presence status.  See {@link android.provider.Im.CommonPresenceColumns}
-         * for individual status definitions.
+         * for individual status definitions.  This column is only returned if explicitly
+         * requested in the query projection.
+         * <p>Type: NUMBER</p>
          */
         public static final String PRESENCE_STATUS = Presence.PRESENCE_STATUS;
+
+        /**
+         * Contact presence custom status. This column is only returned if explicitly
+         * requested in the query projection.
+         * <p>Type: TEXT</p>
+         */
+        public static final String PRESENCE_CUSTOM_STATUS = Presence.PRESENCE_CUSTOM_STATUS;
 
         /**
          * An indicator of whether this contact has at least one phone number. "1" if there is
@@ -640,7 +646,11 @@ public final class ContactsContract {
         /**
          * Reference to the {@link RawContacts#_ID} this presence references.
          * <P>Type: INTEGER</P>
+         *
+         * TODO remove this from public API
+         * @hide
          */
+        @Deprecated
         public static final String RAW_CONTACT_ID = "presence_raw_contact_id";
 
         /**
@@ -649,17 +659,27 @@ public final class ContactsContract {
          */
         public static final String DATA_ID = "presence_data_id";
 
-        /**
-         * The IM service the presence is coming from. Formatted using either
-         * {@link CommonDataKinds.Im#encodePredefinedImProtocol(int)} or
-         * {@link CommonDataKinds.Im#encodeCustomImProtocol(String)}.
-         * <P>Type: TEXT</P>
-         */
+        @Deprecated
         public static final String IM_PROTOCOL = "im_protocol";
 
         /**
-         * The IM handle the presence item is for. The handle is scoped to the
-         * {@link #IM_PROTOCOL}.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String PROTOCOL = "protocol";
+
+        /**
+         * Name of the custom protocol.  Should be supplied along with the {@link #PROTOCOL} value
+         * {@link ContactsContract.CommonDataKinds.Im#PROTOCOL_CUSTOM}.  Should be null or
+         * omitted if {@link #PROTOCOL} value is not
+         * {@link ContactsContract.CommonDataKinds.Im#PROTOCOL_CUSTOM}.
+         *
+         * <p>Type: NUMBER</p>
+         */
+        public static final String CUSTOM_PROTOCOL = "custom_protocol";
+
+        /**
+         * The IM handle the presence item is for. The handle is scoped to
+         * {@link #PROTOCOL}.
          * <P>Type: TEXT</P>
          */
         public static final String IM_HANDLE = "im_handle";
@@ -1142,19 +1162,18 @@ public final class ContactsContract {
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
 
+            /**
+             * This column should be populated with one of the defined
+             * constants, e.g. {@link #PROTOCOL_YAHOO}. If the value of this
+             * column is {@link #PROTOCOL_CUSTOM}, the {@link #CUSTOM_PROTOCOL}
+             * should contain the name of the custom protocol.
+             */
             public static final String PROTOCOL = "data5";
 
             public static final String CUSTOM_PROTOCOL = "data6";
 
-            /**
-             * The predefined IM protocol types. The protocol can either be non-present, one
-             * of these types, or a free-form string. These cases are encoded in the PROTOCOL
-             * column as:
-             * <ul>
-             * <li>null</li>
-             * <li>pre:&lt;an integer, one of the protocols below&gt;</li>
-             * <li>custom:&lt;a string&gt;</li>
-             * </ul>
+            /*
+             * The predefined IM protocol types.
              */
             public static final int PROTOCOL_CUSTOM = -1;
             public static final int PROTOCOL_AIM = 0;
@@ -1412,7 +1431,7 @@ public final class ContactsContract {
 
         /**
          * The total number of {@link Contacts} that have
-         * {@link GroupMembership} in this group. Read-only value that is only
+         * {@link CommonDataKinds.GroupMembership} in this group. Read-only value that is only
          * present when querying {@link Groups#CONTENT_SUMMARY_URI}.
          * <p>
          * Type: INTEGER
@@ -1421,7 +1440,7 @@ public final class ContactsContract {
 
         /**
          * The total number of {@link Contacts} that have both
-         * {@link GroupMembership} in this group, and also have phone numbers.
+         * {@link CommonDataKinds.GroupMembership} in this group, and also have phone numbers.
          * Read-only value that is only present when querying
          * {@link Groups#CONTENT_SUMMARY_URI}.
          * <p>
@@ -1606,7 +1625,7 @@ public final class ContactsContract {
         public static final String SHOULD_SYNC = "should_sync";
 
         /**
-         * Flag indicating if contacts without any {@link GroupMembership}
+         * Flag indicating if contacts without any {@link CommonDataKinds.GroupMembership}
          * entries should be visible in any user interface.
          * <p>
          * Type: INTEGER (boolean)
@@ -1651,7 +1670,7 @@ public final class ContactsContract {
          * Mode for {@link #SHOULD_SYNC_MODE} that indicates this data source
          * fully supports per-group {@link Groups#SHOULD_SYNC} flags and assumes
          * that {@link #SHOULD_SYNC} refers to contacts without any
-         * {@link GroupMembership}.
+         * {@link CommonDataKinds.GroupMembership}.
          */
         public static final int SYNC_MODE_UNGROUPED = 1;
 
