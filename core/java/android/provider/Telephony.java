@@ -1264,6 +1264,21 @@ public final class Telephony {
         }
 
         /**
+         * Returns true if the number is a Phone number
+         *
+         * @param number the input number to be tested
+         * @return true if number is a Phone number
+         */
+        public static boolean isPhoneNumber(String number) {
+            if (TextUtils.isEmpty(number)) {
+                return false;
+            }
+
+            Matcher match = Regex.PHONE_PATTERN.matcher(number);
+            return match.matches();
+        }
+
+        /**
          * Contains all MMS messages in the MMS app's inbox.
          */
         public static final class Inbox implements BaseMmsColumns {
