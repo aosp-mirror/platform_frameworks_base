@@ -1021,6 +1021,7 @@ public class PduPersister {
                     + "content://mms/drafts, content://mms/outbox, "
                     + "content://mms/temp.");
         }
+        PDU_CACHE_INSTANCE.purge(uri);
 
         PduHeaders header = pdu.getPduHeaders();
         PduBody body = null;
