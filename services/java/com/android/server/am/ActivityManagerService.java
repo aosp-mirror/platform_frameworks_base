@@ -4013,7 +4013,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @param resultCode Result code, if any, from this Activity.
      * @param resultData Result data (Intent), if any, from this Activity.
      * 
-     * @result Returns true if the activity successfully finished, or false if it is still running.
+     * @return Returns true if the activity successfully finished, or false if it is still running.
      */
     public final boolean finishActivity(IBinder token, int resultCode, Intent resultData) {
         // Refuse possible leaked file descriptors
