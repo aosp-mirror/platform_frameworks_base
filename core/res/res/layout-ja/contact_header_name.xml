@@ -27,8 +27,8 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:ellipsize="end"
-    	android:textAppearance="?android:attr/textAppearanceLargeInverse"
-    	android:textColor="@android:color/secondary_text_light"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold"
         />
 
     <TextView android:id="@+id/phonetic_name"
@@ -36,8 +36,7 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:ellipsize="end"
-    	android:textAppearance="?android:attr/textAppearanceSmallInverse"
-    	android:textColor="@android:color/secondary_text_light"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         />
 
 </LinearLayout>
