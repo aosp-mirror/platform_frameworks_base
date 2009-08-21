@@ -607,8 +607,9 @@ public interface CommandsInterface {
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
      *  ar.result contains a List of DataCallState
-     *  @deprecated
+     *  @deprecated Do not use.
      */
+    @Deprecated
     void getPDPContextList(Message result);
 
     /**
@@ -779,8 +780,9 @@ public interface CommandsInterface {
      * cause code returned as int[0] in Message.obj.response
      * returns an integer cause code defined in TS 24.008
      * section 6.1.3.1.3 or close approximation
-     * @deprecated
+     * @deprecated Do not use.
      */
+    @Deprecated
     void getLastPdpFailCause (Message result);
 
     /**

@@ -172,6 +172,7 @@ public final class URLUtil {
      * requests from a file url.
      * @deprecated Cookieless proxy is no longer supported.
      */
+    @Deprecated
     public static boolean isCookielessProxyUrl(String url) {
         return (null != url) && url.startsWith(PROXY_BASE);
     }

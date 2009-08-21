@@ -32,7 +32,7 @@ oneway interface IAccountAuthenticator {
 
     /**
      * Checks that the account/password combination is valid.
-     * @deprecated
+     * note -- deprecated
      */
     void confirmPassword(in IAccountAuthenticatorResponse response,
         in Account account, String password);

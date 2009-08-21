@@ -34,25 +34,25 @@ public final class Config
      */
 
     /**
-     * Always the inverse of DEBUG.
+     * @deprecated Use {@link #DEBUG} instead.
      */
     @Deprecated
     public static final boolean RELEASE = !DEBUG;
 
     /**
-     * Always false.
+     * @deprecated Always false.
      */
     @Deprecated
     public static final boolean PROFILE = false;
 
     /**
-     * Always false.
+     * @deprecated Always false.
      */
     @Deprecated
     public static final boolean LOGV = false;
 
     /**
-     * Always true.
+     * @deprecated Always true.
      */
     @Deprecated
     public static final boolean LOGD = true;

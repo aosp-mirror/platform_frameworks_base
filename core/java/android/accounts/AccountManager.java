@@ -261,6 +261,7 @@ public class AccountManager {
     }
 
     /** @deprecated use {@link #confirmCredentials} instead */
+    @Deprecated
     public AccountManagerFuture<Boolean> confirmPassword(final Account account, final String password,
             AccountManagerCallback<Boolean> callback, Handler handler) {
         return new Future2Task<Boolean>(handler, callback) {

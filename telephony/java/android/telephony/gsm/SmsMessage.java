@@ -345,6 +345,7 @@ public class SmsMessage {
      *         the number of code units used, and int[2] is the number of code
      *         units remaining until the next message. int[3] is the encoding
      *         type that should be used for the message.
+     * @deprecated Use android.telephony.SmsMessage.
      */
     @Deprecated
     public static int[] calculateLength(String messageBody, boolean use7bitOnly) {

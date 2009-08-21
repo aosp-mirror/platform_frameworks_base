@@ -70,6 +70,7 @@ public class Build {
          * 
          * @deprecated Use {@link #SDK_INT} to easily get this as an integer.
          */
+        @Deprecated
         public static final String SDK = getString("ro.build.version.sdk");
 
         /**

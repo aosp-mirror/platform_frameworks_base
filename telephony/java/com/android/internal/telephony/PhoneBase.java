@@ -618,7 +618,7 @@ public abstract class PhoneBase implements Phone {
      * This should only be called in GSM mode.
      * Only here for some backward compatibility
      * issues concerning the GSMPhone class.
-     * @deprecated
+     * @deprecated Always returns null.
      */
     public List<PdpConnection> getCurrentPdpList() {
         return null;

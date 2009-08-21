@@ -116,47 +116,67 @@ public class SensorManager
     @Deprecated
     public static final int SENSOR_ORIENTATION_RAW = 1 << 7;
 
-    /** A constant that includes all sensors */
+    /** A constant that includes all sensors
+     * @deprecated use {@link android.hardware.Sensor Sensor} instead.
+     */
     @Deprecated
     public static final int SENSOR_ALL = 0x7F;
 
-    /** Smallest sensor ID */
+    /** Smallest sensor ID 
+     * @deprecated use {@link android.hardware.Sensor Sensor} instead.
+     */
     @Deprecated
     public static final int SENSOR_MIN = SENSOR_ORIENTATION;
 
-    /** Largest sensor ID */
+    /** Largest sensor ID
+     * @deprecated use {@link android.hardware.Sensor Sensor} instead.
+     */
     @Deprecated
     public static final int SENSOR_MAX = ((SENSOR_ALL + 1)>>1);
 
 
     /** Index of the X value in the array returned by
-     * {@link android.hardware.SensorListener#onSensorChanged} */
+     * {@link android.hardware.SensorListener#onSensorChanged}
+     * @deprecated use {@link android.hardware.Sensor Sensor} instead.
+     */
     @Deprecated
     public static final int DATA_X = 0;
     /** Index of the Y value in the array returned by
-     * {@link android.hardware.SensorListener#onSensorChanged} */
+     * {@link android.hardware.SensorListener#onSensorChanged}
+     * @deprecated use {@link android.hardware.Sensor Sensor} instead.
+     */
     @Deprecated
     public static final int DATA_Y = 1;
     /** Index of the Z value in the array returned by
-     * {@link android.hardware.SensorListener#onSensorChanged} */
+     * {@link android.hardware.SensorListener#onSensorChanged}
+     * @deprecated use {@link android.hardware.Sensor Sensor} instead.
+     */
     @Deprecated
     public static final int DATA_Z = 2;
 
     /** Offset to the untransformed values in the array returned by
-     * {@link android.hardware.SensorListener#onSensorChanged} */
+     * {@link android.hardware.SensorListener#onSensorChanged}
+     * @deprecated use {@link android.hardware.Sensor Sensor} instead.
+     */
     @Deprecated
     public static final int RAW_DATA_INDEX = 3;
 
     /** Index of the untransformed X value in the array returned by
-     * {@link android.hardware.SensorListener#onSensorChanged} */
+     * {@link android.hardware.SensorListener#onSensorChanged}
+     * @deprecated use {@link android.hardware.Sensor Sensor} instead.
+     */
     @Deprecated
     public static final int RAW_DATA_X = 3;
     /** Index of the untransformed Y value in the array returned by
-     * {@link android.hardware.SensorListener#onSensorChanged} */
+     * {@link android.hardware.SensorListener#onSensorChanged}
+     * @deprecated use {@link android.hardware.Sensor Sensor} instead.
+     */
     @Deprecated
     public static final int RAW_DATA_Y = 4;
     /** Index of the untransformed Z value in the array returned by
-     * {@link android.hardware.SensorListener#onSensorChanged} */
+     * {@link android.hardware.SensorListener#onSensorChanged}
+     * @deprecated use {@link android.hardware.Sensor Sensor} instead.
+     */
     @Deprecated
     public static final int RAW_DATA_Z = 5;
 

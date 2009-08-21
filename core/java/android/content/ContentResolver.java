@@ -887,6 +887,7 @@ public abstract class ContentResolver {
      * @deprecated instead use
      * {@link #requestSync(android.accounts.Account, String, android.os.Bundle)}
      */
+    @Deprecated
     public void startSync(Uri uri, Bundle extras) {
         Account account = null;
         if (extras != null) {
@@ -967,6 +968,7 @@ public abstract class ContentResolver {
      * @param uri the uri of the provider to sync or null to sync all providers.
      * @deprecated instead use {@link #cancelSync(android.accounts.Account, String)}
      */
+    @Deprecated
     public void cancelSync(Uri uri) {
         cancelSync(null /* all accounts */, uri != null ? uri.getAuthority() : null);
     }

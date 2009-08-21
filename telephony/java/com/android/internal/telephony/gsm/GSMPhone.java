@@ -1084,8 +1084,9 @@ public class GSMPhone extends PhoneBase {
     }
 
     /**
-     * @deprecated
+     * @deprecated Do not use.
      */
+    @Deprecated
     public void getPdpContextList(Message response) {
         getDataCallList(response);
     }
@@ -1095,8 +1096,9 @@ public class GSMPhone extends PhoneBase {
     }
 
     /**
-     * @deprecated
+     * @deprecated Do not use.
      */
+    @Deprecated
     public List<PdpConnection> getCurrentPdpList() {
         ArrayList<DataConnection> connections = new ArrayList<DataConnection>();
         ArrayList<PdpConnection> pdp_list = new ArrayList<PdpConnection>();

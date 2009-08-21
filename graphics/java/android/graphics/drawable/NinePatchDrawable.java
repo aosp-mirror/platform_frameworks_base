@@ -56,6 +56,7 @@ public class NinePatchDrawable extends Drawable {
      * @deprecated Use {@link #NinePatchDrawable(Resources, Bitmap, byte[], Rect, String)}
      * to ensure that the drawable has correctly set its target density.
      */
+    @Deprecated
     public NinePatchDrawable(Bitmap bitmap, byte[] chunk, Rect padding, String srcName) {
         this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding));
     }
@@ -78,6 +79,7 @@ public class NinePatchDrawable extends Drawable {
      * @deprecated Use {@link #NinePatchDrawable(Resources, NinePatch)}
      * to ensure that the drawable has correctly set its target density.
      */
+    @Deprecated
     public NinePatchDrawable(NinePatch patch) {
         this(new NinePatchState(patch, null));
     }

@@ -1521,8 +1521,9 @@ public final class Gmail {
 
         /**
          * Returns the number of conversation with a given label.
-         * @deprecated
+         * @deprecated Use {@link #getLabelId} instead.
          */
+        @Deprecated
         public int getNumConversations(String label) {
             return getNumConversations(getLabelId(label));
         }
@@ -1534,8 +1535,9 @@ public final class Gmail {
 
         /**
          * Returns the number of unread conversation with a given label.
-         * @deprecated
+         * @deprecated Use {@link #getLabelId} instead.
          */
+        @Deprecated
         public int getNumUnreadConversations(String label) {
             return getNumUnreadConversations(getLabelId(label));
         }
@@ -2040,8 +2042,9 @@ public final class Gmail {
         }
 
         /**
-         * @deprecated
+         * @deprecated Always returns true.
          */
+        @Deprecated
         public boolean getExpanded() {
             return true;
         }

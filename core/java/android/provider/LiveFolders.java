@@ -45,7 +45,7 @@ import android.annotation.SdkConstant;
  * public static class MyLiveFolder extends Activity {
  *     public static final Uri CONTENT_URI = Uri.parse("content://my.app/live");
  *
- *     @Override
+ *     &amp;#064;Override
  *     protected void onCreate(Bundle savedInstanceState) {
  *         super.onCreate(savedInstanceState);
  *
