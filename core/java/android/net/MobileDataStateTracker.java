@@ -275,8 +275,20 @@ public class MobileDataStateTracker extends NetworkStateTracker {
         case TelephonyManager.NETWORK_TYPE_UMTS:
             networkTypeStr = "umts";
             break;
+        case TelephonyManager.NETWORK_TYPE_HSDPA:
+            networkTypeStr = "hsdpa";
+            break;
+        case TelephonyManager.NETWORK_TYPE_HSUPA:
+            networkTypeStr = "hsupa";
+            break;
+        case TelephonyManager.NETWORK_TYPE_HSPA:
+            networkTypeStr = "hspa";
+            break;
         case TelephonyManager.NETWORK_TYPE_CDMA:
             networkTypeStr = "cdma";
+            break;
+        case TelephonyManager.NETWORK_TYPE_1xRTT:
+            networkTypeStr = "1xrtt";
             break;
         case TelephonyManager.NETWORK_TYPE_EVDO_0:
             networkTypeStr = "evdo";

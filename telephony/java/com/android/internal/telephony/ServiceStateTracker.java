@@ -34,6 +34,14 @@ public abstract class ServiceStateTracker extends Handler {
      *  1 = GPRS only
      *  2 = EDGE
      *  3 = UMTS
+     *  4 = IS95A
+     *  5 = IS95B
+     *  6 = 1xRTT
+     *  7 = EvDo_0
+     *  8 = EvDo_A
+     *  9 = HSDPA
+     *  10 = HSUPA
+     *  11 = HSPA
      */
     protected static final int DATA_ACCESS_UNKNOWN = 0;
     protected static final int DATA_ACCESS_GPRS = 1;
@@ -44,6 +52,9 @@ public abstract class ServiceStateTracker extends Handler {
     protected static final int DATA_ACCESS_CDMA_1xRTT = 6;
     protected static final int DATA_ACCESS_CDMA_EvDo_0 = 7;
     protected static final int DATA_ACCESS_CDMA_EvDo_A = 8;
+    protected static final int DATA_ACCESS_HSDPA = 9;
+    protected static final int DATA_ACCESS_HSUPA = 10;
+    protected static final int DATA_ACCESS_HSPA = 11;
     //***** Instance Variables
 
     protected CommandsInterface cm;

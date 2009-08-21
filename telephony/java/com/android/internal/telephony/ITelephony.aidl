@@ -243,5 +243,9 @@ interface ITelephony {
       */
     int getVoiceMessageCount();
 
+    /**
+      * Returns the network type
+      */
+    int getNetworkType();
 }
 
