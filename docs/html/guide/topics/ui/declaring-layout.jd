@@ -115,7 +115,7 @@ public void onCreate(Bundle savedInstanceState) {
 
 <p>The <code>onCreate()</code> callback method in your Activity is called by the Android framework when
 your Activity is launched (see the discussion on Lifecycles, in the 
-<a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Application Fundamantals</a>, for more on this).</p>
+<a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Application Fundamentals</a>, for more on this).</p>
 
 
 <h2 id="attributes">Attributes</h2>

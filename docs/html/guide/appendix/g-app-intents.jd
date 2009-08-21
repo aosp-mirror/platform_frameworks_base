@@ -103,7 +103,7 @@ narrower than in landscape mode. This is done to minimize the fisheye lens
 effect that would be present if a 90 degree horizontal FOV was used in portrait
 mode.</td></tr>
        <tr><td><em>mapZoom</em></td><td>The map zoom of the map location associated with this panorama. This value is passed on to the
-       Maps activity when the Street View "Go to Maps" menu item is chosen. It corresponds to the <em>z</em> paramaeter in
+       Maps activity when the Street View "Go to Maps" menu item is chosen. It corresponds to the <em>z</em> parameter in
        the geo: intent.</td></tr>
        </table>
           </td>

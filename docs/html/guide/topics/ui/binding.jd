@@ -37,7 +37,7 @@ binds to data of some type. AdapterView is useful whenever you need to display s
 
 <h2 id="FillingTheLayout">Filling the Layout with Data</h2>
 <p>Inserting data into the layout is typically done by binding the AdapterView class to an {@link
-android.widget.Adapter}, which retireves data from an external source (perhaps a list that
+android.widget.Adapter}, which retrieves data from an external source (perhaps a list that
 the code supplies or query results from the device's database). </p>
 <p>The following code sample does the following:</p>
 <ol>
@@ -68,7 +68,7 @@ SimpleCursorAdapter adapter2 = new SimpleCursorAdapter(this,
     android.R.layout.simple_spinner_item, // Use a template
                                           // that displays a
                                           // text view
-    cur, // Give the cursor to the list adatper
+    cur, // Give the cursor to the list adapter
     new String[] {People.NAME}, // Map the NAME column in the
                                          // people database to...
     new int[] {android.R.id.text1}); // The "text1" view defined in
@@ -86,7 +86,7 @@ you should call {@link android.widget.ArrayAdapter#notifyDataSetChanged()}. This
 that the data has been changed and it should refresh itself.</p>
 
 <h2 id="HandlingUserSelections">Handling User Selections</h2>
-<p>You handle the user's selecction by setting the class's {@link
+<p>You handle the user's selection by setting the class's {@link
 android.widget.AdapterView.OnItemClickListener} member to a listener and
 catching the selection changes. </p>
 <pre>

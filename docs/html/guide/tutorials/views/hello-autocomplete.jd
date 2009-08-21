@@ -44,7 +44,7 @@ protected void onCreate(Bundle savedInstanceState) {
     textView.setAdapter(adapter);
 }
 </pre>
-	<p>Here, we create an AutoComplteteTextView from our layout. We then 
+	<p>Here, we create an AutoCompleteTextView from our layout. We then 
 	create an {@link android.widget.ArrayAdapter} that binds a <code>simple_dropdown_item_1line</code>
 	layout item to each entry in the <code>COUNTRIES</code> array (which we'll add next).
 	The last part sets the ArrayAdapter to associate with our AutoCompleteTextView.</p>

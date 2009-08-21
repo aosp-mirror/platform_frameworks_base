@@ -98,7 +98,7 @@ function renderPlaylist(data) {
     // Check whether this playlist includes the video title inside the description meta-data, so we can remove it
     if (playlistsWithTitleInDescription.indexOf(playlistId) != -1) {
       var lines = fullDescription.split("\n");
-      // If the first line includes the first 17 chars from the title, let's use the title from the desciption instead (because it's a more complete title)
+      // If the first line includes the first 17 chars from the title, let's use the title from the description instead (because it's a more complete title)
       // This accounts for, literally, "Google I/O 2009 -", which is (so far) the min AND max for properly identifying a title in the only playlist with titles in the description
       if (lines[0].indexOf(title.slice(0,16)) != -1) {  
 			h3Title = "<h3>" + lines[0] + "</h3>"; 	
@@ -332,7 +332,7 @@ function clickDefaultVideo() {
 <script type="text/javascript">
 // Initialization actions
 showFeatured();            // load featured videos
-showPlaylists();           // load playslists
+showPlaylists();           // load playlists
 </script>
 
 	

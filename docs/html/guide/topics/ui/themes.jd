@@ -111,7 +111,7 @@ This technique can be used only in XML resources.
 </p>
 
 <h3 id="inTheManifest">Set the theme in the manifest</h3>
-<p>To set this theme for all the activites of your application, open the AndroidManifest.xml file and 
+<p>To set this theme for all the activities of your application, open the AndroidManifest.xml file and 
 edit the <code>&lt;application></code> tag to include the <code>android:theme</code> attribute with the 
 theme name:</p>
 

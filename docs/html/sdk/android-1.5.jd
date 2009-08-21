@@ -108,7 +108,7 @@ new APIs introduced since Android 1.0, you can remove the attribute or
 set it to "1". However,
 before publishing your application, you must make sure to compile your
 application against the Android library that corresponds to the application's
-<code>android:minSdkVeresion</code> value.</p>
+<code>android:minSdkVersion</code> value.</p>
 
 <h2 id="apps">Built-in Applications</h2>
 

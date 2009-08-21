@@ -175,7 +175,7 @@ inside a {@link android.widget.RadioGroup}:
 </li>
 <li>To do something when each is selected, we'll need an OnClickListener. Unlike the other 
 listeners we've created, instead of creating this one as an anonymous inner class, 
-we'll create it as a new object. This way, we can re-use the OnClickLIstener for 
+we'll create it as a new object. This way, we can re-use the OnClickListener for 
 both RadioButtons. So, add the following code in the HelloFormStuff Activity
 (<em>outside</em> the <code>onCreate()</code> method):
 <pre>

@@ -24,7 +24,7 @@ page.title=&lt;activity&gt;
           android:<a href="#proc">process</a>="<i>string</i>"
           android:<a href="#screen">screenOrientation</a>=["unspecified" | "user" | "behind" |
                                      "landscape" | "portrait" | 
-                                     "sensor" | "nonsensor"]
+                                     "sensor" | "nosensor"]
           android:<a href="#state">stateNotNeeded</a>=["true" | "false"]
           android:<a href="#aff">taskAffinity</a>="<i>string</i>"
           android:<a href="#theme">theme</a>="<i>resource or theme</i>" 
@@ -687,7 +687,7 @@ Values set here (other than "{@code stateUnspecified}" and
        keyboard.  Rather, the contents of the window are automatically 
        panned so that the current focus is never obscured by the keyboard
        and users can always see what they are typing.  This is generally less 
-       desireable than resizing, because the user may need to close the soft
+       desirable than resizing, because the user may need to close the soft
        keyboard to get at and interact with obscured parts of the window.</td>
 </tr>
 </table>

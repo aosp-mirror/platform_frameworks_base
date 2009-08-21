@@ -151,7 +151,7 @@ custom components, styled text, or anything else you can think of.</p>
 <p><em>Note:</em>
 Except for 3D graphics. If you want to
 use 3D graphics, you must extend {@link android.view.SurfaceView SurfaceView}
-instead of View, and draw from a seperate thread. See the
+instead of View, and draw from a separate thread. See the
 GLSurfaceViewActivity sample
 for details.</p>
 <p><code>onMeasure()</code> is a little more involved. <code>onMeasure()</code>
@@ -171,7 +171,7 @@ result will be an exception at measurement time.</p>
   <li>
     The overridden <code>onMeasure()</code> method is called with width and
     height measure specifications (<code>widthMeasureSpec</code> and
-    <code>heighMeasureSpec</code> parameters, both are integer codes
+    <code>heightMeasureSpec</code> parameters, both are integer codes
     representing dimensions) which should be treated as requirements for
     the restrictions on the width and height measurements you should produce. A
     full reference to the kind of restrictions these specifications can require
@@ -434,7 +434,7 @@ useful in certain circumstances. If there is a component that is already very
 similar to what you want, you can simply extend that component and just
 override the behavior that you want to change. You can do all of the things
 you would do with a fully customized component, but by starting with a more
-specialized class in the View heirarchy, you can also get a lot of behavior for
+specialized class in the View hierarchy, you can also get a lot of behavior for
 free that probably does exactly what you want.</p>
 <p>For example, the SDK includes a <a
 href="{@docRoot}samples/NotePad/index.html">NotePad application</a> in the

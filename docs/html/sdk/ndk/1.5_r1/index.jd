@@ -146,7 +146,7 @@ Applications</a>.</p>
 
 <p>The sections below describe the system and software requirements for using
 the Android NDK, as well as platform compatibility considerations that affect
-appplications using libraries produced with the NDK. </p>
+applications using libraries produced with the NDK. </p>
 
 <h4>The Android SDK</h4>
 <ul>

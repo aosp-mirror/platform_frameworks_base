@@ -1334,7 +1334,7 @@ B:10.0.2.15:&lt;serverPort&gt;</code></li>
 
 <p>You can use the <code>power</code> command to control the simulated power state of the emulator instance.The usage for the command is: </p>
 
-<pre>power &lt;display|ac|status|present|health|capactiy&gt;</pre>
+<pre>power &lt;display|ac|status|present|health|capacity&gt;</pre>
 
 <p>The <code>event</code> command supports the subcommands listed in the table below. </p>
 
@@ -1389,7 +1389,7 @@ B:10.0.2.15:&lt;serverPort&gt;</code></li>
 <a name="netdelay"></a>
 <h3>Network Delay Emulation</h3>
 
-<p>The emulator lets you simulate various network latency levels, so that you can test your applicaton in an environment more typical of the actual conditions in which it will run. You can set a latency level or range at emulator startup or you can use the console to change the latency dynamically, while the application is running in the emulator. </p>
+<p>The emulator lets you simulate various network latency levels, so that you can test your application in an environment more typical of the actual conditions in which it will run. You can set a latency level or range at emulator startup or you can use the console to change the latency dynamically, while the application is running in the emulator. </p>
 <p>To set latency at emulator startup, use the  <code>-netdelay</code> emulator option with a supported <code>&lt;delay&gt;</code> value, as listed in the table below. Here are some examples:</p>
 <pre>emulator -netdelay gprs
 emulator -netdelay 40 100</pre>

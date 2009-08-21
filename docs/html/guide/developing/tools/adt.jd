@@ -4,7 +4,7 @@ page.title=ADT Plugin
 <p>The Android Development Tools (ADT) plugin adds powerful extensions to the Eclipse integrated development environment. It allows you to create and debug your Android applications easier and faster. If you use Eclipse, the ADT plugin gives you an incredible boost in developing Android applications:</p>
 
 <ul>
-  <li>It gives you access to other Android development tools from inside the Eclipse IDE. For example, ADT lets you access the many capabilities of the DDMS tool: take screenshots, manage port-forwarding, set breakpoints, and view thread and process informationd irectly from Eclipse.</li>
+  <li>It gives you access to other Android development tools from inside the Eclipse IDE. For example, ADT lets you access the many capabilities of the DDMS tool: take screenshots, manage port-forwarding, set breakpoints, and view thread and process information directly from Eclipse.</li>
   <li>It provides a New Project Wizard, which helps you quickly create and set up all of the basic files you'll need for a new Android application.</li>
   <li>It automates and simplifies the process of building your Android application.</li>
   <li>It provides an Android code editor that helps you write valid XML for your Android manifest and resource files.</li>
@@ -102,7 +102,7 @@ Note that to update your plugin, you will have to follow these steps again inste
 
 <p>Note that the "Android Editors" feature of ADT requires several optional 
 Eclipse components (for example, WST). If you encounter an error when 
-installing ADT, your Eclipse installion might not include those components. 
+installing ADT, your Eclipse installation might not include those components. 
 For information about how to quickly add the necessary components to your 
 Eclipse installation, see the troubleshooting topic 
 <a href="{@docRoot}guide/appendix/faq/troubleshooting.html#installeclipsecomponents">ADT Installation Error: "requires plug-in org.eclipse.wst.sse.ui"</a>.</p>

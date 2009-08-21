@@ -95,7 +95,7 @@ the tools included in the SDK (skip to <a href="#next">Next Steps</a>).</p>
 <p>Android offers a custom plugin for the Eclipse IDE, called Android
 Development Tools (ADT), that is designed to give you a powerful,
 integrated environment in which to build Android applications. It
-extends the capabilites of Eclipse to let you quickly set up new Android
+extends the capabilities of Eclipse to let you quickly set up new Android
 projects, create an application UI, add components based on the Android
 Framework API, debug your applications using the Android SDK tools, and even export
 signed (or unsigned) APKs in order to distribute your application.</p>
@@ -125,7 +125,7 @@ and click <strong>Next</strong>. </li>
     <li>In the resulting dialog box, enter a name for the remote site (e.g. "Android Plugin") and 
     enter the URL:
         <pre>https://dl-ssl.google.com/android/eclipse/</pre>
-        <p>If you have trouble aqcuiring the plugin, try using "http" in the URL,
+        <p>If you have trouble acquiring the plugin, try using "http" in the URL,
         instead of "https" (https is preferred for security reasons).</p>
         <p>Click <strong>OK</strong>.</p> </li>
     <li>You should now see the new site added to the search list (and checked).
@@ -151,7 +151,7 @@ and click <strong>Next</strong>. </li>
     <li>Click <strong>Add Site...</strong> </li>
     <li>Enter the Location:
       <pre>https://dl-ssl.google.com/android/eclipse/</pre>
-        <p>If you have trouble aqcuiring the plugin, try using "http" in the Location URL,
+        <p>If you have trouble acquiring the plugin, try using "http" in the Location URL,
         instead of "https" (https is preferred for security reasons).</p>   
       <p>Click <strong>OK</strong>.</p></li>
     <li>Back in the Available Software view, you should see the plugin listed by the URL,
@@ -217,7 +217,7 @@ follow these steps again instead of the default update instructions.</p>
 
 <p>Note that there are features of ADT that require some optional 
 Eclipse components (for example, WST). If you encounter an error when 
-installing ADT, your Eclipse installion might not include these components. 
+installing ADT, your Eclipse installation might not include these components. 
 For information about how to quickly add the necessary components to your 
 Eclipse installation, see the troubleshooting topic 
 <a href="{@docRoot}guide/appendix/faq/troubleshooting.html#installeclipsecomponents">ADT 
@@ -271,7 +271,7 @@ begin developing applications. Here are a few ways you can get started: </p>
   <li>Follow the <a href="{@docRoot}guide/tutorials/notepad/index.html">
   Notepad Tutorial</a> to build a full Android application </li>
   <li>Create a new project for one of the other sample applications
-  included in <code><em>&lt;sdk&gt;</em>/platforms/<em>&lt;platfrom&gt;</em>/samples</code>, 
+  included in <code><em>&lt;sdk&gt;</em>/platforms/<em>&lt;platform&gt;</em>/samples</code>, 
   then compile and run it in your development environment</li>
 </ul>
 

@@ -74,7 +74,7 @@ and drawn, read <a href="how-android-draws.html">How Android Draws Views</a>.</p
 
 <p>The most common way to define your layout and express the view hierarchy is with an XML layout file.
 XML offers a human-readable structure for the layout, much like HTML. Each element in XML is 
-either a View or ViewGroup object (or descendent thereof). View objects are leaves in the tree, 
+either a View or ViewGroup object (or descendant thereof). View objects are leaves in the tree, 
 ViewGroup objects are branches in the tree (see the View Hierarchy figure above).</p>
 <p>The name of an XML element
 is respective to the Java class that it represents. So a <code>&lt;TextView></code> element creates

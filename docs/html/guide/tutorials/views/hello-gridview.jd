@@ -94,7 +94,7 @@ public class ImageAdapter extends BaseAdapter {
 }
 </pre>
     <p>First we take care of some required methods inherited from BaseAdapter.
-    The constructor and <code>getCount()</code> are self-explanitory. Normally, <code>getItem()</code>
+    The constructor and <code>getCount()</code> are self-explanatory. Normally, <code>getItem()</code>
     should return the actual object at the specified position in our Adapter, but for this Hello World,
     we're not going to bother. Likewise, <code>getItemId()</code> should return the row id of
     the item, but right now we don't care.</p>

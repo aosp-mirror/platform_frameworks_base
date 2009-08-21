@@ -185,7 +185,7 @@ processes, and "{@code false}" if not.  The default value is "{@code false}".
 Normally, a content provider is instantiated in the process of the 
 application that defined it.  However, if this flag is set to "{@code true}", 
 the system can create an instance in every process where there's a client 
-that wants to interact withit, thus avoiding the overhead of interprocess 
+that wants to interact with it, thus avoiding the overhead of interprocess 
 communication.
 </p></dd>
 

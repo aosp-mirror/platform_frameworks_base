@@ -731,7 +731,7 @@ class name of the content provider (made lowercase).  So, for example, the
 URI for a TransportationProvider class could be defined as follows:
 
 <pre>public static final Uri CONTENT_URI = 
-               Uri.parse("content://com.example.codelab.transporationprovider");</pre>
+               Uri.parse("content://com.example.codelab.transportationprovider");</pre>
 
 <p>
 If the provider has subtables, also define {@code CONTENT_URI} constants for
@@ -740,9 +740,9 @@ that identifies the content provider), and be distinguished only by their paths.
 For example:
 </p>
 
-<p style="margin-left: 2em">{@code content://com.example.codelab.transporationprovider/train} 
-<br/>{@code content://com.example.codelab.transporationprovider/air/domestic}
-<br/>{@code content://com.example.codelab.transporationprovider/air/international}</p>
+<p style="margin-left: 2em">{@code content://com.example.codelab.transportationprovider/train} 
+<br/>{@code content://com.example.codelab.transportationprovider/air/domestic}
+<br/>{@code content://com.example.codelab.transportationprovider/air/international}</p>
 
 <p>
 For an overview of {@code content:} URIs, see the <a href="#urisum">Content URI 

@@ -469,7 +469,7 @@ page.title=Activity and Task Design Guidelines
   re-use activities in other applications, and how your activities might
   be re-used by other applications. If you add an activity with the same
   <a href=#intents title="intent filter">intent filter</a> as an
-  exisiting activity, then the system presents the user with a choice
+  existing activity, then the system presents the user with a choice
   between the activities.
 </p>
 
@@ -879,7 +879,7 @@ page.title=Activity and Task Design Guidelines
 <p>
   You can either test that an activity matches the intent, which you can do
   before starting the activity, or catch an exception if starting the
-  activity fails. Both approaches are descibed in the blog posting
+  activity fails. Both approaches are described in the blog posting
   <a href="http://android-developers.blogspot.com/2009/01/can-i-use-this-intent.html">Can
   I use this Intent?</a>.
 </p>
@@ -938,7 +938,7 @@ page.title=Activity and Task Design Guidelines
         the menus, the system compares the "Share" request (an Intent
         object) to available activities (by looking at their intent
         filters) and displays choices to share. In this case, it
-        matches Email, Gmail, Messaging and Picassa. If your activity
+        matches Email, Gmail, Messaging and Picasa. If your activity
         can send a picture or upload it to a website, all it needs to
         do is make itself available for sharing (by setting its intent
         filter).
@@ -978,7 +978,7 @@ page.title=Activity and Task Design Guidelines
       <li>
         <b>Launch your activity <em>only</em> from within another
         application</b> - The previous cases of sharing by way of
-        Email, Gmail, Messaging and Picassa (from within Gallery) are
+        Email, Gmail, Messaging and Picasa (from within Gallery) are
         all activities that can also be started from icons in the
         application launcher at Home. In contrast, the activities for
         cropping a picture and attaching a file cannot be started from
