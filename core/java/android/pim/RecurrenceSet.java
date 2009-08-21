@@ -410,10 +410,14 @@ public static boolean populateComponent(ContentValues values,
 
         Time end = new Time(endTzid);
         end.parse(dtendProperty.getValue());
-        long durationMillis = end.toMillis(false /* use isDst */) 
+        long durationMillis = end.toMillis(false /* use isDst */)
                 - start.toMillis(false /* use isDst */);
         long durationSeconds = (durationMillis / 1000);
-        return "P" + durationSeconds + "S";
+        if (start.allDay && (durationSeconds % 86400) == 0) {
+            return "P" + (durationSeconds / 86400) + "D"; // Server wants this instead of P86400S
+        } else {
+            return "P" + durationSeconds + "S";
+        }
     }
 
     private static String flattenProperties(ICalendar.Component component,
