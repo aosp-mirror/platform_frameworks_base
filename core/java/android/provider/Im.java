@@ -931,6 +931,12 @@ public class Im {
          * <P>Type: INTEGER</P>
          */
         String IS_GROUP_CHAT = "is_muc";
+
+        /**
+         * A hint that the UI should show the sent time of this message
+         * <P>Type: INTEGER</P>
+         */
+        String DISPLAY_SENT_TIME = "show_ts";
     }
 
     /**
