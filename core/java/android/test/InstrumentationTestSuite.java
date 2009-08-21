@@ -65,7 +65,7 @@ public class InstrumentationTestSuite extends TestSuite {
     public void runTest(Test test, TestResult result) {
 
         if (test instanceof InstrumentationTestCase) {
-            ((InstrumentationTestCase) test).injectInsrumentation(mInstrumentation);
+            ((InstrumentationTestCase) test).injectInstrumentation(mInstrumentation);
         }
 
         // run the test as usual
