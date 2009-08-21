@@ -323,7 +323,7 @@ public final class Bridge implements ILayoutBridge {
             Map<String, Map<String, IResourceValue>> frameworkResources,
             IProjectCallback customViewLoader, ILayoutLog logger) {
         return computeLayout(layoutDescription, projectKey,
-                screenWidth, screenHeight, false /* renderFullHeight */,
+                screenWidth, screenHeight, false /* renderFullSize */,
                 density, xdpi, ydpi, themeName, isProjectTheme,
                 projectResources, frameworkResources, customViewLoader, logger);
     }
@@ -333,7 +333,7 @@ public final class Bridge implements ILayoutBridge {
      * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, boolean, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
      */
     public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
-            int screenWidth, int screenHeight, boolean renderFullHeight,
+            int screenWidth, int screenHeight, boolean renderFullSize,
             int density, float xdpi, float ydpi,
             String themeName, boolean isProjectTheme,
             Map<String, Map<String, IResourceValue>> projectResources,
@@ -412,17 +412,22 @@ public final class Bridge implements ILayoutBridge {
             }
 
             // measure the views
-            int w_spec = MeasureSpec.makeMeasureSpec(screenWidth, MeasureSpec.EXACTLY);
-            int h_spec;
+            int w_spec, h_spec;
 
-            if (renderFullHeight) {
-                // measure the full height needed by the layout.
+            if (renderFullSize) {
+                // measure the full size needed by the layout.
+                w_spec = MeasureSpec.makeMeasureSpec(screenWidth,
+                        MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
                 h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
                         MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
                 view.measure(w_spec, h_spec);
 
-                int neededHeight = root.getChildAt(0).getMeasuredHeight();
+                int neededWidth = root.getChildAt(0).getMeasuredWidth();
+                if (neededWidth > screenWidth) {
+                    screenWidth = neededWidth;
+                }
 
+                int neededHeight = root.getChildAt(0).getMeasuredHeight();
                 if (neededHeight > screenHeight - screenOffset) {
                     screenHeight = neededHeight + screenOffset;
                 }
@@ -430,6 +435,7 @@ public final class Bridge implements ILayoutBridge {
 
             // remeasure with only the size we need
             // This must always be done before the call to layout
+            w_spec = MeasureSpec.makeMeasureSpec(screenWidth, MeasureSpec.EXACTLY);
             h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
                     MeasureSpec.EXACTLY);
             view.measure(w_spec, h_spec);
