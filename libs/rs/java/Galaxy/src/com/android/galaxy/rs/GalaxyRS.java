@@ -115,7 +115,7 @@ class GalaxyRS {
         loadTextures();
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
-        sb.setType(mStateType, "State", 0);
+        sb.setType(mStateType, "State", RSID_STATE);
         sb.setScript(mResources, R.raw.galaxy);
         sb.setRoot(true);
 
