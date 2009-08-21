@@ -103,6 +103,9 @@ class FallRS {
     private int mMeshWidth;
 
     private int mMeshHeight;
+    @SuppressWarnings({"FieldCanBeLocal"})
+    private RenderScript.TriangleMesh mMesh;
+
     private Allocation mRippleMap;
     private Allocation mRefractionMap;
 
@@ -211,8 +214,8 @@ class FallRS {
             }
         }
 
-        RenderScript.TriangleMesh mesh = rs.triangleMeshCreate();
-        mesh.setName("WaterMesh");
+        mMesh = rs.triangleMeshCreate();
+        mMesh.setName("WaterMesh");
 
         mMeshWidth = wResolution + 1;
         mMeshHeight = hResolution + 1;
