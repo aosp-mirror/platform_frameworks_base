@@ -228,7 +228,7 @@ status_t StringPool::writeStringBlock(const sp<AaptFile>& pool)
         }
         dat += (preSize+strPos)/sizeof(uint16_t);
         if (lenSize > sizeof(uint16_t)) {
-            *dat = htods(0x8000 | ((strSize>>16)&0x7ffff));
+            *dat = htods(0x8000 | ((strSize>>16)&0x7fff));
             dat++;
         }
         *dat++ = htods(strSize);
