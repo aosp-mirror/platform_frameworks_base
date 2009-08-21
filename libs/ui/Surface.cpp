@@ -602,7 +602,18 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
     mBackbufferIndex = backIdx;
     layer_cblk_t* const lcblk = &(cblk->layers[index]);
     volatile const surface_info_t* const back = lcblk->surface + backIdx;
-    if ((back->flags & surface_info_t::eNeedNewBuffer) || mUsageChanged) {
+
+    const sp<SurfaceBuffer>& backBuffer(mBuffers[backIdx]);
+
+    if (backBuffer==0 &&
+            !((back->flags & surface_info_t::eNeedNewBuffer) || mUsageChanged)) {
+        LOGW("dequeueBuffer: backbuffer is null, but eNeedNewBuffer "
+                "is not set, fetching a buffer anyways...");
+    }
+
+    if ((back->flags & surface_info_t::eNeedNewBuffer) ||mUsageChanged ||
+            backBuffer==0) 
+    {
         mUsageChanged = false;
         err = getBufferLocked(backIdx, mUsage);
         if (err == NO_ERROR) {
@@ -614,7 +625,6 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
     }
 
     if (err == NO_ERROR) {
-        const sp<SurfaceBuffer>& backBuffer(mBuffers[backIdx]);
         if (backBuffer != 0) {
             mDirtyRegion.set(backBuffer->width, backBuffer->height);
             *buffer = backBuffer.get();
