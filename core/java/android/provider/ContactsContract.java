@@ -29,6 +29,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
+import android.provider.ContactsContract.Contacts.Photo;
 import android.text.TextUtils;
 
 import java.io.ByteArrayInputStream;
@@ -307,35 +308,18 @@ public final class ContactsContract {
         }
 
         /**
-         * Returns a URI that can be used to retrieve the contact's default photo.
-         *
-         * @param contactUri the contact whose photo should be used
+         * A sub-directory of a single contact that contains the contact's primary photo.
          */
-        public static Uri getPhotoUri(ContentResolver cr, Uri contactUri) {
+        public static final class Photo implements BaseColumns, DataColumns {
+            /**
+             * no public constructor since this is a utility class
+             */
+            private Photo() {}
 
-            // TODO remove try/catch block as soon as eclair-dev is merged in eclair
-            try {
-                long photoId = -1;
-                Cursor cursor = cr.query(contactUri, new String[] {Contacts.PHOTO_ID},
-                        null, null, null);
-                try {
-                    if (!cursor.moveToNext()) {
-                        return null;
-                    }
-
-                    if (cursor.isNull(0)) {
-                        return null;
-                    }
-
-                    photoId = cursor.getLong(0);
-                } finally {
-                    cursor.close();
-                }
-
-                return ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, photoId);
-            } catch (Exception e) {
-                return null;
-            }
+            /**
+             * The directory twig for this sub-table
+             */
+            public static final String CONTENT_DIRECTORY = "photo";
         }
 
         /**
@@ -345,7 +329,7 @@ public final class ContactsContract {
          * @param contactUri the contact whose photo should be used
          */
         public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri) {
-            Uri photoUri = getPhotoUri(cr, contactUri);
+            Uri photoUri = Uri.withAppendedPath(contactUri, Photo.CONTENT_DIRECTORY);
             if (photoUri == null) {
                 return null;
             }
