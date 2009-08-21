@@ -18,6 +18,7 @@ public abstract class IntentService extends Service {
     private volatile Looper mServiceLooper;
     private volatile ServiceHandler mServiceHandler;
     private String mName;
+    private boolean mRedelivery;
 
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
@@ -36,6 +37,19 @@ public abstract class IntentService extends Service {
         mName = name;
     }
 
+    /**
+     * Control redelivery of intents.  If called with true,
+     * {@link #onStartCommand(Intent, int, int)} will return
+     * {@link Service#START_REDELIVER_INTENT} instead of
+     * {@link Service#START_NOT_STICKY}, so that if this service's process
+     * is called while it is executing the Intent in
+     * {@link #onHandleIntent(Intent)}, then when later restarted the same Intent
+     * will be re-delivered to it, to retry its execution.
+     */
+    public void setIntentRedelivery(boolean enabled) {
+        mRedelivery = enabled;
+    }
+    
     @Override
     public void onCreate() {
         super.onCreate();
@@ -48,13 +62,18 @@ public abstract class IntentService extends Service {
 
     @Override
     public void onStart(Intent intent, int startId) {
-        super.onStart(intent, startId);
         Message msg = mServiceHandler.obtainMessage();
         msg.arg1 = startId;
         msg.obj = intent;
         mServiceHandler.sendMessage(msg);
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        onStart(intent, startId);
+        return mRedelivery ? START_REDELIVER_INTENT : START_NOT_STICKY;
+    }
+    
     @Override
     public void onDestroy() {
         mServiceLooper.quit();

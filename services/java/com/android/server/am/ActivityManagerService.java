@@ -42,6 +42,7 @@ import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.ResultInfo;
+import android.app.Service;
 import android.backup.IBackupManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -9385,7 +9386,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 sr.app = null;
                 sr.executeNesting = 0;
                 mStoppingServices.remove(sr);
-                if (sr.bindings.size() > 0) {
+                
+                boolean hasClients = sr.bindings.size() > 0;
+                if (hasClients) {
                     Iterator<IntentBindRecord> bindings
                             = sr.bindings.values().iterator();
                     while (bindings.hasNext()) {
@@ -9406,7 +9409,20 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 } else if (!allowRestart) {
                     bringDownServiceLocked(sr, true);
                 } else {
-                    scheduleServiceRestartLocked(sr);
+                    boolean canceled = scheduleServiceRestartLocked(sr, true);
+                    
+                    // Should the service remain running?  Note that in the
+                    // extreme case of so many attempts to deliver a command
+                    // that it failed, that we also will stop it here.
+                    if (sr.startRequested && (sr.stopIfKilled || canceled)) {
+                        if (sr.pendingStarts.size() == 0) {
+                            sr.startRequested = false;
+                            if (!hasClients) {
+                                // Whoops, no reason to restart!
+                                bringDownServiceLocked(sr, true);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -9845,35 +9861,55 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
     private final void sendServiceArgsLocked(ServiceRecord r,
             boolean oomAdjusted) {
-        final int N = r.startArgs.size();
+        final int N = r.pendingStarts.size();
         if (N == 0) {
             return;
         }
 
-        final int BASEID = r.lastStartId - N + 1;
         int i = 0;
         while (i < N) {
             try {
-                Intent args = r.startArgs.get(i);
+                ServiceRecord.StartItem si = r.pendingStarts.get(i);
                 if (DEBUG_SERVICE) Log.v(TAG, "Sending arguments to service: "
-                        + r.name + " " + r.intent + " args=" + args);
+                        + r.name + " " + r.intent + " args=" + si.intent);
+                if (si.intent == null && N > 0) {
+                    // If somehow we got a dummy start at the front, then
+                    // just drop it here.
+                    i++;
+                    continue;
+                }
                 bumpServiceExecutingLocked(r);
                 if (!oomAdjusted) {
                     oomAdjusted = true;
                     updateOomAdjLocked(r.app);
                 }
-                r.app.thread.scheduleServiceArgs(r, BASEID+i, args);
+                int flags = 0;
+                if (si.deliveryCount > 0) {
+                    flags |= Service.START_FLAG_RETRY;
+                }
+                if (si.doneExecutingCount > 0) {
+                    flags |= Service.START_FLAG_REDELIVERY;
+                }
+                r.app.thread.scheduleServiceArgs(r, si.id, flags, si.intent);
+                si.deliveredTime = SystemClock.uptimeMillis();
+                r.deliveredStarts.add(si);
+                si.deliveryCount++;
                 i++;
+            } catch (RemoteException e) {
+                // Remote process gone...  we'll let the normal cleanup take
+                // care of this.
+                break;
             } catch (Exception e) {
+                Log.w(TAG, "Unexpected exception", e);
                 break;
             }
         }
         if (i == N) {
-            r.startArgs.clear();
+            r.pendingStarts.clear();
         } else {
             while (i > 0) {
-                r.startArgs.remove(0);
                 i--;
+                r.pendingStarts.remove(i);
             }
         }
     }
@@ -9942,19 +9978,61 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         } finally {
             if (!created) {
                 app.services.remove(r);
-                scheduleServiceRestartLocked(r);
+                scheduleServiceRestartLocked(r, false);
             }
         }
 
         requestServiceBindingsLocked(r);
+        
+        // If the service is in the started state, and there are no
+        // pending arguments, then fake up one so its onStartCommand() will
+        // be called.
+        if (r.startRequested && r.callStart && r.pendingStarts.size() == 0) {
+            r.lastStartId++;
+            if (r.lastStartId < 1) {
+                r.lastStartId = 1;
+            }
+            r.pendingStarts.add(new ServiceRecord.StartItem(r.lastStartId, null));
+        }
+        
         sendServiceArgsLocked(r, true);
     }
 
-    private final void scheduleServiceRestartLocked(ServiceRecord r) {
+    private final boolean scheduleServiceRestartLocked(ServiceRecord r,
+            boolean allowCancel) {
+        boolean canceled = false;
+        
+        long minDuration = SERVICE_RESTART_DURATION;
+        long resetTime = minDuration*2*2*2;
+        
+        // Any delivered but not yet finished starts should be put back
+        // on the pending list.
+        final int N = r.deliveredStarts.size();
+        if (N > 0) {
+            for (int i=N-1; i>=0; i--) {
+                ServiceRecord.StartItem si = r.deliveredStarts.get(i);
+                if (si.intent == null) {
+                    // We'll generate this again if needed.
+                } else if (!allowCancel || (si.deliveryCount < ServiceRecord.MAX_DELIVERY_COUNT
+                        && si.doneExecutingCount < ServiceRecord.MAX_DONE_EXECUTING_COUNT)) {
+                    r.pendingStarts.add(0, si);
+                    long dur = SystemClock.uptimeMillis() - si.deliveredTime;
+                    dur *= 2;
+                    if (minDuration < dur) minDuration = dur;
+                    if (resetTime < dur) resetTime = dur;
+                } else {
+                    Log.w(TAG, "Canceling start item " + si.intent + " in service "
+                            + r.name);
+                    canceled = true;
+                }
+            }
+            r.deliveredStarts.clear();
+        }
+        
         r.totalRestartCount++;
         if (r.restartDelay == 0) {
             r.restartCount++;
-            r.restartDelay = SERVICE_RESTART_DURATION;
+            r.restartDelay = minDuration;
         } else {
             // If it has been a "reasonably long time" since the service
             // was started, then reset our restart duration back to
@@ -9962,17 +10040,21 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // on a service that just occasionally gets killed (which is
             // a normal case, due to process being killed to reclaim memory).
             long now = SystemClock.uptimeMillis();
-            if (now > (r.restartTime+(SERVICE_RESTART_DURATION*2*2*2))) {
+            if (now > (r.restartTime+resetTime)) {
                 r.restartCount = 1;
-                r.restartDelay = SERVICE_RESTART_DURATION;
+                r.restartDelay = minDuration;
             } else {
-                r.restartDelay *= 2;
+                r.restartDelay *= 4;
+                if (r.restartDelay < minDuration) {
+                    r.restartDelay = minDuration;
+                }
             }
         }
         if (!mRestartingServices.contains(r)) {
             mRestartingServices.add(r);
         }
         r.cancelNotification();
+        
         mHandler.removeCallbacks(r.restarter);
         mHandler.postDelayed(r.restarter, r.restartDelay);
         r.nextRestartTime = SystemClock.uptimeMillis() + r.restartDelay;
@@ -9985,6 +10067,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         msg.what = SERVICE_ERROR_MSG;
         msg.obj = r;
         mHandler.sendMessage(msg);
+        
+        return canceled;
     }
 
     final void performServiceRestartLocked(ServiceRecord r) {
@@ -10146,6 +10230,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         r.foregroundId = 0;
         r.foregroundNoti = null;
         
+        // Clear start entries.
+        r.deliveredStarts.clear();
+        r.pendingStarts.clear();
+        
         if (r.app != null) {
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.stopLaunchedLocked();
@@ -10207,11 +10295,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         + r.shortName);
             }
             r.startRequested = true;
-            r.startArgs.add(service);
+            r.callStart = false;
             r.lastStartId++;
             if (r.lastStartId < 1) {
                 r.lastStartId = 1;
             }
+            r.pendingStarts.add(new ServiceRecord.StartItem(r.lastStartId, service));
             r.lastActivity = SystemClock.uptimeMillis();
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startRunningLocked();
@@ -10279,6 +10368,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         r.record.stats.stopRunningLocked();
                     }
                     r.record.startRequested = false;
+                    r.record.callStart = false;
                     final long origId = Binder.clearCallingIdentity();
                     bringDownServiceLocked(r.record, false);
                     Binder.restoreCallingIdentity(origId);
@@ -10327,10 +10417,35 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (DEBUG_SERVICE) Log.v(TAG, "stopServiceToken: " + className
                     + " " + token + " startId=" + startId);
             ServiceRecord r = findServiceLocked(className, token);
-            if (r != null && (startId < 0 || r.lastStartId == startId)) {
+            if (r != null) {
+                if (startId >= 0) {
+                    // Asked to only stop if done with all work.  Note that
+                    // to avoid leaks, we will take this as dropping all
+                    // start items up to and including this one.
+                    ServiceRecord.StartItem si = r.findDeliveredStart(startId, false);
+                    if (si != null) {
+                        while (r.deliveredStarts.size() > 0) {
+                            if (r.deliveredStarts.remove(0) == si) {
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (r.lastStartId != startId) {
+                        return false;
+                    }
+                    
+                    if (r.deliveredStarts.size() > 0) {
+                        Log.w(TAG, "stopServiceToken startId " + startId
+                                + " is last, but have " + r.deliveredStarts.size()
+                                + " remaining args");
+                    }
+                }
+                
                 synchronized (r.stats.getBatteryStats()) {
                     r.stats.stopRunningLocked();
                     r.startRequested = false;
+                    r.callStart = false;
                 }
                 final long origId = Binder.clearCallingIdentity();
                 bringDownServiceLocked(r, false);
@@ -10674,7 +10789,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    public void serviceDoneExecuting(IBinder token) {
+    public void serviceDoneExecuting(IBinder token, int type, int startId, int res) {
         synchronized(this) {
             if (!(token instanceof ServiceRecord)) {
                 throw new IllegalArgumentException("Invalid service token");
@@ -10692,6 +10807,51 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     return;
                 }
 
+                if (type == 1) {
+                    // This is a call from a service start...  take care of
+                    // book-keeping.
+                    r.callStart = true;
+                    switch (res) {
+                        case Service.START_STICKY_COMPATIBILITY:
+                        case Service.START_STICKY: {
+                            // We are done with the associated start arguments.
+                            r.findDeliveredStart(startId, true);
+                            // Don't stop if killed.
+                            r.stopIfKilled = false;
+                            break;
+                        }
+                        case Service.START_NOT_STICKY: {
+                            // We are done with the associated start arguments.
+                            r.findDeliveredStart(startId, true);
+                            if (r.lastStartId == startId) {
+                                // There is no more work, and this service
+                                // doesn't want to hang around if killed.
+                                r.stopIfKilled = true;
+                            }
+                            break;
+                        }
+                        case Service.START_REDELIVER_INTENT: {
+                            // We'll keep this item until they explicitly
+                            // call stop for it, but keep track of the fact
+                            // that it was delivered.
+                            ServiceRecord.StartItem si = r.findDeliveredStart(startId, false);
+                            if (si != null) {
+                                si.deliveryCount = 0;
+                                si.doneExecutingCount++;
+                                // Don't stop if killed.
+                                r.stopIfKilled = true;
+                            }
+                            break;
+                        }
+                        default:
+                            throw new IllegalArgumentException(
+                                    "Unknown service start result: " + res);
+                    }
+                    if (res == Service.START_STICKY_COMPATIBILITY) {
+                        r.callStart = false;
+                    }
+                }
+                
                 final long origId = Binder.clearCallingIdentity();
                 serviceDoneExecutingLocked(r, inStopping);
                 Binder.restoreCallingIdentity(origId);
