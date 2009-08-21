@@ -158,12 +158,10 @@ public class RenderScript {
     native void nProgramFragmentStoreDither(boolean enable);
     native int  nProgramFragmentStoreCreate();
 
-    native void nProgramFragmentBegin(int in, int out);
+    native void nProgramFragmentBegin(int in, int out, boolean pointSpriteEnable);
     native void nProgramFragmentBindTexture(int vpf, int slot, int a);
     native void nProgramFragmentBindSampler(int vpf, int slot, int s);
-    native void nProgramFragmentSetType(int slot, int vt);
-    native void nProgramFragmentSetEnvMode(int slot, int env);
-    native void nProgramFragmentSetTexEnable(int slot, boolean enable);
+    native void nProgramFragmentSetSlot(int slot, boolean enable, int env, int vt);
     native int  nProgramFragmentCreate();
 
     native void nProgramVertexBindAllocation(int pv, int mID);

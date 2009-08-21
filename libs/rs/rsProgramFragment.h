@@ -32,7 +32,7 @@ public:
 
 
 
-    ProgramFragment(Element *in, Element *out);
+    ProgramFragment(Element *in, Element *out, bool pointSpriteEnable);
     virtual ~ProgramFragment();
 
     virtual void setupGL(ProgramFragmentState *);
@@ -64,6 +64,7 @@ protected:
     // Hacks to create a program for now
     RsTexEnvMode mEnvModes[MAX_TEXTURE];
     uint32_t mTextureEnableMask;
+    bool mPointSpriteEnable;
 };
 
 class ProgramFragmentState

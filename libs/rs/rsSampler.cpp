@@ -143,6 +143,7 @@ RsSampler rsi_SamplerCreate(Context *rsc)
                               ss->mWrapS,
                               ss->mWrapT,
                               ss->mWrapR);
+    s->incRef();
     return s;
 }
 

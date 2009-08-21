@@ -24,7 +24,7 @@ using namespace android;
 using namespace android::renderscript;
 
 
-ProgramFragment::ProgramFragment(Element *in, Element *out) :
+ProgramFragment::ProgramFragment(Element *in, Element *out, bool pointSpriteEnable) :
     Program(in, out)
 {
     for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
@@ -32,6 +32,7 @@ ProgramFragment::ProgramFragment(Element *in, Element *out) :
         mTextureDimensions[ct] = 2;
     }
     mTextureEnableMask = 0;
+    mPointSpriteEnable = pointSpriteEnable;
     mEnvModes[1] = RS_TEX_ENV_MODE_DECAL;
 }
 
@@ -54,6 +55,7 @@ void ProgramFragment::setupGL(ProgramFragmentState *state)
         }
 
         glEnable(GL_TEXTURE_2D);
+        //glTexEnvi(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, mPointSpriteEnable);
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
 
         switch(mEnvModes[ct]) {
@@ -94,7 +96,6 @@ void ProgramFragment::setupGL(ProgramFragmentState *state)
             glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
         }
     }
-
     glActiveTexture(GL_TEXTURE0);
     mDirty = false;
 }
@@ -178,7 +179,7 @@ ProgramFragmentState::~ProgramFragmentState()
 
 void ProgramFragmentState::init(Context *rsc, int32_t w, int32_t h)
 {
-    ProgramFragment *pf = new ProgramFragment(NULL, NULL);
+    ProgramFragment *pf = new ProgramFragment(NULL, NULL, false);
     mDefault.set(pf);
 }
 
@@ -186,10 +187,10 @@ void ProgramFragmentState::init(Context *rsc, int32_t w, int32_t h)
 namespace android {
 namespace renderscript {
 
-void rsi_ProgramFragmentBegin(Context * rsc, RsElement in, RsElement out)
+void rsi_ProgramFragmentBegin(Context * rsc, RsElement in, RsElement out, bool pointSpriteEnable)
 {
     delete rsc->mStateFragment.mPF;
-    rsc->mStateFragment.mPF = new ProgramFragment((Element *)in, (Element *)out);
+    rsc->mStateFragment.mPF = new ProgramFragment((Element *)in, (Element *)out, pointSpriteEnable);
 }
 
 void rsi_ProgramFragmentBindTexture(Context *rsc, RsProgramFragment vpf, uint32_t slot, RsAllocation a)
@@ -204,27 +205,20 @@ void rsi_ProgramFragmentBindSampler(Context *rsc, RsProgramFragment vpf, uint32_
     pf->bindSampler(slot, static_cast<Sampler *>(s));
 }
 
-void rsi_ProgramFragmentSetType(Context *rsc, uint32_t slot, RsType vt)
+void rsi_ProgramFragmentSetSlot(Context *rsc, uint32_t slot, bool enable, RsTexEnvMode env, RsType vt)
 {
     const Type *t = static_cast<const Type *>(vt);
-    uint32_t dim = 1;
-    if (t->getDimY()) {
-        dim ++;
-        if (t->getDimZ()) {
+    if (t) {
+        uint32_t dim = 1;
+        if (t->getDimY()) {
             dim ++;
+            if (t->getDimZ()) {
+                dim ++;
+            }
         }
+        rsc->mStateFragment.mPF->setType(slot, t->getElement(), dim);
     }
-
-    rsc->mStateFragment.mPF->setType(slot, t->getElement(), dim);
-}
-
-void rsi_ProgramFragmentSetEnvMode(Context *rsc, uint32_t slot, RsTexEnvMode env)
-{
     rsc->mStateFragment.mPF->setEnvMode(slot, env);
-}
-
-void rsi_ProgramFragmentSetTexEnable(Context *rsc, uint32_t slot, bool enable)
-{
     rsc->mStateFragment.mPF->setTexEnable(slot, enable);
 }
 
