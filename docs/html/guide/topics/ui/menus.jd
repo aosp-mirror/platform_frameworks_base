@@ -86,7 +86,7 @@ an icon, a keyboard shortcut, an intent, and other settings for the item.</p>
 Usually, you'll want to use one that accepts an <var>itemId</var> argument. 
 This is a unique integer that allows you to identify the item during a callback.</p>
 
-<p>When a menu item is selected from the Options Menu, you will recieve a callback to the
+<p>When a menu item is selected from the Options Menu, you will receive a callback to the
 <code>{@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}</code> 
 method of your Activity. This callback passes you the 
 <code>MenuItem</code> that has been selected. You can identify the item by requesting the 
@@ -216,7 +216,7 @@ from the {@code MenuItem}, which provides information about the currently select
 All we need from
 this is the list ID for the selected item, so whether editing a note or deleting it, 
 we find the ID with the {@code AdapterContextMenuInfo.info} field of the object. This ID
-is passed to the <code>editNote()</code> and <code>deleteNote()</code> methods to perfrom
+is passed to the <code>editNote()</code> and <code>deleteNote()</code> methods to perform
 the respective action.</p>
 
 <p>Now, to register this context menu for all the items in a {@link android.widget.ListView},
@@ -338,7 +338,7 @@ and set whether the items can be checkable with
 <img align="right" src="{@docRoot}images/radio_buttons.png" alt="" />
 <p>Any menu item can be used as an interface for turning options on and off. This can
 be indicated with a checkbox for stand-alone options, or radio buttons for groups of
-mutually exlusive options (see the screenshot, to the right).</p>
+mutually exclusive options (see the screenshot, to the right).</p>
 
 <p class="note"><strong>Note:</strong> Menu items in the Icon Menu cannot
 display a checkbox or radio button. If you choose to make items in the Icon Menu checkable,
@@ -490,7 +490,7 @@ public boolean onCreateOptionsMenu(Menu menu){
          null,   // Specific items to place first (none)
          intent, // Intent created above that describes our requirements
          0,      // Additional flags to control items (none)
-         null);  // Array of MenuItems that corrolate to specific items (none)
+         null);  // Array of MenuItems that correlate to specific items (none)
 
     return true;
 }</pre>

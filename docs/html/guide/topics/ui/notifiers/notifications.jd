@@ -316,7 +316,7 @@ using Notification fields and flags. Some useful features include the following:
   your notification is on-going.</dd>
   <dt><var>number</var> field</dt>
   <dd>This value indicates the current number of events represented by the notification.
-  The appropriate number is overlayed on top of the status bar icon.
+  The appropriate number is overlaid on top of the status bar icon.
   If you intend to use this field, then you must start with "1" when the Notification is first
   created. (If you change the value from zero to anything greater during an update, the number
   is not shown.)</dd>
@@ -375,7 +375,7 @@ pass it to the <var>contentView</var> field of your Notification. Pass the
 </pre>
 
     <p>This layout is used for the expanded view,
-    but the content of the ImageView and TextView still needs to be defined by the applicaiton.
+    but the content of the ImageView and TextView still needs to be defined by the application.
     RemoteViews offers some convenient methods that allow you to define this content...</p>
   </li>
 
@@ -389,7 +389,7 @@ contentView.setTextViewText(R.id.text, "Hello, this message is in a custom expan
 notification.contentView = contentView;
 </pre>
 
-    <p>As shown here, pass the applicaiton's package name and the layout 
+    <p>As shown here, pass the application's package name and the layout 
     resource ID to the RemoteViews constructor. Then, define the content for the ImageView and TextView,
     using the {@link android.widget.RemoteViews#setImageViewResource(int, int) setImageViewResource()}
     and {@link android.widget.RemoteViews#setTextViewText(int, CharSequence) setTextViewText()}.

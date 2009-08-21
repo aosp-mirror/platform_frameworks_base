@@ -96,7 +96,7 @@ changes include: </p>
   <ul>
     <li>Multiple versions of the Android platform are included (Android 1.1,
 Android 1.5). The tools are updated to let you deploy your application
-on any platform in the SDK, which helps you ensure forward-compitility and, 
+on any platform in the SDK, which helps you ensure forward-compatibility and, 
 if applicable, backward-compatibility.</li>
     <li>Introduces <a href="{@docRoot}guide/developing/tools/avd.html">Android
 Virtual Devices</a> &mdash; (AVD) configurations of options that you
@@ -107,7 +107,7 @@ that are running concurrently.</li>
 Android SDK to give you access to one or more external Android libraries and/or
 a customized (but compliant) system image that can run in the emulator. </li>
     <li>The new Eclipse ADT plugin (version 0.9.x) offers new Wizards to let you
-create projects targetted for specific Android configurations, generate XML
+create projects targeted for specific Android configurations, generate XML
 resources (such as layouts, animations, and menus), generate alternate layouts,
 and export and sign your application for publishing.</li>
     <li>Improved JUnit support in ADT</li>
@@ -442,9 +442,9 @@ SDK</a>.
 
 <h3>Other Notes</h3>
 
-<p><strong>T-Mobile G1 Compatability</strong></p>
+<p><strong>T-Mobile G1 Compatibility</strong></p>
 
-<p>This version of the SDK has been tested for compatability with the first 
+<p>This version of the SDK has been tested for compatibility with the first 
 Android-powered mobile device, the <a href="http://www.t-mobileg1.com">T-Mobile
 G1</a>. </p>
 

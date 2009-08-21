@@ -224,7 +224,7 @@ tags.
 <p>
     The following declares two strings: the first &mdash; simple text with no
     formatting (resulting in a CharSequence that is simply a String object) &mdash; the second includes formatting information in the string (resulting
-    in a CharSequence that is a complex data structure). If you are using the custom editor for string files in Eclipse, the HTML formatting tags will automatically be escaped and you will need to use {@link android.content.Context#getString(int) Context.getString()} and {@link android.text.Html#fromHtml} to retreive the resource and then convert it to formatted text.
+    in a CharSequence that is a complex data structure). If you are using the custom editor for string files in Eclipse, the HTML formatting tags will automatically be escaped and you will need to use {@link android.content.Context#getString(int) Context.getString()} and {@link android.text.Html#fromHtml} to retrieve the resource and then convert it to formatted text.
 </p>
 <pre>
 &lt;resources&gt;

@@ -51,7 +51,7 @@ and each View is responsible for drawing itself.
    </p>
    
    <div class="sidebox"><p>
-   To intiate a layout, call <code>{@link android.view.View#requestLayout}</code>. This method is typically
+   To initiate a layout, call <code>{@link android.view.View#requestLayout}</code>. This method is typically
    called by a View on itself when it believes that is can no longer fit within
    its current bounds.</p>
    </div>
@@ -86,7 +86,7 @@ and each View is responsible for drawing itself.
     child. The child must use this size, and guarantee that all of its
     descendants will fit within this size.</li>
     <li><var>AT_MOST</var>: This is used by the parent to impose a maximum size on the
-    child. The child must gurantee that it and all of its descendants will fit
+    child. The child must guarantee that it and all of its descendants will fit
     within this size.</li>
    </ul>
    

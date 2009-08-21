@@ -754,7 +754,7 @@ Android platform defines a "View" style class that
 contains all of the standard view attributes: padding, visibility,
 background, etc.; when View is inflated it uses this style class to
 retrieve those values from the XML file (at which point style and theme
-information is applied as approriate) and load them into its instance.</p>
+information is applied as appropriate) and load them into its instance.</p>
 
 <p><strong>Configuration</strong>: For any particular resource identifier, there may be
 multiple different available values depending on the current configuration.

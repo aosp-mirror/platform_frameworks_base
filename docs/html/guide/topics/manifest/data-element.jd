@@ -28,7 +28,7 @@ attributes for each of its parts:
 These attributes are optional, but also mutually dependent: 
 If a <code><a href="{@docRoot}guide/topics/manifest/data-element.html#scheme">scheme</a></code> is not specified for the 
 intent filter, all the other URI attributes are ignored.  If a 
-<code><a href="{@docRoot}guide/topics/manifest/data-element.html#host">host</a></code> is not specified for the filer, 
+<code><a href="{@docRoot}guide/topics/manifest/data-element.html#host">host</a></code> is not specified for the filter, 
 the {@code port} attribute and all the path attributes are ignored.
 </p>
 

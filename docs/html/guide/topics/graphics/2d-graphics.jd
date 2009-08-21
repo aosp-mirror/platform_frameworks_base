@@ -43,7 +43,7 @@ including {@link android.graphics.drawable.BitmapDrawable}, {@link android.graph
 {@link android.graphics.drawable.PictureDrawable}, {@link android.graphics.drawable.LayerDrawable}, and several more.
 Of course, you can also extend these to define your own custom Drawable objects that behave in unique ways.</p>
 
-<p>There are three ways to define and instantiate a Drawable: using an image saved in your project resouces;
+<p>There are three ways to define and instantiate a Drawable: using an image saved in your project resources;
 using an XML file that defines the Drawable properties; or using the normal class constructors. Below, we'll discuss
 each the first two techniques (using constructors is nothing new for an experienced developer).</p>
 
@@ -126,7 +126,7 @@ instead of directly transforming the Drawable, you should perform a <a href="#tw
 <a href="{@docRoot}guide/topics/ui/index.html">User Interface</a>. Hence, you understand the power
 and flexibility inherent in defining objects in XML. This philosophy caries over from Views to Drawables.
 If there is a Drawable object that you'd like to create, which is not initially dependent on variables defined by
-your applicaton code or user interaction, then defining the Drawable in XML is a good option.
+your application code or user interaction, then defining the Drawable in XML is a good option.
 Even if you expect your Drawable to change its properties during the user's experience with your application, 
 you should consider defining the object in XML, as you can always modify properties once it is instantiated.</p>
 
@@ -206,7 +206,7 @@ public class CustomDrawableView extends View {
 It's then given a color and the bounds of the shape are set. If you do not set the bounds, then the
 shape will not be drawn, whereas if you don't set the color, it will default to black.</p>
 <p>With the custom View defined, it can be drawn any way you like. With the sample above, we can
-draw the shape progammatically in an Activity:</p>
+draw the shape programmatically in an Activity:</p>
 <pre>
 CustomDrawableView mCustomDrawableView;
 
@@ -248,7 +248,7 @@ of the object it's attached to.
 <h2 id="nine-patch">NinePatchDrawable</h2>
 
 <p>A {@link android.graphics.drawable.NinePatchDrawable} graphic is a stretchable bitmap image, which Android
-will automatically resize to accomodate the contents of the View in which you have placed it as the background. 
+will automatically resize to accommodate the contents of the View in which you have placed it as the background. 
 An example use of a NinePatch is the backgrounds used by standard Android buttons &mdash;
 buttons must stretch to accommodate strings of various lengths. A NinePatch drawable is a standard PNG 
 image that includes an extra 1-pixel-wide border. It must be saved with the extension <code>.9.png</code>,
@@ -271,7 +271,7 @@ and saved into the <code>res/drawable/</code> directory of your project.
     define this drawable area.
 </p>
 <p>To clarify the difference between the different lines, the left and top lines define 
-which pixels of the image are allowed to be replicated in order to strech the image.
+which pixels of the image are allowed to be replicated in order to stretch the image.
 The bottom and right lines define the relative area within the image that the contents
 of the View are allowed to lie within.</p>
 <p>
@@ -281,7 +281,7 @@ of the View are allowed to lie within.</p>
 
 <p>This NinePatch defines one stretchable area with the left and top lines
 and the drawable area with the bottom and right lines. In the top image, the dotted grey
-lines identify the regions of the image that will be replicated in order to strech the image. The pink
+lines identify the regions of the image that will be replicated in order to stretch the image. The pink
 rectangle in the bottom image identifies the region in which the contents of the View are allowed.
 If the contents don't fit in this region, then the image will be stretched so that they do.
 </p>
@@ -333,7 +333,7 @@ the contents of a View object. So, if you have a TextView object, you can move, 
 If it has a background image, the background image will be transformed along with the text.
 The {@link android.view.animation animation package} provides all the classes used in a tween animation.</p>
 
-<p>A sequence of animation instructions defines the twen animation, defined by either XML or Android code.
+<p>A sequence of animation instructions defines the tween animation, defined by either XML or Android code.
 Like defining a layout, an XML file is recommended because it's more readable, reusable, and swappable 
 than hard-coding the animation. In the example below, we use XML. (To learn more about defining an animation 
 in your application code, instead of XML, refer to the 
@@ -428,7 +428,7 @@ then assign the animation to the View with
 in the <a href="{@docRoot}guide/topics/resources/available-resources.html#animation">Available Resources</a>.</p>
 
 <p class="note"><strong>Note:</strong> Regardless of how your animation may move or resize, the bounds of the 
-View that holds your animation will not automatically adjust to accomodate it. Even so, the animation will still
+View that holds your animation will not automatically adjust to accommodate it. Even so, the animation will still
 be drawn beyond the bounds of its View and will not be clipped. However, clipping <em>will occur</em>
 if the animation exceeds the bounds of the parent View.</p>
 

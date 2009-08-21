@@ -46,7 +46,7 @@ strings in the user interface.</dd>
 <dd>The name that's at the base of the permission tree.  It serves as 
 a prefix to all permission names in the tree.  Java-style scoping should 
 be used to ensure that the name is unique.  The name must have more than 
-two period-separated seqments in its path &mdash; for example, 
+two period-separated segments in its path &mdash; for example, 
 {@code com.example.base} is OK, but {@code com.example} is not.</dd>
 
 </dl></dd>

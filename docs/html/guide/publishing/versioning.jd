@@ -67,7 +67,7 @@ always define values for both of them: </p>
 <li><code>android:versionCode</code> &mdash; An integer value that represents
 the version of the application code, relative to other versions. 
 
-<p>The value is an integer so that other applications can programatically
+<p>The value is an integer so that other applications can programmatically
 evaluate it, for example to check an upgrade or downgrade relationship. You can
 set the value to any integer you want, however you should make sure that each
 successive release of your application uses a greater value. The system does not
@@ -78,7 +78,7 @@ normative. </p>
 versionCode set to 1, then monotonically increase the value with each release,
 regardless whether the release constitutes a major or minor release. This means
 that the <code>android:versionCode</code> value does not necessarily have a
-strong resemblence to the application release version that is visible to the
+strong resemblance to the application release version that is visible to the
 user (see <code>android:versionName</code>, below). Applications and publishing
 services should not display this version value to users.</p>
 </li>
