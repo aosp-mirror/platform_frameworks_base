@@ -224,11 +224,11 @@ void Loader::init_api(void* dso,
 
 void *Loader::load_driver(const char* driver, gl_hooks_t* hooks, uint32_t mask)
 {
-    //LOGD("%s", driver);
     void* dso = dlopen(driver, RTLD_NOW | RTLD_LOCAL);
-    LOGE_IF(!dso, "%s", dlerror());
     if (dso == 0)
         return 0;
+
+    LOGD("loaded %s", driver);
 
     if (mask & EGL) {
         getProcAddress = (getProcAddressType)dlsym(dso, "eglGetProcAddress");
