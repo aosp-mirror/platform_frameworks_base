@@ -729,7 +729,7 @@ static void SC_shininess(float s)
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, s);
 }
 
-static void SC_hsb(float h, float s, float b, float a)
+static void SC_hsbToRgb(float h, float s, float b, float* rgb)
 {
     float red = 0.0f;
     float green = 0.0f;
@@ -779,7 +779,26 @@ static void SC_hsb(float h, float s, float b, float a)
             break;
     }
 
-    glColor4f(red, green, blue, a);
+    rgb[0] = red;
+    rgb[1] = green;
+    rgb[2] = blue;
+}
+
+static int SC_hsbToAbgr(float h, float s, float b, float a)
+{
+    float rgb[3];
+    SC_hsbToRgb(h, s, b, rgb);
+    return int(a      * 255.0f) << 24 |
+           int(rgb[2] * 255.0f) << 16 |
+           int(rgb[1] * 255.0f) <<  8 |
+           int(rgb[0] * 255.0f);
+}
+
+static void SC_hsb(float h, float s, float b, float a)
+{
+    float rgb[3];
+    SC_hsbToRgb(h, s, b, rgb);
+    glColor4f(rgb[0], rgb[1], rgb[2], a);
 }
 
 static void SC_uploadToTexture(RsAllocation va, uint32_t baseMipLevel)
@@ -809,9 +828,19 @@ static void SC_debugF(const char *s, float f)
     LOGE("%s %f", s, f);
 }
 
+static void SC_debugHexF(const char *s, float f)
+{
+    LOGE("%s 0x%x", s, *((int *) (&f)));
+}
+
 static void SC_debugI32(const char *s, int32_t i)
 {
     LOGE("%s %i", s, i);
+}
+
+static void SC_debugHexI32(const char *s, int32_t i)
+{
+    LOGE("%s 0x%x", s, i);
 }
 
 static uint32_t SC_getWidth()
@@ -1055,6 +1084,10 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(float, float, float, float)" },
     { "hsb", (void *)&SC_hsb,
         "void", "(float, float, float, float)" },
+    { "hsbToRgb", (void *)&SC_hsbToRgb,
+        "void", "(float, float, float, float*)" },
+    { "hsbToAbgr", (void *)&SC_hsbToAbgr,
+        "int", "(float, float, float, float)" },
     { "ambient", (void *)&SC_ambient,
         "void", "(float, float, float, float)" },
     { "diffuse", (void *)&SC_diffuse,
@@ -1087,6 +1120,10 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "debugF", (void *)&SC_debugF,
         "void", "(void *, float)" },
     { "debugI32", (void *)&SC_debugI32,
+        "void", "(void *, int)" },
+    { "debugHexF", (void *)&SC_debugHexF,
+        "void", "(void *, float)" },
+    { "debugHexI32", (void *)&SC_debugHexI32,
         "void", "(void *, int)" },
 
 
