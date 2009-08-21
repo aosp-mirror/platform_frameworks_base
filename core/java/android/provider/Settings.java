@@ -2930,6 +2930,21 @@ public final class Settings {
                 "gtalk_rmq2_include_stream_id";
 
         /**
+         * when receiving a chat message from the server, the message could be an older message
+         * whose "time sent" is x seconds from now. If x is significant enough, we want to flag
+         * it so the UI can give it some special treatment when displaying the "time sent" for
+         * it. This setting is to control what x is.
+         */
+        public static final String GTALK_OLD_CHAT_MESSAGE_THREADHOLD_IN_SEC =
+                "gtalk_old_chat_msg_threadhold_in_sec";
+
+        /**
+         * a setting to control the max connection history record GTalkService stores.
+         */
+        public static final String GTALK_MAX_CONNECTION_HISTORY_RECORDS =
+                "gtalk_max_conn_history_records";
+
+        /**
          * This is gdata url to lookup album and picture info from picasa web.
          */
         public static final String GTALK_PICASA_ALBUM_URL =
