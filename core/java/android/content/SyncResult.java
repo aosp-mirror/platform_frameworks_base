@@ -113,14 +113,19 @@ public final class SyncResult implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(" syncAlreadyInProgress: ").append(syncAlreadyInProgress);
-        sb.append(" tooManyDeletions: ").append(tooManyDeletions);
-        sb.append(" tooManyRetries: ").append(tooManyRetries);
-        sb.append(" databaseError: ").append(databaseError);
-        sb.append(" fullSyncRequested: ").append(fullSyncRequested);
-        sb.append(" partialSyncUnavailable: ").append(partialSyncUnavailable);
-        sb.append(" moreRecordsToGet: ").append(moreRecordsToGet);
-        sb.append(" stats: ").append(stats);
+        sb.append("SyncResult:");
+        if (syncAlreadyInProgress) {
+            sb.append(" syncAlreadyInProgress: ").append(syncAlreadyInProgress);
+        }
+        if (tooManyDeletions) sb.append(" tooManyDeletions: ").append(tooManyDeletions);
+        if (tooManyRetries) sb.append(" tooManyRetries: ").append(tooManyRetries);
+        if (databaseError) sb.append(" databaseError: ").append(databaseError);
+        if (fullSyncRequested) sb.append(" fullSyncRequested: ").append(fullSyncRequested);
+        if (partialSyncUnavailable) {
+            sb.append(" partialSyncUnavailable: ").append(partialSyncUnavailable);
+        }
+        if (moreRecordsToGet) sb.append(" moreRecordsToGet: ").append(moreRecordsToGet);
+        sb.append(stats);
         return sb.toString();
     }
 

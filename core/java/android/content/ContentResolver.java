@@ -244,6 +244,13 @@ public abstract class ContentResolver {
             return mInner.next();
         }
 
+        public void reset() throws RemoteException {
+            if (mClientReleased) {
+                throw new IllegalStateException("this iterator is already closed");
+            }
+            mInner.reset();
+        }
+
         public void close() {
             mClient.release();
             mInner.close();

@@ -87,6 +87,14 @@ public abstract class AbstractCursorEntityIterator implements EntityIterator {
         }
     }
 
+    public void reset() throws RemoteException {
+        if (mIsClosed) {
+            throw new IllegalStateException("calling reset() when the iterator is closed");
+        }
+        mEntityCursor.moveToPosition(-1);
+        mNextEntity = null;
+    }
+
     /**
      * Closes this iterator making it invalid. If is invalid for the user to call any public
      * method on the iterator once it has been closed.

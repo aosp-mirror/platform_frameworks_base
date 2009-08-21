@@ -41,6 +41,8 @@ public interface EntityIterator {
      */
     public Entity next() throws RemoteException;
 
+    public void reset() throws RemoteException;
+
     /**
      * Indicates that this iterator is no longer needed and that any associated resources
      * may be released (such as a SQLite cursor).
