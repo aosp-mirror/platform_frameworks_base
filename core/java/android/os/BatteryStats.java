@@ -314,6 +314,15 @@ public abstract class BatteryStats implements Parcelable {
              * @return foreground cpu time in microseconds
              */
             public abstract long getForegroundTime(int which);
+
+            /**
+             * Returns the approximate cpu time spent in microseconds, at a certain CPU speed.
+             * @param speedStep the index of the CPU speed. This is not the actual speed of the
+             * CPU.
+             * @param which one of STATS_TOTAL, STATS_LAST, STATS_CURRENT or STATS_UNPLUGGED
+             * @see BatteryStats#getCpuSpeedSteps()
+             */
+            public abstract long getTimeAtCpuSpeedStep(int speedStep, int which);
         }
 
         /**
@@ -572,6 +581,9 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long computeRealtime(long curTime, int which);
     
     public abstract Map<String, ? extends Timer> getKernelWakelockStats();
+
+    /** Returns the number of different speeds that the CPU can run at */
+    public abstract int getCpuSpeedSteps();
 
     private final static void formatTimeRaw(StringBuilder out, long seconds) {
         long days = seconds / (60 * 60 * 24);

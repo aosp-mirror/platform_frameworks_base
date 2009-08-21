@@ -47,14 +47,9 @@ public class PowerProfile {
     public static final String POWER_CPU_IDLE = "cpu.idle";
 
     /**
-     * Power consumption when CPU is running at normal speed.
+     * Power consumption when CPU is in power collapse mode.
      */
-    public static final String POWER_CPU_NORMAL = "cpu.normal";
-
-    /**
-     * Power consumption when CPU is running at full speed.
-     */
-    public static final String POWER_CPU_FULL = "cpu.full";
+    public static final String POWER_CPU_ACTIVE = "cpu.active";
 
     /**
      * Power consumption when WiFi driver is scanning for networks.
@@ -123,6 +118,8 @@ public class PowerProfile {
      * to the CPU power, probably due to a DSP.
      */
     public static final String POWER_VIDEO = "dsp.video";
+
+    public static final String POWER_CPU_SPEEDS = "cpu.speeds";
 
     static final HashMap<String, Object> sPowerMap = new HashMap<String, Object>();
 
@@ -214,10 +211,10 @@ public class PowerProfile {
     }
     
     /**
-     * Returns the average current in mA consumed by the subsystem for the given level. 
+     * Returns the average current in mA consumed by the subsystem for the given level.
      * @param type the subsystem type
      * @param level the level of power at which the subsystem is running. For instance, the
-     *  signal strength of the cell network between 0 and 4 (if there are 4 bars max.).
+     *  signal strength of the cell network between 0 and 4 (if there are 4 bars max.)
      *  If there is no data for multiple levels, the level is ignored.
      * @return the average current in milliAmps.
      */
@@ -239,5 +236,13 @@ public class PowerProfile {
         } else {
             return 0;
         }
+    }
+
+    public int getNumSpeedSteps() {
+        Object value = sPowerMap.get(POWER_CPU_SPEEDS);
+        if (value != null && value instanceof Double[]) {
+            return ((Double[])value).length;
+        }
+        return 1; // Only one speed
     }
 }

@@ -1572,6 +1572,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             
+            long[] cpuSpeedTimes = mProcessStats.getLastCpuSpeedTimes();
             final BatteryStatsImpl bstats = mBatteryStatsService.getActiveStatistics();
             synchronized(bstats) {
                 synchronized(mPidsSelfLocked) {
@@ -1585,11 +1586,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 if (pr != null) {
                                     BatteryStatsImpl.Uid.Proc ps = pr.batteryStats;
                                     ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
+                                    ps.addSpeedStepTimes(cpuSpeedTimes);
                                 } else {
                                     BatteryStatsImpl.Uid.Proc ps =
                                             bstats.getProcessStatsLocked(st.name, st.pid);
                                     if (ps != null) {
                                         ps.addCpuTimeLocked(st.rel_utime, st.rel_stime);
+                                        ps.addSpeedStepTimes(cpuSpeedTimes);
                                     }
                                 }
                             }
