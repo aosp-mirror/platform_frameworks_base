@@ -294,8 +294,14 @@ public final class CdmaCallTracker extends CallTracker {
         // Should we bother with this check?
         if (ringingCall.getState() == CdmaCall.State.INCOMING) {
             throw new CallStateException("cannot be in the incoming state");
-        } else {
+        } else if (foregroundCall.getConnections().size() > 1) {
             flashAndSetGenericTrue();
+        } else {
+            // Send a flash command to CDMA network for putting the other party on hold.
+            // For CDMA networks which do not support this the user would just hear a beep
+            // from the network. For CDMA networks which do support it will put the other
+            // party on hold.
+            cm.sendCDMAFeatureCode("", obtainMessage(EVENT_SWITCH_RESULT));
         }
     }
 
