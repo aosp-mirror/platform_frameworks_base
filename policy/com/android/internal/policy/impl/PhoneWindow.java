@@ -568,7 +568,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 WRAP_CONTENT, WRAP_CONTENT,
                 st.x, st.y, WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
                 WindowManager.LayoutParams.FLAG_DITHER
-                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 st.decorView.mDefaultOpacity);
 
         lp.gravity = st.gravity;
@@ -2040,6 +2041,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         protected void onAttachedToWindow() {
             super.onAttachedToWindow();
+            
+            final Callback cb = getCallback();
+            if (cb != null && mFeatureId < 0) {
+                cb.onAttachedToWindow();
+            }
 
             if (mFeatureId == -1) {
                 /*
@@ -2050,6 +2056,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                  * should be shown again.
                  */
                 openPanelsAfterRestore();
+            }
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            
+            final Callback cb = getCallback();
+            if (cb != null && mFeatureId < 0) {
+                cb.onDetachedFromWindow();
             }
         }
     }
