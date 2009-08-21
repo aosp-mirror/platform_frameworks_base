@@ -281,6 +281,10 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
             return mEntityIterator.next();
         }
 
+        public void reset() throws RemoteException {
+            mEntityIterator.reset();
+        }
+
         public void close() throws RemoteException {
             mEntityIterator.close();
         }
@@ -404,6 +408,10 @@ final class ContentProviderProxy implements IContentProvider
 
         public Entity next() throws RemoteException {
             return mEntityIterator.next();
+        }
+
+        public void reset() throws RemoteException {
+            mEntityIterator.reset();
         }
 
         public void close() {
