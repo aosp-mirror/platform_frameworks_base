@@ -404,7 +404,9 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     
     void attachServiceLocked(WallpaperConnection conn) {
         try {
-            conn.mService.attach(conn, conn.mToken, mWidth, mHeight);
+            conn.mService.attach(conn, conn.mToken,
+                    WindowManager.LayoutParams.TYPE_WALLPAPER, false,
+                    mWidth, mHeight);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed attaching wallpaper; clearing", e);
             bindWallpaperComponentLocked(null);
