@@ -655,25 +655,27 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             EGLConfig closestConfig = null;
             int closestDistance = 1000;
             for(EGLConfig config : configs) {
-                int r = findConfigAttrib(egl, display, config,
-                        EGL10.EGL_RED_SIZE, 0);
-                int g = findConfigAttrib(egl, display, config,
-                         EGL10.EGL_GREEN_SIZE, 0);
-                int b = findConfigAttrib(egl, display, config,
-                          EGL10.EGL_BLUE_SIZE, 0);
-                int a = findConfigAttrib(egl, display, config,
-                        EGL10.EGL_ALPHA_SIZE, 0);
                 int d = findConfigAttrib(egl, display, config,
                         EGL10.EGL_DEPTH_SIZE, 0);
                 int s = findConfigAttrib(egl, display, config,
                         EGL10.EGL_STENCIL_SIZE, 0);
-                int distance = Math.abs(r - mRedSize)
-                    + Math.abs(g - mGreenSize)
-                    + Math.abs(b - mBlueSize) + Math.abs(a - mAlphaSize)
-                    + Math.abs(d - mDepthSize) + Math.abs(s - mStencilSize);
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closestConfig = config;
+                if (d >= mDepthSize && s>= mStencilSize) {
+                    int r = findConfigAttrib(egl, display, config,
+                            EGL10.EGL_RED_SIZE, 0);
+                    int g = findConfigAttrib(egl, display, config,
+                             EGL10.EGL_GREEN_SIZE, 0);
+                    int b = findConfigAttrib(egl, display, config,
+                              EGL10.EGL_BLUE_SIZE, 0);
+                    int a = findConfigAttrib(egl, display, config,
+                            EGL10.EGL_ALPHA_SIZE, 0);
+                    int distance = Math.abs(r - mRedSize)
+                                + Math.abs(g - mGreenSize)
+                                + Math.abs(b - mBlueSize)
+                                + Math.abs(a - mAlphaSize);
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        closestConfig = config;
+                    }
                 }
             }
             return closestConfig;
