@@ -70,9 +70,8 @@ public interface ILayoutBridge {
      * @param projectKey An Object identifying the project. This is used for the cache mechanism.
      * @param screenWidth the screen width
      * @param screenHeight the screen height
-     * @param renderFullHeight if true, the rendering will render the full height needed by the
-     * layout. If the layout needs less than <var>screenHeight</var> then the rendering will
-     * use <var>screenHeight</var> as the height.
+     * @param renderFullSize if true, the rendering will render the full size needed by the
+     * layout. This size is never smaller than <var>screenWidth</var> x <var>screenHeight</var>.
      * @param density the density factor for the screen.
      * @param xdpi the screen actual dpi in X
      * @param ydpi the screen actual dpi in Y
@@ -94,7 +93,7 @@ public interface ILayoutBridge {
      */
     ILayoutResult computeLayout(IXmlPullParser layoutDescription,
             Object projectKey,
-            int screenWidth, int screenHeight, boolean renderFullHeight,
+            int screenWidth, int screenHeight, boolean renderFullSize,
             int density, float xdpi, float ydpi,
             String themeName, boolean isProjectTheme,
             Map<String, Map<String, IResourceValue>> projectResources,
