@@ -98,6 +98,20 @@ public interface IEntityIterator extends IInterface {
                     return true;
                 }
 
+                case TRANSACTION_reset:
+                {
+                    data.enforceInterface(DESCRIPTOR);
+                    try {
+                        this.reset();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "caught exception in next()", e);
+                        reply.writeException(e);
+                        return true;
+                    }
+                    reply.writeNoException();
+                    return true;
+                }
+
                 case TRANSACTION_close:
                 {
                     data.enforceInterface(DESCRIPTOR);
@@ -157,6 +171,19 @@ public interface IEntityIterator extends IInterface {
                 }
             }
 
+            public void reset() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_reset, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
             public void close() throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -174,8 +201,10 @@ public interface IEntityIterator extends IInterface {
         static final int TRANSACTION_hasNext = (IBinder.FIRST_CALL_TRANSACTION + 0);
         static final int TRANSACTION_next = (IBinder.FIRST_CALL_TRANSACTION + 1);
         static final int TRANSACTION_close = (IBinder.FIRST_CALL_TRANSACTION + 2);
+        static final int TRANSACTION_reset = (IBinder.FIRST_CALL_TRANSACTION + 3);
     }
     public boolean hasNext() throws RemoteException;
     public Entity next() throws RemoteException;
+    public void reset() throws RemoteException;
     public void close() throws RemoteException;
 }
