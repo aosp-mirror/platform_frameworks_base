@@ -237,7 +237,6 @@ public abstract class Window {
         /**
          * This is called whenever the current window attributes change.
          *
-
          */
         public void onWindowAttributesChanged(WindowManager.LayoutParams attrs);
 
@@ -252,12 +251,28 @@ public abstract class Window {
         public void onContentChanged();
 
         /**
-         * This hook is called whenever the window focus changes.
+         * This hook is called whenever the window focus changes.  See
+         * {@link View#onWindowFocusChanged(boolean)
+         * View.onWindowFocusChanged(boolean)} for more information.
          *
          * @param hasFocus Whether the window now has focus.
          */
         public void onWindowFocusChanged(boolean hasFocus);
 
+        /**
+         * Called when the window has been attached to the window manager.
+         * See {@link View#onAttachedToWindow() View.onAttachedToWindow()}
+         * for more information.
+         */
+        public void onAttachedToWindow();
+        
+        /**
+         * Called when the window has been attached to the window manager.
+         * See {@link View#onDetachedFromWindow() View.onDetachedFromWindow()}
+         * for more information.
+         */
+        public void onDetachedFromWindow();
+        
         /**
          * Called when a panel is being closed.  If another logical subsequent
          * panel is being opened (and this panel is being closed to make room for the subsequent

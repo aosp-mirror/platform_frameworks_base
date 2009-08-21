@@ -576,6 +576,12 @@ public class Dialog implements DialogInterface, Window.Callback,
     public void onWindowFocusChanged(boolean hasFocus) {
     }
 
+    public void onAttachedToWindow() {
+    }
+    
+    public void onDetachedFromWindow() {
+    }
+    
     /**
      * Called to process key events.  You can override this to intercept all 
      * key events before they are dispatched to the window.  Be sure to call 

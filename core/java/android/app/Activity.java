@@ -1930,8 +1930,29 @@ public class Activity extends ContextThemeWrapper
      * 
      * @see #hasWindowFocus()
      * @see #onResume
+     * @see View#onWindowFocusChanged(boolean)
      */
     public void onWindowFocusChanged(boolean hasFocus) {
+    }
+    
+    /**
+     * Called when the main window associated with the activity has been
+     * attached to the window manager.
+     * See {@link View#onAttachedToWindow() View.onAttachedToWindow()}
+     * for more information.
+     * @see View#onAttachedToWindow
+     */
+    public void onAttachedToWindow() {
+    }
+    
+    /**
+     * Called when the main window associated with the activity has been
+     * detached from the window manager.
+     * See {@link View#onDetachedFromWindow() View.onDetachedFromWindow()}
+     * for more information.
+     * @see View#onDetachedFromWindow
+     */
+    public void onDetachedFromWindow() {
     }
     
     /**

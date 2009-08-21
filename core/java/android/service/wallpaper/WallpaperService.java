@@ -212,6 +212,15 @@ public abstract class WallpaperService extends Service {
         }
         
         /**
+         * Returns true if this engine is running in preview mode -- that is,
+         * it is being shown to the user before they select it as the actual
+         * wallpaper.
+         */
+        public boolean isPreview() {
+            return mIWallpaperEngine.mIsPreview;
+        }
+        
+        /**
          * Control whether this wallpaper will receive raw touch events
          * from the window manager as the user interacts with the window
          * that is currently displaying the wallpaper.  By default they
@@ -332,7 +341,7 @@ public abstract class WallpaperService extends Service {
                     mLayout.token = mWindowToken;
 
                     if (!mCreated) {
-                        mLayout.type = WindowManager.LayoutParams.TYPE_WALLPAPER;
+                        mLayout.type = mIWallpaperEngine.mWindowType;
                         mLayout.gravity = Gravity.LEFT|Gravity.TOP;
                         mSession.add(mWindow, mLayout, View.VISIBLE, mContentInsets);
                     }
@@ -465,6 +474,8 @@ public abstract class WallpaperService extends Service {
 
         final IWallpaperConnection mConnection;
         final IBinder mWindowToken;
+        final int mWindowType;
+        final boolean mIsPreview;
         int mReqWidth;
         int mReqHeight;
         
@@ -472,10 +483,12 @@ public abstract class WallpaperService extends Service {
         
         IWallpaperEngineWrapper(WallpaperService context,
                 IWallpaperConnection conn, IBinder windowToken,
-                int reqWidth, int reqHeight) {
+                int windowType, boolean isPreview, int reqWidth, int reqHeight) {
             mCaller = new HandlerCaller(context, this);
             mConnection = conn;
             mWindowToken = windowToken;
+            mWindowType = windowType;
+            mIsPreview = isPreview;
             mReqWidth = reqWidth;
             mReqHeight = reqHeight;
             
@@ -567,10 +580,10 @@ public abstract class WallpaperService extends Service {
             mTarget = context;
         }
 
-        public void attach(IWallpaperConnection conn,
-                IBinder windowToken, int reqWidth, int reqHeight) {
-            new IWallpaperEngineWrapper(
-                    mTarget, conn, windowToken, reqWidth, reqHeight);
+        public void attach(IWallpaperConnection conn, IBinder windowToken,
+                int windowType, boolean isPreview, int reqWidth, int reqHeight) {
+            new IWallpaperEngineWrapper(mTarget, conn, windowToken,
+                    windowType, isPreview, reqWidth, reqHeight);
         }
     }
     
