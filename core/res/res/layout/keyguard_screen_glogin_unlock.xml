@@ -42,7 +42,6 @@
                 android:gravity="center_vertical"
                 android:drawableLeft="@drawable/ic_lock_idle_lock"
                 android:drawablePadding="5dip"
-                android:text="@android:string/lockscreen_glogin_too_many_attempts"
                 />
         
             <!-- spacer below header -->

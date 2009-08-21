@@ -1294,7 +1294,11 @@
          their lock gesture -->
     <string name="lockscreen_forgot_pattern_button_text">Forgot pattern?</string>
 
-    <!-- Title of the unlock screen that uses your Google login and password -->
+    <!-- Title of the unlock screen that uses your Google login and password when the user hit
+         the 'forgot pattern' button.-->
+    <string name="lockscreen_glogin_forgot_pattern">Account unlock</string>
+    <!-- Title of the unlock screen that uses your Google login and password when the user attempted
+         too many patterns and we are forcing them to use their account instead. -->
     <string name="lockscreen_glogin_too_many_attempts">Too many pattern attempts!</string>
     <!-- In the unlock screen, message telling the user that they need to use their Google login and password to unlock the phone -->
     <string name="lockscreen_glogin_instructions">To unlock, sign in with your Google account</string>
@@ -1306,6 +1310,9 @@
     <string name="lockscreen_glogin_submit_button">Sign in</string>
     <!-- Displayed to the user when unlocking the phone with a username and password fails. -->
     <string name="lockscreen_glogin_invalid_input">Invalid username or password.</string>
+
+    <!-- Displayed in a progress dialog while a username and password are being checked. -->
+    <string name="lockscreen_glogin_checking_password">Checking...</string>
 
     <!-- A format string for 12-hour time of day, just the hour, not the minute, with lower-case "am" or "pm" (example: "3pm"). -->
     <string name="hour_ampm">"<xliff:g id="hour" example="3">%-l</xliff:g><xliff:g id="ampm" example="pm">%P</xliff:g>"</string>
