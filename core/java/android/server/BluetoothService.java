@@ -1006,6 +1006,8 @@ public class BluetoothService extends IBluetooth.Stub {
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
             return false;
         }
+        mBondState.setBondState(address, BluetoothDevice.BOND_NOT_BONDED,
+                BluetoothDevice.UNBOND_REASON_AUTH_CANCELED);
         address = address.toUpperCase();
         Integer data = mEventLoop.getPasskeyAgentRequestData().remove(address);
         if (data == null) {
