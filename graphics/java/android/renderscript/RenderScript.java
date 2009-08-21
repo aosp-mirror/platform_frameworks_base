@@ -281,7 +281,11 @@ public class RenderScript {
     // Root state
 
     public void contextBindRootScript(Script s) {
-        nContextBindRootScript(s.mID);
+        int id = 0;
+        if(s != null) {
+            id = s.mID;
+        }
+        nContextBindRootScript(id);
     }
 
     //public void contextBindSampler(Sampler s, int slot) {
