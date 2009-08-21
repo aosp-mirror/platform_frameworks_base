@@ -22,7 +22,7 @@
   use --refresh-test-list option *once* to re-generate test list on the card.
 
   Some other options are:
-    --rebaseline generates expected layout tests results under /sdcard/android/expected_result/ 
+    --rebaseline generates expected layout tests results under /sdcard/android/expected_result/
     --time-out-ms (default is 8000 millis) for each test
     --adb-options="-e" passes option string to adb
     --results-directory=..., (default is ./layout-test-results) directory name under which results are stored.
@@ -51,11 +51,11 @@ def CountLineNumber(filename):
 
 def DumpRenderTreeFinished(adb_cmd):
   """ Check if DumpRenderTree finished running tests
-  
+
   Args:
     output: adb_cmd string
   """
-  
+
   # pull /sdcard/android/running_test.txt, if the content is "#DONE", it's done
   shell_cmd_str = adb_cmd + " shell cat /sdcard/android/running_test.txt"
   adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
@@ -69,7 +69,7 @@ def DiffResults(marker, new_results, old_results, diff_results, strip_reason,
    """
    old_file = open(old_results, "r")
    new_file = open(new_results, "r")
-   diff_file = open(diff_results, "a") 
+   diff_file = open(diff_results, "a")
 
    # Read lines from each file
    ndict = new_file.readlines()
@@ -122,7 +122,7 @@ def CompareResults(ref_dir, results_dir):
   """
   logging.info("Comparing results to " + ref_dir)
 
-  diff_result = os.path.join(results_dir, "layout_tests_diff.txt") 
+  diff_result = os.path.join(results_dir, "layout_tests_diff.txt")
   if os.path.exists(diff_result):
     os.remove(diff_result)
 
@@ -136,7 +136,7 @@ def CompareResults(ref_dir, results_dir):
 
 def main(options, args):
   """Run the tests. Will call sys.exit when complete.
-  
+
   Args:
     options: a dictionary of command line options
     args: a list of sub directories or files to test
@@ -198,7 +198,7 @@ def main(options, args):
 
     shell_cmd_str = adb_cmd + " shell cat /sdcard/android/running_test.txt"
     crashed_test = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE).communicate()[0]
-    
+
     logging.info(crashed_test + " CRASHED");
     crashed_tests.append(crashed_test);
 
@@ -226,14 +226,15 @@ def main(options, args):
   result_files = ["/sdcard/layout_tests_passed.txt",
                   "/sdcard/layout_tests_failed.txt",
                   "/sdcard/layout_tests_nontext.txt"]
-  for file in result_files: 
+  for file in result_files:
     shell_cmd_str = adb_cmd + " pull " + file + " " + results_dir
     adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
     logging.debug(adb_output)
-    
+
   # Create the crash list.
   fp = open(results_dir + "/layout_tests_crashed.txt", "w");
-  fp.writelines('\n'.join(crashed_tests))
+  for crashed_test in crashed_tests:
+    fp.writelines(crashed_test + '\n')
   fp.close()
 
   # Count the number of tests in each category.
