@@ -35,7 +35,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -264,6 +263,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         // press action to be performed.
                         mSearchKeyDownReceived = false;
                     } catch (ActivityNotFoundException e) {
+                        // Ignore
                     }
                 } break;
             }
@@ -1616,8 +1616,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         private final Rect mFrameOffsets = new Rect();
 
-        private final Paint mBlackPaint = new Paint();
-
         private boolean mChanging;
 
         private Drawable mMenuBackground;
@@ -1627,7 +1625,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public DecorView(Context context, int featureId) {
             super(context);
             mFeatureId = featureId;
-            mBlackPaint.setColor(0xFF000000);
         }
 
         @Override
