@@ -2920,16 +2920,16 @@
             when the user clicks a suggestion.  <i>Optional attribute.</i> -->
         <attr name="searchSuggestIntentData" format="string" />
 
-        <!-- If provided, this is the minimum number of characters needed to trigger
+        <!-- @hide If provided, this is the minimum number of characters needed to trigger
              search suggestions. The default value is 0. <i>Optional attribute.</i> -->
         <attr name="searchSuggestThreshold" format="integer" />
 
-        <!-- If provided and <code>true</code>, this searchable activity will be
+        <!-- @hide If provided and <code>true</code>, this searchable activity will be
              included in any global lists of search targets.
-             The default value is <code>false</code>. <i>Optional attribute.</i>. -->
+             The default value is <code>false</code>. <i>Optional attribute.</i>.-->
         <attr name="includeInGlobalSearch" format="boolean" />
 
-        <!-- If provided and <code>true</code>, this searchable activity will be invoked for all
+        <!-- @hide If provided and <code>true</code>, this searchable activity will be invoked for all
              queries in a particular session. If set to <code>false</code> and the activity
              returned zero results for a query, it will not be invoked again in that session for
              supersets of that zero-results query. For example, if the activity returned zero
@@ -2937,7 +2937,7 @@
              The default value is <code>false</code>. <i>Optional attribute.</i>. -->
         <attr name="queryAfterZeroResults" format="boolean" />
 
-        <!-- If provided, this string will be used to describe the searchable item in the
+        <!-- @hide If provided, this string will be used to describe the searchable item in the
              searchable items settings within system search settings. <i>Optional
              attribute.</i> -->
         <attr name="searchSettingsDescription" format="string" />
