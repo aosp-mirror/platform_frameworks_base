@@ -262,6 +262,14 @@ public class StatusBarPolicy {
             com.android.internal.R.drawable.stat_sys_data_out_e,
             com.android.internal.R.drawable.stat_sys_data_inandout_e,
         };
+    //3.5G
+    private static final int[] sDataNetType_h = new int[] {
+            com.android.internal.R.drawable.stat_sys_data_connected_h,
+            com.android.internal.R.drawable.stat_sys_data_in_h,
+            com.android.internal.R.drawable.stat_sys_data_out_h,
+            com.android.internal.R.drawable.stat_sys_data_inandout_h,
+    };
+
     //CDMA
     private static final int[] sDataNetType_evdo = new int[] {
         com.android.internal.R.drawable.stat_sys_data_connected_evdo,
@@ -967,6 +975,11 @@ public class StatusBarPolicy {
             break;
         case TelephonyManager.NETWORK_TYPE_UMTS:
             mDataIconList = sDataNetType_3g;
+            break;
+        case TelephonyManager.NETWORK_TYPE_HSDPA:
+        case TelephonyManager.NETWORK_TYPE_HSUPA:
+        case TelephonyManager.NETWORK_TYPE_HSPA:
+            mDataIconList = sDataNetType_h;
             break;
         case TelephonyManager.NETWORK_TYPE_CDMA:
             // display 1xRTT for IS95A/B

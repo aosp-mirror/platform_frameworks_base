@@ -382,6 +382,15 @@ public class TelephonyManager {
     /** Current network is 1xRTT*/
     /** @hide */
     public static final int NETWORK_TYPE_1xRTT = 7;
+    /** Current network is HSDPA */
+    /** @hide */
+    public static final int NETWORK_TYPE_HSDPA = 8;
+    /** Current network is HSUPA */
+    /** @hide */
+    public static final int NETWORK_TYPE_HSUPA = 9;
+    /** Current network is HSPA */
+    /** @hide */
+    public static final int NETWORK_TYPE_HSPA = 10;
 
     /**
      * Returns a constant indicating the radio technology (network type)
@@ -392,35 +401,25 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_GPRS
      * @see #NETWORK_TYPE_EDGE
      * @see #NETWORK_TYPE_UMTS
+     * @see #NETWORK_TYPE_HSDPA
+     * @see #NETWORK_TYPE_HSUPA
+     * @see #NETWORK_TYPE_HSPA
      * @see #NETWORK_TYPE_CDMA
      * @see #NETWORK_TYPE_EVDO_0
      * @see #NETWORK_TYPE_EVDO_A
      * @see #NETWORK_TYPE_1xRTT
      */
     public int getNetworkType() {
-        String prop = SystemProperties.get(TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE);
-        if ("GPRS".equals(prop)) {
-            return NETWORK_TYPE_GPRS;
-        }
-        else if ("EDGE".equals(prop)) {
-            return NETWORK_TYPE_EDGE;
-        }
-        else if ("UMTS".equals(prop)) {
-            return NETWORK_TYPE_UMTS;
-        }
-        else if ("CDMA".equals(prop)) {
-            return NETWORK_TYPE_CDMA;
-                }
-        else if ("CDMA - EvDo rev. 0".equals(prop)) {
-            return NETWORK_TYPE_EVDO_0;
+        try{
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getNetworkType();
+            } else {
+                // This can happen when the ITelephony interface is not up yet.
+                return NETWORK_TYPE_UNKNOWN;
             }
-        else if ("CDMA - EvDo rev. A".equals(prop)) {
-            return NETWORK_TYPE_EVDO_A;
-            }
-        else if ("CDMA - 1xRTT".equals(prop)) {
-            return NETWORK_TYPE_1xRTT;
-            }
-        else {
+        } catch(RemoteException ex){
+            // This shouldn't happen in the normal case
             return NETWORK_TYPE_UNKNOWN;
         }
     }
@@ -440,6 +439,12 @@ public class TelephonyManager {
                 return "EDGE";
             case NETWORK_TYPE_UMTS:
                 return "UMTS";
+            case NETWORK_TYPE_HSDPA:
+                return "HSDPA";
+            case NETWORK_TYPE_HSUPA:
+                return "HSUPA";
+            case NETWORK_TYPE_HSPA:
+                return "HSPA";
             case NETWORK_TYPE_CDMA:
                 return "CDMA";
             case NETWORK_TYPE_EVDO_0:
