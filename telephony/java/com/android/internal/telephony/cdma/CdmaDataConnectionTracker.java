@@ -76,6 +76,10 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /** Currently active CdmaDataConnection */
     private CdmaDataConnection mActiveDataConnection;
 
+    private boolean mPendingRestartRadio = false;
+    private static final int TIME_DELAYED_TO_RESTART_RADIO =
+            SystemProperties.getInt("ro.cdma.timetoradiorestart", 20000);
+
     /**
      * Pool size of CdmaDataConnection objects.
      */
@@ -318,7 +322,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 && (mCdmaPhone.mSST.isConcurrentVoiceAndData() ||
                         phone.getState() == Phone.State.IDLE )
                 && isDataAllowed()
-                && desiredPowerState) {
+                && desiredPowerState
+                && !mPendingRestartRadio) {
 
             return setupData(reason);
 
@@ -334,7 +339,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     " dataEnabled=" + getAnyDataEnabled() +
                     " roaming=" + roaming +
                     " dataOnRoamingEnable=" + getDataOnRoamingEnabled() +
-                    " desiredPowerState=" + desiredPowerState);
+                    " desiredPowerState=" + desiredPowerState +
+                    " PendingRestartRadio=" + mPendingRestartRadio);
             }
             return false;
         }
@@ -445,16 +451,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected void restartRadio() {
-        Log.d(LOG_TAG, "************TURN OFF RADIO**************");
-        cleanUpConnection(true, Phone.REASON_CDMA_DATA_DETACHED);
-        phone.mCM.setRadioPower(false, null);
-        /* Note: no need to call setRadioPower(true).  Assuming the desired
-         * radio power state is still ON (as tracked by ServiceStateTracker),
-         * ServiceStateTracker will call setRadioPower when it receives the
-         * RADIO_STATE_CHANGED notification for the power off.  And if the
-         * desired power state has changed in the interim, we don't want to
-         * override it with an unconditional power on.
-         */
+        if (DBG) log("Cleanup connection and wait " +
+                (TIME_DELAYED_TO_RESTART_RADIO / 1000) + "s to restart radio");
+        cleanUpConnection(true, Phone.REASON_RADIO_TURNED_OFF);
+        sendEmptyMessageDelayed(EVENT_RESTART_RADIO, TIME_DELAYED_TO_RESTART_RADIO);
+        mPendingRestartRadio = true;
     }
 
     private Runnable mPollNetStat = new Runnable() {
@@ -719,8 +720,18 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
         setState(State.IDLE);
 
+        // Since the pending request to turn off or restart radio will be processed here,
+        // remove the pending event to restart radio from the message queue.
+        if (mPendingRestartRadio) removeMessages(EVENT_RESTART_RADIO);
+
+        // Process the pending request to turn off radio in ServiceStateTracker first.
+        // If radio is turned off in ServiceStateTracker, ignore the pending event to restart radio.
         CdmaServiceStateTracker ssTracker = mCdmaPhone.mSST;
-        ssTracker.processPendingRadioPowerOffAfterDataOff();
+        if (ssTracker.processPendingRadioPowerOffAfterDataOff()) {
+            mPendingRestartRadio = false;
+        } else {
+            onRestartRadio();
+        }
 
         phone.notifyDataConnection(reason);
         if (retryAfterDisconnected(reason)) {
@@ -813,6 +824,21 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     break;
                 }
             }
+        }
+    }
+
+    private void onRestartRadio() {
+        if (mPendingRestartRadio) {
+            Log.d(LOG_TAG, "************TURN OFF RADIO**************");
+            phone.mCM.setRadioPower(false, null);
+            /* Note: no need to call setRadioPower(true).  Assuming the desired
+             * radio power state is still ON (as tracked by ServiceStateTracker),
+             * ServiceStateTracker will call setRadioPower when it receives the
+             * RADIO_STATE_CHANGED notification for the power off.  And if the
+             * desired power state has changed in the interim, we don't want to
+             * override it with an unconditional power on.
+             */
+            mPendingRestartRadio = false;
         }
     }
 
@@ -926,6 +952,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
             case EVENT_CDMA_OTA_PROVISION:
                 onCdmaOtaProvision((AsyncResult) msg.obj);
+                break;
+
+            case EVENT_RESTART_RADIO:
+                if (DBG) log("EVENT_RESTART_RADIO");
+                onRestartRadio();
                 break;
 
             default:

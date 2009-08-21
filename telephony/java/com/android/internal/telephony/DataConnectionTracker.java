@@ -99,6 +99,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int EVENT_PS_RESTRICT_DISABLED = 33;
     public static final int EVENT_CLEAN_UP_CONNECTION = 34;
     protected static final int EVENT_CDMA_OTA_PROVISION = 35;
+    protected static final int EVENT_RESTART_RADIO = 36;
 
     //***** Constants
 
