@@ -73,6 +73,7 @@ public final class CdmaCallTracker extends CallTracker {
     CdmaConnection pendingMO;
     boolean hangupPendingMO;
     boolean pendingCallInEcm=false;
+    boolean mIsInEmergencyCall = false;
     CDMAPhone phone;
 
     boolean desiredMute = false;    // false = mute off
@@ -219,6 +220,9 @@ public final class CdmaCallTracker extends CallTracker {
             // Always unmute when initiating a new call
             setMute(false);
 
+            // Check data call
+            disableDataCallInEmergencyCall(dialString);
+
             // In Ecm mode, if another emergency call is dialed, Ecm mode will not exit.
             if(!isPhoneInEcmMode || (isPhoneInEcmMode && isEmergencyCall)) {
                 cm.dial(pendingMO.address, clirMode, obtainCompleteMessage());
@@ -245,6 +249,9 @@ public final class CdmaCallTracker extends CallTracker {
     private Connection
     dialThreeWay (String dialString) {
         if (!foregroundCall.isIdle()) {
+            // Check data call
+            disableDataCallInEmergencyCall(dialString);
+
             // Attach the new connection to foregroundCall
             pendingMO = new CdmaConnection(phone.getContext(),
                                 dialString, this, foregroundCall);
@@ -556,6 +563,8 @@ public final class CdmaCallTracker extends CallTracker {
                 // Re-start Ecm timer when the connected emergency call ends
                 if (mIsEcmTimerCanceled) {
                     handleEcmTimer(phone.RESTART_ECM_TIMER);
+                } else {
+                    mIsInEmergencyCall = false;
                 }
 
                 // Dropped connections are removed from the CallTracker
@@ -1008,6 +1017,26 @@ public final class CdmaCallTracker extends CallTracker {
         default:
             Log.e(LOG_TAG, "handleEcmTimer, unsupported action " + action);
         }
+    }
+
+    /**
+     * Disable data call when emergency call is connected
+     */
+    private void disableDataCallInEmergencyCall(String dialString) {
+        if (PhoneNumberUtils.isEmergencyNumber(dialString)) {
+            phone.disableDataConnectivity();
+            mIsInEmergencyCall = true;
+        }
+    }
+
+    /**
+     * Check if current call is in emergency call
+     *
+     * @return true if it is in emergency call
+     *         false if it is not in emergency call
+     */
+    boolean isInEmergencyCall() {
+        return mIsInEmergencyCall;
     }
 
     protected void log(String msg) {
