@@ -7222,6 +7222,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (word != null) {
                     Intent i = new Intent("com.android.settings.USER_DICTIONARY_INSERT");
                     i.putExtra("word", word);
+                    i.setFlags(i.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
                     getContext().startActivity(i);
                 }
 
