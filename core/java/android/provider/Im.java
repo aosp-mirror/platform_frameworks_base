@@ -138,6 +138,7 @@ public class Im {
         public static final String ACTIVE_ACCOUNT_USERNAME = "account_username";
         public static final String ACTIVE_ACCOUNT_PW = "account_pw";
         public static final String ACTIVE_ACCOUNT_LOCKED = "account_locked";
+        public static final String ACTIVE_ACCOUNT_KEEP_SIGNED_IN = "account_keepSignedIn";
         public static final String ACCOUNT_PRESENCE_STATUS = "account_presenceStatus";
         public static final String ACCOUNT_CONNECTION_STATUS = "account_connStatus";
 
@@ -1467,7 +1468,7 @@ public class Im {
          * <P>Type: TEXT</P>
          */
         String UNSENT_COMPOSED_MESSAGE = "unsent_composed_message";
-        
+
         /**
          * A value from 0-9 indicating which quick-switch chat screen slot this
          * chat is occupying.  If none (for instance, this is the 12th active chat)
