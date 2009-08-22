@@ -146,8 +146,6 @@
 
     <library name="android.test.runner"
             file="/system/framework/android.test.runner.jar" />
-    <library name="com.android.im.plugin"
-            file="/system/framework/com.android.im.plugin.jar"/>          
     <library name="javax.obex"
             file="/system/framework/javax.obex.jar"/>
 
