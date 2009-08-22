@@ -105,8 +105,7 @@ class ContentLoader extends StreamLoader {
         if (mContentType != null) {
             headers.setContentType("text/html");
         }
-        // override the cache-control header set by StreamLoader as content can
-        // change, we don't want WebKit to cache it
+        // content can change, we don't want WebKit to cache it
         headers.setCacheControl("no-store, no-cache");
     }
 
