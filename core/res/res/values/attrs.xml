@@ -2274,6 +2274,10 @@
              of the states.  If false, the size will vary based on the
              current state. -->
         <attr name="constantSize" format="boolean" />
+        <!-- Enables or disables dithering of the bitmap if the bitmap does not have the
+             same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
+             an RGB 565 screen.) -->
+        <attr name="dither" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="AnimationDrawable">
@@ -2420,7 +2424,7 @@
         <!-- Enables or disables dithering of the bitmap if the bitmap does not have the
              same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
              an RGB 565 screen.) -->
-        <attr name="dither" format="boolean" />
+        <attr name="dither" />
         <!-- Defines the gravity for the bitmap. The gravity indicates where to position
              the drawable in its container if the bitmap is smaller than the container. -->
         <attr name="gravity" />
