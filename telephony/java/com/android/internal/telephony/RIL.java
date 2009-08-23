@@ -2511,6 +2511,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                     mRestrictedStateRegistrant.notifyRegistrant(
                                         new AsyncResult (null, ret, null));
                 }
+                break;
 
             case RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED:
                 if (RILJ_LOGD) unsljLog(response);
