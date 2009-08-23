@@ -16,18 +16,23 @@
 package android.pim.vcard;
 
 /**
- * Unlike VCardBuilderBase, this (and VCardDataBuilder) assumes
+ * Unlike {@link VCardBuilder}, this (and {@link VCardDataBuilder}) assumes
  * "each VCard entry should be correctly parsed and passed to each EntryHandler object",
  */
 public interface EntryHandler {
     /**
-     * Able to be use this method for showing performance log, etc.
-     * TODO: better name?
+     * Called when the parsing started.
      */
-    public void onFinal();
+    public void onParsingStart();
 
     /**
      * The method called when one VCard entry is successfully created
      */
     public void onEntryCreated(final ContactStruct entry);
+
+    /**
+     * Called when the parsing ended.
+     * Able to be use this method for showing performance log, etc.
+     */
+    public void onParsingEnd();
 }

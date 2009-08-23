@@ -34,7 +34,7 @@ import java.util.HashSet;
  * This class is used to parse vcard. Please refer to vCard Specification 2.1.
  */
 public class VCardParser_V21 extends VCardParser {
-    private static final String LOG_TAG = "VCardParser_V21";
+    private static final String LOG_TAG = "vcard.VCardParser_V21";
     
     /** Store the known-type */
     private static final HashSet<String> sKnownTypeSet = new HashSet<String>(
@@ -58,8 +58,10 @@ public class VCardParser_V21 extends VCardParser {
                 "VERSION", "TEL", "EMAIL", "TZ", "GEO", "NOTE", "URL",
                 "BDAY", "ROLE", "REV", "UID", "KEY", "MAILER"));
 
-    // Though vCard 2.1 specification does not allow "B" encoding, some data may have it.
-    // We allow it for safety...
+    /**
+     * Though vCard 2.1 specification does not allow "B" encoding, some data may have it.
+     * We allow it for safety...
+     */
     private static final HashSet<String> sAvailableEncodingV21 =
         new HashSet<String>(Arrays.asList(
                 "7BIT", "8BIT", "QUOTED-PRINTABLE", "BASE64", "B"));
@@ -70,7 +72,10 @@ public class VCardParser_V21 extends VCardParser {
     /** The builder to build parsed data */
     protected VCardBuilder mBuilder = null;
 
-    /** The encoding type */
+    /** 
+     * The encoding type. "Encoding" in vCard is different from "Charset".
+     * e.g. 7BIT, 8BIT, QUOTED-PRINTABLE. 
+     */
     protected String mEncoding = null;
     
     protected final String sDefaultEncoding = "8BIT";
@@ -88,17 +93,17 @@ public class VCardParser_V21 extends VCardParser {
     
     // Just for debugging
     private long mTimeTotal;
-    private long mTimeStartRecord;
-    private long mTimeEndRecord;
+    private long mTimeReadStartRecord;
+    private long mTimeReadEndRecord;
     private long mTimeStartProperty;
     private long mTimeEndProperty;
     private long mTimeParseItems;
-    private long mTimeParseItem1;
-    private long mTimeParseItem2;
-    private long mTimeParseItem3;
-    private long mTimeHandlePropertyValue1;
-    private long mTimeHandlePropertyValue2;
-    private long mTimeHandlePropertyValue3;
+    private long mTimeParseLineAndHandleGroup;
+    private long mTimeParsePropertyValues;
+    private long mTimeParseAdrOrgN;
+    private long mTimeHandleMiscPropertyValue;
+    private long mTimeHandleQuotedPrintable;
+    private long mTimeHandleBase64;
     
     /**
      * Create a new VCard parser.
@@ -213,7 +218,7 @@ public class VCardParser_V21 extends VCardParser {
         if (mBuilder != null) {
             start = System.currentTimeMillis();
             mBuilder.startRecord("VCARD");
-            mTimeStartRecord += System.currentTimeMillis() - start;
+            mTimeReadStartRecord += System.currentTimeMillis() - start;
         }
         start = System.currentTimeMillis();
         parseItems();
@@ -222,7 +227,7 @@ public class VCardParser_V21 extends VCardParser {
         if (mBuilder != null) {
             start = System.currentTimeMillis();
             mBuilder.endRecord();
-            mTimeEndRecord += System.currentTimeMillis() - start;
+            mTimeReadEndRecord += System.currentTimeMillis() - start;
         }
         return true;
     }
@@ -250,26 +255,6 @@ public class VCardParser_V21 extends VCardParser {
             // Though vCard 2.1/3.0 specification does not allow lower cases,
             // some data may have them, so we allow it (Actually, previous code
             // had explicitly allowed "BEGIN:vCard" though there's no example).
-            //
-            // TODO: ignore non vCard entry (e.g. vcalendar).
-            // XXX: Not sure, but according to VDataBuilder.java, vcalendar
-            // entry
-            // may be nested. Just seeking "END:SOMETHING" may not be enough.
-            // e.g.
-            // BEGIN:VCARD
-            // ... (Valid. Must parse this)
-            // END:VCARD
-            // BEGIN:VSOMETHING
-            // ... (Must ignore this)
-            // BEGIN:VSOMETHING2
-            // ... (Must ignore this)
-            // END:VSOMETHING2
-            // ... (Must ignore this!)
-            // END:VSOMETHING
-            // BEGIN:VCARD
-            // ... (Valid. Must parse this)
-            // END:VCARD
-            // INVALID_STRING (VCardException should be thrown)
             if (length == 2 &&
                     strArray[0].trim().equalsIgnoreCase("BEGIN") &&
                     strArray[1].trim().equalsIgnoreCase("VCARD")) {
@@ -367,11 +352,11 @@ public class VCardParser_V21 extends VCardParser {
     }
     
     /**
-     * item      = [groups "."] name    [params] ":" value CRLF
-     *           / [groups "."] "ADR"   [params] ":" addressparts CRLF
-     *           / [groups "."] "ORG"   [params] ":" orgparts CRLF
-     *           / [groups "."] "N"     [params] ":" nameparts CRLF
-     *           / [groups "."] "AGENT" [params] ":" vcard CRLF 
+     * item = [groups "."] name    [params] ":" value CRLF
+     *      / [groups "."] "ADR"   [params] ":" addressparts CRLF
+     *      / [groups "."] "ORG"   [params] ":" orgparts CRLF
+     *      / [groups "."] "N"     [params] ":" nameparts CRLF
+     *      / [groups "."] "AGENT" [params] ":" vcard CRLF 
      */
     protected boolean parseItem() throws IOException, VCardException {
         mEncoding = sDefaultEncoding;
@@ -389,14 +374,13 @@ public class VCardParser_V21 extends VCardParser {
         String propertyName = propertyNameAndValue[0].toUpperCase();
         String propertyValue = propertyNameAndValue[1];
 
-        mTimeParseItem1 += System.currentTimeMillis() - start;
+        mTimeParseLineAndHandleGroup += System.currentTimeMillis() - start;
 
-        if (propertyName.equals("ADR") ||
-                propertyName.equals("ORG") ||
+        if (propertyName.equals("ADR") || propertyName.equals("ORG") ||
                 propertyName.equals("N")) {
             start = System.currentTimeMillis();
             handleMultiplePropertyValue(propertyName, propertyValue);
-            mTimeParseItem3 += System.currentTimeMillis() - start;
+            mTimeParseAdrOrgN += System.currentTimeMillis() - start;
             return false;
         } else if (propertyName.equals("AGENT")) {
             handleAgent(propertyValue);
@@ -408,14 +392,13 @@ public class VCardParser_V21 extends VCardParser {
                 } else {
                     throw new VCardException("Unknown BEGIN type: " + propertyValue);
                 }
-            } else if (propertyName.equals("VERSION") &&
-                    !propertyValue.equals(getVersion())) {
+            } else if (propertyName.equals("VERSION") && !propertyValue.equals(getVersion())) {
                 throw new VCardVersionException("Incompatible version: " + 
                         propertyValue + " != " + getVersion());
             }
             start = System.currentTimeMillis();
             handlePropertyValue(propertyName, propertyValue);
-            mTimeParseItem2 += System.currentTimeMillis() - start;
+            mTimeParsePropertyValues += System.currentTimeMillis() - start;
             return false;
         }
         
@@ -542,7 +525,7 @@ public class VCardParser_V21 extends VCardParser {
     }
     
     /**
-     * ptypeval  = knowntype / "X-" word
+     * ptypeval = knowntype / "X-" word
      */
     protected void handleType(String ptypeval) {
         String upperTypeValue = ptypeval;
@@ -637,8 +620,7 @@ public class VCardParser_V21 extends VCardParser {
         }
     }
     
-    protected void handlePropertyValue(
-            String propertyName, String propertyValue) throws
+    protected void handlePropertyValue(String propertyName, String propertyValue) throws
             IOException, VCardException {
         if (mEncoding.equalsIgnoreCase("QUOTED-PRINTABLE")) {
             long start = System.currentTimeMillis();
@@ -648,7 +630,7 @@ public class VCardParser_V21 extends VCardParser {
                 v.add(result);
                 mBuilder.propertyValues(v);
             }
-            mTimeHandlePropertyValue2 += System.currentTimeMillis() - start;
+            mTimeHandleQuotedPrintable += System.currentTimeMillis() - start;
         } else if (mEncoding.equalsIgnoreCase("BASE64") ||
                 mEncoding.equalsIgnoreCase("B")) {
             long start = System.currentTimeMillis();
@@ -667,7 +649,7 @@ public class VCardParser_V21 extends VCardParser {
                     mBuilder.propertyValues(null);
                 }
             }
-            mTimeHandlePropertyValue3 += System.currentTimeMillis() - start;
+            mTimeHandleBase64 += System.currentTimeMillis() - start;
         } else {
             if (!(mEncoding == null || mEncoding.equalsIgnoreCase("7BIT")
                     || mEncoding.equalsIgnoreCase("8BIT")
@@ -681,7 +663,7 @@ public class VCardParser_V21 extends VCardParser {
                 v.add(maybeUnescapeText(propertyValue));
                 mBuilder.propertyValues(v);
             }
-            mTimeHandlePropertyValue1 += System.currentTimeMillis() - start;
+            mTimeHandleMiscPropertyValue += System.currentTimeMillis() - start;
         }
     }
     
@@ -770,15 +752,15 @@ public class VCardParser_V21 extends VCardParser {
      * We are not sure whether we should add "\" CRLF to each value.
      * For now, we exclude them.               
      */
-    protected void handleMultiplePropertyValue(
-            String propertyName, String propertyValue) throws IOException, VCardException {
-        // vCard 2.1 does not allow QUOTED-PRINTABLE here, but some data have it.
+    protected void handleMultiplePropertyValue(String propertyName, String propertyValue)
+            throws IOException, VCardException {
+        // vCard 2.1 does not allow QUOTED-PRINTABLE here,
+        // but some softwares/devices emit such data.
         if (mEncoding.equalsIgnoreCase("QUOTED-PRINTABLE")) {
             propertyValue = getQuotedPrintable(propertyValue);
         }
 
         if (mBuilder != null) {
-            // TODO: limit should be set in accordance with propertyName?
             StringBuilder builder = new StringBuilder();
             ArrayList<String> list = new ArrayList<String>();
             int length = propertyValue.length();
@@ -786,7 +768,7 @@ public class VCardParser_V21 extends VCardParser {
                 char ch = propertyValue.charAt(i);
                 if (ch == '\\' && i < length - 1) {
                     char nextCh = propertyValue.charAt(i + 1);
-                    String unescapedString = maybeUnescape(nextCh); 
+                    String unescapedString = maybeUnescapeCharacter(nextCh); 
                     if (unescapedString != null) {
                         builder.append(unescapedString);
                         i++;
@@ -819,7 +801,6 @@ public class VCardParser_V21 extends VCardParser {
         throw new VCardNotSupportedException("AGENT Property is not supported now.");
         /* This is insufficient support. Also, AGENT Property is very rare.
            Ignore it for now.
-           TODO: fix this.
 
         String[] strArray = propertyValue.split(":", 2);
         if (!(strArray.length == 2 ||
@@ -843,7 +824,7 @@ public class VCardParser_V21 extends VCardParser {
      * Returns unescaped String if the character should be unescaped. Return null otherwise.
      * e.g. In vCard 2.1, "\;" should be unescaped into ";" while "\x" should not be.
      */
-    protected String maybeUnescape(char ch) {
+    protected String maybeUnescapeCharacter(char ch) {
         // Original vCard 2.1 specification does not allow transformation
         // "\:" -> ":", "\," -> ",", and "\\" -> "\", but previous implementation of
         // this class allowed them, so keep it as is.
@@ -863,17 +844,11 @@ public class VCardParser_V21 extends VCardParser {
     @Override
     public boolean parse(InputStream is, String charset, VCardBuilder builder)
             throws IOException, VCardException {
-        // TODO: make this count error entries instead of just throwing VCardException.
-        
-        {
-            // TODO: If we really need to allow only CRLF as line break,
-            // we will have to develop our own BufferedReader().
-            final InputStreamReader tmpReader = new InputStreamReader(is, charset);
-            if (VCardConfig.showPerformanceLog()) {
-                mReader = new CustomBufferedReader(tmpReader);
-            } else {
-                mReader = new BufferedReader(tmpReader);
-            }
+        final InputStreamReader tmpReader = new InputStreamReader(is, charset);
+        if (VCardConfig.showPerformanceLog()) {
+            mReader = new CustomBufferedReader(tmpReader);
+        } else {
+            mReader = new BufferedReader(tmpReader);
         }
         
         mBuilder = builder;
@@ -903,21 +878,26 @@ public class VCardParser_V21 extends VCardParser {
     }
         
     private void showPerformanceInfo() {
-        Log.d(LOG_TAG, "total parsing time:  " + mTimeTotal + " ms");
+        Log.d(LOG_TAG, "Total parsing time:  " + mTimeTotal + " ms");
         if (mReader instanceof CustomBufferedReader) {
-            Log.d(LOG_TAG, "total readLine time: " +
+            Log.d(LOG_TAG, "Total readLine time: " +
                     ((CustomBufferedReader)mReader).getTotalmillisecond() + " ms");
         }
-        Log.d(LOG_TAG, "mTimeStartRecord: " + mTimeStartRecord + " ms");
-        Log.d(LOG_TAG, "mTimeEndRecord: " + mTimeEndRecord + " ms");
-        Log.d(LOG_TAG, "mTimeParseItem1: " + mTimeParseItem1 + " ms");
-        Log.d(LOG_TAG, "mTimeParseItem2: " + mTimeParseItem2 + " ms");
-        Log.d(LOG_TAG, "mTimeParseItem3: " + mTimeParseItem3 + " ms");
-        Log.d(LOG_TAG, "mTimeHandlePropertyValue1: " + mTimeHandlePropertyValue1 + " ms");
-        Log.d(LOG_TAG, "mTimeHandlePropertyValue2: " + mTimeHandlePropertyValue2 + " ms");
-        Log.d(LOG_TAG, "mTimeHandlePropertyValue3: " + mTimeHandlePropertyValue3 + " ms");
+        Log.d(LOG_TAG, "Time for handling the beggining of the record: " +
+                mTimeReadStartRecord + " ms");
+        Log.d(LOG_TAG, "Time for handling the end of the record: " +
+                mTimeReadEndRecord + " ms");
+        Log.d(LOG_TAG, "Time for parsing line, and handling group: " +
+                mTimeParseLineAndHandleGroup + " ms");
+        Log.d(LOG_TAG, "Time for parsing ADR, ORG, and N fields:" + mTimeParseAdrOrgN + " ms");
+        Log.d(LOG_TAG, "Time for parsing property values: " + mTimeParsePropertyValues + " ms");
+        Log.d(LOG_TAG, "Time for handling normal property values: " +
+                mTimeHandleMiscPropertyValue + " ms");
+        Log.d(LOG_TAG, "Time for handling Quoted-Printable: " +
+                mTimeHandleQuotedPrintable + " ms");
+        Log.d(LOG_TAG, "Time for handling Base64: " + mTimeHandleBase64 + " ms");
     }
-    
+
     private boolean isLetter(char ch) {
         if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
             return true;
