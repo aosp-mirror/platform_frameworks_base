@@ -27,6 +27,7 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.text.TextUtils;
 
 import java.io.ByteArrayInputStream;
@@ -1604,21 +1605,8 @@ public final class ContactsContract {
         public static final String ACCOUNT_TYPE = "account_type";
 
         /**
-         * Setting to indicate how this source handles {@link #SHOULD_SYNC} and
-         * {@link Groups#SHOULD_SYNC} flags. This mode should be one of
-         * {@link Settings#SYNC_MODE_EVERYTHING},
-         * {@link Settings#SYNC_MODE_UNGROUPED}, or
-         * {@link Settings#SYNC_MODE_UNSUPPORTED}.
-         * <p>
-         * Type: INTEGER
-         */
-        public static final String SHOULD_SYNC_MODE = "should_sync_mode";
-
-        /**
-         * When modes is {@link Settings#SYNC_MODE_EVERYTHING}, this flag
-         * overrides any children {@link Groups#SHOULD_SYNC} when set. When mode
-         * is {@link Settings#SYNC_MODE_UNGROUPED}, this flag indicates the
-         * syncing behavior for contacts not belonging to any group.
+         * Depending on the mode defined by the sync-adapter, this flag controls
+         * the top-level sync behavior for this data source.
          * <p>
          * Type: INTEGER (boolean)
          */
@@ -1631,12 +1619,28 @@ public final class ContactsContract {
          * Type: INTEGER (boolean)
          */
         public static final String UNGROUPED_VISIBLE = "ungrouped_visible";
+
+        /**
+         * Read-only count of {@link Contacts} from a specific source that have
+         * no {@link GroupMembership} entries.
+         * <p>
+         * Type: INTEGER
+         */
+        public static final String UNGROUPED_COUNT = "summ_count";
+
+        /**
+         * Read-only count of {@link Contacts} from a specific source that have
+         * no {@link GroupMembership} entries, and also have phone numbers.
+         * <p>
+         * Type: INTEGER
+         */
+        public static final String UNGROUPED_WITH_PHONES = "summ_phones";
     }
 
     /**
      * Contacts-specific settings for various {@link Account}.
      */
-    public static final class Settings implements BaseColumns, SettingsColumns {
+    public static final class Settings implements SettingsColumns {
         /**
          * This utility class cannot be instantiated
          */
@@ -1659,27 +1663,6 @@ public final class ContactsContract {
          * The MIME-type of {@link #CONTENT_URI} providing a single setting.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/setting";
-
-        /**
-         * Mode for {@link #SHOULD_SYNC_MODE} that indicates this data source
-         * doesn't support per-group {@link Groups#SHOULD_SYNC} flags.
-         */
-        public static final int SYNC_MODE_UNSUPPORTED = 0;
-
-        /**
-         * Mode for {@link #SHOULD_SYNC_MODE} that indicates this data source
-         * fully supports per-group {@link Groups#SHOULD_SYNC} flags and assumes
-         * that {@link #SHOULD_SYNC} refers to contacts without any
-         * {@link CommonDataKinds.GroupMembership}.
-         */
-        public static final int SYNC_MODE_UNGROUPED = 1;
-
-        /**
-         * Mode for {@link #SHOULD_SYNC_MODE} that indicates this data source
-         * fully supports per-group {@link Groups#SHOULD_SYNC} flags but assumes
-         * that {@link #SHOULD_SYNC} overrides per-group flags when set.
-         */
-        public static final int SYNC_MODE_EVERYTHING = 2;
     }
 
     /**
