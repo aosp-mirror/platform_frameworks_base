@@ -105,6 +105,8 @@ public class StateListDrawable extends DrawableContainer {
         mStateListState.setConstantSize(a.getBoolean(
                 com.android.internal.R.styleable.StateListDrawable_constantSize, false));
 
+        setDither(a.getBoolean(com.android.internal.R.styleable.StateListDrawable_dither, false));
+
         a.recycle();
 
         int type;
