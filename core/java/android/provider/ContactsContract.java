@@ -1773,6 +1773,13 @@ public final class ContactsContract {
         public static final int MODE_LARGE = 3;
 
         /**
+         * Optional extra used with {@link #SHOW_OR_CREATE_CONTACT} to indicate
+         * a list of specific MIME-types to exclude and not display. Stored as a
+         * {@link String} array.
+         */
+        public static final String EXTRA_EXCLUDE_MIMES = "exclude_mimes";
+
+        /**
          * Intents related to the Contacts app UI.
          */
         public static final class UI {
