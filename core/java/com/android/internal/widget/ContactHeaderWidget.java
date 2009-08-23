@@ -80,6 +80,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     protected Uri mContactUri;
     protected Uri mStatusUri;
 
+    protected String[] mExcludeMimes = null;
+
     protected ContentResolver mContentResolver;
 
     /**
@@ -292,6 +294,15 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     /**
+     * Set a list of specific MIME-types to exclude and not display. For
+     * example, this can be used to hide the {@link Contacts#CONTENT_ITEM_TYPE}
+     * profile icon.
+     */
+    public void setExcludeMimes(String[] excludeMimes) {
+        mExcludeMimes = excludeMimes;
+    }
+
+    /**
      * Convenience method for binding all available data from an existing
      * contact.
      *
@@ -428,6 +439,10 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                 final Rect target = getTargetRect(view);
                 intent.putExtra(Intents.EXTRA_TARGET_RECT, target);
                 intent.putExtra(Intents.EXTRA_MODE, Intents.MODE_SMALL);
+                if (mExcludeMimes != null) {
+                    // Exclude specific MIME-types when requested
+                    intent.putExtra(Intents.EXTRA_EXCLUDE_MIMES, mExcludeMimes);
+                }
                 mContext.startActivity(intent);
                 break;
             }
