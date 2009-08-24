@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.webkit.GeolocationPermissions;
 import android.webkit.HttpAuthHandler;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
@@ -425,6 +426,14 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mCanOpenWindows = true;
     }
 
+    /**
+     * Sets the Geolocation permission state to be used for all future requests.
+     */
+    public void setGeolocationPermission(boolean allow) {
+        mGeolocationPermissionSet = true;
+        mGeolocationPermission = allow;
+    }
+
     private final WebViewClient mViewClient = new WebViewClient(){
         @Override
         public void onPageFinished(WebView view, String url) {
@@ -575,6 +584,18 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             callback.updateQuota(currentQuota + 1024 * 1024 * 5);
         }
 
+        /**
+         * Instructs the client to show a prompt to ask the user to set the
+         * Geolocation permission state for the specified origin.
+         */
+        @Override
+        public void onGeolocationPermissionsShowPrompt(String origin,
+                GeolocationPermissions.Callback callback) {
+            if (mGeolocationPermissionSet) {
+                callback.invoke(origin, mGeolocationPermission, false);
+            }
+        }
+
         @Override
         public void addMessageToConsole(String message, int lineNumber,
                 String sourceID) {
@@ -687,4 +708,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     static final String RESULT_FILE = "ResultFile";
     static final String TIMEOUT_IN_MILLIS = "TimeoutInMillis";
     static final String UI_AUTO_TEST = "UiAutoTest";
+
+    private boolean mGeolocationPermissionSet;
+    private boolean mGeolocationPermission;
 }
