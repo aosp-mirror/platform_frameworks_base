@@ -332,7 +332,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/1.xml 1 \
     -since ./frameworks/base/api/2.xml 2 \
     -since ./frameworks/base/api/3.xml 3 \
-    -since ./frameworks/base/api/current.xml Donut \
+    -since ./frameworks/base/api/4.xml 4 \
 		-error 1 -error 2 -warning 3 -error 4 -error 6 -error 8 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -344,10 +344,18 @@ web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
 		-samplecode $(sample_dir)/ApiDemos \
 		            guide/samples/ApiDemos "API Demos" \
+		-samplecode $(sample_dir)/Home \
+		            guide/samples/Home "Home" \
+		-samplecode $(sample_dir)/JetBoy \
+		            guide/samples/JetBoy "JetBoy" \
 		-samplecode $(sample_dir)/LunarLander \
 		            guide/samples/LunarLander "Lunar Lander" \
 		-samplecode $(sample_dir)/NotePad \
-		            guide/samples/NotePad "Note Pad"
+		            guide/samples/NotePad "Note Pad" \
+		-samplecode $(sample_dir)/Snake \
+		            guide/samples/Snake "Snake" \
+		-samplecode $(sample_dir)/SoftKeyboard \
+		            guide/samples/SoftKeyboard "Soft Keyboard"
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
