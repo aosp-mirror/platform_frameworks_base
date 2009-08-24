@@ -522,6 +522,48 @@ public class WebView extends AbsoluteLayout
     // the last zoom scale.
     boolean mInZoomOverview = false;
 
+    // The viewing mode of this webview.  Reported back to the WebChromeClient
+    // so we can hide and display the title bar as appropriate.
+    private int mViewingMode;
+    /**
+     * Not supporting overview vs reading mode
+     * @hide
+     */
+    public final static int NO_VIEWING_MODE = 0;
+    /**
+     * Zoom overview mode.  The page is zoomed all the way out, mInZoomOverview
+     * is true, and the title bar is showing.  Double tapping will change to
+     * reading mode.
+     * @hide
+     */
+    public final static int OVERVIEW_MODE = 1;
+    /**
+     * Reading mode. The page is at the level specified by the user,
+     * mInZoomOverview is false, and the title bar is not showing.  Double
+     * tapping will change to zoom overview mode.
+     * @hide
+     */
+    public final static int READING_MODE = 2;
+    /**
+     * Modified reading mode, which shows the title bar.  mInZoomOverview is
+     * false, and double tapping will change to zoom overview mode.  However,
+     * if the scrolling will change to reading mode.  Used when swiping a
+     * tab into view which was in reading mode, unless it was a mobile site
+     * with zero scroll.
+     * @hide
+     */
+    public final static int READING_MODE_WITH_TITLE_BAR = 3;
+    /**
+     * Another modified reading mode.  For loading a mobile site, or swiping a
+     * tab into view which was displaying a mobile site in reading mode
+     * with zero scroll
+     * @hide
+     */
+    public final static int TITLE_BAR_DISMISS_MODE = 4;
+    // Whether the current site is a mobile site.  Determined when we receive
+    // NEW_PICTURE_MSG_ID to help determine how to handle double taps
+    private boolean mMobileSite;
+
     // ideally mZoomOverviewWidth should be mContentWidth. But sites like espn,
     // engadget always have wider mContentWidth no matter what viewport size is.
     int mZoomOverviewWidth = WebViewCore.DEFAULT_VIEWPORT_WIDTH;
@@ -1135,6 +1177,7 @@ public class WebView extends AbsoluteLayout
             if (mInZoomOverview) {
                 b.putFloat("lastScale", mLastScale);
             }
+            b.putBoolean("mobile", mMobileSite);
             return true;
         }
         return false;
@@ -1180,12 +1223,20 @@ public class WebView extends AbsoluteLayout
                 // correctly
                 mActualScale = scale;
                 float lastScale = b.getFloat("lastScale", -1.0f);
+                mMobileSite = b.getBoolean("mobile", false);
                 if (lastScale > 0) {
                     mInZoomOverview = true;
+                    mViewingMode = OVERVIEW_MODE;
                     mLastScale = lastScale;
                 } else {
                     mInZoomOverview = false;
+                    if (mMobileSite && (mScrollX | mScrollY) == 0) {
+                        mViewingMode = TITLE_BAR_DISMISS_MODE;
+                    } else {
+                        mViewingMode = READING_MODE_WITH_TITLE_BAR;
+                    }
                 }
+                mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
                 invalidate();
                 return true;
             }
@@ -3695,6 +3746,12 @@ public class WebView extends AbsoluteLayout
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
 
+        if (mViewingMode == READING_MODE_WITH_TITLE_BAR
+                || mViewingMode == TITLE_BAR_DISMISS_MODE) {
+            mViewingMode = READING_MODE;
+            mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
+        }
+
         sendOurVisibleRect();
     }
 
@@ -3909,6 +3966,13 @@ public class WebView extends AbsoluteLayout
                 deltaY = newScrollY - mScrollY;
                 boolean done = false;
                 if (deltaX == 0 && deltaY == 0) {
+                    // The user attempted to pan the page, so dismiss the title
+                    // bar
+                    if (mViewingMode == READING_MODE_WITH_TITLE_BAR
+                            || mViewingMode == TITLE_BAR_DISMISS_MODE) {
+                        mViewingMode = READING_MODE;
+                        mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
+                    }
                     done = true;
                 } else {
                     if (mSnapScrollMode == SNAP_X || mSnapScrollMode == SNAP_Y) {
@@ -4683,14 +4747,42 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /**
+     * Called when the Tabs are used to slide this WebView's tab into view.
+     * @hide
+     */
+    public void slideIntoFocus() {
+        if (mViewingMode == READING_MODE) {
+            if (!mMobileSite || (mScrollX | mScrollY) != 0) {
+                mViewingMode = READING_MODE_WITH_TITLE_BAR;
+            } else {
+                mViewingMode = TITLE_BAR_DISMISS_MODE;
+            }
+            mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
+        }
+    }
+
     private void doDoubleTap() {
-        if (mWebViewCore.getSettings().getUseWideViewPort() == false) {
+        if (mWebViewCore.getSettings().getUseWideViewPort() == false ||
+                mViewingMode == NO_VIEWING_MODE) {
             return;
         }
+        if (mViewingMode == TITLE_BAR_DISMISS_MODE) {
+            mViewingMode = READING_MODE;
+            // mInZoomOverview will not change, so change the viewing mode
+            // and return
+            mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
+            return;
+        }
+        if (mViewingMode == READING_MODE_WITH_TITLE_BAR && mMobileSite) {
+            scrollTo(0,0);
+        }
+        // READING_MODE_WITH_TITLE_BAR will go to OVERVIEW_MODE here.
         mZoomCenterX = mLastTouchX;
         mZoomCenterY = mLastTouchY;
         mInZoomOverview = !mInZoomOverview;
-        mCallbackProxy.uiOnChangeViewingMode(mInZoomOverview);
+        mViewingMode = mInZoomOverview ? OVERVIEW_MODE : READING_MODE;
+        mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
         // remove the zoom control after double tap
         if (getSettings().getBuiltInZoomControls()) {
             if (mZoomButtonsController.isVisible()) {
@@ -5035,21 +5127,27 @@ public class WebView extends AbsoluteLayout
                         } else {
                             mMaxZoomScale = restoreState.mMaxScale;
                         }
-                        if (useWideViewport && restoreState.mViewScale == 0) {
-                            mInZoomOverview = ENABLE_DOUBLETAP_ZOOM
-                                    && settings.getLoadWithOverviewMode();
-                        }
-                        mCallbackProxy.uiOnChangeViewingMode(true);
-                        if (!mInZoomOverview) {
-                            // We are going to start zoomed in.  However, we
-                            // truly want to show the title bar, and then hide
-                            // it once the page has loaded
-                            mCallbackProxy.uiChangeViewingModeOnFinishedLoad(
-                                    false, getOriginalUrl());
-                        }
                         setNewZoomScale(mLastScale, false);
                         setContentScrollTo(restoreState.mScrollX,
                                 restoreState.mScrollY);
+                        if (!ENABLE_DOUBLETAP_ZOOM
+                                || !settings.getLoadWithOverviewMode()) {
+                            mMobileSite = false;
+                            mViewingMode = NO_VIEWING_MODE;
+                        } else {
+                            mMobileSite = restoreState.mMobileSite;
+                            if (useWideViewport
+                                    && restoreState.mViewScale == 0) {
+                                mViewingMode = OVERVIEW_MODE;
+                                mInZoomOverview = true;
+                            } else if (mMobileSite
+                                    && (mScrollX | mScrollY) == 0) {
+                                mViewingMode = TITLE_BAR_DISMISS_MODE;
+                            } else {
+                                mViewingMode = READING_MODE_WITH_TITLE_BAR;
+                            }
+                        }
+                        mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
                         // As we are on a new page, remove the WebTextView. This
                         // is necessary for page loads driven by webkit, and in
                         // particular when the user was on a password field, so

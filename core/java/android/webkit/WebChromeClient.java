@@ -24,12 +24,12 @@ public class WebChromeClient {
 
     /**
      * Tell the host application that the WebView has changed viewing modes.
-     * @param toZoomedOut If true, the WebView has zoomed out so that the page
-     *          fits the screen.  If false, it is zoomed to the setting
-     *          specified by the user.
+     * @param view The WebView that initiated the callback.
+     * @param newViewingMode  One of the values described in WebView as possible
+     *                        values for the viewing mode
      * @hide
      */
-    public void onChangeViewingMode(boolean toZoomedOut) {}
+    public void onChangeViewingMode(WebView view, int newViewingMode) {}
 
     /**
      * Tell the host application the current progress of loading a page.
