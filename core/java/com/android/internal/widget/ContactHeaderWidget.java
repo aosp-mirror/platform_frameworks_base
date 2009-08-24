@@ -39,6 +39,7 @@ import android.provider.ContactsContract.Intents;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.Presence;
 import android.provider.ContactsContract.RawContacts;
+import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.SocialContract.Activities;
 import android.util.AttributeSet;
@@ -347,9 +348,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     public void bindFromEmail(String emailAddress) {
         Cursor c = null;
         try {
-            c = mContentResolver.query(Uri.withAppendedPath(
-                    RawContacts.CONTENT_FILTER_EMAIL_URI, Uri.encode(emailAddress)),
-                    EMAIL_LOOKUP_PROJECTION, null, null, null);
+            c = mContentResolver.query(Uri.withAppendedPath(Email.CONTENT_FILTER_EMAIL_URI, Uri
+                    .encode(emailAddress)), EMAIL_LOOKUP_PROJECTION, null, null, null);
             if (c != null && c.moveToFirst()) {
                 long contactId = c.getLong(EMAIL_LOOKUP_CONTACT_ID_COLUMN_INDEX);
                 bindFromContactId(contactId);
