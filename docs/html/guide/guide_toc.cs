@@ -386,17 +386,30 @@
           <li><a href="<?cs var:toroot ?>guide/samples/ApiDemos/index.html">
                 <span class="en">API Demos</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/Home/index.html">
+                <span class="en">Home</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/JetBoy/index.html">
+                <span class="en">JetBoy</span>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/LunarLander/index.html">
                 <span class="en">Lunar Lander</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/NotePad/index.html">
-                <span class="en">NotePad</span>
+                <span class="en">Note Pad</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/Snake/index.html">
+                <span class="en">Snake</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/SoftKeyboard/index.html">
+                <span class="en">Soft Keyboard</span>
               </a></li>
         </ul>
       </li>
     <?cs /if ?>
     </ul>
   </li>
+  
 
   <li>
     <h2><span class="en">Appendix</span>
