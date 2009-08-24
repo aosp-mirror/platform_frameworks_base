@@ -172,6 +172,7 @@ public class WebSettings {
     private long            mAppCacheMaxSize = Long.MAX_VALUE;
     private String          mAppCachePath = "";
     private String          mDatabasePath = "";
+    private String          mGeolocationDatabasePath = "";
     // Don't need to synchronize the get/set methods as they
     // are basic types, also none of these values are used in
     // native WebCore code.
@@ -973,6 +974,21 @@ public class WebSettings {
     public synchronized void setDatabasePath(String databasePath) {
         if (databasePath != null && !databasePath.equals(mDatabasePath)) {
             mDatabasePath = databasePath;
+            postSync();
+        }
+    }
+
+    /**
+     * Set the path where the Geolocation permissions database should be saved.
+     * This will update WebCore when the Sync runs in the C++ side.
+     * @param databasePath String path to the directory where the Geolocation
+     *     permissions database should be saved. May be the empty string but
+     *     should never be null.
+     * @hide pending api council approval
+     */
+    public synchronized void setGeolocationDatabasePath(String databasePath) {
+        if (databasePath != null && !databasePath.equals(mDatabasePath)) {
+            mGeolocationDatabasePath = databasePath;
             postSync();
         }
     }
