@@ -16,6 +16,7 @@
 
 package com.android.providers.subscribedfeeds;
 
+import android.accounts.Account;
 import android.content.UriMatcher;
 import android.content.*;
 import android.database.Cursor;
@@ -120,6 +121,14 @@ public class SubscribedFeedsProvider extends AbstractSyncableContentProvider {
                     "_sync_account_type TEXT," +
                     "_sync_mark INTEGER, " + // Used to filter out new rows
                     "UNIQUE(_sync_id))");
+    }
+
+    @Override
+    protected void onAccountsChanged(Account[] accountsArray) {
+        super.onAccountsChanged(accountsArray);
+        for (Account account : accountsArray) {
+            ContentResolver.setSyncAutomatically(account, "subscribedfeeds", true);
+        }
     }
 
     @Override
