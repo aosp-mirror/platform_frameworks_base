@@ -157,7 +157,6 @@ abstract class StreamLoader extends Handler {
         if (mContentLength > 0) {
             headers.setContentLength(mContentLength);
         }
-        headers.setCacheControl(NO_STORE);
         buildHeaders(headers);
         mHandler.headers(headers);
     }
