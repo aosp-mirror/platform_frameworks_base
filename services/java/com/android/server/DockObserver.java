@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -91,16 +90,12 @@ class DockObserver extends UEventObserver {
     }
 
     private synchronized final void sendIntent() {
+        Log.d(TAG, "Broadcasting dock state " + mDockState);
+
         // Pack up the values and broadcast them to everyone
         Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
-
-        // TODO: Should we require a permission?
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "Broadcasting dock state " + mDockState);
-        }
-        ActivityManagerNative.broadcastStickyIntent(intent, null);
+        mContext.sendStickyBroadcast(intent);
     }
 
     private final Handler mHandler = new Handler() {
