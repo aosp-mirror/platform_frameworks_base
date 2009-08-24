@@ -685,6 +685,17 @@ class LoadListener extends Handler implements EventHandler {
                     " primary error: " + error.getPrimaryError() +
                     " certificate: " + error.getCertificate());
         }
+        // Check the cached preference table before sending a message. This
+        // will prevent waiting for an already available answer.
+        if (Network.getInstance(mContext).checkSslPrefTable(this, error)) {
+            return true;
+        }
+        // Do not post a message for a synchronous request. This will cause a
+        // deadlock. Just bail on the request.
+        if (isSynchronous()) {
+            mRequestHandle.handleSslErrorResponse(false);
+            return true;
+        }
         sendMessageInternal(obtainMessage(MSG_SSL_ERROR, error));
         // if it has been canceled, return false so that the network thread
         // won't be blocked. If it is not canceled, save the mRequestHandle

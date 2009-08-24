@@ -58,7 +58,9 @@ public class SslErrorHandler extends Handler {
     public void handleMessage(Message msg) {
         switch (msg.what) {
             case HANDLE_RESPONSE:
-                handleSslErrorResponse(msg.arg1 == 1);
+                LoadListener loader = (LoadListener) msg.obj;
+                handleSslErrorResponse(loader, loader.sslError(),
+                        msg.arg1 == 1);
                 fastProcessQueuedSslErrors();
                 break;
         }
@@ -76,7 +78,7 @@ public class SslErrorHandler extends Handler {
      * Saves this handler's state into a map.
      * @return True iff succeeds.
      */
-    /* package */ boolean saveState(Bundle outState) {
+    /* package */ synchronized boolean saveState(Bundle outState) {
         boolean success = (outState != null);
         if (success) {
             // TODO?
@@ -90,7 +92,7 @@ public class SslErrorHandler extends Handler {
      * Restores this handler's state from a map.
      * @return True iff succeeds.
      */
-    /* package */ boolean restoreState(Bundle inState) {
+    /* package */ synchronized boolean restoreState(Bundle inState) {
         boolean success = (inState != null);
         if (success) {
             success = inState.containsKey("ssl-error-handler");
@@ -127,6 +129,28 @@ public class SslErrorHandler extends Handler {
     }
 
     /**
+     * Check the preference table for a ssl error that has already been shown
+     * to the user.
+     */
+    /* package */ synchronized boolean checkSslPrefTable(LoadListener loader,
+            SslError error) {
+        final String host = loader.host();
+        final int primary = error.getPrimaryError();
+
+        if (DebugFlags.SSL_ERROR_HANDLER) {
+            Assert.assertTrue(host != null && primary != 0);
+        }
+
+        if (mSslPrefTable.containsKey(host)) {
+            if (primary <= mSslPrefTable.getInt(host)) {
+                handleSslErrorResponse(loader, error, true);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Processes queued SSL-error confirmation requests in
      * a tight loop while there is no need to ask the user.
      */
@@ -144,7 +168,9 @@ public class SslErrorHandler extends Handler {
         if (loader != null) {
             // if this loader has been cancelled
             if (loader.cancelled()) {
-                // go to the following loader in the queue
+                // go to the following loader in the queue. Make sure this
+                // loader has been removed from the queue.
+                mLoaderQueue.remove(loader);
                 return true;
             }
 
@@ -154,18 +180,12 @@ public class SslErrorHandler extends Handler {
                 Assert.assertNotNull(error);
             }
 
-            int primary = error.getPrimaryError();
-            String host = loader.host();
-
-            if (DebugFlags.SSL_ERROR_HANDLER) {
-                Assert.assertTrue(host != null && primary != 0);
-            }
-
-            if (mSslPrefTable.containsKey(host)) {
-                if (primary <= mSslPrefTable.getInt(host)) {
-                    handleSslErrorResponse(true);
-                    return true;
-                }
+            // checkSslPrefTable will handle the ssl error response if the
+            // answer is available. It does not remove the loader from the
+            // queue.
+            if (checkSslPrefTable(loader, error)) {
+                mLoaderQueue.remove(loader);
+                return true;
             }
 
             // if we do not have information on record, ask
@@ -182,7 +202,7 @@ public class SslErrorHandler extends Handler {
      * Proceed with the SSL certificate.
      */
     public void proceed() {
-        sendMessage(obtainMessage(HANDLE_RESPONSE, 1, 0));
+        sendMessage(obtainMessage(HANDLE_RESPONSE, 1, 0, mLoaderQueue.poll()));
     }
 
     /**
@@ -190,16 +210,17 @@ public class SslErrorHandler extends Handler {
      * the error.
      */
     public void cancel() {
-        sendMessage(obtainMessage(HANDLE_RESPONSE, 0, 0));
+        sendMessage(obtainMessage(HANDLE_RESPONSE, 0, 0, mLoaderQueue.poll()));
     }
 
     /**
      * Handles SSL error(s) on the way down from the user.
      */
-    /* package */ synchronized void handleSslErrorResponse(boolean proceed) {
-        LoadListener loader = mLoaderQueue.poll();
+    /* package */ synchronized void handleSslErrorResponse(LoadListener loader,
+            SslError error, boolean proceed) {
         if (DebugFlags.SSL_ERROR_HANDLER) {
             Assert.assertNotNull(loader);
+            Assert.assertNotNull(error);
         }
 
         if (DebugFlags.SSL_ERROR_HANDLER) {
@@ -211,7 +232,7 @@ public class SslErrorHandler extends Handler {
         if (!loader.cancelled()) {
             if (proceed) {
                 // update the user's SSL error preference table
-                int primary = loader.sslError().getPrimaryError();
+                int primary = error.getPrimaryError();
                 String host = loader.host();
 
                 if (DebugFlags.SSL_ERROR_HANDLER) {
