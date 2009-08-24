@@ -343,17 +343,16 @@ class BrowserFrame extends Handler {
         switch (msg.what) {
             case FRAME_COMPLETED: {
                 if (mSettings.getSavePassword() && hasPasswordField()) {
-                    if (DebugFlags.BROWSER_FRAME) {
-                        Assert.assertNotNull(mCallbackProxy.getBackForwardList()
-                                .getCurrentItem());
-                    }
-                    WebAddress uri = new WebAddress(
-                            mCallbackProxy.getBackForwardList().getCurrentItem()
-                            .getUrl());
-                    String schemePlusHost = uri.mScheme + uri.mHost;
-                    String[] up = mDatabase.getUsernamePassword(schemePlusHost);
-                    if (up != null && up[0] != null) {
-                        setUsernamePassword(up[0], up[1]);
+                    WebHistoryItem item = mCallbackProxy.getBackForwardList()
+                            .getCurrentItem();
+                    if (item != null) {
+                        WebAddress uri = new WebAddress(item.getUrl());
+                        String schemePlusHost = uri.mScheme + uri.mHost;
+                        String[] up =
+                                mDatabase.getUsernamePassword(schemePlusHost);
+                        if (up != null && up[0] != null) {
+                            setUsernamePassword(up[0], up[1]);
+                        }
                     }
                 }
                 CacheManager.trimCacheIfNeeded();
