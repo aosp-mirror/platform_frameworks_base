@@ -61,6 +61,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     private static final int LAYOUT_WAIT_UNTIL_DONE = 40;
     private static final int LAYOUT_DUMP_DATABASE_CALLBACKS = 41;
     private static final int LAYOUT_SET_CAN_OPEN_WINDOWS = 42;
+    private static final int SET_GEOLOCATION_PERMISSION = 43;
     
     CallbackProxy(EventSender eventSender, 
             LayoutTestController layoutTestController) {
@@ -201,6 +202,11 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
 
         case LAYOUT_SET_CAN_OPEN_WINDOWS:
             mLayoutTestController.setCanOpenWindows();
+            break;
+
+        case SET_GEOLOCATION_PERMISSION:
+            mLayoutTestController.setGeolocationPermission(
+                    msg.arg1 == 1 ? true : false);
             break;
         }
     }
@@ -363,5 +369,9 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
 
     public void setMockGeolocationError(int code, String message) {
         MockGeolocation.getInstance().setError(code, message);
+    }
+
+    public void setGeolocationPermission(boolean allow) {
+        obtainMessage(SET_GEOLOCATION_PERMISSION, allow ? 1 : 0, 0).sendToTarget();
     }
 }
