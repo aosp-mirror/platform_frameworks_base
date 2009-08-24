@@ -320,6 +320,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                 mEnabled = true;
                 // need to set self to CONNECTING so the below message is handled.
                 mMobileDataState = Phone.DataState.CONNECTING;
+                setDetailedState(DetailedState.CONNECTING, Phone.REASON_APN_CHANGED, null);
                 //send out a connected message
                 Intent intent = new Intent(TelephonyIntents.
                         ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
