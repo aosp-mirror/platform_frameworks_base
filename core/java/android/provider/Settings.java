@@ -2935,8 +2935,8 @@ public final class Settings {
          * it so the UI can give it some special treatment when displaying the "time sent" for
          * it. This setting is to control what x is.
          */
-        public static final String GTALK_OLD_CHAT_MESSAGE_THREADHOLD_IN_SEC =
-                "gtalk_old_chat_msg_threadhold_in_sec";
+        public static final String GTALK_OLD_CHAT_MESSAGE_THRESHOLD_IN_SEC =
+                "gtalk_old_chat_msg_threshold_in_sec";
 
         /**
          * a setting to control the max connection history record GTalkService stores.
