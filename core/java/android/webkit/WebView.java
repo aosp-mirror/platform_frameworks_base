@@ -3674,8 +3674,10 @@ public class WebView extends AbsoluteLayout
     protected void onSizeChanged(int w, int h, int ow, int oh) {
         super.onSizeChanged(w, h, ow, oh);
         // Center zooming to the center of the screen.
-        mZoomCenterX = getViewWidth() * .5f;
-        mZoomCenterY = getViewHeight() * .5f;
+        if (mZoomScale == 0) { // unless we're already zooming
+            mZoomCenterX = getViewWidth() * .5f;
+            mZoomCenterY = getViewHeight() * .5f;
+        }
 
         // update mMinZoomScale if the minimum zoom scale is not fixed
         if (!mMinZoomScaleFixed) {
