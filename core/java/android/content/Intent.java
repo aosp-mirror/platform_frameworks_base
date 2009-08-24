@@ -1970,9 +1970,9 @@ public class Intent implements Parcelable {
     /**
      * Used as an int extra field in {@link android.content.Intent#ACTION_DOCK_EVENT}
      * intents to request the dock state.  Possible values are
-     * {@link android.content.Intent#ACTION_DOCK_STATE_UNDOCKED},
-     * {@link android.content.Intent#ACTION_DOCK_STATE_DESK}, or
-     * {@link android.content.Intent#ACTION_DOCK_STATE_CAR}.
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_UNDOCKED},
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_DESK}, or
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_CAR}.
      * @hide
      */
     public static final String EXTRA_DOCK_STATE = "android.intent.extra.DOCK_STATE";
