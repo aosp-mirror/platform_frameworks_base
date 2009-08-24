@@ -358,7 +358,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     public void onKeyboardChange(boolean isKeyboardOpen) {
-        if (isKeyboardOpen) {
+        if (mUpdateMonitor.isKeyguardBypassEnabled() && isKeyboardOpen) {
             mCallback.goToUnlockScreen();
         }
     }

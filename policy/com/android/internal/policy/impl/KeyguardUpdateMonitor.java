@@ -66,6 +66,8 @@ public class KeyguardUpdateMonitor {
     private boolean mInPortrait;
     private boolean mKeyboardOpen;
 
+    private boolean mKeyguardBypassEnabled;
+
     private boolean mDevicePluggedIn;
     
     private boolean mDeviceProvisioned;
@@ -161,6 +163,9 @@ public class KeyguardUpdateMonitor {
                 }
             }
         };
+
+        mKeyguardBypassEnabled = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_bypass_keyguard_if_slider_open);
 
         mDeviceProvisioned = Settings.Secure.getInt(
                 mContext.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 0) != 0;
@@ -503,6 +508,10 @@ public class KeyguardUpdateMonitor {
 
     public boolean isKeyboardOpen() {
         return mKeyboardOpen;
+    }
+
+    public boolean isKeyguardBypassEnabled() {
+        return mKeyguardBypassEnabled;
     }
 
     public boolean isDevicePluggedIn() {
