@@ -171,6 +171,9 @@ public class RawInputEvent {
     public static final int ABS_MT_BLOB_ID = 0x38;
     public static final int ABS_MAX = 0x3f;
 
+    // Switch events
+    public static final int SW_LID = 0x00;
+
     public static final int SYN_REPORT = 0;
     public static final int SYN_CONFIG = 1;
     public static final int SYN_MT_REPORT = 2;
