@@ -1505,6 +1505,7 @@ final class WebViewCore {
         float mTextWrapScale;
         int mScrollX;
         int mScrollY;
+        boolean mMobileSite;
     }
 
     static class DrawData {
@@ -1859,6 +1860,7 @@ final class WebViewCore {
         mRestoreState.mMaxScale = mViewportMaximumScale / 100.0f;
         mRestoreState.mScrollX = mRestoredX;
         mRestoreState.mScrollY = mRestoredY;
+        mRestoreState.mMobileSite = (0 == mViewportWidth);
         if (mRestoredScale > 0) {
             if (mRestoredScreenWidthScale > 0) {
                 mRestoreState.mTextWrapScale =
