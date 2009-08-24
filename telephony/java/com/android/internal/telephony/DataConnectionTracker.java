@@ -453,7 +453,8 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     protected synchronized void setEnabled(int id, boolean enable) {
-        if (DBG) Log.d(LOG_TAG, "setEnabled(" + id + ", " + enable + ')');
+        if (DBG) Log.d(LOG_TAG, "setEnabled(" + id + ", " + enable + ") with old state = " +
+                dataEnabled[id] + " and enabledCount = " + enabledCount);
         if (dataEnabled[id] != enable) {
             dataEnabled[id] = enable;
 
