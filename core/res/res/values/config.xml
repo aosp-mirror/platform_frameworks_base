@@ -57,4 +57,10 @@
         <item>"wifi,1,1"</item>
         <item>"mobile,0,1"</item>
     </string-array>
+
+    <!-- The number of degrees to rotate the display when the keyboard is open. -->
+    <integer name="config_lidOpenRotation">90</integer>
+
+    <!-- The number of degrees to rotate the display when the device is in a dock. -->
+    <integer name="config_dockedRotation">90</integer>
 </resources>
