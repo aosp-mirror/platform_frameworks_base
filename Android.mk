@@ -143,7 +143,6 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputMethodClient.aidl \
 	core/java/com/android/internal/view/IInputMethodManager.aidl \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
-	im/java/android/im/IImPlugin.aidl \
 	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/IGpsStatusProvider.aidl \
@@ -230,7 +229,6 @@ aidl_files := \
 	frameworks/base/graphics/java/android/graphics/Bitmap.aidl \
 	frameworks/base/graphics/java/android/graphics/Rect.aidl \
 	frameworks/base/graphics/java/android/graphics/Region.aidl \
-	frameworks/base/im/java/android/im/IImPlugin.aidl \
 	frameworks/base/location/java/android/location/Criteria.aidl \
 	frameworks/base/location/java/android/location/Location.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
