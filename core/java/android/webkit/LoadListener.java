@@ -99,6 +99,7 @@ class LoadListener extends Handler implements EventHandler {
     private boolean  mAuthFailed;  // indicates that the prev. auth failed
     private CacheLoader mCacheLoader;
     private CacheManager.CacheResult mCacheResult;
+    private boolean  mFromCache = false;
     private HttpAuthHeader mAuthHeader;
     private int      mErrorID = OK;
     private String   mErrorDescription;
@@ -409,11 +410,10 @@ class LoadListener extends Handler implements EventHandler {
                 mStatusCode == HTTP_MOVED_PERMANENTLY ||
                 mStatusCode == HTTP_TEMPORARY_REDIRECT) && 
                 mNativeLoader != 0) {
-            // Content arriving from a StreamLoader (eg File, Cache or Data)
-            // will not be cached as they have the header:
-            // cache-control: no-store
-            mCacheResult = CacheManager.createCacheFile(mUrl, mStatusCode,
-                    headers, mMimeType, false);
+            if (!mFromCache && URLUtil.isNetworkUrl(mUrl)) {
+                mCacheResult = CacheManager.createCacheFile(mUrl, mStatusCode,
+                        headers, mMimeType, false);
+            }
             if (mCacheResult != null) {
                 mCacheResult.encoding = mEncoding;
             }
@@ -626,6 +626,7 @@ class LoadListener extends Handler implements EventHandler {
      * serviced by the Cache. */
     /* package */ void setCacheLoader(CacheLoader c) {
         mCacheLoader = c;
+        mFromCache = true;
     }
 
     /**
@@ -642,6 +643,8 @@ class LoadListener extends Handler implements EventHandler {
         // Go ahead and set the cache loader to null in case the result is
         // null.
         mCacheLoader = null;
+        // reset the flag
+        mFromCache = false;
 
         if (result != null) {
             // The contents of the cache may need to be revalidated so just
@@ -662,6 +665,7 @@ class LoadListener extends Handler implements EventHandler {
                 }
                 // Load the cached file
                 mCacheLoader.load();
+                mFromCache = true;
                 return true;
             }
         }
