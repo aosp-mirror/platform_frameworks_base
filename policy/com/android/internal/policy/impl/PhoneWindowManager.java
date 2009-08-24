@@ -25,6 +25,7 @@ import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -175,6 +176,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Handler mHandler;
 
     boolean mLidOpen;
+    boolean mDocked;
+    int mLidOpenRotation;
+    int mDockedRotation;
     boolean mScreenOn = false;
     boolean mOrientationSensorEnabled = false;
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -453,6 +457,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mBroadcastWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mBroadcastWakeLock");
         mEnableShiftMenuBugReports = "1".equals(SystemProperties.get("ro.debuggable"));
+        mLidOpenRotation = readRotation(com.android.internal.R.integer.config_lidOpenRotation,
+                Surface.ROTATION_90);
+        mDockedRotation = readRotation(com.android.internal.R.integer.config_dockedRotation,
+                Surface.ROTATION_90);
+        // register for dock events
+        context.registerReceiver(mDockReceiver, new IntentFilter(Intent.ACTION_DOCK_EVENT));
+    }
+
+    private int readRotation(int resID, int defaultRotation) {
+        try {
+            int rotation = mContext.getResources().getInteger(resID);
+            switch (rotation) {
+                case 0:
+                    return Surface.ROTATION_0;
+                case 90:
+                    return Surface.ROTATION_90;
+                case 180:
+                    return Surface.ROTATION_180;
+                case 270:
+                    return Surface.ROTATION_270;
+                default:
+                    return defaultRotation;
+            }
+        } catch (Resources.NotFoundException e) {
+            return defaultRotation;
+        }
     }
 
     /** {@inheritDoc} */
@@ -506,7 +536,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     void readLidState() {
         try {
-            int sw = mWindowManager.getSwitchState(0);
+            int sw = mWindowManager.getSwitchState(RawInputEvent.SW_LID);
             if (sw >= 0) {
                 mLidOpen = sw == 0;
             }
@@ -1312,7 +1342,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean preprocessInputEventTq(RawInputEvent event) {
         switch (event.type) {
             case RawInputEvent.EV_SW:
-                if (event.keycode == 0) {
+                if (event.keycode == RawInputEvent.SW_LID) {
                     // lid changed state
                     mLidOpen = event.value == 0;
                     updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
@@ -1631,7 +1661,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mBroadcastWakeLock.release();
         }
     };
-    
+
+    BroadcastReceiver mDockReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            int state = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
+                    Intent.EXTRA_DOCK_STATE_UNDOCKED);
+            mDocked = (state != Intent.EXTRA_DOCK_STATE_UNDOCKED);
+            updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
+        }
+    };
+
     /** {@inheritDoc} */
     public boolean isWakeRelMovementTq(int device, int classes,
             RawInputEvent event) {
@@ -1747,7 +1786,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // or orientation sensor disabled
             //or case.unspecified
             if (mLidOpen) {
-                return Surface.ROTATION_90;
+                return mLidOpenRotation;
+            } else if (mDocked) {
+                return mDockedRotation;
             } else {
                 if (useSensorForOrientationLp(orientation)) {
                     // If the user has enabled auto rotation by default, do it.
@@ -1800,10 +1841,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     void updateRotation(int animFlags) {
         mPowerManager.setKeyboardVisibility(mLidOpen);
-        int rotation=  Surface.ROTATION_0;
+        int rotation = Surface.ROTATION_0;
         if (mLidOpen) {
-            // always use landscape if lid is open             
-            rotation = Surface.ROTATION_90;
+            rotation = mLidOpenRotation;
+        } else if (mDocked) {
+            rotation = mDockedRotation;
         }
         //if lid is closed orientation will be portrait
         try {
