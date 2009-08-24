@@ -167,6 +167,7 @@ public class WebSettings {
     private boolean         mDatabaseEnabled = false;
     private boolean         mDomStorageEnabled = false;
     private boolean         mWorkersEnabled = false;  // only affects V8.
+    private boolean         mGeolocationEnabled = false;
     // HTML5 configuration parameters
     private long            mAppCacheMaxSize = Long.MAX_VALUE;
     private String          mAppCachePath = "";
@@ -1077,6 +1078,18 @@ public class WebSettings {
     public synchronized void setWorkersEnabled(boolean flag) {
         if (mWorkersEnabled != flag) {
             mWorkersEnabled = flag;
+            postSync();
+        }
+    }
+
+    /**
+     * Sets whether Geolocation is enabled.
+     * @param flag Whether Geolocation should be enabled.
+     * @hide pending api council approval
+     */
+    public synchronized void setGeolocationEnabled(boolean flag) {
+        if (mGeolocationEnabled != flag) {
+            mGeolocationEnabled = flag;
             postSync();
         }
     }
