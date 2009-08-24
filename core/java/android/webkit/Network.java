@@ -304,6 +304,14 @@ class Network {
         }
     }
 
+    /* package */ boolean checkSslPrefTable(LoadListener loader,
+            SslError error) {
+        if (loader != null && error != null) {
+            return mSslErrorHandler.checkSslPrefTable(loader, error);
+        }
+        return false;
+    }
+
      /**
      * Handles authentication requests on their way up to the user (the user
      * must provide credentials).
