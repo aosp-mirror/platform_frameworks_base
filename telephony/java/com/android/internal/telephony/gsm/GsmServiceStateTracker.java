@@ -314,11 +314,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         return mDataRoaming;
     }
 
-    public void getLacAndCid(Message onComplete) {
-        cm.getRegistrationState(obtainMessage(
-                        EVENT_GET_LOC_DONE, onComplete));
-    }
-
     public void handleMessage (Message msg) {
         AsyncResult ar;
         int[] ints;
@@ -391,19 +386,13 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                             Log.w(LOG_TAG, "error parsing location: " + ex);
                         }
                     }
-
-                    // only update if lac or cid changed
-                    if (cellLoc.getCid() != cid || cellLoc.getLac() != lac) {
-                        cellLoc.setLacAndCid(lac, cid);
-                        phone.notifyLocationChanged();
-                    }
+                    cellLoc.setLacAndCid(lac, cid);
+                    phone.notifyLocationChanged();
                 }
 
-                if (ar.userObj != null) {
-                    AsyncResult.forMessage(((Message) ar.userObj)).exception
-                            = ar.exception;
-                    ((Message) ar.userObj).sendToTarget();
-                }
+                // Release any temporary cell lock, which could have been
+                // aquired to allow a single-shot location update.
+                disableSingleLocationUpdate();
                 break;
 
             case EVENT_POLL_STATE_REGISTRATION:
@@ -451,7 +440,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 ar = (AsyncResult) msg.obj;
 
                 if (ar.exception == null) {
-                    getLacAndCid(null);
+                    cm.getRegistrationState(obtainMessage(EVENT_GET_LOC_DONE, null));
                 }
                 break;
 

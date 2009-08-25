@@ -226,12 +226,43 @@ public abstract class ServiceStateTracker extends Handler {
         setPowerStateToDesired();
     }
 
-    public void enableLocationUpdates() {
+    /**
+     * These two flags manage the behavior of the cell lock -- the
+     * lock should be held if either flag is true.  The intention is
+     * to allow temporary aquisition of the lock to get a single
+     * update.  Such a lock grab and release can thus be made to not
+     * interfere with more permanent lock holds -- in other words, the
+     * lock will only be released if both flags are false, and so
+     * releases by temporary users will only affect the lock state if
+     * there is no continuous user.
+     */
+    private boolean mWantContinuousLocationUpdates;
+    private boolean mWantSingleLocationUpdate;
+
+    public void enableSingleLocationUpdate() {
+        if (mWantSingleLocationUpdate || mWantContinuousLocationUpdates) return;
+        mWantSingleLocationUpdate = true;
         cm.setLocationUpdates(true, obtainMessage(EVENT_LOCATION_UPDATES_ENABLED));
     }
 
+    public void enableLocationUpdates() {
+        if (mWantSingleLocationUpdate || mWantContinuousLocationUpdates) return;
+        mWantContinuousLocationUpdates = true;
+        cm.setLocationUpdates(true, obtainMessage(EVENT_LOCATION_UPDATES_ENABLED));
+    }
+
+    protected void disableSingleLocationUpdate() {
+        mWantSingleLocationUpdate = false;
+        if (!mWantSingleLocationUpdate && !mWantContinuousLocationUpdates) {
+            cm.setLocationUpdates(false, null);
+        }
+    }
+
     public void disableLocationUpdates() {
-        cm.setLocationUpdates(false, null);
+        mWantContinuousLocationUpdates = false;
+        if (!mWantSingleLocationUpdate && !mWantContinuousLocationUpdates) {
+            cm.setLocationUpdates(false, null);
+        }
     }
 
     public abstract void handleMessage(Message msg);
