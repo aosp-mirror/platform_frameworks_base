@@ -1696,7 +1696,6 @@ public class Intent implements Parcelable {
     public static final String ACTION_REBOOT =
             "android.intent.action.REBOOT";
 
-
     /**
      * Broadcast Action: a remote intent is to be broadcasted.
      *
@@ -1710,6 +1709,18 @@ public class Intent implements Parcelable {
      */
     public static final String ACTION_REMOTE_INTENT =
             "android.intent.action.REMOTE_INTENT";
+
+    /**
+     * Broadcast Action: hook for permforming cleanup after a system update.
+     *
+     * The broadcast is sent when the system is booting, before the
+     * BOOT_COMPLETED broadcast.  It is only sent to receivers in the system
+     * image.  A receiver for this should do its work and then disable itself
+     * so that it does not get run again at the next boot.
+     * @hide
+     */
+    public static final String ACTION_PRE_BOOT_COMPLETED =
+            "android.intent.action.PRE_BOOT_COMPLETED";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -2251,6 +2262,13 @@ public class Intent implements Parcelable {
      * @hide
      */
     public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 0x20000000;
+    /**
+     * Set when this broadcast is for a boot upgrade, a special mode that
+     * allows the broadcast to be sent before the system is ready and launches
+     * the app process with no providers running in it.
+     * @hide
+     */
+    public static final int FLAG_RECEIVER_BOOT_UPGRADE = 0x10000000;
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
