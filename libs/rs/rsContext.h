@@ -49,7 +49,7 @@ namespace renderscript {
 class Context
 {
 public:
-    Context(Device *, Surface *);
+    Context(Device *, Surface *, bool useDepth);
     ~Context();
 
     static pthread_key_t gThreadTLSKey;
@@ -111,8 +111,8 @@ public:
         mFloatDefines.add(String8(name), value);
     }
 
-    uint32_t getWidth() const {return mWidth;}
-    uint32_t getHeight() const {return mHeight;}
+    uint32_t getWidth() const {return mEGL.mWidth;}
+    uint32_t getHeight() const {return mEGL.mHeight;}
 
 
     ThreadIO mIO;
@@ -132,21 +132,38 @@ public:
     void timerSet(Timers);
     void timerPrint();
 
+    bool checkVersion1_1() const {return (mGL.mMajorVersion > 1) || (mGL.mMinorVersion >= 1); }
+    bool checkVersion2_0() const {return mGL.mMajorVersion >= 2; }
+
 protected:
     Device *mDev;
 
-    EGLint mNumConfigs;
-    EGLint mMajorVersion;
-    EGLint mMinorVersion;
-    EGLConfig mConfig;
-    EGLContext mContext;
-    EGLSurface mSurface;
-    EGLint mWidth;
-    EGLint mHeight;
-    EGLDisplay mDisplay;
+    struct {
+        EGLint mNumConfigs;
+        EGLint mMajorVersion;
+        EGLint mMinorVersion;
+        EGLConfig mConfig;
+        EGLContext mContext;
+        EGLSurface mSurface;
+        EGLint mWidth;
+        EGLint mHeight;
+        EGLDisplay mDisplay;
+    } mEGL;
+
+    struct {
+        const uint8_t * mVendor;
+        const uint8_t * mRenderer;
+        const uint8_t * mVersion;
+        const uint8_t * mExtensions;
+
+        uint32_t mMajorVersion;
+        uint32_t mMinorVersion;
+
+    } mGL;
 
     bool mRunning;
     bool mExit;
+    bool mUseDepth;
 
     pthread_t mThreadId;
 
