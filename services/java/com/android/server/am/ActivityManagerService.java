@@ -2915,7 +2915,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * or null if none was found.
      */
     private final HistoryRecord performClearTaskLocked(int taskId,
-            HistoryRecord newR, boolean doClear) {
+            HistoryRecord newR, int launchFlags, boolean doClear) {
         int i = mHistory.size();
         
         // First find the requested task.
@@ -2958,7 +2958,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // Finally, if this is a normal launch mode (that is, not
                 // expecting onNewIntent()), then we will finish the current
                 // instance of the activity so a new fresh one can be started.
-                if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE) {
+                if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE
+                        && (launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0) {
                     if (!ret.finishing) {
                         int index = indexOfTokenLocked(ret);
                         if (index >= 0) {
@@ -3355,7 +3356,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // cases this means we are resetting the task to its
                         // initial state.
                         HistoryRecord top = performClearTaskLocked(
-                                taskTop.task.taskId, r, true);
+                                taskTop.task.taskId, r, launchFlags, true);
                         if (top != null) {
                             if (top.frontOfTask) {
                                 // Activity aliases may mean we use different
@@ -3498,7 +3499,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // task, but the caller has asked to clear that task if the
                 // activity is already running.
                 HistoryRecord top = performClearTaskLocked(
-                        sourceRecord.task.taskId, r, true);
+                        sourceRecord.task.taskId, r, launchFlags, true);
                 if (top != null) {
                     logStartActivity(LOG_AM_NEW_INTENT, r, top.task);
                     deliverNewIntentLocked(top, r.intent);
