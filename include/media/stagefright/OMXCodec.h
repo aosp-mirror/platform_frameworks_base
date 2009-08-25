@@ -82,6 +82,7 @@ private:
         kWantsNALFragments                   = 2,
         kRequiresLoadedToIdleAfterAllocation = 4,
         kRequiresAllocateBufferOnInputPorts  = 8,
+        kRequiresFlushCompleteEmulation      = 16,
     };
 
     struct BufferInfo {
@@ -165,7 +166,13 @@ private:
     void drainInputBuffers();
     void fillOutputBuffers();
 
-    void flushPortAsync(OMX_U32 portIndex);
+    // Returns true iff a flush was initiated and a completion event is
+    // upcoming, false otherwise (A flush was not necessary as we own all
+    // the buffers on that port).
+    // This method will ONLY ever return false for a component with quirk
+    // "kRequiresFlushCompleteEmulation".
+    bool flushPortAsync(OMX_U32 portIndex);
+
     void disablePortAsync(OMX_U32 portIndex);
     void enablePortAsync(OMX_U32 portIndex);
 
