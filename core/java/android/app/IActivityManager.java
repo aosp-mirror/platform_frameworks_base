@@ -149,7 +149,8 @@ public interface IActivityManager extends IInterface {
     public void unbindFinished(IBinder token, Intent service,
             boolean doRebind) throws RemoteException;
     /* oneway */
-    public void serviceDoneExecuting(IBinder token) throws RemoteException;
+    public void serviceDoneExecuting(IBinder token, int type, int startId,
+            int res) throws RemoteException;
     public IBinder peekService(Intent service, String resolvedType) throws RemoteException;
     
     public boolean bindBackupAgent(ApplicationInfo appInfo, int backupRestoreMode)

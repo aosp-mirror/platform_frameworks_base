@@ -132,6 +132,19 @@ public class Build {
          * </ul>
          */
         public static final int DONUT = 4;
+        /**
+         * Current work on "Eclair" development branch.
+         * 
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li> The {@link android.app.Service#onStartCommand
+         * Service.onStartCommand} function will return the new
+         * {@link android.app.Service#START_STICKY} behavior instead of the
+         * old compatibility {@link android.app.Service#START_STICKY_COMPATIBILITY}.
+         * </ul>
+         */
+        public static final int ECLAIR = CUR_DEVELOPMENT;
     }
     
     /** The type of build, like "user" or "eng". */

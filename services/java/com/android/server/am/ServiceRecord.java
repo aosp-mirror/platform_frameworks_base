@@ -64,7 +64,28 @@ class ServiceRecord extends Binder {
     final HashMap<IBinder, ConnectionRecord> connections
             = new HashMap<IBinder, ConnectionRecord>();
                             // IBinder -> ConnectionRecord of all bound clients
-    final List<Intent> startArgs = new ArrayList<Intent>();
+    
+    // Maximum number of delivery attempts before giving up.
+    static final int MAX_DELIVERY_COUNT = 3;
+    
+    // Maximum number of times it can fail during execution before giving up.
+    static final int MAX_DONE_EXECUTING_COUNT = 6;
+    
+    static class StartItem {
+        final int id;
+        final Intent intent;
+        long deliveredTime;
+        int deliveryCount;
+        int doneExecutingCount;
+        
+        StartItem(int _id, Intent _intent) {
+            id = _id;
+            intent = _intent;
+        }
+    }
+    final ArrayList<StartItem> deliveredStarts = new ArrayList<StartItem>();
+                            // start() arguments which been delivered.
+    final ArrayList<StartItem> pendingStarts = new ArrayList<StartItem>();
                             // start() arguments that haven't yet been delivered.
 
     ProcessRecord app;      // where this service is running or null.
@@ -73,6 +94,8 @@ class ServiceRecord extends Binder {
     Notification foregroundNoti; // Notification record of foreground state.
     long lastActivity;      // last time there was some activity on the service.
     boolean startRequested; // someone explicitly called start?
+    boolean stopIfKilled;   // last onStart() said to stop if service killed?
+    boolean callStart;      // last onStart() has asked to alway be called on restart.
     int lastStartId;        // identifier of most recent start request.
     int executeNesting;     // number of outstanding operations keeping foreground.
     long executingStart;    // start time of last execute request.
@@ -84,6 +107,25 @@ class ServiceRecord extends Binder {
     long nextRestartTime;   // time when restartDelay will expire.
 
     String stringName;      // caching of toString
+    
+    void dumpStartList(PrintWriter pw, String prefix, List<StartItem> list, long now) {
+        final int N = list.size();
+        for (int i=0; i<N; i++) {
+            StartItem si = list.get(i);
+            pw.print(prefix); pw.print("#"); pw.print(i);
+                    pw.print(" id="); pw.print(si.id);
+                    if (now != 0) pw.print(" dur="); pw.print(now-si.deliveredTime);
+                    if (si.deliveryCount != 0) {
+                        pw.print(" dc="); pw.print(si.deliveryCount);
+                    }
+                    if (si.doneExecutingCount != 0) {
+                        pw.print(" dxc="); pw.print(si.doneExecutingCount);
+                    }
+                    pw.print(" ");
+                    if (si.intent != null) pw.println(si.intent.toString());
+                    else pw.println("null");
+        }
+    }
     
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("intent={");
@@ -108,6 +150,8 @@ class ServiceRecord extends Binder {
                 pw.print(" restartTime="); pw.println(restartTime);
         if (startRequested || lastStartId != 0) {
             pw.print(prefix); pw.print("startRequested="); pw.print(startRequested);
+                    pw.print(" stopIfKilled="); pw.print(stopIfKilled);
+                    pw.print(" callStart="); pw.print(callStart);
                     pw.print(" lastStartId="); pw.println(lastStartId);
         }
         if (executeNesting != 0 || crashCount != 0 || restartCount != 0
@@ -118,8 +162,17 @@ class ServiceRecord extends Binder {
                     pw.print(" nextRestartTime="); pw.print(nextRestartTime);
                     pw.print(" crashCount="); pw.println(crashCount);
         }
+        if (deliveredStarts.size() > 0) {
+            pw.print(prefix); pw.println("Delivered Starts:");
+            dumpStartList(pw, prefix, deliveredStarts, SystemClock.uptimeMillis());
+        }
+        if (pendingStarts.size() > 0) {
+            pw.print(prefix); pw.println("Pending Starts:");
+            dumpStartList(pw, prefix, pendingStarts, 0);
+        }
         if (bindings.size() > 0) {
             Iterator<IntentBindRecord> it = bindings.values().iterator();
+            pw.print(prefix); pw.println("Bindings:");
             while (it.hasNext()) {
                 IntentBindRecord b = it.next();
                 pw.print(prefix); pw.print("* IntentBindRecord{");
@@ -178,6 +231,19 @@ class ServiceRecord extends Binder {
         restartCount = 0;
         restartDelay = 0;
         restartTime = 0;
+    }
+    
+    public StartItem findDeliveredStart(int id, boolean remove) {
+        final int N = deliveredStarts.size();
+        for (int i=0; i<N; i++) {
+            StartItem si = deliveredStarts.get(i);
+            if (si.id == id) {
+                if (remove) deliveredStarts.remove(i);
+                return si;
+            }
+        }
+        
+        return null;
     }
     
     public void postNotification() {
