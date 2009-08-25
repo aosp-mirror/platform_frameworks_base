@@ -172,4 +172,14 @@ public class Typeface {
     private static native int  nativeGetStyle(int native_instance);
     private static native int  nativeCreateFromAsset(AssetManager mgr, String path);
     private static native int nativeCreateFromFile(String path);
+
+    /**
+     * Set the global gamma coefficients for black and white text. This call is
+     * usually a no-op in shipping products, and only exists for testing during
+     * development.
+     *
+     * @param blackGamma gamma coefficient for black text
+     * @param whiteGamma gamma coefficient for white text
+     */
+    public static native void setGammaForText(float blackGamma, float whiteGamma);
 }
