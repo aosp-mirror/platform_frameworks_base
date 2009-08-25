@@ -25,7 +25,7 @@ import java.util.List;
  * populated when the plugins are initialized (at
  * browser startup, at the moment).
  *
- * @deprecated This interface was inteded to be used by Gears. Since Gears was
+ * @deprecated This interface was intended to be used by Gears. Since Gears was
  * deprecated, so is this class.
  */
 @Deprecated
@@ -35,7 +35,8 @@ public class PluginList {
    /**
     * Public constructor. Initializes the list of plugins.
     *
-    * @deprecated
+    * @deprecated This interface was intended to be used by Gears. Since Gears was
+    * deprecated, so is this class.
     */
     @Deprecated
     public PluginList() {
@@ -45,7 +46,8 @@ public class PluginList {
    /**
     * Returns the list of plugins as a java.util.List.
     *
-    * @deprecated
+    * @deprecated This interface was intended to be used by Gears. Since Gears was
+    * deprecated, so is this class.
     */
     @Deprecated
     public synchronized List getList() {
@@ -55,7 +57,8 @@ public class PluginList {
    /**
     * Adds a plugin to the list.
     *
-    * @deprecated
+    * @deprecated This interface was intended to be used by Gears. Since Gears was
+    * deprecated, so is this class.
     */
     @Deprecated
     public synchronized void addPlugin(Plugin plugin) {
@@ -67,7 +70,8 @@ public class PluginList {
    /**
     * Removes a plugin from the list.
     *
-    * @deprecated
+    * @deprecated This interface was intended to be used by Gears. Since Gears was
+    * deprecated, so is this class.
     */
     @Deprecated
     public synchronized void removePlugin(Plugin plugin) {
@@ -80,7 +84,8 @@ public class PluginList {
    /**
     * Clears the plugin list.
     *
-    * @deprecated
+    * @deprecated This interface was intended to be used by Gears. Since Gears was
+    * deprecated, so is this class.
     */
     @Deprecated
     public synchronized void clear() {
@@ -90,7 +95,8 @@ public class PluginList {
    /**
     * Dispatches the click event to the appropriate plugin.
     *
-    * @deprecated
+    * @deprecated This interface was intended to be used by Gears. Since Gears was
+    * deprecated, so is this class.
     */
     @Deprecated
     public synchronized void pluginClicked(Context context, int position) {

@@ -1769,6 +1769,7 @@ public class SearchManager
     /**
      * @deprecated This method is an obsolete internal implementation detail. Do not use.
      */
+    @Deprecated
     public void onCancel(DialogInterface dialog) {
         throw new UnsupportedOperationException();
     }
@@ -1776,6 +1777,7 @@ public class SearchManager
     /**
      * @deprecated This method is an obsolete internal implementation detail. Do not use.
      */
+    @Deprecated
     public void onDismiss(DialogInterface dialog) {
         throw new UnsupportedOperationException();
     }

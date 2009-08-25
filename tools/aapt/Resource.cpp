@@ -1238,10 +1238,16 @@ static status_t writeLayoutClasses(
 
         NA = idents.size();
 
+        bool deprecated = false;
+        
         String16 comment = symbols->getComment(realClassName);
         fprintf(fp, "%s/** ", indentStr);
         if (comment.size() > 0) {
-            fprintf(fp, "%s\n", String8(comment).string());
+            String8 cmt(comment);
+            fprintf(fp, "%s\n", cmt.string());
+            if (strstr(cmt.string(), "@deprecated") != NULL) {
+                deprecated = true;
+            }
         } else {
             fprintf(fp, "Attributes that can be used with a %s.\n", nclassName.string());
         }
@@ -1317,6 +1323,10 @@ static status_t writeLayoutClasses(
         }
         fprintf(fp, "%s */\n", getIndentSpace(indent));
 
+        if (deprecated) {
+            fprintf(fp, "%s@Deprecated\n", indentStr);
+        }
+        
         fprintf(fp,
                 "%spublic static final int[] %s = {\n"
                 "%s",
@@ -1365,11 +1375,17 @@ static status_t writeLayoutClasses(
                 //printf("%s:%s/%s: 0x%08x\n", String8(package16).string(),
                 //    String8(attr16).string(), String8(name16).string(), typeSpecFlags);
                 const bool pub = (typeSpecFlags&ResTable_typeSpec::SPEC_PUBLIC) != 0;
-                    
+                
+                bool deprecated = false;
+                
                 fprintf(fp, "%s/**\n", indentStr);
                 if (comment.size() > 0) {
+                    String8 cmt(comment);
                     fprintf(fp, "%s  <p>\n%s  @attr description\n", indentStr, indentStr);
-                    fprintf(fp, "%s  %s\n", indentStr, String8(comment).string());
+                    fprintf(fp, "%s  %s\n", indentStr, cmt.string());
+                    if (strstr(cmt.string(), "@deprecated") != NULL) {
+                        deprecated = true;
+                    }
                 } else {
                     fprintf(fp,
                             "%s  <p>This symbol is the offset where the {@link %s.R.attr#%s}\n"
@@ -1381,7 +1397,11 @@ static status_t writeLayoutClasses(
                             indentStr, nclassName.string());
                 }
                 if (typeComment.size() > 0) {
-                    fprintf(fp, "\n\n%s  %s\n", indentStr, String8(typeComment).string());
+                    String8 cmt(typeComment);
+                    fprintf(fp, "\n\n%s  %s\n", indentStr, cmt.string());
+                    if (strstr(cmt.string(), "@deprecated") != NULL) {
+                        deprecated = true;
+                    }
                 }
                 if (comment.size() > 0) {
                     if (pub) {
@@ -1399,6 +1419,9 @@ static status_t writeLayoutClasses(
                 fprintf(fp, "%s  @attr name %s:%s\n", indentStr,
                         "android", String8(name).string());
                 fprintf(fp, "%s*/\n", indentStr);
+                if (deprecated) {
+                    fprintf(fp, "%s@Deprecated\n", indentStr);
+                }
                 fprintf(fp,
                         "%spublic static final int %s_%s = %d;\n",
                         indentStr, nclassName.string(),
@@ -1440,11 +1463,16 @@ static status_t writeSymbolClass(
         }
         String16 comment(sym.comment);
         bool haveComment = false;
+        bool deprecated = false;
         if (comment.size() > 0) {
             haveComment = true;
+            String8 cmt(comment);
             fprintf(fp,
                     "%s/** %s\n",
-                    getIndentSpace(indent), String8(comment).string());
+                    getIndentSpace(indent), cmt.string());
+            if (strstr(cmt.string(), "@deprecated") != NULL) {
+                deprecated = true;
+            }
         } else if (sym.isPublic && !includePrivate) {
             sym.sourcePos.warning("No comment for public symbol %s:%s/%s",
                 assets->getPackage().string(), className.string(),
@@ -1452,19 +1480,24 @@ static status_t writeSymbolClass(
         }
         String16 typeComment(sym.typeComment);
         if (typeComment.size() > 0) {
+            String8 cmt(typeComment);
             if (!haveComment) {
                 haveComment = true;
                 fprintf(fp,
-                        "%s/** %s\n",
-                        getIndentSpace(indent), String8(typeComment).string());
+                        "%s/** %s\n", getIndentSpace(indent), cmt.string());
             } else {
                 fprintf(fp,
-                        "%s %s\n",
-                        getIndentSpace(indent), String8(typeComment).string());
+                        "%s %s\n", getIndentSpace(indent), cmt.string());
+            }
+            if (strstr(cmt.string(), "@deprecated") != NULL) {
+                deprecated = true;
             }
         }
         if (haveComment) {
             fprintf(fp,"%s */\n", getIndentSpace(indent));
+        }
+        if (deprecated) {
+            fprintf(fp, "%s@Deprecated\n", getIndentSpace(indent));
         }
         fprintf(fp, "%spublic static final int %s=0x%08x;\n",
                 getIndentSpace(indent),
@@ -1484,16 +1517,24 @@ static status_t writeSymbolClass(
             return UNKNOWN_ERROR;
         }
         String16 comment(sym.comment);
+        bool deprecated = false;
         if (comment.size() > 0) {
+            String8 cmt(comment);
             fprintf(fp,
                     "%s/** %s\n"
                      "%s */\n",
-                    getIndentSpace(indent), String8(comment).string(),
+                    getIndentSpace(indent), cmt.string(),
                     getIndentSpace(indent));
+            if (strstr(cmt.string(), "@deprecated") != NULL) {
+                deprecated = true;
+            }
         } else if (sym.isPublic && !includePrivate) {
             sym.sourcePos.warning("No comment for public symbol %s:%s/%s",
                 assets->getPackage().string(), className.string(),
                 String8(sym.name).string());
+        }
+        if (deprecated) {
+            fprintf(fp, "%s@Deprecated\n", getIndentSpace(indent));
         }
         fprintf(fp, "%spublic static final String %s=\"%s\";\n",
                 getIndentSpace(indent),

@@ -565,6 +565,7 @@ public class TouchUtils {
      * {@link android.test.ActivityInstrumentationTestCase2}, which provides more options for
      * configuring the Activity under test
      */
+    @Deprecated
     public static int dragViewBy(InstrumentationTestCase test, View v, int gravity, int deltaX,
             int deltaY) {
         int[] xy = new int[2];

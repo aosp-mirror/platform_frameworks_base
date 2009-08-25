@@ -539,7 +539,7 @@ public class MediaPlayer
      * @param request Parcel with the data for the extension. The
      * caller must use {@link #newRequest()} to get one.
      *
-     * @param[out] reply Parcel with the data returned by the
+     * @param reply Output parcel with the data returned by the
      * native player.
      *
      * @return The status code see utils/Errors.h

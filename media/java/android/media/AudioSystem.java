@@ -93,8 +93,9 @@ public class AudioSystem
      *
      * return      the current audio mode (NORMAL, RINGTONE, or IN_CALL).
      *              Returns the current current audio state from the HAL.
+     *              
      */
-    /** @deprecated */
+    /** @deprecated Do not use. */
     public static int getMode() {
         return MODE_INVALID;
     }

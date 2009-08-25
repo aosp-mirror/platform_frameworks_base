@@ -27,7 +27,7 @@ import android.webkit.WebView;
  * Represents a plugin (Java equivalent of the PluginPackageAndroid
  * C++ class in libs/WebKitLib/WebKit/WebCore/plugins/android/)
  *
- * @deprecated This interface was inteded to be used by Gears. Since Gears was
+ * @deprecated This interface was intended to be used by Gears. Since Gears was
  * deprecated, so is this class.
  */
 @Deprecated
@@ -43,7 +43,8 @@ public class Plugin {
     private PreferencesClickHandler mHandler;
 
     /**
-     * @deprecated
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public Plugin(String name,
@@ -58,7 +59,8 @@ public class Plugin {
     }
 
     /**
-     * @deprecated
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public String toString() {
@@ -66,7 +68,8 @@ public class Plugin {
     }
 
     /**
-     * @deprecated
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public String getName() {
@@ -74,7 +77,8 @@ public class Plugin {
     }
 
     /**
-     * @deprecated
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public String getPath() {
@@ -82,7 +86,8 @@ public class Plugin {
     }
 
     /**
-     * @deprecated
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public String getFileName() {
@@ -90,7 +95,8 @@ public class Plugin {
     }
 
     /**
-     * @deprecated
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public String getDescription() {
@@ -98,7 +104,8 @@ public class Plugin {
     }
 
     /**
-     * @deprecated
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public void setName(String name) {
@@ -106,7 +113,8 @@ public class Plugin {
     }
 
     /**
-     * @deprecated
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public void setPath(String path) {
@@ -114,7 +122,8 @@ public class Plugin {
     }
 
     /**
-     * @deprecated
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public void setFileName(String fileName) {
@@ -122,7 +131,8 @@ public class Plugin {
     }
 
     /**
-     * @deprecated
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public void setDescription(String description) {
@@ -130,7 +140,8 @@ public class Plugin {
     }
 
     /**
-     * @deprecated
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public void setClickHandler(PreferencesClickHandler handler) {
@@ -140,7 +151,8 @@ public class Plugin {
    /**
     * Invokes the click handler for this plugin.
     *
-    * @deprecated
+    * @deprecated This interface was intended to be used by Gears. Since Gears was
+    * deprecated, so is this class.
     */
     @Deprecated
     public void dispatchClickEvent(Context context) {
@@ -152,7 +164,8 @@ public class Plugin {
    /**
     * Default click handler. The plugins should implement their own.
     *
-    * @deprecated
+    * @deprecated This interface was intended to be used by Gears. Since Gears was
+    * deprecated, so is this class.
     */
     @Deprecated
     private class DefaultClickHandler implements PreferencesClickHandler,
@@ -172,7 +185,8 @@ public class Plugin {
             }
         }
         /**
-         * @deprecated
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
          */
         @Deprecated
         public void onClick(DialogInterface dialog, int which) {

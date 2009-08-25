@@ -79,6 +79,7 @@ public final class ProviderInfo extends ComponentInfo
      * @deprecated This flag is now being ignored. The current way to make a provider
      * syncable is to provide a SyncAdapter service for a given provider/account type. 
      */
+    @Deprecated
     public boolean isSyncable = false;
 
     public ProviderInfo() {

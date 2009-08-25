@@ -76,6 +76,7 @@ public class BitmapDrawable extends Drawable {
      * @deprecated Use {@link #BitmapDrawable(Resources)} to ensure
      * that the drawable has correctly set its target density.
      */
+    @Deprecated
     public BitmapDrawable() {
         mBitmapState = new BitmapState((Bitmap) null);
     }
@@ -97,6 +98,7 @@ public class BitmapDrawable extends Drawable {
      * @deprecated Use {@link #BitmapDrawable(Resources, Bitmap)} to ensure
      * that the drawable has correctly set its target density.
      */
+    @Deprecated
     public BitmapDrawable(Bitmap bitmap) {
         this(new BitmapState(bitmap));
     }

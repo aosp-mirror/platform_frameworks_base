@@ -168,7 +168,7 @@ public class MediaRecorder
 
         /** The following formats are audio only .aac or .amr formats **/
         /** @deprecated  Deprecated in favor of AMR_NB */
-        /** @todo change link when AMR_NB is exposed. Deprecated in favor of {@link MediaRecorder.OutputFormat#AMR_NB} */
+        /** TODO: change link when AMR_NB is exposed. Deprecated in favor of {@link MediaRecorder.OutputFormat#AMR_NB} */
         public static final int RAW_AMR = 3;
         /** @hide AMR NB file format */
         public static final int AMR_NB = 3;

@@ -1522,18 +1522,17 @@ public final class Settings {
         @Deprecated
         public static final String USE_GOOGLE_MAIL = Secure.USE_GOOGLE_MAIL;
 
-//       /**
-//         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_MAX_DHCP_RETRY_COUNT}
-//         * instead
-//         */
+       /**
+         * @deprecated Use
+         * {@link android.provider.Settings.Secure#WIFI_MAX_DHCP_RETRY_COUNT} instead
+         */
         @Deprecated
         public static final String WIFI_MAX_DHCP_RETRY_COUNT = Secure.WIFI_MAX_DHCP_RETRY_COUNT;
 
-//        /**
-//         * @deprecated Use
-//         * {@link android.provider.Settings.Secure#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS}
-//         * instead
-//         */
+        /**
+         * @deprecated Use
+         * {@link android.provider.Settings.Secure#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS} instead
+         */
         @Deprecated
         public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
                 Secure.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS;
