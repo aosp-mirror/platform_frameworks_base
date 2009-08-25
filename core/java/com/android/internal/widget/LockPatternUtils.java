@@ -316,20 +316,14 @@ public class LockPatternUtils {
 
     /**
      * Set the state of whether the device is permanently locked, meaning the user
-     * must authenticate via other means.  If false, that means the user has gone
-     * out of permanent lock, so the existing (forgotten) lock pattern needs to
-     * be cleared.
+     * must authenticate via other means.
+     *
      * @param locked Whether the user is permanently locked out until they verify their
      *   credentials.  Occurs after {@link #FAILED_ATTEMPTS_BEFORE_RESET} failed
      *   attempts.
      */
     public void setPermanentlyLocked(boolean locked) {
         setBoolean(LOCKOUT_PERMANENT_KEY, locked);
-
-        if (!locked) {
-            setLockPatternEnabled(false);
-            saveLockPattern(null);
-        }
     }
 
     /**
