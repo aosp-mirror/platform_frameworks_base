@@ -23,6 +23,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache;
+import android.content.pm.PackageInfo;
+import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
@@ -44,6 +46,7 @@ import android.util.Pair;
 import android.app.PendingIntent;
 import android.app.NotificationManager;
 import android.app.Notification;
+import android.app.Activity;
 import android.Manifest;
 
 import java.io.FileDescriptor;
@@ -118,8 +121,7 @@ public class AccountManagerService extends IAccountManager.Stub {
 
     private static final String[] ACCOUNT_NAME_TYPE_PROJECTION =
             new String[]{ACCOUNTS_ID, ACCOUNTS_NAME, ACCOUNTS_TYPE};
-    private static final Intent ACCOUNTS_CHANGED_INTENT =
-            new Intent(Constants.LOGIN_ACCOUNTS_CHANGED_ACTION);
+    private static final Intent ACCOUNTS_CHANGED_INTENT;
 
     private static final String COUNT_OF_MATCHING_GRANTS = ""
             + "SELECT COUNT(*) FROM " + TABLE_GRANTS + ", " + TABLE_ACCOUNTS
@@ -143,6 +145,12 @@ public class AccountManagerService extends IAccountManager.Stub {
     private static final boolean isDebuggableMonkeyBuild =
             SystemProperties.getBoolean("ro.monkey", false)
                     && SystemProperties.getBoolean("ro.debuggable", false);
+
+    static {
+        ACCOUNTS_CHANGED_INTENT = new Intent(Constants.LOGIN_ACCOUNTS_CHANGED_ACTION);
+        ACCOUNTS_CHANGED_INTENT.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+    }
+
     /**
      * This should only be called by system code. One should only call this after the service
      * has started.
@@ -1474,6 +1482,22 @@ public class AccountManagerService extends IAccountManager.Stub {
         }
     }
 
+    private boolean inSystemImage(int callerUid) {
+        String[] packages = mContext.getPackageManager().getPackagesForUid(callerUid);
+        for (String name : packages) {
+            try {
+                PackageInfo packageInfo =
+                        mContext.getPackageManager().getPackageInfo(name, 0 /* flags */);
+                if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    return true;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
     private boolean permissionIsGranted(Account account, String authTokenType, int callerUid) {
         final boolean fromAuthenticator = hasAuthenticatorUid(account.type, callerUid);
         final boolean hasExplicitGrants = hasExplicitlyGrantedPermission(account, authTokenType);
@@ -1483,7 +1507,7 @@ public class AccountManagerService extends IAccountManager.Stub {
                     + ": is authenticator? " + fromAuthenticator
                     + ", has explicit permission? " + hasExplicitGrants);
         }
-        return fromAuthenticator || hasExplicitGrants;
+        return fromAuthenticator || hasExplicitGrants || inSystemImage(callerUid);
     }
 
     private boolean hasAuthenticatorUid(String accountType, int callingUid) {
