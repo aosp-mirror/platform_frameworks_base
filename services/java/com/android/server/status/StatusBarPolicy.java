@@ -253,19 +253,12 @@ public class StatusBarPolicy {
     };
 
     //CDMA
-    private static final int[] sDataNetType_evdo = new int[] {
-        com.android.internal.R.drawable.stat_sys_data_connected_evdo,
-        com.android.internal.R.drawable.stat_sys_data_in_evdo,
-        com.android.internal.R.drawable.stat_sys_data_out_evdo,
-        com.android.internal.R.drawable.stat_sys_data_inandout_evdo,
-        com.android.internal.R.drawable.stat_sys_data_dormant_evdo,
-    };
-    private static final int[] sDataNetType_1xrtt = new int[] {
-        com.android.internal.R.drawable.stat_sys_data_connected_1xrtt,
-        com.android.internal.R.drawable.stat_sys_data_in_1xrtt,
-        com.android.internal.R.drawable.stat_sys_data_out_1xrtt,
-        com.android.internal.R.drawable.stat_sys_data_inandout_1xrtt,
-        com.android.internal.R.drawable.stat_sys_data_dormant_1xrtt,
+    // Use 3G icons for EVDO data and 1x icons for 1XRTT data
+    private static final int[] sDataNetType_1x = new int[] {
+        com.android.internal.R.drawable.stat_sys_data_connected_1x,
+        com.android.internal.R.drawable.stat_sys_data_in_1x,
+        com.android.internal.R.drawable.stat_sys_data_out_1x,
+        com.android.internal.R.drawable.stat_sys_data_inandout_1x,
     };
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
@@ -971,14 +964,14 @@ public class StatusBarPolicy {
             break;
         case TelephonyManager.NETWORK_TYPE_CDMA:
             // display 1xRTT for IS95A/B
-            mDataIconList = this.sDataNetType_1xrtt;
+            mDataIconList = this.sDataNetType_1x;
             break;
         case TelephonyManager.NETWORK_TYPE_1xRTT:
-            mDataIconList = this.sDataNetType_1xrtt;
+            mDataIconList = this.sDataNetType_1x;
             break;
         case TelephonyManager.NETWORK_TYPE_EVDO_0: //fall through
         case TelephonyManager.NETWORK_TYPE_EVDO_A:
-            mDataIconList = sDataNetType_evdo;
+            mDataIconList = sDataNetType_3g;
             break;
         default:
             mDataIconList = sDataNetType_g;
@@ -1031,8 +1024,6 @@ public class StatusBarPolicy {
                         iconId = mDataIconList[3];
                         break;
                     case TelephonyManager.DATA_ACTIVITY_DORMANT:
-                        iconId = mDataIconList[4];
-                        break;
                     default:
                         iconId = mDataIconList[0];
                         break;
