@@ -40,7 +40,7 @@ ProgramFragment::~ProgramFragment()
 {
 }
 
-void ProgramFragment::setupGL(ProgramFragmentState *state)
+void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
 {
     if ((state->mLast.get() == this) && !mDirty) {
         return;
@@ -55,7 +55,9 @@ void ProgramFragment::setupGL(ProgramFragmentState *state)
         }
 
         glEnable(GL_TEXTURE_2D);
-        //glTexEnvi(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, mPointSpriteEnable);
+        if (rsc->checkVersion1_1()) {
+            glTexEnvi(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, mPointSpriteEnable);
+        }
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
 
         switch(mEnvModes[ct]) {

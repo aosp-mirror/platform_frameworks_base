@@ -141,15 +141,12 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
     // ----------------------------------------------------------------------
 
-    public RenderScript createRenderScript() {
-        Log.v(RenderScript.LOG_TAG, "createRenderScript 1");
+    public RenderScript createRenderScript(boolean useDepth) {
         Surface sur = null;
         while ((sur == null) || (mSurfaceHolder == null)) {
             sur = getHolder().getSurface();
         }
-        Log.v(RenderScript.LOG_TAG, "createRenderScript 2");
-        RenderScript rs = new RenderScript(sur);
-        Log.v(RenderScript.LOG_TAG, "createRenderScript 3 rs");
+        RenderScript rs = new RenderScript(sur, useDepth);
         return rs;
     }
 

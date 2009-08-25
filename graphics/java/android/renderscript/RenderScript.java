@@ -60,7 +60,7 @@ public class RenderScript {
 
     native int  nDeviceCreate();
     native void nDeviceDestroy(int dev);
-    native int  nContextCreate(int dev, Surface sur, int ver);
+    native int  nContextCreate(int dev, Surface sur, int ver, boolean useDepth);
     native void nContextDestroy(int con);
 
     //void rsContextBindSampler (uint32_t slot, RsSampler sampler);
@@ -194,10 +194,10 @@ public class RenderScript {
     ///////////////////////////////////////////////////////////////////////////////////
     //
 
-    public RenderScript(Surface sur) {
+    public RenderScript(Surface sur, boolean useDepth) {
         mSurface = sur;
         mDev = nDeviceCreate();
-        mContext = nContextCreate(mDev, mSurface, 0);
+        mContext = nContextCreate(mDev, mSurface, 0, useDepth);
 
         // TODO: This should be protected by a lock
         if(!mElementsInitialized) {

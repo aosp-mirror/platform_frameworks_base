@@ -48,7 +48,7 @@ ProgramFragmentStore::~ProgramFragmentStore()
 {
 }
 
-void ProgramFragmentStore::setupGL(ProgramFragmentStoreState *state)
+void ProgramFragmentStore::setupGL(const Context *rsc, ProgramFragmentStoreState *state)
 {
     if (state->mLast.get() == this) {
         return;

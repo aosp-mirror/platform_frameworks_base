@@ -43,6 +43,11 @@ void ObjectBase::decRef() const
     mRefCount --;
     //LOGV("ObjectBase %p dec ref %i", this, mRefCount);
     if (!mRefCount) {
+        if (mName) {
+            LOGV("Deleting RS object %p, name %s", this, mName);
+        } else {
+            LOGV("Deleting RS object %p, no name", this);
+        }
         delete this;
     }
 }
