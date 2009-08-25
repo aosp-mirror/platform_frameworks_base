@@ -44,7 +44,7 @@ static void logMatrix(const char *txt, const float *f)
     LOGV("%6.2f, %6.2f, %6.2f, %6.2f", f[3], f[7], f[11], f[15]);
 }
 
-void ProgramVertex::setupGL(ProgramVertexState *state)
+void ProgramVertex::setupGL(const Context *rsc, ProgramVertexState *state)
 {
     if ((state->mLast.get() == this) && !mDirty) {
         return;

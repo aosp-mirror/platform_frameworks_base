@@ -31,7 +31,7 @@ public:
     ProgramFragmentStore(Element *in, Element *out);
     virtual ~ProgramFragmentStore();
 
-    virtual void setupGL(ProgramFragmentStoreState *);
+    virtual void setupGL(const Context *, ProgramFragmentStoreState *);
 
     void setDepthFunc(RsDepthFunc);
     void setDepthMask(bool);

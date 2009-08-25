@@ -126,7 +126,7 @@ nDeviceDestroy(JNIEnv *_env, jobject _this, jint dev)
 }
 
 static jint
-nContextCreate(JNIEnv *_env, jobject _this, jint dev, jobject wnd, jint ver)
+nContextCreate(JNIEnv *_env, jobject _this, jint dev, jobject wnd, jint ver, jboolean useDepth)
 {
     LOG_API("nContextCreate");
 
@@ -142,7 +142,7 @@ nContextCreate(JNIEnv *_env, jobject _this, jint dev, jobject wnd, jint ver)
     if (window == NULL)
         goto not_valid_surface;
 
-    return (jint)rsContextCreate((RsDevice)dev, window, ver);
+    return (jint)rsContextCreate((RsDevice)dev, window, ver, useDepth);
 }
 
 static void
@@ -1206,7 +1206,7 @@ static JNINativeMethod methods[] = {
 {"_nInit",                         "()V",                                  (void*)_nInit },
 {"nDeviceCreate",                  "()I",                                  (void*)nDeviceCreate },
 {"nDeviceDestroy",                 "(I)V",                                 (void*)nDeviceDestroy },
-{"nContextCreate",                 "(ILandroid/view/Surface;I)I",          (void*)nContextCreate },
+{"nContextCreate",                 "(ILandroid/view/Surface;IZ)I",         (void*)nContextCreate },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
 {"nAssignName",                    "(I[B)V",                               (void*)nAssignName },
 {"nObjDestroy",                    "(I)V",                                 (void*)nObjDestroy },

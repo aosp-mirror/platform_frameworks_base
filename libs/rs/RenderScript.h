@@ -49,7 +49,7 @@ typedef void * RsProgramFragmentStore;
 RsDevice rsDeviceCreate();
 void rsDeviceDestroy(RsDevice);
 
-RsContext rsContextCreate(RsDevice, void *, uint32_t version);
+RsContext rsContextCreate(RsDevice, void *, uint32_t version, bool useDepth);
 void rsContextDestroy(RsContext);
 void rsObjDestroyOOB(RsContext, void *);
 

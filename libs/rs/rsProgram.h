@@ -32,11 +32,7 @@ public:
     Program(Element *in, Element *out);
     virtual ~Program();
 
-
     void bindAllocation(Allocation *);
-
-    virtual void setupGL();
-
     void checkUpdatedAllocation(const Allocation *);
 
 protected:

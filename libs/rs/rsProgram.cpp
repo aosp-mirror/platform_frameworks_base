@@ -47,9 +47,3 @@ void Program::checkUpdatedAllocation(const Allocation *alloc)
     }
 }
 
-void Program::setupGL()
-{
-
-}
-
-
