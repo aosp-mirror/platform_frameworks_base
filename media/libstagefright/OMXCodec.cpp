@@ -193,6 +193,7 @@ sp<OMXCodec> OMXCodec::Create(
     }
     if (!strcmp(componentName, "OMX.TI.AAC.decode")) {
         quirks |= kNeedsFlushBeforeDisable;
+        quirks |= kRequiresFlushCompleteEmulation;
     }
     if (!strncmp(componentName, "OMX.qcom.video.encoder.", 23)) {
         quirks |= kRequiresLoadedToIdleAfterAllocation;
@@ -1163,21 +1164,38 @@ void OMXCodec::onPortSettingsChanged(OMX_U32 portIndex) {
     setState(RECONFIGURING);
 
     if (mQuirks & kNeedsFlushBeforeDisable) {
-        flushPortAsync(portIndex);
+        if (!flushPortAsync(portIndex)) {
+            onCmdComplete(OMX_CommandFlush, portIndex);
+        }
     } else {
         disablePortAsync(portIndex);
     }
 }
 
-void OMXCodec::flushPortAsync(OMX_U32 portIndex) {
+bool OMXCodec::flushPortAsync(OMX_U32 portIndex) {
     CHECK(mState == EXECUTING || mState == RECONFIGURING);
+
+    LOGV("flushPortAsync(%ld): we own %d out of %d buffers already.",
+         portIndex, countBuffersWeOwn(mPortBuffers[portIndex]),
+         mPortBuffers[portIndex].size());
 
     CHECK_EQ(mPortStatus[portIndex], ENABLED);
     mPortStatus[portIndex] = SHUTTING_DOWN;
 
+    if ((mQuirks & kRequiresFlushCompleteEmulation)
+        && countBuffersWeOwn(mPortBuffers[portIndex])
+                == mPortBuffers[portIndex].size()) {
+        // No flush is necessary and this component fails to send a
+        // flush-complete event in this case.
+
+        return false;
+    }
+
     status_t err =
         mOMX->send_command(mNode, OMX_CommandFlush, portIndex);
     CHECK_EQ(err, OK);
+
+    return true;
 }
 
 void OMXCodec::disablePortAsync(OMX_U32 portIndex) {
@@ -1322,6 +1340,12 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
 void OMXCodec::fillOutputBuffer(BufferInfo *info) {
     CHECK_EQ(info->mOwnedByComponent, false);
+
+    if (mNoMoreOutputData) {
+        LOGV("There is no more output data available, not "
+             "calling fillOutputBuffer");
+        return;
+    }
 
     LOGV("Calling fill_buffer on buffer %p", info->mBuffer);
     mOMX->fill_buffer(mNode, info->mBuffer);
@@ -1648,8 +1672,16 @@ status_t OMXCodec::read(
 
         CHECK_EQ(mState, EXECUTING);
 
-        flushPortAsync(kPortIndexInput);
-        flushPortAsync(kPortIndexOutput);
+        bool emulateInputFlushCompletion = !flushPortAsync(kPortIndexInput);
+        bool emulateOutputFlushCompletion = !flushPortAsync(kPortIndexOutput);
+
+        if (emulateInputFlushCompletion) {
+            onCmdComplete(OMX_CommandFlush, kPortIndexInput);
+        }
+
+        if (emulateOutputFlushCompletion) {
+            onCmdComplete(OMX_CommandFlush, kPortIndexOutput);
+        }
     }
 
     while (mState != ERROR && !mNoMoreOutputData && mFilledBuffers.empty()) {
