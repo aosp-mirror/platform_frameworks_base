@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 /**
- * @deprecated This class was inteded to be used by Gears. Since Gears was
+ * @deprecated This class was intended to be used by Gears. Since Gears was
  * deprecated, so is this class.
  */
 @Deprecated
@@ -48,7 +48,8 @@ public final class UrlInterceptRegistry {
      * 
      * @param disabled true to disable the cache
      *
-     * @deprecated
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public static synchronized void setUrlInterceptDisabled(boolean disabled) {
@@ -60,7 +61,8 @@ public final class UrlInterceptRegistry {
      * 
      * @return return if it is disabled
      *
-     * @deprecated
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public static synchronized boolean urlInterceptDisabled() {
@@ -74,7 +76,8 @@ public final class UrlInterceptRegistry {
      * @param handler The new UrlInterceptHandler object
      * @return true if the handler was not previously registered.
      *
-     * @deprecated
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public static synchronized boolean registerHandler(
@@ -93,7 +96,8 @@ public final class UrlInterceptRegistry {
      * @param handler A previously registered UrlInterceptHandler.
      * @return true if the handler was found and removed from the list.
      *
-     * @deprecated
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public static synchronized boolean unregisterHandler(
@@ -107,7 +111,8 @@ public final class UrlInterceptRegistry {
      *
      * @return A CacheResult containing surrogate content.
      *
-     * @deprecated
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public static synchronized CacheResult getSurrogate(
@@ -133,7 +138,8 @@ public final class UrlInterceptRegistry {
      *
      * @return A PluginData instance containing surrogate content.
      *
-     * @deprecated
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
     @Deprecated
     public static synchronized PluginData getPluginData(

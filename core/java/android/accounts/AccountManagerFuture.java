@@ -56,9 +56,11 @@ public interface AccountManagerFuture<V> extends Future<V> {
     V getResult(long timeout, TimeUnit unit)
             throws OperationCanceledException, IOException, AuthenticatorException;
 
+    /** @deprecated Use {@link #getResult} */
     @Deprecated
     V get() throws InterruptedException, ExecutionException;
 
+    /** @deprecated Use {@link #getResult}  */
     @Deprecated
     V get(long timeout, TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException;

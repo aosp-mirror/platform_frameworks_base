@@ -491,42 +491,49 @@ public abstract class Context {
      * @deprecated Use {@link android.app.WallpaperManager#getDrawable
      * WallpaperManager.get()} instead.
      */
+    @Deprecated
     public abstract Drawable getWallpaper();
 
     /**
      * @deprecated Use {@link android.app.WallpaperManager#peekDrawable
      * WallpaperManager.peek()} instead.
      */
+    @Deprecated
     public abstract Drawable peekWallpaper();
 
     /**
      * @deprecated Use {@link android.app.WallpaperManager#getDesiredMinimumWidth()
      * WallpaperManager.getDesiredMinimumWidth()} instead.
      */
+    @Deprecated
     public abstract int getWallpaperDesiredMinimumWidth();
 
     /**
      * @deprecated Use {@link android.app.WallpaperManager#getDesiredMinimumHeight()
      * WallpaperManager.getDesiredMinimumHeight()} instead.
      */
+    @Deprecated
     public abstract int getWallpaperDesiredMinimumHeight();
 
     /**
      * @deprecated Use {@link android.app.WallpaperManager#setBitmap(Bitmap)
      * WallpaperManager.set()} instead.
      */
+    @Deprecated
     public abstract void setWallpaper(Bitmap bitmap) throws IOException;
 
     /**
      * @deprecated Use {@link android.app.WallpaperManager#setStream(InputStream)
      * WallpaperManager.set()} instead.
      */
+    @Deprecated
     public abstract void setWallpaper(InputStream data) throws IOException;
 
     /**
      * @deprecated Use {@link android.app.WallpaperManager#clear
      * WallpaperManager.clear()} instead.
      */
+    @Deprecated
     public abstract void clearWallpaper() throws IOException;
 
     /**

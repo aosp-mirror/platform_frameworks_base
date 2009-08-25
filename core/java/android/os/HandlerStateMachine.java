@@ -56,22 +56,22 @@ import android.util.LogPrinter;
         }
 
         class S1 extends HandlerState {
-            @Override public void enter(Message message) {
+            &amp;#064;Override public void enter(Message message) {
             }
 
-            @Override public void processMessage(Message message) {
+            &amp;#064;Override public void processMessage(Message message) {
                 deferMessage(message);
                 if (message.what == TEST_WHAT_2) {
                     transitionTo(mS2);
                 }
             }
 
-            @Override public void exit(Message message) {
+            &amp;#064;Override public void exit(Message message) {
             }
         }
 
         class S2 extends HandlerState {
-            @Override public void processMessage(Message message) {
+            &amp;#064;Override public void processMessage(Message message) {
                 // Do some processing
                 if (message.what == TEST_WHAT_2) {
                     transtionTo(mS1);

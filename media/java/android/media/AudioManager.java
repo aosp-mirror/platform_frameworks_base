@@ -816,37 +816,44 @@ public class AudioManager {
     /* Routing bits for setRouting/getRouting API */
     /**
      * Routing audio output to earpiece
-     * @deprecated
+     * @deprecated   Do not set audio routing directly, use setSpeakerphoneOn(),
+     * setBluetoothScoOn() methods instead.
      */
     @Deprecated public static final int ROUTE_EARPIECE          = AudioSystem.ROUTE_EARPIECE;
     /**
-     * Routing audio output to spaker
-     * @deprecated
+     * Routing audio output to speaker
+     * @deprecated   Do not set audio routing directly, use setSpeakerphoneOn(),
+     * setBluetoothScoOn() methods instead.
      */
     @Deprecated public static final int ROUTE_SPEAKER           = AudioSystem.ROUTE_SPEAKER;
     /**
      * @deprecated use {@link #ROUTE_BLUETOOTH_SCO}
-     * @deprecated
+     * @deprecated   Do not set audio routing directly, use setSpeakerphoneOn(),
+     * setBluetoothScoOn() methods instead.
      */
     @Deprecated public static final int ROUTE_BLUETOOTH = AudioSystem.ROUTE_BLUETOOTH_SCO;
     /**
      * Routing audio output to bluetooth SCO
-     * @deprecated
+     * @deprecated   Do not set audio routing directly, use setSpeakerphoneOn(),
+     * setBluetoothScoOn() methods instead.
      */
     @Deprecated public static final int ROUTE_BLUETOOTH_SCO     = AudioSystem.ROUTE_BLUETOOTH_SCO;
     /**
      * Routing audio output to headset
-     * @deprecated
+     * @deprecated   Do not set audio routing directly, use setSpeakerphoneOn(),
+     * setBluetoothScoOn() methods instead.
      */
     @Deprecated public static final int ROUTE_HEADSET           = AudioSystem.ROUTE_HEADSET;
     /**
      * Routing audio output to bluetooth A2DP
-     * @deprecated
+     * @deprecated   Do not set audio routing directly, use setSpeakerphoneOn(),
+     * setBluetoothScoOn() methods instead.
      */
     @Deprecated public static final int ROUTE_BLUETOOTH_A2DP    = AudioSystem.ROUTE_BLUETOOTH_A2DP;
     /**
      * Used for mask parameter of {@link #setRouting(int,int,int)}.
-     * @deprecated
+     * @deprecated   Do not set audio routing directly, use setSpeakerphoneOn(),
+     * setBluetoothScoOn() methods instead.
      */
     @Deprecated public static final int ROUTE_ALL               = AudioSystem.ROUTE_ALL;
 

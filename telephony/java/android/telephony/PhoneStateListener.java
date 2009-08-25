@@ -154,8 +154,9 @@ public class PhoneStateListener {
      * @see ServiceState#STATE_IN_SERVICE
      * @see ServiceState#STATE_OUT_OF_SERVICE
      * @see ServiceState#STATE_POWER_OFF
-     * @deprecated, @see #onSignalStrengthsChanged
+     * @deprecated see #onSignalStrengthsChanged
      */
+    @Deprecated
     public void onSignalStrengthChanged(int asu) {
         // default implementation empty
     }

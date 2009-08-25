@@ -517,6 +517,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @deprecated if the db is locked more than once (becuase of nested transactions) then the lock
      *   will not be yielded. Use yieldIfContendedSafely instead.
      */
+    @Deprecated
     public boolean yieldIfContended() {
         return yieldIfContendedHelper(false /* do not check yielding */);
     }
