@@ -343,7 +343,7 @@ public final class ContactsContract {
             Cursor cursor = cr.query(photoUri,
                     new String[]{ContactsContract.CommonDataKinds.Photo.PHOTO}, null, null, null);
             try {
-                if (!cursor.moveToNext()) {
+                if (cursor == null || !cursor.moveToNext()) {
                     return null;
                 }
                 byte[] data = cursor.getBlob(0);
@@ -352,7 +352,9 @@ public final class ContactsContract {
                 }
                 return new ByteArrayInputStream(data);
             } finally {
-                cursor.close();
+                if (cursor != null) {
+                    cursor.close();
+                }
             }
         }
     }
