@@ -92,14 +92,46 @@ public class WebViewClient {
         cancelMsg.sendToTarget();
     }
 
+    // These ints must match up to the hidden values in EventHandler.
+    /** Generic error */
+    public static final int ERROR_UNKNOWN = -1;
+    /** Server or proxy hostname lookup failed */
+    public static final int ERROR_HOST_LOOKUP = -2;
+    /** Unsupported authentication scheme (not basic or digest) */
+    public static final int ERROR_UNSUPPORTED_AUTH_SCHEME = -3;
+    /** User authentication failed on server */
+    public static final int ERROR_AUTHENTICATION = -4;
+    /** User authentication failed on proxy */
+    public static final int ERROR_PROXY_AUTHENTICATION = -5;
+    /** Failed to connect to the server */
+    public static final int ERROR_CONNECT = -6;
+    /** Failed to read or write to the server */
+    public static final int ERROR_IO = -7;
+    /** Connection timed out */
+    public static final int ERROR_TIMEOUT = -8;
+    /** Too many redirects */
+    public static final int ERROR_REDIRECT_LOOP = -9;
+    /** Unsupported URI scheme */
+    public static final int ERROR_UNSUPPORTED_SCHEME = -10;
+    /** Failed to perform SSL handshake */
+    public static final int ERROR_FAILED_SSL_HANDSHAKE = -11;
+    /** Malformed URL */
+    public static final int ERROR_BAD_URL = -12;
+    /** Generic file error */
+    public static final int ERROR_FILE = -13;
+    /** File not found */
+    public static final int ERROR_FILE_NOT_FOUND = -14;
+    /** Too many requests during this load */
+    public static final int ERROR_TOO_MANY_REQUESTS = -15;
+
     /**
-     * Report an error to an activity. These errors come up from WebCore, and
-     * are network errors.
-     * 
+     * Report an error to the host application. These errors are unrecoverable
+     * (i.e. the main resource is unavailable). The errorCode parameter
+     * corresponds to one of the ERROR_* constants.
      * @param view The WebView that is initiating the callback.
-     * @param errorCode The HTTP error code.
-     * @param description A String description.
-     * @param failingUrl The url that failed.
+     * @param code The error code corresponding to an ERROR_* value.
+     * @param description A String describing the error.
+     * @param failingUrl The url that failed to load.
      */
     public void onReceivedError(WebView view, int errorCode,
             String description, String failingUrl) {
