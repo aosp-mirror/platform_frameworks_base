@@ -435,13 +435,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     @LargeTest
     public void testLocalMp3PrepareAsyncCallback() throws Exception {
         boolean onPrepareSuccess = 
-            CodecTest.prepareAsyncCallback(MediaNames.MP3CBR, false);
-        assertTrue("LocalMp3prepareAsyncCallback", onPrepareSuccess);
-    }
-
-    @LargeTest
-    public void testLocalH263AMRPrepareAsyncCallback() throws Exception {
-        boolean onPrepareSuccess =
             CodecTest.prepareAsyncCallback(MediaNames.VIDEO_H263_AMR, false);
         assertTrue("LocalMp3prepareAsyncCallback", onPrepareSuccess);
     }
