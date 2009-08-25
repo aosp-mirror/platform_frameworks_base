@@ -25,6 +25,16 @@ LocklessCommandFifo::LocklessCommandFifo()
 
 LocklessCommandFifo::~LocklessCommandFifo()
 {
+    if (!mInShutdown) {
+        shutdown();
+    }
+    free(mBuffer);
+}
+
+void LocklessCommandFifo::shutdown()
+{
+    mInShutdown = true;
+    mSignalToWorker.set();
 }
 
 bool LocklessCommandFifo::init(uint32_t sizeInBytes)
@@ -42,6 +52,7 @@ bool LocklessCommandFifo::init(uint32_t sizeInBytes)
         return false;
     }
 
+    mInShutdown = false;
     mSize = sizeInBytes;
     mPut = mBuffer;
     mGet = mBuffer;
@@ -50,7 +61,7 @@ bool LocklessCommandFifo::init(uint32_t sizeInBytes)
     return true;
 }
 
-uint32_t LocklessCommandFifo::getFreeSpace() const 
+uint32_t LocklessCommandFifo::getFreeSpace() const
 {
     int32_t freeSpace = 0;
     //dumpState("getFreeSpace");
@@ -115,7 +126,7 @@ const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData)
 {
     while(1) {
         //dumpState("get");
-        while(isEmpty()) {
+        while(isEmpty() && !mInShutdown) {
             mSignalToControl.set();
             mSignalToWorker.wait();
         }
@@ -126,7 +137,7 @@ const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData)
             // non-zero command is valid
             return mGet+4;
         }
-    
+
         // zero command means reset to beginning.
         mGet = mBuffer;
     }
@@ -161,7 +172,7 @@ void LocklessCommandFifo::makeSpace(uint32_t bytes)
     while(getFreeSpace() < bytes) {
         sleep(1);
     }
-    
+
 }
 
 void LocklessCommandFifo::dumpState(const char *s) const

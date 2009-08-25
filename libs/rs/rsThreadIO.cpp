@@ -30,6 +30,11 @@ ThreadIO::~ThreadIO()
 {
 }
 
+void ThreadIO::shutdown()
+{
+    mToCore.shutdown();
+}
+
 bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand)
 {
     bool ret = false;
