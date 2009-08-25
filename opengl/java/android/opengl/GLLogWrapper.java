@@ -1517,7 +1517,7 @@ class GLLogWrapper extends GLWrapperBase {
         arg("count", count);
         startLogIndices();
         for (int i = 0; i < count; i++) {
-            doElement(mStringBuilder, i, first + count);
+            doElement(mStringBuilder, i, first + i);
         }
         endLogIndices();
         end();
