@@ -105,11 +105,9 @@ public class StatusBarPolicy {
     // phone
     private TelephonyManager mPhone;
     private IBinder mPhoneIcon;
-    private IBinder mPhoneEvdoIcon;
 
     //***** Signal strength icons
     private IconData mPhoneData;
-    private IconData mPhoneEvdoData;
     //GSM/UMTS
     private static final int[] sSignalImages = new int[] {
         com.android.internal.R.drawable.stat_sys_signal_0,
@@ -124,14 +122,6 @@ public class StatusBarPolicy {
         com.android.internal.R.drawable.stat_sys_r_signal_2,
         com.android.internal.R.drawable.stat_sys_r_signal_3,
         com.android.internal.R.drawable.stat_sys_r_signal_4
-    };
-    //CDMA
-    private static final int[] sSignalImages_cdma = new int[] {
-        com.android.internal.R.drawable.stat_sys_signal_cdma_0,
-        com.android.internal.R.drawable.stat_sys_signal_cdma_1,
-        com.android.internal.R.drawable.stat_sys_signal_cdma_2,
-        com.android.internal.R.drawable.stat_sys_signal_cdma_3,
-        com.android.internal.R.drawable.stat_sys_signal_cdma_4
     };
     private static final int[] sRoamingIndicatorImages_cdma = new int[] {
         com.android.internal.R.drawable.stat_sys_roaming_cdma_0, //Standard Roaming Indicator
@@ -231,14 +221,6 @@ public class StatusBarPolicy {
         com.android.internal.R.drawable.stat_sys_roaming_cdma_0 //83
 
         // 128-255 Reserved
-    };
-    // EVDO
-    private static final int[] sSignalImages_evdo = new int[] {
-        com.android.internal.R.drawable.stat_sys_signal_evdo_0,
-        com.android.internal.R.drawable.stat_sys_signal_evdo_1,
-        com.android.internal.R.drawable.stat_sys_signal_evdo_2,
-        com.android.internal.R.drawable.stat_sys_signal_evdo_3,
-        com.android.internal.R.drawable.stat_sys_signal_evdo_4
     };
 
     //***** Data connection icons
@@ -438,12 +420,6 @@ public class StatusBarPolicy {
                 null, com.android.internal.R.drawable.stat_sys_signal_null, 0, 0);
         mPhoneIcon = service.addIcon(mPhoneData, null);
 
-        // phone_evdo_signal
-        mPhoneEvdoData = IconData.makeIcon("phone_evdo_signal",
-                null, com.android.internal.R.drawable.stat_sys_signal_evdo_0, 0, 0);
-        mPhoneEvdoIcon = service.addIcon(mPhoneEvdoData, null);
-        service.setIconVisibility(mPhoneEvdoIcon, false);
-
         // register for phone state notifications.
         ((TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE))
                 .listen(mPhoneStateListener,
@@ -499,7 +475,7 @@ public class StatusBarPolicy {
         mGpsFixIconData = IconData.makeIcon("gps",
                 null, com.android.internal.R.drawable.stat_sys_gps_on, 0, 0);
         mGpsIcon = service.addIcon(mGpsEnabledIconData, null);
-        service.setIconVisibility(mGpsIcon, false);           
+        service.setIconVisibility(mGpsIcon, false);
 
         // Alarm clock
         mAlarmClockIconData = IconData.makeIcon(
@@ -522,7 +498,7 @@ public class StatusBarPolicy {
         mVolumeIcon = service.addIcon(mVolumeData, null);
         service.setIconVisibility(mVolumeIcon, false);
         updateVolume();
-        
+
         IntentFilter filter = new IntentFilter();
 
         // Register for Intent broadcasts for...
@@ -642,7 +618,7 @@ public class StatusBarPolicy {
         }
     }
 
-    private void showBatteryView() {    
+    private void showBatteryView() {
         closeLastBatteryView();
         if (mLowBatteryDialog != null) {
             mLowBatteryDialog.dismiss();
@@ -723,7 +699,7 @@ public class StatusBarPolicy {
                 b.setView(v);
                 b.setIcon(android.R.drawable.ic_dialog_alert);
                 b.setPositiveButton(android.R.string.ok, null);
-                
+
                 final Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
@@ -811,6 +787,10 @@ public class StatusBarPolicy {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
             updateCallState(state);
+            // In cdma, if a voice call is made, RSSI should switch to 1x.
+            if (isCdma()) {
+                updateSignalStrength();
+            }
         }
 
         @Override
@@ -839,7 +819,7 @@ public class StatusBarPolicy {
             final String lockedReason = intent.getStringExtra(IccCard.INTENT_KEY_LOCKED_REASON);
             if (IccCard.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
                 mSimState = IccCard.State.PIN_REQUIRED;
-            } 
+            }
             else if (IccCard.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
                 mSimState = IccCard.State.PUK_REQUIRED;
             }
@@ -854,6 +834,14 @@ public class StatusBarPolicy {
 
     private boolean isCdma() {
         return ((mPhone != null) && (mPhone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA));
+    }
+
+    private boolean isEvdo() {
+        return ( (mServiceState != null)
+                 && ((mServiceState.getRadioTechnology()
+                        == ServiceState.RADIO_TECHNOLOGY_EVDO_0)
+                     || (mServiceState.getRadioTechnology()
+                        == ServiceState.RADIO_TECHNOLOGY_EVDO_A)));
     }
 
     private boolean hasService() {
@@ -872,9 +860,7 @@ public class StatusBarPolicy {
 
     private final void updateSignalStrength() {
         int iconLevel = -1;
-        int evdoIconLevel = -1;
         int[] iconList;
-        int[] evdoIconList;
 
         if (!hasService()) {
             //Log.d(TAG, "updateSignalStrength: no service");
@@ -885,7 +871,6 @@ public class StatusBarPolicy {
                 mPhoneData.iconId = com.android.internal.R.drawable.stat_sys_signal_null;
             }
             mService.updateIcon(mPhoneIcon, mPhoneData, null);
-            mService.setIconVisibility(mPhoneEvdoIcon,false);
             return;
         }
 
@@ -908,62 +893,65 @@ public class StatusBarPolicy {
                 iconList = sSignalImages;
             }
         } else {
-            iconList = this.sSignalImages_cdma;
+            iconList = this.sSignalImages;
 
-            int cdmaDbm = mSignalStrength.getCdmaDbm();
-            int cdmaEcio = mSignalStrength.getCdmaEcio();
-            int levelDbm = 0;
-            int levelEcio = 0;
-
-            if (cdmaDbm >= -75) levelDbm = 4;
-            else if (cdmaDbm >= -85) levelDbm = 3;
-            else if (cdmaDbm >= -95) levelDbm = 2;
-            else if (cdmaDbm >= -100) levelDbm = 1;
-            else levelDbm = 0;
-
-            // Ec/Io are in dB*10
-            if (cdmaEcio >= -90) levelEcio = 4;
-            else if (cdmaEcio >= -110) levelEcio = 3;
-            else if (cdmaEcio >= -130) levelEcio = 2;
-            else if (cdmaEcio >= -150) levelEcio = 1;
-            else levelEcio = 0;
-
-            iconLevel = (levelDbm < levelEcio) ? levelDbm : levelEcio;
+            // If 3G(EV) and 1x network are available than 3G should be
+            // displayed, displayed RSSI should be from the EV side.
+            // If a voice call is made then RSSI should switch to 1x.
+            if ((mPhoneState == TelephonyManager.CALL_STATE_IDLE) && isEvdo()){
+                iconLevel = getEvdoLevel();
+                if (false) {
+                    Log.d(TAG, "use Evdo level=" + iconLevel + " to replace Cdma Level=" + getCdmaLevel());
+                }
+            } else {
+                iconLevel = getCdmaLevel();
+            }
         }
-
-        if ((mServiceState.getRadioTechnology() == ServiceState.RADIO_TECHNOLOGY_EVDO_0)
-                  || (mServiceState.getRadioTechnology() == ServiceState.RADIO_TECHNOLOGY_EVDO_A)) {
-            // Use Evdo icon
-            evdoIconList = this.sSignalImages_evdo;
-
-            int evdoDbm = mSignalStrength.getEvdoDbm();
-            int evdoSnr = mSignalStrength.getEvdoSnr();
-            int levelEvdoDbm = 0;
-            int levelEvdoSnr = 0;
-
-            if (evdoDbm >= -65) levelEvdoDbm = 4;
-            else if (evdoDbm >= -75) levelEvdoDbm = 3;
-            else if (evdoDbm >= -90) levelEvdoDbm = 2;
-            else if (evdoDbm >= -105) levelEvdoDbm = 1;
-            else levelEvdoDbm = 0;
-
-            if (evdoSnr > 7) levelEvdoSnr = 4;
-            else if (evdoSnr > 5) levelEvdoSnr = 3;
-            else if (evdoSnr > 3) levelEvdoSnr = 2;
-            else if (evdoSnr > 1) levelEvdoSnr = 1;
-            else levelEvdoSnr = 0;
-
-            evdoIconLevel = (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
-
-            mPhoneEvdoData.iconId = evdoIconList[evdoIconLevel];
-            mService.updateIcon(mPhoneEvdoIcon, mPhoneEvdoData, null);
-            mService.setIconVisibility(mPhoneEvdoIcon,true);
-        } else {
-            mService.setIconVisibility(mPhoneEvdoIcon,false);
-        }
-
         mPhoneData.iconId = iconList[iconLevel];
         mService.updateIcon(mPhoneIcon, mPhoneData, null);
+    }
+
+    private int getCdmaLevel() {
+        final int cdmaDbm = mSignalStrength.getCdmaDbm();
+        final int cdmaEcio = mSignalStrength.getCdmaEcio();
+        int levelDbm = 0;
+        int levelEcio = 0;
+
+        if (cdmaDbm >= -75) levelDbm = 4;
+        else if (cdmaDbm >= -85) levelDbm = 3;
+        else if (cdmaDbm >= -95) levelDbm = 2;
+        else if (cdmaDbm >= -100) levelDbm = 1;
+        else levelDbm = 0;
+
+        // Ec/Io are in dB*10
+        if (cdmaEcio >= -90) levelEcio = 4;
+        else if (cdmaEcio >= -110) levelEcio = 3;
+        else if (cdmaEcio >= -130) levelEcio = 2;
+        else if (cdmaEcio >= -150) levelEcio = 1;
+        else levelEcio = 0;
+
+        return (levelDbm < levelEcio) ? levelDbm : levelEcio;
+    }
+
+    private int getEvdoLevel() {
+        int evdoDbm = mSignalStrength.getEvdoDbm();
+        int evdoSnr = mSignalStrength.getEvdoSnr();
+        int levelEvdoDbm = 0;
+        int levelEvdoSnr = 0;
+
+        if (evdoDbm >= -65) levelEvdoDbm = 4;
+        else if (evdoDbm >= -75) levelEvdoDbm = 3;
+        else if (evdoDbm >= -90) levelEvdoDbm = 2;
+        else if (evdoDbm >= -105) levelEvdoDbm = 1;
+        else levelEvdoDbm = 0;
+
+        if (evdoSnr > 7) levelEvdoSnr = 4;
+        else if (evdoSnr > 5) levelEvdoSnr = 3;
+        else if (evdoSnr > 3) levelEvdoSnr = 2;
+        else if (evdoSnr > 1) levelEvdoSnr = 1;
+        else levelEvdoSnr = 0;
+
+        return (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
     }
 
     private final void updateDataNetType() {
