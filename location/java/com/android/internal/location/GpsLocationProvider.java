@@ -728,7 +728,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             mStarted = true;
             int positionMode;
             if (Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.ASSISTED_GPS_ENABLED, 0) != 0) {
+                    Settings.Secure.ASSISTED_GPS_ENABLED, 1) != 0) {
                 positionMode = GPS_POSITION_MODE_MS_BASED;
             } else {
                 positionMode = GPS_POSITION_MODE_STANDALONE;
