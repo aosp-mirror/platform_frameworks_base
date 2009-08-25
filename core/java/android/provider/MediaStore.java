@@ -164,6 +164,12 @@ public final class MediaStore
     public final static String EXTRA_SIZE_LIMIT = "android.intent.extra.sizeLimit";
 
     /**
+     * Specify the maximum allowed recording duration in seconds.
+     * @hide
+     */
+    public final static String EXTRA_DURATION_LIMIT = "android.intent.extra.durationLimit";
+
+    /**
      * The name of the Intent-extra used to indicate a content resolver Uri to be used to
      * store the requested image or video.
      */
