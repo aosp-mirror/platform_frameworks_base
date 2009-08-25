@@ -431,7 +431,7 @@ class BluetoothEventLoop {
         boolean authorized = false;
         UUID uuid = UUID.fromString(deviceUuid);
         if (mBluetoothService.isEnabled() &&
-                (BluetoothUuid.isAudioSink(uuid) || BluetoothUuid.isAvrcpController(uuid)
+                (BluetoothUuid.isAudioSink(uuid) || BluetoothUuid.isAvrcpTarget(uuid)
                         || BluetoothUuid.isAdvAudioDist(uuid))) {
             BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
             BluetoothDevice device = mAdapter.getRemoteDevice(address);

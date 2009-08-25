@@ -37,6 +37,7 @@ public final class BluetoothUuid {
     public static final UUID Handsfree  = UUID.fromString("0000111E-0000-1000-8000-00805F9B34FB");
     public static final UUID AvrcpController =
                                           UUID.fromString("0000110E-0000-1000-8000-00805F9B34FB");
+    public static final UUID AvrcpTarget = UUID.fromString("0000110C-0000-1000-8000-00805F9B34FB");
 
     public static boolean isAudioSource(UUID uuid) {
         return uuid.equals(AudioSource);
@@ -60,5 +61,9 @@ public final class BluetoothUuid {
 
     public static boolean isAvrcpController(UUID uuid) {
         return uuid.equals(AvrcpController);
+    }
+
+    public static boolean isAvrcpTarget(UUID uuid) {
+        return uuid.equals(AvrcpTarget);
     }
 }
