@@ -1111,11 +1111,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     int j = 1;
                     for (String dns : dnsList) {
                         if (dns != null && !TextUtils.equals(dns, "0.0.0.0")) {
+                            if (DBG) Log.d(TAG, "  adding "+dns);
                             SystemProperties.set("net.dns" + j++, dns);
                         }
                     }
                     for (int k=j ; k<mNumDnsEntries; k++) {
-                        SystemProperties.set("net.dns" + j, "");
+                        if (DBG) Log.d(TAG, "erasing net.dns" + k);
+                        SystemProperties.set("net.dns" + k, "");
                     }
                     mNumDnsEntries = j;
                 } else {
