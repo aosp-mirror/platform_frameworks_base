@@ -180,12 +180,21 @@ public class AndroidTestRunner extends BaseTestRunner {
     private void setInstrumentationIfInstrumentationTestCase(
             Test test, Instrumentation instrumentation) {
         if (InstrumentationTestCase.class.isAssignableFrom(test.getClass())) {
-            ((InstrumentationTestCase) test).injectInsrumentation(instrumentation);
+            ((InstrumentationTestCase) test).injectInstrumentation(instrumentation);
         }
     }
 
-    public void setInstrumentaiton(Instrumentation instrumentation) {
+    public void setInstrumentation(Instrumentation instrumentation) {
         mInstrumentation = instrumentation;
+    }
+
+    /**
+     * @deprecated Incorrect spelling,
+     * use {@link #setInstrumentation(android.app.Instrumentation)} instead.
+     */
+    @Deprecated
+    public void setInstrumentaiton(Instrumentation instrumentation) {
+        setInstrumentation(instrumentation);
     }
 
     @Override
