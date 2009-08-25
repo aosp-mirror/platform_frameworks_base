@@ -206,6 +206,13 @@ public class RenderScript {
         }
     }
 
+    public void destroy() {
+        nContextDestroy(mContext);
+        mContext = 0;
+
+        nDeviceDestroy(mDev);
+        mDev = 0;
+    }
 
     //////////////////////////////////////////////////////////////////////////////////
     // Triangle Mesh
