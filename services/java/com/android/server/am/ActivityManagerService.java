@@ -755,6 +755,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     String mTopData;
     boolean mSystemReady = false;
     boolean mBooting = false;
+    boolean mWaitingUpdate = false;
+    boolean mDidUpdate = false;
 
     Context mContext;
 
@@ -972,6 +974,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         res.set(0);
                     }
                 }
+                
+                ensureBootCompleted();
             } break;
             case SHOW_NOT_RESPONDING_MSG: {
                 synchronized (ActivityManagerService.this) {
@@ -992,13 +996,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     proc.anrDialog = d;
                 }
                 
-                ensureScreenEnabled();
+                ensureBootCompleted();
             } break;
             case SHOW_FACTORY_ERROR_MSG: {
                 Dialog d = new FactoryErrorDialog(
                     mContext, msg.getData().getCharSequence("msg"));
                 d.show();
-                enableScreenAfterBoot();
+                ensureBootCompleted();
             } break;
             case UPDATE_CONFIGURATION_MSG: {
                 final ContentResolver resolver = mContext.getContentResolver();
@@ -1843,12 +1847,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         startProcessLocked(r.processName, r.info.applicationInfo, true, 0,
-                "activity", r.intent.getComponent());
+                "activity", r.intent.getComponent(), false);
     }
 
     private final ProcessRecord startProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
-            String hostingType, ComponentName hostingName) {
+            String hostingType, ComponentName hostingName, boolean allowWhileBooting) {
         ProcessRecord app = getProcessRecordLocked(processName, info.uid);
         // We don't have to do anything more if:
         // (1) There is an existing application record; and
@@ -1901,7 +1905,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // If the system is not ready yet, then hold off on starting this
         // process until it is.
         if (!mSystemReady
-                && (info.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
+                && !isAllowedWhileBooting(info)
+                && !allowWhileBooting) {
             if (!mProcessesOnHold.contains(app)) {
                 mProcessesOnHold.add(app);
             }
@@ -1912,6 +1917,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return (app.pid != 0) ? app : null;
     }
 
+    boolean isAllowedWhileBooting(ApplicationInfo ai) {
+        return (ai.flags&ApplicationInfo.FLAG_PERSISTENT) != 0;
+    }
+    
     private final void startProcessLocked(ProcessRecord app,
             String hostingType, String hostingNameStr) {
         if (app.pid > 0 && app.pid != MY_PID) {
@@ -5085,8 +5094,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
 
-        List providers = generateApplicationProvidersLocked(app);
+        boolean normalMode = mSystemReady || isAllowedWhileBooting(app.info);
+        List providers = normalMode ? generateApplicationProvidersLocked(app) : null;
 
+        if (!normalMode) {
+            Log.i(TAG, "Launching preboot mode app: " + app);
+        }
+        
         if (localLOGV) Log.v(
             TAG, "New app record " + app
             + " thread=" + thread.asBinder() + " pid=" + pid);
@@ -5102,12 +5116,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     mWaitForDebugger = mOrigWaitForDebugger;
                 }
             }
+            
             // If the app is being launched for restore or full backup, set it up specially
             boolean isRestrictedBackupMode = false;
             if (mBackupTarget != null && mBackupAppName.equals(processName)) {
                 isRestrictedBackupMode = (mBackupTarget.backupMode == BackupRecord.RESTORE)
                         || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL);
             }
+            
             ensurePackageDexOpt(app.instrumentationInfo != null
                     ? app.instrumentationInfo.packageName
                     : app.info.packageName);
@@ -5118,7 +5134,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     ? app.instrumentationInfo : app.info, providers,
                     app.instrumentationClass, app.instrumentationProfileFile,
                     app.instrumentationArguments, app.instrumentationWatcher, testMode, 
-                    isRestrictedBackupMode, mConfiguration, getCommonServicesLocked());
+                    isRestrictedBackupMode || !normalMode,
+                    mConfiguration, getCommonServicesLocked());
             updateLRUListLocked(app, false);
             app.lastRequestedGc = SystemClock.uptimeMillis();
         } catch (Exception e) {
@@ -5284,6 +5301,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     void enableScreenAfterBoot() {
+        EventLog.writeEvent(LOG_BOOT_PROGRESS_ENABLE_SCREEN,
+                SystemClock.uptimeMillis());
         mWindowManager.enableScreenAfterBoot();
     }
 
@@ -5394,26 +5413,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         if (booting) {
-            // Ensure that any processes we had put on hold are now started
-            // up.
-            final int NP = mProcessesOnHold.size();
-            if (NP > 0) {
-                ArrayList<ProcessRecord> procs =
-                    new ArrayList<ProcessRecord>(mProcessesOnHold);
-                for (int ip=0; ip<NP; ip++) {
-                    this.startProcessLocked(procs.get(ip), "on-hold", null);
-                }
-            }
-            if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
-                // Tell anyone interested that we are done booting!
-                synchronized (this) {
-                    broadcastIntentLocked(null, null,
-                            new Intent(Intent.ACTION_BOOT_COMPLETED, null),
-                            null, null, 0, null, null,
-                            android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                            false, false, MY_PID, Process.SYSTEM_UID);
-                }
-            }
+            finishBooting();
         }
 
         trimApplications();
@@ -5421,22 +5421,48 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         //mWindowManager.dump();
 
         if (enableScreen) {
-            EventLog.writeEvent(LOG_BOOT_PROGRESS_ENABLE_SCREEN,
-                SystemClock.uptimeMillis());
             enableScreenAfterBoot();
         }
     }
 
-    final void ensureScreenEnabled() {
+    final void finishBooting() {
+        // Ensure that any processes we had put on hold are now started
+        // up.
+        final int NP = mProcessesOnHold.size();
+        if (NP > 0) {
+            ArrayList<ProcessRecord> procs =
+                new ArrayList<ProcessRecord>(mProcessesOnHold);
+            for (int ip=0; ip<NP; ip++) {
+                this.startProcessLocked(procs.get(ip), "on-hold", null);
+            }
+        }
+        if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+            // Tell anyone interested that we are done booting!
+            synchronized (this) {
+                broadcastIntentLocked(null, null,
+                        new Intent(Intent.ACTION_BOOT_COMPLETED, null),
+                        null, null, 0, null, null,
+                        android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
+                        false, false, MY_PID, Process.SYSTEM_UID);
+            }
+        }
+    }
+    
+    final void ensureBootCompleted() {
+        boolean booting;
         boolean enableScreen;
         synchronized (this) {
+            booting = mBooting;
+            mBooting = false;
             enableScreen = !mBooted;
             mBooted = true;
         }
+        
+        if (booting) {
+            finishBooting();
+        }
 
         if (enableScreen) {
-            EventLog.writeEvent(LOG_BOOT_PROGRESS_ENABLE_SCREEN,
-                SystemClock.uptimeMillis());
             enableScreenAfterBoot();
         }
     }
@@ -5588,6 +5614,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
+        if (type == INTENT_SENDER_BROADCAST) {
+            if ((intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0) {
+                throw new IllegalArgumentException(
+                        "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
+            }
+        }
+        
         synchronized(this) {
             int callingUid = Binder.getCallingUid();
             try {
@@ -7398,7 +7431,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     ProcessRecord proc = startProcessLocked(cpi.processName,
                             cpr.appInfo, false, 0, "content provider",
                             new ComponentName(cpi.applicationInfo.packageName,
-                                    cpi.name));
+                                    cpi.name), false);
                     if (proc == null) {
                         Log.w(TAG, "Unable to launch app "
                                 + cpi.applicationInfo.packageName + "/"
@@ -8125,17 +8158,93 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (mSystemReady) {
                 return;
             }
+            
+            // Check to see if there are any update receivers to run.
+            if (!mDidUpdate) {
+                if (mWaitingUpdate) {
+                    return;
+                }
+                Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
+                List<ResolveInfo> ris = null;
+                try {
+                    ris = ActivityThread.getPackageManager().queryIntentReceivers(
+                                intent, null, 0);
+                } catch (RemoteException e) {
+                }
+                if (ris != null) {
+                    for (int i=ris.size()-1; i>=0; i--) {
+                        if ((ris.get(i).activityInfo.applicationInfo.flags
+                                &ApplicationInfo.FLAG_SYSTEM) == 0) {
+                            ris.remove(i);
+                        }
+                    }
+                    intent.addFlags(Intent.FLAG_RECEIVER_BOOT_UPGRADE);
+                    for (int i=0; i<ris.size(); i++) {
+                        ActivityInfo ai = ris.get(i).activityInfo;
+                        intent.setComponent(new ComponentName(ai.packageName, ai.name));
+                        IIntentReceiver finisher = null;
+                        if (i == 0) {
+                            finisher = new IIntentReceiver.Stub() {
+                                public void performReceive(Intent intent, int resultCode,
+                                        String data, Bundle extras, boolean ordered)
+                                        throws RemoteException {
+                                    synchronized (ActivityManagerService.this) {
+                                        mDidUpdate = true;
+                                    }
+                                    systemReady();
+                                }
+                            };
+                        }
+                        Log.i(TAG, "Sending system update to: " + intent.getComponent());
+                        broadcastIntentLocked(null, null, intent, null, finisher,
+                                0, null, null, null, true, false, MY_PID, Process.SYSTEM_UID);
+                        if (i == 0) {
+                            mWaitingUpdate = true;
+                        }
+                    }
+                }
+                if (mWaitingUpdate) {
+                    return;
+                }
+                mDidUpdate = true;
+            }
+            
             mSystemReady = true;
             if (!mStartRunning) {
                 return;
             }
         }
 
+        ArrayList<ProcessRecord> procsToKill = null;
+        synchronized(mPidsSelfLocked) {
+            for (int i=mPidsSelfLocked.size()-1; i>=0; i--) {
+                ProcessRecord proc = mPidsSelfLocked.valueAt(i);
+                if (!isAllowedWhileBooting(proc.info)){
+                    if (procsToKill == null) {
+                        procsToKill = new ArrayList<ProcessRecord>();
+                    }
+                    procsToKill.add(proc);
+                }
+            }
+        }
+        
+        if (procsToKill != null) {
+            synchronized(this) {
+                for (int i=procsToKill.size()-1; i>=0; i--) {
+                    ProcessRecord proc = procsToKill.get(i);
+                    Log.i(TAG, "Removing system update proc: " + proc);
+                    removeProcessLocked(proc, true);
+                }
+            }
+        }
+        
         if (Config.LOGD) Log.d(TAG, "Start running!");
         EventLog.writeEvent(LOG_BOOT_PROGRESS_AMS_READY,
             SystemClock.uptimeMillis());
 
         synchronized(this) {
+            // Make sure we have no pre-ready processes sitting around.
+            
             if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL) {
                 ResolveInfo ri = mContext.getPackageManager()
                         .resolveActivity(new Intent(Intent.ACTION_FACTORY_TEST),
@@ -8193,6 +8302,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
 
+            // Start up initial activity.
+            mBooting = true;
+            
             try {
                 if (ActivityThread.getPackageManager().hasSystemUidErrors()) {
                     Message msg = Message.obtain();
@@ -8202,8 +8314,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             } catch (RemoteException e) {
             }
 
-            // Start up initial activity.
-            mBooting = true;
             resumeTopActivityLocked(null);
         }
     }
@@ -10128,7 +10238,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // Not running -- get it started, and enqueue this service record
             // to be executed when the app comes up.
             if (startProcessLocked(appName, r.appInfo, true, intentFlags,
-                    "service", r.name) == null) {
+                    "service", r.name, false) == null) {
                 Log.w(TAG, "Unable to launch app "
                         + r.appInfo.packageName + "/"
                         + r.appInfo.uid + " for service "
@@ -10930,7 +11040,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             ComponentName hostingName = new ComponentName(app.packageName, app.backupAgentName);
             // startProcessLocked() returns existing proc's record if it's already running
             ProcessRecord proc = startProcessLocked(app.processName, app,
-                    false, 0, "backup", hostingName);
+                    false, 0, "backup", hostingName, false);
             if (proc == null) {
                 Log.e(TAG, "Unable to start backup agent process " + r);
                 return false;
@@ -11467,10 +11577,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         synchronized(this) {
+            int flags = intent.getFlags();
+            
             if (!mSystemReady) {
                 // if the caller really truly claims to know what they're doing, go
                 // ahead and allow the broadcast without launching any receivers
-                int flags = intent.getFlags();
                 if ((flags&Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT) != 0) {
                     intent = new Intent(intent);
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -11479,6 +11590,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             + " before boot completion");
                     throw new IllegalStateException("Cannot broadcast before boot completed");
                 }
+            }
+            
+            if ((flags&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0) {
+                throw new IllegalArgumentException(
+                        "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
             }
             
             final ProcessRecord callerApp = getRecordForAppLocked(caller);
@@ -12075,12 +12191,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // restart the application.
             }
 
-            // Not running -- get it started, and enqueue this history record
-            // to be executed when the app comes up.
+            // Not running -- get it started, to be executed when the app comes up.
             if ((r.curApp=startProcessLocked(targetProcess,
                     info.activityInfo.applicationInfo, true,
                     r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND,
-                    "broadcast", r.curComponent)) == null) {
+                    "broadcast", r.curComponent,
+                    (r.intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0))
+                            == null) {
                 // Ah, this recipient is unavailable.  Finish it if necessary,
                 // and mark the broadcast record as ready for the next.
                 Log.w(TAG, "Unable to launch app "
