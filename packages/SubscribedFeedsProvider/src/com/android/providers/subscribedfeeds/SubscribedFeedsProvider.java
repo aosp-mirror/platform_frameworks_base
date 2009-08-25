@@ -127,7 +127,9 @@ public class SubscribedFeedsProvider extends AbstractSyncableContentProvider {
     protected void onAccountsChanged(Account[] accountsArray) {
         super.onAccountsChanged(accountsArray);
         for (Account account : accountsArray) {
-            ContentResolver.setSyncAutomatically(account, "subscribedfeeds", true);
+            if (account.type.equals("com.google.GAIA")) {
+                ContentResolver.setSyncAutomatically(account, "subscribedfeeds", true);
+            }
         }
     }
 
