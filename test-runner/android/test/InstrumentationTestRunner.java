@@ -329,7 +329,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
 
         mTestRunner = getAndroidTestRunner();
         mTestRunner.setContext(getTargetContext());
-        mTestRunner.setInstrumentaiton(this);
+        mTestRunner.setInstrumentation(this);
         mTestRunner.setSkipExecution(logOnly);
         mTestRunner.setTest(testSuiteBuilder.build());
         mTestCount = mTestRunner.getTestCases().size();
