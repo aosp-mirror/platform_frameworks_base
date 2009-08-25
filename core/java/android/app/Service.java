@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.ContextWrapper;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.util.Log;
@@ -169,20 +170,119 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     }
 
     /**
-     * Called by the system every time a client explicitly starts the service by calling 
-     * {@link android.content.Context#startService}, providing the arguments it supplied and a 
-     * unique integer token representing the start request.  Do not call this method directly.
-     *  
-     * @param intent The Intent supplied to {@link android.content.Context#startService}, 
-     *                  as given.
-     * @param startId A unique integer representing this specific request to 
-     *                start.  Use with {@link #stopSelfResult(int)}.
-     * 
-     * @see #stopSelfResult(int)
+     * @deprecated Implement {@link #onStartCommand(Intent, int, int)} instead.
      */
+    @Deprecated
     public void onStart(Intent intent, int startId) {
     }
 
+    /**
+     * Bits returned by {@link #onStartCommand} describing how to continue
+     * the service if it is killed.  May be {@link #START_STICKY},
+     * {@link #START_NOT_STICKY}, {@link #START_REDELIVER_INTENT},
+     * or {@link #START_STICKY_COMPATIBILITY}.
+     */
+    public static final int START_CONTINUATION_MASK = 0xf;
+    
+    /**
+     * Constant to return from {@link #onStartCommand}: compatibility
+     * version of {@link #START_STICKY} that does not guarantee that
+     * {@link #onStartCommand} will be called again after being killed.
+     */
+    public static final int START_STICKY_COMPATIBILITY = 0;
+    
+    /**
+     * Constant to return from {@link #onStartCommand}: if this service's
+     * process is killed while it is started (after returning from
+     * {@link #onStartCommand}), then leave it in the started state but
+     * don't retain this delivered intent.  Later the system will try to
+     * re-create the service, but it will <em>not</em> call
+     * {@link #onStartCommand} unless there has been a new call to
+     * {@link Context#startService Context.startService(Intent)} with a new
+     * Intent to deliver.
+     * 
+     * <p>This mode makes sense for things that will be explicitly started
+     * and stopped to run for arbitrary periods of time, such as a service
+     * performing background music playback.
+     */
+    public static final int START_STICKY = 1;
+    
+    /**
+     * Constant to return from {@link #onStartCommand}: if this service's
+     * process is killed while it is started (after returning from
+     * {@link #onStartCommand}), and there are no new start intents to
+     * deliver to it, then take the service out of the started state and
+     * don't recreate until a future explicit call to
+     * {@link Context#startService Context.startService(Intent)}.
+     * 
+     * <p>This mode makes sense for things that want to do some work as a
+     * result of being started, but can be stopped when under memory pressure
+     * and will explicit start themselves again later to do more work.  An
+     * example of such a service would be one that polls for data from
+     * a server: it could schedule an alarm to poll every N minutes by having
+     * the alarm start its service.  When its {@link #onStartCommand} is
+     * called from the alarm, it schedules a new alarm for N minutes later,
+     * and spawns a thread to do its networking.  If its process is killed
+     * while doing that check, the service will not be restarted until the
+     * alarm goes off.
+     */
+    public static final int START_NOT_STICKY = 2;
+    
+    /**
+     * Constant to return from {@link #onStartCommand}: if this service's
+     * process is killed while it is started (after returning from
+     * {@link #onStartCommand}), then it will be scheduled for a restart
+     * and the last delivered Intent re-delivered to it again via
+     * {@link #onStartCommand}.  This Intent will remain scheduled for
+     * redelivery until the service calls {@link #stopSelf(int)} with the
+     * start ID provided to {@link #onStartCommand}.
+     */
+    public static final int START_REDELIVER_INTENT = 3;
+    
+    /**
+     * This flag is set in {@link #onStartCommand} if the Intent is a
+     * re-delivery of a previously delivered intent, because the service
+     * had previously returned {@link #START_REDELIVER_INTENT} but had been
+     * killed before calling {@link #stopSelf(int)} for that Intent.
+     */
+    public static final int START_FLAG_REDELIVERY = 0x0001;
+    
+    /**
+     * This flag is set in {@link #onStartCommand} if the Intent is a
+     * a retry because the original attempt never got to or returned from
+     * {@link #onStartCommand(Intent, int, int)}.
+     */
+    public static final int START_FLAG_RETRY = 0x0002;
+    
+    /**
+     * Called by the system every time a client explicitly starts the service by calling 
+     * {@link android.content.Context#startService}, providing the arguments it supplied and a 
+     * unique integer token representing the start request.  Do not call this method directly.
+     * 
+     * <p>For backwards compatibility, the default implementation calls
+     * {@link #onStart} and returns either {@link #START_STICKY}
+     * or {@link #START_STICKY_COMPATIBILITY}.
+     * 
+     * @param intent The Intent supplied to {@link android.content.Context#startService}, 
+     * as given.  This may be null if the service is being restarted after
+     * its process has gone away, and it had previously returned anything
+     * except {@link #START_STICKY_COMPATIBILITY}.
+     * @param flags Additional data about this start request.  Currently either
+     * 0, {@link #START_FLAG_REDELIVERY}, or {@link #START_FLAG_RETRY}.
+     * @param startId A unique integer representing this specific request to 
+     * start.  Use with {@link #stopSelfResult(int)}.
+     * 
+     * @return The return value indicates what semantics the system should
+     * use for the service's current started state.  It may be one of the
+     * constants associated with the {@link #START_CONTINUATION_MASK} bits.
+     * 
+     * @see #stopSelfResult(int)
+     */
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        onStart(intent, startId);
+        return mStartCompatibility ? START_STICKY_COMPATIBILITY : START_STICKY;
+    }
+    
     /**
      * Called by the system to notify a Service that it is no longer used and is being removed.  The
      * service should clean up an resources it holds (threads, registered
@@ -393,6 +493,8 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         mToken = token;
         mApplication = application;
         mActivityManager = (IActivityManager)activityManager;
+        mStartCompatibility = getApplicationInfo().targetSdkVersion
+                < Build.VERSION_CODES.ECLAIR;
     }
     
     final String getClassName() {
@@ -405,4 +507,5 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     private IBinder mToken = null;
     private Application mApplication = null;
     private IActivityManager mActivityManager = null;
+    private boolean mStartCompatibility = false;
 }

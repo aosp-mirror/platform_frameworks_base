@@ -1215,6 +1215,7 @@ public final class ActivityThread {
     private static final class ServiceArgsData {
         IBinder token;
         int startId;
+        int flags;
         Intent args;
         public String toString() {
             return "ServiceArgsData{token=" + token + " startId=" + startId
@@ -1417,10 +1418,11 @@ public final class ActivityThread {
         }
 
         public final void scheduleServiceArgs(IBinder token, int startId,
-            Intent args) {
+            int flags ,Intent args) {
             ServiceArgsData s = new ServiceArgsData();
             s.token = token;
             s.startId = startId;
+            s.flags = flags;
             s.args = args;
 
             queueOrSendMessage(H.SERVICE_ARGS, s);
@@ -2684,7 +2686,8 @@ public final class ActivityThread {
             service.onCreate();
             mServices.put(data.token, service);
             try {
-                ActivityManagerNative.getDefault().serviceDoneExecuting(data.token);
+                ActivityManagerNative.getDefault().serviceDoneExecuting(
+                        data.token, 0, 0, 0);
             } catch (RemoteException e) {
                 // nothing to do.
             }
@@ -2710,7 +2713,7 @@ public final class ActivityThread {
                     } else {
                         s.onRebind(data.intent);
                         ActivityManagerNative.getDefault().serviceDoneExecuting(
-                                data.token);
+                                data.token, 0, 0, 0);
                     }
                 } catch (RemoteException ex) {
                 }
@@ -2736,7 +2739,7 @@ public final class ActivityThread {
                                 data.token, data.intent, doRebind);
                     } else {
                         ActivityManagerNative.getDefault().serviceDoneExecuting(
-                                data.token);
+                                data.token, 0, 0, 0);
                     }
                 } catch (RemoteException ex) {
                 }
@@ -2773,9 +2776,10 @@ public final class ActivityThread {
                 if (data.args != null) {
                     data.args.setExtrasClassLoader(s.getClassLoader());
                 }
-                s.onStart(data.args, data.startId);
+                int res = s.onStartCommand(data.args, data.flags, data.startId);
                 try {
-                    ActivityManagerNative.getDefault().serviceDoneExecuting(data.token);
+                    ActivityManagerNative.getDefault().serviceDoneExecuting(
+                            data.token, 1, data.startId, res);
                 } catch (RemoteException e) {
                     // nothing to do.
                 }
@@ -2801,7 +2805,8 @@ public final class ActivityThread {
                     ((ApplicationContext) context).scheduleFinalCleanup(who, "Service");
                 }
                 try {
-                    ActivityManagerNative.getDefault().serviceDoneExecuting(token);
+                    ActivityManagerNative.getDefault().serviceDoneExecuting(
+                            token, 0, 0, 0);
                 } catch (RemoteException e) {
                     // nothing to do.
                 }
