@@ -46,6 +46,7 @@
 namespace android {
 
 #define BLUETOOTH_CLASS_ERROR 0xFF000000
+#define PROPERTIES_NREFS 10
 
 #ifdef HAVE_BLUETOOTH
 // We initialize these variables when we load class
@@ -576,11 +577,16 @@ static jobjectArray getDevicePropertiesNative(JNIEnv *env, jobject object,
                 LOGE("DBus reply is NULL in function %s", __FUNCTION__);
             return NULL;
         }
+        env->PushLocalFrame(PROPERTIES_NREFS);
+
         DBusMessageIter iter;
         jobjectArray str_array = NULL;
         if (dbus_message_iter_init(reply, &iter))
            str_array =  parse_remote_device_properties(env, &iter);
         dbus_message_unref(reply);
+
+        env->PopLocalFrame(NULL);
+
         return str_array;
     }
 #endif
@@ -607,11 +613,15 @@ static jobjectArray getAdapterPropertiesNative(JNIEnv *env, jobject object) {
                 LOGE("DBus reply is NULL in function %s", __FUNCTION__);
             return NULL;
         }
+        env->PushLocalFrame(PROPERTIES_NREFS);
+
         DBusMessageIter iter;
         jobjectArray str_array = NULL;
         if (dbus_message_iter_init(reply, &iter))
             str_array = parse_adapter_properties(env, &iter);
         dbus_message_unref(reply);
+
+        env->PopLocalFrame(NULL);
         return str_array;
     }
 #endif
