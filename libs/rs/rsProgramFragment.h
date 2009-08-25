@@ -35,7 +35,7 @@ public:
     ProgramFragment(Element *in, Element *out, bool pointSpriteEnable);
     virtual ~ProgramFragment();
 
-    virtual void setupGL(ProgramFragmentState *);
+    virtual void setupGL(const Context *, ProgramFragmentState *);
 
 
 

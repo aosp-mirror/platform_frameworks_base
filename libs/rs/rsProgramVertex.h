@@ -33,7 +33,7 @@ public:
     ProgramVertex(Element *in, Element *out);
     virtual ~ProgramVertex();
 
-    virtual void setupGL(ProgramVertexState *state);
+    virtual void setupGL(const Context *rsc, ProgramVertexState *state);
 
 
     void setTextureMatrixEnable(bool e) {mTextureMatrixEnable = e;}

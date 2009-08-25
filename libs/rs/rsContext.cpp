@@ -18,6 +18,7 @@
 #include "rsContext.h"
 #include "rsThreadIO.h"
 #include <ui/FramebufferNativeWindow.h>
+#include <ui/EGLUtils.h>
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -29,41 +30,64 @@ pthread_key_t Context::gThreadTLSKey = 0;
 
 void Context::initEGL()
 {
-    mNumConfigs = -1;
+    mEGL.mNumConfigs = -1;
+    EGLint configAttribs[128];
+    EGLint *configAttribsPtr = configAttribs;
 
-    EGLint s_configAttribs[] = {
-         EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-#if 1
-         EGL_RED_SIZE,       8,
-         EGL_GREEN_SIZE,     8,
-         EGL_BLUE_SIZE,      8,
-         EGL_ALPHA_SIZE,     8,
-#else
-         EGL_RED_SIZE,       5,
-         EGL_GREEN_SIZE,     6,
-         EGL_BLUE_SIZE,      5,
-#endif
-         EGL_DEPTH_SIZE,     16,
-         EGL_NONE
-     };
+    memset(configAttribs, 0, sizeof(configAttribs));
 
-     mDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-     eglInitialize(mDisplay, &mMajorVersion, &mMinorVersion);
-     eglChooseConfig(mDisplay, s_configAttribs, &mConfig, 1, &mNumConfigs);
+    configAttribsPtr[0] = EGL_SURFACE_TYPE;
+    configAttribsPtr[1] = EGL_WINDOW_BIT;
+    configAttribsPtr += 2;
 
-     if (mWndSurface) {
-         mSurface = eglCreateWindowSurface(mDisplay, mConfig, mWndSurface,
-                 NULL);
-     } else {
-         mSurface = eglCreateWindowSurface(mDisplay, mConfig,
-                 android_createDisplaySurface(),
-                 NULL);
-     }
+    if (mUseDepth) {
+        configAttribsPtr[0] = EGL_DEPTH_SIZE;
+        configAttribsPtr[1] = 16;
+        configAttribsPtr += 2;
+    }
+    configAttribsPtr[0] = EGL_NONE;
+    rsAssert(configAttribsPtr < (configAttribs + (sizeof(configAttribs) / sizeof(EGLint))));
 
-     mContext = eglCreateContext(mDisplay, mConfig, NULL, NULL);
-     eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
-     eglQuerySurface(mDisplay, mSurface, EGL_WIDTH, &mWidth);
-     eglQuerySurface(mDisplay, mSurface, EGL_HEIGHT, &mHeight);
+    mEGL.mDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    eglInitialize(mEGL.mDisplay, &mEGL.mMajorVersion, &mEGL.mMinorVersion);
+
+    status_t err = EGLUtils::selectConfigForNativeWindow(mEGL.mDisplay, configAttribs, mWndSurface, &mEGL.mConfig);
+    if (err) {
+     LOGE("couldn't find an EGLConfig matching the screen format\n");
+    }
+    //eglChooseConfig(mEGL.mDisplay, configAttribs, &mEGL.mConfig, 1, &mEGL.mNumConfigs);
+
+    if (mWndSurface) {
+        mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig, mWndSurface, NULL);
+    } else {
+        mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig,
+             android_createDisplaySurface(),
+             NULL);
+    }
+
+    mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, NULL, NULL);
+    eglMakeCurrent(mEGL.mDisplay, mEGL.mSurface, mEGL.mSurface, mEGL.mContext);
+    eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_WIDTH, &mEGL.mWidth);
+    eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
+
+
+    mGL.mVersion = glGetString(GL_VERSION);
+    mGL.mVendor = glGetString(GL_VENDOR);
+    mGL.mRenderer = glGetString(GL_RENDERER);
+    mGL.mExtensions = glGetString(GL_EXTENSIONS);
+
+    LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
+    LOGV("GL Version %s", mGL.mVersion);
+    LOGV("GL Vendor %s", mGL.mVendor);
+    LOGV("GL Renderer %s", mGL.mRenderer);
+    LOGV("GL Extensions %s", mGL.mExtensions);
+
+    if (memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
+        LOGE("Error, OpenGL ES Lite not supported");
+    }
+    sscanf((const char *)mGL.mVersion + 13, "%i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
+
+
 }
 
 bool Context::runScript(Script *s, uint32_t launchID)
@@ -90,19 +114,22 @@ bool Context::runRootScript()
 
     //glColor4f(1,1,1,1);
     //glEnable(GL_LIGHT0);
-    glViewport(0, 0, mWidth, mHeight);
-
-    glDepthMask(GL_TRUE);
+    glViewport(0, 0, mEGL.mWidth, mEGL.mHeight);
+#if 1
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
     glClearColor(mRootScript->mEnviroment.mClearColor[0],
                  mRootScript->mEnviroment.mClearColor[1],
                  mRootScript->mEnviroment.mClearColor[2],
                  mRootScript->mEnviroment.mClearColor[3]);
-    glClearDepthf(mRootScript->mEnviroment.mClearDepth);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClear(GL_DEPTH_BUFFER_BIT);
-
+    if (mUseDepth) {
+        glDepthMask(GL_TRUE);
+        glClearDepthf(mRootScript->mEnviroment.mClearDepth);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    } else {
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+#endif
 #if RS_LOG_TIMES
     timerSet(RS_TIMER_SCRIPT);
 #endif
@@ -156,13 +183,13 @@ void Context::timerPrint()
 void Context::setupCheck()
 {
     if (mFragmentStore.get()) {
-        mFragmentStore->setupGL(&mStateFragmentStore);
+        mFragmentStore->setupGL(this, &mStateFragmentStore);
     }
     if (mFragment.get()) {
-        mFragment->setupGL(&mStateFragment);
+        mFragment->setupGL(this, &mStateFragment);
     }
     if (mVertex.get()) {
-        mVertex->setupGL(&mStateVertex);
+        mVertex->setupGL(this, &mStateVertex);
     }
 
 }
@@ -186,11 +213,11 @@ void * Context::threadProc(void *vrsc)
          LOGE("pthread_setspecific %i", status);
      }
 
-     rsc->mStateVertex.init(rsc, rsc->mWidth, rsc->mHeight);
+     rsc->mStateVertex.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
      rsc->setVertex(NULL);
-     rsc->mStateFragment.init(rsc, rsc->mWidth, rsc->mHeight);
+     rsc->mStateFragment.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
      rsc->setFragment(NULL);
-     rsc->mStateFragmentStore.init(rsc, rsc->mWidth, rsc->mHeight);
+     rsc->mStateFragmentStore.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
      rsc->setFragmentStore(NULL);
 
      rsc->mRunning = true;
@@ -204,7 +231,7 @@ void * Context::threadProc(void *vrsc)
 #if RS_LOG_TIMES
              rsc->timerSet(RS_TIMER_CLEAR_SWAP);
 #endif
-             eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
+             eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
 #if RS_LOG_TIMES
              rsc->timerSet(RS_TIMER_INTERNAL);
              rsc->timerPrint();
@@ -218,18 +245,19 @@ void * Context::threadProc(void *vrsc)
 
      glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
-     eglSwapBuffers(rsc->mDisplay, rsc->mSurface);
-     eglTerminate(rsc->mDisplay);
+     eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
+     eglTerminate(rsc->mEGL.mDisplay);
      rsc->objDestroyOOBRun();
      return NULL;
 }
 
-Context::Context(Device *dev, Surface *sur)
+Context::Context(Device *dev, Surface *sur, bool useDepth)
 {
     dev->addContext(this);
     mDev = dev;
     mRunning = false;
     mExit = false;
+    mUseDepth = useDepth;
 
     int status;
     pthread_attr_t threadAttr;
@@ -282,17 +310,6 @@ Context::~Context()
     }
 
     objDestroyOOBDestroy();
-}
-
-void Context::swapBuffers()
-{
-    eglSwapBuffers(mDisplay, mSurface);
-}
-
-void rsContextSwap(RsContext vrsc)
-{
-    Context *rsc = static_cast<Context *>(vrsc);
-    rsc->swapBuffers();
 }
 
 void Context::setRootScript(Script *s)
@@ -520,10 +537,10 @@ void rsi_ContextSetDefineI32(Context *rsc, const char* name, int32_t value)
 }
 
 
-RsContext rsContextCreate(RsDevice vdev, void *sur, uint32_t version)
+RsContext rsContextCreate(RsDevice vdev, void *sur, uint32_t version, bool useDepth)
 {
     Device * dev = static_cast<Device *>(vdev);
-    Context *rsc = new Context(dev, (Surface *)sur);
+    Context *rsc = new Context(dev, (Surface *)sur, useDepth);
     return rsc;
 }
 
