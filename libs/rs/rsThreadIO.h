@@ -31,6 +31,8 @@ public:
     ThreadIO();
     ~ThreadIO();
 
+    void shutdown();
+
     // Plays back commands from the client.
     // Returns true if any commands were processed.
     bool playCoreCommands(Context *con, bool waitForCommand);
