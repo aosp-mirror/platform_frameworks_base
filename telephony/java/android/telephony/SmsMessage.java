@@ -350,6 +350,25 @@ public class SmsMessage {
         return calculateLength((CharSequence)messageBody, use7bitOnly);
     }
 
+    /*
+     * TODO(cleanup): It looks like there is now no useful reason why
+     * apps should generate pdus themselves using these routines,
+     * instead of handing the raw data to SMSDispatcher (and thereby
+     * have the phone process do the encoding).  Moreover, CDMA now
+     * has shared state (in the form of the msgId system property)
+     * which can only be modified by the phone process, and hence
+     * makes the output of these routines incorrect.  Since they now
+     * serve no purpose, they should probably just return null
+     * directly, and be deprecated.  Going further in that direction,
+     * the above parsers of serialized pdu data should probably also
+     * be gotten rid of, hiding all but the necessarily visible
+     * structured data from client apps.  A possible concern with
+     * doing this is that apps may be using these routines to generate
+     * pdus that are then sent elsewhere, some network server, for
+     * example, and that always returning null would thereby break
+     * otherwise useful apps.
+     */
+
     /**
      * Get an SMS-SUBMIT PDU for a destination address and a message
      *

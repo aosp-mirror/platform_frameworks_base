@@ -50,16 +50,21 @@ public class IccSmsInterfaceManagerProxy extends ISms.Stub {
         return mIccSmsInterfaceManager.getAllMessagesFromIccEf();
     }
 
-    public void sendRawPdu(byte[] smsc, byte[] pdu, PendingIntent sentIntent,
-            PendingIntent deliveryIntent) throws android.os.RemoteException {
-        mIccSmsInterfaceManager.sendRawPdu(smsc, pdu, sentIntent,
-                deliveryIntent);
+    public void sendData(String destAddr, String scAddr, int destPort,
+            byte[] data, PendingIntent sentIntent, PendingIntent deliveryIntent) {
+        mIccSmsInterfaceManager.sendData(destAddr, scAddr, destPort, data,
+                sentIntent, deliveryIntent);
     }
 
-    public void sendMultipartText(String destinationAddress, String scAddress,
+    public void sendText(String destAddr, String scAddr,
+            String text, PendingIntent sentIntent, PendingIntent deliveryIntent) {
+        mIccSmsInterfaceManager.sendText(destAddr, scAddr, text, sentIntent, deliveryIntent);
+    }
+
+    public void sendMultipartText(String destAddr, String scAddr,
             List<String> parts, List<PendingIntent> sentIntents,
             List<PendingIntent> deliveryIntents) throws android.os.RemoteException {
-        mIccSmsInterfaceManager.sendMultipartText(destinationAddress, scAddress,
+        mIccSmsInterfaceManager.sendMultipartText(destAddr, scAddr,
                 parts, sentIntents, deliveryIntents);
     }
 
