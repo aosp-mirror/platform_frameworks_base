@@ -211,10 +211,6 @@ DBusHandlerResult a2dp_event_filter(DBusMessage *msg, JNIEnv *env) {
                             method_onSinkPropertyChanged,
                             env->NewStringUTF(c_path),
                             str_array);
-        for (int i = 0; i < env->GetArrayLength(str_array); i++) {
-            env->DeleteLocalRef(env->GetObjectArrayElement(str_array, i));
-        }
-        env->DeleteLocalRef(str_array);
         result = DBUS_HANDLER_RESULT_HANDLED;
         return result;
     } else {

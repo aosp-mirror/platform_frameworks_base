@@ -57,6 +57,8 @@ static jmethodID method_onAgentCancel;
 
 typedef event_loop_native_data_t native_data_t;
 
+#define EVENT_LOOP_REFS 10
+
 static inline native_data_t * get_native_data(JNIEnv *env, jobject object) {
     return (native_data_t *)(env->GetIntField(object,
                                                  field_mNativeData));
@@ -679,6 +681,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
     native_data_t *nat;
     JNIEnv *env;
     DBusError err;
+    DBusHandlerResult ret;
 
     dbus_error_init(&err);
 
@@ -694,6 +697,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
         dbus_message_get_interface(msg), dbus_message_get_member(msg),
         dbus_message_get_path(msg));
 
+    env->PushLocalFrame(EVENT_LOOP_REFS);
     if (dbus_message_is_signal(msg,
                                "org.bluez.Adapter",
                                "DeviceFound")) {
@@ -711,10 +715,9 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                                 method_onDeviceFound,
                                 env->NewStringUTF(c_address),
                                 str_array);
-            env->DeleteLocalRef(str_array);
         } else
             LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
-        return DBUS_HANDLER_RESULT_HANDLED;
+        goto success;
     } else if (dbus_message_is_signal(msg,
                                      "org.bluez.Adapter",
                                      "DeviceDisappeared")) {
@@ -726,7 +729,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
             env->CallVoidMethod(nat->me, method_onDeviceDisappeared,
                                 env->NewStringUTF(c_address));
         } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
-        return DBUS_HANDLER_RESULT_HANDLED;
+        goto success;
     } else if (dbus_message_is_signal(msg,
                                      "org.bluez.Adapter",
                                      "DeviceCreated")) {
@@ -739,7 +742,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                                 method_onDeviceCreated,
                                 env->NewStringUTF(c_object_path));
         } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
-        return DBUS_HANDLER_RESULT_HANDLED;
+        goto success;
     } else if (dbus_message_is_signal(msg,
                                      "org.bluez.Adapter",
                                      "DeviceRemoved")) {
@@ -752,8 +755,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                                method_onDeviceRemoved,
                                env->NewStringUTF(c_object_path));
         } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
-
-        return DBUS_HANDLER_RESULT_HANDLED;
+        goto success;
     } else if (dbus_message_is_signal(msg,
                                       "org.bluez.Adapter",
                                       "PropertyChanged")) {
@@ -775,9 +777,8 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
             env->CallVoidMethod(nat->me,
                               method_onPropertyChanged,
                               str_array);
-            env->DeleteLocalRef(str_array);
         } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
-        return DBUS_HANDLER_RESULT_HANDLED;
+        goto success;
     } else if (dbus_message_is_signal(msg,
                                       "org.bluez.Device",
                                       "PropertyChanged")) {
@@ -788,12 +789,17 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                             method_onDevicePropertyChanged,
                             env->NewStringUTF(remote_device_path),
                             str_array);
-            env->DeleteLocalRef(str_array);
         } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
-        return DBUS_HANDLER_RESULT_HANDLED;
-
+        goto success;
     }
-    return a2dp_event_filter(msg, env);
+
+    ret = a2dp_event_filter(msg, env);
+    env->PopLocalFrame(NULL);
+    return ret;
+
+success:
+    env->PopLocalFrame(NULL);
+    return DBUS_HANDLER_RESULT_HANDLED;
 }
 
 // Called by dbus during WaitForAndDispatchEventNative()
@@ -811,6 +817,8 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
     if (nat == NULL) return DBUS_HANDLER_RESULT_HANDLED;
 
     nat->vm->GetEnv((void**)&env, nat->envVer);
+    env->PushLocalFrame(EVENT_LOOP_REFS);
+
     if (dbus_message_is_method_call(msg,
             "org.bluez.Agent", "Cancel")) {
 
@@ -820,11 +828,11 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         DBusMessage *reply = dbus_message_new_method_return(msg);
         if (!reply) {
             LOGE("%s: Cannot create message reply\n", __FUNCTION__);
-            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+            goto failure;
         }
         dbus_connection_send(nat->conn, reply, NULL);
         dbus_message_unref(reply);
-        return DBUS_HANDLER_RESULT_HANDLED;
+        goto success;
 
     } else if (dbus_message_is_method_call(msg,
             "org.bluez.Agent", "Authorize")) {
@@ -835,7 +843,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
                                    DBUS_TYPE_STRING, &uuid,
                                    DBUS_TYPE_INVALID)) {
             LOGE("%s: Invalid arguments for Authorize() method", __FUNCTION__);
-            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+            goto failure;
         }
 
         LOGV("... object_path = %s", object_path);
@@ -850,7 +858,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
             DBusMessage *reply = dbus_message_new_method_return(msg);
             if (!reply) {
                 LOGE("%s: Cannot create message reply\n", __FUNCTION__);
-                return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+                goto failure;
             }
             dbus_connection_send(nat->conn, reply, NULL);
             dbus_message_unref(reply);
@@ -859,12 +867,12 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
                     "org.bluez.Error.Rejected", "Authorization rejected");
             if (!reply) {
                 LOGE("%s: Cannot create message reply\n", __FUNCTION__);
-                return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+                goto failure;
             }
             dbus_connection_send(nat->conn, reply, NULL);
             dbus_message_unref(reply);
         }
-        return DBUS_HANDLER_RESULT_HANDLED;
+        goto success;
     } else if (dbus_message_is_method_call(msg,
             "org.bluez.Agent", "RequestPinCode")) {
         char *object_path;
@@ -872,14 +880,14 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
                                    DBUS_TYPE_OBJECT_PATH, &object_path,
                                    DBUS_TYPE_INVALID)) {
             LOGE("%s: Invalid arguments for RequestPinCode() method", __FUNCTION__);
-            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+            goto failure;
         }
 
         dbus_message_ref(msg);  // increment refcount because we pass to java
         env->CallVoidMethod(nat->me, method_onRequestPinCode,
                                        env->NewStringUTF(object_path),
                                        int(msg));
-        return DBUS_HANDLER_RESULT_HANDLED;
+        goto success;
     } else if (dbus_message_is_method_call(msg,
             "org.bluez.Agent", "RequestPasskey")) {
         char *object_path;
@@ -887,13 +895,14 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
                                    DBUS_TYPE_OBJECT_PATH, &object_path,
                                    DBUS_TYPE_INVALID)) {
             LOGE("%s: Invalid arguments for RequestPasskey() method", __FUNCTION__);
-            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+            goto failure;
         }
 
         dbus_message_ref(msg);  // increment refcount because we pass to java
         env->CallVoidMethod(nat->me, method_onRequestPasskey,
                                        env->NewStringUTF(object_path),
                                        int(msg));
+        goto success;
     } else if (dbus_message_is_method_call(msg,
             "org.bluez.Agent", "RequestConfirmation")) {
         char *object_path;
@@ -903,7 +912,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
                                    DBUS_TYPE_UINT32, &passkey,
                                    DBUS_TYPE_INVALID)) {
             LOGE("%s: Invalid arguments for RequestConfirmation() method", __FUNCTION__);
-            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+            goto failure;
         }
 
         dbus_message_ref(msg);  // increment refcount because we pass to java
@@ -911,23 +920,30 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
                                        env->NewStringUTF(object_path),
                                        passkey,
                                        int(msg));
-        return DBUS_HANDLER_RESULT_HANDLED;
+        goto success;
     } else if (dbus_message_is_method_call(msg,
                   "org.bluez.Agent", "Release")) {
         // reply
         DBusMessage *reply = dbus_message_new_method_return(msg);
         if (!reply) {
             LOGE("%s: Cannot create message reply\n", __FUNCTION__);
-            return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+            goto failure;
         }
         dbus_connection_send(nat->conn, reply, NULL);
         dbus_message_unref(reply);
-        return DBUS_HANDLER_RESULT_HANDLED;
+        goto success;
     } else {
         LOGV("%s:%s is ignored", dbus_message_get_interface(msg), dbus_message_get_member(msg));
     }
 
+failure:
+    env->PopLocalFrame(NULL);
     return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+
+success:
+    env->PopLocalFrame(NULL);
+    return DBUS_HANDLER_RESULT_HANDLED;
+
 }
 #endif
 
