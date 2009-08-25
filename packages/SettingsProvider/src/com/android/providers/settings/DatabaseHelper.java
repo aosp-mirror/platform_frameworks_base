@@ -64,7 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
-    private static final int DATABASE_VERSION = 38;
+    private static final int DATABASE_VERSION = 39;
 
     private Context mContext;
 
@@ -389,21 +389,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (upgradeVersion == 34) {
             db.beginTransaction();
             try {
-                String value =
-                        mContext.getResources().getBoolean(R.bool.assisted_gps_enabled) ? "1" : "0";
-                db.execSQL("INSERT OR IGNORE INTO secure(name,value) values('" +
-                        Settings.Secure.ASSISTED_GPS_ENABLED + "','" + value + "');");
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-            }
-
-            upgradeVersion = 35;
-        }
-
-        if (upgradeVersion == 35) {
-            db.beginTransaction();
-            try {
                 SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
                         + " VALUES(?,?);");
                 loadSecure35Settings(stmt);
@@ -412,8 +397,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } finally {
                 db.endTransaction();
             }
+        }
+            // due to a botched merge from donut to eclair, the initialization of ASSISTED_GPS_ENABLED
+            // was accidentally done out of order here.
+            // to fix this, ASSISTED_GPS_ENABLED is now initialized while upgrading from 38 to 39,
+            // and we intentionally do nothing from 35 to 36 now.
+        if (upgradeVersion == 35) {
             upgradeVersion = 36;
         }
+
         if (upgradeVersion == 36) {
            // This upgrade adds the STREAM_SYSTEM_ENFORCED type to the list of
             // types affected by ringer modes (silent, vibrate, etc.)
@@ -448,6 +440,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.endTransaction();
             }
             upgradeVersion = 38;
+        }
+
+        if (upgradeVersion == 38) {
+            db.beginTransaction();
+            try {
+                String value =
+                        mContext.getResources().getBoolean(R.bool.assisted_gps_enabled) ? "1" : "0";
+                db.execSQL("INSERT OR IGNORE INTO secure(name,value) values('" +
+                        Settings.Secure.ASSISTED_GPS_ENABLED + "','" + value + "');");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            upgradeVersion = 39;
         }
 
         if (upgradeVersion != currentVersion) {
