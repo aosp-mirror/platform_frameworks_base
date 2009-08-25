@@ -608,7 +608,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case SERVICE_DONE_EXECUTING_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            serviceDoneExecuting(token);
+            int type = data.readInt();
+            int startId = data.readInt();
+            int res = data.readInt();
+            serviceDoneExecuting(token, type, startId, res);
             reply.writeNoException();
             return true;
         }
@@ -1746,11 +1749,15 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public void serviceDoneExecuting(IBinder token) throws RemoteException {
+    public void serviceDoneExecuting(IBinder token, int type, int startId,
+            int res) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
+        data.writeInt(type);
+        data.writeInt(startId);
+        data.writeInt(res);
         mRemote.transact(SERVICE_DONE_EXECUTING_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
