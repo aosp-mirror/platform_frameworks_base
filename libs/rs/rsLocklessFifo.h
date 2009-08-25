@@ -25,13 +25,14 @@ namespace android {
 
 // A simple FIFO to be used as a producer / consumer between two
 // threads.  One is writer and one is reader.  The common cases
-// will not require locking.  It is not threadsafe for multiple 
+// will not require locking.  It is not threadsafe for multiple
 // readers or writers by design.
 
-class LocklessCommandFifo 
+class LocklessCommandFifo
 {
 public:
     bool init(uint32_t size);
+    void shutdown();
 
     LocklessCommandFifo();
     ~LocklessCommandFifo();
@@ -59,6 +60,7 @@ protected:
     uint8_t * mBuffer;
     uint8_t * mEnd;
     uint8_t mSize;
+    bool mInShutdown;
 
     Signal mSignalToWorker;
     Signal mSignalToControl;

@@ -243,11 +243,13 @@ void * Context::threadProc(void *vrsc)
          }
      }
 
+     LOGV("RS Thread exiting");
      glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
      eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
      eglTerminate(rsc->mEGL.mDisplay);
      rsc->objDestroyOOBRun();
+     LOGV("RS Thread exited");
      return NULL;
 }
 
@@ -298,9 +300,11 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
 
 Context::~Context()
 {
+    LOGV("Context::~Context");
     mExit = true;
     void *res;
 
+    mIO.shutdown();
     int status = pthread_join(mThreadId, &res);
     objDestroyOOBRun();
 
