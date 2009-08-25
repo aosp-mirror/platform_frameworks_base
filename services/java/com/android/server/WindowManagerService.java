@@ -8850,6 +8850,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     "Now opening app" + wtoken);
                             wtoken.reportedVisible = false;
                             wtoken.inPendingTransaction = false;
+                            wtoken.animation = null;
                             setTokenVisibilityLocked(wtoken, lp, true, transit, false);
                             wtoken.updateReportedVisibilityLocked();
                             wtoken.showAllWindowsLocked();
@@ -8860,6 +8861,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
                                     "Now closing app" + wtoken);
                             wtoken.inPendingTransaction = false;
+                            wtoken.animation = null;
                             setTokenVisibilityLocked(wtoken, lp, false, transit, false);
                             wtoken.updateReportedVisibilityLocked();
                             // Force the allDrawn flag, because we want to start
