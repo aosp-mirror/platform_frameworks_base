@@ -112,9 +112,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private Mode mMode = Mode.LockScreen;
 
     /**
-     * Keeps track of what mode the current unlock screen is
+     * Keeps track of what mode the current unlock screen is (cached from most recent computation in
+     * {@link #getUnlockMode}).
      */
     private UnlockMode mUnlockScreenMode;
+
+    private boolean mForgotPattern;
 
     /**
      * If true, it means we are in the process of verifying that the user
@@ -185,6 +188,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         mKeyguardScreenCallback = new KeyguardScreenCallback() {
 
             public void goToLockScreen() {
+                mForgotPattern = false;
                 if (mIsVerifyUnlockOnly) {
                     // navigating away from unlock screen during verify mode means
                     // we are done and the user failed to authenticate.
@@ -205,6 +209,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 if (!isSecure()) {
                     getCallback().keyguardDone(true);
                 } else {
+                    updateScreen(Mode.UnlockScreen);
+                }
+            }
+
+            public void forgotPattern(boolean isForgotten) {
+                if (mEnableFallback) {
+                    mForgotPattern = isForgotten;
                     updateScreen(Mode.UnlockScreen);
                 }
             }
@@ -293,12 +304,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     @Override
     public void reset() {
         mIsVerifyUnlockOnly = false;
+        mForgotPattern = false;
         updateScreen(getInitialMode());
     }
 
     @Override
     public void onScreenTurnedOff() {
         mScreenOn = false;
+        mForgotPattern = false;
         if (mMode == Mode.LockScreen) {
            ((KeyguardScreen) mLockScreen).onPause();
         } else {
@@ -523,7 +536,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         if (simState == IccCard.State.PIN_REQUIRED || simState == IccCard.State.PUK_REQUIRED) {
             return UnlockMode.SimPin;
         } else {
-            return mLockPatternUtils.isPermanentlyLocked() ?
+            return (mForgotPattern || mLockPatternUtils.isPermanentlyLocked()) ?
                     UnlockMode.Account:
                     UnlockMode.Pattern;
         }

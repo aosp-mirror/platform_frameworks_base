@@ -35,10 +35,13 @@ import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 
 import java.io.IOException;
 
@@ -68,11 +71,16 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
     private Button mEmergencyCall;
 
     /**
+     * Shown while making asynchronous check of password.
+     */
+    private ProgressDialog mCheckingDialog;
+
+    /**
      * AccountUnlockScreen constructor.
      */
     public AccountUnlockScreen(Context context,
-            KeyguardScreenCallback callback,
-            LockPatternUtils lockPatternUtils) {
+                               KeyguardScreenCallback callback,
+                               LockPatternUtils lockPatternUtils) {
         super(context);
         mCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -81,6 +89,9 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
                 R.layout.keyguard_screen_glogin_unlock, this, true);
 
         mTopHeader = (TextView) findViewById(R.id.topHeader);
+        mTopHeader.setText(mLockPatternUtils.isPermanentlyLocked() ?
+                R.string.lockscreen_glogin_too_many_attempts :
+                R.string.lockscreen_glogin_forgot_pattern);
 
         mInstructions = (TextView) findViewById(R.id.instructions);
 
@@ -135,6 +146,9 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     /** {@inheritDoc} */
     public void cleanUp() {
+        if (mCheckingDialog != null) {
+            mCheckingDialog.hide();
+        }
     }
 
     /** {@inheritDoc} */
@@ -149,10 +163,12 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         }
     }
 
-    private void onCheckPasswordResult(boolean flag) {
-        if (flag) {
+    private void onCheckPasswordResult(boolean success) {
+        if (success) {
             // clear out forgotten password
             mLockPatternUtils.setPermanentlyLocked(false);
+            mLockPatternUtils.setLockPatternEnabled(false);
+            mLockPatternUtils.saveLockPattern(null);
 
             // launch the 'choose lock pattern' activity so
             // the user can pick a new one if they want to
@@ -173,7 +189,11 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN
                 && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            mCallback.goToLockScreen();
+            if (mLockPatternUtils.isPermanentlyLocked()) {
+                mCallback.goToLockScreen();
+            } else {
+                mCallback.forgotPattern(false);
+            }
             return true;
         }
         return super.dispatchKeyEvent(event);
@@ -232,6 +252,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
     }
 
     private void asyncCheckPassword() {
+        mCallback.pokeWakelock(AWAKE_POKE_MILLIS);
         final String login = mLogin.getText().toString();
         final String password = mPassword.getText().toString();
         Account account = findIntendedAccount(login);
@@ -239,18 +260,49 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
             onCheckPasswordResult(false);
             return;
         }
+        getProgressDialog().show();
         AccountManager.get(mContext).confirmPassword(
                 account, password, new AccountManagerCallback<Boolean>() {
             public void run(AccountManagerFuture<Boolean> future) {
-                boolean result = false;
                 try {
-                    result = future.getResult();
+                    mCallback.pokeWakelock(AWAKE_POKE_MILLIS);
+                    final boolean result = future.getResult();
+                    // ensure on UI thread
+                    mLogin.post(new Runnable() {
+                        public void run() {
+                            onCheckPasswordResult(result);
+                        }
+                    });
                 } catch (OperationCanceledException e) {
+                    onCheckPasswordResult(false);
                 } catch (IOException e) {
+                    onCheckPasswordResult(false);
                 } catch (AuthenticatorException e) {
+                    onCheckPasswordResult(false);
+                } finally {
+                    mLogin.post(new Runnable() {
+                        public void run() {
+                            getProgressDialog().hide();
+                        }
+                    });
                 }
-                onCheckPasswordResult(result);
             }
         }, null /* handler */);
+    }
+
+    private Dialog getProgressDialog() {
+        if (mCheckingDialog == null) {
+            mCheckingDialog = new ProgressDialog(mContext);
+            mCheckingDialog.setMessage(
+                    mContext.getString(R.string.lockscreen_glogin_checking_password));
+            mCheckingDialog.setIndeterminate(true);
+            mCheckingDialog.setCancelable(false);
+            mCheckingDialog.getWindow().setType(
+                    WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+            mCheckingDialog.getWindow().setFlags(
+                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        }
+        return mCheckingDialog;
     }
 }

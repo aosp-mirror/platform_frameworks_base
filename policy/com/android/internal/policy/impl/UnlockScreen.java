@@ -104,6 +104,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             case ForgotLockPattern:
                 mFooterNormal.setVisibility(View.GONE);
                 mFooterForgotPattern.setVisibility(View.VISIBLE);
+                mForgotPatternButton.setVisibility(View.VISIBLE);
                 break;
             case VerifyUnlocked:
                 mFooterNormal.setVisibility(View.GONE);
@@ -164,8 +165,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mForgotPatternButton.setOnClickListener(new OnClickListener() {
 
             public void onClick(View v) {
-                mLockPatternUtils.setPermanentlyLocked(true);
-                mCallback.goToUnlockScreen();
+                mCallback.forgotPattern(true);
             }
         });
 
@@ -274,6 +274,15 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mUpdateMonitor.removeCallback(this);
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if (hasWindowFocus) {
+            // when timeout dialog closes we want to update our state
+            onResume();
+        }
+    }
+
     private class UnlockPatternListener
             implements LockPatternView.OnPatternListener {
 
@@ -337,5 +346,4 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             }
         }.start();
     }
-
 }
