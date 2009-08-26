@@ -76,18 +76,17 @@ void Context::initEGL()
     mGL.mRenderer = glGetString(GL_RENDERER);
     mGL.mExtensions = glGetString(GL_EXTENSIONS);
 
-    LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
-    LOGV("GL Version %s", mGL.mVersion);
-    LOGV("GL Vendor %s", mGL.mVendor);
-    LOGV("GL Renderer %s", mGL.mRenderer);
-    LOGV("GL Extensions %s", mGL.mExtensions);
+    //LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
+    //LOGV("GL Version %s", mGL.mVersion);
+    //LOGV("GL Vendor %s", mGL.mVendor);
+    //LOGV("GL Renderer %s", mGL.mRenderer);
+    //LOGV("GL Extensions %s", mGL.mExtensions);
 
-    if (memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
+    if ((strlen((const char *)mGL.mVersion) < 12) || memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
         LOGE("Error, OpenGL ES Lite not supported");
+    } else {
+        sscanf((const char *)mGL.mVersion + 13, "%i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
     }
-    sscanf((const char *)mGL.mVersion + 13, "%i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
-
-
 }
 
 bool Context::runScript(Script *s, uint32_t launchID)
@@ -115,7 +114,6 @@ bool Context::runRootScript()
     //glColor4f(1,1,1,1);
     //glEnable(GL_LIGHT0);
     glViewport(0, 0, mEGL.mWidth, mEGL.mHeight);
-#if 1
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
     glClearColor(mRootScript->mEnviroment.mClearColor[0],
@@ -129,7 +127,7 @@ bool Context::runRootScript()
     } else {
         glClear(GL_COLOR_BUFFER_BIT);
     }
-#endif
+
 #if RS_LOG_TIMES
     timerSet(RS_TIMER_SCRIPT);
 #endif

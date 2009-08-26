@@ -12,7 +12,6 @@ int main(int launchID) {
     float height = getHeight();
 
     if (rate) {
-        debugI32("rate", rate);
         int *dataI = loadArrayI32(1, 0);
         float rMax = ((float)rate) * 0.005f;
         int x = Control_x;
