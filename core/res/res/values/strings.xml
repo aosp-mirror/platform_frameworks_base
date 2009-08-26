@@ -1648,7 +1648,7 @@
     <string name="copyUrl">Copy URL</string>
 
     <!-- EditText context menu -->
-    <string name="inputMethod">Input Method</string>
+    <string name="inputMethod">Input method</string>
 
     <!-- Item on EditText context menu, used to add a word to the
          input method dictionary. -->
