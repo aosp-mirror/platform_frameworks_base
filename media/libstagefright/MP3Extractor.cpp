@@ -18,13 +18,11 @@
 #define LOG_TAG "MP3Extractor"
 #include <utils/Log.h>
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MP3Extractor.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
@@ -317,7 +315,7 @@ MP3Extractor::MP3Extractor(const sp<DataSource> &source)
     off_t pos = 0;
     uint32_t header;
     bool success = Resync(mDataSource, 0, &pos, &header);
-    assert(success);
+    CHECK(success);
 
     if (success) {
         mFirstFramePos = pos;
@@ -393,7 +391,7 @@ MP3Source::~MP3Source() {
 }
 
 status_t MP3Source::start(MetaData *) {
-    assert(!mStarted);
+    CHECK(!mStarted);
 
     mGroup = new MediaBufferGroup;
 
@@ -409,7 +407,7 @@ status_t MP3Source::start(MetaData *) {
 }
 
 status_t MP3Source::stop() {
-    assert(mStarted);
+    CHECK(mStarted);
 
     delete mGroup;
     mGroup = NULL;
@@ -481,7 +479,7 @@ status_t MP3Source::read(
         // Try again with the new position.
     }
 
-    assert(frame_size <= buffer->size());
+    CHECK(frame_size <= buffer->size());
 
     ssize_t n = mDataSource->read_at(mCurrentPos, buffer->data(), frame_size);
     if (n < (ssize_t)frame_size) {

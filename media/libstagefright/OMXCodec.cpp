@@ -494,6 +494,7 @@ void OMXCodec::setVideoOutputFormat(
     // Enabling this code appears to be the right thing(tm), but,...
     // the TI decoder then loses the ability to output YUV420 and only outputs
     // YCbYCr (16bit)
+#if 1
     if (!strcmp("OMX.TI.Video.Decoder", mComponentName)
         && !strcasecmp("video/avc", mime)) {
         OMX_PARAM_COMPONENTROLETYPE role;
@@ -509,6 +510,7 @@ void OMXCodec::setVideoOutputFormat(
                 &role, sizeof(role));
         CHECK_EQ(err, OK);
     }
+#endif
 
     OMX_VIDEO_CODINGTYPE compressionFormat = OMX_VIDEO_CodingUnused;
     if (!strcasecmp("video/avc", mime)) {

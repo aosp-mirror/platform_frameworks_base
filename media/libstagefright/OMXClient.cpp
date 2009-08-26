@@ -20,12 +20,10 @@
 
 #include <sys/socket.h>
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <binder/IServiceManager.h>
 #include <media/IMediaPlayerService.h>
 #include <media/IOMX.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/OMXClient.h>
 
 namespace android {
@@ -44,10 +42,10 @@ status_t OMXClient::connect() {
     sp<IBinder> binder = sm->getService(String16("media.player"));
     sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
 
-    assert(service.get() != NULL);
+    CHECK(service.get() != NULL);
 
     mOMX = service->createOMX();
-    assert(mOMX.get() != NULL);
+    CHECK(mOMX.get() != NULL);
 
     mReflector = new OMXClientReflector(this);
 
@@ -61,7 +59,7 @@ void OMXClient::disconnect() {
         return;
     }
 
-    assert(mObservers.isEmpty());
+    CHECK(mObservers.isEmpty());
 
     mReflector->reset();
     mReflector.clear();
@@ -88,7 +86,7 @@ void OMXClient::unregisterObserver(IOMX::node_id node) {
     Mutex::Autolock autoLock(mLock);
 
     ssize_t index = mObservers.indexOfKey(node);
-    assert(index >= 0);
+    CHECK(index >= 0);
 
     if (index < 0) {
         return;
@@ -155,7 +153,7 @@ void OMXObserver::start() {
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     int err = pthread_create(&mThread, &attr, ThreadWrapper, this);
-    assert(err == 0);
+    CHECK_EQ(err, 0);
 
     pthread_attr_destroy(&attr);
 }

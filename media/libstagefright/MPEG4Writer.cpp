@@ -16,15 +16,13 @@
 
 #include <arpa/inet.h>
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <ctype.h>
 #include <pthread.h>
 
 #include <media/stagefright/MPEG4Writer.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MetaData.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/Utils.h>
 
@@ -71,7 +69,7 @@ MPEG4Writer::MPEG4Writer(const char *filename)
     : mFile(fopen(filename, "wb")),
       mOffset(0),
       mMdatOffset(0) {
-    assert(mFile != NULL);
+    CHECK(mFile != NULL);
 }
 
 MPEG4Writer::~MPEG4Writer() {
@@ -173,7 +171,7 @@ void MPEG4Writer::stop() {
       }
     endBox();  // moov
 
-    assert(mBoxes.empty());
+    CHECK(mBoxes.empty());
 
     fclose(mFile);
     mFile = NULL;
@@ -193,7 +191,7 @@ off_t MPEG4Writer::addSample(MediaBuffer *buffer) {
 }
 
 void MPEG4Writer::beginBox(const char *fourcc) {
-    assert(strlen(fourcc) == 4);
+    CHECK_EQ(strlen(fourcc), 4);
 
     mBoxes.push_back(mOffset);
 
@@ -202,7 +200,7 @@ void MPEG4Writer::beginBox(const char *fourcc) {
 }
 
 void MPEG4Writer::endBox() {
-    assert(!mBoxes.empty());
+    CHECK(!mBoxes.empty());
 
     off_t offset = *--mBoxes.end();
     mBoxes.erase(--mBoxes.end());
@@ -244,7 +242,7 @@ void MPEG4Writer::writeCString(const char *s) {
 }
 
 void MPEG4Writer::writeFourcc(const char *s) {
-    assert(strlen(s) == 4);
+    CHECK_EQ(strlen(s), 4);
     fwrite(s, 1, 4, mFile);
     mOffset += 4;
 }
@@ -286,7 +284,7 @@ void MPEG4Writer::Track::start() {
     mDone = false;
 
     int err = pthread_create(&mThread, &attr, ThreadWrapper, this);
-    assert(err == 0);
+    CHECK_EQ(err, 0);
 
     pthread_attr_destroy(&attr);
 }
@@ -345,7 +343,7 @@ void MPEG4Writer::Track::threadEntry() {
                 ++offset;
             }
 
-            // assert(offset + 3 < size);
+            // CHECK(offset + 3 < size);
             if (offset + 3 >= size) {
                 // XXX assume the entire first chunk of data is the codec specific
                 // data.
@@ -368,10 +366,10 @@ void MPEG4Writer::Track::threadEntry() {
         int32_t units, scale;
         bool success =
             buffer->meta_data()->findInt32(kKeyTimeUnits, &units);
-        assert(success);
+        CHECK(success);
         success =
             buffer->meta_data()->findInt32(kKeyTimeScale, &scale);
-        assert(success);
+        CHECK(success);
 
         info.timestamp = (int64_t)units * 1000 / scale;
 
@@ -389,7 +387,7 @@ int64_t MPEG4Writer::Track::getDuration() const {
 void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
     const char *mime;
     bool success = mMeta->findCString(kKeyMIMEType, &mime);
-    assert(success);
+    CHECK(success);
 
     bool is_audio = !strncasecmp(mime, "audio/", 6);
 
@@ -428,7 +426,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
             int32_t width, height;
             bool success = mMeta->findInt32(kKeyWidth, &width);
             success = success && mMeta->findInt32(kKeyHeight, &height);
-            assert(success);
+            CHECK(success);
 
             mOwner->writeInt32(width);
             mOwner->writeInt32(height);
@@ -505,7 +503,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
 
                   int32_t samplerate;
                   bool success = mMeta->findInt32(kKeySampleRate, &samplerate);
-                  assert(success);
+                  CHECK(success);
 
                   mOwner->writeInt32(samplerate << 16);
                 mOwner->endBox();
@@ -515,7 +513,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                 } else if (!strcasecmp("video/3gpp", mime)) {
                     mOwner->beginBox("s263");
                 } else {
-                    assert(!"should not be here, unknown mime type.");
+                    CHECK(!"should not be here, unknown mime type.");
                 }
 
                   mOwner->writeInt32(0);           // reserved
@@ -530,7 +528,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                   int32_t width, height;
                   bool success = mMeta->findInt32(kKeyWidth, &width);
                   success = success && mMeta->findInt32(kKeyHeight, &height);
-                  assert(success);
+                  CHECK(success);
 
                   mOwner->writeInt16(width);
                   mOwner->writeInt16(height);
@@ -542,7 +540,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                   mOwner->writeInt16(0x18);        // depth
                   mOwner->writeInt16(-1);          // predefined
 
-                  assert(23 + mCodecSpecificDataSize < 128);
+                  CHECK(23 + mCodecSpecificDataSize < 128);
 
                   if (!strcasecmp("video/mp4v-es", mime)) {
                       mOwner->beginBox("esds");

@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-#undef NDEBUG
-#include <assert.h>
-
 #define LOG_TAG "AudioPlayer"
 #include <utils/Log.h>
 
 #include <media/AudioTrack.h>
 #include <media/stagefright/AudioPlayer.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 
@@ -48,36 +46,36 @@ AudioPlayer::~AudioPlayer() {
 }
 
 void AudioPlayer::setSource(const sp<MediaSource> &source) {
-    assert(mSource == NULL);
+    CHECK_EQ(mSource, NULL);
     mSource = source;
 }
 
 void AudioPlayer::start() {
-    assert(!mStarted);
-    assert(mSource != NULL);
+    CHECK(!mStarted);
+    CHECK(mSource != NULL);
 
     status_t err = mSource->start();
-    assert(err == OK);
+    CHECK_EQ(err, OK);
 
     sp<MetaData> format = mSource->getFormat();
     const char *mime;
     bool success = format->findCString(kKeyMIMEType, &mime);
-    assert(success);
-    assert(!strcasecmp(mime, "audio/raw"));
+    CHECK(success);
+    CHECK(!strcasecmp(mime, "audio/raw"));
 
     success = format->findInt32(kKeySampleRate, &mSampleRate);
-    assert(success);
+    CHECK(success);
 
     int32_t numChannels;
     success = format->findInt32(kKeyChannelCount, &numChannels);
-    assert(success);
+    CHECK(success);
 
     if (mAudioSink.get() != NULL) {
         status_t err = mAudioSink->open(
                 mSampleRate, numChannels, AudioSystem::PCM_16_BIT,
                 DEFAULT_AUDIOSINK_BUFFERCOUNT,
                 &AudioPlayer::AudioSinkCallback, this);
-        assert(err == OK);
+        CHECK_EQ(err, OK);
 
         mLatencyUs = (int64_t)mAudioSink->latency() * 1000;
         mFrameSize = mAudioSink->frameSize();
@@ -91,7 +89,7 @@ void AudioPlayer::start() {
                     : AudioSystem::CHANNEL_OUT_MONO,
                 8192, 0, &AudioCallback, this, 0);
 
-        assert(mAudioTrack->initCheck() == OK);
+        CHECK_EQ(mAudioTrack->initCheck(), OK);
 
         mLatencyUs = (int64_t)mAudioTrack->latency() * 1000;
         mFrameSize = mAudioTrack->frameSize();
@@ -103,7 +101,7 @@ void AudioPlayer::start() {
 }
 
 void AudioPlayer::pause() {
-    assert(mStarted);
+    CHECK(mStarted);
 
     if (mAudioSink.get() != NULL) {
         mAudioSink->pause();
@@ -113,7 +111,7 @@ void AudioPlayer::pause() {
 }
 
 void AudioPlayer::resume() {
-    assert(mStarted);
+    CHECK(mStarted);
 
     if (mAudioSink.get() != NULL) {
         mAudioSink->start();
@@ -123,7 +121,7 @@ void AudioPlayer::resume() {
 }
 
 void AudioPlayer::stop() {
-    assert(mStarted);
+    CHECK(mStarted);
 
     if (mAudioSink.get() != NULL) {
         mAudioSink->stop();
@@ -202,7 +200,7 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
         if (mInputBuffer == NULL) {
             status_t err = mSource->read(&mInputBuffer, &options);
 
-            assert((err == OK && mInputBuffer != NULL)
+            CHECK((err == OK && mInputBuffer != NULL)
                    || (err != OK && mInputBuffer == NULL));
 
             if (err != OK) {
@@ -215,7 +213,7 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
                 mInputBuffer->meta_data()->findInt32(kKeyTimeUnits, &units);
             success = success &&
                 mInputBuffer->meta_data()->findInt32(kKeyTimeScale, &scale);
-            assert(success);
+            CHECK(success);
 
             Mutex::Autolock autoLock(mLock);
             mPositionTimeMediaUs = (int64_t)units * 1000000 / scale;

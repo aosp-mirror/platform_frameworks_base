@@ -20,13 +20,11 @@
 
 #include <sys/mman.h>
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MmapSource.h>
 
 namespace android {
@@ -36,7 +34,7 @@ MmapSource::MmapSource(const char *filename)
       mBase(NULL),
       mSize(0) {
     LOGV("MmapSource '%s'", filename);
-    assert(mFd >= 0);
+    CHECK(mFd >= 0);
 
     off_t size = lseek(mFd, 0, SEEK_END);
     mSize = (size_t)size;
@@ -56,7 +54,7 @@ MmapSource::MmapSource(int fd, int64_t offset, int64_t length)
       mBase(NULL),
       mSize(length) {
     LOGV("MmapSource fd:%d offset:%lld length:%lld", fd, offset, length);
-    assert(fd >= 0);
+    CHECK(fd >= 0);
 
     mBase = mmap(0, mSize, PROT_READ, MAP_FILE | MAP_SHARED, mFd, offset);
 
@@ -86,7 +84,7 @@ status_t MmapSource::InitCheck() const {
 
 ssize_t MmapSource::read_at(off_t offset, void *data, size_t size) {
     LOGV("read_at offset:%ld data:%p size:%d", offset, data, size);
-    assert(offset >= 0);
+    CHECK(offset >= 0);
 
     size_t avail = 0;
     if (offset >= 0 && offset < (off_t)mSize) {
