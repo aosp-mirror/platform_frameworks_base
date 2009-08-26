@@ -36,24 +36,16 @@ import java.io.InputStream;
 
 /**
  * The Contacts provider stores all information about contacts.
- *
- * @deprecated This API has been replaced by {@link ContactsContract} as of
- *             {@link Build.VERSION#SDK} = 5.
  */
 @Deprecated
 public class Contacts {
     private static final String TAG = "Contacts";
 
-    /**
-     * @deprecated Replaced by {@link ContactsContract#AUTHORITY}.
-     */
     @Deprecated
     public static final String AUTHORITY = "contacts";
 
     /**
      * The content:// style URL for this provider
-     *
-     * @deprecated Replaced by {@link ContactsContract#AUTHORITY_URI}.
      */
     @Deprecated
     public static final Uri CONTENT_URI =
