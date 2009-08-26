@@ -1094,7 +1094,7 @@ public class BluetoothService extends IBluetooth.Stub {
                     pw.printf("\tuuids = null\n");
                 } else {
                     for (String uuid : uuids) {
-                        pw.printf("\t" + uuid);
+                        pw.printf("\t" + uuid + "\n");
                     }
                 }
             }
