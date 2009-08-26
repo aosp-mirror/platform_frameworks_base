@@ -258,20 +258,23 @@ final class WebViewCore {
      * @param url The URL that caused the overflow.
      * @param databaseIdentifier The identifier of the database.
      * @param currentQuota The current quota for the origin.
+     * @param estimatedSize The estimated size of the database.
      */
     protected void exceededDatabaseQuota(String url,
                                          String databaseIdentifier,
-                                         long currentQuota) {
+                                         long currentQuota,
+                                         long estimatedSize) {
         // Inform the callback proxy of the quota overflow. Send an object
         // that encapsulates a call to the nativeSetDatabaseQuota method to
         // awaken the sleeping webcore thread when a decision from the
         // client to allow or deny quota is available.
         mCallbackProxy.onExceededDatabaseQuota(url, databaseIdentifier,
-                currentQuota, getUsedQuota(), new WebStorage.QuotaUpdater() {
-                                  public void updateQuota(long quota) {
-                                      nativeSetNewStorageLimit(quota);
-                                  }
-                              });
+                currentQuota, estimatedSize, getUsedQuota(),
+                new WebStorage.QuotaUpdater() {
+                        public void updateQuota(long quota) {
+                            nativeSetNewStorageLimit(quota);
+                        }
+                });
     }
 
     /**

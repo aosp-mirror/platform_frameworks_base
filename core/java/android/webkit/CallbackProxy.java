@@ -434,12 +434,14 @@ class CallbackProxy extends Handler {
                             ((Long) map.get("currentQuota")).longValue();
                     long totalUsedQuota =
                             ((Long) map.get("totalUsedQuota")).longValue();
+                    long estimatedSize =
+                            ((Long) map.get("estimatedSize")).longValue();
                     WebStorage.QuotaUpdater quotaUpdater =
                         (WebStorage.QuotaUpdater) map.get("quotaUpdater");
 
                     mWebChromeClient.onExceededDatabaseQuota(url,
-                            databaseIdentifier, currentQuota, totalUsedQuota,
-                            quotaUpdater);
+                            databaseIdentifier, currentQuota, estimatedSize,
+                            totalUsedQuota, quotaUpdater);
                 }
                 break;
 
@@ -1195,6 +1197,7 @@ class CallbackProxy extends Handler {
      * @param databaseIdentifier The identifier of the database that the
      *     transaction that caused the overflow was running on.
      * @param currentQuota The current quota the origin is allowed.
+     * @param estimatedSize The estimated size of the database.
      * @param totalUsedQuota is the sum of all origins' quota.
      * @param quotaUpdater An instance of a class encapsulating a callback
      *     to WebViewCore to run when the decision to allow or deny more
@@ -1202,7 +1205,8 @@ class CallbackProxy extends Handler {
      */
     public void onExceededDatabaseQuota(
             String url, String databaseIdentifier, long currentQuota,
-            long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater) {
+            long estimatedSize, long totalUsedQuota,
+            WebStorage.QuotaUpdater quotaUpdater) {
         if (mWebChromeClient == null) {
             quotaUpdater.updateQuota(currentQuota);
             return;
@@ -1213,6 +1217,7 @@ class CallbackProxy extends Handler {
         map.put("databaseIdentifier", databaseIdentifier);
         map.put("url", url);
         map.put("currentQuota", currentQuota);
+        map.put("estimatedSize", estimatedSize);
         map.put("totalUsedQuota", totalUsedQuota);
         map.put("quotaUpdater", quotaUpdater);
         exceededQuota.obj = map;
