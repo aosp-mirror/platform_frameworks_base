@@ -46,7 +46,8 @@ public class IccProvider extends ContentProvider {
 
     private static final String[] ADDRESS_BOOK_COLUMN_NAMES = new String[] {
         "name",
-        "number"
+        "number",
+        "emails"
     };
 
     private static final int ADN = 1;
@@ -55,6 +56,7 @@ public class IccProvider extends ContentProvider {
 
     private static final String STR_TAG = "tag";
     private static final String STR_NUMBER = "number";
+    private static final String STR_EMAILS = "emails";
     private static final String STR_PIN2 = "pin2";
 
     private static final UriMatcher URL_MATCHER =
@@ -172,7 +174,8 @@ public class IccProvider extends ContentProvider {
 
         String tag = initialValues.getAsString("tag");
         String number = initialValues.getAsString("number");
-        boolean success = addIccRecordToEf(efType, tag, number, pin2);
+        // TODO(): Read email instead of sending null.
+        boolean success = addIccRecordToEf(efType, tag, number, null, pin2);
 
         if (!success) {
             return null;
@@ -238,6 +241,7 @@ public class IccProvider extends ContentProvider {
         // parse where clause
         String tag = null;
         String number = null;
+        String[] emails = null;
         String pin2 = null;
 
         String[] tokens = where.split("AND");
@@ -261,6 +265,9 @@ public class IccProvider extends ContentProvider {
                 tag = normalizeValue(val);
             } else if (STR_NUMBER.equals(key)) {
                 number = normalizeValue(val);
+            } else if (STR_EMAILS.equals(key)) {
+                //TODO(): Email is null.
+                emails = null;
             } else if (STR_PIN2.equals(key)) {
                 pin2 = normalizeValue(val);
             }
@@ -274,7 +281,7 @@ public class IccProvider extends ContentProvider {
             return 0;
         }
 
-        boolean success = deleteIccRecordFromEf(efType, tag, number, pin2);
+        boolean success = deleteIccRecordFromEf(efType, tag, number, emails, pin2);
         if (!success) {
             return 0;
         }
@@ -307,9 +314,11 @@ public class IccProvider extends ContentProvider {
 
         String tag = values.getAsString("tag");
         String number = values.getAsString("number");
+        String[] emails = null;
         String newTag = values.getAsString("newTag");
         String newNumber = values.getAsString("newNumber");
-
+        String[] newEmails = null;
+        // TODO(): Update for email.
         boolean success = updateIccRecordInEf(efType, tag, number,
                 newTag, newNumber, pin2);
 
@@ -355,9 +364,9 @@ public class IccProvider extends ContentProvider {
     }
 
     private boolean
-    addIccRecordToEf(int efType, String name, String number, String pin2) {
+    addIccRecordToEf(int efType, String name, String number, String[] emails, String pin2) {
         if (DBG) log("addIccRecordToEf: efType=" + efType + ", name=" + name +
-                ", number=" + number);
+                ", number=" + number + ", emails=" + emails);
 
         boolean success = false;
 
@@ -384,7 +393,7 @@ public class IccProvider extends ContentProvider {
 
     private boolean
     updateIccRecordInEf(int efType, String oldName, String oldNumber,
-            String newName, String newNumber,String pin2) {
+            String newName, String newNumber, String pin2) {
         if (DBG) log("updateIccRecordInEf: efType=" + efType +
                 ", oldname=" + oldName + ", oldnumber=" + oldNumber +
                 ", newname=" + newName + ", newnumber=" + newNumber);
@@ -407,9 +416,10 @@ public class IccProvider extends ContentProvider {
     }
 
 
-    private boolean deleteIccRecordFromEf(int efType, String name, String number, String pin2) {
+    private boolean deleteIccRecordFromEf(int efType, String name, String number, String[] emails,
+            String pin2) {
         if (DBG) log("deleteIccRecordFromEf: efType=" + efType +
-                ", name=" + name + ", number=" + number + ", pin2=" + pin2);
+                ", name=" + name + ", number=" + number + ", emails=" + emails + ", pin2=" + pin2);
 
         boolean success = false;
 
@@ -438,13 +448,26 @@ public class IccProvider extends ContentProvider {
     private void loadRecord(AdnRecord record,
             ArrayList<ArrayList> results) {
         if (!record.isEmpty()) {
-            ArrayList<String> contact = new ArrayList<String>(2);
+            ArrayList<String> contact = new ArrayList<String>();
             String alphaTag = record.getAlphaTag();
             String number = record.getNumber();
+            String[] emails = record.getEmails();
 
-            if (DBG) log("loadRecord: " + alphaTag + ", " + number);
+            if (DBG) log("loadRecord: " + alphaTag + ", " + number + ",");
             contact.add(alphaTag);
             contact.add(number);
+            StringBuilder emailString = new StringBuilder();
+
+            if (emails != null) {
+                for (String email: emails) {
+                    if (DBG) log("Adding email:" + email);
+                    emailString.append(email);
+                    emailString.append(",");
+                }
+                contact.add(emailString.toString());
+            } else {
+                contact.add(null);
+            }
             results.add(contact);
         }
     }

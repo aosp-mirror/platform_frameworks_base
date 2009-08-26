@@ -655,7 +655,7 @@ public abstract class IccCard {
     }
 
 
-    public boolean hasApplicationType(IccCardApplication.AppType type) {
+    public boolean isApplicationOnIcc(IccCardApplication.AppType type) {
         if (mIccCardStatus == null) return false;
 
         for (int i = 0 ; i < mIccCardStatus.getNumApplications(); i++) {

@@ -115,7 +115,8 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
      * Replace oldAdn with newAdn in ADN-like record in EF
      *
      * getAdnRecordsInEf must be called at least once before this function,
-     * otherwise an error will be returned
+     * otherwise an error will be returned. Currently the email field
+     * if set in the ADN record is ignored.
      * throws SecurityException if no WRITE_CONTACTS permission
      *
      * @param efid must be one among EF_ADN, EF_FDN, and EF_SDN
@@ -167,7 +168,8 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
      * Update an ADN-like EF record by record index
      *
      * This is useful for iteration the whole ADN file, such as write the whole
-     * phone book or erase/format the whole phonebook
+     * phone book or erase/format the whole phonebook. Currently the email field
+     * if set in the ADN record is ignored.
      * throws SecurityException if no WRITE_CONTACTS permission
      *
      * @param efid must be one among EF_ADN, EF_FDN, and EF_SDN
@@ -237,12 +239,13 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
                     "Requires android.permission.READ_CONTACTS permission");
         }
 
+        efid = updateEfForIccType(efid);
         if (DBG) logd("getAdnRecordsInEF: efid=" + efid);
 
         synchronized(mLock) {
             checkThread();
             Message response = mBaseHandler.obtainMessage(EVENT_LOAD_DONE);
-            adnCache.requestLoadAllAdnLike(efid, response);
+            adnCache.requestLoadAllAdnLike(efid, adnCache.extensionEfForEf(efid), response);
             try {
                 mLock.wait();
             } catch (InterruptedException e) {
@@ -261,6 +264,16 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
                         "You cannot call query on this provder from the main UI thread.");
             }
         }
+    }
+
+    private int updateEfForIccType(int efid) {
+        // Check if we are trying to read ADN records
+        if (efid == IccConstants.EF_ADN) {
+            if (phone.getIccCard().isApplicationOnIcc(IccCardApplication.AppType.APPTYPE_USIM)) {
+                return IccConstants.EF_PBR;
+            }
+        }
+        return efid;
     }
 }
 
