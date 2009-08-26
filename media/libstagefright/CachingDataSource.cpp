@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-#include <media/stagefright/CachingDataSource.h>
-
-#undef NDEBUG
-#include <assert.h>
-
 #include <stdlib.h>
 #include <string.h>
+
+#include <media/stagefright/CachingDataSource.h>
+#include <media/stagefright/MediaDebug.h>
 
 namespace android {
 

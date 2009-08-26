@@ -17,14 +17,12 @@
 #define LOG_TAG "MediaBuffer"
 #include <utils/Log.h>
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <errno.h>
 #include <pthread.h>
 #include <stdlib.h>
 
 #include <media/stagefright/MediaBuffer.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MetaData.h>
 
 namespace android {
@@ -65,7 +63,7 @@ MediaBuffer::MediaBuffer(size_t size)
 
 void MediaBuffer::release() {
     if (mObserver == NULL) {
-        assert(mRefCount == 0);
+        CHECK_EQ(mRefCount, 0);
         delete this;
         return;
     }
@@ -79,12 +77,12 @@ void MediaBuffer::release() {
 
         mObserver->signalBufferReturned(this);
     }
-    assert(prevCount > 0);
+    CHECK(prevCount > 0);
 }
 
 void MediaBuffer::claim() {
-    assert(mObserver != NULL);
-    assert(mRefCount == 1);
+    CHECK(mObserver != NULL);
+    CHECK_EQ(mRefCount, 1);
 
     mRefCount = 0;
 }
@@ -113,7 +111,7 @@ void MediaBuffer::set_range(size_t offset, size_t length) {
     if (offset < 0 || offset + length > mSize) {
         LOGE("offset = %d, length = %d, mSize = %d", offset, length, mSize);
     }
-    assert(offset >= 0 && offset + length <= mSize);
+    CHECK(offset >= 0 && offset + length <= mSize);
 
     mRangeOffset = offset;
     mRangeLength = length;
@@ -129,7 +127,7 @@ void MediaBuffer::reset() {
 }
 
 MediaBuffer::~MediaBuffer() {
-    assert(mObserver == NULL);
+    CHECK_EQ(mObserver, NULL);
 
     if (mOwnsData && mData != NULL) {
         free(mData);
@@ -143,7 +141,7 @@ MediaBuffer::~MediaBuffer() {
 }
 
 void MediaBuffer::setObserver(MediaBufferObserver *observer) {
-    assert(observer == NULL || mObserver == NULL);
+    CHECK(observer == NULL || mObserver == NULL);
     mObserver = observer;
 }
 

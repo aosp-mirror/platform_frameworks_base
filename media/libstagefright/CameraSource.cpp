@@ -16,13 +16,11 @@
 
 #include <sys/time.h>
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <OMX_Component.h>
 
 #include <binder/IServiceManager.h>
 #include <media/stagefright/CameraSource.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 #include <ui/ICameraClient.h>
@@ -56,12 +54,12 @@ public:
     }
 
     virtual void notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2) {
-        assert(mSource != NULL);
+        CHECK(mSource != NULL);
         mSource->notifyCallback(msgType, ext1, ext2);
     }
 
     virtual void dataCallback(int32_t msgType, const sp<IMemory> &data) {
-        assert(mSource != NULL);
+        CHECK(mSource != NULL);
         mSource->dataCallback(msgType, data);
     }
 
@@ -128,16 +126,16 @@ CameraSource::~CameraSource() {
 }
 
 status_t CameraSource::start(MetaData *) {
-    assert(!mStarted);
+    CHECK(!mStarted);
 
     status_t err = mCamera->lock();
-    assert(err == OK);
+    CHECK_EQ(err, OK);
 
     err = mCamera->setPreviewDisplay(new DummySurface);
-    assert(err == OK);
+    CHECK_EQ(err, OK);
     mCamera->setPreviewCallbackFlag(1);
     mCamera->startPreview();
-    assert(err == OK);
+    CHECK_EQ(err, OK);
 
     mStarted = true;
 
@@ -145,7 +143,7 @@ status_t CameraSource::start(MetaData *) {
 }
 
 status_t CameraSource::stop() {
-    assert(mStarted);
+    CHECK(mStarted);
 
     mCamera->stopPreview();
     mCamera->unlock();
@@ -167,7 +165,7 @@ sp<MetaData> CameraSource::getFormat() {
 
 status_t CameraSource::read(
         MediaBuffer **buffer, const ReadOptions *options) {
-    assert(mStarted);
+    CHECK(mStarted);
 
     *buffer = NULL;
 

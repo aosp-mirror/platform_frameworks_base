@@ -18,9 +18,6 @@
 #define LOG_TAG "MediaPlayerImpl"
 #include "utils/Log.h"
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <OMX_Component.h>
 
 #include <unistd.h>
@@ -30,6 +27,7 @@
 // #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/HTTPStream.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MediaPlayerImpl.h>
 #include <media/stagefright/MetaData.h>
@@ -227,7 +225,7 @@ void MediaPlayerImpl::videoEntry() {
     bool eof = false;
 
     status_t err = mVideoDecoder->start();
-    assert(err == OK);
+    CHECK_EQ(err, OK);
 
     while (mPlaying) {
         MediaBuffer *buffer;
@@ -253,7 +251,7 @@ void MediaPlayerImpl::videoEntry() {
         }
 
         status_t err = mVideoDecoder->read(&buffer, &options);
-        assert((err == OK && buffer != NULL) || (err != OK && buffer == NULL));
+        CHECK((err == OK && buffer != NULL) || (err != OK && buffer == NULL));
 
         if (err == ERROR_END_OF_STREAM || err != OK) {
             eof = true;
@@ -269,10 +267,10 @@ void MediaPlayerImpl::videoEntry() {
         int32_t units, scale;
         bool success =
             buffer->meta_data()->findInt32(kKeyTimeUnits, &units);
-        assert(success);
+        CHECK(success);
         success =
             buffer->meta_data()->findInt32(kKeyTimeScale, &scale);
-        assert(success);
+        CHECK(success);
 
         int64_t pts_us = (int64_t)units * 1000000 / scale;
         {
@@ -362,7 +360,7 @@ void MediaPlayerImpl::init() {
 
         for (size_t i = 0; i < num_tracks; ++i) {
             const sp<MetaData> meta = mExtractor->getTrackMetaData(i);
-            assert(meta != NULL);
+            CHECK(meta != NULL);
 
             const char *mime;
             if (!meta->findCString(kKeyMIMEType, &mime)) {
@@ -424,10 +422,10 @@ void MediaPlayerImpl::setVideoSource(const sp<MediaSource> &source) {
     sp<MetaData> meta = source->getFormat();
 
     bool success = meta->findInt32(kKeyWidth, &mVideoWidth);
-    assert(success);
+    CHECK(success);
 
     success = meta->findInt32(kKeyHeight, &mVideoHeight);
-    assert(success);
+    CHECK(success);
 
 #if !USE_OMX_CODEC
     mVideoDecoder = OMXDecoder::Create(
@@ -495,8 +493,8 @@ MediaSource *MediaPlayerImpl::makeShoutcastSource(const char *uri) {
     } else {
         char *end;
         long tmp = strtol(colon + 1, &end, 10);
-        assert(end > colon + 1);
-        assert(tmp > 0 && tmp < 65536);
+        CHECK(end > colon + 1);
+        CHECK(tmp > 0 && tmp < 65536);
         port = tmp;
 
         host = string(host, 0, colon - host.c_str());
@@ -510,7 +508,7 @@ MediaSource *MediaPlayerImpl::makeShoutcastSource(const char *uri) {
 
     for (;;) {
         status_t err = http->connect(host.c_str(), port);
-        assert(err == OK);
+        CHECK_EQ(err, OK);
 
         err = http->send("GET ");
         err = http->send(path.c_str());
@@ -520,13 +518,13 @@ MediaSource *MediaPlayerImpl::makeShoutcastSource(const char *uri) {
         err = http->send("\r\n");
         err = http->send("Icy-MetaData: 1\r\n\r\n");
 
-        assert(OK == http->receive_header(&http_status));
+        CHECK_EQ(OK, http->receive_header(&http_status));
 
         if (http_status == 301 || http_status == 302) {
             string location;
-            assert(http->find_header_value("Location", &location));
+            CHECK(http->find_header_value("Location", &location));
 
-            assert(string(location, 0, 7) == "http://");
+            CHECK(string(location, 0, 7) == "http://");
             location.erase(0, 7);
             string::size_type slashPos = location.find('/');
             if (slashPos == string::npos) {
@@ -545,7 +543,7 @@ MediaSource *MediaPlayerImpl::makeShoutcastSource(const char *uri) {
                 const char *start = host.c_str() + colonPos + 1;
                 char *end;
                 long tmp = strtol(start, &end, 10);
-                assert(end > start && *end == '\0');
+                CHECK(end > start && (*end == '\0'));
 
                 port = (tmp >= 0 && tmp < 65536) ? (int)tmp : 80;
             } else {
@@ -622,7 +620,7 @@ void MediaPlayerImpl::populateISurface() {
     success = success && meta->findCString(kKeyDecoderComponent, &component);
     success = success && meta->findInt32(kKeyWidth, &decodedWidth);
     success = success && meta->findInt32(kKeyHeight, &decodedHeight);
-    assert(success);
+    CHECK(success);
 
     if (mSurface.get() != NULL) {
         mVideoRenderer =

@@ -15,9 +15,7 @@
  */
 
 #include <media/stagefright/FileSource.h>
-
-#undef NDEBUG
-#include <assert.h>
+#include <media/stagefright/MediaDebug.h>
 
 namespace android {
 
@@ -40,7 +38,7 @@ ssize_t FileSource::read_at(off_t offset, void *data, size_t size) {
     Mutex::Autolock autoLock(mLock);
 
     int err = fseeko(mFile, offset, SEEK_SET);
-    assert(err != -1);
+    CHECK(err != -1);
 
     ssize_t result = fread(data, 1, size, mFile);
 

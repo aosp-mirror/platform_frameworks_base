@@ -2,6 +2,8 @@
 
 #define MEDIA_DEBUG_H_
 
+#include <cutils/log.h>
+
 #define LITERAL_TO_STRING_INTERNAL(x)    #x
 #define LITERAL_TO_STRING(x) LITERAL_TO_STRING_INTERNAL(x)
 

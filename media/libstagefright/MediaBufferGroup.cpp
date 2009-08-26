@@ -17,11 +17,9 @@
 #define LOG_TAG "MediaBufferGroup"
 #include <utils/Log.h>
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
+#include <media/stagefright/MediaDebug.h>
 
 namespace android {
 
@@ -36,7 +34,7 @@ MediaBufferGroup::~MediaBufferGroup() {
          buffer = next) {
         next = buffer->nextBuffer();
 
-        assert(buffer->refcount() == 0);
+        CHECK_EQ(buffer->refcount(), 0);
 
         buffer->setObserver(NULL);
         buffer->release();
