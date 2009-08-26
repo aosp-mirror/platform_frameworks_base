@@ -857,7 +857,8 @@ void OMXCodec::on_message(const omx_message &msg) {
                 CHECK_EQ(err, OK);
 
                 buffers->removeAt(i);
-            } else if (flags & OMX_BUFFERFLAG_EOS) {
+            } else if (mPortStatus[kPortIndexOutput] == ENABLED
+                       && (flags & OMX_BUFFERFLAG_EOS)) {
                 LOGV("No more output data.");
                 mNoMoreOutputData = true;
                 mBufferFilled.signal();
