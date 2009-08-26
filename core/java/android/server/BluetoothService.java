@@ -1083,14 +1083,25 @@ public class BluetoothService extends IBluetooth.Stub {
 
         pw.println("\n--Known devices--");
         for (String address : mDeviceProperties.keySet()) {
+            int bondState = mBondState.getBondState(address);
             pw.printf("%s %10s (%d) %s\n", address,
-                       toBondStateString(mBondState.getBondState(address)),
+                       toBondStateString(bondState),
                        mBondState.getAttempt(address),
                        getRemoteName(address));
+            if (bondState == BluetoothDevice.BOND_BONDED) {
+                String[] uuids = getRemoteUuids(address);
+                if (uuids == null) {
+                    pw.printf("\tuuids = null\n");
+                } else {
+                    for (String uuid : uuids) {
+                        pw.printf("\t" + uuid);
+                    }
+                }
+            }
         }
 
         String value = getProperty("Devices");
-        String []devicesObjectPath = null;
+        String[] devicesObjectPath = null;
         if (value != null) {
             devicesObjectPath = value.split(",");
         }
