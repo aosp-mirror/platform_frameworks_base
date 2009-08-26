@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryHeapPmem.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/QComHardwareRenderer.h>
 #include <ui/ISurface.h>
 
@@ -68,9 +66,9 @@ QComHardwareRenderer::QComHardwareRenderer(
       mDecodedWidth(decodedWidth),
       mDecodedHeight(decodedHeight),
       mFrameSize((mDecodedWidth * mDecodedHeight * 3) / 2) {
-    assert(mISurface.get() != NULL);
-    assert(mDecodedWidth > 0);
-    assert(mDecodedHeight > 0);
+    CHECK(mISurface.get() != NULL);
+    CHECK(mDecodedWidth > 0);
+    CHECK(mDecodedHeight > 0);
 }
 
 QComHardwareRenderer::~QComHardwareRenderer() {
@@ -133,7 +131,7 @@ void QComHardwareRenderer::publishBuffers(uint32_t pmem_fd) {
             mMemoryHeap);
 
     status_t err = mISurface->registerBuffers(bufferHeap);
-    assert(err == OK);
+    CHECK_EQ(err, OK);
 }
 
 }  // namespace android

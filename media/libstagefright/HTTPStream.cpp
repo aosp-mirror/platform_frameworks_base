@@ -17,7 +17,6 @@
 #include <sys/socket.h>
 
 #include <arpa/inet.h>
-#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <netdb.h>
@@ -27,6 +26,7 @@
 #include <unistd.h>
 
 #include <media/stagefright/HTTPStream.h>
+#include <media/stagefright/MediaDebug.h>
 
 namespace android {
 
@@ -49,7 +49,7 @@ status_t HTTPStream::connect(const char *server, int port) {
         return ERROR_ALREADY_CONNECTED;
     }
 
-    assert(mSocket == -1);
+    CHECK_EQ(mSocket, -1);
     mSocket = socket(AF_INET, SOCK_STREAM, 0);
     
     if (mSocket < 0) {
@@ -89,7 +89,7 @@ status_t HTTPStream::disconnect() {
         return ERROR_NOT_CONNECTED;
     }
 
-    assert(mSocket >= 0);
+    CHECK(mSocket >= 0);
     close(mSocket);
     mSocket = -1;
 
@@ -165,7 +165,7 @@ status_t HTTPStream::receive_line(char *line, size_t size) {
 
         saw_CR = (c == '\r');
 
-        assert(length + 1 < size);
+        CHECK(length + 1 < size);
         line[length++] = c;
     }
 }

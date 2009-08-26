@@ -19,6 +19,7 @@
 #include <media/stagefright/HTTPStream.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/ShoutcastSource.h>
 #include <media/stagefright/string.h>
@@ -36,8 +37,8 @@ ShoutcastSource::ShoutcastSource(HTTPStream *http)
         char *end;
         const char *start = metaint.c_str();
         mMetaDataOffset = strtol(start, &end, 10);
-        assert(end > start && *end == '\0');
-        assert(mMetaDataOffset > 0);
+        CHECK(end > start && *end == '\0');
+        CHECK(mMetaDataOffset > 0);
 
         mBytesUntilMetaData = mMetaDataOffset;
     }
@@ -53,7 +54,7 @@ ShoutcastSource::~ShoutcastSource() {
 }
 
 status_t ShoutcastSource::start(MetaData *) {
-    assert(!mStarted);
+    CHECK(!mStarted);
 
     mGroup = new MediaBufferGroup;
     mGroup->add_buffer(new MediaBuffer(4096));  // XXX
@@ -64,7 +65,7 @@ status_t ShoutcastSource::start(MetaData *) {
 }
 
 status_t ShoutcastSource::stop() {
-    assert(mStarted);
+    CHECK(mStarted);
 
     delete mGroup;
     mGroup = NULL;
@@ -85,7 +86,7 @@ sp<MetaData> ShoutcastSource::getFormat() {
 
 status_t ShoutcastSource::read(
         MediaBuffer **out, const ReadOptions *options) {
-    assert(mStarted);
+    CHECK(mStarted);
 
     *out = NULL;
 
@@ -120,7 +121,7 @@ status_t ShoutcastSource::read(
     if (mBytesUntilMetaData == 0) {
         unsigned char num_16_byte_blocks = 0;
         n = mHttp->receive((char *)&num_16_byte_blocks, 1);
-        assert(n == 1);
+        CHECK_EQ(n, 1);
 
         char meta[255 * 16];
         size_t meta_size = num_16_byte_blocks * 16;

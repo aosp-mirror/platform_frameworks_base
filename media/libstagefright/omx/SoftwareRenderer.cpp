@@ -17,10 +17,8 @@
 #define LOG_TAG "SoftwareRenderer"
 #include <utils/Log.h>
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <binder/MemoryHeapBase.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/SoftwareRenderer.h>
 #include <ui/ISurface.h>
 
@@ -40,10 +38,10 @@ SoftwareRenderer::SoftwareRenderer(
       mFrameSize(mDecodedWidth * mDecodedHeight * 2),  // RGB565
       mMemoryHeap(new MemoryHeapBase(2 * mFrameSize)),
       mIndex(0) {
-    assert(mISurface.get() != NULL);
-    assert(mDecodedWidth > 0);
-    assert(mDecodedHeight > 0);
-    assert(mMemoryHeap->heapID() >= 0);
+    CHECK(mISurface.get() != NULL);
+    CHECK(mDecodedWidth > 0);
+    CHECK(mDecodedHeight > 0);
+    CHECK(mMemoryHeap->heapID() >= 0);
 
     ISurface::BufferHeap bufferHeap(
             mDisplayWidth, mDisplayHeight,
@@ -52,7 +50,7 @@ SoftwareRenderer::SoftwareRenderer(
             mMemoryHeap);
 
     status_t err = mISurface->registerBuffers(bufferHeap);
-    assert(err == OK);
+    CHECK_EQ(err, OK);
 }
 
 SoftwareRenderer::~SoftwareRenderer() {
@@ -65,7 +63,7 @@ void SoftwareRenderer::render(
         LOGE("size is %d, expected %d",
                 size, (mDecodedHeight * mDecodedWidth * 3) / 2);
     }
-    assert(size >= (mDecodedWidth * mDecodedHeight * 3) / 2);
+    CHECK(size >= (mDecodedWidth * mDecodedHeight * 3) / 2);
 
     static const signed kClipMin = -278;
     static const signed kClipMax = 535;
