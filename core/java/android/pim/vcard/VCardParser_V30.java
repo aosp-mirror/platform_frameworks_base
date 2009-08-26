@@ -27,7 +27,7 @@ import java.util.HashSet;
  * Please refer to vCard Specification 3.0 (http://tools.ietf.org/html/rfc2426)
  */
 public class VCardParser_V30 extends VCardParser_V21 {
-    private static final String LOG_TAG = "VCardParser_V30";
+    private static final String LOG_TAG = "vcard.VCardParser_V30";
     
     private static final HashSet<String> sAcceptablePropsWithParam = new HashSet<String>(
             Arrays.asList(
@@ -49,7 +49,7 @@ public class VCardParser_V30 extends VCardParser_V21 {
     
     @Override
     protected String getVersion() {
-        return "3.0";
+        return Constants.VERSION_V30;
     }
     
     @Override
@@ -284,7 +284,7 @@ public class VCardParser_V30 extends VCardParser_V21 {
             if (ch == '\\' && i < length - 1) {
                 char next_ch = text.charAt(++i); 
                 if (next_ch == 'n' || next_ch == 'N') {
-                    builder.append("\r\n");
+                    builder.append("\n");
                 } else {
                     builder.append(next_ch);
                 }
@@ -296,9 +296,9 @@ public class VCardParser_V30 extends VCardParser_V21 {
     }
     
     @Override
-    protected String maybeUnescape(char ch) {
+    protected String maybeUnescapeCharacter(char ch) {
         if (ch == 'n' || ch == 'N') {
-            return "\r\n";
+            return "\n";
         } else {
             return String.valueOf(ch);
         }

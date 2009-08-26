@@ -15,38 +15,58 @@
  */
 package android.pim.vcard;
 
-import android.content.AbstractSyncableContentProvider;
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
-import android.net.Uri;
-import android.provider.Contacts;
-import android.provider.Contacts.ContactMethods;
-import android.provider.Contacts.Extensions;
-import android.provider.Contacts.GroupMembership;
-import android.provider.Contacts.Organizations;
-import android.provider.Contacts.People;
-import android.provider.Contacts.Phones;
-import android.provider.Contacts.Photos;
+import android.content.OperationApplicationException;
+import android.os.RemoteException;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.RawContacts;
+import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.CommonDataKinds.Im;
+import android.provider.ContactsContract.CommonDataKinds.Miscellaneous;
+import android.provider.ContactsContract.CommonDataKinds.Nickname;
+import android.provider.ContactsContract.CommonDataKinds.Note;
+import android.provider.ContactsContract.CommonDataKinds.Organization;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.CommonDataKinds.Photo;
+import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+import android.provider.ContactsContract.CommonDataKinds.Website;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * This class bridges between data structure of Contact app and VCard data.
  */
 public class ContactStruct {
-    private static final String LOG_TAG = "ContactStruct";
+    private static final String LOG_TAG = "vcard.ContactStruct";
+    
+    // Key: the name shown in VCard. e.g. "X-AIM", "X-ICQ"
+    // Value: the result of {@link Contacts.ContactMethods#encodePredefinedImProtocol}
+    private static final Map<String, Integer> sImMap = new HashMap<String, Integer>();
+    
+    static {
+        sImMap.put(Constants.PROPERTY_X_AIM, Im.PROTOCOL_AIM);
+        sImMap.put(Constants.PROPERTY_X_MSN, Im.PROTOCOL_MSN);
+        sImMap.put(Constants.PROPERTY_X_YAHOO, Im.PROTOCOL_YAHOO);
+        sImMap.put(Constants.PROPERTY_X_ICQ, Im.PROTOCOL_ICQ);
+        sImMap.put(Constants.PROPERTY_X_JABBER, Im.PROTOCOL_JABBER);
+        sImMap.put(Constants.PROPERTY_X_SKYPE_USERNAME, Im.PROTOCOL_SKYPE);
+        sImMap.put(Constants.PROPERTY_X_GOOGLE_TALK, Im.PROTOCOL_GOOGLE_TALK);
+        sImMap.put(Constants.PROPERTY_X_GOOGLE_TALK_WITH_SPACE, Im.PROTOCOL_GOOGLE_TALK);
+    }
     
     /**
      * @hide only for testing
@@ -85,11 +105,7 @@ public class ContactStruct {
     /**
      * @hide only for testing
      */
-    static public class ContactMethod {
-        // Contacts.KIND_EMAIL, Contacts.KIND_POSTAL
-        public final int kind;
-        // e.g. Contacts.ContactMethods.TYPE_HOME, Contacts.PhoneColumns.TYPE_HOME
-        // If type == Contacts.PhoneColumns.TYPE_CUSTOM, label is used.
+    static public class EmailData {
         public final int type;
         public final String data;
         // Used only when TYPE is TYPE_CUSTOM.
@@ -97,35 +113,143 @@ public class ContactStruct {
         // isPrimary is changable only when there's no appropriate one existing in
         // the original VCard.
         public boolean isPrimary;
-        public ContactMethod(int kind, int type, String data, String label,
-                boolean isPrimary) {
-            this.kind = kind;
+        public EmailData(int type, String data, String label, boolean isPrimary) {
             this.type = type;
             this.data = data;
-            this.label = data;
+            this.label = label;
             this.isPrimary = isPrimary;
         }
         
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof ContactMethod) {
+            if (obj instanceof EmailData) {
                 return false;
             }
-            ContactMethod contactMethod = (ContactMethod)obj;
-            return (kind == contactMethod.kind && type == contactMethod.type &&
-                    data.equals(contactMethod.data) && label.equals(contactMethod.label) &&
-                    isPrimary == contactMethod.isPrimary);
+            EmailData emailData = (EmailData)obj;
+            return (type == emailData.type && data.equals(emailData.data) &&
+                    label.equals(emailData.label) && isPrimary == emailData.isPrimary);
         }
         
         @Override
         public String toString() {
-            return String.format("kind: %d, type: %d, data: %s, label: %s, isPrimary: %s",
-                    kind, type, data, label, isPrimary);
+            return String.format("type: %d, data: %s, label: %s, isPrimary: %s",
+                    type, data, label, isPrimary);
+        }
+    }
+
+    static public class PostalData {
+        // Determined by vCard spec.
+        // PO Box, Extended Addr, Street, Locality, Region, Postal Code, Country Name
+        public static final int ADDR_MAX_DATA_SIZE = 7;
+        private final String[] dataArray;
+        public final String pobox;
+        public final String extendedAddress;
+        public final String street;
+        public final String localty;
+        public final String region;
+        public final String postalCode;
+        public final String country;
+
+        public final int type;
+        
+        // Used only when type variable is TYPE_CUSTOM.
+        public final String label;
+
+        // isPrimary is changable only when there's no appropriate one existing in
+        // the original VCard.
+        public boolean isPrimary;
+        public PostalData(int type, List<String> propValueList,
+                String label, boolean isPrimary) {
+            this.type = type;
+            dataArray = new String[ADDR_MAX_DATA_SIZE];
+
+            int size = propValueList.size();
+            if (size > ADDR_MAX_DATA_SIZE) {
+                size = ADDR_MAX_DATA_SIZE;
+            }
+
+            // adr-value    = 0*6(text-value ";") text-value
+            //              ; PO Box, Extended Address, Street, Locality, Region, Postal
+            //              ; Code, Country Name
+            //
+            // Use Iterator assuming List may be LinkedList, though actually it is
+            // always ArrayList in the current implementation.
+            int i = 0;
+            for (String addressElement : propValueList) {
+                dataArray[i] = addressElement;
+                if (++i >= size) {
+                    break;
+                }
+            }
+            while (i < ADDR_MAX_DATA_SIZE) {
+                dataArray[i++] = null;
+            }
+
+            this.pobox = dataArray[0];
+            this.extendedAddress = dataArray[1];
+            this.street = dataArray[2];
+            this.localty = dataArray[3];
+            this.region = dataArray[4];
+            this.postalCode = dataArray[5];
+            this.country = dataArray[6];
+            
+            this.label = label;
+            this.isPrimary = isPrimary;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof PostalData) {
+                return false;
+            }
+            PostalData postalData = (PostalData)obj;
+            return (Arrays.equals(dataArray, postalData.dataArray) && 
+                    (type == postalData.type &&
+                            (type == StructuredPostal.TYPE_CUSTOM ?
+                                    (label == postalData.label) : true)) &&
+                    (isPrimary == postalData.isPrimary));
+        }
+        
+        public String getFormattedAddress(int vcardType) {
+            StringBuilder builder = new StringBuilder();
+            boolean empty = true;
+            if (VCardConfig.isJapaneseDevice(vcardType)) {
+                // In Japan, the order is reversed.
+                for (int i = ADDR_MAX_DATA_SIZE - 1; i >= 0; i--) {
+                    String addressPart = dataArray[i];
+                    if (!TextUtils.isEmpty(addressPart)) {
+                        if (!empty) {
+                            builder.append(' ');
+                        }
+                        builder.append(addressPart);
+                        empty = false;
+                    }
+                }
+            } else {
+                for (int i = 0; i < ADDR_MAX_DATA_SIZE; i++) {
+                    String addressPart = dataArray[i];
+                    if (!TextUtils.isEmpty(addressPart)) {
+                        if (!empty) {
+                            builder.append(' ');
+                        }
+                        builder.append(addressPart);
+                        empty = false;
+                    }
+                }
+            }
+
+            return builder.toString().trim();
+        }
+        
+        @Override
+        public String toString() {
+            return String.format("type: %d, label: %s, isPrimary: %s",
+                    type, label, isPrimary);
         }
     }
     
     /**
-     * @hide only for testing
+     * @hide only for testing.
      */
     static public class OrganizationData {
         public final int type;
@@ -161,7 +285,54 @@ public class ContactStruct {
         }
     }
     
-    static class Property {
+    static public class ImData {
+        public final int type;
+        public final String data;
+        public final String label;
+        public final boolean isPrimary;
+        
+        // TODO: ContactsConstant#PROTOCOL, ContactsConstant#CUSTOM_PROTOCOL should be used?
+        public ImData(int type, String data, String label, boolean isPrimary) {
+            this.type = type;
+            this.data = data;
+            this.label = label;
+            this.isPrimary = isPrimary;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof ImData) {
+                return false;
+            }
+            ImData imData = (ImData)obj;
+            return (type == imData.type && data.equals(imData.data) &&
+                    label.equals(imData.label) && isPrimary == imData.isPrimary);
+        }
+        
+        @Override
+        public String toString() {
+            return String.format("type: %d, data: %s, label: %s, isPrimary: %s",
+                    type, data, label, isPrimary);
+        }
+    }
+    
+    /**
+     * @hide only for testing.
+     */
+    static public class PhotoData {
+        public static final String FORMAT_FLASH = "SWF";
+        public final int type;
+        public final String formatName;  // used when type is not defined in ContactsContract.
+        public final byte[] photoBytes;
+
+        public PhotoData(int type, String formatName, byte[] photoBytes) {
+            this.type = type;
+            this.formatName = formatName;
+            this.photoBytes = photoBytes;
+        }
+    }
+    
+    static /* package */ class Property {
         private String mPropertyName;
         private Map<String, Collection<String>> mParameterMap =
             new HashMap<String, Collection<String>>();
@@ -178,7 +349,7 @@ public class ContactStruct {
         
         public void addParameter(final String paramName, final String paramValue) {
             Collection<String> values;
-            if (mParameterMap.containsKey(paramName)) {
+            if (!mParameterMap.containsKey(paramName)) {
                 if (paramName.equals("TYPE")) {
                     values = new HashSet<String>();
                 } else {
@@ -188,6 +359,7 @@ public class ContactStruct {
             } else {
                 values = mParameterMap.get(paramName);
             }
+            values.add(paramValue);
         }
         
         public void addToPropertyValueList(final String propertyValue) {
@@ -213,123 +385,129 @@ public class ContactStruct {
         }
     }
     
-    private String mName;
-    private String mPhoneticName;
-    // private String mPhotoType;
-    private byte[] mPhotoBytes;
-    private List<String> mNotes;
+    private String mFamilyName;
+    private String mGivenName;
+    private String mMiddleName;
+    private String mPrefix;
+    private String mSuffix;
+
+    // Used only when no family nor given name is found.
+    private String mFullName;
+    
+    private String mPhoneticFamilyName;
+    private String mPhoneticGivenName;
+    private String mPhoneticMiddleName;
+    
+    private String mPhoneticFullName;
+
+    private List<String> mNickNameList;
+
+    private String mDisplayName; 
+
+    private String mBirthday;
+    
+    private List<String> mNoteList;
     private List<PhoneData> mPhoneList;
-    private List<ContactMethod> mContactMethodList;
+    private List<EmailData> mEmailList;
+    private List<PostalData> mPostalList;
     private List<OrganizationData> mOrganizationList;
-    private Map<String, List<String>> mExtensionMap;
-
-    private int mNameOrderType;
+    private List<ImData> mImList;
+    private List<PhotoData> mPhotoList;
+    private List<String> mWebsiteList;
     
-    /* private variables bellow is for temporary use. */
-    
-    // For name, there are three fields in vCard: FN, N, NAME.
-    // We prefer FN, which is a required field in vCard 3.0 , but not in vCard 2.1.
-    // Next, we prefer NAME, which is defined only in vCard 3.0.
-    // Finally, we use N, which is a little difficult to parse.
-    private String mTmpFullName;
-    private String mTmpNameFromNProperty;
-
-    // Some vCard has "X-PHONETIC-FIRST-NAME", "X-PHONETIC-MIDDLE-NAME", and
-    // "X-PHONETIC-LAST-NAME"
-    private String mTmpXPhoneticFirstName;
-    private String mTmpXPhoneticMiddleName;
-    private String mTmpXPhoneticLastName;
+    private final int mVCardType;
     
     // Each Column of four properties has ISPRIMARY field
     // (See android.provider.Contacts)
-    // If false even after the following loop, we choose the first
-    // entry as a "primary" entry.
+    // If false even after the parsing loop, we choose the first entry as a "primary"
+    // entry.
     private boolean mPrefIsSet_Address;
     private boolean mPrefIsSet_Phone;
     private boolean mPrefIsSet_Email;
     private boolean mPrefIsSet_Organization;
 
     public ContactStruct() {
-        mNameOrderType = VCardConfig.NAME_ORDER_TYPE_DEFAULT;
+        this(VCardConfig.VCARD_TYPE_V21_GENERIC);
     }
     
-    public ContactStruct(int nameOrderType) {
-        mNameOrderType = nameOrderType; 
-    }
-    
-    /**
-     * @hide only for test
-     */
-    public ContactStruct(String name,
-            String phoneticName,
-            byte[] photoBytes,
-            List<String> notes,
-            List<PhoneData> phoneList, 
-            List<ContactMethod> contactMethodList,
-            List<OrganizationData> organizationList,
-            Map<String, List<String>> extensionMap) {
-        mName = name;
-        mPhoneticName = phoneticName;
-        mPhotoBytes = photoBytes;
-        mContactMethodList = contactMethodList;
-        mOrganizationList = organizationList;
-        mExtensionMap = extensionMap;
-    }
-    
-    /**
-     * @hide only for test
-     */
-    public String getName() {
-        return mName;
-    }
-    
-    /**
-     * @hide only for test
-     */
-    public String getPhoneticName() {
-        return mPhoneticName;
+    public ContactStruct(int vcardType) {
+        mVCardType = vcardType;
     }
 
     /**
-     * @hide only for test
+     * @hide only for testing.
      */
-    public final byte[] getPhotoBytes() {
-        return mPhotoBytes;
+    public ContactStruct(String givenName,
+            String familyName,
+            String middleName,
+            String prefix,
+            String suffix,
+            String phoneticGivenName,
+            String pheneticFamilyName,
+            String phoneticMiddleName,
+            List<byte[]> photoBytesList,
+            List<String> notes,
+            List<PhoneData> phoneList, 
+            List<EmailData> emailList,
+            List<PostalData> postalList,
+            List<OrganizationData> organizationList,
+            List<PhotoData> photoList,
+            List<String> websiteList) {
+        this(VCardConfig.VCARD_TYPE_DEFAULT);
+        mGivenName = givenName;
+        mFamilyName = familyName;
+        mPrefix = prefix;
+        mSuffix = suffix;
+        mPhoneticGivenName = givenName;
+        mPhoneticFamilyName = familyName;
+        mPhoneticMiddleName = middleName;
+        mEmailList = emailList;
+        mPostalList = postalList;
+        mOrganizationList = organizationList;
+        mPhotoList = photoList;
+        mWebsiteList = websiteList;
     }
     
     /**
-     * @hide only for test
+     * @hide only for testing.
+     */
+    public final List<PhotoData> getPhotoList() {
+        return mPhotoList;
+    }
+    
+    /**
+     * @hide only for testing.
      */
     public final List<String> getNotes() {
-        return mNotes;
+        return mNoteList;
     }
     
     /**
-     * @hide only for test
+     * @hide only for testing.
      */
     public final List<PhoneData> getPhoneList() {
         return mPhoneList;
     }
     
     /**
-     * @hide only for test
+     * @hide only for testing.
      */
-    public final List<ContactMethod> getContactMethodList() {
-        return mContactMethodList;
+    public final List<EmailData> getEmailList() {
+        return mEmailList;
     }
     
     /**
-     * @hide only for test
+     * @hide only for testing.
+     */
+    public final List<PostalData> getPostalList() {
+        return mPostalList;
+    }
+    
+    /**
+     * @hide only for testing.
      */
     public final List<OrganizationData> getOrganizationList() {
         return mOrganizationList;
-    }
-
-    /**
-     * @hide only for test
-     */
-    public final Map<String, List<String>> getExtensionMap() {
-        return mExtensionMap;
     }
     
     /**
@@ -359,31 +537,54 @@ public class ContactStruct {
         mPhoneList.add(phoneData);
     }
 
-    /**
-     * Add a contactmethod info to contactmethodList.
-     * @param kind integer value defined in Contacts.java
-     * (e.g. Contacts.KIND_EMAIL)
-     * @param type type col of content://contacts/contact_methods
-     * @param data contact data
-     * @param label extra string used only when kind is Contacts.KIND_CUSTOM.
-     */
-    private void addContactmethod(int kind, int type, String data,
-            String label, boolean isPrimary){
-        if (mContactMethodList == null) {
-            mContactMethodList = new ArrayList<ContactMethod>();
+    private void addNickName(final String nickName) {
+        if (mNickNameList == null) {
+            mNickNameList = new ArrayList<String>();
         }
-        mContactMethodList.add(new ContactMethod(kind, type, data, label, isPrimary));
+        mNickNameList.add(nickName);
     }
     
-    /**
-     * Add a Organization info to organizationList.
-     */
-    private void addOrganization(int type, String companyName, String positionName,
-            boolean isPrimary) {
+    private void addEmail(int type, String data, String label, boolean isPrimary){
+        if (mEmailList == null) {
+            mEmailList = new ArrayList<EmailData>();
+        }
+        mEmailList.add(new EmailData(type, data, label, isPrimary));
+    }
+    
+    private void addPostal(int type, List<String> propValueList, String label, boolean isPrimary){
+        if (mPostalList == null) {
+            mPostalList = new ArrayList<PostalData>();
+        }
+        mPostalList.add(new PostalData(type, propValueList, label, isPrimary));
+    }
+    
+    private void addOrganization(int type, final String companyName,
+            final String positionName, boolean isPrimary) {
         if (mOrganizationList == null) {
             mOrganizationList = new ArrayList<OrganizationData>();
         }
         mOrganizationList.add(new OrganizationData(type, companyName, positionName, isPrimary));
+    }
+    
+    private void addIm(int type, String data, String label, boolean isPrimary) {
+        if (mImList == null) {
+            mImList = new ArrayList<ImData>();
+        }
+        mImList.add(new ImData(type, data, label, isPrimary));
+    }
+    
+    private void addNote(final String note) {
+        if (mNoteList == null) {
+            mNoteList = new ArrayList<String>(1);
+        }
+        mNoteList.add(note);
+    }
+    
+    private void addPhotoBytes(String formatName, byte[] photoBytes) {
+        if (mPhotoList == null) {
+            mPhotoList = new ArrayList<PhotoData>(1);
+        }
+        final PhotoData photoData = new PhotoData(0, null, photoBytes);
     }
 
     /**
@@ -407,148 +608,66 @@ public class ContactStruct {
         }
         int size = mOrganizationList.size();
         if (size == 0) {
-            addOrganization(Contacts.OrganizationColumns.TYPE_OTHER, "", null, false);
+            addOrganization(ContactsContract.CommonDataKinds.Organization.TYPE_OTHER,
+                    "", null, false);
             size = 1;
         }
         OrganizationData lastData = mOrganizationList.get(size - 1);
         lastData.positionName = positionValue;
     }
  
-    private void addExtension(String propName, Map<String, Collection<String>> paramMap,
-            List<String> propValueList) {
-        if (propValueList.size() == 0) {
+    @SuppressWarnings("fallthrough")
+    private void handleNProperty(List<String> elems) {
+        // Family, Given, Middle, Prefix, Suffix. (1 - 5)
+        int size;
+        if (elems == null || (size = elems.size()) < 1) {
             return;
         }
-        // Now store the string into extensionMap.
-        List<String> list;
-        if (mExtensionMap == null) {
-            mExtensionMap = new HashMap<String, List<String>>();
-        }
-        if (!mExtensionMap.containsKey(propName)){
-            list = new ArrayList<String>();
-            mExtensionMap.put(propName, list);
-        } else {
-            list = mExtensionMap.get(propName);
-        }        
-        
-        list.add(encodeProperty(propName, paramMap, propValueList));
-    }
-
-    private String encodeProperty(String propName, Map<String, Collection<String>> paramMap,
-            List<String> propValueList) {
-        // PropertyNode#toString() is for reading, not for parsing in the future.
-        // We construct appropriate String here.
-        StringBuilder builder = new StringBuilder();
-        if (propName.length() > 0) {
-            builder.append("propName:[");
-            builder.append(propName);
-            builder.append("],");
+        if (size > 5) {
+            size = 5;
         }
 
-        if (paramMap.size() > 0) {
-            builder.append("paramMap:[");
-            int size = paramMap.size(); 
-            int i = 0;
-            for (Map.Entry<String, Collection<String>> entry : paramMap.entrySet()) {
-                String key = entry.getKey();
-                for (String value : entry.getValue()) {
-                    // Assuming param-key does not contain NON-ASCII nor symbols.
-                    // TODO: check it.
-                    //
-                    // According to vCard 3.0:
-                    // param-name   = iana-token / x-name
-                    builder.append(key);
-
-                    // param-value may contain any value including NON-ASCIIs.
-                    // We use the following replacing rule.
-                    // \ -> \\
-                    // , -> \,
-                    // In String#replaceAll(), "\\\\" means a single backslash.
-                    builder.append("=");
-
-                    // TODO: fix this.
-                    builder.append(value.replaceAll("\\\\", "\\\\\\\\").replaceAll(",", "\\\\,"));
-                    if (i < size -1) {
-                        builder.append(",");
-                    }
-                    i++;
-                }
-            }
-
-            builder.append("],");
+        switch (size) {
+        // fallthrough
+        case 5:
+            mSuffix = elems.get(4);
+        case 4:
+            mPrefix = elems.get(3);
+        case 3:
+            mMiddleName = elems.get(2);
+        case 2:
+            mGivenName = elems.get(1);
+        default:
+            mFamilyName = elems.get(0);
         }
-
-        int size = propValueList.size();
-        if (size > 0) {
-            builder.append("propValue:[");
-            List<String> list = propValueList;
-            for (int i = 0; i < size; i++) {
-                // TODO: fix this.
-                builder.append(list.get(i).replaceAll("\\\\", "\\\\\\\\").replaceAll(",", "\\\\,"));
-                if (i < size -1) {
-                    builder.append(",");
-                }
-            }
-            builder.append("],");
-        }
-
-        return builder.toString();
     }
     
-    private static String getNameFromNProperty(List<String> elems, int nameOrderType) {
-        // Family, Given, Middle, Prefix, Suffix. (1 - 5)
-        int size = elems.size();
-        if (size > 1) {
-            StringBuilder builder = new StringBuilder();
-            boolean builderIsEmpty = true;
-            // Prefix
-            if (size > 3 && elems.get(3).length() > 0) {
-                builder.append(elems.get(3));
-                builderIsEmpty = false;
-            }
-            String first, second;
-            if (nameOrderType == VCardConfig.NAME_ORDER_TYPE_JAPANESE) {
-                first = elems.get(0);
-                second = elems.get(1);
-            } else {
-                first = elems.get(1);
-                second = elems.get(0);
-            }
-            if (first.length() > 0) {
-                if (!builderIsEmpty) {
-                    builder.append(' ');
-                }
-                builder.append(first);
-                builderIsEmpty = false;
-            }
-            // Middle name
-            if (size > 2 && elems.get(2).length() > 0) {
-                if (!builderIsEmpty) {
-                    builder.append(' ');
-                }
-                builder.append(elems.get(2));
-                builderIsEmpty = false;
-            }
-            if (second.length() > 0) {
-                if (!builderIsEmpty) {
-                    builder.append(' ');
-                }
-                builder.append(second);
-                builderIsEmpty = false;
-            }
-            // Suffix
-            if (size > 4 && elems.get(4).length() > 0) {
-                if (!builderIsEmpty) {
-                    builder.append(' ');
-                }
-                builder.append(elems.get(4));
-                builderIsEmpty = false;
-            }
-            return builder.toString();
-        } else if (size == 1) {
-            return elems.get(0);
-        } else {
-            return "";
+    /**
+     * Some Japanese mobile phones use this field for phonetic name,
+     *  since vCard 2.1 does not have "SORT-STRING" type.
+     * Also, in some cases, the field has some ';'s in it.
+     * Assume the ';' means the same meaning in N property
+     */
+    @SuppressWarnings("fallthrough")
+    private void handlePhoneticNameFromSound(List<String> elems) {
+        // Family, Given, Middle. (1-3)
+        // This is not from specification but mere assumption. Some Japanese phones use this order.
+        int size;
+        if (elems == null || (size = elems.size()) < 1) {
+            return;
+        }
+        if (size > 3) {
+            size = 3;
+        }
+
+        switch (size) {
+        // fallthrough
+        case 3:
+            mPhoneticMiddleName = elems.get(2);
+        case 2:
+            mPhoneticGivenName = elems.get(1);
+        default:
+            mPhoneticFamilyName = elems.get(0);
         }
     }
 
@@ -561,41 +680,27 @@ public class ContactStruct {
         if (propValueList.size() == 0) {
             return;
         }
-
-        String propValue = listToString(propValueList);
-
+        final String propValue = listToString(propValueList).trim();
+        
         if (propName.equals("VERSION")) {
             // vCard version. Ignore this.
         } else if (propName.equals("FN")) {
-            mTmpFullName = propValue;
-        } else if (propName.equals("NAME") && mTmpFullName == null) {
-            // Only in vCard 3.0. Use this if FN does not exist.
-            // Though, note that vCard 3.0 requires FN.
-            mTmpFullName = propValue;
+            mFullName = propValue;
+        } else if (propName.equals("NAME") && mFullName == null) {
+            // Only in vCard 3.0. Use this if FN, which must exist in vCard 3.0 but may not
+            // actually exist in the real vCard data, does not exist.
+            mFullName = propValue;
         } else if (propName.equals("N")) {
-            mTmpNameFromNProperty = getNameFromNProperty(propValueList, mNameOrderType);
+            handleNProperty(propValueList);
         } else if (propName.equals("SORT-STRING")) {
-            mPhoneticName = propValue;
+            mPhoneticFullName = propValue;
+        } else if (propName.equals("NICKNAME") || propName.equals("X-NICKNAME")) {
+            addNickName(propValue);
         } else if (propName.equals("SOUND")) {
-            if ("X-IRMC-N".equals(paramMap.get("TYPE")) && mPhoneticName == null) {
-                // Some Japanese mobile phones use this field for phonetic name,
-                // since vCard 2.1 does not have "SORT-STRING" type.
-                // Also, in some cases, the field has some ';'s in it.
-                // We remove them.
-                StringBuilder builder = new StringBuilder();
-                String value = propValue;
-                int length = value.length();
-                for (int i = 0; i < length; i++) {
-                    char ch = value.charAt(i);
-                    if (ch != ';') {
-                        builder.append(ch);
-                    }
-                }
-                if (builder.length() > 0) {
-                    mPhoneticName = builder.toString();
-                }
+            if (Constants.ATTR_TYPE_X_IRMC_N.equals(paramMap.get(Constants.ATTR_TYPE))) {
+                handlePhoneticNameFromSound(propValueList);
             } else {
-                addExtension(propName, paramMap, propValueList);
+                // Ignore this field since Android cannot understand what it is.
             }
         } else if (propName.equals("ADR")) {
             boolean valuesAreAllEmpty = true;
@@ -609,108 +714,103 @@ public class ContactStruct {
                 return;
             }
 
-            int kind = Contacts.KIND_POSTAL;
             int type = -1;
             String label = "";
             boolean isPrimary = false;
-            Collection<String> typeCollection = paramMap.get("TYPE");
+            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
-                    if (typeString.equals("PREF") && !mPrefIsSet_Address) {
+                    typeString = typeString.toUpperCase();
+                    if (typeString.equals(Constants.ATTR_TYPE_PREF) && !mPrefIsSet_Address) {
                         // Only first "PREF" is considered.
                         mPrefIsSet_Address = true;
                         isPrimary = true;
-                    } else if (typeString.equalsIgnoreCase("HOME")) {
-                        type = Contacts.ContactMethodsColumns.TYPE_HOME;
+                    } else if (typeString.equals(Constants.ATTR_TYPE_HOME)) {
+                        type = StructuredPostal.TYPE_HOME;
                         label = "";
-                    } else if (typeString.equalsIgnoreCase("WORK") || 
+                    } else if (typeString.equals(Constants.ATTR_TYPE_WORK) || 
                             typeString.equalsIgnoreCase("COMPANY")) {
                         // "COMPANY" seems emitted by Windows Mobile, which is not
                         // specifically supported by vCard 2.1. We assume this is same
                         // as "WORK".
-                        type = Contacts.ContactMethodsColumns.TYPE_WORK;
+                        type = StructuredPostal.TYPE_WORK;
                         label = "";
-                    } else if (typeString.equalsIgnoreCase("POSTAL")) {
-                        kind = Contacts.KIND_POSTAL;
-                    } else if (typeString.equalsIgnoreCase("PARCEL") || 
-                            typeString.equalsIgnoreCase("DOM") ||
-                            typeString.equalsIgnoreCase("INTL")) {
-                        // We do not have a kind or type matching these.
-                        // TODO: fix this. We may need to split entries into two.
-                        // (e.g. entries for KIND_POSTAL and KIND_PERCEL)
-                    } else if (typeString.toUpperCase().startsWith("X-") &&
-                            type < 0) {
-                        type = Contacts.ContactMethodsColumns.TYPE_CUSTOM;
-                        label = typeString.substring(2);
-                    } else if (type < 0) {
+                    } else if (typeString.equals("PARCEL") || 
+                            typeString.equals("DOM") ||
+                            typeString.equals("INTL")) {
+                        // We do not have any appropriate way to store this information.
+                    } else {
+                        if (typeString.startsWith("X-") && type < 0) {
+                            typeString = typeString.substring(2);
+                        }
                         // vCard 3.0 allows iana-token. Also some vCard 2.1 exporters
                         // emit non-standard types. We do not handle their values now.
-                        type = Contacts.ContactMethodsColumns.TYPE_CUSTOM;
+                        type = StructuredPostal.TYPE_CUSTOM;
                         label = typeString;
                     }
                 }
             }
             // We use "HOME" as default
             if (type < 0) {
-                type = Contacts.ContactMethodsColumns.TYPE_HOME;
+                type = StructuredPostal.TYPE_HOME;
             }
-                            
-            // adr-value    = 0*6(text-value ";") text-value
-            //              ; PO Box, Extended Address, Street, Locality, Region, Postal
-            //              ; Code, Country Name
-            String address;
-            int size = propValueList.size();
-            if (size > 1) {
-                StringBuilder builder = new StringBuilder();
-                boolean builderIsEmpty = true;
-                if (Locale.getDefault().getCountry().equals(Locale.JAPAN.getCountry())) {
-                    // In Japan, the order is reversed.
-                    for (int i = size - 1; i >= 0; i--) {
-                        String addressPart = propValueList.get(i);
-                        if (addressPart.length() > 0) {
-                            if (!builderIsEmpty) {
-                                builder.append(' ');
-                            }
-                            builder.append(addressPart);
-                            builderIsEmpty = false;
-                        }
-                    }
-                } else {
-                    for (int i = 0; i < size; i++) {
-                        String addressPart = propValueList.get(i);
-                        if (addressPart.length() > 0) {
-                            if (!builderIsEmpty) {
-                                builder.append(' ');
-                            }
-                            builder.append(addressPart);
-                            builderIsEmpty = false;
-                        }
-                    }
-                }
-                address = builder.toString().trim();
-            } else {
-                address = propValue; 
-            }
-            addContactmethod(kind, type, address, label, isPrimary);
-        } else if (propName.equals("ORG")) {
-            // vCard specification does not specify other types.
-            int type = Contacts.OrganizationColumns.TYPE_WORK;
+
+            addPostal(type, propValueList, label, isPrimary);
+        } else if (propName.equals("EMAIL")) {
+            int type = -1;
+            String label = null;
             boolean isPrimary = false;
-            
-            Collection<String> typeCollection = paramMap.get("TYPE");
+            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
-                    if (typeString.equals("PREF") && !mPrefIsSet_Organization) {
+                    typeString = typeString.toUpperCase();
+                    if (typeString.equals(Constants.ATTR_TYPE_PREF) && !mPrefIsSet_Email) {
+                        // Only first "PREF" is considered.
+                        mPrefIsSet_Email = true;
+                        isPrimary = true;
+                    } else if (typeString.equals(Constants.ATTR_TYPE_HOME)) {
+                        type = Email.TYPE_HOME;
+                    } else if (typeString.equals(Constants.ATTR_TYPE_WORK)) {
+                        type = Email.TYPE_WORK;
+                    } else if (typeString.equals(Constants.ATTR_TYPE_CELL)) {
+                        // We do not have TYPE_MOBILE yet.
+                        // TODO: modify this code when TYPE_MOBILE is supported.
+                        type = Email.TYPE_CUSTOM;
+                        label =
+                            android.provider.Contacts.ContactMethodsColumns.MOBILE_EMAIL_TYPE_NAME;
+                    } else {
+                        if (typeString.startsWith("X-") && type < 0) {
+                            typeString = typeString.substring(2);
+                        }
+                        // vCard 3.0 allows iana-token.
+                        // We may have INTERNET (specified in vCard spec),
+                        // SCHOOL, etc.
+                        type = Email.TYPE_CUSTOM;
+                        label = typeString;
+                    }
+                }
+            }
+            if (type < 0) {
+                type = Email.TYPE_OTHER;
+            }
+            addEmail(type, propValue, label, isPrimary);
+        } else if (propName.equals("ORG")) {
+            // vCard specification does not specify other types.
+            int type = Organization.TYPE_WORK;
+            boolean isPrimary = false;
+            
+            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
+            if (typeCollection != null) {
+                for (String typeString : typeCollection) {
+                    if (typeString.equals(Constants.ATTR_TYPE_PREF) && !mPrefIsSet_Organization) {
                         // vCard specification officially does not have PREF in ORG.
                         // This is just for safety.
                         mPrefIsSet_Organization = true;
                         isPrimary = true;
                     }
-                    // XXX: Should we cope with X- words?
                 }
             }
 
-            int size = propValueList.size();
             StringBuilder builder = new StringBuilder();
             for (Iterator<String> iter = propValueList.iterator(); iter.hasNext();) {
                 builder.append(iter.next());
@@ -718,250 +818,190 @@ public class ContactStruct {
                     builder.append(' ');
                 }
             }
-
             addOrganization(type, builder.toString(), "", isPrimary);
         } else if (propName.equals("TITLE")) {
             setPosition(propValue);
         } else if (propName.equals("ROLE")) {
             setPosition(propValue);
-        } else if ((propName.equals("PHOTO") || (propName.equals("LOGO")) && mPhotoBytes == null)) {
-            // We prefer PHOTO to LOGO.
+        } else if (propName.equals("PHOTO") || propName.equals("LOGO")) {
+            String formatName = null;
+            Collection<String> typeCollection = paramMap.get("TYPE");
+            if (typeCollection != null) {
+                formatName = typeCollection.iterator().next();
+            }
             Collection<String> paramMapValue = paramMap.get("VALUE");
             if (paramMapValue != null && paramMapValue.contains("URL")) {
-                // TODO: do something.
+                // Currently we do not have appropriate example for testing this case.
             } else {
-                // Assume PHOTO is stored in BASE64. In that case,
-                // data is already stored in propValue_bytes in binary form.
-                // It should be automatically done by VBuilder (VDataBuilder/VCardDatabuilder) 
-                mPhotoBytes = propBytes;
-                /*
-                Collection<String> typeCollection = paramMap.get("TYPE");
-                if (typeCollection != null) {
-                    if (typeCollection.size() > 1) {
-                        StringBuilder builder = new StringBuilder();
-                        int size = typeCollection.size(); 
-                        int i = 0;
-                        for (String type : typeCollection) {
-                            builder.append(type);
-                            if (i < size - 1) {
-                                builder.append(',');
-                            }
-                            i++;
-                        }
-                        Log.w(LOG_TAG, "There is more than TYPE: " + builder.toString());
-                    }
-                    mPhotoType = typeCollection.iterator().next();
-                }*/
+                addPhotoBytes(formatName, propBytes);
             }
-        } else if (propName.equals("EMAIL")) {
-            int type = -1;
-            String label = null;
-            boolean isPrimary = false;
-            Collection<String> typeCollection = paramMap.get("TYPE");
-            if (typeCollection != null) {
-                for (String typeString : typeCollection) {
-                    if (typeString.equals("PREF") && !mPrefIsSet_Email) {
-                        // Only first "PREF" is considered.
-                        mPrefIsSet_Email = true;
-                        isPrimary = true;
-                    } else if (typeString.equalsIgnoreCase("HOME")) {
-                        type = Contacts.ContactMethodsColumns.TYPE_HOME;
-                    } else if (typeString.equalsIgnoreCase("WORK")) {
-                        type = Contacts.ContactMethodsColumns.TYPE_WORK;
-                    } else if (typeString.equalsIgnoreCase("CELL")) {
-                        // We do not have Contacts.ContactMethodsColumns.TYPE_MOBILE yet.
-                        type = Contacts.ContactMethodsColumns.TYPE_CUSTOM;
-                        label = Contacts.ContactMethodsColumns.MOBILE_EMAIL_TYPE_NAME;
-                    } else if (typeString.toUpperCase().startsWith("X-") &&
-                            type < 0) {
-                        type = Contacts.ContactMethodsColumns.TYPE_CUSTOM;
-                        label = typeString.substring(2);
-                    } else if (type < 0) {
-                        // vCard 3.0 allows iana-token.
-                        // We may have INTERNET (specified in vCard spec),
-                        // SCHOOL, etc.
-                        type = Contacts.ContactMethodsColumns.TYPE_CUSTOM;
-                        label = typeString;
-                    }
-                }
-            }
-            if (type < 0) {
-                type = Contacts.ContactMethodsColumns.TYPE_OTHER;
-            }
-            addContactmethod(Contacts.KIND_EMAIL, type, propValue,label, isPrimary);
         } else if (propName.equals("TEL")) {
-            int type = -1;
-            String label = null;
+            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
+            Object typeObject = VCardUtils.getPhoneTypeFromStrings(typeCollection);
+            final int type;
+            final String label;
+            if (typeObject instanceof Integer) {
+                type = (Integer)typeObject;
+                label = null;
+            } else {
+                type = Phone.TYPE_CUSTOM;
+                label = typeObject.toString();
+            }
+            
+            final boolean isPrimary;
+            if (!mPrefIsSet_Phone && typeCollection != null &&
+                    typeCollection.contains(Constants.ATTR_TYPE_PREF)) {
+                mPrefIsSet_Phone = true;
+                isPrimary = true;
+            } else {
+                isPrimary = false;
+            }
+            addPhone(type, propValue, label, isPrimary);
+        } else if (propName.equals(Constants.PROPERTY_X_SKYPE_PSTNNUMBER)) {
+            // The phone number available via Skype.
+            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
+            // XXX: should use TYPE_CUSTOM + the label "Skype"? (which may need localization)
+            int type = Phone.TYPE_OTHER;
+            final String label = null;
+            final boolean isPrimary;
+            if (!mPrefIsSet_Phone && typeCollection != null &&
+                    typeCollection.contains(Constants.ATTR_TYPE_PREF)) {
+                mPrefIsSet_Phone = true;
+                isPrimary = true;
+            } else {
+                isPrimary = false;
+            }
+            addPhone(type, propValue, label, isPrimary);
+        } else if (sImMap.containsKey(propName)){
+            int type = sImMap.get(propName);
             boolean isPrimary = false;
-            boolean isFax = false;
-            Collection<String> typeCollection = paramMap.get("TYPE");
+            final Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
-                    if (typeString.equals("PREF") && !mPrefIsSet_Phone) {
-                        // Only first "PREF" is considered.
-                        mPrefIsSet_Phone = true;
+                    if (typeString.equals(Constants.ATTR_TYPE_PREF)) {
                         isPrimary = true;
-                    } else if (typeString.equalsIgnoreCase("HOME")) {
-                        type = Contacts.PhonesColumns.TYPE_HOME;
-                    } else if (typeString.equalsIgnoreCase("WORK")) {
-                        type = Contacts.PhonesColumns.TYPE_WORK;
-                    } else if (typeString.equalsIgnoreCase("CELL")) {
-                        type = Contacts.PhonesColumns.TYPE_MOBILE;
-                    } else if (typeString.equalsIgnoreCase("PAGER")) {
-                        type = Contacts.PhonesColumns.TYPE_PAGER;
-                    } else if (typeString.equalsIgnoreCase("FAX")) {
-                        isFax = true;
-                    } else if (typeString.equalsIgnoreCase("VOICE") ||
-                            typeString.equalsIgnoreCase("MSG")) {
-                        // Defined in vCard 3.0. Ignore these because they
-                        // conflict with "HOME", "WORK", etc.
-                        // XXX: do something?
-                    } else if (typeString.toUpperCase().startsWith("X-") &&
-                            type < 0) {
-                        type = Contacts.PhonesColumns.TYPE_CUSTOM;
-                        label = typeString.substring(2);
-                    } else if (type < 0){
-                        // We may have MODEM, CAR, ISDN, etc...
-                        type = Contacts.PhonesColumns.TYPE_CUSTOM;
-                        label = typeString;
+                    } else if (typeString.equalsIgnoreCase(Constants.ATTR_TYPE_HOME)) {
+                        type = Phone.TYPE_HOME;
+                    } else if (typeString.equalsIgnoreCase(Constants.ATTR_TYPE_WORK)) {
+                        type = Phone.TYPE_WORK;
                     }
                 }
             }
             if (type < 0) {
-                type = Contacts.PhonesColumns.TYPE_HOME;
+                type = Phone.TYPE_HOME;
             }
-            if (isFax) {
-                if (type == Contacts.PhonesColumns.TYPE_HOME) {
-                    type = Contacts.PhonesColumns.TYPE_FAX_HOME; 
-                } else if (type == Contacts.PhonesColumns.TYPE_WORK) {
-                    type = Contacts.PhonesColumns.TYPE_FAX_WORK; 
-                }
-            }
-
-            addPhone(type, propValue, label, isPrimary);
+            addIm(type, propValue, null, isPrimary);
         } else if (propName.equals("NOTE")) {
-            if (mNotes == null) {
-                mNotes = new ArrayList<String>(1);
-            }
-            mNotes.add(propValue);
-        } else if (propName.equals("BDAY")) {
-            addExtension(propName, paramMap, propValueList);
+            addNote(propValue);
         } else if (propName.equals("URL")) {
-            addExtension(propName, paramMap, propValueList);
-        } else if (propName.equals("REV")) {                
+            if (mWebsiteList == null) {
+                mWebsiteList = new ArrayList<String>(1);
+            }
+            mWebsiteList.add(propValue);
+        } else if (propName.equals("X-PHONETIC-FIRST-NAME")) {
+            mPhoneticGivenName = propValue;
+        } else if (propName.equals("X-PHONETIC-MIDDLE-NAME")) {
+            mPhoneticMiddleName = propValue;
+        } else if (propName.equals("X-PHONETIC-LAST-NAME")) {
+            mPhoneticFamilyName = propValue;
+        } else if (propName.equals("BDAY")) {
+            mBirthday = propValue;
+        /*} else if (propName.equals("REV")) {                
             // Revision of this VCard entry. I think we can ignore this.
-            addExtension(propName, paramMap, propValueList);
         } else if (propName.equals("UID")) {
-            addExtension(propName, paramMap, propValueList);
         } else if (propName.equals("KEY")) {
             // Type is X509 or PGP? I don't know how to handle this...
-            addExtension(propName, paramMap, propValueList);
         } else if (propName.equals("MAILER")) {
-            addExtension(propName, paramMap, propValueList);
         } else if (propName.equals("TZ")) {
-            addExtension(propName, paramMap, propValueList);
         } else if (propName.equals("GEO")) {
-            addExtension(propName, paramMap, propValueList);
-        } else if (propName.equals("NICKNAME")) {
-            // vCard 3.0 only.
-            addExtension(propName, paramMap, propValueList);
         } else if (propName.equals("CLASS")) {
             // vCard 3.0 only.
             // e.g. CLASS:CONFIDENTIAL
-            addExtension(propName, paramMap, propValueList);
         } else if (propName.equals("PROFILE")) {
             // VCard 3.0 only. Must be "VCARD". I think we can ignore this.
-            addExtension(propName, paramMap, propValueList);
         } else if (propName.equals("CATEGORIES")) {
             // VCard 3.0 only.
             // e.g. CATEGORIES:INTERNET,IETF,INDUSTRY,INFORMATION TECHNOLOGY
-            addExtension(propName, paramMap, propValueList);
         } else if (propName.equals("SOURCE")) {
             // VCard 3.0 only.
-            addExtension(propName, paramMap, propValueList);
         } else if (propName.equals("PRODID")) {
             // VCard 3.0 only.
             // To specify the identifier for the product that created
-            // the vCard object.
-            addExtension(propName, paramMap, propValueList);
-        } else if (propName.equals("X-PHONETIC-FIRST-NAME")) {
-            mTmpXPhoneticFirstName = propValue;
-        } else if (propName.equals("X-PHONETIC-MIDDLE-NAME")) {
-            mTmpXPhoneticMiddleName = propValue;
-        } else if (propName.equals("X-PHONETIC-LAST-NAME")) {
-            mTmpXPhoneticLastName = propValue;
+            // the vCard object.*/
         } else {
             // Unknown X- words and IANA token.
-            addExtension(propName, paramMap, propValueList);
         }
     }
     
-    public String displayString() {
-        if (mName.length() > 0) {
-            return mName;
+    public String getDisplayName() {
+        if (mDisplayName == null) {
+            constructDisplayName();
         }
-        if (mContactMethodList != null && mContactMethodList.size() > 0) {
-            for (ContactMethod contactMethod : mContactMethodList) {
-                if (contactMethod.kind == Contacts.KIND_EMAIL && contactMethod.isPrimary) {
-                    return contactMethod.data;
-                }
-            }
-        }
-        if (mPhoneList != null && mPhoneList.size() > 0) {
-            for (PhoneData phoneData : mPhoneList) {
-                if (phoneData.isPrimary) {
-                    return phoneData.data;
-                }
-            }
-        }
-        return "";
+        return mDisplayName;
     }
 
+    /**
+     * Construct the display name. The constructed data must not be null.
+     */
+    private void constructDisplayName() {
+        if (!(TextUtils.isEmpty(mFamilyName) && TextUtils.isEmpty(mGivenName))) {
+            StringBuilder builder = new StringBuilder();
+            List<String> nameList;
+            switch (VCardConfig.getNameOrderType(mVCardType)) {
+            case VCardConfig.NAME_ORDER_JAPANESE:
+                if (VCardUtils.containsOnlyAscii(mFamilyName) &&
+                        VCardUtils.containsOnlyAscii(mGivenName)) {
+                    nameList = Arrays.asList(mPrefix, mGivenName, mMiddleName, mFamilyName, mSuffix);
+                } else {
+                    nameList = Arrays.asList(mPrefix, mFamilyName, mMiddleName, mGivenName, mSuffix);
+                }
+                break;
+            case VCardConfig.NAME_ORDER_EUROPE:
+                nameList = Arrays.asList(mPrefix, mMiddleName, mGivenName, mFamilyName, mSuffix);
+                break;
+            default:
+                nameList = Arrays.asList(mPrefix, mGivenName, mMiddleName, mFamilyName, mSuffix);
+                break;
+            }
+            boolean first = true;
+            for (String namePart : nameList) {
+                if (!TextUtils.isEmpty(namePart)) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        builder.append(' ');
+                    }
+                    builder.append(namePart);
+                }
+            }
+            mDisplayName = builder.toString();
+        } else if (!TextUtils.isEmpty(mFullName)) {
+            mDisplayName = mFullName;
+        } else if (!(TextUtils.isEmpty(mPhoneticFamilyName) &&
+                TextUtils.isEmpty(mPhoneticGivenName))) {
+            mDisplayName = VCardUtils.constructNameFromElements(mVCardType,
+                    mPhoneticFamilyName, mPhoneticMiddleName, mPhoneticGivenName);
+        } else if (mEmailList != null && mEmailList.size() > 0) {
+            mDisplayName = mEmailList.get(0).data;
+        } else if (mPhoneList != null && mPhoneList.size() > 0) {
+            mDisplayName = mPhoneList.get(0).data;
+        } else if (mPostalList != null && mPostalList.size() > 0) {
+            mDisplayName = mPostalList.get(0).getFormattedAddress(mVCardType);
+        }
+
+        if (mDisplayName == null) {
+            mDisplayName = "";
+        }
+    }
+    
     /**
      * Consolidate several fielsds (like mName) using name candidates, 
      */
     public void consolidateFields() {
-        if (mTmpFullName != null) {
-            mName = mTmpFullName;
-        } else if(mTmpNameFromNProperty != null) {
-            mName = mTmpNameFromNProperty;
-        } else {
-            mName = "";
-        }
-
-        if (mPhoneticName == null &&
-                (mTmpXPhoneticFirstName != null || mTmpXPhoneticMiddleName != null ||
-                        mTmpXPhoneticLastName != null)) {
-            // Note: In Europe, this order should be "LAST FIRST MIDDLE". See the comment around
-            //       NAME_ORDER_TYPE_* for more detail.
-            String first;
-            String second;
-            if (mNameOrderType == VCardConfig.NAME_ORDER_TYPE_JAPANESE) {
-                first = mTmpXPhoneticLastName;
-                second = mTmpXPhoneticFirstName;
-            } else {
-                first = mTmpXPhoneticFirstName;
-                second = mTmpXPhoneticLastName;
-            }
-            StringBuilder builder = new StringBuilder();
-            if (first != null) {
-                builder.append(first);
-            }
-            if (mTmpXPhoneticMiddleName != null) {
-                builder.append(mTmpXPhoneticMiddleName);
-            }
-            if (second != null) {
-                builder.append(second);
-            }
-            mPhoneticName = builder.toString();
-        }
+        constructDisplayName();
         
-        // Remove unnecessary white spaces.
-        // It is found that some mobile phone emits  phonetic name with just one white space
-        // when a user does not specify one.
-        // This logic is effective toward such kind of weird data.
-        if (mPhoneticName != null) {
-            mPhoneticName = mPhoneticName.trim();
+        if (mPhoneticFullName != null) {
+            mPhoneticFullName = mPhoneticFullName.trim();
         }
 
         // If there is no "PREF", we choose the first entries as primary.
@@ -969,258 +1009,196 @@ public class ContactStruct {
             mPhoneList.get(0).isPrimary = true;
         }
 
-        if (!mPrefIsSet_Address && mContactMethodList != null) {
-            for (ContactMethod contactMethod : mContactMethodList) {
-                if (contactMethod.kind == Contacts.KIND_POSTAL) {
-                    contactMethod.isPrimary = true;
-                    break;
-                }
-            }
+        if (!mPrefIsSet_Address && mPostalList != null && mPostalList.size() > 0) {
+            mPostalList.get(0).isPrimary = true;
         }
-        if (!mPrefIsSet_Email && mContactMethodList != null) {
-            for (ContactMethod contactMethod : mContactMethodList) {
-                if (contactMethod.kind == Contacts.KIND_EMAIL) {
-                    contactMethod.isPrimary = true;
-                    break;
-                }
-            }
+        if (!mPrefIsSet_Email && mEmailList != null && mEmailList.size() > 0) {
+            mEmailList.get(0).isPrimary = true;
         }
         if (!mPrefIsSet_Organization && mOrganizationList != null && mOrganizationList.size() > 0) {
             mOrganizationList.get(0).isPrimary = true;
         }
-        
     }
     
-    private void pushIntoContentProviderOrResolver(Object contentSomething,
-            long myContactsGroupId) {
-        ContentResolver resolver = null;
-        AbstractSyncableContentProvider provider = null;
-        if (contentSomething instanceof ContentResolver) {
-            resolver = (ContentResolver)contentSomething;
-        } else if (contentSomething instanceof AbstractSyncableContentProvider) {
-            provider = (AbstractSyncableContentProvider)contentSomething;
-        } else {
-            Log.e(LOG_TAG, "Unsupported object came.");
-            return;
-        }
-        
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(People.NAME, mName);
-        contentValues.put(People.PHONETIC_NAME, mPhoneticName);
-        
-        if (mNotes != null && mNotes.size() > 0) {
-            if (mNotes.size() > 1) {
-                StringBuilder builder = new StringBuilder();
-                for (String note : mNotes) {
-                    builder.append(note);
-                    builder.append("\n");
-                }
-                contentValues.put(People.NOTES, builder.toString());
-            } else {
-                contentValues.put(People.NOTES, mNotes.get(0));
-            }
-        }
-
-        Uri personUri;
-        long personId = 0;
-        if (resolver != null) {
-            personUri = Contacts.People.createPersonInMyContactsGroup(resolver, contentValues);
-            if (personUri != null) {
-                personId = ContentUris.parseId(personUri);
-            }
-        } else {
-            personUri = provider.insert(People.CONTENT_URI, contentValues);
-            if (personUri != null) {
-                personId = ContentUris.parseId(personUri);
-                ContentValues values = new ContentValues();
-                values.put(GroupMembership.PERSON_ID, personId);
-                values.put(GroupMembership.GROUP_ID, myContactsGroupId);
-                Uri resultUri = provider.insert(GroupMembership.CONTENT_URI, values);
-                if (resultUri == null) {
-                    Log.e(LOG_TAG, "Faild to insert the person to MyContact.");
-                    provider.delete(personUri, null, null);
-                    personUri = null;
-                }
-            }
-        }
-
-        if (personUri == null) {
-            Log.e(LOG_TAG, "Failed to create the contact.");
-            return;
-        }
-        
-        if (mPhotoBytes != null) {
-            if (resolver != null) {
-                People.setPhotoData(resolver, personUri, mPhotoBytes);
-            } else {
-                Uri photoUri = Uri.withAppendedPath(personUri, Contacts.Photos.CONTENT_DIRECTORY);
-                ContentValues values = new ContentValues();
-                values.put(Photos.DATA, mPhotoBytes);
-                provider.update(photoUri, values, null, null);
-            }
-        }
-        
-        long primaryPhoneId = -1;
-        if (mPhoneList != null && mPhoneList.size() > 0) {
-            for (PhoneData phoneData : mPhoneList) {
-                ContentValues values = new ContentValues();
-                values.put(Contacts.PhonesColumns.TYPE, phoneData.type);
-                if (phoneData.type == Contacts.PhonesColumns.TYPE_CUSTOM) {
-                    values.put(Contacts.PhonesColumns.LABEL, phoneData.label);
-                }
-                // Already formatted.
-                values.put(Contacts.PhonesColumns.NUMBER, phoneData.data);
-                
-                // Not sure about Contacts.PhonesColumns.NUMBER_KEY ...
-                values.put(Contacts.PhonesColumns.ISPRIMARY, 1);
-                values.put(Contacts.Phones.PERSON_ID, personId);
-                Uri phoneUri;
-                if (resolver != null) {
-                    phoneUri = resolver.insert(Phones.CONTENT_URI, values);
-                } else {
-                    phoneUri = provider.insert(Phones.CONTENT_URI, values);
-                }
-                if (phoneData.isPrimary) {
-                    primaryPhoneId = Long.parseLong(phoneUri.getLastPathSegment());
-                }
-            }
-        }
-        
-        long primaryOrganizationId = -1;
-        if (mOrganizationList != null && mOrganizationList.size() > 0) {
-            for (OrganizationData organizationData : mOrganizationList) {
-                ContentValues values = new ContentValues();
-                // Currently, we do not use TYPE_CUSTOM.
-                values.put(Contacts.OrganizationColumns.TYPE,
-                        organizationData.type);
-                values.put(Contacts.OrganizationColumns.COMPANY,
-                        organizationData.companyName);
-                values.put(Contacts.OrganizationColumns.TITLE,
-                        organizationData.positionName);
-                values.put(Contacts.OrganizationColumns.ISPRIMARY, 1);
-                values.put(Contacts.OrganizationColumns.PERSON_ID, personId);
-                
-                Uri organizationUri;
-                if (resolver != null) {
-                    organizationUri = resolver.insert(Organizations.CONTENT_URI, values);
-                } else {
-                    organizationUri = provider.insert(Organizations.CONTENT_URI, values);
-                }
-                if (organizationData.isPrimary) {
-                    primaryOrganizationId = Long.parseLong(organizationUri.getLastPathSegment());
-                }
-            }
-        }
-        
-        long primaryEmailId = -1;
-        if (mContactMethodList != null && mContactMethodList.size() > 0) {
-            for (ContactMethod contactMethod : mContactMethodList) {
-                ContentValues values = new ContentValues();
-                values.put(Contacts.ContactMethodsColumns.KIND, contactMethod.kind);
-                values.put(Contacts.ContactMethodsColumns.TYPE, contactMethod.type);
-                if (contactMethod.type == Contacts.ContactMethodsColumns.TYPE_CUSTOM) {
-                    values.put(Contacts.ContactMethodsColumns.LABEL, contactMethod.label);
-                }
-                values.put(Contacts.ContactMethodsColumns.DATA, contactMethod.data);
-                values.put(Contacts.ContactMethodsColumns.ISPRIMARY, 1);
-                values.put(Contacts.ContactMethods.PERSON_ID, personId);
-                
-                if (contactMethod.kind == Contacts.KIND_EMAIL) {
-                    Uri emailUri;
-                    if (resolver != null) {
-                        emailUri = resolver.insert(ContactMethods.CONTENT_URI, values);
-                    } else {
-                        emailUri = provider.insert(ContactMethods.CONTENT_URI, values);
-                    }
-                    if (contactMethod.isPrimary) {
-                        primaryEmailId = Long.parseLong(emailUri.getLastPathSegment());
-                    }
-                } else {  // probably KIND_POSTAL
-                    if (resolver != null) {
-                        resolver.insert(ContactMethods.CONTENT_URI, values);
-                    } else {
-                        provider.insert(ContactMethods.CONTENT_URI, values);
-                    }
-                }
-            }
-        }
-        
-        if (mExtensionMap != null && mExtensionMap.size() > 0) {
-            ArrayList<ContentValues> contentValuesArray;
-            if (resolver != null) {
-                contentValuesArray = new ArrayList<ContentValues>();
-            } else {
-                contentValuesArray = null;
-            }
-            for (Entry<String, List<String>> entry : mExtensionMap.entrySet()) {
-                String key = entry.getKey();
-                List<String> list = entry.getValue();
-                for (String value : list) {
-                    ContentValues values = new ContentValues();
-                    values.put(Extensions.NAME, key);
-                    values.put(Extensions.VALUE, value);
-                    values.put(Extensions.PERSON_ID, personId);
-                    if (resolver != null) {
-                        contentValuesArray.add(values);
-                    } else {
-                        provider.insert(Extensions.CONTENT_URI, values);
-                    }
-                }
-            }
-            if (resolver != null) {
-                resolver.bulkInsert(Extensions.CONTENT_URI,
-                        contentValuesArray.toArray(new ContentValues[0]));
-            }
-        }
-        
-        if (primaryPhoneId >= 0 || primaryOrganizationId >= 0 || primaryEmailId >= 0) {
-            ContentValues values = new ContentValues();
-            if (primaryPhoneId >= 0) {
-                values.put(People.PRIMARY_PHONE_ID, primaryPhoneId);
-            }
-            if (primaryOrganizationId >= 0) {
-                values.put(People.PRIMARY_ORGANIZATION_ID, primaryOrganizationId);
-            }
-            if (primaryEmailId >= 0) {
-                values.put(People.PRIMARY_EMAIL_ID, primaryEmailId);
-            }
-            if (resolver != null) {
-                resolver.update(personUri, values, null, null);
-            } else {
-                provider.update(personUri, values, null, null);
-            }
-        }
-    }
-
-    /**
-     * Push this object into database in the resolver.
-     */
     public void pushIntoContentResolver(ContentResolver resolver) {
-        pushIntoContentProviderOrResolver(resolver, 0);
-    }
-    
-    /**
-     * Push this object into AbstractSyncableContentProvider object.
-     * {@link #consolidateFields() must be called before this method is called}
-     * @hide
-     */
-    public void pushIntoAbstractSyncableContentProvider(
-            AbstractSyncableContentProvider provider, long myContactsGroupId) {
-        boolean successful = false;
-        provider.beginBatch();
+        ArrayList<ContentProviderOperation> operationList =
+            new ArrayList<ContentProviderOperation>();  
+        ContentProviderOperation.Builder builder =
+            ContentProviderOperation.newInsert(RawContacts.CONTENT_URI);
+        builder.withValues(new ContentValues());
+        operationList.add(builder.build());
+
+        {
+            builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+            builder.withValueBackReference(StructuredName.RAW_CONTACT_ID, 0);
+            builder.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE);
+
+            builder.withValue(StructuredName.GIVEN_NAME, mGivenName);
+            builder.withValue(StructuredName.FAMILY_NAME, mFamilyName);
+            builder.withValue(StructuredName.MIDDLE_NAME, mMiddleName);
+            builder.withValue(StructuredName.PREFIX, mPrefix);
+            builder.withValue(StructuredName.SUFFIX, mSuffix);
+
+            builder.withValue(StructuredName.PHONETIC_GIVEN_NAME, mPhoneticGivenName);
+            builder.withValue(StructuredName.PHONETIC_FAMILY_NAME, mPhoneticFamilyName);
+            builder.withValue(StructuredName.PHONETIC_MIDDLE_NAME, mPhoneticMiddleName);
+
+            builder.withValue(StructuredName.DISPLAY_NAME, getDisplayName());
+            operationList.add(builder.build());
+        }
+
+        if (mNickNameList != null && mNickNameList.size() > 0) {
+            boolean first = true;
+            for (String nickName : mNickNameList) {
+                builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+                builder.withValueBackReference(Nickname.RAW_CONTACT_ID, 0);
+                builder.withValue(Data.MIMETYPE, Nickname.CONTENT_ITEM_TYPE);
+
+                builder.withValue(Nickname.TYPE, Nickname.TYPE_DEFAULT);
+                builder.withValue(Nickname.NAME, nickName);
+                if (first) {
+                    builder.withValue(Data.IS_PRIMARY, 1);
+                    first = false;
+                }
+                operationList.add(builder.build());
+            }
+        }
+        
+        if (mPhoneList != null) {
+            for (PhoneData phoneData : mPhoneList) {
+                builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+                builder.withValueBackReference(Phone.RAW_CONTACT_ID, 0);
+                builder.withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE);
+
+                builder.withValue(Phone.TYPE, phoneData.type);
+                if (phoneData.type == Phone.TYPE_CUSTOM) {
+                    builder.withValue(Phone.LABEL, phoneData.label);
+                }
+                builder.withValue(Phone.NUMBER, phoneData.data);
+                if (phoneData.isPrimary) {
+                    builder.withValue(Data.IS_PRIMARY, 1);
+                }
+                operationList.add(builder.build());
+            }
+        }
+        
+        if (mOrganizationList != null) {
+            boolean first = true;
+            for (OrganizationData organizationData : mOrganizationList) {
+                builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+                builder.withValueBackReference(Organization.RAW_CONTACT_ID, 0);
+                builder.withValue(Data.MIMETYPE, Organization.CONTENT_ITEM_TYPE);
+
+                // Currently, we do not use TYPE_CUSTOM.
+                builder.withValue(Organization.TYPE, organizationData.type);
+                builder.withValue(Organization.COMPANY, organizationData.companyName);
+                builder.withValue(Organization.TITLE, organizationData.positionName);
+                if (first) {
+                    builder.withValue(Data.IS_PRIMARY, 1);
+                }
+                operationList.add(builder.build());
+            }
+        }
+        
+        if (mEmailList != null) {
+            for (EmailData emailData : mEmailList) {
+                builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+                builder.withValueBackReference(Email.RAW_CONTACT_ID, 0);
+                builder.withValue(Data.MIMETYPE, Email.CONTENT_ITEM_TYPE);
+
+                builder.withValue(Email.TYPE, emailData.type);
+                if (emailData.type == Email.TYPE_CUSTOM) {
+                    builder.withValue(Email.LABEL, emailData.label);
+                }
+                builder.withValue(Email.DATA, emailData.data);
+                if (emailData.isPrimary) {
+                    builder.withValue(Data.IS_PRIMARY, 1);
+                }
+                operationList.add(builder.build());
+            }
+        }
+        
+        if (mPostalList != null) {
+            for (PostalData postalData : mPostalList) {
+                builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+                VCardUtils.insertStructuredPostalDataUsingContactsStruct(
+                        mVCardType, builder, postalData);
+                operationList.add(builder.build());
+            }
+        }
+        
+        if (mImList != null) {
+            for (ImData imData : mImList) {
+                builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+                builder.withValueBackReference(Im.RAW_CONTACT_ID, 0);
+                builder.withValue(Data.MIMETYPE, Im.CONTENT_ITEM_TYPE);
+                
+                builder.withValue(Im.TYPE, imData.type);
+                if (imData.type == Im.TYPE_CUSTOM) {
+                    builder.withValue(Im.LABEL, imData.label);
+                }
+                builder.withValue(Im.DATA, imData.data);
+                if (imData.isPrimary) {
+                    builder.withValue(Data.IS_PRIMARY, 1);
+                }
+            }
+        }
+        
+        if (mNoteList != null) {
+            for (String note : mNoteList) {
+                builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+                builder.withValueBackReference(Note.RAW_CONTACT_ID, 0);
+                builder.withValue(Data.MIMETYPE, Note.CONTENT_ITEM_TYPE);
+
+                builder.withValue(Note.NOTE, note);
+                operationList.add(builder.build());
+            }
+        }
+        
+        if (mPhotoList != null) {
+            boolean first = true;
+            for (PhotoData photoData : mPhotoList) {
+                builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+                builder.withValueBackReference(Photo.RAW_CONTACT_ID, 0);
+                builder.withValue(Data.MIMETYPE, Photo.CONTENT_ITEM_TYPE);
+                builder.withValue(Photo.PHOTO, photoData.photoBytes);
+                if (first) {
+                    builder.withValue(Data.IS_PRIMARY, 1);
+                    first = false;
+                }
+                operationList.add(builder.build());
+            }
+        }
+        
+        if (mWebsiteList != null) {
+            for (String website : mWebsiteList) {
+                builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+                builder.withValueBackReference(Website.RAW_CONTACT_ID, 0);
+                builder.withValue(Data.MIMETYPE, Website.CONTENT_ITEM_TYPE);
+                builder.withValue(Website.URL, website);
+                operationList.add(builder.build());
+            }
+        }
+        
+        if (!TextUtils.isEmpty(mBirthday)) {
+            builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+            builder.withValueBackReference(Miscellaneous.RAW_CONTACT_ID, 0);
+            builder.withValue(Data.MIMETYPE, Miscellaneous.CONTENT_ITEM_TYPE);
+            builder.withValue(Miscellaneous.BIRTHDAY, mBirthday);
+            operationList.add(builder.build());
+        }
+        
         try {
-            pushIntoContentProviderOrResolver(provider, myContactsGroupId);
-            successful = true;
-        } finally {
-            provider.endBatch(successful);
+            resolver.applyBatch(ContactsContract.AUTHORITY, operationList);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+        } catch (OperationApplicationException e) {
+            Log.e(LOG_TAG, String.format("%s: %s", e.toString(), e.getMessage()));
         }
     }
-    
+
     public boolean isIgnorable() {
-        return TextUtils.isEmpty(mName) &&
-                TextUtils.isEmpty(mPhoneticName) &&
-                (mPhoneList == null || mPhoneList.size() == 0) &&
-                (mContactMethodList == null || mContactMethodList.size() == 0);
+        return getDisplayName().length() == 0;
     }
     
     private String listToString(List<String> list){

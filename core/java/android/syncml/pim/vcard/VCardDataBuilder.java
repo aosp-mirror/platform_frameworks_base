@@ -28,6 +28,7 @@ import android.syncml.pim.PropertyNode;
 import android.syncml.pim.VBuilder;
 import android.syncml.pim.VNode;
 import android.syncml.pim.VParser;
+import android.text.TextUtils;
 import android.util.CharsetUtils;
 import android.util.Log;
 
@@ -403,7 +404,10 @@ public class VCardDataBuilder implements VBuilder {
         String targetCharset = CharsetUtils.nameForDefaultVendor(paramMap.getAsString("CHARSET")); 
         String encoding = paramMap.getAsString("ENCODING"); 
         
-        if (targetCharset == null || targetCharset.length() == 0) {
+        Log.d("@@@", String.format("targetCharset: \"%s\", encoding: \"%s\"",
+                targetCharset, encoding));
+
+        if (TextUtils.isEmpty(targetCharset)) {
             targetCharset = mTargetCharset;
         }
         
