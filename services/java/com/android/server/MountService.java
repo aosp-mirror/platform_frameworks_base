@@ -231,6 +231,7 @@ class MountService extends IMountService.Stub {
             if (getMassStorageConnected() && !suppressIfConnected) {
                 Intent intent = new Intent();
                 intent.setClass(mContext, com.android.internal.app.UsbStorageActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
                 setUsbStorageNotification(
                         com.android.internal.R.string.usb_storage_notification_title,
