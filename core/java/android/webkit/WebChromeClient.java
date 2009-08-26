@@ -215,13 +215,14 @@ public class WebChromeClient {
     * @param databaseIdentifier The identifier of the database that caused the
     *     quota overflow.
     * @param currentQuota The current quota for the origin.
+    * @param estimatedSize The estimated size of the database.
     * @param totalUsedQuota is the sum of all origins' quota.
     * @param quotaUpdater A callback to inform the WebCore thread that a new
     *     quota is available. This callback must always be executed at some
     *     point to ensure that the sleeping WebCore thread is woken up.
     */
     public void onExceededDatabaseQuota(String url, String databaseIdentifier,
-        long currentQuota, long totalUsedQuota,
+        long currentQuota, long estimatedSize, long totalUsedQuota,
         WebStorage.QuotaUpdater quotaUpdater) {
         // This default implementation passes the current quota back to WebCore.
         // WebCore will interpret this that new quota was declined.

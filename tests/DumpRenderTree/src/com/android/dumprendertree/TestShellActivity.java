@@ -552,7 +552,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
 
         @Override
         public void onExceededDatabaseQuota(String url_str,
-                String databaseIdentifier, long currentQuota, long totalUsedQuota,
+                String databaseIdentifier, long currentQuota,
+                long estimatedSize, long totalUsedQuota,
                 WebStorage.QuotaUpdater callback) {
             if (mDumpDatabaseCallbacks) {
                 if (mDatabaseCallbackStrings == null) {
