@@ -287,6 +287,7 @@ struct light_t {
     vec4_t      normalizedObjPosition;
     vec4_t      spotDir;
     vec4_t      normalizedSpotDir;
+    vec4_t      objViewer;
     GLfixed     spotExp;
     GLfixed     spotCutoff;
     GLfixed     spotCutoffCosine;
