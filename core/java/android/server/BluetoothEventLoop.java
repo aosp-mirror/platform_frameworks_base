@@ -430,8 +430,10 @@ class BluetoothEventLoop {
 
         boolean authorized = false;
         UUID uuid = UUID.fromString(deviceUuid);
+        // Bluez sends the UUID of the local service being accessed, _not_ the
+        // remote service
         if (mBluetoothService.isEnabled() &&
-                (BluetoothUuid.isAudioSink(uuid) || BluetoothUuid.isAvrcpTarget(uuid)
+                (BluetoothUuid.isAudioSource(uuid) || BluetoothUuid.isAvrcpTarget(uuid)
                         || BluetoothUuid.isAdvAudioDist(uuid))) {
             BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
             BluetoothDevice device = mAdapter.getRemoteDevice(address);
@@ -444,6 +446,7 @@ class BluetoothEventLoop {
         } else {
             Log.i(TAG, "Rejecting incoming " + deviceUuid + " connection from " + address);
         }
+        log("onAgentAuthorize(" + objectPath + ", " + deviceUuid + ") = " + authorized);
         return authorized;
     }
 
