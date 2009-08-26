@@ -186,6 +186,10 @@ SurfaceFlinger::SurfaceFlinger()
         mFreezeDisplayTime(0),
         mDebugRegion(0),
         mDebugBackground(0),
+        mDebugInSwapBuffers(0),
+        mLastSwapBufferTime(0),
+        mDebugInTransaction(0),
+        mLastTransactionTime(0),
         mConsoleSignals(0),
         mSecureFrameBuffer(0)
 {
@@ -517,7 +521,11 @@ void SurfaceFlinger::postFramebuffer()
 
     if (!mInvalidRegion.isEmpty()) {
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
+        const nsecs_t now = systemTime();
+        mDebugInSwapBuffers = now;
         hw.flip(mInvalidRegion);
+        mLastSwapBufferTime = systemTime() - now;
+        mDebugInSwapBuffers = 0;
         mInvalidRegion.clear();
     }
 }
@@ -555,7 +563,11 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
 
     { // scope for the lock
         Mutex::Autolock _l(mStateLock);
+        const nsecs_t now = systemTime();
+        mDebugInTransaction = now;
         handleTransactionLocked(transactionFlags, ditchedLayers);
+        mLastTransactionTime = systemTime() - now;
+        mDebugInTransaction = 0;
     }
 
     // do this without lock held
@@ -1467,7 +1479,29 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 IPCThreadState::self()->getCallingUid());
         result.append(buffer);
     } else {
-        Mutex::Autolock _l(mStateLock);
+
+        // figure out if we're stuck somewhere
+        const nsecs_t now = systemTime();
+        const nsecs_t inSwapBuffers(mDebugInSwapBuffers);
+        const nsecs_t inTransaction(mDebugInTransaction);
+        nsecs_t inSwapBuffersDuration = (inSwapBuffers) ? now-inSwapBuffers : 0;
+        nsecs_t inTransactionDuration = (inTransaction) ? now-inTransaction : 0;
+
+        // Try to get the main lock, but don't insist if we can't
+        // (this would indicate SF is stuck, but we want to be able to
+        // print something in dumpsys).
+        int retry = 3;
+        while (mStateLock.tryLock()<0 && --retry>=0) {
+            usleep(1000000);
+        }
+        const bool locked(retry >= 0);
+        if (!locked) {
+            snprintf(buffer, SIZE, 
+                    "SurfaceFlinger appears to be unresponsive, "
+                    "dumping anyways (no locks held)\n");
+            result.append(buffer);
+        }
+
         size_t s = mClientsMap.size();
         char name[64];
         for (size_t i=0 ; i<s ; i++) {
@@ -1538,10 +1572,29 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 mFreezeDisplay?"yes":"no", mFreezeCount,
                 mCurrentState.orientation, hw.canDraw());
         result.append(buffer);
+        snprintf(buffer, SIZE,
+                "  last eglSwapBuffers() time: %f us\n"
+                "  last transaction time     : %f us\n",
+                mLastSwapBufferTime/1000.0, mLastTransactionTime/1000.0);
+        result.append(buffer);
+        if (inSwapBuffersDuration || !locked) {
+            snprintf(buffer, SIZE, "  eglSwapBuffers time: %f us\n",
+                    inSwapBuffersDuration/1000.0);
+            result.append(buffer);
+        }
+        if (inTransactionDuration || !locked) {
+            snprintf(buffer, SIZE, "  transaction time: %f us\n",
+                    inTransactionDuration/1000.0);
+            result.append(buffer);
+        }
         snprintf(buffer, SIZE, "  client count: %d\n", mClientsMap.size());
         result.append(buffer);
         const BufferAllocator& alloc(BufferAllocator::get());
         alloc.dump(result);
+
+        if (locked) {
+            mStateLock.unlock();
+        }
     }
     write(fd, result.string(), result.size());
     return NO_ERROR;
