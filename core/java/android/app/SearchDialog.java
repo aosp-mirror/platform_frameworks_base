@@ -428,7 +428,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mSearchAutoComplete.setAdapter((SuggestionsAdapter)null);
         // close any leftover cursor
         if (mSuggestionsAdapter != null) {
-            mSuggestionsAdapter.changeCursor(null);
+            mSuggestionsAdapter.close();
         }
         mSuggestionsAdapter = null;
     }

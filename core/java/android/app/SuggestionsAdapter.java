@@ -65,6 +65,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private WeakHashMap<String, Drawable.ConstantState> mOutsideDrawablesCache;
     private SparseArray<Drawable.ConstantState> mBackgroundsCache;
     private boolean mGlobalSearchMode;
+    private boolean mClosed = false;
 
     // Cached column indexes, updated when the cursor changes.
     private int mFormatCol;
@@ -199,12 +200,24 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
     }
 
+    public void close() {
+        if (DBG) Log.d(LOG_TAG, "close()");
+        changeCursor(null);
+        mClosed = true;
+    }
+
     /**
      * Cache columns.
      */
     @Override
     public void changeCursor(Cursor c) {
         if (DBG) Log.d(LOG_TAG, "changeCursor(" + c + ")");
+
+        if (mClosed) {
+            Log.w(LOG_TAG, "Tried to change cursor after adapter was closed.");
+            if (c != null) c.close();
+            return;
+        }
 
         try {
             Cursor oldCursor = getCursor();
