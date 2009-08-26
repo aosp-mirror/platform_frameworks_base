@@ -71,7 +71,6 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v(RenderScript.LOG_TAG, "surfaceCreated");
         mSurfaceHolder = holder;
-        //mGLThread.surfaceCreated();
     }
 
     /**
@@ -81,7 +80,6 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder holder) {
         // Surface will be destroyed when we return
         Log.v(RenderScript.LOG_TAG, "surfaceDestroyed");
-        //mGLThread.surfaceDestroyed();
     }
 
     /**
@@ -90,8 +88,6 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         Log.v(RenderScript.LOG_TAG, "surfaceChanged");
-
-        //mGLThread.onWindowResize(w, h);
     }
 
     /**
@@ -102,7 +98,6 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     public void onPause() {
         Log.v(RenderScript.LOG_TAG, "onPause");
-        //mGLThread.onPause();
     }
 
     /**
@@ -114,7 +109,6 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     public void onResume() {
         Log.v(RenderScript.LOG_TAG, "onResume");
-        //mGLThread.onResume();
     }
 
     /**
@@ -125,7 +119,6 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     public void queueEvent(Runnable r) {
         Log.v(RenderScript.LOG_TAG, "queueEvent");
-        //mGLThread.queueEvent(r);
     }
 
     /**
@@ -136,7 +129,6 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        //mGLThread.requestExitAndWait();
     }
 
     // ----------------------------------------------------------------------

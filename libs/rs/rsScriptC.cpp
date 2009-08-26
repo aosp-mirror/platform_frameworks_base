@@ -267,7 +267,7 @@ void ScriptCState::appendTypes(String8 *str)
                 tmp.append(c->getComponentName());
                 sprintf(buf, " %i\n", ct2);
                 tmp.append(buf);
-                LOGD(tmp);
+                //LOGD(tmp);
                 str->append(tmp);
             }
         }
@@ -295,7 +295,7 @@ void ScriptCState::appendTypes(String8 *str)
                 sprintf(buf, "%i, %i)\n", ct, ct2);
                 tmp.append(buf);
 
-                LOGD(tmp);
+                //LOGD(tmp);
                 str->append(tmp);
             }
         }
