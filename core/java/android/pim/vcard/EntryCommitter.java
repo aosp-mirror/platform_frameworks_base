@@ -15,11 +15,7 @@
  */
 package android.pim.vcard;
 
-import android.content.AbstractSyncableContentProvider;
-import android.content.ContentProvider;
 import android.content.ContentResolver;
-import android.content.IContentProvider;
-import android.provider.Contacts;
 import android.util.Log;
 
 /**
@@ -27,62 +23,26 @@ import android.util.Log;
  */
 public class EntryCommitter implements EntryHandler {
     public static String LOG_TAG = "vcard.EntryComitter";
-    
+
     private ContentResolver mContentResolver;
-    
-    // Ideally, this should be ContactsProvider but it seems Class loader cannot find it,
-    // even when it is subclass of ContactsProvider...
-    private AbstractSyncableContentProvider mProvider;
-    private long mMyContactsGroupId;
-    
     private long mTimeToCommit;
     
     public EntryCommitter(ContentResolver resolver) {
         mContentResolver = resolver;
-        
-        tryGetOriginalProvider();
     }
-    
-    public void onFinal() {
-        if (VCardConfig.showPerformanceLog()) {
-            Log.d(LOG_TAG,
-                    String.format("time to commit entries: %ld ms", mTimeToCommit));
-        }
-    }
-    
-    private void tryGetOriginalProvider() {
-        final ContentResolver resolver = mContentResolver;
-        
-        if ((mMyContactsGroupId = Contacts.People.tryGetMyContactsGroupId(resolver)) == 0) {
-            Log.e(LOG_TAG, "Could not get group id of MyContact");
-            return;
-        }
 
-        IContentProvider iProviderForName = resolver.acquireProvider(Contacts.CONTENT_URI);
-        ContentProvider contentProvider =
-            ContentProvider.coerceToLocalContentProvider(iProviderForName);
-        if (contentProvider == null) {
-            Log.e(LOG_TAG, "Fail to get ContentProvider object.");
-            return;
-        }
-        
-        if (!(contentProvider instanceof AbstractSyncableContentProvider)) {
-            Log.e(LOG_TAG,
-                    "Acquired ContentProvider object is not AbstractSyncableContentProvider.");
-            return;
-        }
-        
-        mProvider = (AbstractSyncableContentProvider)contentProvider; 
+    public void onParsingStart() {
     }
     
+    public void onParsingEnd() {
+        if (VCardConfig.showPerformanceLog()) {
+            Log.d(LOG_TAG, String.format("time to commit entries: %d ms", mTimeToCommit));
+        }
+    }
+
     public void onEntryCreated(final ContactStruct contactStruct) {
         long start = System.currentTimeMillis();
-        if (mProvider != null) {
-            contactStruct.pushIntoAbstractSyncableContentProvider(
-                    mProvider, mMyContactsGroupId);
-        } else {
-            contactStruct.pushIntoContentResolver(mContentResolver);
-        }
+        contactStruct.pushIntoContentResolver(mContentResolver);
         mTimeToCommit += System.currentTimeMillis() - start;
     }
 }

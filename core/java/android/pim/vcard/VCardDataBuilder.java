@@ -59,7 +59,7 @@ public class VCardDataBuilder implements VCardBuilder {
     private String mTargetCharset;
     private boolean mStrictLineBreakParsing;
     
-    private int mNameOrderType;
+    private int mVCardType;
     
     // Just for testing.
     private long mTimePushIntoContentResolver;
@@ -67,23 +67,21 @@ public class VCardDataBuilder implements VCardBuilder {
     private List<EntryHandler> mEntryHandlers = new ArrayList<EntryHandler>();
     
     public VCardDataBuilder() {
-        this(null, null, false, VCardConfig.NAME_ORDER_TYPE_DEFAULT);
+        this(null, null, false, VCardConfig.VCARD_TYPE_V21_GENERIC);
     }
 
     /**
      * @hide 
      */
-    public VCardDataBuilder(int nameOrderType) {
-        this(null, null, false, nameOrderType);
+    public VCardDataBuilder(int vcardType) {
+        this(null, null, false, vcardType);
     }
-    
+
     /**
      * @hide 
      */
-    public VCardDataBuilder(String charset,
-            boolean strictLineBreakParsing,
-            int nameOrderType) {
-        this(null, charset, strictLineBreakParsing, nameOrderType);
+    public VCardDataBuilder(String charset, boolean strictLineBreakParsing, int vcardType) {
+        this(null, charset, strictLineBreakParsing, vcardType);
     }
     
     /**
@@ -92,7 +90,7 @@ public class VCardDataBuilder implements VCardBuilder {
     public VCardDataBuilder(String sourceCharset,
             String targetCharset,
             boolean strictLineBreakParsing,
-            int nameOrderType) {
+            int vcardType) {
         if (sourceCharset != null) {
             mSourceCharset = sourceCharset;
         } else {
@@ -104,7 +102,7 @@ public class VCardDataBuilder implements VCardBuilder {
             mTargetCharset = TARGET_CHARSET;
         }
         mStrictLineBreakParsing = strictLineBreakParsing;
-        mNameOrderType = nameOrderType;
+        mVCardType = vcardType;
     }
     
     public void addEntryHandler(EntryHandler entryHandler) {
@@ -112,11 +110,14 @@ public class VCardDataBuilder implements VCardBuilder {
     }
     
     public void start() {
+        for (EntryHandler entryHandler : mEntryHandlers) {
+            entryHandler.onParsingStart();
+        }
     }
 
     public void end() {
         for (EntryHandler entryHandler : mEntryHandlers) {
-            entryHandler.onFinal();
+            entryHandler.onParsingEnd();
         }
     }
 
@@ -135,7 +136,7 @@ public class VCardDataBuilder implements VCardBuilder {
             Log.e(LOG_TAG, "This is not VCARD!");
         }
 
-        mCurrentContactStruct = new ContactStruct(mNameOrderType);
+        mCurrentContactStruct = new ContactStruct(mVCardType);
     }
 
     public void endRecord() {
@@ -164,8 +165,7 @@ public class VCardDataBuilder implements VCardBuilder {
     
     public void propertyParamType(String type) {
         if (mParamType != null) {
-            Log.e(LOG_TAG,
-                    "propertyParamType() is called more than once " +
+            Log.e(LOG_TAG, "propertyParamType() is called more than once " +
                     "before propertyParamValue() is called");
         }
         mParamType = type;
@@ -173,6 +173,7 @@ public class VCardDataBuilder implements VCardBuilder {
 
     public void propertyParamValue(String value) {
         if (mParamType == null) {
+            // From vCard 2.1 specification. vCard 3.0 formally does not allow this case.
             mParamType = "TYPE";
         }
         mCurrentProperty.addParameter(mParamType, value);
@@ -297,7 +298,7 @@ public class VCardDataBuilder implements VCardBuilder {
         String charset =
             ((charsetCollection != null) ? charsetCollection.iterator().next() : null);
         String targetCharset = CharsetUtils.nameForDefaultVendor(charset); 
-
+        
         final Collection<String> encodingCollection = mCurrentProperty.getParameters("ENCODING");
         String encoding =
             ((encodingCollection != null) ? encodingCollection.iterator().next() : null);
