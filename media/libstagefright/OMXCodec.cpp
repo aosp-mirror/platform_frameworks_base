@@ -735,6 +735,10 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
                 && (mQuirks & kRequiresAllocateBufferOnInputPorts)) {
             err = mOMX->allocate_buffer_with_backup(
                     mNode, portIndex, mem, &buffer);
+        } else if (portIndex == kPortIndexOutput
+                && (mQuirks & kRequiresAllocateBufferOnOutputPorts)) {
+            err = mOMX->allocate_buffer(
+                    mNode, portIndex, def.nBufferSize, &buffer);
         } else {
             err = mOMX->use_buffer(mNode, portIndex, mem, &buffer);
         }

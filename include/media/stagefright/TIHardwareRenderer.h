@@ -46,6 +46,7 @@ private:
     size_t mFrameSize;
     sp<Overlay> mOverlay;
     Vector<void *> mOverlayAddresses;
+    bool mIsFirstFrame;
     size_t mIndex;
 
     TIHardwareRenderer(const TIHardwareRenderer &);

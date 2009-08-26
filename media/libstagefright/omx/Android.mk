@@ -6,6 +6,8 @@ include external/opencore/Config.mk
 LOCAL_C_INCLUDES := $(PV_INCLUDES)
 LOCAL_CFLAGS := $(PV_CFLAGS_MINUS_VISIBILITY)
 
+LOCAL_C_INCLUDES += $(TOP)/hardware/ti/omap3/liboverlay
+
 LOCAL_SRC_FILES:=                 \
 	OMX.cpp                   \
         QComHardwareRenderer.cpp  \
