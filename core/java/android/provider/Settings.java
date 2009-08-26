@@ -3121,6 +3121,13 @@ public final class Settings {
                 "vending_promo_refresh_freq_ms";
 
         /**
+         * Frequency in milliseconds when we should refresh the provisioning information from
+         * the carrier backend.
+         */
+        public static final String VENDING_CARRIER_PROVISIONING_REFRESH_FREQUENCY_MS =
+                "vending_carrier_ref_freq_ms";
+
+        /**
          * URL that points to the legal terms of service to display in Settings.
          * <p>
          * This should be a https URL. For a pretty user-friendly URL, use
