@@ -34,6 +34,8 @@ import android.speech.tts.ITts.Stub;
 import android.speech.tts.ITtsCallback;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -138,6 +140,7 @@ public class TtsService extends Service implements OnCompletionListener {
 
     private ContentResolver mResolver;
 
+    // lock for the speech queue (mSpeechQueue) and the current speech item (mCurrentSpeechItem)
     private final ReentrantLock speechQueueLock = new ReentrantLock();
     private final ReentrantLock synthesizerLock = new ReentrantLock();
 
@@ -173,10 +176,7 @@ public class TtsService extends Service implements OnCompletionListener {
     public void onDestroy() {
         super.onDestroy();
 
-        // TODO replace the call to stopAll() with a method to clear absolutely all upcoming
-        // uses of the native synth, including synthesis to a file, and delete files for which
-        // synthesis was not complete.
-        stopAll("");
+        killAllUtterances();
 
         // Don't hog the media player
         cleanUpPlayer();
@@ -476,6 +476,64 @@ public class TtsService extends Service implements OnCompletionListener {
         }
     }
 
+
+    /**
+     * Stops all speech output, both rendered to a file and directly spoken, and removes any
+     * utterances still in the queue globally. Files that were being written are deleted.
+     */
+    @SuppressWarnings("finally")
+    private int killAllUtterances() {
+        int result = TextToSpeech.ERROR;
+        boolean speechQueueAvailable = false;
+
+        try {
+            speechQueueAvailable = speechQueueLock.tryLock(SPEECHQUEUELOCK_TIMEOUT,
+                    TimeUnit.MILLISECONDS);
+            if (speechQueueAvailable) {
+                // remove every single entry in the speech queue
+                mSpeechQueue.clear();
+
+                // clear the current speech item
+                if (mCurrentSpeechItem != null) {
+                    result = sNativeSynth.stop();
+                    mKillList.put(mCurrentSpeechItem, true);
+                    mIsSpeaking = false;
+
+                    // was the engine writing to a file?
+                    if (mCurrentSpeechItem.mType == SpeechItem.TEXT_TO_FILE) {
+                        // delete the file that was being written
+                        // TODO make sure the synth is not writing to the file anymore
+                        if (mCurrentSpeechItem.mFilename != null) {
+                            File tempFile = new File(mCurrentSpeechItem.mFilename);
+                            Log.v("TtsService", "Leaving behind " + mCurrentSpeechItem.mFilename);
+                            if (tempFile.exists()) {
+                                Log.v("TtsService", "About to delete "
+                                        + mCurrentSpeechItem.mFilename);
+                                if (tempFile.delete()) {
+                                    Log.v("TtsService", "file successfully deleted");
+                                }
+                            }
+                        }
+                    }
+
+                    mCurrentSpeechItem = null;
+                }
+            } else {
+                Log.e("TtsService", "TTS killAllUtterances(): queue locked longer than expected");
+                result = TextToSpeech.ERROR;
+            }
+        } catch (InterruptedException e) {
+            Log.e("TtsService", "TTS killAllUtterances(): tryLock interrupted");
+            result = TextToSpeech.ERROR;
+        } finally {
+            // This check is needed because finally will always run, even if the
+            // method returns somewhere in the try block.
+            if (speechQueueAvailable) {
+                speechQueueLock.unlock();
+            }
+            return result;
+        }
+    }
 
 
     /**
