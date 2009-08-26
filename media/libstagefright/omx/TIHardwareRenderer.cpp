@@ -17,12 +17,14 @@
 #define LOG_TAG "TIHardwareRenderer"
 #include <utils/Log.h>
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <media/stagefright/TIHardwareRenderer.h>
+#include <media/stagefright/MediaDebug.h>
 #include <ui/ISurface.h>
 #include <ui/Overlay.h>
+
+#include "v4l2_utils.h"
+
+#define CACHEABLE_BUFFERS 0x1
 
 namespace android {
 
@@ -37,10 +39,12 @@ TIHardwareRenderer::TIHardwareRenderer(
       mDisplayHeight(displayHeight),
       mDecodedWidth(decodedWidth),
       mDecodedHeight(decodedHeight),
-      mFrameSize((mDecodedWidth * mDecodedHeight * 3) / 2) {
-    assert(mISurface.get() != NULL);
-    assert(mDecodedWidth > 0);
-    assert(mDecodedHeight > 0);
+      mFrameSize(mDecodedWidth * mDecodedHeight * 2),
+      mIsFirstFrame(true),
+      mIndex(0) {
+    CHECK(mISurface.get() != NULL);
+    CHECK(mDecodedWidth > 0);
+    CHECK(mDecodedHeight > 0);
 
     sp<OverlayRef> ref = mISurface->createOverlay(
             mDisplayWidth, mDisplayHeight, OVERLAY_FORMAT_CbYCrY_422_I);
@@ -51,11 +55,14 @@ TIHardwareRenderer::TIHardwareRenderer(
     }
 
     mOverlay = new Overlay(ref);
+    mOverlay->setParameter(CACHEABLE_BUFFERS, 0);
 
-    for (size_t i = 0; i < mOverlay->getBufferCount(); ++i) {
-        mOverlayAddresses.push(mOverlay->getBufferAddress((void *)i));
+    for (size_t i = 0; i < (size_t)mOverlay->getBufferCount(); ++i) {
+        mapping_data_t *data =
+            (mapping_data_t *)mOverlay->getBufferAddress((void *)i);
+
+        mOverlayAddresses.push(data->ptr);
     }
-    mIndex = mOverlayAddresses.size() - 1;
 }
 
 TIHardwareRenderer::~TIHardwareRenderer() {
@@ -70,27 +77,51 @@ TIHardwareRenderer::~TIHardwareRenderer() {
 
 void TIHardwareRenderer::render(
         const void *data, size_t size, void *platformPrivate) {
-    // assert(size == mFrameSize);
+    // CHECK_EQ(size, mFrameSize);
 
     if (mOverlay.get() == NULL) {
         return;
     }
 
 #if 0
-    overlay_buffer_t buffer;
-    if (mOverlay->dequeueBuffer(&buffer) == OK) {
-        void *addr = mOverlay->getBufferAddress(buffer);
+    size_t i = 0;
+    for (; i < mOverlayAddresses.size(); ++i) {
+        if (mOverlayAddresses[i] == data) {
+            break;
+        }
 
-        memcpy(addr, data, size);
+        if (mIsFirstFrame) {
+            LOGI("overlay buffer #%d: %p", i, mOverlayAddresses[i]);
+        }
+    }
 
-        mOverlay->queueBuffer(buffer);
+    if (i == mOverlayAddresses.size()) {
+        LOGE("No suitable overlay buffer found.");
+        return;
+    }
+
+    mOverlay->queueBuffer((void *)i);
+
+    overlay_buffer_t overlay_buffer;
+    if (!mIsFirstFrame) {
+        CHECK_EQ(mOverlay->dequeueBuffer(&overlay_buffer), OK);
+    } else {
+        mIsFirstFrame = false;
     }
 #else
     memcpy(mOverlayAddresses[mIndex], data, size);
+
     mOverlay->queueBuffer((void *)mIndex);
 
-    if (mIndex-- == 0) {
-        mIndex = mOverlayAddresses.size() - 1;
+    if (++mIndex == mOverlayAddresses.size()) {
+        mIndex = 0;
+    }
+
+    overlay_buffer_t overlay_buffer;
+    if (!mIsFirstFrame) {
+        CHECK_EQ(mOverlay->dequeueBuffer(&overlay_buffer), OK);
+    } else {
+        mIsFirstFrame = false;
     }
 #endif
 }
