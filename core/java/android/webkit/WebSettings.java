@@ -167,7 +167,7 @@ public class WebSettings {
     private boolean         mDatabaseEnabled = false;
     private boolean         mDomStorageEnabled = false;
     private boolean         mWorkersEnabled = false;  // only affects V8.
-    private boolean         mGeolocationEnabled = false;
+    private boolean         mGeolocationEnabled = true;
     // HTML5 configuration parameters
     private long            mAppCacheMaxSize = Long.MAX_VALUE;
     private String          mAppCachePath = "";
