@@ -898,6 +898,12 @@
         services.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_performCdmaProvisioning">directly start CDMA phone setup</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_performCdmaProvisioning">Allows the application to start CDMA provisioning.
+        Malicious applications may unnecessarily start CDMA provisioning</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_locationUpdates">control location update notifications</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_locationUpdates">Allows enabling/disabling location
