@@ -33,6 +33,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.RegisteredServicesCache;
+import android.content.pm.ProviderInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -1996,11 +1997,19 @@ class SyncManager implements OnAccountsUpdatedListener {
         private void installHandleTooManyDeletesNotification(Account account, String authority,
                 long numDeletes) {
             if (mNotificationMgr == null) return;
+
+            final ProviderInfo providerInfo = mContext.getPackageManager().resolveContentProvider(
+                    authority, 0 /* flags */);
+            if (providerInfo == null) {
+                return;
+            }
+            CharSequence authorityName = providerInfo.loadLabel(mContext.getPackageManager());
+
             Intent clickIntent = new Intent();
             clickIntent.setClassName("com.android.providers.subscribedfeeds",
                     "com.android.settings.SyncActivityTooManyDeletes");
             clickIntent.putExtra("account", account);
-            clickIntent.putExtra("provider", authority);
+            clickIntent.putExtra("provider", authorityName.toString());
             clickIntent.putExtra("numDeletes", numDeletes);
 
             if (!isActivityAvailable(clickIntent)) {
@@ -2014,14 +2023,13 @@ class SyncManager implements OnAccountsUpdatedListener {
             CharSequence tooManyDeletesDescFormat = mContext.getResources().getText(
                     R.string.contentServiceTooManyDeletesNotificationDesc);
 
-            String[] authorities = authority.split(";");
             Notification notification =
                 new Notification(R.drawable.stat_notify_sync_error,
                         mContext.getString(R.string.contentServiceSync),
                         System.currentTimeMillis());
             notification.setLatestEventInfo(mContext,
                     mContext.getString(R.string.contentServiceSyncNotificationTitle),
-                    String.format(tooManyDeletesDescFormat.toString(), authorities[0]),
+                    String.format(tooManyDeletesDescFormat.toString(), authorityName),
                     pendingIntent);
             notification.flags |= Notification.FLAG_ONGOING_EVENT;
             mNotificationMgr.notify(account.hashCode() ^ authority.hashCode(), notification);

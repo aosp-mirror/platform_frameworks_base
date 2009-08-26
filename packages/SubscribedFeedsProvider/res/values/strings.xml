@@ -17,5 +17,9 @@
 <resources>
     <!-- Title of the feed synchronization activity. -->
     <string name="app_label">Sync Feeds</string>
+
+    <!-- What to show in messaging that refers to this provider, e.g. AccountSyncSettings -->
+    <string name="provider_label">Push Subscriptions</string>
+
 </resources>
 
