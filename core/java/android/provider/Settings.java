@@ -2968,15 +2968,33 @@ public final class Settings {
                 "gtalk_youtube_video_url";
 
         /**
+         * Chat message lifetime (for pruning old chat messages).
+         */
+        public static final String GTALK_CHAT_MESSAGE_LIFETIME =
+                "gtalk_chat_message_lifetime";
+
+        /**
+         * OTR message lifetime (for pruning old otr messages).
+         */
+        public static final String GTALK_OTR_MESSAGE_LIFETIME =
+                "gtalk_otr_message_lifetime";
+
+        /**
+         * Chat expiration time, i.e., time since last message in the chat (for pruning old chats).
+         */
+        public static final String GTALK_CHAT_EXPIRATION_TIME =
+                "gtalk_chat_expiration_time";
+
+        /**
          * This is the url for getting the app token for server-to-device push messaging.
          */
         public static final String PUSH_MESSAGING_REGISTRATION_URL =
                 "push_messaging_registration_url";
 
-	/**
-	 * Use android://&lt;it&gt; routing infos for Google Sync Server subcriptions.
-	 */
-	public static final String GSYNC_USE_RMQ2_ROUTING_INFO = "gsync_use_rmq2_routing_info";
+        /**
+         * Use android://&lt;it&gt; routing infos for Google Sync Server subcriptions.
+         */
+        public static final String GSYNC_USE_RMQ2_ROUTING_INFO = "gsync_use_rmq2_routing_info";
 
         /**
          * Enable use of ssl session caching.
