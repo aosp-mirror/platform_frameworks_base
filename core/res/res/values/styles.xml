@@ -339,7 +339,7 @@
     </style>
     
     <style name="Widget.TextView.ListSeparator">
-        <item name="android:background">@android:drawable/dark_header</item>
+        <item name="android:background">@android:drawable/dark_header_dither</item>
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">25dip</item>
         <item name="android:textStyle">bold</item>
@@ -351,7 +351,7 @@
 
     <style name="Widget.TextView.ListSeparator.White">
         <item name="android:textColor">?textColorPrimaryInverse</item>
-        <item name="android:background">@android:drawable/light_header</item>
+        <item name="android:background">@android:drawable/light_header_dither</item>
     </style>
 
     <style name="Widget.EditText">
