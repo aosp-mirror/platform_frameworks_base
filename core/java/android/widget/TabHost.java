@@ -101,8 +101,8 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             throw new RuntimeException(
                     "Your TabHost must have a TabWidget whose id attribute is 'android.R.id.tabs'");
         }
-        
-        // KeyListener to attach to all tabs. Detects non-navigation keys 
+
+        // KeyListener to attach to all tabs. Detects non-navigation keys
         // and relays them to the tab content.
         mTabKeyListener = new OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -114,14 +114,14 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
                     case KeyEvent.KEYCODE_DPAD_DOWN:
                     case KeyEvent.KEYCODE_ENTER:
                         return false;
-                    
+
                 }
                 mTabContent.requestFocus(View.FOCUS_FORWARD);
                 return mTabContent.dispatchKeyEvent(event);
             }
-            
+
         };
-        
+
         mTabWidget.setTabSelectionListener(new TabWidget.OnTabSelectionChanged() {
             public void onTabSelectionChanged(int tabIndex, boolean clicked) {
                 setCurrentTab(tabIndex);
@@ -134,7 +134,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         mTabContent = (FrameLayout) findViewById(com.android.internal.R.id.tabcontent);
         if (mTabContent == null) {
             throw new RuntimeException(
-                    "Your TabHost must have a FrameLayout whose id attribute is " 
+                    "Your TabHost must have a FrameLayout whose id attribute is "
                             + "'android.R.id.tabcontent'");
         }
     }
@@ -284,7 +284,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             playSoundEffect(SoundEffectConstants.NAVIGATION_UP);
             return true;
         }
-        return handled;        
+        return handled;
     }
 
 
@@ -313,7 +313,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         // Call the tab widget's focusCurrentTab(), instead of just
         // selecting the tab.
         mTabWidget.focusCurrentTab(mCurrentTab);
-        
+
         // tab content
         mCurrentView = spec.mContentStrategy.getContentView();
 
@@ -368,7 +368,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
     public interface TabContentFactory {
         /**
          * Callback to make the tab contents
-         * 
+         *
          * @param tag
          *            Which tab was selected.
          * @return The view to display the contents of the selected tab.
@@ -502,6 +502,8 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             View tabIndicator = inflater.inflate(R.layout.tab_indicator,
                     mTabWidget, // tab widget is the parent
                     false); // no inflate params
+            // TODO: Move this to xml when bug 2068024 is resolved.
+            tabIndicator.getBackground().setDither(true);
 
             final TextView tv = (TextView) tabIndicator.findViewById(R.id.title);
             tv.setText(mLabel);
@@ -529,6 +531,8 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             View tabIndicator = inflater.inflate(R.layout.tab_indicator,
                     mTabWidget, // tab widget is the parent
                     false); // no inflate params
+            // TODO: Move this to xml when bug 2068024 is resolved.
+            tabIndicator.getBackground().setDither(true);
 
             final TextView tv = (TextView) tabIndicator.findViewById(R.id.title);
             tv.setText(mLabel);
@@ -638,7 +642,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
                 }
             }
             mLaunchedView = wd;
-            
+
             // XXX Set FOCUS_AFTER_DESCENDANTS on embedded activities for now so they can get
             // focus if none of their children have it. They need focus to be able to
             // display menu items.
