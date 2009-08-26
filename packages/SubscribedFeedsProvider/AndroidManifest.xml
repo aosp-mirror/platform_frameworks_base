@@ -13,7 +13,8 @@
                  android:label="@string/app_label">
         <uses-library android:name="com.google.android.gtalkservice" />
         <provider android:name="SubscribedFeedsProvider"
-                android:authorities="subscribedfeeds" android:syncable="false"
+                android:authorities="subscribedfeeds"
+                android:label="@string/provider_label"
                 android:multiprocess="false"
                 android:readPermission="android.permission.SUBSCRIBED_FEEDS_READ"
                 android:writePermission="android.permission.SUBSCRIBED_FEEDS_WRITE" />
