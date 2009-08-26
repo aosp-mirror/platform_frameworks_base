@@ -696,6 +696,8 @@ void ogles_viewport(ogles_context_t* c,
     f[2] = 0;   f[6] = 0;   f[10] = A;  f[14] = B;
     f[3] = 0;   f[7] = 0;   f[11] = 0;  f[15] = 1;
     c->transforms.dirty |= transform_state_t::VIEWPORT;
+    if (c->transforms.mvp4.flags & transform_t::FLAGS_2D_PROJECTION)
+        c->transforms.dirty |= transform_state_t::MVP;
 }
 
 // ----------------------------------------------------------------------------
