@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MetaData.h>
 
 namespace android {
@@ -87,7 +87,7 @@ bool MetaData::findInt32(uint32_t key, int32_t *value) {
         return false;
     }
 
-    assert(size == sizeof(*value));
+    CHECK_EQ(size, sizeof(*value));
 
     *value = *(int32_t *)data;
 
@@ -102,7 +102,7 @@ bool MetaData::findFloat(uint32_t key, float *value) {
         return false;
     }
 
-    assert(size == sizeof(*value));
+    CHECK_EQ(size, sizeof(*value));
 
     *value = *(float *)data;
 
@@ -117,7 +117,7 @@ bool MetaData::findPointer(uint32_t key, void **value) {
         return false;
     }
 
-    assert(size == sizeof(*value));
+    CHECK_EQ(size, sizeof(*value));
 
     *value = *(void **)data;
 

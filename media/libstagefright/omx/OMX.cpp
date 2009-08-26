@@ -20,15 +20,13 @@
 
 #include <sys/socket.h>
 
-#undef NDEBUG
-#include <assert.h>
-
 #include "OMX.h"
 #include "OMXRenderer.h"
 
 #include "pv_omxcore.h"
 
 #include <binder/IMemory.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/QComHardwareRenderer.h>
 #include <media/stagefright/SoftwareRenderer.h>
 #include <media/stagefright/TIHardwareRenderer.h>
@@ -50,7 +48,7 @@ public:
     }
 
     void setHandle(OMX_HANDLETYPE handle) {
-        assert(mHandle == NULL);
+        CHECK_EQ(mHandle, NULL);
         mHandle = handle;
     }
 
@@ -541,7 +539,7 @@ void OMX::fill_buffer(node_id node, buffer_id buffer) {
 
     OMX_ERRORTYPE err =
         OMX_FillThisBuffer(node_meta->handle(), header);
-    assert(err == OMX_ErrorNone);
+    CHECK_EQ(err, OMX_ErrorNone);
 }
 
 void OMX::empty_buffer(
@@ -563,7 +561,7 @@ void OMX::empty_buffer(
 
     OMX_ERRORTYPE err =
         OMX_EmptyThisBuffer(node_meta->handle(), header);
-    assert(err == OMX_ErrorNone);
+    CHECK_EQ(err, OMX_ErrorNone);
 }
 
 status_t OMX::get_extension_index(

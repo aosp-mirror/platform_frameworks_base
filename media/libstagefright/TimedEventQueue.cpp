@@ -24,9 +24,7 @@
 
 #include <sys/time.h>
 
-#undef NDEBUG
-#include <assert.h>
-
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/TimedEventQueue.h>
 
 namespace android {
@@ -89,7 +87,7 @@ void TimedEventQueue::postEventToBack(const sp<Event> &event) {
 
 void TimedEventQueue::postEventWithDelay(
         const sp<Event> &event, int64_t delay_us) {
-    assert(delay_us >= 0);
+    CHECK(delay_us >= 0);
     postTimedEvent(event, getRealTimeUs() + delay_us);
 }
 

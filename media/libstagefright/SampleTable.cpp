@@ -18,9 +18,9 @@
 #include <utils/Log.h>
 
 #include <arpa/inet.h>
-#include <assert.h>
 
 #include <media/stagefright/DataSource.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/SampleTable.h>
 #include <media/stagefright/Utils.h>
 
@@ -59,7 +59,7 @@ status_t SampleTable::setChunkOffsetParams(
         return ERROR_MALFORMED;
     }
 
-    assert(type == kChunkOffsetType32 || type == kChunkOffsetType64);
+    CHECK(type == kChunkOffsetType32 || type == kChunkOffsetType64);
 
     mChunkOffsetOffset = data_offset;
     mChunkOffsetType = type;
@@ -132,7 +132,7 @@ status_t SampleTable::setSampleSizeParams(
         return ERROR_MALFORMED;
     }
 
-    assert(type == kSampleSizeType32 || type == kSampleSizeTypeCompact);
+    CHECK(type == kSampleSizeType32 || type == kSampleSizeTypeCompact);
 
     mSampleSizeOffset = data_offset;
 
@@ -272,7 +272,7 @@ status_t SampleTable::getChunkOffset(uint32_t chunk_index, off_t *offset) {
 
         *offset = ntohl(offset32);
     } else {
-        assert(mChunkOffsetOffset == kChunkOffsetType64);
+        CHECK_EQ(mChunkOffsetOffset, kChunkOffsetType64);
 
         uint64_t offset64;
         if (mDataSource->read_at(
@@ -399,7 +399,7 @@ status_t SampleTable::getSampleSize(
 
         default:
         {
-            assert(mSampleSizeFieldSize == 4);
+            CHECK_EQ(mSampleSizeFieldSize, 4);
 
             uint8_t x;
             if (mDataSource->read_at(
@@ -568,26 +568,6 @@ status_t SampleTable::findClosestSyncSample(
             break;
         }
     }
-
-#if 1
-    // Make sure we return a sample at or _after_ the requested one.
-    // Seeking to a particular time in a media source containing audio and
-    // video will most likely be able to sync fairly close to the requested
-    // time in the audio track but may only be able to seek a fair distance
-    // from the requested time in the video track.
-    // If we seek the video track to a time earlier than the audio track,
-    // we'll cause the video track to be late for quite a while, the decoder
-    // trying to catch up.
-    // If we seek the video track to a time later than the audio track,
-    // audio will start playing fine while no video will be output for a
-    // while, the video decoder will not stress the system.
-    if (mDataSource->read_at(
-                mSyncSampleOffset + 8 + (left - 1) * 4, &x, 4) != 4) {
-        return ERROR_IO;
-    }
-    x = ntohl(x);
-    assert((x - 1) >= start_sample_index);
-#endif
 
     *sample_index = x - 1;
 

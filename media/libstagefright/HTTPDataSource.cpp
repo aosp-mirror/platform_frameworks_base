@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <stdlib.h>
 
 #include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/HTTPStream.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/string.h>
 
 namespace android {
@@ -32,7 +30,7 @@ HTTPDataSource::HTTPDataSource(const char *uri)
       mBuffer(malloc(kBufferSize)),
       mBufferLength(0),
       mBufferOffset(0) {
-    assert(!strncasecmp("http://", uri, 7));
+    CHECK(!strncasecmp("http://", uri, 7));
 
     string host;
     string path;
@@ -53,8 +51,8 @@ HTTPDataSource::HTTPDataSource(const char *uri)
     } else {
         char *end;
         long tmp = strtol(colon + 1, &end, 10);
-        assert(end > colon + 1);
-        assert(tmp > 0 && tmp < 65536);
+        CHECK(end > colon + 1);
+        CHECK(tmp > 0 && tmp < 65536);
         port = tmp;
 
         host = string(host, 0, colon - host.c_str());
@@ -68,7 +66,7 @@ HTTPDataSource::HTTPDataSource(const char *uri)
     mPath = strdup(path.c_str());
 
     status_t err = mHttp.connect(mHost, mPort);
-    assert(err == OK);
+    CHECK_EQ(err, OK);
 }
 
 HTTPDataSource::HTTPDataSource(const char *host, int port, const char *path)
@@ -79,7 +77,7 @@ HTTPDataSource::HTTPDataSource(const char *host, int port, const char *path)
       mBufferLength(0),
       mBufferOffset(0) {
     status_t err = mHttp.connect(mHost, mPort);
-    assert(err == OK);
+    CHECK_EQ(err, OK);
 }
 
 HTTPDataSource::~HTTPDataSource() {
