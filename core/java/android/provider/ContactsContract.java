@@ -454,15 +454,24 @@ public final class ContactsContract {
         public static final int AGGREGATION_MODE_IMMEDITATE = 1;
 
         /**
+         * If {@link #AGGREGATION_MODE} is {@link #AGGREGATION_MODE_SUSPENDED}, changes
+         * to the raw contact do not cause its aggregation to be revisited. Note that changing
+         * {@link #AGGREGATION_MODE} from {@link #AGGREGATION_MODE_SUSPENDED} to
+         * {@link #AGGREGATION_MODE_DEFAULT} does not trigger an aggregation pass. Any subsequent
+         * change to the raw contact's data will.
+         */
+        public static final int AGGREGATION_MODE_SUSPENDED = 2;
+
+        /**
          * Aggregation mode: never aggregate this raw contact (note that the raw contact will not
          * have a corresponding Aggregate and therefore will not be included in Aggregates
          * query results.)
          */
-        public static final int AGGREGATION_MODE_DISABLED = 2;
+        public static final int AGGREGATION_MODE_DISABLED = 3;
 
         /**
          * A sub-directory of a single raw contact that contains all of their {@link Data} rows.
-         * To access this directory append
+         * To access this directory append {@link Data#CONTENT_DIRECTORY} to the contact URI.
          */
         public static final class Data implements BaseColumns, DataColumns {
             /**
