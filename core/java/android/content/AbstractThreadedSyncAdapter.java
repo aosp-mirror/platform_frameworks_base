@@ -85,7 +85,6 @@ public abstract class AbstractThreadedSyncAdapter {
                     mSyncThread = new SyncThread(
                             "SyncAdapterThread-" + mNumSyncStarts.incrementAndGet(),
                             syncContextClient, authority, account, extras);
-                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     mSyncThread.start();
                     alreadyInProgress = false;
                 } else {
@@ -133,6 +132,8 @@ public abstract class AbstractThreadedSyncAdapter {
         }
 
         public void run() {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
             if (isCanceled()) {
                 return;
             }
