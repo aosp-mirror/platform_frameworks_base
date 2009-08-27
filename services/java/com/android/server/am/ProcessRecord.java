@@ -71,6 +71,8 @@ class ProcessRecord implements Watchdog.PssRequestor {
     ComponentName instrumentationResultClass;// copy of instrumentationClass
     BroadcastRecord curReceiver;// receiver currently running in the app
     long lastRequestedGc;       // When we last asked the app to do a gc
+    long lastLowMemory;         // When we last told the app that memory is low
+    boolean reportLowMemory;    // Set to true when waiting to report low mem
     int lastPss;                // Last pss size reported by app.
     String adjType;             // Debugging: primary thing impacting oom_adj.
     Object adjSource;           // Debugging: option dependent object.

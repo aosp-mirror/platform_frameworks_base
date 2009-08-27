@@ -136,6 +136,7 @@ class ServiceRecord extends Binder {
         if (permission != null) {
             pw.print(prefix); pw.print("permission="); pw.println(permission);
         }
+        long now = SystemClock.uptimeMillis();
         pw.print(prefix); pw.print("baseDir="); pw.print(baseDir);
                 if (!resDir.equals(baseDir)) pw.print(" resDir="); pw.print(resDir);
                 pw.print(" dataDir="); pw.println(dataDir);
@@ -145,8 +146,8 @@ class ServiceRecord extends Binder {
                     pw.print(" foregroundId="); pw.print(foregroundId);
                     pw.print(" foregroundNoti="); pw.println(foregroundNoti);
         }
-        pw.print(prefix); pw.print("lastActivity="); pw.print(lastActivity);
-                pw.print(" executingStart="); pw.print(executingStart);
+        pw.print(prefix); pw.print("lastActivity="); pw.print(lastActivity-now);
+                pw.print(" executingStart="); pw.print(executingStart-now);
                 pw.print(" restartTime="); pw.println(restartTime);
         if (startRequested || lastStartId != 0) {
             pw.print(prefix); pw.print("startRequested="); pw.print(startRequested);
@@ -158,8 +159,8 @@ class ServiceRecord extends Binder {
                 || restartDelay != 0 || nextRestartTime != 0) {
             pw.print(prefix); pw.print("executeNesting="); pw.print(executeNesting);
                     pw.print(" restartCount="); pw.print(restartCount);
-                    pw.print(" restartDelay="); pw.print(restartDelay);
-                    pw.print(" nextRestartTime="); pw.print(nextRestartTime);
+                    pw.print(" restartDelay="); pw.print(restartDelay-now);
+                    pw.print(" nextRestartTime="); pw.print(nextRestartTime-now);
                     pw.print(" crashCount="); pw.println(crashCount);
         }
         if (deliveredStarts.size() > 0) {
