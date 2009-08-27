@@ -627,8 +627,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /**
      * @override com.android.internal.telephony.DataConnectionTracker
      */
-    protected void onTrySetupData(String reason) {
-        trySetupData(reason);
+    protected boolean onTrySetupData(String reason) {
+        return trySetupData(reason);
     }
 
     /**
