@@ -1381,7 +1381,8 @@ public class AudioService extends IAudioService.Stub {
                             address);
                     mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
                 } else if (!isConnected &&
-                           (state == BluetoothA2dp.STATE_CONNECTED || state != BluetoothA2dp.STATE_PLAYING)){
+                             (state == BluetoothA2dp.STATE_CONNECTED ||
+                              state == BluetoothA2dp.STATE_PLAYING)) {
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE,
                                                          address);
