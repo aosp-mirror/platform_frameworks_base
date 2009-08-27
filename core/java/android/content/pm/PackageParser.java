@@ -268,10 +268,12 @@ public class PackageParser {
             }
         }
         if ((flags&PackageManager.GET_SIGNATURES) != 0) {
-            int N = p.mSignatures.length;
-            if (N > 0) {
-                pi.signatures = new Signature[N];
-                System.arraycopy(p.mSignatures, 0, pi.signatures, 0, N);
+            if (p.mSignatures != null) {
+                int N = p.mSignatures.length;
+                if (N > 0) {
+                    pi.signatures = new Signature[N];
+                    System.arraycopy(p.mSignatures, 0, pi.signatures, 0, N);
+                }
             }
         }
         return pi;
