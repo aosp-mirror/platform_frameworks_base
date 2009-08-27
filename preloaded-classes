@@ -843,14 +843,6 @@ java.util.EventObject
 java.util.Formatter
 java.util.GregorianCalendar
 java.util.HashMap
-java.util.HashMap$1
-java.util.HashMap$2
-java.util.HashMap$AbstractMapIterator
-java.util.HashMap$Entry
-java.util.HashMap$EntryIterator
-java.util.HashMap$HashMapEntrySet
-java.util.HashMap$KeyIterator
-java.util.HashMap$ValueIterator
 java.util.HashSet
 java.util.Hashtable
 java.util.Hashtable$6
@@ -860,7 +852,6 @@ java.util.Hashtable$HashEnumIterator
 java.util.Hashtable$HashIterator
 java.util.IdentityHashMap
 java.util.LinkedHashMap
-java.util.LinkedHashMap$LinkedHashMapEntry
 java.util.LinkedList
 java.util.LinkedList$Link
 java.util.List
