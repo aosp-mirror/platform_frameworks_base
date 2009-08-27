@@ -451,6 +451,7 @@ public:
     status_t get(const String8& key, String8& value);
     status_t getInt(const String8& key, int& value);
     status_t getFloat(const String8& key, float& value);
+    status_t getAt(size_t index, String8& key, String8& value);
 
     size_t size() { return mParameters.size(); }
 
