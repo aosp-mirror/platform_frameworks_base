@@ -27,7 +27,6 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.text.TextUtils;
 
 import java.io.ByteArrayInputStream;
@@ -237,38 +236,52 @@ public final class ContactsContract {
         /**
          * The content:// style URI for this table joined with useful data from
          * {@link Data}.
+         *
+         * @deprecated Please use plain CONTENT_URI for the same result
          */
-        public static final Uri CONTENT_SUMMARY_URI = Uri.withAppendedPath(AUTHORITY_URI,
-                "contacts_summary");
+        @Deprecated
+        public static final Uri CONTENT_SUMMARY_URI = CONTENT_URI;
 
         /**
          * The content:// style URI used for "type-to-filter" functionality on the
-         * {@link #CONTENT_SUMMARY_URI} URI. The filter string will be used to match
+         * {@link #CONTENT_URI} URI. The filter string will be used to match
          * various parts of the contact name. The filter argument should be passed
          * as an additional path segment after this URI.
          */
-        public static final Uri CONTENT_SUMMARY_FILTER_URI = Uri.withAppendedPath(
-                CONTENT_SUMMARY_URI, "filter");
+        public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(
+                CONTENT_URI, "filter");
+
+        @Deprecated
+        public static final Uri CONTENT_SUMMARY_FILTER_URI = CONTENT_FILTER_URI;
 
         /**
          * The content:// style URI for this table joined with useful data from
          * {@link Data}, filtered to include only starred contacts
          * and the most frequently contacted contacts.
          */
-        public static final Uri CONTENT_SUMMARY_STREQUENT_URI = Uri.withAppendedPath(
-                CONTENT_SUMMARY_URI, "strequent");
+        public static final Uri CONTENT_STREQUENT_URI = Uri.withAppendedPath(
+                CONTENT_URI, "strequent");
+
+        @Deprecated
+        public static final Uri CONTENT_SUMMARY_STREQUENT_URI = CONTENT_STREQUENT_URI;
 
         /**
          * The content:// style URI used for "type-to-filter" functionality on the
-         * {@link #CONTENT_SUMMARY_STREQUENT_URI} URI. The filter string will be used to match
+         * {@link #CONTENT_STREQUENT_URI} URI. The filter string will be used to match
          * various parts of the contact name. The filter argument should be passed
          * as an additional path segment after this URI.
          */
-        public static final Uri CONTENT_SUMMARY_STREQUENT_FILTER_URI = Uri.withAppendedPath(
-                CONTENT_SUMMARY_STREQUENT_URI, "filter");
+        public static final Uri CONTENT_STREQUENT_FILTER_URI = Uri.withAppendedPath(
+                CONTENT_STREQUENT_URI, "filter");
 
-        public static final Uri CONTENT_SUMMARY_GROUP_URI = Uri.withAppendedPath(
-                CONTENT_SUMMARY_URI, "group");
+        @Deprecated
+        public static final Uri CONTENT_SUMMARY_STREQUENT_FILTER_URI = CONTENT_STREQUENT_FILTER_URI;
+
+        public static final Uri CONTENT_GROUP_URI = Uri.withAppendedPath(
+                CONTENT_URI, "group");
+
+        @Deprecated
+        public static final Uri CONTENT_SUMMARY_GROUP_URI = CONTENT_GROUP_URI;
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
@@ -1633,7 +1646,7 @@ public final class ContactsContract {
 
         /**
          * Read-only count of {@link Contacts} from a specific source that have
-         * no {@link GroupMembership} entries.
+         * no {@link CommonDataKinds.GroupMembership} entries.
          * <p>
          * Type: INTEGER
          */
@@ -1641,7 +1654,7 @@ public final class ContactsContract {
 
         /**
          * Read-only count of {@link Contacts} from a specific source that have
-         * no {@link GroupMembership} entries, and also have phone numbers.
+         * no {@link CommonDataKinds.GroupMembership} entries, and also have phone numbers.
          * <p>
          * Type: INTEGER
          */
