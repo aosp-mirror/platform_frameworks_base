@@ -1217,7 +1217,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     + w.isReadyForDisplay() + " drawpending=" + w.mDrawPending
                     + " commitdrawpending=" + w.mCommitDrawPending);
             if ((w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0 && w.isReadyForDisplay()
-                    && !w.mDrawPending && !w.mCommitDrawPending) {
+                    && (mWallpaperTarget == w
+                            || (!w.mDrawPending && !w.mCommitDrawPending))) {
                 if (DEBUG_WALLPAPER) Log.v(TAG,
                         "Found wallpaper activity: #" + i + "=" + w);
                 foundW = w;
@@ -6779,10 +6780,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // This must be called while inside a transaction.
-        void commitFinishDrawingLocked(long currentTime) {
+        boolean commitFinishDrawingLocked(long currentTime) {
             //Log.i(TAG, "commitFinishDrawingLocked: " + mSurface);
             if (!mCommitDrawPending) {
-                return;
+                return false;
             }
             mCommitDrawPending = false;
             mReadyToShow = true;
@@ -6791,6 +6792,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (atoken == null || atoken.allDrawn || starting) {
                 performShowLocked();
             }
+            return true;
         }
 
         // This must be called while inside a transaction.
@@ -8639,6 +8641,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 restart = false;
 
                 boolean tokenMayBeDrawn = false;
+                boolean wallpaperMayChange = false;
 
                 mPolicy.beginAnimationLw(dw, dh);
 
@@ -8649,7 +8652,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     if (w.mSurface != null) {
                         // Execute animation.
-                        w.commitFinishDrawingLocked(currentTime);
+                        if (w.commitFinishDrawingLocked(currentTime)) {
+                            if ((w.mAttrs.flags
+                                    & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
+                                wallpaperMayChange = true;
+                            }
+                        }
                         if (w.stepAnimationLocked(currentTime, dw, dh)) {
                             animating = true;
                             //w.dump("  ");
@@ -8787,6 +8795,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
 
                         adjustWallpaperWindowsLocked();
+                        wallpaperMayChange = false;
+                        
                         if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
                                 "New wallpaper target=" + mWallpaperTarget
                                 + ", lower target=" + mLowerWallpaperTarget
@@ -8885,6 +8895,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         restart = true;
                     }
                 }
+                
+                if (wallpaperMayChange) {
+                    if (adjustWallpaperWindowsLocked()) {
+                        assignLayersLocked();
+                    }
+                }
+                
             } while (restart);
 
             // THIRD LOOP: Update the surfaces of all windows.
