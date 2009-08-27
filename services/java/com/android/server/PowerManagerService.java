@@ -150,6 +150,7 @@ class PowerManagerService extends IPowerManager.Stub
     private int mUserState;
     private boolean mKeyboardVisible = false;
     private boolean mUserActivityAllowed = true;
+    private boolean mProximitySensorActive = false;
     private int mTotalDelaySetting;
     private int mKeylightDelay;
     private int mDimDelay;
@@ -1252,6 +1253,10 @@ class PowerManagerService extends IPowerManager.Stub
             if (noChangeLights) {
                 newState = (newState & ~LIGHTS_MASK) | (mPowerState & LIGHTS_MASK);
             }
+            if (mProximitySensorActive) {
+                // don't turn on the screen when the proximity sensor lock is held
+                newState = (newState & ~SCREEN_BRIGHT);
+            }
 
             if (batteryIsLow()) {
                 newState |= BATTERY_LOW_BIT;
@@ -1748,11 +1753,13 @@ class PowerManagerService extends IPowerManager.Stub
                 Log.d(TAG, "userActivity mLastEventTime=" + mLastEventTime + " time=" + time
                         + " mUserActivityAllowed=" + mUserActivityAllowed
                         + " mUserState=0x" + Integer.toHexString(mUserState)
-                        + " mWakeLockState=0x" + Integer.toHexString(mWakeLockState));
+                        + " mWakeLockState=0x" + Integer.toHexString(mWakeLockState)
+                        + " mProximitySensorActive=" + mProximitySensorActive
+                        + " force=" + force);
             }
             if (mLastEventTime <= time || force) {
                 mLastEventTime = time;
-                if (mUserActivityAllowed || force) {
+                if ((mUserActivityAllowed && !mProximitySensorActive) || force) {
                     // Only turn on button backlights if a button was pressed.
                     if (eventType == BUTTON_EVENT) {
                         mUserState = (mKeyboardVisible ? ALL_BRIGHT : SCREEN_BUTTON_BRIGHT);
@@ -2042,22 +2049,37 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     private void enableProximityLockLocked() {
+        if (mSpew) {
+            Log.d(TAG, "enableProximityLockLocked");
+        }
         mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void disableProximityLockLocked() {
+        if (mSpew) {
+            Log.d(TAG, "disableProximityLockLocked");
+        }
         mSensorManager.unregisterListener(this);
+        mProximitySensorActive = false;
     }
 
     public void onSensorChanged(SensorEvent event) {
         long milliseconds = event.timestamp / 1000000;
-        if (event.values[0] == 0.0) {
-            goToSleep(milliseconds);
-        } else {
-            // proximity sensor negative events user activity.
-            // temporarily set mUserActivityAllowed to true so this will work
-            // even when the keyguard is on.
-            synchronized (mLocks) {
+        synchronized (mLocks) {
+            if (event.values[0] == 0.0) {
+                if (mSpew) {
+                    Log.d(TAG, "onSensorChanged: proximity active");
+                }
+                goToSleepLocked(milliseconds);
+                mProximitySensorActive = true;
+            } else {
+                // proximity sensor negative events user activity.
+                // temporarily set mUserActivityAllowed to true so this will work
+                // even when the keyguard is on.
+                if (mSpew) {
+                    Log.d(TAG, "onSensorChanged: proximity inactive");
+                }
+                mProximitySensorActive = false;
                 boolean savedActivityAllowed = mUserActivityAllowed;
                 mUserActivityAllowed = true;
                 userActivity(milliseconds, false);
