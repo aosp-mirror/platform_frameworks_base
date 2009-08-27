@@ -272,7 +272,7 @@ status_t SampleTable::getChunkOffset(uint32_t chunk_index, off_t *offset) {
 
         *offset = ntohl(offset32);
     } else {
-        CHECK_EQ(mChunkOffsetOffset, kChunkOffsetType64);
+        CHECK_EQ(mChunkOffsetType, kChunkOffsetType64);
 
         uint64_t offset64;
         if (mDataSource->read_at(
