@@ -102,7 +102,7 @@ static void dumpstate(int full) {
         PRINT("------ PACKAGE UID ERRORS ------");
         DUMP("/data/system/uiderrors.txt");
         PRINT("------ LAST KERNEL LOG ------");
-        DUMP("/proc/last_kmsg");
+        DUMP("/data/last_kmsg");
     }
     PRINT("========================================================");
     PRINT("== build.prop");
