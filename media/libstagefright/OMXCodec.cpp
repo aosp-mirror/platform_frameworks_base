@@ -634,6 +634,7 @@ OMXCodec::OMXCodec(
       mSource(source),
       mCodecSpecificDataIndex(0),
       mState(LOADED),
+      mInitialBufferSubmit(true),
       mSignalledEOS(false),
       mNoMoreOutputData(false),
       mSeekTimeUs(-1) {
@@ -666,7 +667,7 @@ OMXCodec::~OMXCodec() {
 }
 
 status_t OMXCodec::init() {
-    Mutex::Autolock autoLock(mLock);
+    // mLock is held.
 
     CHECK_EQ(mState, LOADED);
 
@@ -1107,8 +1108,11 @@ void OMXCodec::onStateChange(OMX_STATETYPE newState) {
 
             setState(EXECUTING);
 
-            drainInputBuffers();
-            fillOutputBuffers();
+            // Buffers will be submitted to the component in the first
+            // call to OMXCodec::read as mInitialBufferSubmit is true at
+            // this point. This ensures that this on_message call returns,
+            // releases the lock and ::init can notice the state change and
+            // itself return.
             break;
         }
 
@@ -1603,6 +1607,8 @@ void OMXCodec::clearCodecSpecificData() {
 }
 
 status_t OMXCodec::start(MetaData *) {
+    Mutex::Autolock autoLock(mLock);
+
     if (mState != LOADED) {
         return UNKNOWN_ERROR;
     }
@@ -1618,6 +1624,7 @@ status_t OMXCodec::start(MetaData *) {
     }
 
     mCodecSpecificDataIndex = 0;
+    mInitialBufferSubmit = true;
     mSignalledEOS = false;
     mNoMoreOutputData = false;
     mSeekTimeUs = -1;
@@ -1698,6 +1705,13 @@ status_t OMXCodec::read(
     *buffer = NULL;
 
     Mutex::Autolock autoLock(mLock);
+
+    if (mInitialBufferSubmit) {
+        mInitialBufferSubmit = false;
+
+        drainInputBuffers();
+        fillOutputBuffers();
+    }
 
     if (mState != EXECUTING && mState != RECONFIGURING) {
         return UNKNOWN_ERROR;

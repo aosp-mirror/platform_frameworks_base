@@ -116,6 +116,7 @@ private:
     State mState;
     Vector<BufferInfo> mPortBuffers[2];
     PortStatus mPortStatus[2];
+    bool mInitialBufferSubmit;
     bool mSignalledEOS;
     bool mNoMoreOutputData;
     int64_t mSeekTimeUs;
