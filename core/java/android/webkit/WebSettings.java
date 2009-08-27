@@ -189,6 +189,10 @@ public class WebSettings {
     private boolean         mAllowFileAccess = true;
     private boolean         mLoadWithOverviewMode = true;
 
+    // Manages interaction of the system setting 'Location & security - Share
+    // with Google' and the browser.
+    static GoogleLocationSettingManager sGoogleLocationSettingManager;
+
     // Class to handle messages before WebCore is ready.
     private class EventHandler {
         // Message id for syncing
@@ -1315,6 +1319,8 @@ public class WebSettings {
         if (DebugFlags.WEB_SETTINGS) {
             junit.framework.Assert.assertTrue(frame.mNativeFrame != 0);
         }
+        sGoogleLocationSettingManager = new GoogleLocationSettingManager(mContext);
+        sGoogleLocationSettingManager.start();
         nativeSync(frame.mNativeFrame);
         mSyncPending = false;
         mEventHandler.createHandler();
