@@ -1417,4 +1417,20 @@ public class LocationManager {
             Log.e(TAG, "RemoteException in reportLocation: ", e);
         }
     }
+    
+    /**
+     * Used by NetInitiatedActivity to report user response
+     * for network initiated GPS fix requests.
+     *
+     * {@hide}
+     */
+    public boolean sendNiResponse(int notifId, int userResponse) {
+    	try {
+            return mService.sendNiResponse(notifId, userResponse);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in sendNiResponse: ", e);
+            return false;
+        }
+    }
+ 
 }

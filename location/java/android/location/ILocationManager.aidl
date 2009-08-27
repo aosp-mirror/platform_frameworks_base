@@ -83,4 +83,7 @@ interface ILocationManager
     /* for installing external Location Providers */
     void installLocationProvider(String name, ILocationProvider provider);
     void installGeocodeProvider(IGeocodeProvider provider);
+
+    // for NI support
+    boolean sendNiResponse(int notifId, int userResponse);
 }
