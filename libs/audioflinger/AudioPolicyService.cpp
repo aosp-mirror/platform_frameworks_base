@@ -16,6 +16,13 @@
 
 #define LOG_TAG "AudioPolicyService"
 //#define LOG_NDEBUG 0
+
+#undef __STRICT_ANSI__
+#define __STDINT_LIMITS
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+
+#include <sys/time.h>
 #include <binder/IServiceManager.h>
 #include <utils/Log.h>
 #include <cutils/properties.h>
@@ -54,7 +61,7 @@ AudioPolicyService::AudioPolicyService()
     char value[PROPERTY_VALUE_MAX];
 
     // start tone playback thread
-    mTonePlaybacThread = new AudioCommandThread();
+    mTonePlaybackThread = new AudioCommandThread();
     // start audio commands thread
     mAudioCommandThread = new AudioCommandThread();
 
@@ -80,8 +87,8 @@ AudioPolicyService::AudioPolicyService()
 
 AudioPolicyService::~AudioPolicyService()
 {
-    mTonePlaybacThread->exit();
-    mTonePlaybacThread.clear();
+    mTonePlaybackThread->exit();
+    mTonePlaybackThread.clear();
     mAudioCommandThread->exit();
     mAudioCommandThread.clear();
 
@@ -451,9 +458,9 @@ status_t AudioPolicyService::closeInput(audio_io_handle_t input)
     return af->closeInput(input);
 }
 
-status_t AudioPolicyService::setStreamVolume(AudioSystem::stream_type stream, float volume, audio_io_handle_t output)
+status_t AudioPolicyService::setStreamVolume(AudioSystem::stream_type stream, float volume, audio_io_handle_t output, int delayMs)
 {
-    return mAudioCommandThread->volumeCommand((int)stream, volume, (int)output);
+    return mAudioCommandThread->volumeCommand((int)stream, volume, (int)output, delayMs);
 }
 
 status_t AudioPolicyService::setStreamOutput(AudioSystem::stream_type stream, audio_io_handle_t output)
@@ -465,9 +472,9 @@ status_t AudioPolicyService::setStreamOutput(AudioSystem::stream_type stream, au
 }
 
 
-void AudioPolicyService::setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs)
+void AudioPolicyService::setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs, int delayMs)
 {
-    mAudioCommandThread->parametersCommand((int)ioHandle, keyValuePairs);
+    mAudioCommandThread->parametersCommand((int)ioHandle, keyValuePairs, delayMs);
 }
 
 String8 AudioPolicyService::getParameters(audio_io_handle_t ioHandle, const String8& keys)
@@ -478,13 +485,13 @@ String8 AudioPolicyService::getParameters(audio_io_handle_t ioHandle, const Stri
 
 status_t AudioPolicyService::startTone(ToneGenerator::tone_type tone, AudioSystem::stream_type stream)
 {
-    mTonePlaybacThread->startToneCommand(tone, stream);
+    mTonePlaybackThread->startToneCommand(tone, stream);
     return NO_ERROR;
 }
 
 status_t AudioPolicyService::stopTone()
 {
-    mTonePlaybacThread->stopToneCommand();
+    mTonePlaybackThread->stopToneCommand();
     return NO_ERROR;
 }
 
@@ -516,58 +523,72 @@ void AudioPolicyService::AudioCommandThread::onFirstRef()
 
 bool AudioPolicyService::AudioCommandThread::threadLoop()
 {
+    nsecs_t waitTime = INT64_MAX;
+
     mLock.lock();
     while (!exitPending())
     {
         while(!mAudioCommands.isEmpty()) {
-            AudioCommand *command = mAudioCommands[0];
-            mAudioCommands.removeAt(0);
-            switch (command->mCommand) {
-            case START_TONE: {
-                mLock.unlock();
-                ToneData *data = (ToneData *)command->mParam;
-                LOGV("AudioCommandThread() processing start tone %d on stream %d",
-                        data->mType, data->mStream);
-                if (mpToneGenerator != NULL)
-                    delete mpToneGenerator;
-                mpToneGenerator = new ToneGenerator(data->mStream, 1.0);
-                mpToneGenerator->startTone(data->mType);
-                delete data;
-                mLock.lock();
-                }break;
-            case STOP_TONE: {
-                mLock.unlock();
-                LOGV("AudioCommandThread() processing stop tone");
-                if (mpToneGenerator != NULL) {
-                    mpToneGenerator->stopTone();
-                    delete mpToneGenerator;
-                    mpToneGenerator = NULL;
+            nsecs_t curTime = systemTime();
+            // commands are sorted by increasing time stamp: execute them from index 0 and up
+            if (mAudioCommands[0]->mTime <= curTime) {
+                AudioCommand *command = mAudioCommands[0];
+                mAudioCommands.removeAt(0);
+                switch (command->mCommand) {
+                case START_TONE: {
+                    mLock.unlock();
+                    ToneData *data = (ToneData *)command->mParam;
+                    LOGV("AudioCommandThread() processing start tone %d on stream %d",
+                            data->mType, data->mStream);
+                    if (mpToneGenerator != NULL)
+                        delete mpToneGenerator;
+                    mpToneGenerator = new ToneGenerator(data->mStream, 1.0);
+                    mpToneGenerator->startTone(data->mType);
+                    delete data;
+                    mLock.lock();
+                    }break;
+                case STOP_TONE: {
+                    mLock.unlock();
+                    LOGV("AudioCommandThread() processing stop tone");
+                    if (mpToneGenerator != NULL) {
+                        mpToneGenerator->stopTone();
+                        delete mpToneGenerator;
+                        mpToneGenerator = NULL;
+                    }
+                    mLock.lock();
+                    }break;
+                case SET_VOLUME: {
+                    VolumeData *data = (VolumeData *)command->mParam;
+                    LOGV("AudioCommandThread() processing set volume stream %d, volume %f, output %d", data->mStream, data->mVolume, data->mIO);
+                    command->mStatus = AudioSystem::setStreamVolume(data->mStream, data->mVolume, data->mIO);
+                    if (command->mWaitStatus) {
+                        command->mCond.signal();
+                        mWaitWorkCV.wait(mLock);
+                    }
+                    delete data;
+                    }break;
+                case SET_PARAMETERS: {
+                     ParametersData *data = (ParametersData *)command->mParam;
+                     LOGV("AudioCommandThread() processing set parameters string %s, io %d", data->mKeyValuePairs.string(), data->mIO);
+                     command->mStatus = AudioSystem::setParameters(data->mIO, data->mKeyValuePairs);
+                     if (command->mWaitStatus) {
+                         command->mCond.signal();
+                         mWaitWorkCV.wait(mLock);
+                     }
+                     delete data;
+                     }break;
+                default:
+                    LOGW("AudioCommandThread() unknown command %d", command->mCommand);
                 }
-                mLock.lock();
-                }break;
-            case SET_VOLUME: {
-                VolumeData *data = (VolumeData *)command->mParam;
-                LOGV("AudioCommandThread() processing set volume stream %d, volume %f, output %d", data->mStream, data->mVolume, data->mIO);
-                mCommandStatus = AudioSystem::setStreamVolume(data->mStream, data->mVolume, data->mIO);
-                mCommandCond.signal();
-                mWaitWorkCV.wait(mLock);
-                delete data;
-                }break;
-            case SET_PARAMETERS: {
-                 ParametersData *data = (ParametersData *)command->mParam;
-                 LOGV("AudioCommandThread() processing set parameters string %s, io %d", data->mKeyValuePairs.string(), data->mIO);
-                 mCommandStatus = AudioSystem::setParameters(data->mIO, data->mKeyValuePairs);
-                 mCommandCond.signal();
-                 mWaitWorkCV.wait(mLock);
-                 delete data;
-                 }break;
-            default:
-                LOGW("AudioCommandThread() unknown command %d", command->mCommand);
+                delete command;
+                waitTime = INT64_MAX;
+            } else {
+                waitTime = mAudioCommands[0]->mTime - curTime;
+                break;
             }
-            delete command;
         }
         LOGV("AudioCommandThread() going to sleep");
-        mWaitWorkCV.wait(mLock);
+        mWaitWorkCV.waitRelative(mLock, waitTime);
         LOGV("AudioCommandThread() waking up");
     }
     mLock.unlock();
@@ -583,7 +604,8 @@ void AudioPolicyService::AudioCommandThread::startToneCommand(int type, int stre
     data->mType = type;
     data->mStream = stream;
     command->mParam = (void *)data;
-    mAudioCommands.add(command);
+    command->mWaitStatus = false;
+    insertCommand_l(command);
     LOGV("AudioCommandThread() adding tone start type %d, stream %d", type, stream);
     mWaitWorkCV.signal();
 }
@@ -594,13 +616,16 @@ void AudioPolicyService::AudioCommandThread::stopToneCommand()
     AudioCommand *command = new AudioCommand();
     command->mCommand = STOP_TONE;
     command->mParam = NULL;
-    mAudioCommands.add(command);
+    command->mWaitStatus = false;
+    insertCommand_l(command);
     LOGV("AudioCommandThread() adding tone stop");
     mWaitWorkCV.signal();
 }
 
-status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream, float volume, int output)
+status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream, float volume, int output, int delayMs)
 {
+    status_t status = NO_ERROR;
+
     Mutex::Autolock _l(mLock);
     AudioCommand *command = new AudioCommand();
     command->mCommand = SET_VOLUME;
@@ -609,17 +634,26 @@ status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream, float
     data->mVolume = volume;
     data->mIO = output;
     command->mParam = data;
-    mAudioCommands.add(command);
+    if (delayMs == 0) {
+        command->mWaitStatus = true;
+    } else {
+        command->mWaitStatus = false;
+    }
+    insertCommand_l(command, delayMs);
     LOGV("AudioCommandThread() adding set volume stream %d, volume %f, output %d", stream, volume, output);
     mWaitWorkCV.signal();
-    mCommandCond.wait(mLock);
-    status_t status =  mCommandStatus;
-    mWaitWorkCV.signal();
+    if (command->mWaitStatus) {
+        command->mCond.wait(mLock);
+        status =  command->mStatus;
+        mWaitWorkCV.signal();
+    }
     return status;
 }
 
-status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle, const String8& keyValuePairs)
+status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle, const String8& keyValuePairs, int delayMs)
 {
+    status_t status = NO_ERROR;
+
     Mutex::Autolock _l(mLock);
     AudioCommand *command = new AudioCommand();
     command->mCommand = SET_PARAMETERS;
@@ -627,13 +661,100 @@ status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle,
     data->mIO = ioHandle;
     data->mKeyValuePairs = keyValuePairs;
     command->mParam = data;
-    mAudioCommands.add(command);
-    LOGV("AudioCommandThread() adding set parameter string %s, io %d", keyValuePairs.string(), ioHandle);
+    if (delayMs == 0) {
+        command->mWaitStatus = true;
+    } else {
+        command->mWaitStatus = false;
+    }
+    insertCommand_l(command, delayMs);
+    LOGV("AudioCommandThread() adding set parameter string %s, io %d ,delay %d", keyValuePairs.string(), ioHandle, delayMs);
     mWaitWorkCV.signal();
-    mCommandCond.wait(mLock);
-    status_t status =  mCommandStatus;
-    mWaitWorkCV.signal();
+    if (command->mWaitStatus) {
+        command->mCond.wait(mLock);
+        status =  command->mStatus;
+        mWaitWorkCV.signal();
+    }
     return status;
+}
+
+// insertCommand_l() must be called with mLock held
+void AudioPolicyService::AudioCommandThread::insertCommand_l(AudioCommand *command, int delayMs)
+{
+    ssize_t i;
+    Vector <AudioCommand *> removedCommands;
+
+    command->mTime = systemTime() + milliseconds(delayMs);
+
+    // check same pending commands with later time stamps and eliminate them
+    for (i = mAudioCommands.size()-1; i >= 0; i--) {
+        AudioCommand *command2 = mAudioCommands[i];
+        // commands are sorted by increasing time stamp: no need to scan the rest of mAudioCommands
+        if (command2->mTime <= command->mTime) break;
+        if (command2->mCommand != command->mCommand) continue;
+
+        switch (command->mCommand) {
+        case SET_PARAMETERS: {
+            ParametersData *data = (ParametersData *)command->mParam;
+            ParametersData *data2 = (ParametersData *)command2->mParam;
+            if (data->mIO != data2->mIO) break;
+            LOGV("Comparing parameter command %s to new command %s", data2->mKeyValuePairs.string(), data->mKeyValuePairs.string());
+            AudioParameter param = AudioParameter(data->mKeyValuePairs);
+            AudioParameter param2 = AudioParameter(data2->mKeyValuePairs);
+            for (size_t j = 0; j < param.size(); j++) {
+               String8 key;
+               String8 value;
+               param.getAt(j, key, value);
+               for (size_t k = 0; k < param2.size(); k++) {
+                  String8 key2;
+                  String8 value2;
+                  param2.getAt(k, key2, value2);
+                  if (key2 == key) {
+                      param2.remove(key2);
+                      LOGV("Filtering out parameter %s", key2.string());
+                      break;
+                  }
+               }
+            }
+            // if all keys have been filtered out, remove the command.
+            // otherwise, update the key value pairs
+            if (param2.size() == 0) {
+                removedCommands.add(command2);
+            } else {
+                data2->mKeyValuePairs = param2.toString();
+            }
+        } break;
+
+        case SET_VOLUME: {
+            VolumeData *data = (VolumeData *)command->mParam;
+            VolumeData *data2 = (VolumeData *)command2->mParam;
+            if (data->mIO != data2->mIO) break;
+            if (data->mStream != data2->mStream) break;
+            LOGV("Filtering out volume command on output %d for stream %d", data->mIO, data->mStream);
+            removedCommands.add(command2);
+        } break;
+        case START_TONE:
+        case STOP_TONE:
+        default:
+            break;
+        }
+    }
+
+    // remove filtered commands
+    for (size_t j = 0; j < removedCommands.size(); j++) {
+        // removed commands always have time stamps greater than current command
+        for (size_t k = i + 1; k < mAudioCommands.size(); k++) {
+            if (mAudioCommands[k] == removedCommands[j]) {
+                LOGV("suppressing command: %d", mAudioCommands[k]->mCommand);
+                mAudioCommands.removeAt(k);
+                break;
+            }
+        }
+    }
+    removedCommands.clear();
+
+    // insert command at the right place according to its time stamp
+    LOGV("inserting command: %d at index %ld, num commands %d", command->mCommand, i+1, mAudioCommands.size());
+    mAudioCommands.insertAt(command, i + 1);
 }
 
 void AudioPolicyService::AudioCommandThread::exit()
