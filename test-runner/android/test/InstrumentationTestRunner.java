@@ -17,17 +17,31 @@
 package android.test;
 
 import static android.test.suitebuilder.TestPredicates.REJECT_PERFORMANCE;
+
+import com.android.internal.util.Predicate;
+
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Looper;
+import android.os.Parcelable;
+import android.os.PerformanceCollector;
+import android.os.Process;
+import android.os.SystemClock;
+import android.os.PerformanceCollector.PerformanceResultsWriter;
 import android.test.suitebuilder.TestMethod;
 import android.test.suitebuilder.TestPredicates;
 import android.test.suitebuilder.TestSuiteBuilder;
 import android.util.Log;
 
-import com.android.internal.util.Predicate;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -38,22 +52,13 @@ import junit.framework.TestSuite;
 import junit.runner.BaseTestRunner;
 import junit.textui.ResultPrinter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
-
 /**
  * An {@link Instrumentation} that runs various types of {@link junit.framework.TestCase}s against
  * an Android package (application). Typical usage:
  * <ol>
  * <li>Write {@link junit.framework.TestCase}s that perform unit, functional, or performance tests
  * against the classes in your package.  Typically these are subclassed from:
- *   <ul><li>{@link android.test.ActivityInstrumentationTestCase}</li>
+ *   <ul><li>{@link android.test.ActivityInstrumentationTestCase2}</li>
  *   <li>{@link android.test.ActivityUnitTestCase}</li>
  *   <li>{@link android.test.AndroidTestCase}</li>
  *   <li>{@link android.test.ApplicationTestCase}</li>
@@ -111,13 +116,13 @@ import java.util.List;
  * <p/>
  * <b>To run in 'log only' mode</b>
  * -e log true
- * This option will load and iterate through all test classes and methods, but will bypass actual 
- * test execution. Useful for quickly obtaining info on the tests to be executed by an 
+ * This option will load and iterate through all test classes and methods, but will bypass actual
+ * test execution. Useful for quickly obtaining info on the tests to be executed by an
  * instrumentation command.
  * <p/>
  * <b>To generate EMMA code coverage:</b>
  * -e coverage true
- * Note: this requires an emma instrumented build. By default, the code coverage results file 
+ * Note: this requires an emma instrumented build. By default, the code coverage results file
  * will be saved in a /data/<app>/coverage.ec file, unless overridden by coverageFile flag (see
  * below)
  * <p/>
@@ -129,11 +134,10 @@ import java.util.List;
 
 /* (not JavaDoc)
  * Although not necessary in most case, another way to use this class is to extend it and have the
- * derived class return
- * the desired test suite from the {@link #getTestSuite()} method. The test suite returned from this
- * method will be used if no target class is defined in the meta-data or command line argument
- * parameters. If a derived class is used it needs to be added as an instrumentation to the
- * AndroidManifest.xml and the command to run it would look like:
+ * derived class return the desired test suite from the {@link #getTestSuite()} method. The test
+ * suite returned from this method will be used if no target class is defined in the meta-data or
+ * command line argument parameters. If a derived class is used it needs to be added as an
+ * instrumentation to the AndroidManifest.xml and the command to run it would look like:
  * <p/>
  * adb shell am instrument -w com.android.foo/<i>com.android.FooInstrumentationTestRunner</i>
  * <p/>
@@ -155,66 +159,65 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     public static final String ARGUMENT_DELAY_MSEC = "delay_msec";
 
     private static final String SMALL_SUITE = "small";
-    private static final String MEDIUM_SUITE = "medium";  
+    private static final String MEDIUM_SUITE = "medium";
     private static final String LARGE_SUITE = "large";
-    
+
     private static final String ARGUMENT_LOG_ONLY = "log";
 
-   
     /**
-     * This constant defines the maximum allowed runtime (in ms) for a test included in the "small" suite. 
-     * It is used to make an educated guess at what suite an unlabeled test belongs.
+     * This constant defines the maximum allowed runtime (in ms) for a test included in the "small"
+     * suite. It is used to make an educated guess at what suite an unlabeled test belongs.
      */
     private static final float SMALL_SUITE_MAX_RUNTIME = 100;
-    
+
     /**
-     * This constant defines the maximum allowed runtime (in ms) for a test included in the "medium" suite. 
-     * It is used to make an educated guess at what suite an unlabeled test belongs.
+     * This constant defines the maximum allowed runtime (in ms) for a test included in the
+     * "medium" suite. It is used to make an educated guess at what suite an unlabeled test belongs.
      */
     private static final float MEDIUM_SUITE_MAX_RUNTIME = 1000;
-    
+
     /**
-     * The following keys are used in the status bundle to provide structured reports to 
-     * an IInstrumentationWatcher. 
+     * The following keys are used in the status bundle to provide structured reports to
+     * an IInstrumentationWatcher.
      */
 
     /**
-     * This value, if stored with key {@link android.app.Instrumentation#REPORT_KEY_IDENTIFIER}, 
+     * This value, if stored with key {@link android.app.Instrumentation#REPORT_KEY_IDENTIFIER},
      * identifies InstrumentationTestRunner as the source of the report.  This is sent with all
      * status messages.
      */
     public static final String REPORT_VALUE_ID = "InstrumentationTestRunner";
     /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key 
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
      * identifies the total number of tests that are being run.  This is sent with all status
      * messages.
      */
     public static final String REPORT_KEY_NUM_TOTAL = "numtests";
     /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key 
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
      * identifies the sequence number of the current test.  This is sent with any status message
      * describing a specific test being started or completed.
      */
     public static final String REPORT_KEY_NUM_CURRENT = "current";
     /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key 
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
      * identifies the name of the current test class.  This is sent with any status message
      * describing a specific test being started or completed.
      */
     public static final String REPORT_KEY_NAME_CLASS = "class";
     /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key 
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
      * identifies the name of the current test.  This is sent with any status message
      * describing a specific test being started or completed.
      */
     public static final String REPORT_KEY_NAME_TEST = "test";
     /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key 
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
      * reports the run time in seconds of the current test.
      */
     private static final String REPORT_KEY_RUN_TIME = "runtime";
     /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key 
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
      * reports the guessed suite assignment for the current test.
      */
     private static final String REPORT_KEY_SUITE_ASSIGNMENT = "suiteassignment";
@@ -223,6 +226,19 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
      * identifies the path to the generated code coverage file.
      */
     private static final String REPORT_KEY_COVERAGE_PATH = "coverageFilePath";
+    /**
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
+     * reports the cpu time in milliseconds of the current test.
+     */
+    private static final String REPORT_KEY_PERF_CPU_TIME =
+        "performance." + PerformanceCollector.METRIC_KEY_CPU_TIME;
+    /**
+     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
+     * reports the run time in milliseconds of the current test.
+     */
+    private static final String REPORT_KEY_PERF_EXECUTION_TIME =
+        "performance." + PerformanceCollector.METRIC_KEY_EXECUTION_TIME;
+
     /**
      * The test is starting.
      */
@@ -240,15 +256,15 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
      */
     public static final int REPORT_VALUE_RESULT_FAILURE = -2;
     /**
-     * If included in the status bundle sent to an IInstrumentationWatcher, this key 
-     * identifies a stack trace describing an error or failure.  This is sent with any status 
+     * If included in the status bundle sent to an IInstrumentationWatcher, this key
+     * identifies a stack trace describing an error or failure.  This is sent with any status
      * message describing a specific test being completed.
      */
     public static final String REPORT_KEY_STACK = "stack";
 
     // Default file name for code coverage
     private static final String DEFAULT_COVERAGE_FILE_NAME = "coverage.ec";
-    
+
     private static final String LOG_TAG = "InstrumentationTestRunner";
 
     private final Bundle mResults = new Bundle();
@@ -316,7 +332,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
                 if (testSuite != null) {
                     testSuiteBuilder.addTestSuite(testSuite);
                 } else {
-                    // no package or class bundle arguments were supplied, and no test suite 
+                    // no package or class bundle arguments were supplied, and no test suite
                     // provided so add all tests in application
                     testSuiteBuilder.includePackages("");
                 }
@@ -324,7 +340,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         } else {
             parseTestClasses(testClassesArg, testSuiteBuilder);
         }
-        
+
         testSuiteBuilder.addRequirements(getBuilderRequirements());
 
         mTestRunner = getAndroidTestRunner();
@@ -336,8 +352,10 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         if (mSuiteAssignmentMode) {
             mTestRunner.addTestListener(new SuiteAssignmentPrinter());
         } else {
+            WatcherResultPrinter resultPrinter = new WatcherResultPrinter(mTestCount);
             mTestRunner.addTestListener(new TestPrinter("TestRunner", false));
-            mTestRunner.addTestListener(new WatcherResultPrinter(mTestCount));
+            mTestRunner.addTestListener(resultPrinter);
+            mTestRunner.setPerformanceResultsWriter(resultPrinter);
         }
         start();
     }
@@ -347,7 +365,8 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     }
 
     /**
-     * Parses and loads the specified set of test classes 
+     * Parses and loads the specified set of test classes
+     *
      * @param testClassArg - comma-separated list of test classes and methods
      * @param testSuiteBuilder - builder to add tests to
      */
@@ -360,8 +379,9 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
 
     /**
      * Parse and load the given test class and, optionally, method
-     * @param testClassName - full package name of test class and optionally method to add. Expected
-     *   format: com.android.TestClass#testMethod
+     *
+     * @param testClassName - full package name of test class and optionally method to add.
+     *        Expected format: com.android.TestClass#testMethod
      * @param testSuiteBuilder - builder to add tests to
      */
     private void parseTestClass(String testClassName, TestSuiteBuilder testSuiteBuilder) {
@@ -372,8 +392,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             testMethodName = testClassName.substring(methodSeparatorIndex + 1);
             testClassName = testClassName.substring(0, methodSeparatorIndex);
         }
-        testSuiteBuilder.addTestClassByName(testClassName, testMethodName, 
-                getTargetContext());
+        testSuiteBuilder.addTestClassByName(testClassName, testMethodName, getTargetContext());
     }
 
     protected AndroidTestRunner getAndroidTestRunner() {
@@ -384,12 +403,12 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         String tagString = arguments.getString(tag);
         return tagString != null && Boolean.parseBoolean(tagString);
     }
-    
+
     /*
      * Returns the size predicate object, corresponding to the "size" argument value.
      */
     private Predicate<TestMethod> getSizePredicateFromArg(String sizeArg) {
-     
+
         if (SMALL_SUITE.equals(sizeArg)) {
             return TestPredicates.SELECT_SMALL;
         } else if (MEDIUM_SUITE.equals(sizeArg)) {
@@ -400,11 +419,11 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             return null;
         }
     }
-  
+
     @Override
     public void onStart() {
         Looper.prepare();
-        
+
         if (mJustCount) {
             mResults.putString(Instrumentation.REPORT_KEY_IDENTIFIER, REPORT_VALUE_ID);
             mResults.putInt(REPORT_KEY_NUM_TOTAL, mTestCount);
@@ -413,30 +432,30 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             if (mDebug) {
                 Debug.waitForDebugger();
             }
-    
+
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             PrintStream writer = new PrintStream(byteArrayOutputStream);
             try {
                 StringResultPrinter resultPrinter = new StringResultPrinter(writer);
-    
+
                 mTestRunner.addTestListener(resultPrinter);
-                
+
                 long startTime = System.currentTimeMillis();
                 mTestRunner.runTest();
                 long runTime = System.currentTimeMillis() - startTime;
-    
+
                 resultPrinter.print(mTestRunner.getTestResult(), runTime);
             } finally {
-                mResults.putString(Instrumentation.REPORT_KEY_STREAMRESULT, 
-                        String.format("\nTest results for %s=%s", 
-                        mTestRunner.getTestClassName(), 
+                mResults.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
+                        String.format("\nTest results for %s=%s",
+                        mTestRunner.getTestClassName(),
                         byteArrayOutputStream.toString()));
 
                 if (mCoverage) {
                     generateCoverageReport();
                 }
                 writer.close();
-                
+
                 finish(Activity.RESULT_OK, mResults);
             }
         }
@@ -459,7 +478,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     public ClassLoader getLoader() {
         return null;
     }
-    
+
     private void generateCoverageReport() {
         // use reflection to call emma dump coverage method, to avoid
         // always statically compiling against emma jar
@@ -467,9 +486,9 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         java.io.File coverageFile = new java.io.File(coverageFilePath);
         try {
             Class emmaRTClass = Class.forName("com.vladium.emma.rt.RT");
-            Method dumpCoverageMethod = emmaRTClass.getMethod("dumpCoverageData", 
+            Method dumpCoverageMethod = emmaRTClass.getMethod("dumpCoverageData",
                     coverageFile.getClass(), boolean.class, boolean.class);
-            
+
             dumpCoverageMethod.invoke(null, coverageFile, false, false);
             // output path to generated coverage file so it can be parsed by a test harness if
             // needed
@@ -495,15 +514,14 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
     private String getCoverageFilePath() {
         if (mCoverageFilePath == null) {
             return getTargetContext().getFilesDir().getAbsolutePath() + File.separator +
-                    DEFAULT_COVERAGE_FILE_NAME;
-         }
-        else {
+                   DEFAULT_COVERAGE_FILE_NAME;
+        } else {
             return mCoverageFilePath;
         }
     }
 
     private void reportEmmaError(Exception e) {
-        reportEmmaError("", e); 
+        reportEmmaError("", e);
     }
 
     private void reportEmmaError(String hint, Exception e) {
@@ -524,30 +542,29 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             printFooter(result);
         }
     }
-    
+
     /**
-     * This class sends status reports back to the IInstrumentationWatcher about 
+     * This class sends status reports back to the IInstrumentationWatcher about
      * which suite each test belongs.
      */
-    private class SuiteAssignmentPrinter implements TestListener
-    {
-        
+    private class SuiteAssignmentPrinter implements TestListener {
+
         private Bundle mTestResult;
         private long mStartTime;
         private long mEndTime;
         private boolean mTimingValid;
-        
+
         public SuiteAssignmentPrinter() {
         }
-        
+
         /**
          * send a status for the start of a each test, so long tests can be seen as "running"
          */
         public void startTest(Test test) {
             mTimingValid = true;
-            mStartTime = System.currentTimeMillis(); 
+            mStartTime = System.currentTimeMillis();
         }
-        
+
         /**
          * @see junit.framework.TestListener#addError(Test, Throwable)
          */
@@ -576,7 +593,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
                 runTime = -1;
             } else {
                 runTime = mEndTime - mStartTime;
-                if (runTime < SMALL_SUITE_MAX_RUNTIME 
+                if (runTime < SMALL_SUITE_MAX_RUNTIME
                         && !InstrumentationTestCase.class.isAssignableFrom(test.getClass())) {
                     assignmentSuite = SMALL_SUITE;
                 } else if (runTime < MEDIUM_SUITE_MAX_RUNTIME) {
@@ -588,8 +605,8 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             // Clear mStartTime so that we can verify that it gets set next time.
             mStartTime = -1;
 
-            mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT, 
-                    test.getClass().getName() + "#" + ((TestCase) test).getName() 
+            mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
+                    test.getClass().getName() + "#" + ((TestCase) test).getName()
                     + "\nin " + assignmentSuite + " suite\nrunTime: "
                     + String.valueOf(runTime) + "\n");
             mTestResult.putFloat(REPORT_KEY_RUN_TIME, runTime);
@@ -598,36 +615,40 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             sendStatus(0, mTestResult);
         }
     }
-    
+
     /**
      * This class sends status reports back to the IInstrumentationWatcher
      */
-    private class WatcherResultPrinter implements TestListener
-    {
+    private class WatcherResultPrinter implements TestListener, PerformanceResultsWriter {
         private final Bundle mResultTemplate;
         Bundle mTestResult;
         int mTestNum = 0;
         int mTestResultCode = 0;
         String mTestClass = null;
-        
+        boolean mIsTimedTest = false;
+        long mCpuTime = 0;
+        long mExecTime = 0;
+
         public WatcherResultPrinter(int numTests) {
             mResultTemplate = new Bundle();
             mResultTemplate.putString(Instrumentation.REPORT_KEY_IDENTIFIER, REPORT_VALUE_ID);
             mResultTemplate.putInt(REPORT_KEY_NUM_TOTAL, numTests);
         }
-        
+
         /**
-         * send a status for the start of a each test, so long tests can be seen as "running"
+         * send a status for the start of a each test, so long tests can be seen
+         * as "running"
          */
         public void startTest(Test test) {
             String testClass = test.getClass().getName();
+            String testName = ((TestCase)test).getName();
             mTestResult = new Bundle(mResultTemplate);
             mTestResult.putString(REPORT_KEY_NAME_CLASS, testClass);
-            mTestResult.putString(REPORT_KEY_NAME_TEST, ((TestCase) test).getName());
+            mTestResult.putString(REPORT_KEY_NAME_TEST, testName);
             mTestResult.putInt(REPORT_KEY_NUM_CURRENT, ++mTestNum);
             // pretty printing
             if (testClass != null && !testClass.equals(mTestClass)) {
-                mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT, 
+                mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
                         String.format("\n%s:", testClass));
                 mTestClass = testClass;
             } else {
@@ -635,9 +656,9 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             }
 
             // The delay_msec parameter is normally used to provide buffers of idle time
-            // for power measurement purposes.  To make sure there is a delay before and after
+            // for power measurement purposes. To make sure there is a delay before and after
             // every test in a suite, we delay *after* every test (see endTest below) and also
-            // delay *before* the first test.  So, delay test1 delay test2 delay.
+            // delay *before* the first test. So, delay test1 delay test2 delay.
 
             try {
                 if (mTestNum == 1) Thread.sleep(mDelayMsec);
@@ -647,8 +668,25 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
 
             sendStatus(REPORT_VALUE_RESULT_START, mTestResult);
             mTestResultCode = 0;
+
+            mIsTimedTest = false;
+            try {
+                // Look for TimedTest annotation on both test class and test
+                // method
+                mIsTimedTest = test.getClass().isAnnotationPresent(TimedTest.class) ||
+                    test.getClass().getMethod(testName).isAnnotationPresent(TimedTest.class);
+            } catch (SecurityException e) {
+                throw new IllegalStateException(e);
+            } catch (NoSuchMethodException e) {
+                throw new IllegalStateException(e);
+            }
+
+            if (mIsTimedTest) {
+                mExecTime = SystemClock.uptimeMillis();
+                mCpuTime = Process.getElapsedCpuTime();
+            }
         }
-        
+
         /**
          * @see junit.framework.TestListener#addError(Test, Throwable)
          */
@@ -656,9 +694,9 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             mTestResult.putString(REPORT_KEY_STACK, BaseTestRunner.getFilteredTrace(t));
             mTestResultCode = REPORT_VALUE_RESULT_ERROR;
             // pretty printing
-            mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT, 
-                    String.format("\nError in %s:\n%s", 
-                            ((TestCase) test).getName(), BaseTestRunner.getFilteredTrace(t)));
+            mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
+                String.format("\nError in %s:\n%s",
+                    ((TestCase)test).getName(), BaseTestRunner.getFilteredTrace(t)));
         }
 
         /**
@@ -668,28 +706,68 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             mTestResult.putString(REPORT_KEY_STACK, BaseTestRunner.getFilteredTrace(t));
             mTestResultCode = REPORT_VALUE_RESULT_FAILURE;
             // pretty printing
-            mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT, 
-                    String.format("\nFailure in %s:\n%s", 
-                            ((TestCase) test).getName(), BaseTestRunner.getFilteredTrace(t)));
+            mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT,
+                String.format("\nFailure in %s:\n%s",
+                    ((TestCase)test).getName(), BaseTestRunner.getFilteredTrace(t)));
         }
 
         /**
          * @see junit.framework.TestListener#endTest(Test)
          */
         public void endTest(Test test) {
+            if (mIsTimedTest) {
+                mCpuTime = Process.getElapsedCpuTime() - mCpuTime;
+                mExecTime = SystemClock.uptimeMillis() - mExecTime;
+                mTestResult.putLong(REPORT_KEY_PERF_CPU_TIME, mCpuTime);
+                mTestResult.putLong(REPORT_KEY_PERF_EXECUTION_TIME, mExecTime);
+            }
+
             if (mTestResultCode == 0) {
                 mTestResult.putString(Instrumentation.REPORT_KEY_STREAMRESULT, ".");
             }
             sendStatus(mTestResultCode, mTestResult);
 
-            try {  // Sleep after every test, if specified
+            try { // Sleep after every test, if specified
                 Thread.sleep(mDelayMsec);
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
             }
         }
 
+        public void writeBeginSnapshot(String label) {
+            // Do nothing
+        }
+
+        public void writeEndSnapshot(Bundle results) {
+            // Copy all snapshot data fields as type long into mResults, which
+            // is outputted via Instrumentation.finish
+            for (String key : results.keySet()) {
+                mResults.putLong(key, results.getLong(key));
+            }
+        }
+
+        public void writeStartTiming(String label) {
+            // Do nothing
+        }
+
+        public void writeStopTiming(Bundle results) {
+            // Copy results into mTestResult by flattening list of iterations,
+            // which is outputted via WatcherResultPrinter.endTest
+            int i = 0;
+            for (Parcelable p :
+                    results.getParcelableArrayList(PerformanceCollector.METRIC_KEY_ITERATIONS)) {
+                Bundle iteration = (Bundle)p;
+                String index = "performance.iteration" + i + ".";
+                mTestResult.putString(index + PerformanceCollector.METRIC_KEY_LABEL,
+                        iteration.getString(PerformanceCollector.METRIC_KEY_LABEL));
+                mTestResult.putLong(index + PerformanceCollector.METRIC_KEY_CPU_TIME,
+                        iteration.getLong(PerformanceCollector.METRIC_KEY_CPU_TIME));
+                mTestResult.putLong(index + PerformanceCollector.METRIC_KEY_EXECUTION_TIME,
+                        iteration.getLong(PerformanceCollector.METRIC_KEY_EXECUTION_TIME));
+                i++;
+            }
+        }
+
         // TODO report the end of the cycle
-        // TODO report runtime for each test
     }
 }
