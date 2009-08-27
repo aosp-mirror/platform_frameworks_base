@@ -571,8 +571,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     public void onKeyboardChange(boolean isKeyboardOpen) {
         mKeyboardOpen = isKeyboardOpen;
 
-        if (mKeyboardOpen && !mKeyguardViewProperties.isSecure()
-                && mKeyguardViewManager.isShowing()) {
+        if (mUpdateMonitor.isKeyguardBypassEnabled() && mKeyboardOpen
+                && !mKeyguardViewProperties.isSecure() && mKeyguardViewManager.isShowing()) {
             if (DEBUG) Log.d(TAG, "bypassing keyguard on sliding open of keyboard with non-secure keyguard");
             keyguardDone(true);
         }
