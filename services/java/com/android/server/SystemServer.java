@@ -19,7 +19,6 @@ package com.android.server;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.status.StatusBarService;
 
-import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
 
 import android.app.ActivityManagerNative;
@@ -41,9 +40,6 @@ import android.server.search.SearchManagerService;
 import android.util.EventLog;
 import android.util.Log;
 import android.accounts.AccountManagerService;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 class ServerThread extends Thread {
     private static final String TAG = "SystemServer";
