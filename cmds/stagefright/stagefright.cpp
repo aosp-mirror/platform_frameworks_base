@@ -33,7 +33,6 @@
 #include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
-#include <media/stagefright/OMXDecoder.h>
 
 #include "JPEGSource.h"
 
@@ -50,18 +49,11 @@ static int64_t getNowUs() {
     return (int64_t)tv.tv_usec + tv.tv_sec * 1000000;
 }
 
-#define USE_OMX_CODEC   1
-
 static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     sp<MetaData> meta = source->getFormat();
 
-#if !USE_OMX_CODEC
-    sp<OMXDecoder> decoder = OMXDecoder::Create(
-            client, meta, false /* createEncoder */, source);
-#else
     sp<OMXCodec> decoder = OMXCodec::Create(
             client->interface(), meta, false /* createEncoder */, source);
-#endif
 
     if (decoder == NULL) {
         return;

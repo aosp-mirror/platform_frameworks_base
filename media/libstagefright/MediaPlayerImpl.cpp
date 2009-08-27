@@ -33,13 +33,10 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXCodec.h>
-#include <media/stagefright/OMXDecoder.h>
 #include <media/stagefright/ShoutcastSource.h>
 #include <media/stagefright/TimeSource.h>
 #include <ui/PixelFormat.h>
 #include <ui/Surface.h>
-
-#define USE_OMX_CODEC   1
 
 namespace android {
 
@@ -406,13 +403,8 @@ void MediaPlayerImpl::setAudioSource(const sp<MediaSource> &source) {
 
     sp<MetaData> meta = source->getFormat();
 
-#if !USE_OMX_CODEC
-    mAudioDecoder = OMXDecoder::Create(
-            &mClient, meta, false /* createEncoder */, source);
-#else
     mAudioDecoder = OMXCodec::Create(
             mClient.interface(), meta, false /* createEncoder */, source);
-#endif
 }
 
 void MediaPlayerImpl::setVideoSource(const sp<MediaSource> &source) {
@@ -427,13 +419,8 @@ void MediaPlayerImpl::setVideoSource(const sp<MediaSource> &source) {
     success = meta->findInt32(kKeyHeight, &mVideoHeight);
     CHECK(success);
 
-#if !USE_OMX_CODEC
-    mVideoDecoder = OMXDecoder::Create(
-            &mClient, meta, false /* createEncoder */, source);
-#else
     mVideoDecoder = OMXCodec::Create(
             mClient.interface(), meta, false /* createEncoder */, source);
-#endif
 
     if (mISurface.get() != NULL || mSurface.get() != NULL) {
         depopulateISurface();
