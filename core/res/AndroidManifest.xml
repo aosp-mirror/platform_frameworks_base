@@ -1011,6 +1011,12 @@
         android:description="@string/permdesc_callPrivileged"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- Allows an application to perform CDMA OTA provisioning @hide -->
+    <permission android:name="android.permission.PERFORM_CDMA_PROVISIONING"
+        android:label="@string/permlab_performCdmaProvisioning"
+        android:description="@string/permdesc_performCdmaProvisioning"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- Allows enabling/disabling location update notifications from
          the radio. Not for use by normal applications. -->
     <permission android:name="android.permission.CONTROL_LOCATION_UPDATES"
