@@ -154,7 +154,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final long[] LONG_PRESS_VIBE_PATTERN = {0, 1, 20, 21};
     
     // Vibrator pattern for haptic feedback of virtual key press.
-    private static final long[] VIRTUAL_KEY_VIBE_PATTERN = {0, 1, 20, 21};
+    private static final long[] VIRTUAL_KEY_VIBE_PATTERN = {0, 35};
     
     final Object mLock = new Object();
     
