@@ -194,6 +194,11 @@ sp<OMXCodec> OMXCodec::Create(
     if (!strcmp(componentName, "OMX.TI.AAC.decode")) {
         quirks |= kNeedsFlushBeforeDisable;
         quirks |= kRequiresFlushCompleteEmulation;
+
+        // The following is currently necessary for proper shutdown
+        // behaviour, but NOT enabled by default in order to make the
+        // bug reproducible...
+        // quirks |= kRequiresFlushBeforeShutdown;
     }
     if (!strncmp(componentName, "OMX.qcom.video.encoder.", 23)) {
         quirks |= kRequiresLoadedToIdleAfterAllocation;
@@ -1015,6 +1020,19 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
                 CHECK_EQ(portIndex, kPortIndexOutput);
 
                 disablePortAsync(portIndex);
+            } else if (mState == EXECUTING_TO_IDLE) {
+                if (mPortStatus[kPortIndexInput] == ENABLED
+                    && mPortStatus[kPortIndexOutput] == ENABLED) {
+                    LOGV("Finished flushing both ports, now completing "
+                         "transition from EXECUTING to IDLE.");
+
+                    mPortStatus[kPortIndexInput] = SHUTTING_DOWN;
+                    mPortStatus[kPortIndexOutput] = SHUTTING_DOWN;
+
+                    status_t err =
+                        mOMX->send_command(mNode, OMX_CommandStateSet, OMX_StateIdle);
+                    CHECK_EQ(err, OK);
+                }
             } else {
                 // We're flushing both ports in preparation for seeking.
 
@@ -1180,7 +1198,8 @@ void OMXCodec::onPortSettingsChanged(OMX_U32 portIndex) {
 }
 
 bool OMXCodec::flushPortAsync(OMX_U32 portIndex) {
-    CHECK(mState == EXECUTING || mState == RECONFIGURING);
+    CHECK(mState == EXECUTING || mState == RECONFIGURING
+            || mState == EXECUTING_TO_IDLE);
 
     LOGV("flushPortAsync(%ld): we own %d out of %d buffers already.",
          portIndex, countBuffersWeOwn(mPortBuffers[portIndex]),
@@ -1625,12 +1644,31 @@ status_t OMXCodec::stop() {
         {
             setState(EXECUTING_TO_IDLE);
 
-            mPortStatus[kPortIndexInput] = SHUTTING_DOWN;
-            mPortStatus[kPortIndexOutput] = SHUTTING_DOWN;
+            if (mQuirks & kRequiresFlushBeforeShutdown) {
+                LOGV("This component requires a flush before transitioning "
+                     "from EXECUTING to IDLE...");
 
-            status_t err =
-                mOMX->send_command(mNode, OMX_CommandStateSet, OMX_StateIdle);
-            CHECK_EQ(err, OK);
+                bool emulateInputFlushCompletion =
+                    !flushPortAsync(kPortIndexInput);
+
+                bool emulateOutputFlushCompletion =
+                    !flushPortAsync(kPortIndexOutput);
+
+                if (emulateInputFlushCompletion) {
+                    onCmdComplete(OMX_CommandFlush, kPortIndexInput);
+                }
+
+                if (emulateOutputFlushCompletion) {
+                    onCmdComplete(OMX_CommandFlush, kPortIndexOutput);
+                }
+            } else {
+                mPortStatus[kPortIndexInput] = SHUTTING_DOWN;
+                mPortStatus[kPortIndexOutput] = SHUTTING_DOWN;
+
+                status_t err =
+                    mOMX->send_command(mNode, OMX_CommandStateSet, OMX_StateIdle);
+                CHECK_EQ(err, OK);
+            }
 
             while (mState != LOADED && mState != ERROR) {
                 mAsyncCompletion.wait(mLock);
