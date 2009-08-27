@@ -120,6 +120,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private IGpsStatusProvider mGpsStatusProvider;
     private LocationWorkerHandler mLocationHandler;
 
+    // Cache the real providers for use in addTestProvider() and removeTestProvider()
+     LocationProviderProxy mNetworkLocationProvider;
+     LocationProviderProxy mGpsLocationProvider;
+
     // Handler messages
     private static final int MESSAGE_LOCATION_CHANGED = 1;
 
@@ -539,6 +543,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             mGpsStatusProvider = provider.getGpsStatusProvider();
             LocationProviderProxy proxy = new LocationProviderProxy(LocationManager.GPS_PROVIDER, provider);
             addProvider(proxy);
+            mGpsLocationProvider = proxy;
         }
 
         updateProvidersLocked();
@@ -616,6 +621,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             LocationProviderProxy proxy = new LocationProviderProxy(name, provider);
             addProvider(proxy);
             updateProvidersLocked();
+            if (LocationManager.NETWORK_PROVIDER.equals(name)) {
+                mNetworkLocationProvider = proxy;
+            }
 
             // notify provider of current network state
             proxy.updateNetworkState(mNetworkState);
@@ -1794,16 +1802,22 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 requiresNetwork, requiresSatellite,
                 requiresCell, hasMonetaryCost, supportsAltitude,
                 supportsSpeed, supportsBearing, powerRequirement, accuracy);
+            // remove the real provider if we are replacing GPS or network provider
+            if (LocationManager.GPS_PROVIDER.equals(name)
+                    || LocationManager.NETWORK_PROVIDER.equals(name)) {
+                LocationProviderProxy proxy = mProvidersByName.get(name);
+                if (proxy != null) {
+                    proxy.enableLocationTracking(false);
+                    removeProvider(proxy);
+                }
+            }
             if (mProvidersByName.get(name) != null) {
                 throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
             }
-
-            // clear calling identity so INSTALL_LOCATION_PROVIDER permission is not required
-            long identity = Binder.clearCallingIdentity();
             addProvider(new LocationProviderProxy(name, provider));
             mMockProviders.put(name, provider);
+            mLastKnownLocation.put(name, null);
             updateProvidersLocked();
-            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -1816,6 +1830,15 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
             removeProvider(mProvidersByName.get(provider));
             mMockProviders.remove(mockProvider);
+            // reinstall real provider if we were mocking GPS or network provider
+            if (LocationManager.GPS_PROVIDER.equals(provider) &&
+                    mGpsLocationProvider != null) {
+                addProvider(mGpsLocationProvider);
+            } else if (LocationManager.NETWORK_PROVIDER.equals(provider) &&
+                    mNetworkLocationProvider != null) {
+                addProvider(mNetworkLocationProvider);
+            }
+            mLastKnownLocation.put(provider, null);
             updateProvidersLocked();
         }
     }
