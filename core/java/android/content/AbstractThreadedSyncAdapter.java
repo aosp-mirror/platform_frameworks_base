@@ -105,7 +105,8 @@ public abstract class AbstractThreadedSyncAdapter {
             // check it and when we use it
             synchronized (mSyncThreadLock) {
                 if (mSyncThread != null
-                        && mSyncThread.mSyncContext.getISyncContext() == syncContext) {
+                        && mSyncThread.mSyncContext.getISyncContext().asBinder()
+                        == syncContext.asBinder()) {
                     mSyncThread.interrupt();
                 }
             }
