@@ -42,6 +42,15 @@ public class CertTool {
         System.loadLibrary("certtool_jni");
     }
 
+    /** Keystore namespace for CA certificates. */
+    public static final String CA_CERTIFICATE = "CACERT";
+
+    /** Keystore namespace for user certificates. */
+    public static final String USER_CERTIFICATE = "USRCERT";
+
+    /** Keystore namespace for user private keys. */
+    public static final String USER_KEY = "USRKEY";
+
     public static final String ACTION_ADD_CREDENTIAL =
             "android.security.ADD_CREDENTIAL";
     public static final String KEY_TYPE_NAME = "typeName";
@@ -59,10 +68,6 @@ public class CertTool {
     private static final String UNKNOWN = "Unknown";
     private static final String ISSUER_NAME = "Issuer Name:";
     private static final String DISTINCT_NAME = "Distinct Name:";
-
-    private static final String CA_CERTIFICATE = "CACERT";
-    private static final String USER_CERTIFICATE = "USRCERT";
-    private static final String USER_KEY = "USRKEY";
 
     private static final String KEYNAME_DELIMITER = "_";
     private static final Keystore sKeystore = Keystore.getInstance();
