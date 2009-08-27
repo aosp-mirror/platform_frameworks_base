@@ -1074,8 +1074,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         cleanUpConnection(true, Phone.REASON_APN_SWITCHED);
     }
 
-    protected void onTrySetupData(String reason) {
-        trySetupData(reason);
+    protected boolean onTrySetupData(String reason) {
+        return trySetupData(reason);
     }
 
     /**
