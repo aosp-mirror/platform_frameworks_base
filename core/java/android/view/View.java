@@ -8742,7 +8742,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 mLastColor = color;
                 color |= 0xFF000000;
 
-                shader = new LinearGradient(0, 0, 0, 1, color, 0, Shader.TileMode.CLAMP);
+                shader = new LinearGradient(0, 0, 0, 1, color | 0xFF000000,
+                        color & 0x00FFFFFF, Shader.TileMode.CLAMP);
 
                 paint.setShader(shader);
                 // Restore the default transfer mode (src_over)
