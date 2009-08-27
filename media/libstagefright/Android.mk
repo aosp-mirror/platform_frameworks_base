@@ -26,7 +26,6 @@ LOCAL_SRC_FILES:=                 \
         AudioPlayer.cpp           \
         ESDS.cpp                  \
         OMXClient.cpp             \
-        OMXDecoder.cpp            \
         string.cpp
 
 LOCAL_C_INCLUDES:= \
