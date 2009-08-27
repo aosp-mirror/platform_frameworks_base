@@ -22,6 +22,7 @@ import android.util.Log;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -50,6 +51,8 @@ public final class GeolocationPermissions {
     // Members used to transfer the origins and permissions between threads.
     private Set<String> mOrigins;
     private boolean mAllowed;
+    private Set<String> mOriginsToClear;
+    private Set<String> mOriginsToAllow;
     private static Lock mLock = new ReentrantLock();
     private static boolean mUpdated;
     private static Condition mUpdatedCondition = mLock.newCondition();
@@ -58,7 +61,8 @@ public final class GeolocationPermissions {
     static final int GET_ORIGINS = 0;
     static final int GET_ALLOWED = 1;
     static final int CLEAR = 2;
-    static final int CLEAR_ALL = 3;
+    static final int ALLOW = 3;
+    static final int CLEAR_ALL = 4;
 
     /**
      * Gets the singleton instance of the class.
@@ -74,6 +78,7 @@ public final class GeolocationPermissions {
      * Creates the message handler. Must be called on the WebKit thread.
      */
     public void createHandler() {
+        mLock.lock();
         if (mHandler == null) {
             mHandler = new Handler() {
                 @Override
@@ -89,13 +94,28 @@ public final class GeolocationPermissions {
                         case CLEAR:
                             nativeClear((String) msg.obj);
                             break;
+                        case ALLOW:
+                            nativeAllow((String) msg.obj);
+                            break;
                         case CLEAR_ALL:
                             nativeClearAll();
                             break;
                     }
                 }
             };
+
+            if (mOriginsToClear != null) {
+                for (String origin : mOriginsToClear) {
+                    nativeClear(origin);
+                }
+            }
+            if (mOriginsToAllow != null) {
+                for (String origin : mOriginsToAllow) {
+                    nativeAllow(origin);
+                }
+            }
         }
+        mLock.unlock();
     }
 
     /**
@@ -179,11 +199,47 @@ public final class GeolocationPermissions {
     }
 
     /**
-     * Clears the permission state for the specified origin.
+     * Clears the permission state for the specified origin. This method may be
+     * called before the WebKit thread has intialized the message handler.
+     * Messages will be queued until this time.
      */
     public void clear(String origin) {
         // Called on the UI thread.
-        postMessage(Message.obtain(null, CLEAR, origin));
+        mLock.lock();
+        if (mHandler == null) {
+            if (mOriginsToClear == null) {
+                mOriginsToClear = new HashSet<String>();
+            }
+            mOriginsToClear.add(origin);
+            if (mOriginsToAllow != null) {
+                mOriginsToAllow.remove(origin);
+            }
+        } else {
+            postMessage(Message.obtain(null, CLEAR, origin));
+        }
+        mLock.unlock();
+    }
+
+    /**
+     * Allows the specified origin. This method may be called before the WebKit
+     * thread has intialized the message handler. Messages will be queued until
+     * this time.
+     */
+    public void allow(String origin) {
+        // Called on the UI thread.
+        mLock.lock();
+        if (mHandler == null) {
+            if (mOriginsToAllow == null) {
+                mOriginsToAllow = new HashSet<String>();
+            }
+            mOriginsToAllow.add(origin);
+            if (mOriginsToClear != null) {
+                mOriginsToClear.remove(origin);
+            }
+        } else {
+            postMessage(Message.obtain(null, ALLOW, origin));
+        }
+        mLock.unlock();
     }
 
     /**
@@ -198,5 +254,6 @@ public final class GeolocationPermissions {
     private static native Set nativeGetOrigins();
     private static native boolean nativeGetAllowed(String origin);
     private static native void nativeClear(String origin);
+    private static native void nativeAllow(String origin);
     private static native void nativeClearAll();
 }
