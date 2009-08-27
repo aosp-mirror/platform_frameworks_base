@@ -39,8 +39,9 @@ public abstract class AbstractThreadedSyncAdapter {
     private final AtomicInteger mNumSyncStarts;
     private final ISyncAdapterImpl mISyncAdapterImpl;
 
-    // all accesses to this member variable must be synchronized on "this"
+    // all accesses to this member variable must be synchronized on mSyncThreadLock
     private SyncThread mSyncThread;
+    private final Object mSyncThreadLock = new Object();
 
     /** Kernel event log tag.  Also listed in data/etc/event-log-tags. */
     public static final int LOG_SYNC_DETAILS = 2743;
@@ -71,7 +72,7 @@ public abstract class AbstractThreadedSyncAdapter {
             boolean alreadyInProgress;
             // synchronize to make sure that mSyncThread doesn't change between when we
             // check it and when we use it
-            synchronized (this) {
+            synchronized (mSyncThreadLock) {
                 if (mSyncThread == null) {
                     if (mAutoInitialize
                             && extras != null
@@ -102,7 +103,7 @@ public abstract class AbstractThreadedSyncAdapter {
         public void cancelSync(ISyncContext syncContext) {
             // synchronize to make sure that mSyncThread doesn't change between when we
             // check it and when we use it
-            synchronized (this) {
+            synchronized (mSyncThreadLock) {
                 if (mSyncThread != null
                         && mSyncThread.mSyncContext.getISyncContext() == syncContext) {
                     mSyncThread.interrupt();
@@ -158,7 +159,7 @@ public abstract class AbstractThreadedSyncAdapter {
                 }
                 // synchronize so that the assignment will be seen by other threads
                 // that also synchronize accesses to mSyncThread
-                synchronized (this) {
+                synchronized (mSyncThreadLock) {
                     mSyncThread = null;
                 }
             }
