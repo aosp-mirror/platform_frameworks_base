@@ -355,6 +355,8 @@ public interface WindowManagerPolicy {
     public final int OFF_BECAUSE_OF_USER = 1;
     /** Screen turned off because of timeout */
     public final int OFF_BECAUSE_OF_TIMEOUT = 2;
+    /** Screen turned off because of proximity sensor */
+    public final int OFF_BECAUSE_OF_PROXIMITY_SENSOR = 3;
 
     /**
      * Magic constant to {@link IWindowManager#setRotation} to not actually

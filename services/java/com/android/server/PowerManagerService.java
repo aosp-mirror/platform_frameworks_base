@@ -949,6 +949,9 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void sendNotificationLocked(boolean on, int why)
     {
+        if (mProximitySensorActive) {
+            why = WindowManagerPolicy.OFF_BECAUSE_OF_PROXIMITY_SENSOR;
+        }
         if (!on) {
             mStillNeedSleepNotification = false;
         }
