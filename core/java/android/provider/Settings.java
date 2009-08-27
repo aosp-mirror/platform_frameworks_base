@@ -1061,6 +1061,12 @@ public final class Settings {
         public static final String SCREEN_BRIGHTNESS = "screen_brightness";
 
         /**
+         * Control whether to enable automatic brightness mode.
+         * @hide
+         */
+        public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
+
+        /**
          * Control whether the process CPU usage meter should be shown.
          */
         public static final String SHOW_PROCESSES = "show_processes";
