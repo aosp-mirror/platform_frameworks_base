@@ -78,6 +78,8 @@ public class VolumePreference extends SeekBarPreference implements
     }
 
     public boolean onKey(View v, int keyCode, KeyEvent event) {
+        // If key arrives immediately after the activity has been cleaned up.
+        if (mSeekBarVolumizer == null) return true;
         boolean isdown = (event.getAction() == KeyEvent.ACTION_DOWN);
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
