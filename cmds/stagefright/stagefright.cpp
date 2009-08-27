@@ -41,6 +41,7 @@ using namespace android;
 
 static long gNumRepetitions;
 static long gMaxNumFrames;  // 0 means decode all available.
+static long gReproduceBug;  // if not -1.
 
 static int64_t getNowUs() {
     struct timeval tv;
@@ -100,6 +101,11 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
             if (gMaxNumFrames > 0 && numFrames == gMaxNumFrames) {
                 break;
             }
+
+            if (gReproduceBug == 1 && numFrames == 40) {
+                printf("seeking past the end now.");
+                options.setSeekTo(LONG_MAX);
+            }
         }
 
         printf("$");
@@ -124,6 +130,7 @@ static void usage(const char *me) {
     fprintf(stderr, "       -n repetitions\n");
     fprintf(stderr, "       -l(ist) components\n");
     fprintf(stderr, "       -m max-number-of-frames-to-decode in each pass\n");
+    fprintf(stderr, "       -b bug to reproduce\n");
 }
 
 int main(int argc, char **argv) {
@@ -133,9 +140,10 @@ int main(int argc, char **argv) {
     bool listComponents = false;
     gNumRepetitions = 1;
     gMaxNumFrames = 0;
+    gReproduceBug = -1;
 
     int res;
-    while ((res = getopt(argc, argv, "han:lm:")) >= 0) {
+    while ((res = getopt(argc, argv, "han:lm:b:")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -151,6 +159,7 @@ int main(int argc, char **argv) {
 
             case 'm':
             case 'n':
+            case 'b':
             {
                 char *end;
                 long x = strtol(optarg, &end, 10);
@@ -161,8 +170,11 @@ int main(int argc, char **argv) {
 
                 if (res == 'n') {
                     gNumRepetitions = x;
-                } else {
+                } else if (res == 'm') {
                     gMaxNumFrames = x;
+                } else {
+                    CHECK_EQ(res, 'b');
+                    gReproduceBug = x;
                 }
                 break;
             }
