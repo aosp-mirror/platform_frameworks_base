@@ -26,7 +26,6 @@
 #include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
-#include <media/stagefright/OMXDecoder.h>
 
 using namespace android;
 
@@ -87,8 +86,6 @@ private:
     DummySource &operator=(const DummySource &);
 };
 
-#define USE_OMX_CODEC   1
-
 sp<MediaSource> createSource(const char *filename) {
     sp<MediaSource> source;
 
@@ -140,13 +137,8 @@ int main(int argc, char **argv) {
 
     sp<MetaData> meta = source->getFormat();
 
-#if USE_OMX_CODEC
     sp<OMXCodec> decoder = OMXCodec::Create(
             client.interface(), meta, false /* createEncoder */, source);
-#else
-    sp<OMXDecoder> decoder = OMXDecoder::Create(
-            &client, meta, false /* createEncoder */, source);
-#endif
 
     int width, height;
     bool success = meta->findInt32(kKeyWidth, &width);
@@ -164,14 +156,9 @@ int main(int argc, char **argv) {
     enc_meta->setInt32(kKeyWidth, width);
     enc_meta->setInt32(kKeyHeight, height);
 
-#if USE_OMX_CODEC
     sp<OMXCodec> encoder =
         OMXCodec::Create(
                 client.interface(), enc_meta, true /* createEncoder */, decoder);
-#else
-    sp<OMXDecoder> encoder = OMXDecoder::Create(
-            &client, enc_meta, true /* createEncoder */, decoder);
-#endif
 
 #if 1
     sp<MPEG4Writer> writer = new MPEG4Writer("/sdcard/output.mp4");

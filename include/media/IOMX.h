@@ -119,12 +119,6 @@ struct omx_message {
         EMPTY_BUFFER_DONE,
         FILL_BUFFER_DONE,
 
-        // reserved for OMXDecoder use.
-        START,
-        INITIAL_FILL_BUFFER,
-
-        // reserved for OMXObserver use.
-        QUIT_OBSERVER,
     } type;
 
     IOMX::node_id node;
@@ -137,27 +131,20 @@ struct omx_message {
             OMX_U32 data2;
         } event_data;
 
-        // if type == EMPTY_BUFFER_DONE || type == FILL_BUFFER
-        //    || type == INITIAL_FILL_BUFFER
+        // if type == EMPTY_BUFFER_DONE
         struct {
             IOMX::buffer_id buffer;
         } buffer_data;
 
-        // if type == EMPTY_BUFFER || type == FILL_BUFFER_DONE
+        // if type == FILL_BUFFER_DONE
         struct {
             IOMX::buffer_id buffer;
             OMX_U32 range_offset;
             OMX_U32 range_length;
             OMX_U32 flags;
             OMX_TICKS timestamp;
-            OMX_PTR platform_private;  // ignored if type == EMPTY_BUFFER
+            OMX_PTR platform_private;
         } extended_buffer_data;
-
-        // if type == SEND_COMMAND
-        struct {
-            OMX_COMMANDTYPE cmd;
-            OMX_S32 param;
-        } send_command_data;
 
     } u;
 };
