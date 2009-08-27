@@ -499,15 +499,25 @@ void OMXCodec::setVideoOutputFormat(
     // Enabling this code appears to be the right thing(tm), but,...
     // the TI decoder then loses the ability to output YUV420 and only outputs
     // YCbYCr (16bit)
+
 #if 1
-    if (!strcmp("OMX.TI.Video.Decoder", mComponentName)
-        && !strcasecmp("video/avc", mime)) {
+    if (!strcmp("OMX.TI.Video.Decoder", mComponentName)) {
         OMX_PARAM_COMPONENTROLETYPE role;
         role.nSize = sizeof(role);
         role.nVersion.s.nVersionMajor = 1;
         role.nVersion.s.nVersionMinor = 1;
-        strncpy((char *)role.cRole, "video_decoder.avc",
-                OMX_MAX_STRINGNAME_SIZE - 1);
+
+        if (!strcasecmp("video/avc", mime)) {
+            strncpy((char *)role.cRole, "video_decoder.avc",
+                    OMX_MAX_STRINGNAME_SIZE - 1);
+        } else if (!strcasecmp("video/mp4v-es", mime)) {
+            strncpy((char *)role.cRole, "video_decoder.mpeg4",
+                    OMX_MAX_STRINGNAME_SIZE - 1);
+        } else if (!strcasecmp("video/3gpp", mime)) {
+            strncpy((char *)role.cRole, "video_decoder.h263",
+                    OMX_MAX_STRINGNAME_SIZE - 1);
+        }
+
         role.cRole[OMX_MAX_STRINGNAME_SIZE - 1] = '\0';
 
         status_t err = mOMX->set_parameter(
