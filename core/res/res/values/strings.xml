@@ -549,12 +549,12 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_backup">control system backup and restore</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_backup">Allows the application to control the system's backup and restore mechanism.  Not for use by normal applications.</string>
+    <string name="permdesc_backup">Allows the application to control the system\'s backup and restore mechanism.  Not for use by normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_backup_data">back up and restore the application's data</string>
+    <string name="permlab_backup_data">back up and restore the application\'s data</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_backup_data">Allows the application to participate in the system's backup and restore mechanism.</string>
+    <string name="permdesc_backup_data">Allows the application to participate in the system\'s backup and restore mechanism.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_internalSystemWindow">display unauthorized windows</string>
@@ -707,7 +707,7 @@
 
     <string name="permlab_writeSecureSettings">modify secure system settings</string>
     <string name="permdesc_writeSecureSettings">Allows an application to modify the
-        system's secure settings data. Not for use by normal applications.</string>
+        system\'s secure settings data. Not for use by normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeGservices">modify the Google services map</string>
@@ -1834,7 +1834,7 @@
     <!-- See USB_STORAGE_STOP.   This is the button text to cancel stoping usb storage. -->
     <string name="usb_storage_stop_button_unmount">Cancel</string>
     <!-- See USB_STORAGE_STOP_DIALOG.  If there was an error stopping, this is the text. -->
-    <string name="usb_storage_stop_error_message">We've encountered a problem turning off USB storage. Check to make sure you have unmounted the USB host, then try again.</string>
+    <string name="usb_storage_stop_error_message">We\'ve encountered a problem turning off USB storage. Check to make sure you have unmounted the USB host, then try again.</string>
 
     <!-- External media format dialog strings -->
     <!-- This is the label for the activity, and should never be visible to the user. -->
