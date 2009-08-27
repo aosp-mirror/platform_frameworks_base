@@ -49,6 +49,7 @@ import android.location.IGpsStatusProvider;
 import android.location.ILocationListener;
 import android.location.ILocationManager;
 import android.location.ILocationProvider;
+import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
@@ -71,6 +72,7 @@ import android.util.PrintWriterPrinter;
 import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.location.LocationProviderProxy;
 import com.android.internal.location.MockProvider;
+import com.android.internal.location.GpsNetInitiatedHandler;
 
 /**
  * The service class that manages LocationProviders and issues location
@@ -118,6 +120,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private final Context mContext;
     private IGeocodeProvider mGeocodeProvider;
     private IGpsStatusProvider mGpsStatusProvider;
+    private INetInitiatedListener mNetInitiatedListener;
     private LocationWorkerHandler mLocationHandler;
 
     // Cache the real providers for use in addTestProvider() and removeTestProvider()
@@ -541,6 +544,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             // Create a gps location provider
             GpsLocationProvider provider = new GpsLocationProvider(mContext, this);
             mGpsStatusProvider = provider.getGpsStatusProvider();
+            mNetInitiatedListener = provider.getNetInitiatedListener();
             LocationProviderProxy proxy = new LocationProviderProxy(LocationManager.GPS_PROVIDER, provider);
             addProvider(proxy);
             mGpsLocationProvider = proxy;
@@ -1128,6 +1132,18 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
     
             return proxy.sendExtraCommand(command, extras);
+        }
+    }
+
+    public boolean sendNiResponse(int notifId, int userResponse)
+    {
+        try {
+            return mNetInitiatedListener.sendNiResponse(notifId, userResponse);
+        }
+        catch (RemoteException e)
+        {
+            Log.e(TAG, "RemoteException in LocationManagerService.sendNiResponse");
+            return false;
         }
     }
 
