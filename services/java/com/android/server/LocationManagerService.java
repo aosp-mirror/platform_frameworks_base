@@ -1137,6 +1137,10 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     public boolean sendNiResponse(int notifId, int userResponse)
     {
+        if (Binder.getCallingUid() != Process.myUid()) {
+            throw new SecurityException(
+                    "calling sendNiResponse from outside of the system is not allowed");
+        }
         try {
             return mNetInitiatedListener.sendNiResponse(notifId, userResponse);
         }
