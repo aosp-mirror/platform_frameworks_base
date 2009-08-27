@@ -59,4 +59,9 @@
 
     <!-- The number of degrees to rotate the display when the device is in a dock. -->
     <integer name="config_dockedRotation">90</integer>
+
+    <!-- Flag indicating whether the keyguard should be bypassed when
+         the slider is open.  This can be set or unset depending how easily
+         the slider can be opened (for example, in a pocket or purse). -->
+    <bool name="config_bypass_keyguard_if_slider_open">true</bool>
 </resources>
