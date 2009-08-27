@@ -2128,12 +2128,14 @@ public class Intent implements Parcelable {
      * of activity B, then C and D will be finished and B receive the given
      * Intent, resulting in the stack now being: A, B.
      *
-     * <p>The currently running instance of task B in the above example will
+     * <p>The currently running instance of activity B in the above example will
      * either receive the new intent you are starting here in its
      * onNewIntent() method, or be itself finished and restarted with the
      * new intent.  If it has declared its launch mode to be "multiple" (the
-     * default) it will be finished and re-created; for all other launch modes
-     * it will receive the Intent in the current instance.
+     * default) and you have not set {@link #FLAG_ACTIVITY_SINGLE_TOP} in
+     * the same intent, then it will be finished and re-created; for all other
+     * launch modes or if {@link #FLAG_ACTIVITY_SINGLE_TOP} is set then this
+     * Intent will be delivered to the current instance's onNewIntent().
      *
      * <p>This launch mode can also be used to good effect in conjunction with
      * {@link #FLAG_ACTIVITY_NEW_TASK}: if used to start the root activity
