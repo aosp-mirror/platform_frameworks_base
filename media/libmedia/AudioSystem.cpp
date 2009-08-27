@@ -883,5 +883,15 @@ status_t AudioParameter::getFloat(const String8& key, float& value)
     return result;
 }
 
+status_t AudioParameter::getAt(size_t index, String8& key, String8& value)
+{
+    if (mParameters.size() > index) {
+        key = mParameters.keyAt(index);
+        value = mParameters.valueAt(index);
+        return NO_ERROR;
+    } else {
+        return BAD_VALUE;
+    }
+}
 }; // namespace android
 
