@@ -361,13 +361,13 @@ web_docs_sample_code_flags := \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=1.5
+framework_docs_SDK_VERSION:=1.6
   # release version (ie "Release x")  (full releases only)
-framework_docs_SDK_REL_ID:=3
+framework_docs_SDK_REL_ID:=1
   # name of current SDK directory (full releases only)
 framework_docs_SDK_CURRENT_DIR:=$(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
   # flag to build offline docs for a preview release
-framework_docs_SDK_PREVIEW:=true
+framework_docs_SDK_PREVIEW:=0
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \

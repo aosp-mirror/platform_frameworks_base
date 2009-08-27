@@ -11,6 +11,8 @@ page.title=Android Virtual Devices
         hardware options, system image, and data storage.
     <li>You create AVD configurations to model different device environments 
         in the Android emulator.</li>
+    <li>The <code>android</code> tool offers a graphical Android AVD 
+        Manager and a command-line interface for creating AVDs.</li>
   </ul>
   <h2>In this document</h2>
   <ol>
@@ -72,9 +74,18 @@ reference of emulator options, please see the <a
 href="{@docRoot}guide/developing/tools/emulator.html">Emulator</a>
 documentation. </p>
 
-<p>To create and manage AVDs, you use the android tool provided in the Android
-SDK. For more information about how to work with AVDs from inside
-your development environment, see <a
+<p>To create and manage AVDs, you use the <code>android</code> tool provided in
+the <code>tools/</code> directory of the Android SDK. The tool provides both a
+graphical AVD manager and a command-line interface that you can use to
+create AVDs. To access the graphical AVD manager, run the
+<code>android</code> tool without options. The sections below describe how to
+use the <code>android</code> command-line interface to create and manage AVDs.
+Note that some functionality, such as the capability to create an AVD with a
+custom hardware configuration, are only available through the command-line
+interface. </p>
+
+<p>For more information about how to work with AVDs from inside your development
+environment, see <a
 href="{@docRoot}guide/developing/eclipse-adt.html">Developing in Eclipse with
 ADT</a> or <a href="{@docRoot}guide/developing/other-ide.html">Developing in
 Other IDEs</a>, as appropriate for your environment.</p>
@@ -89,11 +100,11 @@ you need to create an AVD before you can run any application in the emulator
 </div>
 </div>
 
-<p>To create an AVD, you use the android tool, a command-line utility
-available in the <code>&lt;sdk&gt;/tools/</code> directory. Managing AVDs is one
-of the two main function of the android tool (the other is creating and updating
-Android projects). Open a terminal window and change to the 
-<code>&lt;sdk&gt;/tools/</code> directory, if needed</p>
+<p>To create an AVD, you use the <code>android</code> tool, a command-line
+utility available in the <code>&lt;sdk&gt;/tools/</code> directory. Managing
+AVDs is one of the two main function of the <code>android</code> tool (the other
+is creating and updating Android projects). Open a terminal window and change to
+the <code>&lt;sdk&gt;/tools/</code> directory, if needed</p>
 
 <p>To create each AVD, you issue the command <code>android create avd</code>,
 with options that specify a name for the new AVD and the system image you want
@@ -118,11 +129,12 @@ version or that of any SDK add-on. Later, when applications use the AVD, they'll
 be running on the system that you specify in the <code>-t</code> argument.<p>
 
 <p>To specify the system image to use, you refer to its <em>target ID</em>
-&mdash; an integer &mdash; as assigned by the android tool. The target ID is not
-derived from the system image name, version, or API Level, or other attribute,
-so you need to have the android tool list the available system images and the
-target ID of each, as described in the next section. You should do this
-<em>before</em> you run the <code>android create avd</code> command.
+&mdash; an integer &mdash; as assigned by the <code>android</code> tool. The
+target ID is not derived from the system image name, version, or API Level, or
+other attribute, so you need to have the <code>android</code> tool list the
+available system images and the target ID of each, as described in the next
+section. You should do this <em>before</em> you run the <code>android create
+avd</code> command.
 </p>
 
 <h3 id="listingtargets">Listing targets</h3>
@@ -131,7 +143,7 @@ target ID of each, as described in the next section. You should do this
 
 <pre>android list targets</pre>
 
-<p>The android tool scans the <code>&lt;sdk&gt;/platforms</code> and
+<p>The <code>android</code> tool scans the <code>&lt;sdk&gt;/platforms</code> and
 <code>&lt;sdk&gt;/add-ons</code> directories looking for valid system images and
 then generates the list of targets. Here's an example of the command output:
 </p>
@@ -199,24 +211,22 @@ system image in the list above): </p>
 <pre>android create avd -n my_android1.5 -t 2</pre>
 
 <p>If the target you selected was a standard Android system image ("Type:
-platform"), the android tool next asks you whether you want to create a custom
-hardware profile. </p>
-
+platform"), the <code>android</code> tool next asks you whether you want to
+create a custom hardware profile. </p>
 <pre>Android 1.5 is a basic Android platform.
 Do you wish to create a custom hardware profile [no]</pre>
 
 <p>If you want to set custom hardware emulation options for the AVD, enter
 "yes" and set values as needed. If you want to use the default hardware
 emulation options for the AVD, just press the return key (the default is "no").
-The android tool creates the AVD with name and system image mapping you
+The <code>android</code> tool creates the AVD with name and system image mapping you
 requested, with the options you specified. 
 
-<p class="note">If you are creating an AVD whose target is an SDK add-on,
-the android tool does not allow you to set hardware emulation options. It
-assumes that the provider of the add-on has set emulation options appropriately
-for the device that the add-on is modeling, and so prevents you from resetting
-the options. </p>
-
+<p class="note">If you are creating an AVD whose target is an SDK add-on, the
+<code>android</code> tool does not allow you to set hardware emulation options.
+It assumes that the provider of the add-on has set emulation options
+appropriately for the device that the add-on is modeling, and so prevents you
+from resetting the options. </p>
 <p>For a list of options you can use in the <code>android create avd</code>
 command, see the table in <a href="#options">Command-line options for AVDs</a>,
 at the bottom of
@@ -225,11 +235,11 @@ this page. </p>
 <h3 id="hardwareopts">Setting hardware emulation options</h3>
 
 <p>When are creating a new AVD that uses a standard Android system image ("Type:
-platform"), the android tool lets you set hardware emulation options for virtual
-device. The table below lists the options available and the default values, as
-well as the names of properties that store the emulated hardware options in the AVD's
-configuration file (the config.ini file in the AVD's local directory). </p>
-
+platform"), the <code>android</code> tool lets you set hardware emulation
+options for virtual device. The table below lists the options available and the
+default values, as well as the names of properties that store the emulated
+hardware options in the AVD's configuration file (the config.ini file in the
+AVD's local directory). </p>
 
 <table>
 <tr>
@@ -248,7 +258,6 @@ configuration file (the config.ini file in the AVD's local directory). </p>
 <td>Touch-screen support</td>
 <td>Whether there is a touch screen or not on the device. Default value is "yes".</td>
 <td>hw.touchScreen
-
 
 <tr>
 <td>Trackball support </td>
@@ -339,23 +348,30 @@ configuration file (the config.ini file in the AVD's local directory). </p>
 <td>Default value is "66MB".</td>
 <td>disk.cachePartition.size </td>
 </tr>
+
+<tr>
+<td>Abstracted LCD density</td>
+<td>Sets the generalized density characteristic used by the AVD's screen. Default value is "160".</td>
+<td>hw.lcd.density </td>
+</tr>
+
 </table>
 
 <h3 id="location">Default location of the AVD files</h3>
 
-<p>When you create an AVD, the android tool creates a dedicated directory for it
+<p>When you create an AVD, the <code>android</code> tool creates a dedicated directory for it
 on your development computer. The directory contains the AVD configuration file,
 the user data image and SD card image (if available), and any other files
 associated with the device. Note that the directory does not contain a system
 image &mdash; instead, the AVD configuration file contains a mapping to the
 system image, which it loads when the AVD is launched. </p>
 
-<p>The android tool also creates a &lt;AVD name&gt;.ini file for the AVD at the
+<p>The <code>android</code> tool also creates a &lt;AVD name&gt;.ini file for the AVD at the
 root of the .android/avd directory on your computer. The file specifies the
 location of the AVD directory and always remains at the root the .android 
 directory.</p>
 
-<p>By default, the android tool creates the AVD directory inside
+<p>By default, the <code>android</code> tool creates the AVD directory inside
 <code>~/.android/avd/</code> (on Linux/Mac), <code>C:\Documents and
 Settings\&lt;user&gt;\.android\</code> on Windows XP, and 
 <code>C:\Users\&lt;user&gt;\.android\</code> on Windows Vista. 
@@ -396,18 +412,18 @@ Error: Invalid value in image.sysdir. Run 'android update avd -n foo' </pre>
 
 <h3 id="deleting">Deleting an AVD</h3>
 
-<p>You can use the android tool to delete an AVD. Here is the command usage:</p>
+<p>You can use the <code>android</code> tool to delete an AVD. Here is the command usage:</p>
 
 <pre>android delete avd -n &lt;name&gt; </pre>
 
-<p>When you issue the command, the android tool looks for an AVD matching the 
+<p>When you issue the command, the <code>android</code> tool looks for an AVD matching the 
 specified name deletes the AVD's directory and files. </p>
 
 
 <h2 id="options">Command-line options for AVDs</h2>
 
 <p>The table below lists the command-line options you can use with the 
-android tool. </p>
+<code>android</code> tool. </p>
 
 
 <table>
@@ -448,9 +464,9 @@ android tool. </p>
   <td><code>-f</code></td>
   <td>Force creation of the AVD</td>
   <td>By default, if the name of the AVD being created matches that of an 
-      existing AVD, the android tool will not create the new AVD or overwrite 
+      existing AVD, the <code>android</code> tool will not create the new AVD or overwrite 
       the existing AVD. If you specify the <code>-f</code> option, however, the 
-      android tool will automatically overwrite any existing AVD that has the 
+      <code>android</code> tool will automatically overwrite any existing AVD that has the 
       same name as the new AVD. The files and data of the existing AVD are 
       deleted. </td>
 </tr>
@@ -465,7 +481,7 @@ files.</td>
   <td><code>-s &lt;name&gt;</code> or <br>
       <code>-s &lt;width&gt;-&lt;height&gt;</code> </td>
   <td>The skin to use for this AVD, identified by name or dimensions.</td>
-  <td>The android tool scans for a matching skin by name or dimension in the
+  <td>The <code>android</code> tool scans for a matching skin by name or dimension in the
 <code>skins/</code> directory of the target referenced in the <code>-t
 &lt;targetID&gt;</code> argument. Example: <code>-s HVGA-L</code></td>
 </tr>

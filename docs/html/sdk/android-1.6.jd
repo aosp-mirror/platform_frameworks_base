@@ -1,0 +1,235 @@
+page.title=Android 1.6 Version Notes
+
+@jd:body
+
+<p>
+<em>Date:</em> September 2009<br />
+<em>API Level:</em>&nbsp;<strong>4</strong></p>
+
+
+<p>This document provides version notes for the Android 1.6 system image included in the SDK. </p>
+
+<ul>
+<li><a href="#overview">Overview</a>
+<li><a href="#features">New Features</a>
+<li><a href="#apps">Built-in Applications</a>
+<li><a href="#locs">Locales</a>
+<li><a href="#api-changes">API Changes</a>
+</ul>
+
+<h2 id="overview">Overview</h2>
+
+<p>The Android 1.6 system delivered in the SDK (as library and system image) is
+the development counterpart to the Android 1.6 production system image,
+deployable to Android-powered handsets starting September 2009. The system is fully
+compliant and includes no external libraries.</p>
+
+<p>The Android 1.6 system delivers an updated version of the framework
+API. As with previous versions, the Android 1.6 API 
+is assigned an integer identifier &mdash; <strong>4</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/developing/">API Levels</a> document. </p>
+
+<h2 id="features">New Features</h2>
+
+<p>For a list of new system features, see the <a
+href="http://developer.android.com/sdk/android-1.6-highlights.html">Android 1.6 Platform
+Highlights</a> document.</p>
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image includes these built-in applications:</p>
+	<ul>
+	<li>Alarm Clock</li>
+	<li>Browser</li>
+	<li>Calculator</li>
+	<li>Camcorder</li>
+	<li>Camera</li>
+	<li>Contacts</li>
+	<li>Custom Locale (developer app)</li>
+	<li>Dev Tools (developer app)</li>
+	<li>Dialer</li>
+	<li>Email</li>
+	<li>Gallery</li>
+	<li>Gestures Builder</li>
+	<li>IME for Japanese text input</li>
+	<li>Messaging</li>
+	<li>Music</li>
+	<li>Settings</li>
+	<li>Spare Parts (developer app)</li>
+	</ul>
+
+<h2 id="locs">Locales</h2>
+
+<p>The system image provides a variety of built-in locales. In some cases, 
+region-specific strings are available for the locales. In other cases, 
+a default version of the language is used. The languages that will be 
+available in the Android 1.6 system image are listed below (with 
+<em>language</em>_<em>country/region</em> locale descriptor).</p>
+
+<table style="border:0;">
+<tr>
+<td style="border:0">
+<ul style="margin-bottom:0;">
+<li>Arabic, Egypt (ar_EG)</li>
+<li>Arabic, Israel (ar_IL)</li>
+<li>Bulgarian, Bulgaria (bg_BG)</li>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+<li>Croatian, Croatia (hr_HR)</li>
+<li>Czech, Czech Republic (cs_CZ)</li>
+<li>Danish, Denmark (da_DK)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>English, US (en_US)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, India (en_IN)</li>
+<li>English, Ireland (en_IE)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore (en_SG)</li>
+<li>English, South Africa (en_ZA)</li>
+<li>Finnish, Finland (fi_FI)</li>
+<li>French, France (fr_FR)</li>
+<li>French, Belgium (fr_BE)</li>
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Liechtenstein (de_LI)</li>
+</ul>
+</td>
+<td style="border:0;padding-left:5em;">
+<ul style="margin-bottom:0;">
+<li>Greek, Greece (el_GR)</li>
+<li>Hindi, India (hi_IN)</li>
+<li>Hungarian, Hungary (hu_HU)</li>
+<li>Indonesian, Indonesia (id_ID)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Japanese, Japan (ja_JP)</li>
+<li>Korean, Korea (ko_KR)</li>
+<li>Latvian, Latvia (lv_LV)</li>
+<li>Lithuanian, Lithuania (lt_LT)</li>
+<li>Norwegian Bokmål, Norway (nb_NO)</li>
+<li>Polish, Poland (pl_PL)</li>
+<li>Portuguese, Brazil (pt_BR)</li>
+<li>Portuguese, Portugal (pt_PT)</li>
+<li>Romanian, Romania (ro_RO)</li>
+<li>Russian, Russia (ru_RU)</li>
+<li>Serbian, Serbia (sr_RS)</li>
+<li>Slovak, Slovakia (sk_SK)</li>
+<li>Slovenian, Slovenia (sl_SI)</li>
+<li>Spanish, Spain (es_ES)</li>
+<li>Spanish, US (es_US)</li>
+<li>Swedish, Sweden (sv_SE)</li>
+<li>Thai, Thailand (th_TH)</li>
+<li>Tagalog, Philippines (tl_PH)</li>
+<li>Turkish, Turkey (tr_TR)</li>
+<li>Ukranian, Ukrania (uk_UA)</li>
+<li>Vietnamese, Vietnam (vi_VN)</li>
+</ul>
+</td>
+</tr>
+</table>
+
+<p>Localized UI strings match the locales that are displayable in 
+the emulator, accessible through the device Settings application.</p>
+
+<h2 id="api-changes">API Changes</h2>
+
+<h3 style="padding-top:0">Overview</h3>
+
+<ul>
+
+<li>Search framework</li>
+  <ul>
+    <li>Applications can now expose relevant content to users as search suggestions in the Quick Search Box, a new device-wide search capability that is accessible from the home screen. To support this, the search framework adds new attributes to the searchable metadata file. For complete information, see the {@link android.app.SearchManager SearchManager} documentation.</li>
+  </ul>
+</li>
+
+<li>Accessibility framework</li>
+  <ul>
+    <li>New {@link android.view.accessibility android.accessibility} package
+that includes classes for capturing accessibility events and forwarding them to
+an {@link android.accessibilityservice AccessibilityService} handler. </li>
+    <li>New {@link android.accessibilityservice AccessibilityService} package
+that lets your application track user events and provide visual, audible, or
+haptic feedback to the user. </li>
+  </ul>
+</li>
+
+<li>Gestures</li>
+  <ul>
+    <li>New {@link android.gesture gesture} API for creating, recognizing,
+loading, and saving gestures.</li>
+  </ul>
+</li>
+
+<li>Text-to-speech</li>
+  <ul>
+    <li>New package {@link android.speech.tts android.speech.tts} provides
+classes for synthesizing speech from text, for immediate playback or to create a
+sound file.</li>
+  </ul>
+</li>
+
+<li>Permissions</li>
+  <ul>
+
+    <li>New permissions for 
+{@link android.Manifest.permission#CHANGE_WIFI_MULTICAST_STATE CHANGE_WIFI_MULTICAST_STATE}, 
+{@link android.Manifest.permission#INSTALL_LOCATION_PROVIDER INSTALL_LOCATION_PROVIDER}, 
+{@link android.Manifest.permission#READ_HISTORY_BOOKMARKS READ_HISTORY_BOOKMARKS},
+{@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE WRITE_EXTERNAL_STORAGE}, and  
+{@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS WRITE_HISTORY_BOOKMARKS}.</li>
+  </ul>
+</li>
+
+<li>Graphics</li>
+  <ul>
+    <li>Classes in {@link android.graphics android.graphics} now support scaling
+for different screen densities.</li>
+  </ul>
+</li>
+
+<li>Telephony</li>
+  <ul>
+    <li>New {@link android.telephony.SmsManager SmsManager} and other classes
+for sending and receiving SMS messages.</li>
+  </ul>
+</li>
+
+<li>Utilities</li>
+  <ul>
+    <li>New {@link android.util.DisplayMetrics DisplayMetrics} fields for
+determining the density of the current device screen.</li>
+  </ul>
+</li>
+
+<li>Application-defined support for various screen densities</li>
+   <p>Applications can now use a new element in their manifest files, <a
+href="{@docRoot}guide/topics/manifest/supports-screen-element.html">&lt;supports-
+screen&gt;</a> to indicate to the specific screen resolutions/densities that
+they are designed to support. When the application is installed on a device
+whose screen is not explicitly supported by the application, the system
+runs the application in Compatibility Mode, where possible. </p>
+</li>
+</ul>
+
+<h3 id="api-diff">API Change Details</h3>
+
+<p>For a detailed view of API changes in this platform (API Level 4), see the <a
+href="{@docRoot}sdk/api_diff/4/changes.html">API Differences Report</a>.</p>
+
+
+
+
+
+

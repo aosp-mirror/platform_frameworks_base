@@ -16,10 +16,11 @@ page.title=Intents and Intent Filters
 <h2>In this document</h2>
 <ol>
 <li><a href="#iobjs">Intent Objects</a></li>
-<li><a href="#ires">Intent Resolution</a>, including:</li>
+<li><a href="#ires">Intent Resolution</a></li>
 <li style="margin-left: 2em"><a href="#ifs">Intent filters</a></li>
 <li style="margin-left: 2em"><a href="#ccases">Common cases</a></li>
 <li style="margin-left: 2em"><a href="#imatch">Using intent matching</a></li>
+<li><a href="#npex">Note Pad Example</a></li>
 </ol>
 </div>
 </div>
@@ -31,7 +32,7 @@ broadcast receivers &mdash; are activated through messages, called <i>intents</i
 Intent messaging is a facility for late run-time binding between components in the same 
 or different applications.  The intent itself, an {@link android.content.Intent} 
 object, is a passive data structure holding an abstract description of an operation 
-to be performed &mdash; or, in the case of broadcasts, a description of something 
+to be performed &mdash; or, often in the case of broadcasts, a description of something 
 that has happened and is being announced.  There are separate mechanisms for 
 delivering intents to each type of component: 
 </p>
@@ -40,7 +41,9 @@ delivering intents to each type of component:
 <li>An Intent object is passed to <code>{@link android.content.Context#startActivity 
 Context.startActivity()}</code> or <code>{@link android.app.Activity#startActivityForResult 
 Activity.startActivityForResult()}</code> to launch an activity or get an existing 
-activity to do something new.</li>
+activity to do something new. (It can also be passed to 
+<code>{@link android.app.Activity#setResult(int, Intent) Activity.setResult()}</code>
+to return information to the activity that called {@code startActivityForResult()}.)</li>
 
 <li><p>An Intent object is passed to <code>{@link android.content.Context#startService 
 Context.startService()}</code> to initiate a service or deliver new instructions to an 
@@ -380,22 +383,12 @@ component's filters.
 
 <p>
 A component has separate filters for each job it can do, each face it can 
-present to the user.  For example, the principal activity of the sample
-NotePad application has three filters &mdash; one for starting up with a
-blank slate, another for starting with an assigned directory of notes 
-that the user can view, edit, or select from, and a third for finding a 
-particular note without an initial specification of its directory.
-</p>
-
-<p>
-An intent filter is an instance of the {@link android.content.IntentFilter} class.  
-However, since the Android system must know about the capabilities of a component 
-before it can launch that component, intent filters are generally not set up in 
-Java code, but in the application's manifest file (AndroidManifest.xml) as 
-{@code &lt;intent-filter&gt;} elements.  (The one exception would be filters for 
-broadcast receivers that are registered dynamically by calling <code>{@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String, 
-Handler) Context.registerReceiver()}</code>; they are directly created as 
-IntentFilter objects.)
+present to the user.  For example, the NoteEditor activity of the sample
+Note Pad application has two filters &mdash; one for starting up with a
+specific note that the user can view or edit, and another for starting 
+with a new, blank note that the user can fill in and save.  (All of Note 
+Pad's filters are described in the <a href="#npex">Note Pad Example</a>
+section, later.)
 </p>
 
 <div class="sidebox-wrapper">
@@ -411,6 +404,18 @@ name the component as the target.
 </p>
 </div>
 </div> 
+
+<p>
+An intent filter is an instance of the {@link android.content.IntentFilter} class.  
+However, since the Android system must know about the capabilities of a component 
+before it can launch that component, intent filters are generally not set up in 
+Java code, but in the application's manifest file (AndroidManifest.xml) as 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> 
+elements.  (The one exception would be filters for 
+broadcast receivers that are registered dynamically by calling <code>{@link android.content.Context#registerReceiver(BroadcastReceiver, IntentFilter, String, 
+Handler) Context.registerReceiver()}</code>; they are directly created as 
+IntentFilter objects.)
+</p>
 
 <p>
 A filter has fields that parallel the action, data, and category fields of an 
@@ -429,8 +434,11 @@ Each of the three tests is described in detail below:
 <dl>
 
 <dt><b>Action test</b></dt>
-<dd>An {@code &lt;intent-filter&gt;} element in the manifest file lists actions 
-as {@code &lt;action&gt;} subelements.  For example:
+<dd>An 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code>
+element in the manifest file lists actions as 
+<code><a href="{@docRoot}guide/topics/manifest/action-element.html">&lt;action&gt;</a></code> 
+subelements.  For example:
 
 <pre>&lt;intent-filter . . . &gt;
     &lt;action android:name="com.example.project.SHOW_CURRENT" /&gt;
@@ -464,8 +472,9 @@ contains at least one action.</p></li>
 </dd>
 
 <dt><b>Category test</b></dt>
-<dd>An {@code &lt;intent-filter&gt;} element also lists categories as subelements.  
-For example:
+<dd>An 
+<code><a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></code> 
+element also lists categories as subelements.  For example:
 
 <pre>&lt;intent-filter . . . &gt;
     &lt;category android:name="android.intent.category.DEFAULT" /&gt;
@@ -512,14 +521,16 @@ is contained in a subelement.  And, as in those cases, the subelement can appear
 multiple times, or not at all.  For example:
 
 <pre>&lt;intent-filter . . . &gt;
-    &lt;data android:type="video/mpeg" android:scheme="http" . . . /&gt; 
-    &lt;data android:type="audio/mpeg" android:scheme="http" . . . /&gt;
+    &lt;data android:mimeType="video/mpeg" android:scheme="http" . . . /&gt; 
+    &lt;data android:mimeType="audio/mpeg" android:scheme="http" . . . /&gt;
     . . .
 &lt;/intent-filter&gt;</pre>
 
 <p>
-Each {@code &lt;data&gt;} element can specify a URI and a data type (MIME media type).  
-There are separate attributes &mdash; {@code scheme}, {@code host}, {@code port}, 
+Each 
+<code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code> 
+element can specify a URI and a data type (MIME media type).  There are separate 
+attributes &mdash; {@code scheme}, {@code host}, {@code port}, 
 and {@code path} &mdash; for each part of the URI:  
 </p>
 
@@ -607,7 +618,7 @@ for example, tells Android that the component can get image data from a content
 provider and display it:
 </p>
 
-<pre>&lt;data android:type="image/*" /&gt;</pre>
+<pre>&lt;data android:mimeType="image/*" /&gt;</pre>
 
 <p>
 Since most available data is dispensed by content providers, filters that 
@@ -680,6 +691,357 @@ can respond.  There's a similar method,
 {@link android.content.pm.PackageManager#queryBroadcastReceivers 
 queryBroadcastReceivers()}, for broadcast receivers.
 </p>
+
+<h2 id="npex">Note Pad Example</h2>
+
+<p>
+The Note Pad sample application enables users to browse through a list 
+of notes, view details about individual items in the list, edit the items, 
+and add a new item to the list.  This section looks at the intent filters
+declared in its manifest file.  (If you're working offline in the SDK, you 
+can find all the source files for this sample application, including its 
+manifest file, at {@code &lt;sdk&gt;/samples/NotePad/index.html}.  
+If you're viewing the documentation online, the source files are in the 
+<a href="{@docRoot}guide/samples/index.html">Tutorials and Sample Code</a> 
+section <a href="{@docRoot}guide/samples/NotePad/index.html">here</a>.)
+</p>
+
+<p>
+In its manifest file, the Note Pad application declares three activities,
+each with at least one intent filter.  It also declares a content provider 
+that manages the note data.  Here is the manifest file in its entirety:
+</p>
+
+<pre>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.example.android.notepad"&gt;
+    &lt;application android:icon="@drawable/app_notes"
+                 android:label="@string/app_name" &gt;
+
+        &lt;provider android:name="NotePadProvider"
+                  android:authorities="com.google.provider.NotePad" /&gt;
+
+        &lt;activity android:name="NotesList" android:label="@string/title_notes_list"&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.MAIN" /&gt;
+                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+            &lt;/intent-filter&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.VIEW" /&gt;
+                &lt;action android:name="android.intent.action.EDIT" /&gt;
+                &lt;action android:name="android.intent.action.PICK" /&gt;
+                &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+                &lt;data android:mimeType="vnd.android.cursor.dir/vnd.google.note" /&gt;
+            &lt;/intent-filter&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.GET_CONTENT" /&gt;
+                &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+                &lt;data android:mimeType="vnd.android.cursor.item/vnd.google.note" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+        
+        &lt;activity android:name="NoteEditor"
+                  android:theme="@android:style/Theme.Light"
+                  android:label="@string/title_note" &gt;
+            &lt;intent-filter android:label="@string/resolve_edit"&gt;
+                &lt;action android:name="android.intent.action.VIEW" /&gt;
+                &lt;action android:name="android.intent.action.EDIT" /&gt;
+                &lt;action android:name="com.android.notepad.action.EDIT_NOTE" /&gt;
+                &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+                &lt;data android:mimeType="vnd.android.cursor.item/vnd.google.note" /&gt;
+            &lt;/intent-filter&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.INSERT" /&gt;
+                &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+                &lt;data android:mimeType="vnd.android.cursor.dir/vnd.google.note" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+        
+        &lt;activity android:name="TitleEditor" 
+                  android:label="@string/title_edit_title"
+                  android:theme="@android:style/Theme.Dialog"&gt;
+            &lt;intent-filter android:label="@string/resolve_title"&gt;
+                &lt;action android:name="com.android.notepad.action.EDIT_TITLE" /&gt;
+                &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+                &lt;category android:name="android.intent.category.ALTERNATIVE" /&gt;
+                &lt;category android:name="android.intent.category.SELECTED_ALTERNATIVE" /&gt;
+                &lt;data android:mimeType="vnd.android.cursor.item/vnd.google.note" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+        
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>
+The first activity, NotesList, is 
+distinguished from the other activities by the fact that it operates 
+on a directory of notes (the note list) rather than on a single note.  
+It would generally serve as the initial user interface into the 
+application.  It can do three things as described by its three intent 
+filters:
+</p>
+
+<ol>
+<li><pre>&lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.MAIN" /&gt;
+    &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+&lt;/intent-filter&gt;</pre>
+
+<p>
+This filter declares the main entry point into the Note Pad application.  
+The standard {@code MAIN} action is an entry point that does not require 
+any other information in the Intent (no data specification, for example), 
+and the {@code LAUNCHER} category says that this entry point should be 
+listed in the application launcher.
+</p></li>
+
+<li><pre>&lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.VIEW" /&gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="android.intent.action.PICK" /&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;data android:mimeType="vnd.android.cursor.dir/vnd.google.note" /&gt;
+&lt;/intent-filter&gt;</pre>
+
+<p>
+This filter declares the things that the activity can do on a directory 
+of notes.  It can allow the user to view or edit the directory (via
+the {@code VIEW} and {@code EDIT} actions), or to pick a particular note 
+from the directory (via the {@code PICK} action).
+</p> 
+
+<p>
+The {@code mimeType} attribute of the 
+<code><a href="{@docRoot}guide/topics/manifest/data-element.html">&lt;data&gt;</a></code> 
+element specifies the kind of data that these actions operate on.  It 
+indicates that the activity can get a Cursor over zero or more items 
+({@code vnd.android.cursor.dir}) from a content provider that holds
+Note Pad data ({@code vnd.google.note}).  The Intent object that launches
+the activity would include a {@code content:} URI specifying the exact 
+data of this type that the activity should open.
+</p>
+
+<p>
+Note also the {@code DEFAULT} category supplied in this filter.  It's
+there because the <code>{@link android.content.Context#startActivity  
+Context.startActivity()}</code> and 
+<code>{@link android.app.Activity#startActivityForResult  
+Activity.startActivityForResult()}</code> methods treat all intents 
+as if they contained the {@code DEFAULT} category &mdash; with just
+two exceptions:
+</p>
+
+<ul>
+<li>Intents that explicitly name the target activity</li>
+<li>Intents consisting of the {@code MAIN} action and {@code LAUNCHER} 
+category</li>
+</ul>
+
+<p>
+Therefore, the {@code DEFAULT} category is <em>required</em> for all 
+filters &mdash; except for those with the {@code MAIN} action and 
+{@code LAUNCHER} category.  (Intent filters are not consulted for
+explicit intents.)  
+</p></li>
+
+<li><pre>&lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.GET_CONTENT" /&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;data android:mimeType="vnd.android.cursor.item/vnd.google.note" /&gt;
+&lt;/intent-filter&gt;</pre>
+
+<p>
+This filter describes the activity's ability to return a note selected by
+the user without requiring any specification of the directory the user should 
+choose from.  The {@code GET_CONTENT} action is similar to the {@code PICK} 
+action.  In both cases, the activity returns the URI for a note selected by 
+the user.  (In each case, it's returned to the activity that called
+<code>{@link android.app.Activity#startActivityForResult 
+startActivityForResult()}</code> to start the NoteList activity.)  Here, 
+however, the caller specifies the type of data desired instead of the 
+directory of data the user will be picking from.
+</p>
+
+<p>
+The data type, <code>vnd.android.cursor.item/vnd.google.note</code>, 
+indicates the type of data the activity can return &mdash; a URI for 
+a single note.  From the returned URI, the caller can get a Cursor for 
+exactly one item ({@code vnd.android.cursor.item}) from the content 
+provider that holds Note Pad data ({@code vnd.google.note}).
+</p>
+
+<p>
+In other words, for the {@code PICK} action in the previous filter, 
+the data type indicates the type of data the activity could display to the 
+user.  For the {@code GET_CONTENT} filter, it indicates the type of data 
+the activity can return to the caller.
+</p></li>
+</ol>
+
+<p>
+Given these capabilities, the following intents will resolve to the
+NotesList activity:
+</p>
+
+<dl style="margin-left: 2em">
+<dt>action: <code>android.intent.action.MAIN</code></dt>
+<dd>Launches the activity with no data specified.</dd>
+
+<dt>action: <code>android.intent.action.MAIN</code>
+<br/>category: <code>android.intent.category.LAUNCHER</code></dt>
+<dd> Launches the activity with no data selected specified. 
+This is the actual intent used by the Launcher to populate its top-level 
+list.  All activities with filters that match this action and category
+are added to the list.</dd>
+
+<dt>action: <code>android.intent.action.VIEW</code>
+<br/>data: <code>content://com.google.provider.NotePad/notes</code></dt>
+<dd>Asks the activity to display a list of all the notes under
+<code>content://com.google.provider.NotePad/notes</code>.  The user can then 
+browse through the list and get information about the items in it.</dd>
+
+<dt>action: <code>android.intent.action.PICK</code>
+<br/>data: <code>content://com.google.provider.NotePad/notes</code></dt>
+<dd>Asks the activity to display a list of the notes under
+<code>content://com.google.provider.NotePad/notes</code>.
+The user can then pick a note from the list, and the activity will return 
+the URI for that item back to the activity that started the NoteList activity.</dd>
+
+<dt>action: <code>android.intent.action.GET_CONTENT</code>
+<br/>data type: <code>vnd.android.cursor.item/vnd.google.note</code></dt>
+<dd>Asks the activity to supply a single item of Note Pad data.</dd>
+</dl>
+
+<p>
+The second activity, NoteEditor, shows 
+users a single note entry and allows them to edit it.  It can do two things 
+as described by its two intent filters:
+
+<ol>
+<li><pre>&lt;intent-filter android:label="@string/resolve_edit"&gt;
+    &lt;action android:name="android.intent.action.VIEW" /&gt;
+    &lt;action android:name="android.intent.action.EDIT" /&gt;
+    &lt;action android:name="com.android.notepad.action.EDIT_NOTE" /&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;data android:mimeType="vnd.android.cursor.item/vnd.google.note" /&gt;
+&lt;/intent-filter&gt;</pre>
+
+<p>
+The first, primary, purpose of this activity is to enable the user to 
+interact with a single note &mdash to either {@code VIEW} the note or 
+{@code EDIT} it.  (The {@code EDIT_NOTE} category is a synonym for 
+{@code EDIT}.)  The intent would contain the URI for data matching the 
+MIME type <code>vnd.android.cursor.item/vnd.google.note</code> &mdash;
+that is, the URI for a single, specific note.  It would typically be a 
+URI that was returned by the {@code PICK} or {@code GET_CONTENT} 
+actions of the NoteList activity.
+</p>
+
+<p>
+As before, this filter lists the {@code DEFAULT} category so that the 
+activity can be launched by intents that don't explicitly specify the
+NoteEditor class.
+</p></li>
+
+<li><pre>&lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.INSERT" /&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;data android:mimeType="vnd.android.cursor.dir/vnd.google.note" /&gt;
+&lt;/intent-filter&gt;</pre>
+
+<p>
+The secondary purpose of this activity is to enable the user to create a new 
+note, which it will {@code INSERT} into an existing directory of notes.  The 
+intent would contain the URI for data matching the MIME type
+<code>vnd.android.cursor.dir/vnd.google.note</code> &mdash; that 
+is, the URI for the directory where the note should be placed.
+</p></li>  
+</ol>
+
+<p>
+Given these capabilities, the following intents will resolve to the
+NoteEditor activity:
+</p>
+
+<dl style:"margin-left: 2em">
+<dt>action: <code>android.intent.action.VIEW</code>
+<br/>data: <code>content://com.google.provider.NotePad/notes/<var>ID</var></code></dt>
+<dd>Asks the activity to display the content of the note identified 
+by {@code <var>ID</var>}. (For details on how {@code content:} URIs
+specify individual members of a group, see 
+<a href="{@docRoot}guide/topics/provider/content-providers.html">Content Providers</a>.)
+
+<dt>action: <code>android.intent.action.EDIT</code>
+<br/>data: <code>content://com.google.provider.NotePad/notes/<var>ID</var></code></dt>
+<dd>Asks the activity to display the content of the note identified 
+by {@code <var>ID</var>}, and to let the user edit it.  If the user 
+saves the changes, the activity updates the data for the note in the 
+content provider.</dd>
+
+<dt>action: <code>android.intent.action.INSERT</code>
+<br/>data: <code>content://com.google.provider.NotePad/notes</code></dt>
+<dd>Asks the activity to create a new, empty note in the notes list at
+<code>content://com.google.provider.NotePad/notes</code>
+and allow the user to edit it.  If the user saves the note, its URI
+is returned to the caller.
+</dd>
+</dl>
+
+<p>The last activity, TitleEditor, 
+enables the user to edit the title of a note.  This could be implemented 
+by directly invoking the activity (by explicitly setting its component 
+name in the Intent), without using an intent filter.  But here we take 
+the opportunity to show how to publish alternative operations on existing 
+data:
+</p>
+
+<pre>&lt;intent-filter android:label="@string/resolve_title"&gt;
+    &lt;action android:name="com.android.notepad.action.EDIT_TITLE" /&gt;
+    &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;category android:name="android.intent.category.ALTERNATIVE" /&gt;
+    &lt;category android:name="android.intent.category.SELECTED_ALTERNATIVE" /&gt;
+    &lt;data android:mimeType="vnd.android.cursor.item/vnd.google.note" /&gt;
+&lt;/intent-filter&gt;</pre>
+
+<p>
+The single intent filter for this activity uses a custom action called
+"<code>com.android.notepad.action.EDIT_TITLE</code>".  It must be invoked on
+a specific note (data type <code>vnd.android.cursor.item/vnd.google.note</code>),
+like the previous {@code VIEW} and {@code EDIT} actions.  However, here the 
+activity displays the title contained in the note data, not the content of 
+the note itself.
+</p>
+
+<p>
+In addition to supporting the usual {@code DEFAULT} category, the title 
+editor also supports two other standard categories: 
+<code>{@link android.content.Intent#CATEGORY_ALTERNATIVE ALTERNATIVE}</code>
+and <code>{@link android.content.Intent#CATEGORY_SELECTED_ALTERNATIVE 
+SELECTED_ALTERNATIVE}</code>.
+These categories identify activities that can be presented to users in 
+a menu of options (much as the {@code LAUNCHER} category identifies 
+activities that should be presented to user in the application launcher).  
+Note that the filter also supplies an explicit label (via 
+<code>android:label="@string/resolve_title"</code>) to better control
+what users see when presented with this activity as an alternative
+action to the data they are currently viewing.  (For more information 
+on these categories and building options menus, see the 
+<code>{@link android.content.pm.PackageManager#queryIntentActivityOptions 
+PackageManager.queryIntentActivityOptions()}</code> and 
+<code>{@link android.view.Menu#addIntentOptions Menu.addIntentOptions()}</code>
+methods.)
+</p>
+
+<p>
+Given these capabilities, the following intent will resolve to the
+TitleEditor activity:
+</p>
+
+<dl style="margin-left: 2em">
+<dt>action: <code>com.android.notepad.action.EDIT_TITLE</code>
+<br/>data: <code>content://com.google.provider.NotePad/notes/<var>ID</var></code></dt>
+<dd>Asks the activity to display the title associated with note <var>ID</var>, and 
+allow the user to edit the title.</dd>
+</dl>
 
 
 
