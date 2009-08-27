@@ -20,6 +20,7 @@
 #include <media/IAudioPolicyService.h>
 #include <hardware_legacy/AudioPolicyInterface.h>
 #include <media/ToneGenerator.h>
+#include <utils/Vector.h>
 
 namespace android {
 
@@ -98,9 +99,9 @@ public:
                                     uint32_t *pChannels,
                                     uint32_t acoustics);
     virtual status_t closeInput(audio_io_handle_t input);
-    virtual status_t setStreamVolume(AudioSystem::stream_type stream, float volume, audio_io_handle_t output);
+    virtual status_t setStreamVolume(AudioSystem::stream_type stream, float volume, audio_io_handle_t output, int delayMs = 0);
     virtual status_t setStreamOutput(AudioSystem::stream_type stream, audio_io_handle_t output);
-    virtual void setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs);
+    virtual void setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs, int delayMs = 0);
     virtual String8 getParameters(audio_io_handle_t ioHandle, const String8& keys);
     virtual status_t startTone(ToneGenerator::tone_type tone, AudioSystem::stream_type stream);
     virtual status_t stopTone();
@@ -116,6 +117,7 @@ private:
     // For audio config commands, it is necessary because audio flinger requires that the calling process (user)
     // has permission to modify audio settings.
     class AudioCommandThread : public Thread {
+        class AudioCommand;
     public:
 
         // commands for tone AudioCommand
@@ -136,15 +138,20 @@ private:
                     void        exit();
                     void        startToneCommand(int type = 0, int stream = 0);
                     void        stopToneCommand();
-                    status_t    volumeCommand(int stream, float volume, int output);
-                    status_t    parametersCommand(int ioHandle, const String8& keyValuePairs);
+                    status_t    volumeCommand(int stream, float volume, int output, int delayMs = 0);
+                    status_t    parametersCommand(int ioHandle, const String8& keyValuePairs, int delayMs = 0);
+                    void        insertCommand_l(AudioCommand *command, int delayMs = 0);
 
     private:
         // descriptor for requested tone playback event
         class AudioCommand {
         public:
             int mCommand;   // START_TONE, STOP_TONE ...
-            void *mParam;
+            nsecs_t mTime;  // time stamp
+            Condition mCond; // condition for status return
+            status_t mStatus; // command status
+            bool mWaitStatus; // true if caller is waiting for status
+            void *mParam;     // command parameter (ToneData, VolumeData, ParametersData)
         };
 
         class ToneData {
@@ -168,9 +175,7 @@ private:
 
         Mutex   mLock;
         Condition mWaitWorkCV;
-        Vector<AudioCommand *> mAudioCommands;    // list of pending tone events
-        Condition              mCommandCond;
-        status_t               mCommandStatus;
+        Vector <AudioCommand *> mAudioCommands; // list of pending commands
         ToneGenerator *mpToneGenerator;     // the tone generator
     };
 
@@ -182,7 +187,7 @@ private:
                         // connection stated our routing
     AudioPolicyInterface* mpPolicyManager;          // the platform specific policy manager
     sp <AudioCommandThread> mAudioCommandThread;    // audio commands thread
-    sp <AudioCommandThread> mTonePlaybacThread;     // tone playback thread
+    sp <AudioCommandThread> mTonePlaybackThread;     // tone playback thread
 };
 
 }; // namespace android
