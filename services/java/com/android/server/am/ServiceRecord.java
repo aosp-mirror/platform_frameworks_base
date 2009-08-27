@@ -88,22 +88,23 @@ class ServiceRecord extends Binder {
         if (permission != null) {
             pw.print(prefix); pw.print("permission="); pw.println(permission);
         }
+        long now = SystemClock.uptimeMillis();
         pw.print(prefix); pw.print("baseDir="); pw.print(baseDir);
                 if (!resDir.equals(baseDir)) pw.print(" resDir="); pw.print(resDir);
                 pw.print(" dataDir="); pw.println(dataDir);
         pw.print(prefix); pw.print("app="); pw.println(app);
         pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
-                pw.print(" lastActivity="); pw.println(lastActivity);
+                pw.print(" lastActivity="); pw.println(lastActivity-now);
         pw.print(prefix); pw.print("startRequested="); pw.print(startRequested);
                 pw.print(" startId="); pw.print(lastStartId);
                 pw.print(" executeNesting="); pw.print(executeNesting);
-                pw.print(" executingStart="); pw.print(executingStart);
+                pw.print(" executingStart="); pw.print(executingStart-now);
                 pw.print(" crashCount="); pw.println(crashCount);
         pw.print(prefix); pw.print("totalRestartCount="); pw.print(totalRestartCount);
                 pw.print(" restartCount="); pw.print(restartCount);
                 pw.print(" restartDelay="); pw.print(restartDelay);
-                pw.print(" restartTime="); pw.print(restartTime);
-                pw.print(" nextRestartTime="); pw.println(nextRestartTime);
+                pw.print(" restartTime="); pw.print(restartTime-now);
+                pw.print(" nextRestartTime="); pw.println(nextRestartTime-now);
         if (bindings.size() > 0) {
             Iterator<IntentBindRecord> it = bindings.values().iterator();
             while (it.hasNext()) {

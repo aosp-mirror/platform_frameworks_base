@@ -19,7 +19,6 @@ package com.android.server;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.status.StatusBarService;
 
-import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
 
 import android.app.ActivityManagerNative;
@@ -32,7 +31,6 @@ import android.content.pm.IPackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.media.AudioService;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -45,9 +43,6 @@ import android.server.BluetoothDeviceService;
 import android.server.search.SearchManagerService;
 import android.util.EventLog;
 import android.util.Log;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 class ServerThread extends Thread {
     private static final String TAG = "SystemServer";
