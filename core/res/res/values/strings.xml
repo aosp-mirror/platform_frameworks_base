@@ -1541,11 +1541,11 @@
     </plurals>
 
     <!-- String used to display the date. Preposition for date display ("on May 29") -->
-    <string name="preposition_for_date">on %s</string>
+    <string name="preposition_for_date">on <xliff:g id="date" example="May 29">%s</xliff:g></string>
     <!-- String used to display the date. Preposition for time display ("at 2:33am") -->
-    <string name="preposition_for_time">at %s</string>
+    <string name="preposition_for_time">at <xliff:g id="time" example="2:33 am">%s</xliff:g></string>
     <!-- String used to display the date. Preposition for year display ("in 2008") -->
-    <string name="preposition_for_year">in %s</string>
+    <string name="preposition_for_year">in <xliff:g id="year" example="2003">%s</xliff:g></string>
 
     <!-- Appened to express the value is this unit of time: singular day -->
     <string name="day">day</string>
@@ -1658,7 +1658,7 @@
 
     <!-- Item on EditText context menu, used to add a word to the
          input method dictionary. -->
-    <string name="addToDictionary">"Add \"%s\" to dictionary</string>
+    <string name="addToDictionary">"Add \"<xliff:g id="word" example="rickroll">%s</xliff:g>\" to dictionary</string>
 
     <!-- Title for EditText context menu -->
     <string name="editTextMenuTitle">Edit text</string>
@@ -1950,18 +1950,18 @@
      <string name="accessibility_compound_button_unselected">not checked</string>
 
      <string name="grant_credentials_permission_message_desc">The
-     listed applications are requesting permission to access the login credentials for account %s from
-     %s. Do you wish to grant this permission? If so then your answer will be remembered and you will not be prompted
+     listed applications are requesting permission to access the login credentials for account <xliff:g id="account" example="foo@gmail.com">%1$s</xliff:g> from
+     <xliff:g id="application" example="Google Apps">%2$s</xliff:g>. Do you wish to grant this permission? If so, your answer will be remembered and you will not be prompted
      again.</string>
 
      <string name="grant_credentials_permission_message_with_authtokenlabel_desc">The
-     listed applications are requesting permission to access the %s login credentials for account %s from
-     %s. Do you wish to grant this permission? If so then your answer will be remembered and you will not be prompted
+     listed applications are requesting permission to access the <xliff:g id="type" example="Contacts">%1$s</xliff:g> login credentials for account <xliff:g id="account" example="foo@gmail.com">%2$s</xliff:g> from
+     <xliff:g id="application" example="Google Apps">%3$s</xliff:g>. Do you wish to grant this permission? If so, your answer will be remembered and you will not be prompted
      again.</string>
 
      <string name="allow">Allow</string>
      <string name="deny">Deny</string>
      <string name="permission_request_notification_title">Permission Requested</string>
-     <string name="permission_request_notification_subtitle">for account %s</string>
+     <string name="permission_request_notification_subtitle">for account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g></string>
 
 </resources>
