@@ -211,8 +211,10 @@ public abstract class AccessibilityService extends Service {
             switch (message.what) {
                 case DO_ON_ACCESSIBILITY_EVENT :
                     AccessibilityEvent event = (AccessibilityEvent) message.obj;
-                    mTarget.onAccessibilityEvent(event);
-                    event.recycle();
+                    if (event != null){
+                      mTarget.onAccessibilityEvent(event);
+                      event.recycle();
+                    }
                     return;
                 case DO_ON_INTERRUPT :
                     mTarget.onInterrupt();
