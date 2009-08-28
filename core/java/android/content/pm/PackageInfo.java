@@ -127,6 +127,11 @@ public class PackageInfo implements Parcelable {
      */
     public ConfigurationInfo[] configPreferences;
 
+    /**
+     * The features that this application has said it requires.
+     */
+    public FeatureInfo[] reqFeatures;
+    
     public PackageInfo() {
     }
 
@@ -162,6 +167,7 @@ public class PackageInfo implements Parcelable {
         dest.writeStringArray(requestedPermissions);
         dest.writeTypedArray(signatures, parcelableFlags);
         dest.writeTypedArray(configPreferences, parcelableFlags);
+        dest.writeTypedArray(reqFeatures, parcelableFlags);
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -195,5 +201,6 @@ public class PackageInfo implements Parcelable {
         requestedPermissions = source.createStringArray();
         signatures = source.createTypedArray(Signature.CREATOR);
         configPreferences = source.createTypedArray(ConfigurationInfo.CREATOR);
+        reqFeatures = source.createTypedArray(FeatureInfo.CREATOR);
     }
 }

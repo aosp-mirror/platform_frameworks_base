@@ -730,8 +730,6 @@ int doDump(Bundle* bundle)
                     } else if (tag == "uses-permission") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
                         if (error == "") {
-                            int opt = getIntegerAttribute(tree,
-                                    REQUIRED_ATTR, NULL, 1);
                             if (name == "android.permission.CAMERA") {
                                 hasCameraPermission = true;
                             }
@@ -772,7 +770,10 @@ int doDump(Bundle* bundle)
                             fprintf(stderr, "ERROR getting 'android:name' attribute for uses-library: %s\n", error.string());
                             goto bail;
                         }
-                        printf("uses-library:'%s'\n", libraryName.string());
+                        int req = getIntegerAttribute(tree,
+                                REQUIRED_ATTR, NULL, 1);
+                        printf("uses-library%s:'%s'\n",
+                                req ? "" : "-not-required", libraryName.string());
                     } else if (tag == "receiver") {
                         withinReceiver = true;
                         receiverName = getAttribute(tree, NAME_ATTR, &error);

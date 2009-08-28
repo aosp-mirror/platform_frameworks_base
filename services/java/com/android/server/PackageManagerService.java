@@ -35,6 +35,7 @@ import android.content.IntentSender.SendIntentException;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
@@ -88,6 +89,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -220,6 +222,14 @@ class PackageManagerService extends IPackageManager.Stub {
     // These are the built-in shared libraries that were read from the
     // etc/permissions.xml file.
     final HashMap<String, String> mSharedLibraries = new HashMap<String, String>();
+    
+    // Temporary for building the final shared libraries for an .apk.
+    String[] mTmpSharedLibraries = null;
+    
+    // These are the features this devices supports that were read from the
+    // etc/permissions.xml file.
+    final HashMap<String, FeatureInfo> mAvailableFeatures =
+            new HashMap<String, FeatureInfo>();
     
     // All available activities, for your resolving pleasure.
     final ActivityIntentResolver mActivities =
@@ -671,7 +681,21 @@ class PackageManagerService extends IPackageManager.Stub {
                                 + parser.getPositionDescription());
                     } else {
                         Log.i(TAG, "Got library " + lname + " in " + lfile);
-                        this.mSharedLibraries.put(lname, lfile);
+                        mSharedLibraries.put(lname, lfile);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+                    
+                } else if ("feature".equals(name)) {
+                    String fname = parser.getAttributeValue(null, "name");
+                    if (fname == null) {
+                        Log.w(TAG, "<feature> without name at "
+                                + parser.getPositionDescription());
+                    } else {
+                        Log.i(TAG, "Got feature " + fname);
+                        FeatureInfo fi = new FeatureInfo();
+                        fi.name = fname;
+                        mAvailableFeatures.put(fname, fi);
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
@@ -1001,12 +1025,30 @@ class PackageManagerService extends IPackageManager.Stub {
         Set<String> libSet;
         synchronized (mPackages) {
             libSet = mSharedLibraries.keySet();
+            int size = libSet.size();
+            if (size > 0) {
+                String[] libs = new String[size];
+                libSet.toArray(libs);
+                return libs;
+            }
         }
-        int size = libSet.size();
-        if (size > 0) {
-            String[] libs = new String[size];
-            libSet.toArray(libs);
-            return libs;
+        return null;
+    }
+
+    public FeatureInfo[] getSystemAvailableFeatures() {
+        Collection<FeatureInfo> featSet;
+        synchronized (mPackages) {
+            featSet = mAvailableFeatures.values();
+            int size = featSet.size();
+            if (size > 0) {
+                FeatureInfo[] features = new FeatureInfo[size+1];
+                featSet.toArray(features);
+                FeatureInfo fi = new FeatureInfo();
+                fi.reqGlEsVersion = SystemProperties.getInt("ro.opengles.version",
+                        FeatureInfo.GL_ES_VERSION_UNDEFINED);
+                features[size] = fi;
+                return features;
+            }
         }
         return null;
     }
@@ -2065,17 +2107,62 @@ class PackageManagerService extends IPackageManager.Stub {
         
         synchronized (mPackages) {
             // Check all shared libraries and map to their actual file path.
-            if (pkg.usesLibraryFiles != null) {
-                for (int i=0; i<pkg.usesLibraryFiles.length; i++) {
-                    String file = mSharedLibraries.get(pkg.usesLibraryFiles[i]);
+            if (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null) {
+                if (mTmpSharedLibraries == null ||
+                        mTmpSharedLibraries.length < mSharedLibraries.size()) {
+                    mTmpSharedLibraries = new String[mSharedLibraries.size()];
+                }
+                int num = 0;
+                int N = pkg.usesLibraries != null ? pkg.usesLibraries.size() : 0;
+                for (int i=0; i<N; i++) {
+                    String file = mSharedLibraries.get(pkg.usesLibraries.get(i));
                     if (file == null) {
                         Log.e(TAG, "Package " + pkg.packageName
                                 + " requires unavailable shared library "
-                                + pkg.usesLibraryFiles[i] + "; ignoring!");
+                                + pkg.usesLibraries.get(i) + "; failing!");
                         mLastScanError = PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
                         return null;
                     }
-                    pkg.usesLibraryFiles[i] = file;
+                    mTmpSharedLibraries[num] = file;
+                    num++;
+                }
+                N = pkg.usesOptionalLibraries != null ? pkg.usesOptionalLibraries.size() : 0;
+                for (int i=0; i<N; i++) {
+                    String file = mSharedLibraries.get(pkg.usesOptionalLibraries.get(i));
+                    if (file == null) {
+                        Log.w(TAG, "Package " + pkg.packageName
+                                + " desires unavailable shared library "
+                                + pkg.usesOptionalLibraries.get(i) + "; ignoring!");
+                    } else {
+                        mTmpSharedLibraries[num] = file;
+                        num++;
+                    }
+                }
+                if (num > 0) {
+                    pkg.usesLibraryFiles = new String[num];
+                    System.arraycopy(mTmpSharedLibraries, 0,
+                            pkg.usesLibraryFiles, 0, num);
+                }
+                
+                if (pkg.reqFeatures != null) {
+                    N = pkg.reqFeatures.size();
+                    for (int i=0; i<N; i++) {
+                        FeatureInfo fi = pkg.reqFeatures.get(i);
+                        if ((fi.flags&FeatureInfo.FLAG_REQUIRED) == 0) {
+                            // Don't care.
+                            continue;
+                        }
+                        
+                        if (fi.name != null) {
+                            if (mAvailableFeatures.get(fi.name) == null) {
+                                Log.e(TAG, "Package " + pkg.packageName
+                                        + " requires unavailable feature "
+                                        + fi.name + "; failing!");
+                                mLastScanError = PackageManager.INSTALL_FAILED_MISSING_FEATURE;
+                                return null;
+                            }
+                        }
+                    }
                 }
             }
             

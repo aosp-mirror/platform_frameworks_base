@@ -22,6 +22,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstallObserver;
@@ -420,6 +421,11 @@ public class MockPackageManager extends PackageManager {
     
     @Override
     public String[] getSystemSharedLibraryNames() {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public FeatureInfo[] getSystemAvailableFeatures() {
         throw new UnsupportedOperationException();
     }
     
