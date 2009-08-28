@@ -33,6 +33,7 @@ import android.preference.PreferenceManager;
 import android.util.Config;
 import android.util.Log;
 import android.telephony.SmsManager;
+import android.telephony.SmsMessage.MessageClass;
 
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.CommandsInterface;
@@ -91,23 +92,8 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         int teleService = sms.getTeleService();
         boolean handled = false;
 
-        if ((sms.getUserData() == null) && (SmsEnvelope.TELESERVICE_MWI != teleService) &&
-            (SmsEnvelope.TELESERVICE_VMN != teleService)) {
-            if (Config.LOGD) {
-                Log.d(TAG, "Received SMS without user data");
-            }
-            handled = true;
-        }
-
-        if (handled) {
-            return Intents.RESULT_SMS_HANDLED;
-        }
-
-        if (SmsEnvelope.TELESERVICE_WAP == teleService) {
-            return processCdmaWapPdu(sms.getUserData(), sms.messageRef,
-                    sms.getOriginatingAddress());
-        } else if ((SmsEnvelope.TELESERVICE_VMN == teleService) ||
-                   (SmsEnvelope.TELESERVICE_MWI == teleService)) {
+        if ((SmsEnvelope.TELESERVICE_VMN == teleService) ||
+                (SmsEnvelope.TELESERVICE_MWI == teleService)) {
             // handling Voicemail
             int voicemailCount = sms.getNumOfVoicemails();
             Log.d(TAG, "Voicemail count=" + voicemailCount);
@@ -118,7 +104,28 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             editor.putInt(CDMAPhone.VM_COUNT_CDMA, voicemailCount);
             editor.commit();
             ((CDMAPhone) mPhone).updateMessageWaitingIndicator(voicemailCount);
+            handled = true;
+        } else if ((sms.getUserData() == null)) {
+            if (Config.LOGD) {
+                Log.d(TAG, "Received SMS without user data");
+            }
+            handled = true;
+        }
+
+        if (handled) {
             return Intents.RESULT_SMS_HANDLED;
+        }
+
+        if (!mStorageAvailable && (sms.getMessageClass() != MessageClass.CLASS_0)) {
+            // It's a storable message and there's no storage available.  Bail.
+            // (See C.S0015-B v2.0 for a description of "Immediate Display"
+            // messages, which we represent as CLASS_0.)
+            return Intents.RESULT_SMS_OUT_OF_MEMORY;
+        }
+
+        if (SmsEnvelope.TELESERVICE_WAP == teleService) {
+            return processCdmaWapPdu(sms.getUserData(), sms.messageRef,
+                    sms.getOriginatingAddress());
         }
 
         /**
