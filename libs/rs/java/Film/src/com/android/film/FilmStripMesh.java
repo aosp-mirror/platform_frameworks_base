@@ -22,6 +22,7 @@ import java.lang.Math;
 import android.util.Log;
 
 import android.renderscript.RenderScript;
+import android.renderscript.SimpleMesh;
 
 
 class FilmStripMesh {
@@ -72,19 +73,15 @@ class FilmStripMesh {
             dx /= len;
             dy /= len;
             dz /= len;
-        
+
             nx = dx * dz;
             ny = dy * dz;
             nz = (float)java.lang.Math.sqrt(dx*dx + dy*dy);
-        
+
             len = (float)java.lang.Math.sqrt(nx*nx + ny*ny + nz*nz);
             nx /= len;
             ny /= len;
             nz /= len;
-        }
-
-        void addToRS(RenderScript rs) {
-            rs.triangleMeshAddVertex_XYZ_ST_NORM(x, y, z, s, t, nx, ny, nz);
         }
     }
 
@@ -92,7 +89,7 @@ class FilmStripMesh {
     float[] mTriangleOffsetsTex;
     int mTriangleOffsetsCount;
 
-    void init(RenderScript rs)
+    SimpleMesh init(RenderScript rs)
     {
         float vtx[] = new float[] {
             60.431003f, 124.482050f,
@@ -203,17 +200,19 @@ class FilmStripMesh {
              -60.862074f, 120.872604f,
              -60.431003f, 124.482050f
         };
-    
-    
+
+
         mTriangleOffsets = new int[64];
         mTriangleOffsetsTex = new float[64];
-    
+
         mTriangleOffsets[0] = 0;
         mTriangleOffsetsCount = 1;
 
         Vertex t = new Vertex();
         t.nxyz(1, 0, 0);
         int count = vtx.length / 2;
+
+        SimpleMesh.TriangleMeshBuilder tm = new SimpleMesh.TriangleMeshBuilder(rs, 3, true, true);
 
         float runningS = 0;
         for (int ct=0; ct < (count-1); ct++) {
@@ -228,16 +227,15 @@ class FilmStripMesh {
             t.ny /= len;
             t.y = -0.5f;
             t.t = 0;
-            //Log.e("xx", "vtx " + t.x + "  " + t.y + "  " + t.z);
-            t.addToRS(rs);
+            tm.add_XYZ_ST_NORM(t.x, t.y, t.z, t.s, t.t, t.nx, t.ny, t.nz);
+            //android.util.Log.e("rs", "vtx x="+t.x+" y="+t.y+" z="+t.z+" s="+t.s+" t="+t.t);
             t.y = .5f;
             t.t = 1;
-            t.addToRS(rs);
+            tm.add_XYZ_ST_NORM(t.x, t.y, t.z, t.s, t.t, t.nx, t.ny, t.nz);
+            //android.util.Log.e("rs", "vtx x="+t.x+" y="+t.y+" z="+t.z+" s="+t.s+" t="+t.t);
 
-            //LOGE(" %f", runningS);
             if((runningS*2) > mTriangleOffsetsCount) {
-                //LOGE("**** img %i  %i", gTriangleOffsetsCount, ct*2);
-                mTriangleOffsets[mTriangleOffsetsCount] = ct*2;
+                mTriangleOffsets[mTriangleOffsetsCount] = ct*2 * 3;
                 mTriangleOffsetsTex[mTriangleOffsetsCount] = t.s;
                 mTriangleOffsetsCount ++;
             }
@@ -245,9 +243,10 @@ class FilmStripMesh {
 
         count = (count * 2 - 2);
         for (int ct=0; ct < (count-2); ct+= 2) {
-            rs.triangleMeshAddTriangle(ct, ct+1, ct+2);
-            rs.triangleMeshAddTriangle(ct+1, ct+3, ct+2);
+            tm.addTriangle(ct, ct+1, ct+2);
+            tm.addTriangle(ct+1, ct+3, ct+2);
         }
+        return tm.create();
     }
 
 

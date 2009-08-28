@@ -70,7 +70,7 @@ static void
 nAssignName(JNIEnv *_env, jobject _this, jint obj, jbyteArray str)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nAssignName, con(%p), obj(%p)", con, obj);
+    LOG_API("nAssignName, con(%p), obj(%p)", con, (void *)obj);
 
     jint len = _env->GetArrayLength(str);
     jbyte * cptr = (jbyte *) _env->GetPrimitiveArrayCritical(str, 0);
@@ -345,6 +345,14 @@ nAllocationUploadToTexture(JNIEnv *_env, jobject _this, jint a, jint mip)
     rsAllocationUploadToTexture(con, (RsAllocation)a, mip);
 }
 
+static void
+nAllocationUploadToBufferObject(JNIEnv *_env, jobject _this, jint a)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nAllocationUploadToBufferObject, con(%p), a(%p)", con, (RsAllocation)a);
+    rsAllocationUploadToBufferObject(con, (RsAllocation)a);
+}
+
 static RsElementPredefined SkBitmapToPredefined(SkBitmap::Config cfg)
 {
     switch (cfg) {
@@ -413,68 +421,68 @@ nAllocationCreateFromBitmapBoxed(JNIEnv *_env, jobject _this, jint dstFmt, jbool
 
 
 static void
-nAllocationData_i(JNIEnv *_env, jobject _this, jint alloc, jintArray data)
+nAllocationData_i(JNIEnv *_env, jobject _this, jint alloc, jintArray data, int sizeBytes)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationData_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAllocationData(con, (RsAllocation)alloc, ptr);
+    rsAllocationData(con, (RsAllocation)alloc, ptr, sizeBytes);
     _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
 }
 
 static void
-nAllocationData_f(JNIEnv *_env, jobject _this, jint alloc, jfloatArray data)
+nAllocationData_f(JNIEnv *_env, jobject _this, jint alloc, jfloatArray data, int sizeBytes)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationData_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAllocationData(con, (RsAllocation)alloc, ptr);
+    rsAllocationData(con, (RsAllocation)alloc, ptr, sizeBytes);
     _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
 }
 
 static void
-nAllocationSubData1D_i(JNIEnv *_env, jobject _this, jint alloc, jint offset, jint count, jintArray data)
+nAllocationSubData1D_i(JNIEnv *_env, jobject _this, jint alloc, jint offset, jint count, jintArray data, int sizeBytes)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation1DSubData_i, con(%p), adapter(%p), offset(%i), count(%i), len(%i)", con, (RsAllocation)alloc, offset, count, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAllocation1DSubData(con, (RsAllocation)alloc, offset, count, ptr);
+    rsAllocation1DSubData(con, (RsAllocation)alloc, offset, count, ptr, sizeBytes);
     _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
 }
 
 static void
-nAllocationSubData1D_f(JNIEnv *_env, jobject _this, jint alloc, jint offset, jint count, jfloatArray data)
+nAllocationSubData1D_f(JNIEnv *_env, jobject _this, jint alloc, jint offset, jint count, jfloatArray data, int sizeBytes)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation1DSubData_f, con(%p), adapter(%p), offset(%i), count(%i), len(%i)", con, (RsAllocation)alloc, offset, count, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAllocation1DSubData(con, (RsAllocation)alloc, offset, count, ptr);
+    rsAllocation1DSubData(con, (RsAllocation)alloc, offset, count, ptr, sizeBytes);
     _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
 }
 
 static void
-nAllocationSubData2D_i(JNIEnv *_env, jobject _this, jint alloc, jint xoff, jint yoff, jint w, jint h, jintArray data)
+nAllocationSubData2D_i(JNIEnv *_env, jobject _this, jint alloc, jint xoff, jint yoff, jint w, jint h, jintArray data, int sizeBytes)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation2DSubData_i, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, w, h, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAllocation2DSubData(con, (RsAllocation)alloc, xoff, yoff, w, h, ptr);
+    rsAllocation2DSubData(con, (RsAllocation)alloc, xoff, yoff, w, h, ptr, sizeBytes);
     _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
 }
 
 static void
-nAllocationSubData2D_f(JNIEnv *_env, jobject _this, jint alloc, jint xoff, jint yoff, jint w, jint h, jfloatArray data)
+nAllocationSubData2D_f(JNIEnv *_env, jobject _this, jint alloc, jint xoff, jint yoff, jint w, jint h, jfloatArray data, int sizeBytes)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocation2DSubData_i, con(%p), adapter(%p), xoff(%i), yoff(%i), w(%i), h(%i), len(%i)", con, (RsAllocation)alloc, xoff, yoff, w, h, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAllocation2DSubData(con, (RsAllocation)alloc, xoff, yoff, w, h, ptr);
+    rsAllocation2DSubData(con, (RsAllocation)alloc, xoff, yoff, w, h, ptr, sizeBytes);
     _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
 }
 
@@ -516,7 +524,7 @@ nAllocationDataFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _type
         const TypeFieldCache *tfc = &tc->fields[ct];
         buf = tfc->ptr(_env, _o, tfc->field, buf);
     }
-    rsAllocationData(con, (RsAllocation)alloc, bufAlloc);
+    rsAllocationData(con, (RsAllocation)alloc, bufAlloc, tc->size);
     const uint32_t * tmp = (const uint32_t *)bufAlloc;
     free(bufAlloc);
 }
@@ -748,7 +756,7 @@ static void
 nScriptSetClearColor(JNIEnv *_env, jobject _this, jint script, jfloat r, jfloat g, jfloat b, jfloat a)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptSetClearColor, con(%p), s(%p), r(%f), g(%f), b(%f), a(%f)", con, script, r, g, b, a);
+    LOG_API("nScriptSetClearColor, con(%p), s(%p), r(%f), g(%f), b(%f), a(%f)", con, (void *)script, r, g, b, a);
     rsScriptSetClearColor(con, (RsScript)script, r, g, b, a);
 }
 
@@ -756,7 +764,7 @@ static void
 nScriptSetClearDepth(JNIEnv *_env, jobject _this, jint script, jfloat d)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCSetClearDepth, con(%p), s(%p), depth(%f)", con, script, d);
+    LOG_API("nScriptCSetClearDepth, con(%p), s(%p), depth(%f)", con, (void *)script, d);
     rsScriptSetClearDepth(con, (RsScript)script, d);
 }
 
@@ -764,7 +772,7 @@ static void
 nScriptSetClearStencil(JNIEnv *_env, jobject _this, jint script, jint stencil)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCSetClearStencil, con(%p), s(%p), stencil(%i)", con, script, stencil);
+    LOG_API("nScriptCSetClearStencil, con(%p), s(%p), stencil(%i)", con, (void *)script, stencil);
     rsScriptSetClearStencil(con, (RsScript)script, stencil);
 }
 
@@ -772,7 +780,7 @@ static void
 nScriptSetTimeZone(JNIEnv *_env, jobject _this, jint script, jbyteArray timeZone)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nScriptCSetTimeZone, con(%p), s(%p), timeZone(%s)", con, script, timeZone);
+    LOG_API("nScriptCSetTimeZone, con(%p), s(%p), timeZone(%s)", con, (void *)script, (const char *)timeZone);
 
     jint length = _env->GetArrayLength(timeZone);
     jbyte* timeZone_ptr;
@@ -1005,7 +1013,7 @@ static void
 nProgramVertexBindAllocation(JNIEnv *_env, jobject _this, jint vpv, jint a)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexBindAllocation, con(%p), vpf(%p), slot(%i), a(%p)", con, (RsProgramVertex)vpv, slot, (RsAllocation)a);
+    LOG_API("nProgramVertexBindAllocation, con(%p), vpf(%p), a(%p)", con, (RsProgramVertex)vpv, (RsAllocation)a);
     rsProgramVertexBindAllocation(con, (RsProgramFragment)vpv, (RsAllocation)a);
 }
 
@@ -1230,14 +1238,15 @@ static JNINativeMethod methods[] = {
 {"nAllocationCreatePredefSized",   "(II)I",                                (void*)nAllocationCreatePredefSized },
 {"nAllocationCreateSized",         "(II)I",                                (void*)nAllocationCreateSized },
 {"nAllocationCreateFromBitmap",    "(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
-{"nAllocationCreateFromBitmapBoxed","(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmapBoxed },
+{"nAllocationCreateFromBitmapBoxed","(IZLandroid/graphics/Bitmap;)I",      (void*)nAllocationCreateFromBitmapBoxed },
 {"nAllocationUploadToTexture",     "(II)V",                                (void*)nAllocationUploadToTexture },
-{"nAllocationData",                "(I[I)V",                               (void*)nAllocationData_i },
-{"nAllocationData",                "(I[F)V",                               (void*)nAllocationData_f },
-{"nAllocationSubData1D",           "(III[I)V",                             (void*)nAllocationSubData1D_i },
-{"nAllocationSubData1D",           "(III[F)V",                             (void*)nAllocationSubData1D_f },
-{"nAllocationSubData2D",           "(IIIII[I)V",                           (void*)nAllocationSubData2D_i },
-{"nAllocationSubData2D",           "(IIIII[F)V",                           (void*)nAllocationSubData2D_f },
+{"nAllocationUploadToBufferObject","(I)V",                                 (void*)nAllocationUploadToBufferObject },
+{"nAllocationData",                "(I[II)V",                              (void*)nAllocationData_i },
+{"nAllocationData",                "(I[FI)V",                              (void*)nAllocationData_f },
+{"nAllocationSubData1D",           "(III[II)V",                            (void*)nAllocationSubData1D_i },
+{"nAllocationSubData1D",           "(III[FI)V",                            (void*)nAllocationSubData1D_f },
+{"nAllocationSubData2D",           "(IIIII[II)V",                          (void*)nAllocationSubData2D_i },
+{"nAllocationSubData2D",           "(IIIII[FI)V",                          (void*)nAllocationSubData2D_f },
 {"nAllocationRead",                "(I[I)V",                               (void*)nAllocationRead_i },
 {"nAllocationRead",                "(I[F)V",                               (void*)nAllocationRead_f },
 {"nAllocationDataFromObject",      "(ILandroid/renderscript/Type;Ljava/lang/Object;)V",   (void*)nAllocationDataFromObject },

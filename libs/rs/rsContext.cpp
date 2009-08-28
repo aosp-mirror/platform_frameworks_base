@@ -45,6 +45,7 @@ void Context::initEGL()
         configAttribsPtr[1] = 16;
         configAttribsPtr += 2;
     }
+
     configAttribsPtr[0] = EGL_NONE;
     rsAssert(configAttribsPtr < (configAttribs + (sizeof(configAttribs) / sizeof(EGLint))));
 
@@ -53,7 +54,7 @@ void Context::initEGL()
 
     status_t err = EGLUtils::selectConfigForNativeWindow(mEGL.mDisplay, configAttribs, mWndSurface, &mEGL.mConfig);
     if (err) {
-     LOGE("couldn't find an EGLConfig matching the screen format\n");
+       LOGE("couldn't find an EGLConfig matching the screen format\n");
     }
     //eglChooseConfig(mEGL.mDisplay, configAttribs, &mEGL.mConfig, 1, &mEGL.mNumConfigs);
 
@@ -76,11 +77,11 @@ void Context::initEGL()
     mGL.mRenderer = glGetString(GL_RENDERER);
     mGL.mExtensions = glGetString(GL_EXTENSIONS);
 
-    //LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
-    //LOGV("GL Version %s", mGL.mVersion);
-    //LOGV("GL Vendor %s", mGL.mVendor);
-    //LOGV("GL Renderer %s", mGL.mRenderer);
-    //LOGV("GL Extensions %s", mGL.mExtensions);
+    LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
+    LOGV("GL Version %s", mGL.mVersion);
+    LOGV("GL Vendor %s", mGL.mVendor);
+    LOGV("GL Renderer %s", mGL.mRenderer);
+    LOGV("GL Extensions %s", mGL.mExtensions);
 
     if ((strlen((const char *)mGL.mVersion) < 12) || memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
         LOGE("Error, OpenGL ES Lite not supported");
@@ -432,7 +433,7 @@ void Context::objDestroyOOBRun()
         }
 
         for (size_t ct = 0; ct < mObjDestroy.mDestroyList.size(); ct++) {
-            mObjDestroy.mDestroyList[ct]->decRef();
+            mObjDestroy.mDestroyList[ct]->decUserRef();
         }
         mObjDestroy.mDestroyList.clear();
         mObjDestroy.mNeedToEmpty = false;
@@ -522,7 +523,7 @@ void rsi_ObjDestroy(Context *rsc, void *obj)
 {
     ObjectBase *ob = static_cast<ObjectBase *>(obj);
     rsc->removeName(ob);
-    ob->decRef();
+    ob->decUserRef();
 }
 
 void rsi_ContextSetDefineF(Context *rsc, const char* name, float value)

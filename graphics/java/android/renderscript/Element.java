@@ -25,30 +25,31 @@ import java.lang.reflect.Field;
 public class Element extends BaseObj {
     final int mPredefinedID;
     final boolean mIsPredefined;
+    final int mSize;
 
-    public static final Element USER_U8 = new Element(0);
-    public static final Element USER_I8 = new Element(1);
-    public static final Element USER_U16 = new Element(2);
-    public static final Element USER_I16 = new Element(3);
-    public static final Element USER_U32 = new Element(4);
-    public static final Element USER_I32 = new Element(5);
-    public static final Element USER_FLOAT = new Element(6);
+    public static final Element USER_U8 = new Element(0, 1);
+    public static final Element USER_I8 = new Element(1, 1);
+    public static final Element USER_U16 = new Element(2, 2);
+    public static final Element USER_I16 = new Element(3, 2);
+    public static final Element USER_U32 = new Element(4, 4);
+    public static final Element USER_I32 = new Element(5, 4);
+    public static final Element USER_FLOAT = new Element(6, 4);
 
-    public static final Element A_8 = new Element(7);
-    public static final Element RGB_565 = new Element(8);
-    public static final Element RGB_888 = new Element(11);
-    public static final Element RGBA_5551 = new Element(9);
-    public static final Element RGBA_4444 = new Element(10);
-    public static final Element RGBA_8888 = new Element(12);
+    public static final Element A_8 = new Element(7, 1);
+    public static final Element RGB_565 = new Element(8, 2);
+    public static final Element RGB_888 = new Element(11, 2);
+    public static final Element RGBA_5551 = new Element(9, 2);
+    public static final Element RGBA_4444 = new Element(10, 2);
+    public static final Element RGBA_8888 = new Element(12, 4);
 
-    public static final Element INDEX_16 = new Element(13);
-    public static final Element INDEX_32 = new Element(14);
-    public static final Element XY_F32 = new Element(15);
-    public static final Element XYZ_F32 = new Element(16);
-    public static final Element ST_XY_F32 = new Element(17);
-    public static final Element ST_XYZ_F32 = new Element(18);
-    public static final Element NORM_XYZ_F32 = new Element(19);
-    public static final Element NORM_ST_XYZ_F32 = new Element(20);
+    public static final Element INDEX_16 = new Element(13, 2);
+    public static final Element INDEX_32 = new Element(14, 2);
+    public static final Element XY_F32 = new Element(15, 8);
+    public static final Element XYZ_F32 = new Element(16, 12);
+    public static final Element ST_XY_F32 = new Element(17, 16);
+    public static final Element ST_XYZ_F32 = new Element(18, 20);
+    public static final Element NORM_XYZ_F32 = new Element(19, 24);
+    public static final Element NORM_ST_XYZ_F32 = new Element(20, 32);
 
     void initPredef(RenderScript rs) {
         mID = rs.nElementGetPredefined(mPredefinedID);
@@ -121,18 +122,20 @@ public class Element extends BaseObj {
     }
 
 
-    Element(int predef) {
+    Element(int predef, int size) {
         super(null);
         mID = 0;
         mPredefinedID = predef;
         mIsPredefined = true;
+        mSize = size;
     }
 
-    Element(int id, RenderScript rs) {
+    Element(int id, RenderScript rs, int size) {
         super(rs);
         mID = id;
         mPredefinedID = 0;
         mIsPredefined = false;
+        mSize = size;
     }
 
     public void destroy() throws IllegalStateException {
@@ -168,6 +171,7 @@ public class Element extends BaseObj {
         RenderScript mRS;
         Entry[] mEntries;
         int mEntryCount;
+        int mSizeBits;
 
         private class Entry {
             Element mElement;
@@ -182,6 +186,7 @@ public class Element extends BaseObj {
             mRS = rs;
             mEntryCount = 0;
             mEntries = new Entry[8];
+            mSizeBits = 0;
         }
 
         void addEntry(Entry e) {
@@ -201,6 +206,7 @@ public class Element extends BaseObj {
             Entry en = new Entry();
             en.mElement = e;
             addEntry(en);
+            mSizeBits += e.mSize * 8;
             return this;
         }
 
@@ -211,6 +217,7 @@ public class Element extends BaseObj {
             en.mIsNormalized = isNormalized;
             en.mBits = bits;
             en.mName = name;
+            mSizeBits += bits;
             addEntry(en);
             return this;
         }
@@ -236,10 +243,23 @@ public class Element extends BaseObj {
             return this;
         }
 
+        public Builder addFloatXY(String prefix) {
+            add(DataType.FLOAT, DataKind.X, false, 32, prefix + "X");
+            add(DataType.FLOAT, DataKind.Y, false, 32, prefix + "Y");
+            return this;
+        }
+
         public Builder addFloatXYZ() {
             add(DataType.FLOAT, DataKind.X, false, 32, null);
             add(DataType.FLOAT, DataKind.Y, false, 32, null);
             add(DataType.FLOAT, DataKind.Z, false, 32, null);
+            return this;
+        }
+
+        public Builder addFloatXYZ(String prefix) {
+            add(DataType.FLOAT, DataKind.X, false, 32, prefix + "X");
+            add(DataType.FLOAT, DataKind.Y, false, 32, prefix + "Y");
+            add(DataType.FLOAT, DataKind.Z, false, 32, prefix + "Z");
             return this;
         }
 
@@ -249,8 +269,33 @@ public class Element extends BaseObj {
             return this;
         }
 
+        public Builder addFloatST(String prefix) {
+            add(DataType.FLOAT, DataKind.S, false, 32, prefix + "S");
+            add(DataType.FLOAT, DataKind.T, false, 32, prefix + "T");
+            return this;
+        }
+
+        public Builder addFloatNorm() {
+            add(DataType.FLOAT, DataKind.NX, false, 32, null);
+            add(DataType.FLOAT, DataKind.NY, false, 32, null);
+            add(DataType.FLOAT, DataKind.NZ, false, 32, null);
+            return this;
+        }
+
+        public Builder addFloatNorm(String prefix) {
+            add(DataType.FLOAT, DataKind.NX, false, 32, prefix + "NX");
+            add(DataType.FLOAT, DataKind.NY, false, 32, prefix + "NY");
+            add(DataType.FLOAT, DataKind.NZ, false, 32, prefix + "NZ");
+            return this;
+        }
+
         public Builder addFloatPointSize() {
             add(DataType.FLOAT, DataKind.POINT_SIZE, false, 32, null);
+            return this;
+        }
+
+        public Builder addFloatPointSize(String name) {
+            add(DataType.FLOAT, DataKind.POINT_SIZE, false, 32, name);
             return this;
         }
 
@@ -258,6 +303,13 @@ public class Element extends BaseObj {
             add(DataType.FLOAT, DataKind.RED, false, 32, null);
             add(DataType.FLOAT, DataKind.GREEN, false, 32, null);
             add(DataType.FLOAT, DataKind.BLUE, false, 32, null);
+            return this;
+        }
+
+        public Builder addFloatRGB(String prefix) {
+            add(DataType.FLOAT, DataKind.RED, false, 32, prefix + "R");
+            add(DataType.FLOAT, DataKind.GREEN, false, 32, prefix + "G");
+            add(DataType.FLOAT, DataKind.BLUE, false, 32, prefix + "B");
             return this;
         }
 
@@ -269,11 +321,27 @@ public class Element extends BaseObj {
             return this;
         }
 
+        public Builder addFloatRGBA(String prefix) {
+            add(DataType.FLOAT, DataKind.RED, false, 32, prefix + "R");
+            add(DataType.FLOAT, DataKind.GREEN, false, 32, prefix + "G");
+            add(DataType.FLOAT, DataKind.BLUE, false, 32, prefix + "B");
+            add(DataType.FLOAT, DataKind.ALPHA, false, 32, prefix + "A");
+            return this;
+        }
+
         public Builder addUNorm8RGBA() {
             add(DataType.UNSIGNED, DataKind.RED, true, 8, null);
             add(DataType.UNSIGNED, DataKind.GREEN, true, 8, null);
             add(DataType.UNSIGNED, DataKind.BLUE, true, 8, null);
             add(DataType.UNSIGNED, DataKind.ALPHA, true, 8, null);
+            return this;
+        }
+
+        public Builder addUNorm8RGBA(String prefix) {
+            add(DataType.UNSIGNED, DataKind.RED, true, 8, prefix + "R");
+            add(DataType.UNSIGNED, DataKind.GREEN, true, 8, prefix + "G");
+            add(DataType.UNSIGNED, DataKind.BLUE, true, 8, prefix + "B");
+            add(DataType.UNSIGNED, DataKind.ALPHA, true, 8, prefix + "A");
             return this;
         }
 
@@ -292,7 +360,7 @@ public class Element extends BaseObj {
                 }
             }
             int id = rs.nElementCreate();
-            return new Element(id, rs);
+            return new Element(id, rs, (b.mSizeBits + 7) >> 3);
         }
 
         public Element create() {

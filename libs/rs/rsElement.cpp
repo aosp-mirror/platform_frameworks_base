@@ -215,7 +215,7 @@ void Element::setComponent(uint32_t idx, Component *c)
     rsAssert(!mComponents[idx].get());
     rsAssert(idx < mComponentCount);
     mComponents[idx].set(c);
-    c->incRef();
+    c->incUserRef();
 }
 
 
@@ -387,7 +387,7 @@ RsElement rsi_ElementGetPredefined(Context *rsc, RsElementPredefined predef)
 
     rsAssert(sec->mPredefinedList[predef].mEnum == predef);
     Element * e = sec->mPredefinedList[predef].mElement;
-    e->incRef();
+    e->incUserRef();
     return e;
 }
 
@@ -412,7 +412,7 @@ RsElement rsi_ElementCreate(Context *rsc)
     }
 
     rsc->mStateElement.mComponentBuildList.clear();
-    se->incRef();
+    se->incUserRef();
     return se;
 }
 

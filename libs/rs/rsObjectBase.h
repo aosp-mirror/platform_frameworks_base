@@ -30,8 +30,11 @@ public:
     ObjectBase();
     virtual ~ObjectBase();
 
-    void incRef() const;
-    void decRef() const;
+    void incSysRef() const;
+    void decSysRef() const;
+
+    void incUserRef() const;
+    void decUserRef() const;
 
     const char * getName() const {
         return mName;
@@ -41,13 +44,14 @@ public:
 
 private:
     char * mName;
-    mutable int32_t mRefCount;
+    mutable int32_t mSysRefCount;
+    mutable int32_t mUserRefCount;
 
 
 };
 
-template<class T> 
-class ObjectBaseRef 
+template<class T>
+class ObjectBaseRef
 {
 public:
     ObjectBaseRef() {
@@ -57,14 +61,14 @@ public:
     ObjectBaseRef(const ObjectBaseRef &ref) {
         mRef = ref.get();
         if (mRef) {
-            mRef->incRef();
+            mRef->incSysRef();
         }
     }
 
     ObjectBaseRef(T *ref) {
         mRef = ref;
         if (mRef) {
-            ref->incRef();
+            ref->incSysRef();
         }
     }
 
@@ -77,7 +81,7 @@ public:
             clear();
             mRef = ref;
             if (mRef) {
-                ref->incRef();
+                ref->incSysRef();
             }
         }
     }
@@ -88,7 +92,7 @@ public:
 
     void clear() {
         if (mRef) {
-            mRef->decRef();
+            mRef->decSysRef();
         }
         mRef = NULL;
     }
@@ -97,8 +101,8 @@ public:
         return mRef;
     }
 
-    inline T * operator-> () const { 
-        return mRef;  
+    inline T * operator-> () const {
+        return mRef;
     }
 
 protected:

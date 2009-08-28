@@ -130,6 +130,9 @@ AllocationUploadToBufferObject {
 AllocationData {
 	param RsAllocation va
 	param const void * data
+	param uint32_t bytes
+	handcodeApi
+	togglePlay
 	}
 
 Allocation1DSubData {
@@ -137,6 +140,9 @@ Allocation1DSubData {
 	param uint32_t xoff
 	param uint32_t count
 	param const void *data
+	param uint32_t bytes
+	handcodeApi
+	togglePlay
 	}
 
 Allocation2DSubData {
@@ -146,6 +152,7 @@ Allocation2DSubData {
 	param uint32_t w
 	param uint32_t h
 	param const void *data
+	param uint32_t bytes
 	}
 
 AllocationRead {

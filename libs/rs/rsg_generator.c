@@ -141,6 +141,7 @@ void printApiCpp(FILE *f)
     fprintf(f, "\n");
     fprintf(f, "using namespace android;\n");
     fprintf(f, "using namespace android::renderscript;\n");
+    fprintf(f, "#include \"rsHandcode.h\"\n");
     fprintf(f, "\n");
 
     for(ct=0; ct < apiCount; ct++) {
@@ -149,30 +150,39 @@ void printApiCpp(FILE *f)
 
         printFuncDecl(f, api, "rs", 0);
         fprintf(f, "\n{\n");
-        fprintf(f, "    ThreadIO *io = &((Context *)rsc)->mIO;\n");
-        //fprintf(f, "    LOGE(\"add command %s\\n\");\n", api->name);
-        fprintf(f, "    RS_CMD_%s *cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(sizeof(RS_CMD_%s)));\n", api->name, api->name, api->name);
-        fprintf(f, "    uint32_t size = sizeof(RS_CMD_%s);\n", api->name);
+        if (api->handcodeApi) {
+            fprintf(f, "    rsHCAPI_%s(rsc", api->name);
+            for(ct2=0; ct2 < api->paramCount; ct2++) {
+                const VarType *vt = &api->params[ct2];
+                fprintf(f, ", %s", vt->name);
+            }
+            fprintf(f, ");\n");
+        } else {
+            fprintf(f, "    ThreadIO *io = &((Context *)rsc)->mIO;\n");
+            //fprintf(f, "    LOGE(\"add command %s\\n\");\n", api->name);
+            fprintf(f, "    RS_CMD_%s *cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(sizeof(RS_CMD_%s)));\n", api->name, api->name, api->name);
+            fprintf(f, "    uint32_t size = sizeof(RS_CMD_%s);\n", api->name);
 
-        for(ct2=0; ct2 < api->paramCount; ct2++) {
-            const VarType *vt = &api->params[ct2];
-            needFlush += vt->ptrLevel;
-            fprintf(f, "    cmd->%s = %s;\n", vt->name, vt->name);
-        }
-        if (api->ret.typeName[0]) {
-            needFlush = 1;
-        }
+            for(ct2=0; ct2 < api->paramCount; ct2++) {
+                const VarType *vt = &api->params[ct2];
+                needFlush += vt->ptrLevel;
+                fprintf(f, "    cmd->%s = %s;\n", vt->name, vt->name);
+            }
+            if (api->ret.typeName[0]) {
+                needFlush = 1;
+            }
 
-        fprintf(f, "    io->mToCore.commit");
-        if (needFlush) {
-            fprintf(f, "Sync");
-        }
-        fprintf(f, "(RS_CMD_ID_%s, size);\n", api->name);
+            fprintf(f, "    io->mToCore.commit");
+            if (needFlush) {
+                fprintf(f, "Sync");
+            }
+            fprintf(f, "(RS_CMD_ID_%s, size);\n", api->name);
 
-        if (api->ret.typeName[0]) {
-            fprintf(f, "    return reinterpret_cast<");
-            printVarType(f, &api->ret);
-            fprintf(f, ">(io->mToCoreRet);\n");
+            if (api->ret.typeName[0]) {
+                fprintf(f, "    return reinterpret_cast<");
+                printVarType(f, &api->ret);
+                fprintf(f, ">(io->mToCoreRet);\n");
+            }
         }
         fprintf(f, "};\n\n");
     }
@@ -191,6 +201,7 @@ void printPlaybackCpp(FILE *f)
     fprintf(f, "\n");
     fprintf(f, "namespace android {\n");
     fprintf(f, "namespace renderscript {\n");
+    fprintf(f, "#include \"rsHandcode.h\"\n");
     fprintf(f, "\n");
 
     for(ct=0; ct < apiCount; ct++) {
@@ -198,20 +209,22 @@ void printPlaybackCpp(FILE *f)
 
         fprintf(f, "void rsp_%s(Context *con, const void *vp)\n", api->name);
         fprintf(f, "{\n");
-        //fprintf(f, "    LOGE(\"play command %s\\n\");\n", api->name);
-        fprintf(f, "    const RS_CMD_%s *cmd = static_cast<const RS_CMD_%s *>(vp);\n", api->name, api->name);
-        fprintf(f, "    ");
-        if (api->ret.typeName[0]) {
-            fprintf(f, "con->mIO.mToCoreRet = (intptr_t)");
+        if (api->handcodePlay) {
+            fprintf(f, "    rsHCPLAY_%s(con, vp);\n", api->name);
+        } else {
+            //fprintf(f, "    LOGE(\"play command %s\\n\");\n", api->name);
+            fprintf(f, "    const RS_CMD_%s *cmd = static_cast<const RS_CMD_%s *>(vp);\n", api->name, api->name);
+            fprintf(f, "    ");
+            if (api->ret.typeName[0]) {
+                fprintf(f, "con->mIO.mToCoreRet = (intptr_t)");
+            }
+            fprintf(f, "rsi_%s(con", api->name);
+            for(ct2=0; ct2 < api->paramCount; ct2++) {
+                const VarType *vt = &api->params[ct2];
+                fprintf(f, ",\n           cmd->%s", vt->name);
+            }
+            fprintf(f, ");\n");
         }
-        fprintf(f, "rsi_%s(con", api->name);
-        for(ct2=0; ct2 < api->paramCount; ct2++) {
-            const VarType *vt = &api->params[ct2];
-            fprintf(f, ",");
-            fprintf(f, "\n           cmd->%s", vt->name);
-        }
-        fprintf(f, ");\n");
-
         fprintf(f, "};\n\n");
     }
 
