@@ -143,10 +143,10 @@ void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
 
     Matrix m;
     m.loadOrtho(0,w, h,0, -1,1);
-    alloc->subData(RS_PROGRAM_VERTEX_PROJECTION_OFFSET, 16, &m.m[0]);
+    alloc->subData(RS_PROGRAM_VERTEX_PROJECTION_OFFSET, 16, &m.m[0], 16*4);
 
     m.loadIdentity();
-    alloc->subData(RS_PROGRAM_VERTEX_MODELVIEW_OFFSET, 16, &m.m[0]);
+    alloc->subData(RS_PROGRAM_VERTEX_MODELVIEW_OFFSET, 16, &m.m[0], 16*4);
 }
 
 
@@ -162,7 +162,7 @@ void rsi_ProgramVertexBegin(Context *rsc, RsElement in, RsElement out)
 RsProgramVertex rsi_ProgramVertexCreate(Context *rsc)
 {
     ProgramVertex *pv = rsc->mStateVertex.mPV;
-    pv->incRef();
+    pv->incUserRef();
     rsc->mStateVertex.mPV = 0;
     return pv;
 }

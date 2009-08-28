@@ -227,7 +227,7 @@ void rsi_ProgramFragmentSetSlot(Context *rsc, uint32_t slot, bool enable, RsTexE
 RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc)
 {
     ProgramFragment *pf = rsc->mStateFragment.mPF;
-    pf->incRef();
+    pf->incUserRef();
     rsc->mStateFragment.mPF = 0;
     return pf;
 }

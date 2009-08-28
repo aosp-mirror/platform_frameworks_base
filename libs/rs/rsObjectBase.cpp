@@ -21,28 +21,51 @@ using namespace android::renderscript;
 
 ObjectBase::ObjectBase()
 {
-    mRefCount = 0;
+    mUserRefCount = 0;
+    mSysRefCount = 0;
     mName = NULL;
 }
 
 ObjectBase::~ObjectBase()
 {
     //LOGV("~ObjectBase %p  ref %i", this, mRefCount);
-    rsAssert(!mRefCount);
+    rsAssert(!mUserRefCount);
+    rsAssert(!mSysRefCount);
 }
 
-void ObjectBase::incRef() const
+void ObjectBase::incUserRef() const
 {
-    mRefCount ++;
+    mUserRefCount ++;
     //LOGV("ObjectBase %p inc ref %i", this, mRefCount);
 }
 
-void ObjectBase::decRef() const
+void ObjectBase::incSysRef() const
 {
-    rsAssert(mRefCount > 0);
-    mRefCount --;
+    mSysRefCount ++;
+    //LOGV("ObjectBase %p inc ref %i", this, mRefCount);
+}
+
+void ObjectBase::decUserRef() const
+{
+    rsAssert(mUserRefCount > 0);
+    mUserRefCount --;
     //LOGV("ObjectBase %p dec ref %i", this, mRefCount);
-    if (!mRefCount) {
+    if (!(mSysRefCount | mUserRefCount)) {
+        if (mName) {
+            LOGV("Deleting RS object %p, name %s", this, mName);
+        } else {
+            LOGV("Deleting RS object %p, no name", this);
+        }
+        delete this;
+    }
+}
+
+void ObjectBase::decSysRef() const
+{
+    rsAssert(mSysRefCount > 0);
+    mSysRefCount --;
+    //LOGV("ObjectBase %p dec ref %i", this, mRefCount);
+    if (!(mSysRefCount | mUserRefCount)) {
         if (mName) {
             LOGV("Deleting RS object %p, name %s", this, mName);
         } else {

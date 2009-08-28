@@ -72,7 +72,7 @@ namespace renderscript {
 RsAdapter1D rsi_Adapter1DCreate(Context *rsc)
 {
     Adapter1D *a = new Adapter1D();
-    a->incRef();
+    a->incUserRef();
     return a;
 }
 
@@ -185,7 +185,7 @@ namespace renderscript {
 RsAdapter2D rsi_Adapter2DCreate(Context *rsc)
 {
     Adapter2D *a = new Adapter2D();
-    a->incRef();
+    a->incUserRef();
     return a;
 }
 

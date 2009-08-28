@@ -334,7 +334,7 @@ RsScript rsi_ScriptCCreate(Context * rsc)
     ss->runCompiler(rsc);
 
     ScriptC *s = new ScriptC();
-    s->incRef();
+    s->incUserRef();
     s->mAccScript = ss->mAccScript;
     ss->mAccScript = NULL;
     s->mEnviroment = ss->mEnviroment;

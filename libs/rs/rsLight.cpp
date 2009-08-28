@@ -106,7 +106,7 @@ RsLight rsi_LightCreate(Context *rsc)
 {
     Light *l = new Light(rsc->mStateLight.mIsLocal,
                          rsc->mStateLight.mIsMono);
-    l->incRef();
+    l->incUserRef();
     return l;
 }
 
