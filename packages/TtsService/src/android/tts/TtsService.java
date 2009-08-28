@@ -148,7 +148,7 @@ public class TtsService extends Service implements OnCompletionListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i("TtsService", "TtsService.onCreate()");
+        Log.v("TtsService", "TtsService.onCreate()");
 
         mResolver = getContentResolver();
 
@@ -279,7 +279,6 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private int isLanguageAvailable(String lang, String country, String variant) {
-        //Log.v("TtsService", "TtsService.isLanguageAvailable(" + lang + ", " + country + ", " +variant+")");
         int res = TextToSpeech.LANG_NOT_SUPPORTED;
         try {
             res = sNativeSynth.isLanguageAvailable(lang, country, variant);
@@ -462,6 +461,9 @@ public class TtsService extends Service implements OnCompletionListener {
                     result = TextToSpeech.SUCCESS;
                 }
                 Log.i("TtsService", "Stopped");
+            } else {
+                Log.e("TtsService", "TTS stop(): queue locked longer than expected");
+                result = TextToSpeech.ERROR;
             }
         } catch (InterruptedException e) {
           Log.e("TtsService", "TTS stop: tryLock interrupted");
@@ -575,6 +577,9 @@ public class TtsService extends Service implements OnCompletionListener {
                     result = TextToSpeech.SUCCESS;
                 }
                 Log.i("TtsService", "Stopped all");
+            } else {
+                Log.e("TtsService", "TTS stopAll(): queue locked longer than expected");
+                result = TextToSpeech.ERROR;
             }
         } catch (InterruptedException e) {
           Log.e("TtsService", "TTS stopAll: tryLock interrupted");
@@ -725,7 +730,7 @@ public class TtsService extends Service implements OnCompletionListener {
             }
         }
         Thread synth = (new Thread(new SynthThread()));
-        //synth.setPriority(Thread.MIN_PRIORITY);
+        synth.setPriority(Thread.MAX_PRIORITY);
         synth.start();
     }
 
@@ -799,7 +804,7 @@ public class TtsService extends Service implements OnCompletionListener {
             }
         }
         Thread synth = (new Thread(new SynthThread()));
-        //synth.setPriority(Thread.MIN_PRIORITY);
+        synth.setPriority(Thread.MAX_PRIORITY);
         synth.start();
     }
 
@@ -827,7 +832,7 @@ public class TtsService extends Service implements OnCompletionListener {
         if (cb == null){
             return;
         }
-        Log.i("TtsService", "TTS callback: dispatch started");
+        Log.v("TtsService", "TTS callback: dispatch started");
         // Broadcast to all clients the new value.
         final int N = mCallbacks.beginBroadcast();
         try {
@@ -837,7 +842,7 @@ public class TtsService extends Service implements OnCompletionListener {
             // the dead object for us.
         }
         mCallbacks.finishBroadcast();
-        Log.i("TtsService", "TTS callback: dispatch completed to " + N);
+        Log.v("TtsService", "TTS callback: dispatch completed to " + N);
     }
 
     private SpeechItem splitCurrentTextIfNeeded(SpeechItem currentSpeechItem){
@@ -888,7 +893,7 @@ public class TtsService extends Service implements OnCompletionListener {
             SoundResource sr = getSoundResource(mCurrentSpeechItem);
             // Synth speech as needed - synthesizer should call
             // processSpeechQueue to continue running the queue
-            Log.i("TtsService", "TTS processing: " + mCurrentSpeechItem.mText);
+            Log.v("TtsService", "TTS processing: " + mCurrentSpeechItem.mText);
             if (sr == null) {
                 if (mCurrentSpeechItem.mType == SpeechItem.TEXT) {
                     mCurrentSpeechItem = splitCurrentTextIfNeeded(mCurrentSpeechItem);
