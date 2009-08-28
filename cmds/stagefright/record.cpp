@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-#undef NDEBUG
-#include <assert.h>
-
 #include <binder/ProcessState.h>
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
+#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MPEG4Extractor.h>
 #include <media/stagefright/MPEG4Writer.h>
@@ -97,7 +95,7 @@ sp<MediaSource> createSource(const char *filename) {
     sp<MetaData> meta;
     for (size_t i = 0; i < num_tracks; ++i) {
         meta = extractor->getTrackMetaData(i);
-        assert(meta.get() != NULL);
+        CHECK(meta.get() != NULL);
 
         const char *mime;
         if (!meta->findCString(kKeyMIMEType, &mime)) {
@@ -125,7 +123,7 @@ int main(int argc, char **argv) {
     }
 
     OMXClient client;
-    assert(client.connect() == android::OK);
+    CHECK_EQ(client.connect(), OK);
 
 #if 0
     sp<MediaSource> source = createSource(argv[1]);
@@ -143,7 +141,7 @@ int main(int argc, char **argv) {
     int width, height;
     bool success = meta->findInt32(kKeyWidth, &width);
     success = success && meta->findInt32(kKeyHeight, &height);
-    assert(success);
+    CHECK(success);
 #else
     int width = 320;
     int height = 240;
@@ -171,7 +169,7 @@ int main(int argc, char **argv) {
     encoder->start();
 
     MediaBuffer *buffer;
-    while (encoder->read(&buffer) == ::OK) {
+    while (encoder->read(&buffer) == OK) {
         printf("got an output frame of size %d\n", buffer->range_length());
 
         buffer->release();
@@ -191,7 +189,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < 100; ++i) {
         MediaBuffer *buffer;
         status_t err = source->read(&buffer);
-        assert(err == OK);
+        CHECK_EQ(err, OK);
 
         printf("got a frame, data=%p, size=%d\n",
                buffer->data(), buffer->range_length());
