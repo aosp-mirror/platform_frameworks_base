@@ -64,6 +64,10 @@ public abstract class AbstractThreadedSyncAdapter {
         mAutoInitialize = autoInitialize;
     }
 
+    public Context getContext() {
+        return mContext;
+    }
+
     class ISyncAdapterImpl extends ISyncAdapter.Stub {
         public void startSync(ISyncContext syncContext, String authority, Account account,
                 Bundle extras) {

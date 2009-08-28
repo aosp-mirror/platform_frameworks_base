@@ -21,6 +21,7 @@ import android.content.pm.RegisteredServicesCache;
 import android.content.res.TypedArray;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.text.TextUtils;
 
 /**
  * A cache of services that export the {@link IAccountAuthenticator} interface. This cache
@@ -48,6 +49,9 @@ import android.util.AttributeSet;
                     com.android.internal.R.styleable.AccountAuthenticator_label, 0);
             final int iconId = sa.getResourceId(
                     com.android.internal.R.styleable.AccountAuthenticator_icon, 0);
+            if (TextUtils.isEmpty(accountType)) {
+                return null;
+            }
             return new AuthenticatorDescription(accountType, packageName, labelId, iconId);
         } finally {
             sa.recycle();
