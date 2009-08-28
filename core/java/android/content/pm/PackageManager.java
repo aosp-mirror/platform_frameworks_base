@@ -159,8 +159,10 @@ public abstract class PackageManager {
     
     /**
      * {@link PackageInfo} flag: return information about
-     * hardware preferences
-     * {@link PackageInfo#configPreferences}
+     * hardware preferences in
+     * {@link PackageInfo#configPreferences PackageInfo.configPreferences} and
+     * requested features in {@link PackageInfo#reqFeatures
+     * PackageInfo.reqFeatures}. 
      */
     public static final int GET_CONFIGURATIONS = 0x00004000;
 
@@ -398,6 +400,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FAILED_CPU_ABI_INCOMPATIBLE = -16;
+
+    /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the new package uses a feature that is not available.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_MISSING_FEATURE = -17;
 
     /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
@@ -978,6 +988,16 @@ public abstract class PackageManager {
      * 
      */
     public abstract String[] getSystemSharedLibraryNames();
+
+    /**
+     * Get a list of features that are available on the
+     * system.
+     * 
+     * @return An array of FeatureInfo classes describing the features
+     * that are available on the system, or null if there are none(!!).
+     * 
+     */
+    public abstract FeatureInfo[] getSystemAvailableFeatures();
 
     /**
      * Determine the best action to perform for a given Intent.  This is how
