@@ -115,9 +115,14 @@ void Allocation::uploadToBufferObject()
 }
 
 
-void Allocation::data(const void *data)
+void Allocation::data(const void *data, uint32_t sizeBytes)
 {
-    memcpy(mPtr, data, mType->getSizeBytes());
+    uint32_t size = mType->getSizeBytes();
+    if (size != sizeBytes) {
+        LOGE("Allocation::data called with mismatched size expected %i, got %i", size, sizeBytes);
+        return;
+    }
+    memcpy(mPtr, data, size);
 }
 
 void Allocation::read(void *data)
@@ -125,16 +130,22 @@ void Allocation::read(void *data)
     memcpy(data, mPtr, mType->getSizeBytes());
 }
 
-void Allocation::subData(uint32_t xoff, uint32_t count, const void *data)
+void Allocation::subData(uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes)
 {
     uint32_t eSize = mType->getElementSizeBytes();
     uint8_t * ptr = static_cast<uint8_t *>(mPtr);
     ptr += eSize * xoff;
-    memcpy(ptr, data, count * eSize);
+    uint32_t size = count * eSize;
+
+    if (size != sizeBytes) {
+        LOGE("Allocation::subData called with mismatched size expected %i, got %i", size, sizeBytes);
+        return;
+    }
+    memcpy(ptr, data, size);
 }
 
 void Allocation::subData(uint32_t xoff, uint32_t yoff,
-             uint32_t w, uint32_t h, const void *data)
+             uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes)
 {
     uint32_t eSize = mType->getElementSizeBytes();
     uint32_t lineSize = eSize * w;
@@ -143,6 +154,12 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff,
     const uint8_t *src = static_cast<const uint8_t *>(data);
     uint8_t *dst = static_cast<uint8_t *>(mPtr);
     dst += eSize * (xoff + yoff * destW);
+
+    if ((lineSize * eSize * h) != sizeBytes) {
+        rsAssert(!"Allocation::subData called with mismatched size");
+        return;
+    }
+
     for (uint32_t line=yoff; line < (yoff+h); line++) {
         uint8_t * ptr = static_cast<uint8_t *>(mPtr);
         memcpy(dst, src, lineSize);
@@ -152,7 +169,7 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff,
 }
 
 void Allocation::subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
-             uint32_t w, uint32_t h, uint32_t d, const void *data)
+             uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes)
 {
 }
 
@@ -170,7 +187,7 @@ RsAllocation rsi_AllocationCreateTyped(Context *rsc, RsType vtype)
     const Type * type = static_cast<const Type *>(vtype);
 
     Allocation * alloc = new Allocation(type);
-    alloc->incRef();
+    alloc->incUserRef();
     return alloc;
 }
 
@@ -340,7 +357,7 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
         LOGE("Memory allocation failure");
         return NULL;
     }
-    texAlloc->incRef();
+    texAlloc->incUserRef();
 
     ElementConverter_t cvt = pickConverter(dstFmt, srcFmt);
     cvt(texAlloc->getPtr(), data, w * h);
@@ -451,7 +468,7 @@ RsAllocation rsi_AllocationCreateFromFile(Context *rsc, const char *file, bool g
 
     RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, type);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
-    texAlloc->incRef();
+    texAlloc->incUserRef();
     if (texAlloc == NULL) {
         LOGE("Memory allocation failure");
         fclose(f);
@@ -503,24 +520,24 @@ RsAllocation rsi_AllocationCreateFromFile(Context *rsc, const char *file, bool g
     return texAlloc;
 }
 
-void rsi_AllocationData(Context *rsc, RsAllocation va, const void *data)
+void rsi_AllocationData(Context *rsc, RsAllocation va, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
-    a->data(data);
+    a->data(data, sizeBytes);
     rsc->allocationCheck(a);
 }
 
-void rsi_Allocation1DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t count, const void *data)
+void rsi_Allocation1DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
-    a->subData(xoff, count, data);
+    a->subData(xoff, count, data, sizeBytes);
     rsc->allocationCheck(a);
 }
 
-void rsi_Allocation2DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data)
+void rsi_Allocation2DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
-    a->subData(xoff, yoff, w, h, data);
+    a->subData(xoff, yoff, w, h, data, sizeBytes);
     rsc->allocationCheck(a);
 }
 

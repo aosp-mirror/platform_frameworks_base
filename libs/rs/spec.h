@@ -24,6 +24,8 @@ extern VarType *currType;
 typedef struct {
   char name[256];
   int sync;
+  int handcodeApi;
+  int handcodePlay;
   int paramCount;
   VarType ret;
   VarType params[16];

@@ -251,7 +251,7 @@ void rsi_ProgramFragmentStoreBlendFunc(Context *rsc, RsBlendSrcFunc src, RsBlend
 RsProgramFragmentStore rsi_ProgramFragmentStoreCreate(Context *rsc)
 {
     ProgramFragmentStore *pfs = rsc->mStateFragmentStore.mPFS;
-    pfs->incRef();
+    pfs->incUserRef();
     rsc->mStateFragmentStore.mPFS = 0;
     return pfs;
 }

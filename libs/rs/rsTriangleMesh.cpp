@@ -199,7 +199,7 @@ RsTriangleMesh rsi_TriangleMeshCreate(Context *rsc)
     memcpy(tm->mIndexData, tmc->mIndexData.array(), tm->mIndexDataSize);
     tm->analyzeElement();
 
-    tm->incRef();
+    tm->incUserRef();
     return tm;
 }
 
