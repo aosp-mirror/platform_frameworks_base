@@ -64,4 +64,21 @@
          the slider is open.  This can be set or unset depending how easily
          the slider can be opened (for example, in a pocket or purse). -->
     <bool name="config_bypass_keyguard_if_slider_open">true</bool>
+    
+    <!-- Vibrator pattern for feedback about a long screen/key press -->
+    <integer-array name="config_longPressVibePattern">
+        <item>0</item>
+        <item>1</item>
+        <item>20</item>
+        <item>21</item>
+    </integer-array>
+    
+    <!-- Vibrator pattern for feedback about touching a virtual key -->
+    <integer-array name="config_virtualKeyVibePattern">
+        <item>0</item>
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+    </integer-array>
+    
 </resources>
