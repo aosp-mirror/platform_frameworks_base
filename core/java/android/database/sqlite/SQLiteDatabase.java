@@ -519,7 +519,8 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     @Deprecated
     public boolean yieldIfContended() {
-        return yieldIfContendedHelper(false /* do not check yielding */);
+        return yieldIfContendedHelper(false /* do not check yielding */,
+                -1 /* sleepAfterYieldDelay */);
     }
 
     /**
@@ -527,14 +528,29 @@ public class SQLiteDatabase extends SQLiteClosable {
      * successful so far. Do not call setTransactionSuccessful before calling this. When this
      * returns a new transaction will have been created but not marked as successful. This assumes
      * that there are no nested transactions (beginTransaction has only been called once) and will
-     * through an exception if that is not the case.
+     * throw an exception if that is not the case.
      * @return true if the transaction was yielded
      */
     public boolean yieldIfContendedSafely() {
-        return yieldIfContendedHelper(true /* check yielding */);
+        return yieldIfContendedHelper(true /* check yielding */, -1 /* sleepAfterYieldDelay*/);
     }
 
-    private boolean yieldIfContendedHelper(boolean checkFullyYielded) {
+    /**
+     * Temporarily end the transaction to let other threads run. The transaction is assumed to be
+     * successful so far. Do not call setTransactionSuccessful before calling this. When this
+     * returns a new transaction will have been created but not marked as successful. This assumes
+     * that there are no nested transactions (beginTransaction has only been called once) and will
+     * throw an exception if that is not the case.
+     * @param sleepAfterYieldDelay if > 0, sleep this long before starting a new transaction if
+     *   the lock was actually yielded. This will allow other background threads to make some
+     *   more progress than they would if we started the transaction immediately.
+     * @return true if the transaction was yielded
+     */
+    public boolean yieldIfContendedSafely(long sleepAfterYieldDelay) {
+        return yieldIfContendedHelper(true /* check yielding */, sleepAfterYieldDelay);
+    }
+
+    private boolean yieldIfContendedHelper(boolean checkFullyYielded, long sleepAfterYieldDelay) {
         if (mLock.getQueueLength() == 0) {
             // Reset the lock acquire time since we know that the thread was willing to yield
             // the lock at this time.
@@ -548,6 +564,13 @@ public class SQLiteDatabase extends SQLiteClosable {
             if (this.isDbLockedByCurrentThread()) {
                 throw new IllegalStateException(
                         "Db locked more than once. yielfIfContended cannot yield");
+            }
+        }
+        if (sleepAfterYieldDelay > 0) {
+            try {
+                Thread.sleep(sleepAfterYieldDelay);
+            } catch (InterruptedException e) {
+                Thread.interrupted();
             }
         }
         beginTransaction();
