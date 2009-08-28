@@ -1150,6 +1150,7 @@
      =============================================================== -->
   <eat-comment />
 
+  <public type="attr" name="required" id="0x0101028e" />
   <public type="attr" name="accountType" />
   <public type="attr" name="contentAuthority" />
   <public type="attr" name="userVisible" />
