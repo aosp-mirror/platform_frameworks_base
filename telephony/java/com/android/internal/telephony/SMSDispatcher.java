@@ -61,6 +61,7 @@ import static android.telephony.SmsManager.RESULT_ERROR_GENERIC_FAILURE;
 import static android.telephony.SmsManager.RESULT_ERROR_NO_SERVICE;
 import static android.telephony.SmsManager.RESULT_ERROR_NULL_PDU;
 import static android.telephony.SmsManager.RESULT_ERROR_RADIO_OFF;
+import static android.telephony.SmsManager.RESULT_ERROR_LIMIT_EXCEEDED;
 
 
 public abstract class SMSDispatcher extends Handler {
@@ -105,6 +106,9 @@ public abstract class SMSDispatcher extends Handler {
     /** Alert is timeout */
     static final protected int EVENT_ALERT_TIMEOUT = 9;
 
+    /** Stop the sending */
+    static final protected int EVENT_STOP_SENDING = 10;
+
     protected Phone mPhone;
     protected Context mContext;
     protected ContentResolver mResolver;
@@ -120,6 +124,8 @@ public abstract class SMSDispatcher extends Handler {
     private static final int SEND_RETRY_DELAY = 2000;
     /** single part SMS */
     private static final int SINGLE_PART_SMS = 1;
+    /** Message sending queue limit */
+    private static final int MO_MSG_QUEUE_LIMIT = 5;
 
     /**
      * Message reference for a CONCATENATED_8_BIT_REFERENCE or
@@ -130,7 +136,7 @@ public abstract class SMSDispatcher extends Handler {
 
     private SmsCounter mCounter;
 
-    private SmsTracker mSTracker;
+    private ArrayList mSTrackers = new ArrayList(MO_MSG_QUEUE_LIMIT);
 
     /** Wake lock to ensure device stays awake while dispatching the SMS intent. */
     private PowerManager.WakeLock mWakeLock;
@@ -214,7 +220,6 @@ public abstract class SMSDispatcher extends Handler {
         mContext = phone.getContext();
         mResolver = mContext.getContentResolver();
         mCm = phone.mCM;
-        mSTracker = null;
 
         createWakelock();
 
@@ -330,17 +335,41 @@ public abstract class SMSDispatcher extends Handler {
         case EVENT_ALERT_TIMEOUT:
             ((AlertDialog)(msg.obj)).dismiss();
             msg.obj = null;
-            mSTracker = null;
+            if (mSTrackers.isEmpty() == false) {
+                try {
+                    SmsTracker sTracker = (SmsTracker)mSTrackers.remove(0);
+                    sTracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
+                } catch (CanceledException ex) {
+                    Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
+                }
+            }
+            if (Config.LOGD) {
+                Log.d(TAG, "EVENT_ALERT_TIMEOUT, message stop sending");
+            }
             break;
 
         case EVENT_SEND_CONFIRMED_SMS:
-            if (mSTracker!=null) {
-                if (isMultipartTracker(mSTracker)) {
-                    sendMultipartSms(mSTracker);
+            if (mSTrackers.isEmpty() == false) {
+                SmsTracker sTracker = (SmsTracker)mSTrackers.remove(mSTrackers.size() - 1);
+                if (isMultipartTracker(sTracker)) {
+                    sendMultipartSms(sTracker);
                 } else {
-                    sendSms(mSTracker);
+                    sendSms(sTracker);
                 }
-                mSTracker = null;
+                removeMessages(EVENT_ALERT_TIMEOUT, msg.obj);
+            }
+            break;
+
+        case EVENT_STOP_SENDING:
+            if (mSTrackers.isEmpty() == false) {
+                // Remove the latest one.
+                try {
+                    SmsTracker sTracker = (SmsTracker)mSTrackers.remove(mSTrackers.size() - 1);
+                    sTracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
+                } catch (CanceledException ex) {
+                    Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
+                }
+                removeMessages(EVENT_ALERT_TIMEOUT, msg.obj);
             }
             break;
         }
@@ -693,6 +722,15 @@ public abstract class SMSDispatcher extends Handler {
      * An SmsTracker for the current message.
      */
     protected void handleReachSentLimit(SmsTracker tracker) {
+        if (mSTrackers.size() >= MO_MSG_QUEUE_LIMIT) {
+            // Deny the sending when the queue limit is reached.
+            try {
+                tracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
+            } catch (CanceledException ex) {
+                Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
+            }
+            return;
+        }
 
         Resources r = Resources.getSystem();
 
@@ -702,13 +740,13 @@ public abstract class SMSDispatcher extends Handler {
                 .setTitle(r.getString(R.string.sms_control_title))
                 .setMessage(appName + " " + r.getString(R.string.sms_control_message))
                 .setPositiveButton(r.getString(R.string.sms_control_yes), mListener)
-                .setNegativeButton(r.getString(R.string.sms_control_no), null)
+                .setNegativeButton(r.getString(R.string.sms_control_no), mListener)
                 .create();
 
         d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         d.show();
 
-        mSTracker = tracker;
+        mSTrackers.add(tracker);
         sendMessageDelayed ( obtainMessage(EVENT_ALERT_TIMEOUT, d),
                 DEFAULT_SMS_TIMOUEOUT);
     }
@@ -819,6 +857,9 @@ public abstract class SMSDispatcher extends Handler {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
                     Log.d(TAG, "click YES to send out sms");
                     sendMessage(obtainMessage(EVENT_SEND_CONFIRMED_SMS));
+                } else if (which == DialogInterface.BUTTON_NEGATIVE) {
+                    Log.d(TAG, "click NO to stop sending");
+                    sendMessage(obtainMessage(EVENT_STOP_SENDING));
                 }
             }
         };
