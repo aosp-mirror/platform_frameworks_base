@@ -51,6 +51,8 @@ import java.util.List;
  * <li><a href="#HowSearchIsInvoked">How Search Is Invoked</a>
  * <li><a href="#ImplementingSearchForYourApp">Implementing Search for Your App</a>
  * <li><a href="#Suggestions">Search Suggestions</a>
+ * <li><a href="#ExposingSearchSuggestionsToQuickSearchBox">Exposing Search Suggestions to
+ * Quick Search Box</a></li>
  * <li><a href="#ActionKeys">Action Keys</a>
  * <li><a href="#SearchabilityMetadata">Searchability Metadata</a>
  * <li><a href="#PassingSearchContext">Passing Search Context</a>
@@ -245,6 +247,12 @@ import java.util.List;
  * <li>Contextually appropriate queries or results</li>
  * <li>Summaries of possible results</li>
  * </ul>
+ * 
+ * <p>Once an application is configured to provide search suggestions, those same suggestions can
+ * easily be made available to the system-wide Quick Search Box, providing faster access to its
+ * content from on central prominent place. See
+ * <a href="#ExposingSearchSuggestionsToQuickSearchBox">Exposing Search Suggestions to Quick Search
+ * Box</a> for more details.
  * 
  * <p>The primary form of suggestions is known as <i>queried suggestions</i> and is based on query
  * text that the user has already typed.  This would generally be based on partial matches in
@@ -480,6 +488,26 @@ import java.util.List;
  *             {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH}, optional otherwise.</td>
  *     </tr>
  *
+ *     <tr><th>{@link #SUGGEST_COLUMN_SHORTCUT_ID}</th>
+ *         <td>This column is used to indicate whether a search suggestion should be stored as a
+ *             shortcut, and whether it should be validated.  Shortcuts are usually formed when the
+ *             user clicks a suggestion from Quick Search Box.  If missing, the result will be
+ *             stored as a shortcut and never refreshed.  If set to
+ *             {@link #SUGGEST_NEVER_MAKE_SHORTCUT}, the result will not be stored as a shortcut.
+ *             Otherwise, the shortcut id will be used to check back for for an up to date
+ *             suggestion using {@link #SUGGEST_URI_PATH_SHORTCUT}. Read more about shortcut
+ *             refreshing in the section about
+ *             <a href="#ExposingSearchSuggestionsToQuickSearchBox">exposing search suggestions to
+ *             Quick Search Box</a>.</td>
+ *         <td align="center">No.  Only applicable to sources included in Quick Search Box.</td>
+ *     </tr>
+ *
+ *     <tr><th>{@link #SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING}</th>
+ *         <td>This column is used to specify that a spinner should be shown in lieu of an icon2
+ *             while the shortcut of this suggestion is being refreshed.</td>
+ *         <td align="center">No.  Only applicable to sources included in Quick Search Box.</td>
+ *     </tr>
+ * 
  *     <tr><th><i>Other Columns</i></th>
  *         <td>Finally, if you have defined any <a href="#ActionKeys">Action Keys</a> and you wish 
  *             for them to have suggestion-specific definitions, you'll need to define one 
@@ -553,6 +581,59 @@ import java.util.List;
  * query text is provided and the SUGGEST_COLUMN_INTENT_DATA values are not suitable for user 
  * inspection and editing.</li></ul>
  *
+ * <a name="ExposingSearchSuggestionsToQuickSearchBox"></a>
+ * <h3>Exposing Search Suggestions to Quick Search Box</h3>
+ * 
+ * <p>Once your application is setup to provide search suggestions, making them available to the
+ * globally accessable Quick Search Box is as easy as setting android:includeInGlobalSearch to
+ * "true" in your searchable metadata file.  Beyond that, here are some more details of how
+ * suggestions interact with Quick Search Box, and optional ways that you may customize suggestions
+ * for your application.
+ *
+ * <p><b>Source Ranking:</b>  Once your application's search results are made available to Quick
+ * Search Box, how they surface to the user for a particular query will depend on how many
+ * other apps have results for that query, and how often the user has clicked on your results
+ * compared to the other apps'.  The apps with the best track record within Quick Search
+ * Box will get queried earlier and have a better chance of showing their results in the top few
+ * slots.  If there are more results than can be displayed to the user within a screen or two, the
+ * results may spill into a "more results" section that groups the remaining results by
+ * source.  The newest apps with little usage information are given middle of the road positioning
+ * until enough usage information is available to rank it as usual.  The exact formula for ranking
+ * the results is not set in stone, but suffice it is to say that providing quality results will
+ * increase the likelihood that your app's suggestions are provided in a prominent position, and
+ * apps that provide lower quality suggestions will be more likely to be pushed into the spillover
+ * area.
+ *
+ * <p><b>Search Settings:</b>  Each app that is available to Quick Search Box has an entry in the
+ * system settings where the user can enable or disable the inclusion of its results.  Below the
+ * name of the application, each application may provide a brief description of what kind of
+ * information will be made available via a search settings description string pointed to by the
+ * android:searchSettingsDescription attribute in the searchable metadata.
+ *
+ * <p><b>Shortcuts:</b>  Suggestions that are clicked on by the user are automatically made into
+ * shortcuts, or, copied so they can quickly be displayed to the user before querying any of
+ * the sources. Thereafter, the shortcutted suggestion will be displayed for the query that yielded
+ * the suggestion and for any prefixes of that query.  When multiple shortcuts are made available
+ * for a given query, they are ranked based on recency and the number of clicks they have received.
+ * You can control how your suggestions are made into shortcuts, and whether they are refreshed,
+ * using the {@link #SUGGEST_COLUMN_SHORTCUT_ID} column:
+ * <ul><li>Suggestions that do not include a shortcut id column will be made into shortcuts and
+ * never refreshed.  This makes sense for suggestions that refer to data that will never be changed
+ * or removed.</li>
+ * <li>Suggestions that include a shortcut id will be re-queried for a fresh version of the
+ * suggestion each time the shortcut is displayed.  The shortcut will be quickly displayed with
+ * whatever data was most recently available until the refresh query returns, after which the
+ * suggestion will be dynamically refreshed with the up to date information.  The shortcut refresh
+ * query will be sent to your suggestion provider with a uri of {@link #SUGGEST_URI_PATH_SHORTCUT}.
+ * The result should contain one suggestion using the same columns as the suggestion query, or be
+ * empty, indicating that the shortcut is no longer valid.  Shortcut ids make sense when referring
+ * to data that may change over time, such as a contact's presence status.  If a suggestion refers
+ * to data that could take longer to refresh, such as a network based refresh of a stock quote, you
+ * may include {@link #SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING} to show a progress spinner for the
+ * right hand icon until the refresh is complete.</li>
+ * <li>Finally, to prevent a suggestion from being copied into a shortcut, you may provide a
+ * shortcut id with a value of {@link #SUGGEST_NEVER_MAKE_SHORTCUT}.</li></ul>
+ * 
  * <a name="ActionKeys"></a>
  * <h3>Action Keys</h3>
  * 
@@ -866,6 +947,47 @@ import java.util.List;
  *         <td align="center">No</td>
  *     </tr>
  *     
+ *     </tbody>
+ * </table>
+ *
+ * <p>Elements of search metadata that configure search suggestions being available to Quick Search
+ * Box:
+ * <table border="2" width="85%" align="center" frame="hsides" rules="rows">
+ *
+ *     <thead>
+ *     <tr><th>Attribute</th> <th>Description</th> <th>Required?</th></tr>
+ *     </thead>
+ *
+ *     <tr><th>android:includeInGlobalSearch</th>
+ *         <td>If true, indicates the search suggestions provided by your application should be
+ *             included in the globally accessible Quick Search Box.  The attributes below are only
+ *             applicable if this is set to true.</td>
+ *         <td align="center">Yes</td>
+ *     </tr>
+ *
+ *     <tr><th>android:searchSettingsDescription</th>
+ *         <td>If provided, provides a brief description of the search suggestions that are provided
+ *             by your application to Quick Search Box, and will be displayed in the search settings
+ *             entry for your application.</td>
+ *         <td align="center">No</td>
+ *     </tr>
+ *
+ *     <tr><th>android:queryAfterZeroResults</th>
+ *         <td>Indicates whether a source should be invoked for supersets of queries it has
+ *             returned zero results for in the past.  For example, if a source returned zero
+ *             results for "bo", it would be ignored for "bob".  If set to false, this source
+ *             will only be ignored for a single session; the next time the search dialog is
+ *             invoked, all sources will be queried.  The default value is false.</td>
+ *         <td align="center">No</td>
+ *     </tr>
+ *
+ *     <tr><th>android:searchSuggestThreshold</th>
+ *         <td>Indicates the minimum number of characters needed to trigger a source from Quick
+ *             Search Box.  Only guarantees that a source will not be queried for anything shorter
+ *             than the threshold.  The default value is 0.</td>
+ *         <td align="center">No</td>
+ *     </tr>
+ *
  *     </tbody>
  * </table>
  *
@@ -1246,16 +1368,12 @@ public class SearchManager
      * result indicates the shortcut refers to a no longer valid sugggestion.
      *
      * @see #SUGGEST_COLUMN_SHORTCUT_ID
-     *
-     * @hide pending enabling of global search for third parties
      */
     public final static String SUGGEST_URI_PATH_SHORTCUT = "search_suggest_shortcut";
     
     /**
      * MIME type for shortcut validation.  You'll use this in your suggestions content provider
      * in the getType() function.
-     *
-     * @hide pending enabling of global search for third parties
      */
     public final static String SHORTCUT_MIME_TYPE = 
             "vnd.android.cursor.item/vnd.android.search.suggest";
@@ -1268,7 +1386,7 @@ public class SearchManager
      * In addition to the columns below, the suggestion columns are used to pass along the full
      * suggestion so it can be shortcutted.
      *
-     * @hide an implementation detail not part of the public api
+     * @hide
      */
     public final static String SEARCH_CLICK_REPORT_AUTHORITY =
             "com.android.globalsearch.stats";
@@ -1276,21 +1394,21 @@ public class SearchManager
     /**
      * The path the write goes to.
      *
-     * @hide an implementation detail not part of the public api
+     * @hide
      */
     public final static String SEARCH_CLICK_REPORT_URI_PATH = "click";
 
     /**
      * The column storing the query for the click.
      *
-     * @hide an implementation detail not part of the public api
+     * @hide
      */
     public final static String SEARCH_CLICK_REPORT_COLUMN_QUERY = "query";
 
     /**
      * The column storing the component name of the application that was pivoted into.
      *
-     * @hide an implementation detail not part of the public api
+     * @hide
      */
     public final static String SEARCH_CLICK_REPORT_COLUMN_COMPONENT = "component";
 
@@ -1375,7 +1493,7 @@ public class SearchManager
      *  {@link #COMPONENT_NAME_KEY}. For use by the global search system only - if other providers
      *  attempt to use this column, the value will be overwritten by global search.
      *
-     * @hide an implementation detail not part of the public api
+     * @hide
      */
     public final static String SUGGEST_COLUMN_INTENT_COMPONENT_NAME = "suggest_intent_component";
     /**
@@ -1400,8 +1518,6 @@ public class SearchManager
      * {@link #SUGGEST_NEVER_MAKE_SHORTCUT}, the result will not be stored as a shortcut.
      * Otherwise, the shortcut id will be used to check back for an up to date suggestion using
      * {@link #SUGGEST_URI_PATH_SHORTCUT}.
-     *
-     * @hide pending reenabling of global search for third parties
      */
     public final static String SUGGEST_COLUMN_SHORTCUT_ID = "suggest_shortcut_id";
 
@@ -1410,7 +1526,7 @@ public class SearchManager
      * cursor item's background color if it needs a non-default background color. A non-zero value
      * indicates a valid background color to override the default.
      *
-     * @hide an implementation detail not part of the public api
+     * @hide For internal use, not part of the public API.
      */
     public final static String SUGGEST_COLUMN_BACKGROUND_COLOR = "suggest_background_color";
     
@@ -1418,8 +1534,6 @@ public class SearchManager
      * Column name for suggestions cursor. <i>Optional.</i> This column is used to specify
      * that a spinner should be shown in lieu of an icon2 while the shortcut of this suggestion
      * is being refreshed.
-     *
-     * @hide pending reenabling of global search for third parties
      */
     public final static String SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING =
             "suggest_spinner_while_refreshing";
@@ -1427,8 +1541,6 @@ public class SearchManager
     /**
      * Column value for suggestion column {@link #SUGGEST_COLUMN_SHORTCUT_ID} when a suggestion
      * should not be stored as a shortcut in global search.
-     *
-     * @hide pending reenabling of global search for third parties
      */
     public final static String SUGGEST_NEVER_MAKE_SHORTCUT = "_-1";
 
@@ -1475,8 +1587,6 @@ public class SearchManager
      * Intent action for starting a web search provider's settings activity.
      * Web search providers should handle this intent if they have provider-specific
      * settings to implement.
-     *
-     * @hide implementation detail only relevent to web search providers
      */
     public final static String INTENT_ACTION_WEB_SEARCH_SETTINGS
             = "android.search.action.WEB_SEARCH_SETTINGS";
@@ -1491,7 +1601,8 @@ public class SearchManager
     
     /**
      * Intent action broadcasted to inform that the search settings have changed in some way.
-     * Either searchables have been enabled or disabled.
+     * Either searchables have been enabled or disabled, or a different web search provider
+     * has been chosen.
      */
     public final static String INTENT_ACTION_SEARCH_SETTINGS_CHANGED
             = "android.search.action.SETTINGS_CHANGED";
@@ -1500,7 +1611,7 @@ public class SearchManager
      * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
      * the search dialog will take no action.
      *
-     * @hide an implentation detail not part of the public api
+     * @hide
      */
     public final static String INTENT_ACTION_NONE = "android.search.action.ZILCH";
     
