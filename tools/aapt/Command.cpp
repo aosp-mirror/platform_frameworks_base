@@ -332,9 +332,11 @@ enum {
     TARGET_SDK_VERSION_ATTR = 0x01010270,
     TEST_ONLY_ATTR = 0x01010272,
     DENSITY_ATTR = 0x0101026c,
+    GL_ES_VERSION_ATTR = 0x01010281,
     SMALL_SCREEN_ATTR = 0x01010284,
     NORMAL_SCREEN_ATTR = 0x01010285,
     LARGE_SCREEN_ATTR = 0x01010286,
+    REQUIRED_ATTR = 0x0101028e,
 };
 
 const char *getComponentName(String8 &pkgName, String8 &componentName) {
@@ -520,6 +522,8 @@ int doDump(Bundle* bundle)
             bool actWidgetReceivers = false;
             bool actImeService = false;
             bool actWallpaperService = false;
+            bool specCameraFeature = false;
+            bool hasCameraPermission = false;
             int targetSdk = 0;
             int smallScreen = 1;
             int normalScreen = 1;
@@ -706,6 +710,37 @@ int doDump(Bundle* bundle)
                                 NORMAL_SCREEN_ATTR, NULL, 1);
                         largeScreen = getIntegerAttribute(tree,
                                 LARGE_SCREEN_ATTR, NULL, 1);
+                    } else if (tag == "uses-feature") {
+                        String8 name = getAttribute(tree, NAME_ATTR, &error);
+                        if (error == "") {
+                            int req = getIntegerAttribute(tree,
+                                    REQUIRED_ATTR, NULL, 1);
+                            if (name == "android.hardware.camera") {
+                                specCameraFeature = true;
+                            }
+                            printf("uses-feature%s:'%s'\n",
+                                    req ? "" : "-not-required", name.string());
+                        } else {
+                            int vers = getIntegerAttribute(tree,
+                                    GL_ES_VERSION_ATTR, &error);
+                            if (error == "") {
+                                printf("uses-gl-es:'0x%x'\n", vers);
+                            }
+                        }
+                    } else if (tag == "uses-permission") {
+                        String8 name = getAttribute(tree, NAME_ATTR, &error);
+                        if (error == "") {
+                            int opt = getIntegerAttribute(tree,
+                                    REQUIRED_ATTR, NULL, 1);
+                            if (name == "android.permission.CAMERA") {
+                                hasCameraPermission = true;
+                            }
+                            printf("uses-permission:'%s'\n", name.string());
+                        } else {
+                            fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
+                                    error.string());
+                            goto bail;
+                        }
                     }
                 } else if (depth == 3 && withinApplication) {
                     withinActivity = false;
@@ -803,6 +838,15 @@ int doDump(Bundle* bundle)
                 }
             }
 
+            if (!specCameraFeature && hasCameraPermission) {
+                // For applications that have not explicitly stated their
+                // camera feature requirements, but have requested the camera
+                // permission, we are going to give them compatibility treatment
+                // of requiring the equivalent to original android devices.
+                printf("uses-feature:'android.hardware.camera'\n");
+                printf("uses-feature:'android.hardware.camera.autofocus'\n");
+            }
+            
             if (hasMainActivity) {
                 printf("main\n");
             }

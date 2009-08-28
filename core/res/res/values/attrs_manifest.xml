@@ -781,6 +781,15 @@
              represent the minor number. For example for GL 1.2 referring to
              0x00000102, the actual value should be set as 0x00010002. -->
         <attr name="glEsVersion" format="integer"/>
+        <!--  The name of the feature that is being used. -->
+        <attr name="name" />
+        <!--  Specify whether this feature is required for the application.
+              The default is true, meaning the application requires the
+              feature, and does not want to be installed on devices that
+              don't support it.  If you set this to false, then this will
+              not impose a restriction on where the application can be
+              installed. -->
+        <attr name="required" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>uses-sdk</code> tag describes the SDK features that the
