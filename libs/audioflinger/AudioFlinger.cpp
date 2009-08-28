@@ -136,8 +136,17 @@ AudioFlinger::AudioFlinger()
 
 AudioFlinger::~AudioFlinger()
 {
-    mRecordThreads.clear();
-    mPlaybackThreads.clear();
+    while (!mRecordThreads.isEmpty()) {
+        // closeInput() will remove first entry from mRecordThreads
+        closeInput(mRecordThreads.keyAt(0));
+    }
+    while (!mPlaybackThreads.isEmpty()) {
+        // closeOutput() will remove first entry from mPlaybackThreads
+        closeOutput(mPlaybackThreads.keyAt(0));
+    }
+    if (mAudioHardware) {
+        delete mAudioHardware;
+    }
 }
 
 
