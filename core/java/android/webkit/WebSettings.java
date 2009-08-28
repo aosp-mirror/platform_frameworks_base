@@ -360,11 +360,13 @@ public class WebSettings {
             // default to "en"
             buffer.append("en");
         }
-        
-        final String model = Build.MODEL;
-        if (model.length() > 0) {
-            buffer.append("; ");
-            buffer.append(model);
+        // add the model for the release build
+        if ("REL".equals(Build.VERSION.CODENAME)) {
+            final String model = Build.MODEL;
+            if (model.length() > 0) {
+                buffer.append("; ");
+                buffer.append(model);
+            }
         }
         final String id = Build.ID;
         if (id.length() > 0) {
