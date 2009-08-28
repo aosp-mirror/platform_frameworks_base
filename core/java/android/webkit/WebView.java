@@ -1935,6 +1935,7 @@ public class WebView extends AbsoluteLayout
         int mHeight;
         int mTextWrapWidth;
         float mScale;
+        boolean mIgnoreHeight;
     }
 
     /**
@@ -1969,6 +1970,7 @@ public class WebView extends AbsoluteLayout
             data.mTextWrapWidth = mInZoomOverview ? Math.round(viewWidth
                     / mLastScale) : newWidth;
             data.mScale = mActualScale;
+            data.mIgnoreHeight = mZoomScale != 0 && !mHeightCanMeasure;
             mWebViewCore.sendMessage(EventHub.VIEW_SIZE_CHANGED, data);
             mLastWidthSent = newWidth;
             mLastHeightSent = newHeight;
