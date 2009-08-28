@@ -116,6 +116,16 @@ public abstract class SmsMessageBase {
          * android.telephony.SmsMessage ENCODING_*).
          */
         public int codeUnitSize;
+
+        @Override
+        public String toString() {
+            return "TextEncodingDetails " +
+                    "{ msgCount=" + msgCount +
+                    ", codeUnitCount=" + codeUnitCount +
+                    ", codeUnitsRemaining=" + codeUnitsRemaining +
+                    ", codeUnitSize=" + codeUnitSize +
+                    " }";
+        }
     }
 
     // TODO(): This class is duplicated in SmsMessage.java. Refactor accordingly.

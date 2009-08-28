@@ -309,8 +309,13 @@ public class SmsMessage {
         while (pos < textLen) {
             int nextPos = 0;  // Counts code units.
             if (ted.codeUnitSize == ENCODING_7BIT) {
-                // For multi-segment messages, CDMA 7bit equals GSM 7bit encoding (EMS mode).
-                nextPos = GsmAlphabet.findGsmSeptetLimitIndex(text, pos, limit);
+                if (activePhone == PHONE_TYPE_CDMA && ted.msgCount == 1) {
+                    // For a singleton CDMA message, the encoding must be ASCII...
+                    nextPos = pos + Math.min(limit, textLen - pos);
+                } else {
+                    // For multi-segment messages, CDMA 7bit equals GSM 7bit encoding (EMS mode).
+                    nextPos = GsmAlphabet.findGsmSeptetLimitIndex(text, pos, limit);
+                }
             } else {  // Assume unicode.
                 nextPos = pos + Math.min(limit / 2, textLen - pos);
             }
