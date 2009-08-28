@@ -67,7 +67,7 @@ void SimpleMesh::renderRange(uint32_t start, uint32_t len) const
 
     if (mIndexType.get()) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer->getBufferObjectID());
-        glDrawElements(mGLPrimitive, len, GL_UNSIGNED_SHORT, (GLvoid *)(start * 2));
+        glDrawElements(mGLPrimitive, len, GL_UNSIGNED_SHORT, (uint16_t *)(start * 2));
     } else {
         glDrawArrays(mGLPrimitive, start, len);
     }
@@ -91,7 +91,7 @@ namespace renderscript {
 RsSimpleMesh rsi_SimpleMeshCreate(Context *rsc, RsType prim, RsType idx, RsType *vtx, uint32_t vtxCount, uint32_t primType)
 {
     SimpleMesh *sm = new SimpleMesh();
-    sm->incRef();
+    sm->incUserRef();
 
     sm->mIndexType.set((const Type *)idx);
     sm->mPrimitiveType.set((const Type *)prim);

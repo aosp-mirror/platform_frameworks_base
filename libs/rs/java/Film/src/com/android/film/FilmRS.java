@@ -68,8 +68,6 @@ public class FilmRS {
     private RenderScript mRS;
     private Script mScriptStrip;
     private Script mScriptImage;
-    private Element mElementVertex;
-    private Element mElementIndex;
     private Sampler mSampler;
     private ProgramStore mPSBackground;
     private ProgramStore mPSImages;
@@ -88,7 +86,7 @@ public class FilmRS {
     private Allocation mAllocOffsetsTex;
     private Allocation mAllocOffsets;
 
-    private RenderScript.TriangleMesh mMesh;
+    private SimpleMesh mMesh;
     private Light mLight;
 
     private FilmStripMesh mFSM;
@@ -186,7 +184,6 @@ public class FilmRS {
                 mip++;
                 a.setConstraint(Dimension.LOD, mip);
             }
-            a.destroy();
 
             mImages[ct].uploadToTexture(1);
             mBufferIDs[ct] = mImages[ct].getID();
@@ -204,13 +201,8 @@ public class FilmRS {
     }
 
     private void initRS() {
-        mElementVertex = Element.NORM_ST_XYZ_F32;
-        mElementIndex = Element.INDEX_16;
-
-        mRS.triangleMeshBegin(mElementVertex, mElementIndex);
         mFSM = new FilmStripMesh();
-        mFSM.init(mRS);
-        mMesh = mRS.triangleMeshCreate();
+        mMesh = mFSM.init(mRS);
         mMesh.setName("mesh");
 
         initPFS();

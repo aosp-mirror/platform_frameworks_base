@@ -252,6 +252,7 @@ void Type::enableGLVertexBuffer() const
 
     uint32_t stride = mElement->getSizeBytes();
     if (mGL.mVtx.size) {
+        //LOGE("va vtx %i %x, %i, %p", mGL.mVtx.size, mGL.mVtx.type, stride, (void *)mGL.mVtx.offset);
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(mGL.mVtx.size,
                         mGL.mVtx.type,
@@ -260,9 +261,10 @@ void Type::enableGLVertexBuffer() const
     }
 
     if (mGL.mNorm.size) {
+        //LOGE("va norm %i %x, %i, %p", mGL.mNorm.size, mGL.mNorm.type, stride, (void *)mGL.mNorm.offset);
         glEnableClientState(GL_NORMAL_ARRAY);
         rsAssert(mGL.mNorm.size == 3);
-        glNormalPointer(mGL.mNorm.size,
+        glNormalPointer(mGL.mNorm.type,
                         stride,
                         (void *)mGL.mNorm.offset);
     }
@@ -277,6 +279,7 @@ void Type::enableGLVertexBuffer() const
 
     for (uint32_t ct=0; ct < RS_MAX_TEXTURE; ct++) {
         if (mGL.mTex[ct].size) {
+            //LOGE("va tex%i %i %x, %i, %p", ct, mGL.mTex[ct].size, mGL.mTex[ct].type, stride, (void *)mGL.mTex[ct].offset);
             glClientActiveTexture(GL_TEXTURE0 + ct);
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             glTexCoordPointer(mGL.mTex[ct].size,
@@ -361,7 +364,7 @@ RsType rsi_TypeCreate(Context *rsc)
     TypeState * stc = &rsc->mStateType;
 
     Type * st = new Type();
-    st->incRef();
+    st->incUserRef();
     st->setDimX(stc->mX);
     st->setDimY(stc->mY);
     st->setDimZ(stc->mZ);

@@ -47,6 +47,14 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
     apis[apiCount].sync = 1;
     }
 
+<api_entry2>"handcodeApi" {
+    apis[apiCount].handcodeApi = 1;
+    }
+
+<api_entry2>"handcodePlay" {
+    apis[apiCount].handcodePlay = 1;
+    }
+
 <api_entry2>"ret" {
     currType = &apis[apiCount].ret;
     typeNextState = api_entry2;

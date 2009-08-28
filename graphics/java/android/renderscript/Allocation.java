@@ -47,28 +47,62 @@ public class Allocation extends BaseObj {
         mRS.nAllocationUploadToTexture(mID, baseMipLevel);
     }
 
+    public void uploadToBufferObject() {
+        mRS.nAllocationUploadToBufferObject(mID);
+    }
+
     public void data(int[] d) {
-        mRS.nAllocationData(mID, d);
+        int size = 0;
+        if(mType != null && mType.mElement != null) {
+            size = mType.mElement.mSize;
+            for(int ct=0; ct < mType.mValues.length; ct++) {
+                if(mType.mValues[ct] != 0) {
+                    size *= mType.mValues[ct];
+                }
+            }
+            if((d.length * 4) < size) {
+                throw new IllegalArgumentException("Array too small for allocation type.");
+            }
+            Log.e("rs", "Alloc data size=" + size);
+            mRS.nAllocationData(mID, d, size);
+            return;
+        }
+        mRS.nAllocationData(mID, d, d.length * 4);
     }
 
     public void data(float[] d) {
-        mRS.nAllocationData(mID, d);
+        int size = 0;
+        if(mType != null && mType.mElement != null) {
+            size = mType.mElement.mSize;
+            for(int ct=0; ct < mType.mValues.length; ct++) {
+                if(mType.mValues[ct] != 0) {
+                    size *= mType.mValues[ct];
+                }
+            }
+            if((d.length * 4) < size) {
+                throw new IllegalArgumentException("Array too small for allocation type.");
+            }
+            Log.e("rs", "Alloc data size=" + size);
+            mRS.nAllocationData(mID, d, size);
+            return;
+        }
+        mRS.nAllocationData(mID, d, d.length * 4);
     }
 
     public void subData1D(int off, int count, int[] d) {
-        mRS.nAllocationSubData1D(mID, off, count, d);
+        mRS.nAllocationSubData1D(mID, off, count, d, count * 4);
     }
 
     public void subData1D(int off, int count, float[] d) {
-        mRS.nAllocationSubData1D(mID, off, count, d);
+        mRS.nAllocationSubData1D(mID, off, count, d, d.length * 4);
     }
 
     public void subData2D(int xoff, int yoff, int w, int h, int[] d) {
-        mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d);
+        mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d, d.length * 4);
     }
 
     public void subData2D(int xoff, int yoff, int w, int h, float[] d) {
-        mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d);
+        mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d, d.length * 4);
     }
 
     public void readData(int[] d) {
@@ -221,20 +255,6 @@ public class Allocation extends BaseObj {
         Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
         return createFromBitmapBoxed(rs, b, dstFmt, genMips);
     }
-/*
-    public static Allocation createFromObject(RenderScript rs, Object o) {
-        Class c = o.getClass();
-        Type t;
-        if(c.isArray()) {
-            t = Type.createFromClass(rs, c, Array.getLength(o));
-        } else {
-            t = Type.createFromClass(rs, c, 1);
-        }
-        Allocation alloc = createTyped(rs, t);
-        t.destroy();
-        return alloc;
-    }
-*/
 }
 
 

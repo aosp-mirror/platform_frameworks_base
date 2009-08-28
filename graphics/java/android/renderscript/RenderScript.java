@@ -97,12 +97,13 @@ public class RenderScript {
     native int  nAllocationCreateFromBitmapBoxed(int dstFmt, boolean genMips, Bitmap bmp);
 
     native void nAllocationUploadToTexture(int alloc, int baseMioLevel);
-    native void nAllocationData(int id, int[] d);
-    native void nAllocationData(int id, float[] d);
-    native void nAllocationSubData1D(int id, int off, int count, int[] d);
-    native void nAllocationSubData1D(int id, int off, int count, float[] d);
-    native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, int[] d);
-    native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, float[] d);
+    native void nAllocationUploadToBufferObject(int alloc);
+    native void nAllocationData(int id, int[] d, int sizeBytes);
+    native void nAllocationData(int id, float[] d, int sizeBytes);
+    native void nAllocationSubData1D(int id, int off, int count, int[] d, int sizeBytes);
+    native void nAllocationSubData1D(int id, int off, int count, float[] d, int sizeBytes);
+    native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, int[] d, int sizeBytes);
+    native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, float[] d, int sizeBytes);
     native void nAllocationRead(int id, int[] d);
     native void nAllocationRead(int id, float[] d);
     native void nAllocationDataFromObject(int id, Type t, Object o);
