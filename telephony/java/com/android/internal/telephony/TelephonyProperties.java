@@ -120,4 +120,14 @@ public interface TelephonyProperties
      */
     static final String PROPERTY_DISABLE_CALL = "ro.telephony.disable-call";
 
+    /**
+     * Set to true for vendor RIL's that send multiple UNSOL_CALL_RING notifications.
+     */
+    static final String PROPERTY_RIL_SENDS_MULTIPLE_CALL_RING =
+        "ro.telephony.call_ring.multiple";
+
+    /**
+     * The number of milli-seconds between CALL_RING notifications.
+     */
+    static final String PROPERTY_CALL_RING_DELAY = "ro.telephony.call_ring.delay";
 }

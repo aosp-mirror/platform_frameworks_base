@@ -31,7 +31,6 @@ import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.telephony.ServiceState;
-import android.telephony.SignalStrength;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -55,7 +54,7 @@ import java.util.Locale;
  *
  */
 
-public abstract class PhoneBase implements Phone {
+public abstract class PhoneBase extends Handler implements Phone {
     private static final String LOG_TAG = "PHONE";
     private static final boolean LOCAL_DEBUG = true;
 
@@ -68,7 +67,7 @@ public abstract class PhoneBase implements Phone {
     // Key used to read/write "disable data connection on boot" pref (used for testing)
     public static final String DATA_DISABLED_ON_BOOT_KEY = "disabled_on_boot_key";
 
-    //***** Event Constants
+    /* Event Constants */
     protected static final int EVENT_RADIO_AVAILABLE             = 1;
     /** Supplementary Service Notification received. */
     protected static final int EVENT_SSN                         = 2;
@@ -84,20 +83,22 @@ public abstract class PhoneBase implements Phone {
     protected static final int EVENT_SET_CALL_FORWARD_DONE       = 12;
     protected static final int EVENT_GET_CALL_FORWARD_DONE       = 13;
     protected static final int EVENT_CALL_RING                   = 14;
+    protected static final int EVENT_CALL_RING_CONTINUE          = 15;
+
     // Used to intercept the carrier selection calls so that
     // we can save the values.
-    protected static final int EVENT_SET_NETWORK_MANUAL_COMPLETE    = 15;
-    protected static final int EVENT_SET_NETWORK_AUTOMATIC_COMPLETE = 16;
-    protected static final int EVENT_SET_CLIR_COMPLETE              = 17;
-    protected static final int EVENT_REGISTERED_TO_NETWORK          = 18;
-    protected static final int EVENT_SET_VM_NUMBER_DONE             = 19;
+    protected static final int EVENT_SET_NETWORK_MANUAL_COMPLETE    = 16;
+    protected static final int EVENT_SET_NETWORK_AUTOMATIC_COMPLETE = 17;
+    protected static final int EVENT_SET_CLIR_COMPLETE              = 18;
+    protected static final int EVENT_REGISTERED_TO_NETWORK          = 19;
+    protected static final int EVENT_SET_VM_NUMBER_DONE             = 20;
     // Events for CDMA support
-    protected static final int EVENT_GET_DEVICE_IDENTITY_DONE       = 20;
-    protected static final int EVENT_RUIM_RECORDS_LOADED            = 21;
-    protected static final int EVENT_NV_READY                       = 22;
-    protected static final int EVENT_SET_ENHANCED_VP                = 23;
-    protected static final int EVENT_EMERGENCY_CALLBACK_MODE_ENTER  = 24;
-    protected static final int EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE = 25;
+    protected static final int EVENT_GET_DEVICE_IDENTITY_DONE       = 21;
+    protected static final int EVENT_RUIM_RECORDS_LOADED            = 22;
+    protected static final int EVENT_NV_READY                       = 23;
+    protected static final int EVENT_SET_ENHANCED_VP                = 24;
+    protected static final int EVENT_EMERGENCY_CALLBACK_MODE_ENTER  = 25;
+    protected static final int EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE = 26;
 
     // Key used to read/write current CLIR setting
     public static final String CLIR_KEY = "clir_key";
@@ -105,11 +106,14 @@ public abstract class PhoneBase implements Phone {
     // Key used to read/write "disable DNS server check" pref (used for testing)
     public static final String DNS_SERVER_CHECK_DISABLED_KEY = "dns_server_check_disabled_key";
 
-    //***** Instance Variables
+    /* Instance Variables */
     public CommandsInterface mCM;
     protected IccFileHandler mIccFileHandler;
     boolean mDnsCheckDisabled = false;
     public DataConnectionTracker mDataConnection;
+    boolean mDoesRilSendMultipleCallRing;
+    int mCallRingContinueToken = 0;
+    int mCallRingDelay;
 
     /**
      * Set a system property, unless we're in unit test mode
@@ -172,8 +176,8 @@ public abstract class PhoneBase implements Phone {
      * @param notifier An instance of DefaultPhoneNotifier,
      * unless unit testing.
      */
-    protected PhoneBase(PhoneNotifier notifier, Context context) {
-        this(notifier, context, false);
+    protected PhoneBase(PhoneNotifier notifier, Context context, CommandsInterface ci) {
+        this(notifier, context, ci, false);
     }
 
     /**
@@ -185,11 +189,12 @@ public abstract class PhoneBase implements Phone {
      * @param unitTestMode when true, prevents notifications
      * of state change events
      */
-    protected PhoneBase(PhoneNotifier notifier, Context context,
+    protected PhoneBase(PhoneNotifier notifier, Context context, CommandsInterface ci,
             boolean unitTestMode) {
         this.mNotifier = notifier;
         this.mContext = context;
         mLooper = Looper.myLooper();
+        mCM = ci;
 
         setPropertiesByCarrier();
 
@@ -197,6 +202,70 @@ public abstract class PhoneBase implements Phone {
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         mDnsCheckDisabled = sp.getBoolean(DNS_SERVER_CHECK_DISABLED_KEY, false);
+        mCM.setOnCallRing(this, EVENT_CALL_RING, null);
+
+        /**
+         *  Some RIL's don't always send RIL_UNSOL_CALL_RING so it needs
+         *  to be generated locally. Ideally all ring tones should be loops
+         * and this wouldn't be necessary. But to minimize changes to upper
+         * layers it is requested that it be generated by lower layers.
+         *
+         * By default old phones won't have the property set but do generate
+         * the RIL_UNSOL_CALL_RING so the default if there is no property is
+         * true.
+         */
+        mDoesRilSendMultipleCallRing = SystemProperties.getBoolean(
+                TelephonyProperties.PROPERTY_RIL_SENDS_MULTIPLE_CALL_RING, true);
+        Log.d(LOG_TAG, "mDoesRilSendMultipleCallRing=" + mDoesRilSendMultipleCallRing);
+
+        mCallRingDelay = SystemProperties.getInt(
+                TelephonyProperties.PROPERTY_CALL_RING_DELAY, 3000);
+        Log.d(LOG_TAG, "mCallRingDelay=" + mCallRingDelay);
+    }
+
+    public void dispose() {
+        synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+            mCM.unSetOnCallRing(this);
+        }
+    }
+
+    /**
+     * When overridden the derived class needs to call
+     * super.handleMessage(msg) so this method has a
+     * a chance to process the message.
+     *
+     * @param msg
+     */
+    @Override
+    public void handleMessage(Message msg) {
+        AsyncResult ar;
+
+        switch(msg.what) {
+            case EVENT_CALL_RING:
+                Log.d(LOG_TAG, "Event EVENT_CALL_RING Received state=" + getState());
+                ar = (AsyncResult)msg.obj;
+                if (ar.exception == null) {
+                    Phone.State state = getState();
+                    if ((!mDoesRilSendMultipleCallRing)
+                            && ((state == Phone.State.RINGING) || (state == Phone.State.IDLE))) {
+                        mCallRingContinueToken += 1;
+                        sendIncomingCallRingNotification(mCallRingContinueToken);
+                    } else {
+                        notifyIncomingRing();
+                    }
+                }
+                break;
+
+            case EVENT_CALL_RING_CONTINUE:
+                Log.d(LOG_TAG, "Event EVENT_CALL_RING_CONTINUE Received stat=" + getState());
+                if (getState() == Phone.State.RINGING) {
+                    sendIncomingCallRingNotification(msg.arg1);
+                }
+                break;
+
+            default:
+                throw new RuntimeException("unexpected event not handled");
+        }
     }
 
     // Inherited documentation suffices.
@@ -288,16 +357,6 @@ public abstract class PhoneBase implements Phone {
     // Inherited documentation suffices.
     public void unregisterForInCallVoicePrivacyOff(Handler h){
         mCM.unregisterForInCallVoicePrivacyOff(h);
-    }
-
-    /**
-     * Notifiy registrants of a new ringing Connection.
-     * Subclasses of Phone probably want to replace this with a
-     * version scoped to their packages
-     */
-    protected void notifyNewRingingConnectionP(Connection cn) {
-        AsyncResult ar = new AsyncResult(null, cn, null);
-        mNewRingingConnectionRegistrants.notifyRegistrants(ar);
     }
 
     // Inherited documentation suffices.
@@ -553,16 +612,22 @@ public abstract class PhoneBase implements Phone {
         }
     }
 
-    /*
-     * Retrieves the Handler of the Phone instance
+    /**
+     * Get state
      */
-    public abstract Handler getHandler();
+    public abstract Phone.State getState();
 
     /**
      * Retrieves the IccFileHandler of the Phone instance
      */
     public abstract IccFileHandler getIccFileHandler();
 
+    /*
+     * Retrieves the Handler of the Phone instance
+     */
+    public Handler getHandler() {
+        return this;
+    }
 
     /**
      *  Query the status of the CDMA roaming preference
@@ -901,5 +966,40 @@ public abstract class PhoneBase implements Phone {
 
         mDataConnection.setState(dcState);
         notifyDataConnection(null);
+    }
+
+    /**
+     * Notifiy registrants of a new ringing Connection.
+     * Subclasses of Phone probably want to replace this with a
+     * version scoped to their packages
+     */
+    protected void notifyNewRingingConnectionP(Connection cn) {
+        AsyncResult ar = new AsyncResult(null, cn, null);
+        mNewRingingConnectionRegistrants.notifyRegistrants(ar);
+    }
+
+    /**
+     * Notify registrants of a RING event.
+     */
+    private void notifyIncomingRing() {
+        AsyncResult ar = new AsyncResult(null, this, null);
+        mIncomingRingRegistrants.notifyRegistrants(ar);
+    }
+
+    /**
+     * Send the incoming call Ring notification if conditions are right.
+     */
+    private void sendIncomingCallRingNotification(int token) {
+        if (!mDoesRilSendMultipleCallRing && (token == mCallRingContinueToken)) {
+            Log.d(LOG_TAG, "Sending notifyIncomingRing");
+            notifyIncomingRing();
+            sendMessageDelayed(
+                    obtainMessage(EVENT_CALL_RING_CONTINUE, token, 0), mCallRingDelay);
+        } else {
+            Log.d(LOG_TAG, "Ignoring ring notification request,"
+                    + " mDoesRilSendMultipleCallRing=" + mDoesRilSendMultipleCallRing
+                    + " token=" + token
+                    + " mCallRingContinueToken=" + mCallRingContinueToken);
+        }
     }
 }
