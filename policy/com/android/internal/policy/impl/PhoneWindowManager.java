@@ -150,12 +150,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
     static public final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
 
-    // Vibrator pattern for haptic feedback of a long press.
-    private static final long[] LONG_PRESS_VIBE_PATTERN = {0, 1, 20, 21};
-    
-    // Vibrator pattern for haptic feedback of virtual key press.
-    private static final long[] VIRTUAL_KEY_VIBE_PATTERN = {0, 35};
-    
     final Object mLock = new Object();
     
     Context mContext;
@@ -163,6 +157,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     LocalPowerManager mPowerManager;
     Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
 
+    // Vibrator pattern for haptic feedback of a long press.
+    long[] mLongPressVibePattern;
+    
+    // Vibrator pattern for haptic feedback of virtual key press.
+    long[] mVirtualKeyVibePattern;
+    
     /** If true, hitting shift & menu will broadcast Intent.ACTION_BUG_REPORT */
     boolean mEnableShiftMenuBugReports = false;
     
@@ -1812,6 +1812,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
     
+    static long[] getLongIntArray(Resources r, int resid) {
+        int[] ar = r.getIntArray(resid);
+        if (ar == null) {
+            return null;
+        }
+        long[] out = new long[ar.length];
+        for (int i=0; i<ar.length; i++) {
+            out[i] = ar[i];
+        }
+        return out;
+    }
+    
     /** {@inheritDoc} */
     public void systemReady() {
         try {
@@ -1826,6 +1838,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             synchronized (mLock) {
                 updateOrientationListenerLp();
                 mVibrator = new Vibrator();
+                mLongPressVibePattern = getLongIntArray(mContext.getResources(),
+                        com.android.internal.R.array.config_longPressVibePattern);
+                mVirtualKeyVibePattern = getLongIntArray(mContext.getResources(),
+                        com.android.internal.R.array.config_virtualKeyVibePattern);
             }
         } catch (RemoteException e) {
             // Ignore
@@ -1906,7 +1922,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         switch (effectId) {
             case HapticFeedbackConstants.LONG_PRESS:
-                mVibrator.vibrate(LONG_PRESS_VIBE_PATTERN, -1);
+                mVibrator.vibrate(mLongPressVibePattern, -1);
                 return true;
         }
         return false;
@@ -1915,7 +1931,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void keyFeedbackFromInput(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN
                 && (event.getFlags()&KeyEvent.FLAG_VIRTUAL_HARD_KEY) != 0) {
-            mVibrator.vibrate(VIRTUAL_KEY_VIBE_PATTERN, -1);
+            mVibrator.vibrate(mVirtualKeyVibePattern, -1);
         }
     }
     
