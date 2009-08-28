@@ -1388,7 +1388,7 @@ public interface Phone {
      */
     String getIccSerialNumber();
 
-    //***** CDMA support methods
+    /* CDMA support methods */
 
     /*
      * TODO(Moto) TODO(Teleca): can getCdmaMin, getEsn, getMeid use more generic calls

@@ -26,7 +26,6 @@ import android.database.SQLException;
 import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -35,7 +34,6 @@ import android.os.RegistrantList;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.provider.Telephony;
 import android.telephony.CellLocation;
 import android.telephony.PhoneNumberUtils;
@@ -96,19 +94,19 @@ public class CDMAPhone extends PhoneBase {
     static final int RESTART_ECM_TIMER = 0; // restart Ecm timer
     static final int CANCEL_ECM_TIMER = 1; // cancel Ecm timer
 
-    //***** Instance Variables
+    // Instance Variables
     CdmaCallTracker mCT;
     CdmaSMSDispatcher mSMS;
     CdmaServiceStateTracker mSST;
     RuimFileHandler mRuimFileHandler;
     RuimRecords mRuimRecords;
     RuimCard mRuimCard;
-    MyHandler h;
     RuimPhoneBookInterfaceManager mRuimPhoneBookInterfaceManager;
     RuimSmsInterfaceManager mRuimSmsInterfaceManager;
     PhoneSubInfo mSubInfo;
     EriManager mEriManager;
     WakeLock mWakeLock;
+
 
     // mNvLoadedRegistrants are informed after the EVENT_NV_READY
     private RegistrantList mNvLoadedRegistrants = new RegistrantList();
@@ -139,17 +137,14 @@ public class CDMAPhone extends PhoneBase {
     Registrant mPostDialHandler;
 
 
-    //***** Constructors
+    // Constructors
     public CDMAPhone(Context context, CommandsInterface ci, PhoneNotifier notifier) {
         this(context,ci,notifier, false);
     }
 
     public CDMAPhone(Context context, CommandsInterface ci, PhoneNotifier notifier,
             boolean unitTestMode) {
-        super(notifier, context, unitTestMode);
-
-        h = new MyHandler();
-        mCM = ci;
+        super(notifier, context, ci, unitTestMode);
 
         mCM.setPhoneType(RILConstants.CDMA_PHONE);
         mCT = new CdmaCallTracker(this);
@@ -164,15 +159,14 @@ public class CDMAPhone extends PhoneBase {
         mSubInfo = new PhoneSubInfo(this);
         mEriManager = new EriManager(this, context, EriManager.ERI_FROM_XML);
 
-        mCM.registerForAvailable(h, EVENT_RADIO_AVAILABLE, null);
-        mRuimRecords.registerForRecordsLoaded(h, EVENT_RUIM_RECORDS_LOADED, null);
-        mCM.registerForOffOrNotAvailable(h, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
-        mCM.registerForOn(h, EVENT_RADIO_ON, null);
-        mCM.setOnSuppServiceNotification(h, EVENT_SSN, null);
-        mCM.setOnCallRing(h, EVENT_CALL_RING, null);
-        mSST.registerForNetworkAttach(h, EVENT_REGISTERED_TO_NETWORK, null);
-        mCM.registerForNVReady(h, EVENT_NV_READY, null);
-        mCM.setEmergencyCallbackMode(h, EVENT_EMERGENCY_CALLBACK_MODE_ENTER, null);
+        mCM.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
+        mRuimRecords.registerForRecordsLoaded(this, EVENT_RUIM_RECORDS_LOADED, null);
+        mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
+        mCM.registerForOn(this, EVENT_RADIO_ON, null);
+        mCM.setOnSuppServiceNotification(this, EVENT_SSN, null);
+        mSST.registerForNetworkAttach(this, EVENT_REGISTERED_TO_NETWORK, null);
+        mCM.registerForNVReady(this, EVENT_NV_READY, null);
+        mCM.setEmergencyCallbackMode(this, EVENT_EMERGENCY_CALLBACK_MODE_ENTER, null);
 
         PowerManager pm
             = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -207,23 +201,23 @@ public class CDMAPhone extends PhoneBase {
         // Updates MCC MNC device configuration information
         updateMccMncConfiguration(operatorNumeric);
 
+
         // Notify voicemails.
         notifier.notifyMessageWaitingChanged(this);
     }
 
     public void dispose() {
         synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+            super.dispose();
 
             //Unregister from all former registered events
-            mRuimRecords.unregisterForRecordsLoaded(h); //EVENT_RUIM_RECORDS_LOADED
-            mCM.unregisterForAvailable(h); //EVENT_RADIO_AVAILABLE
-            mCM.unregisterForOffOrNotAvailable(h); //EVENT_RADIO_OFF_OR_NOT_AVAILABLE
-            mCM.unregisterForOn(h); //EVENT_RADIO_ON
-            mCM.unregisterForNVReady(h); //EVENT_NV_READY
-            mSST.unregisterForNetworkAttach(h); //EVENT_REGISTERED_TO_NETWORK
-            mCM.unSetOnSuppServiceNotification(h);
-            mCM.unSetOnCallRing(h);
-
+            mRuimRecords.unregisterForRecordsLoaded(this); //EVENT_RUIM_RECORDS_LOADED
+            mCM.unregisterForAvailable(this); //EVENT_RADIO_AVAILABLE
+            mCM.unregisterForOffOrNotAvailable(this); //EVENT_RADIO_OFF_OR_NOT_AVAILABLE
+            mCM.unregisterForOn(this); //EVENT_RADIO_ON
+            mCM.unregisterForNVReady(this); //EVENT_NV_READY
+            mSST.unregisterForNetworkAttach(this); //EVENT_REGISTERED_TO_NETWORK
+            mCM.unSetOnSuppServiceNotification(this);
 
             //Force all referenced classes to unregister their former registered events
             mCT.dispose();
@@ -262,8 +256,6 @@ public class CDMAPhone extends PhoneBase {
         }
     }
 
-
-    //***** Overridden from Phone
     public ServiceState getServiceState() {
         return mSST.ss;
     }
@@ -701,7 +693,7 @@ public class CDMAPhone extends PhoneBase {
                                    Message onComplete) {
         Message resp;
         mVmNumber = voiceMailNumber;
-        resp = h.obtainMessage(EVENT_SET_VM_NUMBER_DONE, 0, 0, onComplete);
+        resp = obtainMessage(EVENT_SET_VM_NUMBER_DONE, 0, 0, onComplete);
         mRuimRecords.setVoiceMailNumber(alphaTag, mVmNumber, resp);
     }
 
@@ -826,14 +818,6 @@ public class CDMAPhone extends PhoneBase {
         super.notifyNewRingingConnectionP(c);
     }
 
-    /**
-     * Notifiy registrants of a RING event.
-     */
-    void notifyIncomingRing() {
-        AsyncResult ar = new AsyncResult(null, this, null);
-        mIncomingRingRegistrants.notifyRegistrants(ar);
-    }
-
     /*package*/ void notifyDisconnect(Connection cn) {
         mDisconnectRegistrants.notifyResult(cn);
     }
@@ -883,7 +867,7 @@ public class CDMAPhone extends PhoneBase {
             mWakeLock.release();
         }
         // Send a message which will invoke handleExitEmergencyCallbackMode
-        mCM.exitEmergencyCallbackMode(h.obtainMessage(EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE));
+        mCM.exitEmergencyCallbackMode(obtainMessage(EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE));
     }
 
     private void handleEnterEmergencyCallbackMode(Message msg) {
@@ -902,7 +886,7 @@ public class CDMAPhone extends PhoneBase {
             // if no one invokes exitEmergencyCallbackMode() directly.
             long delayInMillis = SystemProperties.getLong(
                     TelephonyProperties.PROPERTY_ECM_EXIT_TIMER, DEFAULT_ECM_EXIT_TIMER_VALUE);
-            h.postDelayed(mExitEcmRunnable, delayInMillis);
+            postDelayed(mExitEcmRunnable, delayInMillis);
             // We don't want to go to sleep while in Ecm
             mWakeLock.acquire();
         }
@@ -915,7 +899,7 @@ public class CDMAPhone extends PhoneBase {
                     + ar.exception + mIsPhoneInEcmState);
         }
         // Remove pending exit Ecm runnable, if any
-        h.removeCallbacks(mExitEcmRunnable);
+        removeCallbacks(mExitEcmRunnable);
 
         if (mEcmExitRespRegistrant != null) {
             mEcmExitRespRegistrant.notifyRegistrant(ar);
@@ -941,13 +925,13 @@ public class CDMAPhone extends PhoneBase {
     void handleTimerInEmergencyCallbackMode(int action) {
         switch(action) {
         case CANCEL_ECM_TIMER:
-            h.removeCallbacks(mExitEcmRunnable);
+            removeCallbacks(mExitEcmRunnable);
             mEcmTimerResetRegistrants.notifyResult(new Boolean(true));
             break;
         case RESTART_ECM_TIMER:
             long delayInMillis = SystemProperties.getLong(
                     TelephonyProperties.PROPERTY_ECM_EXIT_TIMER, DEFAULT_ECM_EXIT_TIMER_VALUE);
-            h.postDelayed(mExitEcmRunnable, delayInMillis);
+            postDelayed(mExitEcmRunnable, delayInMillis);
             mEcmTimerResetRegistrants.notifyResult(new Boolean(false));
             break;
         default:
@@ -969,123 +953,108 @@ public class CDMAPhone extends PhoneBase {
         mEcmTimerResetRegistrants.remove(h);
     }
 
-    //***** Inner Classes
-    class MyHandler extends Handler {
-        MyHandler() {
-        }
+    @Override
+    public void handleMessage(Message msg) {
+        AsyncResult ar;
+        Message     onComplete;
 
-        MyHandler(Looper l) {
-            super(l);
-        }
+        switch(msg.what) {
+            case EVENT_RADIO_AVAILABLE: {
+                mCM.getBasebandVersion(obtainMessage(EVENT_GET_BASEBAND_VERSION_DONE));
 
-        @Override
-        public void handleMessage(Message msg) {
-            AsyncResult ar;
-            Message     onComplete;
+                mCM.getDeviceIdentity(obtainMessage(EVENT_GET_DEVICE_IDENTITY_DONE));
+            }
+            break;
 
-            switch(msg.what) {
-                case EVENT_RADIO_AVAILABLE: {
-                    mCM.getBasebandVersion(obtainMessage(EVENT_GET_BASEBAND_VERSION_DONE));
+            case EVENT_GET_BASEBAND_VERSION_DONE:{
+                ar = (AsyncResult)msg.obj;
 
-                    mCM.getDeviceIdentity(obtainMessage(EVENT_GET_DEVICE_IDENTITY_DONE));
+                if (ar.exception != null) {
+                    break;
                 }
-                break;
 
-                case EVENT_GET_BASEBAND_VERSION_DONE:{
-                    ar = (AsyncResult)msg.obj;
+                if (DBG) Log.d(LOG_TAG, "Baseband version: " + ar.result);
+                setSystemProperty(TelephonyProperties.PROPERTY_BASEBAND_VERSION, (String)ar.result);
+            }
+            break;
 
-                    if (ar.exception != null) {
-                        break;
-                    }
+            case EVENT_GET_DEVICE_IDENTITY_DONE:{
+                ar = (AsyncResult)msg.obj;
 
-                    if (DBG) Log.d(LOG_TAG, "Baseband version: " + ar.result);
-                    setSystemProperty(TelephonyProperties.PROPERTY_BASEBAND_VERSION, (String)ar.result);
+                if (ar.exception != null) {
+                    break;
                 }
-                break;
+                String[] respId = (String[])ar.result;
+                mEsn  =  respId[2];
+                mMeid =  respId[3];
+            }
+            break;
 
-                case EVENT_GET_DEVICE_IDENTITY_DONE:{
-                    ar = (AsyncResult)msg.obj;
+            case EVENT_EMERGENCY_CALLBACK_MODE_ENTER:{
+                handleEnterEmergencyCallbackMode(msg);
+            }
+            break;
 
-                    if (ar.exception != null) {
-                        break;
-                    }
-                    String[] respId = (String[])ar.result;
-                    mEsn  =  respId[2];
-                    mMeid =  respId[3];
+            case  EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE:{
+                handleExitEmergencyCallbackMode(msg);
+            }
+            break;
+
+            case EVENT_RUIM_RECORDS_LOADED:{
+                Log.d(LOG_TAG, "Event EVENT_RUIM_RECORDS_LOADED Received");
+            }
+            break;
+
+            case EVENT_RADIO_OFF_OR_NOT_AVAILABLE:{
+                Log.d(LOG_TAG, "Event EVENT_RADIO_OFF_OR_NOT_AVAILABLE Received");
+            }
+            break;
+
+            case EVENT_RADIO_ON:{
+                Log.d(LOG_TAG, "Event EVENT_RADIO_ON Received");
+            }
+            break;
+
+            case EVENT_SSN:{
+                Log.d(LOG_TAG, "Event EVENT_SSN Received");
+            }
+            break;
+
+            case EVENT_REGISTERED_TO_NETWORK:{
+                Log.d(LOG_TAG, "Event EVENT_REGISTERED_TO_NETWORK Received");
+            }
+            break;
+
+            case EVENT_NV_READY:{
+                Log.d(LOG_TAG, "Event EVENT_NV_READY Received");
+                //Inform the Service State Tracker
+                mEriManager.loadEriFile();
+                mNvLoadedRegistrants.notifyRegistrants();
+                if(mEriManager.isEriFileLoaded()) {
+                    // when the ERI file is loaded
+                    Log.d(LOG_TAG, "ERI read, notify registrants");
+                    mEriFileLoadedRegistrants.notifyRegistrants();
                 }
-                break;
+                setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE,"false");
+            }
+            break;
 
-                case EVENT_EMERGENCY_CALLBACK_MODE_ENTER:{
-                    handleEnterEmergencyCallbackMode(msg);
+            case EVENT_SET_VM_NUMBER_DONE:{
+                ar = (AsyncResult)msg.obj;
+                if (IccException.class.isInstance(ar.exception)) {
+                    storeVoiceMailNumber(mVmNumber);
+                    ar.exception = null;
                 }
-                break;
+                onComplete = (Message) ar.userObj;
+                if (onComplete != null) {
+                    AsyncResult.forMessage(onComplete, ar.result, ar.exception);
+                    onComplete.sendToTarget();
+                }
+            }
+            break;
 
-                case  EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE:{
-                    handleExitEmergencyCallbackMode(msg);
-                }
-                break;
-
-                case EVENT_RUIM_RECORDS_LOADED:{
-                    Log.d(LOG_TAG, "Event EVENT_RUIM_RECORDS_LOADED Received");
-                }
-                break;
-
-                case EVENT_RADIO_OFF_OR_NOT_AVAILABLE:{
-                    Log.d(LOG_TAG, "Event EVENT_RADIO_OFF_OR_NOT_AVAILABLE Received");
-                }
-                break;
-
-                case EVENT_RADIO_ON:{
-                    Log.d(LOG_TAG, "Event EVENT_RADIO_ON Received");
-                }
-                break;
-
-                case EVENT_SSN:{
-                    Log.d(LOG_TAG, "Event EVENT_SSN Received");
-                }
-                break;
-
-                case EVENT_CALL_RING:{
-                    Log.d(LOG_TAG, "Event EVENT_CALL_RING Received");
-                }
-                break;
-
-                case EVENT_REGISTERED_TO_NETWORK:{
-                    Log.d(LOG_TAG, "Event EVENT_REGISTERED_TO_NETWORK Received");
-                }
-                break;
-
-                case EVENT_NV_READY:{
-                    Log.d(LOG_TAG, "Event EVENT_NV_READY Received");
-                    //Inform the Service State Tracker
-                    mEriManager.loadEriFile();
-                    mNvLoadedRegistrants.notifyRegistrants();
-                    if(mEriManager.isEriFileLoaded()) {
-                        // when the ERI file is loaded
-                        Log.d(LOG_TAG, "ERI read, notify registrants");
-                        mEriFileLoadedRegistrants.notifyRegistrants();
-                    }
-                    setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE,"false");
-                }
-                break;
-
-                case EVENT_SET_VM_NUMBER_DONE:{
-                    ar = (AsyncResult)msg.obj;
-                    if (IccException.class.isInstance(ar.exception)) {
-                        storeVoiceMailNumber(mVmNumber);
-                        ar.exception = null;
-                    }
-                    onComplete = (Message) ar.userObj;
-                    if (onComplete != null) {
-                        AsyncResult.forMessage(onComplete, ar.result, ar.exception);
-                        onComplete.sendToTarget();
-                    }
-                }
-                break;
-
-                default:{
-                    throw new RuntimeException("unexpected event not handled");
-                }
+            default:{
+                super.handleMessage(msg);
             }
         }
     }
@@ -1135,13 +1104,6 @@ public class CDMAPhone extends PhoneBase {
      */
     public final void setSystemProperty(String property, String value) {
         super.setSystemProperty(property, value);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Handler getHandler() {
-        return h;
     }
 
     /**
