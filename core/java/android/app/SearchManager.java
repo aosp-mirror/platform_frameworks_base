@@ -251,7 +251,7 @@ import java.util.List;
  * 
  * <p>Once an application is configured to provide search suggestions, those same suggestions can
  * easily be made available to the system-wide Quick Search Box, providing faster access to its
- * content from on central prominent place. See
+ * content from one central prominent place. See
  * <a href="#ExposingSearchSuggestionsToQuickSearchBox">Exposing Search Suggestions to Quick Search
  * Box</a> for more details.
  * 
@@ -505,7 +505,7 @@ import java.util.List;
  *
  *     <tr><th>{@link #SUGGEST_COLUMN_SPINNER_WHILE_REFRESHING}</th>
  *         <td>This column is used to specify that a spinner should be shown in lieu of an icon2
- *             while the shortcut of this suggestion is being refreshed.</td>
+ *             while the shortcut of this suggestion is being refreshed in Quick Search Box.</td>
  *         <td align="center">No.  Only applicable to sources included in Quick Search Box.</td>
  *     </tr>
  * 
@@ -585,39 +585,45 @@ import java.util.List;
  * <a name="ExposingSearchSuggestionsToQuickSearchBox"></a>
  * <h3>Exposing Search Suggestions to Quick Search Box</h3>
  * 
- * <p>Once your application is setup to provide search suggestions, making them available to the
+ * <p>Once your application is set up to provide search suggestions, making them available to the
  * globally accessable Quick Search Box is as easy as setting android:includeInGlobalSearch to
  * "true" in your searchable metadata file.  Beyond that, here are some more details of how
  * suggestions interact with Quick Search Box, and optional ways that you may customize suggestions
  * for your application.
+ * 
+ * <p><b>Important Note:</b>  By default, your application will not be enabled as a suggestion
+ * provider (or "searchable item") in Quick Search Box. Once your app is installed, the user must
+ * enable it as a "searchable item" in the Search settings in order to receive your app's
+ * suggestions in Quick Search Box. You should consider how to message this to users of your app -
+ * perhaps with a note to the user the first time they launch the app about how to enable search
+ * suggestions. This gives your app a chance to be queried for suggestions as the user types into
+ * Quick Search Box, though exactly how or if your suggestions will be surfaced is decided by Quick
+ * Search Box.
  *
  * <p><b>Source Ranking:</b>  Once your application's search results are made available to Quick
- * Search Box, how they surface to the user for a particular query will depend on how many
- * other apps have results for that query, and how often the user has clicked on your results
- * compared to the other apps'.  The apps with the best track record within Quick Search
- * Box will get queried earlier and have a better chance of showing their results in the top few
- * slots.  If there are more results than can be displayed to the user within a screen or two, the
- * results may spill into a "more results" section that groups the remaining results by
- * source.  The newest apps with little usage information are given middle of the road positioning
- * until enough usage information is available to rank it as usual.  The exact formula for ranking
- * the results is not set in stone, but suffice it is to say that providing quality results will
- * increase the likelihood that your app's suggestions are provided in a prominent position, and
- * apps that provide lower quality suggestions will be more likely to be pushed into the spillover
- * area.
+ * Search Box, how they surface to the user for a particular query will be determined as appropriate
+ * by Quick Search Box ranking. This may depend on how many other apps have results for that query,
+ * and how often the user has clicked on your results compared to the other apps - but there is no
+ * guarantee about how ranking will occur, or whether your app's suggestions will show at all for
+ * a given query.  In general, you can expect that providing quality results will increase the
+ * likelihood that your app's suggestions are provided in a prominent position, and apps that
+ * provide lower quality suggestions will be more likely to be ranked lower and/or not displayed.
  *
  * <p><b>Search Settings:</b>  Each app that is available to Quick Search Box has an entry in the
  * system settings where the user can enable or disable the inclusion of its results.  Below the
  * name of the application, each application may provide a brief description of what kind of
  * information will be made available via a search settings description string pointed to by the
- * android:searchSettingsDescription attribute in the searchable metadata.
+ * android:searchSettingsDescription attribute in the searchable metadata. Note that the
+ * user will need to visit this settings menu to enable search suggestions for your app before your
+ * app will have a chance to provide search suggestions to Quick Search Box - see the section
+ * called "Important Note" above.
  *
- * <p><b>Shortcuts:</b>  Suggestions that are clicked on by the user are automatically made into
- * shortcuts, or, copied so they can quickly be displayed to the user before querying any of
- * the sources. Thereafter, the shortcutted suggestion will be displayed for the query that yielded
- * the suggestion and for any prefixes of that query.  When multiple shortcuts are made available
- * for a given query, they are ranked based on recency and the number of clicks they have received.
- * You can control how your suggestions are made into shortcuts, and whether they are refreshed,
- * using the {@link #SUGGEST_COLUMN_SHORTCUT_ID} column:
+ * <p><b>Shortcuts:</b>  Suggestions that are clicked on by the user may be automatically made into
+ * shortcuts, which are suggestions that have been copied from your provider in order to be quickly
+ * displayed without the need to re-query the original sources. Shortcutted suggestions may be
+ * displayed for the query that yielded the suggestion and for any prefixes of that query. You can
+ * request how to have your app's suggestions made into shortcuts, and whether they should be
+ * refreshed, using the {@link #SUGGEST_COLUMN_SHORTCUT_ID} column:
  * <ul><li>Suggestions that do not include a shortcut id column will be made into shortcuts and
  * never refreshed.  This makes sense for suggestions that refer to data that will never be changed
  * or removed.</li>
@@ -634,6 +640,9 @@ import java.util.List;
  * right hand icon until the refresh is complete.</li>
  * <li>Finally, to prevent a suggestion from being copied into a shortcut, you may provide a
  * shortcut id with a value of {@link #SUGGEST_NEVER_MAKE_SHORTCUT}.</li></ul>
+ * 
+ * Note that Quick Search Box will ultimately decide whether to shortcut your app's suggestions,
+ * considering these values as a strong request from your application.
  * 
  * <a name="ActionKeys"></a>
  * <h3>Action Keys</h3>
@@ -807,7 +816,12 @@ import java.util.List;
  *                         and editing.</td>
  *                 </tr>
  *                 </tbody>
- *            </table></td>
+ *            </table>
+ *            Note that the icon of your app will likely be shown alongside any badge you specify,
+ *            to differentiate search in your app from Quick Search Box. The display of this icon
+ *            is not under the app's control.
+ *         </td>
+ *            
  *         <td align="center">No</td>
  *     </tr>
  *     
