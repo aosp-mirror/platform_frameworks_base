@@ -21,13 +21,18 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ViewRoot;
 
@@ -51,7 +56,7 @@ public class WallpaperManager {
     
     static class Globals extends IWallpaperManagerCallback.Stub {
         private IWallpaperManager mService;
-        private Drawable mWallpaper;
+        private Bitmap mWallpaper;
         
         Globals() {
             IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
@@ -69,7 +74,7 @@ public class WallpaperManager {
             }
         }
         
-        public Drawable peekWallpaper(Context context) {
+        public Bitmap peekWallpaperBitmap(Context context) {
             synchronized (this) {
                 if (mWallpaper != null) {
                     return mWallpaper;
@@ -79,18 +84,82 @@ public class WallpaperManager {
             }
         }
         
-        private Drawable getCurrentWallpaperLocked(Context context) {
+        private Bitmap getCurrentWallpaperLocked(Context context) {
             try {
-                ParcelFileDescriptor fd = mService.getWallpaper(this);
+                Bundle params = new Bundle();
+                ParcelFileDescriptor fd = mService.getWallpaper(this, params);
                 if (fd != null) {
-                    Bitmap bm = BitmapFactory.decodeFileDescriptor(
-                            fd.getFileDescriptor(), null, null);
-                    if (bm != null) {
-                        // For now clear the density until we figure out how
-                        // to deal with it for wallpapers.
-                        bm.setDensity(0);
-                        return new BitmapDrawable(context.getResources(), bm);
+                    int width = params.getInt("width", 0);
+                    int height = params.getInt("height", 0);
+                    
+                    if (width <= 0 || height <= 0) {
+                        // Degenerate case: no size requested, just load
+                        // bitmap as-is.
+                        Bitmap bm = BitmapFactory.decodeFileDescriptor(
+                                fd.getFileDescriptor(), null, null);
+                        try {
+                            fd.close();
+                        } catch (IOException e) {
+                        }
+                        if (bm != null) {
+                            bm.setDensity(DisplayMetrics.DENSITY_DEVICE);
+                        }
+                        return bm;
                     }
+                    
+                    // Load the bitmap with full color depth, to preserve
+                    // quality for later processing.
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inDither = false;
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                    Bitmap bm = BitmapFactory.decodeFileDescriptor(
+                            fd.getFileDescriptor(), null, options);
+                    try {
+                        fd.close();
+                    } catch (IOException e) {
+                    }
+                    if (bm == null) {
+                        return bm;
+                    }
+                    bm.setDensity(DisplayMetrics.DENSITY_DEVICE);
+                    
+                    // This is the final bitmap we want to return.
+                    Bitmap newbm = Bitmap.createBitmap(width, height,
+                            bm.getConfig());
+                    newbm.setDensity(DisplayMetrics.DENSITY_DEVICE);
+                    Canvas c = new Canvas(newbm);
+                    c.setDensity(DisplayMetrics.DENSITY_DEVICE);
+                    Rect targetRect = new Rect();
+                    targetRect.left = targetRect.top = 0;
+                    targetRect.right = bm.getWidth();
+                    targetRect.bottom = bm.getHeight();
+                    
+                    int deltaw = width - targetRect.right;
+                    int deltah = height - targetRect.bottom;
+                    
+                    if (deltaw > 0 || deltah > 0) {
+                        // We need to scale up so it covers the entire
+                        // area.
+                        float scale = 1.0f;
+                        if (deltaw > deltah) {
+                            scale = width / (float)targetRect.right;
+                        } else {
+                            scale = height / (float)targetRect.bottom;
+                        }
+                        targetRect.right = (int)(targetRect.right*scale);
+                        targetRect.bottom = (int)(targetRect.bottom*scale);
+                        deltaw = width - targetRect.right;
+                        deltah = height - targetRect.bottom;
+                    }
+                    
+                    targetRect.offset(deltaw/2, deltah/2);
+                    Paint paint = new Paint();
+                    paint.setFilterBitmap(true);
+                    paint.setDither(true);
+                    c.drawBitmap(bm, null, targetRect, paint);
+                    
+                    bm.recycle();
+                    return newbm;
                 }
             } catch (RemoteException e) {
             }
@@ -149,7 +218,8 @@ public class WallpaperManager {
      * null pointer if these is none.
      */
     public Drawable peekDrawable() {
-        return getGlobals().peekWallpaper(mContext);
+        Bitmap bm = getGlobals().peekWallpaperBitmap(mContext);
+        return bm != null ? new BitmapDrawable(mContext.getResources(), bm) : null;
     }
 
     /**

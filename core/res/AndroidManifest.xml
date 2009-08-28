@@ -898,7 +898,7 @@
     <permission android:name="android.permission.BIND_WALLPAPER"
         android:label="@string/permlab_bindWallpaper"
         android:description="@string/permdesc_bindWallpaper"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows low-level access to setting the orientation (actually
          rotation) of the screen.  Not for use by normal applications. -->

@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.app.IWallpaperManagerCallback;
 import android.content.ComponentName;
@@ -36,7 +37,8 @@ interface IWallpaperManager {
     /**
      * Get the wallpaper.
      */
-    ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb);
+    ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb,
+            out Bundle outParams);
     
     /**
      * Clear the wallpaper.

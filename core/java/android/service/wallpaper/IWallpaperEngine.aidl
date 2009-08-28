@@ -20,5 +20,7 @@ package android.service.wallpaper;
  * @hide
  */
 oneway interface IWallpaperEngine {
+    void setDesiredSize(int width, int height);
+    void setVisibility(boolean visible);
 	void destroy();
 }

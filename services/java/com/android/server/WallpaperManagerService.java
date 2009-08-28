@@ -32,6 +32,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.FileObserver;
@@ -232,6 +233,16 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 mWidth = width;
                 mHeight = height;
                 saveSettingsLocked();
+                if (mWallpaperConnection != null) {
+                    if (mWallpaperConnection.mEngine != null) {
+                        try {
+                            mWallpaperConnection.mEngine.setDesiredSize(
+                                    width, height);
+                        } catch (RemoteException e) {
+                        }
+                        notifyCallbacksLocked();
+                    }
+                }
             }
         }
     }
@@ -248,9 +259,14 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
-    public ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb) {
+    public ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb,
+            Bundle outParams) {
         synchronized (mLock) {
             try {
+                if (outParams != null) {
+                    outParams.putInt("width", mWidth);
+                    outParams.putInt("height", mHeight);
+                }
                 mCallbacks.register(cb);
                 File f = WALLPAPER_FILE;
                 if (!f.exists()) {
