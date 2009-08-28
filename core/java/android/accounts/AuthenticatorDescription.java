@@ -10,6 +10,8 @@ public class AuthenticatorDescription implements Parcelable {
     final public String packageName;
 
     public AuthenticatorDescription(String type, String packageName, int labelId, int iconId) {
+        if (type == null) throw new IllegalArgumentException("type cannot be null");
+        if (packageName == null) throw new IllegalArgumentException("packageName cannot be null");
         this.type = type;
         this.packageName = packageName;
         this.labelId = labelId;
@@ -17,6 +19,7 @@ public class AuthenticatorDescription implements Parcelable {
     }
 
     public static AuthenticatorDescription newKey(String type) {
+        if (type == null) throw new IllegalArgumentException("type cannot be null");
         return new AuthenticatorDescription(type);
     }
 
