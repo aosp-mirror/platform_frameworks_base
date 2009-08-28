@@ -44,6 +44,7 @@ public class ContentProviderOperation implements Parcelable {
     private final Integer mExpectedCount;
     private final ContentValues mValuesBackReferences;
     private final Map<Integer, Integer> mSelectionArgsBackReferences;
+    private final boolean mYieldAllowed;
 
     /**
      * Creates a {@link ContentProviderOperation} by copying the contents of a
@@ -58,6 +59,7 @@ public class ContentProviderOperation implements Parcelable {
         mExpectedCount = builder.mExpectedCount;
         mSelectionArgsBackReferences = builder.mSelectionArgsBackReferences;
         mValuesBackReferences = builder.mValuesBackReferences;
+        mYieldAllowed = builder.mYieldAllowed;
     }
 
     private ContentProviderOperation(Parcel source) {
@@ -68,7 +70,6 @@ public class ContentProviderOperation implements Parcelable {
         mSelectionArgs = source.readInt() != 0 ? source.readStringArray() : null;
         mExpectedCount = source.readInt() != 0 ? source.readInt() : null;
         mValuesBackReferences = source.readInt() != 0
-
                 ? ContentValues.CREATOR.createFromParcel(source)
                 : null;
         mSelectionArgsBackReferences = source.readInt() != 0
@@ -80,6 +81,7 @@ public class ContentProviderOperation implements Parcelable {
                 mSelectionArgsBackReferences.put(source.readInt(), source.readInt());
             }
         }
+        mYieldAllowed = source.readInt() != 0;
     }
 
     public void writeToParcel(Parcel dest, int flags) {
@@ -125,6 +127,7 @@ public class ContentProviderOperation implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        dest.writeInt(mYieldAllowed ? 1 : 0);
     }
 
     /**
@@ -165,6 +168,10 @@ public class ContentProviderOperation implements Parcelable {
 
     public Uri getUri() {
         return mUri;
+    }
+
+    public boolean isYieldAllowed() {
+        return mYieldAllowed;
     }
 
     /** @hide exposed for unit tests */
@@ -375,6 +382,7 @@ public class ContentProviderOperation implements Parcelable {
         private Integer mExpectedCount;
         private ContentValues mValuesBackReferences;
         private Map<Integer, Integer> mSelectionArgsBackReferences;
+        private boolean mYieldAllowed;
 
         /** Create a {@link Builder} of a given type. The uri must not be null. */
         private Builder(int type, Uri uri) {
@@ -542,6 +550,11 @@ public class ContentProviderOperation implements Parcelable {
                         "only updates, deletes, and asserts can have expected counts");
             }
             mExpectedCount = count;
+            return this;
+        }
+
+        public Builder withYieldAllowed(boolean yieldAllowed) {
+            mYieldAllowed = yieldAllowed;
             return this;
         }
     }
