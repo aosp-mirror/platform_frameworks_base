@@ -222,7 +222,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 
-        p.getContext().registerReceiver(mIntentReceiver, filter, null, p.h);
+        // TODO: Why is this registering the phone as the receiver of the intent
+        //       and not its own handler?
+        p.getContext().registerReceiver(mIntentReceiver, filter, null, p);
 
 
         mDataConnectionTracker = this;
