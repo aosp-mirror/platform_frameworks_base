@@ -56,10 +56,6 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
     private static final String REMOTE_IP = "net.ipremote";
     private static final String DNS_DOMAIN_SUFFICES = "net.dns.search";
 
-    private static final int CHALLENGE_ERROR_CODE = 5;
-    private static final int REMOTE_HUNG_UP_ERROR_CODE = 7;
-    private static final int AUTH_ERROR_CODE = 51;
-
     private final String TAG = VpnService.class.getSimpleName();
 
     // FIXME: profile is only needed in connecting phase, so we can just save
@@ -202,7 +198,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
     private void waitUntilConnectedOrTimedout() throws IOException {
         sleep(2000); // 2 seconds
-        for (int i = 0; i < 60; i++) {
+        for (int i = 0; i < 80; i++) {
             if (mState != VpnState.CONNECTING) {
                 break;
             } else if (VPN_IS_UP.equals(
@@ -464,22 +460,8 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
         synchronized int getSocketError() {
             for (DaemonProxy s : mDaemonList) {
-                switch (getResultFromSocket(s)) {
-                    case 0:
-                        continue;
-
-                    case AUTH_ERROR_CODE:
-                        return VpnManager.VPN_ERROR_AUTH;
-
-                    case CHALLENGE_ERROR_CODE:
-                        return VpnManager.VPN_ERROR_CHALLENGE;
-
-                    case REMOTE_HUNG_UP_ERROR_CODE:
-                        return VpnManager.VPN_ERROR_REMOTE_HUNG_UP;
-
-                    default:
-                        return VpnManager.VPN_ERROR_CONNECTION_FAILED;
-                }
+                int errCode = getResultFromSocket(s);
+                if (errCode != 0) return errCode;
             }
             return 0;
         }
