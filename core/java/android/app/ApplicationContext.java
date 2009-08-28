@@ -40,6 +40,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
@@ -1622,6 +1623,15 @@ class ApplicationContext extends Context {
              }
         }
 
+        @Override
+        public FeatureInfo[] getSystemAvailableFeatures() {
+            try {
+                return mPM.getSystemAvailableFeatures();
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
+        }
+        
         @Override
         public int checkPermission(String permName, String pkgName) {
             try {

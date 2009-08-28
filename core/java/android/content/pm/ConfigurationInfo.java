@@ -22,9 +22,9 @@ import android.os.Parcelable;
 /**
  * Information you can retrieve about hardware configuration preferences
  * declared by an application. This corresponds to information collected from the
- * AndroidManifest.xml's &lt;uses-configuration&gt; and the   &lt;uses-feature&gt;tags.
+ * AndroidManifest.xml's &lt;uses-configuration&gt; and &lt;uses-feature&gt; tags.
  */
-public class ConfigurationInfo implements Parcelable {    
+public class ConfigurationInfo implements Parcelable {
     /**
      * The kind of touch screen attached to the device.
      * One of: {@link android.content.res.Configuration#TOUCHSCREEN_NOTOUCH},
@@ -92,13 +92,13 @@ public class ConfigurationInfo implements Parcelable {
     }
 
     public String toString() {
-        return "ApplicationHardwarePreferences{"
+        return "ConfigurationInfo{"
             + Integer.toHexString(System.identityHashCode(this))
-            + ", touchscreen = " + reqTouchScreen + "}"
-            + ", inputMethod = " + reqKeyboardType + "}"
-            + ", navigation = " + reqNavigation + "}"
-            + ", reqInputFeatures = " + reqInputFeatures + "}"
-            + ", reqGlEsVersion = " + reqGlEsVersion + "}";
+            + " touchscreen = " + reqTouchScreen
+            + " inputMethod = " + reqKeyboardType
+            + " navigation = " + reqNavigation
+            + " reqInputFeatures = " + reqInputFeatures
+            + " reqGlEsVersion = " + reqGlEsVersion + "}";
     }
 
     public int describeContents() {

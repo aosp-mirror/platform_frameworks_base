@@ -832,6 +832,14 @@
     <declare-styleable name="AndroidManifestUsesLibrary" parent="AndroidManifestApplication">
         <!-- Required name of the library you use. -->
         <attr name="name" />
+        <!--  Specify whether this library is required for the application.
+              The default is true, meaning the application requires the
+              library, and does not want to be installed on devices that
+              don't support it.  If you set this to false, then this will
+              allow the application to be installed even if the library
+              doesn't exist, and you will need to check for its presence
+              dynamically at runtime. -->
+        <attr name="required" />
     </declare-styleable>
     
     <!-- The <code>supports-screens</code> specifies the screen dimensions an

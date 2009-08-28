@@ -184,9 +184,12 @@ public class PackageParser {
             int N = p.configPreferences.size();
             if (N > 0) {
                 pi.configPreferences = new ConfigurationInfo[N];
-                for (int i=0; i<N; i++) {
-                    pi.configPreferences[i] = p.configPreferences.get(i);
-                }
+                p.configPreferences.toArray(pi.configPreferences);
+            }
+            N = p.reqFeatures != null ? p.reqFeatures.size() : 0;
+            if (N > 0) {
+                pi.reqFeatures = new FeatureInfo[N];
+                p.reqFeatures.toArray(pi.reqFeatures);
             }
         }
         if ((flags&PackageManager.GET_ACTIVITIES) != 0) {
@@ -760,14 +763,32 @@ public class PackageParser {
                 XmlUtils.skipCurrentTag(parser);
 
             } else if (tagName.equals("uses-feature")) {
-                ConfigurationInfo cPref = new ConfigurationInfo();
+                FeatureInfo fi = new FeatureInfo();
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestUsesFeature);
-                cPref.reqGlEsVersion = sa.getInt(
-                        com.android.internal.R.styleable.AndroidManifestUsesFeature_glEsVersion,
-                        ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
+                fi.name = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestUsesFeature_name);
+                if (fi.name == null) {
+                    fi.reqGlEsVersion = sa.getInt(
+                            com.android.internal.R.styleable.AndroidManifestUsesFeature_glEsVersion,
+                            FeatureInfo.GL_ES_VERSION_UNDEFINED);
+                }
+                if (sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestUsesFeature_required,
+                        true)) {
+                    fi.flags |= FeatureInfo.FLAG_REQUIRED;
+                }
                 sa.recycle();
-                pkg.configPreferences.add(cPref);
+                if (pkg.reqFeatures == null) {
+                    pkg.reqFeatures = new ArrayList<FeatureInfo>();
+                }
+                pkg.reqFeatures.add(fi);
+                
+                if (fi.name == null) {
+                    ConfigurationInfo cPref = new ConfigurationInfo();
+                    cPref.reqGlEsVersion = fi.reqGlEsVersion;
+                    pkg.configPreferences.add(cPref);
+                }
 
                 XmlUtils.skipCurrentTag(parser);
 
@@ -944,11 +965,6 @@ public class PackageParser {
                         + pkg.packageName);
                 pkg.requestedPermissions.add(npi.name);
             }
-        }
-        
-        if (pkg.usesLibraries.size() > 0) {
-            pkg.usesLibraryFiles = new String[pkg.usesLibraries.size()];
-            pkg.usesLibraries.toArray(pkg.usesLibraryFiles);
         }
         
         if (supportsSmallScreens < 0 || (supportsSmallScreens > 0
@@ -1436,11 +1452,28 @@ public class PackageParser {
 
                 String lname = sa.getNonResourceString(
                         com.android.internal.R.styleable.AndroidManifestUsesLibrary_name);
+                boolean req = sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestUsesLibrary_required,
+                        true);
 
                 sa.recycle();
 
-                if (lname != null && !owner.usesLibraries.contains(lname)) {
-                    owner.usesLibraries.add(lname.intern());
+                if (lname != null) {
+                    if (req) {
+                        if (owner.usesLibraries == null) {
+                            owner.usesLibraries = new ArrayList<String>();
+                        }
+                        if (!owner.usesLibraries.contains(lname)) {
+                            owner.usesLibraries.add(lname.intern());
+                        }
+                    } else {
+                        if (owner.usesOptionalLibraries == null) {
+                            owner.usesOptionalLibraries = new ArrayList<String>();
+                        }
+                        if (!owner.usesOptionalLibraries.contains(lname)) {
+                            owner.usesOptionalLibraries.add(lname.intern());
+                        }
+                    }
                 }
 
                 XmlUtils.skipCurrentTag(parser);
@@ -2418,7 +2451,8 @@ public class PackageParser {
 
         public ArrayList<String> protectedBroadcasts;
         
-        public final ArrayList<String> usesLibraries = new ArrayList<String>();
+        public ArrayList<String> usesLibraries = null;
+        public ArrayList<String> usesOptionalLibraries = null;
         public String[] usesLibraryFiles = null;
 
         // We store the application meta-data independently to avoid multiple unwanted references
@@ -2465,6 +2499,11 @@ public class PackageParser {
          */
         public final ArrayList<ConfigurationInfo> configPreferences =
                 new ArrayList<ConfigurationInfo>();
+
+        /*
+         *  Applications requested features
+         */
+        public ArrayList<FeatureInfo> reqFeatures = null;
 
         public Package(String _name) {
             packageName = _name;
