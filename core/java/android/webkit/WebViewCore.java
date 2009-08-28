@@ -418,7 +418,8 @@ final class WebViewCore {
         should this be called nativeSetViewPortSize?
     */
     private native void nativeSetSize(int width, int height, int screenWidth,
-            float scale, int realScreenWidth, int screenHeight);
+            float scale, int realScreenWidth, int screenHeight,
+            boolean ignoreHeight);
 
     private native int nativeGetContentMinPrefWidth();
 
@@ -918,7 +919,8 @@ final class WebViewCore {
                             WebView.ViewSizeData data =
                                     (WebView.ViewSizeData) msg.obj;
                             viewSizeChanged(data.mWidth, data.mHeight,
-                                    data.mTextWrapWidth, data.mScale);
+                                    data.mTextWrapWidth, data.mScale,
+                                    data.mIgnoreHeight);
                             break;
                         }
                         case SET_SCROLL_OFFSET:
@@ -1411,7 +1413,8 @@ final class WebViewCore {
     private float mCurrentViewScale = 1.0f;
 
     // notify webkit that our virtual view size changed size (after inv-zoom)
-    private void viewSizeChanged(int w, int h, int textwrapWidth, float scale) {
+    private void viewSizeChanged(int w, int h, int textwrapWidth, float scale,
+            boolean ignoreHeight) {
         if (DebugFlags.WEB_VIEW_CORE) {
             Log.v(LOGTAG, "viewSizeChanged w=" + w + "; h=" + h
                     + "; textwrapWidth=" + textwrapWidth + "; scale=" + scale);
@@ -1447,7 +1450,7 @@ final class WebViewCore {
             }
         }
         nativeSetSize(width, width == w ? h : Math.round((float) width * h / w),
-                textwrapWidth, scale, w, h);
+                textwrapWidth, scale, w, h, ignoreHeight);
         // Remember the current width and height
         boolean needInvalidate = (mCurrentViewWidth == 0);
         mCurrentViewWidth = w;
@@ -1905,6 +1908,7 @@ final class WebViewCore {
             // true. It is safe to use mWidth for mTextWrapWidth.
             data.mTextWrapWidth = data.mWidth;
             data.mScale = -1.0f;
+            data.mIgnoreHeight = false;
             mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
                     EventHub.VIEW_SIZE_CHANGED, data));
         } else if (mSettings.getUseWideViewPort()) {
@@ -1926,6 +1930,7 @@ final class WebViewCore {
                         / mCurrentViewWidth;
                 data.mTextWrapWidth = Math.round(webViewWidth
                         / mRestoreState.mTextWrapScale);
+                data.mIgnoreHeight = false;
                 mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
                         EventHub.VIEW_SIZE_CHANGED, data));
             }
