@@ -784,6 +784,7 @@ int EventHub::close_device(const char *deviceName)
             int count = mFDCount - i - 1;
             int index = (device->id&ID_MASK);
             mDevicesById[index].device = NULL;
+            close(mFDs[i].fd);
             memmove(mDevices + i, mDevices + i + 1, sizeof(mDevices[0]) * count);
             memmove(mFDs + i, mFDs + i + 1, sizeof(mFDs[0]) * count);
 
