@@ -280,16 +280,8 @@ public abstract class DataConnectionTracker extends Handler {
                         if (!dataEnabled[apnId]) {
                             dataEnabled[apnId] = true;
                             enabledCount++;
-                            if (enabledCount == 1) {
-                                if (onTrySetupData(null) == false) {
-                                    // failed to setup data - note we can't optimize by only adj
-                                    // these after a successfull call.  dataEnabled must be set
-                                    // prior or we think data is not available.
-                                    dataEnabled[apnId] = false;
-                                    enabledCount--;
-                                }
-                            }
                         }
+                        onTrySetupData(null);
                     } else {
                         // disable
                         if (dataEnabled[apnId]) {
