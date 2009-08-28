@@ -1272,7 +1272,7 @@ void OMXCodec::fillOutputBuffers() {
 }
 
 void OMXCodec::drainInputBuffers() {
-    CHECK_EQ(mState, EXECUTING);
+    CHECK(mState == EXECUTING || mState == RECONFIGURING);
 
     Vector<BufferInfo> *buffers = &mPortBuffers[kPortIndexInput];
     for (size_t i = 0; i < buffers->size(); ++i) {
@@ -1716,15 +1716,20 @@ status_t OMXCodec::read(
 
     Mutex::Autolock autoLock(mLock);
 
+    if (mState != EXECUTING && mState != RECONFIGURING) {
+        return UNKNOWN_ERROR;
+    }
+
     if (mInitialBufferSubmit) {
         mInitialBufferSubmit = false;
 
         drainInputBuffers();
-        fillOutputBuffers();
-    }
 
-    if (mState != EXECUTING && mState != RECONFIGURING) {
-        return UNKNOWN_ERROR;
+        if (mState == EXECUTING) {
+            // Otherwise mState == RECONFIGURING and this code will trigger
+            // after the output port is reenabled.
+            fillOutputBuffers();
+        }
     }
 
     int64_t seekTimeUs;
