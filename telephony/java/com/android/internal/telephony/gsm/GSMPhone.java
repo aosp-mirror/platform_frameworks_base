@@ -23,13 +23,11 @@ import android.database.SQLException;
 import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Registrant;
 import android.os.RegistrantList;
 import android.os.SystemProperties;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.provider.Telephony;
 import android.telephony.CellLocation;
 import android.telephony.PhoneNumberUtils;
@@ -98,14 +96,13 @@ public class GSMPhone extends PhoneBase {
     // Key used to read/write the SIM IMSI used for storing the voice mail
     public static final String VM_SIM_IMSI = "vm_sim_imsi_key";
 
-    //***** Instance Variables
+    // Instance Variables
     GsmCallTracker mCT;
     GsmServiceStateTracker mSST;
     GsmSMSDispatcher mSMS;
     SIMRecords mSIMRecords;
     SimCard mSimCard;
     StkService mStkService;
-    MyHandler h;
     ArrayList <GsmMmiCode> mPendingMMIs = new ArrayList<GsmMmiCode>();
     SimPhoneBookInterfaceManager mSimPhoneBookIntManager;
     SimSmsInterfaceManager mSimSmsIntManager;
@@ -129,7 +126,7 @@ public class GSMPhone extends PhoneBase {
     private String mVmNumber;
 
 
-    //***** Constructors
+    // Constructors
 
     public
     GSMPhone (Context context, CommandsInterface ci, PhoneNotifier notifier) {
@@ -138,9 +135,7 @@ public class GSMPhone extends PhoneBase {
 
     public
     GSMPhone (Context context, CommandsInterface ci, PhoneNotifier notifier, boolean unitTestMode) {
-        super(notifier, context, unitTestMode);
-        h = new MyHandler();
-        mCM = ci;
+        super(notifier, context, ci, unitTestMode);
 
         if (ci instanceof SimulatedRadioControl) {
             mSimulatedRadioControl = (SimulatedRadioControl) ci;
@@ -162,14 +157,13 @@ public class GSMPhone extends PhoneBase {
         mStkService = StkService.getInstance(mCM, mSIMRecords, mContext,
                 (SIMFileHandler)mIccFileHandler, mSimCard);
 
-        mCM.registerForAvailable(h, EVENT_RADIO_AVAILABLE, null);
-        mSIMRecords.registerForRecordsLoaded(h, EVENT_SIM_RECORDS_LOADED, null);
-        mCM.registerForOffOrNotAvailable(h, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
-        mCM.registerForOn(h, EVENT_RADIO_ON, null);
-        mCM.setOnUSSD(h, EVENT_USSD, null);
-        mCM.setOnSuppServiceNotification(h, EVENT_SSN, null);
-        mCM.setOnCallRing(h, EVENT_CALL_RING, null);
-        mSST.registerForNetworkAttach(h, EVENT_REGISTERED_TO_NETWORK, null);
+        mCM.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
+        mSIMRecords.registerForRecordsLoaded(this, EVENT_SIM_RECORDS_LOADED, null);
+        mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
+        mCM.registerForOn(this, EVENT_RADIO_ON, null);
+        mCM.setOnUSSD(this, EVENT_USSD, null);
+        mCM.setOnSuppServiceNotification(this, EVENT_SSN, null);
+        mSST.registerForNetworkAttach(this, EVENT_REGISTERED_TO_NETWORK, null);
 
         if (false) {
             try {
@@ -212,15 +206,16 @@ public class GSMPhone extends PhoneBase {
 
     public void dispose() {
         synchronized(PhoneProxy.lockForRadioTechnologyChange) {
+            super.dispose();
+
             //Unregister from all former registered events
-            mCM.unregisterForAvailable(h); //EVENT_RADIO_AVAILABLE
-            mSIMRecords.unregisterForRecordsLoaded(h); //EVENT_SIM_RECORDS_LOADED
-            mCM.unregisterForOffOrNotAvailable(h); //EVENT_RADIO_OFF_OR_NOT_AVAILABLE
-            mCM.unregisterForOn(h); //EVENT_RADIO_ON
-            mSST.unregisterForNetworkAttach(h); //EVENT_REGISTERED_TO_NETWORK
-            mCM.unSetOnUSSD(h);
-            mCM.unSetOnSuppServiceNotification(h);
-            mCM.unSetOnCallRing(h);
+            mCM.unregisterForAvailable(this); //EVENT_RADIO_AVAILABLE
+            mSIMRecords.unregisterForRecordsLoaded(this); //EVENT_SIM_RECORDS_LOADED
+            mCM.unregisterForOffOrNotAvailable(this); //EVENT_RADIO_OFF_OR_NOT_AVAILABLE
+            mCM.unregisterForOn(this); //EVENT_RADIO_ON
+            mSST.unregisterForNetworkAttach(this); //EVENT_REGISTERED_TO_NETWORK
+            mCM.unSetOnUSSD(this);
+            mCM.unSetOnSuppServiceNotification(this);
 
             mPendingMMIs.clear();
 
@@ -257,8 +252,6 @@ public class GSMPhone extends PhoneBase {
         if(LOCAL_DEBUG) Log.d(LOG_TAG, "GSMPhone finalized");
     }
 
-
-    //***** Overridden from Phone
 
     public ServiceState
     getServiceState() {
@@ -389,14 +382,6 @@ public class GSMPhone extends PhoneBase {
     notifyNewRingingConnection(Connection c) {
         /* we'd love it if this was package-scoped*/
         super.notifyNewRingingConnectionP(c);
-    }
-
-    /**
-     * Notifiy registrants of a RING event.
-     */
-    void notifyIncomingRing() {
-        AsyncResult ar = new AsyncResult(null, this, null);
-        mIncomingRingRegistrants.notifyRegistrants(ar);
     }
 
     /*package*/ void
@@ -917,7 +902,7 @@ public class GSMPhone extends PhoneBase {
 
         Message resp;
         mVmNumber = voiceMailNumber;
-        resp = h.obtainMessage(EVENT_SET_VM_NUMBER_DONE, 0, 0, onComplete);
+        resp = obtainMessage(EVENT_SET_VM_NUMBER_DONE, 0, 0, onComplete);
         mSIMRecords.setVoiceMailNumber(alphaTag, mVmNumber, resp);
     }
 
@@ -956,7 +941,7 @@ public class GSMPhone extends PhoneBase {
             if (LOCAL_DEBUG) Log.d(LOG_TAG, "requesting call forwarding query.");
             Message resp;
             if (commandInterfaceCFReason == CF_REASON_UNCONDITIONAL) {
-                resp = h.obtainMessage(EVENT_GET_CALL_FORWARD_DONE, onComplete);
+                resp = obtainMessage(EVENT_GET_CALL_FORWARD_DONE, onComplete);
             } else {
                 resp = onComplete;
             }
@@ -974,7 +959,7 @@ public class GSMPhone extends PhoneBase {
 
             Message resp;
             if (commandInterfaceCFReason == CF_REASON_UNCONDITIONAL) {
-                resp = h.obtainMessage(EVENT_SET_CALL_FORWARD_DONE,
+                resp = obtainMessage(EVENT_SET_CALL_FORWARD_DONE,
                         isCfEnable(commandInterfaceCFAction) ? 1 : 0, 0, onComplete);
             } else {
                 resp = onComplete;
@@ -995,7 +980,7 @@ public class GSMPhone extends PhoneBase {
     public void setOutgoingCallerIdDisplay(int commandInterfaceCLIRMode,
                                            Message onComplete) {
         mCM.setCLIR(commandInterfaceCLIRMode,
-                h.obtainMessage(EVENT_SET_CLIR_COMPLETE, commandInterfaceCLIRMode, 0, onComplete));
+                obtainMessage(EVENT_SET_CLIR_COMPLETE, commandInterfaceCLIRMode, 0, onComplete));
     }
 
     public void getCallWaiting(Message onComplete) {
@@ -1043,7 +1028,7 @@ public class GSMPhone extends PhoneBase {
         nsm.operatorAlphaLong = "";
 
         // get the message
-        Message msg = h.obtainMessage(EVENT_SET_NETWORK_AUTOMATIC_COMPLETE, nsm);
+        Message msg = obtainMessage(EVENT_SET_NETWORK_AUTOMATIC_COMPLETE, nsm);
         if (LOCAL_DEBUG)
             Log.d(LOG_TAG, "wrapping and sending message to connect automatically");
 
@@ -1061,7 +1046,7 @@ public class GSMPhone extends PhoneBase {
         nsm.operatorAlphaLong = network.operatorAlphaLong;
 
         // get the message
-        Message msg = h.obtainMessage(EVENT_SET_NETWORK_MANUAL_COMPLETE, nsm);
+        Message msg = obtainMessage(EVENT_SET_NETWORK_MANUAL_COMPLETE, nsm);
 
         mCM.setNetworkSelectionModeManual(network.operatorNumeric, msg);
     }
@@ -1247,178 +1232,163 @@ public class GSMPhone extends PhoneBase {
         }
     }
 
-    //***** Inner Classes
+    @Override
+    public void handleMessage (Message msg) {
+        AsyncResult ar;
+        Message onComplete;
 
-    class MyHandler extends Handler {
-        MyHandler() {
-        }
+        switch (msg.what) {
+            case EVENT_RADIO_AVAILABLE: {
+                mCM.getBasebandVersion(
+                        obtainMessage(EVENT_GET_BASEBAND_VERSION_DONE));
 
-        MyHandler(Looper l) {
-            super(l);
-        }
+                mCM.getIMEI(obtainMessage(EVENT_GET_IMEI_DONE));
+                mCM.getIMEISV(obtainMessage(EVENT_GET_IMEISV_DONE));
+            }
+            break;
 
-        public void
-        handleMessage (Message msg) {
-            AsyncResult ar;
-            Message onComplete;
+            case EVENT_RADIO_ON:
+            break;
 
-            switch (msg.what) {
-                case EVENT_RADIO_AVAILABLE: {
-                    mCM.getBasebandVersion(
-                            obtainMessage(EVENT_GET_BASEBAND_VERSION_DONE));
+            case EVENT_REGISTERED_TO_NETWORK:
+                syncClirSetting();
+                break;
 
-                    mCM.getIMEI(obtainMessage(EVENT_GET_IMEI_DONE));
-                    mCM.getIMEISV(obtainMessage(EVENT_GET_IMEISV_DONE));
+            case EVENT_SIM_RECORDS_LOADED:
+                updateCurrentCarrierInProvider();
+
+                // Check if this is a different SIM than the previous one. If so unset the
+                // voice mail number.
+                String imsi = getVmSimImsi();
+                if (imsi != null && !getSubscriberId().equals(imsi)) {
+                    storeVoiceMailNumber(null);
+                    setVmSimImsi(null);
+                }
+
+            break;
+
+            case EVENT_GET_BASEBAND_VERSION_DONE:
+                ar = (AsyncResult)msg.obj;
+
+                if (ar.exception != null) {
+                    break;
+                }
+
+                if (LOCAL_DEBUG) Log.d(LOG_TAG, "Baseband version: " + ar.result);
+                setSystemProperty(PROPERTY_BASEBAND_VERSION, (String)ar.result);
+            break;
+
+            case EVENT_GET_IMEI_DONE:
+                ar = (AsyncResult)msg.obj;
+
+                if (ar.exception != null) {
+                    break;
+                }
+
+                mImei = (String)ar.result;
+            break;
+
+            case EVENT_GET_IMEISV_DONE:
+                ar = (AsyncResult)msg.obj;
+
+                if (ar.exception != null) {
+                    break;
+                }
+
+                mImeiSv = (String)ar.result;
+            break;
+
+            case EVENT_USSD:
+                ar = (AsyncResult)msg.obj;
+
+                String[] ussdResult = (String[]) ar.result;
+
+                if (ussdResult.length > 1) {
+                    try {
+                        onIncomingUSSD(Integer.parseInt(ussdResult[0]), ussdResult[1]);
+                    } catch (NumberFormatException e) {
+                        Log.w(LOG_TAG, "error parsing USSD");
+                    }
+                }
+            break;
+
+            case EVENT_RADIO_OFF_OR_NOT_AVAILABLE:
+                // Some MMI requests (eg USSD) are not completed
+                // within the course of a CommandsInterface request
+                // If the radio shuts off or resets while one of these
+                // is pending, we need to clean up.
+
+                for (int i = 0, s = mPendingMMIs.size() ; i < s; i++) {
+                    if (mPendingMMIs.get(i).isPendingUSSD()) {
+                        mPendingMMIs.get(i).onUssdFinishedError();
+                    }
+                }
+            break;
+
+            case EVENT_SSN:
+                ar = (AsyncResult)msg.obj;
+                SuppServiceNotification not = (SuppServiceNotification) ar.result;
+                mSsnRegistrants.notifyRegistrants(ar);
+            break;
+
+            case EVENT_SET_CALL_FORWARD_DONE:
+                ar = (AsyncResult)msg.obj;
+                if (ar.exception == null) {
+                    mSIMRecords.setVoiceCallForwardingFlag(1, msg.arg1 == 1);
+                }
+                onComplete = (Message) ar.userObj;
+                if (onComplete != null) {
+                    AsyncResult.forMessage(onComplete, ar.result, ar.exception);
+                    onComplete.sendToTarget();
                 }
                 break;
 
-                case EVENT_RADIO_ON:
+            case EVENT_SET_VM_NUMBER_DONE:
+                ar = (AsyncResult)msg.obj;
+                if (IccVmNotSupportedException.class.isInstance(ar.exception)) {
+                    storeVoiceMailNumber(mVmNumber);
+                    ar.exception = null;
+                }
+                onComplete = (Message) ar.userObj;
+                if (onComplete != null) {
+                    AsyncResult.forMessage(onComplete, ar.result, ar.exception);
+                    onComplete.sendToTarget();
+                }
                 break;
 
-                case EVENT_REGISTERED_TO_NETWORK:
-                    syncClirSetting();
-                    break;
 
-                case EVENT_SIM_RECORDS_LOADED:
-                    updateCurrentCarrierInProvider();
-
-                    // Check if this is a different SIM than the previous one. If so unset the
-                    // voice mail number.
-                    String imsi = getVmSimImsi();
-                    if (imsi != null && !getSubscriberId().equals(imsi)) {
-                        storeVoiceMailNumber(null);
-                        setVmSimImsi(null);
-                    }
-
+            case EVENT_GET_CALL_FORWARD_DONE:
+                ar = (AsyncResult)msg.obj;
+                if (ar.exception == null) {
+                    handleCfuQueryResult((CallForwardInfo[])ar.result);
+                }
+                onComplete = (Message) ar.userObj;
+                if (onComplete != null) {
+                    AsyncResult.forMessage(onComplete, ar.result, ar.exception);
+                    onComplete.sendToTarget();
+                }
                 break;
 
-                case EVENT_GET_BASEBAND_VERSION_DONE:
-                    ar = (AsyncResult)msg.obj;
-
-                    if (ar.exception != null) {
-                        break;
-                    }
-
-                    if (LOCAL_DEBUG) Log.d(LOG_TAG, "Baseband version: " + ar.result);
-                    setSystemProperty(PROPERTY_BASEBAND_VERSION, (String)ar.result);
+            // handle the select network completion callbacks.
+            case EVENT_SET_NETWORK_MANUAL_COMPLETE:
+            case EVENT_SET_NETWORK_AUTOMATIC_COMPLETE:
+                handleSetSelectNetwork((AsyncResult) msg.obj);
                 break;
 
-                case EVENT_GET_IMEI_DONE:
-                    ar = (AsyncResult)msg.obj;
-
-                    if (ar.exception != null) {
-                        break;
-                    }
-
-                    mImei = (String)ar.result;
+            case EVENT_SET_CLIR_COMPLETE:
+                ar = (AsyncResult)msg.obj;
+                if (ar.exception == null) {
+                    saveClirSetting(msg.arg1);
+                }
+                onComplete = (Message) ar.userObj;
+                if (onComplete != null) {
+                    AsyncResult.forMessage(onComplete, ar.result, ar.exception);
+                    onComplete.sendToTarget();
+                }
                 break;
 
-                case EVENT_GET_IMEISV_DONE:
-                    ar = (AsyncResult)msg.obj;
-
-                    if (ar.exception != null) {
-                        break;
-                    }
-
-                    mImeiSv = (String)ar.result;
-                break;
-
-                case EVENT_USSD:
-                    ar = (AsyncResult)msg.obj;
-
-                    String[] ussdResult = (String[]) ar.result;
-
-                    if (ussdResult.length > 1) {
-                        try {
-                            onIncomingUSSD(Integer.parseInt(ussdResult[0]), ussdResult[1]);
-                        } catch (NumberFormatException e) {
-                            Log.w(LOG_TAG, "error parsing USSD");
-                        }
-                    }
-                break;
-
-                case EVENT_RADIO_OFF_OR_NOT_AVAILABLE:
-                    // Some MMI requests (eg USSD) are not completed
-                    // within the course of a CommandsInterface request
-                    // If the radio shuts off or resets while one of these
-                    // is pending, we need to clean up.
-
-                    for (int i = 0, s = mPendingMMIs.size() ; i < s; i++) {
-                        if (mPendingMMIs.get(i).isPendingUSSD()) {
-                            mPendingMMIs.get(i).onUssdFinishedError();
-                        }
-                    }
-                break;
-
-                case EVENT_SSN:
-                    ar = (AsyncResult)msg.obj;
-                    SuppServiceNotification not = (SuppServiceNotification) ar.result;
-                    mSsnRegistrants.notifyRegistrants(ar);
-                break;
-
-                case EVENT_SET_CALL_FORWARD_DONE:
-                    ar = (AsyncResult)msg.obj;
-                    if (ar.exception == null) {
-                        mSIMRecords.setVoiceCallForwardingFlag(1, msg.arg1 == 1);
-                    }
-                    onComplete = (Message) ar.userObj;
-                    if (onComplete != null) {
-                        AsyncResult.forMessage(onComplete, ar.result, ar.exception);
-                        onComplete.sendToTarget();
-                    }
-                    break;
-
-                case EVENT_SET_VM_NUMBER_DONE:
-                    ar = (AsyncResult)msg.obj;
-                    if (IccVmNotSupportedException.class.isInstance(ar.exception)) {
-                        storeVoiceMailNumber(mVmNumber);
-                        ar.exception = null;
-                    }
-                    onComplete = (Message) ar.userObj;
-                    if (onComplete != null) {
-                        AsyncResult.forMessage(onComplete, ar.result, ar.exception);
-                        onComplete.sendToTarget();
-                    }
-                    break;
-
-
-                case EVENT_GET_CALL_FORWARD_DONE:
-                    ar = (AsyncResult)msg.obj;
-                    if (ar.exception == null) {
-                        handleCfuQueryResult((CallForwardInfo[])ar.result);
-                    }
-                    onComplete = (Message) ar.userObj;
-                    if (onComplete != null) {
-                        AsyncResult.forMessage(onComplete, ar.result, ar.exception);
-                        onComplete.sendToTarget();
-                    }
-                    break;
-
-                case EVENT_CALL_RING:
-                    ar = (AsyncResult)msg.obj;
-                    if (ar.exception == null) {
-                        notifyIncomingRing();
-                    }
-                    break;
-
-                // handle the select network completion callbacks.
-                case EVENT_SET_NETWORK_MANUAL_COMPLETE:
-                case EVENT_SET_NETWORK_AUTOMATIC_COMPLETE:
-                    handleSetSelectNetwork((AsyncResult) msg.obj);
-                    break;
-
-                case EVENT_SET_CLIR_COMPLETE:
-                    ar = (AsyncResult)msg.obj;
-                    if (ar.exception == null) {
-                        saveClirSetting(msg.arg1);
-                    }
-                    onComplete = (Message) ar.userObj;
-                    if (onComplete != null) {
-                        AsyncResult.forMessage(onComplete, ar.result, ar.exception);
-                        onComplete.sendToTarget();
-                    }
-                    break;
-            }
+             default:
+                 super.handleMessage(msg);
         }
     }
 
@@ -1528,13 +1498,6 @@ public class GSMPhone extends PhoneBase {
      */
     public IccPhoneBookInterfaceManager getIccPhoneBookInterfaceManager(){
         return mSimPhoneBookIntManager;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Handler getHandler(){
-        return h;
     }
 
     /**
