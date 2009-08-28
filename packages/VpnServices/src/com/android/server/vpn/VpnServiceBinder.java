@@ -91,7 +91,8 @@ public class VpnServiceBinder extends Service {
 
     void removeStates() {
         try {
-            new File(STATES_FILE_PATH).delete();
+            File f = new File(STATES_FILE_PATH);
+            if (f.exists()) f.delete();
         } catch (Throwable e) {
             if (DBG) Log.d("VpnServiceBinder", "     remove states: " + e);
         }
