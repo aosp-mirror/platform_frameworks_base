@@ -360,6 +360,8 @@ web_docs_sample_code_flags := \
 		            guide/samples/LunarLander "Lunar Lander" \
 		-samplecode $(sample_dir)/NotePad \
 		            guide/samples/NotePad "Note Pad" \
+		-samplecode $(sample_dir)/SearchableDictionary \
+		            guide/samples/SearchableDictionary "Searchable Dictionary" \
 		-samplecode $(sample_dir)/Snake \
 		            guide/samples/Snake "Snake" \
 		-samplecode $(sample_dir)/SoftKeyboard \
