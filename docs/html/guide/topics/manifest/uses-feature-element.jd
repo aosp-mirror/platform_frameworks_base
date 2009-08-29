@@ -6,7 +6,8 @@ page.title=&lt;uses-feature&gt;
 <dt>syntax:</dt>
 <dd>
 <pre class="stx">
-&lt;uses-feature android:<a href="#glEsVersion">glEsVersion</a>=["true" | "false"] /&gt;
+&lt;uses-feature android:<a href="#glEsVersion">glEsVersion</a>="<em>integer</em>"
+              android:<a href="#name">name</a>="<em>string</em>" /&gt;
 </pre>
 </dd>
 
@@ -14,7 +15,7 @@ page.title=&lt;uses-feature&gt;
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>This element specifies specific features used by the application.
+<dd>This element specifies a specific feature used by the application.
 Android provides some features that may not be equally supported by all
 Android devices. In a manner similar to the <code><a href="uses-sdk-element.html">&lt;uses-sdk></a></code> 
 element, this element allows an application to specify which potentially variable
@@ -23,6 +24,11 @@ will not be installed on devices that do not offer the required feature.</p>
 
 <p>For example, an application might specify that it requires a certain version of Open GL.
 If a device does not support that version of Open GL, then it will not allow installation of the application.</p>
+
+<p class="note"><strong>Note:</strong>
+For each feature required by your application, you must include a new {@code
+&lt;uses-feature>} element. Multiple features cannot be declared in one 
+instance of this element.</p>
 </dd> 
 
 
@@ -34,6 +40,30 @@ If a device does not support that version of Open GL, then it will not allow ins
      The higher 16 bits represent the major number and the lower 16 bits
      represent the minor number. For example, for GL 1.2 referring to
      0x00000102, the actual value should be set as 0x00010002.
+  </dd>
+</dl>
+</dd>
+
+<dd>
+<dl class="attr"><dt><a name="name"></a>{@code android:name}</dt>
+  <dd>The name of a feature required by the application. 
+  The value must be one of the following accepted strings:
+  
+  <table> 
+    <tr> 
+       <th>Value</th> 
+       <th>Description</th> 
+    </tr><tr> 
+       <td>"{@code android.hardware.camera}"</td> 
+       <td>The application requires a camera.</td> 
+    </tr><tr> 
+       <td>"{@code android.hardware.camera.autofocus}"</td> 
+       <td>The application requires a camera with auto-focus capability.
+       As a prerequisite, "{@code android.hardware.camera}" must also be declared
+       with a separate {@code &lt;uses-feature>} element.</td> 
+    </tr>
+  </table>
+  
   </dd>
 </dl>
 </dd>
