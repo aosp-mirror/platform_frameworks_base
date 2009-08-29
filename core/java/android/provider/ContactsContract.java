@@ -1042,6 +1042,7 @@ public final class ContactsContract {
             public static final int TYPE_HOME = 1;
             public static final int TYPE_WORK = 2;
             public static final int TYPE_OTHER = 3;
+            public static final int TYPE_MOBILE = 4;
 
             /**
              * The display name for the email address
