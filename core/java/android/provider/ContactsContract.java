@@ -20,6 +20,7 @@ import android.accounts.Account;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -215,6 +216,12 @@ public final class ContactsContract {
          * <P>Type: INTEGER</P>
          */
         public static final String HAS_PHONE_NUMBER = "has_phone_number";
+
+        /**
+         * An opaque value that contains hints on how to find the contact if
+         * its row id changed as a result of a sync or aggregation.
+         */
+        public static final String LOOKUP_KEY = "lookup";
     }
 
     /**
@@ -232,6 +239,54 @@ public final class ContactsContract {
          * The content:// style URI for this table
          */
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "contacts");
+
+        /**
+         * A content:// style URI for this table that should be used to create
+         * shortcuts or otherwise create long-term links to contacts. This URI
+         * should always be followed by a "/" and the contact's {@link #LOOKUP_KEY}.
+         * It can optionally also have a "/" and last known contact ID appended after
+         * that. This "complete" format is an important optimization and is highly recommended.
+         * <p>
+         * As long as the contact's row ID remains the same, this URI is
+         * equivalent to {@link #CONTENT_URI}. If the contact's row ID changes
+         * as a result of a sync or aggregation, this URI will look up the
+         * contact using indirect information (sync IDs or constituent raw
+         * contacts).
+         * <p>
+         * Lookup key should be appended unencoded - it is stored in the encoded
+         * form, ready for use in a URI.
+         */
+        public static final Uri CONTENT_LOOKUP_URI = Uri.withAppendedPath(CONTENT_URI,
+                "lookup");
+
+        /**
+         * Computes a complete lookup URI (see {@link #CONTENT_LOOKUP_URI}).
+         * Pass either a basic content URI with a contact ID to obtain an
+         * equivalent lookup URI. Pass a possibly stale lookup URI to get a fresh
+         * lookup URI for the same contact.
+         * <p>
+         * Returns null if the contact cannot be found.
+         */
+        public static Uri getLookupUri(ContentResolver resolver, Uri contentUri) {
+            Cursor c = resolver.query(contentUri,
+                    new String[]{Contacts.LOOKUP_KEY, Contacts._ID}, null, null, null);
+            if (c == null) {
+                return null;
+            }
+
+            try {
+                if (c.moveToFirst()) {
+                    String lookupKey = c.getString(0);
+                    long contactId = c.getLong(1);
+                    return ContentUris.withAppendedId(
+                            Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, lookupKey),
+                            contactId);
+                }
+            } finally {
+                c.close();
+            }
+            return null;
+        }
 
         /**
          * The content:// style URI for this table joined with useful data from
