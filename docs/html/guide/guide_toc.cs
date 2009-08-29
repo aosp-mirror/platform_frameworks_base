@@ -399,6 +399,9 @@
           <li><a href="<?cs var:toroot ?>guide/samples/NotePad/index.html">
                 <span class="en">Note Pad</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/SearchableDictionary/index.html">
+                <span class="en">Searchable Dictionary</span>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/Snake/index.html">
                 <span class="en">Snake</span>
               </a></li>
