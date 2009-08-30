@@ -1630,3 +1630,230 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
 
     return NO_ERROR;
 }
+
+
+
+class ProguardKeepSet
+{
+public:
+    // { rule --> { file locations } }
+    KeyedVector<String8, SortedVector<String8> > rules;
+
+    void add(const String8& rule, const String8& where);
+};
+
+void ProguardKeepSet::add(const String8& rule, const String8& where)
+{
+    ssize_t index = rules.indexOfKey(rule);
+    if (index < 0) {
+        index = rules.add(rule, SortedVector<String8>());
+    }
+    rules.editValueAt(index).add(where);
+}
+
+status_t
+writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
+{
+    status_t err;
+    ResXMLTree tree;
+    size_t len;
+    ResXMLTree::event_code_t code;
+    int depth = 0;
+    bool inApplication = false;
+    String8 error;
+    sp<AaptGroup> assGroup;
+    sp<AaptFile> assFile;
+    String8 pkg;
+
+    // First, look for a package file to parse.  This is required to
+    // be able to generate the resource information.
+    assGroup = assets->getFiles().valueFor(String8("AndroidManifest.xml"));
+    if (assGroup == NULL) {
+        fprintf(stderr, "ERROR: No AndroidManifest.xml file found.\n");
+        return -1;
+    }
+
+    if (assGroup->getFiles().size() != 1) {
+        fprintf(stderr, "warning: Multiple AndroidManifest.xml files found, using %s\n",
+                assGroup->getFiles().valueAt(0)->getPrintableSource().string());
+    }
+
+    assFile = assGroup->getFiles().valueAt(0);
+
+    err = parseXMLResource(assFile, &tree);
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    tree.restart();
+
+    while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+        if (code == ResXMLTree::END_TAG) {
+            if (/* name == "Application" && */ depth == 2) {
+                inApplication = false;
+            }
+            depth--;
+            continue;
+        }
+        if (code != ResXMLTree::START_TAG) {
+            continue;
+        }
+        depth++;
+        String8 tag(tree.getElementName(&len));
+        // printf("Depth %d tag %s\n", depth, tag.string());
+        if (depth == 1) {
+            if (tag != "manifest") {
+                fprintf(stderr, "ERROR: manifest does not start with <manifest> tag\n");
+                return -1;
+            }
+            pkg = getAttribute(tree, NULL, "package", NULL);
+        } else if (depth == 2 && tag == "application") {
+            inApplication = true;
+        }
+        if (depth == 3 && inApplication) {
+            if (tag == "application" || tag == "activity" || tag == "service" || tag == "receiver"
+                    || tag == "provider") {
+                String8 name = getAttribute(tree, "http://schemas.android.com/apk/res/android",
+                        "name", &error);
+                if (error != "") {
+                    fprintf(stderr, "ERROR: %s\n", error.string());
+                    return -1;
+                }
+                // asdf     --> package.asdf
+                // .asdf  .a.b  --> package.asdf package.a.b
+                // asdf.adsf --> asdf.asdf
+                String8 rule("-keep class ");
+                const char* p = name.string();
+                const char* q = strchr(p, '.');
+                if (p == q) {
+                    rule += pkg;
+                    rule += name;
+                } else if (q == NULL) {
+                    rule += pkg;
+                    rule += ".";
+                    rule += name;
+                } else {
+                    rule += name;
+                }
+
+                String8 location = tag;
+                location += " ";
+                location += assFile->getSourceFile();
+                char lineno[20];
+                sprintf(lineno, ":%d", tree.getLineNumber());
+                location += lineno;
+
+                keep->add(rule, location);
+            }
+        }
+    }
+
+    return NO_ERROR;
+}
+
+status_t
+writeProguardForLayout(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile)
+{
+    status_t err;
+    ResXMLTree tree;
+    size_t len;
+    ResXMLTree::event_code_t code;
+
+    err = parseXMLResource(layoutFile, &tree);
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    tree.restart();
+
+    while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+        if (code != ResXMLTree::START_TAG) {
+            continue;
+        }
+        String8 tag(tree.getElementName(&len));
+
+        // If there is no '.', we'll assume that it's one of the built in names.
+        if (strchr(tag.string(), '.')) {
+            String8 rule("-keep class ");
+            rule += tag;
+            rule += " { <init>(...); }";
+
+            String8 location("view ");
+            location += layoutFile->getSourceFile();
+            char lineno[20];
+            sprintf(lineno, ":%d", tree.getLineNumber());
+            location += lineno;
+
+            keep->add(rule, location);
+        }
+    }
+
+    return NO_ERROR;
+}
+
+status_t
+writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
+{
+    status_t err;
+    sp<AaptDir> layout = assets->resDir(String8("layout"));
+
+    if (layout != NULL) {
+        const KeyedVector<String8,sp<AaptGroup> > groups = layout->getFiles();
+        const size_t N = groups.size();
+        for (size_t i=0; i<N; i++) {
+            const sp<AaptGroup>& group = groups.valueAt(i);
+            const DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> >& files = group->getFiles();
+            const size_t M = files.size();
+            for (size_t j=0; j<M; j++) {
+                err = writeProguardForLayout(keep, files.valueAt(j));
+                if (err < 0) {
+                    return err;
+                }
+            }
+        }
+    }
+    return NO_ERROR;
+}
+
+status_t
+writeProguardFile(Bundle* bundle, const sp<AaptAssets>& assets)
+{
+    status_t err = -1;
+
+    if (!bundle->getProguardFile()) {
+        return NO_ERROR;
+    }
+
+    ProguardKeepSet keep;
+
+    err = writeProguardForAndroidManifest(&keep, assets);
+    if (err < 0) {
+        return err;
+    }
+
+    err = writeProguardForLayouts(&keep, assets);
+    if (err < 0) {
+        return err;
+    }
+
+    FILE* fp = fopen(bundle->getProguardFile(), "w+");
+    if (fp == NULL) {
+        fprintf(stderr, "ERROR: Unable to open class file %s: %s\n",
+                bundle->getProguardFile(), strerror(errno));
+        return UNKNOWN_ERROR;
+    }
+
+    const KeyedVector<String8, SortedVector<String8> >& rules = keep.rules;
+    const size_t N = rules.size();
+    for (size_t i=0; i<N; i++) {
+        const SortedVector<String8>& locations = rules.valueAt(i);
+        const size_t M = locations.size();
+        for (size_t j=0; j<M; j++) {
+            fprintf(fp, "# %s\n", locations.itemAt(j).string());
+        }
+        fprintf(fp, "%s\n\n", rules.keyAt(i).string());
+    }
+    fclose(fp);
+
+    return err;
+}

@@ -39,7 +39,7 @@ public:
           mRequireLocalization(false), mPseudolocalize(false),
           mValues(false),
           mCompressionMethod(0), mOutputAPKFile(NULL),
-          mAssetSourceDir(NULL),
+          mAssetSourceDir(NULL), mProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL),
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
@@ -88,6 +88,8 @@ public:
      */
     const char* getAssetSourceDir() const { return mAssetSourceDir; }
     void setAssetSourceDir(const char* dir) { mAssetSourceDir = dir; }
+    const char* getProguardFile() const { return mProguardFile; }
+    void setProguardFile(const char* file) { mProguardFile = file; }
     const android::Vector<const char*>& getResourceSourceDirs() const { return mResourceSourceDirs; }
     void addResourceSourceDir(const char* dir) { mResourceSourceDirs.insertAt(dir,0); }
     const char* getAndroidManifestFile() const { return mAndroidManifestFile; }
@@ -161,6 +163,7 @@ private:
     int         mCompressionMethod;
     const char* mOutputAPKFile;
     const char* mAssetSourceDir;
+    const char* mProguardFile;
     const char* mAndroidManifestFile;
     const char* mPublicOutputFile;
     const char* mRClassDir;

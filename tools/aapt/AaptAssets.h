@@ -508,6 +508,7 @@ public:
     void print() const;
 
     inline const Vector<sp<AaptDir> >& resDirs() { return mDirs; }
+    sp<AaptDir> resDir(const String8& name);
 
     inline sp<AaptAssets> getOverlay() { return mOverlay; }
     inline void setOverlay(sp<AaptAssets>& overlay) { mOverlay = overlay; }
