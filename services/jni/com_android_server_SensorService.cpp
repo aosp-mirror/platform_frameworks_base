@@ -111,6 +111,15 @@ android_open(JNIEnv *env, jclass clazz)
     return bundle;
 }
 
+static jint
+android_close(JNIEnv *env, jclass clazz)
+{
+    if (sSensorDevice->close_data_source)
+        return sSensorDevice->close_data_source(sSensorDevice);
+    else
+        return 0;
+}
+
 static jboolean
 android_activate(JNIEnv *env, jclass clazz, jint sensor, jboolean activate)
 {
@@ -135,6 +144,7 @@ android_data_wake(JNIEnv *env, jclass clazz)
 static JNINativeMethod gMethods[] = {
     {"_sensors_control_init",     "()I",   (void*) android_init },
     {"_sensors_control_open",     "()Landroid/os/Bundle;",  (void*) android_open },
+    {"_sensors_control_close",     "()I",  (void*) android_close },
     {"_sensors_control_activate", "(IZ)Z", (void*) android_activate },
     {"_sensors_control_wake",     "()I", (void*) android_data_wake },
     {"_sensors_control_set_delay","(I)I", (void*) android_set_delay },
