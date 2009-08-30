@@ -1710,7 +1710,7 @@ writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& ass
         } else if (depth == 2 && tag == "application") {
             inApplication = true;
         }
-        if (depth == 3 && inApplication) {
+        if (inApplication) {
             if (tag == "application" || tag == "activity" || tag == "service" || tag == "receiver"
                     || tag == "provider") {
                 String8 name = getAttribute(tree, "http://schemas.android.com/apk/res/android",
