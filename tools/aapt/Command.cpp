@@ -233,7 +233,7 @@ static ssize_t indexOfAttribute(const ResXMLTree& tree, uint32_t attrRes)
     return -1;
 }
 
-static String8 getAttribute(const ResXMLTree& tree, const char* ns,
+String8 getAttribute(const ResXMLTree& tree, const char* ns,
                             const char* attr, String8* outError)
 {
     ssize_t idx = tree.indexOfAttribute(ns, attr);
@@ -1156,6 +1156,12 @@ int doPackage(Bundle* bundle)
         if (err < 0) {
             goto bail;
         }
+    }
+
+    // Write out the ProGuard file
+    err = writeProguardFile(bundle, assets);
+    if (err < 0) {
+        goto bail;
     }
 
     // Write the apk

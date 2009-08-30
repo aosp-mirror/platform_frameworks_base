@@ -1819,6 +1819,19 @@ void AaptAssets::print() const
     AaptDir::print();
 }
 
+sp<AaptDir> AaptAssets::resDir(const String8& name)
+{
+    const Vector<sp<AaptDir> >& dirs = mDirs;
+    const size_t N = dirs.size();
+    for (size_t i=0; i<N; i++) {
+        const sp<AaptDir>& d = dirs.itemAt(i);
+        if (d->getLeaf() == name) {
+            return d;
+        }
+    }
+    return NULL;
+}
+
 bool
 valid_symbol_name(const String8& symbol)
 {
