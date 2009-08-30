@@ -33,49 +33,47 @@ import android.content.BroadcastReceiver;
  */
 public class ImageWallpaper extends WallpaperService {
     WallpaperManager mWallpaperManager;
-    ImageWallpaper.DrawableEngine mEngine;
-    private WallpaperObserver mReceiver;
 
     @Override
     public void onCreate() {
         super.onCreate();
         mWallpaperManager = (WallpaperManager) getSystemService(WALLPAPER_SERVICE);
-        IntentFilter filter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
-        mReceiver = new WallpaperObserver();
-        registerReceiver(mReceiver, filter);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(mReceiver);
     }
 
     public Engine onCreateEngine() {
-        mEngine = new DrawableEngine();
-        return mEngine;
-    }
-
-    class WallpaperObserver extends BroadcastReceiver {
-        public void onReceive(Context context, Intent intent) {
-            mEngine.updateWallpaper();
-            mEngine.drawFrame();
-        }
+        return new DrawableEngine();
     }
 
     class DrawableEngine extends Engine {
         private final Object mLock = new Object();
         private final Rect mBounds = new Rect();
+        private WallpaperObserver mReceiver;
         Drawable mBackground;
         float mXOffset;
         float mYOffset;
 
+        class WallpaperObserver extends BroadcastReceiver {
+            public void onReceive(Context context, Intent intent) {
+                updateWallpaper();
+                drawFrame();
+            }
+        }
+
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
+            IntentFilter filter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
+            mReceiver = new WallpaperObserver();
+            registerReceiver(mReceiver, filter);
             updateWallpaper();
             surfaceHolder.setSizeFromLayout();
             //setTouchEventsEnabled(true);
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            unregisterReceiver(mReceiver);
         }
 
         @Override
