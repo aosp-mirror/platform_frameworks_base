@@ -392,6 +392,7 @@ class ServerThread extends Thread {
         if (wallpaper != null) wallpaper.systemReady();
         if (battery != null) battery.systemReady();
         if (connectivity != null) connectivity.systemReady();
+        if (dock != null) dock.systemReady();
         Watchdog.getInstance().start();
 
         Looper.loop();
