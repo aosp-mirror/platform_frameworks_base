@@ -36,17 +36,15 @@ class DockObserver extends UEventObserver {
     private static final String DOCK_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/dock";
     private static final String DOCK_STATE_PATH = "/sys/class/switch/dock/state";
 
-    private int mDockState;
-    private boolean mPendingIntent;
+    private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+    private boolean mSystemReady;
 
     private final Context mContext;
 
     public DockObserver(Context context) {
         mContext = context;
-
-        startObserving(DOCK_UEVENT_MATCH);
-
         init();  // set initial status
+        startObserving(DOCK_UEVENT_MATCH);
     }
 
     @Override
@@ -55,55 +53,59 @@ class DockObserver extends UEventObserver {
             Log.v(TAG, "Dock UEVENT: " + event.toString());
         }
 
-        try {
-            update(Integer.parseInt(event.get("SWITCH_STATE")));
-        } catch (NumberFormatException e) {
-            Log.e(TAG, "Could not parse switch state from event " + event);
+        synchronized (this) {
+            try {
+                int newState = Integer.parseInt(event.get("SWITCH_STATE"));
+                if (newState != mDockState) {
+                    mDockState = newState;
+                    if (mSystemReady) {
+                        update();
+                    }
+                }
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Could not parse switch state from event " + event);
+            }
         }
     }
 
-    private synchronized final void init() {
+    private final void init() {
         char[] buffer = new char[1024];
 
-        int newState = mDockState;
         try {
             FileReader file = new FileReader(DOCK_STATE_PATH);
             int len = file.read(buffer, 0, 1024);
-            newState = Integer.valueOf((new String(buffer, 0, len)).trim());
+            mDockState = Integer.valueOf((new String(buffer, 0, len)).trim());
 
         } catch (FileNotFoundException e) {
             Log.w(TAG, "This kernel does not have dock station support");
         } catch (Exception e) {
             Log.e(TAG, "" , e);
         }
-
-        update(newState);
     }
 
-    private synchronized final void update(int newState) {
-        if (newState != mDockState) {
-            mDockState = newState;
-
-            mPendingIntent = true;
-            mHandler.sendEmptyMessage(0);
+    void systemReady() {
+        synchronized (this) {
+            // don't bother broadcasting undocked here
+            if (mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                update();
+            }
+            mSystemReady = true;
         }
     }
 
-    private synchronized final void sendIntent() {
-        Log.d(TAG, "Broadcasting dock state " + mDockState);
-
-        // Pack up the values and broadcast them to everyone
-        Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
-        intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
-        mContext.sendStickyBroadcast(intent);
+    private final void update() {
+        mHandler.sendEmptyMessage(0);
     }
 
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (mPendingIntent) {
-                sendIntent();
-                mPendingIntent = false;
+            synchronized (this) {
+                Log.d(TAG, "Broadcasting dock state " + mDockState);
+                // Pack up the values and broadcast them to everyone
+                Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
+                intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
+                mContext.sendStickyBroadcast(intent);
             }
         }
     };
