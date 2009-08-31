@@ -21,13 +21,12 @@
 
   <FrameLayout
     android:layout_width="fill_parent"
-    android:layout_height="0px"
-    android:layout_weight="1">
+    android:layout_height="fill_parent">
     
   <SurfaceView
      android:id="@+id/surface_view"
-     android:layout_width="320dip"
-     android:layout_height="240dip"
+     android:layout_width="fill_parent"
+     android:layout_height="fill_parent"
      android:layout_centerInParent="true"
      />
      
