@@ -551,20 +551,21 @@ public class BluetoothService extends IBluetooth.Stub {
 
         for (int i = 0; i < properties.length; i++) {
             String name = properties[i];
-            String newValue;
+            String newValue = null;
             int len;
             if (name == null) {
                 Log.e(TAG, "Error:Adapter Property at index" + i + "is null");
                 continue;
             }
             if (name.equals("Devices")) {
+                StringBuilder str = new StringBuilder();
                 len = Integer.valueOf(properties[++i]);
-                if (len != 0)
-                    newValue = "";
-                else
-                    newValue = null;
                 for (int j = 0; j < len; j++) {
-                    newValue += properties[++i] + ",";
+                    str.append(properties[++i]);
+                    str.append(",");
+                }
+                if (len > 0) {
+                    newValue = str.toString();
                 }
             } else {
                 newValue = properties[++i];
@@ -837,32 +838,32 @@ public class BluetoothService extends IBluetooth.Stub {
          * We get a DeviceFound signal every time RSSI changes or name changes.
          * Don't create a new Map object every time */
         Map<String, String> propertyValues = mDeviceProperties.get(address);
-        if (propertyValues != null) {
-            propertyValues.clear();
-        } else {
+        if (propertyValues == null) {
             propertyValues = new HashMap<String, String>();
         }
 
         for (int i = 0; i < properties.length; i++) {
             String name = properties[i];
-            String newValue;
+            String newValue = null;
             int len;
             if (name == null) {
                 Log.e(TAG, "Error: Remote Device Property at index" + i + "is null");
                 continue;
             }
             if (name.equals("UUIDs") || name.equals("Nodes")) {
+                StringBuilder str = new StringBuilder();
                 len = Integer.valueOf(properties[++i]);
-                if (len != 0)
-                    newValue = "";
-                else
-                    newValue = null;
                 for (int j = 0; j < len; j++) {
-                    newValue += properties[++i] + ",";
+                    str.append(properties[++i]);
+                    str.append(",");
+                }
+                if (len > 0) {
+                    newValue = str.toString();
                 }
             } else {
                 newValue = properties[++i];
             }
+
             propertyValues.put(name, newValue);
         }
         mDeviceProperties.put(address, propertyValues);
