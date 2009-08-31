@@ -428,10 +428,15 @@ static void checkForIds(const String8& path, ResXMLParser& parser)
     }
 }
 
-static bool applyFileOverlay(const sp<AaptAssets>& assets,
+static bool applyFileOverlay(Bundle *bundle,
+                             const sp<AaptAssets>& assets,
                              const sp<ResourceTypeSet>& baseSet,
                              const char *resType)
 {
+    if (bundle->getVerbose()) {
+        printf("applyFileOverlay for %s\n", resType);
+    }
+
     // Replace any base level files in this category with any found from the overlay
     // Also add any found only in the overlay.
     sp<AaptAssets> overlay = assets->getOverlay();
@@ -450,6 +455,9 @@ static bool applyFileOverlay(const sp<AaptAssets>& assets,
             // non-overlay "baseset".
             size_t overlayCount = overlaySet->size();
             for (size_t overlayIndex=0; overlayIndex<overlayCount; overlayIndex++) {
+                if (bundle->getVerbose()) {
+                    printf("trying overlaySet Key=%s\n",overlaySet->keyAt(overlayIndex).string());
+                }
                 size_t baseIndex = baseSet->indexOfKey(overlaySet->keyAt(overlayIndex));
                 if (baseIndex < UNKNOWN_ERROR) {
                     // look for same flavor.  For a given file (strings.xml, for example)
@@ -457,18 +465,36 @@ static bool applyFileOverlay(const sp<AaptAssets>& assets,
                     // the same flavor.
                     sp<AaptGroup> overlayGroup = overlaySet->valueAt(overlayIndex);
                     sp<AaptGroup> baseGroup = baseSet->valueAt(baseIndex);
-                   
-                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > baseFiles = 
-                            baseGroup->getFiles();
-                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > overlayFiles = 
+
+                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > overlayFiles =
                             overlayGroup->getFiles();
+                    if (bundle->getVerbose()) {
+                        DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > baseFiles =
+                                baseGroup->getFiles();
+                        for (size_t i=0; i < baseFiles.size(); i++) {
+                            printf("baseFile %d has flavor %s\n", i,
+                                    baseFiles.keyAt(i).toString().string());
+                        }
+                        for (size_t i=0; i < overlayFiles.size(); i++) {
+                            printf("overlayFile %d has flavor %s\n", i,
+                                    overlayFiles.keyAt(i).toString().string());
+                        }
+                    }
+
                     size_t overlayGroupSize = overlayFiles.size();
-                    for (size_t overlayGroupIndex = 0; 
-                            overlayGroupIndex<overlayGroupSize; 
+                    for (size_t overlayGroupIndex = 0;
+                            overlayGroupIndex<overlayGroupSize;
                             overlayGroupIndex++) {
-                        size_t baseFileIndex = 
-                                baseFiles.indexOfKey(overlayFiles.keyAt(overlayGroupIndex));
+                        size_t baseFileIndex =
+                                baseGroup->getFiles().indexOfKey(overlayFiles.
+                                keyAt(overlayGroupIndex));
                         if(baseFileIndex < UNKNOWN_ERROR) {
+                            if (bundle->getVerbose()) {
+                                printf("found a match (%d) for overlay file %s, for flavor %s\n",
+                                        baseFileIndex,
+                                        overlayGroup->getLeaf().string(),
+                                        overlayFiles.keyAt(overlayGroupIndex).toString().string());
+                            }
                             baseGroup->removeFile(baseFileIndex);
                         } else {
                             // didn't find a match fall through and add it..
@@ -482,11 +508,11 @@ static bool applyFileOverlay(const sp<AaptAssets>& assets,
                             overlaySet->valueAt(overlayIndex));
                     // make sure all flavors are defined in the resources.
                     sp<AaptGroup> overlayGroup = overlaySet->valueAt(overlayIndex);
-                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > overlayFiles = 
+                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > overlayFiles =
                             overlayGroup->getFiles();
                     size_t overlayGroupSize = overlayFiles.size();
-                    for (size_t overlayGroupIndex = 0; 
-                            overlayGroupIndex<overlayGroupSize; 
+                    for (size_t overlayGroupIndex = 0;
+                            overlayGroupIndex<overlayGroupSize;
                             overlayGroupIndex++) {
                         assets->addGroupEntry(overlayFiles.keyAt(overlayGroupIndex));
                     }
@@ -623,13 +649,13 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         current = current->getOverlay();
     }
     // apply the overlay files to the base set
-    if (!applyFileOverlay(assets, drawables, "drawable") ||
-            !applyFileOverlay(assets, layouts, "layout") ||
-            !applyFileOverlay(assets, anims, "anim") ||
-            !applyFileOverlay(assets, xmls, "xml") ||
-            !applyFileOverlay(assets, raws, "raw") ||
-            !applyFileOverlay(assets, colors, "color") ||
-            !applyFileOverlay(assets, menus, "menu")) {
+    if (!applyFileOverlay(bundle, assets, drawables, "drawable") ||
+            !applyFileOverlay(bundle, assets, layouts, "layout") ||
+            !applyFileOverlay(bundle, assets, anims, "anim") ||
+            !applyFileOverlay(bundle, assets, xmls, "xml") ||
+            !applyFileOverlay(bundle, assets, raws, "raw") ||
+            !applyFileOverlay(bundle, assets, colors, "color") ||
+            !applyFileOverlay(bundle, assets, menus, "menu")) {
         return UNKNOWN_ERROR;
     }
 
