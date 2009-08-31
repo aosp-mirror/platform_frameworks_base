@@ -1277,6 +1277,11 @@ public final class ViewRoot extends Handler implements ViewParent,
             // TODO: we should ask the window manager to do something!
             // for now we just do nothing
             return;
+        } catch (IllegalArgumentException e) {
+            Log.e("ViewRoot", "IllegalArgumentException locking surface", e);
+            // TODO: we should ask the window manager to do something!
+            // for now we just do nothing
+            return;
         }
 
         try {

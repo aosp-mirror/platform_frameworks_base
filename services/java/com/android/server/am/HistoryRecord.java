@@ -470,7 +470,8 @@ class HistoryRecord extends IApplicationToken.Stub {
                 }
                 
                 if (r.app.instrumentationClass == null) { 
-                    service.appNotRespondingLocked(r.app, r, "keyDispatchingTimedOut");
+                    service.appNotRespondingLocked(r.app, r, this,
+                            "keyDispatchingTimedOut");
                 } else {
                     Bundle info = new Bundle();
                     info.putString("shortMsg", "keyDispatchingTimedOut");

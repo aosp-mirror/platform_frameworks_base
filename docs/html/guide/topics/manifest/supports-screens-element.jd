@@ -1,0 +1,123 @@
+page.title=&lt;supports-screens&gt;
+@jd:body
+
+<dl class="xml">
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;supports-screens android:<a href="#small">smallScreens</a>=["true" | "false"] 
+                  android:<a href="#normal">normalScreens</a>=["true" | "false"] 
+                  android:<a href="#large">largeScreens</a>=["true" | "false"] 
+                  android:<a href="#any">anyDensity</a>=["true" | "false"] /&gt;
+</pre>
+</dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>Lets you specify the screen dimensions the
+application supports.  By default a modern application (using API Level 4 or higher) supports all
+screen sizes and must explicitly disable certain screen sizes here;
+older applications are assumed to support only the "normal"
+screen size.  Note that screen size is a separate axis from
+density. Screen size is determined as the available pixels to an application
+after density scaling has been applied. 
+
+<p>Based on the target device screen density, the Android 
+framework will scale down assets by a factor of 0.75 (low dpi screens) 
+or scale them up by a factor of 1.5 (high dpi screens).
+The screen density is expressed as dots-per-inch (dpi).</p>
+
+<p>Currently supported densities:</p>
+<ul>
+  <li>Low density: 120 dpi</li>
+  <li>Medium density: 160 dpi</li>
+  <li>High density: 240 dpi</li>
+</ul>
+
+<p>Table of display types:</p>
+
+<table>
+<tr>
+  <th></th><th>Low Density</th><th>Medium Density</th><th>High Density</th>
+</tr>
+<tr>
+  <th>Small Screen</th>
+  <td>QVGA</td>
+  <td>n/a</td>
+  <td>VGA</td>
+</tr>
+<tr>
+  <th>Normal Screen</th>
+  <td>WQVGA</td>
+  <td>HVGA</td>
+  <td>WVGA, FWVGA</td>
+</tr>
+<tr>
+  <th>Large Screen</th>
+  <td>n/a</td>
+  <td>VGA, WVGA, FWVGA</td>
+  <td>n/a</td>
+</tr>
+</table>
+
+</dd> 
+
+
+<dt>attributes:</dt>
+
+<dd>
+<dl class="attr"><dt><a name="small"></a>{@code android:smallScreens}</dt>
+  <dd>Indicates whether the application supports smaller screen form-factors.
+     A small screen is defined as one with a smaller aspect ratio than
+     the "normal" (traditional HVGA) screen.  An application that does
+     not support small screens <em>will not be available</em> for
+     small screen devices, because there is little the platform can do
+     to make such an application work on a smaller screen. Applications using
+     API Level 4 or higher default this to "true", others are "false".
+  </dd>
+  
+  <dt><a name="normal"></a>{@code android:normalScreens}</dt>
+  <dd>Indicates whether an application supports the "normal" screen
+     form-factors.  Traditionally this is an HVGA medium density
+     screen, but WQVGA low density and WVGA high density are also
+     considered to be normal.  This attribute is "true" by default,
+     and applications currently should leave it that way.
+  </dd>
+  
+  <dt><a name="large"></a>{@code android:largeScreens}</dt>
+  <dd>Indicates whether the application supports larger screen form-factors.
+     A large screen is defined as a screen that is significantly larger
+     than a "normal" phone screen, and thus may require some special care
+     on the application's part to make good use of it. An application that 
+     does not support large screens will be placed as a "postage stamp" on 
+     such a screen, so that it retains the dimensions it was originally
+     designed for. Applications using API Level 4 or higher default 
+     to "true", others are "false".
+  </dd>
+  
+  <dt><a name="any"></a>{@code android:anyDensity}</dt>
+  <dd>Indicates whether the application can accommodate any screen
+     density.  Older applications (pre API Level 4) are assumed unable to
+     accomodate all densities and this is "false" by default. Applications using 
+     API Level 4 or higher are assumed able to and this is "true" by default. 
+     You can explicitly supply your abilities here.
+  </dd>
+  
+
+</dl></dd>
+
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 4</dd>
+
+<dt>see also:</dt>
+<dd>
+  <ul>
+    <li>{@link android.util.DisplayMetrics}</li>
+  </ul>
+</dd>
+
+</dl>

@@ -64,7 +64,7 @@ import java.util.Map.Entry;
  * Custom implementation of Context to handle non compiled resources.
  */
 public final class BridgeContext extends Context {
-    
+
     private Resources mResources;
     private Theme mTheme;
     private HashMap<View, Object> mViewKeyMap = new HashMap<View, Object>();
@@ -73,12 +73,12 @@ public final class BridgeContext extends Context {
     private Map<String, Map<String, IResourceValue>> mProjectResources;
     private Map<String, Map<String, IResourceValue>> mFrameworkResources;
     private Map<IStyleResourceValue, IStyleResourceValue> mStyleInheritanceMap;
-    
+
     // maps for dynamically generated id representing style objects (IStyleResourceValue)
     private Map<Integer, IStyleResourceValue> mDynamicIdToStyleMap;
     private Map<IStyleResourceValue, Integer> mStyleToDynamicIdMap;
     private int mDynamicIdGenerator = 0x01030000; // Base id for framework R.style
-    
+
     // cache for TypedArray generated from IStyleResourceValue object
     private Map<int[], Map<Integer, TypedArray>> mTypedArrayCache;
     private BridgeInflater mInflater;
@@ -112,7 +112,7 @@ public final class BridgeContext extends Context {
         mProjectCallback = customViewLoader;
         mLogger = logger;
         Configuration config = new Configuration();
-        
+
         AssetManager assetManager = BridgeAssetManager.initSystem();
         mResources = BridgeResources.initSystem(
                 this,
@@ -120,19 +120,19 @@ public final class BridgeContext extends Context {
                 metrics,
                 config,
                 customViewLoader);
-        
+
         mTheme = mResources.newTheme();
-        
+
         mThemeValues = currentTheme;
         mProjectResources = projectResources;
         mFrameworkResources = frameworkResources;
         mStyleInheritanceMap = styleInheritanceMap;
     }
-    
+
     public void setBridgeInflater(BridgeInflater inflater) {
         mInflater = inflater;
     }
-    
+
     public void addViewKey(View view, Object viewKey) {
         mViewKeyMap.put(view, viewKey);
     }
@@ -140,19 +140,19 @@ public final class BridgeContext extends Context {
     public Object getViewKey(View view) {
         return mViewKeyMap.get(view);
     }
-    
+
     public Object getProjectKey() {
         return mProjectKey;
     }
-    
+
     public IProjectCallback getProjectCallback() {
         return mProjectCallback;
     }
-    
+
     public ILayoutLog getLogger() {
         return mLogger;
     }
-    
+
     // ------------ Context methods
 
     @Override
@@ -169,14 +169,14 @@ public final class BridgeContext extends Context {
     public ClassLoader getClassLoader() {
         return this.getClass().getClassLoader();
     }
-    
+
     @Override
     public Object getSystemService(String service) {
         if (LAYOUT_INFLATER_SERVICE.equals(service)) {
             return mInflater;
         }
-        
-        // AutoCompleteTextView and MultiAutoCompleteTextView want a window 
+
+        // AutoCompleteTextView and MultiAutoCompleteTextView want a window
         // service. We don't have any but it's not worth an exception.
         if (WINDOW_SERVICE.equals(service)) {
             return null;
@@ -196,38 +196,38 @@ public final class BridgeContext extends Context {
             throws Resources.NotFoundException {
         // get the IStyleResourceValue based on the resId;
         IStyleResourceValue style = getStyleByDynamicId(resid);
-        
+
         if (style == null) {
             throw new Resources.NotFoundException();
         }
 
         if (mTypedArrayCache == null) {
             mTypedArrayCache = new HashMap<int[], Map<Integer,TypedArray>>();
-            
+
             Map<Integer, TypedArray> map = new HashMap<Integer, TypedArray>();
             mTypedArrayCache.put(attrs, map);
 
             BridgeTypedArray ta = createStyleBasedTypedArray(style, attrs);
             map.put(resid, ta);
-            
+
             return ta;
         }
-        
+
         // get the 2nd map
         Map<Integer, TypedArray> map = mTypedArrayCache.get(attrs);
         if (map == null) {
             map = new HashMap<Integer, TypedArray>();
             mTypedArrayCache.put(attrs, map);
         }
-        
+
         // get the array from the 2nd map
         TypedArray ta = map.get(resid);
-        
+
         if (ta == null) {
             ta = createStyleBasedTypedArray(style, attrs);
             map.put(resid, ta);
         }
-        
+
         return ta;
     }
 
@@ -235,11 +235,11 @@ public final class BridgeContext extends Context {
     public final TypedArray obtainStyledAttributes(AttributeSet set, int[] attrs) {
         return obtainStyledAttributes(set, attrs, 0, 0);
     }
-    
+
     @Override
     public TypedArray obtainStyledAttributes(AttributeSet set, int[] attrs,
             int defStyleAttr, int defStyleRes) {
-        
+
         // Hint: for XmlPullParser, attach source //DEVICE_SRC/dalvik/libcore/xml/src/java
         BridgeXmlBlockParser parser = null;
         if (set instanceof BridgeXmlBlockParser) {
@@ -252,10 +252,10 @@ public final class BridgeContext extends Context {
 
         boolean[] frameworkAttributes = new boolean[1];
         TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, frameworkAttributes);
-        
+
         BridgeTypedArray ta = ((BridgeResources) mResources).newTypeArray(attrs.length,
                 parser.isPlatformFile());
-        
+
         // resolve the defStyleAttr value into a IStyleResourceValue
         IStyleResourceValue defStyleValues = null;
         if (defStyleAttr != 0) {
@@ -265,7 +265,7 @@ public final class BridgeContext extends Context {
             // look for the style in the current theme, and its parent:
             if (mThemeValues != null) {
                 IResourceValue item = findItemInStyle(mThemeValues, defStyleName);
-                
+
                 if (item != null) {
                     // item is a reference to a style entry. Search for it.
                     item = findResValue(item.getValue());
@@ -279,12 +279,12 @@ public final class BridgeContext extends Context {
                 }
             }
         }
-        
+
         if (defStyleRes != 0) {
             // FIXME: See what we need to do with this.
             throw new UnsupportedOperationException();
         }
-        
+
         String namespace = BridgeConstants.NS_RESOURCES;
         if (frameworkAttributes[0] == false) {
             // need to use the application namespace
@@ -294,32 +294,32 @@ public final class BridgeContext extends Context {
         if (styleNameMap != null) {
             for (Entry<Integer, String> styleAttribute : styleNameMap.entrySet()) {
                 int index = styleAttribute.getKey().intValue();
-    
+
                 String name = styleAttribute.getValue();
                 String value = parser.getAttributeValue(namespace, name);
-                
+
                 // if there's no direct value for this attribute in the XML, we look for default
                 // values in the widget defStyle, and then in the theme.
                 if (value == null) {
                     IResourceValue resValue = null;
-    
+
                     // look for the value in the defStyle first (and its parent if needed)
                     if (defStyleValues != null) {
                         resValue = findItemInStyle(defStyleValues, name);
                     }
-                    
+
                     // if the item is not present in the defStyle, we look in the main theme (and
                     // its parent themes)
                     if (resValue == null && mThemeValues != null) {
                         resValue = findItemInStyle(mThemeValues, name);
                     }
-    
+
                     // if we found a value, we make sure this doesn't reference another value.
                     // So we resolve it.
                     if (resValue != null) {
                         resValue = resolveResValue(resValue);
                     }
-                    
+
                     ta.bridgeSetValue(index, name, resValue);
                 } else {
                     // there is a value in the XML, but we need to resolve it in case it's
@@ -328,15 +328,20 @@ public final class BridgeContext extends Context {
                 }
             }
         }
-        
+
         ta.sealArray();
-        
+
         return ta;
     }
-    
-    
+
+    @Override
+    public Looper getMainLooper() {
+        return Looper.myLooper();
+    }
+
+
     // ------------- private new methods
-    
+
     /**
      * Creates a {@link BridgeTypedArray} by filling the values defined by the int[] with the
      * values found in the given style.
@@ -345,30 +350,30 @@ public final class BridgeContext extends Context {
     private BridgeTypedArray createStyleBasedTypedArray(IStyleResourceValue style, int[] attrs)
             throws Resources.NotFoundException {
         TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, null);
-        
+
         BridgeTypedArray ta = ((BridgeResources) mResources).newTypeArray(attrs.length,
                 false /* platformResourceFlag */);
-        
+
         // loop through all the values in the style map, and init the TypedArray with
         // the style we got from the dynamic id
         for (Entry<Integer, String> styleAttribute : styleNameMap.entrySet()) {
             int index = styleAttribute.getKey().intValue();
 
             String name = styleAttribute.getValue();
-            
+
             // get the value from the style, or its parent styles.
             IResourceValue resValue = findItemInStyle(style, name);
-            
+
             // resolve it to make sure there are no references left.
             ta.bridgeSetValue(index, name, resolveResValue(resValue));
         }
-        
+
         ta.sealArray();
 
         return ta;
     }
 
-    
+
     /**
      * Resolves the value of a resource, if the value references a theme or resource value.
      * <p/>
@@ -391,13 +396,13 @@ public final class BridgeContext extends Context {
 
         // get the IResourceValue referenced by this value
         IResourceValue resValue = findResValue(value);
-        
+
         // if resValue is null, but value is not null, this means it was not a reference.
         // we return the name/value wrapper in a IResourceValue
         if (resValue == null) {
             return new ResourceValue(type, name, value);
         }
-        
+
         // we resolved a first reference, but we need to make sure this isn't a reference also.
         return resolveResValue(resValue);
     }
@@ -411,7 +416,7 @@ public final class BridgeContext extends Context {
      * <p/>
      * If a value that does not need to be resolved is given, the method will return the input
      * value.
-     * 
+     *
      * @param value the value containing the reference to resolve.
      * @return a {@link IResourceValue} object or <code>null</code>
      */
@@ -419,7 +424,7 @@ public final class BridgeContext extends Context {
         if (value == null) {
             return null;
         }
-        
+
         // if the resource value is a style, we simply return it.
         if (value instanceof IStyleResourceValue) {
             return value;
@@ -436,7 +441,7 @@ public final class BridgeContext extends Context {
         // otherwise, we attempt to resolve this new value as well
         return resolveResValue(resolvedValue);
     }
-    
+
     /**
      * Searches for, and returns a {@link IResourceValue} by its reference.
      * <p/>
@@ -451,7 +456,7 @@ public final class BridgeContext extends Context {
      * <p/>
      * The actual format of a reference is <pre>@[namespace:]resType/resName</pre> but this method
      * only support the android namespace.
-     * 
+     *
      * @param reference the resource reference to search for.
      * @return a {@link IResourceValue} or <code>null</code>.
      */
@@ -481,7 +486,7 @@ public final class BridgeContext extends Context {
 
             // we look for the referenced item name.
             String referenceName = null;
-            
+
             if (segments.length == 2) {
                 // there was a resType in the reference. If it's attr, we ignore it
                 // else, we assert for now.
@@ -495,7 +500,7 @@ public final class BridgeContext extends Context {
                 // it's just an item name.
                 referenceName = segments[0];
             }
-            
+
             // now we look for android: in the referenceName in order to support format
             // such as: ?attr/android:name
             if (referenceName.startsWith(BridgeConstants.PREFIX_ANDROID)) {
@@ -512,9 +517,9 @@ public final class BridgeContext extends Context {
             return findItemInStyle(mThemeValues, referenceName);
         } else if (reference.startsWith(BridgeConstants.PREFIX_RESOURCE_REF)) {
             boolean frameworkOnly = false;
-            
+
             // check for the specific null reference value.
-            if (BridgeConstants.REFERENCE_NULL.equals(reference)) { 
+            if (BridgeConstants.REFERENCE_NULL.equals(reference)) {
                 return null;
             }
 
@@ -526,20 +531,20 @@ public final class BridgeContext extends Context {
             } else {
                 reference = reference.substring(BridgeConstants.PREFIX_RESOURCE_REF.length());
             }
-            
+
             // at this point, value contains type/[android:]name (drawable/foo for instance)
             String[] segments = reference.split("\\/");
-            
+
             // now we look for android: in the resource name in order to support format
             // such as: @drawable/android:name
             if (segments[1].startsWith(BridgeConstants.PREFIX_ANDROID)) {
                 frameworkOnly = true;
                 segments[1] = segments[1].substring(BridgeConstants.PREFIX_ANDROID.length());
             }
-            
+
             return findResValue(segments[0], segments[1], frameworkOnly);
         }
-        
+
         // Looks like the value didn't reference anything. Return null.
         return null;
     }
@@ -565,7 +570,7 @@ public final class BridgeContext extends Context {
                 }
             }
         }
-        
+
         // now search in the framework resources.
         typeMap = mFrameworkResources.get(resType);
         if (typeMap != null) {
@@ -574,11 +579,11 @@ public final class BridgeContext extends Context {
                 return item;
             }
         }
-        
+
         // didn't find the resource anywhere.
         return null;
     }
-    
+
     /**
      * Returns a framework resource by type and name. The returned resource is resolved.
      * @param resourceType the type of the resource
@@ -587,7 +592,7 @@ public final class BridgeContext extends Context {
     public IResourceValue getFrameworkResource(String resourceType, String resourceName) {
         return getResource(resourceType, resourceName, mFrameworkResources);
     }
-    
+
     /**
      * Returns a project resource by type and name. The returned resource is resolved.
      * @param resourceType the type of the resource
@@ -596,7 +601,7 @@ public final class BridgeContext extends Context {
     public IResourceValue getProjectResource(String resourceType, String resourceName) {
         return getResource(resourceType, resourceName, mProjectResources);
     }
-    
+
     IResourceValue getResource(String resourceType, String resourceName,
             Map<String, Map<String, IResourceValue>> resourceRepository) {
         Map<String, IResourceValue> typeMap = resourceRepository.get(resourceType);
@@ -607,12 +612,12 @@ public final class BridgeContext extends Context {
                 return item;
             }
         }
-        
+
         // didn't find the resource anywhere.
         return null;
-        
+
     }
-    
+
     /**
      * Returns the {@link IResourceValue} matching a given name in a given style. If the
      * item is not directly available in the style, the method looks in its parent style.
@@ -622,7 +627,7 @@ public final class BridgeContext extends Context {
      */
     IResourceValue findItemInStyle(IStyleResourceValue style, String itemName) {
         IResourceValue item = style.findItem(itemName);
-        
+
         // if we didn't find it, we look in the parent style (if applicable)
         if (item == null && mStyleInheritanceMap != null) {
             IStyleResourceValue parentStyle = mStyleInheritanceMap.get(style);
@@ -630,7 +635,7 @@ public final class BridgeContext extends Context {
                 return findItemInStyle(parentStyle, itemName);
             }
         }
-        
+
         return item;
     }
 
@@ -642,7 +647,7 @@ public final class BridgeContext extends Context {
      * attrs == com.android.internal.R.styleable.View, this returns the list of the "xyz" where
      * there's a field com.android.internal.R.styleable.View_xyz and the field value is the index
      * that is used to reference the attribute later in the TypedArray.
-     * 
+     *
      * @param attrs An attribute array reference given to obtainStyledAttributes.
      * @return A sorted map Attribute-Value to Attribute-Name for all attributes declared by the
      *         attribute array. Returns null if nothing is found.
@@ -662,14 +667,14 @@ public final class BridgeContext extends Context {
                     attributes.put(i, null);
                 }
             }
-            
+
             if (outFrameworkFlag != null) {
                 outFrameworkFlag[0] = true;
             }
-            
+
             return attributes;
         }
-        
+
         // if the name was not found in the framework resources, look in the project
         // resources
         arrayName = mProjectCallback.resolveResourceValue(attrs);
@@ -697,7 +702,7 @@ public final class BridgeContext extends Context {
 
     /**
      * Searches for the attribute referenced by its internal id.
-     * 
+     *
      * @param attr An attribute reference given to obtainStyledAttributes such as defStyle.
      * @return The unique name of the attribute, if found, e.g. "buttonStyle". Returns null
      *         if nothing is found.
@@ -707,12 +712,12 @@ public final class BridgeContext extends Context {
         if (info != null) {
             return info[0];
         }
-        
+
         info = mProjectCallback.resolveResourceValue(attr);
         if (info != null) {
             return info[0];
         }
-        
+
         return null;
     }
 
@@ -722,27 +727,27 @@ public final class BridgeContext extends Context {
             mDynamicIdToStyleMap = new HashMap<Integer, IStyleResourceValue>();
             mStyleToDynamicIdMap = new HashMap<IStyleResourceValue, Integer>();
         }
-        
+
         // look for an existing id
         Integer id = mStyleToDynamicIdMap.get(resValue);
-        
+
         if (id == null) {
             // generate a new id
             id = Integer.valueOf(++mDynamicIdGenerator);
-            
+
             // and add it to the maps.
             mDynamicIdToStyleMap.put(id, resValue);
             mStyleToDynamicIdMap.put(resValue, id);
         }
-        
+
         return id;
     }
-    
+
     private IStyleResourceValue getStyleByDynamicId(int i) {
         if (mDynamicIdToStyleMap != null) {
             return mDynamicIdToStyleMap.get(i);
         }
-   
+
         return null;
     }
 
@@ -751,10 +756,10 @@ public final class BridgeContext extends Context {
         if (value != null) {
             return value.intValue();
         }
-        
+
         return defValue;
     }
-    
+
     int getProjectIdValue(String idName, int defValue) {
         if (mProjectCallback != null) {
             Integer value = mProjectCallback.getResourceValue(BridgeConstants.RES_ID, idName);
@@ -762,7 +767,7 @@ public final class BridgeContext extends Context {
                 return value.intValue();
             }
         }
-        
+
         return defValue;
     }
 
@@ -820,7 +825,7 @@ public final class BridgeContext extends Context {
     @Override
     public void clearWallpaper() {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -850,46 +855,46 @@ public final class BridgeContext extends Context {
     @Override
     public void enforceCallingOrSelfPermission(String arg0, String arg1) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void enforceCallingOrSelfUriPermission(Uri arg0, int arg1,
             String arg2) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void enforceCallingPermission(String arg0, String arg1) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void enforceCallingUriPermission(Uri arg0, int arg1, String arg2) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void enforcePermission(String arg0, int arg1, int arg2, String arg3) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void enforceUriPermission(Uri arg0, int arg1, int arg2, int arg3,
             String arg4) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void enforceUriPermission(Uri arg0, String arg1, String arg2,
             int arg3, int arg4, int arg5, String arg6) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -965,7 +970,7 @@ public final class BridgeContext extends Context {
         // TODO Auto-generated method stub
         return null;
     }
-    
+
     @Override
     public String getPackageResourcePath() {
         // TODO Auto-generated method stub
@@ -1003,7 +1008,7 @@ public final class BridgeContext extends Context {
     @Override
     public void grantUriPermission(String arg0, Uri arg1, int arg2) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @SuppressWarnings("unused")
@@ -1051,31 +1056,31 @@ public final class BridgeContext extends Context {
     @Override
     public void removeStickyBroadcast(Intent arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void revokeUriPermission(Uri arg0, int arg1) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void sendBroadcast(Intent arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void sendBroadcast(Intent arg0, String arg1) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void sendOrderedBroadcast(Intent arg0, String arg1) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1083,39 +1088,39 @@ public final class BridgeContext extends Context {
             BroadcastReceiver arg2, Handler arg3, int arg4, String arg5,
             Bundle arg6) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void sendStickyBroadcast(Intent arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void setTheme(int arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @SuppressWarnings("unused")
     @Override
     public void setWallpaper(Bitmap arg0) throws IOException {
         // TODO Auto-generated method stub
-        
+
     }
 
     @SuppressWarnings("unused")
     @Override
     public void setWallpaper(InputStream arg0) throws IOException {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void startActivity(Intent arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1140,20 +1145,15 @@ public final class BridgeContext extends Context {
     @Override
     public void unbindService(ServiceConnection arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void unregisterReceiver(BroadcastReceiver arg0) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    @Override
-    public Looper getMainLooper() {
-        throw new UnsupportedOperationException();
-    }
-    
     @Override
     public Context getApplicationContext() {
         throw new UnsupportedOperationException();

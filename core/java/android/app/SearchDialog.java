@@ -67,6 +67,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ListAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
@@ -427,7 +428,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mSearchAutoComplete.setAdapter((SuggestionsAdapter)null);
         // close any leftover cursor
         if (mSuggestionsAdapter != null) {
-            mSuggestionsAdapter.changeCursor(null);
+            mSuggestionsAdapter.close();
         }
         mSuggestionsAdapter = null;
     }
@@ -1743,13 +1744,25 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 }
                 // If the drop-down obscures the keyboard, the user wouldn't see anything
                 // happening when pressing back, so we dismiss the entire dialog instead.
-                if (isInputMethodNotNeeded()) {
+                //
+                // also: if there is no text entered, we also want to dismiss the whole dialog,
+                // not just the soft keyboard.  the exception to this is if there are shortcuts
+                // that aren't displayed (e.g are being obscured by the soft keyboard); in that
+                // case we want to dismiss the soft keyboard so the user can see the rest of the
+                // shortcuts.
+                if (isInputMethodNotNeeded() ||
+                        (isEmpty() && getDropDownChildCount() >= getAdapterCount())) {
                     mSearchDialog.cancel();
                     return true;
                 }
                 return false; // will dismiss soft keyboard if necessary
             }
             return false;
+        }
+
+        private int getAdapterCount() {
+            final ListAdapter adapter = getAdapter();
+            return adapter == null ? 0 : adapter.getCount();
         }
     }
     

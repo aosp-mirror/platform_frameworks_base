@@ -318,10 +318,8 @@
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"Permet à l\'application de signaler au système quels widgets peuvent être utilisés par quelle application. Grâce à cette autorisation, les applications peuvent accorder l\'accès à des données personnelles à d\'autres applications. Cette option n\'est pas utilisée par les applications standard."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"Modification de l\'état du téléphone"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Permet à une application de contrôler les fonctionnalités téléphoniques de l\'appareil. Une application bénéficiant de cette autorisation peut changer de réseau, éteindre et allumer le signal radio du téléphone, etc., sans vous en avertir."</string>
-    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"Lire l\'état et l\'identité du téléphone"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Permet à l\'application d\'accéder aux fonctionnalités d\'appel du téléphone. L\'application peut alors déterminer le numéro de téléphone et le numéro de série de l\'appareil, savoir si un appel est en cours, identifier le numéro appelé, etc."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"Arrêt du mode veille sur le téléphone"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"Permet à une application d\'empêcher votre téléphone de passer en mode veille."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"Éteindre ou allumer le téléphone"</string>

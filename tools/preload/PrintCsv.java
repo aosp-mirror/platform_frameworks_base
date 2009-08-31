@@ -18,6 +18,12 @@ import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.BufferedInputStream;
+import java.io.Writer;
+import java.io.PrintStream;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.TreeSet;
+import java.util.Iterator;
 
 /**
  * Prints raw information in CSV format.
@@ -33,10 +39,25 @@ public class PrintCsv {
 
         Root root = Root.fromFile(args[0]);
 
-        System.out.println("Name"
+        printHeaders(System.out);
+
+        MemoryUsage baseline = MemoryUsage.baseline();
+
+        for (LoadedClass loadedClass : root.loadedClasses.values()) {
+            if (!loadedClass.systemClass) {
+                continue;
+            }
+
+            printRow(System.out, baseline, loadedClass);
+        }
+    }
+
+    static void printHeaders(PrintStream out) {
+        out.println("Name"
                 + ",Preloaded"
                 + ",Median Load Time (us)"
                 + ",Median Init Time (us)"
+                + ",Process Names"
                 + ",Load Count"
                 + ",Init Count"
                 + ",Managed Heap (B)"
@@ -44,46 +65,63 @@ public class PrintCsv {
                 + ",Managed Pages (kB)"
                 + ",Native Pages (kB)"
                 + ",Other Pages (kB)");
+    }
 
-        MemoryUsage baseline = root.baseline;
+    static void printRow(PrintStream out, MemoryUsage baseline,
+            LoadedClass loadedClass) {
+        out.print(loadedClass.name);
+        out.print(',');
+        out.print(loadedClass.preloaded);
+        out.print(',');
+        out.print(loadedClass.medianLoadTimeMicros());
+        out.print(',');
+        out.print(loadedClass.medianInitTimeMicros());
+        out.print(',');
+        out.print('"');
 
-        for (LoadedClass loadedClass : root.loadedClasses.values()) {
-            if (!loadedClass.systemClass) {
-                continue;
+        Set<String> procNames = new TreeSet<String>();
+        for (Operation op : loadedClass.loads)
+            procNames.add(op.process.name);
+        for (Operation op : loadedClass.initializations)
+            procNames.add(op.process.name);
+
+        if (procNames.size() <= 3) {
+            for (String name : procNames) {
+                out.print(name + "\n");
             }
-
-            System.out.print(loadedClass.name);
-            System.out.print(',');
-            System.out.print(loadedClass.preloaded);
-            System.out.print(',');
-            System.out.print(loadedClass.medianLoadTimeMicros());
-            System.out.print(',');
-            System.out.print(loadedClass.medianInitTimeMicros());
-            System.out.print(',');
-            System.out.print(loadedClass.loads.size());
-            System.out.print(',');
-            System.out.print(loadedClass.initializations.size());
-
-            if (loadedClass.memoryUsage.isAvailable()) {
-                MemoryUsage subtracted
-                        = loadedClass.memoryUsage.subtract(baseline);
-
-                System.out.print(',');
-                System.out.print(subtracted.javaHeapSize());
-                System.out.print(',');
-                System.out.print(subtracted.nativeHeapSize);
-                System.out.print(',');
-                System.out.print(subtracted.javaPagesInK());
-                System.out.print(',');
-                System.out.print(subtracted.nativePagesInK());
-                System.out.print(',');
-                System.out.print(subtracted.otherPagesInK());
-
-            } else {
-                System.out.print(",n/a,n/a,n/a,n/a,n/a");
-            }
-
-            System.out.println();
+        } else {
+            Iterator<String> i = procNames.iterator();
+            out.print(i.next() + "\n");
+            out.print(i.next() + "\n");
+            out.print("...and " + (procNames.size() - 2)
+                    + " others.");
         }
+
+        out.print('"');
+        out.print(',');
+        out.print(loadedClass.loads.size());
+        out.print(',');
+        out.print(loadedClass.initializations.size());
+
+        if (loadedClass.memoryUsage.isAvailable()) {
+            MemoryUsage subtracted
+                    = loadedClass.memoryUsage.subtract(baseline);
+
+            out.print(',');
+            out.print(subtracted.javaHeapSize());
+            out.print(',');
+            out.print(subtracted.nativeHeapSize);
+            out.print(',');
+            out.print(subtracted.javaPagesInK());
+            out.print(',');
+            out.print(subtracted.nativePagesInK());
+            out.print(',');
+            out.print(subtracted.otherPagesInK());
+
+        } else {
+            out.print(",n/a,n/a,n/a,n/a,n/a");
+        }
+
+        out.println();
     }
 }

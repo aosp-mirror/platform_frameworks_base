@@ -1,0 +1,52 @@
+page.title=&lt;uses-feature&gt;
+@jd:body
+
+<dl class="xml">
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;uses-feature android:<a href="#glEsVersion">glEsVersion</a>=["true" | "false"] /&gt;
+</pre>
+</dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>This element specifies specific features used by the application.
+Android provides some features that may not be equally supported by all
+Android devices. In a manner similar to the <code><a href="uses-sdk-element.html">&lt;uses-sdk></a></code> 
+element, this element allows an application to specify which potentially variable
+features it requires. In this way, the application
+will not be installed on devices that do not offer the required feature.</p>
+
+<p>For example, an application might specify that it requires a certain version of Open GL.
+If a device does not support that version of Open GL, then it will not allow installation of the application.</p>
+</dd> 
+
+
+<dt>attributes:</dt>
+
+<dd>
+<dl class="attr"><dt><a name="glEsVersion"></a>{@code android:glEsVersion}</dt>
+  <dd>The GLES version needed by the application.
+     The higher 16 bits represent the major number and the lower 16 bits
+     represent the minor number. For example, for GL 1.2 referring to
+     0x00000102, the actual value should be set as 0x00010002.
+  </dd>
+</dl>
+</dd>
+
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 4</dd>
+
+<dt>see also:</dt>
+<dd>
+  <ul>
+    <li>{@link android.content.pm.ConfigurationInfo}</li>
+  </ul>
+</dd>
+
+</dl>

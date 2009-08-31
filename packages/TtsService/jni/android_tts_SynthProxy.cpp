@@ -26,15 +26,24 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <tts/TtsEngine.h>
 #include <media/AudioTrack.h>
+#include <math.h>
 
 #include <dlfcn.h>
 
 #define DEFAULT_TTS_RATE        16000
 #define DEFAULT_TTS_FORMAT      AudioSystem::PCM_16_BIT
 #define DEFAULT_TTS_NB_CHANNELS 1
-#define DEFAULT_TTS_BUFFERSIZE  1024
+#define DEFAULT_TTS_BUFFERSIZE  2048
 // TODO use the TTS stream type when available
 #define DEFAULT_TTS_STREAM_TYPE AudioSystem::MUSIC
+
+// EQ + BOOST parameters
+#define FILTER_LOWSHELF_ATTENUATION -18.0f // in dB
+#define FILTER_TRANSITION_FREQ 1100.0f     // in Hz
+#define FILTER_SHELF_SLOPE 1.0f            // Q
+#define FILTER_GAIN 6.0f // linear gain
+// such a huge gain is justified by how much energy in the low frequencies is "wasted" at the output
+// of the synthesis. The low shelving filter removes it, leaving room for amplification.
 
 #define USAGEMODE_PLAY_IMMEDIATELY 0
 #define USAGEMODE_WRITE_TO_FILE    1
@@ -55,6 +64,79 @@ struct afterSynthData_t {
     FILE* outputFile;
     AudioSystem::stream_type streamType;
 };
+
+// ----------------------------------------------------------------------------
+// EQ data
+double amp;
+double w;
+double sinw;
+double cosw;
+double beta;
+double a0, a1, a2, b0, b1, b2;
+double m_fa, m_fb, m_fc, m_fd, m_fe;
+double x0;  // x[n]
+double x1;  // x[n-1]
+double x2;  // x[n-2]
+double out0;// y[n]
+double out1;// y[n-1]
+double out2;// y[n-2]
+
+void initializeEQ() {
+
+    amp = float(pow(10.0, FILTER_LOWSHELF_ATTENUATION / 40.0));
+    w = 2.0 * M_PI * (FILTER_TRANSITION_FREQ / DEFAULT_TTS_RATE);
+    sinw = float(sin(w));
+    cosw = float(cos(w));
+    beta = float(sqrt(amp)/FILTER_SHELF_SLOPE);
+
+    // initialize low-shelf parameters
+    b0 = amp * ((amp+1.0F) - ((amp-1.0F)*cosw) + (beta*sinw));
+    b1 = 2.0F * amp * ((amp-1.0F) - ((amp+1.0F)*cosw));
+    b2 = amp * ((amp+1.0F) - ((amp-1.0F)*cosw) - (beta*sinw));
+    a0 = (amp+1.0F) + ((amp-1.0F)*cosw) + (beta*sinw);
+    a1 = 2.0F * ((amp-1.0F) + ((amp+1.0F)*cosw));
+    a2 = -((amp+1.0F) + ((amp-1.0F)*cosw) - (beta*sinw));
+
+    m_fa = FILTER_GAIN * b0/a0;
+    m_fb = FILTER_GAIN * b1/a0;
+    m_fc = FILTER_GAIN * b2/a0;
+    m_fd = a1/a0;
+    m_fe = a2/a0;
+}
+
+void initializeFilter() {
+    x0 = 0.0f;
+    x1 = 0.0f;
+    x2 = 0.0f;
+    out0 = 0.0f;
+    out1 = 0.0f;
+    out2 = 0.0f;
+}
+
+void applyFilter(int16_t* buffer, size_t sampleCount) {
+
+    for (size_t i=0 ; i<sampleCount ; i++) {
+
+        x0 = (double) buffer[i];
+
+        out0 = (m_fa*x0) + (m_fb*x1) + (m_fc*x2) + (m_fd*out1) + (m_fe*out2);
+
+        x2 = x1;
+        x1 = x0;
+
+        out2 = out1;
+        out1 = out0;
+
+        if (out0 > 32767.0f) {
+            buffer[i] = 32767;
+        } else if (out0 < -32768.0f) {
+            buffer[i] = -32768;
+        } else {
+            buffer[i] = (int16_t) out0;
+        }
+    }
+}
+
 
 // ----------------------------------------------------------------------------
 static fields_t javaTTSFields;
@@ -198,12 +280,13 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
 
         if (wav == NULL) {
             delete pForAfter;
-            LOGI("Null: speech has completed");
+            LOGV("Null: speech has completed");
         }
 
         if (bufferSize > 0) {
             prepAudioTrack(pJniData, pForAfter->streamType, rate, format, channel);
             if (pJniData->mAudioOut) {
+                applyFilter((int16_t*)wav, bufferSize/2);
                 pJniData->mAudioOut->write(wav, bufferSize);
                 memset(wav, 0, bufferSize);
                 //LOGV("AudioTrack wrote: %d bytes", bufferSize);
@@ -212,13 +295,14 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
             }
         }
     } else  if (pForAfter->usageMode == USAGEMODE_WRITE_TO_FILE) {
-        LOGV("Save to file");
+        //LOGV("Save to file");
         if (wav == NULL) {
             delete pForAfter;
             LOGV("Null: speech has completed");
             return TTS_CALLBACK_HALT;
         }
         if (bufferSize > 0){
+            applyFilter((int16_t*)wav, bufferSize/2);
             fwrite(wav, 1, bufferSize, pForAfter->outputFile);
             memset(wav, 0, bufferSize);
         }
@@ -288,6 +372,8 @@ android_tts_SynthProxy_native_setup(JNIEnv *env, jobject thiz,
     // save the JNI resources so we can use them (and free them) later
     env->SetIntField(thiz, javaTTSFields.synthProxyFieldJniData,
             (int)pJniStorage);
+
+    initializeEQ();
 
     env->ReleaseStringUTFChars(nativeSoLib, nativeSoLibNativeString);
 }
@@ -479,6 +565,8 @@ android_tts_SynthProxy_synthesizeToFile(JNIEnv *env, jobject thiz, jint jniData,
         return result;
     }
 
+    initializeFilter();
+
     Mutex::Autolock l(engineMutex);
 
     // Retrieve audio parameters before writing the file header
@@ -582,6 +670,8 @@ android_tts_SynthProxy_speak(JNIEnv *env, jobject thiz, jint jniData,
         LOGE("android_tts_SynthProxy_speak(): invalid JNI data");
         return result;
     }
+
+    initializeFilter();
 
     Mutex::Autolock l(engineMutex);
 

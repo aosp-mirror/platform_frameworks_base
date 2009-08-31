@@ -16,6 +16,8 @@
 
 package android.net.http;
 
+import org.apache.harmony.xnet.provider.jsse.SSLParameters;
+
 import java.io.IOException;
 
 import java.security.cert.Certificate;
@@ -47,11 +49,6 @@ class CertificateChainValidator {
             = new CertificateChainValidator();
 
     /**
-     * Default trust manager (used to perform CA certificate validation)
-     */
-    private X509TrustManager mDefaultTrustManager;
-
-    /**
      * @return The singleton instance of the certificator chain validator
      */
     public static CertificateChainValidator getInstance() {
@@ -62,28 +59,7 @@ class CertificateChainValidator {
      * Creates a new certificate chain validator. This is a pivate constructor.
      * If you need a Certificate chain validator, call getInstance().
      */
-    private CertificateChainValidator() {
-        try {
-            TrustManagerFactory trustManagerFactory
-                = TrustManagerFactory.getInstance("X509");
-            trustManagerFactory.init((KeyStore)null);
-            TrustManager[] trustManagers =
-                trustManagerFactory.getTrustManagers();
-            if (trustManagers != null && trustManagers.length > 0) {
-                for (TrustManager trustManager : trustManagers) {
-                    if (trustManager instanceof X509TrustManager) {
-                        mDefaultTrustManager = (X509TrustManager)(trustManager);
-                        break;
-                    }
-                }
-            }
-        } catch (Exception exc) {
-            if (HttpLog.LOGV) {
-                HttpLog.v("CertificateChainValidator():" +
-                          " failed to initialize the trust manager");
-            }
-        }
-    }
+    private CertificateChainValidator() {}
 
     /**
      * Performs the handshake and server certificates validation
@@ -156,7 +132,7 @@ class CertificateChainValidator {
         // report back to the user.
         //
         try {
-            mDefaultTrustManager.checkServerTrusted(
+            SSLParameters.getDefaultTrustManager().checkServerTrusted(
                 serverCertificates, "RSA");
 
             // no errors!!!
@@ -186,7 +162,7 @@ class CertificateChainValidator {
         // check if the last certificate in the chain (root) is trusted
         X509Certificate[] rootCertificateChain = { currCertificate };
         try {
-            mDefaultTrustManager.checkServerTrusted(
+            SSLParameters.getDefaultTrustManager().checkServerTrusted(
                 rootCertificateChain, "RSA");
         } catch (CertificateExpiredException e) {
             String errorMessage = e.getMessage();

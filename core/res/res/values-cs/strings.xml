@@ -168,7 +168,7 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Umožňuje aplikaci přijímat a zpracovávat zprávy SMS. Škodlivé aplikace mohou sledovat vaše zprávy nebo je smazat, aniž by vám byly zobrazeny."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"příjem zpráv MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Umožňuje aplikaci přijímat a zpracovávat zprávy MMS. Škodlivé aplikace mohou sledovat vaše zprávy nebo je smazat, aniž by vám byly zobrazeny."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"odesílat zprávy SMS"</string>
+    <string name="permlab_sendSms" msgid="5600830612147671529">"odesílaní zpráv SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Umožňuje aplikaci odesílat zprávy SMS. Škodlivé aplikace mohou bez vašeho potvrzení odesílat zpoplatněné zprávy."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"čtení zpráv SMS a MMS"</string>
     <string name="permdesc_readSms" msgid="3002170087197294591">"Umožňuje aplikaci číst zprávy SMS uložené ve vašem telefonu nebo na kartě SIM. Škodlivé aplikace mohou načíst vaše soukromé zprávy."</string>
@@ -182,7 +182,7 @@
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Umožňuje aplikaci přesouvat úlohy do popředí či pozadí. Škodlivé aplikace mohou vynutit své přesunutí do popředí bez vašeho přičinění."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"povolit ladění aplikací"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Umožňuje aplikaci povolit ladění jiné aplikace. Škodlivé aplikace mohou pomocí tohoto nastavení ukončit jiné aplikace."</string>
-    <string name="permlab_changeConfiguration" msgid="8214475779521218295">"změny vašeho nastavení uživatelského rozhraní"</string>
+    <string name="permlab_changeConfiguration" msgid="8214475779521218295">"změna vašeho nastavení uživatelského rozhraní"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Umožňuje aplikaci změnit aktuální konfiguraci, např. národní prostředí či obecnou velikost písma."</string>
     <string name="permlab_restartPackages" msgid="2386396847203622628">"restartování ostatních aplikací"</string>
     <string name="permdesc_restartPackages" msgid="1076364837492936814">"Umožňuje aplikaci vynutit restartování jiných aplikací."</string>
@@ -190,9 +190,9 @@
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Umožňuje aplikaci vynutit zavření a přesunutí libovolné činnosti v popředí na pozadí. Běžné aplikace by toto nastavení neměly nikdy využívat."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"načtení interního stavu systému"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"Umožňuje aplikaci načíst interní stav systému. Škodlivé aplikace mohou načíst řádu soukromých a zabezpečených informací, které by nikdy neměly potřebovat."</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"Částečné vypnutí"</string>
+    <string name="permlab_shutdown" msgid="7185747824038909016">"částečné vypnutí"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Uvede správce činností do vypnutého stavu. Nedojde však k úplnému vypnutí."</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"Zabránit přepínání aplikací"</string>
+    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zabránění přepínání aplikací"</string>
     <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Zabrání uživateli přepnout na jinou aplikaci."</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"sledování a řízení spouštění všech aplikací"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"Umožňuje aplikaci sledovat a řídit spouštění činností systémem. Škodlivé aplikace mohou zcela ovládnout systém. Toto oprávnění je zapotřebí pouze pro účely vývoje, nikdy pro běžné použití telefonu."</string>
@@ -208,13 +208,13 @@
     <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Umožňuje aplikaci ovládat, zda jsou činnosti vždy dokončeny po přesunutí do pozadí. Běžné aplikace toto nastavení nikdy nevyužívají."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"změna statistických údajů o baterii"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Umožňuje změnu shromážděných statistických údajů o baterii. Není určeno pro běžné aplikace."</string>
-    <string name="permlab_backup" msgid="470013022865453920">"Ovládat zálohování a obnovu systému"</string>
+    <string name="permlab_backup" msgid="470013022865453920">"ovládání zálohování a obnovy systému"</string>
     <string name="permdesc_backup" msgid="2305432853944929371">"Umožňuje aplikaci ovládat mechanizmus zálohování a obnovy systému. Není určeno k použití v běžných aplikacích."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"zobrazení nepovolených oken"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Umožňuje vytvoření oken, která mají být použita interním systémem uživatelského rozhraní. Běžné aplikace toto nastavení nepoužívají."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"zobrazení upozornění systémové úrovně"</string>
     <string name="permdesc_systemAlertWindow" msgid="5109622689323490558">"Umožňuje aplikaci zobrazit okna s výstrahami systému. Škodlivé aplikace mohou převzít kontrolu nad celou obrazovkou telefonu."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"globální změny rychlosti animace"</string>
+    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"změna globální rychlosti animace"</string>
     <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Umožňuje aplikaci kdykoli globálně změnit rychlost animace (rychlejší či pomalejší animace)."</string>
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"správa tokenů aplikací"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Umožňuje aplikaci vytvořit a spravovat své vlastní tokeny a obejít jejich obvyklé řazení typu Z. Toto nastavení by nikdy nemělo být potřeba pro běžné aplikace."</string>
@@ -250,11 +250,11 @@
     <string name="permdesc_changeComponentState" msgid="4569107043246700630">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou pomocí tohoto nastavení vypnout důležité funkce telefonu. Je třeba postupovat opatrně, protože je možné způsobit nepoužitelnost, nekonzistenci či nestabilitu komponent aplikací."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"nastavení upřednostňovaných aplikací"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Umožňuje aplikaci změnit vaše upřednostňované aplikace. Toto nastavení může škodlivým aplikacím umožnit nepozorovaně změnit spouštěné aplikace a oklamat vaše existující aplikace tak, aby shromažďovaly vaše soukromá data."</string>
-    <string name="permlab_writeSettings" msgid="1365523497395143704">"změny globálních nastavení systému"</string>
+    <string name="permlab_writeSettings" msgid="1365523497395143704">"změna globálních nastavení systému"</string>
     <string name="permdesc_writeSettings" msgid="838789419871034696">"Umožňuje aplikaci upravit data nastavení systému. Škodlivé aplikace mohou poškodit konfiguraci vašeho systému."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"změny zabezpečených nastavení systému"</string>
     <string name="permdesc_writeSecureSettings" msgid="4116616249170428132">"Umožňuje aplikaci změnit data zabezpečených nastavení systému. Běžné aplikace toto nastavení nevyužívají."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"změny mapy služeb Google"</string>
+    <string name="permlab_writeGservices" msgid="2149426664226152185">"změna mapy služeb Google"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Umožňuje aplikaci změnit mapu služeb Google. Běžné aplikace toto nastavení nevyužívají."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"automatické spuštění při startu"</string>
     <string name="permdesc_receiveBootCompleted" msgid="698336728415008796">"Umožňuje aplikaci spuštění ihned po spuštění systému. Toto nastavení může zpomalit spuštění telefonu a umožnit aplikaci celkově zpomalit telefon, protože bude neustále spuštěna."</string>
@@ -276,7 +276,7 @@
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Vytváří simulované zdroje polohy pro účely testování. Škodlivé aplikace mohou pomocí tohoto nastavení změnit polohu či stav vrácený zdroji skutečné polohy, jako je např. jednotka GPS či poskytovatelé sítě."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"přístup k dalším příkazům poskytovatele polohy"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Umožňuje získat přístup k dalším příkazům poskytovatele polohy. Škodlivé aplikace mohou pomocí tohoto nastavení narušit funkci GPS či jiných zdrojů polohy."</string>
-    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"Oprávnění k instalaci poskytovatele polohy"</string>
+    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"oprávnění k instalaci poskytovatele polohy"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Vytvořit simulace zdrojů polohy pro účely testování. Škodlivé aplikace mohou toto nastavení využít k přepsání polohy nebo stavu vráceného zdroji skutečné polohy, například systémem GPS nebo poskytovateli sítí. Mohou také monitorovat polohu a ohlásit ji externímu zdroji."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"upřesnění polohy (GPS)"</string>
     <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Umožňuje aplikaci přístup ke zdrojům přesné polohy v telefonu, jako je například systém GPS, je-li k dispozici. Škodlivé aplikace mohou pomocí tohoto nastavení zjistit vaši polohu a mohou zvýšit spotřebu baterie."</string>
@@ -316,12 +316,10 @@
     <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Umožňuje čtení i zápis vlastností nahraných službou Checkin. Běžné aplikace toto nastavení obvykle nevyužívají."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"zvolit widgety"</string>
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"Umožňuje aplikaci sdělit systému, které aplikace mohou používat které widgety. Aplikace s tímto oprávněním mohou zpřístupnit osobní údaje jiným aplikacím. Není určeno pro běžné aplikace."</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"změny stavu telefonu"</string>
+    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"změna stavu telefonu"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Umožňuje aplikaci ovládat telefonní funkce zařízení. Aplikace s tímto oprávněním může přepínat sítě nebo zapnout či vypnout bezdrátové připojení telefonu bez vašeho svolení."</string>
-    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"čtení stavu a identity telefonu"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Umožňuje aplikaci získat přístup k telefonním funkcím zařízení. Aplikace s tímto oprávněním mohou určit telefonní a sériové číslo tohoto telefonu, zda zrovna probíhá hovor, volané telefonní číslo a podobně."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"zabránění přechodu telefonu do režimu spánku"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"Umožňuje aplikaci zabránit přechodu telefonu do režimu spánku."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"zapnutí či vypnutí telefonu"</string>
@@ -342,7 +340,7 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Umožňuje aplikaci zobrazit stav všech sítí."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"plný přístup k Internetu"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Umožňuje aplikaci vytvořit síťové sokety."</string>
-    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"zápis nastavení pro název přístupového bodu (APN)"</string>
+    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"zápis nastavení názvu přístupového bodu (APN)"</string>
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Umožňuje aplikaci změnit nastavení APN, jako je například proxy či port APN."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"změna připojení k síti"</string>
     <string name="permdesc_changeNetworkState" msgid="6278115726355634395">"Umožňuje aplikaci změnit stav připojení k síti."</string>
@@ -350,9 +348,9 @@
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Umožňuje aplikaci změnit nastavení použití dat na pozadí."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"zobrazení stavu WiFi"</string>
     <string name="permdesc_accessWifiState" msgid="485796529139236346">"Umožňuje aplikaci zobrazit informace o stavu připojení WiFi."</string>
-    <string name="permlab_changeWifiState" msgid="7280632711057112137">"Změnit stav WiFi"</string>
+    <string name="permlab_changeWifiState" msgid="7280632711057112137">"změna stavu WiFi"</string>
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Umožňuje aplikaci připojit se k přístupovým bodům WiFi či se od nich odpojit a provádět změny nakonfigurovaných sítí WiFi."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Povolit příjem Wi-Fi Multicast"</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"povolení příjmu Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Povoluje aplikaci přijímat pakety, které nebyly adresovány přímo vašemu zařízení. Pomocí této možnosti můžete objevit služby nabízené ve vaší blízkosti. Spotřeba energie je vyšší než u režimu bez vícesměrového vysílání (multicast)."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"správa rozhraní Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Umožňuje aplikaci konfigurovat místní telefon s rozhraním Bluetooth a vyhledávat a párovat vzdálená zařízení."</string>
@@ -370,11 +368,11 @@
     <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Umožňuje aplikaci získat podrobnosti o aktuálně synchronizovaných zdrojích."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"zápis odebíraných zdrojů"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Umožňuje aplikaci upravit vaše aktuálně synchronizované zdroje. To může škodlivým aplikacím umožnit změnu vašich synchronizovaných zdrojů."</string>
-    <string name="permlab_readDictionary" msgid="432535716804748781">"číst slovník definovaný uživatelem"</string>
+    <string name="permlab_readDictionary" msgid="432535716804748781">"člení slovníku definovaného uživatelem"</string>
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Umožní aplikaci číst soukromá slova, jména a fráze, která uživatel mohl uložit do svého slovníku."</string>
-    <string name="permlab_writeDictionary" msgid="6703109511836343341">"zapisovat do slovníku definovaného uživatelem"</string>
+    <string name="permlab_writeDictionary" msgid="6703109511836343341">"zápis do slovníku definovaného uživatelem"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Umožní aplikaci zapisovat nová slova do uživatelského slovníku."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"Změnit/smazat obsah karty SD"</string>
+    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"změna/smazání obsah karty SD"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Umožní aplikaci zápis na kartu SD."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domů"</item>
@@ -473,10 +471,10 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Chcete opustit tuto stránku?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Vyberte OK, chcete-li pokračovat, nebo Zrušit, chcete-li na stránce zůstat."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdit"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"Čtení historie a záložek prohlížeče"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky prohlížeče."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"Zapisovat historii a záložky prohlížeče"</string>
-    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Umožní aplikaci změnit historii či záložky prohlížeče uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit data prohlížeče."</string>
+    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"čtení historie a záložek Prohlížeče"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky Prohlížeče."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"zápis do historie a záložek Prohlížeče"</string>
+    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Umožní aplikaci změnit historii či záložky prohlížeče uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit data Prohlížeče."</string>
     <string name="save_password_message" msgid="767344687139195790">"Chcete, aby si prohlížeč zapamatoval toto heslo?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nyní ne"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapamatovat"</string>
@@ -630,7 +628,7 @@
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Přehrávání pomocí rozhraní Bluetooth"</string>
     <string name="volume_call" msgid="3941680041282788711">"Hlasitost hovoru"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Hlasitost příchozích hovorů při připojení Bluetooth"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Hlasitost upozornění a budíku"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Hlasitost budíku"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Hlasitost oznámení"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Hlasitost"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Výchozí vyzváněcí tón"</string>

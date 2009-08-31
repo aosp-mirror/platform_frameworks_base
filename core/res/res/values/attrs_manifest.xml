@@ -577,9 +577,7 @@
          backup and restore of the application's settings to external storage. -->
     <attr name="backupAgent" format="string" />
 
-    <!-- Whether the application allows its data to be backed up at all.  This
-         attribute defaults to 'true':  unless the application opts out, the
-         user will be able to back up its data to desktop storage. -->
+    <!-- This is not the attribute you are looking for. -->
     <attr name="allowBackup" format="boolean" />
 
     <!-- The <code>manifest</code> tag is the root of an
