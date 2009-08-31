@@ -89,7 +89,7 @@ public final class UrlInterceptRegistry {
      * UrlInterceptHandler interested, or null if none are.
      *
      * @return A CacheResult containing surrogate content.
-     * @Deprecated Use PluginData getPluginData( String url,
+     * @deprecated Use PluginData getPluginData( String url,
      * Map<String, String> headers) instead.
      */
     @Deprecated

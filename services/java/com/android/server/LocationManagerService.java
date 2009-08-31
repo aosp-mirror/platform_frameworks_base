@@ -1402,7 +1402,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
     /**
      * @return null if the provider does not exits
-     * @throw SecurityException if the provider is not allowed to be
+     * @throws SecurityException if the provider is not allowed to be
      * accessed by the caller
      */
     public Bundle getProviderInfo(String provider) {

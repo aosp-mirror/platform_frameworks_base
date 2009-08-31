@@ -319,7 +319,7 @@ public abstract class Animation implements Cloneable {
      * 
      * @param durationMillis Duration in milliseconds
      *
-     * @throw java.lang.IllegalArgumentException if the duration is < 0
+     * @throws java.lang.IllegalArgumentException if the duration is < 0
      *
      * @attr ref android.R.styleable#Animation_duration
      */

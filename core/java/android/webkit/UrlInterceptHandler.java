@@ -30,7 +30,7 @@ public interface UrlInterceptHandler {
      * @param url URL string.
      * @param headers The headers associated with the request. May be null.
      * @return The CacheResult containing the surrogate response.
-     * @Deprecated Use PluginData getPluginData(String url,
+     * @deprecated Use PluginData getPluginData(String url,
      * Map<String, String> headers); instead
      */
     @Deprecated
