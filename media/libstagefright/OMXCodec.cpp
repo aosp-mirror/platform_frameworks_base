@@ -1321,6 +1321,10 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         return;
     }
 
+    // We're going to temporarily give up the lock while reading data
+    // from the source. A certain client unfortunately chose to have the
+    // thread supplying input data and reading output data be the same...
+
     MediaBuffer *srcBuffer;
     status_t err;
     if (mSeekTimeUs >= 0) {
@@ -1328,10 +1332,13 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         options.setSeekTo(mSeekTimeUs);
         mSeekTimeUs = -1;
 
+        mLock.unlock();
         err = mSource->read(&srcBuffer, &options);
     } else {
+        mLock.unlock();
         err = mSource->read(&srcBuffer);
     }
+    mLock.lock();
 
     OMX_U32 flags = OMX_BUFFERFLAG_ENDOFFRAME;
     OMX_TICKS timestamp = 0;
