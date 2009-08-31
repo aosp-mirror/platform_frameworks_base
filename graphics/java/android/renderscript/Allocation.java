@@ -16,19 +16,15 @@
 
 package android.renderscript;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Array;
-
 import java.io.IOException;
 import java.io.InputStream;
 
 import android.content.res.Resources;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
-import android.renderscript.Type;
-import android.util.Config;
 import android.util.Log;
+import android.util.TypedValue;
 
 /**
  * @hide
@@ -52,7 +48,7 @@ public class Allocation extends BaseObj {
     }
 
     public void data(int[] d) {
-        int size = 0;
+        int size;
         if(mType != null && mType.mElement != null) {
             size = mType.mElement.mSize;
             for(int ct=0; ct < mType.mValues.length; ct++) {
@@ -71,7 +67,7 @@ public class Allocation extends BaseObj {
     }
 
     public void data(float[] d) {
-        int size = 0;
+        int size;
         if(mType != null && mType.mElement != null) {
             size = mType.mElement.mSize;
             for(int ct=0; ct < mType.mValues.length; ct++) {
@@ -245,8 +241,29 @@ public class Allocation extends BaseObj {
     static public Allocation createFromBitmapResource(RenderScript rs, Resources res, int id, Element dstFmt, boolean genMips)
         throws IllegalArgumentException {
 
-        Bitmap b = BitmapFactory.decodeResource(res, id, mBitmapOptions);
-        return createFromBitmap(rs, b, dstFmt, genMips);
+        InputStream is = null;
+        try {
+            final TypedValue value = new TypedValue();
+            is = res.openRawResource(id, value);
+
+            int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
+            int allocationId = rs.nAllocationCreateFromAssetStream(dstFmt.mPredefinedID, genMips,
+                    asset);
+
+            return new Allocation(allocationId, rs, null);            
+        } catch (Exception e) {
+            // Ignore
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+
+        return null;
     }
 
     static public Allocation createFromBitmapResourceBoxed(RenderScript rs, Resources res, int id, Element dstFmt, boolean genMips)

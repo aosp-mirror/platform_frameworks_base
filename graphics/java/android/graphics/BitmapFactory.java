@@ -337,19 +337,26 @@ public class BitmapFactory {
      */
     public static Bitmap decodeResource(Resources res, int id, Options opts) {
         Bitmap bm = null;
-
+        InputStream is = null; 
+        
         try {
             final TypedValue value = new TypedValue();
-            final InputStream is = res.openRawResource(id, value);
+            is = res.openRawResource(id, value);
 
             bm = decodeResourceStream(res, value, is, null, opts);
-            is.close();
-        } catch (java.io.IOException e) {
+        } catch (Exception e) {
             /*  do nothing.
                 If the exception happened on open, bm will be null.
                 If it happened on close, bm is still valid.
             */
+        } finally {
+            try {
+                if (is != null) is.close();
+            } catch (IOException e) {
+                // Ignore
+            }
         }
+
         return bm;
     }
 

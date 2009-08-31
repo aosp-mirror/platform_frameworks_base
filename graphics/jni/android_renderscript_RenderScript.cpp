@@ -26,7 +26,13 @@
 #include <ui/Surface.h>
 
 #include <core/SkBitmap.h>
+#include <core/SkPixelRef.h>
+#include <core/SkStream.h>
+#include <core/SkTemplates.h>
+#include <images/SkImageDecoder.h>
 
+#include <utils/Asset.h>
+#include <utils/ResourceTypes.h>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -380,6 +386,32 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jint dstFmt, jboolean g
     SkBitmap const * nativeBitmap =
             (SkBitmap const *)_env->GetIntField(jbitmap, gNativeBitmapID);
     const SkBitmap& bitmap(*nativeBitmap);
+    SkBitmap::Config config = bitmap.getConfig();
+
+    RsElementPredefined e = SkBitmapToPredefined(config);
+
+    if (e != RS_ELEMENT_USER_U8) {
+        bitmap.lockPixels();
+        const int w = bitmap.width();
+        const int h = bitmap.height();
+        const void* ptr = bitmap.getPixels();
+        jint id = (jint)rsAllocationCreateFromBitmap(con, w, h, (RsElementPredefined)dstFmt, e, genMips, ptr);
+        bitmap.unlockPixels();
+        return id;
+    }
+    return 0;
+}
+
+static int
+nAllocationCreateFromAssetStream(JNIEnv *_env, jobject _this, jint dstFmt, jboolean genMips, jint native_asset)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+
+    Asset* asset = reinterpret_cast<Asset*>(native_asset);
+    SkBitmap bitmap;
+    SkImageDecoder::DecodeMemory(asset->getBuffer(false), asset->getLength(),
+            &bitmap, SkBitmap::kNo_Config, SkImageDecoder::kDecodePixels_Mode);
+
     SkBitmap::Config config = bitmap.getConfig();
 
     RsElementPredefined e = SkBitmapToPredefined(config);
@@ -1239,6 +1271,7 @@ static JNINativeMethod methods[] = {
 {"nAllocationCreateSized",         "(II)I",                                (void*)nAllocationCreateSized },
 {"nAllocationCreateFromBitmap",    "(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
 {"nAllocationCreateFromBitmapBoxed","(IZLandroid/graphics/Bitmap;)I",      (void*)nAllocationCreateFromBitmapBoxed },
+{"nAllocationCreateFromAssetStream","(IZI)I",                              (void*)nAllocationCreateFromAssetStream },
 {"nAllocationUploadToTexture",     "(II)V",                                (void*)nAllocationUploadToTexture },
 {"nAllocationUploadToBufferObject","(I)V",                                 (void*)nAllocationUploadToBufferObject },
 {"nAllocationData",                "(I[II)V",                              (void*)nAllocationData_i },
