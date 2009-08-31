@@ -283,10 +283,12 @@ class BluetoothEventLoop {
             String value = null;
             int len = Integer.valueOf(propValues[1]);
             if (len > 0) {
-                value = "";
+                StringBuilder str = new StringBuilder();
                 for (int i = 2; i < propValues.length; i++) {
-                    value = value + propValues[i] + ',';
+                    str.append(propValues[i]);
+                    str.append(",");
                 }
+                value = str.toString();
             }
             mBluetoothService.setProperty(name, value);
         } else if (name.equals("Powered")) {
@@ -331,10 +333,12 @@ class BluetoothEventLoop {
             String uuid = null;
             int len = Integer.valueOf(propValues[1]);
             if (len > 0) {
-                uuid = "";
+                StringBuilder str = new StringBuilder();
                 for (int i = 2; i < propValues.length; i++) {
-                    uuid = uuid + propValues[i] + ",";
+                    str.append(propValues[i]);
+                    str.append(",");
                 }
+                uuid = str.toString();
             }
             mBluetoothService.setRemoteDeviceProperty(address, name, uuid);
         } else if (name.equals("Paired")) {
