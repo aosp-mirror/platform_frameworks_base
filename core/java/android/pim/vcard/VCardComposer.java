@@ -967,6 +967,9 @@ public class VCardComposer {
         if (contentValuesList != null) {
             for (ContentValues contentValues : contentValuesList) {
                 byte[] data = contentValues.getAsByteArray(Photo.PHOTO);
+                if (data == null) {
+                    continue;
+                }
                 final String photoType;
                 // Use some heuristics for guessing the format of the image.
                 // TODO: there should be some general API for detecting the file format.
