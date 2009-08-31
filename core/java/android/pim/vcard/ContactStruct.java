@@ -773,11 +773,7 @@ public class ContactStruct {
                     } else if (typeString.equals(Constants.ATTR_TYPE_WORK)) {
                         type = Email.TYPE_WORK;
                     } else if (typeString.equals(Constants.ATTR_TYPE_CELL)) {
-                        // We do not have TYPE_MOBILE yet.
-                        // TODO: modify this code when TYPE_MOBILE is supported.
-                        type = Email.TYPE_CUSTOM;
-                        label =
-                            android.provider.Contacts.ContactMethodsColumns.MOBILE_EMAIL_TYPE_NAME;
+                        type = Email.TYPE_MOBILE;
                     } else {
                         if (typeString.startsWith("X-") && type < 0) {
                             typeString = typeString.substring(2);
