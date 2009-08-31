@@ -52,6 +52,18 @@ public class SynthProxy {
     }
 
     /**
+     * Synchronous stop of the synthesizer. This method returns when the synth
+     * has completed the stop procedure and doesn't use any of the resources it
+     * was using while synthesizing.
+     *
+     * @return {@link android.speech.tts.TextToSpeech.SUCCESS} or
+     *         {@link android.speech.tts.TextToSpeech.ERROR}
+     */
+    public int stopSync() {
+        return native_stopSync(mJniData);
+    }
+
+    /**
      * Synthesize speech and speak it directly using AudioTrack.
      */
     public int speak(String text, int streamType) {
@@ -155,6 +167,8 @@ public class SynthProxy {
     private native final void native_finalize(int jniData);
 
     private native final int native_stop(int jniData);
+
+    private native final int native_stopSync(int jniData);
 
     private native final int native_speak(int jniData, String text, int streamType);
 
