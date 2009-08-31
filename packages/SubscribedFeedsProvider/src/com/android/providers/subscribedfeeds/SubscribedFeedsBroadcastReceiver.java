@@ -16,6 +16,7 @@
 
 package com.android.providers.subscribedfeeds;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +36,10 @@ public class SubscribedFeedsBroadcastReceiver extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent intent) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "Received intent " + intent);
-            intent.setClass(context, SubscribedFeedsIntentService.class);
+        if (intent.getAction().equals(Intent.ACTION_REMOTE_INTENT)) {
+            setResultCode(Activity.RESULT_OK);
+        }
+        intent.setClass(context, SubscribedFeedsIntentService.class);
         context.startService(intent);
     }
 }
