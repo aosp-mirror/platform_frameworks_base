@@ -54,6 +54,8 @@ static const int TYPE_RFCOMM = 1;
 static const int TYPE_SCO = 2;
 static const int TYPE_L2CAP = 3;  // TODO: Test l2cap code paths
 
+static const int RFCOMM_SO_SNDBUF = 70 * 1024;  // 70 KB send buffer
+
 static struct asocket *get_socketData(JNIEnv *env, jobject obj) {
     struct asocket *s =
             (struct asocket *) env->GetIntField(obj, field_mSocketData);
@@ -87,6 +89,7 @@ static void initSocketNative(JNIEnv *env, jobject obj) {
 
     int fd;
     int lm = 0;
+    int sndbuf;
     jboolean auth;
     jboolean encrypt;
     jint type;
@@ -131,7 +134,16 @@ static void initSocketNative(JNIEnv *env, jobject obj) {
 
     if (lm) {
         if (setsockopt(fd, SOL_RFCOMM, RFCOMM_LM, &lm, sizeof(lm))) {
-            LOGV("setsockopt() failed, throwing");
+            LOGV("setsockopt(RFCOMM_LM) failed, throwing");
+            jniThrowIOException(env, errno);
+            return;
+        }
+    }
+
+    if (type == TYPE_RFCOMM) {
+        sndbuf = RFCOMM_SO_SNDBUF;
+        if (setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(sndbuf))) {
+            LOGV("setsockopt(SO_SNDBUF) failed, throwing");
             jniThrowIOException(env, errno);
             return;
         }
@@ -274,16 +286,21 @@ static void bindListenNative(JNIEnv *env, jobject obj) {
     }
 
     if (bind(s->fd, addr, addr_sz)) {
+        LOGV("...bind(%d) gave errno %d", s->fd, errno);
         jniThrowIOException(env, errno);
         return;
     }
 
     if (listen(s->fd, 1)) {
+        LOGV("...listen(%d) gave errno %d", s->fd, errno);
         jniThrowIOException(env, errno);
         return;
     }
 
+    LOGV("...bindListenNative(%d) success", s->fd);
+
     return;
+
 #endif
     jniThrowIOException(env, ENOSYS);
 }
