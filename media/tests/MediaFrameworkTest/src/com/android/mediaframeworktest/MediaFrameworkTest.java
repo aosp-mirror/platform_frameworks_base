@@ -69,10 +69,6 @@ public class MediaFrameworkTest extends Activity {
         setContentView(R.layout.surface_view);
         mSurfaceView = (SurfaceView)findViewById(R.id.surface_view);
         ViewGroup.LayoutParams lp = mSurfaceView.getLayoutParams();
-        lp.width = 320;
-        lp.height = 240;
-        mSurfaceView.setLayoutParams(lp);
-        mSurfaceView.getHolder().setFixedSize(320, 240);  
         mSurfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         
         //Get the midi fd
