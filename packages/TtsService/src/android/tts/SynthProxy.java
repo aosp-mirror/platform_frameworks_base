@@ -40,7 +40,7 @@ public class SynthProxy {
      * Constructor; pass the location of the native TTS .so to use.
      */
     public SynthProxy(String nativeSoLib) {
-        Log.e("TTS is loading", nativeSoLib);
+        Log.v(TtsService.SERVICE_TAG, "TTS is loading " + nativeSoLib);
         native_setup(new WeakReference<SynthProxy>(this), nativeSoLib);
     }
 
