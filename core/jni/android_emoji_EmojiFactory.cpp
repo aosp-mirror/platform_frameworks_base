@@ -197,8 +197,11 @@ static jobject android_emoji_EmojiFactory_getBitmapFromAndroidPua(
 
 static void android_emoji_EmojiFactory_destructor(
     JNIEnv* env, jobject obj, jint nativeEmojiFactory) {
+  /*
+  // Must not delete this object!!
   EmojiFactory *factory = reinterpret_cast<EmojiFactory *>(nativeEmojiFactory);
   delete factory;
+  */
 }
 
 static jint android_emoji_EmojiFactory_getAndroidPuaFromVendorSpecificSjis(
