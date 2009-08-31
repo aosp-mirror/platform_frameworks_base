@@ -188,6 +188,8 @@ public class TtsService extends Service implements OnCompletionListener {
 
         // Unregister all callbacks.
         mCallbacks.kill();
+
+        Log.v("TtsService", "onDestroy() completed");
     }
 
 
@@ -497,14 +499,13 @@ public class TtsService extends Service implements OnCompletionListener {
 
                 // clear the current speech item
                 if (mCurrentSpeechItem != null) {
-                    result = sNativeSynth.stop();
+                    result = sNativeSynth.stopSync();
                     mKillList.put(mCurrentSpeechItem, true);
                     mIsSpeaking = false;
 
                     // was the engine writing to a file?
                     if (mCurrentSpeechItem.mType == SpeechItem.TEXT_TO_FILE) {
                         // delete the file that was being written
-                        // TODO make sure the synth is not writing to the file anymore
                         if (mCurrentSpeechItem.mFilename != null) {
                             File tempFile = new File(mCurrentSpeechItem.mFilename);
                             Log.v("TtsService", "Leaving behind " + mCurrentSpeechItem.mFilename);
@@ -884,6 +885,7 @@ public class TtsService extends Service implements OnCompletionListener {
             }
             if (mSpeechQueue.size() < 1) {
                 mIsSpeaking = false;
+                mKillList.clear();
                 broadcastTtsQueueProcessingCompleted();
                 return;
             }

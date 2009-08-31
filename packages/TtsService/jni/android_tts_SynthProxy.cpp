@@ -721,6 +721,27 @@ android_tts_SynthProxy_stop(JNIEnv *env, jobject thiz, jint jniData)
 }
 
 
+static int
+android_tts_SynthProxy_stopSync(JNIEnv *env, jobject thiz, jint jniData)
+{
+    int result = TTS_FAILURE;
+
+    if (jniData == 0) {
+        LOGE("android_tts_SynthProxy_stop(): invalid JNI data");
+        return result;
+    }
+
+    // perform a regular stop
+    result = android_tts_SynthProxy_stop(env, thiz, jniData);
+    // but wait on the engine having released the engine mutex which protects
+    // the synthesizer resources.
+    engineMutex.lock();
+    engineMutex.unlock();
+
+    return result;
+}
+
+
 static jobjectArray
 android_tts_SynthProxy_getLanguage(JNIEnv *env, jobject thiz, jint jniData)
 {
@@ -777,6 +798,10 @@ static JNINativeMethod gMethods[] = {
     {   "native_stop",
         "(I)I",
         (void*)android_tts_SynthProxy_stop
+    },
+    {   "native_stopSync",
+        "(I)I",
+        (void*)android_tts_SynthProxy_stopSync
     },
     {   "native_speak",
         "(ILjava/lang/String;I)I",
