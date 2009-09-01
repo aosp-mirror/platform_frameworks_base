@@ -16,13 +16,10 @@
 
 package android.renderscript;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.renderscript.Type;
+import android.graphics.BitmapFactory;
 import android.util.Config;
 import android.util.Log;
 import android.view.Surface;
@@ -35,6 +32,7 @@ import android.view.Surface;
 public class RenderScript {
     static final String LOG_TAG = "libRS_jni";
     private static final boolean DEBUG  = false;
+    @SuppressWarnings({"UnusedDeclaration", "deprecation"})
     private static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
 
 
@@ -43,6 +41,7 @@ public class RenderScript {
      * We use a class initializer to allow the native code to cache some
      * field offsets.
      */
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     private static boolean sInitialized;
     native private static void _nInit();
 
@@ -95,6 +94,7 @@ public class RenderScript {
     native int  nAllocationCreateSized(int elem, int count);
     native int  nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp);
     native int  nAllocationCreateFromBitmapBoxed(int dstFmt, boolean genMips, Bitmap bmp);
+    native int  nAllocationCreateFromAssetStream(int dstFmt, boolean genMips, int assetStream);
 
     native void nAllocationUploadToTexture(int alloc, int baseMioLevel);
     native void nAllocationUploadToBufferObject(int alloc);
@@ -188,6 +188,7 @@ public class RenderScript {
 
     private int     mDev;
     private int     mContext;
+    @SuppressWarnings({"FieldCanBeLocal"})
     private Surface mSurface;
 
     private static boolean mElementsInitialized = false;
