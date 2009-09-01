@@ -57,6 +57,16 @@ class ContentLoader extends StreamLoader {
 
     }
 
+    private String errString(Exception ex) {
+        String exMessage = ex.getMessage();
+        String errString = mContext.getString(
+                com.android.internal.R.string.httpErrorFileNotFound);
+        if (exMessage != null) {
+            errString += " " + exMessage;
+        }
+        return errString;
+    }
+
     @Override
     protected boolean setupStreamAndSendStatus() {
         Uri uri = Uri.parse(mUrl);
@@ -73,28 +83,16 @@ class ContentLoader extends StreamLoader {
             mDataStream = mContext.getContentResolver().openInputStream(uri);
             mHandler.status(1, 1, 0, "OK");
         } catch (java.io.FileNotFoundException ex) {
-            mHandler.error(
-                    EventHandler.FILE_NOT_FOUND_ERROR,
-                    mContext.getString(
-                            com.android.internal.R.string.httpErrorFileNotFound) +
-                    " " + ex.getMessage());
+            mHandler.error(EventHandler.FILE_NOT_FOUND_ERROR, errString(ex));
             return false;
 
         } catch (java.io.IOException ex) {
-            mHandler.error(
-                    EventHandler.FILE_ERROR,
-                    mContext.getString(
-                            com.android.internal.R.string.httpErrorFileNotFound) +
-                    " " + ex.getMessage());
+            mHandler.error(EventHandler.FILE_ERROR, errString(ex));
             return false;
         } catch (RuntimeException ex) {
             // readExceptionWithFileNotFoundExceptionFromParcel in DatabaseUtils
             // can throw a serial of RuntimeException. Catch them all here.
-            mHandler.error(
-                    EventHandler.FILE_ERROR,
-                    mContext.getString(
-                            com.android.internal.R.string.httpErrorFileNotFound) +
-                    " " + ex.getMessage());
+            mHandler.error(EventHandler.FILE_ERROR, errString(ex));
             return false;
         }
         return true;

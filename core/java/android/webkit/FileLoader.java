@@ -72,6 +72,15 @@ class FileLoader extends StreamLoader {
         }
     }
 
+    private String errString(Exception ex) {
+        String exMessage = ex.getMessage();
+        String errString = mContext.getString(R.string.httpErrorFileNotFound);
+        if (exMessage != null) {
+            errString += " " + exMessage;
+        }
+        return errString;
+    }
+
     @Override
     protected boolean setupStreamAndSendStatus() {
         try {
@@ -95,16 +104,11 @@ class FileLoader extends StreamLoader {
             mHandler.status(1, 1, 0, "OK");
 
         } catch (java.io.FileNotFoundException ex) {
-            mHandler.error(
-                    EventHandler.FILE_NOT_FOUND_ERROR,
-                    mContext.getString(R.string.httpErrorFileNotFound) +
-                    " " + ex.getMessage());
+            mHandler.error(EventHandler.FILE_NOT_FOUND_ERROR, errString(ex));
             return false;
 
         } catch (java.io.IOException ex) {
-            mHandler.error(EventHandler.FILE_ERROR,
-                           mContext.getString(R.string.httpErrorFileNotFound) +
-                           " " + ex.getMessage());
+            mHandler.error(EventHandler.FILE_ERROR, errString(ex));
             return false;
         }
         return true;
