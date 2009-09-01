@@ -266,6 +266,33 @@ public final class BluetoothDevice implements Parcelable {
         return BluetoothError.ERROR_IPC;
     }
 
+    /**
+     * Get trust state of a remote device.
+     * @hide
+     */
+    public boolean getTrustState() {
+        try {
+            return sService.getTrustState(mAddress);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return false;
+    }
+
+    /**
+     * Set trust state for a remote device.
+     * @param value the trust state value (true or false)
+     * @hide
+     */
+    public boolean setTrust(boolean value) {
+        try {
+            return sService.setTrust(mAddress, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return false;
+    }
+
     /** @hide */
     public int getBluetoothClass() {
         try {
