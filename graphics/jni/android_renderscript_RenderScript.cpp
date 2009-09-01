@@ -526,7 +526,7 @@ nAllocationRead_i(JNIEnv *_env, jobject _this, jint alloc, jintArray data)
     LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
     rsAllocationRead(con, (RsAllocation)alloc, ptr);
-    _env->ReleaseIntArrayElements(data, ptr, JNI_COMMIT);
+    _env->ReleaseIntArrayElements(data, ptr, 0);
 }
 
 static void
@@ -537,7 +537,7 @@ nAllocationRead_f(JNIEnv *_env, jobject _this, jint alloc, jfloatArray data)
     LOG_API("nAllocationRead_f, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
     rsAllocationRead(con, (RsAllocation)alloc, ptr);
-    _env->ReleaseFloatArrayElements(data, ptr, JNI_COMMIT);
+    _env->ReleaseFloatArrayElements(data, ptr, 0);
 }
 
 
