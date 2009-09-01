@@ -1397,7 +1397,7 @@ public class AccountManagerService extends IAccountManager.Stub {
                 Log.v(TAG, "current IMSI=" + imsi + "; stored IMSI=" + storedImsi);
             }
 
-            if (!imsi.equals(storedImsi) && !"initial".equals(storedImsi)) {
+            if (!imsi.equals(storedImsi) && !TextUtils.isEmpty(storedImsi)) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
                     Log.v(TAG, "wiping all passwords and authtokens");
                 }
