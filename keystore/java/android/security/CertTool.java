@@ -163,15 +163,9 @@ public class CertTool {
                 return ret;
             }
         }
-        while ((pemData = this.popPkcs12CertificateStack(handle)) != null) {
-            if (i++ > 0) {
-                if ((ret = sKeystore.put(CA_CERTIFICATE, keyname + i, pemData)) != 0) {
-                    return ret;
-                }
-            } else {
-                if ((ret = sKeystore.put(CA_CERTIFICATE, keyname, pemData)) != 0) {
-                    return ret;
-                }
+        if ((pemData = this.popPkcs12CertificateStack(handle)) != null) {
+            if ((ret = sKeystore.put(CA_CERTIFICATE, keyname, pemData)) != 0) {
+                return ret;
             }
         }
         return 0;
