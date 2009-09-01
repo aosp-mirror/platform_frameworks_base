@@ -62,53 +62,53 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public enum ConflictAlgorithm {
         /**
-         *  When a constraint violation occurs, an immediate ROLLBACK occurs, 
-         * thus ending the current transaction, and the command aborts with a 
-         * return code of SQLITE_CONSTRAINT. If no transaction is active 
+         *  When a constraint violation occurs, an immediate ROLLBACK occurs,
+         * thus ending the current transaction, and the command aborts with a
+         * return code of SQLITE_CONSTRAINT. If no transaction is active
          * (other than the implied transaction that is created on every command)
          *  then this algorithm works the same as ABORT.
          */
         ROLLBACK("ROLLBACK"),
-        
+
         /**
-         * When a constraint violation occurs,no ROLLBACK is executed 
-         * so changes from prior commands within the same transaction 
+         * When a constraint violation occurs,no ROLLBACK is executed
+         * so changes from prior commands within the same transaction
          * are preserved. This is the default behavior.
          */
         ABORT("ABORT"),
-        
+
         /**
-         * When a constraint violation occurs, the command aborts with a return 
-         * code SQLITE_CONSTRAINT. But any changes to the database that 
-         * the command made prior to encountering the constraint violation 
+         * When a constraint violation occurs, the command aborts with a return
+         * code SQLITE_CONSTRAINT. But any changes to the database that
+         * the command made prior to encountering the constraint violation
          * are preserved and are not backed out.
          */
         FAIL("FAIL"),
-        
+
         /**
-         * When a constraint violation occurs, the one row that contains 
-         * the constraint violation is not inserted or changed. 
-         * But the command continues executing normally. Other rows before and 
-         * after the row that contained the constraint violation continue to be 
+         * When a constraint violation occurs, the one row that contains
+         * the constraint violation is not inserted or changed.
+         * But the command continues executing normally. Other rows before and
+         * after the row that contained the constraint violation continue to be
          * inserted or updated normally. No error is returned.
          */
         IGNORE("IGNORE"),
-        
+
         /**
          * When a UNIQUE constraint violation occurs, the pre-existing rows that
-         * are causing the constraint violation are removed prior to inserting 
+         * are causing the constraint violation are removed prior to inserting
          * or updating the current row. Thus the insert or update always occurs.
-         * The command continues executing normally. No error is returned. 
+         * The command continues executing normally. No error is returned.
          * If a NOT NULL constraint violation occurs, the NULL value is replaced
-         * by the default value for that column. If the column has no default 
-         * value, then the ABORT algorithm is used. If a CHECK constraint 
-         * violation occurs then the IGNORE algorithm is used. When this conflict 
-         * resolution strategy deletes rows in order to satisfy a constraint, 
+         * by the default value for that column. If the column has no default
+         * value, then the ABORT algorithm is used. If a CHECK constraint
+         * violation occurs then the IGNORE algorithm is used. When this conflict
+         * resolution strategy deletes rows in order to satisfy a constraint,
          * it does not invoke delete triggers on those rows.
          *  This behavior might change in a future release.
          */
         REPLACE("REPLACE");
-        
+
         private final String mValue;
         ConflictAlgorithm(String value) {
             mValue = value;
@@ -117,7 +117,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             return mValue;
         }
     }
-    
+
     /**
      * Maximum Length Of A LIKE Or GLOB Pattern
      * The pattern matching algorithm used in the default LIKE and GLOB implementation
@@ -180,17 +180,19 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     private long mLockAcquiredWallTime = 0L;
     private long mLockAcquiredThreadTime = 0L;
-    
+
     // limit the frequency of complaints about each database to one within 20 sec
-    // unless run command adb shell setprop log.tag.Database VERBOSE  
+    // unless run command adb shell setprop log.tag.Database VERBOSE
     private static final int LOCK_WARNING_WINDOW_IN_MS = 20000;
     /** If the lock is held this long then a warning will be printed when it is released. */
     private static final int LOCK_ACQUIRED_WARNING_TIME_IN_MS = 300;
     private static final int LOCK_ACQUIRED_WARNING_THREAD_TIME_IN_MS = 100;
     private static final int LOCK_ACQUIRED_WARNING_TIME_IN_MS_ALWAYS_PRINT = 2000;
 
+    private static final int SLEEP_AFTER_YIELD_QUANTUM = 500;
+
     private long mLastLockMessageTime = 0L;
-    
+
     /** Used by native code, do not rename */
     /* package */ int mNativeHandle = 0;
 
@@ -205,15 +207,15 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     /** The optional factory to use when creating new Cursors */
     private CursorFactory mFactory;
-    
+
     private WeakHashMap<SQLiteClosable, Object> mPrograms;
- 
+
     private final RuntimeException mLeakedException;
 
     // package visible, since callers will access directly to minimize overhead in the case
     // that logging is not enabled.
     /* package */ final boolean mLogStats;
-    
+
     /**
      * @param closable
      */
@@ -225,7 +227,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             unlock();
         }
     }
-    
+
     void removeSQLiteClosable(SQLiteClosable closable) {
         lock();
         try {
@@ -233,8 +235,8 @@ public class SQLiteDatabase extends SQLiteClosable {
         } finally {
             unlock();
         }
-    }    
-   
+    }
+
     @Override
     protected void onAllReferencesReleased() {
         if (isOpen()) {
@@ -245,10 +247,10 @@ public class SQLiteDatabase extends SQLiteClosable {
     /**
      * Attempts to release memory that SQLite holds but does not require to
      * operate properly. Typically this memory will come from the page cache.
-     * 
+     *
      * @return the number of bytes actually released
      */
-    static public native int releaseMemory(); 
+    static public native int releaseMemory();
 
     /**
      * Control whether or not the SQLiteDatabase is made thread-safe by using locks
@@ -284,7 +286,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * touch the native sqlite3* object since it is single threaded and uses
      * a polling lock contention algorithm. The lock is recursive, and may be acquired
      * multiple times by the same thread. This is a no-op if mLockingEnabled is false.
-     * 
+     *
      * @see #unlock()
      */
     /* package */ void lock() {
@@ -320,7 +322,7 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     /**
      * Releases the database lock. This is a no-op if mLockingEnabled is false.
-     * 
+     *
      * @see #unlock()
      */
     /* package */ void unlock() {
@@ -350,7 +352,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     private void checkLockHoldTime() {
         // Use elapsed real-time since the CPU may sleep when waiting for IO
         long elapsedTime = SystemClock.elapsedRealtime();
-        long lockedTime = elapsedTime - mLockAcquiredWallTime;                
+        long lockedTime = elapsedTime - mLockAcquiredWallTime;
         if (lockedTime < LOCK_ACQUIRED_WARNING_TIME_IN_MS_ALWAYS_PRINT &&
                 !Log.isLoggable(TAG, Log.VERBOSE) &&
                 (elapsedTime - mLastLockMessageTime) < LOCK_WARNING_WINDOW_IN_MS) {
@@ -567,10 +569,21 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
         }
         if (sleepAfterYieldDelay > 0) {
-            try {
-                Thread.sleep(sleepAfterYieldDelay);
-            } catch (InterruptedException e) {
-                Thread.interrupted();
+            // Sleep for up to sleepAfterYieldDelay milliseconds, waking up periodically to
+            // check if anyone is using the database.  If the database is not contended,
+            // retake the lock and return.
+            long remainingDelay = sleepAfterYieldDelay;
+            while (remainingDelay > 0) {
+                try {
+                    Thread.sleep(remainingDelay < SLEEP_AFTER_YIELD_QUANTUM ?
+                            remainingDelay : SLEEP_AFTER_YIELD_QUANTUM);
+                } catch (InterruptedException e) {
+                    Thread.interrupted();
+                }
+                remainingDelay -= SLEEP_AFTER_YIELD_QUANTUM;
+                if (mLock.getQueueLength() == 0) {
+                    break;
+                }
             }
         }
         beginTransaction();
@@ -720,9 +733,9 @@ public class SQLiteDatabase extends SQLiteClosable {
             if (program != null) {
                 program.onAllReferencesReleasedFromContainer();
             }
-        }        
+        }
     }
-    
+
     /**
      * Native call to close the database.
      */
@@ -1157,8 +1170,8 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     /**
      * Runs the provided SQL and returns a cursor over the result set.
-     * The cursor will read an initial set of rows and the return to the caller. 
-     * It will continue to read in batches and send data changed notifications 
+     * The cursor will read an initial set of rows and the return to the caller.
+     * It will continue to read in batches and send data changed notifications
      * when the later batches are ready.
      * @param sql the SQL query. The SQL string must not be ; terminated
      * @param selectionArgs You may include ?s in where clause in the query,
@@ -1167,19 +1180,19 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @param initialRead set the initial count of items to read from the cursor
      * @param maxRead set the count of items to read on each iteration after the first
      * @return A {@link Cursor} object, which is positioned before the first entry
-     * 
+     *
      * This work is incomplete and not fully tested or reviewed, so currently
      * hidden.
      * @hide
      */
-    public Cursor rawQuery(String sql, String[] selectionArgs, 
+    public Cursor rawQuery(String sql, String[] selectionArgs,
             int initialRead, int maxRead) {
         SQLiteCursor c = (SQLiteCursor)rawQueryWithFactory(
                 null, sql, selectionArgs, null);
         c.setLoadStyle(initialRead, maxRead);
         return c;
     }
-    
+
     /**
      * Convenience method for inserting a row into the database.
      *
@@ -1232,7 +1245,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long replace(String table, String nullColumnHack, ContentValues initialValues) {
         try {
-            return insertWithOnConflict(table, nullColumnHack, initialValues, 
+            return insertWithOnConflict(table, nullColumnHack, initialValues,
                     ConflictAlgorithm.REPLACE);
         } catch (SQLException e) {
             Log.e(TAG, "Error inserting " + initialValues, e);
@@ -1254,7 +1267,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public long replaceOrThrow(String table, String nullColumnHack,
             ContentValues initialValues) throws SQLException {
-        return insertWithOnConflict(table, nullColumnHack, initialValues, 
+        return insertWithOnConflict(table, nullColumnHack, initialValues,
                 ConflictAlgorithm.REPLACE);
     }
 
@@ -1410,7 +1423,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
         return updateWithOnConflict(table, values, whereClause, whereArgs, null);
     }
-    
+
     /**
      * Convenience method for updating rows in the database.
      *
@@ -1423,7 +1436,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return the number of rows affected
      * @hide
      */
-    public int updateWithOnConflict(String table, ContentValues values, 
+    public int updateWithOnConflict(String table, ContentValues values,
             String whereClause, String[] whereArgs, ConflictAlgorithm algorithm) {
         if (!isOpen()) {
             throw new IllegalStateException("database not open");
@@ -1440,7 +1453,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             sql.append(algorithm.value());
             sql.append(" ");
         }
-        
+
         sql.append(table);
         sql.append(" SET ");
 
@@ -1601,7 +1614,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         mFlags = flags;
         mPath = path;
         mLogStats = "1".equals(android.os.SystemProperties.get("db.logstats"));
-        
+
         mLeakedException = new IllegalStateException(path +
             " SQLiteDatabase created and never closed");
         mFactory = factory;
