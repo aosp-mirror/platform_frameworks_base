@@ -646,6 +646,7 @@ static jboolean setAdapterPropertyNative(JNIEnv *env, jobject object, jstring ke
         if (!msg) {
             LOGE("%s: Can't allocate new method call for GetProperties!",
                   __FUNCTION__);
+            env->ReleaseStringUTFChars(key, c_key);
             return JNI_FALSE;
         }
 
@@ -701,6 +702,60 @@ static jboolean setAdapterPropertyBooleanNative(JNIEnv *env, jobject object, jst
 #endif
 }
 
+static jboolean setDevicePropertyNative(JNIEnv *env, jobject object, jstring path,
+                                               jstring key, void *value, jint type) {
+#ifdef HAVE_BLUETOOTH
+    LOGV(__FUNCTION__);
+    native_data_t *nat = get_native_data(env, object);
+    if (nat) {
+        DBusMessage *reply, *msg;
+        DBusMessageIter iter;
+        DBusError err;
+
+        const char *c_key = env->GetStringUTFChars(key, NULL);
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+
+        dbus_error_init(&err);
+        msg = dbus_message_new_method_call(BLUEZ_DBUS_BASE_IFC,
+                                          c_path, DBUS_DEVICE_IFACE, "SetProperty");
+        if (!msg) {
+            LOGE("%s: Can't allocate new method call for device SetProperty!", __FUNCTION__);
+            env->ReleaseStringUTFChars(key, c_key);
+            env->ReleaseStringUTFChars(path, c_path);
+            return JNI_FALSE;
+        }
+
+        dbus_message_append_args(msg, DBUS_TYPE_STRING, &c_key, DBUS_TYPE_INVALID);
+        dbus_message_iter_init_append(msg, &iter);
+        append_variant(&iter, type, value);
+
+        reply = dbus_connection_send_with_reply_and_block(nat->conn, msg, -1, &err);
+        dbus_message_unref(msg);
+
+        env->ReleaseStringUTFChars(key, c_key);
+        env->ReleaseStringUTFChars(path, c_path);
+        if (!reply) {
+            if (dbus_error_is_set(&err)) {
+                LOG_AND_FREE_DBUS_ERROR(&err);
+            } else
+            LOGE("DBus reply is NULL in function %s", __FUNCTION__);
+            return JNI_FALSE;
+        }
+        return JNI_TRUE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
+static jboolean setDevicePropertyBooleanNative(JNIEnv *env, jobject object,
+                                                     jstring path, jstring key, jint value) {
+#ifdef HAVE_BLUETOOTH
+    return setDevicePropertyNative(env, object, path, key,
+                                        (void *)&value, DBUS_TYPE_BOOLEAN);
+#else
+    return JNI_FALSE;
+#endif
+}
 
 static JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
@@ -740,6 +795,8 @@ static JNINativeMethod sMethods[] = {
     {"setPinNative", "(Ljava/lang/String;Ljava/lang/String;I)Z", (void *)setPinNative},
     {"cancelPairingUserInputNative", "(Ljava/lang/String;I)Z",
             (void *)cancelPairingUserInputNative},
+    {"setDevicePropertyBooleanNative", "(Ljava/lang/String;Ljava/lang/String;I)Z",
+            (void *)setDevicePropertyBooleanNative},
 };
 
 int register_android_server_BluetoothService(JNIEnv *env) {

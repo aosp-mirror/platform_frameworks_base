@@ -58,4 +58,6 @@ interface IBluetooth
     boolean setPairingConfirmation(in String address, boolean confirm);
     boolean cancelPairingUserInput(in String address);
 
+    boolean setTrust(in String address, in boolean value);
+    boolean getTrustState(in String address);
 }
