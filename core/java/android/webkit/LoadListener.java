@@ -606,6 +606,7 @@ class LoadListener extends Handler implements EventHandler {
                 // before calling it.
                 if (mCacheLoader != null) {
                     mCacheLoader.load();
+                    mFromCache = true;
                     if (DebugFlags.LOAD_LISTENER) {
                         Log.v(LOGTAG, "LoadListener cache load url=" + url());
                     }
