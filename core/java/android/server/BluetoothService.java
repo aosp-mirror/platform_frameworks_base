@@ -885,6 +885,42 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /**
+     * Sets the remote device trust state.
+     *
+     * @return boolean to indicate operation success or fail
+     */
+    public synchronized boolean setTrust(String address, boolean value) {
+        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+            mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+            return false;
+        }
+
+        return setDevicePropertyBooleanNative(getObjectPathFromAddress(address), "Trusted",
+                value ? 1 : 0);
+    }
+
+    /**
+     * Gets the remote device trust state as boolean.
+     * Note: this value may be
+     * retrieved from cache if we retrieved the data before *
+     *
+     * @return boolean to indicate trust or untrust state
+     */
+    public synchronized boolean getTrustState(String address) {
+        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+            mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+            return false;
+        }
+
+        String val = getRemoteDeviceProperty(address, "Trusted");
+        if (val == null) {
+            return false;
+        } else {
+            return val.equals("true") ? true : false;
+        }
+    }
+
+    /**
      * Gets the remote major, minor classes encoded as a 32-bit
      * integer.
      *
@@ -1220,5 +1256,6 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean setPasskeyNative(String address, int passkey, int nativeData);
     private native boolean setPairingConfirmationNative(String address, boolean confirm,
             int nativeData);
+    private native boolean setDevicePropertyBooleanNative(String objectPath, String key, int value);
 
 }

@@ -347,7 +347,12 @@ class BluetoothEventLoop {
             } else {
                 mBluetoothService.getBondState().setBondState(address,
                         BluetoothDevice.BOND_NOT_BONDED);
+                mBluetoothService.setRemoteDeviceProperty(address, "Trusted", "false");
             }
+        } else if (name.equals("Trusted")) {
+            if (DBG)
+                log("set trust state succeded, value is  " + propValues[1]);
+            mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
         }
     }
 
