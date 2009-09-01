@@ -32,12 +32,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import android.util.Log;
 
-import java.util.Iterator;
-
-import java.lang.Integer;
-
 public class CdmaSmsTest extends AndroidTestCase {
-    private final static String LOG_TAG = "CDMA";
+    private final static String LOG_TAG = "XXX CdmaSmsTest XXX";
 
     @SmallTest
     public void testCdmaSmsAddrParsing() throws Exception {
@@ -530,29 +526,19 @@ public class CdmaSmsTest extends AndroidTestCase {
 
     @SmallTest
     public void testNumberOfMessages() throws Exception {
+        // Note that the message text below does not properly reflect
+        // the message count.  The author of these messages was
+        // apparently unaware that the values are bcd encoded, and the
+        // values being tested against (not the ones in the message
+        // text) are actually correct.
         String pdu1 = "000310409001124896a794e07595f69f199540ea759a0dc8e00b0163";
         BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
         assertEquals("Test Voice mail 99", bd1.userData.payloadStr);
-        assertEquals(99, bd1.numberOfMessages);
+        assertEquals(63, bd1.numberOfMessages);
         String pdu2 = "00031040900113489ea794e07595f69f199540ea759a0988c0600b0164";
         BearerData bd2 = BearerData.decode(HexDump.hexStringToByteArray(pdu2));
         assertEquals("Test Voice mail 100", bd2.userData.payloadStr);
-        assertEquals(100, bd2.numberOfMessages);
-    }
-
-    @SmallTest
-    public void testNumberOfMessagesFeedback() throws Exception {
-        BearerData bearerData = new BearerData();
-        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
-        bearerData.messageId = 0;
-        bearerData.hasUserDataHeader = false;
-        UserData userData = new UserData();
-        userData.payloadStr = "test message count";
-        bearerData.userData = userData;
-        bearerData.numberOfMessages = 27;
-        byte []encodedSms = BearerData.encode(bearerData);
-        BearerData revBearerData = BearerData.decode(encodedSms);
-        assertEquals(bearerData.numberOfMessages, revBearerData.numberOfMessages);
+        assertEquals(64, bd2.numberOfMessages);
     }
 
     @SmallTest
@@ -766,7 +752,6 @@ public class CdmaSmsTest extends AndroidTestCase {
     public void testDisplayMode() throws Exception {
         String pdu1 = "0003104090010c485f4194dfea34becf61b8400f0100";
         BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
-        //Log.d(LOG_TAG, "bd1 = " + bd1);
         assertEquals(bd1.displayMode, BearerData.DISPLAY_MODE_IMMEDIATE);
         String pdu2 = "0003104090010c485f4194dfea34becf61b8400f0140";
         BearerData bd2 = BearerData.decode(HexDump.hexStringToByteArray(pdu2));
