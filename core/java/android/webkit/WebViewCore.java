@@ -1244,6 +1244,18 @@ final class WebViewCore {
             }
         }
 
+        private synchronized boolean hasMessages(int what) {
+            if (mBlockMessages) {
+                return false;
+            }
+            if (mMessages != null) {
+                Log.w(LOGTAG, "hasMessages() is not supported in this case.");
+                return false;
+            } else {
+                return mHandler.hasMessages(what);
+            }
+        }
+
         private synchronized void sendMessageDelayed(Message msg, long delay) {
             if (mBlockMessages) {
                 return;
@@ -1355,9 +1367,22 @@ final class WebViewCore {
         // We don't want anyone to post a message between removing pending
         // messages and sending the destroy message.
         synchronized (mEventHub) {
+            // RESUME_TIMERS and PAUSE_TIMERS are per process base. They need to
+            // be preserved even the WebView is destroyed.
+            // Note: we should not have more than one RESUME_TIMERS/PAUSE_TIMERS
+            boolean hasResume = mEventHub.hasMessages(EventHub.RESUME_TIMERS);
+            boolean hasPause = mEventHub.hasMessages(EventHub.PAUSE_TIMERS);
             mEventHub.removeMessages();
             mEventHub.sendMessageAtFrontOfQueue(
                     Message.obtain(null, EventHub.DESTROY));
+            if (hasPause) {
+                mEventHub.sendMessageAtFrontOfQueue(
+                        Message.obtain(null, EventHub.PAUSE_TIMERS));
+            }
+            if (hasResume) {
+                mEventHub.sendMessageAtFrontOfQueue(
+                        Message.obtain(null, EventHub.RESUME_TIMERS));
+            }
             mEventHub.blockMessages();
             mWebView = null;
         }
