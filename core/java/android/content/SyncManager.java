@@ -148,7 +148,6 @@ class SyncManager implements OnAccountsUpdatedListener {
     private volatile boolean mSyncPollInitialized;
     private final PendingIntent mSyncAlarmIntent;
     private final PendingIntent mSyncPollAlarmIntent;
-    private final ConnectivityManager mConnManager;
 
     private final SyncAdaptersCache mSyncAdapters;
 
@@ -289,7 +288,6 @@ class SyncManager implements OnAccountsUpdatedListener {
         SyncStorageEngine.init(context);
         mSyncStorageEngine = SyncStorageEngine.getSingleton();
         mSyncQueue = new SyncQueue(mSyncStorageEngine);
-        mConnManager = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         mContext = context;
 
@@ -538,14 +536,6 @@ class SyncManager implements OnAccountsUpdatedListener {
             return;
         }
 
-        if (!mConnManager.getBackgroundDataSetting()) {
-            if (isLoggable) {
-                Log.v(TAG, "not syncing because background data usage isn't allowed");
-            }
-            setStatusText("Sync is disabled.");
-            return;
-        }
-
         if (mAccounts == null) setStatusText("The accounts aren't known yet.");
         if (!mDataConnectionIsConnected) setStatusText("No data connection");
         if (mStorageIsLow) setStatusText("Memory low");
@@ -612,8 +602,6 @@ class SyncManager implements OnAccountsUpdatedListener {
             if (hasSyncAdapter) syncableAuthorities.add(requestedAuthority);
         }
 
-        final boolean masterSyncAutomatically = mSyncStorageEngine.getMasterSyncAutomatically();
-
         for (String authority : syncableAuthorities) {
             for (Account account : accounts) {
                 int isSyncable = mSyncStorageEngine.getIsSyncable(account, authority);
@@ -630,36 +618,22 @@ class SyncManager implements OnAccountsUpdatedListener {
                     if (!syncAdapterInfo.type.supportsUploading() && uploadOnly) {
                         continue;
                     }
-
                     // make this an initialization sync if the isSyncable state is unknown
                     Bundle extrasCopy = extras;
-                    long delayCopy = delay;
                     if (isSyncable < 0) {
                         extrasCopy = new Bundle(extras);
                         extrasCopy.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
-                        delayCopy = -1; // expedite this
-                    } else {
-                        final boolean syncAutomatically = masterSyncAutomatically
-                                && mSyncStorageEngine.getSyncAutomatically(account, authority);
-                        boolean syncAllowed = manualSync || syncAutomatically;
-                        if (!syncAllowed) {
-                            if (isLoggable) {
-                                Log.d(TAG, "scheduleSync: sync of " + account + ", " + authority
-                                        + " is not allowed, dropping request");
-                                continue;
-                            }
-                        }
                     }
                     if (isLoggable) {
                         Log.v(TAG, "scheduleSync:"
-                                + " delay " + delayCopy
+                                + " delay " + delay
                                 + ", source " + source
                                 + ", account " + account
                                 + ", authority " + authority
                                 + ", extras " + extrasCopy);
                     }
                     scheduleSyncOperation(
-                            new SyncOperation(account, source, authority, extrasCopy, delayCopy));
+                            new SyncOperation(account, source, authority, extrasCopy, delay));
                 }
             }
         }
@@ -1617,7 +1591,9 @@ class SyncManager implements OnAccountsUpdatedListener {
             // found that is runnable (not disabled, etc). If that one is ready to run then
             // start it, otherwise just get out.
             SyncOperation op;
-            final boolean backgroundDataUsageAllowed = mConnManager.getBackgroundDataSetting();
+            final ConnectivityManager connManager = (ConnectivityManager)
+                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            final boolean backgroundDataUsageAllowed = connManager.getBackgroundDataSetting();
             synchronized (mSyncQueue) {
                 while (true) {
                     op = mSyncQueue.head();
