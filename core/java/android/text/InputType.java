@@ -20,7 +20,25 @@ import android.text.TextUtils;
 
 /**
  * Bit definitions for an integer defining the basic content type of text
- * held in an {@link Editable} object.
+ * held in an {@link Editable} object. Supported classes may be combined
+ * with variations and flags to indicate desired behaviors.
+ *
+ * <h3>Examples</h3>
+ *
+ * <dl>
+ * <dt>A password field with with the password visible to the user:
+ * <dd>inputType = TYPE_CLASS_TEXT |
+ *     TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+ *
+ * <dt>A multi-line postal address with automatic capitalization:
+ * <dd>inputType = TYPE_CLASS_TEXT |
+ *     TYPE_TEXT_VARIATION_POSTAL_ADDRESS |
+ *     TYPE_TEXT_FLAG_MULTI_LINE
+ *
+ * <dt>A time field:
+ * <dd>inputType = TYPE_CLASS_DATETIME |
+ *     TYPE_DATETIME_VARIATION_TIME
+ * </dl>
  */
 public interface InputType {
     /**

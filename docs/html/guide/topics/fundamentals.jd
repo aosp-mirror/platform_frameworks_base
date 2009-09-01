@@ -72,8 +72,8 @@ resources are required by other applications.</li>
 runs in isolation from the code of all other applications.</li>
 
 <li>By default, each application is assigned a unique Linux user ID.  
-Permissions are set so that the application's files are visible only 
-that user, only to the application itself &mdash; although there are ways 
+Permissions are set so that the application's files are visible only to
+that user and only to the application itself &mdash; although there are ways
 to export them to other applications as well.</li>
 </ul>
 

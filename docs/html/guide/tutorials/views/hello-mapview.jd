@@ -93,28 +93,6 @@ protected boolean isRouteDisplayed() {
 }
 </pre>
 <p>You can actually run this now, but all it does is allow you to pan around the map.</p>
-<p>Android provides a handy {@link android.widget.ZoomControls} widget for zooming in and out of a View. 
-MapView can automatically hook one for us by requesting it with the <code>getZoomControls()</code>
-method. Let's do this.</p>
-
-<li>Go back to the layout file. We need a new ViewGroup element, in which we'll 
-   place the ZoomControls. Just below the MapView element (but inside the RelativeLayout), add this element:
-<pre>
-&lt;LinearLayout
-    android:id="@+id/zoomview"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignBottom="@id/mapview"
-    android:layout_centerHorizontal="true"
-/></pre>
-
-      <p>It doesn't really matter what kind of ViewGroup we use, because we just want a 
-      container that we can position within our root RelativeLayout.</p>
-
-      <p>The last two attributes are available only to an element that's a child of a 
-      RelativeLayout. <code>layout_alignBottom</code> aligns the bottom of this element to the bottom of 
-      the element identified with a resource tag (which must be a sibling to this element). 
-      <code>layout_centerHorizontal</code> centers this on the horizontal plane.</p></li>
 
    <li>Now go back to the HelloMapView class. We'll now retrieve the ZoomControls object from 
    the MapView and add it to our new layout element. First, at the top of the HelloMapView, 
@@ -122,24 +100,18 @@ method. Let's do this.</p>
 <pre>
 LinearLayout linearLayout;
 MapView mapView;
-ZoomControls mZoom;</pre></li>
+</pre>
 
    <li>Then initialize each of these in <code>onCreate()</code>. We'll capture the LinearLayout and 
    MapView through their layout resources. Then get the ZoomControls from the MapView::
 <pre>
-linearLayout = (LinearLayout) findViewById(R.id.zoomview);
 mapView = (MapView) findViewById(R.id.mapview);
-mZoom = (ZoomControls) mapView.getZoomControls();</pre>
+mapView.setBuiltInZoomControls(true);
+</pre>
 
-      <p>By using the ZoomControls object provided by MapView, we don't have to do any of the work
-      required to actually perform the zoom operations. The ZoomControls widget that MapView 
-      returns for us is already hooked into the MapView and works as soon as we add it to the 
-      layout. The controls will appear whenever the user touches the map, then disappear after 
-      a few moments of inactivity.</p></li>
-
-   <li>Now just plug our ZoomControls into the LinearLayout we added:
-
-      <pre>linearLayout.addView(mZoom);</pre></li>
+      <p>By using the built-in zoom control provided by MapView, we don't have to do any of the work
+      required to actually perform the zoom operations. The controls will appear whenever the user
+      touches the map, then disappear after a few moments of inactivity.</p></li>
 
    <li>Run it.</li>
 </ol>

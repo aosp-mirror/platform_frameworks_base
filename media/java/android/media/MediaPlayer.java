@@ -720,7 +720,8 @@ public class MediaPlayer
     }
 
     /**
-     * Sets the data source (FileDescriptor) to use.  It is the caller's responsibility
+     * Sets the data source (FileDescriptor) to use.  The FileDescriptor must be
+     * seekable (N.B. a LocalSocket is not seekable). It is the caller's responsibility
      * to close the file descriptor. It is safe to do so as soon as this call returns.
      *
      * @param fd the FileDescriptor for the file you want to play
