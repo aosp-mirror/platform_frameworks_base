@@ -546,6 +546,9 @@ public final class Pm {
         case PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE:
             s = "INSTALL_FAILED_CPU_ABI_INCOMPATIBLE";
             break;
+        case PackageManager.INSTALL_FAILED_MISSING_FEATURE:
+            s = "INSTALL_FAILED_MISSING_FEATURE";
+            break;
         case PackageManager.INSTALL_PARSE_FAILED_NOT_APK:
             s = "INSTALL_PARSE_FAILED_NOT_APK";
             break;
