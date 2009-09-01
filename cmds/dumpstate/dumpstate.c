@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <limits.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -33,6 +34,8 @@ static int start_pattern[] = { 150, 0 };
 static int end_pattern[] = { 75, 50, 75, 50, 75, 0 };
 
 static struct tm now;
+
+static void dump_kernel_log(const char *path, const char *title) ;
 
 /* dumps the current system state to stdout */
 static void dumpstate(int full) {
@@ -101,8 +104,12 @@ static void dumpstate(int full) {
         DUMP("/data/system/packages.xml");
         PRINT("------ PACKAGE UID ERRORS ------");
         DUMP("/data/system/uiderrors.txt");
-        PRINT("------ LAST KERNEL LOG ------");
-        DUMP("/data/last_kmsg");
+
+        dump_kernel_log("/data/dontpanic/last_kmsg", "RAMCONSOLE");
+        dump_kernel_log("/data/dontpanic/apanic_console",
+                        "PANIC CONSOLE");
+        dump_kernel_log("/data/dontpanic/apanic_threads",
+                        "PANIC THREADS");
     }
     PRINT("========================================================");
     PRINT("== build.prop");
@@ -293,5 +300,15 @@ int main(int argc, char *argv[]) {
     close(STDOUT_FILENO);
 
     return 0;
+}
+
+static void dump_kernel_log(const char *path, const char *title) 
+
+{
+	printf("------ KERNEL %s LOG ------\n", title);
+        if (access(path, R_OK) < 0)
+		printf("%s: %s\n", path, strerror(errno));
+	else
+        	DUMP(path);
 }
 
