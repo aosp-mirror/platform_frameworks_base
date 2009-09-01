@@ -175,7 +175,7 @@ def main(options, args):
   # Count crashed tests.
   crashed_tests = []
 
-  timeout_ms = '5000'
+  timeout_ms = '30000'
   if options.time_out_ms:
     timeout_ms = options.time_out_ms
 
