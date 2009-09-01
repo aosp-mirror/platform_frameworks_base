@@ -286,6 +286,22 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
+    protected void sendData(String destAddr, String scAddr, int destPort,
+            byte[] data, PendingIntent sentIntent, PendingIntent deliveryIntent) {
+        SmsMessage.SubmitPdu pdu = SmsMessage.getSubmitPdu(
+                scAddr, destAddr, destPort, data, (deliveryIntent != null));
+        sendSubmitPdu(pdu, sentIntent, deliveryIntent);
+    }
+
+    /** {@inheritDoc} */
+    protected void sendText(String destAddr, String scAddr, String text,
+            PendingIntent sentIntent, PendingIntent deliveryIntent) {
+        SmsMessage.SubmitPdu pdu = SmsMessage.getSubmitPdu(
+                scAddr, destAddr, text, (deliveryIntent != null), null);
+        sendSubmitPdu(pdu, sentIntent, deliveryIntent);
+    }
+
+    /** {@inheritDoc} */
     protected void sendMultipartText(String destAddr, String scAddr,
             ArrayList<String> parts, ArrayList<PendingIntent> sentIntents,
             ArrayList<PendingIntent> deliveryIntents) {
@@ -329,16 +345,9 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         }
     }
 
-    protected void sendSubmitPdu(SmsMessage.SubmitPdu submitPdu, PendingIntent sentIntent,
-            PendingIntent deliveryIntent) {
-        sendRawPdu(submitPdu.encodedScAddress, submitPdu.encodedMessage,
-                sentIntent, deliveryIntent);
-    }
-
-    protected void sendRawPdu(byte[] smsc, byte[] pdu, PendingIntent sentIntent,
-            PendingIntent deliveryIntent) {
-        String inEcm = SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE);
-        if (Boolean.parseBoolean(inEcm)) {
+    protected void sendSubmitPdu(SmsMessage.SubmitPdu pdu,
+            PendingIntent sentIntent, PendingIntent deliveryIntent) {
+        if (SystemProperties.getBoolean(TelephonyProperties.PROPERTY_INECM_MODE, false)) {
             if (sentIntent != null) {
                 try {
                     sentIntent.send(SmsManager.RESULT_ERROR_NO_SERVICE);
@@ -349,8 +358,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             }
             return;
         }
-
-        super.sendRawPdu(smsc, pdu, sentIntent, deliveryIntent);
+        sendRawPdu(pdu.encodedScAddress, pdu.encodedMessage, sentIntent, deliveryIntent);
     }
 
     /** {@inheritDoc} */

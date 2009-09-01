@@ -17,6 +17,7 @@
 package com.android.internal.telephony.cdma;
 
 import android.os.Parcel;
+import android.os.SystemProperties;
 import android.text.format.Time;
 import android.util.Config;
 import android.util.Log;
@@ -25,6 +26,7 @@ import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
+import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.cdma.sms.BearerData;
 import com.android.internal.telephony.cdma.sms.CdmaSmsAddress;
 import com.android.internal.telephony.cdma.sms.SmsEnvelope;
@@ -38,7 +40,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Random;
 
 /**
  * TODO(cleanup): these constants are disturbing... are they not just
@@ -77,14 +78,6 @@ public class SmsMessage extends SmsMessageBase {
      *  See C.S0015-B, v2.0, 4.5.21 for a detailed description of possible values.
      */
     private int status;
-
-    /** The next message ID for the BearerData. Shall be a random value on first use.
-     * (See C.S0015-B, v2.0, 4.3.1.5)
-     */
-    private static int nextMessageId = 0;
-
-    /** Specifies if this is the first SMS message submit */
-    private static boolean firstSMS = true;
 
     /** Specifies if a return of an acknowledgment is requested for send SMS */
     private static final int RETURN_NO_ACK  = 0;
@@ -331,7 +324,7 @@ public class SmsMessage extends SmsMessageBase {
      *         address, if applicable, and the encoded message.
      *         Returns null on encode error.
      */
-    public static SubmitPdu getSubmitPdu(String scAddr, String destAddr, short destPort,
+    public static SubmitPdu getSubmitPdu(String scAddr, String destAddr, int destPort,
             byte[] data, boolean statusReportRequested) {
 
         /**
@@ -605,18 +598,28 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Set the nextMessageId to a random value between 0 and 65536
-     * See C.S0015-B, v2.0, 4.3.1.5
+     * Calculate the next message id, starting at 0 and iteratively
+     * incrementing within the range 0..65535 remembering the state
+     * via a persistent system property.  (See C.S0015-B, v2.0,
+     * 4.3.1.5)
      */
-    private static void setNextMessageId() {
-        // Message ID, modulo 65536
-        if(firstSMS) {
-            Random generator = new Random();
-            nextMessageId = generator.nextInt(65536);
-            firstSMS = false;
-        } else {
-            nextMessageId = ++nextMessageId & 0xFFFF;
+    private synchronized static int getNextMessageId() {
+        // The only (meaningful) way this code can be called is via
+        // binder-call into the Phone process.  All other calls will
+        // assumedly not be as with UID radio, and hence will be
+        // unable to modify the system property.  Synchronization has
+        // thus been added to this function conservatively -- if it
+        // can be conclusively reasoned to be unnecessary, it should
+        // be removed.
+        int msgId = SystemProperties.getInt(TelephonyProperties.PROPERTY_CDMA_MSG_ID, 0);
+        String nextMsgId = Integer.toString((msgId + 1) & 0xFFFF);
+        SystemProperties.set(TelephonyProperties.PROPERTY_CDMA_MSG_ID, nextMsgId);
+        if (DBG_SMS) {
+            Log.d(LOG_TAG, "next " + TelephonyProperties.PROPERTY_CDMA_MSG_ID + " = " + nextMsgId);
+            Log.d(LOG_TAG, "readback gets " +
+                    SystemProperties.get(TelephonyProperties.PROPERTY_CDMA_MSG_ID));
         }
+        return msgId;
     }
 
     /**
@@ -642,8 +645,7 @@ public class SmsMessage extends SmsMessageBase {
         BearerData bearerData = new BearerData();
         bearerData.messageType = BearerData.MESSAGE_TYPE_SUBMIT;
 
-        if (userData != null) setNextMessageId();
-        bearerData.messageId = nextMessageId;
+        bearerData.messageId = getNextMessageId();
 
         bearerData.deliveryAckReq = statusReportRequested;
         bearerData.userAckReq = false;

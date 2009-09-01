@@ -130,4 +130,10 @@ public interface TelephonyProperties
      * The number of milli-seconds between CALL_RING notifications.
      */
     static final String PROPERTY_CALL_RING_DELAY = "ro.telephony.call_ring.delay";
+
+    /**
+     * Track CDMA SMS message id numbers to ensure they increment
+     * monotonically, regardless of reboots.
+     */
+    static final String PROPERTY_CDMA_MSG_ID = "persist.radio.cdma.msgid";
 }
