@@ -129,7 +129,7 @@ public class WebViewClient {
      * (i.e. the main resource is unavailable). The errorCode parameter
      * corresponds to one of the ERROR_* constants.
      * @param view The WebView that is initiating the callback.
-     * @param code The error code corresponding to an ERROR_* value.
+     * @param errorCode The error code corresponding to an ERROR_* value.
      * @param description A String describing the error.
      * @param failingUrl The url that failed to load.
      */
