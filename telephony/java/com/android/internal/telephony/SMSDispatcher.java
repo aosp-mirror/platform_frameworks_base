@@ -150,7 +150,8 @@ public abstract class SMSDispatcher extends Handler {
     private static SmsMessage mSmsMessage;
     private static SmsMessageBase mSmsMessageBase;
     private SmsMessageBase.SubmitPduBase mSubmitPduBase;
-    private boolean mStorageAvailable = true;
+
+    protected boolean mStorageAvailable = true;
 
     protected static int getNextConcatenatedRef() {
         sConcatenatedRef += 1;
@@ -294,19 +295,15 @@ public abstract class SMSDispatcher extends Handler {
 
             sms = (SmsMessage) ar.result;
             try {
-                if (mStorageAvailable) {
-                    int result = dispatchMessage(sms.mWrappedSmsMessage);
-                    if (result != Activity.RESULT_OK) {
-                        // RESULT_OK means that message was broadcast for app(s) to handle.
-                        // Any other result, we should ack here.
-                        boolean handled = (result == Intents.RESULT_SMS_HANDLED);
-                        acknowledgeLastIncomingSms(handled, result, null);
-                    }
-                } else {
-                    acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_OUT_OF_MEMORY, null);
+                int result = dispatchMessage(sms.mWrappedSmsMessage);
+                if (result != Activity.RESULT_OK) {
+                    // RESULT_OK means that message was broadcast for app(s) to handle.
+                    // Any other result, we should ack here.
+                    boolean handled = (result == Intents.RESULT_SMS_HANDLED);
+                    notifyAndAcknowledgeLastIncomingSms(handled, result, null);
                 }
             } catch (RuntimeException ex) {
-                acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_GENERIC_ERROR, null);
+                notifyAndAcknowledgeLastIncomingSms(false, Intents.RESULT_SMS_GENERIC_ERROR, null);
             }
 
             break;
@@ -864,6 +861,25 @@ public abstract class SMSDispatcher extends Handler {
      */
     protected abstract void acknowledgeLastIncomingSms(boolean success,
             int result, Message response);
+
+    /**
+     * Notify interested apps if the framework has rejected an incoming SMS,
+     * and send an acknowledge message to the network.
+     * @param success indicates that last message was successfully received.
+     * @param result result code indicating any error
+     * @param response callback message sent when operation completes.
+     */
+    private void notifyAndAcknowledgeLastIncomingSms(boolean success,
+            int result, Message response) {
+        if (!success) {
+            // broadcast SMS_REJECTED_ACTION intent
+            Intent intent = new Intent(Intents.SMS_REJECTED_ACTION);
+            intent.putExtra("result", result);
+            mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
+            mContext.sendBroadcast(intent, "android.permission.RECEIVE_SMS");
+        }
+        acknowledgeLastIncomingSms(success, result, response);
+    }
 
     /**
      * Check if a SmsTracker holds multi-part Sms
