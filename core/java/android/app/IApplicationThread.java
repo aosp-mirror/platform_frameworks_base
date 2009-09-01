@@ -25,6 +25,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.IBinder;
@@ -97,6 +98,7 @@ public interface IApplicationThread extends IInterface {
     void profilerControl(boolean start, String path, ParcelFileDescriptor fd)
             throws RemoteException;
     void setSchedulingGroup(int group) throws RemoteException;
+    void getMemoryInfo(Debug.MemoryInfo outInfo) throws RemoteException;
     
     String descriptor = "android.app.IApplicationThread";
 
@@ -130,4 +132,5 @@ public interface IApplicationThread extends IInterface {
     int SET_SCHEDULING_GROUP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+28;
     int SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
     int SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
+    int GET_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
 }

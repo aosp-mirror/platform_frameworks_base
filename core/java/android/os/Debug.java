@@ -104,7 +104,7 @@ public final class Debug
      * This class is used to retrieved various statistics about the memory mappings for this
      * process. The returns info broken down by dalvik, native, and other. All results are in kB.
      */
-    public static class MemoryInfo {
+    public static class MemoryInfo implements Parcelable {
         /** The proportional set size for dalvik. */
         public int dalvikPss;
         /** The private dirty pages used by dalvik. */
@@ -125,6 +125,50 @@ public final class Debug
         public int otherPrivateDirty;
         /** The shared dirty pages used by everything else. */
         public int otherSharedDirty;
+        
+        public MemoryInfo() {
+        }
+
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(dalvikPss);
+            dest.writeInt(dalvikPrivateDirty);
+            dest.writeInt(dalvikSharedDirty);
+            dest.writeInt(nativePss);
+            dest.writeInt(nativePrivateDirty);
+            dest.writeInt(nativeSharedDirty);
+            dest.writeInt(otherPss);
+            dest.writeInt(otherPrivateDirty);
+            dest.writeInt(otherSharedDirty);
+        }
+
+        public void readFromParcel(Parcel source) {
+            dalvikPss = source.readInt();
+            dalvikPrivateDirty = source.readInt();
+            dalvikSharedDirty = source.readInt();
+            nativePss = source.readInt();
+            nativePrivateDirty = source.readInt();
+            nativeSharedDirty = source.readInt();
+            otherPss = source.readInt();
+            otherPrivateDirty = source.readInt();
+            otherSharedDirty = source.readInt();
+        }
+        
+        public static final Creator<MemoryInfo> CREATOR = new Creator<MemoryInfo>() {
+            public MemoryInfo createFromParcel(Parcel source) {
+                return new MemoryInfo(source);
+            }
+            public MemoryInfo[] newArray(int size) {
+                return new MemoryInfo[size];
+            }
+        };
+
+        private MemoryInfo(Parcel source) {
+            readFromParcel(source);
+        }
     }
 
 
@@ -554,6 +598,13 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * how much is in use by dalivk, the native heap, and everything else.
      */
     public static native void getMemoryInfo(MemoryInfo memoryInfo);
+
+    /**
+     * Note: currently only works when the requested pid has the same UID
+     * as the caller.
+     * @hide
+     */
+    public static native void getMemoryInfo(int pid, MemoryInfo memoryInfo);
 
     /**
      * Establish an object allocation limit in the current thread.  Useful
