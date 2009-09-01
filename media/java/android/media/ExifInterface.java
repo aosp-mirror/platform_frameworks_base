@@ -340,6 +340,7 @@ public class ExifInterface {
         ParsePosition pos = new ParsePosition(0);
         try {
             Date date = sFormatter.parse(dateTimeString, pos);
+            if (date == null) return -1;
             return date.getTime();
         } catch (IllegalArgumentException ex) {
             return -1;
