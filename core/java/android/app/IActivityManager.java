@@ -30,6 +30,7 @@ import android.content.pm.ProviderInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Debug;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -272,6 +273,9 @@ public interface IActivityManager extends IInterface {
     
     public void closeSystemDialogs(String reason) throws RemoteException;
     
+    public void getProcessMemoryInfo(int pid, Debug.MemoryInfo outInfo)
+            throws RemoteException;
+    
     /*
      * Private non-Binder interfaces
      */
@@ -428,4 +432,5 @@ public interface IActivityManager extends IInterface {
     int START_ACTIVITY_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;
     int KILL_APPLICATION_WITH_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
+    int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;
 }

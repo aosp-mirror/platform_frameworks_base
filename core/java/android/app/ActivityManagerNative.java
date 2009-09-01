@@ -29,6 +29,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Parcelable;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -1105,6 +1106,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String reason = data.readString();
             closeSystemDialogs(reason);
             reply.writeNoException();
+            return true;
+        }
+        
+        case GET_PROCESS_MEMORY_INFO_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int pid = data.readInt();
+            Debug.MemoryInfo mi = new Debug.MemoryInfo();
+            getProcessMemoryInfo(pid, mi);
+            reply.writeNoException();
+            mi.writeToParcel(reply, 0);
             return true;
         }
         }
@@ -2424,6 +2435,19 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-        
+    
+    public void getProcessMemoryInfo(int pid, Debug.MemoryInfo outInfo)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(pid);
+        mRemote.transact(GET_PROCESS_MEMORY_INFO_TRANSACTION, data, reply, 0);
+        reply.readException();
+        outInfo.readFromParcel(reply);
+        data.recycle();
+        reply.recycle();
+    }
+    
     private IBinder mRemote;
 }
