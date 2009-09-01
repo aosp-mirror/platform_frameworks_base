@@ -41,7 +41,7 @@
 #define FILTER_LOWSHELF_ATTENUATION -18.0f // in dB
 #define FILTER_TRANSITION_FREQ 1100.0f     // in Hz
 #define FILTER_SHELF_SLOPE 1.0f            // Q
-#define FILTER_GAIN 6.0f // linear gain
+#define FILTER_GAIN 5.5f // linear gain
 // such a huge gain is justified by how much energy in the low frequencies is "wasted" at the output
 // of the synthesis. The low shelving filter removes it, leaving room for amplification.
 
