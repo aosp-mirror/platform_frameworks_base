@@ -2364,13 +2364,12 @@ ResourceTable::validateLocalizations(void)
                         String8 region(config.string(), 2);
                         if (configSet.find(region) == configSet.end()) {
                             if (configSet.count(defaultLocale) == 0) {
-                                fprintf(stdout, "aapt: error: "
+                                fprintf(stdout, "aapt: warning: "
                                         "*** string '%s' has no default or required localization "
                                         "for '%s' in %s\n",
                                         String8(nameIter->first).string(),
                                         config.string(),
                                         mBundle->getResourceSourceDirs()[0]);
-                                err = UNKNOWN_ERROR;
                             }
                         }
                     }
