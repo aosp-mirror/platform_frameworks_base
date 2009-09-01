@@ -68,6 +68,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -4893,6 +4894,25 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     null, 0, null, null, null, false, false, -1, uid);
         }
         Binder.restoreCallingIdentity(origId);
+    }
+    
+    public void getProcessMemoryInfo(int pid, Debug.MemoryInfo mi)
+            throws RemoteException {
+        ProcessRecord proc;
+        synchronized (mPidsSelfLocked) {
+            proc = mPidsSelfLocked.get(pid);
+        }
+        
+        if (proc == null) {
+            throw new RemoteException();
+        }
+        
+        IApplicationThread thread = proc.thread;
+        if (thread == null) {
+            throw new RemoteException();
+        }
+        
+        thread.getMemoryInfo(mi);
     }
     
     private void restartPackageLocked(final String packageName, int uid) {
@@ -9819,6 +9839,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (r.app != null) {
             info.pid = r.app.pid;
         }
+        info.uid = r.appInfo.uid;
         info.process = r.processName;
         info.foreground = r.isForeground;
         info.activeSince = r.createTime;
@@ -9826,6 +9847,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         info.clientCount = r.connections.size();
         info.crashCount = r.crashCount;
         info.lastActivityTime = r.lastActivity;
+        if (r.isForeground) {
+            info.flags |= ActivityManager.RunningServiceInfo.FLAG_FOREGROUND;
+        }
+        if (r.startRequested) {
+            info.flags |= ActivityManager.RunningServiceInfo.FLAG_STARTED;
+        }
+        if (r.app != null && r.app.pid == Process.myPid()) {
+            info.flags |= ActivityManager.RunningServiceInfo.FLAG_SYSTEM_PROCESS;
+        }
+        if (r.app != null && r.app.persistent) {
+            info.flags |= ActivityManager.RunningServiceInfo.FLAG_PERSISTENT_PROCESS;
+        }
         return info;
     }
     

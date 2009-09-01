@@ -1546,6 +1546,10 @@ public final class ActivityThread {
             }
         }
         
+        public void getMemoryInfo(Debug.MemoryInfo outInfo) {
+            Debug.getMemoryInfo(outInfo);
+        }
+        
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
