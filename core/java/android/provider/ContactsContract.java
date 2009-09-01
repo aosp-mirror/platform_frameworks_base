@@ -991,13 +991,13 @@ public final class ContactsContract {
             private Phone() {}
 
             /** MIME type used when storing this in data table. */
-            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/phone";
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/phone_v2";
 
             /**
              * The MIME type of {@link #CONTENT_URI} providing a directory of
              * phones.
              */
-            public static final String CONTENT_TYPE = "vnd.android.cursor.dir/phone";
+            public static final String CONTENT_TYPE = "vnd.android.cursor.dir/phone_v2";
 
             /**
              * The content:// style URI for all data records of the
@@ -1076,7 +1076,7 @@ public final class ContactsContract {
             private Email() {}
 
             /** MIME type used when storing this in data table. */
-            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/email";
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/email_v2";
 
             /**
              * The content:// style URI for all data records of the
@@ -1114,13 +1114,14 @@ public final class ContactsContract {
             }
 
             /** MIME type used when storing this in data table. */
-            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/postal-address";
+            public static final String CONTENT_ITEM_TYPE =
+                    "vnd.android.cursor.item/postal-address_v2";
 
             /**
              * The MIME type of {@link #CONTENT_URI} providing a directory of
              * postal addresses.
              */
-            public static final String CONTENT_TYPE = "vnd.android.cursor.dir/postal-address";
+            public static final String CONTENT_TYPE = "vnd.android.cursor.dir/postal-address_v2";
 
             /**
              * The content:// style URI for all data records of the
