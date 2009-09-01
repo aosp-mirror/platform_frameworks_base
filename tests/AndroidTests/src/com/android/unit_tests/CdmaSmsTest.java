@@ -32,6 +32,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import android.util.Log;
 
+import java.util.ArrayList;
+
 public class CdmaSmsTest extends AndroidTestCase {
     private final static String LOG_TAG = "XXX CdmaSmsTest XXX";
 
@@ -814,5 +816,31 @@ public class CdmaSmsTest extends AndroidTestCase {
         byte[] encodedSms = BearerData.encode(bearerData);
         BearerData revBearerData = BearerData.decode(encodedSms);
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+    }
+
+    @SmallTest
+    public void testFragmentText() throws Exception {
+        // Valid 160 character ASCII text.
+        String text1 = "123456789012345678901234567890123456789012345678901234567890" +
+                "1234567890123456789012345678901234567890123456789012345678901234567890" +
+                "12345678901234567890123456789[";
+        TextEncodingDetails ted = SmsMessage.calculateLength(text1, false);
+        assertEquals(ted.msgCount, 1);
+        assertEquals(ted.codeUnitCount, 160);
+        assertEquals(ted.codeUnitSize, 1);
+        ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text1);
+        assertEquals(fragments.size(), 1);
+        // Valid 160 character GSM text -- the last character is
+        // non-ASCII, and so this will currently generate a singleton
+        // EMS message, which is not necessarily supported by Verizon.
+        String text2 = "123456789012345678901234567890123456789012345678901234567890" +
+                "1234567890123456789012345678901234567890123456789012345678901234567890" +
+                "12345678901234567890123456789\u00a3";  // Trailing pound-currency sign.
+        ted = SmsMessage.calculateLength(text2, false);
+        assertEquals(ted.msgCount, 1);
+        assertEquals(ted.codeUnitCount, 160);
+        assertEquals(ted.codeUnitSize, 1);
+        fragments = android.telephony.SmsMessage.fragmentText(text2);
+        assertEquals(fragments.size(), 1);
     }
 }
