@@ -111,8 +111,7 @@ public abstract class AbstractThreadedSyncAdapter {
                 if (mSyncThread != null
                         && mSyncThread.mSyncContext.getISyncContext().asBinder()
                         == syncContext.asBinder()) {
-                    // TODO: figure out why canceling causes a hang
-//                    mSyncThread.interrupt();
+                    mSyncThread.interrupt();
                 }
             }
         }
