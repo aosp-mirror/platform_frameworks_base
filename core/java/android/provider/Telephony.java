@@ -1539,6 +1539,9 @@ public final class Telephony {
         public static final Uri CONTENT_DRAFT_URI = Uri.parse(
                 "content://mms-sms/draft");
 
+        public static final Uri CONTENT_LOCKED_URI = Uri.parse(
+                "content://mms-sms/locked");
+
         /***
          * Pass in a query parameter called "pattern" which is the text
          * to search for.
