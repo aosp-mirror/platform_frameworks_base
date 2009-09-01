@@ -1328,19 +1328,23 @@ public class ListView extends AbsListView {
 
             // Make sure we are 1) Too low, and 2) Either there are more rows below the
             // last row or the last row is scrolled off the bottom of the drawable area
-            if (topOffset > 0 && (lastPosition < mItemCount - 1 || lastBottom > end))  {
-                if (lastPosition == mItemCount - 1 ) {
-                    // Don't pull the bottom too far up
-                    topOffset = Math.min(topOffset, lastBottom - end);
-                }
-                // Move everything up
-                offsetChildrenTopAndBottom(-topOffset);
-                if (lastPosition < mItemCount - 1) {
-                    // Fill the gap that was opened below the last position with more rows, if
-                    // possible
-                    fillDown(lastPosition + 1, lastChild.getBottom() + mDividerHeight);
-                    // Close up the remaining gap
-                    adjustViewsUpOrDown();
+            if (topOffset > 0) {
+                if (lastPosition < mItemCount - 1 || lastBottom > end)  {
+                    if (lastPosition == mItemCount - 1) {
+                        // Don't pull the bottom too far up
+                        topOffset = Math.min(topOffset, lastBottom - end);
+                    }
+                    // Move everything up
+                    offsetChildrenTopAndBottom(-topOffset);
+                    if (lastPosition < mItemCount - 1) {
+                        // Fill the gap that was opened below the last position with more rows, if
+                        // possible
+                        fillDown(lastPosition + 1, lastChild.getBottom() + mDividerHeight);
+                        // Close up the remaining gap
+                        adjustViewsUpOrDown();
+                    }
+                } else if (lastPosition == mItemCount - 1) {
+                    adjustViewsUpOrDown();                    
                 }
             }
         }
