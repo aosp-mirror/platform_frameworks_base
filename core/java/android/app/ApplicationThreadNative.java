@@ -26,6 +26,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.IBinder;
@@ -368,6 +369,16 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             ApplicationInfo appInfo = ApplicationInfo.CREATOR.createFromParcel(data);
             scheduleDestroyBackupAgent(appInfo);
+            return true;
+        }
+
+        case GET_MEMORY_INFO_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            Debug.MemoryInfo mi = new Debug.MemoryInfo();
+            getMemoryInfo(mi);
+            reply.writeNoException();
+            mi.writeToParcel(reply, 0);
             return true;
         }
         }
@@ -755,6 +766,17 @@ class ApplicationThreadProxy implements IApplicationThread {
         mRemote.transact(SET_SCHEDULING_GROUP_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
+    }
+    
+    public void getMemoryInfo(Debug.MemoryInfo outInfo) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        mRemote.transact(GET_MEMORY_INFO_TRANSACTION, data, reply, 0);
+        reply.readException();
+        outInfo.readFromParcel(reply);
+        data.recycle();
+        reply.recycle();
     }
 }
 
