@@ -374,7 +374,7 @@
     </ul>
     <ul>
     <?cs if:android.whichdoc != "online" ?>
-      <li><a href="<?cs var:toroot ?>../samples">
+      <li><a href="<?cs var:toroot ?>../platforms/android-<?cs var:sdk.version ?>/samples">
             <span class="en">Sample Code</span>
           &raquo;</a></li>
     <?cs else ?>
