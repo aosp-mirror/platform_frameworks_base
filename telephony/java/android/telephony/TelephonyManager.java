@@ -481,6 +481,13 @@ public class TelephonyManager {
     public static final int SIM_STATE_READY = 5;
 
     /**
+     * @return true if a ICC card is present
+     */
+    public boolean hasIccCard() {
+        return PhoneFactory.getDefaultPhone().getIccCard().hasIccCard();
+    }
+
+    /**
      * Returns a constant indicating the state of the
      * device SIM card.
      *
