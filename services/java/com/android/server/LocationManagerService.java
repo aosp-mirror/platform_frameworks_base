@@ -16,12 +16,7 @@
 
 package com.android.server;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +26,6 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -64,7 +58,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
@@ -84,16 +77,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private static final String TAG = "LocationManagerService";
     private static final boolean LOCAL_LOGV = false;
 
-    // Minimum time interval between last known location writes, in milliseconds.
-    private static final long MIN_LAST_KNOWN_LOCATION_TIME = 60L * 1000L;
-
-    // Max time to hold wake lock for, in milliseconds.
-    private static final long MAX_TIME_FOR_WAKE_LOCK = 60 * 1000L;
-
     // The last time a location was written, by provider name.
     private HashMap<String,Long> mLastWriteTime = new HashMap<String,Long>();
-
-    private static final Pattern PATTERN_COMMA = Pattern.compile(",");
 
     private static final String ACCESS_FINE_LOCATION =
         android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -412,97 +397,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         public void update(Observable o, Object arg) {
             synchronized (mLock) {
                 updateProvidersLocked();
-            }
-        }
-    }
-
-    private Location readLastKnownLocationLocked(String provider) {
-        Location location = null;
-        String s = null;
-        try {
-            File f = new File(LocationManager.SYSTEM_DIR + "/location."
-                    + provider);
-            if (!f.exists()) {
-                return null;
-            }
-            BufferedReader reader = new BufferedReader(new FileReader(f), 256);
-            s = reader.readLine();
-        } catch (IOException e) {
-            Log.w(TAG, "Unable to read last known location", e);
-        }
-
-        if (s == null) {
-            return null;
-        }
-        try {
-            String[] tokens = PATTERN_COMMA.split(s);
-            int idx = 0;
-            long time = Long.parseLong(tokens[idx++]);
-            double latitude = Double.parseDouble(tokens[idx++]);
-            double longitude = Double.parseDouble(tokens[idx++]);
-            double altitude = Double.parseDouble(tokens[idx++]);
-            float bearing = Float.parseFloat(tokens[idx++]);
-            float speed = Float.parseFloat(tokens[idx++]);
-
-            location = new Location(provider);
-            location.setTime(time);
-            location.setLatitude(latitude);
-            location.setLongitude(longitude);
-            location.setAltitude(altitude);
-            location.setBearing(bearing);
-            location.setSpeed(speed);
-        } catch (NumberFormatException nfe) {
-            Log.e(TAG, "NumberFormatException reading last known location", nfe);
-            return null;
-        }
-
-        return location;
-    }
-
-    private void writeLastKnownLocationLocked(String provider,
-        Location location) {
-        long now = SystemClock.elapsedRealtime();
-        Long last = mLastWriteTime.get(provider);
-        if ((last != null)
-            && (now - last.longValue() < MIN_LAST_KNOWN_LOCATION_TIME)) {
-            return;
-        }
-        mLastWriteTime.put(provider, now);
-
-        StringBuilder sb = new StringBuilder(100);
-        sb.append(location.getTime());
-        sb.append(',');
-        sb.append(location.getLatitude());
-        sb.append(',');
-        sb.append(location.getLongitude());
-        sb.append(',');
-        sb.append(location.getAltitude());
-        sb.append(',');
-        sb.append(location.getBearing());
-        sb.append(',');
-        sb.append(location.getSpeed());
-
-        FileWriter writer = null;
-        try {
-            File d = new File(LocationManager.SYSTEM_DIR);
-            if (!d.exists()) {
-                if (!d.mkdirs()) {
-                    Log.w(TAG, "Unable to create directory to write location");
-                    return;
-                }
-            }
-            File f = new File(LocationManager.SYSTEM_DIR + "/location." + provider);
-            writer = new FileWriter(f);
-            writer.write(sb.toString());
-        } catch (IOException e) {
-            Log.w(TAG, "Unable to write location", e);
-        } finally {
-            if (writer != null) {
-                try {
-                writer.close();
-                } catch (IOException e) {
-                    Log.w(TAG, "Exception closing file", e);
-                }
             }
         }
     }
@@ -854,7 +748,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
          */
         void disposeLocked() {
             ArrayList<UpdateRecord> records = mRecordsByProvider.get(this.mProvider);
-            records.remove(this);
+            if (records != null) {
+                records.remove(this);
+            }
         }
 
         @Override
@@ -872,15 +768,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             pw.println(prefix + "mLastFixBroadcast:");
             mLastFixBroadcast.dump(new PrintWriterPrinter(pw), prefix + "  ");
             pw.println(prefix + "mLastStatusBroadcast=" + mLastStatusBroadcast);
-        }
-        
-        /**
-         * Calls dispose().
-         */
-        @Override protected void finalize() {
-            synchronized (mLock) {
-                disposeLocked();
-            }
         }
     }
 
@@ -1512,16 +1399,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             return null;
         }
 
-        Location location = mLastKnownLocation.get(provider);
-        if (location == null) {
-            // Get the persistent last known location for the provider
-            location = readLastKnownLocationLocked(provider);
-            if (location != null) {
-                mLastKnownLocation.put(provider, location);
-            }
-        }
-
-        return location;
+        return mLastKnownLocation.get(provider);
     }
 
     private static boolean shouldBroadcastSafe(Location loc, Location lastLoc, UpdateRecord record) {
@@ -1566,7 +1444,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } else {
             lastLocation.set(location);
         }
-        writeLastKnownLocationLocked(provider, location);
 
         // Fetch latest status update time
         long newStatusUpdateTime = p.getStatusUpdateTime();
