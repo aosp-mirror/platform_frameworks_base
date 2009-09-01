@@ -16,6 +16,7 @@
 
 package com.android.dumprendertree;
 
+import com.android.dumprendertree.TestShellActivity.DumpDataType;
 import com.android.dumprendertree.forwarder.AdbUtils;
 import com.android.dumprendertree.forwarder.ForwardServer;
 
@@ -399,7 +400,8 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         if (resume)
             resumeTestList();
 
-        TestShellActivity activity = (TestShellActivity) getActivity();
+        TestShellActivity activity = getActivity();
+        activity.setDefaultDumpDataType(DumpDataType.DUMP_AS_TEXT);
 
         // Run tests.
         int addr = -1;
