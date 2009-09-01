@@ -854,7 +854,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
          */
         void disposeLocked() {
             ArrayList<UpdateRecord> records = mRecordsByProvider.get(this.mProvider);
-            records.remove(this);
+            if (records != null) {
+                records.remove(this);
+            }
         }
 
         @Override
@@ -872,15 +874,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             pw.println(prefix + "mLastFixBroadcast:");
             mLastFixBroadcast.dump(new PrintWriterPrinter(pw), prefix + "  ");
             pw.println(prefix + "mLastStatusBroadcast=" + mLastStatusBroadcast);
-        }
-        
-        /**
-         * Calls dispose().
-         */
-        @Override protected void finalize() {
-            synchronized (mLock) {
-                disposeLocked();
-            }
         }
     }
 
