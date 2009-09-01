@@ -19,13 +19,10 @@ package com.android.internal.telephony.gsm;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
-import android.app.AlarmManager;
 import android.content.Context;
-import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
 import android.os.Message;
 import android.os.SystemProperties;
-import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.telephony.AdnRecord;
@@ -37,6 +34,7 @@ import com.android.internal.telephony.IccRecords;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.IccVmFixedException;
 import com.android.internal.telephony.IccVmNotSupportedException;
+import com.android.internal.telephony.MccTable;
 
 import java.util.ArrayList;
 
@@ -51,14 +49,14 @@ public final class SIMRecords extends IccRecords {
 
     private static final boolean DBG = true;
 
-    //***** Instance Variables
+    // ***** Instance Variables
 
     VoiceMailConstants mVmConfig;
 
 
     SpnOverride mSpnOverride;
 
-    //***** Cached SIM State; cleared on channel close
+    // ***** Cached SIM State; cleared on channel close
 
     String imsi;
     boolean callForwardingEnabled;
@@ -88,7 +86,7 @@ public final class SIMRecords extends IccRecords {
 
     String pnnHomeName = null;
 
-    //***** Constants
+    // ***** Constants
 
     // Bitmasks for SPN display rules.
     static final int SPN_RULE_SHOW_SPN  = 0x01;
@@ -113,7 +111,7 @@ public final class SIMRecords extends IccRecords {
     private static final int CPHS_SST_MBN_MASK = 0x30;
     private static final int CPHS_SST_MBN_ENABLED = 0x30;
 
-    //***** Event Constants
+    // ***** Event Constants
 
     private static final int EVENT_SIM_READY = 1;
     private static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 2;
@@ -143,9 +141,7 @@ public final class SIMRecords extends IccRecords {
     private static final int EVENT_SIM_REFRESH = 31;
     private static final int EVENT_GET_CFIS_DONE = 32;
 
-    private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
-
-    //***** Constructor
+    // ***** Constructor
 
     SIMRecords(GSMPhone p) {
         super(p);
@@ -188,7 +184,7 @@ public final class SIMRecords extends IccRecords {
         msisdn = null;
         voiceMailNum = null;
         countVoiceMessages = 0;
-        mncLength = 0;
+        mncLength = UNINITIALIZED;
         iccid = null;
         // -1 means no EF_SPN found; treat accordingly.
         spnDisplayCondition = -1;
@@ -453,79 +449,16 @@ public final class SIMRecords extends IccRecords {
      *  provided the SIM card. Returns null of SIM is not yet ready
      */
     String getSIMOperatorNumeric() {
-        if (imsi == null) {
+        if (imsi == null || mncLength == UNINITIALIZED || mncLength == UNKNOWN) {
             return null;
         }
 
-        if (mncLength != 0) {
-            // Length = length of MCC + length of MNC
-            // length of mcc = 3 (TS 23.003 Section 2.2)
-            return imsi.substring(0, 3 + mncLength);
-        }
-
-        // Guess the MNC length based on the MCC if we don't
-        // have a valid value in ef[ad]
-
-        int mcc;
-
-        mcc = Integer.parseInt(imsi.substring(0,3));
-
-        return imsi.substring(0, 3 + MccTable.smallestDigitsMccForMnc(mcc));
+        // Length = length of MCC + length of MNC
+        // length of mcc = 3 (TS 23.003 Section 2.2)
+        return imsi.substring(0, 3 + mncLength);
     }
 
-     /**
-     * If the timezone is not already set, set it based on the MCC of the SIM.
-     * @param mcc Mobile Country Code of the SIM
-     */
-    private void setTimezoneFromMccIfNeeded(int mcc) {
-        String timezone = SystemProperties.get(TIMEZONE_PROPERTY);
-        if (timezone == null || timezone.length() == 0) {
-            String zoneId = MccTable.defaultTimeZoneForMcc(mcc);
-
-            if (zoneId != null && zoneId.length() > 0) {
-                // Set time zone based on MCC
-                AlarmManager alarm =
-                    (AlarmManager) phone.getContext().getSystemService(Context.ALARM_SERVICE);
-                alarm.setTimeZone(zoneId);
-            }
-        }
-    }
-
-    /**
-     * If the locale is not already set, set it based on the MCC of the SIM.
-     * @param mcc Mobile Country Code of the SIM
-     */
-    private void setLocaleFromMccIfNeeded(int mcc) {
-        String language = MccTable.defaultLanguageForMcc(mcc);
-        String country = MccTable.countryCodeForMcc(mcc);
-
-        phone.setSystemLocale(language, country);
-    }
-
-    /**
-     * If the number of allowed wifi channels has not been set, set it based on
-     * the MCC of the SIM.
-     * @param mcc Mobile Country Code of the SIM
-     */
-    private void setWifiChannelsFromMccIfNeeded(int mcc) {
-        int wifiChannels = MccTable.wifiChannelsForMcc(mcc);
-
-        if (wifiChannels != 0) {
-            Context context = phone.getContext();
-            // only set to this default if the user hasn't manually set it
-            try {
-                Settings.Secure.getInt(context.getContentResolver(),
-                        Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS);
-            } catch (Settings.SettingNotFoundException e) {
-                WifiManager wM = (WifiManager)
-                        context.getSystemService(Context.WIFI_SERVICE);
-                // don't persist
-                wM.setNumAllowedChannels(wifiChannels, false);
-            }
-        }
-    }
-
-    //***** Overridden from Handler
+    // ***** Overridden from Handler
     public void handleMessage(Message msg) {
         AsyncResult ar;
         AdnRecord adn;
@@ -564,14 +497,25 @@ public final class SIMRecords extends IccRecords {
                 }
 
                 Log.d(LOG_TAG, "IMSI: " + imsi.substring(0, 6) + "xxxxxxxxx");
-                ((GSMPhone) phone).mSimCard.updateImsiConfiguration(imsi);
+
+                if (mncLength == UNKNOWN) {
+                    // the SIM has told us all it knows, but it didn't know the mnc length.
+                    // guess using the mcc
+                    try {
+                        int mcc = Integer.parseInt(imsi.substring(0,3));
+                        mncLength = MccTable.smallestDigitsMccForMnc(mcc);
+                    } catch (NumberFormatException e) {
+                        mncLength = UNKNOWN;
+                        Log.e(LOG_TAG, "SIMRecords: Corrupt IMSI!");
+                    }
+                }
+
+                if (mncLength != UNKNOWN && mncLength != UNINITIALIZED) {
+                    // finally have both the imsi and the mncLength and can parse the imsi properly
+                    MccTable.updateMccMncConfiguration(phone, imsi.substring(0, 3 + mncLength));
+                }
                 ((GSMPhone) phone).mSimCard.broadcastIccStateChangedIntent(
                         SimCard.INTENT_VALUE_ICC_IMSI, null);
-
-                int mcc = Integer.parseInt(imsi.substring(0, 3));
-                setTimezoneFromMccIfNeeded(mcc);
-                setLocaleFromMccIfNeeded(mcc);
-                setWifiChannelsFromMccIfNeeded(mcc);
             break;
 
             case EVENT_GET_MBI_DONE:
@@ -794,12 +738,25 @@ public final class SIMRecords extends IccRecords {
                 mncLength = (int)data[3] & 0xf;
 
                 if (mncLength == 0xf) {
-                    // Resetting mncLength to 0 to indicate that it is not
-                    // initialised
-                    mncLength = 0;
+                    if (imsi != null) {
+                        try {
+                            int mcc = Integer.parseInt(imsi.substring(0,3));
 
-                    Log.d(LOG_TAG, "SIMRecords: MNC length not present in EF_AD");
-                    break;
+                            mncLength = MccTable.smallestDigitsMccForMnc(mcc);
+                        } catch (NumberFormatException e) {
+                            mncLength = UNKNOWN;
+                            Log.e(LOG_TAG, "SIMRecords: Corrupt IMSI!");
+                        }
+                    } else {
+                        // Indicate we got this info, but it didn't contain the length.
+                        mncLength = UNKNOWN;
+
+                        Log.d(LOG_TAG, "SIMRecords: MNC length not present in EF_AD");
+                    }
+                }
+                if (imsi != null && mncLength != UNKNOWN) {
+                    // finally have both imsi and the length of the mnc and can parse it properly
+                    MccTable.updateMccMncConfiguration(phone, imsi.substring(0, 3 + mncLength));
                 }
 
             break;

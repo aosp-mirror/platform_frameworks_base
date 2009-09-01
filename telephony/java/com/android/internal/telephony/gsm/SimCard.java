@@ -16,9 +16,6 @@
 
 package com.android.internal.telephony.gsm;
 
-import android.app.ActivityManagerNative;
-import android.content.res.Configuration;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.telephony.IccCard;
@@ -50,20 +47,4 @@ public final class SimCard extends IccCard {
         return ((GSMPhone)mPhone).mSIMRecords.getServiceProviderName();
     }
 
-    public void updateImsiConfiguration(String imsi) {
-        if (imsi.length() >= 6) {
-            Configuration config = new Configuration();
-            config.mcc = ((imsi.charAt(0)-'0')*100)
-                    + ((imsi.charAt(1)-'0')*10)
-                    + (imsi.charAt(2)-'0');
-            config.mnc = ((imsi.charAt(3)-'0')*100)
-                    + ((imsi.charAt(4)-'0')*10)
-                    + (imsi.charAt(5)-'0');
-            try {
-                ActivityManagerNative.getDefault().updateConfiguration(config);
-            } catch (RemoteException e) {
-                Log.e(mLogTag, "[SimCard] Remote Exception when updating imsi configuration");
-            }
-        }
-    }
 }
