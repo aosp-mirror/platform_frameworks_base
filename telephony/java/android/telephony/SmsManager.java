@@ -81,9 +81,14 @@ public final class SmsManager {
             throw new IllegalArgumentException("Invalid message body");
         }
 
-        SmsMessage.SubmitPdu pdus = SmsMessage.getSubmitPdu(
-                scAddress, destinationAddress, text, (deliveryIntent != null));
-        sendRawPdu(pdus.encodedScAddress, pdus.encodedMessage, sentIntent, deliveryIntent);
+        try {
+            ISms iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
+            if (iccISms != null) {
+                iccISms.sendText(destinationAddress, scAddress, text, sentIntent, deliveryIntent);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
     }
 
     /**
@@ -202,43 +207,11 @@ public final class SmsManager {
             throw new IllegalArgumentException("Invalid message data");
         }
 
-        SmsMessage.SubmitPdu pdus = SmsMessage.getSubmitPdu(
-                scAddress, destinationAddress,
-                destinationPort, data, (deliveryIntent != null));
-        sendRawPdu(pdus.encodedScAddress, pdus.encodedMessage, sentIntent, deliveryIntent);
-    }
-
-    /**
-     * Send a raw SMS PDU.
-     * A PDU is a protocol data unit. It contains the message and the
-     * associated meta information.
-     *
-     * @param smsc the SMSC to send the message through, or NULL for the
-     *  default SMSC
-     * @param pdu the raw PDU to send
-     * @param sentIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is successfully sent, or failed.
-     *  The result code will be <code>Activity.RESULT_OK<code> for success,
-     *  or one of these errors:<br>
-     *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
-     *  <code>RESULT_ERROR_RADIO_OFF</code><br>
-     *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
-     *  the extra "errorCode" containing a radio technology specific value,
-     *  generally only useful for troubleshooting.<br>
-     *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applications,
-     *  which cause smaller number of SMS to be sent in checking period.
-     * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is delivered to the recipient.  The
-     *  raw pdu of the status report is in the extended data ("pdu").
-     */
-    private void sendRawPdu(byte[] smsc, byte[] pdu, PendingIntent sentIntent,
-            PendingIntent deliveryIntent) {
         try {
             ISms iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
             if (iccISms != null) {
-                iccISms.sendRawPdu(smsc, pdu, sentIntent, deliveryIntent);
+                iccISms.sendData(destinationAddress, scAddress, destinationPort & 0xFFFF,
+                        data, sentIntent, deliveryIntent);
             }
         } catch (RemoteException ex) {
             // ignore it

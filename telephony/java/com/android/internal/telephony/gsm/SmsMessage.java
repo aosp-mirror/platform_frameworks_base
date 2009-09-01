@@ -337,7 +337,7 @@ public class SmsMessage extends SmsMessageBase{
      *         Returns null on encode error.
      */
     public static SubmitPdu getSubmitPdu(String scAddress,
-            String destinationAddress, short destinationPort, byte[] data,
+            String destinationAddress, int destinationPort, byte[] data,
             boolean statusReportRequested) {
 
         SmsHeader.PortAddrs portAddrs = new SmsHeader.PortAddrs();
