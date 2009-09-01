@@ -1449,6 +1449,8 @@ void AudioFlinger::MixerThread::putTracks(
         int j = activeTracks.indexOf(t);
         if (j >= 0) {
             mActiveTracks.add(t);
+            // force buffer refilling and no ramp volume when the track is mixed for the first time
+            t->mFillingUpStatus = Track::FS_FILLING;
         }
     }
 }
@@ -3512,9 +3514,10 @@ status_t AudioFlinger::setStreamOutput(uint32_t stream, int output)
             if (tracks.size()) {
                 dstThread->putTracks(tracks, activeTracks);
             }
-            dstThread->sendConfigEvent(AudioSystem::STREAM_CONFIG_CHANGED, stream);
         }
     }
+
+    dstThread->sendConfigEvent(AudioSystem::STREAM_CONFIG_CHANGED, stream);
 
     return NO_ERROR;
 }
