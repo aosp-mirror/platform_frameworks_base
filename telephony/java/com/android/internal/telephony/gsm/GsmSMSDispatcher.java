@@ -37,6 +37,7 @@ import com.android.internal.telephony.SmsMessageBase;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static android.telephony.SmsMessage.MessageClass;
 
 final class GsmSMSDispatcher extends SMSDispatcher {
     private static final String TAG = "GSM";
@@ -109,6 +110,12 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
         if (handled) {
             return Intents.RESULT_SMS_HANDLED;
+        }
+
+        if (!mStorageAvailable && (sms.getMessageClass() != MessageClass.CLASS_0)) {
+            // It's a storable message and there's no storage available.  Bail.
+            // (See TS 23.038 for a description of class 0 messages.)
+            return Intents.RESULT_SMS_OUT_OF_MEMORY;
         }
 
         SmsHeader smsHeader = sms.getUserDataHeader();

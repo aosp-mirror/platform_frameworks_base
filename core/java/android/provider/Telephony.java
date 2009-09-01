@@ -558,6 +558,23 @@ public final class Telephony {
                 "android.provider.Telephony.SIM_FULL";
 
             /**
+             * Broadcast Action: An incoming SMS has been rejected by the
+             * telephony framework.  This intent is sent in lieu of any
+             * of the RECEIVED_ACTION intents.  The intent will have the
+             * following extra value:</p>
+             *
+             * <ul>
+             *   <li><em>result</em> - An int result code, eg,
+             *   <code>{@link #RESULT_SMS_OUT_OF_MEMORY}</code>,
+             *   indicating the error returned to the network.</li>
+             * </ul>
+
+             */
+            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+            public static final String SMS_REJECTED_ACTION =
+                "android.provider.Telephony.SMS_REJECTED";
+
+            /**
              * Read the PDUs out of an {@link #SMS_RECEIVED_ACTION} or a
              * {@link #DATA_SMS_RECEIVED_ACTION} intent.
              *
