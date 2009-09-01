@@ -342,6 +342,9 @@ public class WebView extends AbsoluteLayout
      */
     VelocityTracker mVelocityTracker;
     private int mMaximumFling;
+    private float mLastVelocity;
+    private float mLastVelX;
+    private float mLastVelY;
 
     // use this flag to control whether enabling the new double tap zoom
     static final boolean ENABLE_DOUBLETAP_ZOOM = true;
@@ -1795,6 +1798,13 @@ public class WebView extends AbsoluteLayout
                 , contentToView(x.right), contentToView(x.bottom));
     }
 
+    // stop the scroll animation, and don't let a subsequent fling add
+    // to the existing velocity
+    private void abortAnimation() {
+        mScroller.abortAnimation();
+        mLastVelocity = 0;
+    }
+
     /* call from webcoreview.draw(), so we're still executing in the UI thread
     */
     private void recordNewContentSize(int w, int h, boolean updateLayout) {
@@ -1819,7 +1829,7 @@ public class WebView extends AbsoluteLayout
                 mScrollY = pinLocY(mScrollY);
                 // android.util.Log.d("skia", "recordNewContentSize -
                 // abortAnimation");
-                mScroller.abortAnimation(); // just in case
+                abortAnimation(); // just in case
                 if (oldX != mScrollX || oldY != mScrollY) {
                     sendOurVisibleRect();
                 }
@@ -2339,7 +2349,7 @@ public class WebView extends AbsoluteLayout
                     animationDuration > 0 ? animationDuration : computeDuration(dx, dy));
             invalidate();
         } else {
-            mScroller.abortAnimation(); // just in case
+            abortAnimation(); // just in case
             scrollTo(x, y);
         }
         return true;
@@ -2963,7 +2973,7 @@ public class WebView extends AbsoluteLayout
         mLastTouchX = halfW;
         int halfH = height >> 1;
         mLastTouchY = halfH;
-        mScroller.abortAnimation();
+        abortAnimation();
         mZoomScrollStart = System.currentTimeMillis();
         Rect zoomFrame = scrollZoomFrame(width, height
                 , scrollZoomMagScale(mZoomScrollInvLimit));
@@ -3850,6 +3860,9 @@ public class WebView extends AbsoluteLayout
                     mLastScrollY = mZoomScrollY;
                     // If two taps are close, ignore the first tap
                 } else if (!mScroller.isFinished()) {
+                    // stop the current scroll animation, but if this is
+                    // the start of a fling, allow it to add to the current
+                    // fling's velocity
                     mScroller.abortAnimation();
                     mTouchMode = TOUCH_DRAG_START_MODE;
                     mPrivateHandler.removeMessages(RESUME_WEBCORE_UPDATE);
@@ -4110,6 +4123,7 @@ public class WebView extends AbsoluteLayout
                             doFling();
                             break;
                         }
+                        mLastVelocity = 0;
                         WebViewCore.resumeUpdate(mWebViewCore);
                         break;
                     case TOUCH_DRAG_START_MODE:
@@ -4475,6 +4489,27 @@ public class WebView extends AbsoluteLayout
             vx = vx * 3 / 4;
             vy = vy * 3 / 4;
         }
+        float currentVelocity = mScroller.getCurrVelocity();
+        if (mLastVelocity > 0 && currentVelocity > 0) {
+            float deltaR = (float) (Math.abs(Math.atan2(mLastVelY, mLastVelX)
+                    - Math.atan2(vy, vx)));
+            final float circle = (float) (Math.PI) * 2.0f;
+            if (deltaR > circle * 0.9f || deltaR < circle * 0.1f) {
+                vx += currentVelocity * mLastVelX / mLastVelocity;
+                vy += currentVelocity * mLastVelY / mLastVelocity;
+                if (DebugFlags.WEB_VIEW) {
+                    Log.v(LOGTAG, "doFling vx= " + vx + " vy=" + vy);
+                }
+            } else if (DebugFlags.WEB_VIEW) {
+                Log.v(LOGTAG, "doFling missed " + deltaR / circle);
+            }
+        } else if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, "doFling start last=" + mLastVelocity
+                    + " current=" + currentVelocity);
+        }
+        mLastVelX = vx;
+        mLastVelY = vy;
+        mLastVelocity = (float) Math.hypot(vx, vy);
 
         mScroller.fling(mScrollX, mScrollY, -vx, -vy, 0, maxX, 0, maxY);
         // TODO: duration is calculated based on velocity, if the range is
@@ -4683,7 +4718,7 @@ public class WebView extends AbsoluteLayout
         mLastTouchY = y + (float) (mWebTextView.getTop() - mScrollY);
         mLastTouchTime = eventTime;
         if (!mScroller.isFinished()) {
-            mScroller.abortAnimation();
+            abortAnimation();
             mPrivateHandler.removeMessages(RESUME_WEBCORE_UPDATE);
         }
         mSnapScrollMode = SNAP_NONE;
