@@ -1996,7 +1996,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (y != mLastY) {
                     deltaY -= mMotionCorrection;
                     int incrementalDeltaY = mLastY != Integer.MIN_VALUE ? y - mLastY : deltaY;
-                    trackMotionScroll(deltaY, incrementalDeltaY);
+                    // No need to do all this work if we're not going to move anyway
+                    if (incrementalDeltaY != 0) {
+                        trackMotionScroll(deltaY, incrementalDeltaY);
+                    }
 
                     // Check to see if we have bumped into the scroll limit
                     View motionView = this.getChildAt(mMotionPosition - mFirstPosition);
@@ -2063,7 +2066,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             if (mSelector != null) {
                                 Drawable d = mSelector.getCurrent();
                                 if (d != null && d instanceof TransitionDrawable) {
-                                    ((TransitionDrawable)d).resetTransition();
+                                    ((TransitionDrawable) d).resetTransition();
                                 }
                             }
                             postDelayed(new Runnable() {
@@ -2087,15 +2090,27 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mTouchMode = TOUCH_MODE_REST;
                 break;
             case TOUCH_MODE_SCROLL:
-                final VelocityTracker velocityTracker = mVelocityTracker;
-                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                final int initialVelocity = (int) velocityTracker.getYVelocity();
-                if (Math.abs(initialVelocity) > mMinimumVelocity && (getChildCount() > 0)) {
-                    if (mFlingRunnable == null) {
-                        mFlingRunnable = new FlingRunnable();
+                final int childCount = getChildCount();
+                if (childCount > 0) {
+                    if (mFirstPosition == 0 && getChildAt(0).getTop() >= mListPadding.top &&
+                            mFirstPosition + childCount < mItemCount &&
+                            getChildAt(childCount - 1).getBottom() <=
+                                    getHeight() - mListPadding.bottom) {
+                        mTouchMode = TOUCH_MODE_REST;
+                        reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
+                    } else {
+                        final VelocityTracker velocityTracker = mVelocityTracker;
+                        velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                        final int initialVelocity = (int) velocityTracker.getYVelocity();
+    
+                        if (Math.abs(initialVelocity) > mMinimumVelocity) {
+                            if (mFlingRunnable == null) {
+                                mFlingRunnable = new FlingRunnable();
+                            }
+                            reportScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
+                            mFlingRunnable.start(-initialVelocity);
+                        }
                     }
-                    reportScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
-                    mFlingRunnable.start(-initialVelocity);
                 } else {
                     mTouchMode = TOUCH_MODE_REST;
                     reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);

@@ -46,7 +46,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.Config;
-import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pool;
