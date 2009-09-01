@@ -105,9 +105,6 @@ public class LocationManager {
      */
     public static final String KEY_LOCATION_CHANGED = "location";
 
-    /** @hide */
-    public static final String SYSTEM_DIR = "/data/system/location";
-
     // Map from LocationListeners to their associated ListenerTransport objects
     private HashMap<LocationListener,ListenerTransport> mListeners =
         new HashMap<LocationListener,ListenerTransport>();
