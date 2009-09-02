@@ -1548,11 +1548,12 @@ public final class Gmail {
                     getLabelIdValues(labelId).getAsInteger(LabelColumns.NUM_UNREAD_CONVERSATIONS);
             // There seems to be a race condition here that can get the label maps into a bad
             // state and lose state on a particular label.
-            if (unreadConversations == null) {
-                return 0;
-            } else {
-                return unreadConversations < 0 ? 0 : unreadConversations;
+            int result = 0;
+            if (unreadConversations != null) {
+                result = unreadConversations < 0 ? 0 : unreadConversations;
             }
+
+            return result;
         }
 
         /**
