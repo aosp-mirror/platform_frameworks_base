@@ -53,7 +53,7 @@ import java.io.OutputStream;
     public void write(int oneByte) throws IOException {
         byte b[] = new byte[1];
         b[0] = (byte)oneByte;
-        mSocket.writeNative(b, 0, 1);
+        mSocket.write(b, 0, 1);
     }
 
     /**
@@ -82,6 +82,6 @@ import java.io.OutputStream;
         if ((offset | count) < 0 || count > b.length - offset) {
             throw new IndexOutOfBoundsException("invalid offset or length");
         }
-        mSocket.writeNative(b, offset, count);
+        mSocket.write(b, offset, count);
     }
 }

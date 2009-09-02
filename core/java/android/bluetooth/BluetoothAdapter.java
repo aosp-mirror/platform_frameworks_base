@@ -312,7 +312,7 @@ public final class BluetoothAdapter {
         BluetoothServerSocket socket = new BluetoothServerSocket(
                 BluetoothSocket.TYPE_RFCOMM, true, true, channel);
         try {
-            socket.mSocket.bindListenNative();
+            socket.mSocket.bindListen();
         } catch (IOException e) {
             try {
                 socket.close();
@@ -334,7 +334,7 @@ public final class BluetoothAdapter {
         BluetoothServerSocket socket = new BluetoothServerSocket(
                 BluetoothSocket.TYPE_RFCOMM, false, false, port);
         try {
-            socket.mSocket.bindListenNative();
+            socket.mSocket.bindListen();
         } catch (IOException e) {
             try {
                 socket.close();
@@ -356,7 +356,7 @@ public final class BluetoothAdapter {
         BluetoothServerSocket socket = new BluetoothServerSocket(
                 BluetoothSocket.TYPE_SCO, false, false, -1);
         try {
-            socket.mSocket.bindListenNative();
+            socket.mSocket.bindListen();
         } catch (IOException e) {
             try {
                 socket.close();
