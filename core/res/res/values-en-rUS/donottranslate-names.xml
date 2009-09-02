@@ -147,7 +147,7 @@
         MD, MS, PH.D., PHD, SR, V, VI, VII, VIII, X
     </string>
     <string name="common_last_name_prefixes">
-        D', DE, DEL, DI, LA, LE, MC, SAN, ST, TER, VAN, VON
+        D\', DE, DEL, DI, LA, LE, MC, SAN, ST, TER, VAN, VON
     </string>
     <string name="common_name_conjunctions">
         &amp;, AND, OR
