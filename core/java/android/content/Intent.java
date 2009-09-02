@@ -1267,6 +1267,8 @@ public class Intent implements Parcelable {
      * enabled or disabled.  The data contains the name of the package.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
+     * <li> {@link #EXTRA_CHANGED_COMPONENT_NAME} containing the class name of the changed component.
+     * <li> {@link #EXTRA_DONT_KILL_APP} containing boolean field to override the default action of restarting the application.
      * </ul>
      * 
      * <p class="note">This is a protected intent that can only be sent
@@ -2033,6 +2035,14 @@ public class Intent implements Parcelable {
      */
     public static final String EXTRA_REMOTE_INTENT_TOKEN =
             "android.intent.extra.remote_intent_token";
+
+    /**
+     * Used as an int extra field in {@link android.content.Intent#ACTION_PACKAGE_CHANGED}
+     * intent to supply the name of the component that changed.
+     * @hide
+     */
+    public static final String EXTRA_CHANGED_COMPONENT_NAME =
+            "android.intent.extra.changed_component_name";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

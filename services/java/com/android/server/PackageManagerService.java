@@ -62,6 +62,8 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.Environment;
@@ -140,7 +142,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
     final HandlerThread mHandlerThread = new HandlerThread("PackageManager",
             Process.THREAD_PRIORITY_BACKGROUND);
-    final Handler mHandler;
+    final PackageHandler mHandler;
 
     final int mSdkVersion = Build.VERSION.SDK_INT;
     final String mSdkCodename = "REL".equals(Build.VERSION.CODENAME)
@@ -272,6 +274,49 @@ class PackageManagerService extends IPackageManager.Stub {
     ComponentName mResolveComponentName;
     PackageParser.Package mPlatformPackage;
 
+    // Set of pending broadcasts for aggregating enable/disable of components.
+    final HashMap<String, String> mPendingBroadcasts = new HashMap<String, String>();
+    static final int SEND_PENDING_BROADCAST = 1;
+    // Delay time in millisecs
+    static final int BROADCAST_DELAY = 10 * 1000;
+
+    class PackageHandler extends Handler {
+        PackageHandler(Looper looper) {
+            super(looper);
+        }
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case SEND_PENDING_BROADCAST : {
+                    int size = 0;
+                    String broadcastList[];
+                    HashMap<String, String> tmpMap;
+                    int uids[];
+                    synchronized (mPackages) {
+                        size = mPendingBroadcasts.size();
+                        if (size <= 0) {
+                            // Nothing to be done. Just return
+                            return;
+                        }
+                        broadcastList = new String[size];
+                        mPendingBroadcasts.keySet().toArray(broadcastList);
+                        tmpMap = new HashMap<String, String>(mPendingBroadcasts);
+                        uids = new int[size];
+                        for (int i = 0; i < size; i++) {
+                            PackageSetting ps = mSettings.mPackages.get(mPendingBroadcasts.get(broadcastList[i]));
+                            uids[i] = (ps != null) ? ps.userId : -1;
+                        }
+                        mPendingBroadcasts.clear();
+                    }
+                    // Send broadcasts
+                    for (int i = 0; i < size; i++) {
+                        String className = broadcastList[i];
+                        sendPackageChangedBroadcast(className, true, tmpMap.get(className), uids[i]);
+                    }
+                    break;
+                }
+            }
+        }
+    }
     public static final IPackageManager main(Context context, boolean factoryTest) {
         PackageManagerService m = new PackageManagerService(context, factoryTest);
         ServiceManager.addService("package", m);
@@ -355,7 +400,7 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mInstallLock) {
         synchronized (mPackages) {
             mHandlerThread.start();
-            mHandler = new Handler(mHandlerThread.getLooper());
+            mHandler = new PackageHandler(mHandlerThread.getLooper());
             
             File dataDir = Environment.getDataDirectory();
             mAppDataDir = new File(dataDir, "data");
@@ -4866,7 +4911,7 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void setEnabledSetting(
-            final String packageNameStr, String classNameStr, int newState, final int flags) {
+            final String packageName, String className, int newState, final int flags) {
         if (!(newState == COMPONENT_ENABLED_STATE_DEFAULT
               || newState == COMPONENT_ENABLED_STATE_ENABLED
               || newState == COMPONENT_ENABLED_STATE_DISABLED)) {
@@ -4878,17 +4923,20 @@ class PackageManagerService extends IPackageManager.Stub {
         final int permission = mContext.checkCallingPermission(
                 android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE);
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
+        boolean sendNow = false;
+        boolean isApp = (className == null);
+        String key = isApp ? packageName : className;
         int packageUid = -1;
         synchronized (mPackages) {
-            pkgSetting = mSettings.mPackages.get(packageNameStr);
+            pkgSetting = mSettings.mPackages.get(packageName);
             if (pkgSetting == null) {
-                if (classNameStr == null) {
+                if (className == null) {
                     throw new IllegalArgumentException(
-                            "Unknown package: " + packageNameStr);
+                            "Unknown package: " + packageName);
                 }
                 throw new IllegalArgumentException(
-                        "Unknown component: " + packageNameStr
-                        + "/" + classNameStr);
+                        "Unknown component: " + packageName
+                        + "/" + className);
             }
             if (!allowedByPermission && (uid != pkgSetting.userId)) {
                 throw new SecurityException(
@@ -4896,39 +4944,65 @@ class PackageManagerService extends IPackageManager.Stub {
                         + Binder.getCallingPid()
                         + ", uid=" + uid + ", package uid=" + pkgSetting.userId);
             }
-            packageUid = pkgSetting.userId;
-            if (classNameStr == null) {
+            if (className == null) {
                 // We're dealing with an application/package level state change
                 pkgSetting.enabled = newState;
             } else {
                 // We're dealing with a component level state change
                 switch (newState) {
                 case COMPONENT_ENABLED_STATE_ENABLED:
-                    pkgSetting.enableComponentLP(classNameStr);
+                    pkgSetting.enableComponentLP(className);
                     break;
                 case COMPONENT_ENABLED_STATE_DISABLED:
-                    pkgSetting.disableComponentLP(classNameStr);
+                    pkgSetting.disableComponentLP(className);
                     break;
                 case COMPONENT_ENABLED_STATE_DEFAULT:
-                    pkgSetting.restoreComponentLP(classNameStr);
+                    pkgSetting.restoreComponentLP(className);
                     break;
                 default:
                     Log.e(TAG, "Invalid new component state: " + newState);
+                    return;
                 }
             }
             mSettings.writeLP();
+            packageUid = pkgSetting.userId;
+            if ((flags&PackageManager.DONT_KILL_APP) == 0) {
+                sendNow = true;
+                // Purge entry from pending broadcast list if another one exists already
+                // since we are sending one right away.
+                if (mPendingBroadcasts.get(key) != null) {
+                    mPendingBroadcasts.remove(key);
+                    // Can ignore empty list since its handled in the handler anyway
+                }
+            } else {
+                if (mPendingBroadcasts.get(key) == null) {
+                    mPendingBroadcasts.put(key, packageName);
+                }
+                if (!mHandler.hasMessages(SEND_PENDING_BROADCAST)) {
+                    // Schedule a message
+                    mHandler.sendEmptyMessageDelayed(SEND_PENDING_BROADCAST, BROADCAST_DELAY);
+                }
+            }
         }
-        
+
         long callingId = Binder.clearCallingIdentity();
         try {
-            Bundle extras = new Bundle(2);
-            extras.putBoolean(Intent.EXTRA_DONT_KILL_APP,
-                    (flags&PackageManager.DONT_KILL_APP) != 0);
-            extras.putInt(Intent.EXTRA_UID, packageUid);
-            sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED, packageNameStr, extras);
+            if (sendNow) {
+                sendPackageChangedBroadcast(packageName,
+                        (flags&PackageManager.DONT_KILL_APP) != 0, key, packageUid);
+            }
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
+    }
+
+    private void sendPackageChangedBroadcast(String packageName,
+            boolean killFlag, String componentName, int packageUid) {
+        Bundle extras = new Bundle(2);
+        extras.putString(Intent.EXTRA_CHANGED_COMPONENT_NAME, componentName);
+        extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, killFlag);
+        extras.putInt(Intent.EXTRA_UID, packageUid);
+        sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras);   
     }
 
     public String getInstallerPackageName(String packageName) {
