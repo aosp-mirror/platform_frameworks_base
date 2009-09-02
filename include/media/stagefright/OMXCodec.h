@@ -135,6 +135,8 @@ private:
     void addCodecSpecificData(const void *data, size_t size);
     void clearCodecSpecificData();
 
+    void setComponentRole();
+
     void setAMRFormat();
     void setAACFormat(int32_t numChannels, int32_t sampleRate);
 
