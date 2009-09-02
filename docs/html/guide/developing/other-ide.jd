@@ -85,7 +85,8 @@ command to generate all the necessary files and folders.</p>
 navigate to the <code>tools/</code> directory of your SDK and run:</p>
 <pre>
 android create project \
---target <em>&lt;targetID&gt;</em> \
+--target <em>&lt;target_ID&gt;</em> \
+--name <em>&lt;your_project_name&gt;</em> \
 --path <em>/path/to/your/project</em> \
 --activity <em>&lt;your_activity_name&gt;</em> \
 --package <em>&lt;your_package_namespace&gt;</em>
@@ -96,11 +97,14 @@ android create project \
   to an Android platform library (including any add-ons, such as Google APIs) that you would like to
   build your project against. To see a list of available targets and their corresponding IDs, 
   execute: <code>android list targets</code>.</li>
+  <li><code>name</code> is the name for your project. This is optional. If provided, this name will be used
+  for your .apk filename when you build your application.</li>
   <li><code>path</code> is the location of your project directory. If the directory does not exist,
   it will be created for you.</li>
-  <li><code>activity</code> is the name for your {@link android.app.Activity} class. This class file
+  <li><code>activity</code> is the name for your default {@link android.app.Activity} class. This class file
   will be created for you inside 
-  <code><em>&lt;path_to_your_project&gt;</em>/src/<em>&lt;your_package_namespace_path&gt;</em>/</code>.</li>
+  <code><em>&lt;path_to_your_project&gt;</em>/src/<em>&lt;your_package_namespace_path&gt;</em>/</code>.
+  This will also be used for your .apk filename unless you provide a the <code>name</code>.</li>
   <li><code>package</code> is the package namespace for your project, following the same rules as for
   packages in the Java programming language.</li>
 </ul>
@@ -109,9 +113,10 @@ android create project \
 <pre>
 android create project \
 --target 1 \
---path ./myProject \
---activity MyActivity \
---package com.example.myproject
+--name MyAndroidApp \
+--path ./MyAndroidAppProject \
+--activity MyAndroidAppActivity \
+--package com.example.myandroid
 </pre>
 
 <p>The tool generates the following files and directories:</p>
@@ -123,7 +128,8 @@ android create project \
   <li><code>default.properties</code> - Properties for the build system. <em>Do not modify 
   this file</em>.</li>
   <li><code>build.properties</code> - Customizable properties for the build system. You can edit this 
-  file to overried default build settings used by Ant.</li>
+  file to override default build settings used by Ant and provide a pointer to your keystore and key alias
+  so that the build tools can sign your application when built in release mode.</li>
   <li><code>src<em>/your/package/namespace/ActivityName</em>.java</code> - The Activity class 
   you specified during project creation.</li>
   <li><code>bin/</code>  - Output directory for the build script.</li>
@@ -141,7 +147,7 @@ that you must use the <a href="{@docRoot}guide/developing/tools/adb.html">Androi
 to the emulator (discussed later). So you need access between your project solution and 
 the <code>tools/</code> folder.</p>
 
-<p class="warning"><strong>Note:</strong> You should refrain from moving the
+<p class="caution"><strong>Caution:</strong> You should refrain from moving the
 location of the SDK directory, because this will break the build scripts. (They
 will need to be manually updated to reflect the new SDK location before they will
 work again.)</p>
@@ -153,14 +159,15 @@ work again.)</p>
 a new project from existing code, use the
 <code>android update project</code> command to update the project to the new development
 environment. You can also use this command to revise the build target of an existing project
-(with the <code>--target</code> option). The <code>android</code> tool will generate any files and 
+(with the <code>--target</code> option) and the project name (with the <code>--name</code> 
+option). The <code>android</code> tool will generate any files and 
 folders (listed in the previous section) that are either missing or need to be updated, 
 as needed for the Android project.</p>
 
 <p>To update an existing Android project, open a command-line
 and navigate to the <code>tools/</code> directory of your SDK. Now run:</p>
 <pre>
-android update project --target <em>&lt;targetID&gt;</em> --path <em>path/to/your/project/</em>
+android update project --name <em>&lt;project_name&gt;</em> --target <em>&lt;target_ID&gt;</em> --path <em>path/to/your/project/</em>
 </pre>
 
 <ul>
@@ -169,11 +176,13 @@ android update project --target <em>&lt;targetID&gt;</em> --path <em>path/to/you
   like to build your project against. To see a list of available targets and their corresponding IDs, 
   execute: <code>android list targets</code>.</li>
   <li><code>path</code> is the location of your project directory.</li>
+  <li><code>name</code> is the name for the project. This is optional&mdash;if you're not 
+  changing the project name, you don't need this.</li>
 </ul>
 
 <p>Here's an example:</p>
 <pre>
-android update project --target 2 --path ./myProject
+android update project --name MyApp --target 2 --path ./MyAppProject
 </pre>
 
 
@@ -237,8 +246,9 @@ install JDK in a non-space directory, for example: <code>c:\java\jdk1.6.0_02</co
 <h3 id="DebugMode">Building in debug mode</h3>
 
 <p>For immediate application testing and debugging, you can build your application 
-in debug mode and immediately install it on an emulator. In debug mode, the build tools automatically
-sign your application with a debug key. However, you can (and should) also test your
+in debug mode and immediately install it on an emulator. In debug mode, the build tools 
+automatically sign your application with a debug key and optimize the package with 
+{@code zipalign}. However, you can (and should) also test your
 application in release mode. Debug mode simply allows you to run your application without
 manually signing the application.</p>
 
@@ -248,9 +258,9 @@ manually signing the application.</p>
   <li>Open a command-line and navigate to the root of your project directory.</li>
   <li>Use Ant to compile your project in debug mode:
     <pre>ant debug</pre>
-    <p>This creates your Android application .apk file inside the project <code>bin/</code>
-    directory, named <code><em>&lt;your_DefaultActivity_name&gt;</em>-debug.apk</code>. The file
-    is already signed with the debug key.</p>
+    <p>This creates your debug .apk file inside the project <code>bin/</code>
+    directory, named <code><em>&lt;your_project_name&gt;</em>-debug.apk</code>. The file
+    is already signed with the debug key and has been aligned with {@code zipalign}.</p>
   </li>
 </ol>
 
@@ -267,22 +277,85 @@ about <a href="#Running">Running Your Application</a>.</p>
 your application in release mode. Once you have built in release mode, it's a good idea to perform 
 additional testing and debugging with the final .apk.</p>
 
-<p>To build in release mode:</p>
+<p>Before you start building your application in release mode, be aware that you must sign
+the resulting application package with your private key, and should then align it using the
+{@code zipalign} tool. There are two approaches to building in release mode:
+build an unsigned package in release mode and then manually sign and align 
+the package, or allow the build script
+to sign and align the package for you.</p>
+
+<h4 id="ManualReleaseMode">Build unsigned</h4>
+
+<p>If you build your application <em>unsigned</em>, then you will need to
+manually sign and align the package.</p>
+
+<p>To build an <em>unsigned</em> .apk in release mode:</p>
 
 <ol>
   <li>Open a command-line and navigate to the root of your project directory.</li>
   <li>Use Ant to compile your project in release mode:
     <pre>ant release</pre>
-    <p>This creates your Android application .apk file inside the project <code>bin/</code>
-    directory, named <code><em>&lt;your_DefaultActivity_name&gt;</em>.apk</code>.</p>
-    <p class="note"><strong>Note:</strong> The .apk file is <em>unsigned</em> at this point.
-    You can't install it on an emulator or device until you sign it with your private key.</p>
   </li>
 </ol>
 
-<p>Because release mode builds your application unsigned, your next step is to sign
-it with your private key, in order to distribute it to end-users. To complete this procedure, 
+<p>This creates your Android application .apk file inside the project <code>bin/</code>
+directory, named <code><em>&lt;your_project_name&gt;</em>-unsigned.apk</code>.</p>
+    
+<p class="note"><strong>Note:</strong> The .apk file is <em>unsigned</em> at this point 
+and can't be installed until signed with your private key.</p>
+
+<p>Once you have created the unsigned .apk, your next step is to sign the .apk
+with your private key and then align it with {@code zipalign}. To complete this procedure, 
 read <a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>.</p>
+
+<p>When your .apk has been signed and aligned, it's ready to be distributed to end-users.</p>
+
+<h4 id="AutoReleaseMode">Build signed and aligned</h4>
+
+<p>If you would like, you can configure the Android build script to automatically
+sign and align your application package. To do so, you must provide the path to your keystore 
+and the name of your key alias in your project's {@code build.properties} file. With this
+information provided, the build script will prompt you for your keystore and alias password
+when you build in release mode and produce your final application package, which will be ready
+for distribution.</p>
+
+<p class="caution"><strong>Caution:</strong> Due to the way Ant handles input, the password that
+you enter during the build process <strong>will be visible</strong>. If you are
+concerned about your keystore and alias password being visible on screen, then you
+may prefer to perform the application signing manually, via Jarsigner (or a similar tool). To instead 
+perform the signing procedure manually, <a href="#ManualReleaseMode">buid unsigned</a> and then continue 
+with <a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>.</p>
+
+<p>To specify your keystore and alias, open the project {@code build.properties} file (found in the
+root of the project directory) and add entries for {@code key.store} and {@code key.alias}. 
+For example:</p>
+
+<pre>
+key.store=/path/to/my.keystore
+key.alias=mykeystore
+</pre>
+
+<p>Save your changes. Now you can build a <em>signed</em> .apk in release mode:</p>
+
+<ol>
+  <li>Open a command-line and navigate to the root of your project directory.</li>
+  <li>Use Ant to compile your project in release mode:
+    <pre>ant release</pre>
+  </li>
+  <li>When prompted, enter you keystore and alias passwords.
+    <p class="caution"><strong>Caution:</strong> As described above, 
+    your password will be visible on the screen.</p>
+  </li>
+</ol>
+
+<p>This creates your Android application .apk file inside the project <code>bin/</code>
+directory, named <code><em>&lt;your_project_name&gt;</em>-release.apk</code>.
+This .apk file has been signed with the private key specified in
+{@code build.properties} and aligned with {@code zipalign}. It's ready for 
+installation and distribution.</p>
+
+
+<h4>Once built and signed in release mode</h4>
 
 <p>Once you have signed your application with a private key, you can install it on an 
 emulator or device as discussed in the following section about 
@@ -329,7 +402,7 @@ id:2
         you'll use this in the next step.</p>
       </li>
       <li>Create a new AVD using your selected deployment target:
-        <pre>android create avd --name <em>&lt;your_avd_name&gt;</em> --target <em>&lt;targetID&gt;</em></pre>
+        <pre>android create avd --name <em>&lt;your_avd_name&gt;</em> --target <em>&lt;target_ID&gt;</em></pre>
       <li>Next, you'll be asked whether you'd like to create a custom hardware profile.
       If you respond "yes," you'll be presented with a series of prompts to define various aspects of the
       device hardware (leave entries blank to use default values, which are shown in brackets). Otherwise,
