@@ -241,7 +241,10 @@ int pop_pkcs12_certs_stack(PKCS12_KEYSTORE *p12store, char *buf, int size)
     if ((p12store != NULL) && (p12store->certs != NULL)) {
         while (((cert = sk_X509_pop(p12store->certs)) != NULL) && (len < size)) {
             int s = convert_to_pem((void*)cert, 1, buf + len, size - len);
-            if (s == 0) return -1;
+            if (s == 0) {
+                LOGE("buffer size is too small. len=%d size=%d\n", len, size);
+                return -1;
+            }
             len += s;
             X509_free(cert);
         }
