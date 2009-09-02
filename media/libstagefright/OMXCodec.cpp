@@ -302,7 +302,11 @@ sp<OMXCodec> OMXCodec::Create(
         codec->setAMRFormat();
     }
     if (!createEncoder && !strcasecmp("audio/mp4a-latm", mime)) {
-        codec->setAACFormat();
+        int32_t numChannels, sampleRate;
+        CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+        CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+
+        codec->setAACFormat(numChannels, sampleRate);
     }
     if (!strncasecmp(mime, "video/", 6)) {
         int32_t width, height;
@@ -1321,10 +1325,6 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         return;
     }
 
-    // We're going to temporarily give up the lock while reading data
-    // from the source. A certain client unfortunately chose to have the
-    // thread supplying input data and reading output data be the same...
-
     MediaBuffer *srcBuffer;
     status_t err;
     if (mSeekTimeUs >= 0) {
@@ -1332,13 +1332,10 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         options.setSeekTo(mSeekTimeUs);
         mSeekTimeUs = -1;
 
-        mLock.unlock();
         err = mSource->read(&srcBuffer, &options);
     } else {
-        mLock.unlock();
         err = mSource->read(&srcBuffer);
     }
-    mLock.lock();
 
     OMX_U32 flags = OMX_BUFFERFLAG_ENDOFFRAME;
     OMX_TICKS timestamp = 0;
@@ -1496,20 +1493,22 @@ void OMXCodec::setAMRFormat() {
     }
 }
 
-void OMXCodec::setAACFormat() {
-    OMX_AUDIO_PARAM_AACPROFILETYPE def;
-    def.nSize = sizeof(def);
-    def.nVersion.s.nVersionMajor = 1;
-    def.nVersion.s.nVersionMinor = 1;
-    def.nPortIndex = kPortIndexInput;
+void OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate) {
+    OMX_AUDIO_PARAM_AACPROFILETYPE profile;
+    profile.nSize = sizeof(profile);
+    profile.nVersion.s.nVersionMajor = 1;
+    profile.nVersion.s.nVersionMinor = 1;
+    profile.nPortIndex = kPortIndexInput;
 
     status_t err =
-        mOMX->get_parameter(mNode, OMX_IndexParamAudioAac, &def, sizeof(def));
+        mOMX->get_parameter(mNode, OMX_IndexParamAudioAac, &profile, sizeof(profile));
     CHECK_EQ(err, OK);
 
-    def.eAACStreamFormat = OMX_AUDIO_AACStreamFormatMP4ADTS;
+    profile.nChannels = numChannels;
+    profile.nSampleRate = sampleRate;
+    profile.eAACStreamFormat = OMX_AUDIO_AACStreamFormatMP4ADTS;
 
-    err = mOMX->set_parameter(mNode, OMX_IndexParamAudioAac, &def, sizeof(def));
+    err = mOMX->set_parameter(mNode, OMX_IndexParamAudioAac, &profile, sizeof(profile));
     CHECK_EQ(err, OK);
 }
 
@@ -2123,8 +2122,19 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
             inputFormat->findInt32(kKeyChannelCount, &numChannels);
             inputFormat->findInt32(kKeySampleRate, &sampleRate);
 
+            if ((OMX_U32)numChannels != params.nChannels) {
+                LOGW("Codec outputs a different number of channels than "
+                     "the input stream contains.");
+            }
+
             mOutputFormat->setCString(kKeyMIMEType, "audio/raw");
-            mOutputFormat->setInt32(kKeyChannelCount, numChannels);
+
+            // Use the codec-advertised number of channels, as some
+            // codecs appear to output stereo even if the input data is
+            // mono.
+            mOutputFormat->setInt32(kKeyChannelCount, params.nChannels);
+
+            // The codec-reported sampleRate is not reliable...
             mOutputFormat->setInt32(kKeySampleRate, sampleRate);
             break;
         }
