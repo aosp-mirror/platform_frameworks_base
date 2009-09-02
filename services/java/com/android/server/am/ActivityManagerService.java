@@ -136,6 +136,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final boolean DEBUG_SERVICE = localLOGV || false;
     static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean DEBUG_PROCESSES = localLOGV || false;
+    static final boolean DEBUG_PROVIDER = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean DEBUG_RESULTS = localLOGV || false;
     static final boolean DEBUG_BACKUP = localLOGV || true;
@@ -7411,9 +7412,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
                 final long origId = Binder.clearCallingIdentity();
 
-                // In this case the provider is a single instance, so we can
+                // In this case the provider instance already exists, so we can
                 // return it right away.
                 if (r != null) {
+                    if (DEBUG_PROVIDER) Log.v(TAG,
+                            "Adding provider requested by "
+                            + r.processName + " from process "
+                            + cpr.info.processName);                    
                     r.conProviders.add(cpr);
                     cpr.clients.add(r);
                 } else {
@@ -7471,10 +7476,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     return cpr;
                 }
 
-                if (false) {
-                    RuntimeException e = new RuntimeException("foo");
-                    //Log.w(TAG, "LAUNCHING REMOTE PROVIDER (myuid " + r.info.uid
-                    //      + " pruid " + ai.uid + "): " + cpi.className, e);
+                if (DEBUG_PROVIDER) {
+                    RuntimeException e = new RuntimeException("here");
+                    Log.w(TAG, "LAUNCHING REMOTE PROVIDER (myuid " + r.info.uid
+                          + " pruid " + cpr.appInfo.uid + "): " + cpr.info.name, e);
                 }
 
                 // This is single process, and our app is now connecting to it.
@@ -7485,14 +7490,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 for (i=0; i<N; i++) {
                     if (mLaunchingProviders.get(i) == cpr) {
                         break;
-                    }
-                    if (false) {
-                        final ContentProviderRecord rec =
-                            (ContentProviderRecord)mLaunchingProviders.get(i);
-                        if (rec.info.name.equals(cpr.info.name)) {
-                            cpr = rec;
-                            break;
-                        }
                     }
                 }
 
@@ -7524,6 +7521,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 mProvidersByName.put(name, cpr);
 
                 if (r != null) {
+                    if (DEBUG_PROVIDER) Log.v(TAG,
+                            "Adding provider requested by "
+                            + r.processName + " from process "
+                            + cpr.info.processName);                    
                     r.conProviders.add(cpr);
                     cpr.clients.add(r);
                 } else {
@@ -7578,8 +7579,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         synchronized (this) {
             ContentProviderRecord cpr = (ContentProviderRecord)mProvidersByName.get(name);
             if(cpr == null) {
-                //remove from mProvidersByClass
-                if(localLOGV) Log.v(TAG, name+" content provider not found in providers list");
+                // remove from mProvidersByClass
+                if (DEBUG_PROVIDER) Log.v(TAG, name +
+                        " provider not found in providers list");
                 return;
             }
             final ProcessRecord r = getRecordForAppLocked(caller);
@@ -7589,12 +7591,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         " when removing content provider " + name);
             }
             //update content provider record entry info
-            ContentProviderRecord localCpr = (ContentProviderRecord) mProvidersByClass.get(cpr.info.name);
-            if(localLOGV) Log.v(TAG, "Removing content provider requested by "+
-                    r.info.processName+" from process "+localCpr.appInfo.processName);
-            if(localCpr.appInfo.processName ==  r.info.processName) {
+            ContentProviderRecord localCpr = (ContentProviderRecord)
+                    mProvidersByClass.get(cpr.info.name);
+            if (DEBUG_PROVIDER) Log.v(TAG, "Removing provider requested by "
+                    + r.info.processName + " from process "
+                    + localCpr.appInfo.processName);
+            if (localCpr.app == r) {
                 //should not happen. taken care of as a local provider
-                if(localLOGV) Log.v(TAG, "local provider doing nothing Ignoring other names");
+                Log.w(TAG, "removeContentProvider called on local provider: "
+                        + cpr.info.name + " in process " + r.processName);
                 return;
             } else {
                 localCpr.clients.remove(r);
@@ -10511,7 +10516,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             r.app.services.remove(r);
             if (r.app.thread != null) {
                 try {
-                    Log.i(TAG, "Stopping service: " + r.shortName);
+                    if (DEBUG_SERVICE) Log.v(TAG,
+                            "Stopping service: " + r.shortName);
                     bumpServiceExecutingLocked(r);
                     mStoppingServices.add(r);
                     updateOomAdjLocked(r.app);
