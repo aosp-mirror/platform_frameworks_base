@@ -25,6 +25,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
+#include <cutils/sockets.h>
 #include "private/android_filesystem_config.h"
 
 #include "dumpstate.h"
@@ -164,11 +165,11 @@ static int check_command_name(const char* name, const char* test) {
 
 int main(int argc, char *argv[]) {
     int dumpcrash = check_command_name(argv[0], "dumpcrash");
-    int bugreport = check_command_name(argv[0], "bugreport");
     int add_date = 0;
     char* outfile = 0;
     int vibrate = 0;
     int compress = 0;
+    int socket = 0;
     int c, fd, vibrate_fd, fds[2];
     char path[PATH_MAX];
     pid_t   pid;
@@ -180,31 +181,32 @@ int main(int argc, char *argv[]) {
 
     get_time(&now);
 
-    if (bugreport) {
-        do {
-            c = getopt(argc, argv, "do:vz");
-            if (c == EOF)
+    do {
+        c = getopt(argc, argv, "do:svz");
+        if (c == EOF)
+            break;
+        switch (c) {
+            case 'd':
+                add_date = 1;
                 break;
-            switch (c) {
-                case 'd':
-                    add_date = 1;
-                    break;
-                case 'o':
-                    outfile = optarg;
-                    break;
-                case 'v':
-                    vibrate = 1;
-                    break;
-                case 'z':
-                    compress = 1;
-                    break;
-                case '?':
-                fprintf(stderr, "%s: invalid option -%c\n",
-                    argv[0], optopt);
-                    exit(1);
-            }
-        } while (1);
-    }
+            case 'o':
+                outfile = optarg;
+                break;
+            case 'v':
+                vibrate = 1;
+                break;
+            case 'z':
+                compress = 1;
+                break;
+            case 's':
+                socket = 1;
+                break;
+            case '?':
+            fprintf(stderr, "%s: invalid option -%c\n",
+                argv[0], optopt);
+                exit(1);
+        }
+    } while (1);
 
     /* open vibrator before switching user */
     if (vibrate) {
@@ -214,14 +216,40 @@ int main(int argc, char *argv[]) {
     } else
         vibrate_fd = -1;
 
+#if 0
     /* switch to non-root user and group */
     setgroups(sizeof(groups)/sizeof(groups[0]), groups);
     setuid(AID_SHELL);
+#endif
 
     /* make it safe to use both printf and STDOUT_FILENO */ 
     setvbuf(stdout, 0, _IONBF, 0);
 
-    if (outfile) {
+    if (socket) {
+        struct sockaddr addr;
+        socklen_t alen;
+
+        int s = android_get_control_socket("dumpstate");
+        if (s < 0) {
+            fprintf(stderr, "could not open dumpstate socket\n");
+            exit(1);
+        }
+        if (listen(s, 4) < 0) {
+            fprintf(stderr, "could not listen on dumpstate socket\n");
+            exit(1);
+        }
+
+        alen = sizeof(addr);
+        fd = accept(s, &addr, &alen);
+        if (fd < 0) {
+            fprintf(stderr, "could not accept dumpstate socket\n");
+            exit(1);
+        }
+
+        /* redirect stdout to the socket */
+        dup2(fd, STDOUT_FILENO);
+        close(fd);
+    } else if (outfile) {
         if (strlen(outfile) > sizeof(path) - 100)
             exit(1);
 
