@@ -1463,6 +1463,10 @@ public final class ActivityThread {
             queueOrSendMessage(H.EXIT_APPLICATION, null);
         }
 
+        public final void scheduleSuicide() {
+            queueOrSendMessage(H.SUICIDE, null);
+        }
+
         public void requestThumbnail(IBinder token) {
             queueOrSendMessage(H.REQUEST_THUMBNAIL, token);
         }
@@ -1752,7 +1756,8 @@ public final class ActivityThread {
         public static final int RELAUNCH_ACTIVITY       = 126;
         public static final int PROFILER_CONTROL        = 127;
         public static final int CREATE_BACKUP_AGENT     = 128;
-        public static final int DESTROY_BACKUP_AGENT     = 129;
+        public static final int DESTROY_BACKUP_AGENT    = 129;
+        public static final int SUICIDE                 = 130;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -1786,6 +1791,7 @@ public final class ActivityThread {
                     case PROFILER_CONTROL: return "PROFILER_CONTROL";
                     case CREATE_BACKUP_AGENT: return "CREATE_BACKUP_AGENT";
                     case DESTROY_BACKUP_AGENT: return "DESTROY_BACKUP_AGENT";
+                    case SUICIDE: return "SUICIDE";
                 }
             }
             return "(unknown)";
@@ -1893,6 +1899,11 @@ public final class ActivityThread {
                     break;
                 case DESTROY_BACKUP_AGENT:
                     handleDestroyBackupAgent((CreateBackupAgentData)msg.obj);
+                    break;
+                case SUICIDE:
+                    {
+                        Process.killProcess(Process.myPid());
+                    }
                     break;
             }
         }

@@ -1296,12 +1296,26 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestApplication_allowBackup, true);
         if (allowBackup) {
             ai.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+
+            // backupAgent, killAfterRestore, and restoreNeedsApplication are only relevant
+            // if backup is possible for the given application.
             String backupAgent = sa.getNonResourceString(
                     com.android.internal.R.styleable.AndroidManifestApplication_backupAgent);
             if (backupAgent != null) {
                 ai.backupAgentName = buildClassName(pkgName, backupAgent, outError);
                 Log.v(TAG, "android:backupAgent = " + ai.backupAgentName
                         + " from " + pkgName + "+" + backupAgent);
+
+                if (sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestApplication_killAfterRestore,
+                        true)) {
+                    ai.flags |= ApplicationInfo.FLAG_KILL_AFTER_RESTORE;
+                }
+                if (sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestApplication_restoreNeedsApplication,
+                        false)) {
+                    ai.flags |= ApplicationInfo.FLAG_RESTORE_NEEDS_APPLICATION;
+                }
             }
         }
         

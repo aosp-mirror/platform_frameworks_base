@@ -158,6 +158,7 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
     public void backupAgentCreated(String packageName, IBinder agent) throws RemoteException;
     public void unbindBackupAgent(ApplicationInfo appInfo) throws RemoteException;
+    public void killApplicationProcess(String processName, int uid) throws RemoteException;
     
     public boolean startInstrumentation(ComponentName className, String profileFile,
             int flags, Bundle arguments, IInstrumentationWatcher watcher)
@@ -433,4 +434,5 @@ public interface IActivityManager extends IInterface {
     int KILL_APPLICATION_WITH_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
     int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;
+    int KILL_APPLICATION_PROCESS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+98;
 }

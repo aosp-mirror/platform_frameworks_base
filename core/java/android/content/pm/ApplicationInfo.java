@@ -184,7 +184,29 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@hide}
      */
     public static final int FLAG_ALLOW_BACKUP = 1<<14;
-    
+
+    /**
+     * Value for {@link #flags}: this is false if the application has set
+     * its android:killAfterRestore to false, true otherwise.
+     *
+     * <p>If android:allowBackup is set to false or no android:backupAgent
+     * is specified, this flag will be ignored.
+     *
+     * {@hide}
+     */
+    public static final int FLAG_KILL_AFTER_RESTORE = 1<<15;
+
+    /**
+     * Value for {@link #flags}: this is true if the application has set
+     * its android:restoreNeedsApplication to true, false otherwise.
+     *
+     * <p>If android:allowBackup is set to false or no android:backupAgent
+     * is specified, this flag will be ignored.
+     *
+     * {@hide}
+     */
+    public static final int FLAG_RESTORE_NEEDS_APPLICATION = 1<<16;
+
     /**
      * Flags associated with the application.  Any combination of
      * {@link #FLAG_SYSTEM}, {@link #FLAG_DEBUGGABLE}, {@link #FLAG_HAS_CODE},
@@ -193,7 +215,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_ALLOW_CLEAR_USER_DATA}, {@link #FLAG_UPDATED_SYSTEM_APP},
      * {@link #FLAG_TEST_ONLY}, {@link #FLAG_SUPPORTS_SMALL_SCREENS},
      * {@link #FLAG_SUPPORTS_NORMAL_SCREENS},
-     * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_RESIZEABLE_FOR_SCREENS}.
+     * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_RESIZEABLE_FOR_SCREENS},
+     * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}.
      */
     public int flags = 0;
     
