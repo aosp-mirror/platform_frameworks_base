@@ -177,6 +177,7 @@ class SyncManager implements OnAccountsUpdatedListener {
     private BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             if (!mFactoryTest) {
+                mBootCompleted = true;
                 AccountManager.get(mContext).addOnAccountsUpdatedListener(SyncManager.this,
                         mSyncHandler, true /* updateImmediately */);
             }
@@ -282,6 +283,8 @@ class SyncManager implements OnAccountsUpdatedListener {
     private static final String SYNCMANAGER_PREFS_FILENAME = "/data/system/syncmanager.prefs";
 
     private final boolean mFactoryTest;
+
+    private volatile boolean mBootCompleted = false;
 
     private ConnectivityManager getConnectivityManager() {
         synchronized (this) {
@@ -540,6 +543,13 @@ class SyncManager implements OnAccountsUpdatedListener {
     public void scheduleSync(Account requestedAccount, String requestedAuthority,
             Bundle extras, long delay, boolean onlyThoseWithUnkownSyncableState) {
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
+
+        if (!mBootCompleted) {
+            if (isLoggable) {
+                Log.v(TAG, "suppressing scheduleSync() since boot hasn't completed");
+            }
+            return;
+        }
 
         if (!isSyncEnabled()) {
             if (isLoggable) {
