@@ -128,7 +128,15 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
                     sms.getOriginatingAddress());
         }
 
-        /**
+        // Reject (NAK) any messages with teleservice ids that have
+        // not yet been handled and also do not correspond to the two
+        // kinds that are processed below.
+        if ((SmsEnvelope.TELESERVICE_WMT != teleService) &&
+                (SmsEnvelope.TELESERVICE_WEMT != teleService)) {
+            return Intents.RESULT_SMS_UNSUPPORTED;
+        }
+
+        /*
          * TODO(cleanup): Why are we using a getter method for this
          * (and for so many other sms fields)?  Trivial getters and
          * setters like this are direct violations of the style guide.
@@ -141,11 +149,12 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
          */
         SmsHeader smsHeader = sms.getUserDataHeader();
 
-        /**
+        /*
          * TODO(cleanup): Since both CDMA and GSM use the same header
          * format, this dispatch processing is naturally identical,
          * and code should probably not be replicated explicitly.
          */
+
         // See if message is partial or port addressed.
         if ((smsHeader == null) || (smsHeader.concatRef == null)) {
             // Message is not partial (not part of concatenated sequence).
@@ -416,15 +425,17 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
     private int resultToCause(int rc) {
         switch (rc) {
-            case Activity.RESULT_OK:
-            case Intents.RESULT_SMS_HANDLED:
-                // Cause code is ignored on success.
-                return 0;
-            case Intents.RESULT_SMS_OUT_OF_MEMORY:
-                return CommandsInterface.CDMA_SMS_FAIL_CAUSE_RESOURCE_SHORTAGE;
-            case Intents.RESULT_SMS_GENERIC_ERROR:
-            default:
-                return CommandsInterface.CDMA_SMS_FAIL_CAUSE_OTHER_TERMINAL_PROBLEM;
+        case Activity.RESULT_OK:
+        case Intents.RESULT_SMS_HANDLED:
+            // Cause code is ignored on success.
+            return 0;
+        case Intents.RESULT_SMS_OUT_OF_MEMORY:
+            return CommandsInterface.CDMA_SMS_FAIL_CAUSE_RESOURCE_SHORTAGE;
+        case Intents.RESULT_SMS_UNSUPPORTED:
+            return CommandsInterface.CDMA_SMS_FAIL_CAUSE_INVALID_TELESERVICE_ID;
+        case Intents.RESULT_SMS_GENERIC_ERROR:
+        default:
+            return CommandsInterface.CDMA_SMS_FAIL_CAUSE_OTHER_TERMINAL_PROBLEM;
         }
     }
 }
