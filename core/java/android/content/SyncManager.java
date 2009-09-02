@@ -148,6 +148,9 @@ class SyncManager implements OnAccountsUpdatedListener {
     private volatile boolean mSyncPollInitialized;
     private final PendingIntent mSyncAlarmIntent;
     private final PendingIntent mSyncPollAlarmIntent;
+    // Synchronized on "this". Instead of using this directly one should instead call
+    // its accessor, getConnManager().
+    private ConnectivityManager mConnManagerDoNotUseDirectly;
 
     private final SyncAdaptersCache mSyncAdapters;
 
@@ -279,6 +282,16 @@ class SyncManager implements OnAccountsUpdatedListener {
     private static final String SYNCMANAGER_PREFS_FILENAME = "/data/system/syncmanager.prefs";
 
     private final boolean mFactoryTest;
+
+    private ConnectivityManager getConnectivityManager() {
+        synchronized (this) {
+            if (mConnManagerDoNotUseDirectly == null) {
+                mConnManagerDoNotUseDirectly = (ConnectivityManager)mContext.getSystemService(
+                        Context.CONNECTIVITY_SERVICE);
+            }
+            return mConnManagerDoNotUseDirectly;
+        }
+    }
 
     public SyncManager(Context context, boolean factoryTest) {
         mFactoryTest = factoryTest;
@@ -536,6 +549,14 @@ class SyncManager implements OnAccountsUpdatedListener {
             return;
         }
 
+        if (!getConnectivityManager().getBackgroundDataSetting()) {
+            if (isLoggable) {
+                Log.v(TAG, "not syncing because background data usage isn't allowed");
+            }
+            setStatusText("Sync is disabled.");
+            return;
+        }
+
         if (mAccounts == null) setStatusText("The accounts aren't known yet.");
         if (!mDataConnectionIsConnected) setStatusText("No data connection");
         if (mStorageIsLow) setStatusText("Memory low");
@@ -602,6 +623,8 @@ class SyncManager implements OnAccountsUpdatedListener {
             if (hasSyncAdapter) syncableAuthorities.add(requestedAuthority);
         }
 
+        final boolean masterSyncAutomatically = mSyncStorageEngine.getMasterSyncAutomatically();
+
         for (String authority : syncableAuthorities) {
             for (Account account : accounts) {
                 int isSyncable = mSyncStorageEngine.getIsSyncable(account, authority);
@@ -618,22 +641,36 @@ class SyncManager implements OnAccountsUpdatedListener {
                     if (!syncAdapterInfo.type.supportsUploading() && uploadOnly) {
                         continue;
                     }
+
                     // make this an initialization sync if the isSyncable state is unknown
                     Bundle extrasCopy = extras;
+                    long delayCopy = delay;
                     if (isSyncable < 0) {
                         extrasCopy = new Bundle(extras);
                         extrasCopy.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
+                        delayCopy = -1; // expedite this
+                    } else {
+                        final boolean syncAutomatically = masterSyncAutomatically
+                                && mSyncStorageEngine.getSyncAutomatically(account, authority);
+                        boolean syncAllowed = manualSync || syncAutomatically;
+                        if (!syncAllowed) {
+                            if (isLoggable) {
+                                Log.d(TAG, "scheduleSync: sync of " + account + ", " + authority
+                                        + " is not allowed, dropping request");
+                                continue;
+                            }
+                        }
                     }
                     if (isLoggable) {
                         Log.v(TAG, "scheduleSync:"
-                                + " delay " + delay
+                                + " delay " + delayCopy
                                 + ", source " + source
                                 + ", account " + account
                                 + ", authority " + authority
                                 + ", extras " + extrasCopy);
                     }
                     scheduleSyncOperation(
-                            new SyncOperation(account, source, authority, extrasCopy, delay));
+                            new SyncOperation(account, source, authority, extrasCopy, delayCopy));
                 }
             }
         }
@@ -1591,9 +1628,8 @@ class SyncManager implements OnAccountsUpdatedListener {
             // found that is runnable (not disabled, etc). If that one is ready to run then
             // start it, otherwise just get out.
             SyncOperation op;
-            final ConnectivityManager connManager = (ConnectivityManager)
-                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            final boolean backgroundDataUsageAllowed = connManager.getBackgroundDataSetting();
+            final boolean backgroundDataUsageAllowed =
+                    getConnectivityManager().getBackgroundDataSetting();
             synchronized (mSyncQueue) {
                 while (true) {
                     op = mSyncQueue.head();
