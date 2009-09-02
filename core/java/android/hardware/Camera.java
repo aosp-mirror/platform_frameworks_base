@@ -182,7 +182,7 @@ public class Camera {
          * @param data The contents of the preview frame in {@link
          *             android.hardware.Camera.Parameters#getPreviewFormat()}
          *             format. If {@link
-         *             android.hardware.Camera.Parameters#setPreviewFormat()}
+         *             android.hardware.Camera.Parameters#setPreviewFormat(int)}
          *             is never called, the default will be the YCbCr_420_SP
          *             (NV21) format.
          * @param camera The Camera service object.
@@ -341,7 +341,8 @@ public class Camera {
      * Starts auto-focus function and registers a callback function to run when
      * camera is focused. Only valid after startPreview() has been called. If
      * the camera does not support auto-focus, it is a no-op and {@link
-     * AutoFocusCallback#onAutoFocus} callback will be called immediately.
+     * AutoFocusCallback#onAutoFocus(boolean, Camera)} callback will be called
+     * immediately.
      *
      * @param cb the callback to run
      */
