@@ -17,7 +17,9 @@
 package android.hardware;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.io.IOException;
 
@@ -38,7 +40,7 @@ import android.os.Message;
  */
 public class Camera {
     private static final String TAG = "Camera";
-    
+
     // These match the enums in frameworks/base/include/ui/Camera.h
     private static final int CAMERA_MSG_ERROR            = 0x001;
     private static final int CAMERA_MSG_SHUTTER          = 0x002;
@@ -62,12 +64,12 @@ public class Camera {
     private ZoomCallback mZoomCallback;
     private ErrorCallback mErrorCallback;
     private boolean mOneShot;
-    
+
     /**
      * Returns a new Camera object.
      */
-    public static Camera open() { 
-        return new Camera(); 
+    public static Camera open() {
+        return new Camera();
     }
 
     Camera() {
@@ -89,32 +91,32 @@ public class Camera {
 
         native_setup(new WeakReference<Camera>(this));
     }
-    
-    protected void finalize() { 
-        native_release(); 
+
+    protected void finalize() {
+        native_release();
     }
-    
+
     private native final void native_setup(Object camera_this);
     private native final void native_release();
-    
+
 
     /**
      * Disconnects and releases the Camera object resources.
-     * <p>It is recommended that you call this as soon as you're done with the 
+     * <p>It is recommended that you call this as soon as you're done with the
      * Camera object.</p>
      */
-    public final void release() { 
+    public final void release() {
         native_release();
     }
 
     /**
      * Reconnect to the camera after passing it to MediaRecorder. To save
      * setup/teardown time, a client of Camera can pass an initialized Camera
-     * object to a MediaRecorder to use for video recording. Once the 
+     * object to a MediaRecorder to use for video recording. Once the
      * MediaRecorder is done with the Camera, this method can be used to
      * re-establish a connection with the camera hardware. NOTE: The Camera
      * object must first be unlocked by the process that owns it before it
-     * can be connected to another proces.
+     * can be connected to another process.
      *
      * @throws IOException if the method fails.
      *
@@ -122,7 +124,7 @@ public class Camera {
      * @hide
      */
     public native final void reconnect() throws IOException;
-    
+
     /**
      * Lock the camera to prevent other processes from accessing it. To save
      * setup/teardown time, a client of Camera can pass an initialized Camera
@@ -137,9 +139,9 @@ public class Camera {
      * @hide
      */
     public native final int lock();
-    
+
     /**
-     * Unlock the camera to allow aother process to access it. To save
+     * Unlock the camera to allow another process to access it. To save
      * setup/teardown time, a client of Camera can pass an initialized Camera
      * object to another process. This method is used to unlock the Camera
      * object before handing off the Camera object to the other process.
@@ -150,12 +152,12 @@ public class Camera {
      * @hide
      */
     public native final int unlock();
-    
+
     /**
      * Sets the SurfaceHolder to be used for a picture preview. If the surface
      * changed since the last call, the screen will blank. Nothing happens
      * if the same surface is re-set.
-     * 
+     *
      * @param holder the SurfaceHolder upon which to place the picture preview
      * @throws IOException if the method fails.
      */
@@ -177,23 +179,27 @@ public class Camera {
         /**
          * The callback that delivers the preview frames.
          *
-         * @param data The contents of the preview frame in getPreviewFormat()
-         *             format.
+         * @param data The contents of the preview frame in {@link
+         *             android.hardware.Camera.Parameters#getPreviewFormat()}
+         *             format. If {@link
+         *             android.hardware.Camera.Parameters#setPreviewFormat()}
+         *             is never called, the default will be the YCbCr_420_SP
+         *             (NV21) format.
          * @param camera The Camera service object.
          */
         void onPreviewFrame(byte[] data, Camera camera);
     };
-    
+
     /**
      * Start drawing preview frames to the surface.
      */
     public native final void startPreview();
-    
+
     /**
      * Stop drawing preview frames to the surface.
      */
     public native final void stopPreview();
-    
+
     /**
      * Return current preview state.
      *
@@ -201,7 +207,7 @@ public class Camera {
      * @hide
      */
     public native final boolean previewEnabled();
-    
+
     /**
      * Can be called at any time to instruct the camera to use a callback for
      * each preview frame in addition to displaying it.
@@ -260,7 +266,7 @@ public class Camera {
                     mJpegCallback.onPictureTaken((byte[])msg.obj, mCamera);
                 }
                 return;
-            
+
             case CAMERA_MSG_PREVIEW_FRAME:
                 if (mPreviewCallback != null) {
                     mPreviewCallback.onPreviewFrame((byte[])msg.obj, mCamera);
@@ -321,8 +327,10 @@ public class Camera {
     public interface AutoFocusCallback
     {
         /**
-         * Callback for the camera auto focus.
-         * 
+         * Callback for the camera auto focus. If the camera does not support
+         * auto-focus and autoFocus is called, onAutoFocus will be called
+         * immediately with success.
+         *
          * @param success true if focus was successful, false if otherwise
          * @param camera  the Camera service object
          */
@@ -330,10 +338,11 @@ public class Camera {
     };
 
     /**
-     * Starts auto-focus function and registers a callback function to
-     * run when camera is focused. Only valid after startPreview() has
-     * been called.
-     * 
+     * Starts auto-focus function and registers a callback function to run when
+     * camera is focused. Only valid after startPreview() has been called. If
+     * the camera does not support auto-focus, it is a no-op and {@link
+     * AutoFocusCallback#onAutoFocus} callback will be called immediately.
+     *
      * @param cb the callback to run
      */
     public final void autoFocus(AutoFocusCallback cb)
@@ -361,7 +370,7 @@ public class Camera {
     public interface PictureCallback {
         /**
          * Callback for when a picture is taken.
-         * 
+         *
          * @param data   a byte array of the picture data
          * @param camera the Camera service object
          */
@@ -369,16 +378,16 @@ public class Camera {
     };
 
     /**
-     * Triggers an asynchronous image capture. The camera service
-     * will initiate a series of callbacks to the application as the
-     * image capture progresses. The shutter callback occurs after
-     * the image is captured. This can be used to trigger a sound
-     * to let the user know that image has been captured. The raw
-     * callback occurs when the raw image data is available. The jpeg
-     * callback occurs when the compressed image is available. If the
-     * application does not need a particular callback, a null can be
-     * passed instead of a callback method.
-     * 
+     * Triggers an asynchronous image capture. The camera service will initiate
+     * a series of callbacks to the application as the image capture progresses.
+     * The shutter callback occurs after the image is captured. This can be used
+     * to trigger a sound to let the user know that image has been captured. The
+     * raw callback occurs when the raw image data is available (NOTE: the data
+     * may be null if the hardware does not have enough memory to make a copy).
+     * The jpeg callback occurs when the compressed image is available. If the
+     * application does not need a particular callback, a null can be passed
+     * instead of a callback method.
+     *
      * @param shutter   callback after the image is captured, may be null
      * @param raw       callback with raw image data, may be null
      * @param jpeg      callback with jpeg image data, may be null
@@ -390,17 +399,17 @@ public class Camera {
     private native final void native_takePicture();
 
     /**
-     * Triggers an asynchronous image capture. The camera service
-     * will initiate a series of callbacks to the application as the
-     * image capture progresses. The shutter callback occurs after
-     * the image is captured. This can be used to trigger a sound
-     * to let the user know that image has been captured. The raw
-     * callback occurs when the raw image data is available. The
-     * postview callback occurs when a scaled, fully processed
-     * postview image is available (NOTE: not all hardware supports
-     * this). The jpeg callback occurs when the compressed image is
-     * available. If the application does not need a particular
-     * callback, a null can be passed instead of a callback method.
+     * Triggers an asynchronous image capture. The camera service will initiate
+     * a series of callbacks to the application as the image capture progresses.
+     * The shutter callback occurs after the image is captured. This can be used
+     * to trigger a sound to let the user know that image has been captured. The
+     * raw callback occurs when the raw image data is available (NOTE: the data
+     * may be null if the hardware does not have enough memory to make a copy).
+     * The postview callback occurs when a scaled, fully processed postview
+     * image is available (NOTE: not all hardware supports this). The jpeg
+     * callback occurs when the compressed image is available. If the
+     * application does not need a particular callback, a null can be passed
+     * instead of a callback method.
      *
      * @param shutter   callback after the image is captured, may be null
      * @param raw       callback with raw image data, may be null
@@ -441,14 +450,14 @@ public class Camera {
     {
         mZoomCallback = cb;
     }
-    
+
     // These match the enum in include/ui/Camera.h
     /** Unspecified camerar error.  @see #ErrorCallback */
     public static final int CAMERA_ERROR_UNKNOWN = 1;
     /** Media server died. In this case, the application must release the
      * Camera object and instantiate a new one. @see #ErrorCallback */
     public static final int CAMERA_ERROR_SERVER_DIED = 100;
-    
+
     /**
      * Handles the camera error callback.
      */
@@ -474,13 +483,13 @@ public class Camera {
     {
         mErrorCallback = cb;
     }
-    
+
     private native final void native_setParameters(String params);
     private native final String native_getParameters();
 
     /**
      * Sets the Parameters for pictures from this Camera service.
-     * 
+     *
      * @param params the Parameters to use for this Camera service
      */
     public void setParameters(Parameters params) {
@@ -503,7 +512,7 @@ public class Camera {
     public class Size {
         /**
          * Sets the dimensions for pictures.
-         * 
+         *
          * @param w the photo width (pixels)
          * @param h the photo height (pixels)
          */
@@ -519,8 +528,111 @@ public class Camera {
 
     /**
      * Handles the parameters for pictures created by a Camera service.
+     *
+     * <p>To make camera parameters take effect, applications have to call
+     * Camera.setParameters. For example, after setWhiteBalance is called, white
+     * balance is not changed until Camera.setParameters() is called.
+     *
+     * <p>Different devices may have different camera capabilities, such as
+     * picture size or flash modes. The application should query the camera
+     * capabilities before setting parameters. For example, the application
+     * should call getSupportedColorEffects before calling setEffect. If the
+     * camera does not support color effects, getSupportedColorEffects will
+     * return null.
      */
     public class Parameters {
+        // Parameter keys to communicate with the camera driver.
+        private static final String KEY_PREVIEW_SIZE = "preview-size";
+        private static final String KEY_PREVIEW_FORMAT = "preview-format";
+        private static final String KEY_PREVIEW_FRAME_RATE = "preview-frame-rate";
+        private static final String KEY_PICTURE_SIZE = "picture-size";
+        private static final String KEY_PICTURE_FORMAT = "picture-format";
+        private static final String KEY_JPEG_THUMBNAIL_WIDTH = "jpeg-thumbnail-width";
+        private static final String KEY_JPEG_THUMBNAIL_HEIGHT = "jpeg-thumbnail-height";
+        private static final String KEY_JPEG_THUMBNAIL_QUALITY = "jpeg-thumbnail-quality";
+        private static final String KEY_JPEG_QUALITY = "jpeg-quality";
+        private static final String KEY_ROTATION = "rotation";
+        private static final String KEY_GPS_LATITUDE = "gps-latitude";
+        private static final String KEY_GPS_LONGITUDE = "gps-longitude";
+        private static final String KEY_GPS_ALTITUDE = "gps-altitude";
+        private static final String KEY_GPS_TIMESTAMP = "gps-timestamp";
+        private static final String KEY_WHITE_BALANCE = "whitebalance";
+        private static final String KEY_EFFECT = "effect";
+        private static final String KEY_ANTIBANDING = "antibanding";
+        private static final String KEY_SCENE_MODE = "scene-mode";
+        private static final String KEY_FLASH_MODE = "flash-mode";
+        // Parameter key suffix for supported values.
+        private static final String SUPPORTED_VALUES_SUFFIX = "-values";
+
+        // Values for white balance settings.
+        public static final String WHITE_BALANCE_AUTO = "auto";
+        public static final String WHITE_BALANCE_INCANDESCENT = "incandescent";
+        public static final String WHITE_BALANCE_FLUORESCENT = "fluorescent";
+        public static final String WHITE_BALANCE_WARM_FLUORESCENT = "warm-fluorescent";
+        public static final String WHITE_BALANCE_DAYLIGHT = "daylight";
+        public static final String WHITE_BALANCE_CLOUDY_DAYLIGHT = "cloudy-daylight";
+        public static final String WHITE_BALANCE_TWILIGHT = "twilight";
+        public static final String WHITE_BALANCE_SHADE = "shade";
+
+        // Values for color effect settings.
+        public static final String EFFECT_NONE = "none";
+        public static final String EFFECT_MONO = "mono";
+        public static final String EFFECT_NEGATIVE = "negative";
+        public static final String EFFECT_SOLARIZE = "solarize";
+        public static final String EFFECT_SEPIA = "sepia";
+        public static final String EFFECT_POSTERIZE = "posterize";
+        public static final String EFFECT_WHITEBOARD = "whiteboard";
+        public static final String EFFECT_BLACKBOARD = "blackboard";
+        public static final String EFFECT_AQUA = "aqua";
+
+        // Values for antibanding settings.
+        public static final String ANTIBANDING_AUTO = "auto";
+        public static final String ANTIBANDING_50HZ = "50hz";
+        public static final String ANTIBANDING_60HZ = "60hz";
+        public static final String ANTIBANDING_OFF = "off";
+
+        // Values for flash mode settings.
+        /**
+         * Flash will not be fired.
+         */
+        public static final String FLASH_MODE_OFF = "off";
+        /**
+         * Flash will be fired automatically when required. The timing is
+         * decided by camera driver.
+         */
+        public static final String FLASH_MODE_AUTO = "auto";
+        /**
+         * Flash will always be fired. The timing is decided by camera driver.
+         */
+        public static final String FLASH_MODE_ON = "on";
+        /**
+         * Flash will be fired in red-eye reduction mode.
+         */
+        public static final String FLASH_MODE_RED_EYE = "red-eye";
+
+        // Values for scene mode settings.
+        public static final String SCENE_MODE_AUTO = "auto";
+        public static final String SCENE_MODE_ACTION = "action";
+        public static final String SCENE_MODE_PORTRAIT = "portrait";
+        public static final String SCENE_MODE_LANDSCAPE = "landscape";
+        public static final String SCENE_MODE_NIGHT = "night";
+        public static final String SCENE_MODE_NIGHT_PORTRAIT = "night-portrait";
+        public static final String SCENE_MODE_THEATRE = "theatre";
+        public static final String SCENE_MODE_BEACH = "beach";
+        public static final String SCENE_MODE_SNOW = "snow";
+        public static final String SCENE_MODE_SUNSET = "sunset";
+        public static final String SCENE_MODE_STEADYPHOTO = "steadyphoto";
+        public static final String SCENE_MODE_FIREWORKS = "fireworks";
+        public static final String SCENE_MODE_SPORTS = "sports";
+        public static final String SCENE_MODE_PARTY = "party";
+        public static final String SCENE_MODE_CANDLELIGHT = "candlelight";
+
+        // Formats for setPreviewFormat and setPictureFormat.
+        private static final String PIXEL_FORMAT_YUV422SP = "yuv422sp";
+        private static final String PIXEL_FORMAT_YUV420SP = "yuv420sp";
+        private static final String PIXEL_FORMAT_RGB565 = "rgb565";
+        private static final String PIXEL_FORMAT_JPEG = "jpeg";
+
         private HashMap<String, String> mMap;
 
         private Parameters() {
@@ -543,7 +655,7 @@ public class Camera {
          * Creates a single string with all the parameters set in
          * this Parameters object.
          * <p>The {@link #unflatten(String)} method does the reverse.</p>
-         * 
+         *
          * @return a String with all values from this Parameters object, in
          *         semi-colon delimited key-value pairs
          */
@@ -561,16 +673,16 @@ public class Camera {
         }
 
         /**
-         * Takes a flattened string of parameters and adds each one to 
+         * Takes a flattened string of parameters and adds each one to
          * this Parameters object.
          * <p>The {@link #flatten()} method does the reverse.</p>
-         * 
-         * @param flattened a String of parameters (key-value paired) that 
+         *
+         * @param flattened a String of parameters (key-value paired) that
          *                  are semi-colon delimited
          */
         public void unflatten(String flattened) {
             mMap.clear();
-            
+
             StringTokenizer tokenizer = new StringTokenizer(flattened, ";");
             while (tokenizer.hasMoreElements()) {
                 String kv = tokenizer.nextToken();
@@ -583,14 +695,14 @@ public class Camera {
                 mMap.put(k, v);
             }
         }
-        
+
         public void remove(String key) {
             mMap.remove(key);
         }
 
         /**
          * Sets a String parameter.
-         * 
+         *
          * @param key   the key name for the parameter
          * @param value the String value of the parameter
          */
@@ -609,7 +721,7 @@ public class Camera {
 
         /**
          * Sets an integer parameter.
-         * 
+         *
          * @param key   the key name for the parameter
          * @param value the int value of the parameter
          */
@@ -619,7 +731,7 @@ public class Camera {
 
         /**
          * Returns the value of a String parameter.
-         * 
+         *
          * @param key the key name for the parameter
          * @return the String value of the parameter
          */
@@ -629,7 +741,7 @@ public class Camera {
 
         /**
          * Returns the value of an integer parameter.
-         * 
+         *
          * @param key the key name for the parameter
          * @return the int value of the parameter
          */
@@ -639,110 +751,133 @@ public class Camera {
 
         /**
          * Sets the dimensions for preview pictures.
-         * 
+         *
          * @param width  the width of the pictures, in pixels
          * @param height the height of the pictures, in pixels
          */
         public void setPreviewSize(int width, int height) {
             String v = Integer.toString(width) + "x" + Integer.toString(height);
-            set("preview-size", v);
+            set(KEY_PREVIEW_SIZE, v);
         }
 
         /**
          * Returns the dimensions setting for preview pictures.
-         * 
-         * @return a Size object with the height and width setting 
+         *
+         * @return a Size object with the height and width setting
          *          for the preview picture
          */
         public Size getPreviewSize() {
-            String pair = get("preview-size");
-            if (pair == null)
-                return null;
-            String[] dims = pair.split("x");
-            if (dims.length != 2)
-                return null;
-
-            return new Size(Integer.parseInt(dims[0]),
-                            Integer.parseInt(dims[1]));
-
+            String pair = get(KEY_PREVIEW_SIZE);
+            return strToSize(pair);
         }
 
         /**
-         * Sets the dimensions for EXIF thumbnails.
-         * 
+         * Gets the supported preview sizes.
+         *
+         * @return a List of Size object. null if preview size setting is not
+         *         supported.
+         */
+        public List<Size> getSupportedPreviewSizes() {
+            String str = get(KEY_PREVIEW_SIZE + SUPPORTED_VALUES_SUFFIX);
+            return splitSize(str);
+        }
+
+        /**
+         * Sets the dimensions for EXIF thumbnail in Jpeg picture.
+         *
          * @param width  the width of the thumbnail, in pixels
          * @param height the height of the thumbnail, in pixels
-         *
-         * FIXME: unhide before release
-         * @hide
          */
-        public void setThumbnailSize(int width, int height) {
-            set("jpeg-thumbnail-width", width);
-            set("jpeg-thumbnail-height", height);
+        public void setJpegThumbnailSize(int width, int height) {
+            set(KEY_JPEG_THUMBNAIL_WIDTH, width);
+            set(KEY_JPEG_THUMBNAIL_HEIGHT, height);
         }
 
         /**
-         * Returns the dimensions for EXIF thumbnail
-         * 
-         * @return a Size object with the height and width setting 
-         *          for the EXIF thumbnails
+         * Returns the dimensions for EXIF thumbnail in Jpeg picture.
          *
-         * FIXME: unhide before release
-         * @hide
+         * @return a Size object with the height and width setting for the EXIF
+         *         thumbnails
          */
-        public Size getThumbnailSize() {
-            return new Size(getInt("jpeg-thumbnail-width"),
-                            getInt("jpeg-thumbnail-height"));
+        public Size getJpegThumbnailSize() {
+            return new Size(getInt(KEY_JPEG_THUMBNAIL_WIDTH),
+                            getInt(KEY_JPEG_THUMBNAIL_HEIGHT));
         }
 
         /**
-         * Sets the quality of the EXIF thumbnail
-         * 
-         * @param quality the JPEG quality of the EXIT thumbnail
+         * Sets the quality of the EXIF thumbnail in Jpeg picture.
          *
-         * FIXME: unhide before release
-         * @hide
+         * @param quality the JPEG quality of the EXIF thumbnail. The range is 1
+         *                to 100, with 100 being the best.
          */
-        public void setThumbnailQuality(int quality) {
-            set("jpeg-thumbnail-quality", quality);
+        public void setJpegThumbnailQuality(int quality) {
+            set(KEY_JPEG_THUMBNAIL_QUALITY, quality);
         }
 
         /**
-         * Returns the quality setting for the EXIF thumbnail
-         * 
-         * @return the JPEG quality setting of the EXIF thumbnail
+         * Returns the quality setting for the EXIF thumbnail in Jpeg picture.
          *
-         * FIXME: unhide before release
-         * @hide
+         * @return the JPEG quality setting of the EXIF thumbnail.
          */
-        public int getThumbnailQuality() {
-            return getInt("jpeg-thumbnail-quality");
+        public int getJpegThumbnailQuality() {
+            return getInt(KEY_JPEG_THUMBNAIL_QUALITY);
+        }
+
+        /**
+         * Sets Jpeg quality of captured picture.
+         *
+         * @param quality the JPEG quality of captured picture. The range is 1
+         *                to 100, with 100 being the best.
+         */
+        public void setJpegQuality(int quality) {
+            set(KEY_JPEG_QUALITY, quality);
+        }
+
+        /**
+         * Returns the quality setting for the JPEG picture.
+         *
+         * @return the JPEG picture quality setting.
+         */
+        public int getJpegQuality() {
+            return getInt(KEY_JPEG_QUALITY);
         }
 
         /**
          * Sets the rate at which preview frames are received.
-         * 
+         *
          * @param fps the frame rate (frames per second)
          */
         public void setPreviewFrameRate(int fps) {
-            set("preview-frame-rate", fps);
+            set(KEY_PREVIEW_FRAME_RATE, fps);
         }
 
         /**
          * Returns the setting for the rate at which preview frames
          * are received.
-         * 
+         *
          * @return the frame rate setting (frames per second)
          */
         public int getPreviewFrameRate() {
-            return getInt("preview-frame-rate");
+            return getInt(KEY_PREVIEW_FRAME_RATE);
         }
 
         /**
-         * Sets the image format for preview pictures.
-         * 
-         * @param pixel_format the desired preview picture format 
-         *                     (<var>PixelFormat.YCbCr_420_SP</var>,
+         * Gets the supported preview frame rates.
+         *
+         * @return a List of Integer objects (preview frame rates). null if
+         *         preview frame rate setting is not supported.
+         */
+        public List<Integer> getSupportedPreviewFrameRates() {
+            String str = get(KEY_PREVIEW_FRAME_RATE + SUPPORTED_VALUES_SUFFIX);
+            return splitInt(str);
+        }
+
+        /**
+         * Sets the image format for preview pictures. If this is never called,
+         * the default will be the YCbCr_420_SP (NV21) format.
+         *
+         * @param pixel_format the desired preview picture format
+         *                     (<var>PixelFormat.YCbCr_420_SP (NV21)</var>,
          *                      <var>PixelFormat.RGB_565</var>, or
          *                      <var>PixelFormat.JPEG</var>)
          * @see android.graphics.PixelFormat
@@ -750,56 +885,73 @@ public class Camera {
         public void setPreviewFormat(int pixel_format) {
             String s = cameraFormatForPixelFormat(pixel_format);
             if (s == null) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(
+                        "Invalid pixel_format=" + pixel_format);
             }
 
-            set("preview-format", s);
+            set(KEY_PREVIEW_FORMAT, s);
         }
 
         /**
-         * Returns the image format for preview pictures.
-         * 
+         * Returns the image format for preview pictures got from
+         * {@link PreviewCallback}.
+         *
          * @return the PixelFormat int representing the preview picture format
+         * @see android.graphics.PixelFormat
          */
         public int getPreviewFormat() {
-            return pixelFormatForCameraFormat(get("preview-format"));
+            return pixelFormatForCameraFormat(get(KEY_PREVIEW_FORMAT));
+        }
+
+        /**
+         * Gets the supported preview formats.
+         *
+         * @return a List of Integer objects. null if preview format setting is
+         *         not supported.
+         */
+        public List<Integer> getSupportedPreviewFormats() {
+            String str = get(KEY_PREVIEW_FORMAT + SUPPORTED_VALUES_SUFFIX);
+            return splitInt(str);
         }
 
         /**
          * Sets the dimensions for pictures.
-         * 
+         *
          * @param width  the width for pictures, in pixels
          * @param height the height for pictures, in pixels
          */
         public void setPictureSize(int width, int height) {
             String v = Integer.toString(width) + "x" + Integer.toString(height);
-            set("picture-size", v);
+            set(KEY_PICTURE_SIZE, v);
         }
 
         /**
          * Returns the dimension setting for pictures.
-         * 
-         * @return a Size object with the height and width setting 
+         *
+         * @return a Size object with the height and width setting
          *          for pictures
          */
         public Size getPictureSize() {
-            String pair = get("picture-size");
-            if (pair == null)
-                return null;
-            String[] dims = pair.split("x");
-            if (dims.length != 2)
-                return null;
+            String pair = get(KEY_PICTURE_SIZE);
+            return strToSize(pair);
+        }
 
-            return new Size(Integer.parseInt(dims[0]),
-                            Integer.parseInt(dims[1]));
-
+        /**
+         * Gets the supported picture sizes.
+         *
+         * @return a List of Size objects. null if picture size setting is not
+         *         supported.
+         */
+        public List<Size> getSupportedPictureSizes() {
+            String str = get(KEY_PICTURE_SIZE + SUPPORTED_VALUES_SUFFIX);
+            return splitSize(str);
         }
 
         /**
          * Sets the image format for pictures.
-         * 
-         * @param pixel_format the desired picture format 
-         *                     (<var>PixelFormat.YCbCr_420_SP</var>,
+         *
+         * @param pixel_format the desired picture format
+         *                     (<var>PixelFormat.YCbCr_420_SP (NV21)</var>,
          *                      <var>PixelFormat.RGB_565</var>, or
          *                      <var>PixelFormat.JPEG</var>)
          * @see android.graphics.PixelFormat
@@ -807,27 +959,39 @@ public class Camera {
         public void setPictureFormat(int pixel_format) {
             String s = cameraFormatForPixelFormat(pixel_format);
             if (s == null) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException(
+                        "Invalid pixel_format=" + pixel_format);
             }
 
-            set("picture-format", s);
+            set(KEY_PICTURE_FORMAT, s);
         }
 
         /**
          * Returns the image format for pictures.
-         * 
+         *
          * @return the PixelFormat int representing the picture format
          */
         public int getPictureFormat() {
-            return pixelFormatForCameraFormat(get("picture-format"));
+            return pixelFormatForCameraFormat(get(KEY_PICTURE_FORMAT));
+        }
+
+        /**
+         * Gets the supported picture formats.
+         *
+         * @return a List of Integer objects (values are PixelFormat.XXX). null
+         *         if picture setting is not supported.
+         */
+        public List<Integer> getSupportedPictureFormats() {
+            String str = get(KEY_PICTURE_SIZE + SUPPORTED_VALUES_SUFFIX);
+            return splitInt(str);
         }
 
         private String cameraFormatForPixelFormat(int pixel_format) {
             switch(pixel_format) {
-            case PixelFormat.YCbCr_422_SP: return "yuv422sp";
-            case PixelFormat.YCbCr_420_SP: return "yuv420sp";
-            case PixelFormat.RGB_565:      return "rgb565";
-            case PixelFormat.JPEG:         return "jpeg";
+            case PixelFormat.YCbCr_422_SP: return PIXEL_FORMAT_YUV422SP;
+            case PixelFormat.YCbCr_420_SP: return PIXEL_FORMAT_YUV420SP;
+            case PixelFormat.RGB_565:      return PIXEL_FORMAT_RGB565;
+            case PixelFormat.JPEG:         return PIXEL_FORMAT_JPEG;
             default:                       return null;
             }
         }
@@ -836,21 +1000,309 @@ public class Camera {
             if (format == null)
                 return PixelFormat.UNKNOWN;
 
-            if (format.equals("yuv422sp"))
+            if (format.equals(PIXEL_FORMAT_YUV422SP))
                 return PixelFormat.YCbCr_422_SP;
 
-            if (format.equals("yuv420sp"))
+            if (format.equals(PIXEL_FORMAT_YUV420SP))
                 return PixelFormat.YCbCr_420_SP;
 
-            if (format.equals("rgb565"))
+            if (format.equals(PIXEL_FORMAT_RGB565))
                 return PixelFormat.RGB_565;
 
-            if (format.equals("jpeg"))
+            if (format.equals(PIXEL_FORMAT_JPEG))
                 return PixelFormat.JPEG;
 
             return PixelFormat.UNKNOWN;
         }
 
+        /**
+         * Sets the orientation of the device in degrees, which instructs the
+         * camera driver to rotate the picture and thumbnail, in order to match
+         * what the user sees from the viewfinder. For example, suppose the
+         * natural position of the device is landscape. If the user takes a
+         * picture in landscape mode in 2048x1536 resolution, the rotation
+         * should be set to 0. If the user rotates the phone 90 degrees
+         * clockwise, the rotation should be set to 90. Applications can use
+         * {@link android.view.OrientationEventListener} to set this parameter.
+         *
+         * Since the picture is rotated, the orientation in the EXIF header is
+         * missing or always 1 (row #0 is top and column #0 is left side).
+         *
+         * @param rotation The orientation of the device in degrees. Rotation
+         *                 can only be 0, 90, 180 or 270.
+         * @throws IllegalArgumentException if rotation value is invalid.
+         * @see android.view.OrientationEventListener
+         */
+        public void setRotation(int rotation) {
+            if (rotation == 0 || rotation == 90 || rotation == 180
+                    || rotation == 270) {
+                set(KEY_ROTATION, Integer.toString(rotation));
+            } else {
+                throw new IllegalArgumentException(
+                        "Invalid rotation=" + rotation);
+            }
+        }
+
+        /**
+         * Sets GPS latitude coordinate. This will be stored in JPEG EXIF
+         * header.
+         *
+         * @param latitude GPS latitude coordinate.
+         */
+        public void setGpsLatitude(double latitude) {
+            set(KEY_GPS_LATITUDE, Double.toString(latitude));
+        }
+
+        /**
+         * Sets GPS longitude coordinate. This will be stored in JPEG EXIF
+         * header.
+         *
+         * @param longitude GPS longitude coordinate.
+         */
+        public void setGpsLongitude(double longitude) {
+            set(KEY_GPS_LONGITUDE, Double.toString(longitude));
+        }
+
+        /**
+         * Sets GPS altitude. This will be stored in JPEG EXIF header.
+         *
+         * @param altitude GPS altitude in meters.
+         */
+        public void setGpsAltitude(double altitude) {
+            set(KEY_GPS_ALTITUDE, Double.toString(altitude));
+        }
+
+        /**
+         * Sets GPS timestamp. This will be stored in JPEG EXIF header.
+         *
+         * @param timestamp GPS timestamp (UTC in seconds since January 1,
+         *                  1970).
+         */
+        public void setGpsTimestamp(long timestamp) {
+            set(KEY_GPS_TIMESTAMP, Long.toString(timestamp));
+        }
+
+        /**
+         * Removes GPS latitude, longitude, altitude, and timestamp from the
+         * parameters.
+         */
+        public void removeGpsData() {
+            remove(KEY_GPS_LATITUDE);
+            remove(KEY_GPS_LONGITUDE);
+            remove(KEY_GPS_ALTITUDE);
+            remove(KEY_GPS_TIMESTAMP);
+        }
+
+        /**
+         * Gets the current white balance setting.
+         *
+         * @return one of WHITE_BALANCE_XXX string constant. null if white
+         *         balance setting is not supported.
+         */
+        public String getWhiteBalance() {
+            return get(KEY_WHITE_BALANCE);
+        }
+
+        /**
+         * Sets the white balance.
+         *
+         * @param value WHITE_BALANCE_XXX string constant.
+         */
+        public void setWhiteBalance(String value) {
+            set(KEY_WHITE_BALANCE, value);
+        }
+
+        /**
+         * Gets the supported white balance.
+         *
+         * @return a List of WHITE_BALANCE_XXX string constants. null if white
+         *         balance setting is not supported.
+         */
+        public List<String> getSupportedWhiteBalance() {
+            String str = get(KEY_WHITE_BALANCE + SUPPORTED_VALUES_SUFFIX);
+            return split(str);
+        }
+
+        /**
+         * Gets the current color effect setting.
+         *
+         * @return one of EFFECT_XXX string constant. null if color effect
+         *         setting is not supported.
+         */
+        public String getColorEffect() {
+            return get(KEY_EFFECT);
+        }
+
+        /**
+         * Sets the current color effect setting.
+         *
+         * @param value EFFECT_XXX string constants.
+         */
+        public void setColorEffect(String value) {
+            set(KEY_EFFECT, value);
+        }
+
+        /**
+         * Gets the supported color effects.
+         *
+         * @return a List of EFFECT_XXX string constants. null if color effect
+         *         setting is not supported.
+         */
+        public List<String> getSupportedColorEffects() {
+            String str = get(KEY_EFFECT + SUPPORTED_VALUES_SUFFIX);
+            return split(str);
+        }
+
+
+        /**
+         * Gets the current antibanding setting.
+         *
+         * @return one of ANTIBANDING_XXX string constant. null if antibanding
+         *         setting is not supported.
+         */
+        public String getAntibanding() {
+            return get(KEY_ANTIBANDING);
+        }
+
+        /**
+         * Sets the antibanding.
+         *
+         * @param antibanding ANTIBANDING_XXX string constant.
+         */
+        public void setAntibanding(String antibanding) {
+            set(KEY_ANTIBANDING, antibanding);
+        }
+
+        /**
+         * Gets the supported antibanding values.
+         *
+         * @return a List of ANTIBANDING_XXX string constants. null if
+         *         antibanding setting is not supported.
+         */
+        public List<String> getSupportedAntibanding() {
+            String str = get(KEY_ANTIBANDING + SUPPORTED_VALUES_SUFFIX);
+            return split(str);
+        }
+
+        /**
+         * Gets the current scene mode setting.
+         *
+         * @return one of SCENE_MODE_XXX string constant. null if scene mode
+         *         setting is not supported.
+         */
+        public String getSceneMode() {
+            return get(KEY_SCENE_MODE);
+        }
+
+        /**
+         * Sets the scene mode.
+         *
+         * @param value SCENE_MODE_XXX string constants.
+         */
+        public void setSceneMode(String value) {
+            set(KEY_SCENE_MODE, value);
+        }
+
+        /**
+         * Gets the supported scene modes.
+         *
+         * @return a List of SCENE_MODE_XXX string constant. null if scene mode
+         *         setting is not supported.
+         */
+        public List<String> getSupportedSceneModes() {
+            String str = get(KEY_SCENE_MODE + SUPPORTED_VALUES_SUFFIX);
+            return split(str);
+        }
+
+        /**
+         * Gets the current flash mode setting.
+         *
+         * @return one of FLASH_MODE_XXX string constant. null if flash mode
+         *         setting is not supported.
+         */
+        public String getFlashMode() {
+            return get(KEY_FLASH_MODE);
+        }
+
+        /**
+         * Sets the flash mode.
+         *
+         * @param value FLASH_MODE_XXX string constants.
+         */
+        public void setFlashMode(String value) {
+            set(KEY_FLASH_MODE, value);
+        }
+
+        /**
+         * Gets the supported flash modes.
+         *
+         * @return a List of FLASH_MODE_XXX string constants. null if flash mode
+         *         setting is not supported.
+         */
+        public List<String> getSupportedFlashModes() {
+            String str = get(KEY_FLASH_MODE + SUPPORTED_VALUES_SUFFIX);
+            return split(str);
+        }
+
+        // Splits a comma delimited string to an ArrayList of String.
+        // Return null if the passing string is null or the size is 0.
+        private ArrayList<String> split(String str) {
+            if (str == null) return null;
+
+            // Use StringTokenizer because it is faster than split.
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
+            ArrayList<String> substrings = new ArrayList<String>();
+            while (tokenizer.hasMoreElements()) {
+                substrings.add(tokenizer.nextToken());
+            }
+            return substrings;
+        }
+
+        // Splits a comma delimited string to an ArrayList of Integer.
+        // Return null if the passing string is null or the size is 0.
+        private ArrayList<Integer> splitInt(String str) {
+            if (str == null) return null;
+
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
+            ArrayList<Integer> substrings = new ArrayList<Integer>();
+            while (tokenizer.hasMoreElements()) {
+                String token = tokenizer.nextToken();
+                substrings.add(Integer.parseInt(token));
+            }
+            if (substrings.size() == 0) return null;
+            return substrings;
+        }
+
+        // Splits a comma delimited string to an ArrayList of Size.
+        // Return null if the passing string is null or the size is 0.
+        private ArrayList<Size> splitSize(String str) {
+            if (str == null) return null;
+
+            StringTokenizer tokenizer = new StringTokenizer(str, ",");
+            ArrayList<Size> sizeList = new ArrayList<Size>();
+            while (tokenizer.hasMoreElements()) {
+                Size size = strToSize(tokenizer.nextToken());
+                if (size != null) sizeList.add(size);
+            }
+            if (sizeList.size() == 0) return null;
+            return sizeList;
+        }
+
+        // Parses a string (ex: "480x320") to Size object.
+        // Return null if the passing string is null.
+        private Size strToSize(String str) {
+            if (str == null) return null;
+
+            int pos = str.indexOf('x');
+            if (pos != -1) {
+                String width = str.substring(0, pos);
+                String height = str.substring(pos + 1);
+                return new Size(Integer.parseInt(width),
+                                Integer.parseInt(height));
+            }
+            Log.e(TAG, "Invalid size parameter string=" + str);
+            return null;
+        }
     };
 }
 
