@@ -212,13 +212,14 @@ static int convert_to_pem(void *data, int is_cert, char *buf, int size)
     }
 err:
     if (bio) BIO_free(bio);
-    return (len == 0) ? -1 : 0;
+    return len;
 }
 
 int get_pkcs12_certificate(PKCS12_KEYSTORE *p12store, char *buf, int size)
 {
     if ((p12store != NULL) && (p12store->cert != NULL)) {
-        return convert_to_pem((void*)p12store->cert, 1, buf, size);
+        int len = convert_to_pem((void*)p12store->cert, 1, buf, size);
+        return (len == 0) ? -1 : 0;
     }
     return -1;
 }
@@ -226,7 +227,8 @@ int get_pkcs12_certificate(PKCS12_KEYSTORE *p12store, char *buf, int size)
 int get_pkcs12_private_key(PKCS12_KEYSTORE *p12store, char *buf, int size)
 {
     if ((p12store != NULL) && (p12store->pkey != NULL)) {
-        return convert_to_pem((void*)p12store->pkey, 0, buf, size);
+        int len = convert_to_pem((void*)p12store->pkey, 0, buf, size);
+        return (len == 0) ? -1 : 0;
     }
     return -1;
 }
@@ -234,12 +236,16 @@ int get_pkcs12_private_key(PKCS12_KEYSTORE *p12store, char *buf, int size)
 int pop_pkcs12_certs_stack(PKCS12_KEYSTORE *p12store, char *buf, int size)
 {
     X509 *cert = NULL;
+    int len = 0;
 
-    if ((p12store != NULL) && (p12store->certs != NULL) &&
-        ((cert = sk_X509_pop(p12store->certs)) != NULL)) {
-        int ret = convert_to_pem((void*)cert, 1, buf, size);
-        X509_free(cert);
-        return ret;
+    if ((p12store != NULL) && (p12store->certs != NULL)) {
+        while (((cert = sk_X509_pop(p12store->certs)) != NULL) && (len < size)) {
+            int s = convert_to_pem((void*)cert, 1, buf + len, size - len);
+            if (s == 0) return -1;
+            len += s;
+            X509_free(cert);
+        }
+        return (len == 0) ? -1 : 0;
     }
     return -1;
 }
