@@ -468,7 +468,7 @@ static jint writeNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
     return -1;
 }
 
-static void closeNative(JNIEnv *env, jobject obj) {
+static void abortNative(JNIEnv *env, jobject obj) {
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
     struct asocket *s = get_socketData(env, obj);
@@ -510,7 +510,7 @@ static JNINativeMethod sMethods[] = {
     {"availableNative", "()I",    (void *) availableNative},
     {"readNative", "([BII)I",    (void *) readNative},
     {"writeNative", "([BII)I",    (void *) writeNative},
-    {"closeNative", "()V",    (void *) closeNative},
+    {"abortNative", "()V",    (void *) abortNative},
     {"destroyNative", "()V",    (void *) destroyNative},
 };
 
