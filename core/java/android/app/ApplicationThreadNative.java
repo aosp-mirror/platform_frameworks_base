@@ -258,6 +258,13 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
 
+        case SCHEDULE_SUICIDE_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            scheduleSuicide();
+            return true;
+        }
+
         case REQUEST_THUMBNAIL_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -652,7 +659,15 @@ class ApplicationThreadProxy implements IApplicationThread {
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
-    
+
+    public final void scheduleSuicide() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        mRemote.transact(SCHEDULE_SUICIDE_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
     public final void requestThumbnail(IBinder token)
             throws RemoteException {
         Parcel data = Parcel.obtain();

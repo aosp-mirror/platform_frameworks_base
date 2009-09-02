@@ -4914,7 +4914,34 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         thread.getMemoryInfo(mi);
     }
-    
+
+    public void killApplicationProcess(String processName, int uid) {
+        if (processName == null) {
+            return;
+        }
+
+        int callerUid = Binder.getCallingUid();
+        // Only the system server can kill an application
+        if (callerUid == Process.SYSTEM_UID) {
+            synchronized (this) {
+                ProcessRecord app = getProcessRecordLocked(processName, uid);
+                if (app != null) {
+                    try {
+                        app.thread.scheduleSuicide();
+                    } catch (RemoteException e) {
+                        // If the other end already died, then our work here is done.
+                    }
+                } else {
+                    Log.w(TAG, "Process/uid not found attempting kill of "
+                            + processName + " / " + uid);
+                }
+            }
+        } else {
+            throw new SecurityException(callerUid + " cannot kill app process: " +
+                    processName);
+        }
+    }
+
     private void restartPackageLocked(final String packageName, int uid) {
         uninstallPackageLocked(packageName, uid, false);
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,

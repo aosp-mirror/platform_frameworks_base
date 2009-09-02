@@ -83,6 +83,7 @@ public interface IApplicationThread extends IInterface {
             IInstrumentationWatcher testWatcher, int debugMode, boolean restrictedBackupMode,
             Configuration config, Map<String, IBinder> services) throws RemoteException;
     void scheduleExit() throws RemoteException;
+    void scheduleSuicide() throws RemoteException;
     void requestThumbnail(IBinder token) throws RemoteException;
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;
     void updateTimeZone() throws RemoteException;
@@ -133,4 +134,5 @@ public interface IApplicationThread extends IInterface {
     int SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
     int SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
     int GET_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
+    int SCHEDULE_SUICIDE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
 }

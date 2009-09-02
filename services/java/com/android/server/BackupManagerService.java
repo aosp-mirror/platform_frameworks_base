@@ -557,7 +557,12 @@ class BackupManagerService extends IBackupManager.Stub {
             Log.v(TAG, "Adding " + targetPkgs.size() + " backup participants:");
             for (PackageInfo p : targetPkgs) {
                 Log.v(TAG, "    " + p + " agent=" + p.applicationInfo.backupAgentName
-                        + " uid=" + p.applicationInfo.uid);
+                        + " uid=" + p.applicationInfo.uid
+                        + " killAfterRestore="
+                        + (((p.applicationInfo.flags & ApplicationInfo.FLAG_KILL_AFTER_RESTORE) != 0) ? "true" : "false")
+                        + " restoreNeedsApplication="
+                        + (((p.applicationInfo.flags & ApplicationInfo.FLAG_RESTORE_NEEDS_APPLICATION) != 0) ? "true" : "false")
+                        );
             }
         }
 
@@ -1244,11 +1249,21 @@ class BackupManagerService extends IBackupManager.Stub {
                             + "] is compatible with installed version ["
                             + packageInfo.versionCode + "]");
 
-                    // Now perform the actual restore
+                    // Now perform the actual restore:  first clear the app's data
+                    // if appropriate
                     clearApplicationDataSynchronous(packageName);
+
+                    // Then set up and bind the agent (with a restricted Application object
+                    // unless the application says otherwise)
+                    boolean useRealApp = (packageInfo.applicationInfo.flags
+                            & ApplicationInfo.FLAG_RESTORE_NEEDS_APPLICATION) != 0;
+                    if (DEBUG && useRealApp) {
+                        Log.v(TAG, "agent requires real Application subclass for restore");
+                    }
                     IBackupAgent agent = bindToAgentSynchronous(
                             packageInfo.applicationInfo,
-                            IApplicationThread.BACKUP_MODE_RESTORE);
+                            (useRealApp ? IApplicationThread.BACKUP_MODE_INCREMENTAL
+                                    : IApplicationThread.BACKUP_MODE_RESTORE));
                     if (agent == null) {
                         Log.w(TAG, "Can't find backup agent for " + packageName);
                         EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName,
@@ -1256,12 +1271,26 @@ class BackupManagerService extends IBackupManager.Stub {
                         continue;
                     }
 
+                    // And then finally run the restore on this agent
                     try {
                         processOneRestore(packageInfo, metaInfo.versionCode, agent);
                         ++count;
                     } finally {
-                        // unbind even on timeout or failure, just in case
+                        // unbind and tidy up even on timeout or failure, just in case
                         mActivityManager.unbindBackupAgent(packageInfo.applicationInfo);
+
+                        // The agent was probably running with a stub Application object,
+                        // which isn't a valid run mode for the main app logic.  Shut
+                        // down the app so that next time it's launched, it gets the
+                        // usual full initialization.
+                        if ((packageInfo.applicationInfo.flags
+                                & ApplicationInfo.FLAG_KILL_AFTER_RESTORE) != 0) {
+                            if (DEBUG) Log.d(TAG, "Restore complete, killing host process of "
+                                    + packageInfo.applicationInfo.processName);
+                            mActivityManager.killApplicationProcess(
+                                    packageInfo.applicationInfo.processName,
+                                    packageInfo.applicationInfo.uid);
+                        }
                     }
                 }
 

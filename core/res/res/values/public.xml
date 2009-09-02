@@ -1155,10 +1155,11 @@
   <public type="attr" name="wallpaperActivityOpenExitAnimation" />
   <public type="attr" name="wallpaperActivityCloseEnterAnimation" />
   <public type="attr" name="wallpaperActivityCloseExitAnimation" />
+  <public type="attr" name="supportsUploading" />
+  <public type="attr" name="killAfterRestore" />
+  <public type="attr" name="restoreNeedsApplication" />
 
   <public type="style" name="Theme.Wallpaper" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar.Fullscreen" />
-
-  <public type="attr" name="supportsUploading" />
 </resources>

@@ -1118,6 +1118,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             mi.writeToParcel(reply, 0);
             return true;
         }
+
+        case KILL_APPLICATION_PROCESS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String processName = data.readString();
+            int uid = data.readInt();
+            killApplicationProcess(processName, uid);
+            reply.writeNoException();
+            return true;
+        }
         }
         
         return super.onTransact(code, data, reply, flags);
@@ -2448,6 +2457,18 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-    
+
+    public void killApplicationProcess(String processName, int uid) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(processName);
+        data.writeInt(uid);
+        mRemote.transact(KILL_APPLICATION_PROCESS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+        
     private IBinder mRemote;
 }
