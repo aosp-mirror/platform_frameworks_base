@@ -227,37 +227,58 @@ static jboolean setUpEventLoop(native_data_t *nat) {
 
 
 const char * get_adapter_path(DBusConnection *conn) {
-    DBusMessage *msg, *reply;
+    DBusMessage *msg, *reply = NULL;
     DBusError err;
     const char *device_path = NULL;
-    msg = dbus_message_new_method_call("org.bluez", "/",
-          "org.bluez.Manager", "DefaultAdapter");
-    if (!msg) {
-        LOGE("%s: Can't allocate new method call for GetProperties!",
-              __FUNCTION__);
-        return NULL;
-    }
-    dbus_message_append_args(msg, DBUS_TYPE_INVALID);
+    int attempt = 0;
 
-    dbus_error_init(&err);
-    reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
-    dbus_message_unref(msg);
-
-    if (!reply) {
-        if (dbus_error_is_set(&err)) {
-            LOG_AND_FREE_DBUS_ERROR(&err);
+    for (attempt = 0; attempt < 1000 && reply == NULL; attempt ++) {
+        msg = dbus_message_new_method_call("org.bluez", "/",
+              "org.bluez.Manager", "DefaultAdapter");
+        if (!msg) {
+            LOGE("%s: Can't allocate new method call for get_adapter_path!",
+                  __FUNCTION__);
+            return NULL;
         }
-        return NULL;
+        dbus_message_append_args(msg, DBUS_TYPE_INVALID);
+        dbus_error_init(&err);
+        reply = dbus_connection_send_with_reply_and_block(conn, msg, -1, &err);
+
+        if (!reply) {
+            if (dbus_error_is_set(&err)) {
+                if (dbus_error_has_name(&err,
+                    "org.freedesktop.DBus.Error.ServiceUnknown")) {
+                    // bluetoothd is still down, retry
+                    LOG_AND_FREE_DBUS_ERROR(&err);
+                    usleep(10000);  // 10 ms
+                    continue;
+                } else {
+                    // Some other error we weren't expecting
+                    LOG_AND_FREE_DBUS_ERROR(&err);
+                }
+            }
+            goto failed;
+        }
     }
+    if (attempt == 1000) {
+        LOGE("Time out while trying to get Adapter path, is bluetoothd up ?");
+        goto failed;
+    }
+
     if (!dbus_message_get_args(reply, &err, DBUS_TYPE_OBJECT_PATH,
                                &device_path, DBUS_TYPE_INVALID)
                                || !device_path){
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);
         }
-        return NULL;
+        goto failed;
     }
+    dbus_message_unref(msg);
     return device_path;
+
+failed:
+    dbus_message_unref(msg);
+    return NULL;
 }
 
 static int register_agent(native_data_t *nat,
@@ -274,6 +295,9 @@ static int register_agent(native_data_t *nat,
     }
 
     nat->adapter = get_adapter_path(nat->conn);
+    if (nat->adapter == NULL) {
+        return -1;
+    }
     msg = dbus_message_new_method_call("org.bluez", nat->adapter,
           "org.bluez.Adapter", "RegisterAgent");
     if (!msg) {
