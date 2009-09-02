@@ -3,7 +3,10 @@ page.title=&lt;uses-sdk&gt;
 
 <dl class="xml">
 <dt>syntax:</dt>
-<dd><pre class="stx">&lt;uses-sdk android:<a href="#min">minSdkVersion</a>="<i>integer</i>" /&gt;</pre></dd>
+<dd><pre>
+&lt;uses-sdk android:<a href="#min">minSdkVersion</a>="<i>integer</i>" 
+          android:<a href="#max">maxSdkVersion</a>="<i>integer</i>"
+          android:<a href="#target">targetSdkVersion</a>="<i>integer</i>" /&gt;</pre></dd>
 
 <dt>contained in:</dt>
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
@@ -64,12 +67,16 @@ and minor versions).</p>
   <dt><a name="target"></a>{@code android:targetSdkVersion}</dt>
   <dd>An integer designating the API Level that the application is targetting.
   
-  <p>With this attribute set, the application says that is is be able to run on 
+  <p>With this attribute set, the application says that it is able to run on 
   older versions (down to {@code minSdkVersion}), but was explicitly tested to work 
   with the version specified here.
-  Specifying this version allows the platform to disable compatibility
-  code that is not required or enable newer features that are not
-  available to older applications.</p>
+  Specifying this target version allows the platform to disable compatibility
+  settings that are not required for the target version (which may otherwise be turned on
+  in order to maintain forward-compatibility) or enable newer features that are not
+  available to older applications. This does not mean that you can program different 
+  features for different versions of the platform&mdash;it simply informs the platform that you
+  have tested against the target version and the platform should not perform any extra
+  work to maintain forward-compatibility with the target version.</p>
   
   <p>Introduced in: API Level 4</p>
   </dd>
