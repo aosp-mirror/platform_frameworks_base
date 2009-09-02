@@ -174,7 +174,7 @@ status_t HTTPStream::receive_header(int *http_status) {
     *http_status = -1;
     mHeaders.clear();
 
-    char line[256];
+    char line[1024];
     status_t err = receive_line(line, sizeof(line));
     if (err != OK) {
         return err;
