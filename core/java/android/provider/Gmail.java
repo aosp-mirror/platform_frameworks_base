@@ -1551,7 +1551,7 @@ public final class Gmail {
             if (unreadConversations == null) {
                 return 0;
             } else {
-                return unreadConversations;
+                return unreadConversations < 0 ? 0 : unreadConversations;
             }
         }
 
