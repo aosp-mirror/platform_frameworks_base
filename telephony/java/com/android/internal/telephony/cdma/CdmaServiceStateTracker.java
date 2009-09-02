@@ -46,6 +46,7 @@ import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.gsm.MccTable;
+import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyEventLog;
@@ -443,6 +444,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                     if (!mIsMinInfoReady) {
                         mIsMinInfoReady = true;
                     }
+                    phone.getIccCard().broadcastIccStateChangedIntent(IccCard.INTENT_VALUE_ICC_IMSI,
+                            null);
                 } else {
                     Log.w(LOG_TAG,"error parsing cdmaSubscription params num="
                             + cdmaSubscription.length);
