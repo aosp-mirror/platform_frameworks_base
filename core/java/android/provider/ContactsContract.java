@@ -289,6 +289,32 @@ public final class ContactsContract {
         }
 
         /**
+         * Computes a content URI (see {@link #CONTENT_URI}) given a lookup URI.
+         * <p>
+         * Returns null if the contact cannot be found.
+         */
+        public static Uri lookupContact(ContentResolver resolver, Uri lookupUri) {
+            if (lookupUri == null) {
+                return null;
+            }
+
+            Cursor c = resolver.query(lookupUri, new String[]{Contacts._ID}, null, null, null);
+            if (c == null) {
+                return null;
+            }
+
+            try {
+                if (c.moveToFirst()) {
+                    long contactId = c.getLong(0);
+                    return ContentUris.withAppendedId(Contacts.CONTENT_URI, contactId);
+                }
+            } finally {
+                c.close();
+            }
+            return null;
+        }
+
+        /**
          * The content:// style URI for this table joined with useful data from
          * {@link Data}.
          *
