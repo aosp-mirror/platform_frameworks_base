@@ -375,11 +375,14 @@ public class WindowManagerService extends IWindowManager.Stub
     // made visible or hidden at the next transition.
     int mNextAppTransition = WindowManagerPolicy.TRANSIT_NONE;
     boolean mAppTransitionReady = false;
+    boolean mAppTransitionRunning = false;
     boolean mAppTransitionTimeout = false;
     boolean mStartingIconInTransition = false;
     boolean mSkipAppTransitionAnimation = false;
     final ArrayList<AppWindowToken> mOpeningApps = new ArrayList<AppWindowToken>();
     final ArrayList<AppWindowToken> mClosingApps = new ArrayList<AppWindowToken>();
+    final ArrayList<AppWindowToken> mToTopApps = new ArrayList<AppWindowToken>();
+    final ArrayList<AppWindowToken> mToBottomApps = new ArrayList<AppWindowToken>();
 
     //flag to detect fat touch events
     boolean mFatTouch = false;
@@ -690,7 +693,11 @@ public class WindowManagerService extends IWindowManager.Stub
                             i--;
                             break;
                         }
-                        if (t.windows.size() > 0) {
+                        
+                        // We haven't reached the token yet; if this token
+                        // is not going to the bottom and has windows, we can
+                        // use it as an anchor for when we do reach the token.
+                        if (!t.sendingToBottom && t.windows.size() > 0) {
                             pos = t.windows.get(0);
                         }
                     }
@@ -712,6 +719,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         placeWindowBefore(pos, win);
                     } else {
+                        // Continue looking down until we find the first
+                        // token that has windows.
                         while (i >= 0) {
                             AppWindowToken t = mAppTokens.get(i);
                             final int NW = t.windows.size();
@@ -2760,7 +2769,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 mTempConfiguration.setToDefaults();
                 if (computeNewConfigurationLocked(mTempConfiguration)) {
                     if (appConfig.diff(mTempConfiguration) != 0) {
-                        Log.i(TAG, "Config changed: " + mTempConfiguration);
                         return new Configuration(mTempConfiguration);
                     }
                 }
@@ -3198,12 +3206,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.setDummyAnimation();
                 mOpeningApps.remove(wtoken);
                 mClosingApps.remove(wtoken);
+                wtoken.waitingToShow = wtoken.waitingToHide = false;
                 wtoken.inPendingTransaction = true;
                 if (visible) {
                     mOpeningApps.add(wtoken);
                     wtoken.allDrawn = false;
                     wtoken.startingDisplayed = false;
                     wtoken.startingMoved = false;
+                    wtoken.waitingToShow = true;
 
                     if (wtoken.clientHidden) {
                         // In the case where we are making an app visible
@@ -3217,6 +3227,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 } else {
                     mClosingApps.add(wtoken);
+                    wtoken.waitingToHide = true;
                 }
                 return;
             }
@@ -3351,10 +3362,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 delayed = setTokenVisibilityLocked(wtoken, null, false, WindowManagerPolicy.TRANSIT_NONE, true);
                 wtoken.inPendingTransaction = false;
                 mOpeningApps.remove(wtoken);
+                wtoken.waitingToShow = false;
                 if (mClosingApps.contains(wtoken)) {
                     delayed = true;
                 } else if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
                     mClosingApps.add(wtoken);
+                    wtoken.waitingToHide = true;
                     delayed = true;
                 }
                 if (DEBUG_APP_TRANSITIONS) Log.v(
@@ -3441,6 +3454,12 @@ public class WindowManagerService extends IWindowManager.Stub
             final AppWindowToken wtoken = mAppTokens.get(tokenPos-1);
             if (DEBUG_REORDER) Log.v(TAG, "Looking for lower windows @ "
                     + tokenPos + " -- " + wtoken.token);
+            if (wtoken.sendingToBottom) {
+                if (DEBUG_REORDER) Log.v(TAG,
+                        "Skipping token -- currently sending to bottom");
+                tokenPos--;
+                continue;
+            }
             int i = wtoken.windows.size();
             while (i > 0) {
                 i--;
@@ -3449,7 +3468,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 while (j > 0) {
                     j--;
                     WindowState cwin = (WindowState)win.mChildWindows.get(j);
-                    if (cwin.mSubLayer >= 0 ) {
+                    if (cwin.mSubLayer >= 0) {
                         for (int pos=NW-1; pos>=0; pos--) {
                             if (mWindows.get(pos) == cwin) {
                                 if (DEBUG_REORDER) Log.v(TAG,
@@ -3553,6 +3572,26 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void moveAppWindowsLocked(AppWindowToken wtoken, int tokenPos,
+            boolean updateFocusAndLayout) {
+        // First remove all of the windows from the list.
+        tmpRemoveAppWindowsLocked(wtoken);
+
+        // Where to start adding?
+        int pos = findWindowOffsetLocked(tokenPos);
+
+        // And now add them back at the correct place.
+        pos = reAddAppWindowsLocked(pos, wtoken);
+
+        if (updateFocusAndLayout) {
+            if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES)) {
+                assignLayersLocked();
+            }
+            mLayoutNeeded = true;
+            performLayoutAndPlaceSurfacesLocked();
+        }
+    }
+
     private void moveAppWindowsLocked(List<IBinder> tokens, int tokenPos) {
         // First remove all of the windows from the list.
         final int N = tokens.size();
@@ -3575,7 +3614,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
+        if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES)) {
+            assignLayersLocked();
+        }
         mLayoutNeeded = true;
         performLayoutAndPlaceSurfacesLocked();
 
@@ -3596,9 +3637,19 @@ public class WindowManagerService extends IWindowManager.Stub
                 AppWindowToken wt = findAppWindowToken(tokens.get(i));
                 if (wt != null) {
                     mAppTokens.add(wt);
+                    if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+                        mToTopApps.remove(wt);
+                        mToBottomApps.remove(wt);
+                        mToTopApps.add(wt);
+                        wt.sendingToBottom = false;
+                        wt.sendingToTop = true;
+                    }
                 }
             }
-            moveAppWindowsLocked(tokens, mAppTokens.size());
+            
+            if (mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
+                moveAppWindowsLocked(tokens, mAppTokens.size());
+            }
         }
         Binder.restoreCallingIdentity(origId);
     }
@@ -3618,10 +3669,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 AppWindowToken wt = findAppWindowToken(tokens.get(i));
                 if (wt != null) {
                     mAppTokens.add(pos, wt);
+                    if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+                        mToTopApps.remove(wt);
+                        mToBottomApps.remove(wt);
+                        mToBottomApps.add(i, wt);
+                        wt.sendingToTop = false;
+                        wt.sendingToBottom = true;
+                    }
                     pos++;
                 }
             }
-            moveAppWindowsLocked(tokens, 0);
+            
+            if (mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
+                moveAppWindowsLocked(tokens, 0);
+            }
         }
         Binder.restoreCallingIdentity(origId);
     }
@@ -4252,19 +4313,6 @@ public class WindowManagerService extends IWindowManager.Stub
         Configuration config = new Configuration();
         if (!computeNewConfigurationLocked(config)) {
             return null;
-        }
-        Log.i(TAG, "Config changed: " + config);
-        long now = SystemClock.uptimeMillis();
-        //Log.i(TAG, "Config changing, gc pending: " + mFreezeGcPending + ", now " + now);
-        if (mFreezeGcPending != 0) {
-            if (now > (mFreezeGcPending+1000)) {
-                //Log.i(TAG, "Gc!  " + now + " > " + (mFreezeGcPending+1000));
-                mH.removeMessages(H.FORCE_GC);
-                Runtime.getRuntime().gc();
-                mFreezeGcPending = now;
-            }
-        } else {
-            mFreezeGcPending = now;
         }
         return config;
     }
@@ -7213,6 +7261,10 @@ public class WindowManagerService extends IWindowManager.Stub
          * of a transition that has not yet been started.
          */
         boolean isReadyForDisplay() {
+            if (mRootToken.waitingToShow &&
+                    mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+                return false;
+            }
             final AppWindowToken atoken = mAppToken;
             final boolean animating = atoken != null
                     ? (atoken.animation != null) : false;
@@ -7547,6 +7599,22 @@ public class WindowManagerService extends IWindowManager.Stub
         // Temporary for finding which tokens no longer have visible windows.
         boolean hasVisible;
 
+        // Set to true when this token is in a pending transaction where it
+        // will be shown.
+        boolean waitingToShow;
+        
+        // Set to true when this token is in a pending transaction where it
+        // will be hidden.
+        boolean waitingToHide;
+        
+        // Set to true when this token is in a pending transaction where its
+        // windows will be put to the bottom of the list.
+        boolean sendingToBottom;
+        
+        // Set to true when this token is in a pending transaction where its
+        // windows will be put to the top of the list.
+        boolean sendingToTop;
+        
         WindowToken(IBinder _token, int type, boolean _explicit) {
             token = _token;
             windowType = type;
@@ -7559,6 +7627,12 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print(prefix); pw.print("windowType="); pw.print(windowType);
                     pw.print(" hidden="); pw.print(hidden);
                     pw.print(" hasVisible="); pw.println(hasVisible);
+            if (waitingToShow || waitingToHide || sendingToBottom || sendingToTop) {
+                pw.print(prefix); pw.print("waitingToShow="); pw.print(waitingToShow);
+                        pw.print(" waitingToHide="); pw.print(waitingToHide);
+                        pw.print(" sendingToBottom="); pw.print(sendingToBottom);
+                        pw.print(" sendingToTop="); pw.println(sendingToTop);
+            }
         }
 
         @Override
@@ -7868,7 +7942,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print(prefix); pw.print("allAppWindows="); pw.println(allAppWindows);
             }
             pw.print(prefix); pw.print("groupId="); pw.print(groupId);
-                    pw.print(" appFullscreen="); pw.println(appFullscreen);
+                    pw.print(" appFullscreen="); pw.print(appFullscreen);
                     pw.print(" requestedOrientation="); pw.println(requestedOrientation);
             pw.print(prefix); pw.print("hiddenRequested="); pw.print(hiddenRequested);
                     pw.print(" clientHidden="); pw.print(clientHidden);
@@ -8434,6 +8508,50 @@ public class WindowManagerService extends IWindowManager.Stub
         return win;
     }
 
+    final void rebuildAppWindowListLocked() {
+        int NW = mWindows.size();
+        int i;
+        
+        // First remove all existing app windows.
+        i=0;
+        while (i < NW) {
+            if (((WindowState)mWindows.get(i)).mAppToken != null) {
+                mWindows.remove(i);
+                NW--;
+                continue;
+            }
+            i++;
+        }
+        
+        // Now go through the app tokens and add the windows back in.
+        int NT = mAppTokens.size();
+        i = 0;
+        for (int j=0; j<NT; j++) {
+            AppWindowToken wt = mAppTokens.get(j);
+            final int NTW = wt.windows.size();
+            for (int k=0; k<NTW; k++) {
+                WindowState win = wt.windows.get(k);
+                final int NC = win.mChildWindows.size();
+                int c;
+                for (c=0; c<NC; c++) {
+                    WindowState cwin = (WindowState)win.mChildWindows.get(c);
+                    if (cwin.mSubLayer >= 0) {
+                        break;
+                    }
+                    mWindows.add(i, cwin);
+                    i++;
+                }
+                mWindows.add(i, win);
+                i++;
+                for (; c<NC; c++) {
+                    WindowState cwin = (WindowState)win.mChildWindows.get(c);
+                    mWindows.add(i, cwin);
+                    i++;
+                }
+            }
+        }
+    }
+    
     private final void assignLayersLocked() {
         int N = mWindows.size();
         int curBaseLayer = 0;
@@ -8814,12 +8932,30 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         mNextAppTransition = WindowManagerPolicy.TRANSIT_NONE;
                         mAppTransitionReady = false;
+                        mAppTransitionRunning = true;
                         mAppTransitionTimeout = false;
                         mStartingIconInTransition = false;
                         mSkipAppTransitionAnimation = false;
 
                         mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
 
+                        // If there are applications waiting to come to the
+                        // top of the stack, now is the time to move their windows.
+                        // (Note that we don't do apps going to the bottom
+                        // here -- we want to keep their windows in the old
+                        // Z-order until the animation completes.)
+                        if (mToTopApps.size() > 0) {
+                            NN = mAppTokens.size();
+                            for (i=0; i<NN; i++) {
+                                AppWindowToken wtoken = mAppTokens.get(i);
+                                if (wtoken.sendingToTop) {
+                                    wtoken.sendingToTop = false;
+                                    moveAppWindowsLocked(wtoken, NN, false);
+                                }
+                            }
+                            mToTopApps.clear();
+                        }
+                        
                         adjustWallpaperWindowsLocked();
                         wallpaperMayChange = false;
                         
@@ -8889,6 +9025,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             wtoken.animation = null;
                             setTokenVisibilityLocked(wtoken, lp, true, transit, false);
                             wtoken.updateReportedVisibilityLocked();
+                            wtoken.waitingToShow = false;
                             wtoken.showAllWindowsLocked();
                         }
                         NN = mClosingApps.size();
@@ -8900,6 +9037,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             wtoken.animation = null;
                             setTokenVisibilityLocked(wtoken, lp, false, transit, false);
                             wtoken.updateReportedVisibilityLocked();
+                            wtoken.waitingToHide = false;
                             // Force the allDrawn flag, because we want to start
                             // this guy's animations regardless of whether it's
                             // gotten drawn.
@@ -8922,9 +9060,30 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 
+                if (!animating && mAppTransitionRunning) {
+                    // We have finished the animation of an app transition.  To do
+                    // this, we have delayed a lot of operations like showing and
+                    // hiding apps, moving apps in Z-order, etc.  The app token list
+                    // reflects the correct Z-order, but the window list may now
+                    // be out of sync with it.  So here we will just rebuild the
+                    // entire app window list.  Fun!
+                    mAppTransitionRunning = false;
+                    // Clear information about apps that were moving.
+                    mToBottomApps.clear();
+                    
+                    rebuildAppWindowListLocked();
+                    restart = true;
+                    moveInputMethodWindowsIfNeededLocked(false);
+                    wallpaperMayChange = true;
+                    mLayoutNeeded = true;
+                }
+                
                 if (wallpaperMayChange) {
                     if (adjustWallpaperWindowsLocked()) {
                         assignLayersLocked();
+                    }
+                    if (mLayoutNeeded) {
+                        performLayoutLockedInner();
                     }
                 }
                 
@@ -9407,13 +9566,29 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        boolean needRelayout = false;
+        
+        if (!animating && mAppTransitionRunning) {
+            // We have finished the animation of an app transition.  To do
+            // this, we have delayed a lot of operations like showing and
+            // hiding apps, moving apps in Z-order, etc.  The app token list
+            // reflects the correct Z-order, but the window list may now
+            // be out of sync with it.  So here we will just rebuild the
+            // entire app window list.  Fun!
+            mAppTransitionRunning = false;
+            needRelayout = true;
+            rebuildAppWindowListLocked();
+            // Clear information about apps that were moving.
+            mToBottomApps.clear();
+        }
+        
         if (focusDisplayed) {
             mH.sendEmptyMessage(H.REPORT_LOSING_FOCUS);
         }
         if (wallpaperDestroyed) {
-            wallpaperDestroyed = adjustWallpaperWindowsLocked();            
+            needRelayout = adjustWallpaperWindowsLocked();            
         }
-        if (wallpaperDestroyed) {
+        if (needRelayout) {
             requestAnimationLocked(0);
         } else if (animating) {
             requestAnimationLocked(currentTime+(1000/60)-SystemClock.uptimeMillis());
@@ -9909,6 +10084,7 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mNextAppTransition=0x");
                     pw.print(Integer.toHexString(mNextAppTransition));
                     pw.print(", mAppTransitionReady="); pw.print(mAppTransitionReady);
+                    pw.print(", mAppTransitionRunning="); pw.print(mAppTransitionRunning);
                     pw.print(", mAppTransitionTimeout="); pw.println( mAppTransitionTimeout);
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(", mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
@@ -9917,6 +10093,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (mClosingApps.size() > 0) {
                 pw.print("  mClosingApps="); pw.println(mClosingApps);
+            }
+            if (mToTopApps.size() > 0) {
+                pw.print("  mToTopApps="); pw.println(mToTopApps);
+            }
+            if (mToBottomApps.size() > 0) {
+                pw.print("  mToBottomApps="); pw.println(mToBottomApps);
             }
             pw.print("  DisplayWidth="); pw.print(mDisplay.getWidth());
                     pw.print(" DisplayHeight="); pw.println(mDisplay.getHeight());
