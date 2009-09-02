@@ -2035,6 +2035,7 @@ class SyncManager implements OnAccountsUpdatedListener {
 
         private void sendSyncStateIntent() {
             Intent syncStateIntent = new Intent(Intent.ACTION_SYNC_STATE_CHANGED);
+            syncStateIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             syncStateIntent.putExtra("active", mNeedSyncActiveNotification);
             syncStateIntent.putExtra("failing", mNeedSyncErrorNotification);
             mContext.sendBroadcast(syncStateIntent);
