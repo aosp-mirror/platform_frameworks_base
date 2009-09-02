@@ -67,7 +67,8 @@ public class LifecycleTest extends ActivityTestsBase {
         runLaunchpad(LaunchpadActivity.LIFECYCLE_SCREEN);
     }
 
-    @LargeTest
+    //flaky test, removing from large suite until 1866891 is fixed
+    //@LargeTest
     public void testDialog() throws Exception {
         mIntent = mTopIntent;
         runLaunchpad(LaunchpadActivity.LIFECYCLE_DIALOG);

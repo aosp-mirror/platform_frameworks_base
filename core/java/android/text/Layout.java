@@ -1527,7 +1527,7 @@ public abstract class Layout {
                     if (bm != null) {
                         workPaint.set(paint);
                         Styled.measureText(paint, workPaint, text,
-                                           offset, offset + 1, null);
+                                           j, j + 2, null);
 
                         float wid = (float) bm.getWidth() *
                                     -workPaint.ascent() / bm.getHeight();
