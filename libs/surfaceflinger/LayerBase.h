@@ -251,7 +251,9 @@ protected:
               uint32_t      transform;
               bool          dirty;
           };
-          
+
+          void clearWithOpenGL(const Region& clip, GLclampx r, GLclampx g,
+                               GLclampx b, GLclampx alpha) const;
           void clearWithOpenGL(const Region& clip) const;
           void drawWithOpenGL(const Region& clip, const Texture& texture) const;
           void loadTexture(Texture* texture, GLint textureName, 
