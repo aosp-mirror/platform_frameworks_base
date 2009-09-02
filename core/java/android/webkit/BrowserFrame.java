@@ -112,14 +112,15 @@ class BrowserFrame extends Handler {
             // create PluginManager with current Context
             PluginManager.getInstance(context);
         }
-        AssetManager am = context.getAssets();
-        nativeCreateFrame(w, am, proxy.getBackForwardList());
 
         mSettings = settings;
         mContext = context;
         mCallbackProxy = proxy;
         mDatabase = WebViewDatabase.getInstance(context);
         mWebViewCore = w;
+
+        AssetManager am = context.getAssets();
+        nativeCreateFrame(w, am, proxy.getBackForwardList());
 
         if (DebugFlags.BROWSER_FRAME) {
             Log.v(LOGTAG, "BrowserFrame constructor: this=" + this);
@@ -670,6 +671,7 @@ class BrowserFrame extends Handler {
     // these ids need to be in sync with enum RAW_RES_ID in WebFrame
     private static final int NODOMAIN = 1;
     private static final int LOADERROR = 2;
+    private static final int DRAWABLEDIR = 3;
 
     String getRawResFilename(int id) {
         int resid;
@@ -682,12 +684,26 @@ class BrowserFrame extends Handler {
                 resid = com.android.internal.R.raw.loaderror;
                 break;
 
+            case DRAWABLEDIR:
+                // use one known resource to find the drawable directory
+                resid = com.android.internal.R.drawable.btn_check_off;
+                break;
+
             default:
                 Log.e(LOGTAG, "getRawResFilename got incompatible resource ID");
                 return "";
         }
         TypedValue value = new TypedValue();
         mContext.getResources().getValue(resid, value, true);
+        if (id == DRAWABLEDIR) {
+            String path = value.string.toString();
+            int index = path.lastIndexOf('/');
+            if (index < 0) {
+                Log.e(LOGTAG, "Can't find drawable directory.");
+                return "";
+            }
+            return path.substring(0, index + 1);
+        }
         return value.string.toString();
     }
 
