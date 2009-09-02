@@ -425,6 +425,11 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     public void onClick(View view) {
+        // Make sure there is a contact
+        if (mContactUri == null) {
+            return;
+        }
+
         switch (view.getId()) {
             case R.id.star: {
                 // Toggle "starred" state

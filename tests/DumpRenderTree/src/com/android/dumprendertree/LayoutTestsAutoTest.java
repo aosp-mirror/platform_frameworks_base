@@ -150,6 +150,8 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     static final String HTTP_WML_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/wml/";
 
 
+    static final String DEFAULT_TEST_HOST = "android-browser-test.mtv.corp.google.com";
+    static final String FORWARD_HOST_CONF = "/sdcard/drt_forward_host.txt";
     private ForwardServer fs8000, fs8080, fs8443;
 
     private MyTestRecorder mResultRecorder;
@@ -161,17 +163,44 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     public LayoutTestsAutoTest() {
       super("com.android.dumprendertree", TestShellActivity.class);
 
-      int addr = -1;
-      try {
-          addr = AdbUtils.resolve("android-browser-test.mtv.corp.google.com");
-      } catch (IOException ioe) {
-          Log.e(LOGTAG, "failed to resolve server address.", ioe);
-      }
+      int addr = getForwardHostAddr();
       if(addr != -1) {
           fs8000 = new ForwardServer(8000, addr, 8000);
           fs8080 = new ForwardServer(8080, addr, 8080);
           fs8443 = new ForwardServer(8443, addr, 8443);
       }
+    }
+
+    private int getForwardHostAddr() {
+        int addr = -1;
+        String host = null;
+        File forwardHostConf = new File(FORWARD_HOST_CONF);
+        if (forwardHostConf.isFile()) {
+            BufferedReader hostReader = null;
+            try {
+                hostReader = new BufferedReader(new FileReader(forwardHostConf));
+                host = hostReader.readLine();
+                Log.v(LOGTAG, "read forward host from file: " + host);
+            } catch (IOException ioe) {
+                Log.v(LOGTAG, "cannot read forward host from file", ioe);
+            } finally {
+                if (hostReader != null) {
+                    try {
+                        hostReader.close();
+                    } catch (IOException ioe) {
+                        // burn!!!
+                    }
+                }
+            }
+        }
+        if (host == null || host.length() == 0)
+            host = DEFAULT_TEST_HOST;
+        try {
+            addr = AdbUtils.resolve(host);
+        } catch (IOException ioe) {
+            Log.e(LOGTAG, "failed to resolve server address", ioe);
+        }
+        return addr;
     }
 
     // This function writes the result of the layout test to
