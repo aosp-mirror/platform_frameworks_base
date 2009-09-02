@@ -697,8 +697,12 @@ import java.util.ArrayList;
      * Set the selection, and disable our onSelectionChanged action.
      */
     /* package */ void setSelectionFromWebKit(int start, int end) {
+        if (start < 0 || end < 0) return;
+        Spannable text = (Spannable) getText();
+        int length = text.length();
+        if (start > length || end > length) return;
         mFromWebKit = true;
-        Selection.setSelection((Spannable) getText(), start, end);
+        Selection.setSelection(text, start, end);
         mFromWebKit = false;
     }
 
