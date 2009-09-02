@@ -2039,7 +2039,7 @@ public class Intent implements Parcelable {
     /**
      * Used as an int extra field in {@link android.content.Intent#ACTION_PACKAGE_CHANGED}
      * intent to supply the name of the component that changed.
-     * @hide
+     *
      */
     public static final String EXTRA_CHANGED_COMPONENT_NAME =
             "android.intent.extra.changed_component_name";
