@@ -7325,8 +7325,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // In this case the provider is a single instance, so we can
                 // return it right away.
                 if (r != null) {
-                    if(true) Log.v(TAG, "Adding content provider requested by "+
-                            r.processName +" from process "+cpr.info.processName);
                     r.conProviders.add(cpr);
                     cpr.clients.add(r);
                 } else {
@@ -7437,8 +7435,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 mProvidersByName.put(name, cpr);
 
                 if (r != null) {
-                    if(true) Log.v(TAG, "Adding content provider requested by "+
-                            r.processName +" from process "+cpr.info.processName);
                     r.conProviders.add(cpr);
                     cpr.clients.add(r);
                 } else {
@@ -7494,7 +7490,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             ContentProviderRecord cpr = (ContentProviderRecord)mProvidersByName.get(name);
             if(cpr == null) {
                 //remove from mProvidersByClass
-                if(true) Log.v(TAG, name+" content provider not found in providers list");
+                if(localLOGV) Log.v(TAG, name+" content provider not found in providers list");
                 return;
             }
             final ProcessRecord r = getRecordForAppLocked(caller);
@@ -7505,11 +7501,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             //update content provider record entry info
             ContentProviderRecord localCpr = (ContentProviderRecord) mProvidersByClass.get(cpr.info.name);
-            if(true) Log.v(TAG, "Removing content provider requested by "+
-                    r.processName+" from process "+localCpr.info.processName);
-            if(localCpr.app == r) {
+            if(localLOGV) Log.v(TAG, "Removing content provider requested by "+
+                    r.info.processName+" from process "+localCpr.appInfo.processName);
+            if(localCpr.appInfo.processName ==  r.info.processName) {
                 //should not happen. taken care of as a local provider
-                if(true) Log.v(TAG, "local provider doing nothing Ignoring other names");
+                if(localLOGV) Log.v(TAG, "local provider doing nothing Ignoring other names");
                 return;
             } else {
                 localCpr.clients.remove(r);
