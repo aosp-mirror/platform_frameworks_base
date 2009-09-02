@@ -59,6 +59,8 @@ public final class Checkin {
 
         /** Valid tag values.  Extend as necessary for your needs. */
         public enum Tag {
+            APANIC_CONSOLE,
+            APANIC_THREADS,
             AUTOTEST_FAILURE,
             AUTOTEST_SEQUENCE_BEGIN,
             AUTOTEST_SUITE_BEGIN,

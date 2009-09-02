@@ -2231,6 +2231,32 @@ public final class Settings {
         public static final String BACKGROUND_DATA = "background_data";
 
         /**
+         * The time in msec, when the LAST_KMSG file was send to the checkin server.
+         * We will only send the LAST_KMSG file if it was modified after this time.
+         *
+         * @hide
+         */
+        public static final String CHECKIN_SEND_LAST_KMSG_TIME = "checkin_kmsg_time";
+
+        /**
+         * The time in msec, when the apanic_console file was send to the checkin server.
+         * We will only send the apanic_console file if it was modified after this time.
+         *
+         * @hide
+         */
+        public static final String CHECKIN_SEND_APANIC_CONSOLE_TIME =
+            "checkin_apanic_console_time";
+
+        /**
+         * The time in msec, when the apanic_thread file was send to the checkin server.
+         * We will only send the apanic_thread file if it was modified after this time.
+         *
+         * @hide
+         */
+        public static final String CHECKIN_SEND_APANIC_THREAD_TIME =
+            "checkin_apanic_thread_time";
+
+        /**
          * The CDMA roaming mode 0 = Home Networks, CDMA default
          *                       1 = Roaming on Affiliated networks
          *                       2 = Roaming on any networks
