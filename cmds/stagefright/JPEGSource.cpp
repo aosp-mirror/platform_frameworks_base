@@ -102,7 +102,7 @@ sp<MetaData> JPEGSource::getFormat() {
     meta->setCString(kKeyMIMEType, "image/jpeg");
     meta->setInt32(kKeyWidth, mWidth);
     meta->setInt32(kKeyHeight, mHeight);
-    meta->setInt32(kKeyCompressedSize, mSize);
+    meta->setInt32(kKeyMaxInputSize, mSize);
 
     return meta;
 }

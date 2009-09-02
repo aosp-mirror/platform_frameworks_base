@@ -155,6 +155,11 @@ private:
     void setJPEGInputFormat(
             OMX_U32 width, OMX_U32 height, OMX_U32 compressedSize);
 
+    void setMinBufferSize(OMX_U32 portIndex, OMX_U32 size);
+
+    void setRawAudioFormat(
+            OMX_U32 portIndex, int32_t sampleRate, int32_t numChannels);
+
     status_t allocateBuffers();
     status_t allocateBuffersOnPort(OMX_U32 portIndex);
 
