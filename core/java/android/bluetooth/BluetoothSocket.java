@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 /**
  * A connected or connecting Bluetooth socket.
  *
@@ -63,7 +65,14 @@ public final class BluetoothSocket implements Closeable {
     private final BluetoothInputStream mInputStream;
     private final BluetoothOutputStream mOutputStream;
 
-    private int mSocketData;    /* used by native code only */
+    /** prevents all native calls after destroyNative() */
+    private boolean mClosed;
+
+    /** protects mClosed */
+    private final ReentrantReadWriteLock mLock;
+
+    /** used by native code only */
+    private int mSocketData;
 
     /**
      * Construct a BluetoothSocket.
@@ -95,6 +104,8 @@ public final class BluetoothSocket implements Closeable {
         }
         mInputStream = new BluetoothInputStream(this);
         mOutputStream = new BluetoothOutputStream(this);
+        mClosed = false;
+        mLock = new ReentrantReadWriteLock();
     }
 
     /**
@@ -132,7 +143,13 @@ public final class BluetoothSocket implements Closeable {
      * @throws IOException on error, for example connection failure
      */
     public void connect() throws IOException {
-        connectNative();
+        mLock.readLock().lock();
+        try {
+            if (mClosed) throw new IOException("socket closed");
+            connectNative();
+        } finally {
+            mLock.readLock().unlock();
+        }
     }
 
     /**
@@ -141,7 +158,24 @@ public final class BluetoothSocket implements Closeable {
      * throw an IOException.
      */
     public void close() throws IOException {
-        closeNative();
+        // abort blocking operations on the socket
+        mLock.readLock().lock();
+        try {
+            if (mClosed) return;
+            abortNative();
+        } finally {
+            mLock.readLock().unlock();
+        }
+
+        // all native calls are guarenteed to immediately return after
+        // abortNative(), so this lock should immediatley acquire
+        mLock.writeLock().lock();
+        try {
+            mClosed = true;
+            destroyNative();
+        } finally {
+            mLock.writeLock().unlock();
+        }
     }
 
     /**
@@ -174,14 +208,64 @@ public final class BluetoothSocket implements Closeable {
         return mOutputStream;
     }
 
+    /*package*/ void bindListen() throws IOException {
+        mLock.readLock().lock();
+        try {
+            if (mClosed) throw new IOException("socket closed");
+            bindListenNative();
+        } finally {
+            mLock.readLock().unlock();
+        }
+    }
+
+    /*package*/ BluetoothSocket accept(int timeout) throws IOException {
+        mLock.readLock().lock();
+        try {
+            if (mClosed) throw new IOException("socket closed");
+            return acceptNative(timeout);
+        } finally {
+            mLock.readLock().unlock();
+        }
+    }
+
+    /*package*/ int available() throws IOException {
+        mLock.readLock().lock();
+        try {
+            if (mClosed) throw new IOException("socket closed");
+            return availableNative();
+        } finally {
+            mLock.readLock().unlock();
+        }
+    }
+
+    /*package*/ int read(byte[] b, int offset, int length) throws IOException {
+        mLock.readLock().lock();
+        try {
+            if (mClosed) throw new IOException("socket closed");
+            return readNative(b, offset, length);
+        } finally {
+            mLock.readLock().unlock();
+        }
+    }
+
+    /*package*/ int write(byte[] b, int offset, int length) throws IOException {
+        mLock.readLock().lock();
+        try {
+            if (mClosed) throw new IOException("socket closed");
+            return writeNative(b, offset, length);
+        } finally {
+            mLock.readLock().unlock();
+        }
+    }
+
     private native void initSocketNative() throws IOException;
     private native void initSocketFromFdNative(int fd) throws IOException;
     private native void connectNative() throws IOException;
-    /*package*/ native void bindListenNative() throws IOException;
-    /*package*/ native BluetoothSocket acceptNative(int timeout) throws IOException;
-    /*package*/ native int availableNative() throws IOException;
-    /*package*/ native int readNative(byte[] b, int offset, int length) throws IOException;
-    /*package*/ native int writeNative(byte[] b, int offset, int length) throws IOException;
-    /*package*/ native void closeNative() throws IOException;
+    private native void bindListenNative() throws IOException;
+    private native BluetoothSocket acceptNative(int timeout) throws IOException;
+    private native int availableNative() throws IOException;
+    private native int readNative(byte[] b, int offset, int length) throws IOException;
+    private native int writeNative(byte[] b, int offset, int length) throws IOException;
+    private native void abortNative() throws IOException;
     private native void destroyNative() throws IOException;
 }

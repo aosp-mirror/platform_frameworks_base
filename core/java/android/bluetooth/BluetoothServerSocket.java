@@ -47,6 +47,7 @@ import java.io.IOException;
  * operations and close the socket.
  */
 public final class BluetoothServerSocket implements Closeable {
+
     /*package*/ final BluetoothSocket mSocket;
 
     /**
@@ -88,7 +89,7 @@ public final class BluetoothServerSocket implements Closeable {
      *                     timeout
      */
     public BluetoothSocket accept(int timeout) throws IOException {
-        return mSocket.acceptNative(timeout);
+        return mSocket.accept(timeout);
     }
 
     /**
@@ -97,6 +98,6 @@ public final class BluetoothServerSocket implements Closeable {
      * throw an IOException.
      */
     public void close() throws IOException {
-        mSocket.closeNative();
+        mSocket.close();
     }
 }

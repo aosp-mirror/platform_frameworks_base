@@ -37,7 +37,7 @@ import java.io.InputStream;
      * Return number of bytes available before this stream will block.
      */
     public int available() throws IOException {
-        return mSocket.availableNative();
+        return mSocket.available();
     }
 
     public void close() throws IOException {
@@ -57,7 +57,7 @@ import java.io.InputStream;
      */
     public int read() throws IOException {
         byte b[] = new byte[1];
-        int ret = mSocket.readNative(b, 0, 1);
+        int ret = mSocket.read(b, 0, 1);
         if (ret == 1) {
             return (int)b[0] & 0xff;
         } else {
@@ -93,6 +93,6 @@ import java.io.InputStream;
         if ((offset | length) < 0 || length > b.length - offset) {
             throw new ArrayIndexOutOfBoundsException("invalid offset or length");
         }
-        return mSocket.readNative(b, offset, length);
+        return mSocket.read(b, offset, length);
     }
 }
