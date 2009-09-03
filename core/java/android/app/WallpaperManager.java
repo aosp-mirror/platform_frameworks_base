@@ -62,22 +62,23 @@ public class WallpaperManager {
         
         private static final int MSG_CLEAR_WALLPAPER = 1;
         
-        private final Handler mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case MSG_CLEAR_WALLPAPER:
-                        synchronized (this) {
-                            mWallpaper = null;
-                        }
-                        break;
-                }
-            }
-        };
+        private final Handler mHandler;
         
-        Globals() {
+        Globals(Looper looper) {
             IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
             mService = IWallpaperManager.Stub.asInterface(b);
+            mHandler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    switch (msg.what) {
+                        case MSG_CLEAR_WALLPAPER:
+                            synchronized (this) {
+                                mWallpaper = null;
+                            }
+                            break;
+                    }
+                }
+            };
         }
         
         public void onWallpaperChanged() {
@@ -188,7 +189,7 @@ public class WallpaperManager {
     static void initGlobals(Looper looper) {
         synchronized (mSync) {
             if (sGlobals == null) {
-                sGlobals = new Globals();
+                sGlobals = new Globals(looper);
             }
         }
     }
