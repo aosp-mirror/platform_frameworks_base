@@ -315,15 +315,6 @@ public final class ContactsContract {
         }
 
         /**
-         * The content:// style URI for this table joined with useful data from
-         * {@link Data}.
-         *
-         * @deprecated Please use plain CONTENT_URI for the same result
-         */
-        @Deprecated
-        public static final Uri CONTENT_SUMMARY_URI = CONTENT_URI;
-
-        /**
          * The content:// style URI used for "type-to-filter" functionality on the
          * {@link #CONTENT_URI} URI. The filter string will be used to match
          * various parts of the contact name. The filter argument should be passed
@@ -332,9 +323,6 @@ public final class ContactsContract {
         public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(
                 CONTENT_URI, "filter");
 
-        @Deprecated
-        public static final Uri CONTENT_SUMMARY_FILTER_URI = CONTENT_FILTER_URI;
-
         /**
          * The content:// style URI for this table joined with useful data from
          * {@link Data}, filtered to include only starred contacts
@@ -342,9 +330,6 @@ public final class ContactsContract {
          */
         public static final Uri CONTENT_STREQUENT_URI = Uri.withAppendedPath(
                 CONTENT_URI, "strequent");
-
-        @Deprecated
-        public static final Uri CONTENT_SUMMARY_STREQUENT_URI = CONTENT_STREQUENT_URI;
 
         /**
          * The content:// style URI used for "type-to-filter" functionality on the
@@ -355,14 +340,9 @@ public final class ContactsContract {
         public static final Uri CONTENT_STREQUENT_FILTER_URI = Uri.withAppendedPath(
                 CONTENT_STREQUENT_URI, "filter");
 
-        @Deprecated
-        public static final Uri CONTENT_SUMMARY_STREQUENT_FILTER_URI = CONTENT_STREQUENT_FILTER_URI;
-
         public static final Uri CONTENT_GROUP_URI = Uri.withAppendedPath(
                 CONTENT_URI, "group");
 
-        @Deprecated
-        public static final Uri CONTENT_SUMMARY_GROUP_URI = CONTENT_GROUP_URI;
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
@@ -505,17 +485,6 @@ public final class ContactsContract {
          * The content:// style URI for this table
          */
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "raw_contacts");
-
-        /**
-         * The content:// style URL for filtering people by email address. The
-         * filter argument should be passed as an additional path segment after
-         * this URI.
-         *
-         * @hide
-         */
-        @Deprecated
-        public static final Uri CONTENT_FILTER_EMAIL_URI =
-                Uri.withAppendedPath(CONTENT_URI, "filter_email");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
@@ -759,23 +728,10 @@ public final class ContactsContract {
         public static final String _ID = "presence_id";
 
         /**
-         * Reference to the {@link RawContacts#_ID} this presence references.
-         * <P>Type: INTEGER</P>
-         *
-         * TODO remove this from public API
-         * @hide
-         */
-        @Deprecated
-        public static final String RAW_CONTACT_ID = "presence_raw_contact_id";
-
-        /**
          * Reference to the {@link Data#_ID} entry that owns this presence.
          * <P>Type: INTEGER</P>
          */
         public static final String DATA_ID = "presence_data_id";
-
-        @Deprecated
-        public static final String IM_PROTOCOL = "im_protocol";
 
         /**
          * <p>Type: NUMBER</p>
@@ -1178,26 +1134,6 @@ public final class ContactsContract {
             public static final String FORMATTED_ADDRESS = DATA;
 
             /**
-             * The agent who actually receives the mail. Used in work addresses.
-             * Also for 'in care of' or 'c/o'.
-             * <p>
-             * Type: TEXT
-             * @deprecated since this isn't supported by gd:structuredPostalAddress
-             */
-            @Deprecated
-            public static final String AGENT = "data4";
-
-            /**
-             * Used in places where houses or buildings have names (and not
-             * necessarily numbers), eg. "The Pillars".
-             * <p>
-             * Type: TEXT
-             * @deprecated since this isn't supported by gd:structuredPostalAddress
-             */
-            @Deprecated
-            public static final String HOUSENAME = "data5";
-
-            /**
              * Can be street, avenue, road, etc. This element also includes the
              * house number and room/apartment/flat/floor number.
              * <p>
@@ -1230,17 +1166,6 @@ public final class ContactsContract {
              * Type: TEXT
              */
             public static final String CITY = "data9";
-
-            /**
-             * Handles administrative districts such as U.S. or U.K. counties
-             * that are not used for mail addressing purposes. Subregion is not
-             * intended for delivery addresses.
-             * <p>
-             * Type: TEXT
-             * @deprecated since this isn't supported by gd:structuredPostalAddress
-             */
-            @Deprecated
-            public static final String SUBREGION = "data10";
 
             /**
              * A state, province, county (in Ireland), Land (in Germany),
