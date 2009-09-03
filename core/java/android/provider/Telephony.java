@@ -490,6 +490,13 @@ public final class Telephony {
             public static final int RESULT_SMS_OUT_OF_MEMORY = 3;
 
             /**
+             * Set by BroadcastReceiver. Indicates the message, while
+             * possibly valid, is of a format or encoding that is not
+             * supported.
+             */
+            public static final int RESULT_SMS_UNSUPPORTED = 4;
+
+            /**
              * Broadcast Action: A new text based SMS message has been received
              * by the device. The intent will have the following extra
              * values:</p>
@@ -1696,7 +1703,3 @@ public final class Telephony {
         public static final String EXTRA_SPN        = "spn";
     }
 }
-
-
-
-
