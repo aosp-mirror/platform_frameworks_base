@@ -600,7 +600,11 @@ LayerBuffer::OverlaySource::~OverlaySource()
 
 void LayerBuffer::OverlaySource::onDraw(const Region& clip) const
 {
-    mLayer.clearWithOpenGL(clip);
+    GLclampx color = 0x000018; //dark blue
+    GLclampx red = 0;
+    GLclampx green = 0;
+    GLclampx blue = 0x1818;
+    mLayer.clearWithOpenGL(clip, red, green, blue, 0);
 }
 
 void LayerBuffer::OverlaySource::onTransaction(uint32_t flags)

@@ -354,11 +354,13 @@ GLuint LayerBase::createTexture() const
     return textureName;
 }
 
-void LayerBase::clearWithOpenGL(const Region& clip) const
+void LayerBase::clearWithOpenGL(const Region& clip, GLclampx red,
+                                GLclampx green, GLclampx blue,
+                                GLclampx alpha) const
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t fbHeight = hw.getHeight();
-    glColor4x(0,0,0,0);
+    glColor4x(red,green,blue,alpha);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
@@ -375,6 +377,11 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
         }
     }
+}
+
+void LayerBase::clearWithOpenGL(const Region& clip) const
+{
+    clearWithOpenGL(clip,0,0,0,0);
 }
 
 void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
