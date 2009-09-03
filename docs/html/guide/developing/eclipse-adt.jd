@@ -149,15 +149,15 @@ on running your applicaiton.</p>
 
 <h3 id="CreatingAnAvd">Creating an AVD</h3>
 
-<p>With ADT 0.9.2 and above, the Android AVD Manager provides a simple graphical interface
+<p>With ADT 0.9.3 and above, the Android SDK and AVD Manager provides a simple graphical interface
 for creating and managing AVDs. (If you're using ADT version 0.9.1 or older, you must 
 use the <code>android</code> tool to create your AVDs&mdash;read the AVD guide to
 <a href="{@docRoot}guide/developing/tools/avd.html#creating">Creating an AVD</a>.)
 
-<p>To create an AVD with the Android AVD Manager:</p>
+<p>To create an AVD with the AVD Manager:</p>
 
 <ol>
-  <li>Select <strong>Window > Android AVD Manager</strong>, or click the Android AVD Manager icon (a black device)
+  <li>Select <strong>Window > Android SDK and AVD Manager</strong>, or click the Android SDK and AVD Manager icon (a black device)
     in the Eclipse toolbar.</p>
   </li>
   <li>In the Virtual Devices panel, you'll see a list of existing AVDs. Click <strong>New</strong>
@@ -169,7 +169,7 @@ use the <code>android</code> tool to create your AVDs&mdash;read the AVD guide t
   <li>Click <strong>Create AVD</strong>.</li>
 </ol>
 
-<p>Your AVD is now ready and you can close the Android AVD Manager. 
+<p>Your AVD is now ready and you can close the AVD Manager. 
 In the next section, you'll see how the AVD is used
 when launching your application on an emulator.</p>
 
@@ -217,7 +217,7 @@ to start, the emulator options to use, and so on. When you first run a project
 as an <em>Android Application</em>, ADT will automatically create a run configuration.
 The default run configuration will
 launch the default project Activity and use automatic target mode for device selection 
-(with no preferred AVD). If the default setting don't suit your project, you can 
+(with no preferred AVD). If the default settings don't suit your project, you can 
 customize the launch configuration or even create a new.</p>
 
 <p>To create or modify a launch configuration, follow these steps as appropriate 
@@ -256,6 +256,12 @@ for your Eclipse version:</p>
     when selecting an AVD to run your application.
     See the following section on <a href=#AutoAndManualModes">Automatic and manual target 
     modes</a>).</p>
+    <p>You can specify any emulator options to the Additional Emulator Command
+    Line Options field. For example, you could add <code>-scale 96dpi</code> to
+    scale the AVD's screen to an accurate size, based on the dpi of your
+    computer monitor. For a full list of emulator options, see the <a
+    href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a>
+document.</p>
   </li>
 </ol>
 
