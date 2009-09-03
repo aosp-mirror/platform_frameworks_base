@@ -484,7 +484,12 @@ public class TelephonyManager {
      * @return true if a ICC card is present
      */
     public boolean hasIccCard() {
-        return PhoneFactory.getDefaultPhone().getIccCard().hasIccCard();
+        try {
+            return getITelephony().hasIccCard();
+        } catch (RemoteException ex) {
+            // Assume no ICC card if remote exception which shouldn't happen
+            return false;
+        }
     }
 
     /**
