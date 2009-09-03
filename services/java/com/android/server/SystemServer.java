@@ -92,22 +92,22 @@ class ServerThread extends Thread {
 
         // Critical services...
         try {
-            Log.i(TAG, "Starting Entropy Service.");
+            Log.i(TAG, "Entropy Service");
             ServiceManager.addService("entropy", new EntropyService());
 
-            Log.i(TAG, "Starting Power Manager.");
+            Log.i(TAG, "Power Manager");
             power = new PowerManagerService();
             ServiceManager.addService(Context.POWER_SERVICE, power);
 
-            Log.i(TAG, "Starting Activity Manager.");
+            Log.i(TAG, "Activity Manager");
             context = ActivityManagerService.main(factoryTest);
 
-            Log.i(TAG, "Starting telephony registry");
+            Log.i(TAG, "Telephony Registry");
             ServiceManager.addService("telephony.registry", new TelephonyRegistry(context));
 
             AttributeCache.init(context);
 
-            Log.i(TAG, "Starting Package Manager.");
+            Log.i(TAG, "Package Manager");
             pm = PackageManagerService.main(context,
                     factoryTest != SystemServer.FACTORY_TEST_OFF);
 
@@ -116,25 +116,25 @@ class ServerThread extends Thread {
             mContentResolver = context.getContentResolver();
 
             try {
-                Log.i(TAG, "Starting Account Manager.");
+                Log.i(TAG, "Account Manager");
                 ServiceManager.addService(Context.ACCOUNT_SERVICE,
                         new AccountManagerService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Account Manager", e);
             }
 
-            Log.i(TAG, "Starting Content Manager.");
+            Log.i(TAG, "Content Manager");
             ContentService.main(context,
                     factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL);
 
-            Log.i(TAG, "Starting System Content Providers.");
+            Log.i(TAG, "System Content Providers");
             ActivityManagerService.installSystemProviders();
 
-            Log.i(TAG, "Starting Battery Service.");
+            Log.i(TAG, "Battery Service");
             battery = new BatteryService(context);
             ServiceManager.addService("battery", battery);
 
-            Log.i(TAG, "Starting Hardware Service.");
+            Log.i(TAG, "Hardware Service");
             hardware = new HardwareService(context);
             ServiceManager.addService("hardware", hardware);
 
@@ -142,18 +142,19 @@ class ServerThread extends Thread {
             // hardware service, content providers and the battery service.
             power.init(context, hardware, ActivityManagerService.getDefault(), battery);
 
-            Log.i(TAG, "Starting Alarm Manager.");
+            Log.i(TAG, "Alarm Manager");
             AlarmManagerService alarm = new AlarmManagerService(context);
             ServiceManager.addService(Context.ALARM_SERVICE, alarm);
 
+            Log.i(TAG, "Init Watchdog");
             Watchdog.getInstance().init(context, battery, power, alarm,
                     ActivityManagerService.self());
 
             // Sensor Service is needed by Window Manager, so this goes first
-            Log.i(TAG, "Starting Sensor Service.");
+            Log.i(TAG, "Sensor Service");
             ServiceManager.addService(Context.SENSOR_SERVICE, new SensorService(context));
 
-            Log.i(TAG, "Starting Window Manager.");
+            Log.i(TAG, "Window Manager");
             wm = WindowManagerService.main(context, power,
                     factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
@@ -171,7 +172,7 @@ class ServerThread extends Thread {
                 Log.i(TAG, "Registering null Bluetooth Service (factory test)");
                 ServiceManager.addService(Context.BLUETOOTH_SERVICE, null);
             } else {
-                Log.i(TAG, "Starting Bluetooth Service.");
+                Log.i(TAG, "Bluetooth Service");
                 bluetooth = new BluetoothService(context);
                 ServiceManager.addService(Context.BLUETOOTH_SERVICE, bluetooth);
                 bluetooth.initAfterRegistration();
@@ -198,7 +199,7 @@ class ServerThread extends Thread {
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
-                Log.i(TAG, "Starting Status Bar Service.");
+                Log.i(TAG, "Status Bar");
                 statusBar = new StatusBarService(context);
                 ServiceManager.addService("statusbar", statusBar);
             } catch (Throwable e) {
@@ -206,14 +207,14 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting Clipboard Service.");
+                Log.i(TAG, "Clipboard Service");
                 ServiceManager.addService("clipboard", new ClipboardService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Clipboard Service", e);
             }
 
             try {
-                Log.i(TAG, "Starting Input Method Service.");
+                Log.i(TAG, "Input Method Service");
                 imm = new InputMethodManagerService(context, statusBar);
                 ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
             } catch (Throwable e) {
@@ -221,14 +222,14 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting NetStat Service.");
+                Log.i(TAG, "NetStat Service");
                 ServiceManager.addService("netstat", new NetStatService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting NetStat Service", e);
             }
 
             try {
-                Log.i(TAG, "Starting Connectivity Service.");
+                Log.i(TAG, "Connectivity Service");
                 connectivity = ConnectivityService.getInstance(context);
                 ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
             } catch (Throwable e) {
@@ -236,7 +237,7 @@ class ServerThread extends Thread {
             }
 
             try {
-              Log.i(TAG, "Starting Accessibility Manager.");
+              Log.i(TAG, "Accessibility Manager");
               ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
                       new AccessibilityManagerService(context));
             } catch (Throwable e) {
@@ -244,7 +245,7 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting Notification Manager.");
+                Log.i(TAG, "Notification Manager");
                 notification = new NotificationManagerService(context, statusBar, hardware);
                 ServiceManager.addService(Context.NOTIFICATION_SERVICE, notification);
             } catch (Throwable e) {
@@ -253,14 +254,14 @@ class ServerThread extends Thread {
 
             try {
                 // MountService must start after NotificationManagerService
-                Log.i(TAG, "Starting Mount Service.");
+                Log.i(TAG, "Mount Service");
                 ServiceManager.addService("mount", new MountService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Mount Service", e);
             }
 
             try {
-                Log.i(TAG, "Starting DeviceStorageMonitor service");
+                Log.i(TAG, "Device Storage Monitor");
                 ServiceManager.addService(DeviceStorageMonitorService.SERVICE,
                         new DeviceStorageMonitorService(context));
             } catch (Throwable e) {
@@ -268,14 +269,14 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting Location Manager.");
+                Log.i(TAG, "Location Manager");
                 ServiceManager.addService(Context.LOCATION_SERVICE, new LocationManagerService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Location Manager", e);
             }
 
             try {
-                Log.i(TAG, "Starting Search Service.");
+                Log.i(TAG, "Search Service");
                 ServiceManager.addService( Context.SEARCH_SERVICE, new SearchManagerService(context) );
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Search Service", e);
@@ -287,7 +288,7 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting Checkin Service.");
+                Log.i(TAG, "Checkin Service");
                 Intent intent = new Intent().setComponent(new ComponentName(
                         "com.google.android.server.checkin",
                         "com.google.android.server.checkin.CheckinService"));
@@ -300,7 +301,7 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting Wallpaper Service");
+                Log.i(TAG, "Wallpaper Service");
                 wallpaper = new WallpaperManagerService(context);
                 ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
             } catch (Throwable e) {
@@ -308,14 +309,14 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting Audio Service");
+                Log.i(TAG, "Audio Service");
                 ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Audio Service", e);
             }
 
             try {
-                Log.i(TAG, "Starting HeadsetObserver");
+                Log.i(TAG, "Headset Observer");
                 // Listen for wired headset changes
                 headset = new HeadsetObserver(context);
             } catch (Throwable e) {
@@ -323,7 +324,7 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting DockObserver");
+                Log.i(TAG, "Dock Observer");
                 // Listen for dock station changes
                 dock = new DockObserver(context);
             } catch (Throwable e) {
@@ -331,14 +332,14 @@ class ServerThread extends Thread {
             }
 
             try {
-                Log.i(TAG, "Starting Backup Service");
+                Log.i(TAG, "Backup Service");
                 ServiceManager.addService(Context.BACKUP_SERVICE, new BackupManagerService(context));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Backup Service", e);
             }
 
             try {
-                Log.i(TAG, "Starting AppWidget Service");
+                Log.i(TAG, "AppWidget Service");
                 appWidget = new AppWidgetService(context);
                 ServiceManager.addService(Context.APPWIDGET_SERVICE, appWidget);
             } catch (Throwable e) {
@@ -361,7 +362,7 @@ class ServerThread extends Thread {
                 false, new AdbSettingsObserver());
 
         // It is now time to start up the app processes...
-        boolean safeMode = wm.detectSafeMode();
+        final boolean safeMode = wm.detectSafeMode();
 
         if (notification != null) {
             notification.systemReady();
@@ -370,31 +371,45 @@ class ServerThread extends Thread {
         if (statusBar != null) {
             statusBar.systemReady();
         }
-        if (imm != null) {
-            imm.systemReady();
-        }
         wm.systemReady();
         power.systemReady();
         try {
             pm.systemReady();
         } catch (RemoteException e) {
         }
-        if (appWidget != null) {
-            appWidget.systemReady(safeMode);
-        }
 
-        // After making the following code, third party code may be running...
-        try {
-            ActivityManagerNative.getDefault().systemReady();
-        } catch (RemoteException e) {
-        }
+        // These are needed to propagate to the runnable below.
+        final BatteryService batteryF = battery;
+        final ConnectivityService connectivityF = connectivity;
+        final DockObserver dockF = dock;
+        final AppWidgetService appWidgetF = appWidget;
+        final WallpaperManagerService wallpaperF = wallpaper;
+        final InputMethodManagerService immF = imm;
+        
+        // We now tell the activity manager it is okay to run third party
+        // code.  It will call back into us once it has gotten to the state
+        // where third party code can really run (but before it has actually
+        // started launching the initial applications), for us to complete our
+        // initialization.
+        ((ActivityManagerService)ActivityManagerNative.getDefault())
+                .systemReady(new Runnable() {
+            public void run() {
+                Log.i(TAG, "Making services ready");
+                
+                if (batteryF != null) batteryF.systemReady();
+                if (connectivityF != null) connectivityF.systemReady();
+                if (dockF != null) dockF.systemReady();
+                Watchdog.getInstance().start();
 
-        if (wallpaper != null) wallpaper.systemReady();
-        if (battery != null) battery.systemReady();
-        if (connectivity != null) connectivity.systemReady();
-        if (dock != null) dock.systemReady();
-        Watchdog.getInstance().start();
-
+                // It is now okay to let the various system services start their
+                // third party code...
+                
+                if (appWidgetF != null) appWidgetF.systemReady(safeMode);
+                if (wallpaperF != null) wallpaperF.systemReady();
+                if (immF != null) immF.systemReady();
+            }
+        });
+        
         Looper.loop();
         Log.d(TAG, "System ServerThread is exiting!");
     }

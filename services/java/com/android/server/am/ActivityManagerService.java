@@ -8189,7 +8189,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        systemReady();
+        systemReady(null);
     }
 
     private void retrieveSettings() {
@@ -8219,7 +8219,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return mSystemReady;
     }
     
-    public void systemReady() {
+    public void systemReady(final Runnable goingCallback) {
         // In the simulator, startRunning will never have been called, which
         // normally sets a few crucial variables. Do it here instead.
         if (!Process.supportsProcesses()) {
@@ -8229,6 +8229,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         synchronized(this) {
             if (mSystemReady) {
+                if (goingCallback != null) goingCallback.run();
                 return;
             }
             
@@ -8264,7 +8265,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                     synchronized (ActivityManagerService.this) {
                                         mDidUpdate = true;
                                     }
-                                    systemReady();
+                                    systemReady(goingCallback);
                                 }
                             };
                         }
@@ -8311,7 +8312,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
         
-        if (Config.LOGD) Log.d(TAG, "Start running!");
+        Log.i(TAG, "System now ready");
         EventLog.writeEvent(LOG_BOOT_PROGRESS_AMS_READY,
             SystemClock.uptimeMillis());
 
@@ -8353,6 +8354,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         retrieveSettings();
 
+        if (goingCallback != null) goingCallback.run();
+        
         synchronized (this) {
             if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
                 try {
