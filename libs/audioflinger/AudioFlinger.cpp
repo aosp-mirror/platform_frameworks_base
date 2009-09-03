@@ -1319,19 +1319,20 @@ size_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track> 
             mAudioMixer->setBufferProvider(track);
             mAudioMixer->enable(AudioMixer::MIXING);
 
-            int param;
-            if ( track->mFillingUpStatus == Track::FS_FILLED) {
+            int param = AudioMixer::VOLUME;
+            if (track->mFillingUpStatus == Track::FS_FILLED) {
                 // no ramp for the first volume setting
                 track->mFillingUpStatus = Track::FS_ACTIVE;
                 if (track->mState == TrackBase::RESUMING) {
                     track->mState = TrackBase::ACTIVE;
                     param = AudioMixer::RAMP_VOLUME;
-                } else {
-                    param = AudioMixer::VOLUME;
                 }
-            } else {
+            } else if (cblk->server != 0) {
+                // If the track is stopped before the first frame was mixed,
+                // do not apply ramp
                 param = AudioMixer::RAMP_VOLUME;
             }
+
             mAudioMixer->setParameter(param, AudioMixer::VOLUME0, left);
             mAudioMixer->setParameter(param, AudioMixer::VOLUME1, right);
             mAudioMixer->setParameter(
@@ -1365,7 +1366,7 @@ size_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track> 
                     LOGV("BUFFER TIMEOUT: remove(%d) from active list", track->name());
                     tracksToRemove->add(track);
                 }
-                // For tracks using static shared memry buffer, make sure that we have
+                // For tracks using static shared memory buffer, make sure that we have
                 // written enough data to audio hardware before disabling the track
                 // NOTE: this condition with arrive before track->mRetryCount <= 0 so we
                 // don't care about code removing track from active list above.
