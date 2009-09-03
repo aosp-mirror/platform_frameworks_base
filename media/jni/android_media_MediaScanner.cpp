@@ -65,6 +65,8 @@ public:
                                                      "(Ljava/lang/String;Ljava/lang/String;)V");
             mSetMimeTypeMethodID = env->GetMethodID(mediaScannerClientInterface, "setMimeType",
                                                      "(Ljava/lang/String;)V");
+            mAddNoMediaFolderMethodID = env->GetMethodID(mediaScannerClientInterface, "addNoMediaFolder",
+                                                     "(Ljava/lang/String;)V");
         }
     }
     
@@ -111,12 +113,26 @@ public:
         return (!mEnv->ExceptionCheck());
     }
 
+    // returns true if it succeeded, false if an exception occured in the Java code
+    virtual bool addNoMediaFolder(const char* path)
+    {
+        jstring pathStr;
+        if ((pathStr = mEnv->NewStringUTF(path)) == NULL) return false;
+
+        mEnv->CallVoidMethod(mClient, mAddNoMediaFolderMethodID, pathStr);
+
+        mEnv->DeleteLocalRef(pathStr);
+        return (!mEnv->ExceptionCheck());
+    }
+
+
 private:
     JNIEnv *mEnv;
     jobject mClient;
     jmethodID mScanFileMethodID; 
     jmethodID mHandleStringTagMethodID; 
     jmethodID mSetMimeTypeMethodID;
+    jmethodID mAddNoMediaFolderMethodID;
 };
 
 
