@@ -27,12 +27,8 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Message;
 import android.os.SystemClock;
-import android.provider.SocialContract;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Intents;
@@ -43,13 +39,11 @@ import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.SocialContract.Activities;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -77,7 +71,6 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     private QueryHandler mQueryHandler;
 
     protected long mContactId;
-    protected Uri mContactSummaryUri;
     protected Uri mContactUri;
     protected Uri mStatusUri;
 
@@ -313,17 +306,16 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mContactId = contactId;
         mContactUri = ContentUris.withAppendedId(Contacts.CONTENT_URI, mContactId);
 
-        bindSummaryUri(ContentUris.withAppendedId(Contacts.CONTENT_SUMMARY_URI, mContactId));
+        bindContactUri(mContactUri);
         bindSocialUri(ContentUris.withAppendedId(Activities.CONTENT_CONTACT_STATUS_URI, mContactId));
     }
 
     /**
      * Convenience method for binding {@link Contacts} header details from a
-     * {@link Contacts#CONTENT_SUMMARY_URI} reference.
+     * {@link Contacts#CONTENT_URI} reference.
      */
-    public void bindSummaryUri(Uri contactSummary) {
-        mContactSummaryUri = contactSummary;
-        mQueryHandler.startQuery(TOKEN_CONTACT_INFO, null, mContactSummaryUri, HEADER_PROJECTION,
+    public void bindContactUri(Uri contactUri) {
+        mQueryHandler.startQuery(TOKEN_CONTACT_INFO, null, contactUri, HEADER_PROJECTION,
                 null, null, null);
     }
 
