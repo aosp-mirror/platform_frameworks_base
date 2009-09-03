@@ -12545,6 +12545,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
 
                 mConfiguration = newConfig;
+                Log.i(TAG, "Config changed: " + newConfig);
 
                 Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
                 msg.obj = new Configuration(mConfiguration);
