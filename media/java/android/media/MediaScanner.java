@@ -825,6 +825,22 @@ public class MediaScanner
             }
         }
 
+        public void addNoMediaFolder(String path) {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.ImageColumns.DATA, "");
+            String [] pathSpec = new String[] {path + '%'};
+            try {
+                mMediaProvider.update(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values,
+                        MediaStore.Images.ImageColumns.DATA + " LIKE ?", pathSpec);
+                mMediaProvider.update(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values,
+                        MediaStore.Images.ImageColumns.DATA + " LIKE ?", pathSpec);
+                mMediaProvider.update(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values,
+                        MediaStore.Images.ImageColumns.DATA + " LIKE ?", pathSpec);
+            } catch (RemoteException e) {
+                throw new RuntimeException();
+            }
+        }
+
     }; // end of anonymous MediaScannerClient instance
 
     private void prescan(String filePath) throws RemoteException {
