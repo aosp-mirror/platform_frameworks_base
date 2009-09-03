@@ -50,11 +50,6 @@ public:
         return meta;
     }
 
-    virtual status_t getMaxSampleSize(size_t *max_size) {
-        *max_size = mSize;
-        return OK;
-    }
-
     virtual status_t start(MetaData *params) {
         return OK;
     }
@@ -209,7 +204,7 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-#endif
+#else
 
 int main(int argc, char **argv) {
     android::ProcessState::self()->startThreadPool();
@@ -265,4 +260,4 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-
+#endif
