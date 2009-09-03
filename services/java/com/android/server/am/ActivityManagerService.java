@@ -8867,6 +8867,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     } else {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
                     }
+                    currApp.importanceReasonCode = app.adjTypeCode;
+                    if (app.adjSource instanceof ProcessRecord) {
+                        currApp.importanceReasonPid = ((ProcessRecord)app.adjSource).pid;
+                    } else if (app.adjSource instanceof HistoryRecord) {
+                        HistoryRecord r = (HistoryRecord)app.adjSource;
+                        if (r.app != null) currApp.importanceReasonPid = r.app.pid;
+                    }
+                    if (app.adjTarget instanceof ComponentName) {
+                        currApp.importanceReasonComponent = (ComponentName)app.adjTarget;
+                    }
                     //Log.v(TAG, "Proc " + app.processName + ": imp=" + currApp.importance
                     //        + " lru=" + currApp.lru);
                     if (runList == null) {
@@ -9889,6 +9899,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (r.app != null && r.app.persistent) {
             info.flags |= ActivityManager.RunningServiceInfo.FLAG_PERSISTENT_PROCESS;
         }
+        for (ConnectionRecord conn : r.connections.values()) {
+            if (conn.clientLabel != 0) {
+                info.clientPackage = conn.binding.client.info.packageName;
+                info.clientLabel = conn.clientLabel;
+                break;
+            }
+        }
         return info;
     }
     
@@ -9917,6 +9934,20 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public PendingIntent getRunningServiceControlPanel(ComponentName name) {
+        synchronized (this) {
+            ServiceRecord r = mServices.get(name);
+            if (r != null) {
+                for (ConnectionRecord conn : r.connections.values()) {
+                    if (conn.clientIntent != null) {
+                        return conn.clientIntent;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
     private final ServiceRecord findServiceLocked(ComponentName name,
             IBinder token) {
         ServiceRecord r = mServices.get(name);
@@ -10784,6 +10815,29 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 activity = (HistoryRecord)mHistory.get(aindex);
             }
 
+            int clientLabel = 0;
+            PendingIntent clientIntent = null;
+            
+            if (callerApp.info.uid == Process.SYSTEM_UID) {
+                // Hacky kind of thing -- allow system stuff to tell us
+                // what they are, so we can report this elsewhere for
+                // others to know why certain services are running.
+                try {
+                    clientIntent = (PendingIntent)service.getParcelableExtra(
+                            Intent.EXTRA_CLIENT_INTENT);
+                } catch (RuntimeException e) {
+                }
+                if (clientIntent != null) {
+                    clientLabel = service.getIntExtra(Intent.EXTRA_CLIENT_LABEL, 0);
+                    if (clientLabel != 0) {
+                        // There are no useful extras in the intent, trash them.
+                        // System code calling with this stuff just needs to know
+                        // this will happen.
+                        service = service.cloneFilter();
+                    }
+                }
+            }
+            
             ServiceLookupResult res =
                 retrieveServiceLocked(service, resolvedType,
                         Binder.getCallingPid(), Binder.getCallingUid());
@@ -10804,7 +10858,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp);
             ConnectionRecord c = new ConnectionRecord(b, activity,
-                    connection, flags);
+                    connection, flags, clientLabel, clientIntent);
 
             IBinder binder = connection.asBinder();
             s.connections.put(binder, c);
@@ -12777,6 +12831,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             return (app.curAdj=app.maxAdj);
        }
         
+        app.adjTypeCode = ActivityManager.RunningAppProcessInfo.REASON_UNKNOWN;
         app.adjSource = null;
         app.adjTarget = null;
 
@@ -12910,6 +12965,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 adj = clientAdj > VISIBLE_APP_ADJ
                                         ? clientAdj : VISIBLE_APP_ADJ;
                                 app.adjType = "service";
+                                app.adjTypeCode = ActivityManager.RunningAppProcessInfo
+                                        .REASON_SERVICE_IN_USE;
                                 app.adjSource = cr.binding.client;
                                 app.adjTarget = s.serviceInfo.name;
                             }
@@ -12923,6 +12980,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                  || a.state == ActivityState.PAUSING)) {
                             adj = FOREGROUND_APP_ADJ;
                             app.adjType = "service";
+                            app.adjTypeCode = ActivityManager.RunningAppProcessInfo
+                                    .REASON_SERVICE_IN_USE;
                             app.adjSource = a;
                             app.adjTarget = s.serviceInfo.name;
                         }
@@ -12965,6 +13024,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             adj = clientAdj > FOREGROUND_APP_ADJ
                                     ? clientAdj : FOREGROUND_APP_ADJ;
                             app.adjType = "provider";
+                            app.adjTypeCode = ActivityManager.RunningAppProcessInfo
+                                    .REASON_PROVIDER_IN_USE;
                             app.adjSource = client;
                             app.adjTarget = cpr.info.name;
                         }

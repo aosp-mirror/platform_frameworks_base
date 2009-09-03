@@ -25,6 +25,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.accessibilityservice.IEventListener;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -615,6 +616,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mId = sIdCounter++;
             mComponentName = componentName;
             mIntent = new Intent().setComponent(mComponentName);
+            mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
+                    com.android.internal.R.string.accessibility_binding_label);
+            mIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
+                    mContext, 0, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 0));
         }
 
         /**
