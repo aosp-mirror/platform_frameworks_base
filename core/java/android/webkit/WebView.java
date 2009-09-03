@@ -58,6 +58,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.animation.AlphaAnimation;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebTextView.AutoCompleteAdapter;
 import android.webkit.WebViewCore.EventHub;
@@ -2733,6 +2734,15 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /**
+     * Need to adjust the WebTextView after a change in zoom, since mActualScale
+     * has changed.  This is especially important for password fields, which are
+     * drawn by the WebTextView, since it conveys more information than what
+     * webkit draws.  Thus we need to reposition it to show in the correct
+     * place.
+     */
+    private boolean mNeedToAdjustWebTextView;
+
     private void drawCoreAndCursorRing(Canvas canvas, int color,
         boolean drawCursorRing) {
         if (mDrawHistory) {
@@ -2756,6 +2766,20 @@ public class WebView extends AbsoluteLayout
                 zoomScale = mZoomScale;
                 // set mZoomScale to be 0 as we have done animation
                 mZoomScale = 0;
+                if (mNeedToAdjustWebTextView) {
+                    mNeedToAdjustWebTextView = false;
+                    mWebTextView.setTextSize(contentToViewDimension(
+                            nativeFocusCandidateTextSize()));
+                    Rect bounds = nativeFocusCandidateNodeBounds();
+                    Rect vBox = contentToView(bounds);
+                    mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
+                            vBox.height());
+                    // If it is a password field, start drawing the
+                    // WebTextView once again.
+                    if (nativeFocusCandidateIsPassword()) {
+                        mWebTextView.setInPassword(true);
+                    }
+                }
             }
             float scale = zoomScale * mInvInitialZoomScale;
             int tx = Math.round(scale * (mInitialScrollX + mZoomCenterX)
@@ -2768,6 +2792,17 @@ public class WebView extends AbsoluteLayout
                     * zoomScale)) + mScrollY;
             canvas.translate(tx, ty);
             canvas.scale(zoomScale, zoomScale);
+            if (inEditingMode() && !mNeedToAdjustWebTextView
+                    && mZoomScale != 0) {
+                // The WebTextView is up.  Keep track of this so we can adjust
+                // its size and placement when we finish zooming
+                mNeedToAdjustWebTextView = true;
+                // If it is in password mode, turn it off so it does not draw
+                // misplaced.
+                if (nativeFocusCandidateIsPassword()) {
+                    mWebTextView.setInPassword(false);
+                }
+            }
         } else {
             canvas.scale(mActualScale, mActualScale);
         }
