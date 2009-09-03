@@ -180,6 +180,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             = new HashMap<IBinder, ClientState>();
     
     /**
+     * Set once the system is ready to run third party code.
+     */
+    boolean mSystemReady;
+    
+    /**
      * Id of the currently selected input method.
      */
     String mCurMethodId;
@@ -508,6 +513,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     public void systemReady() {
+        synchronized (mMethodMap) {
+            if (!mSystemReady) {
+                mSystemReady = true;
+                startInputInnerLocked();
+            }
+        }
     }
     
     public List<InputMethodInfo> getInputMethodList() {
@@ -725,6 +736,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             SystemClock.uptimeMillis()-mLastBindTime, 0);
                 }
             }
+        }
+        
+        return startInputInnerLocked();
+    }
+    
+    InputBindResult startInputInnerLocked() {
+        if (mCurMethodId == null) {
+            return mNoBinding;
+        }
+        
+        if (!mSystemReady) {
+            // If the system is not yet ready, we shouldn't be running third
+            // party code.
+            return new InputBindResult(null, mCurId, mCurSeq);
         }
         
         InputMethodInfo info = mMethodMap.get(mCurMethodId);

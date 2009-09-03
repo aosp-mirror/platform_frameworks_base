@@ -941,13 +941,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case SYSTEM_READY_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            systemReady();
-            reply.writeNoException();
-            return true;
-        }
-
         case HANDLE_APPLICATION_ERROR_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder app = data.readStrongBinder();
@@ -2244,16 +2237,6 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(action);
         data.writeString(indata);
         mRemote.transact(START_RUNNING_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-    public void systemReady() throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(SYSTEM_READY_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
