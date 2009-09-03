@@ -24,6 +24,7 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=         \
+        SineSource.cpp    \
         record.cpp
 
 LOCAL_SHARED_LIBRARIES := \

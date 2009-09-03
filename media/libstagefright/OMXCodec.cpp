@@ -301,7 +301,7 @@ sp<OMXCodec> OMXCodec::Create(
     if (!strcasecmp("audio/3gpp", mime)) {
         codec->setAMRFormat();
     }
-    if (!createEncoder && !strcasecmp("audio/mp4a-latm", mime)) {
+    if (!strcasecmp("audio/mp4a-latm", mime)) {
         int32_t numChannels, sampleRate;
         CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
@@ -334,7 +334,7 @@ sp<OMXCodec> OMXCodec::Create(
 
         int32_t compressedSize;
         success = success && meta->findInt32(
-                kKeyCompressedSize, &compressedSize);
+                kKeyMaxInputSize, &compressedSize);
 
         CHECK(success);
         CHECK(compressedSize > 0);
@@ -343,9 +343,40 @@ sp<OMXCodec> OMXCodec::Create(
         codec->setJPEGInputFormat(width, height, (OMX_U32)compressedSize);
     }
 
+    int32_t maxInputSize;
+    if (createEncoder && meta->findInt32(kKeyMaxInputSize, &maxInputSize)) {
+        codec->setMinBufferSize(kPortIndexInput, (OMX_U32)maxInputSize);
+    }
+
+    if (!strcmp(componentName, "OMX.TI.AMR.encode")
+        || !strcmp(componentName, "OMX.TI.WBAMR.encode")) {
+        codec->setMinBufferSize(kPortIndexOutput, 8192);  // XXX
+    }
+
     codec->initOutputFormat(meta);
 
     return codec;
+}
+
+void OMXCodec::setMinBufferSize(OMX_U32 portIndex, OMX_U32 size) {
+    OMX_PARAM_PORTDEFINITIONTYPE def;
+    def.nSize = sizeof(def);
+    def.nVersion.s.nVersionMajor = 1;
+    def.nVersion.s.nVersionMinor = 1;
+    def.nPortIndex = portIndex;
+
+    status_t err = mOMX->get_parameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    CHECK_EQ(err, OK);
+
+    if (def.nBufferSize < size) {
+        def.nBufferSize = size;
+
+    }
+
+    err = mOMX->set_parameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    CHECK_EQ(err, OK);
 }
 
 status_t OMXCodec::setVideoPortFormatType(
@@ -689,7 +720,6 @@ status_t OMXCodec::init() {
     if (!(mQuirks & kRequiresLoadedToIdleAfterAllocation)) {
         err = mOMX->send_command(mNode, OMX_CommandStateSet, OMX_StateIdle);
         CHECK_EQ(err, OK);
-
         setState(LOADED_TO_IDLE);
     }
 
@@ -1430,6 +1460,41 @@ void OMXCodec::setState(State newState) {
     mBufferFilled.signal();
 }
 
+void OMXCodec::setRawAudioFormat(
+        OMX_U32 portIndex, int32_t sampleRate, int32_t numChannels) {
+    OMX_AUDIO_PARAM_PCMMODETYPE pcmParams;
+    pcmParams.nSize = sizeof(pcmParams);
+    pcmParams.nVersion.s.nVersionMajor = 1;
+    pcmParams.nVersion.s.nVersionMinor = 1;
+    pcmParams.nPortIndex = portIndex;
+
+    status_t err = mOMX->get_parameter(
+            mNode, OMX_IndexParamAudioPcm, &pcmParams, sizeof(pcmParams));
+
+    CHECK_EQ(err, OK);
+
+    pcmParams.nChannels = numChannels;
+    pcmParams.eNumData = OMX_NumericalDataSigned;
+    pcmParams.bInterleaved = OMX_TRUE;
+    pcmParams.nBitPerSample = 16;
+    pcmParams.nSamplingRate = sampleRate;
+    pcmParams.ePCMMode = OMX_AUDIO_PCMModeLinear;
+
+    if (numChannels == 1) {
+        pcmParams.eChannelMapping[0] = OMX_AUDIO_ChannelCF;
+    } else {
+        CHECK_EQ(numChannels, 2);
+
+        pcmParams.eChannelMapping[0] = OMX_AUDIO_ChannelLF;
+        pcmParams.eChannelMapping[1] = OMX_AUDIO_ChannelRF;
+    }
+
+    err = mOMX->set_parameter(
+            mNode, OMX_IndexParamAudioPcm, &pcmParams, sizeof(pcmParams));
+
+    CHECK_EQ(err, OK);
+}
+
 void OMXCodec::setAMRFormat() {
     if (!mIsEncoder) {
         OMX_AUDIO_PARAM_AMRTYPE def;
@@ -1459,57 +1524,32 @@ void OMXCodec::setAMRFormat() {
         CHECK(format->findInt32(kKeySampleRate, &sampleRate));
         CHECK(format->findInt32(kKeyChannelCount, &numChannels));
 
-        OMX_AUDIO_PARAM_PCMMODETYPE pcmParams;
-        pcmParams.nSize = sizeof(pcmParams);
-        pcmParams.nVersion.s.nVersionMajor = 1;
-        pcmParams.nVersion.s.nVersionMinor = 1;
-        pcmParams.nPortIndex = kPortIndexInput;
-
-        status_t err = mOMX->get_parameter(
-                mNode, OMX_IndexParamAudioPcm, &pcmParams, sizeof(pcmParams));
-
-        CHECK_EQ(err, OK);
-
-        pcmParams.nChannels = numChannels;
-        pcmParams.eNumData = OMX_NumericalDataSigned;
-        pcmParams.bInterleaved = OMX_TRUE;
-        pcmParams.nBitPerSample = 16;
-        pcmParams.nSamplingRate = sampleRate;
-        pcmParams.ePCMMode = OMX_AUDIO_PCMModeLinear;
-
-        if (numChannels == 1) {
-            pcmParams.eChannelMapping[0] = OMX_AUDIO_ChannelCF;
-        } else {
-            CHECK_EQ(numChannels, 2);
-
-            pcmParams.eChannelMapping[0] = OMX_AUDIO_ChannelLF;
-            pcmParams.eChannelMapping[1] = OMX_AUDIO_ChannelRF;
-        }
-
-        err = mOMX->set_parameter(
-                mNode, OMX_IndexParamAudioPcm, &pcmParams, sizeof(pcmParams));
-
-        CHECK_EQ(err, OK);
+        setRawAudioFormat(kPortIndexInput, sampleRate, numChannels);
     }
 }
 
 void OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate) {
-    OMX_AUDIO_PARAM_AACPROFILETYPE profile;
-    profile.nSize = sizeof(profile);
-    profile.nVersion.s.nVersionMajor = 1;
-    profile.nVersion.s.nVersionMinor = 1;
-    profile.nPortIndex = kPortIndexInput;
+    if (mIsEncoder) {
+        setRawAudioFormat(kPortIndexInput, sampleRate, numChannels);
+    } else {
+        OMX_AUDIO_PARAM_AACPROFILETYPE profile;
+        profile.nSize = sizeof(profile);
+        profile.nVersion.s.nVersionMajor = 1;
+        profile.nVersion.s.nVersionMinor = 1;
+        profile.nPortIndex = kPortIndexInput;
 
-    status_t err =
-        mOMX->get_parameter(mNode, OMX_IndexParamAudioAac, &profile, sizeof(profile));
-    CHECK_EQ(err, OK);
+        status_t err = mOMX->get_parameter(
+                mNode, OMX_IndexParamAudioAac, &profile, sizeof(profile));
+        CHECK_EQ(err, OK);
 
-    profile.nChannels = numChannels;
-    profile.nSampleRate = sampleRate;
-    profile.eAACStreamFormat = OMX_AUDIO_AACStreamFormatMP4ADTS;
+        profile.nChannels = numChannels;
+        profile.nSampleRate = sampleRate;
+        profile.eAACStreamFormat = OMX_AUDIO_AACStreamFormatMP4ADTS;
 
-    err = mOMX->set_parameter(mNode, OMX_IndexParamAudioAac, &profile, sizeof(profile));
-    CHECK_EQ(err, OK);
+        err = mOMX->set_parameter(
+                mNode, OMX_IndexParamAudioAac, &profile, sizeof(profile));
+        CHECK_EQ(err, OK);
+    }
 }
 
 void OMXCodec::setImageOutputFormat(
@@ -2102,40 +2142,46 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
         {
             OMX_AUDIO_PORTDEFINITIONTYPE *audio_def = &def.format.audio;
 
-            CHECK_EQ(audio_def->eEncoding, OMX_AUDIO_CodingPCM);
+            if (audio_def->eEncoding == OMX_AUDIO_CodingPCM) {
+                OMX_AUDIO_PARAM_PCMMODETYPE params;
+                params.nSize = sizeof(params);
+                params.nVersion.s.nVersionMajor = 1;
+                params.nVersion.s.nVersionMinor = 1;
+                params.nPortIndex = kPortIndexOutput;
 
-            OMX_AUDIO_PARAM_PCMMODETYPE params;
-            params.nSize = sizeof(params);
-            params.nVersion.s.nVersionMajor = 1;
-            params.nVersion.s.nVersionMinor = 1;
-            params.nPortIndex = kPortIndexOutput;
+                err = mOMX->get_parameter(
+                        mNode, OMX_IndexParamAudioPcm, &params, sizeof(params));
+                CHECK_EQ(err, OK);
 
-            err = mOMX->get_parameter(
-                    mNode, OMX_IndexParamAudioPcm, &params, sizeof(params));
-            CHECK_EQ(err, OK);
+                CHECK_EQ(params.eNumData, OMX_NumericalDataSigned);
+                CHECK_EQ(params.nBitPerSample, 16);
+                CHECK_EQ(params.ePCMMode, OMX_AUDIO_PCMModeLinear);
 
-            CHECK_EQ(params.eNumData, OMX_NumericalDataSigned);
-            CHECK_EQ(params.nBitPerSample, 16);
-            CHECK_EQ(params.ePCMMode, OMX_AUDIO_PCMModeLinear);
+                int32_t numChannels, sampleRate;
+                inputFormat->findInt32(kKeyChannelCount, &numChannels);
+                inputFormat->findInt32(kKeySampleRate, &sampleRate);
 
-            int32_t numChannels, sampleRate;
-            inputFormat->findInt32(kKeyChannelCount, &numChannels);
-            inputFormat->findInt32(kKeySampleRate, &sampleRate);
+                if ((OMX_U32)numChannels != params.nChannels) {
+                    LOGW("Codec outputs a different number of channels than "
+                         "the input stream contains.");
+                }
 
-            if ((OMX_U32)numChannels != params.nChannels) {
-                LOGW("Codec outputs a different number of channels than "
-                     "the input stream contains.");
+                mOutputFormat->setCString(kKeyMIMEType, "audio/raw");
+
+                // Use the codec-advertised number of channels, as some
+                // codecs appear to output stereo even if the input data is
+                // mono.
+                mOutputFormat->setInt32(kKeyChannelCount, params.nChannels);
+
+                // The codec-reported sampleRate is not reliable...
+                mOutputFormat->setInt32(kKeySampleRate, sampleRate);
+            } else if (audio_def->eEncoding == OMX_AUDIO_CodingAMR) {
+                mOutputFormat->setCString(kKeyMIMEType, "audio/3gpp");
+            } else if (audio_def->eEncoding == OMX_AUDIO_CodingAAC) {
+                mOutputFormat->setCString(kKeyMIMEType, "audio/mp4a-latm");
+            } else {
+                CHECK(!"Should not be here. Unknown audio encoding.");
             }
-
-            mOutputFormat->setCString(kKeyMIMEType, "audio/raw");
-
-            // Use the codec-advertised number of channels, as some
-            // codecs appear to output stereo even if the input data is
-            // mono.
-            mOutputFormat->setInt32(kKeyChannelCount, params.nChannels);
-
-            // The codec-reported sampleRate is not reliable...
-            mOutputFormat->setInt32(kKeySampleRate, sampleRate);
             break;
         }
 

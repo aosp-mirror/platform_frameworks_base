@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+#include "SineSource.h"
+
 #include <binder/ProcessState.h>
+#include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
@@ -24,9 +27,11 @@
 #include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
+#include <media/MediaPlayerInterface.h>
 
 using namespace android;
 
+#if 0
 class DummySource : public MediaSource {
 public:
     DummySource(int width, int height)
@@ -158,7 +163,7 @@ int main(int argc, char **argv) {
         OMXCodec::Create(
                 client.interface(), enc_meta, true /* createEncoder */, decoder);
 
-#if 1
+#if 0
     sp<MPEG4Writer> writer = new MPEG4Writer("/sdcard/output.mp4");
     writer->addSource(enc_meta, encoder);
     writer->start();
@@ -201,6 +206,62 @@ int main(int argc, char **argv) {
     delete source;
     source = NULL;
 #endif
+
+    return 0;
+}
+#endif
+
+int main(int argc, char **argv) {
+    android::ProcessState::self()->startThreadPool();
+
+    OMXClient client;
+    CHECK_EQ(client.connect(), OK);
+
+    const int32_t kSampleRate = 22050;
+    const int32_t kNumChannels = 2;
+    sp<MediaSource> audioSource = new SineSource(kSampleRate, kNumChannels);
+
+#if 0
+    sp<MediaPlayerBase::AudioSink> audioSink;
+    AudioPlayer *player = new AudioPlayer(audioSink);
+    player->setSource(audioSource);
+    player->start();
+
+    sleep(10);
+
+    player->stop();
+#endif
+
+    sp<MetaData> encMeta = new MetaData;
+    encMeta->setCString(kKeyMIMEType, 1 ? "audio/3gpp" : "audio/mp4a-latm");
+    encMeta->setInt32(kKeySampleRate, kSampleRate);
+    encMeta->setInt32(kKeyChannelCount, kNumChannels);
+    encMeta->setInt32(kKeyMaxInputSize, 8192);
+
+    sp<MediaSource> encoder =
+        OMXCodec::Create(client.interface(), encMeta, true, audioSource);
+
+    encoder->start();
+
+    int32_t n = 0;
+    status_t err;
+    MediaBuffer *buffer;
+    while ((err = encoder->read(&buffer)) == OK) {
+        printf(".");
+        fflush(stdout);
+
+        buffer->release();
+        buffer = NULL;
+
+        if (++n == 10000) {
+            break;
+        }
+    }
+    printf("$\n");
+
+    encoder->stop();
+
+    client.disconnect();
 
     return 0;
 }
