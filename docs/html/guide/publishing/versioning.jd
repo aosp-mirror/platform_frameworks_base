@@ -17,7 +17,7 @@ page.title=Versioning Your Applications
 
 <ol>
 <li><a href="#appversion">Setting Application Version</a></li>
-<li><a href="#minsdkversion">Specifying Minimum System API Version</a>
+<li><a href="#minsdkversion">Specifying Your Application's System API Requirements</a>
 </ol>
 
 
@@ -125,31 +125,44 @@ applications use the
 {@link android.content.pm.PackageManager#getPackageInfo(java.lang.String, int)} 
 method of {@link android.content.pm.PackageManager PackageManager}. </p>
 
-<h2 id="minsdkversion">Specifying Minimum System API Version</h2>
+<h2 id="minsdkversion">Specifying Your Application's System API Requirements</h2>
 
 <p>If your application requires a specific minimum version of the Android
-platform, you can specify that version as an API Level identifier 
+platform, or is designed only to support a certain range of Android platform
+versions, you can specify those version requirements as API Level identifiers 
 in the application's manifest file. Doing so ensures that your 
 application can only be installed on devices that
 are running a compatible version of the Android system. </p>
 
-<p>To specify the minimum system version in the manifest, use this attribute: </p>
+<p>To specify API Level requirements, add a <code>&lt;uses-sdk&gt;</code> 
+element in the application's manifest, with one or more of these attributes: </p>
 
 <ul>
-<li><code>android:minSdkVersion</code> &mdash; An integer value corresponding to
-the code version of the Android platform. 
-<p>When preparing to install an application, the system checks the value of this
+<li><code>android:minSdkVersion</code> &mdash; The minimum version
+of the Android platform on which the application will run, specified
+by the platform's API Level identifier. </li>
+<li><code>android:maxSdkVersion</code> &mdash; The maximum version
+of the Android platform on which the application is designed to run, 
+specified by the platform's API Level identifier.  </li>
+</ul>
+
+<p>When preparing to install your application, the system checks the value of this
 attribute and compares it to the system version. If the
 <code>android:minSdkVersion</code> value is greater than the system version, the
-system aborts the installation of the application. </p>
+system aborts the installation of the application. Similarly, the system
+installs your application only if its <code>android:maxSdkVersion</code>
+is compatible with the platform version.</p>
 
-<p>If you do not specify this attribute in your manifest, the system assumes
-that your application is compatible with all platform versions.</p></li>
-</ul>
+<p>If you do not specify these attributes in your manifest, the system assumes
+that your application is compatible with all platform versions, with no
+maximum API Level. </p>
 
 <p>To specify a minimum platform version for your application, add a
 <code>&lt;uses-sdk&gt;</code> element as a child of
 <code>&lt;manifest&gt;</code>, then define the
 <code>android:minSdkVersion</code> as an attribute. </p>
 
-<p>For more information, also see the <a href="{@docRoot}sdk/android-1.1.html">Android System Image 1.1 Version Notes</a>.</p>
+<p>For more information, see the <a
+href="{@docRoot}guide/developing/manifest/uses-sdk-element.html"><code>&lt;uses-
+sdk&gt;</code></a> manifest element documentation and the <a
+href="{@docRoot}guide/appendix/api-levels.htmll">API Levels</a> document.</p>

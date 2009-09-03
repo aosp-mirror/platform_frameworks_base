@@ -40,38 +40,46 @@ page.title=コミュニティ
 
 <h3 id="ApplicationDeveloperLists">アプリケーション デベロッパー メーリング リスト</h3>
 <ul>
+
+<li><b>Android SDK Japan</b> - Android SDK に関する質問と答え、提案とフィードバックを交換できる場です。
+<ul>
+<li>Google グループで登録:&nbsp;<a href="http://groups.google.co.jp/group/android-sdk-japan?hl=ja">android-sdk-japan</a></li>
+<li>メールで登録:&nbsp;<a href="mailto:android-sdk-japan-subscribe@googlegroups.com">android-sdk-japan-subscribe@googlegroups.com</a></li>
+</ul>
+</li>
+
 <li><b>Android 初心者向け</b> - Android アプリケーションの開発初心者向けです。Android SDK と基本的な Android API の利用方法について学習したい場合は、このメーリング リストから始めてください。このメーリング リストには、SDK を利用するデベロッパーの初歩的なディスカッションの場所です。Android プラットフォームで初めてアプリケーションを作成して実行する際は、非常に有益な情報を得ることができるでしょう。開発環境のインストール方法についての質問を投稿したり、Android 開発の初歩（初めて作成するユーザー インターフェース、権限、Android ファイルシステムでのファイル、Android マーケットでのアプリケーションなど）について教えてもらうことができます。新たに質問する前に、必ず最初にアーカイブを確認してください。高度な内容の質問の場合はここでは質問せず、android-developers メーリング リストで質問してください。また使用に関する質問は、android-discuss メーリング リストの方が適しています。
 <ul>
 <li>Google グループで登録:&nbsp;<a href="http://groups.google.com/group/android-beginners?hl=ja">android-beginners</a></li>
-<li>メールで登録:&nbsp;<a href="mailto:android-beginners-subscribe@googlegroups.com">android-beginners-subscribe@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com"> </a></li>
+<li>メールで登録:&nbsp;<a href="mailto:android-beginners-subscribe@googlegroups.com">android-beginners-subscribe@googlegroups.com</a></li>
 </ul>
 </li>
 
 <li><b>Android デベロッパー向け</b> - Android アプリケーション デベロッパーとして経験を積むにつれ、Android アプリケーション開発の基本を把握して、SDK を使いこなせるようになります。今度は、より高度な内容について質問する必要があります。アプリケーションのトラブルシューティング、実装へのアドバイス、アプリケーションのパフォーマンスやユーザー エクスペリエンスを改良するテクニックに関する質問には、次のメーリング リストが役立ちます。使用に関する問題（android-discuss をご利用ください）や、Android SDK を使用する際の初歩的質問（android-beginners をご利用ください）についてのディスカッションの場所ではありません。
 <ul>
 <li>Google グループで登録:&nbsp;<a href="http://groups.google.com/group/android-developers?hl=ja">android-developers</a></li>
-<li>メールで登録:&nbsp;<a href="mailto:android-developers-subscribe@googlegroups.com">android-developers-subscribe@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com"> </a></li>
+<li>メールで登録:&nbsp;<a href="mailto:android-developers-subscribe@googlegroups.com">android-developers-subscribe@googlegroups.com</a></li>
 </ul>
 </li>
 
 <li><b>Android ディスカッション</b> - Android に関する「井戸端会議」です。ここでは、Android プラットフォームへのアイデア、自分のアプリケーションの公表、Android 携帯端末に関するディスカッション、コミュニティ リソースなど、Android に関することなら何でも投稿可能です。ただし他のメーリング リストに該当する内容の場合は、そのメーリング リストに投稿することをおすすめします。質問のテーマが限定されている場所の方が、より多くの回答を得ることができるでしょう。
 <ul>
 <li>Google グループで登録:&nbsp;<a href="http://groups.google.com/group/android-discuss?hl=ja">android-discuss</a></li>
-<li>メールで登録:&nbsp;<a href="mailto:android-discuss-subscribe@googlegroups.com">android-discuss-subscribe@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com"> </a></li>
+<li>メールで登録:&nbsp;<a href="mailto:android-discuss-subscribe@googlegroups.com">android-discuss-subscribe@googlegroups.com</a></li>
 </ul>
 </li>
 
 <li><b>Android セキュリティ ディスカッション</b> - 安全な開発、新たに発生したセキュリティの問題、Android デベロッパー向けの Android デベロッパーによるベスト プラクティスについて自由にディスカッションを行える場所です。メーリング リストで脆弱性を直接公開することは、すべての Android ユーザーを危険にさらすことになるので、避けてください。
 <ul>
 <li>Google グループで登録:&nbsp;<a href="http://groups.google.com/group/android-security-discuss?hl=ja">android-security-discuss</a></li>
-<li>メールで登録:&nbsp;<a href="mailto:android-security-discuss@googlegroups.com">android-security-discuss@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com"> </a></li>
+<li>メールで登録:&nbsp;<a href="mailto:android-security-discuss@googlegroups.com">android-security-discuss@googlegroups.com</a></li>
 </ul>
 </li>
 
 <li><b>Android セキュリティに関する発表</b> - Android セキュリティ チームがセキュリティ関連の発表を行う、小規模なグループです。
 <ul>
 <li>Google グループで登録:&nbsp;<a href="http://groups.google.com/group/android-security-announce?hl=ja">android-security-announce</a></li>
-<li>メールで登録:&nbsp;<a href="mailto:android-security-announce-subscribe@googlegroups.com">android-security-announce-subscribe@googlegroups.com</a> <a href="mailto:android-platform-subscribe@googlegroups.com"> </a></li>
+<li>メールで登録:&nbsp;<a href="mailto:android-security-announce-subscribe@googlegroups.com">android-security-announce-subscribe@googlegroups.com</a></li>
 </ul>
 </li>
 
