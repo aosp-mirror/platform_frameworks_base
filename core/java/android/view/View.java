@@ -5410,6 +5410,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     *  @hide
+     */
+    protected void onDrawVScrollBar(Canvas canvas, ScrollBarDrawable scrollBar,
+                                    int l, int t, int r, int b) {
+        scrollBar.setBounds(l, t, r, b);
+        scrollBar.setParameters(computeVerticalScrollRange(),
+                                computeVerticalScrollOffset(),
+                                computeVerticalScrollExtent(), true);
+        scrollBar.draw(canvas);
+    }
+    
+    /**
      * <p>Draw the vertical scrollbar if {@link #isVerticalScrollBarEnabled()}
      * returns true.</p>
      *
@@ -5441,13 +5453,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         // TODO: Deal with RTL languages to position scrollbar on left
         final int left = scrollX + width - size - (mUserPaddingRight & inside);
 
-        scrollBar.setBounds(left, scrollY + (mPaddingTop & inside),
-                left + size, scrollY + height - (mUserPaddingBottom & inside));
-        scrollBar.setParameters(
-                computeVerticalScrollRange(),
-                computeVerticalScrollOffset(),
-                computeVerticalScrollExtent(), true);
-        scrollBar.draw(canvas);
+        onDrawVScrollBar(canvas, scrollBar,
+                         left,
+                         scrollY + (mPaddingTop & inside),
+                         left + size,
+                         scrollY + height - (mUserPaddingBottom & inside));
     }
 
     /**
