@@ -366,6 +366,19 @@ public class ActivityManager {
          */
         public int flags;
         
+        /**
+         * For special services that are bound to by system code, this is
+         * the package that holds the binding.
+         */
+        public String clientPackage;
+        
+        /**
+         * For special services that are bound to by system code, this is
+         * a string resource providing a user-visible label for who the
+         * client is.
+         */
+        public int clientLabel;
+        
         public RunningServiceInfo() {
         }
 
@@ -386,6 +399,8 @@ public class ActivityManager {
             dest.writeLong(lastActivityTime);
             dest.writeLong(restarting);
             dest.writeInt(this.flags);
+            dest.writeString(clientPackage);
+            dest.writeInt(clientLabel);
         }
 
         public void readFromParcel(Parcel source) {
@@ -401,6 +416,8 @@ public class ActivityManager {
             lastActivityTime = source.readLong();
             restarting = source.readLong();
             flags = source.readInt();
+            clientPackage = source.readString();
+            clientLabel = source.readInt();
         }
         
         public static final Creator<RunningServiceInfo> CREATOR = new Creator<RunningServiceInfo>() {
@@ -432,6 +449,22 @@ public class ActivityManager {
         try {
             return (List<RunningServiceInfo>)ActivityManagerNative.getDefault()
                     .getServices(maxNum, 0);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+            return null;
+        }
+    }
+    
+    /**
+     * Returns a PendingIntent you can start to show a control panel for the
+     * given running service.  If the service does not have a control panel,
+     * null is returned.
+     */
+    public PendingIntent getRunningServiceControlPanel(ComponentName service)
+            throws SecurityException {
+        try {
+            return ActivityManagerNative.getDefault()
+                    .getRunningServiceControlPanel(service);
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
             return null;
@@ -704,8 +737,51 @@ public class ActivityManager {
          */
         public int lru;
         
+        /**
+         * Constant for {@link #importanceReasonCode}: nothing special has
+         * been specified for the reason for this level.
+         */
+        public static final int REASON_UNKNOWN = 0;
+        
+        /**
+         * Constant for {@link #importanceReasonCode}: one of the application's
+         * content providers is being used by another process.  The pid of
+         * the client process is in {@link #importanceReasonPid} and the
+         * target provider in this process is in
+         * {@link #importanceReasonComponent}.
+         */
+        public static final int REASON_PROVIDER_IN_USE = 1;
+        
+        /**
+         * Constant for {@link #importanceReasonCode}: one of the application's
+         * content providers is being used by another process.  The pid of
+         * the client process is in {@link #importanceReasonPid} and the
+         * target provider in this process is in
+         * {@link #importanceReasonComponent}.
+         */
+        public static final int REASON_SERVICE_IN_USE = 2;
+        
+        /**
+         * The reason for {@link #importance}, if any.
+         */
+        public int importanceReasonCode;
+        
+        /**
+         * For the specified values of {@link #importanceReasonCode}, this
+         * is the process ID of the other process that is a client of this
+         * process.  This will be 0 if no other process is using this one.
+         */
+        public int importanceReasonPid;
+        
+        /**
+         * For the specified values of {@link #importanceReasonCode}, this
+         * is the name of the component that is being used in this process.
+         */
+        public ComponentName importanceReasonComponent;
+        
         public RunningAppProcessInfo() {
             importance = IMPORTANCE_FOREGROUND;
+            importanceReasonCode = REASON_UNKNOWN;
         }
         
         public RunningAppProcessInfo(String pProcessName, int pPid, String pArr[]) {
@@ -724,6 +800,9 @@ public class ActivityManager {
             dest.writeStringArray(pkgList);
             dest.writeInt(importance);
             dest.writeInt(lru);
+            dest.writeInt(importanceReasonCode);
+            dest.writeInt(importanceReasonPid);
+            ComponentName.writeToParcel(importanceReasonComponent, dest);
         }
 
         public void readFromParcel(Parcel source) {
@@ -732,6 +811,9 @@ public class ActivityManager {
             pkgList = source.readStringArray();
             importance = source.readInt();
             lru = source.readInt();
+            importanceReasonCode = source.readInt();
+            importanceReasonPid = source.readInt();
+            importanceReasonComponent = ComponentName.readFromParcel(source);
         }
 
         public static final Creator<RunningAppProcessInfo> CREATOR = 

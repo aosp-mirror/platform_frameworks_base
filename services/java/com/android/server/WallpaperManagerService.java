@@ -21,6 +21,7 @@ import static android.os.ParcelFileDescriptor.*;
 
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
+import android.app.PendingIntent;
 import android.backup.BackupManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -40,6 +41,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.IWallpaperService;
@@ -376,6 +378,10 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             // Bind the service!
             WallpaperConnection newConn = new WallpaperConnection();
             intent.setComponent(realName);
+            intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
+                    com.android.internal.R.string.wallpaper_binding_label);
+            intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
+                    mContext, 0, new Intent(Intent.ACTION_SET_WALLPAPER), 0));
             if (!mContext.bindService(intent, newConn,
                     Context.BIND_AUTO_CREATE)) {
                 throw new IllegalArgumentException("Unable to bind service: "

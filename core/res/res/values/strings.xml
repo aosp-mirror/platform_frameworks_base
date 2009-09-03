@@ -1943,25 +1943,34 @@
     <string-array translatable="false" name="carrier_properties">
     </string-array>
 
-     <!-- Title for the selected state of a CompoundButton. -->
-     <string name="accessibility_compound_button_selected">checked</string>
+    <!-- Title for the selected state of a CompoundButton. -->
+    <string name="accessibility_compound_button_selected">checked</string>
 
-     <!-- Title for the unselected state of a CompoundButton. -->
-     <string name="accessibility_compound_button_unselected">not checked</string>
+    <!-- Title for the unselected state of a CompoundButton. -->
+    <string name="accessibility_compound_button_unselected">not checked</string>
 
-     <string name="grant_credentials_permission_message_desc">The
-     listed applications are requesting permission to access the login credentials for account <xliff:g id="account" example="foo@gmail.com">%1$s</xliff:g> from
-     <xliff:g id="application" example="Google Apps">%2$s</xliff:g>. Do you wish to grant this permission? If so, your answer will be remembered and you will not be prompted
-     again.</string>
+    <string name="grant_credentials_permission_message_desc">The
+    listed applications are requesting permission to access the login credentials for account <xliff:g id="account" example="foo@gmail.com">%1$s</xliff:g> from
+    <xliff:g id="application" example="Google Apps">%2$s</xliff:g>. Do you wish to grant this permission? If so, your answer will be remembered and you will not be prompted
+    again.</string>
 
-     <string name="grant_credentials_permission_message_with_authtokenlabel_desc">The
-     listed applications are requesting permission to access the <xliff:g id="type" example="Contacts">%1$s</xliff:g> login credentials for account <xliff:g id="account" example="foo@gmail.com">%2$s</xliff:g> from
-     <xliff:g id="application" example="Google Apps">%3$s</xliff:g>. Do you wish to grant this permission? If so, your answer will be remembered and you will not be prompted
-     again.</string>
+    <string name="grant_credentials_permission_message_with_authtokenlabel_desc">The
+    listed applications are requesting permission to access the <xliff:g id="type" example="Contacts">%1$s</xliff:g> login credentials for account <xliff:g id="account" example="foo@gmail.com">%2$s</xliff:g> from
+    <xliff:g id="application" example="Google Apps">%3$s</xliff:g>. Do you wish to grant this permission? If so, your answer will be remembered and you will not be prompted
+    again.</string>
 
-     <string name="allow">Allow</string>
-     <string name="deny">Deny</string>
-     <string name="permission_request_notification_title">Permission Requested</string>
-     <string name="permission_request_notification_subtitle">for account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g></string>
+    <string name="allow">Allow</string>
+    <string name="deny">Deny</string>
+    <string name="permission_request_notification_title">Permission Requested</string>
+    <string name="permission_request_notification_subtitle">for account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g></string>
 
+    <!-- Label to show for a service that is running because it is an input method. -->
+    <string name="input_method_binding_label">Input method</string>
+    <!-- Label to show for a service that is running because it is a sync adapter. -->
+    <string name="sync_binding_label">Sync</string>
+    <!-- Label to show for a service that is running because it is an accessibility module. -->
+    <string name="accessibility_binding_label">Accessibility</string>
+    <!-- Label to show for a service that is running because it is a wallpaper. -->
+    <string name="wallpaper_binding_label">Wallpaper</string>
+    
 </resources>
