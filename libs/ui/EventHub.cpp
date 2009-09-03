@@ -781,12 +781,21 @@ int EventHub::close_device(const char *deviceName)
         if(strcmp(mDevices[i]->path.string(), deviceName) == 0) {
             //LOGD("remove device %d: %s\n", i, deviceName);
             device_t* device = mDevices[i];
-            int count = mFDCount - i - 1;
+            
+            LOGI("Removed device: path=%s name=%s id=0x%x (of 0x%x) index=%d fd=%d classes=0x%x\n",
+                 device->path.string(), device->name.string(), device->id,
+                 mNumDevicesById, mFDCount, mFDs[i].fd, device->classes);
+         
+            // Clear this device's entry.
             int index = (device->id&ID_MASK);
             mDevicesById[index].device = NULL;
+            
+            // Close the file descriptor and compact the fd array.
             close(mFDs[i].fd);
+            int count = mFDCount - i - 1;
             memmove(mDevices + i, mDevices + i + 1, sizeof(mDevices[0]) * count);
             memmove(mFDs + i, mFDs + i + 1, sizeof(mFDs[0]) * count);
+            mFDCount--;
 
 #ifdef EV_SW
             for (int j=0; j<EV_SW; j++) {
@@ -798,8 +807,6 @@ int EventHub::close_device(const char *deviceName)
             
             device->next = mClosingDevices;
             mClosingDevices = device;
-
-            mFDCount--;
 
             uint32_t publicID;
             if (device->id == mFirstKeyboardId) {
@@ -817,7 +824,7 @@ int EventHub::close_device(const char *deviceName)
             return 0;
         }
     }
-    LOGE("remote device: %s not found\n", deviceName);
+    LOGE("remove device: %s not found\n", deviceName);
     return -1;
 }
 
@@ -832,7 +839,7 @@ int EventHub::read_notify(int nfd)
     int event_pos = 0;
     struct inotify_event *event;
 
-LOGD("EventHub::read_notify nfd: %d\n", nfd);
+    LOGV("EventHub::read_notify nfd: %d\n", nfd);
     res = read(nfd, event_buf, sizeof(event_buf));
     if(res < (int)sizeof(*event)) {
         if(errno == EINTR)

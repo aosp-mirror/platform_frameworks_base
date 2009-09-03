@@ -54,6 +54,7 @@ public abstract class KeyInputQueue {
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
 
     final SparseArray<InputDevice> mDevices = new SparseArray<InputDevice>();
+    final SparseArray<InputDevice> mIgnoredDevices = new SparseArray<InputDevice>();
     final ArrayList<VirtualKey> mVirtualKeys = new ArrayList<VirtualKey>();
     final HapticFeedbackCallback mHapticFeedbackCallback;
     
@@ -391,26 +392,50 @@ public abstract class KeyInputQueue {
                     if (ev.type == RawInputEvent.EV_DEVICE_ADDED) {
                         synchronized (mFirst) {
                             di = newInputDevice(ev.deviceId);
-                            mDevices.put(ev.deviceId, di);
-                            if ((di.classes & RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
-                                readVirtualKeys(di.name);
+                            if (di.classes != 0) {
+                                // If this device is some kind of input class,
+                                // we care about it.
+                                mDevices.put(ev.deviceId, di);
+                                if ((di.classes & RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
+                                    readVirtualKeys(di.name);
+                                }
+                                // The configuration may have changed because
+                                // of this device.
+                                configChanged = true;
+                            } else {
+                                // We won't do anything with this device.
+                                mIgnoredDevices.put(ev.deviceId, di);
+                                Log.i(TAG, "Ignoring non-input device: id=0x"
+                                        + Integer.toHexString(di.id)
+                                        + ", name=" + di.name);
                             }
-                            configChanged = true;
                         }
                     } else if (ev.type == RawInputEvent.EV_DEVICE_REMOVED) {
                         synchronized (mFirst) {
-                            Log.i(TAG, "Device removed: id=0x"
-                                    + Integer.toHexString(ev.deviceId));
+                            if (false) {
+                                Log.i(TAG, "Device removed: id=0x"
+                                        + Integer.toHexString(ev.deviceId));
+                            }
                             di = mDevices.get(ev.deviceId);
                             if (di != null) {
                                 mDevices.delete(ev.deviceId);
+                                // The configuration may have changed because
+                                // of this device.
                                 configChanged = true;
+                            } else if ((di=mIgnoredDevices.get(ev.deviceId)) != null) {
+                                mIgnoredDevices.remove(ev.deviceId);
                             } else {
-                                Log.w(TAG, "Bad device id: " + ev.deviceId);
+                                Log.w(TAG, "Removing bad device id: "
+                                        + Integer.toHexString(ev.deviceId));
+                                continue;
                             }
                         }
                     } else {
                         di = getInputDevice(ev.deviceId);
+                        if (di == null) {
+                            // This may be some junk from an ignored device.
+                            continue;
+                        }
                         
                         // first crack at it
                         send = preprocessEvent(di, ev);
@@ -422,10 +447,6 @@ public abstract class KeyInputQueue {
                         }
                     }
 
-                    if (di == null) {
-                        continue;
-                    }
-                    
                     if (configChanged) {
                         synchronized (mFirst) {
                             addLocked(di, System.nanoTime(), 0,
@@ -1056,28 +1077,33 @@ public abstract class KeyInputQueue {
     private InputDevice newInputDevice(int deviceId) {
         int classes = getDeviceClasses(deviceId);
         String name = getDeviceName(deviceId);
-        Log.i(TAG, "Device added: id=0x" + Integer.toHexString(deviceId)
-                + ", name=" + name
-                + ", classes=" + Integer.toHexString(classes));
-        InputDevice.AbsoluteInfo absX;
-        InputDevice.AbsoluteInfo absY;
-        InputDevice.AbsoluteInfo absPressure;
-        InputDevice.AbsoluteInfo absSize;
-        if ((classes&RawInputEvent.CLASS_TOUCHSCREEN_MT) != 0) {
-            absX = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_MT_POSITION_X, "X");
-            absY = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_MT_POSITION_Y, "Y");
-            absPressure = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_MT_TOUCH_MAJOR, "Pressure");
-            absSize = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_MT_WIDTH_MAJOR, "Size");
-        } else if ((classes&RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
-            absX = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_X, "X");
-            absY = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_Y, "Y");
-            absPressure = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_PRESSURE, "Pressure");
-            absSize = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_TOOL_WIDTH, "Size");
-        } else {
-            absX = null;
-            absY = null;
-            absPressure = null;
-            absSize = null;
+        InputDevice.AbsoluteInfo absX = null;
+        InputDevice.AbsoluteInfo absY = null;
+        InputDevice.AbsoluteInfo absPressure = null;
+        InputDevice.AbsoluteInfo absSize = null;
+        if (classes != 0) {
+            Log.i(TAG, "Device added: id=0x" + Integer.toHexString(deviceId)
+                    + ", name=" + name
+                    + ", classes=" + Integer.toHexString(classes));
+            if ((classes&RawInputEvent.CLASS_TOUCHSCREEN_MT) != 0) {
+                absX = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_MT_POSITION_X, "X");
+                absY = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_MT_POSITION_Y, "Y");
+                absPressure = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_MT_TOUCH_MAJOR, "Pressure");
+                absSize = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_MT_WIDTH_MAJOR, "Size");
+            } else if ((classes&RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
+                absX = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_X, "X");
+                absY = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_Y, "Y");
+                absPressure = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_PRESSURE, "Pressure");
+                absSize = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_TOOL_WIDTH, "Size");
+            }
         }
         
         return new InputDevice(deviceId, classes, name, absX, absY, absPressure, absSize);
