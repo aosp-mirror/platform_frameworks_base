@@ -1,7 +1,7 @@
 page.title=Android Emulator
 @jd:body
 
-<img src="{@docRoot}images/emulator-hvga-p.png" alt="Image of the Android Emulator" width="271" height="524" style="margin-left:0em;margin-top:-4em;float:right;"/>
+<div style="padding:1em;"><img src="/images/emulator-wvga800l.png" alt="Image of the Android Emulator" width="367" height="349" style="margin-left:2em;margin-top:-4em;float:right;"/></div>
 
 <p>The Android SDK includes a mobile device emulator -- a virtual mobile device 
 that runs on your computer. The emulator lets you prototype, develop, and test 
@@ -27,9 +27,13 @@ from which you can log kernel output, simulate application interrupts (such as
 arriving SMS messages or phone calls), and simulate latency effects and dropouts 
 on the data channel.</p>
 
-<div class="inline-toc" style="whitespace:nowrap;">
-<h4>In this document:</h4>
-<div class="g-unit g-first" style="whitespace:nowrap;width:35%;">
+<table>
+<tr>
+<td colspan="2" style="border:0;"><strong>In this document:</strong></td>
+</tr>
+<tr>
+<td style="border:0;">
+
 <ol class="toc">
 <li><a href="#overview">Overview</a></li>
 <li><a href="#starting">Starting and Stopping the Emulator</a></li>
@@ -53,9 +57,9 @@ on the data channel.</p>
 	<li><a href="#calling">Sending a Voice Call or SMS to Another Emulator Instance</a></li>
 	</ol></li>
 </ol>
-</div>
+</td>
 
-<div class="g-unit" style="whitespace:nowrap;">
+<td style="border:0;">
 <ol class="toc">
 <li><a href="#console">Using the Emulator Console</a>
 	<ol class="toc">
@@ -85,9 +89,9 @@ on the data channel.</p>
 <li><a href="#troubleshooting">Troubleshooting Emulator Problems</a></li>
 <li><a href="#limitations">Emulator Limitations</a></li>
 </ol>
-</div>
+</td>
 
-</div>
+</table>
 
 <a name="overview"></a>
 
@@ -260,11 +264,11 @@ the keys of your keyboard. </p>
   </tr>
   <tr>
     <td>Switch to previous layout orientation (for example, portrait, landscape)</td>
-    <td>KEYPAD_7, F11</td>
+    <td>KEYPAD_7, Ctrl-F11</td>
   </tr>
   <tr>
     <td>Switch to next layout orientation (for example, portrait, landscape)</td>
-    <td>KEYPAD_9, F12</td>
+    <td>KEYPAD_9, Ctrl-F12</td>
   </tr>
   <tr>
     <td>Toggle cell networking on/off</td>
@@ -721,19 +725,19 @@ scale in direct relationship with &lt;delay&gt; values.</p>
 </tr>
 <tr>
   <td><code>-skin &lt;skinID&gt;</code></td>
-  <td>Start the emulator with the specified skin. </td>
-  <td>The standard Android platforms includes a <a href="#skins">choice of 
-      four skins</a>:<br />
-      <li>HVGA-L (480x320, landscape)</li>
-      <li>HVGA-P (320x480, portrait) (default) </li>
-      <li>QVGA-L (320x240, landscape)</li>
-      <li>QVGA-P (240x320, portrait) </li>
+  <td>This emulator option is deprecated. </td>
+  <td>Please set skin options using AVDs, rather than by using this emulator
+option. Using this option may yield unexpected and in some cases misleading
+results, since the density with which to render the skin may not be defined.
+AVDs let you associate each skin with a default density and override the default
+as needed. For more information, see <a
+href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>.
 </td>
 </tr>
 <tr>
   <td><code>-skindir &lt;dir&gt;</code></td>
-  <td>Search for emulator skins in &lt;dir&gt;. </td>
-  <td>&nbsp;</td></tr>
+  <td>This emulator option is deprecated. </td>
+  <td>See comments for <code>-skin</code>, above.</td></tr>
 </table>
 
 <a name="diskimages"></a>
@@ -1636,41 +1640,9 @@ kilobits/sec):</p>
 
 <h2>Using Emulator Skins</h2>
 
-<p>You can run the emulator with any of four default skins, as described in the table below. To specify a skin, use <code>-skin &lt;skinID&gt;</code> when starting the emulator. </p>
+<p>The Android SDK includes several Emulator skins that you can use to control the resolution and density of the emulated device's screen. To select a specific skin for running the emulator, create an AVD that uses that skin. Please do not use deprecated emulator options such as <code>-skin</code> to control the skin used by an emulator instance. For more information about AVDs, see <a
+href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>.  </p>
 
-<p>For example: </p>
-
-<pre>emulator -skin HVGA-L</pre> 
-
-<p>Note that you must enter the <code>&lt;skinID&gt;</code> in uppercase letters (if your development computer is case-sensitive).</p>
-
-<table border="0" style="clear:left;padding:2em;">
-  <tr>
-    <th width="20%">skinID</th>
-    <th >Description</th>
-    <th >Skin</th>
-  </tr>
-  <tr>
-    <td><code>HVGA-L</code></td>
-    <td>480x320, landscape</td>
-    <td><img src="{@docRoot}images/e-mini-hvga-l.png" width="219" height="113"></td>
-  </tr>
-  <tr>
-    <td><code>HVGA-P</code></td>
-    <td>320x480, portrait (default)</td>
-    <td><img src="{@docRoot}images/e-mini-hvga-p.png" width="113" height="219"></td>
-  </tr>
-  <tr>
-    <td><code>QVGA-L</code></td>
-    <td>320x240, landscape</td>
-    <td><img src="{@docRoot}images/e-mini-qvga-l.png" width="119" height="197"></td>
-  </tr>
-  <tr>
-    <td><code>QVGA-P</code></td>
-    <td>240x320, portrait</td>
-    <td><img src="{@docRoot}images/e-mini-qvga-p.png" width="95" height="173"></td>
-  </tr>
-</table>
 
 <a name="multipleinstances"></a>
 
