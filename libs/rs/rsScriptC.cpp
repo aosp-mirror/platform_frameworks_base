@@ -67,6 +67,12 @@ bool ScriptC::run(Context *rsc, uint32_t launchIndex)
                 = nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
     }
 
+    for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
+        if (mProgram.mSlotPointers[ct]) {
+            *mProgram.mSlotPointers[ct] = mSlots[ct]->getPtr();
+        }
+    }
+
     bool ret = false;
     tls->mScript = this;
     ret = mProgram.mScript(launchIndex) != 0;
@@ -139,6 +145,7 @@ void ScriptCState::runCompiler(Context *rsc)
     accRegisterSymbolCallback(mAccScript, symbolLookup, NULL);
     accCompileScript(mAccScript);
     accGetScriptLabel(mAccScript, "main", (ACCvoid**) &mProgram.mScript);
+    accGetScriptLabel(mAccScript, "init", (ACCvoid**) &mProgram.mInit);
     rsAssert(mProgram.mScript);
 
     if (!mProgram.mScript) {
@@ -146,6 +153,19 @@ void ScriptCState::runCompiler(Context *rsc)
         ACCsizei len;
         accGetScriptInfoLog(mAccScript, sizeof(buf), &len, buf);
         LOGE(buf);
+    }
+
+    if (mProgram.mInit) {
+        mProgram.mInit();
+    }
+
+    for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
+        if (mSlotNames[ct].length() > 0) {
+            accGetScriptLabel(mAccScript,
+                              mSlotNames[ct].string(),
+                              (ACCvoid**) &mProgram.mSlotPointers[ct]);
+            LOGE("var  %s  %p", mSlotNames[ct].string(), mProgram.mSlotPointers[ct]);
+        }
     }
 
     mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
@@ -224,6 +244,19 @@ void ScriptCState::runCompiler(Context *rsc)
     }
 }
 
+static void appendElementBody(String8 *s, const Element *e)
+{
+    s->append(" {\n");
+    for (size_t ct2=0; ct2 < e->getComponentCount(); ct2++) {
+        const Component *c = e->getComponent(ct2);
+        s->append("    ");
+        s->append(c->getCType());
+        s->append(" ");
+        s->append(c->getComponentName());
+        s->append(";\n");
+    }
+    s->append("}");
+}
 
 void ScriptCState::appendVarDefines(String8 *str)
 {
@@ -246,6 +279,8 @@ void ScriptCState::appendVarDefines(String8 *str)
     }
 }
 
+
+
 void ScriptCState::appendTypes(String8 *str)
 {
     char buf[256];
@@ -257,6 +292,19 @@ void ScriptCState::appendTypes(String8 *str)
             continue;
         }
         const Element *e = t->getElement();
+        if (e->getName() && (e->getComponentCount() > 1)) {
+            String8 s("struct struct_");
+            s.append(e->getName());
+            appendElementBody(&s, e);
+            s.append(";\n");
+            s.append("#define ");
+            s.append(e->getName());
+            s.append("_t struct struct_");
+            s.append(e->getName());
+            s.append("\n\n");
+            LOGD(s);
+            str->append(s);
+        }
 
         if (t->getName()) {
             for (size_t ct2=0; ct2 < e->getComponentCount(); ct2++) {
@@ -267,12 +315,39 @@ void ScriptCState::appendTypes(String8 *str)
                 tmp.append(c->getComponentName());
                 sprintf(buf, " %i\n", ct2);
                 tmp.append(buf);
-                //LOGD(tmp);
+                LOGD(tmp);
                 str->append(tmp);
             }
         }
 
         if (mSlotNames[ct].length() > 0) {
+            String8 s;
+            if (e->getComponentCount() > 1) {
+                if (e->getName()) {
+                    // Use the named struct
+                    s.setTo(e->getName());
+                    s.append("_t *");
+                } else {
+                    // create an struct named from the slot.
+                    s.setTo("struct ");
+                    s.append(mSlotNames[ct]);
+                    s.append("_s");
+                    appendElementBody(&s, e);
+                    s.append(";\n");
+                    s.append("struct ");
+                    s.append(mSlotNames[ct]);
+                    s.append("_s * ");
+                }
+            } else {
+                // Just make an array
+                s.setTo(e->getComponent(0)->getCType());
+                s.append("_t *");
+            }
+            s.append(mSlotNames[ct]);
+            s.append(";\n");
+            LOGD(s);
+            str->append(s);
+#if 0
             for (size_t ct2=0; ct2 < e->getComponentCount(); ct2++) {
                 const Component *c = e->getComponent(ct2);
                 tmp.setTo("#define ");
@@ -295,12 +370,12 @@ void ScriptCState::appendTypes(String8 *str)
                 sprintf(buf, "%i, %i)\n", ct, ct2);
                 tmp.append(buf);
 
-                //LOGD(tmp);
+                LOGD(tmp);
                 str->append(tmp);
             }
+#endif
         }
     }
-
 }
 
 

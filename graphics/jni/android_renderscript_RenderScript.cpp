@@ -543,7 +543,7 @@ nAllocationRead_f(JNIEnv *_env, jobject _this, jint alloc, jfloatArray data)
 
 //{"nAllocationDataFromObject",      "(ILandroid/renderscript/Type;Ljava/lang/Object;)V",   (void*)nAllocationDataFromObject },
 static void
-nAllocationDataFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _type, jobject _o)
+nAllocationSubDataFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _type, jint offset, jobject _o)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nAllocationDataFromObject con(%p), alloc(%p)", con, (RsAllocation)alloc);
@@ -556,7 +556,7 @@ nAllocationDataFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _type
         const TypeFieldCache *tfc = &tc->fields[ct];
         buf = tfc->ptr(_env, _o, tfc->field, buf);
     }
-    rsAllocationData(con, (RsAllocation)alloc, bufAlloc, tc->size);
+    rsAllocation1DSubData(con, (RsAllocation)alloc, offset, 1, bufAlloc, tc->size);
     const uint32_t * tmp = (const uint32_t *)bufAlloc;
     free(bufAlloc);
 }
@@ -1282,7 +1282,7 @@ static JNINativeMethod methods[] = {
 {"nAllocationSubData2D",           "(IIIII[FI)V",                          (void*)nAllocationSubData2D_f },
 {"nAllocationRead",                "(I[I)V",                               (void*)nAllocationRead_i },
 {"nAllocationRead",                "(I[F)V",                               (void*)nAllocationRead_f },
-{"nAllocationDataFromObject",      "(ILandroid/renderscript/Type;Ljava/lang/Object;)V",   (void*)nAllocationDataFromObject },
+{"nAllocationSubDataFromObject",   "(ILandroid/renderscript/Type;ILjava/lang/Object;)V",   (void*)nAllocationSubDataFromObject },
 
 {"nTriangleMeshBegin",             "(II)V",                                (void*)nTriangleMeshBegin },
 {"nTriangleMeshAddVertex_XY",      "(FF)V",                                (void*)nTriangleMeshAddVertex_XY },

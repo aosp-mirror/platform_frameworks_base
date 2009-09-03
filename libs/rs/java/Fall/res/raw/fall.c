@@ -52,8 +52,8 @@ int offset(int x, int y, int width) {
 }
 
 void dropWithStrength(int x, int y, int r, int s) {
-    int width = State_meshWidth;
-    int height = State_meshHeight;
+    int width = State->meshWidth;
+    int height = State->meshHeight;
 
     if (x < r) x = r;
     if (y < r) y = r;
@@ -62,8 +62,8 @@ void dropWithStrength(int x, int y, int r, int s) {
 
     x = width - x;
 
-    int rippleMapSize = State_rippleMapSize;
-    int index = State_rippleIndex;
+    int rippleMapSize = State->rippleMapSize;
+    int index = State->rippleIndex;
     int origin = offset(0, 0, width);
 
     int* current = loadArrayI32(RSID_RIPPLE_MAP, index * rippleMapSize + origin);
@@ -94,10 +94,10 @@ void drop(int x, int y, int r) {
 }
 
 void updateRipples() {
-    int rippleMapSize = State_rippleMapSize;
-    int width = State_meshWidth;
-    int height = State_meshHeight;
-    int index = State_rippleIndex;
+    int rippleMapSize = State->rippleMapSize;
+    int width = State->meshWidth;
+    int height = State->meshHeight;
+    int index = State->rippleIndex;
     int origin = offset(0, 0, width);
 
     int* current = loadArrayI32(RSID_RIPPLE_MAP, index * rippleMapSize + origin);
@@ -139,9 +139,9 @@ int refraction(int d, int wave, int *map) {
 
 void generateRipples() {
     int rippleMapSize = loadI32(RSID_STATE, OFFSETOF_WorldState_rippleMapSize);
-    int width = State_meshWidth;
-    int height = State_meshHeight;
-    int index = State_rippleIndex;
+    int width = State->meshWidth;
+    int height = State->meshHeight;
+    int index = State->rippleIndex;
     int origin = offset(0, 0, width);
 
     int b = width + 2;
@@ -180,7 +180,7 @@ void generateRipples() {
 
             // Update Z coordinate of the vertex
             vertices[index + 7] = dy * fy;
-            
+
             w -= 1;
             current += 1;
             wave = nextWave;
@@ -210,7 +210,7 @@ void generateRipples() {
             float v2x = vertices[o1 + 5];
             float v2y = vertices[o1 + 6];
             float v2z = vertices[o1 + 7];
-            
+
             // V3
             float v3x = vertices[ow + 5];
             float v3y = vertices[ow + 6];
@@ -236,7 +236,7 @@ void generateRipples() {
             n3x *= len;
             n3y *= len;
             n3z *= len;
-            
+
             // V2
             v2x = vertices[ow1 + 5];
             v2y = vertices[ow1 + 6];
@@ -266,7 +266,7 @@ void generateRipples() {
             vertices[o + 0] = n3x;
             vertices[o + 1] = n3y;
             vertices[o + 2] = -n3z;
-            
+
             // reset Z
             //vertices[(yOffset + x) << 3 + 7] = 0.0f;
         }
@@ -322,7 +322,7 @@ void drawLeaf(int index, float* vertices, int meshWidth, int meshHeight,
     float z2 = 0.0f;
     float z3 = 0.0f;
     float z4 = 0.0f;
-    
+
     float a = leafStruct[LEAF_STRUCT_ALTITUDE];
     float s = leafStruct[LEAF_STRUCT_SCALE];
     float r = leafStruct[LEAF_STRUCT_ANGLE];
@@ -384,7 +384,7 @@ void drawLeaf(int index, float* vertices, int meshWidth, int meshHeight,
         LEAF_SIZE * s + y < -glHeight / 2.0f) {
 
         int sprite = randf(LEAVES_TEXTURES_COUNT);
-        leafStruct[LEAF_STRUCT_X] = randf2(-1.0f, 1.0f);   
+        leafStruct[LEAF_STRUCT_X] = randf2(-1.0f, 1.0f);
         leafStruct[LEAF_STRUCT_Y] = glHeight / 2.0f + LEAF_SIZE * 2 * randf(1.0f);
         leafStruct[LEAF_STRUCT_SCALE] = randf2(0.4f, 0.5f);
         leafStruct[LEAF_STRUCT_SPIN] = degf(randf2(-0.02f, 0.02f)) / 4.0f;
@@ -401,20 +401,20 @@ void drawLeaves() {
     bindProgramVertex(NAMED_PVSky);
     bindTexture(NAMED_PFBackground, 0, NAMED_TLeaves);
 
-    int leavesCount = State_leavesCount;
+    int leavesCount = State->leavesCount;
     int count = leavesCount * LEAF_STRUCT_FIELDS_COUNT;
-    int width = State_meshWidth;
-    int height = State_meshHeight;    
-    float glWidth = State_glWidth;
-    float glHeight = State_glHeight;
+    int width = State->meshWidth;
+    int height = State->meshHeight;
+    float glWidth = State->glWidth;
+    float glHeight = State->glHeight;
 
-    float *vertices = loadTriangleMeshVerticesF(NAMED_WaterMesh);    
+    float *vertices = loadTriangleMeshVerticesF(NAMED_WaterMesh);
 
     int i = 0;
     for ( ; i < count; i += LEAF_STRUCT_FIELDS_COUNT) {
         drawLeaf(i, vertices, width, height, glWidth, glHeight);
     }
-    
+
     float matrix[16];
     matrixLoadIdentity(matrix);
     vpLoadModelMatrix(matrix);
@@ -433,8 +433,8 @@ void drawSky() {
     bindProgramFragmentStore(NAMED_PFSLeaf);
     bindTexture(NAMED_PFSky, 0, NAMED_TSky);
 
-    float x = State_skyOffsetX + State_skySpeedX;
-    float y = State_skyOffsetY + State_skySpeedY;
+    float x = State->skyOffsetX + State->skySpeedX;
+    float y = State->skyOffsetY + State->skySpeedY;
 
     if (x > 1.0f) x = 0.0f;
     if (x < -1.0f) x = 0.0f;
@@ -467,8 +467,8 @@ void drawLighting() {
 }
 
 void drawNormals() {
-    int width = State_meshWidth;
-    int height = State_meshHeight;
+    int width = State->meshWidth;
+    int height = State->meshHeight;
 
     float *vertices = loadTriangleMeshVerticesF(NAMED_WaterMesh);
 
@@ -496,12 +496,10 @@ void drawNormals() {
 }
 
 int main(int index) {
-    int dropX = Drop_dropX;
-    if (dropX != -1) {
-        int dropY = Drop_dropY;
-        drop(dropX, dropY, DROP_RADIUS);
-        storeI32(RSID_DROP, OFFSETOF_DropState_dropX, -1);
-        storeI32(RSID_DROP, OFFSETOF_DropState_dropY, -1);
+    if (Drop->dropX != -1) {
+        drop(Drop->dropX, Drop->dropY, DROP_RADIUS);
+        Drop->dropX = -1;
+        Drop->dropY = -1;
     }
 
     updateRipples();

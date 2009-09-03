@@ -131,6 +131,7 @@ public:
     void timerReset();
     void timerSet(Timers);
     void timerPrint();
+    void timerFrame();
 
     bool checkVersion1_1() const {return (mGL.mMajorVersion > 1) || (mGL.mMinorVersion >= 1); }
     bool checkVersion2_0() const {return mGL.mMajorVersion >= 2; }
@@ -202,6 +203,8 @@ private:
     uint64_t mTimers[_RS_TIMER_TOTAL];
     Timers mTimerActive;
     uint64_t mTimeLast;
+    uint64_t mTimeFrame;
+    uint64_t mTimeLastFrame;
 };
 
 

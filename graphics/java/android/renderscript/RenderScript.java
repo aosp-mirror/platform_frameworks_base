@@ -106,7 +106,7 @@ public class RenderScript {
     native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, float[] d, int sizeBytes);
     native void nAllocationRead(int id, int[] d);
     native void nAllocationRead(int id, float[] d);
-    native void nAllocationDataFromObject(int id, Type t, Object o);
+    native void nAllocationSubDataFromObject(int id, Type t, int offset, Object o);
 
     native void nTriangleMeshBegin(int vertex, int index);
     native void nTriangleMeshAddVertex_XY (float x, float y);
