@@ -340,15 +340,6 @@ public class CDMAPhone extends PhoneBase {
     dial (String dialString) throws CallStateException {
         // Need to make sure dialString gets parsed properly
         String newDialString = PhoneNumberUtils.stripSeparators(dialString);
-
-        if (!mCT.foregroundCall.isIdle()) {
-            FeatureCode fc = FeatureCode.newFromDialString(newDialString, this);
-            if (fc != null) {
-                //mMmiRegistrants.notifyRegistrants(new AsyncResult(null, fc, null));
-                fc.processCode();
-                return null;
-            }
-        }
         return mCT.dial(newDialString);
     }
 
@@ -845,21 +836,6 @@ public class CDMAPhone extends PhoneBase {
     updateMessageWaitingIndicator(int mwi) {
         mRuimRecords.setVoiceMessageWaiting(1, mwi);
     }
-
-    /**
-     * Removes the given FC from the pending list and notifies
-     * registrants that it is complete.
-     * @param fc FC that is done
-     */
-    /*package*/ void onFeatureCodeDone(FeatureCode fc) {
-        /* Only notify complete if it's on the pending list.
-         * Otherwise, it's already been handled (eg, previously canceled).
-         * The exception is cancellation of an incoming USSD-REQUEST, which is
-         * not on the list.
-         */
-         mMmiCompleteRegistrants.notifyRegistrants(new AsyncResult(null, fc, null));
-    }
-
 
     @Override
     public void exitEmergencyCallbackMode() {
