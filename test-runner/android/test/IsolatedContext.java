@@ -4,6 +4,7 @@ import com.google.android.collect.Lists;
 
 import android.accounts.AccountManager;
 import android.accounts.OnAccountsUpdatedListener;
+import android.accounts.Account;
 import android.content.ContextWrapper;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -100,6 +101,10 @@ public class IsolatedContext extends ContextWrapper {
         public void addOnAccountsUpdatedListener(OnAccountsUpdatedListener listener,
                 Handler handler, boolean updateImmediately) {
             // do nothing
+        }
+
+        public Account[] getAccounts() {
+            return new Account[]{};
         }
     }
     @Override
