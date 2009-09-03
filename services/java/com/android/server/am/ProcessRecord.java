@@ -75,6 +75,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
     boolean reportLowMemory;    // Set to true when waiting to report low mem
     int lastPss;                // Last pss size reported by app.
     String adjType;             // Debugging: primary thing impacting oom_adj.
+    int adjTypeCode;            // Debugging: adj code to report to app.
     Object adjSource;           // Debugging: option dependent object.
     Object adjTarget;           // Debugging: target component impacting oom_adj.
     
