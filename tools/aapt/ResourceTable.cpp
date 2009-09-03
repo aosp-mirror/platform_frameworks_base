@@ -984,7 +984,7 @@ status_t compileResourceFile(Bundle* bundle,
 
                 while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                     if (code == ResXMLTree::END_TAG) {
-                        if (strcmp16(block.getElementName(&len), private_symbols16.string()) == 0) {
+                        if (strcmp16(block.getElementName(&len), add_resource16.string()) == 0) {
                             break;
                         }
                     }
