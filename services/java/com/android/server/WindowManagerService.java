@@ -135,6 +135,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_INPUT = false;
     static final boolean DEBUG_INPUT_METHOD = false;
     static final boolean DEBUG_VISIBILITY = false;
+    static final boolean DEBUG_WINDOW_MOVEMENT = false;
     static final boolean DEBUG_ORIENTATION = false;
     static final boolean DEBUG_APP_TRANSITIONS = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
@@ -1903,6 +1904,12 @@ public class WindowManagerService extends IWindowManager.Stub
             moveInputMethodWindowsIfNeededLocked(false);
         }
 
+        if (false) {
+            RuntimeException e = new RuntimeException("here");
+            e.fillInStackTrace();
+            Log.w(TAG, "Removing window " + win, e);
+        }
+        
         mPolicy.removeWindowLw(win);
         win.removeLocked();
 
@@ -2716,10 +2723,10 @@ public class WindowManagerService extends IWindowManager.Stub
         Configuration config;
         synchronized(mWindowMap) {
             config = updateOrientationFromAppTokensLocked(currentConfig, freezeThisOneIfNeeded);
-        }
-        if (config != null) {
-            mLayoutNeeded = true;
-            performLayoutAndPlaceSurfacesLocked();
+            if (config != null) {
+                mLayoutNeeded = true;
+                performLayoutAndPlaceSurfacesLocked();
+            }
         }
         return config;
     }
@@ -3412,11 +3419,15 @@ public class WindowManagerService extends IWindowManager.Stub
         final int NW = token.windows.size();
         for (int i=0; i<NW; i++) {
             WindowState win = token.windows.get(i);
+            if (DEBUG_WINDOW_MOVEMENT) Log.v(TAG, "Tmp removing window " + win);
             mWindows.remove(win);
             int j = win.mChildWindows.size();
             while (j > 0) {
                 j--;
-                mWindows.remove(win.mChildWindows.get(j));
+                WindowState cwin = (WindowState)win.mChildWindows.get(j);
+                if (DEBUG_WINDOW_MOVEMENT) Log.v(TAG,
+                        "Tmp removing child window " + cwin);
+                mWindows.remove(cwin);
             }
         }
         return NW > 0;
@@ -3497,14 +3508,20 @@ public class WindowManagerService extends IWindowManager.Stub
         for (int j=0; j<NCW; j++) {
             WindowState cwin = (WindowState)win.mChildWindows.get(j);
             if (!added && cwin.mSubLayer >= 0) {
+                if (DEBUG_WINDOW_MOVEMENT) Log.v(TAG, "Re-adding child window at "
+                        + index + ": " + cwin);
                 mWindows.add(index, win);
                 index++;
                 added = true;
             }
+            if (DEBUG_WINDOW_MOVEMENT) Log.v(TAG, "Re-adding window at "
+                    + index + ": " + cwin);
             mWindows.add(index, cwin);
             index++;
         }
         if (!added) {
+            if (DEBUG_WINDOW_MOVEMENT) Log.v(TAG, "Re-adding window at "
+                    + index + ": " + win);
             mWindows.add(index, win);
             index++;
         }
@@ -8516,39 +8533,29 @@ public class WindowManagerService extends IWindowManager.Stub
         i=0;
         while (i < NW) {
             if (((WindowState)mWindows.get(i)).mAppToken != null) {
-                mWindows.remove(i);
+                WindowState win = (WindowState)mWindows.remove(i);
+                if (DEBUG_WINDOW_MOVEMENT) Log.v(TAG,
+                        "Rebuild removing window: " + win);
                 NW--;
                 continue;
             }
             i++;
         }
         
-        // Now go through the app tokens and add the windows back in.
-        int NT = mAppTokens.size();
+        // First add all of the exiting app tokens...  these are no longer
+        // in the main app list, but still have windows shown.  We put them
+        // in the back because now that the animation is over we no longer
+        // will care about them.
+        int NT = mExitingAppTokens.size();
         i = 0;
         for (int j=0; j<NT; j++) {
-            AppWindowToken wt = mAppTokens.get(j);
-            final int NTW = wt.windows.size();
-            for (int k=0; k<NTW; k++) {
-                WindowState win = wt.windows.get(k);
-                final int NC = win.mChildWindows.size();
-                int c;
-                for (c=0; c<NC; c++) {
-                    WindowState cwin = (WindowState)win.mChildWindows.get(c);
-                    if (cwin.mSubLayer >= 0) {
-                        break;
-                    }
-                    mWindows.add(i, cwin);
-                    i++;
-                }
-                mWindows.add(i, win);
-                i++;
-                for (; c<NC; c++) {
-                    WindowState cwin = (WindowState)win.mChildWindows.get(c);
-                    mWindows.add(i, cwin);
-                    i++;
-                }
-            }
+            i = reAddAppWindowsLocked(i, mExitingAppTokens.get(j));
+        }
+        
+        // And add in the still active app tokens in Z order.
+        NT = mAppTokens.size();
+        for (int j=0; j<NT; j++) {
+            i = reAddAppWindowsLocked(i, mAppTokens.get(j));
         }
     }
     
@@ -8729,7 +8736,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final int dw = mDisplay.getWidth();
         final int dh = mDisplay.getHeight();
 
-        final int N = mWindows.size();
         int i;
 
         // FIRST LOOP: Perform a layout, if needed.
@@ -8789,6 +8795,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 mPolicy.beginAnimationLw(dw, dh);
 
+                final int N = mWindows.size();
+                
                 for (i=N-1; i>=0; i--) {
                     WindowState w = (WindowState)mWindows.get(i);
 
@@ -9100,6 +9108,8 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean syswin = false;
             boolean backgroundFillerShown = false;
 
+            final int N = mWindows.size();
+            
             for (i=N-1; i>=0; i--) {
                 WindowState w = (WindowState)mWindows.get(i);
 
