@@ -32,8 +32,6 @@ import static android.telephony.SmsManager.STATUS_ON_ICC_FREE;
  * access Sms in Icc.
  */
 public abstract class IccSmsInterfaceManager extends ISms.Stub {
-    static final boolean DBG = true;
-
     protected PhoneBase mPhone;
     protected Context mContext;
     protected SMSDispatcher mDispatcher;
@@ -80,9 +78,11 @@ public abstract class IccSmsInterfaceManager extends ISms.Stub {
         mPhone.getContext().enforceCallingPermission(
                 "android.permission.SEND_SMS",
                 "Sending SMS message");
-        if (DBG) log("sendData: destAddr=" + destAddr + " scAddr=" + scAddr + " destPort=" +
+        if (Log.isLoggable("SMS", Log.VERBOSE)) {
+            log("sendData: destAddr=" + destAddr + " scAddr=" + scAddr + " destPort=" +
                 destPort + " data='"+ HexDump.toHexString(data)  + "' sentIntent=" +
                 sentIntent + " deliveryIntent=" + deliveryIntent);
+        }
         mDispatcher.sendData(destAddr, scAddr, destPort, data, sentIntent, deliveryIntent);
     }
 
@@ -115,9 +115,11 @@ public abstract class IccSmsInterfaceManager extends ISms.Stub {
         mPhone.getContext().enforceCallingPermission(
                 "android.permission.SEND_SMS",
                 "Sending SMS message");
-        if (DBG) log("sendText: destAddr=" + destAddr + " scAddr=" + scAddr +
+        if (Log.isLoggable("SMS", Log.VERBOSE)) {
+            log("sendText: destAddr=" + destAddr + " scAddr=" + scAddr +
                 " text='"+ text + "' sentIntent=" +
                 sentIntent + " deliveryIntent=" + deliveryIntent);
+        }
         mDispatcher.sendText(destAddr, scAddr, text, sentIntent, deliveryIntent);
     }
 
@@ -151,7 +153,13 @@ public abstract class IccSmsInterfaceManager extends ISms.Stub {
         mPhone.getContext().enforceCallingPermission(
                 "android.permission.SEND_SMS",
                 "Sending SMS message");
-        if (DBG) log("sendMultipartText");
+        if (Log.isLoggable("SMS", Log.VERBOSE)) {
+            int i = 0;
+            for (String part : parts) {
+                log("sendMultipartText: destAddr=" + destAddr + ", srAddr=" + scAddr +
+                        ", part[" + (i++) + "]=" + part);
+            }
+        }
         mDispatcher.sendMultipartText(destAddr, scAddr, (ArrayList<String>) parts,
                 (ArrayList<PendingIntent>) sentIntents, (ArrayList<PendingIntent>) deliveryIntents);
     }
