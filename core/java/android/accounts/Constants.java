@@ -53,8 +53,6 @@ public class Constants {
      * Action sent as a broadcast Intent by the AccountsService
      * when accounts are added to and/or removed from the device's
      * database.
-     * Note: The primary account on the phone can only be changed
-     * after a data wipe.
      */
     public static final String LOGIN_ACCOUNTS_CHANGED_ACTION =
         "android.accounts.LOGIN_ACCOUNTS_CHANGED";
