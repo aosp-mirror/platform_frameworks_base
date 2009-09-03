@@ -179,6 +179,10 @@ public class CDMAPhone extends PhoneBase {
         // This is needed to handle phone process crashes
         String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
         mIsPhoneInEcmState = inEcm.equals("true");
+        if (mIsPhoneInEcmState) {
+            // Send a message which will invoke handleExitEmergencyCallbackMode
+            mCM.exitEmergencyCallbackMode(obtainMessage(EVENT_EXIT_EMERGENCY_CALLBACK_RESPONSE));
+        }
 
         // get the string that specifies the carrier OTA Sp number
         mCarrierOtaSpNumSchema = SystemProperties.get(
@@ -1011,7 +1015,6 @@ public class CDMAPhone extends PhoneBase {
                     Log.d(LOG_TAG, "ERI read, notify registrants");
                     mEriFileLoadedRegistrants.notifyRegistrants();
                 }
-                setSystemProperty(TelephonyProperties.PROPERTY_INECM_MODE,"false");
             }
             break;
 
