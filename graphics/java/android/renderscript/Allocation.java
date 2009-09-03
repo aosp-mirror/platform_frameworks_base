@@ -110,9 +110,12 @@ public class Allocation extends BaseObj {
     }
 
     public void data(Object o) {
-        mRS.nAllocationDataFromObject(mID, mType, o);
+        mRS.nAllocationSubDataFromObject(mID, mType, 0, o);
     }
 
+    public void subData(int offset, Object o) {
+        mRS.nAllocationSubDataFromObject(mID, mType, offset, o);
+    }
 
     public class Adapter1D extends BaseObj {
         Adapter1D(int id, RenderScript rs) {

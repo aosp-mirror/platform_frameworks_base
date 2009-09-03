@@ -4,27 +4,32 @@
 #pragma stateFragment(default)
 #pragma stateFragmentStore(default)
 
-struct PartStruct {float dx; float dy; float x; float y; int c;};
 int newPart = 0;
 
 int main(int launchID) {
     int ct;
-    int count = Control_count - 1;
-    int rate = Control_rate;
+    int count = Control->count;
+    int rate = Control->rate;
     float height = getHeight();
-    struct PartStruct * p = (struct PartStruct *)loadArrayF(1, 0);
+    struct point_s * p = (struct point_s *)point;
 
     if (rate) {
         float rMax = ((float)rate) * 0.005f;
-        int x = Control_x;
-        int y = Control_y;
-        int c = colorFloatRGBAtoUNorm8(Control_r, Control_g, Control_b, 0.99f);
+        int x = Control->x;
+        int y = Control->y;
+        char r = Control->r * 255.f;
+        char g = Control->g * 255.f;
+        char b = Control->b * 255.f;
+        char a = 0xf0;
 
         while (rate--) {
             vec2Rand((float *)(p + newPart), rMax);
             p[newPart].x = x;
             p[newPart].y = y;
-            p[newPart].c = c;
+            p[newPart].r = r;
+            p[newPart].g = g;
+            p[newPart].b = b;
+            p[newPart].a = a;
             newPart++;
             if (newPart >= count) {
                 newPart = 0;
@@ -45,6 +50,6 @@ int main(int launchID) {
     }
 
     uploadToBufferObject(NAMED_PartBuffer);
-    drawSimpleMeshRange(NAMED_PartMesh, 0, count);
+    drawSimpleMesh(NAMED_PartMesh);
     return 1;
 }
