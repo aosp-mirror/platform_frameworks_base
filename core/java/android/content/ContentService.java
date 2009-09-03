@@ -241,7 +241,7 @@ public final class ContentService extends IContentService.Stub {
             restoreCallingIdentity(identityToken);
         }
     }
-    
+
     public boolean getSyncAutomatically(Account account, String providerName) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
@@ -318,7 +318,7 @@ public final class ContentService extends IContentService.Stub {
         }
         return false;
     }
-    
+
     public void setMasterSyncAutomatically(boolean flag) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
@@ -348,7 +348,7 @@ public final class ContentService extends IContentService.Stub {
         }
         return false;
     }
-    
+
     public ActiveSyncInfo getActiveSync() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
@@ -363,7 +363,7 @@ public final class ContentService extends IContentService.Stub {
         }
         return null;
     }
-    
+
     public SyncStatusInfo getSyncStatus(Account account, String authority) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
@@ -371,15 +371,15 @@ public final class ContentService extends IContentService.Stub {
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                return syncManager.getSyncStorageEngine().getStatusByAuthority(
-                        authority);
+                return syncManager.getSyncStorageEngine().getStatusByAccountAndAuthority(
+                    account, authority);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
         return null;
     }
-    
+
     public boolean isSyncPending(Account account, String authority) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
@@ -394,7 +394,7 @@ public final class ContentService extends IContentService.Stub {
         }
         return false;
     }
-    
+
     public void addStatusChangeListener(int mask, ISyncStatusObserver callback) {
         long identityToken = clearCallingIdentity();
         try {
@@ -406,7 +406,7 @@ public final class ContentService extends IContentService.Stub {
             restoreCallingIdentity(identityToken);
         }
     }
-    
+
     public void removeStatusChangeListener(ISyncStatusObserver callback) {
         long identityToken = clearCallingIdentity();
         try {
@@ -418,7 +418,7 @@ public final class ContentService extends IContentService.Stub {
             restoreCallingIdentity(identityToken);
         }
     }
-    
+
     public static IContentService main(Context context, boolean factoryTest) {
         ContentService service = new ContentService(context, factoryTest);
         ServiceManager.addService(ContentResolver.CONTENT_SERVICE_NAME, service);

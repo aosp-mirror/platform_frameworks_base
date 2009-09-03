@@ -866,27 +866,28 @@ public class SyncStorageEngine extends Handler {
     }
 
     /**
-     * Returns the status that matches the authority. If there are multiples accounts for
-     * the authority, the one with the latest "lastSuccessTime" status is returned.
+     * Returns the status that matches the authority and account.
+     *
+     * @param account the account we want to check
      * @param authority the authority whose row should be selected
      * @return the SyncStatusInfo for the authority, or null if none exists
      */
-    public SyncStatusInfo getStatusByAuthority(String authority) {
+    public SyncStatusInfo getStatusByAccountAndAuthority(Account account, String authority) {
+        if (account == null || authority == null) {
+          throw new IllegalArgumentException();
+        }
         synchronized (mAuthorities) {
-            SyncStatusInfo best = null;
             final int N = mSyncStatus.size();
             for (int i=0; i<N; i++) {
                 SyncStatusInfo cur = mSyncStatus.valueAt(i);
                 AuthorityInfo ainfo = mAuthorities.get(cur.authorityId);
-                if (ainfo != null && ainfo.authority.equals(authority)) {
-                    if (best == null) {
-                        best = cur;
-                    } else if (best.lastSuccessTime > cur.lastSuccessTime) {
-                        best = cur;
-                    }
+
+                if (ainfo != null && ainfo.authority.equals(authority) &&
+                    account.equals(ainfo.account)) {
+                  return cur;
                 }
             }
-            return best;
+            return null;
         }
     }
 
