@@ -688,6 +688,15 @@ public final class ContactsContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "data");
 
         /**
+         * The content:// style URI for this table joined with {@link Presence}
+         * data where applicable.
+         *
+         * @hide
+         */
+        public static final Uri CONTENT_WITH_PRESENCE_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "data_with_presence");
+
+        /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of data.
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/data";
