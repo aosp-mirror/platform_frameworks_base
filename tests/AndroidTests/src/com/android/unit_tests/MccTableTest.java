@@ -16,7 +16,7 @@
 
 package com.android.unit_tests;
 
-import com.android.internal.telephony.gsm.MccTable;
+import com.android.internal.telephony.MccTable;
 
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;

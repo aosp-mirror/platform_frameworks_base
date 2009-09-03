@@ -48,10 +48,7 @@ import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.DataConnection;
-// TODO(Moto): need to move MccTable from telephony.gsm to telephony
-// since there is no difference between CDMA and GSM for MccTable and
-// CDMA uses gsm's MccTable is not good.
-import com.android.internal.telephony.gsm.MccTable;
+import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccException;
 import com.android.internal.telephony.IccFileHandler;
@@ -203,7 +200,7 @@ public class CDMAPhone extends PhoneBase {
         updateCurrentCarrierInProvider(operatorNumeric);
 
         // Updates MCC MNC device configuration information
-        updateMccMncConfiguration(operatorNumeric);
+        MccTable.updateMccMncConfiguration(this, operatorNumeric);
 
 
         // Notify voicemails.
@@ -1406,21 +1403,4 @@ public class CDMAPhone extends PhoneBase {
         return false;
     }
 
-    /**
-     * Updates MCC and MNC device configuration information for application retrieving
-     * correct version of resources
-     *
-     */
-    private void updateMccMncConfiguration(String operatorNumeric) {
-        if (operatorNumeric.length() >= 5) {
-            Configuration config = new Configuration();
-            config.mcc = Integer.parseInt(operatorNumeric.substring(0,3));
-            config.mnc = Integer.parseInt(operatorNumeric.substring(3));
-            try {
-                ActivityManagerNative.getDefault().updateConfiguration(config);
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Can't update configuration", e);
-            }
-        }
-    }
 }
