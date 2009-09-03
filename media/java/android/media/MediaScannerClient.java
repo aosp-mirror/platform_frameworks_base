@@ -25,11 +25,13 @@ public interface MediaScannerClient
     
     public void scanFile(String path, String mimeType, long lastModified, long fileSize);
 
+    public void addNoMediaFolder(String path);
+
     /**
      * Called by native code to return metadata extracted from media files.
      */
     public void handleStringTag(String name, String value);
-    
+
     /**
      * Called by native code to return mime type extracted from DRM content.
      */
