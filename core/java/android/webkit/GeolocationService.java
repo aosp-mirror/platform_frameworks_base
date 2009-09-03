@@ -156,11 +156,16 @@ public final class GeolocationService implements LocationListener {
      * Registers this object with the location service.
      */
     private void registerForLocationUpdates() {
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-        mIsNetworkProviderAvailable = true;
-        if (mIsGpsEnabled) {
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-            mIsGpsProviderAvailable = true;
+        try {
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+            mIsNetworkProviderAvailable = true;
+            if (mIsGpsEnabled) {
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+                mIsGpsProviderAvailable = true;
+            }
+        } catch(SecurityException e) {
+            Log.e(TAG, "Caught security exception registering for location updates from system. " +
+                "This should only happen in DumpRenderTree.");
         }
     }
 
