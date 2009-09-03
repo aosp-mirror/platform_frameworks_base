@@ -28,7 +28,7 @@ import com.android.internal.telephony.AdnRecordLoader;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.cdma.RuimCard;
-import com.android.internal.telephony.gsm.MccTable;
+import com.android.internal.telephony.MccTable;
 
 // can't be used since VoiceMailConstants is not public
 //import com.android.internal.telephony.gsm.VoiceMailConstants;
@@ -47,7 +47,7 @@ public final class RuimRecords extends IccRecords {
     private static final boolean DBG = true;
     private boolean  m_ota_commited=false;
 
-    //***** Instance Variables
+    // ***** Instance Variables
 
     private String mImsi;
     private String mMyMobileNumber;
@@ -55,7 +55,7 @@ public final class RuimRecords extends IccRecords {
 
     private String mPrlVersion;
 
-    //***** Event Constants
+    // ***** Event Constants
 
     private static final int EVENT_RUIM_READY = 1;
     private static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 2;
@@ -109,7 +109,7 @@ public final class RuimRecords extends IccRecords {
     @Override
     protected void onRadioOffOrNotAvailable() {
         countVoiceMessages = 0;
-        mncLength = 0;
+        mncLength = UNINITIALIZED;
         iccid = null;
 
         adnCache.reset();
@@ -167,7 +167,7 @@ public final class RuimRecords extends IccRecords {
         }
 
         // TODO(Moto): mncLength is not set anywhere.
-        if (mncLength != 0) {
+        if (mncLength != UNINITIALIZED && mncLength != UNKNOWN) {
             // Length = length of MCC + length of MNC
             // TODO: change spec name
             // length of mcc = 3 (3GPP2 C.S0005 - Section 2.3)

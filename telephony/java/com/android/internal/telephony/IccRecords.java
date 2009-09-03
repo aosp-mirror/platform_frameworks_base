@@ -31,7 +31,7 @@ import java.util.ArrayList;
 public abstract class IccRecords extends Handler implements IccConstants {
 
     protected static final boolean DBG = true;
-    //***** Instance Variables
+    // ***** Instance Variables
 
     protected PhoneBase phone;
     protected RegistrantList recordsLoadedRegistrants = new RegistrantList();
@@ -40,7 +40,7 @@ public abstract class IccRecords extends Handler implements IccConstants {
 
     protected AdnRecordCache adnCache;
 
-    //***** Cached SIM State; cleared on channel close
+    // ***** Cached SIM State; cleared on channel close
 
     protected boolean recordsRequested = false; // true if we've made requests for the sim records
 
@@ -54,23 +54,26 @@ public abstract class IccRecords extends Handler implements IccConstants {
     protected boolean isVoiceMailFixed = false;
     protected int countVoiceMessages = 0;
 
-    protected int mncLength = 0;   // 0 is used to indicate that the value
-                         // is not initialized
+    protected int mncLength = UNINITIALIZED;
     protected int mailboxIndex = 0; // 0 is no mailbox dailing number associated
 
     protected String spn;
     protected int spnDisplayCondition;
 
-    //***** Constants
+    // ***** Constants
+
+    // Markers for mncLength
+    protected static final int UNINITIALIZED = -1;
+    protected static final int UNKNOWN = 0;
 
     // Bitmasks for SPN display rules.
     protected static final int SPN_RULE_SHOW_SPN  = 0x01;
     protected static final int SPN_RULE_SHOW_PLMN = 0x02;
 
-    //***** Event Constants
+    // ***** Event Constants
     protected static final int EVENT_SET_MSISDN_DONE = 30;
 
-    //***** Constructor
+    // ***** Constructor
 
     public IccRecords(PhoneBase p) {
         this.phone = p;
@@ -234,4 +237,3 @@ public abstract class IccRecords extends Handler implements IccConstants {
 
     protected abstract void log(String s);
 }
-

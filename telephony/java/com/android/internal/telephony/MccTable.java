@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony.gsm;
+package com.android.internal.telephony;
+
+import android.app.ActivityManagerNative;
+import android.app.AlarmManager;
+import android.content.Context;
+import android.content.res.Configuration;
+import android.net.wifi.WifiManager;
+import android.os.RemoteException;
+import android.os.SystemProperties;
+import android.provider.Settings;
+import android.util.Log;
 
 import java.util.Arrays;
 
@@ -475,8 +485,10 @@ public final class MccTable
         0x65630400, 0x67660400, 0x70790400, 0x73720400, 0x75790400, 0x666b0400
     };
 
+    static final String LOG_TAG = "MccTable";
+
     /**
-     * Given a GSM Mobile Country Code, returns a default time zone ID
+     * Given a Mobile Country Code, returns a default time zone ID
      * if available.  Returns null if unavailable.
      */
     public static String defaultTimeZoneForMcc(int mcc) {
@@ -494,7 +506,7 @@ public final class MccTable
     }
 
     /**
-     * Given a GSM Mobile Country Code, returns an ISO two-character
+     * Given a Mobile Country Code, returns an ISO two-character
      * country code if available.  Returns "" if unavailable.
      */
     public static String countryCodeForMcc(int mcc) {
@@ -553,4 +565,95 @@ public final class MccTable
         return wifi;
     }
 
+    /**
+     * Updates MCC and MNC device configuration information for application retrieving
+     * correct version of resources.  If either MCC or MNC is 0, they will be ignored (not set).
+     * @param phone PhoneBae to act on.
+     * @param mccmnc truncated imsi with just the MCC and MNC - MNC assumed to be from 4th to end
+     */
+    public static void updateMccMncConfiguration(PhoneBase phone, String mccmnc) {
+        Configuration config = new Configuration();
+        int mcc, mnc;
+
+        try {
+            mcc = Integer.parseInt(mccmnc.substring(0,3));
+            mnc = Integer.parseInt(mccmnc.substring(3));
+        } catch (NumberFormatException e) {
+            Log.e(LOG_TAG, "Error parsing IMSI");
+            return;
+        }
+
+        Log.d(LOG_TAG, "updateMccMncConfiguration: mcc=" + mcc + ", mnc=" + mnc);
+
+        if (mcc != 0) {
+            config.mcc = mcc;
+            setTimezoneFromMccIfNeeded(phone, mcc);
+            setLocaleFromMccIfNeeded(phone, mcc);
+            setWifiChannelsFromMccIfNeeded(phone, mcc);
+        }
+        if (mnc != 0) {
+            config.mnc = mnc;
+        }
+        try {
+            ActivityManagerNative.getDefault().updateConfiguration(config);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Can't update configuration", e);
+        }
+    }
+
+    /**
+     * If the timezone is not already set, set it based on the MCC of the SIM.
+     * @param phone PhoneBase to act on (get context from).
+     * @param mcc Mobile Country Code of the SIM or SIM-like entity (build prop on CDMA)
+     */
+    private static void setTimezoneFromMccIfNeeded(PhoneBase phone, int mcc) {
+        String timezone = SystemProperties.get(ServiceStateTracker.TIMEZONE_PROPERTY);
+        if (timezone == null || timezone.length() == 0) {
+            String zoneId = defaultTimeZoneForMcc(mcc);
+            if (zoneId != null && zoneId.length() > 0) {
+                Context context = phone.getContext();
+                // Set time zone based on MCC
+                AlarmManager alarm =
+                        (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                alarm.setTimeZone(zoneId);
+                Log.d(LOG_TAG, "timezone set to "+zoneId);
+            }
+        }
+    }
+
+    /**
+     * If the locale is not already set, set it based on the MCC of the SIM.
+     * @param phone PhoneBase to act on.
+     * @param mcc Mobile Country Code of the SIM or SIM-like entity (build prop on CDMA)
+     */
+    private static void setLocaleFromMccIfNeeded(PhoneBase phone, int mcc) {
+        String language = MccTable.defaultLanguageForMcc(mcc);
+        String country = MccTable.countryCodeForMcc(mcc);
+
+        Log.d(LOG_TAG, "locale set to "+language+"_"+country);
+        phone.setSystemLocale(language, country);
+    }
+
+    /**
+     * If the number of allowed wifi channels has not been set, set it based on
+     * the MCC of the SIM.
+     * @param phone PhoneBase to act on (get context from).
+     * @param mcc Mobile Country Code of the SIM or SIM-like entity (build prop on CDMA)
+     */
+    private static void setWifiChannelsFromMccIfNeeded(PhoneBase phone, int mcc) {
+        int wifiChannels = MccTable.wifiChannelsForMcc(mcc);
+        if (wifiChannels != 0) {
+            Context context = phone.getContext();
+            // only set to this default if the user hasn't manually set it
+            try {
+                Settings.Secure.getInt(context.getContentResolver(),
+                        Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS);
+            } catch (Settings.SettingNotFoundException e) {
+                Log.d(LOG_TAG, "WIFI_NUM_ALLOWED_CHANNESL set to " + wifiChannels);
+                WifiManager wM = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+                // don't persist
+                wM.setNumAllowedChannels(wifiChannels, false);
+            }
+        }
+    }
 }
