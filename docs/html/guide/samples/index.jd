@@ -15,11 +15,32 @@ in the SDK. You can find the sample applications for each platform version in th
 <p>You can easily add these applications as projects in your development environment, so that you 
 can modify them and watch them execute. </p>
 <dl>
+
  <dt><a href="ApiDemos/index.html">API Demos</a></dt>
-  <dd>A variety of small applications that demonstrate simple views and widgets.</dd>
+  <dd>A variety of small applications that demonstrate an extensive collection of framework topics.</dd>
+  
+ <dt><a href="Home/index.html">Home</a></dt>
+  <dd>An application for saving notes. Similar (but not identical) to the 
+    <a href="{@docRoot}guide/tutorials/notepad/index.html">Notepad tutorial</a>.</dd>
+  
+ <dt><a href="JetBoy/index.html">JetBoy</a></dt>
+  <dd>JetBoy is a game that demonstrates the SONiVOX JET interactive music technology, with {@link android.media.JetPlayer}.</dd>
+    
  <dt><a href="LunarLander/index.html">Lunar Lander</a></dt>
   <dd>A classic Lunar Lander game.</dd>
+  
  <dt><a href="NotePad/index.html">Note Pad</a></dt>
   <dd>An application for saving notes. Similar (but not identical) to the 
     <a href="{@docRoot}guide/tutorials/notepad/index.html">Notepad tutorial</a>.</dd>
+  
+ <dt><a href="SearchableDictionary/index.html">Searchable Dictionary</a></dt>
+  <dd>A sample application that demonstrates Android's search framework, 
+  including how to provide search suggestions for Quick Search Box.</dd>
+  
+ <dt><a href="Snake/index.html">Snake</a></dt>
+  <dd>An implementation of the classic game "Snake."</dd>
+  
+ <dt><a href="SoftKeyboard/index.html">Soft Keyboard</a></dt>
+  <dd>An example of writing an input method for a software keyboard.</dd>
+    
 </dl>

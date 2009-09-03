@@ -41,6 +41,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
 import org.apache.harmony.xnet.provider.jsse.SSLContextImpl;
+import org.apache.harmony.xnet.provider.jsse.SSLParameters;
 
 /**
  * SSLSocketFactory that provides optional (on debug devices, only) skipping of ssl certificfate
@@ -53,28 +54,6 @@ import org.apache.harmony.xnet.provider.jsse.SSLContextImpl;
 public class SSLCertificateSocketFactory extends SSLSocketFactory {
 
     private static final String LOG_TAG = "SSLCertificateSocketFactory";
-
-    private static X509TrustManager sDefaultTrustManager;
-
-    static {
-        try {
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance("X509");
-            tmf.init((KeyStore)null);
-            TrustManager[] tms = tmf.getTrustManagers();
-            if (tms != null) {
-                for (TrustManager tm : tms) {
-                    if (tm instanceof X509TrustManager) {
-                        sDefaultTrustManager = (X509TrustManager)tm;
-                        break;
-                    }
-                }
-            }
-        } catch (NoSuchAlgorithmException e) {
-            Log.e(LOG_TAG, "Unable to get X509 Trust Manager ", e);
-        } catch (KeyStoreException e) {
-            Log.e(LOG_TAG, "Key Store exception while initializing TrustManagerFactory ", e);
-        }
-    }
 
     private static final TrustManager[] TRUST_MANAGER = new TrustManager[] {
         new X509TrustManager() {
@@ -155,20 +134,13 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
 
     private boolean hasValidCertificateChain(Certificate[] certs) 
             throws IOException {
-        if (sDefaultTrustManager == null) {
-            if (Config.LOGD) {
-                Log.d(LOG_TAG,"hasValidCertificateChain():" +
-                          " null default trust manager!");
-            }
-            throw new IOException("null default trust manager");
-        }
-
         boolean trusted = (certs != null && (certs.length > 0));
 
         if (trusted) {
             try {
                 // the authtype we pass in doesn't actually matter
-                sDefaultTrustManager.checkServerTrusted((X509Certificate[]) certs, "RSA");
+                SSLParameters.getDefaultTrustManager()
+                        .checkServerTrusted((X509Certificate[]) certs, "RSA");
             } catch (GeneralSecurityException e) { 
                 String exceptionMessage = e != null ? e.getMessage() : "none";
                 if (Config.LOGD) {

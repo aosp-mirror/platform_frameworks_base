@@ -139,13 +139,16 @@
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/intent-filter-element.html">&lt;intent-filter&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/meta-data-element.html">&lt;meta-data&gt;</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/manifest/path-permission-element.html">&lt;path-permission&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-element.html">&lt;permission&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-group-element.html">&lt;permission-group&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/permission-tree-element.html">&lt;permission-tree&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/service-element.html">&lt;service&gt;</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></li>  <!-- ##api level 4## -->
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a></li> <!-- ##api level 4## -->
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-library-element.html">&lt;uses-library&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></li>
@@ -372,7 +375,7 @@
     </ul>
     <ul>
     <?cs if:android.whichdoc != "online" ?>
-      <li><a href="<?cs var:toroot ?>../samples">
+      <li><a href="<?cs var:toroot ?>../platforms/android-<?cs var:sdk.version ?>/samples">
             <span class="en">Sample Code</span>
           &raquo;</a></li>
     <?cs else ?>
@@ -384,17 +387,33 @@
           <li><a href="<?cs var:toroot ?>guide/samples/ApiDemos/index.html">
                 <span class="en">API Demos</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/Home/index.html">
+                <span class="en">Home</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/JetBoy/index.html">
+                <span class="en">JetBoy</span>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/LunarLander/index.html">
                 <span class="en">Lunar Lander</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/NotePad/index.html">
-                <span class="en">NotePad</span>
+                <span class="en">Note Pad</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/SearchableDictionary/index.html">
+                <span class="en">Searchable Dictionary</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/Snake/index.html">
+                <span class="en">Snake</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/SoftKeyboard/index.html">
+                <span class="en">Soft Keyboard</span>
               </a></li>
         </ul>
       </li>
     <?cs /if ?>
     </ul>
   </li>
+  
 
   <li>
     <h2><span class="en">Appendix</span>
@@ -407,6 +426,9 @@
                <span class="zh-TW">附錄</span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>guide/appendix/api-levels.html">
+            <span class="en">Android API Levels</span>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
             <span class="en">Supported Media Formats</span>
           </a></li>

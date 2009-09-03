@@ -43,14 +43,14 @@ import java.io.FileReader;
 import java.io.InputStream;
 
 /**
- * 
+ *
  */
 public final class BridgeResources extends Resources {
 
     private BridgeContext mContext;
     private IProjectCallback mProjectCallback;
     private boolean[] mPlatformResourceFlag = new boolean[1];
-    
+
     /**
      * This initializes the static field {@link Resources#mSystem} which is used
      * by methods who get global resources using {@link Resources#getSystem()}.
@@ -59,7 +59,7 @@ public final class BridgeResources extends Resources {
      * <p/>
      * {@link Bridge} calls this method after setting up a new bridge.
      */
-    /*package*/ static Resources initSystem(BridgeContext context, 
+    /*package*/ static Resources initSystem(BridgeContext context,
             AssetManager assets,
             DisplayMetrics metrics,
             Configuration config,
@@ -73,7 +73,7 @@ public final class BridgeResources extends Resources {
         }
         return Resources.mSystem;
     }
-    
+
     /**
      * Clears the static {@link Resources#mSystem} to make sure we don't leave objects
      * around that would prevent us from unloading the library.
@@ -92,15 +92,15 @@ public final class BridgeResources extends Resources {
         mContext = context;
         mProjectCallback = projectCallback;
     }
-    
+
     public BridgeTypedArray newTypeArray(int numEntries, boolean platformFile) {
         return new BridgeTypedArray(this, mContext, numEntries, platformFile);
     }
-    
+
     private IResourceValue getResourceValue(int id, boolean[] platformResFlag_out) {
         // first get the String related to this id in the framework
         String[] resourceInfo = Bridge.resolveResourceValue(id);
-        
+
         if (resourceInfo != null) {
             platformResFlag_out[0] = true;
             return mContext.getFrameworkResource(resourceInfo[1], resourceInfo[0]);
@@ -109,7 +109,7 @@ public final class BridgeResources extends Resources {
         // didn't find a match in the framework? look in the project.
         if (mProjectCallback != null) {
             resourceInfo = mProjectCallback.resolveResourceValue(id);
-            
+
             if (resourceInfo != null) {
                 platformResFlag_out[0] = false;
                 return mContext.getProjectResource(resourceInfo[1], resourceInfo[0]);
@@ -118,26 +118,26 @@ public final class BridgeResources extends Resources {
 
         return null;
     }
-    
+
     @Override
     public Drawable getDrawable(int id) throws NotFoundException {
         IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
-        
+
         if (value != null) {
             return ResourceHelper.getDrawable(value.getValue(), mContext, value.isFramework());
         }
-        
+
         // id was not found or not resolved. Throw a NotFoundException.
         throwException(id);
-        
+
         // this is not used since the method above always throws
         return null;
     }
-    
+
     @Override
     public int getColor(int id) throws NotFoundException {
         IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
-        
+
         if (value != null) {
             try {
                 return ResourceHelper.getColor(value.getValue());
@@ -145,18 +145,18 @@ public final class BridgeResources extends Resources {
                 return 0;
             }
         }
-        
+
         // id was not found or not resolved. Throw a NotFoundException.
         throwException(id);
-        
+
         // this is not used since the method above always throws
         return 0;
     }
-    
+
     @Override
     public ColorStateList getColorStateList(int id) throws NotFoundException {
         IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
-        
+
         if (value != null) {
             try {
                 int color = ResourceHelper.getColor(value.getValue());
@@ -165,33 +165,33 @@ public final class BridgeResources extends Resources {
                 return null;
             }
         }
-        
+
         // id was not found or not resolved. Throw a NotFoundException.
         throwException(id);
-        
+
         // this is not used since the method above always throws
         return null;
     }
-    
+
     @Override
     public CharSequence getText(int id) throws NotFoundException {
         IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
-        
+
         if (value != null) {
             return value.getValue();
         }
-        
+
         // id was not found or not resolved. Throw a NotFoundException.
         throwException(id);
-        
+
         // this is not used since the method above always throws
         return null;
     }
-    
+
     @Override
     public XmlResourceParser getLayout(int id) throws NotFoundException {
         IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
-        
+
         if (value != null) {
             File xml = new File(value.getValue());
             if (xml.isFile()) {
@@ -201,7 +201,7 @@ public final class BridgeResources extends Resources {
                     KXmlParser parser = new KXmlParser();
                     parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
                     parser.setInput(new FileReader(xml));
-                    
+
                     return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                 } catch (XmlPullParserException e) {
                     mContext.getLogger().error(e);
@@ -215,22 +215,22 @@ public final class BridgeResources extends Resources {
 
         // id was not found or not resolved. Throw a NotFoundException.
         throwException(id);
-        
+
         // this is not used since the method above always throws
         return null;
     }
-    
+
     @Override
     public TypedArray obtainAttributes(AttributeSet set, int[] attrs) {
         return mContext.obtainStyledAttributes(set, attrs);
     }
-    
+
     @Override
     public TypedArray obtainTypedArray(int id) throws NotFoundException {
         throw new UnsupportedOperationException();
     }
-    
-    
+
+
     @Override
     public float getDimension(int id) throws NotFoundException {
         IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
@@ -244,7 +244,7 @@ public final class BridgeResources extends Resources {
                 } else if (v.equals(BridgeConstants.WRAP_CONTENT)) {
                     return LayoutParams.WRAP_CONTENT;
                 }
-            
+
                 if (ResourceHelper.stringToFloat(v, mTmpValue) &&
                         mTmpValue.type == TypedValue.TYPE_DIMENSION) {
                     return mTmpValue.getDimension(mMetrics);
@@ -254,7 +254,7 @@ public final class BridgeResources extends Resources {
 
         // id was not found or not resolved. Throw a NotFoundException.
         throwException(id);
-        
+
         // this is not used since the method above always throws
         return 0;
     }
@@ -276,7 +276,7 @@ public final class BridgeResources extends Resources {
 
         // id was not found or not resolved. Throw a NotFoundException.
         throwException(id);
-        
+
         // this is not used since the method above always throws
         return 0;
     }
@@ -298,7 +298,7 @@ public final class BridgeResources extends Resources {
 
         // id was not found or not resolved. Throw a NotFoundException.
         throwException(id);
-        
+
         // this is not used since the method above always throws
         return 0;
     }
@@ -306,7 +306,7 @@ public final class BridgeResources extends Resources {
     @Override
     public int getInteger(int id) throws NotFoundException {
         IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
-        
+
         if (value != null && value.getValue() != null) {
             String v = value.getValue();
             int radix = 10;
@@ -320,10 +320,10 @@ public final class BridgeResources extends Resources {
                 // return exception below
             }
         }
-        
+
         // id was not found or not resolved. Throw a NotFoundException.
         throwException(id);
-        
+
         // this is not used since the method above always throws
         return 0;
     }
@@ -348,12 +348,12 @@ public final class BridgeResources extends Resources {
         String s = getString(id);
         if (s != null) {
             return String.format(s, formatArgs);
-            
+
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
         throwException(id);
-        
+
         // this is not used since the method above always throws
         return null;
     }
@@ -361,14 +361,14 @@ public final class BridgeResources extends Resources {
     @Override
     public String getString(int id) throws NotFoundException {
         IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
-        
+
         if (value != null && value.getValue() != null) {
             return value.getValue();
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
         throwException(id);
-        
+
         // this is not used since the method above always throws
         return null;
     }
@@ -385,6 +385,11 @@ public final class BridgeResources extends Resources {
                 if (ResourceHelper.stringToFloat(v, outValue)) {
                     return;
                 }
+
+                // else it's a string
+                outValue.type = TypedValue.TYPE_STRING;
+                outValue.string = v;
+                return;
             }
         }
 
@@ -413,7 +418,7 @@ public final class BridgeResources extends Resources {
                         KXmlParser parser = new KXmlParser();
                         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
                         parser.setInput(new FileReader(f));
-                        
+
                         return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                     } catch (XmlPullParserException e) {
                         NotFoundException newE = new NotFoundException();
@@ -434,6 +439,33 @@ public final class BridgeResources extends Resources {
         // this is not used since the method above always throws
         return null;
     }
+
+    @Override
+    public XmlResourceParser loadXmlResourceParser(String file, int id,
+            int assetCookie, String type) throws NotFoundException {
+        // even though we know the XML file to load directly, we still need to resolve the
+        // id so that we can know if it's a platform or project resource.
+        // (mPlatformResouceFlag will get the result and will be used later).
+        getResourceValue(id, mPlatformResourceFlag);
+
+        File f = new File(file);
+        try {
+            KXmlParser parser = new KXmlParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+            parser.setInput(new FileReader(f));
+
+            return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
+        } catch (XmlPullParserException e) {
+            NotFoundException newE = new NotFoundException();
+            newE.initCause(e);
+            throw newE;
+        } catch (FileNotFoundException e) {
+            NotFoundException newE = new NotFoundException();
+            newE.initCause(e);
+            throw newE;
+        }
+    }
+
 
     @Override
     public InputStream openRawResource(int id) throws NotFoundException {
@@ -465,6 +497,24 @@ public final class BridgeResources extends Resources {
     }
 
     @Override
+    public InputStream openRawResource(int id, TypedValue value) throws NotFoundException {
+        getValue(id, value, true);
+
+        File f = new File(value.string.toString());
+        if (f.isFile()) {
+            try {
+                return new FileInputStream(f);
+            } catch (FileNotFoundException e) {
+                NotFoundException exception = new NotFoundException();
+                exception.initCause(e);
+                throw exception;
+            }
+        }
+
+        throw new NotFoundException();
+    }
+
+    @Override
     public AssetFileDescriptor openRawResourceFd(int id) throws NotFoundException {
         throw new UnsupportedOperationException();
     }
@@ -482,7 +532,7 @@ public final class BridgeResources extends Resources {
         if (resourceInfo == null && mProjectCallback != null) {
             resourceInfo = mProjectCallback.resolveResourceValue(id);
         }
-        
+
         String message = null;
         if (resourceInfo != null) {
             message = String.format(
@@ -492,7 +542,7 @@ public final class BridgeResources extends Resources {
             message = String.format(
                     "Could not resolve resource value: 0x%1$X.", id);
         }
-        
+
         throw new NotFoundException(message);
     }
 }

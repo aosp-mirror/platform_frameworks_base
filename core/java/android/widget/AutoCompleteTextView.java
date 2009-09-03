@@ -862,6 +862,16 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         return ListView.INVALID_POSITION;
     }
 
+
+    /**
+     * @hide
+     * @return {@link android.widget.ListView#getChildCount()} of the drop down if it is showing,
+     *         otherwise 0.
+     */
+    protected int getDropDownChildCount() {
+        return mDropDownList == null ? 0 : mDropDownList.getChildCount();
+    }
+
     /**
      * <p>Starts filtering the content of the drop down list. The filtering
      * pattern is the content of the edit box. Subclasses should override this

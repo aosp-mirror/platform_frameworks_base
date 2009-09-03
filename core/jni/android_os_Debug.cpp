@@ -129,6 +129,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             isDalvikHeap = 1;
         } else if (strstr(line, "/dalvik-heap-bitmap/")) {
             isDalvikHeap = 1;    
+        } else if (strstr(line, "/data/dalvik-cache/")) {
+            isDalvikHeap = 1;
         } else if (strstr(line, "/tmp/sqlite-heap")) {
             isSqliteHeap = 1;
         }
@@ -158,9 +160,9 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 private_dirty = temp;
             } else if (sscanf(line, "Referenced: %d kB", &temp) == 1) {
                 referenced = temp;
-            } else if (strlen(line) > 40 && line[8] == '-' && line[17] == ' ') {
+            } else if (strlen(line) > 30 && line[8] == '-' && line[17] == ' ') {
                 // looks like a new mapping
-                // example: "0000a000-00232000 rwxp 0000a000 00:00 0          [heap]"
+                // example: "10000000-10001000 ---p 10000000 00:00 0"
                 break;
             }
         }
@@ -178,8 +180,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 // ignore
             } else {
                 stats->otherPss += pss;
-                stats->otherPrivateDirty += shared_dirty;
-                stats->otherSharedDirty += private_dirty;
+                stats->otherPrivateDirty += private_dirty;
+                stats->otherSharedDirty += shared_dirty;
             }
         }
     }

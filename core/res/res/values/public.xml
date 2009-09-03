@@ -1092,74 +1092,52 @@
   <eat-comment />
 
   <public type="attr" name="tension" id="0x0101026a" />
-  <public type="attr" name="extraTension" />
-  <public type="attr" name="anyDensity" />
-  <public type="attr" name="searchSuggestThreshold" />
-  <public type="attr" name="includeInGlobalSearch" />
-  <public type="attr" name="onClick" />
-  <public type="attr" name="targetSdkVersion" />
-  <public type="attr" name="maxSdkVersion" />
-  <public type="attr" name="testOnly" />
-  <public type="attr" name="contentDescription" />
-  <public type="attr" name="gestureStrokeWidth" />
-  <public type="attr" name="gestureColor" />
-  <public type="attr" name="uncertainGestureColor" />
-  <public type="attr" name="fadeOffset" />
-  <public type="attr" name="fadeDuration" />
-  <public type="attr" name="gestureStrokeType" />
-  <public type="attr" name="gestureStrokeLengthThreshold" />
-  <public type="attr" name="gestureStrokeSquarenessThreshold" />
-  <public type="attr" name="gestureStrokeAngleThreshold" />
-  <public type="attr" name="eventsInterceptionEnabled" />
-  <public type="attr" name="fadeEnabled" />
-  <public type="attr" name="backupAgent" />
-  <public type="attr" name="allowBackup" />
-  <public type="attr" name="glEsVersion" />
-  <public type="attr" name="queryAfterZeroResults" />
-  <public type="attr" name="dropDownHeight" />
-  <public type="attr" name="smallScreens" />
-  <public type="attr" name="normalScreens" />
-  <public type="attr" name="largeScreens" />
-  <public type="attr" name="progressBarStyleInverse" />
-  <public type="attr" name="progressBarStyleSmallInverse" />
-  <public type="attr" name="progressBarStyleLargeInverse" /> 
-  <public type="attr" name="searchSettingsDescription" />
-  <public type="attr" name="textColorPrimaryInverseDisableOnly" />
-  <public type="attr" name="autoUrlDetect" />
-  <public type="attr" name="resizeable" />
+  <public type="attr" name="extraTension" id="0x0101026b" />
+  <public type="attr" name="anyDensity" id="0x0101026c" />
+  <public type="attr" name="searchSuggestThreshold" id="0x0101026d" />
+  <public type="attr" name="includeInGlobalSearch" id="0x0101026e" />
+  <public type="attr" name="onClick" id="0x0101026f" />
+  <public type="attr" name="targetSdkVersion" id="0x01010270" />
+  <public type="attr" name="maxSdkVersion" id="0x01010271" />
+  <public type="attr" name="testOnly" id="0x01010272" />
+  <public type="attr" name="contentDescription" id="0x01010273" />
+  <public type="attr" name="gestureStrokeWidth" id="0x01010274" />
+  <public type="attr" name="gestureColor" id="0x01010275" />
+  <public type="attr" name="uncertainGestureColor" id="0x01010276" />
+  <public type="attr" name="fadeOffset" id="0x01010277" />
+  <public type="attr" name="fadeDuration" id="0x01010278" />
+  <public type="attr" name="gestureStrokeType" id="0x01010279" />
+  <public type="attr" name="gestureStrokeLengthThreshold" id="0x0101027a" />
+  <public type="attr" name="gestureStrokeSquarenessThreshold" id="0x0101027b" />
+  <public type="attr" name="gestureStrokeAngleThreshold" id="0x0101027c" />
+  <public type="attr" name="eventsInterceptionEnabled" id="0x0101027d" />
+  <public type="attr" name="fadeEnabled" id="0x0101027e" />
+  <public type="attr" name="backupAgent" id="0x0101027f" />
+  <public type="attr" name="allowBackup" id="0x01010280" />
+  <public type="attr" name="glEsVersion" id="0x01010281" />
+  <public type="attr" name="queryAfterZeroResults" id="0x01010282" />
+  <public type="attr" name="dropDownHeight" id="0x01010283" />
+  <public type="attr" name="smallScreens" id="0x01010284" />
+  <public type="attr" name="normalScreens" id="0x01010285" />
+  <public type="attr" name="largeScreens" id="0x01010286" />
+  <public type="attr" name="progressBarStyleInverse" id="0x01010287" />
+  <public type="attr" name="progressBarStyleSmallInverse" id="0x01010288" />
+  <public type="attr" name="progressBarStyleLargeInverse" id="0x01010289" />
+  <public type="attr" name="searchSettingsDescription" id="0x0101028a" />
+  <public type="attr" name="textColorPrimaryInverseDisableOnly" id="0x0101028b" />
+  <public type="attr" name="autoUrlDetect" id="0x0101028c" />
+  <public type="attr" name="resizeable" id="0x0101028d" />
 
-  <public-padding type="attr" name="donut_resource_pad" end="0x0101029f" />
-
-  <public-padding type="id" name="donut_resource_pad" end="0x01020040" />
-  
   <public type="style" name="Widget.ProgressBar.Inverse" id="0x0103005b" />
   <public type="style" name="Widget.ProgressBar.Large.Inverse" id="0x0103005c" />
   <public type="style" name="Widget.ProgressBar.Small.Inverse" id="0x0103005d" /> 
-  <public-padding type="style" name="donut_resource_pad" end="0x01030070" />
-  
-  <public-padding type="string" name="donut_resource_pad" end="0x01040030" />
 
-  <public-padding type="dimen" name="donut_resource_pad" end="0x01050010" />
-
-  <public-padding type="color" name="donut_resource_pad" end="0x01060030" />
-
-  <public-padding type="array" name="donut_resource_pad" end="0x01070010" />
-
-  <public type="drawable" name="stat_sys_vp_phone_call" />
-  <public type="drawable" name="stat_sys_vp_phone_call_on_hold" />
+  <public type="drawable" name="stat_sys_vp_phone_call" id="0x010800a7" />
+  <public type="drawable" name="stat_sys_vp_phone_call_on_hold" id="0x010800a8" />
   
-  <public-padding type="drawable" name="donut_resource_pad" end="0x010800d0" />
-  
-  <public-padding type="layout" name="donut_resource_pad" end="0x01090020" />
-  
-  <public type="anim" name="anticipate_interpolator" />
-  <public type="anim" name="overshoot_interpolator" />
-  <public type="anim" name="anticipate_overshoot_interpolator" />
-  <public type="anim" name="bounce_interpolator" />
-  <public type="anim" name="linear_interpolator" />
-
-  <public-padding type="anim" name="donut_resource_pad" end="0x010a0020" />
-  
-  <public-padding type="integer" name="donut_resource_pad" end="0x010e0010" />
-  
+  <public type="anim" name="anticipate_interpolator" id="0x010a0007" />
+  <public type="anim" name="overshoot_interpolator" id="0x010a0008" />
+  <public type="anim" name="anticipate_overshoot_interpolator" id="0x010a0009" />
+  <public type="anim" name="bounce_interpolator" id="0x010a000a" />
+  <public type="anim" name="linear_interpolator" id="0x010a000b" />
 </resources>

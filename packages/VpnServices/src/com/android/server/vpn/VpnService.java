@@ -133,11 +133,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
         if (VpnState.CONNECTED.equals(mState)) {
             Log.i("VpnService", "     recovered: " + mProfile.getName());
-            new Thread(new Runnable() {
-                public void run() {
-                    enterConnectivityLoop();
-                }
-            }).start();
+            startConnectivityMonitor();
         }
     }
 
@@ -147,8 +143,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
     synchronized boolean onConnect(String username, String password) {
         try {
-            mState = VpnState.CONNECTING;
-            broadcastConnectivity(VpnState.CONNECTING);
+            setState(VpnState.CONNECTING);
 
             stopPreviouslyRunDaemons();
             String serverIp = getIp(getProfile().getServerName());
@@ -166,8 +161,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
     synchronized void onDisconnect() {
         try {
             Log.i(TAG, "disconnecting VPN...");
-            mState = VpnState.DISCONNECTING;
-            broadcastConnectivity(VpnState.DISCONNECTING);
+            setState(VpnState.DISCONNECTING);
             mNotification.showDisconnect();
 
             mDaemonHelper.stopAll();
@@ -215,16 +209,18 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
                     SystemProperties.get(VPN_STATUS))) {
                 onConnected();
                 return;
-            } else if (mDaemonHelper.anySocketError()) {
-                return;
+            } else {
+                int err = mDaemonHelper.getSocketError();
+                if (err != 0) {
+                    onError(err);
+                    return;
+                }
             }
             sleep(500); // 0.5 second
         }
 
-        synchronized (VpnService.this) {
-            if (mState == VpnState.CONNECTING) {
-                onError(new IOException("Connecting timed out"));
-            }
+        if (mState == VpnState.CONNECTING) {
+            onError(new IOException("Connecting timed out"));
         }
     }
 
@@ -235,16 +231,17 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         saveOriginalDns();
         saveAndSetDomainSuffices();
 
-        mState = VpnState.CONNECTED;
         mStartTime = System.currentTimeMillis();
 
-        // set DNS after saving the states in case the process gets killed
-        // before states are saved
+        // Correct order to make sure VpnService doesn't break when killed:
+        // (1) set state to CONNECTED
+        // (2) save states
+        // (3) set DNS
+        setState(VpnState.CONNECTED);
         saveSelf();
         setVpnDns();
-        broadcastConnectivity(VpnState.CONNECTED);
 
-        enterConnectivityLoop();
+        startConnectivityMonitor();
     }
 
     private void saveSelf() throws IOException {
@@ -261,10 +258,10 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
         restoreOriginalDns();
         restoreOriginalDomainSuffices();
-        mState = VpnState.IDLE;
-        broadcastConnectivity(VpnState.IDLE);
+        setState(VpnState.IDLE);
 
         // stop the service itself
+        SystemProperties.set(VPN_STATUS, VPN_IS_DOWN);
         mContext.removeStates();
         mContext.stopSelf();
     }
@@ -316,6 +313,11 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         SystemProperties.set(DNS_DOMAIN_SUFFICES, mOriginalDomainSuffices);
     }
 
+    private void setState(VpnState newState) {
+        mState = newState;
+        broadcastConnectivity(newState);
+    }
+
     private void broadcastConnectivity(VpnState s) {
         VpnManager m = new VpnManager(mContext);
         Throwable err = mError;
@@ -326,6 +328,9 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             } else if (err instanceof VpnConnectingError) {
                 m.broadcastConnectivity(mProfile.getName(), s,
                         ((VpnConnectingError) err).getErrorCode());
+            } else if (VPN_IS_UP.equals(SystemProperties.get(VPN_STATUS))) {
+                m.broadcastConnectivity(mProfile.getName(), s,
+                        VpnManager.VPN_ERROR_CONNECTION_LOST);
             } else {
                 m.broadcastConnectivity(mProfile.getName(), s,
                         VpnManager.VPN_ERROR_CONNECTION_FAILED);
@@ -335,23 +340,28 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         }
     }
 
-    private void enterConnectivityLoop() {
-        Log.i(TAG, "VPN connectivity monitor running");
-        try {
-            for (;;) {
-                synchronized (VpnService.this) {
-                    if (mState != VpnState.CONNECTED || !checkConnectivity()) {
-                        break;
+    private void startConnectivityMonitor() {
+        new Thread(new Runnable() {
+            public void run() {
+                Log.i(TAG, "VPN connectivity monitor running");
+                try {
+                    for (;;) {
+                        synchronized (VpnService.this) {
+                            if ((mState != VpnState.CONNECTED)
+                                || !checkConnectivity()) {
+                                break;
+                            }
+                            mNotification.update();
+                            checkDns();
+                            VpnService.this.wait(1000); // 1 second
+                        }
                     }
-                    mNotification.update();
-                    checkDns();
-                    VpnService.this.wait(1000); // 1 second
+                } catch (InterruptedException e) {
+                    onError(e);
                 }
+                Log.i(TAG, "VPN connectivity monitor stopped");
             }
-        } catch (InterruptedException e) {
-            onError(e);
-        }
-        Log.i(TAG, "VPN connectivity monitor stopped");
+        }).start();
     }
 
     private void saveLocalIpAndInterface(String serverIp) throws IOException {
@@ -373,7 +383,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
     // returns false if vpn connectivity is broken
     private boolean checkConnectivity() {
         if (mDaemonHelper.anyDaemonStopped() || isLocalIpChanged()) {
-            onDisconnect();
+            onError(new IOException("Connectivity lost"));
             return false;
         } else {
             return true;
@@ -427,11 +437,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         }
 
         synchronized void stopAll() {
-            if (mDaemonList.isEmpty()) {
-                onFinalCleanUp();
-            } else {
-                for (DaemonProxy s : mDaemonList) s.stop();
-            }
+            for (DaemonProxy s : mDaemonList) s.stop();
         }
 
         synchronized void closeSockets() {
@@ -456,30 +462,26 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             }
         }
 
-        synchronized boolean anySocketError() {
+        synchronized int getSocketError() {
             for (DaemonProxy s : mDaemonList) {
                 switch (getResultFromSocket(s)) {
                     case 0:
                         continue;
 
                     case AUTH_ERROR_CODE:
-                        onError(VpnManager.VPN_ERROR_AUTH);
-                        return true;
+                        return VpnManager.VPN_ERROR_AUTH;
 
                     case CHALLENGE_ERROR_CODE:
-                        onError(VpnManager.VPN_ERROR_CHALLENGE);
-                        return true;
+                        return VpnManager.VPN_ERROR_CHALLENGE;
 
                     case REMOTE_HUNG_UP_ERROR_CODE:
-                        onError(VpnManager.VPN_ERROR_REMOTE_HUNG_UP);
-                        return true;
+                        return VpnManager.VPN_ERROR_REMOTE_HUNG_UP;
 
                     default:
-                        onError(VpnManager.VPN_ERROR_CONNECTION_FAILED);
-                        return true;
+                        return VpnManager.VPN_ERROR_CONNECTION_FAILED;
                 }
             }
-            return false;
+            return 0;
         }
     }
 

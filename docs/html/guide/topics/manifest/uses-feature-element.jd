@@ -1,0 +1,136 @@
+page.title=&lt;uses-feature&gt;
+@jd:body
+
+<dl class="xml">
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;uses-feature android:<a href="#glEsVersion">glEsVersion</a>="<em>integer</em>"
+              android:<a href="#name">name</a>="<em>string</em>" /&gt;
+</pre>
+</dd>
+
+<dt>contained in:</dt>
+<dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
+
+<dt>description:</dt>
+<dd>This element declares a specific feature used by the application.
+Android provides some features that may not be equally supported by all
+Android devices. In a manner similar to the <code><a href="uses-sdk-element.html">&lt;uses-sdk></a></code> 
+element, this element allows an application to specify which device-variable
+features it uses. In this way, the application
+will not be installed on devices that do not offer the feature.</p>
+
+<p>For example, an application might specify that it requires a camera with auto-focus capabilities.
+If a device does not provide a camera with auto-focus, then it will not allow
+installation of the application.</p>
+
+<p>In order to maintain strict device compatibility, it's very important that you use
+this element to declare all features that your application uses. Failure to declare
+a feature may result your application being installed on a device
+that does not support the feature and your application failing.</p>
+
+<p>For some features, there may exist a specfic attribute that allows you to define
+a version of the feature, such as the version of Open GL used (declared with
+<a href="#glEsVersion">{@code glEsVersion}</a>). Other features that either do or do not
+exist for a device, such as camera auto-focus, are declared using the
+<a href="#name">{@code name}</a> attribute.</p>
+
+<p>Any software or hardware features that may vary among Android-powered
+devices will be listed on this page among the attributes below. If you see any features
+here that you use in your application, you should include a {@code
+&lt;uses-feature>} element for each one. For example, if your application uses the device
+camera, then you should include the following in your {@code AndroidManifest.xml}:</p>
+
+<pre>
+&lt;uses-feature android:name="android.hardware.camera" />
+</pre>
+
+<p>If you declare "android.hardware.camera", then your application is considered
+compatible with all devices that include a camera, regardless of whether auto-focus is
+available or not. If you also use the auto-focus features (available through the {@link
+android.hardware.Camera Camera API}), then you need to include an additional
+{@code &lt;uses-feature>} element that declares the "android.hardware.camera.autofocus"
+feature. Also note that you must still request the {@link android.Manifest.permission#CAMERA
+CAMERA permission}. Requesting permission grants your application access to the
+appropriate hardware and software, while declaring the features used by
+your application ensures proper device compatibility.</p>
+
+<p>Although the {@code &lt;uses-feature>} element is only activated for devices running 
+API Level 4 or higher, it is safe to include this for applications that declare 
+a <a href="uses-sdk-element.html#min">{@code minSdkVersion}</a> 
+of "3" or lower. Devices running older versions of the platform 
+will simply ignore this element, but newer devices will recognize it and enforce 
+installation restrictions based on whether the device supports the feature.</p>
+
+<p class="note"><strong>Note:</strong>
+For each feature required by your application, you must include a new {@code
+&lt;uses-feature>} element. Multiple features cannot be declared in one 
+instance of this element.</p>
+
+</dd> 
+
+
+<dt>attributes:</dt>
+
+<dd>
+<dl class="attr"><dt><a name="glEsVersion"></a>{@code android:glEsVersion}</dt>
+  <dd>The GLES version needed by the application.
+     The higher 16 bits represent the major number and the lower 16 bits
+     represent the minor number. For example, for GL 1.2 referring to
+     0x00000102, the actual value should be set as 0x00010002.
+  </dd>
+</dl>
+</dd>
+
+<dd>
+<dl class="attr"><dt><a name="name"></a>{@code android:name}</dt>
+  <dd>The name of a feature required by the application. 
+  The value must be one of the following accepted strings:
+  
+  <table> 
+    <tr> 
+       <th>Feature</th>
+       <th>Value</th> 
+       <th>Description</th> 
+    </tr><tr> 
+       <td rowspan="3">Camera</td>
+       <td>"{@code android.hardware.camera}"</td> 
+       <td>The application requires a camera.</td> 
+    </tr><tr> 
+       <td>"{@code android.hardware.camera.autofocus}"</td> 
+       <td>The application requires a camera with auto-focus capability.
+       As a prerequisite, "{@code android.hardware.camera}" must also be declared
+       with a separate {@code &lt;uses-feature>} element.
+       </td>
+     <tr>
+       <td colspan="2">
+         <strong>Note:</strong> Any application that requests the 
+         {@link android.Manifest.permission#CAMERA CAMERA permission} but does <em>not</em>
+         declare any camera features with the {@code &lt;uses-feature>} element will be assumed
+         to use all camera features (such as auto-focus). Thus, the application will not
+         be compatible with devices that do not support all features. Please use 
+         {@code &lt;uses-feature>} to declare only the camera features that your 
+         application needs.
+       </td>
+     </tr>
+    </tr>
+  </table>
+  
+  </dd>
+</dl>
+</dd>
+
+<!-- ##api level indication## -->
+<dt>introduced in:</dt>
+<dd>API Level 4</dd>
+
+<dt>see also:</dt>
+<dd>
+  <ul>
+    <li>{@link android.content.pm.ConfigurationInfo}</li>
+  </ul>
+</dd>
+
+</dl>

@@ -65,6 +65,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private WeakHashMap<String, Drawable.ConstantState> mOutsideDrawablesCache;
     private SparseArray<Drawable.ConstantState> mBackgroundsCache;
     private boolean mGlobalSearchMode;
+    private boolean mClosed = false;
 
     // Cached column indexes, updated when the cursor changes.
     private int mFormatCol;
@@ -73,6 +74,14 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     private int mIconName1Col;
     private int mIconName2Col;
     private int mBackgroundColorCol;
+    
+    // The extra used to tell a cursor to close itself. This is a hack, see the description by
+    // its use later in this file.
+    private static final String EXTRA_CURSOR_RESPOND_CLOSE_CURSOR = "cursor_respond_close_cursor";
+
+    // The bundle which contains {EXTRA_CURSOR_RESPOND_CLOSE_CURSOR=true}, just cached once
+    // so we don't bother recreating it a bunch.
+    private final Bundle mCursorRespondCloseCursorBundle;
 
     // This value is stored in SuggestionsAdapter by the SearchDialog to indicate whether
     // a particular list item should be selected upon the next call to notifyDataSetChanged.
@@ -129,6 +138,10 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
                 mSearchDialog.setWorking(false);
             }
         };
+        
+        // Create this once because we'll reuse it a bunch.
+        mCursorRespondCloseCursorBundle = new Bundle();
+        mCursorRespondCloseCursorBundle.putBoolean(EXTRA_CURSOR_RESPOND_CLOSE_CURSOR, true);
 
         // delay 500ms when deleting
         getFilter().setDelayer(new Filter.Delayer() {
@@ -187,6 +200,12 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         }
     }
 
+    public void close() {
+        if (DBG) Log.d(LOG_TAG, "close()");
+        changeCursor(null);
+        mClosed = true;
+    }
+
     /**
      * Cache columns.
      */
@@ -194,8 +213,28 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
     public void changeCursor(Cursor c) {
         if (DBG) Log.d(LOG_TAG, "changeCursor(" + c + ")");
 
+        if (mClosed) {
+            Log.w(LOG_TAG, "Tried to change cursor after adapter was closed.");
+            if (c != null) c.close();
+            return;
+        }
+
         try {
+            Cursor oldCursor = getCursor();
             super.changeCursor(c);
+            
+            // We send a special respond to the cursor to tell it to close itself directly because
+            // it may not happen correctly for some cursors currently. This was originally
+            // included as a fix to http://b/2036290, in which the search dialog was holding
+            // on to references to the web search provider unnecessarily. This is being caused by
+            // the fact that the cursor is not being correctly closed in
+            // BulkCursorToCursorAdapter#close, which remains unfixed (see http://b/2015069).
+            //
+            // TODO: Remove this hack once http://b/2015069 is fixed.
+            if (oldCursor != null && oldCursor != c) {
+                oldCursor.respond(mCursorRespondCloseCursorBundle);
+            }
+            
             if (c != null) {
                 mFormatCol = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_FORMAT);
                 mText1Col = c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1);
@@ -658,7 +697,14 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (col == NONE) {
             return null;
         }
-        return cursor.getString(col);
+        try {
+            return cursor.getString(col);
+        } catch (Exception e) {
+            Log.e(LOG_TAG,
+                    "unexpected error retrieving valid column from cursor, "
+                            + "did the remote process die?", e);
+            return null;
+        }
     }
 
 }

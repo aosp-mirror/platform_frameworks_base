@@ -31,6 +31,7 @@ import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface;
@@ -358,7 +359,7 @@ public final class Bridge implements ILayoutBridge {
                 windowBackground = context.findItemInStyle(currentTheme, "windowBackground");
                 windowBackground = context.resolveResValue(windowBackground);
 
-                screenOffset = getScreenOffset(currentTheme, context);
+                screenOffset = getScreenOffset(frameworkResources, currentTheme, context);
             }
 
             // we need to make sure the Looper has been initialized for this thread.
@@ -401,8 +402,7 @@ public final class Bridge implements ILayoutBridge {
             view.layout(0, screenOffset, screenWidth, screenHeight);
 
             // draw them
-            BridgeCanvas canvas = new BridgeCanvas(screenWidth, screenHeight - screenOffset,
-                    logger);
+            Canvas canvas = new Canvas(screenWidth, screenHeight - screenOffset, logger);
 
             root.draw(canvas);
             canvas.dispose();
@@ -673,9 +673,13 @@ public final class Bridge implements ILayoutBridge {
     /**
      * Returns the top screen offset. This depends on whether the current theme defines the user
      * of the title and status bars.
+     * @param frameworkResources The framework resources
+     * @param currentTheme The current theme
+     * @param context The context
      * @return the pixel height offset
      */
-    private int getScreenOffset(IStyleResourceValue currentTheme, BridgeContext context) {
+    private int getScreenOffset(Map<String, Map<String, IResourceValue>> frameworkResources,
+            IStyleResourceValue currentTheme, BridgeContext context) {
         int offset = 0;
 
         // get the title bar flag from the current theme.
@@ -687,22 +691,25 @@ public final class Bridge implements ILayoutBridge {
         // if there's a value and it's true (default is false)
         if (value == null || value.getValue() == null ||
                 XmlUtils.convertValueToBoolean(value.getValue(), false /* defValue */) == false) {
+            // default size of the window title bar
+            int defaultOffset = DEFAULT_TITLE_BAR_HEIGHT;
+
             // get value from the theme.
             value = context.findItemInStyle(currentTheme, "windowTitleSize");
 
             // resolve it
             value = context.resolveResValue(value);
 
-            // default value
-            offset = DEFAULT_TITLE_BAR_HEIGHT;
-
-            // get the real value;
             if (value != null) {
+                // get the numerical value, if available
                 TypedValue typedValue = ResourceHelper.getValue(value.getValue());
                 if (typedValue != null) {
-                    offset = (int)typedValue.getDimension(context.getResources().mMetrics);
+                    // compute the pixel value based on the display metrics
+                    defaultOffset = (int)typedValue.getDimension(context.getResources().mMetrics);
                 }
             }
+
+            offset += defaultOffset;
         }
 
         // get the fullscreen flag from the current theme.
@@ -713,8 +720,25 @@ public final class Bridge implements ILayoutBridge {
 
         if (value == null || value.getValue() == null ||
                 XmlUtils.convertValueToBoolean(value.getValue(), false /* defValue */) == false) {
-            // FIXME: Right now this is hard-coded in the platform, but once there's a constant, we'll need to use it.
-            offset += DEFAULT_STATUS_BAR_HEIGHT;
+
+            // default value
+            int defaultOffset = DEFAULT_STATUS_BAR_HEIGHT;
+
+            // get the real value, first the list of Dimensions from the framework map
+            Map<String, IResourceValue> dimens = frameworkResources.get(BridgeConstants.RES_DIMEN);
+
+            // now get the value
+            value = dimens.get("status_bar_height");
+            if (value != null) {
+                TypedValue typedValue = ResourceHelper.getValue(value.getValue());
+                if (typedValue != null) {
+                    // compute the pixel value based on the display metrics
+                    defaultOffset = (int)typedValue.getDimension(context.getResources().mMetrics);
+                }
+            }
+
+            // add the computed offset.
+            offset += defaultOffset;
         }
 
         return offset;

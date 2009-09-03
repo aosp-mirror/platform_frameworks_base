@@ -61,7 +61,7 @@ public class TextToSpeech {
 
 
     /**
-     * Denotes the language is available exactly as specified by the locale
+     * Denotes the language is available exactly as specified by the locale.
      */
     public static final int LANG_COUNTRY_VAR_AVAILABLE = 2;
 
@@ -176,7 +176,7 @@ public class TextToSpeech {
 
         // intents to ask engine to install data or check its data
         /**
-         * Broadcast Action: Triggers the platform Text-To-Speech engine to
+         * Activity Action: Triggers the platform Text-To-Speech engine to
          * start the activity that installs the resource files on the device
          * that are required for TTS to be operational. Since the installation
          * of the data can be interrupted or declined by the user, the application
@@ -184,12 +184,20 @@ public class TextToSpeech {
          * and if need be, should check installation status with
          * {@link #ACTION_CHECK_TTS_DATA}.
          */
-        @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
         public static final String ACTION_INSTALL_TTS_DATA =
                 "android.speech.tts.engine.INSTALL_TTS_DATA";
 
         /**
-         * Broadcast Action: Starts the activity from the platform Text-To-Speech
+         * Broadcast Action: broadcast to signal the completion of the installation of
+         * the data files used by the synthesis engine. Success or failure is indicated in the
+         * {@link #EXTRA_TTS_DATA_INSTALLED} extra.
+         */
+        @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        public static final String ACTION_TTS_DATA_INSTALLED =
+                "android.speech.tts.engine.TTS_DATA_INSTALLED";
+        /**
+         * Activity Action: Starts the activity from the platform Text-To-Speech
          * engine to verify the proper installation and availability of the
          * resource files on the system. Upon completion, the activity will
          * return one of the following codes:
@@ -211,7 +219,7 @@ public class TextToSpeech {
          *       and YYY is the 3-letter ISO country code.</li>
          * </ul>
          */
-        @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
         public static final String ACTION_CHECK_TTS_DATA =
                 "android.speech.tts.engine.CHECK_TTS_DATA";
 
@@ -232,6 +240,16 @@ public class TextToSpeech {
          * the text-to-speech engine specifies the locale associated with each resource file.
          */
         public static final String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
+
+        // extras for a TTS engine's data installation
+        /**
+         * Extra information received with the {@link #ACTION_TTS_DATA_INSTALLED} intent.
+         * It indicates whether the data files for the synthesis engine were successfully
+         * installed. The installation was initiated with the  {@link #ACTION_INSTALL_TTS_DATA}
+         * intent. The possible values for this extra are
+         * {@link TextToSpeech#SUCCESS} and {@link TextToSpeech#ERROR}.
+         */
+        public static final String EXTRA_TTS_DATA_INSTALLED = "dataInstalled";
 
         // keys for the parameters passed with speak commands. Hidden keys are used internally
         // to maintain engine state for each TextToSpeech instance.
@@ -1016,7 +1034,7 @@ public class TextToSpeech {
             }
             try {
                 String[] locStrings =  mITts.getLanguage();
-                if (locStrings.length == 3) {
+                if ((locStrings != null) && (locStrings.length == 3)) {
                     return new Locale(locStrings[0], locStrings[1], locStrings[2]);
                 } else {
                     return null;

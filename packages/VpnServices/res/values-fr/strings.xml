@@ -15,11 +15,8 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label">"Services VPN"</string>
-    <!-- no translation found for vpn_notification_title_connected (2567196609405266775) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (3564361788336568244) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (1952209867082269429) -->
-    <skip />
+    <string name="app_label" msgid="4589592829302498102">"Services VPN"</string>
+    <string name="vpn_notification_title_connected" msgid="2567196609405266775">"VPN %s connecté"</string>
+    <string name="vpn_notification_title_disconnected" msgid="3564361788336568244">"VPN %s déconnecté"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="1952209867082269429">"Touchez l\'écran pour vous reconnecter à un VPN."</string>
 </resources>

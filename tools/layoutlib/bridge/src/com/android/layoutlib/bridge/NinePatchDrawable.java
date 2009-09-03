@@ -30,17 +30,17 @@ public class NinePatchDrawable extends Drawable {
     NinePatchDrawable(NinePatch ninePatch) {
         m9Patch = ninePatch;
     }
-    
+
     @Override
     public int getMinimumWidth() {
         return m9Patch.getWidth();
     }
-    
+
     @Override
     public int getMinimumHeight() {
         return m9Patch.getHeight();
     }
-    
+
     /**
      * Return the intrinsic width of the underlying drawable object.  Returns
      * -1 if it has no intrinsic width, such as with a solid color.
@@ -58,7 +58,7 @@ public class NinePatchDrawable extends Drawable {
     public int getIntrinsicHeight() {
         return m9Patch.getHeight();
     }
-    
+
     /**
      * Return in padding the insets suggested by this Drawable for placing
      * content inside the drawable's bounds. Positive values move toward the
@@ -76,24 +76,18 @@ public class NinePatchDrawable extends Drawable {
         padding.bottom = padd[3];
         return true;
     }
-    
+
     @Override
     public void draw(Canvas canvas) {
-        if (canvas instanceof BridgeCanvas) {
-            BridgeCanvas bridgeCanvas = (BridgeCanvas)canvas;
-            
-            Rect r = getBounds();
-            m9Patch.draw(bridgeCanvas.getGraphics2d(), r.left, r.top, r.width(), r.height());
-            
-            return;
-        }
+        Rect r = getBounds();
+        m9Patch.draw(canvas.getGraphics2d(), r.left, r.top, r.width(), r.height());
 
-        throw new UnsupportedOperationException();
+        return;
     }
 
-    
+
     // ----------- Not implemented methods ---------------
-    
+
 
     @Override
     public int getOpacity() {

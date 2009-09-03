@@ -326,7 +326,13 @@ framework_docs_LOCAL_JAVA_LIBRARIES := \
 
 framework_docs_LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
+# The since flag (-since N.xml API_LEVEL) is used to add API Level information
+# to the reference documentation. Must be in order of oldest to newest.
 framework_docs_LOCAL_DROIDDOC_OPTIONS := \
+    -since ./frameworks/base/api/1.xml 1 \
+    -since ./frameworks/base/api/2.xml 2 \
+    -since ./frameworks/base/api/3.xml 3 \
+    -since ./frameworks/base/api/4.xml 4 \
 		-error 1 -error 2 -warning 3 -error 4 -error 6 -error 8 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -338,19 +344,30 @@ web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
 		-samplecode $(sample_dir)/ApiDemos \
 		            guide/samples/ApiDemos "API Demos" \
+		-samplecode $(sample_dir)/Home \
+		            guide/samples/Home "Home" \
+		-samplecode $(sample_dir)/JetBoy \
+		            guide/samples/JetBoy "JetBoy" \
 		-samplecode $(sample_dir)/LunarLander \
 		            guide/samples/LunarLander "Lunar Lander" \
 		-samplecode $(sample_dir)/NotePad \
-		            guide/samples/NotePad "Note Pad"
+		            guide/samples/NotePad "Note Pad" \
+		-samplecode $(sample_dir)/SearchableDictionary \
+		            guide/samples/SearchableDictionary "Searchable Dictionary" \
+		-samplecode $(sample_dir)/Snake \
+		            guide/samples/Snake "Snake" \
+		-samplecode $(sample_dir)/SoftKeyboard \
+		            guide/samples/SoftKeyboard "Soft Keyboard"
 
-# SDK version identifiers used in the published docs. 
-
-# major[.minor] version for SDK. Typically identical to the 
-# most current Android platform version included in the SDK package. 
-framework_docs_SDK_VERSION :=  1.5
-# release version for SDK (ie "Release x")
-framework_docs_SDK_REL_ID :=   3
-framework_docs_SDK_CURRENT_DIR := $(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
+## SDK version identifiers used in the published docs
+  # major[.minor] version for current SDK. (full releases only)
+framework_docs_SDK_VERSION:=1.5
+  # release version (ie "Release x")  (full releases only)
+framework_docs_SDK_REL_ID:=3
+  # name of current SDK directory (full releases only)
+framework_docs_SDK_CURRENT_DIR:=$(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
+  # flag to build offline docs for a preview release
+framework_docs_SDK_PREVIEW:=true
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
@@ -379,7 +396,11 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-apixml $(INTERNAL_PLATFORM_API_FILE) \
 		-sdkvalues $(OUT_DOCS) \
 		-warning 3 \
-		-hdf android.whichdoc offline
+		-hdf android.whichdoc offline 
+
+ifeq ($(framework_docs_SDK_PREVIEW),true)
+  LOCAL_DROIDDOC_OPTIONS += -hdf sdk.current preview 
+endif
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk

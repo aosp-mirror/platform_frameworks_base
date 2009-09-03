@@ -37,6 +37,7 @@
 #include "netkeystore.h"
 #include "keymgmt.h"
 
+#define  DBG  1
 #define  CMD_PUT_WITH_FILE  "putfile"
 
 typedef void CMD_FUNC(LPC_MARSHAL *cmd, LPC_MARSHAL *reply);
@@ -397,12 +398,12 @@ int main(const int argc, const char *argv[])
 
         // read the command, execute and send the result back.
         if(read_marshal(s, &cmd)) goto err;
-        LOGI("new connection\n");
+        if (DBG) LOGD("new connection\n");
         execute(&cmd, &reply);
         write_marshal(s, &reply);
 err:
         memset(&reply, 0, sizeof(LPC_MARSHAL));
-        LOGI("closing connection\n");
+        if (DBG) LOGD("closing connection\n");
         close(s);
     }
 

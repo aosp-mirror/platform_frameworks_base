@@ -1,0 +1,81 @@
+page.title=Android API Levels
+@jd:body
+
+
+<p>The Android <em>API Level</em> is an integer that indicates a set of APIs available in an Android SDK
+and on a version of the Android platform. Each version of the Android platform supports a specific set
+of APIs, which are always backward-compatible. For example, Android 1.5 supports all APIs available in
+Android 1.0, but the reverse is not true. If an application uses APIs
+available in Android 1.5 that are not available in 1.0, then the application should never be installed
+on an Android 1.0 device, because it will fail due to missing APIs. The API Level ensures this does not happen
+by comparing the minimum API Level required by the applicaiton to the API Level available on the device.</p>
+
+<p>When a new version of Android adds APIs, a new API Level is added to the platform. The new APIs
+are available only to applications that declare a minimum API Level that is equal-to or greater-than 
+the API Level in which the APIs were introduced. The API Level required by an application is declared with the
+<code>&lt;uses-sdk></code> element inside the Android manifest, like this:</p>
+
+<pre>&lt;uses-sdk android:minSdkVersion="3" /></pre>
+
+<p>The value for <code>minSdkVersion</code> is the minimum API Level required by the application.
+If this is not declared, then it is assumed that the application is compatible with all versions and defaults to 
+API Level 1. In which case, if the application actually uses APIs introduced with an API Level greater than 1, then
+the application will fail in unpredictable ways when installed on a device that only supports API Level 1 
+(such as an Android 1.0 device).  
+See the <code><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk></a></code> 
+documentation for more about declaring the API Level in your manifest.</p>
+
+<p>For example, the {@link android.appwidget} package was introduced with API Level 3. If your application
+has set <code>minSdkVersion</code> to 1 or 2, then your application cannot use this package, 
+even if the device running your application uses a version of Android that supports it.
+In order to use the {@link android.appwidget} package, your application must set <code>minSdkVersion</code> 
+to 3 or higher. When the <code>minSdkVersion</code> is set to 3, the application will no longer be able to install 
+on a device running a platform version with an API Level less than 3.</p>
+
+<p>Despite the name of the manifest attribute (<code>minSdkVersion</code>), the API Level is not directly 
+associated with a specific SDK. For example, the SDK for Android 1.0 uses
+API Level 1 and the SDK for Android 1.1 uses API Level 2. So it may seem that the API Level increases consistently.
+However, it's possible that a subsequent platform
+releases will not introduce new APIs, and thus, the API Level will remain the same. In addition, there are often
+multiple SDK releases for a single platform version (there were three SDK releases for Android 1.5), and
+there's no guarantee that the API Level will remain the same between these. It's possible (but unlikely) that
+a second or third SDK for a given version of the platform will provide new APIs and add a new API Level.
+When you install a new SDK, be sure to read the SDK Contents on the install page, which specifies the API 
+Level for each platform available in the SDK. Also see the comparison of 
+<a href="#VersionsVsApiLevels">Platform Versions vs. API Levels</a>, below.</p>
+
+<p class="note"><strong>Note:</strong> During an "Early Look" SDK release, the APIs may not be final, so the
+API Level number cannot be specified. In this case, a string value matching the
+platform codename must be used as the value for <code>minSdkVersion</code>. This codename value
+will only be valid while using the Early Look SDK with the emulator. An application using this API Level
+can never be installed on an Android device. When the final SDK is released, you must update your manifest to use
+the official API Level integer.</p>
+
+<h2 id="VersionsVsApiLevels">Platform Versions vs. API Levels</h2>
+
+<p>The following table specifies the <em>maximum</em> API Level supported by each version of the Android platform.
+(Every platform is backward-compatible to API Level 1.)</p>
+
+<table>
+  <tr><th>Platform Version</th><th>API Level</th></tr>
+  <tr><td>Android 1.0</td><td>1</td></tr>
+  <tr><td>Android 1.1</td><td>2</td></tr>
+  <tr><td>Android 1.5</td><td>3</td></tr>
+  <tr><td>Android Donut</td><td>Donut</td></tr>
+</table>
+
+
+<h2 id="ViewingTheApiReference">Viewing the API Reference Based on API Level</h2>
+
+<p>The Android API reference includes information that specififies the minimum API Level required for each 
+package, class, and member. You can see this information on the right side of each header or label.</p>
+
+<p>By default, the reference documentation shows all APIs available with the latest SDK release.
+This means that the reference assumes you're using the latest API Level and will show you everything available
+with it. If you're developing applications for a version of Android that does not support the latest API Level, 
+then you can filter the reference to reveal only the packages, classes, and members available for that API Level.
+When viewing the reference, use the "Filter by API Level" selection box (below the search box) to pick the API Level
+you'd like to view.</p>
+
+
+

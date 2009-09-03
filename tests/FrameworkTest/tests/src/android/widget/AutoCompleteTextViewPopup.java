@@ -23,30 +23,38 @@ import android.test.suitebuilder.annotation.MediumTest;
 
 /**
  * A collection of tests on aspects of the AutoCompleteTextView's popup
+ *
+ * TODO: tests fail intermittently. Add back MediumTest annotation when fixed
  */
 public class AutoCompleteTextViewPopup
         extends ActivityInstrumentationTestCase2<AutoCompleteTextViewSimple> {
 
+    // ms to sleep when checking for intermittent UI state
+    private static final int SLEEP_TIME = 50;
+    // number of times to poll when checking expected UI state
+    // total wait time will be LOOP_AMOUNT * SLEEP_TIME
+    private static final int LOOP_AMOUNT = 10;
+
+
     public AutoCompleteTextViewPopup() {
         super("com.android.frameworktest", AutoCompleteTextViewSimple.class);
     }
-    
+
     /** Test that we can move the selection and it responds as expected */
-    @MediumTest
+    @FlakyTest(tolerance=3)
     public void testPopupSetListSelection() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
         final AutoCompleteTextView textView = theActivity.getTextView();
         final Instrumentation instrumentation = getInstrumentation();
-        
+
         // focus and type
         textView.requestFocus();
         instrumentation.waitForIdleSync();
         sendKeys("A");
-        
+
         // No initial selection
-        assertEquals("getListSelection(-1)", 
-                ListView.INVALID_POSITION, textView.getListSelection());
-        
+        waitAssertListSelection(textView, ListView.INVALID_POSITION);
+
         // set and check
         runTestOnUiThread(new Runnable() {
             public void run() {
@@ -54,58 +62,62 @@ public class AutoCompleteTextViewPopup
             }
         });
         instrumentation.waitForIdleSync();
-        assertEquals("set selection to (0)", 0, textView.getListSelection());
-        
+        waitAssertListSelection("set selection to (0)", textView, 0);
+
         // Use movement to cross-check the movement
         sendKeys("DPAD_DOWN");
-        assertEquals("move selection to (1)", 1, textView.getListSelection());
+        waitAssertListSelection("move selection to (1)", textView, 1);
+
+        // TODO: FlakyTest repeat runs will not currently call setUp, clear state
+        clearText(textView);
     }
-    
+
     /** Test that we can look at the selection as we move around */
-    @MediumTest
-    public void testPopupGetListSelection() {
+    @FlakyTest(tolerance=3)
+    public void testPopupGetListSelection() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
-        AutoCompleteTextView textView = theActivity.getTextView();
+        final AutoCompleteTextView textView = theActivity.getTextView();
         final Instrumentation instrumentation = getInstrumentation();
-        
+
         // focus and type
         textView.requestFocus();
         instrumentation.waitForIdleSync();
         sendKeys("A");
-        
+
         // No initial selection
-        assertEquals("getListSelection(-1)", 
-                ListView.INVALID_POSITION, textView.getListSelection());
-        
+        waitAssertListSelection(textView, ListView.INVALID_POSITION);
+
         // check for selection position as expected
         sendKeys("DPAD_DOWN");
-        assertEquals("move selection to (0)", 0, textView.getListSelection());
-        
+        waitAssertListSelection("move selection to (0)", textView, 0);
+
         // Repeat for one more movement
         sendKeys("DPAD_DOWN");
-        assertEquals("move selection to (1)", 1, textView.getListSelection());
+        waitAssertListSelection("move selection to (1)", textView, 1);
+
+        // TODO: FlakyTest repeat runs will not currently call setUp, clear state
+        clearText(textView);
     }
-    
+
     /** Test that we can clear the selection */
-    @MediumTest
+    @FlakyTest(tolerance=3)
     public void testPopupClearListSelection() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
         final AutoCompleteTextView textView = theActivity.getTextView();
         final Instrumentation instrumentation = getInstrumentation();
-        
+
         // focus and type
         textView.requestFocus();
         instrumentation.waitForIdleSync();
         sendKeys("A");
-        
+
         // No initial selection
-        assertEquals("getListSelection(-1)", 
-                ListView.INVALID_POSITION, textView.getListSelection());
-        
+        waitAssertListSelection(textView, ListView.INVALID_POSITION);
+
         // check for selection position as expected
         sendKeys("DPAD_DOWN");
-        assertEquals("getListSelection(0)", 0, textView.getListSelection());
-        
+        waitAssertListSelection(textView, 0);
+
         // clear it
         runTestOnUiThread(new Runnable() {
             public void run() {
@@ -113,12 +125,15 @@ public class AutoCompleteTextViewPopup
             }
         });
         instrumentation.waitForIdleSync();
-        assertEquals("setListSelection(ListView.INVALID_POSITION)", 
-                ListView.INVALID_POSITION, textView.getListSelection());
+        waitAssertListSelection("setListSelection(ListView.INVALID_POSITION)", textView,
+                ListView.INVALID_POSITION);
+
+        // TODO: FlakyTest repeat runs will not currently call setUp, clear state
+        clearText(textView);
     }
 
     /** Make sure we handle an empty adapter properly */
-    @MediumTest
+    @FlakyTest(tolerance=3)
     public void testPopupNavigateNoAdapter() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
         final AutoCompleteTextView textView = theActivity.getTextView();
@@ -130,12 +145,11 @@ public class AutoCompleteTextViewPopup
         sendKeys("A");
 
         // No initial selection
-        assertEquals("getListSelection(-1)",
-                ListView.INVALID_POSITION, textView.getListSelection());
+         waitAssertListSelection(textView, ListView.INVALID_POSITION);
 
         // check for selection position as expected
         sendKeys("DPAD_DOWN");
-        assertEquals("getListSelection(0)", 0, textView.getListSelection());
+        waitAssertListSelection(textView, 0);
 
         // Now get rid of the adapter
         runTestOnUiThread(new Runnable() {
@@ -147,27 +161,29 @@ public class AutoCompleteTextViewPopup
 
         // now try moving "down" - nothing should happen since there's no longer an adapter
         sendKeys("DPAD_DOWN");
+
+        // TODO: FlakyTest repeat runs will not currently call setUp, clear state
+        clearText(textView);
     }
-    
+
     /** Test the show/hide behavior of the drop-down. */
-    @FlakyTest(tolerance=5)
-    @MediumTest
+    @FlakyTest(tolerance=3)
     public void testPopupShow() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
         final AutoCompleteTextView textView = theActivity.getTextView();
         final Instrumentation instrumentation = getInstrumentation();
-        
+
         // Drop-down should not be showing when no text has been entered
         assertFalse("isPopupShowing() on start", textView.isPopupShowing());
-        
+
         // focus and type
         textView.requestFocus();
         instrumentation.waitForIdleSync();
         sendKeys("A");
-        
+
         // Drop-down should now be visible
-        assertTrue("isPopupShowing() after typing", textView.isPopupShowing());
-        
+        waitAssertPopupShowState("isPopupShowing() after typing", textView, true);
+
         // Clear the text
         runTestOnUiThread(new Runnable() {
             public void run() {
@@ -175,10 +191,10 @@ public class AutoCompleteTextViewPopup
             }
         });
         instrumentation.waitForIdleSync();
-        
+
         // Drop-down should be hidden when text is cleared
-        assertFalse("isPopupShowing() after text cleared", textView.isPopupShowing());
-        
+        waitAssertPopupShowState("isPopupShowing() after text cleared", textView, false);
+
         // Set the text, without filtering
         runTestOnUiThread(new Runnable() {
             public void run() {
@@ -186,10 +202,10 @@ public class AutoCompleteTextViewPopup
             }
         });
         instrumentation.waitForIdleSync();
-        
+
         // Drop-down should still be hidden
-        assertFalse("isPopupShowing() after setText(\"a\", false)", textView.isPopupShowing());
-        
+        waitAssertPopupShowState("isPopupShowing() after setText(\"a\", false)", textView, false);
+
         // Set the text, now with filtering
         runTestOnUiThread(new Runnable() {
             public void run() {
@@ -197,8 +213,48 @@ public class AutoCompleteTextViewPopup
             }
         });
         instrumentation.waitForIdleSync();
-        
-        // Drop-down should show up after setText() with filtering 
-        assertTrue("isPopupShowing() after text set", textView.isPopupShowing());
+
+        // Drop-down should show up after setText() with filtering
+        waitAssertPopupShowState("isPopupShowing() after text set", textView, true);
+
+        // TODO: FlakyTest repeat runs will not currently call setUp, clear state
+        clearText(textView);
+    }
+
+    private void waitAssertPopupShowState(String message, AutoCompleteTextView textView,
+            boolean expected) throws InterruptedException {
+        for (int i = 0; i < LOOP_AMOUNT; i++) {
+            if (textView.isPopupShowing() == expected) {
+                return;
+            }
+            Thread.sleep(SLEEP_TIME);
+        }
+        assertEquals(message, expected, textView.isPopupShowing());
+    }
+
+    private void waitAssertListSelection(AutoCompleteTextView textView, int expected)
+            throws Exception {
+        waitAssertListSelection("getListSelection()", textView, expected);
+    }
+
+    private void waitAssertListSelection(String message, AutoCompleteTextView textView,
+            int expected) throws Exception {
+        int currentSelection = ListView.INVALID_POSITION;
+        for (int i = 0; i < LOOP_AMOUNT; i++) {
+            currentSelection = textView.getListSelection();
+            if (expected == currentSelection) {
+                return;
+            }
+            Thread.sleep(SLEEP_TIME);
+        }
+        assertEquals(message, expected, textView.getListSelection());
+    }
+
+    private void clearText(final AutoCompleteTextView textView) throws Throwable {
+        runTestOnUiThread(new Runnable() {
+            public void run() {
+                textView.setText("");
+            }
+        });
     }
 }

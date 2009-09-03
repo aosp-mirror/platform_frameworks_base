@@ -128,7 +128,10 @@ public class ExifInterface {
     }
 
     public void setFilename(String filename) {
-        mFilename = filename;
+        if (mFilename == null || !mFilename.equals(filename)) {
+            mFilename = filename;
+            mCachedAttributes = null;
+        }
     }
 
     /**

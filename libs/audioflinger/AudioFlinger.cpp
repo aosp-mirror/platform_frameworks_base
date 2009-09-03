@@ -202,8 +202,8 @@ void AudioFlinger::setA2dpEnabled_l(bool enable)
     SortedVector < sp<MixerThread::Track> > tracks;
     SortedVector < wp<MixerThread::Track> > activeTracks;
     
-    LOGV_IF(enable, "set output to A2DP\n");
-    LOGV_IF(!enable, "set output to hardware audio\n");
+    LOGD_IF(enable, "set output to A2DP\n");
+    LOGD_IF(!enable, "set output to hardware audio\n");
 
     // Transfer tracks playing on MUSIC stream from one mixer to the other
     if (enable) {
@@ -212,6 +212,7 @@ void AudioFlinger::setA2dpEnabled_l(bool enable)
     } else {
         mA2dpMixerThread->getTracks_l(tracks, activeTracks);
         mHardwareMixerThread->putTracks_l(tracks, activeTracks);
+        mA2dpMixerThread->mOutput->standby();
     }
     mA2dpEnabled = enable;
     mNotifyA2dpChange = true;

@@ -58,7 +58,6 @@ class ProcessRecord implements Watchdog.PssRequestor {
     int setAdj;                 // Last set OOM adjustment for this process
     int curSchedGroup;          // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
-    boolean isForeground;       // Is this app running the foreground UI?
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean foregroundServices; // Running any services that are foreground?
     boolean bad;                // True if disabled in the bad process list
@@ -72,7 +71,12 @@ class ProcessRecord implements Watchdog.PssRequestor {
     ComponentName instrumentationResultClass;// copy of instrumentationClass
     BroadcastRecord curReceiver;// receiver currently running in the app
     long lastRequestedGc;       // When we last asked the app to do a gc
+    long lastLowMemory;         // When we last told the app that memory is low
+    boolean reportLowMemory;    // Set to true when waiting to report low mem
     int lastPss;                // Last pss size reported by app.
+    String adjType;             // Debugging: primary thing impacting oom_adj.
+    Object adjSource;           // Debugging: option dependent object.
+    Object adjTarget;           // Debugging: target component impacting oom_adj.
     
     // contains HistoryRecord objects
     final ArrayList activities = new ArrayList();
@@ -151,8 +155,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
                 pw.print(" set="); pw.println(setAdj);
         pw.print(prefix); pw.print("curSchedGroup="); pw.print(curSchedGroup);
                 pw.print(" setSchedGroup="); pw.println(setSchedGroup);
-        pw.print(prefix); pw.print("isForeground="); pw.print(isForeground);
-                pw.print(" setIsForeground="); pw.print(setIsForeground);
+        pw.print(prefix); pw.print("setIsForeground="); pw.print(setIsForeground);
                 pw.print(" foregroundServices="); pw.print(foregroundServices);
                 pw.print(" forcingToForeground="); pw.println(forcingToForeground);
         pw.print(prefix); pw.print("persistent="); pw.print(persistent);

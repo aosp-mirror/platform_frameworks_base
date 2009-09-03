@@ -277,10 +277,12 @@ public class SmsMessage extends SmsMessageBase{
             }
 
             if (header != null) {
-                userData = new byte[header.length + textPart.length];
+                // Need 1 byte for UDHL
+                userData = new byte[header.length + textPart.length + 1];
 
-                System.arraycopy(header, 0, userData, 0, header.length);
-                System.arraycopy(textPart, 0, userData, header.length, textPart.length);
+                userData[0] = (byte)header.length;
+                System.arraycopy(header, 0, userData, 1, header.length);
+                System.arraycopy(textPart, 0, userData, header.length + 1, textPart.length);
             }
             else {
                 userData = textPart;

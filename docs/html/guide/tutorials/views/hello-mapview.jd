@@ -5,7 +5,7 @@ parent.link=index.html
 
 <div class="special">
 <p>This tutorial requires that you have the Google Maps external library
-installed in your SDK environment. By default the Android 1.5 SDK includes the
+installed in your SDK environment. By default the Android SDK includes the
 Google APIs add-on, which in turn includes the Maps external library. If you
 don't have the Google APIs SDK add-on, you can download it from this
 location:</p>

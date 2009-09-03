@@ -573,7 +573,7 @@ void drm_discardPaddingByte(uint8_t *decryptedBuf, int32_t *decryptedBufLen)
     return;
 }
 
-int32_t drm_aesDecBuffer(uint8_t * Buffer, int32_t * BufferLen, aes_decrypt_ctx ctx[1])
+int32_t drm_aesDecBuffer(uint8_t * Buffer, int32_t * BufferLen, AES_KEY *key)
 {
     uint8_t dbuf[3 * DRM_ONE_AES_BLOCK_LEN], buf[DRM_ONE_AES_BLOCK_LEN];
     uint64_t i, len, wlen = DRM_ONE_AES_BLOCK_LEN, curLen, restLen;
@@ -596,7 +596,7 @@ int32_t drm_aesDecBuffer(uint8_t * Buffer, int32_t * BufferLen, aes_decrypt_ctx 
     if (len < 2 * DRM_ONE_AES_BLOCK_LEN) { /* The original file is less than one block in length */
         len -= DRM_ONE_AES_BLOCK_LEN;
         /* Decrypt from position len to position len + DRM_ONE_AES_BLOCK_LEN */
-        aes_decrypt((dbuf + len), (dbuf + len), ctx);
+        AES_decrypt((dbuf + len), (dbuf + len), key);
 
         /* Undo the CBC chaining */
         for (i = 0; i < len; ++i)
@@ -620,7 +620,7 @@ int32_t drm_aesDecBuffer(uint8_t * Buffer, int32_t * BufferLen, aes_decrypt_ctx 
             Buffer += len;
 
             /* Decrypt the b2 block */
-            aes_decrypt((uint8_t *)b2, buf, ctx);
+            AES_decrypt((uint8_t *)b2, buf, key);
 
             if (len == 0 || len == DRM_ONE_AES_BLOCK_LEN) { /* No ciphertext stealing */
                 /* Unchain CBC using the previous ciphertext block in b1 */
@@ -639,7 +639,7 @@ int32_t drm_aesDecBuffer(uint8_t * Buffer, int32_t * BufferLen, aes_decrypt_ctx 
                     b3[i] = buf[i];
 
                 /* Decrypt the C[N-1] block in b3 */
-                aes_decrypt((uint8_t *)b3, (uint8_t *)b3, ctx);
+                AES_decrypt((uint8_t *)b3, (uint8_t *)b3, key);
 
                 /* Produce the last but one plaintext block by xoring with */
                 /* The last but two ciphertext block */
@@ -669,15 +669,15 @@ int32_t drm_aesDecBuffer(uint8_t * Buffer, int32_t * BufferLen, aes_decrypt_ctx 
 
 int32_t drm_updateDcfDataLen(uint8_t* pDcfLastData, uint8_t* keyValue, int32_t* moreBytes)
 {
-    aes_decrypt_ctx ctx[1];
+    AES_KEY key;
     int32_t len = DRM_TWO_AES_BLOCK_LEN;
 
     if (NULL == pDcfLastData || NULL == keyValue)
         return FALSE;
 
-    aes_decrypt_key128(keyValue, ctx);
+    AES_set_decrypt_key(keyValue, DRM_KEY_LEN * 8, &key);
 
-    if (drm_aesDecBuffer(pDcfLastData, &len, ctx) < 0)
+    if (drm_aesDecBuffer(pDcfLastData, &len, &key) < 0)
         return FALSE;
 
     drm_discardPaddingByte(pDcfLastData, &len);

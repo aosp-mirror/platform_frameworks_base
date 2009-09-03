@@ -204,6 +204,7 @@ private:
 
     jobject                 mSoundPoolRef;
     Mutex                   mLock;
+    Mutex                   mRestartLock;
     Condition               mCondition;
     SoundPoolThread*        mDecodeThread;
     SoundChannel*           mChannelPool;

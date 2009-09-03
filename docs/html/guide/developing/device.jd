@@ -7,11 +7,12 @@ page.title=Developing on a Device
   <ol>
     <li><a href="#devices">Available Devices</a>
       <ol>
-        <li><a href="#g1">T-Mobile G1</a></li>
+        <li><a href="#consumer">Consumer devices</a></li>
         <li><a href="#dev-phone-1">Android Dev Phone 1</a></li>
       </ol>
     </li>
     <li><a href="#setting-up">Setting up a Device for Development</a></li>
+    <li><a href="#WinUsbDriver">Installing the WinUsb Driver</a></li>
   </ol>
 </div>
 </div>
@@ -23,20 +24,24 @@ developing and debugging.</p>
 
 
 <h2 id="devices">Available Devices</h2>
-<p>While developers can use regular
-consumer devices purchased at retail to test and use their apps, some developers
-may choose not to use a retail device, preferring an unlocked or no-contract
-device. Here are some options for obtaining devices capable of testing your applications.</p>
+<p>Here are some options for obtaining devices capable of testing your applications.</p>
 
 
-<h3 id="g1">T-Mobile G1</h3>
+<h3 id="consumer">Consumer devices</h3>
 
-<p>The T-Mobile G1 device makes an excellent development device. You can write
-applications in the SDK and install them on the G1, then run them as users
-would, using the same hardware, system, and network.</p>
+<p>It's likely that one of your local mobile carriers offers an Android-powered device.
+Any Android-powered device (even one bought from your mobile carrier) is a perfectly good
+device for running and testing your own Android applications.
+You can write applications using the Android SDK and then install them 
+directly onto the device for testing.</p>
 
-<p>For more information about obtaining a G1, visit the <a
-href="http://www.t-mobileg1.com">T-Mobile G1 site</a>. </p>
+<p>Check with the service providers in your area to determine which Android-powered 
+devices are available.</p>
+
+<p>Be aware that consumer devices are not designed to allow system image updates by the
+user. If you're interested in manually updating the device with custom system images, then
+you'll need a developer device such as the <a href="#dev-phone-1">Android Dev Phone 1</a>.</p>
+
 
 
 <h3 id="dev-phone-1">Android Dev Phone 1</h3>
@@ -60,6 +65,7 @@ href="http://www.t-mobileg1.com">T-Mobile G1 site</a>. </p>
 </ul>
 </div> 
 </div>
+
 <p>The Android Dev Phone 1 is a SIM-unlocked and hardware-unlocked device that
 is designed for advanced developers. The device ships with a system image that
 is fully compatible with Android 1.0, so you can rely on it when developing your
@@ -67,7 +73,7 @@ applications. You can use any SIM in the device and can flash custom Android
 builds that will work with the unlocked bootloader. Unlike the bootloader on
 retail devices, the bootloader on the Android Dev Phone 1 does not enforce
 signed system images. The Android Dev Phone 1 should also appeal to developers 
-who live outside of T-Mobile geographies. </p>
+who live in geographies where local mobile carriers do not currently offer Android-powered devices. </p>
 
 <p>To purchase an Android Dev Phone 1 device, you must first register as an
 Android developer on the Android Market site, if you haven't done so already.
@@ -82,25 +88,30 @@ Singapore, Switzerland, Netherlands, Austria, Sweden, Finland, Poland, and
 Hungary.  We will continue to expand this program into new geographies over
 time.  Check this page for updated information.</p>
 
-<p>Note that Android Dev Phone 1 devices are <em>not</em> intended for
+<p>Android Dev Phone 1 devices are <em>not</em> intended for
 non-developer end-users. Because the device can be configured with system
 software not provided by or supported by Google or any other company, end-users
 operate these devices at their own risk.</p>
+
+<p>Note that your Android Dev Phone 1 will not receive automated 
+over-the-air (OTA) updates for the system image. System updates must be flashed manually.
+See the HTC site for a guide to <a href="http://www.htc.com/www/support/android/adp.html">Flashing 
+your Android Dev Phone with a Factory System Image</a>.</p>
 
 <p>For full device specs and more information about obtaining an Android Dev 
 Phone 1 device, see the <a href="http://market.android.com/publish">Android 
 Market</a> site.</p>
 
 
+
 <h2 id="setting-up">Setting up a Device for Development</h2>
 
-<p>With a T-mobile G1 or Android Dev Phone 1, you can develop and debug your Android applications just as you
+<p>With an Android-powered device, you can develop and debug your Android applications just as you
 would on the emulator. There are just a few things to do before you can start.</p>
 <ol>
   <li>Declare your application as "debuggable" in your Android Manifest.
     <p>In Eclipse, you can do this from the <b>Application</b> tab when viewing the Manifest
     (on the right side, set <b>Debuggable</b> to <em>true</em>). Otherwise, in the <code>AndroidManifest.xml</code>
-
     file, add <code>android:debuggable="true"</code> to the <code>&lt;application></code> element.</p>
   </li>
   <li>Turn on "USB Debugging" on your device.
@@ -110,30 +121,8 @@ would on the emulator. There are just a few things to do before you can start.</
   </li>
   <li>Setup your system to detect your device.
     <ul>
-      <li>If you're developing on 32-bit Windows, you need to install the 32-bit USB driver for adb. 
-      The USB driver is included in the SDK package. To install it, follow these steps:</p>
-        <ol>
-          <li>Connect your Android device via USB. When the <em>Found New Hardware Wizard</em> appears, 
-          you'll be asked if you'd like Windows Update to search for software. Select <em>No, not this 
-          time</em> and click <b>Next</b>.</li>
-
-          <li>Select <em>Install from a list or specified location</em> and click <b>Next</b>.</li>
-          <li>Select <em>Search for the best driver in these locations</em>. Browse to the <code>usb_driver/x86</code> in the SDK package (<code>&lt;sdk&gt;\usb_driver\x86</code>).</li>
-          <li>Click <b>Finish</b>. The system should install the driver files as necessary. Your machine may require a reboot.</li>
-        </ol>
-      </li>
-      <li>If you're developing on 64-bit Windows Vista, you need to install the 64-bit USB driver for adb. 
-      The USB driver is included in the SDK package. To install it, follow these steps:</p>
-        <ol>
-          <li>Connect your Android device via USB. When the <em>Found New Hardware Wizard</em> appears, 
-          you'll be asked if you'd like Windows Update to search for software. Select <em>No, not this 
-          time</em> and click <b>Next</b>.</li>
-
-          <li>Select <em>Install from a list or specified location</em> and click <b>Next</b>.</li>
-          <li>Select <em>Search for the best driver in these locations</em>. Browse to the <code>usb_driver/amd64</code> in the SDK package (<code>&lt;sdk&gt;\usb_driver\amd64</code>).</li>
-          <li>Click <b>Finish</b>. The system should install the driver files as necessary. Your machine may require a reboot.</li>
-        </ol>
-      </li>
+      <li>If you're developing on Windows, you need to install a USB driver for adb. 
+        Follow the steps below for <a href="#WinUsbDriver">Installing the WinUsb Driver</a>.</li>
       <li>If you're developing on Mac OS X, it just works. Skip this step.</li>
       <li>If you're developing on Ubuntu Linux, you need to add a rules file:
         <ol>
@@ -145,7 +134,7 @@ would on the emulator. There are just a few things to do before you can start.</
               <code>SUBSYSTEM=="usb_device", SYSFS{idVendor}=="0bb4", MODE="0666"</code></p>
           </li>
           <li>Now execute:<br/>
-              <code>chmod a+rx /etc/udev/rules.d/50-android.rules</code>
+              <code>chmod a+rx /etc/udev/rules.d/51-android.rules</code>
           </li>
         </ol>
 
@@ -161,3 +150,156 @@ Select the device to install and run the application there.</p>
 
 <p>If using the <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (adb), 
 you can issue commands with the <code>-d</code> flag to target your connected device.</p>
+
+
+
+
+<h2 id="WinUsbDriver">Installing the WinUsb Driver</h2>
+
+<p>A WinUsb-based driver is needed in order to use your Android-powered device for development on a Windows machine.
+The USB installation package can be found in the <code><em>&lt;sdk></em>\usb_driver\</code> 
+folder of your SDK package.</p>
+
+<p class="note"><strong>Note:</strong> If you are connecting an Android-powered device to your computer
+for the first time, folllow the procedure to "Perform a fresh installation."
+Android SDKs older than version 1.6 included a non-WinUsb-based driver
+for connecting your device. If you installed the older USB driver and it is working properly,
+you do not need to upgrade to the new driver. However, if you are having problems with the driver or 
+would simply like to upgrade to the latest version, follow the procedure to "Upgrade an existing
+driver." </p>
+
+<p>Before you begin installing or upgrading the USB driver, you must
+copy the USB installation package to a secure location on your computer.
+For example, you might want to create a directory at <code>C:\Android\Windows\USB\install\</code> and
+move it there. Once you've moved the installation package, select the appropriate procedure below, 
+based on your operating system and whether you're installing for the first time or upgrading.</p>
+
+<ol class="nolist">
+  <li>Windows Vista:
+    <ol class="nolist">
+      <li><a href="#VistaFreshInstall">Perform a fresh installation</a></li>
+      <li><a href="#VistaUprade">Upgrade an existing driver</a></li>
+    </ol>
+  </li>
+  <li>Windows XP:
+    <ol class="nolist">
+      <li><a href="#XPFreshInstall">Perform a fresh installation</a></li>
+      <li><a href="#XPUpgrade">Upgrade an existing driver</a></li>
+    </ol>
+  </li>
+</ol>
+
+
+<p class="caution"><strong>Caution:</strong>
+You may make changes to <code>android_winusb.inf</code> file found inside <code>usb_driver\</code>
+(e.g., to add support for new devices), 
+however, this will lead to security warnings when you install or upgrade the
+driver. Making any other changes to the driver files may break the installation process.</p>
+
+<h3 id="VistaFreshInstall">Windows Vista: Perform a fresh installation</h3>
+
+<p>To install the Android USB driver on Windows Vista for the first time:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port. Windows will detect the device
+    and launch the Found New Hardware wizard.</li>
+  <li>Select "Locate and install driver software."</li>
+  <li>Select "Don't search online."</li>
+  <li>Select "I don't have the disk. Show me other options."</li>
+  <li>Select "Browse my computer for driver software."</li>
+  <li>Click "Browse..." and locate the folder where you copied the
+    installation package. As long as you specified the exact location of the 
+    installation package, you may leave "Include subfolders" checked or unchecked&mdash;it doesn't matter.</li>
+  <li>Click "Next." Vista may prompt you to confirm the privilege elevation required for driver 
+    installation. Confirm it.</li>
+  <li>When Vista asks if you'd like to install the Google ADB Interface device, click "Install"
+    to install the driver.</li>
+</ol>
+
+<p>Return to <a href="#setting-up">Setting up a Device for Development</a>.</p>
+
+
+
+<h3 id="VistaUpgrade">Windows Vista: Upgrade an existing driver</h3>
+
+<p>To upgrade an existing Android USB driver on Windows Vista with the new one:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port.</li>
+  <li>Right-click on "Computer" from your desktop or Windows Explorer,
+    and select "Manage."</li>
+  <li>Select "Device Manager" in the left pane of the Computer Management window.</li>
+  <li>Locate and expand "ADB Interface" in the right pane.</li>
+  <li>Right-click on "HTC Dream Composite ADB Interface", and select "Update Driver Software..."</li>
+  <li>When Vista starts updating the driver, a prompt will ask how you want to search for the driver 
+    software. Select "Browse my computer for driver software."</li>
+  <li>Click "Browse..." and locate the folder where you copied the
+    installation package. As long as you specified the exact location of the 
+    installation package, you may leave "Include subfolders" checked or unchecked&mdash;it doesn't matter.</li>
+  <li>Click "Next." Vista may prompt you to confirm the privilege elevation required for driver 
+  installation. Confirm it.</li>
+  <li>When Vista asks if you'd like to install the Google ADB Interface device, click "Install"
+    to install the driver.</li>
+</ol>
+
+<p>Return to <a href="#setting-up">Setting up a Device for Development</a>.</p>
+
+
+
+<h3 id="XPFreshInstall">Windows XP: Perform a fresh installation</h3>
+
+<p>To install the Android USB driver on Windows XP for the first time:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port. Windows 
+    will detect the device and launch the Hardware Update Wizard.</li>
+  <li>Select "Install from a list or specific location" and click
+    "Next."</li>
+  <li>Select "Search for the best driver in these locations"; uncheck "Search 
+    removable media"; and check "Include this location in the search."</li>
+  <li>Click "Browse..." and locate the folder where you copied the installation 
+    package.</li>
+  <li>Click "Next" to install the driver.</li>
+</ol>
+
+<p>Return to <a href="#setting-up">Setting up a Device for Development</a>.</p>
+
+
+
+<h3 id="XPUpgrade">Windows XP: Upgrade an existing driver</h3>
+
+<p>To upgrade an existing Android USB driver on Windows XP with the new one:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port.</li>
+  <li>Right-click on "My Computer" from your desktop or Windows Explorer,
+    and select "Manage."</li>
+  <li>Select "Device Manager" in the left pane of the Computer Management window.</li>
+  <li>Locate and expand "Android Phone" in the right pane.</li>
+  <li>Right-click "Android Composite ADB Interface" and select "Update Driver..."
+    This will launch the Hardware Update Wizard.</li>
+  <li>Select "Install from a list or specific location" and click
+    "Next."</li>
+  <li>Select "Search for the best driver in these locations"; uncheck "Search 
+    removable media"; and check "Include this location in the search."</li>
+  <li>Click "Browse..." and locate the folder where you copied the installation 
+    package.</li>
+  <li>Click "Next" to install the driver.</li>
+</ol>
+
+<p>Return to <a href="#setting-up">Setting up a Device for Development</a>.</p>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
