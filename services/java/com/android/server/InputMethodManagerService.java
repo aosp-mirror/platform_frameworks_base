@@ -516,7 +516,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             if (!mSystemReady) {
                 mSystemReady = true;
-                startInputInnerLocked();
+                try {
+                    startInputInnerLocked();
+                } catch (RuntimeException e) {
+                    Log.w(TAG, "Unexpected exception", e);
+                }
             }
         }
     }
@@ -749,7 +753,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (!mSystemReady) {
             // If the system is not yet ready, we shouldn't be running third
             // party code.
-            return new InputBindResult(null, mCurId, mCurSeq);
+            return new InputBindResult(null, mCurMethodId, mCurSeq);
         }
         
         InputMethodInfo info = mMethodMap.get(mCurMethodId);
@@ -802,17 +806,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
                 mCurMethod = IInputMethod.Stub.asInterface(service);
+                if (mCurToken == null) {
+                    Log.w(TAG, "Service connected without a token!");
+                    unbindCurrentMethodLocked(false);
+                    return;
+                }
+                if (DEBUG) Log.v(TAG, "Initiating attach with token: " + mCurToken);
+                executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
+                        MSG_ATTACH_TOKEN, mCurMethod, mCurToken));
                 if (mCurClient != null) {
-                    if (DEBUG) Log.v(TAG, "Initiating attach with token: " + mCurToken);
+                    if (DEBUG) Log.v(TAG, "Creating first session while with client "
+                            + mCurClient);
                     executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
-                            MSG_ATTACH_TOKEN, mCurMethod, mCurToken));
-                    if (mCurClient != null) {
-                        if (DEBUG) Log.v(TAG, "Creating first session while with client "
-                                + mCurClient);
-                        executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
-                                MSG_CREATE_SESSION, mCurMethod,
-                                new MethodCallback(mCurMethod)));
-                    }
+                            MSG_CREATE_SESSION, mCurMethod,
+                            new MethodCallback(mCurMethod)));
                 }
             }
         }
@@ -1002,6 +1009,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mShowExplicitlyRequested = true;
             mShowForced = true;
         }
+        
+        if (!mSystemReady) {
+            return false;
+        }
+        
         boolean res = false;
         if (mCurMethod != null) {
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOO(
@@ -1637,7 +1649,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " mShowExplicitlyRequested=" + mShowExplicitlyRequested
                     + " mShowForced=" + mShowForced
                     + " mInputShown=" + mInputShown);
-            p.println("  mScreenOn=" + mScreenOn);
+            p.println("  mSystemReady=" + mSystemReady + " mScreenOn=" + mScreenOn);
         }
         
         if (client != null) {
