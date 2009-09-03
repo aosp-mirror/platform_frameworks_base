@@ -256,6 +256,7 @@
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/monkey.html">Monkey</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/traceview.html" >Traceview</a></li>
+      		<li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html" >zipalign</a></li>
     	  </ul>
   	  </li>
   <!--<li><a href="<?cs var:toroot ?>guide/developing/instrumentation/index.html">Instrumentation</a></li>
