@@ -525,48 +525,6 @@ public class WebView extends AbsoluteLayout
     // the last zoom scale.
     boolean mInZoomOverview = false;
 
-    // The viewing mode of this webview.  Reported back to the WebChromeClient
-    // so we can hide and display the title bar as appropriate.
-    private int mViewingMode;
-    /**
-     * Not supporting overview vs reading mode
-     * @hide
-     */
-    public final static int NO_VIEWING_MODE = 0;
-    /**
-     * Zoom overview mode.  The page is zoomed all the way out, mInZoomOverview
-     * is true, and the title bar is showing.  Double tapping will change to
-     * reading mode.
-     * @hide
-     */
-    public final static int OVERVIEW_MODE = 1;
-    /**
-     * Reading mode. The page is at the level specified by the user,
-     * mInZoomOverview is false, and the title bar is not showing.  Double
-     * tapping will change to zoom overview mode.
-     * @hide
-     */
-    public final static int READING_MODE = 2;
-    /**
-     * Modified reading mode, which shows the title bar.  mInZoomOverview is
-     * false, and double tapping will change to zoom overview mode.  However,
-     * if the scrolling will change to reading mode.  Used when swiping a
-     * tab into view which was in reading mode, unless it was a mobile site
-     * with zero scroll.
-     * @hide
-     */
-    public final static int READING_MODE_WITH_TITLE_BAR = 3;
-    /**
-     * Another modified reading mode.  For loading a mobile site, or swiping a
-     * tab into view which was displaying a mobile site in reading mode
-     * with zero scroll
-     * @hide
-     */
-    public final static int TITLE_BAR_DISMISS_MODE = 4;
-    // Whether the current site is a mobile site.  Determined when we receive
-    // NEW_PICTURE_MSG_ID to help determine how to handle double taps
-    private boolean mMobileSite;
-
     // ideally mZoomOverviewWidth should be mContentWidth. But sites like espn,
     // engadget always have wider mContentWidth no matter what viewport size is.
     int mZoomOverviewWidth = WebViewCore.DEFAULT_VIEWPORT_WIDTH;
@@ -962,14 +920,20 @@ public class WebView extends AbsoluteLayout
 
     /*
      * Return the height of the view where the content of WebView should render
-     * to.
+     * to.  Note that this excludes mTitleBar, if there is one.
      */
     private int getViewHeight() {
-        if (!isHorizontalScrollBarEnabled() || mOverlayHorizontalScrollbar) {
-            return getHeight();
-        } else {
-            return getHeight() - getHorizontalScrollbarHeight();
+        int height = getHeight();
+        if (isHorizontalScrollBarEnabled() && mOverlayHorizontalScrollbar) {
+            height -= getHorizontalScrollbarHeight();
         }
+        if (mTitleBar != null) {
+            int titleBarVisibleHeight = mTitleBar.getHeight() - mScrollY;
+            if (titleBarVisibleHeight > 0) {
+                height -= titleBarVisibleHeight;
+            }
+        }
+        return height;
     }
 
     /**
@@ -1180,7 +1144,6 @@ public class WebView extends AbsoluteLayout
             if (mInZoomOverview) {
                 b.putFloat("lastScale", mLastScale);
             }
-            b.putBoolean("mobile", mMobileSite);
             return true;
         }
         return false;
@@ -1226,20 +1189,12 @@ public class WebView extends AbsoluteLayout
                 // correctly
                 mActualScale = scale;
                 float lastScale = b.getFloat("lastScale", -1.0f);
-                mMobileSite = b.getBoolean("mobile", false);
                 if (lastScale > 0) {
                     mInZoomOverview = true;
-                    mViewingMode = OVERVIEW_MODE;
                     mLastScale = lastScale;
                 } else {
                     mInZoomOverview = false;
-                    if (mMobileSite && (mScrollX | mScrollY) == 0) {
-                        mViewingMode = TITLE_BAR_DISMISS_MODE;
-                    } else {
-                        mViewingMode = READING_MODE_WITH_TITLE_BAR;
-                    }
                 }
-                mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
                 invalidate();
                 return true;
             }
@@ -1692,8 +1647,8 @@ public class WebView extends AbsoluteLayout
         if (type == HitTestResult.UNKNOWN_TYPE
                 || type == HitTestResult.SRC_ANCHOR_TYPE) {
             // Now check to see if it is an image.
-            int contentX = viewToContent((int) mLastTouchX + mScrollX);
-            int contentY = viewToContent((int) mLastTouchY + mScrollY);
+            int contentX = viewToContentX((int) mLastTouchX + mScrollX);
+            int contentY = viewToContentY((int) mLastTouchY + mScrollY);
             String text = nativeImageURI(contentX, contentY);
             if (text != null) {
                 result.setType(type == HitTestResult.UNKNOWN_TYPE ?
@@ -1736,8 +1691,8 @@ public class WebView extends AbsoluteLayout
      *            as the data member with "url" as key. The result can be null.
      */
     public void requestImageRef(Message msg) {
-        int contentX = viewToContent((int) mLastTouchX + mScrollX);
-        int contentY = viewToContent((int) mLastTouchY + mScrollY);
+        int contentX = viewToContentX((int) mLastTouchX + mScrollX);
+        int contentY = viewToContentY((int) mLastTouchY + mScrollY);
         String ref = nativeImageURI(contentX, contentY);
         Bundle data = msg.getData();
         data.putString("url", ref);
@@ -1771,31 +1726,88 @@ public class WebView extends AbsoluteLayout
         return pinLoc(y, getViewHeight(), computeVerticalScrollRange());
     }
 
-    /*package*/ int viewToContent(int x) {
+    /**
+     * A title bar which is embedded in this WebView, and scrolls along with it
+     * vertically, but not horizontally.
+     */
+    private View mTitleBar;
+
+    /**
+     * Add or remove a title bar to be embedded into the WebView, and scroll
+     * along with it vertically, while remaining in view horizontally. Pass
+     * null to remove the title bar from the WebView, and return to drawing
+     * the WebView normally without translating to account for the title bar.
+     * @hide
+     */
+    public void addTitleBar(View v) {
+        if (null == v) {
+            removeView(mTitleBar);
+        } else {
+            addView(v, new AbsoluteLayout.LayoutParams(
+                    ViewGroup.LayoutParams.FILL_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT, mScrollX, 0));
+        }
+        mTitleBar = v;
+    }
+
+    /**
+     * Given an x coordinate in view space, convert it to content space.  Also
+     * may be used for absolute heights (such as for the WebTextView's
+     * textSize, which is unaffected by the height of the title bar).
+     */
+    /*package*/ int viewToContentX(int x) {
         return Math.round(x * mInvActualScale);
     }
 
-    /*package*/ int contentToView(int x) {
+    /**
+     * Given a y coordinate in view space, convert it to content space.
+     * Takes into account the height of the title bar if there is one
+     * embedded into the WebView.
+     */
+    /*package*/ int viewToContentY(int y) {
+        if (mTitleBar != null) {
+            y -= mTitleBar.getHeight();
+        }
+        return viewToContentX(y);
+    }
+
+    /**
+     * Given an x coordinate in content space, convert it to view
+     * space.  Also used for absolute heights.
+     */
+    /*package*/ int contentToViewX(int x) {
         return Math.round(x * mActualScale);
+    }
+
+    /**
+     * Given a y coordinate in content space, convert it to view
+     * space.  Takes into account the height of the title bar.
+     */
+    /*package*/ int contentToViewY(int y) {
+        int val = Math.round(y * mActualScale);
+        if (mTitleBar != null) {
+            val += mTitleBar.getHeight();
+        }
+        return val;
     }
 
     // Called by JNI to invalidate the View, given rectangle coordinates in
     // content space
     private void viewInvalidate(int l, int t, int r, int b) {
-        invalidate(contentToView(l), contentToView(t), contentToView(r),
-                contentToView(b));
+        invalidate(contentToViewX(l), contentToViewY(t), contentToViewX(r),
+                contentToViewY(b));
     }
 
     // Called by JNI to invalidate the View after a delay, given rectangle
     // coordinates in content space
     private void viewInvalidateDelayed(long delay, int l, int t, int r, int b) {
-        postInvalidateDelayed(delay, contentToView(l), contentToView(t),
-                contentToView(r), contentToView(b));
+        postInvalidateDelayed(delay, contentToViewX(l), contentToViewY(t),
+                contentToViewX(r), contentToViewY(b));
     }
 
     private Rect contentToView(Rect x) {
-        return new Rect(contentToView(x.left), contentToView(x.top)
-                , contentToView(x.right), contentToView(x.bottom));
+        return new Rect(contentToViewX(x.left), contentToViewY(x.top)
+                , contentToViewX(x.right), contentToViewY(x.bottom));
     }
 
     // stop the scroll animation, and don't let a subsequent fling add
@@ -1934,10 +1946,10 @@ public class WebView extends AbsoluteLayout
     // Sets r to be our visible rectangle in content coordinates
     private void calcOurContentVisibleRect(Rect r) {
         calcOurVisibleRect(r);
-        r.left = viewToContent(r.left);
-        r.top = viewToContent(r.top);
-        r.right = viewToContent(r.right);
-        r.bottom = viewToContent(r.bottom);
+        r.left = viewToContentX(r.left);
+        r.top = viewToContentY(r.top);
+        r.right = viewToContentX(r.right);
+        r.bottom = viewToContentY(r.bottom);
     }
 
     static class ViewSizeData {
@@ -1994,7 +2006,7 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             return mHistoryWidth;
         } else {
-            return contentToView(mContentWidth);
+            return contentToViewX(mContentWidth);
         }
     }
 
@@ -2006,12 +2018,29 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             return mHistoryHeight;
         } else {
-            int height = contentToView(mContentHeight);
+            int height = contentToViewX(mContentHeight);
             if (mFindIsUp) {
                 height += FIND_HEIGHT;
             }
             return height;
         }
+    }
+
+    @Override
+    protected int computeVerticalScrollOffset() {
+        int offset = super.computeVerticalScrollOffset();
+        if (mTitleBar != null) {
+            // Need to adjust so that the resulting offset is at minimum
+            // the height of the title bar, if it is visible.
+            offset += mTitleBar.getHeight()*computeVerticalScrollRange()
+                    /getViewHeight();
+        }
+        return offset;
+    }
+
+    @Override
+    protected int computeVerticalScrollExtent() {
+        return getViewHeight();
     }
 
     /**
@@ -2365,8 +2394,8 @@ public class WebView extends AbsoluteLayout
             // keys are hit, this should be safe. Right?
             return false;
         }
-        cx = contentToView(cx);
-        cy = contentToView(cy);
+        cx = contentToViewX(cx);
+        cy = contentToViewY(cy);
         if (mHeightCanMeasure) {
             // move our visible rect according to scroll request
             if (cy != 0) {
@@ -2398,8 +2427,8 @@ public class WebView extends AbsoluteLayout
             // saved scroll position, it is ok to skip this.
             return false;
         }
-        int vx = contentToView(cx);
-        int vy = contentToView(cy);
+        int vx = contentToViewX(cx);
+        int vy = contentToViewY(cy);
 //        Log.d(LOGTAG, "content scrollTo [" + cx + " " + cy + "] view=[" +
 //                      vx + " " + vy + "]");
         pinScrollTo(vx, vy, false, 0);
@@ -2417,8 +2446,8 @@ public class WebView extends AbsoluteLayout
             // is used in the view system.
             return;
         }
-        int vx = contentToView(cx);
-        int vy = contentToView(cy);
+        int vx = contentToViewX(cx);
+        int vy = contentToViewY(cy);
         pinScrollTo(vx, vy, true, 0);
     }
 
@@ -2435,12 +2464,12 @@ public class WebView extends AbsoluteLayout
         }
 
         if (mHeightCanMeasure) {
-            if (getMeasuredHeight() != contentToView(mContentHeight)
+            if (getMeasuredHeight() != contentToViewX(mContentHeight)
                     && updateLayout) {
                 requestLayout();
             }
         } else if (mWidthCanMeasure) {
-            if (getMeasuredWidth() != contentToView(mContentWidth)
+            if (getMeasuredWidth() != contentToViewX(mContentWidth)
                     && updateLayout) {
                 requestLayout();
             }
@@ -2582,7 +2611,22 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
+    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+        if (child == mTitleBar) {
+            // When drawing the title bar, move it horizontally to always show
+            // at the top of the WebView.
+            mTitleBar.offsetLeftAndRight(mScrollX - mTitleBar.getLeft());
+        }
+        return super.drawChild(canvas, child, drawingTime);
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
+        int saveCount = canvas.getSaveCount();
+        if (mTitleBar != null) {
+            canvas.save();
+            canvas.translate(0, (int) mTitleBar.getHeight());
+        }
         // if mNativeClass is 0, the WebView has been destroyed. Do nothing.
         if (mNativeClass == 0) {
             return;
@@ -2596,7 +2640,7 @@ public class WebView extends AbsoluteLayout
                 mTouchMode = TOUCH_DONE_MODE;
             }
         }
-        int sc = canvas.save();
+        canvas.save();
         if (mTouchMode >= FIRST_SCROLL_ZOOM && mTouchMode <= LAST_SCROLL_ZOOM) {
             scrollZoomDraw(canvas);
         } else {
@@ -2613,7 +2657,7 @@ public class WebView extends AbsoluteLayout
                     || mTrackballDown || mGotCenterDown, false);
             drawCoreAndCursorRing(canvas, mBackgroundColor, mDrawCursorRing);
         }
-        canvas.restoreToCount(sc);
+        canvas.restoreToCount(saveCount);
 
         if (AUTO_REDRAW_HACK && mAutoRedraw) {
             invalidate();
@@ -3210,7 +3254,7 @@ public class WebView extends AbsoluteLayout
             // Initialize our generation number.
             mTextGeneration = 0;
         }
-        mWebTextView.setTextSize(contentToView(nativeFocusCandidateTextSize()));
+        mWebTextView.setTextSize(contentToViewX(nativeFocusCandidateTextSize()));
         Rect visibleRect = new Rect();
         calcOurContentVisibleRect(visibleRect);
         // Note that sendOurVisibleRect calls viewToContent, so the coordinates
@@ -3370,8 +3414,8 @@ public class WebView extends AbsoluteLayout
             mShiftIsPressed = true;
             if (nativeHasCursorNode()) {
                 Rect rect = nativeCursorNodeBounds();
-                mSelectX = contentToView(rect.left);
-                mSelectY = contentToView(rect.top);
+                mSelectX = contentToViewX(rect.left);
+                mSelectY = contentToViewY(rect.top);
             } else {
                 mSelectX = mScrollX + (int) mLastTouchX;
                 mSelectY = mScrollY + (int) mLastTouchY;
@@ -3758,12 +3802,6 @@ public class WebView extends AbsoluteLayout
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
 
-        if (mViewingMode == READING_MODE_WITH_TITLE_BAR
-                || mViewingMode == TITLE_BAR_DISMISS_MODE) {
-            mViewingMode = READING_MODE;
-            mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
-        }
-
         sendOurVisibleRect();
     }
 
@@ -3840,8 +3878,8 @@ public class WebView extends AbsoluteLayout
                         eventTime - mLastSentTouchTime > TOUCH_SENT_INTERVAL)) {
             WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
             ted.mAction = action;
-            ted.mX = viewToContent((int) x + mScrollX);
-            ted.mY = viewToContent((int) y + mScrollY);
+            ted.mX = viewToContentX((int) x + mScrollX);
+            ted.mY = viewToContentY((int) y + mScrollY);
             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
             mLastSentTouchTime = eventTime;
         }
@@ -3873,8 +3911,8 @@ public class WebView extends AbsoluteLayout
                     if (DebugFlags.WEB_VIEW) {
                         Log.v(LOGTAG, "select=" + mSelectX + "," + mSelectY);
                     }
-                    nativeMoveSelection(viewToContent(mSelectX)
-                            , viewToContent(mSelectY), false);
+                    nativeMoveSelection(viewToContentX(mSelectX),
+                            viewToContentY(mSelectY), false);
                     mTouchSelection = mExtendSelection = true;
                 } else if (mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
@@ -3930,8 +3968,8 @@ public class WebView extends AbsoluteLayout
                         if (DebugFlags.WEB_VIEW) {
                             Log.v(LOGTAG, "xtend=" + mSelectX + "," + mSelectY);
                         }
-                        nativeMoveSelection(viewToContent(mSelectX)
-                                , viewToContent(mSelectY), true);
+                        nativeMoveSelection(viewToContentX(mSelectX),
+                               viewToContentY(mSelectY), true);
                         invalidate();
                         break;
                     }
@@ -3981,13 +4019,6 @@ public class WebView extends AbsoluteLayout
                 deltaY = newScrollY - mScrollY;
                 boolean done = false;
                 if (deltaX == 0 && deltaY == 0) {
-                    // The user attempted to pan the page, so dismiss the title
-                    // bar
-                    if (mViewingMode == READING_MODE_WITH_TITLE_BAR
-                            || mViewingMode == TITLE_BAR_DISMISS_MODE) {
-                        mViewingMode = READING_MODE;
-                        mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
-                    }
                     done = true;
                 } else {
                     if (mSnapScrollMode == SNAP_X || mSnapScrollMode == SNAP_Y) {
@@ -4307,8 +4338,8 @@ public class WebView extends AbsoluteLayout
                     + " yRate=" + yRate
                     );
         }
-        nativeMoveSelection(viewToContent(mSelectX)
-                , viewToContent(mSelectY), mExtendSelection);
+        nativeMoveSelection(viewToContentX(mSelectX),
+                viewToContentY(mSelectY), mExtendSelection);
         int scrollX = mSelectX < mScrollX ? -SELECT_CURSOR_OFFSET
                 : mSelectX > maxX - SELECT_CURSOR_OFFSET ? SELECT_CURSOR_OFFSET
                 : 0;
@@ -4687,8 +4718,8 @@ public class WebView extends AbsoluteLayout
             return;
         }
         // mLastTouchX and mLastTouchY are the point in the current viewport
-        int contentX = viewToContent((int) mLastTouchX + mScrollX);
-        int contentY = viewToContent((int) mLastTouchY + mScrollY);
+        int contentX = viewToContentX((int) mLastTouchX + mScrollX);
+        int contentY = viewToContentY((int) mLastTouchY + mScrollY);
         Rect rect = new Rect(contentX - mNavSlop, contentY - mNavSlop,
                 contentX + mNavSlop, contentY + mNavSlop);
         nativeSelectBestAt(rect);
@@ -4703,8 +4734,8 @@ public class WebView extends AbsoluteLayout
         if (!inEditingMode() || mWebViewCore == null) {
             return;
         }
-        mWebViewCore.sendMessage(EventHub.SCROLL_TEXT_INPUT, viewToContent(x),
-                viewToContent(y));
+        mWebViewCore.sendMessage(EventHub.SCROLL_TEXT_INPUT, viewToContentX(x),
+                viewToContentY(y));
     }
 
     /**
@@ -4751,16 +4782,16 @@ public class WebView extends AbsoluteLayout
         if (!inEditingMode()) {
             return;
         }
-        int x = viewToContent((int) event.getX() + mWebTextView.getLeft());
-        int y = viewToContent((int) event.getY() + mWebTextView.getTop());
+        int x = viewToContentX((int) event.getX() + mWebTextView.getLeft());
+        int y = viewToContentY((int) event.getY() + mWebTextView.getTop());
         nativeTextInputMotionUp(x, y);
     }
 
     /*package*/ void shortPressOnTextField() {
         if (inEditingMode()) {
             View v = mWebTextView;
-            int x = viewToContent((v.getLeft() + v.getRight()) >> 1);
-            int y = viewToContent((v.getTop() + v.getBottom()) >> 1);
+            int x = viewToContentX((v.getLeft() + v.getRight()) >> 1);
+            int y = viewToContentY((v.getTop() + v.getBottom()) >> 1);
             nativeTextInputMotionUp(x, y);
         }
     }
@@ -4771,8 +4802,8 @@ public class WebView extends AbsoluteLayout
         }
         switchOutDrawHistory();
         // mLastTouchX and mLastTouchY are the point in the current viewport
-        int contentX = viewToContent((int) mLastTouchX + mScrollX);
-        int contentY = viewToContent((int) mLastTouchY + mScrollY);
+        int contentX = viewToContentX((int) mLastTouchX + mScrollX);
+        int contentY = viewToContentY((int) mLastTouchY + mScrollY);
         if (nativeMotionUp(contentX, contentY, mNavSlop)) {
             if (mLogEvent) {
                 Checkin.updateStats(mContext.getContentResolver(),
@@ -4784,42 +4815,13 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    /**
-     * Called when the Tabs are used to slide this WebView's tab into view.
-     * @hide
-     */
-    public void slideIntoFocus() {
-        if (mViewingMode == READING_MODE) {
-            if (!mMobileSite || (mScrollX | mScrollY) != 0) {
-                mViewingMode = READING_MODE_WITH_TITLE_BAR;
-            } else {
-                mViewingMode = TITLE_BAR_DISMISS_MODE;
-            }
-            mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
-        }
-    }
-
     private void doDoubleTap() {
-        if (mWebViewCore.getSettings().getUseWideViewPort() == false ||
-                mViewingMode == NO_VIEWING_MODE) {
+        if (mWebViewCore.getSettings().getUseWideViewPort() == false) {
             return;
         }
-        if (mViewingMode == TITLE_BAR_DISMISS_MODE) {
-            mViewingMode = READING_MODE;
-            // mInZoomOverview will not change, so change the viewing mode
-            // and return
-            mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
-            return;
-        }
-        if (mViewingMode == READING_MODE_WITH_TITLE_BAR && mMobileSite) {
-            scrollTo(0,0);
-        }
-        // READING_MODE_WITH_TITLE_BAR will go to OVERVIEW_MODE here.
         mZoomCenterX = mLastTouchX;
         mZoomCenterY = mLastTouchY;
         mInZoomOverview = !mInZoomOverview;
-        mViewingMode = mInZoomOverview ? OVERVIEW_MODE : READING_MODE;
-        mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
         // remove the zoom control after double tap
         if (getSettings().getBuiltInZoomControls()) {
             if (mZoomButtonsController.isVisible()) {
@@ -4837,8 +4839,8 @@ public class WebView extends AbsoluteLayout
             zoomWithPreview((float) getViewWidth() / mZoomOverviewWidth);
         } else {
             // mLastTouchX and mLastTouchY are the point in the current viewport
-            int contentX = viewToContent((int) mLastTouchX + mScrollX);
-            int contentY = viewToContent((int) mLastTouchY + mScrollY);
+            int contentX = viewToContentX((int) mLastTouchX + mScrollX);
+            int contentY = viewToContentY((int) mLastTouchY + mScrollY);
             int left = nativeGetBlockLeftEdge(contentX, contentY, mActualScale);
             if (left != NO_LEFTEDGE) {
                 // add a 5pt padding to the left edge. Re-calculate the zoom
@@ -5169,22 +5171,12 @@ public class WebView extends AbsoluteLayout
                                 restoreState.mScrollY);
                         if (!ENABLE_DOUBLETAP_ZOOM
                                 || !settings.getLoadWithOverviewMode()) {
-                            mMobileSite = false;
-                            mViewingMode = NO_VIEWING_MODE;
                         } else {
-                            mMobileSite = restoreState.mMobileSite;
                             if (useWideViewport
                                     && restoreState.mViewScale == 0) {
-                                mViewingMode = OVERVIEW_MODE;
                                 mInZoomOverview = true;
-                            } else if (mMobileSite
-                                    && (mScrollX | mScrollY) == 0) {
-                                mViewingMode = TITLE_BAR_DISMISS_MODE;
-                            } else {
-                                mViewingMode = READING_MODE_WITH_TITLE_BAR;
                             }
                         }
-                        mCallbackProxy.uiOnChangeViewingMode(mViewingMode);
                         // As we are on a new page, remove the WebTextView. This
                         // is necessary for page loads driven by webkit, and in
                         // particular when the user was on a password field, so
@@ -5648,7 +5640,7 @@ public class WebView extends AbsoluteLayout
             width = visRect.width() / 2;
         }
         // FIXME the divisor should be retrieved from somewhere
-        return viewToContent(width);
+        return viewToContentX(width);
     }
 
     private int getScaledMaxYScroll() {
@@ -5663,7 +5655,7 @@ public class WebView extends AbsoluteLayout
         // FIXME the divisor should be retrieved from somewhere
         // the closest thing today is hard-coded into ScrollView.java
         // (from ScrollView.java, line 363)   int maxJump = height/2;
-        return viewToContent(height);
+        return viewToContentY(height);
     }
 
     /**

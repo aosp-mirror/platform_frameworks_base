@@ -177,17 +177,6 @@ class CallbackProxy extends Handler {
     }
 
     /**
-     * Tell the host application that the WebView has changed viewing modes.
-     * @param newViewingMode  One of the values described in WebView as possible
-     *                        values for the viewing mode
-     */
-    /* package */ void uiOnChangeViewingMode(int newViewingMode) {
-        if (mWebChromeClient != null) {
-            mWebChromeClient.onChangeViewingMode(mWebView, newViewingMode);
-        }
-    }
-
-    /**
      * Called by the UI side.  Calling overrideUrlLoading from the WebCore
      * side will post a message to call this method.
      */

@@ -23,15 +23,6 @@ import android.view.View;
 public class WebChromeClient {
 
     /**
-     * Tell the host application that the WebView has changed viewing modes.
-     * @param view The WebView that initiated the callback.
-     * @param newViewingMode  One of the values described in WebView as possible
-     *                        values for the viewing mode
-     * @hide
-     */
-    public void onChangeViewingMode(WebView view, int newViewingMode) {}
-
-    /**
      * Tell the host application the current progress of loading a page.
      * @param view The WebView that initiated the callback.
      * @param newProgress Current page loading progress, represented by
