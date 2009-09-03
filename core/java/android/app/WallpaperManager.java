@@ -67,7 +67,7 @@ public class WallpaperManager {
         Globals(Looper looper) {
             IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
             mService = IWallpaperManager.Stub.asInterface(b);
-            mHandler = new Handler() {
+            mHandler = new Handler(looper) {
                 @Override
                 public void handleMessage(Message msg) {
                     switch (msg.what) {
