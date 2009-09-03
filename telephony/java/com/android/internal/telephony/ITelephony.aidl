@@ -252,5 +252,10 @@ interface ITelephony {
       * Returns the network type
       */
     int getNetworkType();
+    
+    /**
+     * Return true if an ICC card is present
+     */
+    boolean hasIccCard();
 }
 
