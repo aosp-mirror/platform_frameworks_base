@@ -20,9 +20,11 @@ import android.net.Uri;
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.content.ContentProviderOperation;
+import android.content.ContentUris;
 import android.accounts.Account;
 import android.database.Cursor;
 import android.os.RemoteException;
+import android.util.Pair;
 
 /**
  * The ContentProvider contract for associating data with ana data array account.
@@ -54,7 +56,7 @@ public class SyncStateContract {
     }
 
     public static final class Helpers {
-        private static final String[] DATA_PROJECTION = new String[]{Columns.DATA};
+        private static final String[] DATA_PROJECTION = new String[]{Columns.DATA, Columns._ID};
         private static final String SELECT_BY_ACCOUNT =
                 Columns.ACCOUNT_NAME + "=? AND " + Columns.ACCOUNT_TYPE + "=?";
 
@@ -101,6 +103,38 @@ public class SyncStateContract {
             provider.insert(uri, values);
         }
 
+        public static Uri insert(ContentProviderClient provider, Uri uri,
+                Account account, byte[] data) throws RemoteException {
+            ContentValues values = new ContentValues();
+            values.put(Columns.DATA, data);
+            values.put(Columns.ACCOUNT_NAME, account.name);
+            values.put(Columns.ACCOUNT_TYPE, account.type);
+            return provider.insert(uri, values);
+        }
+
+        public static void update(ContentProviderClient provider, Uri uri, byte[] data)
+                throws RemoteException {
+            ContentValues values = new ContentValues();
+            values.put(Columns.DATA, data);
+            provider.update(uri, values, null, null);
+        }
+
+        public static Pair<Uri, byte[]> getWithUri(ContentProviderClient provider, Uri uri,
+                Account account) throws RemoteException {
+            Cursor c = provider.query(uri, DATA_PROJECTION, SELECT_BY_ACCOUNT,
+                    new String[]{account.name, account.type}, null);
+            try {
+                if (c.moveToNext()) {
+                    long rowId = c.getLong(1);
+                    byte[] blob = c.getBlob(c.getColumnIndexOrThrow(Columns.DATA));
+                    return Pair.create(ContentUris.withAppendedId(uri, rowId), blob);
+                }
+            } finally {
+                c.close();
+            }
+            return null;
+        }
+
         /**
          * Creates and returns a ContentProviderOperation that assigns the data array as the
          * sync state for the given account.
@@ -118,6 +152,23 @@ public class SyncStateContract {
                     .newInsert(uri)
                     .withValue(Columns.ACCOUNT_NAME, account.name)
                     .withValue(Columns.ACCOUNT_TYPE, account.type)
+                    .withValues(values)
+                    .build();
+        }
+
+        /**
+         * Creates and returns a ContentProviderOperation that assigns the data array as the
+         * sync state for the given account.
+         * @param uri the uri of the specific sync state to set
+         * @param data the byte[] that contains the sync state
+         * @return the new ContentProviderOperation that assigns the data array as the
+         * account's sync state
+         */
+        public static ContentProviderOperation newUpdateOperation(Uri uri, byte[] data) {
+            ContentValues values = new ContentValues();
+            values.put(Columns.DATA, data);
+            return ContentProviderOperation
+                    .newUpdate(uri)
                     .withValues(values)
                     .build();
         }

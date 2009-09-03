@@ -96,6 +96,13 @@ public class SyncStateContentProviderHelper {
         return db.update(SYNC_STATE_TABLE, values, selection, selectionArgs);
     }
 
+    public void update(SQLiteDatabase db, long rowId, Object data) {
+        db.execSQL("UPDATE " + SYNC_STATE_TABLE
+                + " SET " + SyncStateContract.Columns.DATA + "=?"
+                + " WHERE " + SyncStateContract.Columns._ID + "=" + rowId,
+                new Object[]{data});
+    }
+
     public void onAccountsChanged(SQLiteDatabase db, Account[] accounts) {
         Cursor c = db.query(SYNC_STATE_TABLE, ACCOUNT_PROJECTION, null, null, null, null, null);
         try {

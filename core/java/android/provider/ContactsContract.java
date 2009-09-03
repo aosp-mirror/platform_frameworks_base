@@ -29,6 +29,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -69,6 +70,14 @@ public final class ContactsContract {
         public static byte[] get(ContentProviderClient provider, Account account)
                 throws RemoteException {
             return SyncStateContract.Helpers.get(provider, CONTENT_URI, account);
+        }
+
+        /**
+         * @see android.provider.SyncStateContract.Helpers#get
+         */
+        public static Pair<Uri, byte[]> getWithUri(ContentProviderClient provider, Account account)
+                throws RemoteException {
+            return SyncStateContract.Helpers.getWithUri(provider, CONTENT_URI, account);
         }
 
         /**

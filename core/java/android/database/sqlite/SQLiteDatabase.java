@@ -175,6 +175,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     private boolean mTransactionIsSuccessful;
 
+    /**
+     * Valid during the life of a transaction.
+     */
+    private SQLiteTransactionListener mTransactionListener;
+
     /** Synchronize on this when accessing the database */
     private final ReentrantLock mLock = new ReentrantLock(true);
 
@@ -394,6 +399,31 @@ public class SQLiteDatabase extends SQLiteClosable {
      * </pre>
      */
     public void beginTransaction() {
+        beginTransactionWithListener(null /* transactionStatusCallback */);
+    }
+
+    /**
+     * Begins a transaction. Transactions can be nested. When the outer transaction is ended all of
+     * the work done in that transaction and all of the nested transactions will be committed or
+     * rolled back. The changes will be rolled back if any transaction is ended without being
+     * marked as clean (by calling setTransactionSuccessful). Otherwise they will be committed.
+     *
+     * <p>Here is the standard idiom for transactions:
+     *
+     * <pre>
+     *   db.beginTransactionWithListener(listener);
+     *   try {
+     *     ...
+     *     db.setTransactionSuccessful();
+     *   } finally {
+     *     db.endTransaction();
+     *   }
+     * </pre>
+     * @param transactionListener listener that should be notified when the transaction begins,
+     * commits, or is rolled back, either explicitly or by a call to
+     * {@link #yieldIfContendedSafely}.
+     */
+    public void beginTransactionWithListener(SQLiteTransactionListener transactionListener) {
         lockForced();
         boolean ok = false;
         try {
@@ -413,8 +443,17 @@ public class SQLiteDatabase extends SQLiteClosable {
             // This thread didn't already have the lock, so begin a database
             // transaction now.
             execSQL("BEGIN EXCLUSIVE;");
+            mTransactionListener = transactionListener;
             mTransactionIsSuccessful = true;
             mInnerTransactionIsSuccessful = false;
+            if (transactionListener != null) {
+                try {
+                    transactionListener.onBegin();
+                } catch (RuntimeException e) {
+                    execSQL("ROLLBACK;");
+                    throw e;
+                }
+            }
             ok = true;
         } finally {
             if (!ok) {
@@ -442,11 +481,27 @@ public class SQLiteDatabase extends SQLiteClosable {
             if (mLock.getHoldCount() != 1) {
                 return;
             }
+            RuntimeException savedException = null;
+            if (mTransactionListener != null) {
+                try {
+                    if (mTransactionIsSuccessful) {
+                        mTransactionListener.onCommit();
+                    } else {
+                        mTransactionListener.onRollback();
+                    }
+                } catch (RuntimeException e) {
+                    savedException = e;
+                    mTransactionIsSuccessful = false;
+                }
+            }
             if (mTransactionIsSuccessful) {
                 execSQL("COMMIT;");
             } else {
                 try {
                     execSQL("ROLLBACK;");
+                    if (savedException != null) {
+                        throw savedException;
+                    }
                 } catch (SQLException e) {
                     if (Config.LOGD) {
                         Log.d(TAG, "exception during rollback, maybe the DB previously "
@@ -455,6 +510,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                 }
             }
         } finally {
+            mTransactionListener = null;
             unlockForced();
             if (Config.LOGV) {
                 Log.v(TAG, "unlocked " + Thread.currentThread()
@@ -561,6 +617,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             return false;
         }
         setTransactionSuccessful();
+        SQLiteTransactionListener transactionListener = mTransactionListener;
         endTransaction();
         if (checkFullyYielded) {
             if (this.isDbLockedByCurrentThread()) {
@@ -586,7 +643,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                 }
             }
         }
-        beginTransaction();
+        beginTransactionWithListener(transactionListener);
         return true;
     }
 
