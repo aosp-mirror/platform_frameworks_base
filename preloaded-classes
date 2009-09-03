@@ -845,11 +845,6 @@ java.util.GregorianCalendar
 java.util.HashMap
 java.util.HashSet
 java.util.Hashtable
-java.util.Hashtable$6
-java.util.Hashtable$6$1
-java.util.Hashtable$Entry
-java.util.Hashtable$HashEnumIterator
-java.util.Hashtable$HashIterator
 java.util.IdentityHashMap
 java.util.LinkedHashMap
 java.util.LinkedList
