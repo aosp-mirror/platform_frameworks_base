@@ -31,6 +31,7 @@ import junit.framework.Assert;
 
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 
 class BrowserFrame extends Handler {
@@ -59,7 +60,7 @@ class BrowserFrame extends Handler {
     private boolean mIsMainFrame;
 
     // Attached Javascript interfaces
-    private HashMap mJSInterfaceMap;
+    private Map<String, Object> mJSInterfaceMap;
 
     // message ids
     // a message posted when a frame loading is completed
@@ -98,7 +99,7 @@ class BrowserFrame extends Handler {
      * XXX: Called by WebCore thread.
      */
     public BrowserFrame(Context context, WebViewCore w, CallbackProxy proxy,
-            WebSettings settings) {
+            WebSettings settings, Map<String, Object> javascriptInterfaces) {
         // Create a global JWebCoreJavaBridge to handle timers and
         // cookies in the WebCore thread.
         if (sJavaBridge == null) {
@@ -112,6 +113,7 @@ class BrowserFrame extends Handler {
             // create PluginManager with current Context
             PluginManager.getInstance(context);
         }
+        mJSInterfaceMap = javascriptInterfaces;
 
         mSettings = settings;
         mContext = context;
@@ -453,6 +455,8 @@ class BrowserFrame extends Handler {
             mJSInterfaceMap.remove(interfaceName);
         }
         mJSInterfaceMap.put(interfaceName, obj);
+        nativeAddJavascriptInterface(0, mJSInterfaceMap.get(interfaceName),
+                interfaceName);
     }
 
     /**

@@ -81,6 +81,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>A View that displays web pages. This class is the basis upon which you
@@ -721,11 +722,28 @@ public class WebView extends AbsoluteLayout
      * @param defStyle The default style resource ID.
      */
     public WebView(Context context, AttributeSet attrs, int defStyle) {
+        this(context, attrs, defStyle, null);
+    }
+
+    /**
+     * Construct a new WebView with layout parameters, a default style and a set
+     * of custom Javscript interfaces to be added to the WebView at initialization
+     * time. This guraratees that these interfaces will be available when the JS
+     * context is initialized.
+     * @param context A Context object used to access application assets.
+     * @param attrs An AttributeSet passed to our parent.
+     * @param defStyle The default style resource ID.
+     * @param javascriptInterfaces is a Map of intareface names, as keys, and
+     * object implementing those interfaces, as values.
+     * @hide pending API council approval.
+     */
+    protected WebView(Context context, AttributeSet attrs, int defStyle,
+            Map<String, Object> javascriptInterfaces) {
         super(context, attrs, defStyle);
         init();
 
         mCallbackProxy = new CallbackProxy(context, this);
-        mWebViewCore = new WebViewCore(context, this, mCallbackProxy);
+        mWebViewCore = new WebViewCore(context, this, mCallbackProxy, javascriptInterfaces);
         mDatabase = WebViewDatabase.getInstance(context);
         mScroller = new Scroller(context);
 

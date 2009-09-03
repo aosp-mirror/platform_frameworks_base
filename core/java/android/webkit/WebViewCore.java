@@ -36,6 +36,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -67,7 +69,8 @@ final class WebViewCore {
     private int mNativeClass;
     // The BrowserFrame is an interface to the native Frame component.
     private BrowserFrame mBrowserFrame;
-
+    // Custom JS interfaces to add during the initialization.
+    private Map<String, Object> mJavascriptInterfaces;
     /*
      * range is from 200 to 10,000. 0 is a special value means device-width. -1
      * means undefined.
@@ -113,10 +116,12 @@ final class WebViewCore {
     // debugging other classes that require operation within the WebCore thread.
     /* package */ static final String THREAD_NAME = "WebViewCoreThread";
 
-    public WebViewCore(Context context, WebView w, CallbackProxy proxy) {
+    public WebViewCore(Context context, WebView w, CallbackProxy proxy,
+            Map<String, Object> javascriptInterfaces) {
         // No need to assign this in the WebCore thread.
         mCallbackProxy = proxy;
         mWebView = w;
+        mJavascriptInterfaces = javascriptInterfaces;
         // This context object is used to initialize the WebViewCore during
         // subwindow creation.
         mContext = context;
@@ -164,7 +169,8 @@ final class WebViewCore {
          * in turn creates a C level FrameView and attaches it to the frame.
          */
         mBrowserFrame = new BrowserFrame(mContext, this, mCallbackProxy,
-                mSettings);
+                mSettings, mJavascriptInterfaces);
+        mJavascriptInterfaces = null;
         // Sync the native settings and also create the WebCore thread handler.
         mSettings.syncSettingsAndCreateHandler(mBrowserFrame);
         // Create the handler and transfer messages for the IconDatabase
