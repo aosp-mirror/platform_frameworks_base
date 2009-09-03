@@ -54,7 +54,7 @@ public abstract class RegisteredServicesCache<V> {
     private final String mAttributesName;
 
     // no need to be synchronized since the map is never changed once mService is written
-    private volatile Map<V, ServiceInfo<V>> mServices;
+    volatile Map<V, ServiceInfo<V>> mServices;
 
     // synchronized on "this"
     private BroadcastReceiver mReceiver = null;
@@ -81,6 +81,7 @@ public abstract class RegisteredServicesCache<V> {
             if (mReceiver == null) {
                 synchronized (this) {
                     mReceiver = new BroadcastReceiver() {
+                        @Override
                         public void onReceive(Context context, Intent intent) {
                             mServices = generateServicesMap();
                         }
@@ -91,6 +92,7 @@ public abstract class RegisteredServicesCache<V> {
                 intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
                 intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
                 intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+                intentFilter.addDataScheme("package");
                 mContext.registerReceiver(mReceiver, intentFilter);
                 return true;
             }
@@ -122,6 +124,7 @@ public abstract class RegisteredServicesCache<V> {
             this.uid = uid;
         }
 
+        @Override
         public String toString() {
             return "ServiceInfo: " + type + ", " + componentName;
         }
@@ -159,6 +162,7 @@ public abstract class RegisteredServicesCache<V> {
         maybeUnregisterForPackageChanges();
     }
 
+    @Override
     protected void finalize() throws Throwable {
         synchronized (this) {
             if (mReceiver != null) {
@@ -169,7 +173,7 @@ public abstract class RegisteredServicesCache<V> {
         super.finalize();
     }
 
-    private Map<V, ServiceInfo<V>> generateServicesMap() {
+    Map<V, ServiceInfo<V>> generateServicesMap() {
         Map<V, ServiceInfo<V>> services = Maps.newHashMap();
         PackageManager pm = mContext.getPackageManager();
 
