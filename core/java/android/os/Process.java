@@ -74,6 +74,12 @@ public class Process {
     public static final int SHELL_UID = 2000;
 
     /**
+     * Defines the UID/GID for the log group.
+     * @hide
+     */
+    public static final int LOG_UID = 1007;
+
+    /**
      * Defines the UID/GID for the WIFI supplicant process.
      * @hide
      */
