@@ -29,6 +29,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -58,6 +60,21 @@ public class WallpaperManager {
         private IWallpaperManager mService;
         private Bitmap mWallpaper;
         
+        private static final int MSG_CLEAR_WALLPAPER = 1;
+        
+        private final Handler mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_CLEAR_WALLPAPER:
+                        synchronized (this) {
+                            mWallpaper = null;
+                        }
+                        break;
+                }
+            }
+        };
+        
         Globals() {
             IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
             mService = IWallpaperManager.Stub.asInterface(b);
@@ -69,9 +86,7 @@ public class WallpaperManager {
              * to null so if the user requests the wallpaper again then we'll
              * fetch it.
              */
-            synchronized (this) {
-                mWallpaper = null;
-            }
+            mHandler.sendEmptyMessage(MSG_CLEAR_WALLPAPER);
         }
         
         public Bitmap peekWallpaperBitmap(Context context) {
@@ -170,17 +185,17 @@ public class WallpaperManager {
     private static Object mSync = new Object();
     private static Globals sGlobals;
 
-    static Globals getGlobals() {
+    static void initGlobals(Looper looper) {
         synchronized (mSync) {
             if (sGlobals == null) {
                 sGlobals = new Globals();
             }
-            return sGlobals;
         }
     }
     
     /*package*/ WallpaperManager(Context context, Handler handler) {
         mContext = context;
+        initGlobals(context.getMainLooper());
     }
 
     /**
@@ -193,7 +208,7 @@ public class WallpaperManager {
     
     /** @hide */
     public IWallpaperManager getIWallpaperManager() {
-        return getGlobals().mService;
+        return sGlobals.mService;
     }
     
     /**
@@ -218,7 +233,7 @@ public class WallpaperManager {
      * null pointer if these is none.
      */
     public Drawable peekDrawable() {
-        Bitmap bm = getGlobals().peekWallpaperBitmap(mContext);
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext);
         return bm != null ? new BitmapDrawable(mContext.getResources(), bm) : null;
     }
 
@@ -237,7 +252,7 @@ public class WallpaperManager {
         try {
             Resources resources = mContext.getResources();
             /* Set the wallpaper to the default values */
-            ParcelFileDescriptor fd = getGlobals().mService.setWallpaper(
+            ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(
                     "res:" + resources.getResourceName(resid));
             if (fd != null) {
                 FileOutputStream fos = null;
@@ -266,7 +281,7 @@ public class WallpaperManager {
      */
     public void setBitmap(Bitmap bitmap) throws IOException {
         try {
-            ParcelFileDescriptor fd = getGlobals().mService.setWallpaper(null);
+            ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null);
             if (fd == null) {
                 return;
             }
@@ -297,7 +312,7 @@ public class WallpaperManager {
      */
     public void setStream(InputStream data) throws IOException {
         try {
-            ParcelFileDescriptor fd = getGlobals().mService.setWallpaper(null);
+            ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null);
             if (fd == null) {
                 return;
             }
@@ -339,7 +354,7 @@ public class WallpaperManager {
      */
     public int getDesiredMinimumWidth() {
         try {
-            return getGlobals().mService.getWidthHint();
+            return sGlobals.mService.getWidthHint();
         } catch (RemoteException e) {
             // Shouldn't happen!
             return 0;
@@ -362,7 +377,7 @@ public class WallpaperManager {
      */
     public int getDesiredMinimumHeight() {
         try {
-            return getGlobals().mService.getHeightHint();
+            return sGlobals.mService.getHeightHint();
         } catch (RemoteException e) {
             // Shouldn't happen!
             return 0;
@@ -379,7 +394,7 @@ public class WallpaperManager {
      */
     public void suggestDesiredDimensions(int minimumWidth, int minimumHeight) {
         try {
-            getGlobals().mService.setDimensionHints(minimumWidth, minimumHeight);
+            sGlobals.mService.setDimensionHints(minimumWidth, minimumHeight);
         } catch (RemoteException e) {
         }
     }
