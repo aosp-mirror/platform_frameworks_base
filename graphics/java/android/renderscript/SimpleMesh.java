@@ -50,6 +50,13 @@ public class SimpleMesh extends BaseObj {
         return Allocation.createTyped(mRS, mIndexType);
     }
 
+    public Type getVertexType(int slot) {
+        return mVertexTypes[slot];
+    }
+
+    public Type getIndexType() {
+        return mIndexType;
+    }
 
     public static class Builder {
         RenderScript mRS;

@@ -35,6 +35,7 @@ class ScriptC : public Script
 {
 public:
     typedef int (*RunScript_t)(uint32_t launchIndex);
+    typedef void (*VoidFunc_t)();
 
     ScriptC();
     virtual ~ScriptC();
@@ -48,6 +49,9 @@ public:
         int mVersionMinor;
 
         RunScript_t mScript;
+        VoidFunc_t mInit;
+
+        void ** mSlotPointers[MAX_SCRIPT_BANKS];
     };
 
     Program_t mProgram;
