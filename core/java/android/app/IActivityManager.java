@@ -233,7 +233,6 @@ public interface IActivityManager extends IInterface {
     // Special low-level communication with activity manager.
     public void startRunning(String pkg, String cls, String action,
             String data) throws RemoteException;
-    public void systemReady() throws RemoteException;
     // Returns 1 if the user wants to debug.
     public int handleApplicationError(IBinder app,
             int flags,    /* 1 == can debug */
@@ -368,7 +367,7 @@ public interface IActivityManager extends IInterface {
     int PUBLISH_CONTENT_PROVIDERS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
     int SET_PERSISTENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
     int FINISH_SUB_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
-    int SYSTEM_READY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
+    
     int START_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
     int STOP_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+34;
     int BIND_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+35;
