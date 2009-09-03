@@ -183,8 +183,14 @@ public class ContactsAsyncHelper extends Handler {
 
             switch (msg.arg1) {
                 case EVENT_LOAD_IMAGE:
-                    InputStream inputStream = Contacts.openContactPhotoInputStream(
-                            args.context.getContentResolver(), args.uri);
+                    InputStream inputStream = null;
+                    try {
+                        inputStream = Contacts.openContactPhotoInputStream(
+                                args.context.getContentResolver(), args.uri);
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Error opening photo input stream", e);
+                    }
+
                     if (inputStream != null) {
                         args.result = Drawable.createFromStream(inputStream, args.uri.toString());
 
