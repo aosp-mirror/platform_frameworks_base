@@ -126,13 +126,15 @@ public interface IActivityManager extends IInterface {
     public void finishOtherInstances(IBinder token, ComponentName className) throws RemoteException;
     /* oneway */
     public void reportThumbnail(IBinder token,
-                                Bitmap thumbnail, CharSequence description) throws RemoteException;
+            Bitmap thumbnail, CharSequence description) throws RemoteException;
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
-                                                    String name) throws RemoteException;
+            String name) throws RemoteException;
     public void removeContentProvider(IApplicationThread caller,
-        String name) throws RemoteException;
+            String name) throws RemoteException;
     public void publishContentProviders(IApplicationThread caller,
-                                        List<ContentProviderHolder> providers) throws RemoteException;
+            List<ContentProviderHolder> providers) throws RemoteException;
+    public PendingIntent getRunningServiceControlPanel(ComponentName service)
+            throws RemoteException;
     public ComponentName startService(IApplicationThread caller, Intent service,
             String resolvedType) throws RemoteException;
     public int stopService(IApplicationThread caller, Intent service,
@@ -367,7 +369,7 @@ public interface IActivityManager extends IInterface {
     int PUBLISH_CONTENT_PROVIDERS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
     int SET_PERSISTENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
     int FINISH_SUB_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
-    
+    int GET_RUNNING_SERVICE_CONTROL_PANEL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
     int START_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
     int STOP_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+34;
     int BIND_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+35;

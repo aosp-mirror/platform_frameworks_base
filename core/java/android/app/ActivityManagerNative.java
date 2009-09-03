@@ -510,6 +510,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
         
+        case GET_RUNNING_SERVICE_CONTROL_PANEL_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            ComponentName comp = ComponentName.CREATOR.createFromParcel(data);
+            PendingIntent pi = getRunningServiceControlPanel(comp);
+            reply.writeNoException();
+            PendingIntent.writePendingIntentOrNullToParcel(pi, reply);
+            return true;
+        }
+
         case START_SERVICE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
@@ -1632,6 +1641,21 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+    
+    public PendingIntent getRunningServiceControlPanel(ComponentName service)
+            throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        service.writeToParcel(data, 0);
+        mRemote.transact(GET_RUNNING_SERVICE_CONTROL_PANEL_TRANSACTION, data, reply, 0);
+        reply.readException();
+        PendingIntent res = PendingIntent.readPendingIntentOrNullFromParcel(reply);
+        data.recycle();
+        reply.recycle();
+        return res;
     }
     
     public ComponentName startService(IApplicationThread caller, Intent service,

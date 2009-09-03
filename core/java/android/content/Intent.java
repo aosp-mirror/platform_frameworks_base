@@ -2044,6 +2044,24 @@ public class Intent implements Parcelable {
     public static final String EXTRA_CHANGED_COMPONENT_NAME =
             "android.intent.extra.changed_component_name";
 
+    /**
+     * @hide
+     * Magic extra system code can use when binding, to give a label for
+     * who it is that has bound to a service.  This is an integer giving
+     * a framework string resource that can be displayed to the user.
+     */
+    public static final String EXTRA_CLIENT_LABEL =
+            "android.intent.extra.client_label";
+
+    /**
+     * @hide
+     * Magic extra system code can use when binding, to give a PendingIntent object
+     * that can be launched for the user to disable the system's use of this
+     * service.
+     */
+    public static final String EXTRA_CLIENT_INTENT =
+            "android.intent.extra.client_intent";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Intent flags (see mFlags variable).
