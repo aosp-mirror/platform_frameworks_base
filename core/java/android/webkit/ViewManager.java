@@ -50,7 +50,7 @@ class ViewManager {
             }
             setBounds(x, y, width, height);
             final AbsoluteLayout.LayoutParams lp =
-                    new AbsoluteLayout.LayoutParams(ctvX(width), ctvX(height),
+                    new AbsoluteLayout.LayoutParams(ctvD(width), ctvD(height),
                             ctvX(x), ctvY(y));
             mWebView.mPrivateHandler.post(new Runnable() {
                 public void run() {
@@ -98,9 +98,17 @@ class ViewManager {
     }
 
     /**
+     * Shorthand for calling mWebView.contentToViewDimension.  Used when
+     * obtaining a view dimension from a content dimension, whether it be in x
+     * or y.
+     */
+    private int ctvD(int val) {
+        return mWebView.contentToViewDimension(val);
+    }
+
+    /**
      * Shorthand for calling mWebView.contentToViewX.  Used when obtaining a
-     * view x coordinate from a content x coordinate, or when getting a
-     * view dimension from a content dimension, whether it be in x or y.
+     * view x coordinate from a content x coordinate.
      */
     private int ctvX(int val) {
         return mWebView.contentToViewX(val);
@@ -119,8 +127,8 @@ class ViewManager {
             View view = v.mView;
             AbsoluteLayout.LayoutParams lp =
                     (AbsoluteLayout.LayoutParams) view.getLayoutParams();
-            lp.width = ctvX(v.width);
-            lp.height = ctvX(v.height);
+            lp.width = ctvD(v.width);
+            lp.height = ctvD(v.height);
             lp.x = ctvX(v.x);
             lp.y = ctvY(v.y);
             view.setLayoutParams(lp);
