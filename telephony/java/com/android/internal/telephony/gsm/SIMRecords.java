@@ -713,52 +713,58 @@ public final class SIMRecords extends IccRecords {
 
 
             case EVENT_GET_AD_DONE:
-                isRecordLoadResponse = true;
+                try {
+                    isRecordLoadResponse = true;
 
-                ar = (AsyncResult)msg.obj;
-                data = (byte[])ar.result;
+                    ar = (AsyncResult)msg.obj;
+                    data = (byte[])ar.result;
 
-                if (ar.exception != null) {
-                    break;
-                }
+                    if (ar.exception != null) {
+                        break;
+                    }
 
-                Log.d(LOG_TAG, "EF_AD: " +
-                    IccUtils.bytesToHexString(data));
+                    Log.d(LOG_TAG, "EF_AD: " +
+                            IccUtils.bytesToHexString(data));
 
-                if (data.length < 3) {
-                    Log.d(LOG_TAG, "SIMRecords: Corrupt AD data on SIM");
-                    break;
-                }
+                    if (data.length < 3) {
+                        Log.d(LOG_TAG, "SIMRecords: Corrupt AD data on SIM");
+                        break;
+                    }
 
-                if (data.length == 3) {
-                    Log.d(LOG_TAG, "SIMRecords: MNC length not present in EF_AD");
-                    break;
-                }
-
-                mncLength = (int)data[3] & 0xf;
-
-                if (mncLength == 0xf) {
-                    if (imsi != null) {
-                        try {
-                            int mcc = Integer.parseInt(imsi.substring(0,3));
-
-                            mncLength = MccTable.smallestDigitsMccForMnc(mcc);
-                        } catch (NumberFormatException e) {
-                            mncLength = UNKNOWN;
-                            Log.e(LOG_TAG, "SIMRecords: Corrupt IMSI!");
-                        }
-                    } else {
-                        // Indicate we got this info, but it didn't contain the length.
-                        mncLength = UNKNOWN;
-
+                    if (data.length == 3) {
                         Log.d(LOG_TAG, "SIMRecords: MNC length not present in EF_AD");
+                        break;
+                    }
+
+                    mncLength = (int)data[3] & 0xf;
+
+                    if (mncLength == 0xf) {
+                        mncLength = UNKNOWN;
+                    }
+                } finally {
+                    if (mncLength == UNKNOWN || mncLength == UNINITIALIZED) {
+                        if (imsi != null) {
+                            try {
+                                int mcc = Integer.parseInt(imsi.substring(0,3));
+
+                                mncLength = MccTable.smallestDigitsMccForMnc(mcc);
+                            } catch (NumberFormatException e) {
+                                mncLength = UNKNOWN;
+                                Log.e(LOG_TAG, "SIMRecords: Corrupt IMSI!");
+                            }
+                        } else {
+                            // Indicate we got this info, but it didn't contain the length.
+                            mncLength = UNKNOWN;
+
+                            Log.d(LOG_TAG, "SIMRecords: MNC length not present in EF_AD");
+                        }
+                    }
+                    if (imsi != null && mncLength != UNKNOWN) {
+                        // finally have both imsi and the length of the mnc and can parse
+                        // the imsi properly
+                        MccTable.updateMccMncConfiguration(phone, imsi.substring(0, 3 + mncLength));
                     }
                 }
-                if (imsi != null && mncLength != UNKNOWN) {
-                    // finally have both imsi and the length of the mnc and can parse it properly
-                    MccTable.updateMccMncConfiguration(phone, imsi.substring(0, 3 + mncLength));
-                }
-
             break;
 
             case EVENT_GET_SPN_DONE:
