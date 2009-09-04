@@ -4935,8 +4935,8 @@ public class WebView extends AbsoluteLayout
         int measuredWidth = widthSize;
 
         // Grab the content size from WebViewCore.
-        int contentHeight = mContentHeight;
-        int contentWidth = mContentWidth;
+        int contentHeight = Math.round(mContentHeight * mActualScale);
+        int contentWidth = Math.round(mContentWidth * mActualScale);
 
 //        Log.d(LOGTAG, "------- measure " + heightMode);
 
