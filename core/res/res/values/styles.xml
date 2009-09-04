@@ -66,10 +66,14 @@
         <item name="taskToFrontExitAnimation">@anim/task_open_exit</item>
         <item name="taskToBackEnterAnimation">@anim/task_close_enter</item>
         <item name="taskToBackExitAnimation">@anim/task_close_exit</item>
-        <item name="wallpaperActivityOpenEnterAnimation">@anim/wallpaper_activity_open_enter</item>
-        <item name="wallpaperActivityOpenExitAnimation">@anim/wallpaper_activity_open_exit</item>
-        <item name="wallpaperActivityCloseEnterAnimation">@anim/wallpaper_activity_close_enter</item>
-        <item name="wallpaperActivityCloseExitAnimation">@anim/wallpaper_activity_close_exit</item>
+        <item name="wallpaperOpenEnterAnimation">@anim/wallpaper_open_enter</item>
+        <item name="wallpaperOpenExitAnimation">@anim/wallpaper_open_exit</item>
+        <item name="wallpaperCloseEnterAnimation">@anim/wallpaper_close_enter</item>
+        <item name="wallpaperCloseExitAnimation">@anim/wallpaper_close_exit</item>
+        <item name="wallpaperIntraOpenEnterAnimation">@anim/wallpaper_intra_open_enter</item>
+        <item name="wallpaperIntraOpenExitAnimation">@anim/wallpaper_intra_open_exit</item>
+        <item name="wallpaperIntraCloseEnterAnimation">@anim/wallpaper_intra_close_enter</item>
+        <item name="wallpaperIntraCloseExitAnimation">@anim/wallpaper_intra_close_exit</item>
     </style>
 
     <!-- Standard animations for a non-full-screen window or activity. -->
