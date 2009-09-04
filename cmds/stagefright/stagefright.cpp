@@ -97,6 +97,9 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
             if (gReproduceBug == 1 && numFrames == 40) {
                 printf("seeking past the end now.");
                 options.setSeekTo(0x7fffffffL);
+            } else if (gReproduceBug == 2 && numFrames == 40) {
+                printf("seeking to 5 secs.");
+                options.setSeekTo(5000000);
             }
         }
 
