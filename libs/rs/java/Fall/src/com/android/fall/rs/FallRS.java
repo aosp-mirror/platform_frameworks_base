@@ -44,7 +44,7 @@ class FallRS {
     private static final int MESH_RESOLUTION = 48;
 
     private static final int RSID_STATE = 0;
-    
+
     private static final int TEXTURES_COUNT = 3;
     private static final int LEAVES_TEXTURES_COUNT = 4;
     private static final int RSID_TEXTURE_RIVERBED = 0;
@@ -52,7 +52,7 @@ class FallRS {
     private static final int RSID_TEXTURE_SKY = 2;
 
     private static final int RSID_RIPPLE_MAP = 1;
-    
+
     private static final int RSID_REFRACTION_MAP = 2;
 
     private static final int RSID_LEAVES = 3;
@@ -70,7 +70,21 @@ class FallRS {
     private static final int LEAF_STRUCT_DELTAX = 9;
     private static final int LEAF_STRUCT_DELTAY = 10;
 
-    private static final int RSID_DROP = 4;    
+    class Leaf {
+        float x;
+        float y;
+        float scale;
+        float angle;
+        float spin;
+        float u1;
+        float u2;
+        float altitude;
+        float rippled;
+        float deltaX;
+        float deltaY;
+    }
+
+    private static final int RSID_DROP = 4;
 
     private Resources mResources;
     private RenderScript mRS;
@@ -175,10 +189,10 @@ class FallRS {
 
         float quadWidth = 2.0f / (float) wResolution;
         float quadHeight = glHeight / (float) hResolution;
-        
+
         wResolution += 2;
-        hResolution += 2;        
-        
+        hResolution += 2;
+
         for (int y = 0; y <= hResolution; y++) {
             final boolean shift = (y & 0x1) == 0;
             final float yOffset = y * quadHeight - glHeight / 2.0f - quadHeight;
@@ -267,12 +281,10 @@ class FallRS {
         public int leavesCount;
         public float glWidth;
         public float glHeight;
-        public float skyOffsetX;
-        public float skyOffsetY;
         public float skySpeedX;
         public float skySpeedY;
     }
-    
+
     static class DropState {
         public int dropX;
         public int dropY;
@@ -295,11 +307,11 @@ class FallRS {
         mStateType = Type.createFromClass(mRS, WorldState.class, 1, "WorldState");
         mState = Allocation.createTyped(mRS, mStateType);
         mState.data(worldState);
-        
+
         mDrop = new DropState();
         mDrop.dropX = -1;
         mDrop.dropY = -1;
-        
+
         mDropType = Type.createFromClass(mRS, DropState.class, 1, "DropState");
         mDropState = Allocation.createTyped(mRS, mDropType);
         mDropState.data(mDrop);
@@ -346,7 +358,7 @@ class FallRS {
         final Allocation allocation = Allocation.createFromBitmap(mRS, b, RGBA_8888, false);
         allocation.setName(name);
         return allocation;
-    }    
+    }
 
     private void createProgramFragment() {
         Sampler.Builder sampleBuilder = new Sampler.Builder(mRS);
@@ -368,7 +380,7 @@ class FallRS {
         mPfLighting = builder.create();
         mPfLighting.setName("PFLighting");
         mPfLighting.bindSampler(sampler, 0);
-        
+
         builder = new ProgramFragment.Builder(mRS, null, null);
         builder.setTexEnable(true, 0);
         builder.setTexEnvMode(MODULATE, 0);
@@ -407,7 +419,7 @@ class FallRS {
         mPvLight = builder.create();
         mPvLight.bindAllocation(pvOrthoAlloc);
         mPvLight.setName("PVLight");
-        
+
         builder = new ProgramVertex.Builder(mRS, null, null);
         builder.setTextureMatrixEnable(true);
         mPvSky = builder.create();

@@ -47,6 +47,20 @@
 // The higher, the smaller the ripple
 #define RIPPLE_HEIGHT 10.0f
 
+float g_SkyOffsetX;
+float g_SkyOffsetY;
+
+struct vert_s {
+    float nx;
+    float ny;
+    float nz;
+    float s;
+    float t;
+    float x;
+    float y;
+    float z;
+};
+
 int offset(int x, int y, int width) {
     return x + 1 + (y + 1) * (width + 2);
 }
@@ -150,8 +164,8 @@ void generateRipples() {
     int *map = loadArrayI32(RSID_REFRACTION_MAP, 0);
     float *vertices = loadTriangleMeshVerticesF(NAMED_WaterMesh);
 
-    float fw = (float) width;
-    float fh = (float) height;
+    float fw = 1.f / width;
+    float fh = 1.f / height;
     float fy = (1.0f / 512.0f) * (1.0f / RIPPLE_HEIGHT);
 
     int h = height - 1;
@@ -175,8 +189,8 @@ void generateRipples() {
             if (v >= height) v = height - 1;
 
             int index = (offset + w) << 3;
-            vertices[index + 3] = u / fw;
-            vertices[index + 4] = v / fh;
+            vertices[index + 3] = u * fw;
+            vertices[index + 4] = v * fh;
 
             // Update Z coordinate of the vertex
             vertices[index + 7] = dy * fy;
@@ -196,76 +210,26 @@ void generateRipples() {
         int x = 0;
         int yOffset = y * width;
         for ( ; x < width; x += 1) {
-            int o = (yOffset + x) << 3;
-            int o1 = o + 8;
-            int ow = o + w8;
+            int o = ((yOffset + x) << 3);
+            int o1 = o + 8 + 5;
+            int ow = o + w8 + 5;
             int ow1 = ow + 8;
 
-            // V1
-            float v1x = vertices[o + 5];
-            float v1y = vertices[o + 6];
-            float v1z = vertices[o + 7];
-
-            // V2
-            float v2x = vertices[o1 + 5];
-            float v2y = vertices[o1 + 6];
-            float v2z = vertices[o1 + 7];
-
-            // V3
-            float v3x = vertices[ow + 5];
-            float v3y = vertices[ow + 6];
-            float v3z = vertices[ow + 7];
-
-            // N1
-            float n1x = v2x - v1x;
-            float n1y = v2y - v1y;
-            float n1z = v2z - v1z;
-
-            // N2
-            float n2x = v3x - v1x;
-            float n2y = v3y - v1y;
-            float n2z = v3z - v1z;
-
-            // N1 x N2
-            float n3x = n1y * n2z - n1z * n2y;
-            float n3y = n1z * n2x - n1x * n2z;
-            float n3z = n1x * n2y - n1y * n2x;
-
-            // Normalize
-            float len = 1.0f / magf3(n3x, n3y, n3z);
-            n3x *= len;
-            n3y *= len;
-            n3z *= len;
-
-            // V2
-            v2x = vertices[ow1 + 5];
-            v2y = vertices[ow1 + 6];
-            v2z = vertices[ow1 + 7];
-
-            // N1
-            n1x = v2x - v1x;
-            n1y = v2y - v1y;
-            n1z = v2z - v1z;
-
-            // N2
-            n2x = v3x - v1x;
-            n2y = v3y - v1y;
-            n2z = v3z - v1z;
+            struct vec3_s n1, n2, n3;
+            vec3Sub(&n1, (struct vec3_s *)(vertices + o1 + 5), (struct vec3_s *)(vertices + o + 5));
+            vec3Sub(&n2, (struct vec3_s *)(vertices + ow + 5), (struct vec3_s *)(vertices + o + 5));
+            vec3Cross(&n3, &n1, &n2);
+            vec3Norm(&n3);
 
             // Average of previous normal and N1 x N2
-            n3x = n3x * 0.5f + (n1y * n2z - n1z * n2y) * 0.5f;
-            n3y = n3y * 0.5f + (n1z * n2x - n1x * n2z) * 0.5f;
-            n3z = n3z * 0.5f + (n1x * n2y - n1y * n2x) * 0.5f;
+            vec3Sub(&n1, (struct vec3_s *)(vertices + ow1 + 5), (struct vec3_s *)(vertices + o + 5));
+            vec3Cross(&n2, &n1, &n2);
+            vec3Add(&n3, &n3, &n2);
+            vec3Norm(&n3);
 
-            // Normalize
-            len = 1.0f / magf3(n3x, n3y, n3z);
-            n3x *= len;
-            n3y *= len;
-            n3z *= len;
-
-            vertices[o + 0] = n3x;
-            vertices[o + 1] = n3y;
-            vertices[o + 2] = -n3z;
+            vertices[o + 0] = n3.x;
+            vertices[o + 1] = n3.y;
+            vertices[o + 2] = -n3.z;
 
             // reset Z
             //vertices[(yOffset + x) << 3 + 7] = 0.0f;
@@ -433,15 +397,15 @@ void drawSky() {
     bindProgramFragmentStore(NAMED_PFSLeaf);
     bindTexture(NAMED_PFSky, 0, NAMED_TSky);
 
-    float x = State->skyOffsetX + State->skySpeedX;
-    float y = State->skyOffsetY + State->skySpeedY;
+    float x = g_SkyOffsetX + State->skySpeedX;
+    float y = g_SkyOffsetY + State->skySpeedY;
 
     if (x > 1.0f) x = 0.0f;
     if (x < -1.0f) x = 0.0f;
     if (y > 1.0f) y = 0.0f;
 
-    storeF(RSID_STATE, OFFSETOF_WorldState_skyOffsetX, x);
-    storeF(RSID_STATE, OFFSETOF_WorldState_skyOffsetY, y);
+    g_SkyOffsetX = x;
+    g_SkyOffsetY = y;
 
     float matrix[16];
     matrixLoadTranslate(matrix, x, y, 0.0f);
@@ -509,7 +473,7 @@ int main(int index) {
     drawRiverbed();
     drawSky();
     drawLighting();
-    drawLeaves();
+    //drawLeaves();
     //drawNormals();
 
     return 1;
