@@ -1193,6 +1193,20 @@ public class WindowManagerService extends IWindowManager.Stub
         moveInputMethodDialogsLocked(findDesiredInputMethodWindowIndexLocked(true));
     }
 
+    final boolean isWallpaperVisible(WindowState wallpaperTarget) {
+        if (DEBUG_WALLPAPER) Log.v(TAG, "Wallpaper vis: target obscured="
+                + (wallpaperTarget != null ? Boolean.toString(wallpaperTarget.mObscured) : "??")
+                + " anim=" + ((wallpaperTarget != null && wallpaperTarget.mAppToken != null)
+                        ? wallpaperTarget.mAppToken.animation : null)
+                + " upper=" + mUpperWallpaperTarget
+                + " lower=" + mLowerWallpaperTarget);
+        return (wallpaperTarget != null
+                        && (!wallpaperTarget.mObscured || (wallpaperTarget.mAppToken != null
+                                && wallpaperTarget.mAppToken.animation != null)))
+                || mUpperWallpaperTarget != null
+                || mLowerWallpaperTarget != null;
+    }
+    
     boolean adjustWallpaperWindowsLocked() {
         boolean changed = false;
         
@@ -1352,7 +1366,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (visible) {
             // The window is visible to the compositor...  but is it visible
             // to the user?  That is what the wallpaper cares about.
-            visible = !foundW.mObscured;
+            visible = isWallpaperVisible(foundW);
             if (DEBUG_WALLPAPER) Log.v(TAG, "Wallpaper visibility: " + visible);
             
             // If the wallpaper target is animating, we may need to copy
@@ -1377,6 +1391,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 foundW = wb;
                 foundI--;
             }
+        } else {
+            if (DEBUG_WALLPAPER) Log.v(TAG, "Wallpaper not visible");
         }
         
         // Okay i is the position immediately above the wallpaper.  Look at
@@ -1394,6 +1410,8 @@ public class WindowManagerService extends IWindowManager.Stub
         while (curTokenIndex > 0) {
             curTokenIndex--;
             WindowToken token = mWallpaperTokens.get(curTokenIndex);
+            token.hidden = !visible;
+            
             int curWallpaperIndex = token.windows.size();
             while (curWallpaperIndex > 0) {
                 curWallpaperIndex--;
@@ -1548,8 +1566,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
     
     void updateWallpaperVisibilityLocked() {
-        final boolean visible = mWallpaperTarget != null
-                && !mWallpaperTarget.mObscured;
+        final boolean visible = isWallpaperVisible(mWallpaperTarget);
         final int dw = mDisplay.getWidth();
         final int dh = mDisplay.getHeight();
         
@@ -1557,6 +1574,8 @@ public class WindowManagerService extends IWindowManager.Stub
         while (curTokenIndex > 0) {
             curTokenIndex--;
             WindowToken token = mWallpaperTokens.get(curTokenIndex);
+            token.hidden = !visible;
+            
             int curWallpaperIndex = token.windows.size();
             while (curWallpaperIndex > 0) {
                 curWallpaperIndex--;
@@ -1569,7 +1588,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     wallpaper.mWallpaperVisible = visible;
                     try {
                         if (DEBUG_VISIBILITY || DEBUG_WALLPAPER) Log.v(TAG,
-                                "Setting visibility of wallpaper " + wallpaper
+                                "Updating visibility of wallpaper " + wallpaper
                                 + ": " + visible);
                         wallpaper.mClient.dispatchAppVisibility(visible);
                     } catch (RemoteException e) {
@@ -2408,15 +2427,25 @@ public class WindowManagerService extends IWindowManager.Stub
                                 ? com.android.internal.R.styleable.WindowAnimation_taskToBackEnterAnimation
                                 : com.android.internal.R.styleable.WindowAnimation_taskToBackExitAnimation;
                         break;
-                    case WindowManagerPolicy.TRANSIT_WALLPAPER_ACTIVITY_OPEN:
+                    case WindowManagerPolicy.TRANSIT_WALLPAPER_OPEN:
                         animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperActivityOpenEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_wallpaperActivityOpenExitAnimation;
+                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
                         break;
-                    case WindowManagerPolicy.TRANSIT_WALLPAPER_ACTIVITY_CLOSE:
+                    case WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE:
                         animAttr = enter
-                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperActivityCloseEnterAnimation
-                                : com.android.internal.R.styleable.WindowAnimation_wallpaperActivityCloseExitAnimation;
+                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperCloseEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_wallpaperCloseExitAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN:
+                        animAttr = enter
+                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
+                        break;
+                    case WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE:
+                        animAttr = enter
+                                ? com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseEnterAnimation
+                                : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
                         break;
                 }
                 a = loadAnimation(lp, animAttr);
@@ -7346,11 +7375,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         /**
-         * Return true if the window is opaque and fully drawn.
+         * Return true if the window is opaque and fully drawn.  This indicates
+         * it may obscure windows behind it.
          */
         boolean isOpaqueDrawn() {
-            return mAttrs.format == PixelFormat.OPAQUE && mSurface != null
-                    && mAnimation == null && !mDrawPending && !mCommitDrawPending;
+            return (mAttrs.format == PixelFormat.OPAQUE
+                            || mAttrs.type == TYPE_WALLPAPER)
+                    && mSurface != null && mAnimation == null
+                    && (mAppToken == null || mAppToken.animation == null)
+                    && !mDrawPending && !mCommitDrawPending;
         }
 
         boolean needsBackgroundFiller(int screenWidth, int screenHeight) {
@@ -8964,6 +8997,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             mToTopApps.clear();
                         }
                         
+                        WindowState oldWallpaper = mWallpaperTarget;
+                        
                         adjustWallpaperWindowsLocked();
                         wallpaperMayChange = false;
                         
@@ -8971,52 +9006,64 @@ public class WindowManagerService extends IWindowManager.Stub
                                 "New wallpaper target=" + mWallpaperTarget
                                 + ", lower target=" + mLowerWallpaperTarget
                                 + ", upper target=" + mUpperWallpaperTarget);
+                        int foundWallpapers = 0;
                         if (mLowerWallpaperTarget != null) {
                             // Need to determine if both the closing and
                             // opening app token sets are wallpaper targets,
                             // in which case special animations are needed
                             // (since the wallpaper needs to stay static
                             // behind them).
-                            int found = 0;
-                            NN = mOpeningApps.size();
-                            for (i=0; i<NN; i++) {
-                                AppWindowToken wtoken = mOpeningApps.get(i);
-                                if (mLowerWallpaperTarget.mAppToken == wtoken) {
-                                    found |= 1;
-                                }
-                                if (mUpperWallpaperTarget.mAppToken == wtoken) {
-                                    found |= 1;
-                                }
-                            }
                             NN = mClosingApps.size();
                             for (i=0; i<NN; i++) {
                                 AppWindowToken wtoken = mClosingApps.get(i);
                                 if (mLowerWallpaperTarget.mAppToken == wtoken) {
-                                    found |= 2;
+                                    foundWallpapers |= 1;
                                 }
                                 if (mUpperWallpaperTarget.mAppToken == wtoken) {
-                                    found |= 2;
+                                    foundWallpapers |= 1;
                                 }
                             }
-                            
-                            if (found == 3) {
-                                if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
-                                        "Wallpaper animation!");
-                                switch (transit) {
-                                    case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
-                                    case WindowManagerPolicy.TRANSIT_TASK_OPEN:
-                                    case WindowManagerPolicy.TRANSIT_TASK_TO_FRONT:
-                                        transit = WindowManagerPolicy.TRANSIT_WALLPAPER_ACTIVITY_OPEN;
-                                        break;
-                                    case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
-                                    case WindowManagerPolicy.TRANSIT_TASK_CLOSE:
-                                    case WindowManagerPolicy.TRANSIT_TASK_TO_BACK:
-                                        transit = WindowManagerPolicy.TRANSIT_WALLPAPER_ACTIVITY_CLOSE;
-                                        break;
+                            NN = mOpeningApps.size();
+                            for (i=0; i<NN; i++) {
+                                AppWindowToken wtoken = mOpeningApps.get(i);
+                                if (mLowerWallpaperTarget.mAppToken == wtoken) {
+                                    foundWallpapers |= 2;
                                 }
-                                if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
-                                        "New transit: " + transit);
+                                if (mUpperWallpaperTarget.mAppToken == wtoken) {
+                                    foundWallpapers |= 2;
+                                }
                             }
+                        }
+                        
+                        if (foundWallpapers == 3) {
+                            if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
+                                    "Wallpaper animation!");
+                            switch (transit) {
+                                case WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN:
+                                case WindowManagerPolicy.TRANSIT_TASK_OPEN:
+                                case WindowManagerPolicy.TRANSIT_TASK_TO_FRONT:
+                                    transit = WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_OPEN;
+                                    break;
+                                case WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE:
+                                case WindowManagerPolicy.TRANSIT_TASK_CLOSE:
+                                case WindowManagerPolicy.TRANSIT_TASK_TO_BACK:
+                                    transit = WindowManagerPolicy.TRANSIT_WALLPAPER_INTRA_CLOSE;
+                                    break;
+                            }
+                            if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
+                                    "New transit: " + transit);
+                        } else if (oldWallpaper != null) {
+                            // We are transitioning from an activity with
+                            // a wallpaper to one without.
+                            transit = WindowManagerPolicy.TRANSIT_WALLPAPER_CLOSE;
+                            if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
+                                    "New transit away from wallpaper: " + transit);
+                        } else if (mWallpaperTarget != null) {
+                            // We are transitioning from an activity without
+                            // a wallpaper to now showing the wallpaper
+                            transit = WindowManagerPolicy.TRANSIT_WALLPAPER_OPEN;
+                            if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
+                                    "New transit into wallpaper: " + transit);
                         }
                         
                         // We need to figure out which animation to use...
@@ -9381,9 +9428,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
 
-                    boolean opaqueDrawn = w.isOpaqueDrawn();
-                    if ((opaqueDrawn && w.isFullscreen(dw, dh))
-                            || attrs.type == TYPE_WALLPAPER) {
+                    boolean opaqueDrawn = canBeSeen && w.isOpaqueDrawn();
+                    if (opaqueDrawn && w.isFullscreen(dw, dh)) {
                         // This window completely covers everything behind it,
                         // so we want to leave all of them as unblurred (for
                         // performance reasons).

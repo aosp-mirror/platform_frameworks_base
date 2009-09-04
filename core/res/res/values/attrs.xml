@@ -979,26 +979,47 @@
               (which is exiting the screen). -->
         <attr name="taskToBackExitAnimation" format="reference" />
         
+        <!--  When opening a new activity that shows the wallpaper, while
+              currently not showing the wallpaper, this is the animation that
+              is run on the new wallpaper activity (which is entering the screen). -->
+        <attr name="wallpaperOpenEnterAnimation" format="reference" />
+        <!--  When opening a new activity that shows the wallpaper, while
+              currently not showing the wallpaper, this is the animation that
+              is run on the current activity (which is exiting the screen). -->
+        <attr name="wallpaperOpenExitAnimation" format="reference" />
+        <!--  When opening a new activity that hides the wallpaper, while
+              currently showing the wallpaper, this is the animation that
+              is run on the new activity (which is entering the screen). -->
+        <attr name="wallpaperCloseEnterAnimation" format="reference" />
+        <!--  When opening a new activity that hides the wallpaper, while
+              currently showing the wallpaper, this is the animation that
+              is run on the old wallpaper activity (which is exiting the screen). -->
+        <attr name="wallpaperCloseExitAnimation" format="reference" />
+        
         <!--  When opening a new activity that is on top of the wallpaper
               when the current activity is also on top of the wallpaper,
               this is the animation that is run on the new activity
-              (which is entering the screen). -->
-        <attr name="wallpaperActivityOpenEnterAnimation" format="reference" />
+              (which is entering the screen).  The wallpaper remains
+              static behind the animation. -->
+        <attr name="wallpaperIntraOpenEnterAnimation" format="reference" />
         <!--  When opening a new activity that is on top of the wallpaper
               when the current activity is also on top of the wallpaper,
               this is the animation that is run on the current activity
-              (which is exiting the screen). -->
-        <attr name="wallpaperActivityOpenExitAnimation" format="reference" />
+              (which is exiting the screen).  The wallpaper remains
+              static behind the animation. -->
+        <attr name="wallpaperIntraOpenExitAnimation" format="reference" />
         <!--  When closing a foreround activity that is on top of the wallpaper
               when the previous activity is also on top of the wallpaper,
               this is the animation that is run on the previous activity
-              (which is entering the screen). -->
-        <attr name="wallpaperActivityCloseEnterAnimation" format="reference" />
+              (which is entering the screen).  The wallpaper remains
+              static behind the animation. -->
+        <attr name="wallpaperIntraCloseEnterAnimation" format="reference" />
         <!--  When closing a foreround activity that is on top of the wallpaper
               when the previous activity is also on top of the wallpaper,
               this is the animation that is run on the current activity
-              (which is exiting the screen). -->
-        <attr name="wallpaperActivityCloseExitAnimation" format="reference" />
+              (which is exiting the screen).  The wallpaper remains
+              static behind the animation. -->
+        <attr name="wallpaperIntraCloseExitAnimation" format="reference" />
     </declare-styleable>
 
     <!-- ============================= -->
