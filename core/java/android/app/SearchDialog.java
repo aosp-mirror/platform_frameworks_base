@@ -745,7 +745,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return true;
         }
         
-        if (keyCode == KeyEvent.KEYCODE_SEARCH) {
+        if (keyCode == KeyEvent.KEYCODE_SEARCH && event.getRepeatCount() < 1) {
             // If the search key is pressed, toggle between global and in-app search. If we are
             // currently doing global search and there is no in-app search context to toggle to,
             // just don't do anything.
