@@ -39,10 +39,6 @@ ObjDestroy {
 ElementBegin {
 }
 
-ElementAddPredefined {
-	param RsElementPredefined predef
-	}
-
 ElementAdd {
 	param RsDataKind dataKind
 	param RsDataType dataType
@@ -99,8 +95,8 @@ AllocationCreateFromFile {
 AllocationCreateFromBitmap {
 	param uint32_t width
 	param uint32_t height
-	param RsElementPredefined dstFmt
-	param RsElementPredefined srcFmt
+	param RsElement dstFmt
+	param RsElement srcFmt
 	param bool genMips
 	param const void * data
 	ret RsAllocation
@@ -109,8 +105,8 @@ AllocationCreateFromBitmap {
 AllocationCreateFromBitmapBoxed {
 	param uint32_t width
 	param uint32_t height
-	param RsElementPredefined dstFmt
-	param RsElementPredefined srcFmt
+	param RsElement dstFmt
+	param RsElement srcFmt
 	param bool genMips
 	param const void * data
 	ret RsAllocation

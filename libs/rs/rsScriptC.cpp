@@ -286,6 +286,10 @@ void ScriptCState::appendTypes(String8 *str)
     char buf[256];
     String8 tmp;
 
+    str->append("struct vec2_s {float x; float y;};");
+    str->append("struct vec3_s {float x; float y; float z;};");
+    str->append("struct vec4_s {float x; float y; float z; float w;};");
+
     for (size_t ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
         const Type *t = mConstantBufferTypes[ct].get();
         if (!t) {

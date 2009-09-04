@@ -209,35 +209,24 @@ public class Allocation extends BaseObj {
     static public Allocation createSized(RenderScript rs, Element e, int count)
         throws IllegalArgumentException {
 
-        int id;
-        if(e.mIsPredefined) {
-            id = rs.nAllocationCreatePredefSized(e.mPredefinedID, count);
-        } else {
-            id = rs.nAllocationCreateSized(e.mID, count);
-            if(id == 0) {
-                throw new IllegalStateException("Bad element.");
-            }
+        int id = rs.nAllocationCreateSized(e.mID, count);
+        if(id == 0) {
+            throw new IllegalStateException("Bad element.");
         }
         return new Allocation(id, rs, null);
     }
 
     static public Allocation createFromBitmap(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
         throws IllegalArgumentException {
-        if(!dstFmt.mIsPredefined) {
-            throw new IllegalStateException("Attempting to allocate a bitmap with a non-static element.");
-        }
 
-        int id = rs.nAllocationCreateFromBitmap(dstFmt.mPredefinedID, genMips, b);
+        int id = rs.nAllocationCreateFromBitmap(dstFmt.mID, genMips, b);
         return new Allocation(id, rs, null);
     }
 
     static public Allocation createFromBitmapBoxed(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
         throws IllegalArgumentException {
-        if(!dstFmt.mIsPredefined) {
-            throw new IllegalStateException("Attempting to allocate a bitmap with a non-static element.");
-        }
 
-        int id = rs.nAllocationCreateFromBitmapBoxed(dstFmt.mPredefinedID, genMips, b);
+        int id = rs.nAllocationCreateFromBitmapBoxed(dstFmt.mID, genMips, b);
         return new Allocation(id, rs, null);
     }
 
@@ -250,10 +239,10 @@ public class Allocation extends BaseObj {
             is = res.openRawResource(id, value);
 
             int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
-            int allocationId = rs.nAllocationCreateFromAssetStream(dstFmt.mPredefinedID, genMips,
+            int allocationId = rs.nAllocationCreateFromAssetStream(dstFmt.mID, genMips,
                     asset);
 
-            return new Allocation(allocationId, rs, null);            
+            return new Allocation(allocationId, rs, null);
         } catch (Exception e) {
             // Ignore
         } finally {
