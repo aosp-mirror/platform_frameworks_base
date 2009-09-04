@@ -21,6 +21,7 @@ import com.android.internal.policy.PolicyManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.ComponentName;
+import android.content.ContextWrapper;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -801,12 +802,29 @@ public class Dialog implements DialogInterface, Window.Callback,
 
         // associate search with owner activity if possible (otherwise it will default to
         // global search).
-        final ComponentName appName = mOwnerActivity == null ? null
-                : mOwnerActivity.getComponentName();
+        final ComponentName appName = getAssociatedActivity();
         final boolean globalSearch = (appName == null);
         searchManager.startSearch(null, false, appName, null, globalSearch);
         dismiss();
         return true;
+    }
+
+    /**
+     * @return The activity associated with this dialog, or null if there is no assocaited activity.
+     */
+    private ComponentName getAssociatedActivity() {
+        Activity activity = mOwnerActivity;
+        Context context = getContext();
+        while (activity == null && context != null) {
+            if (context instanceof Activity) {
+                activity = (Activity) context;  // found it!
+            } else {
+                context = (context instanceof ContextWrapper) ?
+                        ((ContextWrapper) context).getBaseContext() : // unwrap one level
+                        null;                                         // done
+            }
+        }
+        return activity == null ? null : activity.getComponentName();
     }
 
 
