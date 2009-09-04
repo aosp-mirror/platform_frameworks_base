@@ -5203,8 +5203,19 @@ public class WebView extends AbsoluteLayout
                         mInZoomOverview = false;
                         mLastScale = restoreState.mTextWrapScale;
                         if (restoreState.mMinScale == 0) {
-                            mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
-                            mMinZoomScaleFixed = false;
+                            if (restoreState.mMobileSite) {
+                                if (draw.mMinPrefWidth > draw.mViewPoint.x) {
+                                    mMinZoomScale = (float) viewWidth
+                                            / draw.mMinPrefWidth;
+                                    mMinZoomScaleFixed = false;
+                                } else {
+                                    mMinZoomScale = mDefaultScale;
+                                    mMinZoomScaleFixed = true;
+                                }
+                            } else {
+                                mMinZoomScale = DEFAULT_MIN_ZOOM_SCALE;
+                                mMinZoomScaleFixed = false;
+                            }
                         } else {
                             mMinZoomScale = restoreState.mMinScale;
                             mMinZoomScaleFixed = true;
@@ -5217,11 +5228,11 @@ public class WebView extends AbsoluteLayout
                         setNewZoomScale(mLastScale, false);
                         setContentScrollTo(restoreState.mScrollX,
                                 restoreState.mScrollY);
-                        if (!ENABLE_DOUBLETAP_ZOOM
-                                || !settings.getLoadWithOverviewMode()) {
-                        } else {
-                            if (useWideViewport
-                                    && restoreState.mViewScale == 0) {
+                        if (ENABLE_DOUBLETAP_ZOOM && useWideViewport
+                                && settings.getLoadWithOverviewMode()) {
+                            if (restoreState.mViewScale == 0
+                                    || (restoreState.mMobileSite
+                                            && mMinZoomScale < mDefaultScale)) {
                                 mInZoomOverview = true;
                             }
                         }

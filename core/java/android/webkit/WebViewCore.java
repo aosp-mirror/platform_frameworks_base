@@ -1572,7 +1572,10 @@ final class WebViewCore {
             // layout.
             draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
             if (WebView.ENABLE_DOUBLETAP_ZOOM && mSettings.getUseWideViewPort()) {
-                draw.mMinPrefWidth = Math.max(DEFAULT_VIEWPORT_WIDTH,
+                draw.mMinPrefWidth = Math.max(
+                        mViewportWidth == -1 ? DEFAULT_VIEWPORT_WIDTH
+                                : (mViewportWidth == 0 ? mCurrentViewWidth
+                                        : mViewportWidth),
                         nativeGetContentMinPrefWidth());
             }
             if (mRestoreState != null) {
@@ -1858,9 +1861,6 @@ final class WebViewCore {
         if (mViewportWidth == 0) {
             if (mViewportInitialScale == 0) {
                 mViewportInitialScale = WebView.DEFAULT_SCALE_PERCENT;
-            }
-            if (mViewportMinimumScale == 0) {
-                mViewportMinimumScale = WebView.DEFAULT_SCALE_PERCENT;
             }
         }
         if (mViewportUserScalable == false) {
