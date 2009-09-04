@@ -18,6 +18,7 @@ package com.android.dumprendertree;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
@@ -47,6 +48,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 public class TestShellActivity extends Activity implements LayoutTestController {
@@ -107,6 +110,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mEventSender = new WebViewEventSender(mWebView);
         mCallbackProxy = new CallbackProxy(mEventSender, this);
 
+        mWebView.addJavascriptInterface(mCallbackProxy, "layoutTestController");
+        mWebView.addJavascriptInterface(mCallbackProxy, "eventSender");
         setupWebViewForLayoutTests(mWebView, mCallbackProxy);
 
         contentView.addView(mWebView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT, 0.0f));
@@ -620,7 +625,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             // allow it's content to execute and be recorded by the test
             // runner.
 
-            WebView newWindowView = new WebView(TestShellActivity.this);
+            HashMap<String, Object> jsIfaces = new HashMap<String, Object>();
+            jsIfaces.put("layoutTestController", mCallbackProxy);
+            jsIfaces.put("eventSender", mCallbackProxy);
+            WebView newWindowView = new NewWindowWebView(TestShellActivity.this, jsIfaces);
             setupWebViewForLayoutTests(newWindowView, mCallbackProxy);
             WebView.WebViewTransport transport =
                     (WebView.WebViewTransport) resultMsg.obj;
@@ -629,6 +637,12 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             return true;
         }
     };
+
+    private static class NewWindowWebView extends WebView {
+        public NewWindowWebView(Context context, Map<String, Object> jsIfaces) {
+            super(context, null, 0, jsIfaces);
+        }
+    }
 
     private void resetTestStatus() {
         mWaitUntilDone = false;
@@ -658,9 +672,6 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         settings.setDatabasePath(getDir("databases",0).getAbsolutePath());
         settings.setDomStorageEnabled(true);
         settings.setWorkersEnabled(false);
-
-        webview.addJavascriptInterface(callbackProxy, "layoutTestController");
-        webview.addJavascriptInterface(callbackProxy, "eventSender");
 
         webview.setWebChromeClient(mChromeClient);
         webview.setWebViewClient(mViewClient);
