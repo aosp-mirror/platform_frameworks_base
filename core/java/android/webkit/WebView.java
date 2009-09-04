@@ -31,6 +31,7 @@ import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.drawable.Drawable;
 import android.net.http.SslCertificate;
 import android.net.Uri;
 import android.os.Bundle;
@@ -67,6 +68,7 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ScrollBarDrawable;
 import android.widget.Scroller;
 import android.widget.Toast;
 import android.widget.ZoomButtonsController;
@@ -937,21 +939,30 @@ public class WebView extends AbsoluteLayout
     }
 
     /*
+     * returns the height of the titlebarview (if any). Does not care about
+     * scrolling
+     */
+    private int getTitleHeight() {
+        return mTitleBar != null ? mTitleBar.getHeight() : 0;
+    }
+
+    /*
+     * Return the amount of the titlebarview (if any) that is visible
+     */
+    private int getVisibleTitleHeight() {
+        return Math.max(getTitleHeight() - mScrollY, 0);
+    }
+
+    /*
      * Return the height of the view where the content of WebView should render
      * to.  Note that this excludes mTitleBar, if there is one.
      */
     private int getViewHeight() {
         int height = getHeight();
-        if (isHorizontalScrollBarEnabled() && mOverlayHorizontalScrollbar) {
+        if (isHorizontalScrollBarEnabled() && !mOverlayHorizontalScrollbar) {
             height -= getHorizontalScrollbarHeight();
         }
-        if (mTitleBar != null) {
-            int titleBarVisibleHeight = mTitleBar.getHeight() - mScrollY;
-            if (titleBarVisibleHeight > 0) {
-                height -= titleBarVisibleHeight;
-            }
-        }
-        return height;
+        return height - getVisibleTitleHeight();
     }
 
     /**
@@ -1741,7 +1752,15 @@ public class WebView extends AbsoluteLayout
 
     // Expects y in view coordinates
     private int pinLocY(int y) {
-        return pinLoc(y, getViewHeight(), computeVerticalScrollRange());
+        int titleH = getTitleHeight();
+        // if the titlebar is still visible, just pin against 0
+        if (y <= titleH) {
+            return Math.max(y, 0);
+        }
+        // convert to 0-based coordinate (subtract the title height)
+        // pin(), and then add the title height back in
+        return pinLoc(y - titleH, getViewHeight(),
+                      computeVerticalScrollRange()) + titleH;
     }
 
     /**
@@ -1783,10 +1802,17 @@ public class WebView extends AbsoluteLayout
      * embedded into the WebView.
      */
     /*package*/ int viewToContentY(int y) {
-        if (mTitleBar != null) {
-            y -= mTitleBar.getHeight();
-        }
-        return viewToContentX(y);
+        return viewToContentX(y - getTitleHeight());
+    }
+
+    /**
+     * Given a distance in content space, convert it to view space. Note: this
+     * does not reflect translation, just scaling, so this should not be called
+     * with coordinates, but should be called for dimensions like width or
+     * height.
+     */
+    /*package*/ int contentToViewDimension(int d) {
+        return Math.round(d * mActualScale);
     }
 
     /**
@@ -1794,7 +1820,7 @@ public class WebView extends AbsoluteLayout
      * space.  Also used for absolute heights.
      */
     /*package*/ int contentToViewX(int x) {
-        return Math.round(x * mActualScale);
+        return contentToViewDimension(x);
     }
 
     /**
@@ -1802,11 +1828,7 @@ public class WebView extends AbsoluteLayout
      * space.  Takes into account the height of the title bar.
      */
     /*package*/ int contentToViewY(int y) {
-        int val = Math.round(y * mActualScale);
-        if (mTitleBar != null) {
-            val += mTitleBar.getHeight();
-        }
-        return val;
+        return contentToViewDimension(y) + getTitleHeight();
     }
 
     // Called by JNI to invalidate the View, given rectangle coordinates in
@@ -2024,7 +2046,7 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             return mHistoryWidth;
         } else {
-            return contentToViewX(mContentWidth);
+            return contentToViewDimension(mContentWidth);
         }
     }
 
@@ -2036,7 +2058,7 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             return mHistoryHeight;
         } else {
-            int height = contentToViewX(mContentHeight);
+            int height = contentToViewDimension(mContentHeight);
             if (mFindIsUp) {
                 height += FIND_HEIGHT;
             }
@@ -2046,19 +2068,21 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected int computeVerticalScrollOffset() {
-        int offset = super.computeVerticalScrollOffset();
-        if (mTitleBar != null) {
-            // Need to adjust so that the resulting offset is at minimum
-            // the height of the title bar, if it is visible.
-            offset += mTitleBar.getHeight()*computeVerticalScrollRange()
-                    /getViewHeight();
-        }
-        return offset;
+        return Math.max(mScrollY - getTitleHeight(), 0);
     }
 
     @Override
     protected int computeVerticalScrollExtent() {
         return getViewHeight();
+    }
+
+    /** @hide */
+    @Override
+    protected void onDrawVerticalScrollBar(Canvas canvas,
+                                           Drawable scrollBar,
+                                           int l, int t, int r, int b) {
+        scrollBar.setBounds(l, t + getVisibleTitleHeight(), r, b);
+        scrollBar.draw(canvas);
     }
 
     /**
@@ -2412,8 +2436,8 @@ public class WebView extends AbsoluteLayout
             // keys are hit, this should be safe. Right?
             return false;
         }
-        cx = contentToViewX(cx);
-        cy = contentToViewY(cy);
+        cx = contentToViewDimension(cx);
+        cy = contentToViewDimension(cy);
         if (mHeightCanMeasure) {
             // move our visible rect according to scroll request
             if (cy != 0) {
@@ -2482,12 +2506,12 @@ public class WebView extends AbsoluteLayout
         }
 
         if (mHeightCanMeasure) {
-            if (getMeasuredHeight() != contentToViewX(mContentHeight)
+            if (getMeasuredHeight() != contentToViewDimension(mContentHeight)
                     && updateLayout) {
                 requestLayout();
             }
         } else if (mWidthCanMeasure) {
-            if (getMeasuredWidth() != contentToViewX(mContentWidth)
+            if (getMeasuredWidth() != contentToViewDimension(mContentWidth)
                     && updateLayout) {
                 requestLayout();
             }
@@ -3272,7 +3296,7 @@ public class WebView extends AbsoluteLayout
             // Initialize our generation number.
             mTextGeneration = 0;
         }
-        mWebTextView.setTextSize(contentToViewX(nativeFocusCandidateTextSize()));
+        mWebTextView.setTextSize(contentToViewDimension(nativeFocusCandidateTextSize()));
         Rect visibleRect = new Rect();
         calcOurContentVisibleRect(visibleRect);
         // Note that sendOurVisibleRect calls viewToContent, so the coordinates
@@ -4506,9 +4530,15 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    private int computeMaxScrollY() {
+        int maxContentH = contentToViewDimension(mContentHeight)
+                          + getTitleHeight();
+        return Math.max(maxContentH - getHeight(), 0);
+    }
+
     public void flingScroll(int vx, int vy) {
         int maxX = Math.max(computeHorizontalScrollRange() - getViewWidth(), 0);
-        int maxY = Math.max(computeVerticalScrollRange() - getViewHeight(), 0);
+        int maxY = computeMaxScrollY();
 
         mScroller.fling(mScrollX, mScrollY, vx, vy, 0, maxX, 0, maxY);
         invalidate();
@@ -4519,7 +4549,7 @@ public class WebView extends AbsoluteLayout
             return;
         }
         int maxX = Math.max(computeHorizontalScrollRange() - getViewWidth(), 0);
-        int maxY = Math.max(computeVerticalScrollRange() - getViewHeight(), 0);
+        int maxY = computeMaxScrollY();
 
         mVelocityTracker.computeCurrentVelocity(1000, mMaximumFling);
         int vx = (int) mVelocityTracker.getXVelocity();
