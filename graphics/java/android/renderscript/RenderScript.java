@@ -57,6 +57,8 @@ public class RenderScript {
         }
     }
 
+    native void nInitElements(int a8, int rgba4444, int rgba8888, int rgb565);
+
     native int  nDeviceCreate();
     native void nDeviceDestroy(int dev);
     native int  nContextCreate(int dev, Surface sur, int ver, boolean useDepth);
@@ -78,10 +80,8 @@ public class RenderScript {
     native int  nFileOpen(byte[] name);
 
     native void nElementBegin();
-    native void nElementAddPredefined(int predef);
     native void nElementAdd(int kind, int type, int norm, int bits, String s);
     native int  nElementCreate();
-    native int  nElementGetPredefined(int predef);
 
     native void nTypeBegin(int elementID);
     native void nTypeAdd(int dim, int val);
@@ -90,7 +90,6 @@ public class RenderScript {
     native void nTypeSetupFields(Type t, int[] types, int[] bits, Field[] IDs);
 
     native int  nAllocationCreateTyped(int type);
-    native int  nAllocationCreatePredefSized(int predef, int count);
     native int  nAllocationCreateSized(int elem, int count);
     native int  nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp);
     native int  nAllocationCreateFromBitmapBoxed(int dstFmt, boolean genMips, Bitmap bmp);
@@ -203,7 +202,7 @@ public class RenderScript {
 
         // TODO: This should be protected by a lock
         if(!mElementsInitialized) {
-            Element.init(this);
+            Element.initPredefined(this);
             mElementsInitialized = true;
         }
     }
@@ -227,7 +226,6 @@ public class RenderScript {
     }
 
     public void triangleMeshBegin(Element vertex, Element index) {
-        Log.e("rs", "vtx " + vertex.toString() + "  " + vertex.mID + "  " + vertex.mPredefinedID);
         nTriangleMeshBegin(vertex.mID, index.mID);
     }
 

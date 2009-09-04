@@ -184,10 +184,10 @@ void Context::timerPrint()
 
     LOGV("RS: Frame (%lli),   Script %2.1f (%lli),  Clear & Swap %2.1f (%lli),  Idle %2.1f (%lli),  Internal %2.1f (%lli)",
          frame / 1000000,
-         100.0 * mTimers[RS_TIMER_IDLE] / total, mTimers[RS_TIMER_IDLE] / 1000000,
-         100.0 * mTimers[RS_TIMER_INTERNAL] / total, mTimers[RS_TIMER_INTERNAL] / 1000000,
          100.0 * mTimers[RS_TIMER_SCRIPT] / total, mTimers[RS_TIMER_SCRIPT] / 1000000,
-         100.0 * mTimers[RS_TIMER_CLEAR_SWAP] / total, mTimers[RS_TIMER_CLEAR_SWAP] / 1000000);
+         100.0 * mTimers[RS_TIMER_CLEAR_SWAP] / total, mTimers[RS_TIMER_CLEAR_SWAP] / 1000000,
+         100.0 * mTimers[RS_TIMER_IDLE] / total, mTimers[RS_TIMER_IDLE] / 1000000,
+         100.0 * mTimers[RS_TIMER_INTERNAL] / total, mTimers[RS_TIMER_INTERNAL] / 1000000);
 }
 
 void Context::setupCheck()

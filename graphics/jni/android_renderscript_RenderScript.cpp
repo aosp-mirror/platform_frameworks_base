@@ -58,6 +58,11 @@ static jfieldID gContextId = 0;
 static jfieldID gNativeBitmapID = 0;
 static jfieldID gTypeNativeCache = 0;
 
+static RsElement g_A_8 = NULL;
+static RsElement g_RGBA_4444 = NULL;
+static RsElement g_RGBA_8888 = NULL;
+static RsElement g_RGB_565 = NULL;
+
 static void _nInit(JNIEnv *_env, jclass _this)
 {
     gContextId             = _env->GetFieldID(_this, "mContext", "I");
@@ -69,6 +74,13 @@ static void _nInit(JNIEnv *_env, jclass _this)
     gTypeNativeCache = _env->GetFieldID(typeClass, "mNativeCache", "I");
 }
 
+static void nInitElements(JNIEnv *_env, jobject _this, jint a8, jint rgba4444, jint rgba8888, jint rgb565)
+{
+    g_A_8 = reinterpret_cast<RsElement>(a8);
+    g_RGBA_4444 = reinterpret_cast<RsElement>(rgba4444);
+    g_RGBA_8888 = reinterpret_cast<RsElement>(rgba8888);
+    g_RGB_565 = reinterpret_cast<RsElement>(rgb565);
+}
 
 // ---------------------------------------------------------------------------
 
@@ -167,13 +179,6 @@ nElementBegin(JNIEnv *_env, jobject _this)
     rsElementBegin(con);
 }
 
-static void
-nElementAddPredefined(JNIEnv *_env, jobject _this, jint predef)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nElementAddPredefined, con(%p), predef(%i)", con, predef);
-    rsElementAddPredefined(con, (RsElementPredefined)predef);
-}
 
 static void
 nElementAdd(JNIEnv *_env, jobject _this, jint kind, jint type, jint norm, jint bits, jstring name)
@@ -196,14 +201,6 @@ nElementCreate(JNIEnv *_env, jobject _this)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nElementCreate, con(%p)", con);
     return (jint)rsElementCreate(con);
-}
-
-static jint
-nElementGetPredefined(JNIEnv *_env, jobject _this, jint predef)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nElementGetPredefined, con(%p) predef(%i)", con, predef);
-    return (jint)rsElementGetPredefined(con, (RsElementPredefined)predef);
 }
 
 // -----------------------------------
@@ -328,14 +325,6 @@ nAllocationCreateTyped(JNIEnv *_env, jobject _this, jint e)
 }
 
 static jint
-nAllocationCreatePredefSized(JNIEnv *_env, jobject _this, jint predef, jint count)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nAllocationCreatePredefSized, con(%p), predef(%i), count(%i)", con, predef, count);
-    return (jint) rsAllocationCreatePredefSized(con, (RsElementPredefined)predef, count);
-}
-
-static jint
 nAllocationCreateSized(JNIEnv *_env, jobject _this, jint e, jint count)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -359,24 +348,24 @@ nAllocationUploadToBufferObject(JNIEnv *_env, jobject _this, jint a)
     rsAllocationUploadToBufferObject(con, (RsAllocation)a);
 }
 
-static RsElementPredefined SkBitmapToPredefined(SkBitmap::Config cfg)
+static RsElement SkBitmapToPredefined(SkBitmap::Config cfg)
 {
     switch (cfg) {
     case SkBitmap::kA8_Config:
-        return RS_ELEMENT_A_8;
+        return g_A_8;
     case SkBitmap::kARGB_4444_Config:
-        return RS_ELEMENT_RGBA_4444;
+        return g_RGBA_4444;
     case SkBitmap::kARGB_8888_Config:
-        return RS_ELEMENT_RGBA_8888;
+        return g_RGBA_8888;
     case SkBitmap::kRGB_565_Config:
-        return RS_ELEMENT_RGB_565;
+        return g_RGB_565;
 
     default:
         break;
     }
     // If we don't have a conversion mark it as a user type.
     LOGE("Unsupported bitmap type");
-    return RS_ELEMENT_USER_U8;
+    return NULL;
 }
 
 static int
@@ -388,14 +377,13 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jint dstFmt, jboolean g
     const SkBitmap& bitmap(*nativeBitmap);
     SkBitmap::Config config = bitmap.getConfig();
 
-    RsElementPredefined e = SkBitmapToPredefined(config);
-
-    if (e != RS_ELEMENT_USER_U8) {
+    RsElement e = SkBitmapToPredefined(config);
+    if (e) {
         bitmap.lockPixels();
         const int w = bitmap.width();
         const int h = bitmap.height();
         const void* ptr = bitmap.getPixels();
-        jint id = (jint)rsAllocationCreateFromBitmap(con, w, h, (RsElementPredefined)dstFmt, e, genMips, ptr);
+        jint id = (jint)rsAllocationCreateFromBitmap(con, w, h, (RsElement)dstFmt, e, genMips, ptr);
         bitmap.unlockPixels();
         return id;
     }
@@ -414,14 +402,14 @@ nAllocationCreateFromAssetStream(JNIEnv *_env, jobject _this, jint dstFmt, jbool
 
     SkBitmap::Config config = bitmap.getConfig();
 
-    RsElementPredefined e = SkBitmapToPredefined(config);
+    RsElement e = SkBitmapToPredefined(config);
 
-    if (e != RS_ELEMENT_USER_U8) {
+    if (e) {
         bitmap.lockPixels();
         const int w = bitmap.width();
         const int h = bitmap.height();
         const void* ptr = bitmap.getPixels();
-        jint id = (jint)rsAllocationCreateFromBitmap(con, w, h, (RsElementPredefined)dstFmt, e, genMips, ptr);
+        jint id = (jint)rsAllocationCreateFromBitmap(con, w, h, (RsElement)dstFmt, e, genMips, ptr);
         bitmap.unlockPixels();
         return id;
     }
@@ -437,14 +425,14 @@ nAllocationCreateFromBitmapBoxed(JNIEnv *_env, jobject _this, jint dstFmt, jbool
     const SkBitmap& bitmap(*nativeBitmap);
     SkBitmap::Config config = bitmap.getConfig();
 
-    RsElementPredefined e = SkBitmapToPredefined(config);
+    RsElement e = SkBitmapToPredefined(config);
 
-    if (e != RS_ELEMENT_USER_U8) {
+    if (e) {
         bitmap.lockPixels();
         const int w = bitmap.width();
         const int h = bitmap.height();
         const void* ptr = bitmap.getPixels();
-        jint id = (jint)rsAllocationCreateFromBitmapBoxed(con, w, h, (RsElementPredefined)dstFmt, e, genMips, ptr);
+        jint id = (jint)rsAllocationCreateFromBitmapBoxed(con, w, h, (RsElement)dstFmt, e, genMips, ptr);
         bitmap.unlockPixels();
         return id;
     }
@@ -1244,6 +1232,8 @@ static const char *classPathName = "android/renderscript/RenderScript";
 
 static JNINativeMethod methods[] = {
 {"_nInit",                         "()V",                                  (void*)_nInit },
+{"nInitElements",                  "(IIII)V",                              (void*)nInitElements },
+
 {"nDeviceCreate",                  "()I",                                  (void*)nDeviceCreate },
 {"nDeviceDestroy",                 "(I)V",                                 (void*)nDeviceDestroy },
 {"nContextCreate",                 "(ILandroid/view/Surface;IZ)I",         (void*)nContextCreate },
@@ -1255,10 +1245,8 @@ static JNINativeMethod methods[] = {
 {"nFileOpen",                      "([B)I",                                (void*)nFileOpen },
 
 {"nElementBegin",                  "()V",                                  (void*)nElementBegin },
-{"nElementAddPredefined",          "(I)V",                                 (void*)nElementAddPredefined },
 {"nElementAdd",                    "(IIIILjava/lang/String;)V",            (void*)nElementAdd },
 {"nElementCreate",                 "()I",                                  (void*)nElementCreate },
-{"nElementGetPredefined",          "(I)I",                                 (void*)nElementGetPredefined },
 
 {"nTypeBegin",                     "(I)V",                                 (void*)nTypeBegin },
 {"nTypeAdd",                       "(II)V",                                (void*)nTypeAdd },
@@ -1267,7 +1255,6 @@ static JNINativeMethod methods[] = {
 {"nTypeSetupFields",               "(Landroid/renderscript/Type;[I[I[Ljava/lang/reflect/Field;)V", (void*)nTypeSetupFields },
 
 {"nAllocationCreateTyped",         "(I)I",                                 (void*)nAllocationCreateTyped },
-{"nAllocationCreatePredefSized",   "(II)I",                                (void*)nAllocationCreatePredefSized },
 {"nAllocationCreateSized",         "(II)I",                                (void*)nAllocationCreateSized },
 {"nAllocationCreateFromBitmap",    "(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
 {"nAllocationCreateFromBitmapBoxed","(IZLandroid/graphics/Bitmap;)I",      (void*)nAllocationCreateFromBitmapBoxed },
