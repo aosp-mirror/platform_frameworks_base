@@ -310,40 +310,54 @@ static void elementConverter_8888_to_565(void *dst, const void *src, uint32_t co
     }
 }
 
-static ElementConverter_t pickConverter(RsElementPredefined dstFmt, RsElementPredefined srcFmt)
+static ElementConverter_t pickConverter(const Element *dst, const Element *src)
 {
-    if ((dstFmt == RS_ELEMENT_RGB_565) &&
-        (srcFmt == RS_ELEMENT_RGB_565)) {
-        return elementConverter_cpy_16;
+    GLenum srcGLType = src->getGLType();
+    GLenum srcGLFmt = src->getGLFormat();
+    GLenum dstGLType = dst->getGLType();
+    GLenum dstGLFmt = dst->getGLFormat();
+
+    if (srcGLFmt == dstGLFmt && srcGLType == dstGLType) {
+        switch(dst->getSizeBytes()) {
+        case 4:
+            return elementConverter_cpy_32;
+        case 2:
+            return elementConverter_cpy_16;
+        case 1:
+            return elementConverter_cpy_8;
+        }
     }
 
-    if ((dstFmt == RS_ELEMENT_RGB_565) &&
-        (srcFmt == RS_ELEMENT_RGB_888)) {
+    if (srcGLType == GL_UNSIGNED_BYTE &&
+        srcGLFmt == GL_RGB &&
+        dstGLType == GL_UNSIGNED_SHORT_5_6_5 &&
+        dstGLType == GL_RGB) {
+
         return elementConverter_888_to_565;
     }
 
-    if ((dstFmt == RS_ELEMENT_RGB_565) &&
-        (srcFmt == RS_ELEMENT_RGBA_8888)) {
+    if (srcGLType == GL_UNSIGNED_BYTE &&
+        srcGLFmt == GL_RGBA &&
+        dstGLType == GL_UNSIGNED_SHORT_5_6_5 &&
+        dstGLType == GL_RGB) {
+
         return elementConverter_8888_to_565;
     }
 
-    if ((dstFmt == RS_ELEMENT_RGBA_8888) &&
-        (srcFmt == RS_ELEMENT_RGBA_8888)) {
-        return elementConverter_cpy_32;
-    }
-
-    LOGE("pickConverter, unsuported combo, src %i,  dst %i", srcFmt, dstFmt);
+    LOGE("pickConverter, unsuported combo, src %p,  dst %p", src, dst);
     return 0;
 }
 
 
-RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h, RsElementPredefined dstFmt, RsElementPredefined srcFmt,  bool genMips, const void *data)
+RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h, RsElement _dst, RsElement _src,  bool genMips, const void *data)
 {
+    const Element *src = static_cast<const Element *>(_src);
+    const Element *dst = static_cast<const Element *>(_dst);
     rsAssert(!(w & (w-1)));
     rsAssert(!(h & (h-1)));
 
     //LOGE("rsi_AllocationCreateFromBitmap %i %i %i %i %i", w, h, dstFmt, srcFmt, genMips);
-    rsi_TypeBegin(rsc, rsi_ElementGetPredefined(rsc, dstFmt));
+    rsi_TypeBegin(rsc, _dst);
     rsi_TypeAdd(rsc, RS_DIMENSION_X, w);
     rsi_TypeAdd(rsc, RS_DIMENSION_Y, h);
     if (genMips) {
@@ -359,7 +373,7 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
     }
     texAlloc->incUserRef();
 
-    ElementConverter_t cvt = pickConverter(dstFmt, srcFmt);
+    ElementConverter_t cvt = pickConverter(dst, src);
     cvt(texAlloc->getPtr(), data, w * h);
 
     if (genMips) {
@@ -375,21 +389,18 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
     return texAlloc;
 }
 
-static uint32_t fmtToBits(RsElementPredefined fmt)
+RsAllocation rsi_AllocationCreateFromBitmapBoxed(Context *rsc, uint32_t w, uint32_t h, RsElement _dst, RsElement _src, bool genMips, const void *data)
 {
-    return 16;
-}
-
-RsAllocation rsi_AllocationCreateFromBitmapBoxed(Context *rsc, uint32_t w, uint32_t h, RsElementPredefined dstFmt, RsElementPredefined srcFmt, bool genMips, const void *data)
-{
+    const Element *srcE = static_cast<const Element *>(_src);
+    const Element *dstE = static_cast<const Element *>(_dst);
     uint32_t w2 = rsHigherPow2(w);
     uint32_t h2 = rsHigherPow2(h);
 
     if ((w2 == w) && (h2 == h)) {
-        return rsi_AllocationCreateFromBitmap(rsc, w, h, dstFmt, srcFmt, genMips, data);
+        return rsi_AllocationCreateFromBitmap(rsc, w, h, _dst, _src, genMips, data);
     }
 
-    uint32_t bpp = fmtToBits(srcFmt) >> 3;
+    uint32_t bpp = srcE->getSizeBytes();
     size_t size = w2 * h2 * bpp;
     uint8_t *tmp = static_cast<uint8_t *>(malloc(size));
     memset(tmp, 0, size);
@@ -401,7 +412,7 @@ RsAllocation rsi_AllocationCreateFromBitmapBoxed(Context *rsc, uint32_t w, uint3
         src += w * bpp;
     }
 
-    RsAllocation ret = rsi_AllocationCreateFromBitmap(rsc, w2, h2, dstFmt, srcFmt, genMips, tmp);
+    RsAllocation ret = rsi_AllocationCreateFromBitmap(rsc, w2, h2, _dst, _src, genMips, tmp);
     free(tmp);
     return ret;
 

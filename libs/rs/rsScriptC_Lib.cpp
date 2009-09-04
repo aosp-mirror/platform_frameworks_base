@@ -36,6 +36,23 @@ using namespace android::renderscript;
     Context * rsc = tls->mContext; \
     ScriptC * sc = (ScriptC *) tls->mScript
 
+typedef struct {
+    float x;
+    float y;
+    float z;
+} vec3_t;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float w;
+} vec4_t;
+
+typedef struct {
+    float x;
+    float y;
+} vec2_t;
 
 //////////////////////////////////////////////////////////////////////////////
 // IO routines
@@ -161,6 +178,60 @@ static void SC_storeMatrix(uint32_t bank, uint32_t offset, const rsc_Matrix *m)
     memcpy(&f[offset], m, sizeof(rsc_Matrix));
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Vec3 routines
+//////////////////////////////////////////////////////////////////////////////
+
+static void SC_vec3Norm(vec3_t *v)
+{
+    float len = sqrtf(v->x * v->x + v->y * v->y + v->z * v->z);
+    len = 1 / len;
+    v->x *= len;
+    v->y *= len;
+    v->z *= len;
+}
+
+static float SC_vec3Length(const vec3_t *v)
+{
+    return sqrtf(v->x * v->x + v->y * v->y + v->z * v->z);
+}
+
+static void SC_vec3Add(vec3_t *dest, const vec3_t *lhs, const vec3_t *rhs)
+{
+    dest->x = lhs->x + rhs->x;
+    dest->y = lhs->y + rhs->y;
+    dest->z = lhs->z + rhs->z;
+}
+
+static void SC_vec3Sub(vec3_t *dest, const vec3_t *lhs, const vec3_t *rhs)
+{
+    dest->x = lhs->x - rhs->x;
+    dest->y = lhs->y - rhs->y;
+    dest->z = lhs->z - rhs->z;
+}
+
+static void SC_vec3Cross(vec3_t *dest, const vec3_t *lhs, const vec3_t *rhs)
+{
+    float x = lhs->y * rhs->z  - lhs->z * rhs->y;
+    float y = lhs->z * rhs->x  - lhs->x * rhs->z;
+    float z = lhs->x * rhs->y  - lhs->y * rhs->x;
+    dest->x = x;
+    dest->y = y;
+    dest->z = z;
+}
+
+static float SC_vec3Dot(const vec3_t *lhs, const vec3_t *rhs)
+{
+    return lhs->x * rhs->x + lhs->y * rhs->y + lhs->z * rhs->z;
+}
+
+static void SC_vec3Scale(vec3_t *lhs, float scale)
+{
+    lhs->x *= scale;
+    lhs->y *= scale;
+    lhs->z *= scale;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Math routines
@@ -175,15 +246,15 @@ static float SC_sinf_fast(float x)
     const float A =   1.0f / (2.0f * M_PI);
     const float B = -16.0f;
     const float C =   8.0f;
-    
+
     // scale angle for easy argument reduction
     x *= A;
-    
+
     if (fabsf(x) >= 0.5f) {
         // argument reduction
         x = x - ceilf(x + 0.5f) + 1.0f;
     }
-    
+
     const float y = B * x * fabsf(x) + C * x;
     return 0.2215f * (y * fabsf(y) - y) + y;
 }
@@ -195,15 +266,15 @@ static float SC_cosf_fast(float x)
     const float A =   1.0f / (2.0f * M_PI);
     const float B = -16.0f;
     const float C =   8.0f;
-    
+
     // scale angle for easy argument reduction
     x *= A;
-    
+
     if (fabsf(x) >= 0.5f) {
         // argument reduction
         x = x - ceilf(x + 0.5f) + 1.0f;
     }
-    
+
     const float y = B * x * fabsf(x) + C * x;
     return 0.2215f * (y * fabsf(y) - y) + y;
 }
@@ -1037,6 +1108,22 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     // vector
     { "vec2Rand", (void *)&SC_vec2Rand,
         "void", "(float *vec, float maxLen)" },
+
+    // vec3
+    { "vec3Norm", (void *)&SC_vec3Norm,
+        "void", "(struct vec3_s *)" },
+    { "vec3Length", (void *)&SC_vec3Length,
+        "float", "(struct vec3_s *)" },
+    { "vec3Add", (void *)&SC_vec3Add,
+        "void", "(struct vec3_s *dest, struct vec3_s *lhs, struct vec3_s *rhs)" },
+    { "vec3Sub", (void *)&SC_vec3Sub,
+        "void", "(struct vec3_s *dest, struct vec3_s *lhs, struct vec3_s *rhs)" },
+    { "vec3Cross", (void *)&SC_vec3Cross,
+        "void", "(struct vec3_s *dest, struct vec3_s *lhs, struct vec3_s *rhs)" },
+    { "vec3Dot", (void *)&SC_vec3Dot,
+        "float", "(struct vec3_s *lhs, struct vec3_s *rhs)" },
+    { "vec3Scale", (void *)&SC_vec3Scale,
+        "void", "(struct vec3_s *lhs, float scale)" },
 
     // context
     { "bindProgramFragment", (void *)&SC_bindProgramFragment,
