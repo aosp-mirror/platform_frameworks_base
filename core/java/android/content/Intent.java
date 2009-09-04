@@ -923,6 +923,16 @@ public class Intent implements Parcelable {
      * get*ArrayListExtra can have either a {@link #EXTRA_TEXT} or {@link
      * #EXTRA_STREAM} field, containing the data to be sent.
      * <p>
+     * Multiple types are supported, and receivers should handle mixed types
+     * whenever possible. The right way for the receiver to check them is to
+     * use the content resolver on each URI. The intent sender should try to
+     * put the most concrete mime type in the intent type, but it can fall
+     * back to {@literal <type>/*} or {@literal *}/* as needed.
+     * <p>
+     * e.g. if you are sending image/jpg and image/jpg, the intent's type can
+     * be image/jpg, but if you are sending image/jpg and image/png, then the
+     * intent's type should be image/*.
+     * <p>
      * Optional standard extras, which may be interpreted by some recipients as
      * appropriate, are: {@link #EXTRA_EMAIL}, {@link #EXTRA_CC},
      * {@link #EXTRA_BCC}, {@link #EXTRA_SUBJECT}.
