@@ -116,6 +116,7 @@ bool Context::runRootScript()
     //glEnable(GL_LIGHT0);
     glViewport(0, 0, mEGL.mWidth, mEGL.mHeight);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glEnable(GL_POINT_SMOOTH);
 
     glClearColor(mRootScript->mEnviroment.mClearColor[0],
                  mRootScript->mEnviroment.mClearColor[1],
@@ -153,8 +154,16 @@ void Context::timerReset()
 void Context::timerInit()
 {
     mTimeLast = getTime();
+    mTimeFrame = mTimeLast;
+    mTimeLastFrame = mTimeLast;
     mTimerActive = RS_TIMER_INTERNAL;
     timerReset();
+}
+
+void Context::timerFrame()
+{
+    mTimeLastFrame = mTimeFrame;
+    mTimeFrame = getTime();
 }
 
 void Context::timerSet(Timers tm)
@@ -171,8 +180,10 @@ void Context::timerPrint()
     for (int ct = 0; ct < _RS_TIMER_TOTAL; ct++) {
         total += mTimers[ct];
     }
+    uint64_t frame = mTimeFrame - mTimeLastFrame;
 
-    LOGV("RS Time Data: Idle %2.1f (%lli),  Internal %2.1f (%lli),  Script %2.1f (%lli),  Clear & Swap %2.1f (%lli)",
+    LOGV("RS: Frame (%lli),   Script %2.1f (%lli),  Clear & Swap %2.1f (%lli),  Idle %2.1f (%lli),  Internal %2.1f (%lli)",
+         frame / 1000000,
          100.0 * mTimers[RS_TIMER_IDLE] / total, mTimers[RS_TIMER_IDLE] / 1000000,
          100.0 * mTimers[RS_TIMER_INTERNAL] / total, mTimers[RS_TIMER_INTERNAL] / 1000000,
          100.0 * mTimers[RS_TIMER_SCRIPT] / total, mTimers[RS_TIMER_SCRIPT] / 1000000,
@@ -232,6 +243,7 @@ void * Context::threadProc(void *vrsc)
 #endif
              eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
 #if RS_LOG_TIMES
+             rsc->timerFrame();
              rsc->timerSet(RS_TIMER_INTERNAL);
              rsc->timerPrint();
              rsc->timerReset();

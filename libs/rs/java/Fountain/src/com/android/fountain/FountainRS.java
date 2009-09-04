@@ -79,10 +79,10 @@ public class FountainRS {
         mIntAlloc.data(mSD);
 
         Element.Builder eb = new Element.Builder(mRS);
-        eb.addFloat(Element.DataKind.USER); //dx
-        eb.addFloat(Element.DataKind.USER); //dy
-        eb.addFloatXY();
-        eb.addUNorm8RGBA();
+        eb.addFloat(Element.DataKind.USER, "dx");
+        eb.addFloat(Element.DataKind.USER, "dy");
+        eb.addFloatXY("");
+        eb.addUNorm8RGBA("");
         Element primElement = eb.create();
 
 
@@ -102,6 +102,7 @@ public class FountainRS {
         sb.setScript(mRes, R.raw.fountain);
         sb.setRoot(true);
         sb.setType(mSDType, "Control", 0);
+        sb.setType(mSM.getVertexType(0), "point", 1);
         Script script = sb.create();
         script.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 

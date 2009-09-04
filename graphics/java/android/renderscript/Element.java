@@ -244,8 +244,8 @@ public class Element extends BaseObj {
         }
 
         public Builder addFloatXY(String prefix) {
-            add(DataType.FLOAT, DataKind.X, false, 32, prefix + "X");
-            add(DataType.FLOAT, DataKind.Y, false, 32, prefix + "Y");
+            add(DataType.FLOAT, DataKind.X, false, 32, prefix + "x");
+            add(DataType.FLOAT, DataKind.Y, false, 32, prefix + "y");
             return this;
         }
 
@@ -257,9 +257,9 @@ public class Element extends BaseObj {
         }
 
         public Builder addFloatXYZ(String prefix) {
-            add(DataType.FLOAT, DataKind.X, false, 32, prefix + "X");
-            add(DataType.FLOAT, DataKind.Y, false, 32, prefix + "Y");
-            add(DataType.FLOAT, DataKind.Z, false, 32, prefix + "Z");
+            add(DataType.FLOAT, DataKind.X, false, 32, prefix + "x");
+            add(DataType.FLOAT, DataKind.Y, false, 32, prefix + "y");
+            add(DataType.FLOAT, DataKind.Z, false, 32, prefix + "z");
             return this;
         }
 
@@ -270,8 +270,8 @@ public class Element extends BaseObj {
         }
 
         public Builder addFloatST(String prefix) {
-            add(DataType.FLOAT, DataKind.S, false, 32, prefix + "S");
-            add(DataType.FLOAT, DataKind.T, false, 32, prefix + "T");
+            add(DataType.FLOAT, DataKind.S, false, 32, prefix + "s");
+            add(DataType.FLOAT, DataKind.T, false, 32, prefix + "t");
             return this;
         }
 
@@ -283,9 +283,9 @@ public class Element extends BaseObj {
         }
 
         public Builder addFloatNorm(String prefix) {
-            add(DataType.FLOAT, DataKind.NX, false, 32, prefix + "NX");
-            add(DataType.FLOAT, DataKind.NY, false, 32, prefix + "NY");
-            add(DataType.FLOAT, DataKind.NZ, false, 32, prefix + "NZ");
+            add(DataType.FLOAT, DataKind.NX, false, 32, prefix + "nx");
+            add(DataType.FLOAT, DataKind.NY, false, 32, prefix + "ny");
+            add(DataType.FLOAT, DataKind.NZ, false, 32, prefix + "nz");
             return this;
         }
 
@@ -294,8 +294,8 @@ public class Element extends BaseObj {
             return this;
         }
 
-        public Builder addFloatPointSize(String name) {
-            add(DataType.FLOAT, DataKind.POINT_SIZE, false, 32, name);
+        public Builder addFloatPointSize(String prefix) {
+            add(DataType.FLOAT, DataKind.POINT_SIZE, false, 32, prefix + "pointSize");
             return this;
         }
 
@@ -307,9 +307,9 @@ public class Element extends BaseObj {
         }
 
         public Builder addFloatRGB(String prefix) {
-            add(DataType.FLOAT, DataKind.RED, false, 32, prefix + "R");
-            add(DataType.FLOAT, DataKind.GREEN, false, 32, prefix + "G");
-            add(DataType.FLOAT, DataKind.BLUE, false, 32, prefix + "B");
+            add(DataType.FLOAT, DataKind.RED, false, 32, prefix + "r");
+            add(DataType.FLOAT, DataKind.GREEN, false, 32, prefix + "g");
+            add(DataType.FLOAT, DataKind.BLUE, false, 32, prefix + "b");
             return this;
         }
 
@@ -322,10 +322,10 @@ public class Element extends BaseObj {
         }
 
         public Builder addFloatRGBA(String prefix) {
-            add(DataType.FLOAT, DataKind.RED, false, 32, prefix + "R");
-            add(DataType.FLOAT, DataKind.GREEN, false, 32, prefix + "G");
-            add(DataType.FLOAT, DataKind.BLUE, false, 32, prefix + "B");
-            add(DataType.FLOAT, DataKind.ALPHA, false, 32, prefix + "A");
+            add(DataType.FLOAT, DataKind.RED, false, 32, prefix + "r");
+            add(DataType.FLOAT, DataKind.GREEN, false, 32, prefix + "g");
+            add(DataType.FLOAT, DataKind.BLUE, false, 32, prefix + "b");
+            add(DataType.FLOAT, DataKind.ALPHA, false, 32, prefix + "a");
             return this;
         }
 
@@ -338,10 +338,10 @@ public class Element extends BaseObj {
         }
 
         public Builder addUNorm8RGBA(String prefix) {
-            add(DataType.UNSIGNED, DataKind.RED, true, 8, prefix + "R");
-            add(DataType.UNSIGNED, DataKind.GREEN, true, 8, prefix + "G");
-            add(DataType.UNSIGNED, DataKind.BLUE, true, 8, prefix + "B");
-            add(DataType.UNSIGNED, DataKind.ALPHA, true, 8, prefix + "A");
+            add(DataType.UNSIGNED, DataKind.RED, true, 8, prefix + "r");
+            add(DataType.UNSIGNED, DataKind.GREEN, true, 8, prefix + "g");
+            add(DataType.UNSIGNED, DataKind.BLUE, true, 8, prefix + "b");
+            add(DataType.UNSIGNED, DataKind.ALPHA, true, 8, prefix + "a");
             return this;
         }
 

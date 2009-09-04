@@ -5,10 +5,6 @@
 #pragma stateFragment(PFBackground)
 #pragma stateFragmentStore(PSBackground)
 
-#define POS_TRANSLATE 0
-#define POS_ROTATE 1
-#define POS_FOCUS 2
-
 #define STATE_TRIANGLE_OFFSET_COUNT 0
 #define STATE_LAST_FOCUS 1
 
@@ -18,12 +14,14 @@
 // bank1: (r) The position information
 // bank2: (rw) The temporary texture state
 
+int lastFocus;
+
 int main(int index)
 {
     float mat1[16];
 
-    float trans = Pos_translate;
-    float rot = Pos_rotate;
+    float trans = Pos->translate;
+    float rot = Pos->rotate;
 
     matrixLoadScale(mat1, 2.f, 2.f, 2.f);
     matrixTranslate(mat1, 0.f, 0.f, trans);
@@ -39,7 +37,7 @@ int main(int index)
     bindProgramFragment(NAMED_PFImages);
     bindProgramVertex(NAMED_PVImages);
 
-    float focusPos = Pos_focus;
+    float focusPos = Pos->focus;
     int focusID = 0;
     int lastFocusID = loadI32(2, STATE_LAST_FOCUS);
     int imgCount = 13;
@@ -63,9 +61,9 @@ int main(int index)
         }
     }
     */
-    storeI32(2, STATE_LAST_FOCUS, focusID);
+    lastFocus = focusID;
 
-    int triangleOffsetsCount = Pos_triangleOffsetCount;
+    int triangleOffsetsCount = Pos->triangleOffsetCount;
 
     int imgId = 0;
     for (imgId=1; imgId <= imgCount; imgId++) {
