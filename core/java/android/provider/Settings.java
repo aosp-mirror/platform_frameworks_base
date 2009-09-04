@@ -3485,6 +3485,93 @@ public final class Settings {
                 "google_calendar_sync_window_update_days";
 
         /**
+         * The number of promoted sources in GlobalSearch.
+         */
+        public static final String SEARCH_NUM_PROMOTED_SOURCES = "search_num_promoted_sources";
+        /**
+         * The maximum number of suggestions returned by GlobalSearch.
+         */
+        public static final String SEARCH_MAX_RESULTS_TO_DISPLAY = "search_max_results_to_display";
+        /**
+         * The number of suggestions GlobalSearch will ask each non-web search source for.
+         */
+        public static final String SEARCH_MAX_RESULTS_PER_SOURCE = "search_max_results_per_source";
+        /**
+         * The number of suggestions the GlobalSearch will ask the web search source for.
+         */
+        public static final String SEARCH_WEB_RESULTS_OVERRIDE_LIMIT =
+                "search_web_results_override_limit";
+        /**
+         * The number of milliseconds that GlobalSearch will wait for suggestions from
+         * promoted sources before continuing with all other sources.
+         */
+        public static final String SEARCH_PROMOTED_SOURCE_DEADLINE_MILLIS =
+                "search_promoted_source_deadline_millis";
+        /**
+         * The number of milliseconds before GlobalSearch aborts search suggesiton queries.
+         */
+        public static final String SEARCH_SOURCE_TIMEOUT_MILLIS = "search_source_timeout_millis";
+        /**
+         * The maximum number of milliseconds that GlobalSearch shows the previous results
+         * after receiving a new query.
+         */
+        public static final String SEARCH_PREFILL_MILLIS = "search_prefill_millis";
+        /**
+         * The maximum age of log data used for shortcuts in GlobalSearch.
+         */
+        public static final String SEARCH_MAX_STAT_AGE_MILLIS = "search_max_stat_age_millis";
+        /**
+         * The maximum age of log data used for source ranking in GlobalSearch.
+         */
+        public static final String SEARCH_MAX_SOURCE_EVENT_AGE_MILLIS =
+                "search_max_source_event_age_millis";
+        /**
+         * The minimum number of impressions needed to rank a source in GlobalSearch.
+         */
+        public static final String SEARCH_MIN_IMPRESSIONS_FOR_SOURCE_RANKING =
+                "search_min_impressions_for_source_ranking";
+        /**
+         * The minimum number of clicks needed to rank a source in GlobalSearch.
+         */
+        public static final String SEARCH_MIN_CLICKS_FOR_SOURCE_RANKING =
+                "search_min_clicks_for_source_ranking";
+        /**
+         * The maximum number of shortcuts shown by GlobalSearch.
+         */
+        public static final String SEARCH_MAX_SHORTCUTS_RETURNED = "search_max_shortcuts_returned";
+        /**
+         * The size of the core thread pool for suggestion queries in GlobalSearch.
+         */
+        public static final String SEARCH_QUERY_THREAD_CORE_POOL_SIZE =
+                "search_query_thread_core_pool_size";
+        /**
+         * The maximum size of the thread pool for suggestion queries in GlobalSearch.
+         */
+        public static final String SEARCH_QUERY_THREAD_MAX_POOL_SIZE =
+                "search_query_thread_max_pool_size";
+        /**
+         * The size of the core thread pool for shortcut refreshing in GlobalSearch.
+         */
+        public static final String SEARCH_SHORTCUT_REFRESH_CORE_POOL_SIZE =
+                "search_shortcut_refresh_core_pool_size";
+        /**
+         * The maximum size of the thread pool for shortcut refreshing in GlobalSearch.
+         */
+        public static final String SEARCH_SHORTCUT_REFRESH_MAX_POOL_SIZE =
+                "search_shortcut_refresh_max_pool_size";
+        /**
+         * The maximun time that excess threads in the GlobalSeach thread pools will
+         * wait before terminating.
+         */
+        public static final String SEARCH_THREAD_KEEPALIVE_SECONDS =
+                "search_thread_keepalive_seconds";
+        /**
+         * The maximum number of concurrent suggestion queries to each source.
+         */
+        public static final String SEARCH_PER_SOURCE_CONCURRENT_QUERY_LIMIT =
+                "search_per_source_concurrent_query_limit";
+
+        /**
          * @deprecated
          * @hide
          */
