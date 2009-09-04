@@ -370,14 +370,14 @@ static jint android_location_GpsLocationProvider_read_sv_status(JNIEnv* env, job
 
 static jint android_location_GpsLocationProvider_read_nmea(JNIEnv* env, jobject obj, jint index, jbyteArray nmeaArray, jint buffer_size)
 {
-    // this should only be called from within a call to reportStatus, so we don't need to lock here
+    // this should only be called from within a call to reportNmea, so we don't need to lock here
 
     jbyte* nmea = env->GetByteArrayElements(nmeaArray, 0);
 
-    int length = strlen(sNmeaBuffer[index].nmea);
+    int length = strlen(sNmeaBufferCopy[index].nmea);
     if (length > buffer_size)
         length = buffer_size;
-    memcpy(nmea, sNmeaBuffer[index].nmea, length);
+    memcpy(nmea, sNmeaBufferCopy[index].nmea, length);
 
     env->ReleaseByteArrayElements(nmeaArray, nmea, 0);
     return length;
