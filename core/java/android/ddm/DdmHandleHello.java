@@ -152,8 +152,8 @@ public class DdmHandleHello extends ChunkHandler {
             "hprof-heap-dump", "method-trace-profiling"
         };
 
-        if (Config.LOGD)
-            Log.d("ddm-heap", "Got feature list request");
+        if (Config.LOGV)
+            Log.v("ddm-heap", "Got feature list request");
 
         int size = 4 + 4 * features.length;
         for (int i = features.length-1; i >= 0; i--)
