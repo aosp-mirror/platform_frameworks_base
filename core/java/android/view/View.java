@@ -5343,12 +5343,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     size = cache.scrollBarSize;
                 }
 
+                final int scrollX = mScrollX;
+                final int scrollY = mScrollY;
+                final int inside = (viewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
+
                 if (drawHorizontalScrollBar) {
-                    onDrawHorizontalScrollBar(canvas, scrollBar, width, height, size);
+                    scrollBar.setParameters(
+                                            computeHorizontalScrollRange(),
+                                            computeHorizontalScrollOffset(),
+                                            computeHorizontalScrollExtent(), false);
+                    final int top = scrollY + height - size - (mUserPaddingBottom & inside);
+                    final int verticalScrollBarGap = drawVerticalScrollBar ?
+                                                getVerticalScrollbarWidth() : 0;
+                    onDrawHorizontalScrollBar(canvas, scrollBar,
+                        scrollX + (mPaddingLeft & inside),
+                        top,
+                        scrollX + width - (mUserPaddingRight & inside) - verticalScrollBarGap,
+                        top + size);
                 }
 
                 if (drawVerticalScrollBar) {
-                    onDrawVerticalScrollBar(canvas, scrollBar, width, height, size);
+                    scrollBar.setParameters(computeVerticalScrollRange(),
+                                            computeVerticalScrollOffset(),
+                                            computeVerticalScrollExtent(), true);
+                    // TODO: Deal with RTL languages to position scrollbar on left
+                    final int left = scrollX + width - size - (mUserPaddingRight & inside);
+                    onDrawVerticalScrollBar(canvas, scrollBar,
+                             left,
+                             scrollY + (mPaddingTop & inside),
+                             left + size,
+                             scrollY + height - (mUserPaddingBottom & inside));
                 }
             }
         }
@@ -5368,96 +5392,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * <p>Draw the horizontal scrollbar if
      * {@link #isHorizontalScrollBarEnabled()} returns true.</p>
      *
-     * <p>The length of the scrollbar and its thumb is computed according to the
-     * values returned by {@link #computeHorizontalScrollRange()},
-     * {@link #computeHorizontalScrollExtent()} and
-     * {@link #computeHorizontalScrollOffset()}. Refer to
-     * {@link android.widget.ScrollBarDrawable} for more information about how
-     * these values relate to each other.</p>
-     *
      * @param canvas the canvas on which to draw the scrollbar
      * @param scrollBar the scrollbar's drawable
-     * @param width the width of the drawing surface
-     * @param height the height of the drawing surface
-     * @param size the size of the scrollbar
      *
      * @see #isHorizontalScrollBarEnabled()
      * @see #computeHorizontalScrollRange()
      * @see #computeHorizontalScrollExtent()
      * @see #computeHorizontalScrollOffset()
      * @see android.widget.ScrollBarDrawable
-     */
-    private void onDrawHorizontalScrollBar(Canvas canvas, ScrollBarDrawable scrollBar, int width,
-            int height, int size) {
-
-        final int viewFlags = mViewFlags;
-        final int scrollX = mScrollX;
-        final int scrollY = mScrollY;
-        final int inside = (viewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
-        final int top = scrollY + height - size - (mUserPaddingBottom & inside);
-
-        final int verticalScrollBarGap =
-            (viewFlags & SCROLLBARS_VERTICAL) == SCROLLBARS_VERTICAL ?
-                    getVerticalScrollbarWidth() : 0;
-
-        scrollBar.setBounds(scrollX + (mPaddingLeft & inside), top,
-                scrollX + width - (mUserPaddingRight & inside) - verticalScrollBarGap, top + size);
-        scrollBar.setParameters(
-                computeHorizontalScrollRange(),
-                computeHorizontalScrollOffset(),
-                computeHorizontalScrollExtent(), false);
-        scrollBar.draw(canvas);
-    }
-
-    /**
      *  @hide
      */
-    protected void onDrawVScrollBar(Canvas canvas, ScrollBarDrawable scrollBar,
-                                    int l, int t, int r, int b) {
+    protected void onDrawHorizontalScrollBar(Canvas canvas,
+                                             Drawable scrollBar,
+                                             int l, int t, int r, int b) {
         scrollBar.setBounds(l, t, r, b);
-        scrollBar.setParameters(computeVerticalScrollRange(),
-                                computeVerticalScrollOffset(),
-                                computeVerticalScrollExtent(), true);
         scrollBar.draw(canvas);
     }
-    
+
     /**
      * <p>Draw the vertical scrollbar if {@link #isVerticalScrollBarEnabled()}
      * returns true.</p>
      *
-     * <p>The length of the scrollbar and its thumb is computed according to the
-     * values returned by {@link #computeVerticalScrollRange()},
-     * {@link #computeVerticalScrollExtent()} and
-     * {@link #computeVerticalScrollOffset()}. Refer to
-     * {@link android.widget.ScrollBarDrawable} for more information about how
-     * these values relate to each other.</p>
-     *
      * @param canvas the canvas on which to draw the scrollbar
      * @param scrollBar the scrollbar's drawable
-     * @param width the width of the drawing surface
-     * @param height the height of the drawing surface
-     * @param size the size of the scrollbar
      *
      * @see #isVerticalScrollBarEnabled()
      * @see #computeVerticalScrollRange()
      * @see #computeVerticalScrollExtent()
      * @see #computeVerticalScrollOffset()
      * @see android.widget.ScrollBarDrawable
+     * @hide
      */
-    private void onDrawVerticalScrollBar(Canvas canvas, ScrollBarDrawable scrollBar, int width,
-            int height, int size) {
-
-        final int scrollX = mScrollX;
-        final int scrollY = mScrollY;
-        final int inside = (mViewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
-        // TODO: Deal with RTL languages to position scrollbar on left
-        final int left = scrollX + width - size - (mUserPaddingRight & inside);
-
-        onDrawVScrollBar(canvas, scrollBar,
-                         left,
-                         scrollY + (mPaddingTop & inside),
-                         left + size,
-                         scrollY + height - (mUserPaddingBottom & inside));
+    protected void onDrawVerticalScrollBar(Canvas canvas,
+                                           Drawable scrollBar,
+                                           int l, int t, int r, int b) {
+        scrollBar.setBounds(l, t, r, b);
+        scrollBar.draw(canvas);
     }
 
     /**
