@@ -1776,13 +1776,15 @@ public class WebView extends AbsoluteLayout
      * the WebView normally without translating to account for the title bar.
      * @hide
      */
-    public void addTitleBar(View v) {
-        if (null == v) {
+    public void setEmbeddedTitleBar(View v) {
+        if (mTitleBar == v) return;
+        if (mTitleBar != null) {
             removeView(mTitleBar);
-        } else {
+        }
+        if (null != v) {
             addView(v, new AbsoluteLayout.LayoutParams(
                     ViewGroup.LayoutParams.FILL_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT, mScrollX, 0));
+                    ViewGroup.LayoutParams.WRAP_CONTENT, 0, 0));
         }
         mTitleBar = v;
     }
