@@ -54,14 +54,14 @@ import java.util.TimeZone;
 /**
  * Singleton that tracks the sync data and overall sync
  * history on the device.
- * 
+ *
  * @hide
  */
 public class SyncStorageEngine extends Handler {
     private static final String TAG = "SyncManager";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_FILE = false;
-    
+
     // @VisibleForTesting
     static final long MILLIS_IN_4WEEKS = 1000L * 60 * 60 * 24 * 7 * 4;
 
@@ -104,24 +104,24 @@ public class SyncStorageEngine extends Handler {
     public static final String MESG_CANCELED = "canceled";
 
     public static final int MAX_HISTORY = 15;
-    
+
     private static final int MSG_WRITE_STATUS = 1;
     private static final long WRITE_STATUS_DELAY = 1000*60*10; // 10 minutes
-    
+
     private static final int MSG_WRITE_STATISTICS = 2;
     private static final long WRITE_STATISTICS_DELAY = 1000*60*30; // 1/2 hour
 
     private static final boolean SYNC_ENABLED_DEFAULT = false;
-    
+
     public static class PendingOperation {
         final Account account;
         final int syncSource;
         final String authority;
         final Bundle extras;        // note: read-only.
-        
+
         int authorityId;
         byte[] flatExtras;
-        
+
         PendingOperation(Account account, int source,
                 String authority, Bundle extras) {
             this.account = account;
@@ -139,17 +139,17 @@ public class SyncStorageEngine extends Handler {
             this.authorityId = other.authorityId;
         }
     }
-    
+
     static class AccountInfo {
         final Account account;
         final HashMap<String, AuthorityInfo> authorities =
                 new HashMap<String, AuthorityInfo>();
-        
+
         AccountInfo(Account account) {
             this.account = account;
         }
     }
-    
+
     public static class AuthorityInfo {
         final Account account;
         final String authority;
@@ -165,7 +165,7 @@ public class SyncStorageEngine extends Handler {
             syncable = -1; // default to "unknown"
         }
     }
-    
+
     public static class SyncHistoryItem {
         int authorityId;
         int historyId;
@@ -177,69 +177,69 @@ public class SyncStorageEngine extends Handler {
         long downstreamActivity;
         String mesg;
     }
-    
+
     public static class DayStats {
         public final int day;
         public int successCount;
         public long successTime;
         public int failureCount;
         public long failureTime;
-        
+
         public DayStats(int day) {
             this.day = day;
         }
     }
-    
+
     // Primary list of all syncable authorities.  Also our global lock.
     private final SparseArray<AuthorityInfo> mAuthorities =
             new SparseArray<AuthorityInfo>();
-    
+
     private final HashMap<Account, AccountInfo> mAccounts =
         new HashMap<Account, AccountInfo>();
 
     private final ArrayList<PendingOperation> mPendingOperations =
             new ArrayList<PendingOperation>();
-    
+
     private ActiveSyncInfo mActiveSync;
-    
+
     private final SparseArray<SyncStatusInfo> mSyncStatus =
             new SparseArray<SyncStatusInfo>();
-    
+
     private final ArrayList<SyncHistoryItem> mSyncHistory =
             new ArrayList<SyncHistoryItem>();
-    
+
     private final RemoteCallbackList<ISyncStatusObserver> mChangeListeners
             = new RemoteCallbackList<ISyncStatusObserver>();
-    
+
     // We keep 4 weeks of stats.
     private final DayStats[] mDayStats = new DayStats[7*4];
     private final Calendar mCal;
     private int mYear;
     private int mYearInDays;
-    
+
     private final Context mContext;
     private static volatile SyncStorageEngine sSyncStorageEngine = null;
-    
+
     /**
      * This file contains the core engine state: all accounts and the
      * settings for them.  It must never be lost, and should be changed
      * infrequently, so it is stored as an XML file.
      */
     private final AtomicFile mAccountInfoFile;
-    
+
     /**
      * This file contains the current sync status.  We would like to retain
      * it across boots, but its loss is not the end of the world, so we store
      * this information as binary data.
      */
     private final AtomicFile mStatusFile;
-    
+
     /**
      * This file contains sync statistics.  This is purely debugging information
      * so is written infrequently and can be thrown away at any time.
      */
     private final AtomicFile mStatisticsFile;
-    
+
     /**
      * This file contains the pending sync operations.  It is a binary file,
      * which must be updated every time an operation is added or removed,
@@ -248,16 +248,16 @@ public class SyncStorageEngine extends Handler {
     private final AtomicFile mPendingFile;
     private static final int PENDING_FINISH_TO_WRITE = 4;
     private int mNumPendingFinished = 0;
-    
+
     private int mNextHistoryId = 0;
     private boolean mMasterSyncAutomatically = true;
-    
+
     private SyncStorageEngine(Context context) {
         mContext = context;
         sSyncStorageEngine = this;
-        
+
         mCal = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
-        
+
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
         File syncDir = new File(systemDir, "sync");
@@ -265,7 +265,7 @@ public class SyncStorageEngine extends Handler {
         mStatusFile = new AtomicFile(new File(syncDir, "status.bin"));
         mPendingFile = new AtomicFile(new File(syncDir, "pending.bin"));
         mStatisticsFile = new AtomicFile(new File(syncDir, "stats.bin"));
-        
+
         readAccountInfoLocked();
         readStatusLocked();
         readPendingOperationsLocked();
@@ -302,19 +302,19 @@ public class SyncStorageEngine extends Handler {
             }
         }
     }
-    
+
     public void addStatusChangeListener(int mask, ISyncStatusObserver callback) {
         synchronized (mAuthorities) {
             mChangeListeners.register(callback, mask);
         }
     }
-    
+
     public void removeStatusChangeListener(ISyncStatusObserver callback) {
         synchronized (mAuthorities) {
             mChangeListeners.unregister(callback);
         }
     }
-    
+
     private void reportChange(int which) {
         ArrayList<ISyncStatusObserver> reports = null;
         synchronized (mAuthorities) {
@@ -332,9 +332,9 @@ public class SyncStorageEngine extends Handler {
             }
             mChangeListeners.finishBroadcast();
         }
-        
+
         if (DEBUG) Log.v(TAG, "reportChange " + which + " to: " + reports);
-        
+
         if (reports != null) {
             int i = reports.size();
             while (i > 0) {
@@ -369,7 +369,7 @@ public class SyncStorageEngine extends Handler {
             int i = mAuthorities.size();
             while (i > 0) {
                 i--;
-                AuthorityInfo authority = mAuthorities.get(i);
+                AuthorityInfo authority = mAuthorities.valueAt(i);
                 if (authority.authority.equals(providerName)
                         && authority.enabled) {
                     return true;
@@ -408,7 +408,7 @@ public class SyncStorageEngine extends Handler {
             int i = mAuthorities.size();
             while (i > 0) {
                 i--;
-                AuthorityInfo authority = mAuthorities.get(i);
+                AuthorityInfo authority = mAuthorities.valueAt(i);
                 if (authority.authority.equals(providerName)) {
                     return authority.syncable;
                 }
@@ -457,19 +457,19 @@ public class SyncStorageEngine extends Handler {
             return mMasterSyncAutomatically;
         }
     }
-    
+
     public AuthorityInfo getAuthority(Account account, String authority) {
         synchronized (mAuthorities) {
             return getAuthorityLocked(account, authority, null);
         }
     }
-    
+
     public AuthorityInfo getAuthority(int authorityId) {
         synchronized (mAuthorities) {
             return mAuthorities.get(authorityId);
         }
     }
-    
+
     /**
      * Returns true if there is currently a sync operation for the given
      * account or authority in the pending list, or actively being processed.
@@ -486,7 +486,7 @@ public class SyncStorageEngine extends Handler {
                     return true;
                 }
             }
-            
+
             if (mActiveSync != null) {
                 AuthorityInfo ainfo = getAuthority(mActiveSync.authorityId);
                 if (ainfo != null && ainfo.account.equals(account)
@@ -495,17 +495,17 @@ public class SyncStorageEngine extends Handler {
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     public PendingOperation insertIntoPending(PendingOperation op) {
         synchronized (mAuthorities) {
             if (DEBUG) Log.v(TAG, "insertIntoPending: account=" + op.account
                     + " auth=" + op.authority
                     + " src=" + op.syncSource
                     + " extras=" + op.extras);
-            
+
             AuthorityInfo authority = getOrCreateAuthorityLocked(op.account,
                     op.authority,
                     -1 /* desired identifier */,
@@ -513,16 +513,16 @@ public class SyncStorageEngine extends Handler {
             if (authority == null) {
                 return null;
             }
-            
+
             op = new PendingOperation(op);
             op.authorityId = authority.ident;
             mPendingOperations.add(op);
             appendPendingOperationLocked(op);
-            
+
             SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
             status.pending = true;
         }
-        
+
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING);
         return op;
     }
@@ -542,7 +542,7 @@ public class SyncStorageEngine extends Handler {
                 } else {
                     mNumPendingFinished++;
                 }
-                
+
                 AuthorityInfo authority = getAuthorityLocked(op.account, op.authority,
                         "deleteFromPending");
                 if (authority != null) {
@@ -557,18 +557,18 @@ public class SyncStorageEngine extends Handler {
                             break;
                         }
                     }
-                    
+
                     if (!morePending) {
                         if (DEBUG) Log.v(TAG, "no more pending!");
                         SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
                         status.pending = false;
                     }
                 }
-                
+
                 res = true;
             }
         }
-        
+
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING);
         return res;
     }
@@ -581,7 +581,7 @@ public class SyncStorageEngine extends Handler {
             mPendingOperations.clear();
             final int N = mSyncStatus.size();
             for (int i=0; i<N; i++) {
-                mSyncStatus.get(i).pending = false;
+                mSyncStatus.valueAt(i).pending = false;
             }
             writePendingOperationsLocked();
         }
@@ -599,7 +599,7 @@ public class SyncStorageEngine extends Handler {
             return new ArrayList<PendingOperation>(mPendingOperations);
         }
     }
-    
+
     /**
      * Return the number of currently pending operations.
      */
@@ -608,7 +608,7 @@ public class SyncStorageEngine extends Handler {
             return mPendingOperations.size();
         }
     }
-    
+
     /**
      * Called when the set of account has changed, given the new array of
      * active accounts.
@@ -629,7 +629,7 @@ public class SyncStorageEngine extends Handler {
                     accIt.remove();
                 }
             }
-            
+
             // Clean out all data structures.
             int i = removing.size();
             if (i > 0) {
@@ -691,7 +691,7 @@ public class SyncStorageEngine extends Handler {
                 mActiveSync = null;
             }
         }
-        
+
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE);
     }
 
@@ -701,7 +701,7 @@ public class SyncStorageEngine extends Handler {
     public void reportActiveChange() {
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE);
     }
-    
+
     /**
      * Note that sync has started for the given account and authority.
      */
@@ -730,7 +730,7 @@ public class SyncStorageEngine extends Handler {
             id = item.historyId;
             if (DEBUG) Log.v(TAG, "returning historyId " + id);
         }
-        
+
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
         return id;
     }
@@ -749,20 +749,20 @@ public class SyncStorageEngine extends Handler {
                 }
                 item = null;
             }
-            
+
             if (item == null) {
                 Log.w(TAG, "stopSyncEvent: no history for id " + historyId);
                 return;
             }
-            
+
             item.elapsedTime = elapsedTime;
             item.event = EVENT_STOP;
             item.mesg = resultMessage;
             item.downstreamActivity = downstreamActivity;
             item.upstreamActivity = upstreamActivity;
-            
+
             SyncStatusInfo status = getOrCreateSyncStatusLocked(item.authorityId);
-            
+
             status.numSyncs++;
             status.totalElapsedTime += elapsedTime;
             switch (item.source) {
@@ -779,7 +779,7 @@ public class SyncStorageEngine extends Handler {
                     status.numSourceServer++;
                     break;
             }
-            
+
             boolean writeStatisticsNow = false;
             int day = getCurrentDayLocked();
             if (mDayStats[0] == null) {
@@ -791,7 +791,7 @@ public class SyncStorageEngine extends Handler {
             } else if (mDayStats[0] == null) {
             }
             final DayStats ds = mDayStats[0];
-            
+
             final long lastSyncTime = (item.eventTime + elapsedTime);
             boolean writeStatusNow = false;
             if (MESG_SUCCESS.equals(resultMessage)) {
@@ -820,7 +820,7 @@ public class SyncStorageEngine extends Handler {
                 ds.failureCount++;
                 ds.failureTime += elapsedTime;
             }
-            
+
             if (writeStatusNow) {
                 writeStatusLocked();
             } else if (!hasMessages(MSG_WRITE_STATUS)) {
@@ -832,9 +832,9 @@ public class SyncStorageEngine extends Handler {
             } else if (!hasMessages(MSG_WRITE_STATISTICS)) {
                 sendMessageDelayed(obtainMessage(MSG_WRITE_STATISTICS),
                         WRITE_STATISTICS_DELAY);
-            }            
+            }
         }
-        
+
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
     }
 
@@ -848,7 +848,7 @@ public class SyncStorageEngine extends Handler {
             return mActiveSync;
         }
     }
-    
+
     /**
      * Return an array of the current sync status for all authorities.  Note
      * that the objects inside the array are the real, live status objects,
@@ -864,7 +864,7 @@ public class SyncStorageEngine extends Handler {
             return ops;
         }
     }
-    
+
     /**
      * Returns the status that matches the authority. If there are multiples accounts for
      * the authority, the one with the latest "lastSuccessTime" status is returned.
@@ -876,7 +876,7 @@ public class SyncStorageEngine extends Handler {
             SyncStatusInfo best = null;
             final int N = mSyncStatus.size();
             for (int i=0; i<N; i++) {
-                SyncStatusInfo cur = mSyncStatus.get(i);
+                SyncStatusInfo cur = mSyncStatus.valueAt(i);
                 AuthorityInfo ainfo = mAuthorities.get(cur.authorityId);
                 if (ainfo != null && ainfo.authority.equals(authority)) {
                     if (best == null) {
@@ -889,7 +889,7 @@ public class SyncStorageEngine extends Handler {
             return best;
         }
     }
-    
+
     /**
      * Return true if the pending status is true of any matching authorities.
      */
@@ -897,7 +897,7 @@ public class SyncStorageEngine extends Handler {
         synchronized (mAuthorities) {
             final int N = mSyncStatus.size();
             for (int i=0; i<N; i++) {
-                SyncStatusInfo cur = mSyncStatus.get(i);
+                SyncStatusInfo cur = mSyncStatus.valueAt(i);
                 AuthorityInfo ainfo = mAuthorities.get(cur.authorityId);
                 if (ainfo == null) {
                     continue;
@@ -928,7 +928,7 @@ public class SyncStorageEngine extends Handler {
             return items;
         }
     }
-    
+
     /**
      * Return an array of the current per-day statistics.  Note
      * that the objects inside the array are the real, live status objects,
@@ -941,7 +941,7 @@ public class SyncStorageEngine extends Handler {
             return ds;
         }
     }
-    
+
     /**
      * If sync is failing for any of the provider/accounts then determine the time at which it
      * started failing and return the earliest time over all the provider/accounts. If none are
@@ -952,7 +952,7 @@ public class SyncStorageEngine extends Handler {
             if (!mMasterSyncAutomatically) {
                 return 0;
             }
-            
+
             long oldest = 0;
             int i = mSyncStatus.size();
             while (i > 0) {
@@ -965,11 +965,11 @@ public class SyncStorageEngine extends Handler {
                     }
                 }
             }
-            
+
             return oldest;
         }
     }
-    
+
     private int getCurrentDayLocked() {
         mCal.setTimeInMillis(System.currentTimeMillis());
         final int dayOfYear = mCal.get(Calendar.DAY_OF_YEAR);
@@ -981,10 +981,10 @@ public class SyncStorageEngine extends Handler {
         }
         return dayOfYear + mYearInDays;
     }
-    
+
     /**
      * Retrieve an authority, returning null if one does not exist.
-     * 
+     *
      * @param accountName The name of the account for the authority.
      * @param authorityName The name of the authority itself.
      * @param tag If non-null, this will be used in a log message if the
@@ -1010,10 +1010,10 @@ public class SyncStorageEngine extends Handler {
             }
             return null;
         }
-        
+
         return authority;
     }
-    
+
     private AuthorityInfo getOrCreateAuthorityLocked(Account accountName,
             String authorityName, int ident, boolean doWrite) {
         AccountInfo account = mAccounts.get(accountName);
@@ -1043,10 +1043,10 @@ public class SyncStorageEngine extends Handler {
                 writeAccountInfoLocked();
             }
         }
-        
+
         return authority;
     }
-    
+
     private SyncStatusInfo getOrCreateSyncStatusLocked(int authorityId) {
         SyncStatusInfo status = mSyncStatus.get(authorityId);
         if (status == null) {
@@ -1055,22 +1055,22 @@ public class SyncStorageEngine extends Handler {
         }
         return status;
     }
-    
+
     public void writeAllState() {
         synchronized (mAuthorities) {
             // Account info is always written so no need to do it here.
-            
+
             if (mNumPendingFinished > 0) {
                 // Only write these if they are out of date.
                 writePendingOperationsLocked();
             }
-            
+
             // Just always write these...  they are likely out of date.
             writeStatusLocked();
             writeStatisticsLocked();
         }
     }
-    
+
     /**
      * Read all account information back in to the initial engine state.
      */
@@ -1165,29 +1165,29 @@ public class SyncStorageEngine extends Handler {
             }
         }
     }
-    
+
     /**
      * Write all account information to the account file.
      */
     private void writeAccountInfoLocked() {
         if (DEBUG_FILE) Log.v(TAG, "Writing new " + mAccountInfoFile.getBaseFile());
         FileOutputStream fos = null;
-        
+
         try {
             fos = mAccountInfoFile.startWrite();
             XmlSerializer out = new FastXmlSerializer();
             out.setOutput(fos, "utf-8");
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-            
+
             out.startTag(null, "accounts");
             if (!mMasterSyncAutomatically) {
                 out.attribute(null, "listen-for-tickles", "false");
             }
-            
+
             final int N = mAuthorities.size();
             for (int i=0; i<N; i++) {
-                AuthorityInfo authority = mAuthorities.get(i);
+                AuthorityInfo authority = mAuthorities.valueAt(i);
                 out.startTag(null, "authority");
                 out.attribute(null, "id", Integer.toString(authority.ident));
                 out.attribute(null, "account", authority.account.name);
@@ -1203,11 +1203,11 @@ public class SyncStorageEngine extends Handler {
                 }
                 out.endTag(null, "authority");
             }
-            
+
             out.endTag(null, "accounts");
-            
+
             out.endDocument();
-            
+
             mAccountInfoFile.finishWrite(fos);
         } catch (java.io.IOException e1) {
             Log.w(TAG, "Error writing accounts", e1);
@@ -1216,15 +1216,15 @@ public class SyncStorageEngine extends Handler {
             }
         }
     }
-    
+
     static int getIntColumn(Cursor c, String name) {
         return c.getInt(c.getColumnIndex(name));
     }
-    
+
     static long getLongColumn(Cursor c, String name) {
         return c.getLong(c.getColumnIndex(name));
     }
-    
+
     /**
      * Load sync engine state from the old syncmanager database, and then
      * erase it.  Note that we don't deal with pending operations, active
@@ -1243,10 +1243,10 @@ public class SyncStorageEngine extends Handler {
                     SQLiteDatabase.OPEN_READONLY);
         } catch (SQLiteException e) {
         }
-        
+
         if (db != null) {
             final boolean hasType = db.getVersion() >= 11;
-            
+
             // Copy in all of the status information, as well as accounts.
             if (DEBUG_FILE) Log.v(TAG, "Reading legacy sync accounts db");
             SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
@@ -1290,7 +1290,7 @@ public class SyncStorageEngine extends Handler {
                     SyncStatusInfo st = null;
                     while (i > 0) {
                         i--;
-                        st = mSyncStatus.get(i);
+                        st = mSyncStatus.valueAt(i);
                         if (st.authorityId == authority.ident) {
                             found = true;
                             break;
@@ -1314,9 +1314,9 @@ public class SyncStorageEngine extends Handler {
                     st.pending = getIntColumn(c, "pending") != 0;
                 }
             }
-            
+
             c.close();
-            
+
             // Retrieve the settings.
             qb = new SQLiteQueryBuilder();
             qb.setTables("settings");
@@ -1333,7 +1333,7 @@ public class SyncStorageEngine extends Handler {
                     int i = mAuthorities.size();
                     while (i > 0) {
                         i--;
-                        AuthorityInfo authority = mAuthorities.get(i);
+                        AuthorityInfo authority = mAuthorities.valueAt(i);
                         if (authority.authority.equals(provider)) {
                             authority.enabled = value == null || Boolean.parseBoolean(value);
                             authority.syncable = 1;
@@ -1341,20 +1341,20 @@ public class SyncStorageEngine extends Handler {
                     }
                 }
             }
-            
+
             c.close();
-            
+
             db.close();
-            
+
             writeAccountInfoLocked();
             writeStatusLocked();
             (new File(path)).delete();
         }
     }
-    
+
     public static final int STATUS_FILE_END = 0;
     public static final int STATUS_FILE_ITEM = 100;
-    
+
     /**
      * Read all sync status back in to the initial engine state.
      */
@@ -1385,17 +1385,17 @@ public class SyncStorageEngine extends Handler {
             Log.i(TAG, "No initial status");
         }
     }
-    
+
     /**
      * Write all sync status to the sync status file.
      */
     private void writeStatusLocked() {
         if (DEBUG_FILE) Log.v(TAG, "Writing new " + mStatusFile.getBaseFile());
-        
+
         // The file is being written, so we don't need to have a scheduled
         // write until the next change.
         removeMessages(MSG_WRITE_STATUS);
-        
+
         FileOutputStream fos = null;
         try {
             fos = mStatusFile.startWrite();
@@ -1409,7 +1409,7 @@ public class SyncStorageEngine extends Handler {
             out.writeInt(STATUS_FILE_END);
             fos.write(out.marshall());
             out.recycle();
-            
+
             mStatusFile.finishWrite(fos);
         } catch (java.io.IOException e1) {
             Log.w(TAG, "Error writing status", e1);
@@ -1418,9 +1418,9 @@ public class SyncStorageEngine extends Handler {
             }
         }
     }
-    
+
     public static final int PENDING_OPERATION_VERSION = 1;
-    
+
     /**
      * Read all pending operations back in to the initial engine state.
      */
@@ -1464,7 +1464,7 @@ public class SyncStorageEngine extends Handler {
             Log.i(TAG, "No initial pending operations");
         }
     }
-    
+
     private void writePendingOperationLocked(PendingOperation op, Parcel out) {
         out.writeInt(PENDING_OPERATION_VERSION);
         out.writeInt(op.authorityId);
@@ -1474,7 +1474,7 @@ public class SyncStorageEngine extends Handler {
         }
         out.writeByteArray(op.flatExtras);
     }
-    
+
     /**
      * Write all currently pending ops to the pending ops file.
      */
@@ -1487,10 +1487,10 @@ public class SyncStorageEngine extends Handler {
                 mPendingFile.truncate();
                 return;
             }
-            
+
             if (DEBUG_FILE) Log.v(TAG, "Writing new " + mPendingFile.getBaseFile());
             fos = mPendingFile.startWrite();
-        
+
             Parcel out = Parcel.obtain();
             for (int i=0; i<N; i++) {
                 PendingOperation op = mPendingOperations.get(i);
@@ -1498,7 +1498,7 @@ public class SyncStorageEngine extends Handler {
             }
             fos.write(out.marshall());
             out.recycle();
-            
+
             mPendingFile.finishWrite(fos);
         } catch (java.io.IOException e1) {
             Log.w(TAG, "Error writing pending operations", e1);
@@ -1507,7 +1507,7 @@ public class SyncStorageEngine extends Handler {
             }
         }
     }
-    
+
     /**
      * Append the given operation to the pending ops file; if unable to,
      * write all pending ops.
@@ -1522,7 +1522,7 @@ public class SyncStorageEngine extends Handler {
             writePendingOperationsLocked();
             return;
         }
-        
+
         try {
             Parcel out = Parcel.obtain();
             writePendingOperationLocked(op, out);
@@ -1537,7 +1537,7 @@ public class SyncStorageEngine extends Handler {
             }
         }
     }
-    
+
     static private byte[] flattenBundle(Bundle bundle) {
         byte[] flatData = null;
         Parcel parcel = Parcel.obtain();
@@ -1549,7 +1549,7 @@ public class SyncStorageEngine extends Handler {
         }
         return flatData;
     }
-    
+
     static private Bundle unflattenBundle(byte[] flatData) {
         Bundle bundle;
         Parcel parcel = Parcel.obtain();
@@ -1566,11 +1566,11 @@ public class SyncStorageEngine extends Handler {
         }
         return bundle;
     }
-    
+
     public static final int STATISTICS_FILE_END = 0;
     public static final int STATISTICS_FILE_ITEM_OLD = 100;
     public static final int STATISTICS_FILE_ITEM = 101;
-    
+
     /**
      * Read all sync statistics back in to the initial engine state.
      */
@@ -1608,17 +1608,17 @@ public class SyncStorageEngine extends Handler {
             Log.i(TAG, "No initial statistics");
         }
     }
-    
+
     /**
      * Write all sync statistics to the sync status file.
      */
     private void writeStatisticsLocked() {
         if (DEBUG_FILE) Log.v(TAG, "Writing new " + mStatisticsFile.getBaseFile());
-        
+
         // The file is being written, so we don't need to have a scheduled
         // write until the next change.
         removeMessages(MSG_WRITE_STATISTICS);
-        
+
         FileOutputStream fos = null;
         try {
             fos = mStatisticsFile.startWrite();
@@ -1639,7 +1639,7 @@ public class SyncStorageEngine extends Handler {
             out.writeInt(STATISTICS_FILE_END);
             fos.write(out.marshall());
             out.recycle();
-            
+
             mStatisticsFile.finishWrite(fos);
         } catch (java.io.IOException e1) {
             Log.w(TAG, "Error writing stats", e1);
