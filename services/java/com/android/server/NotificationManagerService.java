@@ -957,8 +957,15 @@ class NotificationManagerService extends INotificationManager.Stub
     {
         // Battery low always shows, other states only show if charging.
         if (mBatteryLow) {
-            mHardware.setLightFlashing_UNCHECKED(HardwareService.LIGHT_ID_BATTERY, BATTERY_LOW_ARGB,
-                    HardwareService.LIGHT_FLASH_TIMED, BATTERY_BLINK_ON, BATTERY_BLINK_OFF);
+            if (mBatteryCharging) {
+                mHardware.setLightColor_UNCHECKED(HardwareService.LIGHT_ID_BATTERY,
+                    BATTERY_LOW_ARGB);
+            } else {
+                // Flash when battery is low and not charging
+                mHardware.setLightFlashing_UNCHECKED(HardwareService.LIGHT_ID_BATTERY,
+                    BATTERY_LOW_ARGB, HardwareService.LIGHT_FLASH_TIMED,
+                    BATTERY_BLINK_ON, BATTERY_BLINK_OFF);
+            }
         } else if (mBatteryCharging) {
             if (mBatteryFull) {
                 mHardware.setLightColor_UNCHECKED(HardwareService.LIGHT_ID_BATTERY,
