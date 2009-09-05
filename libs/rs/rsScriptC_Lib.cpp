@@ -800,6 +800,12 @@ static void SC_shininess(float s)
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, s);
 }
 
+static void SC_pointAttenuation(float a, float b, float c)
+{
+    GLfloat params[] = { a, b, c };
+    glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, params);
+}
+
 static void SC_hsbToRgb(float h, float s, float b, float* rgb)
 {
     float red = 0.0f;
@@ -1185,6 +1191,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(float, float, float, float)" },
     { "shininess", (void *)&SC_shininess,
         "void", "(float)" },
+    { "pointAttenuation", (void *)&SC_pointAttenuation,
+        "void", "(float, float, float)" },
 
     { "uploadToTexture", (void *)&SC_uploadToTexture,
         "void", "(int, int)" },

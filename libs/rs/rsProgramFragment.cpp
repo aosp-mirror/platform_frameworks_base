@@ -56,6 +56,11 @@ void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
 
         glEnable(GL_TEXTURE_2D);
         if (rsc->checkVersion1_1()) {
+            if (mPointSpriteEnable) {
+                glEnable(GL_POINT_SPRITE_OES);
+            } else {
+                glDisable(GL_POINT_SPRITE_OES);
+            }
             glTexEnvi(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, mPointSpriteEnable);
         }
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
