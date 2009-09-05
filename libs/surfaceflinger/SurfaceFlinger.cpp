@@ -573,8 +573,10 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
     // do this without lock held
     const size_t count = ditchedLayers.size();
     for (size_t i=0 ; i<count ; i++) {
-        //LOGD("ditching layer %p", ditchedLayers[i].get());
-        ditchedLayers[i]->ditch();
+        if (ditchedLayers[i] != 0) {
+            //LOGD("ditching layer %p", ditchedLayers[i].get());
+            ditchedLayers[i]->ditch();
+        }
     }
 }
 
@@ -1082,6 +1084,8 @@ status_t SurfaceFlinger::invalidateLayerVisibility(const sp<LayerBase>& layer)
 
 status_t SurfaceFlinger::addLayer_l(const sp<LayerBase>& layer)
 {
+    if (layer == 0)
+        return BAD_VALUE;
     ssize_t i = mCurrentState.layersSortedByZ.add(
                 layer, &LayerBase::compareCurrentStateZ);
     sp<LayerBaseClient> lbc = LayerBase::dynamicCast< LayerBaseClient* >(layer.get());
