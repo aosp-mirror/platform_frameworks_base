@@ -163,6 +163,7 @@ void generateRipples() {
     int* current = loadArrayI32(RSID_RIPPLE_MAP, index * rippleMapSize + origin);
     int *map = loadArrayI32(RSID_REFRACTION_MAP, 0);
     float *vertices = loadTriangleMeshVerticesF(NAMED_WaterMesh);
+    struct vert_s *vert = (struct vert_s *)vertices;
 
     float fw = 1.f / width;
     float fh = 1.f / height;
@@ -173,6 +174,8 @@ void generateRipples() {
         int w = width - 1;
         int wave = *current;
         int offset = h * width;
+        struct vert_s *vtx = vert + offset + w;
+
         while (w >= 0) {
             int nextWave = current[1];
             int dx = nextWave - wave;
@@ -188,12 +191,10 @@ void generateRipples() {
             v &= ~(v >> 31);
             if (v >= height) v = height - 1;
 
-            int index = (offset + w) << 3;
-            vertices[index + 3] = u * fw;
-            vertices[index + 4] = v * fh;
-
-            // Update Z coordinate of the vertex
-            vertices[index + 7] = dy * fy;
+            vtx->s = u * fw;
+            vtx->t = v * fh;
+            vtx->z = dy * fy;
+            vtx --;
 
             w -= 1;
             current += 1;
@@ -205,17 +206,12 @@ void generateRipples() {
 
     // Compute the normals for lighting
     int y = 0;
-    int w8 = width << 3;
     for ( ; y < height; y += 1) {
         int x = 0;
         int yOffset = y * width;
-        for ( ; x < width; x += 1) {
-            struct vert_s *v = (struct vec3_s *)(vertices + x);
-            //int o = ((yOffset + x) << 3);
-            //int o1 = o + 8 + 5;
-            //int ow = o + w8 + 5;
-            //int ow1 = ow + 8;
+        struct vert_s *v = vert;
 
+        for ( ; x < width; x += 1) {
             struct vec3_s n1, n2, n3;
             vec3Sub(&n1, (struct vec3_s *)&(v+1)->x, (struct vec3_s *)&v->x);
             vec3Sub(&n2, (struct vec3_s *)&(v+width)->x, (struct vec3_s *)&v->x);
@@ -231,6 +227,7 @@ void generateRipples() {
             v->nx = n3.x;
             v->ny = n3.y;
             v->nz = -n3.z;
+            v += 1;
 
             // reset Z
             //vertices[(yOffset + x) << 3 + 7] = 0.0f;
@@ -474,7 +471,7 @@ int main(int index) {
     drawRiverbed();
     drawSky();
     drawLighting();
-    //drawLeaves();
+    drawLeaves();
     //drawNormals();
 
     return 1;
