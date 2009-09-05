@@ -1594,7 +1594,7 @@ public final class ContactsContract {
                 "vnd.android.cursor.item/aggregation_exception";
 
         /**
-         * The type of exception: {@link #TYPE_KEEP_IN}, {@link #TYPE_KEEP_OUT} or
+         * The type of exception: {@link #TYPE_KEEP_TOGETHER}, {@link #TYPE_KEEP_SEPARATE} or
          * {@link #TYPE_AUTOMATIC}.
          *
          * <P>Type: INTEGER</P>
@@ -1602,33 +1602,45 @@ public final class ContactsContract {
         public static final String TYPE = "type";
 
         /**
-         * Allows the provider to automatically decide whether the aggregate
-         * contact should include a particular raw contact or not.
+         * Allows the provider to automatically decide whether the specified raw contacts should
+         * be included in the same aggregate contact or not.
          */
         public static final int TYPE_AUTOMATIC = 0;
 
         /**
-         * Makes sure that the specified raw contact is included in the
-         * specified aggregate contact.
+         * Makes sure that the specified raw contacts are included in the same
+         * aggregate contact.
          */
+        public static final int TYPE_KEEP_TOGETHER = 1;
+
+        @Deprecated
         public static final int TYPE_KEEP_IN = 1;
 
         /**
-         * Makes sure that the specified raw contact is NOT included in the
-         * specified aggregate contact.
+         * Makes sure that the specified raw contacts are NOT included in the same
+         * aggregate contact.
          */
+        public static final int TYPE_KEEP_SEPARATE = 2;
+
+        @Deprecated
         public static final int TYPE_KEEP_OUT = 2;
 
-        /**
-         * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} of the
-         * aggregate contact that the rule applies to.
-         */
+        @Deprecated
         public static final String CONTACT_ID = "contact_id";
+
+        @Deprecated
+        public static final String RAW_CONTACT_ID = "raw_contact_id";
 
         /**
          * A reference to the {@link RawContacts#_ID} of the raw contact that the rule applies to.
          */
-        public static final String RAW_CONTACT_ID = "raw_contact_id";
+        public static final String RAW_CONTACT_ID1 = "raw_contact_id1";
+
+        /**
+         * A reference to the other {@link RawContacts#_ID} of the raw contact that the rule
+         * applies to.
+         */
+        public static final String RAW_CONTACT_ID2 = "raw_contact_id2";
     }
 
     private interface SettingsColumns {
