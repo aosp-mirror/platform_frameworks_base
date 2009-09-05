@@ -333,10 +333,18 @@ int main(int argc, char *argv[]) {
 static void dump_kernel_log(const char *path, const char *title) 
 
 {
-	printf("------ KERNEL %s LOG ------\n", title);
-        if (access(path, R_OK) < 0)
-		printf("%s: %s\n", path, strerror(errno));
-	else
-        	DUMP(path);
+    printf("------ KERNEL %s LOG ------\n", title);
+    if (access(path, R_OK) < 0)
+        printf("%s: %s\n", path, strerror(errno));
+    else {
+        struct stat sbuf;
+
+        if (stat(path, &sbuf) < 0)
+            printf("%s: stat failed (%s)\n", path, strerror(errno));
+        else
+            printf("Harvested %s", ctime(&sbuf.st_ctime));
+    
+        DUMP(path);
+    }
 }
 
