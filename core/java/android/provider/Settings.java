@@ -3032,6 +3032,12 @@ public final class Settings {
                 "push_messaging_registration_url";
 
         /**
+         * Enable/disable GTalk URL scraping for JPG images.
+         */
+        public static final String GTALK_URL_SCRAPING_FOR_JPG =
+                "gtalk_url_scraping_for_jpg";
+
+        /**
          * Use android://&lt;it&gt; routing infos for Google Sync Server subcriptions.
          */
         public static final String GSYNC_USE_RMQ2_ROUTING_INFO = "gsync_use_rmq2_routing_info";
