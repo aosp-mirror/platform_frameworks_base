@@ -398,7 +398,8 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
     glEnable(GL_TEXTURE_2D);
 
     // Dithering...
-    if (s.flags & ISurfaceComposer::eLayerDither) {
+    bool fast = !(mFlags & DisplayHardware::SLOW_CONFIG);
+    if (fast || s.flags & ISurfaceComposer::eLayerDither) {
         glEnable(GL_DITHER);
     } else {
         glDisable(GL_DITHER);
