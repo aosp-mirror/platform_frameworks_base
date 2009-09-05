@@ -2984,13 +2984,15 @@ public final class Settings {
                 "gtalk_max_conn_history_records";
 
         /**
-         * This is gdata url to lookup album and picture info from picasa web.
+         * This is gdata url to lookup album and picture info from picasa web. It also controls
+         * whether url scraping for picasa is enabled (NULL to disable).
          */
         public static final String GTALK_PICASA_ALBUM_URL =
                 "gtalk_picasa_album_url";
 
         /**
-         * This is the url to lookup picture info from flickr.
+         * This is the url to lookup picture info from flickr. It also controls
+         * whether url scraping for flickr is enabled (NULL to disable).
          */
         public static final String GTALK_FLICKR_PHOTO_INFO_URL =
                 "gtalk_flickr_photo_info_url";
@@ -3002,10 +3004,17 @@ public final class Settings {
                 "gtalk_flickr_photo_url";
 
         /**
-         * This is the gdata url to lookup info on a youtube video.
+         * This is the gdata url to lookup info on a youtube video. It also controls
+         * whether url scraping for youtube is enabled (NULL to disable).
          */
         public static final String GTALK_YOUTUBE_VIDEO_URL =
                 "gtalk_youtube_video_url";
+
+        /**
+         * Enable/disable GTalk URL scraping for JPG images ("true" to enable).
+         */
+        public static final String GTALK_URL_SCRAPING_FOR_JPG =
+                "gtalk_url_scraping_for_jpg";
 
         /**
          * Chat message lifetime (for pruning old chat messages).
@@ -3030,12 +3039,6 @@ public final class Settings {
          */
         public static final String PUSH_MESSAGING_REGISTRATION_URL =
                 "push_messaging_registration_url";
-
-        /**
-         * Enable/disable GTalk URL scraping for JPG images.
-         */
-        public static final String GTALK_URL_SCRAPING_FOR_JPG =
-                "gtalk_url_scraping_for_jpg";
 
         /**
          * Use android://&lt;it&gt; routing infos for Google Sync Server subcriptions.
