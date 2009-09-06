@@ -19,7 +19,6 @@ package com.android.internal.os;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.net.LocalServerSocket;
 import android.os.Debug;
@@ -31,6 +30,7 @@ import android.util.Log;
 
 import dalvik.system.VMRuntime;
 import dalvik.system.Zygote;
+import dalvik.system.SamplingProfiler;
 
 import java.io.BufferedReader;
 import java.io.FileDescriptor;
@@ -73,7 +73,7 @@ public class ZygoteInit {
      * never gets destroyed.
      */
     private static Resources mResources;
-    
+
     /**
      * The number of times that the main Zygote loop
      * should run before calling gc() again.
@@ -192,7 +192,7 @@ public class ZygoteInit {
      * RuntimeException on failure.
      */
     private static ZygoteConnection acceptCommandPeer() {
-        try {            
+        try {
             return new ZygoteConnection(sServerSocket.accept());
         } catch (IOException ex) {
             throw new RuntimeException(
@@ -251,7 +251,7 @@ public class ZygoteInit {
      */
     private static void preloadClasses() {
         final VMRuntime runtime = VMRuntime.getRuntime();
-        
+
         InputStream is = ZygoteInit.class.getClassLoader().getResourceAsStream(
                 PRELOADED_CLASSES);
         if (is == null) {
@@ -259,7 +259,7 @@ public class ZygoteInit {
         } else {
             Log.i(TAG, "Preloading classes...");
             long startTime = SystemClock.uptimeMillis();
-            
+
             // Drop root perms while running static initializers.
             setEffectiveGroup(UNPRIVILEGED_GID);
             setEffectiveUser(UNPRIVILEGED_UID);
@@ -275,7 +275,7 @@ public class ZygoteInit {
             Debug.startAllocCounting();
 
             try {
-                BufferedReader br 
+                BufferedReader br
                     = new BufferedReader(new InputStreamReader(is), 256);
 
                 int count = 0;
@@ -394,7 +394,7 @@ public class ZygoteInit {
      */
     private static void preloadResources() {
         final VMRuntime runtime = VMRuntime.getRuntime();
-        
+
         Debug.startAllocCounting();
         try {
             runtime.gcSoftReferences();
@@ -527,7 +527,7 @@ public class ZygoteInit {
     /**
      * Prepare the arguments and fork for the system server process.
      */
-    private static boolean startSystemServer() 
+    private static boolean startSystemServer()
             throws MethodAndArgsCaller, RuntimeException {
         /* Hardcoded command line to start the system server */
         String args[] = {
@@ -561,8 +561,8 @@ public class ZygoteInit {
                     parsedArgs.gids, debugFlags, null);
         } catch (IllegalArgumentException ex) {
             throw new RuntimeException(ex);
-        } 
- 
+        }
+
         /* For child process */
         if (pid == 0) {
             handleSystemServerProcess(parsedArgs);
@@ -573,6 +573,9 @@ public class ZygoteInit {
 
     public static void main(String argv[]) {
         try {
+            // Start profiling the zygote initialization.
+            SamplingProfilerIntegration.start();
+
             registerZygoteSocket();
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_START,
                 SystemClock.uptimeMillis());
@@ -581,6 +584,13 @@ public class ZygoteInit {
             preloadResources();
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
                 SystemClock.uptimeMillis());
+
+            if (SamplingProfilerIntegration.isEnabled()) {
+                SamplingProfiler sp = SamplingProfiler.getInstance();
+                sp.pause();
+                SamplingProfilerIntegration.writeZygoteSnapshot();
+                sp.shutDown();
+            }
 
             // Do an initial gc to clean up after startup
             gc();

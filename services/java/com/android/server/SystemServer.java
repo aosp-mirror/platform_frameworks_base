@@ -18,6 +18,7 @@ package com.android.server;
 
 import com.android.server.am.ActivityManagerService;
 import com.android.server.status.StatusBarService;
+import com.android.internal.os.SamplingProfilerIntegration;
 
 import dalvik.system.VMRuntime;
 
@@ -40,6 +41,9 @@ import android.server.search.SearchManagerService;
 import android.util.EventLog;
 import android.util.Log;
 import android.accounts.AccountManagerService;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 class ServerThread extends Thread {
     private static final String TAG = "SystemServer";
@@ -452,6 +456,9 @@ public class SystemServer
     public static final int FACTORY_TEST_LOW_LEVEL = 1;
     public static final int FACTORY_TEST_HIGH_LEVEL = 2;
 
+    static Timer timer;
+    static final long SNAPSHOT_INTERVAL = 60 * 60 * 1000; // 1hr
+
     /**
      * This method is called from Zygote to initialize the system. This will cause the native
      * services (SurfaceFlinger, AudioFlinger, etc..) to be started. After that it will call back
@@ -460,6 +467,17 @@ public class SystemServer
     native public static void init1(String[] args);
 
     public static void main(String[] args) {
+        if (SamplingProfilerIntegration.isEnabled()) {
+            SamplingProfilerIntegration.start();
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    SamplingProfilerIntegration.writeSnapshot("system_server");
+                }
+            }, SNAPSHOT_INTERVAL, SNAPSHOT_INTERVAL);
+        }
+
         // The system server has to run all of the time, so it needs to be
         // as efficient as possible with its memory usage.
         VMRuntime.getRuntime().setTargetHeapUtilization(0.8f);
