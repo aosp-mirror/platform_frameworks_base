@@ -611,7 +611,7 @@ static player_type getDefaultPlayerType() {
     return PV_PLAYER;
 }
 
-static player_type getPlayerType(int fd, int64_t offset, int64_t length)
+player_type getPlayerType(int fd, int64_t offset, int64_t length)
 {
     char buf[20];
     lseek(fd, offset, SEEK_SET);
@@ -644,7 +644,7 @@ static player_type getPlayerType(int fd, int64_t offset, int64_t length)
     return getDefaultPlayerType();
 }
 
-static player_type getPlayerType(const char* url)
+player_type getPlayerType(const char* url)
 {
     if (TestPlayerStub::canBeUsed(url)) {
         return TEST_PLAYER;
