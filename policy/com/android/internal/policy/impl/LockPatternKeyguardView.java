@@ -582,8 +582,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     }
 
     /**
-     * Used to put wallpaper on the background of the lock screen.  Centers it Horizontally and
-     * vertically.
+     * Used to put wallpaper on the background of the lock screen.  Centers it
+     * Horizontally and pins the bottom (assuming that the lock screen is aligned
+     * with the bottom, so the wallpaper should extend above the top into the
+     * status bar).
      */
     static private class FastBitmapDrawable extends Drawable {
         private Bitmap mBitmap;
@@ -599,7 +601,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             canvas.drawBitmap(
                     mBitmap,
                     (getBounds().width() - mBitmap.getWidth()) / 2,
-                    (getBounds().height() - mBitmap.getHeight()) / 2,
+                    (getBounds().height() - mBitmap.getHeight()),
                     null);
         }
 
