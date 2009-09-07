@@ -44,12 +44,12 @@
 #include <GLES/gl.h>
 
 #include "clz.h"
+#include "Buffer.h"
 #include "BufferAllocator.h"
 #include "Layer.h"
 #include "LayerBlur.h"
 #include "LayerBuffer.h"
 #include "LayerDim.h"
-#include "LayerBitmap.h"
 #include "SurfaceFlinger.h"
 
 #include "DisplayHardware/DisplayHardware.h"
@@ -173,12 +173,12 @@ SurfaceFlinger::SurfaceFlinger()
     :   BnSurfaceComposer(), Thread(false),
         mTransactionFlags(0),
         mTransactionCount(0),
+        mResizeTransationPending(false),
         mLayersRemoved(false),
         mBootTime(systemTime()),
         mHardwareTest("android.permission.HARDWARE_TEST"),
         mAccessSurfaceFlinger("android.permission.ACCESS_SURFACE_FLINGER"),
         mDump("android.permission.DUMP"),
-        mLastScheduledBroadcast(NULL),
         mVisibleRegionsDirty(false),
         mDeferReleaseConsole(false),
         mFreezeDisplay(false),
@@ -497,13 +497,11 @@ bool SurfaceFlinger::threadLoop()
 
         // release the clients before we flip ('cause flip might block)
         unlockClients();
-        executeScheduledBroadcasts();
 
         postFramebuffer();
     } else {
         // pretend we did the post
         unlockClients();
-        executeScheduledBroadcasts();
         usleep(16667); // 60 fps period
     }
     return true;
@@ -773,7 +771,8 @@ void SurfaceFlinger::computeVisibleRegions(
 void SurfaceFlinger::commitTransaction()
 {
     mDrawingState = mCurrentState;
-    mTransactionCV.signal();
+    mResizeTransationPending = false;
+    mTransactionCV.broadcast();
 }
 
 void SurfaceFlinger::handlePageFlip()
@@ -908,37 +907,6 @@ void SurfaceFlinger::unlockClients()
         const sp<LayerBase>& layer = layers[i];
         layer->finishPageFlip();
     }
-}
-
-void SurfaceFlinger::scheduleBroadcast(const sp<Client>& client)
-{
-    if (mLastScheduledBroadcast != client) {
-        mLastScheduledBroadcast = client;
-        mScheduledBroadcasts.add(client);
-    }
-}
-
-void SurfaceFlinger::executeScheduledBroadcasts()
-{
-    SortedVector< wp<Client> >& list(mScheduledBroadcasts);
-    size_t count = list.size();
-    while (count--) {
-        sp<Client> client = list[count].promote();
-        if (client != 0) {
-            per_client_cblk_t* const cblk = client->ctrlblk;
-            if (cblk->lock.tryLock() == NO_ERROR) {
-                cblk->cv.broadcast();
-                list.removeAt(count);
-                cblk->lock.unlock();
-            } else {
-                // schedule another round
-                LOGW("executeScheduledBroadcasts() skipped, "
-                        "contention on the client. We'll try again later...");
-                signalDelayedEvent(ms2ns(4));
-            }
-        }
-    }
-    mLastScheduledBroadcast = 0;
 }
 
 void SurfaceFlinger::debugFlashRegions()
@@ -1129,18 +1097,10 @@ void SurfaceFlinger::free_resources_l()
     mLayersRemoved = false;
     
     // free resources associated with disconnected clients
-    SortedVector< wp<Client> >& scheduledBroadcasts(mScheduledBroadcasts);
     Vector< sp<Client> >& disconnectedClients(mDisconnectedClients);
     const size_t count = disconnectedClients.size();
     for (size_t i=0 ; i<count ; i++) {
         sp<Client> client = disconnectedClients[i];
-        // if this client is the scheduled broadcast list,
-        // remove it from there (and we don't need to signal it
-        // since it is dead).
-        int32_t index = scheduledBroadcasts.indexOf(client);
-        if (index >= 0) {
-            scheduledBroadcasts.removeItemsAt(index);
-        }
         mTokens.release(client->cid);
     }
     disconnectedClients.clear();
@@ -1173,6 +1133,13 @@ void SurfaceFlinger::closeGlobalTransaction()
 {
     if (android_atomic_dec(&mTransactionCount) == 1) {
         signalEvent();
+
+        // if there is a transaction with a resize, wait for it to 
+        // take effect before returning.
+        Mutex::Autolock _l(mStateLock);
+        while (mResizeTransationPending) {
+            mTransactionCV.wait(mStateLock);
+        }
     }
 }
 
@@ -1424,8 +1391,10 @@ status_t SurfaceFlinger::setClientState(
                 }
             }
             if (what & eSizeChanged) {
-                if (layer->setSize(s.w, s.h))
+                if (layer->setSize(s.w, s.h)) {
                     flags |= eTraversalNeeded;
+                    mResizeTransationPending = true;
+                }
             }
             if (what & eAlphaChanged) {
                 if (layer->setAlpha(uint8_t(255.0f*s.alpha+0.5f)))
@@ -1543,28 +1512,27 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                         "id=0x%08x, client=0x%08x, identity=%u\n",
                         lbc->clientIndex(), client.get() ? client->cid : 0,
                         lbc->getIdentity());
+
+                result.append(buffer);
+                buffer[0] = 0;
             }
-            result.append(buffer);
-            buffer[0] = 0;
             /*** Layer ***/
             sp<Layer> l = LayerBase::dynamicCast< Layer* >(layer.get());
             if (l != 0) {
-                const LayerBitmap& buf0(l->getBuffer(0));
-                const LayerBitmap& buf1(l->getBuffer(1));
+                result.append( l->lcblk->dump("      ") );
+                sp<const Buffer> buf0(l->getBuffer(0));
+                sp<const Buffer> buf1(l->getBuffer(1));
                 snprintf(buffer, SIZE,
                         "      "
                         "format=%2d, [%3ux%3u:%3u] [%3ux%3u:%3u],"
-                        " freezeLock=%p, swapState=0x%08x\n",
+                        " freezeLock=%p\n",
                         l->pixelFormat(),
-                        buf0.getWidth(), buf0.getHeight(), 
-                        buf0.getBuffer()->getStride(),
-                        buf1.getWidth(), buf1.getHeight(), 
-                        buf1.getBuffer()->getStride(),
-                        l->getFreezeLock().get(),
-                        l->lcblk->swapState);
+                        buf0->getWidth(), buf0->getHeight(), buf0->getStride(),
+                        buf1->getWidth(), buf1->getHeight(), buf1->getStride(),
+                        l->getFreezeLock().get());
+                result.append(buffer);
+                buffer[0] = 0;
             }
-            result.append(buffer);
-            buffer[0] = 0;
             s.transparentRegion.dump(result, "transparentRegion");
             layer->transparentRegionScreen.dump(result, "transparentRegionScreen");
             layer->visibleRegionScreen.dump(result, "visibleRegionScreen");
@@ -1657,8 +1625,12 @@ status_t SurfaceFlinger::onTransact(
                 const DisplayHardware& hw(graphicPlane(0).displayHardware());
                 mDirtyRegion.set(hw.bounds()); // careful that's not thread-safe
                 signalEvent();
+                return NO_ERROR;
             }
-            return NO_ERROR;
+            case 1005:{ // force transaction
+                setTransactionFlags(eTransactionNeeded|eTraversalNeeded);
+                return NO_ERROR;
+            }
             case 1007: // set mFreezeCount
                 mFreezeCount = data.readInt32();
                 return NO_ERROR;
@@ -1688,21 +1660,20 @@ Client::Client(ClientID clientID, const sp<SurfaceFlinger>& flinger)
     : ctrlblk(0), cid(clientID), mPid(0), mBitmap(0), mFlinger(flinger)
 {
     const int pgsize = getpagesize();
-    const int cblksize = ((sizeof(per_client_cblk_t)+(pgsize-1))&~(pgsize-1));
+    const int cblksize = ((sizeof(SharedClient)+(pgsize-1))&~(pgsize-1));
 
     mCblkHeap = new MemoryHeapBase(cblksize, 0,
             "SurfaceFlinger Client control-block");
 
-    ctrlblk = static_cast<per_client_cblk_t *>(mCblkHeap->getBase());
+    ctrlblk = static_cast<SharedClient *>(mCblkHeap->getBase());
     if (ctrlblk) { // construct the shared structure in-place.
-        new(ctrlblk) per_client_cblk_t;
+        new(ctrlblk) SharedClient;
     }
 }
 
 Client::~Client() {
     if (ctrlblk) {
-        const int pgsize = getpagesize();
-        ctrlblk->~per_client_cblk_t();  // destroy our shared-structure.
+        ctrlblk->~SharedClient();  // destroy our shared-structure.
     }
 }
 

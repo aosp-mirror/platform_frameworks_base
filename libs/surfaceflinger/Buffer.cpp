@@ -27,8 +27,8 @@
 #include <ui/Surface.h>
 #include <pixelflinger/pixelflinger.h>
 
+#include "Buffer.h"
 #include "BufferAllocator.h"
-#include "LayerBitmap.h"
 #include "SurfaceFlinger.h"
 
 
@@ -38,15 +38,16 @@ namespace android {
 // Buffer and implementation of android_native_buffer_t
 // ===========================================================================
 
+Buffer::Buffer()
+    : SurfaceBuffer(), mInitCheck(NO_ERROR),  mVStride(0)
+{
+}
+
 Buffer::Buffer(uint32_t w, uint32_t h, PixelFormat format,
         uint32_t reqUsage, uint32_t flags)
-    : SurfaceBuffer(), mInitCheck(NO_INIT), mFlags(flags), 
-    mVStride(0)
+    : SurfaceBuffer(), mInitCheck(NO_INIT), mVStride(0)
 {
-    this->format = format;
-    if (w>0 && h>0) {
-        mInitCheck = initSize(w, h, reqUsage);
-    }
+    mInitCheck = initSize(w, h, format, reqUsage, flags);
 }
 
 Buffer::~Buffer()
@@ -66,7 +67,19 @@ android_native_buffer_t* Buffer::getNativeBuffer() const
     return static_cast<android_native_buffer_t*>(const_cast<Buffer*>(this));
 }
 
-status_t Buffer::initSize(uint32_t w, uint32_t h, uint32_t reqUsage)
+status_t Buffer::reallocate(uint32_t w, uint32_t h, PixelFormat f,
+        uint32_t reqUsage, uint32_t flags)
+{
+    if (handle) {
+        BufferAllocator& allocator(BufferAllocator::get());
+        allocator.free(handle);
+        handle = 0;
+    }
+    return initSize(w, h, f, reqUsage, flags);
+}
+
+status_t Buffer::initSize(uint32_t w, uint32_t h, PixelFormat format,
+        uint32_t reqUsage, uint32_t flags)
 {
     status_t err = NO_ERROR;
 
@@ -84,7 +97,7 @@ status_t Buffer::initSize(uint32_t w, uint32_t h, uint32_t reqUsage)
      *  
      */
     
-    if (mFlags & Buffer::SECURE) {
+    if (flags & Buffer::SECURE) {
         // secure buffer, don't store it into the GPU
         usage = BufferAllocator::USAGE_SW_READ_OFTEN | 
                 BufferAllocator::USAGE_SW_WRITE_OFTEN;
@@ -95,10 +108,10 @@ status_t Buffer::initSize(uint32_t w, uint32_t h, uint32_t reqUsage)
     }
 
     err = allocator.alloc(w, h, format, usage, &handle, &stride);
-    
     if (err == NO_ERROR) {
-        width  = w;
-        height = h;
+        this->width  = w;
+        this->height = h;
+        this->format = format;
         mVStride = 0;
     }
 
@@ -120,78 +133,6 @@ status_t Buffer::lock(GGLSurface* sur, uint32_t usage)
     }
     return res;
 }
-
-// ===========================================================================
-// LayerBitmap
-// ===========================================================================
-
-LayerBitmap::LayerBitmap()
-    : mInfo(0), mWidth(0), mHeight(0)
-{
-}
-
-LayerBitmap::~LayerBitmap()
-{
-}
-
-status_t LayerBitmap::init(surface_info_t* info,
-        uint32_t w, uint32_t h, PixelFormat format, uint32_t flags)
-{
-    if (info == NULL)
-        return BAD_VALUE;
-    
-    mFormat = format;
-    mFlags = flags;
-    mWidth = w;
-    mHeight = h;
-
-    mInfo = info;
-    memset(info, 0, sizeof(surface_info_t));
-    info->flags = surface_info_t::eNeedNewBuffer;
-    
-    // init the buffer, but don't trigger an allocation
-    mBuffer = new Buffer(0, 0, format, flags);
-    return NO_ERROR;
-}
-
-status_t LayerBitmap::setSize(uint32_t w, uint32_t h)
-{
-    Mutex::Autolock _l(mLock);
-    if ((w != mWidth) || (h != mHeight)) {
-        mWidth  = w;
-        mHeight = h;
-        // this will signal the client that it needs to asks us for a new buffer
-        mInfo->flags = surface_info_t::eNeedNewBuffer;
-    }
-    return NO_ERROR;
-}
-
-sp<Buffer> LayerBitmap::allocate(uint32_t reqUsage)
-{
-    Mutex::Autolock _l(mLock);
-    surface_info_t* info = mInfo;
-    mBuffer.clear(); // free buffer before allocating a new one
-    sp<Buffer> buffer = new Buffer(mWidth, mHeight, mFormat, reqUsage, mFlags);
-    status_t err = buffer->initCheck();
-    if (LIKELY(err == NO_ERROR)) {
-        info->flags  = surface_info_t::eBufferDirty;
-        info->status = NO_ERROR;
-    } else {
-        memset(info, 0, sizeof(surface_info_t));
-        info->status = NO_MEMORY;
-    }
-    mBuffer = buffer;
-    return buffer;
-}
-
-status_t LayerBitmap::free()
-{
-    mBuffer.clear();
-    mWidth = 0;
-    mHeight = 0;
-    return NO_ERROR;
-}
-
 
 // ---------------------------------------------------------------------------
 

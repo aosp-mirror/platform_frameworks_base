@@ -34,7 +34,7 @@
 #include <ui/ISurfaceComposer.h>
 #include <ui/ISurfaceFlingerClient.h>
 
-#include <private/ui/SharedState.h>
+#include <private/ui/SharedBufferStack.h>
 #include <private/ui/LayerState.h>
 
 #include "Barrier.h"
@@ -87,7 +87,7 @@ public:
     }
     
     // pointer to this client's control block
-    per_client_cblk_t*      ctrlblk;
+    SharedClient*           ctrlblk;
     ClientID                cid;
 
     
@@ -268,8 +268,6 @@ private:
             bool        lockPageFlip(const LayerVector& currentLayers);
             void        unlockPageFlip(const LayerVector& currentLayers);
             void        handleRepaint();
-            void        scheduleBroadcast(const sp<Client>& client);
-            void        executeScheduledBroadcasts();
             void        postFramebuffer();
             void        composeSurfaces(const Region& dirty);
             void        unlockClients();
@@ -313,6 +311,7 @@ private:
     volatile    int32_t                 mTransactionFlags;
     volatile    int32_t                 mTransactionCount;
                 Condition               mTransactionCV;
+                bool                    mResizeTransationPending;
                 
                 // protected by mStateLock (but we could use another lock)
                 Tokenizer                               mTokens;
@@ -337,8 +336,6 @@ private:
                 Region                      mDirtyRegionRemovedLayer;
                 Region                      mInvalidRegion;
                 Region                      mWormholeRegion;
-                wp<Client>                  mLastScheduledBroadcast;
-                SortedVector< wp<Client> >  mScheduledBroadcasts;
                 bool                        mVisibleRegionsDirty;
                 bool                        mDeferReleaseConsole;
                 bool                        mFreezeDisplay;

@@ -30,17 +30,13 @@
 
 #include <pixelflinger/pixelflinger.h>
 
-#include <private/ui/SharedState.h>
+#include <private/ui/SharedBufferStack.h>
 #include <private/ui/SurfaceBuffer.h>
 
 class copybit_image_t;
 struct android_native_buffer_t;
 
 namespace android {
-
-// ---------------------------------------------------------------------------
-class IMemory;
-class LayerBitmap;
 
 // ===========================================================================
 // Buffer
@@ -55,6 +51,8 @@ public:
         DONT_CLEAR  = 0x00000001,
         SECURE      = 0x00000004
     };
+
+    Buffer();
 
     // creates w * h buffer
     Buffer(uint32_t w, uint32_t h, PixelFormat format,
@@ -74,6 +72,9 @@ public:
     
     android_native_buffer_t* getNativeBuffer() const;
     
+    status_t reallocate(uint32_t w, uint32_t h, PixelFormat f,
+            uint32_t reqUsage, uint32_t flags);
+
 private:
     friend class LightRefBase<Buffer>;
     Buffer(const Buffer& rhs);
@@ -81,52 +82,11 @@ private:
     Buffer& operator = (const Buffer& rhs);
     const Buffer& operator = (const Buffer& rhs) const;
 
-    status_t initSize(uint32_t w, uint32_t h, uint32_t reqUsage);
+    status_t initSize(uint32_t w, uint32_t h, PixelFormat format,
+            uint32_t reqUsage, uint32_t flags);
 
-    ssize_t                 mInitCheck;
-    uint32_t                mFlags;
-    uint32_t                mVStride;
-};
-
-// ===========================================================================
-// LayerBitmap
-// ===========================================================================
-
-class LayerBitmap
-{
-public:
-    enum {
-        DONT_CLEAR  = Buffer::DONT_CLEAR,
-        SECURE      = Buffer::SECURE
-    };
-    LayerBitmap();
-    ~LayerBitmap();
-
-    status_t init(surface_info_t* info,
-            uint32_t w, uint32_t h, PixelFormat format, uint32_t flags = 0);
-
-    status_t setSize(uint32_t w, uint32_t h);
-
-    sp<Buffer> allocate(uint32_t reqUsage);
-    status_t free();
-    
-    sp<const Buffer>  getBuffer() const { return mBuffer; }
-    sp<Buffer>        getBuffer()       { return mBuffer; }
-    
-    uint32_t getWidth() const           { return mWidth; }
-    uint32_t getHeight() const          { return mHeight; }
-    PixelFormat getPixelFormat() const  { return mBuffer->getPixelFormat(); }
-    Rect getBounds() const              { return mBuffer->getBounds(); }
-    
-private:
-    surface_info_t* mInfo;
-    sp<Buffer>      mBuffer;
-    uint32_t        mWidth;
-    uint32_t        mHeight;
-    PixelFormat     mFormat;
-    uint32_t        mFlags;
-    // protects setSize() and allocate()
-    mutable Mutex   mLock;
+    ssize_t     mInitCheck;
+    uint32_t    mVStride;
 };
 
 }; // namespace android

@@ -46,21 +46,24 @@ using namespace android;
 static __attribute__((noinline))
 void checkGLErrors()
 {
-    GLenum error = glGetError();
-    if (error != GL_NO_ERROR)
+    do {
+        // there could be more than one error flag
+        GLenum error = glGetError();
+        if (error == GL_NO_ERROR)
+            break;
         LOGE("GL error 0x%04x", int(error));
+    } while(true);
 }
 
 static __attribute__((noinline))
 void checkEGLErrors(const char* token)
 {
     EGLint error = eglGetError();
-    // GLESonGL seems to be returning 0 when there is no errors?
-    if (error && error != EGL_SUCCESS)
-        LOGE("%s error 0x%04x (%s)",
+    if (error && error != EGL_SUCCESS) {
+        LOGE("%s: EGL error 0x%04x (%s)",
                 token, int(error), EGLUtils::strerror(error));
+    }
 }
-
 
 /*
  * Initialize the display to the specified values.
@@ -158,7 +161,6 @@ void DisplayHardware::init(uint32_t dpy)
      */
 
     surface = eglCreateWindowSurface(display, config, mNativeWindow.get(), NULL);
-    checkEGLErrors("eglCreateWindowSurface");
 
     if (eglQuerySurface(display, surface, EGL_SWAP_BEHAVIOR, &dummy) == EGL_TRUE) {
         if (dummy == EGL_BUFFER_PRESERVED) {
@@ -212,8 +214,6 @@ void DisplayHardware::init(uint32_t dpy)
      */
     
     context = eglCreateContext(display, config, NULL, NULL);
-    //checkEGLErrors("eglCreateContext");
-    
     
     /*
      * Gather OpenGL ES extensions
