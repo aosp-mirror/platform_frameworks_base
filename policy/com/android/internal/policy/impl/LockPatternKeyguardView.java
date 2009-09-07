@@ -455,7 +455,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                     mLockPatternUtils,
                     mUpdateMonitor,
                     mKeyguardScreenCallback,
-                    mUpdateMonitor.getFailedAttempts());
+                    mUpdateMonitor.getFailedAttempts(),
+                    mEnableFallback);
         } else if (unlockMode == UnlockMode.SimPin) {
             return new SimUnlockScreen(
                     mContext,
@@ -521,8 +522,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         final IccCard.State simState = mUpdateMonitor.getSimState();
         if (stuckOnLockScreenBecauseSimMissing() || (simState == IccCard.State.PUK_REQUIRED)) {
             return Mode.LockScreen;
-        } else if (mUpdateMonitor.isKeyguardBypassEnabled() && mUpdateMonitor.isKeyboardOpen()
-                && isSecure()) {
+        } else if (isSecure()) {
             return Mode.UnlockScreen;
         } else {
             return Mode.LockScreen;
