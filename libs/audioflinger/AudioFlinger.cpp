@@ -1160,7 +1160,7 @@ AudioFlinger::MixerThread::~MixerThread()
 
 bool AudioFlinger::MixerThread::threadLoop()
 {
-    unsigned long sleepTime = kBufferRecoveryInUsecs;
+    unsigned long sleepTime = 0;
     int16_t* curBuf = mMixBuffer;
     Vector< sp<Track> > tracksToRemove;
     size_t enabledTracks = 0;
@@ -1215,6 +1215,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
+                    sleepTime = 0;
                     continue;
                 }
             }
@@ -1222,14 +1223,31 @@ bool AudioFlinger::MixerThread::threadLoop()
             enabledTracks = prepareTracks_l(activeTracks, &tracksToRemove);
        }
 
-        if (LIKELY(enabledTracks)) {
-            // mix buffers...
-            mAudioMixer->process(curBuf);
 
-            // output audio to hardware
-            if (mSuspended) {
-                usleep(kMaxBufferRecoveryInUsecs);
+        // output audio to hardware
+        if (mSuspended) {
+            usleep(kMaxBufferRecoveryInUsecs);
+        } else {
+            if (LIKELY(enabledTracks)) {
+                // mix buffers...
+                mAudioMixer->process(curBuf);
+                sleepTime = 0;
+                standbyTime = systemTime() + kStandbyTimeInNsecs;
             } else {
+                sleepTime += kBufferRecoveryInUsecs;
+                // There was nothing to mix this round, which means all
+                // active tracks were late. Sleep a little bit to give
+                // them another chance. If we're too late, write 0s to audio
+                // hardware to avoid underrun.
+                if (sleepTime < kMaxBufferRecoveryInUsecs) {
+                    usleep(kBufferRecoveryInUsecs);
+                } else {
+                    memset (curBuf, 0, mixBufferSize);
+                    sleepTime = 0;
+                }
+            }
+            // sleepTime == 0 means PCM data were written to mMixBuffer[]
+            if (sleepTime == 0) {
                 mLastWriteTime = systemTime();
                 mInWrite = true;
                 int bytesWritten = (int)mOutput->write(curBuf, mixBufferSize);
@@ -1237,24 +1255,11 @@ bool AudioFlinger::MixerThread::threadLoop()
                 mNumWrites++;
                 mInWrite = false;
                 mStandby = false;
-                nsecs_t temp = systemTime();
-                standbyTime = temp + kStandbyTimeInNsecs;
-                nsecs_t delta = temp - mLastWriteTime;
+                nsecs_t delta = systemTime() - mLastWriteTime;
                 if (delta > maxPeriod) {
                     LOGW("write blocked for %llu msecs", ns2ms(delta));
                     mNumDelayedWrites++;
                 }
-                sleepTime = kBufferRecoveryInUsecs;
-            }
-        } else {
-            // There was nothing to mix this round, which means all
-            // active tracks were late. Sleep a little bit to give
-            // them another chance. If we're too late, the audio
-            // hardware will zero-fill for us.
-            // LOGV("thread %p no buffers - usleep(%lu)", this, sleepTime);
-            usleep(sleepTime);
-            if (sleepTime < kMaxBufferRecoveryInUsecs) {
-                sleepTime += kBufferRecoveryInUsecs;
             }
         }
 
@@ -1568,7 +1573,7 @@ AudioFlinger::DirectOutputThread::~DirectOutputThread()
 
 bool AudioFlinger::DirectOutputThread::threadLoop()
 {
-    unsigned long sleepTime = kBufferRecoveryInUsecs;
+    unsigned long sleepTime = 0;
     sp<Track> trackToRemove;
     sp<Track> activeTrack;
     nsecs_t standbyTime = systemTime();
@@ -1618,6 +1623,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
+                    sleepTime = 0;
                     continue;
                 }
             }
@@ -1710,46 +1716,48 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             }
        }
 
-        if (activeTrack != 0) {
-            AudioBufferProvider::Buffer buffer;
-            size_t frameCount = mFrameCount;
-            curBuf = (int8_t *)mMixBuffer;
-            // output audio to hardware
-            mLastWriteTime = systemTime();
-            mInWrite = true;
-            while(frameCount) {
-                buffer.frameCount = frameCount;
-                activeTrack->getNextBuffer(&buffer);
-                if (UNLIKELY(buffer.raw == 0)) {
-                    memset(curBuf, 0, frameCount * mFrameSize);
-                    break;
+        // output audio to hardware
+        if (mSuspended) {
+            usleep(kMaxBufferRecoveryInUsecs);
+        } else {
+            if (activeTrack != 0) {
+                AudioBufferProvider::Buffer buffer;
+                size_t frameCount = mFrameCount;
+                curBuf = (int8_t *)mMixBuffer;
+                // output audio to hardware
+                while(frameCount) {
+                    buffer.frameCount = frameCount;
+                    activeTrack->getNextBuffer(&buffer);
+                    if (UNLIKELY(buffer.raw == 0)) {
+                        memset(curBuf, 0, frameCount * mFrameSize);
+                        break;
+                    }
+                    memcpy(curBuf, buffer.raw, buffer.frameCount * mFrameSize);
+                    frameCount -= buffer.frameCount;
+                    curBuf += buffer.frameCount * mFrameSize;
+                    activeTrack->releaseBuffer(&buffer);
                 }
-                memcpy(curBuf, buffer.raw, buffer.frameCount * mFrameSize);
-                frameCount -= buffer.frameCount;
-                curBuf += buffer.frameCount * mFrameSize;
-                activeTrack->releaseBuffer(&buffer);
-            }
-            if (mSuspended) {
-                usleep(kMaxBufferRecoveryInUsecs);
+                sleepTime = 0;
+                standbyTime = systemTime() + kStandbyTimeInNsecs;
             } else {
+                sleepTime += kBufferRecoveryInUsecs;
+                if (sleepTime < kMaxBufferRecoveryInUsecs) {
+                    usleep(kBufferRecoveryInUsecs);
+                } else {
+                    memset (mMixBuffer, 0, mFrameCount * mFrameSize);
+                    sleepTime = 0;
+                }
+            }
+
+            // sleepTime == 0 means PCM data were written to mMixBuffer[]
+            if (sleepTime == 0) {
+                mLastWriteTime = systemTime();
+                mInWrite = true;
                 int bytesWritten = (int)mOutput->write(mMixBuffer, mixBufferSize);
                 if (bytesWritten) mBytesWritten += bytesWritten;
                 mNumWrites++;
                 mInWrite = false;
                 mStandby = false;
-                nsecs_t temp = systemTime();
-                standbyTime = temp + kStandbyTimeInNsecs;
-                sleepTime = kBufferRecoveryInUsecs;
-            }
-        } else {
-            // There was nothing to mix this round, which means all
-            // active tracks were late. Sleep a little bit to give
-            // them another chance. If we're too late, the audio
-            // hardware will zero-fill for us.
-            //LOGV("no buffers - usleep(%lu)", sleepTime);
-            usleep(sleepTime);
-            if (sleepTime < kMaxBufferRecoveryInUsecs) {
-                sleepTime += kBufferRecoveryInUsecs;
             }
         }
 

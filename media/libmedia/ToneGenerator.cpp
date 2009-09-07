@@ -791,7 +791,6 @@ const unsigned char ToneGenerator::sToneMappingTable[NUM_REGIONS-1][NUM_SUP_TONE
 //        generators, instantiates output audio track.
 //
 //    Input:
-//        toneType:        Type of tone generated (values in enum tone_type)
 //        streamType:        Type of stream used for tone playback (enum AudioTrack::stream_type)
 //        volume:            volume applied to tone (0.0 to 1.0)
 //
@@ -869,13 +868,16 @@ ToneGenerator::~ToneGenerator() {
 //    Description:    Starts tone playback.
 //
 //    Input:
-//        none
+//        toneType:        Type of tone generated (values in enum tone_type)
+//        durationMs:      The tone duration in milliseconds. If the tone is limited in time by definition,
+//              the actual duration will be the minimum of durationMs and the defined tone duration.
+//              Ommiting or setting durationMs to -1 does not limit tone duration.
 //
 //    Output:
 //        none
 //
 ////////////////////////////////////////////////////////////////////////////////
-bool ToneGenerator::startTone(int toneType) {
+bool ToneGenerator::startTone(int toneType, int durationMs) {
     bool lResult = false;
 
     if ((toneType < 0) || (toneType >= NUM_TONES))
@@ -895,6 +897,17 @@ bool ToneGenerator::startTone(int toneType) {
     // Get descriptor for requested tone
     toneType = getToneForRegion(toneType);
     mpNewToneDesc = &sToneDescriptors[toneType];
+
+    if (durationMs == -1) {
+        mMaxSmp = TONEGEN_INF;
+    } else {
+        if (durationMs > (int)(TONEGEN_INF / mSamplingRate)) {
+            mMaxSmp = (durationMs / 1000) * mSamplingRate;
+        } else {
+            mMaxSmp = (durationMs * mSamplingRate) / 1000;
+        }
+        LOGV("startTone, duration limited to %d ms", durationMs);
+    }
 
     if (mState == TONE_INIT) {
         if (prepareWave()) {
@@ -1102,11 +1115,17 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
 
 
         // Exit if tone sequence is over
-        if (lpToneDesc->segments[lpToneGen->mCurSegment].duration == 0) {
+        if (lpToneDesc->segments[lpToneGen->mCurSegment].duration == 0 ||
+            lpToneGen->mTotalSmp > lpToneGen->mMaxSmp) {
             if (lpToneGen->mState == TONE_PLAYING) {
                 lpToneGen->mState = TONE_STOPPING;
             }
-            goto audioCallback_EndLoop;
+            if (lpToneDesc->segments[lpToneGen->mCurSegment].duration == 0) {
+                goto audioCallback_EndLoop;
+            }
+            // fade out before stopping if maximum duraiton reached
+            lWaveCmd = WaveGenerator::WAVEGEN_STOP;
+            lpToneGen->mNextSegSmp = TONEGEN_INF; // forced to skip state machine management below
         }
 
         if (lpToneGen->mTotalSmp > lpToneGen->mNextSegSmp) {
