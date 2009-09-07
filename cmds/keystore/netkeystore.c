@@ -85,28 +85,44 @@ static int check_reset_perm(int uid)
     return -1;
 }
 
-static int parse_keyname(char *name, uint32_t len,
-                         char *namespace, char *keyname)
+/**
+ * The function parse_strings() only handle two or three tokens just for
+ * keystore's need.
+ */
+static int parse_strings(char *data, int data_len, int ntokens, ...)
 {
     int count = 0;
-    char *c = namespace, *p = namespace, *t = name;
+    va_list args;
+    char *p = data, **q;
 
-    if (!name || !namespace || !keyname) return -1;
-    while (t < name + len && (*t != 0)) {
-        if (*t == ' ') {
-            if (c == keyname) return -1;
-            *p = count = 0;
-            c = p = keyname;
-            t++;
-        } else {
-            if (!isalnum(*t)) return -1;
-            *p++ = *t++;
-            // also check if the keyname/namespace is too long.
-            if (count++ == MAX_KEY_NAME_LENGTH) return -1;
+    va_start(args, ntokens);
+    q = va_arg(args, char**);
+    *q = p;
+    while (p < (data + data_len)) {
+        if (*(p++) == 0) {
+            if (++count == ntokens) break;
+            if ((q = va_arg(args, char**)) == NULL) break;
+            *q = p;
         }
     }
-    *p = 0;
-    return 0;
+    va_end(args);
+    // the first two strings should be null-terminated and the third could
+    // ignore the delimiter.
+    if (count >= 2) {
+        if ((ntokens == 3) || ((ntokens == 2) && (p == (data + data_len)))) {
+            return 0;
+        }
+    }
+    return -1;
+}
+
+static int is_alnum_string(char *s)
+{
+    while (*s != 0) {
+        if (!isalnum(*s++)) return 0;
+    }
+    LOGE("The string %s is not an alphanumeric string\n", s);
+    return 1;
 }
 
 // args of passwd():
@@ -114,7 +130,17 @@ static int parse_keyname(char *name, uint32_t len,
 // oldPassword newPassword - for changing the password
 static void do_passwd(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
 {
-    reply->retcode = passwd((char*)cmd->data);
+    char *p1 = NULL, *p2 = NULL;
+
+    if (strlen((char*)cmd->data) == (cmd->len - 1)) {
+        reply->retcode = new_passwd((char*)cmd->data);
+    } else {
+        if (parse_strings((char *)cmd->data, cmd->len, 2, &p1, &p2) != 0) {
+            reply->retcode = -1;
+        } else {
+            reply->retcode = change_passwd(p1, p2);
+        }
+    }
 }
 
 // args of lock():
@@ -150,8 +176,7 @@ static void do_listkeys(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
 // namespace keyname
 static void do_get_key(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
 {
-    char namespace[MAX_KEY_NAME_LENGTH];
-    char keyname[MAX_KEY_NAME_LENGTH];
+    char *namespace = NULL, *keyname = NULL;
 
     if (check_get_perm(cr.uid)) {
         LOGE("uid %d doesn't have the permission to get key value\n", cr.uid);
@@ -159,7 +184,8 @@ static void do_get_key(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
         return;
     }
 
-    if (parse_keyname((char*)cmd->data, cmd->len, namespace, keyname)) {
+    if (parse_strings((char*)cmd->data, cmd->len, 2, &namespace, &keyname) ||
+        !is_alnum_string(namespace) || !is_alnum_string(keyname)) {
         reply->retcode = -1;
     } else {
         reply->retcode = get_key(namespace, keyname, reply->data,
@@ -182,31 +208,26 @@ static int get_value_index(LPC_MARSHAL *cmd)
 // namespace keyname keyvalue
 static void do_put_key(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
 {
-    char namespace[MAX_KEY_NAME_LENGTH];
-    char keyname[MAX_KEY_NAME_LENGTH];
+    char *namespace = NULL, *keyname = NULL;
+    char *value = NULL;
 
-    int p = get_value_index(cmd);
-    if (p == -1) {
+    if (parse_strings((char*)cmd->data, cmd->len, 3, &namespace, &keyname, &value) ||
+        !is_alnum_string(namespace) || !is_alnum_string(keyname)) {
         reply->retcode = -1;
-    } else {
-        unsigned char *value;
-        if (parse_keyname((char*)cmd->data, p - 1, namespace, keyname)) {
-            reply->retcode = -1;
-            return;
-        }
-        value = &cmd->data[p];
-        int len = cmd->len - p;
-        reply->retcode = put_key(namespace, keyname, value, len);
+        return;
     }
+    int len = cmd->len - (value - namespace);
+    reply->retcode = put_key(namespace, keyname, (unsigned char *)value, len);
 }
 
 // args of remove_key():
 // namespace keyname
 static void do_remove_key(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
 {
-    char namespace[MAX_KEY_NAME_LENGTH];
-    char keyname[MAX_KEY_NAME_LENGTH];
-    if (parse_keyname((char*)cmd->data, cmd->len, namespace, keyname)) {
+    char *namespace = NULL, *keyname = NULL;
+
+    if (parse_strings((char*)cmd->data, cmd->len, 2, &namespace, &keyname) ||
+        !is_alnum_string(namespace) || !is_alnum_string(keyname)) {
         reply->retcode = -1;
         return;
     }
@@ -260,8 +281,6 @@ static int append_input_from_file(const char *filename, LPC_MARSHAL *cmd)
         fprintf(stderr, "Can not open file %s\n", filename);
         return -1;
     }
-    cmd->data[cmd->len] = ' ';
-    cmd->len++;
     len = read(fd, cmd->data + cmd->len, BUFFER_MAX - cmd->len);
     if (len < 0 || (len == (int)(BUFFER_MAX - cmd->len))) {
         ret = -1;
@@ -278,14 +297,15 @@ static int flatten_str_args(int argc, const char **argv, LPC_MARSHAL *cmd)
     char *buf = (char*)cmd->data;
     buf[0] = 0;
     for (i = 0 ; i < argc ; ++i) {
+        // we also include the \0 character in the input.
         if (i == 0) {
-            len = strlcpy(buf, argv[i], BUFFER_MAX);
+            len = (strlcpy(buf, argv[i], BUFFER_MAX) + 1);
         } else {
-            len += snprintf(buf + len, BUFFER_MAX - len, " %s", argv[i]);
+            len += (snprintf(buf + len, BUFFER_MAX - len, "%s", argv[i]) + 1);
         }
         if (len >= BUFFER_MAX) return -1;
     }
-    if (len) cmd->len = len;
+    if (len) cmd->len = len ;
     return 0;
 }
 

@@ -43,7 +43,7 @@ typedef struct {
 #define FUNC_BODY(x) int test_##x()
 
 #define TEST_PASSWD        "12345678"
-#define TEST_NPASSWD    "11111111"
+#define TEST_NPASSWD    "hello world"
 #define TEST_DIR        "/data/local/tmp/keystore"
 #define READONLY_DIR    "/proc/keystore"
 #define TEST_NAMESPACE    "test"
@@ -83,7 +83,7 @@ FUNC_BODY(reset_keystore)
 FUNC_BODY(get_state)
 {
     if (get_state() != UNINITIALIZED) return -1;
-    passwd(TEST_PASSWD);
+    new_passwd(TEST_PASSWD);
     if (get_state() != UNLOCKED) return -1;
     lock();
     if (get_state() != LOCKED) return -1;
@@ -96,19 +96,17 @@ FUNC_BODY(passwd)
 {
     char buf[512];
 
-    if (passwd(" 23432dsfsdf") == 0) return -1;
-    if (passwd("dsfsdf") == 0) return -1;
-    passwd(TEST_PASSWD);
+    if (new_passwd("2d fsdf") == 0) return -1;
+    if (new_passwd("dsfsdf") == 0) return -1;
+    new_passwd(TEST_PASSWD);
     lock();
     if (unlock("55555555") == 0) return -1;
     if (unlock(TEST_PASSWD) != 0) return -1;
 
     // change the password
-    sprintf(buf, "%s %s", "klfdjdsklfjg", "abcdefghi");
-    if (passwd(buf) == 0) return -1;
+    if (change_passwd("klfdjdsklfjg", "abcdefghi") == 0) return -1;
 
-    sprintf(buf, "%s %s", TEST_PASSWD, TEST_NPASSWD);
-    if (passwd(buf) != 0) return -1;
+    if (change_passwd(TEST_PASSWD, TEST_NPASSWD) != 0) return -1;
     lock();
 
     if (unlock(TEST_PASSWD) == 0) return -1;
@@ -120,7 +118,7 @@ FUNC_BODY(passwd)
 FUNC_BODY(lock)
 {
     if (lock() == 0) return -1;
-    passwd(TEST_PASSWD);
+    new_passwd(TEST_PASSWD);
     if (lock() != 0) return -1;
     if (lock() != 0) return -1;
     return EXIT_SUCCESS;
@@ -129,7 +127,7 @@ FUNC_BODY(lock)
 FUNC_BODY(unlock)
 {
     int i = MAX_RETRY_COUNT;
-    passwd(TEST_PASSWD);
+    new_passwd(TEST_PASSWD);
     lock();
     while (i > 1) {
         if (unlock(TEST_NPASSWD) != --i) return -1;
@@ -145,7 +143,7 @@ FUNC_BODY(put_key)
 
     if (put_key(TEST_NAMESPACE, TEST_KEYNAME, (unsigned char *)TEST_KEYVALUE,
                 strlen(TEST_KEYVALUE)) == 0) return -1;
-    passwd(TEST_PASSWD);
+    new_passwd(TEST_PASSWD);
     if (put_key(TEST_NAMESPACE, TEST_KEYNAME, (unsigned char *)TEST_KEYVALUE,
                 strlen(TEST_KEYVALUE)) != 0) return -1;
 
@@ -165,7 +163,7 @@ FUNC_BODY(get_key)
 
     if (get_key(TEST_NAMESPACE, TEST_KEYNAME, data, &size) == 0) return -1;
 
-    passwd(TEST_PASSWD);
+    new_passwd(TEST_PASSWD);
     put_key(TEST_NAMESPACE, TEST_KEYNAME, (unsigned char *)TEST_KEYVALUE,
             strlen(TEST_KEYVALUE));
     if (get_key(TEST_NAMESPACE, TEST_KEYNAME, data, &size) != 0) return -1;
@@ -178,7 +176,7 @@ FUNC_BODY(remove_key)
 {
     if (remove_key(TEST_NAMESPACE, TEST_KEYNAME) == 0) return -1;
 
-    passwd(TEST_PASSWD);
+    new_passwd(TEST_PASSWD);
     if (remove_key(TEST_NAMESPACE, TEST_KEYNAME) == 0) return -1;
 
     put_key(TEST_NAMESPACE, TEST_KEYNAME, (unsigned char *)TEST_KEYVALUE,
@@ -199,7 +197,7 @@ FUNC_BODY(list_keys)
 
     if (list_keys(TEST_NAMESPACE, reply) == 0) return -1;
 
-    passwd(TEST_PASSWD);
+    new_passwd(TEST_PASSWD);
     if (list_keys(buf, reply) == 0) return -1;
 
     if (list_keys(TEST_NAMESPACE, reply) != 0) return -1;

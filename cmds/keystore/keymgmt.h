@@ -72,7 +72,8 @@ int get_key(const char *namespace, const char *keyname,
             unsigned char *data, int *size);
 int remove_key(const char *namespace, const char *keyname);
 int list_keys(const char *namespace, char reply[BUFFER_MAX]);
-int passwd(char *data);
+int new_passwd(char *password);
+int change_passwd(char *old_pass, char *new_pass);
 int lock();
 int unlock(char *passwd);
 KEYSTORE_STATE get_state();
