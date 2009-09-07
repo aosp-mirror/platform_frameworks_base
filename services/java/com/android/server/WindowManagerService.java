@@ -1207,8 +1207,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 || mLowerWallpaperTarget != null;
     }
     
-    boolean adjustWallpaperWindowsLocked() {
-        boolean changed = false;
+    static final int ADJUST_WALLPAPER_LAYERS_CHANGED = 1<<1;
+    static final int ADJUST_WALLPAPER_VISIBILITY_CHANGED = 1<<2;
+    
+    int adjustWallpaperWindowsLocked() {
+        int changed = 0;
         
         final int dw = mDisplay.getWidth();
         final int dh = mDisplay.getHeight();
@@ -1274,12 +1277,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mWallpaperTarget != null && mWallpaperTarget.mAppToken != null) {
                 if (DEBUG_WALLPAPER) Log.v(TAG,
                         "Wallpaper not changing: waiting for app anim in current target");
-                return false;
+                return 0;
             }
             if (foundW != null && foundW.mAppToken != null) {
                 if (DEBUG_WALLPAPER) Log.v(TAG,
                         "Wallpaper not changing: waiting for app anim in found target");
-                return false;
+                return 0;
             }
         }
         
@@ -1410,7 +1413,13 @@ public class WindowManagerService extends IWindowManager.Stub
         while (curTokenIndex > 0) {
             curTokenIndex--;
             WindowToken token = mWallpaperTokens.get(curTokenIndex);
-            token.hidden = !visible;
+            if (token.hidden == visible) {
+                changed |= ADJUST_WALLPAPER_VISIBILITY_CHANGED;
+                token.hidden = !visible;
+                // Need to do a layout to ensure the wallpaper now has the
+                // correct size.
+                mLayoutNeeded = true;
+            }
             
             int curWallpaperIndex = token.windows.size();
             while (curWallpaperIndex > 0) {
@@ -1463,7 +1472,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " from " + oldIndex + " to " + foundI);
                 
                 localmWindows.add(foundI, wallpaper);
-                changed = true;
+                changed |= ADJUST_WALLPAPER_LAYERS_CHANGED;
             }
         }
         
@@ -1574,7 +1583,12 @@ public class WindowManagerService extends IWindowManager.Stub
         while (curTokenIndex > 0) {
             curTokenIndex--;
             WindowToken token = mWallpaperTokens.get(curTokenIndex);
-            token.hidden = !visible;
+            if (token.hidden == visible) {
+                token.hidden = !visible;
+                // Need to do a layout to ensure the wallpaper now has the
+                // correct size.
+                mLayoutNeeded = true;
+            }
             
             int curWallpaperIndex = token.windows.size();
             while (curWallpaperIndex > 0) {
@@ -1999,10 +2013,15 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 WindowState w = windowForClientLocked(session, client);
                 if ((w != null) && (w.mSurface != null)) {
+                    if (SHOW_TRANSACTIONS) Log.i(TAG, ">>> OPEN TRANSACTION");
                     Surface.openTransaction();
                     try {
+                        if (SHOW_TRANSACTIONS) Log.i(
+                                TAG, "  SURFACE " + w.mSurface
+                                + ": transparentRegionHint=" + region);
                         w.mSurface.setTransparentRegionHint(region);
                     } finally {
+                        if (SHOW_TRANSACTIONS) Log.i(TAG, "<<< CLOSE TRANSACTION");
                         Surface.closeTransaction();
                     }
                 }
@@ -2149,13 +2168,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     Surface surface = win.createSurfaceLocked();
                     if (surface != null) {
                         outSurface.copyFrom(surface);
+                        if (SHOW_TRANSACTIONS) Log.i(TAG,
+                                "  OUT SURFACE " + outSurface + ": copied");
                     } else {
-                        outSurface.clear();
+                        // For some reason there isn't a surface.  Clear the
+                        // caller's object so they see the same state.
+                        outSurface.release();
                     }
                 } catch (Exception e) {
                     Log.w(TAG, "Exception thrown when creating surface for client "
-                         + client + " (" + win.mAttrs.getTitle() + ")",
-                         e);
+                             + client + " (" + win.mAttrs.getTitle() + ")",
+                             e);
                     Binder.restoreCallingIdentity(origId);
                     return 0;
                 }
@@ -2196,7 +2219,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                 }
-                outSurface.clear();
+                // We are being called from a local process, which
+                // means outSurface holds its current surface.  Ensure the
+                // surface object is cleared, but we don't want it actually
+                // destroyed at this point.
+                outSurface.release();
             }
 
             if (focusMayChange) {
@@ -2217,7 +2244,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             if (wallpaperMayMove) {
-                if (adjustWallpaperWindowsLocked()) {
+                if ((adjustWallpaperWindowsLocked()&ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
                     assignLayers = true;
                 }
             }
@@ -6281,6 +6308,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (localLOGV) Log.v(
                     TAG, "First window added to " + this + ", creating SurfaceSession");
                 mSurfaceSession = new SurfaceSession();
+                if (SHOW_TRANSACTIONS) Log.i(
+                        TAG, "  NEW SURFACE SESSION " + mSurfaceSession);
                 mSessions.add(this);
             }
             mNumWindow++;
@@ -6298,6 +6327,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (localLOGV) Log.v(
                         TAG, "Last window removed from " + this
                         + ", destroying " + mSurfaceSession);
+                    if (SHOW_TRANSACTIONS) Log.i(
+                            TAG, "  KILL SURFACE SESSION " + mSurfaceSession);
                     try {
                         mSurfaceSession.kill();
                     } catch (Exception e) {
@@ -6794,6 +6825,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     mSurface = new Surface(
                             mSession.mSurfaceSession, mSession.mPid,
                             0, w, h, mAttrs.format, flags);
+                    if (SHOW_TRANSACTIONS) Log.i(TAG, "  CREATE SURFACE "
+                            + mSurface + " IN SESSION "
+                            + mSession.mSurfaceSession
+                            + ": pid=" + mSession.mPid + " format="
+                            + mAttrs.format + " flags=0x"
+                            + Integer.toHexString(flags));
                 } catch (Surface.OutOfResourcesException e) {
                     Log.w(TAG, "OutOfResourcesException creating surface");
                     reclaimSomeSurfaceMemoryLocked(this, "create");
@@ -6823,6 +6860,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         mSurface.setLayer(mAnimLayer);
                         mSurface.hide();
                         if ((mAttrs.flags&WindowManager.LayoutParams.FLAG_DITHER) != 0) {
+                            if (SHOW_TRANSACTIONS) Log.i(TAG, "  SURFACE "
+                                    + mSurface + ": DITHER");
                             mSurface.setFlags(Surface.SURFACE_DITHER,
                                     Surface.SURFACE_DITHER);
                         }
@@ -6868,7 +6907,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         Log.i(TAG, "  SURFACE " + mSurface + ": DESTROY ("
                                 + mAttrs.getTitle() + ")", ex);
                     }
-                    mSurface.clear();
+                    mSurface.destroy();
                 } catch (RuntimeException e) {
                     Log.w(TAG, "Exception thrown when destroying Window " + this
                         + " surface " + mSurface + " session " + mSession
@@ -8840,6 +8879,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (w.commitFinishDrawingLocked(currentTime)) {
                             if ((w.mAttrs.flags
                                     & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
+                                if (DEBUG_WALLPAPER) Log.v(TAG,
+                                        "First draw done in potential wallpaper target " + w);
                                 wallpaperMayChange = true;
                             }
                         }
@@ -9134,10 +9175,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 
                 if (wallpaperMayChange) {
-                    if (adjustWallpaperWindowsLocked()) {
+                    if (DEBUG_WALLPAPER) Log.v(TAG,
+                            "Wallpaper may change!  Adjusting");
+                    int adjResult = adjustWallpaperWindowsLocked();
+                    if ((adjResult&ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
+                        if (DEBUG_WALLPAPER) Log.v(TAG,
+                                "Wallpaper layer changed: assigning layers + relayout");
+                        restart = true;
+                        mLayoutNeeded = true;
                         assignLayersLocked();
+                    } else if ((adjResult&ADJUST_WALLPAPER_VISIBILITY_CHANGED) != 0) {
+                        if (DEBUG_WALLPAPER) Log.v(TAG,
+                                "Wallpaper visibility changed: relayout");
+                        restart = true;
+                        mLayoutNeeded = true;
                     }
                     if (mLayoutNeeded) {
+                        restart = true;
                         performLayoutLockedInner();
                     }
                 }
@@ -9184,6 +9238,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         w.mLastRequestedHeight = height;
                         w.mLastShownFrame.set(w.mShownFrame);
                         try {
+                            if (SHOW_TRANSACTIONS) Log.i(
+                                    TAG, "  SURFACE " + w.mSurface
+                                    + ": POS " + w.mShownFrame.left
+                                    + ", " + w.mShownFrame.top);
                             w.mSurface.setPosition(w.mShownFrame.left, w.mShownFrame.top);
                         } catch (RuntimeException e) {
                             Log.w(TAG, "Error positioning surface in " + w, e);
@@ -9196,14 +9254,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         width = w.mShownFrame.width();
                         height = w.mShownFrame.height();
                         w.mLastShownFrame.set(w.mShownFrame);
-                        if (resize) {
-                            if (SHOW_TRANSACTIONS) Log.i(
-                                    TAG, "  SURFACE " + w.mSurface + ": ("
-                                    + w.mShownFrame.left + ","
-                                    + w.mShownFrame.top + ") ("
-                                    + w.mShownFrame.width() + "x"
-                                    + w.mShownFrame.height() + ")");
-                        }
                     }
 
                     if (resize) {
@@ -9211,6 +9261,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (height < 1) height = 1;
                         if (w.mSurface != null) {
                             try {
+                                if (SHOW_TRANSACTIONS) Log.i(
+                                        TAG, "  SURFACE " + w.mSurface + ": POS "
+                                        + w.mShownFrame.left + ","
+                                        + w.mShownFrame.top + " SIZE "
+                                        + w.mShownFrame.width() + "x"
+                                        + w.mShownFrame.height());
                                 w.mSurface.setSize(width, height);
                                 w.mSurface.setPosition(w.mShownFrame.left,
                                         w.mShownFrame.top);
@@ -9239,6 +9295,22 @@ public class WindowManagerService extends IWindowManager.Stub
                             w.mLastFrame.set(w.mFrame);
                             w.mLastContentInsets.set(w.mContentInsets);
                             w.mLastVisibleInsets.set(w.mVisibleInsets);
+                            // If the screen is currently frozen, then keep
+                            // it frozen until this window draws at its new
+                            // orientation.
+                            if (mDisplayFrozen) {
+                                if (DEBUG_ORIENTATION) Log.v(TAG,
+                                        "Resizing while display frozen: " + w);
+                                w.mOrientationChanging = true;
+                                if (mWindowsFreezingScreen) {
+                                    mWindowsFreezingScreen = true;
+                                    // XXX should probably keep timeout from
+                                    // when we first froze the display.
+                                    mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
+                                    mH.sendMessageDelayed(mH.obtainMessage(
+                                            H.WINDOW_FREEZE_TIMEOUT), 2000);
+                                }
+                            }
                             // If the orientation is changing, then we need to
                             // hold off on unfreezing the display until this
                             // window has been redrawn; to do that, we need
@@ -9340,7 +9412,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         w.mLastVScale = w.mVScale;
                         if (SHOW_TRANSACTIONS) Log.i(
                                 TAG, "  SURFACE " + w.mSurface + ": alpha="
-                                + w.mShownAlpha + " layer=" + w.mAnimLayer);
+                                + w.mShownAlpha + " layer=" + w.mAnimLayer
+                                + " matrix=[" + (w.mDsDx*w.mHScale)
+                                + "," + (w.mDtDx*w.mVScale)
+                                + "][" + (w.mDsDy*w.mHScale)
+                                + "," + (w.mDtDy*w.mVScale) + "]");
                         if (w.mSurface != null) {
                             try {
                                 w.mSurface.setAlpha(w.mShownAlpha);
@@ -9571,6 +9647,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 i--;
                 WindowState win = mResizingWindows.get(i);
                 try {
+                    if (DEBUG_ORIENTATION) Log.v(TAG, "Reporting new frame to "
+                            + win + ": " + win.mFrame);
                     win.mClient.resized(win.mFrame.width(),
                             win.mFrame.height(), win.mLastContentInsets,
                             win.mLastVisibleInsets, win.mDrawPending);
@@ -9642,7 +9720,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mH.sendEmptyMessage(H.REPORT_LOSING_FOCUS);
         }
         if (wallpaperDestroyed) {
-            needRelayout = adjustWallpaperWindowsLocked();            
+            needRelayout = adjustWallpaperWindowsLocked() != 0;
         }
         if (needRelayout) {
             requestAnimationLocked(0);
@@ -9720,7 +9798,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + " token=" + win.mToken
                                 + " pid=" + ws.mSession.mPid
                                 + " uid=" + ws.mSession.mUid);
-                        ws.mSurface.clear();
+                        ws.mSurface.destroy();
                         ws.mSurface = null;
                         mForceRemoves.add(ws);
                         i--;
@@ -9730,7 +9808,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         Log.w(TAG, "LEAKED SURFACE (app token hidden): "
                                 + ws + " surface=" + ws.mSurface
                                 + " token=" + win.mAppToken);
-                        ws.mSurface.clear();
+                        ws.mSurface.destroy();
                         ws.mSurface = null;
                         leakedSurface = true;
                     }
@@ -9766,7 +9844,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // surface and ask the app to request another one.
                 Log.w(TAG, "Looks like we have reclaimed some memory, clearing surface for retry.");
                 if (surface != null) {
-                    surface.clear();
+                    surface.destroy();
                     win.mSurface = null;
                 }
 
@@ -10025,6 +10103,16 @@ public class WindowManagerService extends IWindowManager.Stub
                     w.dump(pw, "    ");
                 }
             }
+            if (mResizingWindows.size() > 0) {
+                pw.println(" ");
+                pw.println("  Windows waiting to resize:");
+                for (int i=mResizingWindows.size()-1; i>=0; i--) {
+                    WindowState w = mResizingWindows.get(i);
+                    pw.print("  Resizing #"); pw.print(i); pw.print(' ');
+                            pw.print(w); pw.println(":");
+                    w.dump(pw, "    ");
+                }
+            }
             if (mSessions.size() > 0) {
                 pw.println(" ");
                 pw.println("  All active sessions:");
@@ -10227,7 +10315,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mDimSurface.setLayer(w.mAnimLayer-1);
 
             final float target = w.mExiting ? 0 : w.mAttrs.dimAmount;
-            if (SHOW_TRANSACTIONS) Log.i(TAG, "layer=" + (w.mAnimLayer-1) + ", target=" + target);
+            if (SHOW_TRANSACTIONS) Log.i(TAG, "  DIM " + mDimSurface
+                    + ": layer=" + (w.mAnimLayer-1) + " target=" + target);
             if (mDimTargetAlpha != target) {
                 // If the desired dim level has changed, then
                 // start an animation to it.
