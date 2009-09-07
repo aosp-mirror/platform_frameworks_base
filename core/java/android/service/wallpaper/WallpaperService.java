@@ -50,6 +50,14 @@ public abstract class WallpaperService extends Service {
     public static final String SERVICE_INTERFACE =
         "android.service.wallpaper.WallpaperService";
 
+    /**
+     * Name under which a WallpaperService component publishes information
+     * about itself.  This meta-data must reference an XML resource containing
+     * a <code>&lt;{@link android.R.styleable#Wallpaper wallpaper}&gt;</code>
+     * tag.
+     */
+    public static final String SERVICE_META_DATA = "android.service.wallpaper";
+    
     static final String TAG = "WallpaperService";
     static final boolean DEBUG = false;
     

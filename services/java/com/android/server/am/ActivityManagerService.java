@@ -8855,6 +8855,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     ActivityManager.RunningAppProcessInfo currApp = 
                         new ActivityManager.RunningAppProcessInfo(app.processName,
                                 app.pid, app.getPackageList());
+                    currApp.uid = app.info.uid;
                     int adj = app.curAdj;
                     if (adj >= CONTENT_PROVIDER_ADJ) {
                         currApp.importance = ActivityManager.RunningAppProcessInfo.IMPORTANCE_EMPTY;

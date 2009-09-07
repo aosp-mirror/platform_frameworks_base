@@ -1972,5 +1972,7 @@
     <string name="accessibility_binding_label">Accessibility</string>
     <!-- Label to show for a service that is running because it is a wallpaper. -->
     <string name="wallpaper_binding_label">Wallpaper</string>
+    <!-- Dialog title for user to select a different wallpaper from service list -->
+    <string name="chooser_wallpaper">Change wallpaper</string>
     
 </resources>

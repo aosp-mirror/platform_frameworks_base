@@ -49,7 +49,7 @@ public class WallpaperManager {
     /**
      * Launch an activity for the user to pick the current global live
      * wallpaper.
-     * @hide
+     * @hide Live Wallpaper
      */
     public static final String ACTION_LIVE_WALLPAPER_CHOOSER
             = "android.service.wallpaper.LIVE_WALLPAPER_CHOOSER";
@@ -238,6 +238,20 @@ public class WallpaperManager {
         return bm != null ? new BitmapDrawable(mContext.getResources(), bm) : null;
     }
 
+    /**
+     * If the current wallpaper is a live wallpaper component, return the
+     * information about that wallpaper.  Otherwise, if it is a static image,
+     * simply return null.
+     * @hide Live Wallpaper
+     */
+    public WallpaperInfo getWallpaperInfo() {
+        try {
+            return sGlobals.mService.getWallpaperInfo();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+    
     /**
      * Change the current system wallpaper to the bitmap in the given resource.
      * The resource is opened as a raw data stream and copied into the
