@@ -3416,7 +3416,8 @@
          referenced from its
          {@link android.service.wallpaper.WallpaperService#SERVICE_META_DATA}
          meta-data entry.  Described here are the attributes that can be
-         included in that tag. -->
+         included in that tag.
+         @hide Live Wallpaper -->
     <declare-styleable name="Wallpaper">
         <!-- Component name of an activity that allows the user to modify
              the current settings for this wallpaper. -->
