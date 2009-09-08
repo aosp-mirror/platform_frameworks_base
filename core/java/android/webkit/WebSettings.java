@@ -187,7 +187,7 @@ public class WebSettings {
     private boolean         mSupportZoom = true;
     private boolean         mBuiltInZoomControls = false;
     private boolean         mAllowFileAccess = true;
-    private boolean         mLoadWithOverviewMode = true;
+    private boolean         mLoadWithOverviewMode = false;
 
     // Manages interaction of the system setting 'Location & security - Share
     // with Google' and the browser.
