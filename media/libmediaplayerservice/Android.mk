@@ -13,6 +13,8 @@ LOCAL_SRC_FILES:=               \
     StagefrightPlayer.cpp       \
     TestPlayerStub.cpp          \
     VorbisPlayer.cpp            \
+    VorbisMetadataRetriever.cpp \
+    MidiMetadataRetriever.cpp \
     MidiFile.cpp
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)

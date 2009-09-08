@@ -34,11 +34,14 @@
 #include <media/MediaPlayerInterface.h>
 #include <media/PVMetadataRetriever.h>
 #include <private/media/VideoFrame.h>
-
+#include "VorbisMetadataRetriever.h"
+#include "MidiMetadataRetriever.h"
 #include "MetadataRetrieverClient.h"
 
-
 namespace android {
+
+extern player_type getPlayerType(const char* url);
+extern player_type getPlayerType(int fd, int64_t offset, int64_t length);
 
 MetadataRetrieverClient::MetadataRetrieverClient(pid_t pid)
 {
@@ -90,6 +93,36 @@ void MetadataRetrieverClient::disconnect()
     IPCThreadState::self()->flushCommands();
 }
 
+static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
+{
+    sp<MediaMetadataRetrieverBase> p;
+    switch (playerType) {
+#ifndef NO_OPENCORE
+        case PV_PLAYER:
+            LOGV("create pv metadata retriever");
+            p = new PVMetadataRetriever();
+            break;
+#endif
+        case VORBIS_PLAYER:
+            LOGV("create vorbis metadata retriever");
+            p = new VorbisMetadataRetriever();
+            break;
+        case SONIVOX_PLAYER:
+            LOGV("create midi metadata retriever");
+            p = new MidiMetadataRetriever();
+            break;
+        default:
+            // TODO:
+            // support for STAGEFRIGHT_PLAYER and TEST_PLAYER
+            LOGE("player type %d is not supported",  playerType);
+            break;
+    }
+    if (p == NULL) {
+        LOGE("failed to create a retriever object");
+    }
+    return p;
+}
+
 status_t MetadataRetrieverClient::setDataSource(const char *url)
 {
     LOGV("setDataSource(%s)", url);
@@ -97,11 +130,13 @@ status_t MetadataRetrieverClient::setDataSource(const char *url)
     if (url == NULL) {
         return UNKNOWN_ERROR;
     }
-    if (mRetriever == NULL) {
-        LOGE("retriever is not initialized");
-        return NO_INIT;
-    }
-    return mRetriever->setDataSource(url);
+    player_type playerType = getPlayerType(url);
+    LOGV("player type = %d", playerType);
+    sp<MediaMetadataRetrieverBase> p = createRetriever(playerType);
+    if (p == NULL) return NO_INIT;
+    status_t ret = p->setDataSource(url);
+    if (ret == NO_ERROR) mRetriever = p;
+    return ret;
 }
 
 status_t MetadataRetrieverClient::setDataSource(int fd, int64_t offset, int64_t length)
@@ -118,7 +153,7 @@ status_t MetadataRetrieverClient::setDataSource(int fd, int64_t offset, int64_t 
     int ret = fstat(fd, &sb);
     if (ret != 0) {
         LOGE("fstat(%d) failed: %d, %s", fd, ret, strerror(errno));
-        return UNKNOWN_ERROR;
+        return BAD_VALUE;
     }
     LOGV("st_dev  = %llu", sb.st_dev);
     LOGV("st_mode = %u", sb.st_mode);
@@ -129,13 +164,22 @@ status_t MetadataRetrieverClient::setDataSource(int fd, int64_t offset, int64_t 
     if (offset >= sb.st_size) {
         LOGE("offset (%lld) bigger than file size (%llu)", offset, sb.st_size);
         ::close(fd);
-        return UNKNOWN_ERROR;
+        return BAD_VALUE;
     }
     if (offset + length > sb.st_size) {
         length = sb.st_size - offset;
-        LOGE("calculated length = %lld", length);
+        LOGV("calculated length = %lld", length);
     }
-    status_t status = mRetriever->setDataSource(fd, offset, length);
+
+    player_type playerType = getPlayerType(fd, offset, length);
+    LOGV("player type = %d", playerType);
+    sp<MediaMetadataRetrieverBase> p = createRetriever(playerType);
+    if (p == NULL) {
+        ::close(fd);
+        return NO_INIT;
+    }
+    status_t status = p->setDataSource(fd, offset, length);
+    if (status == NO_ERROR) mRetriever = p;
     ::close(fd);
     return status;
 }
