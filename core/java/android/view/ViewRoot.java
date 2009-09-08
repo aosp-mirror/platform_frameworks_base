@@ -1575,7 +1575,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (mUseGL) {
             destroyGL();
         }
-        mSurface.clear();
+        mSurface.release();
 
         try {
             sWindowSession.remove(mWindow);
@@ -2532,7 +2532,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     }
                 }
 
-                mSurface.clear();
+                mSurface.release();
             }
             if (mAdded) {
                 mAdded = false;

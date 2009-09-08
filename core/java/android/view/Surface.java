@@ -181,7 +181,7 @@ public class Surface implements Parcelable {
     public Surface(SurfaceSession s,
             int pid, int display, int w, int h, int format, int flags)
         throws OutOfResourcesException {
-        mCanvas = new Canvas();
+        mCanvas = new CompatibleCanvas();
         init(s,pid,display,w,h,format,flags);
     }
 
@@ -271,8 +271,12 @@ public class Surface implements Parcelable {
      */
     public native   boolean isValid();
     
-    /** Call this free the surface up. {@hide} */
-    public native   void clear();
+    /** Free all server-side state associated with this surface and
+     * release this object's reference. {@hide} */
+    public native void destroy();
+    
+    /** Release the local reference to the server-side surface. @hide */
+    public native void release();
     
     /** draw into a surface */
     public Canvas lockCanvas(Rect dirty) throws OutOfResourcesException, IllegalArgumentException
@@ -400,6 +404,4 @@ public class Surface implements Parcelable {
             throws OutOfResourcesException;
 
     private native void init(Parcel source);
-    
-    private native void release();
 }

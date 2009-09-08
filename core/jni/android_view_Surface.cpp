@@ -214,7 +214,7 @@ static void Surface_initParcel(JNIEnv* env, jobject clazz, jobject argParcel)
     setSurface(env, clazz, rhs);
 }
 
-static void Surface_clear(JNIEnv* env, jobject clazz, uintptr_t *ostack)
+static void Surface_destroy(JNIEnv* env, jobject clazz, uintptr_t *ostack)
 {
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (SurfaceControl::isValid(surface)) {
@@ -622,7 +622,7 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"nativeClassInit",     "()V",  (void*)nativeClassInit },
     {"init",                "(Landroid/view/SurfaceSession;IIIIII)V",  (void*)Surface_init },
     {"init",                "(Landroid/os/Parcel;)V",  (void*)Surface_initParcel },
-    {"clear",               "()V",  (void*)Surface_clear },
+    {"destroy",             "()V",  (void*)Surface_destroy },
     {"release",             "()V",  (void*)Surface_release },
 	{"copyFrom",            "(Landroid/view/Surface;)V",  (void*)Surface_copyFrom },
 	{"isValid",             "()Z",  (void*)Surface_isValid },
