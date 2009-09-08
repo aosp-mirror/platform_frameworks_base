@@ -191,7 +191,7 @@ sp<OMXCodec> OMXCodec::Create(
 
         status_t err = omx->allocate_node(componentName, &node);
         if (err == OK) {
-            LOGV("Successfully allocated OMX node '%s'", componentName);
+            LOGI("Successfully allocated OMX node '%s'", componentName);
             break;
         }
     }
@@ -215,6 +215,10 @@ sp<OMXCodec> OMXCodec::Create(
     if (!strncmp(componentName, "OMX.qcom.video.encoder.", 23)) {
         quirks |= kRequiresLoadedToIdleAfterAllocation;
         quirks |= kRequiresAllocateBufferOnInputPorts;
+    }
+    if (!strncmp(componentName, "OMX.qcom.video.decoder.", 23)) {
+        // XXX Required on P....on only.
+        quirks |= kRequiresAllocateBufferOnOutputPorts;
     }
 
     sp<OMXCodec> codec = new OMXCodec(
