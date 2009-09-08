@@ -322,6 +322,7 @@ public class StatusBarService extends IStatusBar.Stub
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Telephony.Intents.SPN_STRINGS_UPDATED_ACTION);
         context.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -1672,7 +1673,8 @@ public class StatusBarService extends IStatusBar.Stub
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
+            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
+                    || Intent.ACTION_SCREEN_OFF.equals(action)) {
                 deactivate();
             }
             else if (Telephony.Intents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
