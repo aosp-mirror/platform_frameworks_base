@@ -18,6 +18,7 @@
 #define LOG_TAG "MediaExtractor"
 #include <utils/Log.h>
 
+#include <media/stagefright/AMRExtractor.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MP3Extractor.h>
 #include <media/stagefright/MPEG4Extractor.h>
@@ -47,6 +48,9 @@ sp<MediaExtractor> MediaExtractor::Create(
         return new MPEG4Extractor(source);
     } else if (!strcasecmp(mime, "audio/mpeg")) {
         return new MP3Extractor(source);
+    } else if (!strcasecmp(mime, "audio/3gpp")
+            || !strcasecmp(mime, "audio/amr-wb")) {
+        return new AMRExtractor(source);
     }
 
     return NULL;

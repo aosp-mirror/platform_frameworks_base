@@ -14,42 +14,41 @@
  * limitations under the License.
  */
 
-#ifndef MP3_EXTRACTOR_H_
+#ifndef AMR_EXTRACTOR_H_
 
-#define MP3_EXTRACTOR_H_
+#define AMR_EXTRACTOR_H_
 
 #include <media/stagefright/MediaExtractor.h>
 
 namespace android {
 
-class DataSource;
 class String8;
 
-class MP3Extractor : public MediaExtractor {
+class AMRExtractor : public MediaExtractor {
 public:
-    // Extractor assumes ownership of "source".
-    MP3Extractor(const sp<DataSource> &source);
+    AMRExtractor(const sp<DataSource> &source);
 
     virtual size_t countTracks();
     virtual sp<MediaSource> getTrack(size_t index);
     virtual sp<MetaData> getTrackMetaData(size_t index);
 
+    static sp<MetaData> makeAMRFormat(bool isWide);
+
 protected:
-    virtual ~MP3Extractor();
+    virtual ~AMRExtractor();
 
 private:
     sp<DataSource> mDataSource;
-    off_t mFirstFramePos;
-    sp<MetaData> mMeta;
-    uint32_t mFixedHeader;
+    status_t mInitCheck;
+    bool mIsWide;
 
-    MP3Extractor(const MP3Extractor &);
-    MP3Extractor &operator=(const MP3Extractor &);
+    AMRExtractor(const AMRExtractor &);
+    AMRExtractor &operator=(const AMRExtractor &);
 };
 
-bool SniffMP3(
+bool SniffAMR(
         const sp<DataSource> &source, String8 *mimeType, float *confidence);
 
 }  // namespace android
 
-#endif  // MP3_EXTRACTOR_H_
+#endif  // AMR_EXTRACTOR_H_
