@@ -22,8 +22,9 @@ package android.security;
  */
 
 public abstract class Keystore {
-    private static final String TAG = "Keystore";
-    private static final String[] NOTFOUND = new String[0];
+    /** Action to unlock (or initialize) the keystore. */
+    public static final String ACTION_UNLOCK_CREDENTIAL_STORAGE =
+            "android.security.UNLOCK_CREDENTIAL_STORAGE";
 
     // Keystore States
     public static final int BOOTUP = 0;
@@ -31,8 +32,9 @@ public abstract class Keystore {
     public static final int LOCKED = 2;
     public static final int UNLOCKED = 3;
 
-    /**
-     */
+    private static final String TAG = "Keystore";
+    private static final String[] NOTFOUND = new String[0];
+
     public static Keystore getInstance() {
         return new FileKeystore();
     }
