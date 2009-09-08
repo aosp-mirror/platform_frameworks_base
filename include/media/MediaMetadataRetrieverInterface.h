@@ -44,6 +44,28 @@ class MediaMetadataRetrieverInterface : public MediaMetadataRetrieverBase
 {
 public:
     virtual             ~MediaMetadataRetrieverInterface() {}
+
+    // @param mode The intended mode of operations:
+    // can be any of the following:
+    // METADATA_MODE_NOOP: Experimental - just add and remove data source.
+    // METADATA_MODE_FRAME_CAPTURE_ONLY: For capture frame/thumbnail only.
+    // METADATA_MODE_METADATA_RETRIEVAL_ONLY: For meta data retrieval only.
+    // METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL: For both frame
+    //     capture and meta data retrieval.
+    virtual status_t    setMode(int mode) {
+                            if (mode < METADATA_MODE_NOOP ||
+                                mode > METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL) {
+                                return BAD_VALUE;
+                            }
+                            return NO_ERROR;
+                        }
+
+    virtual status_t    getMode(int* mode) const { *mode = mMode; return NO_ERROR; }
+    virtual VideoFrame* captureFrame() { return NULL; }
+    virtual MediaAlbumArt* extractAlbumArt() { return NULL; }
+    virtual const char* extractMetadata(int keyCode) { return NULL; }
+
+    uint32_t mMode;
 };
 
 }; // namespace android
