@@ -1166,4 +1166,10 @@
   <public type="style" name="Theme.Wallpaper" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar.Fullscreen" />
+  
+  <!-- Semi-transparent background that can be used when placing a dark
+       themed UI on top of some arbitrary background (such as the
+       wallpaper).  This darkens the background sufficiently that the UI
+       can be seen. -->
+  <public type="drawable" name="screen_background_dark_transparent" />
 </resources>

@@ -684,6 +684,11 @@ public class ActivityManager {
          */
         public int pid;
         
+        /**
+         * The user id of this process.
+         */
+        public int uid;
+        
         public String pkgList[];
         
         /**
@@ -797,6 +802,7 @@ public class ActivityManager {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(processName);
             dest.writeInt(pid);
+            dest.writeInt(uid);
             dest.writeStringArray(pkgList);
             dest.writeInt(importance);
             dest.writeInt(lru);
@@ -808,6 +814,7 @@ public class ActivityManager {
         public void readFromParcel(Parcel source) {
             processName = source.readString();
             pid = source.readInt();
+            uid = source.readInt();
             pkgList = source.readStringArray();
             importance = source.readInt();
             lru = source.readInt();
