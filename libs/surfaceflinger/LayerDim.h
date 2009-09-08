@@ -24,11 +24,10 @@
 #include <EGL/eglext.h>
 
 #include "LayerBase.h"
-#include "LayerBitmap.h"
-
-namespace android {
 
 // ---------------------------------------------------------------------------
+
+namespace android {
 
 class LayerDim : public LayerBaseClient
 {

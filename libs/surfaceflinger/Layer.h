@@ -21,10 +21,6 @@
 #include <sys/types.h>
 
 #include <ui/PixelFormat.h>
-
-#include <private/ui/SharedState.h>
-#include <private/ui/LayerState.h>
-
 #include <pixelflinger/pixelflinger.h>
 
 #include <EGL/egl.h>
@@ -32,7 +28,7 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-#include "LayerBitmap.h"
+#include "Buffer.h"
 #include "LayerBase.h"
 #include "Transform.h"
 
@@ -41,12 +37,12 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 class Client;
-class LayerBitmap;
 class FreezeLock;
+class Buffer;
 
 // ---------------------------------------------------------------------------
 
-const int NUM_BUFFERS = 2;
+const size_t NUM_BUFFERS = 2;
 
 class Layer : public LayerBaseClient
 {
@@ -56,23 +52,22 @@ public:
     virtual char const* getTypeID() const { return typeID; }
     virtual uint32_t getTypeInfo() const { return typeInfo; }
 
+    
+    SharedBufferServer*     lcblk;
+
+    
                  Layer(SurfaceFlinger* flinger, DisplayID display,
                          const sp<Client>& client, int32_t i);
 
         virtual ~Layer();
 
-    inline PixelFormat pixelFormat() const {
-        return frontBuffer().getPixelFormat();
-    }
+    status_t setBuffers(uint32_t w, uint32_t h, 
+            PixelFormat format, uint32_t flags=0);
 
-    status_t setBuffers(    uint32_t w, uint32_t h,
-                            PixelFormat format, uint32_t flags=0);
+    void setDrawingSize(uint32_t w, uint32_t h);
 
     virtual void onDraw(const Region& clip) const;
-    virtual void initStates(uint32_t w, uint32_t h, uint32_t flags);
-    virtual void setSizeChanged(uint32_t w, uint32_t h);
     virtual uint32_t doTransaction(uint32_t transactionFlags);
-    virtual Point getPhysicalSize() const;
     virtual void lockPageFlip(bool& recomputeVisibleRegions);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
     virtual void finishPageFlip();
@@ -80,42 +75,31 @@ public:
     virtual bool isSecure() const           { return mSecure; }
     virtual sp<Surface> createSurface() const;
     virtual status_t ditch();
-
-    const LayerBitmap& getBuffer(int i) const { return mBuffers[i]; }
-          LayerBitmap& getBuffer(int i)       { return mBuffers[i]; }
-
+    
     // only for debugging
-    const sp<FreezeLock>&  getFreezeLock() const { return mFreezeLock; }
+    inline sp<Buffer> getBuffer(int i) { return mBuffers[i]; }
+    // only for debugging
+    inline const sp<FreezeLock>&  getFreezeLock() const { return mFreezeLock; }
+    // only for debugging
+    inline PixelFormat pixelFormat() const { return mFormat; }
 
 private:
-    inline const LayerBitmap&
-            frontBuffer() const { return getBuffer(mFrontBufferIndex); }
-    inline LayerBitmap&
-            frontBuffer()       { return getBuffer(mFrontBufferIndex); }
-    inline const LayerBitmap&
-            backBuffer() const  { return getBuffer(1-mFrontBufferIndex); }
-    inline LayerBitmap&
-            backBuffer()        { return getBuffer(1-mFrontBufferIndex); }
-
+    inline sp<Buffer> getFrontBuffer() {
+        return mBuffers[mFrontBufferIndex];
+    }
+ 
     void reloadTexture(const Region& dirty);
 
-    status_t resize(int32_t index, uint32_t w, uint32_t h, const char* what);
-    Region post(uint32_t* oldState, bool& recomputeVisibleRegions);
-    sp<SurfaceBuffer> peekBuffer(int usage);
+    sp<SurfaceBuffer> requestBuffer(int index, int usage);
     void destroy();
-    void scheduleBroadcast();
 
-    
-    class SurfaceLayer : public LayerBaseClient::Surface
-    {
+    class SurfaceLayer : public LayerBaseClient::Surface {
     public:
-                SurfaceLayer(const sp<SurfaceFlinger>& flinger,
-                        SurfaceID id, const sp<Layer>& owner);
-                ~SurfaceLayer();
-
+        SurfaceLayer(const sp<SurfaceFlinger>& flinger,
+                SurfaceID id, const sp<Layer>& owner);
+        ~SurfaceLayer();
     private:
-        virtual sp<SurfaceBuffer> getBuffer(int usage);
-
+        virtual sp<SurfaceBuffer> requestBuffer(int index, int usage);
         sp<Layer> getOwner() const {
             return static_cast<Layer*>(Surface::getOwner().get());
         }
@@ -125,13 +109,20 @@ private:
     sp<Surface>             mSurface;
 
             bool            mSecure;
-            LayerBitmap     mBuffers[NUM_BUFFERS];
-            Texture         mTextures[NUM_BUFFERS];
             int32_t         mFrontBufferIndex;
             bool            mNeedsBlending;
-            bool            mResizeTransactionDone;
             Region          mPostedDirtyRegion;
             sp<FreezeLock>  mFreezeLock;
+            PixelFormat     mFormat;
+            uint32_t        mBufferFlags;
+            
+            // protected by mLock
+            sp<Buffer>      mBuffers[NUM_BUFFERS];
+            Texture         mTextures[NUM_BUFFERS];
+            uint32_t        mWidth;
+            uint32_t        mHeight;
+            
+   mutable Mutex mLock;
 };
 
 // ---------------------------------------------------------------------------

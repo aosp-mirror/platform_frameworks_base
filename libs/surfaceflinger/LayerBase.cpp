@@ -30,7 +30,6 @@
 
 #include "clz.h"
 #include "LayerBase.h"
-#include "LayerBlur.h"
 #include "SurfaceFlinger.h"
 #include "DisplayHardware/DisplayHardware.h"
 
@@ -127,9 +126,6 @@ uint32_t LayerBase::setTransactionFlags(uint32_t flags) {
     return android_atomic_or(flags, &mTransactionFlags);
 }
 
-void LayerBase::setSizeChanged(uint32_t w, uint32_t h) {
-}
-
 bool LayerBase::setPosition(int32_t x, int32_t y) {
     if (mCurrentState.transform.tx() == x && mCurrentState.transform.ty() == y)
         return false;
@@ -149,7 +145,6 @@ bool LayerBase::setLayer(uint32_t z) {
 bool LayerBase::setSize(uint32_t w, uint32_t h) {
     if (mCurrentState.w == w && mCurrentState.h == h)
         return false;
-    setSizeChanged(w, h);
     mCurrentState.w = w;
     mCurrentState.h = h;
     requestTransaction();
@@ -219,21 +214,14 @@ uint32_t LayerBase::doTransaction(uint32_t flags)
     return flags;
 }
 
-Point LayerBase::getPhysicalSize() const
-{
-    const Layer::State& front(drawingState());
-    return Point(front.w, front.h);
-}
-
 void LayerBase::validateVisibility(const Transform& planeTransform)
 {
     const Layer::State& s(drawingState());
     const Transform tr(planeTransform * s.transform);
     const bool transformed = tr.transformed();
    
-    const Point size(getPhysicalSize());
-    uint32_t w = size.x;
-    uint32_t h = size.y;    
+    uint32_t w = s.w;
+    uint32_t h = s.h;    
     tr.transform(mVertices[0], 0, 0);
     tr.transform(mVertices[1], 0, h);
     tr.transform(mVertices[2], w, h);
@@ -655,9 +643,7 @@ int32_t LayerBaseClient::sIdentity = 0;
 LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
     : LayerBase(flinger, display), client(client),
-      lcblk( client!=0 ? &(client->ctrlblk->layers[i]) : 0 ),
-      mIndex(i),
-      mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
+      mIndex(i), mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
 {
 }
 
@@ -666,11 +652,8 @@ void LayerBaseClient::onFirstRef()
     sp<Client> client(this->client.promote());
     if (client != 0) {
         client->bindLayer(this, mIndex);
-        // Initialize this layer's control block
-        memset(this->lcblk, 0, sizeof(layer_cblk_t));
-        this->lcblk->identity = mIdentity;
-        Region::writeEmpty(&(this->lcblk->region[0]), sizeof(flat_region_t));
-        Region::writeEmpty(&(this->lcblk->region[1]), sizeof(flat_region_t));
+        // Initialize this layer's identity
+        client->ctrlblk->setIdentity(mIndex, mIdentity);
     }
 }
 
@@ -759,7 +742,7 @@ status_t LayerBaseClient::Surface::onTransact(
     return BnSurface::onTransact(code, data, reply, flags);
 }
 
-sp<SurfaceBuffer> LayerBaseClient::Surface::getBuffer(int) 
+sp<SurfaceBuffer> LayerBaseClient::Surface::requestBuffer(int index, int usage) 
 {
     return NULL; 
 }

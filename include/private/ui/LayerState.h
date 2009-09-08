@@ -25,8 +25,6 @@
 #include <ui/ISurfaceFlingerClient.h>
 #include <ui/Region.h>
 
-#include <private/ui/SharedState.h>
-
 namespace android {
 
 class Parcel;

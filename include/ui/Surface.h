@@ -39,8 +39,8 @@ class IOMX;
 class Rect;
 class Surface;
 class SurfaceComposerClient;
-struct per_client_cblk_t;
-struct layer_cblk_t;
+class SharedClient;
+class SharedBufferClient;
 
 // ---------------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ private:
 
     ~SurfaceControl();
 
-    status_t validate(per_client_cblk_t const* cblk) const;
+    status_t validate(SharedClient const* cblk) const;
     void destroy();
     
     sp<SurfaceComposerClient>   mClient;
@@ -190,8 +190,7 @@ private:
 
     status_t getBufferLocked(int index, int usage);
    
-           status_t validate(per_client_cblk_t const* cblk) const;
-    static void _send_dirty_region(layer_cblk_t* lcblk, const Region& dirty);
+           status_t validate(SharedClient const* cblk) const;
 
     inline const BufferMapper& getBufferMapper() const { return mBufferMapper; }
     inline BufferMapper& getBufferMapper() { return mBufferMapper; }
@@ -210,11 +209,10 @@ private:
     int perform(int operation, va_list args);
 
     status_t dequeueBuffer(sp<SurfaceBuffer>* buffer);
-    status_t lockBuffer(const sp<SurfaceBuffer>& buffer);
-    status_t queueBuffer(const sp<SurfaceBuffer>& buffer);
 
     
     void setUsage(uint32_t reqUsage);
+    bool getUsage(uint32_t* usage);
     
     // constants
     sp<SurfaceComposerClient>   mClient;
@@ -224,21 +222,23 @@ private:
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
     BufferMapper&               mBufferMapper;
+    SharedBufferClient*         mSharedBufferClient;
 
     // protected by mSurfaceLock
     Rect                        mSwapRectangle;
     uint32_t                    mUsage;
-    bool                        mUsageChanged;
+    int32_t                     mUsageChanged;
     
     // protected by mSurfaceLock. These are also used from lock/unlock
     // but in that case, they must be called form the same thread.
     sp<SurfaceBuffer>           mBuffers[2];
     mutable Region              mDirtyRegion;
-    mutable uint8_t             mBackbufferIndex;
 
     // must be used from the lock/unlock thread
     sp<SurfaceBuffer>           mLockedBuffer;
+    sp<SurfaceBuffer>           mPostedBuffer;
     mutable Region              mOldDirtyRegion;
+    bool                        mNeedFullUpdate;
 
     // query() must be called from dequeueBuffer() thread
     uint32_t                    mWidth;
@@ -246,6 +246,7 @@ private:
 
     // Inherently thread-safe
     mutable Mutex               mSurfaceLock;
+    mutable Mutex               mApiLock;
 };
 
 }; // namespace android
