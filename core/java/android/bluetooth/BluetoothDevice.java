@@ -357,6 +357,7 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Use {@link BluetoothSocket#connect} to intiate the outgoing
      * connection.
      * <p>Valid RFCOMM channels are in range 1 to 30.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      * @param channel RFCOMM channel to connect to
      * @return a RFCOMM BluetoothServerSocket ready for an outgoing connection
      * @throws IOException on error, for example Bluetooth not available, or
