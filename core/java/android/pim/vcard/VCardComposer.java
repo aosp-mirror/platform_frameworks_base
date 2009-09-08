@@ -103,7 +103,7 @@ public class VCardComposer {
         private OutputStream mOutputStream; // mWriter will close this.
         private Writer mWriter;
 
-        private boolean mFinishIsCalled = false;
+        private boolean mOnTerminateIsCalled = false;
 
         /**
          * Input stream will be closed on the detruction of this object.
@@ -152,6 +152,7 @@ public class VCardComposer {
         }
 
         public void onTerminate() {
+            mOnTerminateIsCalled = true;
             if (mWriter != null) {
                 try {
                     // Flush and sync the data so that a user is able to pull
@@ -177,7 +178,7 @@ public class VCardComposer {
 
         @Override
         public void finalize() {
-            if (!mFinishIsCalled) {
+            if (!mOnTerminateIsCalled) {
                 onTerminate();
             }
         }
@@ -604,11 +605,11 @@ public class VCardComposer {
 
                 // FN property
                 builder.append(VCARD_PROPERTY_FULL_NAME);
-                builder.append(VCARD_ATTR_SEPARATOR);
                 if (!VCardUtils.containsOnlyAscii(encodedFullname)) {
+                    builder.append(VCARD_ATTR_SEPARATOR);
                     builder.append(mVCardAttributeCharset);
-                    builder.append(VCARD_DATA_SEPARATOR);
                 }
+                builder.append(VCARD_DATA_SEPARATOR);
                 builder.append(encodedFullname);
                 builder.append(VCARD_COL_SEPARATOR);
             } else if (!TextUtils.isEmpty(displayName)) {
@@ -1241,6 +1242,9 @@ public class VCardComposer {
             break;
         case Email.TYPE_OTHER:
             builder.append(Constants.ATTR_TYPE_INTERNET);
+            break;
+        case Email.TYPE_MOBILE:
+            builder.append(Constants.ATTR_TYPE_CELL);
             break;
         default:
             Log.e(LOG_TAG, "Unknown Email type: " + type);
