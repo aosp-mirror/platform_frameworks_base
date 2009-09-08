@@ -1659,6 +1659,15 @@ void OMXCodec::setImageOutputFormat(
             break;
         }
 
+        case OMX_COLOR_Format16bitARGB4444:
+        case OMX_COLOR_Format16bitARGB1555:
+        case OMX_COLOR_Format16bitRGB565:
+        case OMX_COLOR_Format16bitBGR565:
+        {
+            def.nBufferSize = width * height * 2;
+            break;
+        }
+
         default:
             CHECK(!"Should not be here. Unknown color format.");
             break;
