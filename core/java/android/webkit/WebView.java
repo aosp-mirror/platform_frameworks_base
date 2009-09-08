@@ -4605,6 +4605,10 @@ public class WebView extends AbsoluteLayout
             vx = vx * 3 / 4;
             vy = vy * 3 / 4;
         }
+        if ((maxX == 0 && vy == 0) || (maxY == 0 && vx == 0)) {
+            WebViewCore.resumeUpdate(mWebViewCore);
+            return;
+        }
         float currentVelocity = mScroller.getCurrVelocity();
         if (mLastVelocity > 0 && currentVelocity > 0) {
             float deltaR = (float) (Math.abs(Math.atan2(mLastVelY, mLastVelX)
@@ -4621,7 +4625,10 @@ public class WebView extends AbsoluteLayout
             }
         } else if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "doFling start last=" + mLastVelocity
-                    + " current=" + currentVelocity);
+                    + " current=" + currentVelocity
+                    + " vx=" + vx + " vy=" + vy
+                    + " maxX=" + maxX + " maxY=" + maxY
+                    + " mScrollX=" + mScrollX + " mScrollY=" + mScrollY);
         }
         mLastVelX = vx;
         mLastVelY = vy;
