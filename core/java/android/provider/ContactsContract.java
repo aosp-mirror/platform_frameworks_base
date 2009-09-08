@@ -999,10 +999,10 @@ public final class ContactsContract {
                     "phones");
 
             /**
-             * The content:// style URI for filtering data records of the
-             * {@link Phone#CONTENT_ITEM_TYPE} MIME type, combined with the
-             * associated raw contact and aggregate contact data. The filter argument should
-             * be passed as an additional path segment after this URI.
+             * The content:// style URL for phone lookup using a filter. The filter returns
+             * records of MIME type {@link Phone#CONTENT_ITEM_TYPE}. The filter is applied
+             * to display names as well as phone numbers. The filter argument should be passed
+             * as an additional path segment after this URI.
              */
             public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
                     "filter");
@@ -1078,11 +1078,23 @@ public final class ContactsContract {
                     "emails");
 
             /**
-             * The content:// style URL for filtering data rows by email address. The
-             * filter argument should be passed as an additional path segment after
-             * this URI.
+             * The content:// style URL for looking up data rows by email address. The
+             * lookup argument, an email address, should be passed as an additional path segment
+             * after this URI.
              */
-            public static final Uri CONTENT_FILTER_EMAIL_URI = Uri.withAppendedPath(CONTENT_URI,
+            public static final Uri CONTENT_LOOKUP_URI = Uri.withAppendedPath(CONTENT_URI,
+                    "lookup");
+
+            @Deprecated
+            public static final Uri CONTENT_FILTER_EMAIL_URI = CONTENT_LOOKUP_URI;
+
+            /**
+             * The content:// style URL for email lookup using a filter. The filter returns
+             * records of MIME type {@link Email#CONTENT_ITEM_TYPE}. The filter is applied
+             * to display names as well as email addresses. The filter argument should be passed
+             * as an additional path segment after this URI.
+             */
+            public static final Uri CONTENT_FILTER_URI = Uri.withAppendedPath(CONTENT_URI,
                     "filter");
 
             public static final int TYPE_HOME = 1;
