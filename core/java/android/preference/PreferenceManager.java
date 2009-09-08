@@ -134,7 +134,10 @@ public class PreferenceManager {
     
     private OnPreferenceTreeClickListener mOnPreferenceTreeClickListener;
     
-    PreferenceManager(Activity activity, int firstRequestCode) {
+    /**
+     * @hide
+     */
+    public PreferenceManager(Activity activity, int firstRequestCode) {
         mActivity = activity;
         mNextRequestCode = firstRequestCode;
         
@@ -240,8 +243,9 @@ public class PreferenceManager {
      *            hierarchies into.
      * @return The root hierarchy (if one was not provided, the new hierarchy's
      *         root).
+     * @hide
      */
-    PreferenceScreen inflateFromResource(Context context, int resId,
+    public PreferenceScreen inflateFromResource(Context context, int resId,
             PreferenceScreen rootPreferences) {
         // Block commits
         setNoCommit(true);
