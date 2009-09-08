@@ -35,11 +35,8 @@ public:
     virtual int16 handleEvent(const ANPEvent* evt);
 
 private:
-    void drawPlugin(int surfaceWidth, int surfaceHeight);
+    void drawPlugin(const ANPBitmap& bitmap, const ANPRectI& clip);
     void printToDiv(const char* text, int length);
-
-    bool        m_surfaceReady;
-    ANPSurface* m_surface;
 };
 
 #endif // eventPlugin__DEFINED
