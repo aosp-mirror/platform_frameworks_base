@@ -49,6 +49,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <p>{@link BluetoothSocket} and {@link BluetoothServerSocket} are thread
  * safe. In particular, {@link #close} will always immediately abort ongoing
  * operations and close the socket.
+ *
+ * <p>All methods on a {@link BluetoothSocket} require
+ * {@link android.Manifest.permission#BLUETOOTH}
  */
 public final class BluetoothSocket implements Closeable {
     /** Keep TYPE_ fields in sync with BluetoothSocket.cpp */
