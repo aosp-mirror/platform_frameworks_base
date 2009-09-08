@@ -47,6 +47,8 @@ public class VCardParser_V30 extends VCardParser_V21 {
 
     private String mPreviousLine;
     
+    private boolean mEmittedAgentWarning = false;
+    
     @Override
     protected String getVersion() {
         return Constants.VERSION_V30;
@@ -221,7 +223,7 @@ public class VCardParser_V30 extends VCardParser_V21 {
     }
 
     @Override
-    protected void handleAgent(String propertyValue) throws VCardException {
+    protected void handleAgent(String propertyValue) {
         // The way how vCard 3.0 supports "AGENT" is completely different from vCard 2.0.
         //
         // e.g.
@@ -238,7 +240,12 @@ public class VCardParser_V30 extends VCardParser_V21 {
         //  CID:JQPUBLIC.part3.960129T083020.xyzMail@host3.com
         //
         // This is not VCARD. Should we support this?
-        throw new VCardException("AGENT in vCard 3.0 is not supported yet.");
+        // throw new VCardException("AGENT in vCard 3.0 is not supported yet.");
+        if (!mEmittedAgentWarning) {
+            Log.w(LOG_TAG, "AGENT in vCard 3.0 is not supported yet. Ignore it");
+            mEmittedAgentWarning = true;
+        }
+        // Just ignore the line for now, since we cannot know how to handle it...
     }
     
     /**
