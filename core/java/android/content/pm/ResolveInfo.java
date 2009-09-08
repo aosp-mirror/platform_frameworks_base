@@ -92,6 +92,13 @@ public class ResolveInfo implements Parcelable {
     public int icon;
 
     /**
+     * Optional -- if non-null, the {@link #labelRes} and {@link #icon}
+     * resources will be loaded from this package, rather than the one
+     * containing the resolved component.
+     */
+    public String resolvePackageName;
+    
+    /**
      * Retrieve the current textual label associated with this resolution.  This
      * will call back on the given PackageManager to load the label from
      * the application.
@@ -106,9 +113,15 @@ public class ResolveInfo implements Parcelable {
         if (nonLocalizedLabel != null) {
             return nonLocalizedLabel;
         }
+        CharSequence label;
+        if (resolvePackageName != null && labelRes != 0) {
+            label = pm.getText(resolvePackageName, labelRes, null);
+            if (label != null) {
+                return label;
+            }
+        }
         ComponentInfo ci = activityInfo != null ? activityInfo : serviceInfo;
         ApplicationInfo ai = ci.applicationInfo;
-        CharSequence label;
         if (labelRes != 0) {
             label = pm.getText(ci.packageName, labelRes, ai);
             if (label != null) {
@@ -133,6 +146,12 @@ public class ResolveInfo implements Parcelable {
         ComponentInfo ci = activityInfo != null ? activityInfo : serviceInfo;
         ApplicationInfo ai = ci.applicationInfo;
         Drawable dr;
+        if (resolvePackageName != null && icon != 0) {
+            dr = pm.getDrawable(resolvePackageName, icon, null);
+            if (dr != null) {
+                return dr;
+            }
+        }
         if (icon != 0) {
             dr = pm.getDrawable(ci.packageName, icon, ai);
             if (dr != null) {
@@ -160,24 +179,26 @@ public class ResolveInfo implements Parcelable {
         if (filter != null) {
             pw.println(prefix + "Filter:");
             filter.dump(pw, prefix + "  ");
-        } else {
-            pw.println(prefix + "Filter: null");
         }
         pw.println(prefix + "priority=" + priority
                 + " preferredOrder=" + preferredOrder
                 + " match=0x" + Integer.toHexString(match)
                 + " specificIndex=" + specificIndex
                 + " isDefault=" + isDefault);
-        pw.println(prefix + "labelRes=0x" + Integer.toHexString(labelRes)
-                + " nonLocalizedLabel=" + nonLocalizedLabel
-                + " icon=0x" + Integer.toHexString(icon));
+        if (resolvePackageName != null) {
+            pw.println(prefix + "resolvePackageName=" + resolvePackageName);
+        }
+        if (labelRes != 0 || nonLocalizedLabel != null || icon != 0) {
+            pw.println(prefix + "labelRes=0x" + Integer.toHexString(labelRes)
+                    + " nonLocalizedLabel=" + nonLocalizedLabel
+                    + " icon=0x" + Integer.toHexString(icon));
+        }
         if (activityInfo != null) {
             pw.println(prefix + "ActivityInfo:");
             activityInfo.dump(pw, prefix + "  ");
         } else if (serviceInfo != null) {
             pw.println(prefix + "ServiceInfo:");
-            // TODO
-            //serviceInfo.dump(pw, prefix + "  ");
+            serviceInfo.dump(pw, prefix + "  ");
         }
     }
     
@@ -219,6 +240,7 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(labelRes);
         TextUtils.writeToParcel(nonLocalizedLabel, dest, parcelableFlags);
         dest.writeInt(icon);
+        dest.writeString(resolvePackageName);
     }
 
     public static final Creator<ResolveInfo> CREATOR
@@ -257,6 +279,7 @@ public class ResolveInfo implements Parcelable {
         nonLocalizedLabel
                 = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         icon = source.readInt();
+        resolvePackageName = source.readString();
     }
     
     public static class DisplayNameComparator

@@ -3407,6 +3407,23 @@
     </declare-styleable>
 
     <!-- =============================== -->
+    <!-- App package class attributes -->
+    <!-- =============================== -->
+
+    <!-- Use <code>wallpaper</code> as the root tag of the XML resource that
+         describes an
+         {@link android.service.wallpaper.WallpaperService}, which is
+         referenced from its
+         {@link android.service.wallpaper.WallpaperService#SERVICE_META_DATA}
+         meta-data entry.  Described here are the attributes that can be
+         included in that tag. -->
+    <declare-styleable name="Wallpaper">
+        <!-- Component name of an activity that allows the user to modify
+             the current settings for this wallpaper. -->
+        <attr name="settingsActivity" />
+    </declare-styleable>
+
+    <!-- =============================== -->
     <!-- Accounts package class attributes -->
     <!-- =============================== -->
 

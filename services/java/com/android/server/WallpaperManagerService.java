@@ -22,6 +22,7 @@ import static android.os.ParcelFileDescriptor.*;
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
 import android.app.PendingIntent;
+import android.app.WallpaperInfo;
 import android.backup.BackupManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,7 +42,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.IWallpaperService;
@@ -51,12 +51,14 @@ import android.util.Xml;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.List;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -130,15 +132,25 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     
     class WallpaperConnection extends IWallpaperConnection.Stub
             implements ServiceConnection {
+        final WallpaperInfo mInfo;
         final Binder mToken = new Binder();
         IWallpaperService mService;
         IWallpaperEngine mEngine;
 
+        public WallpaperConnection(WallpaperInfo info) {
+            mInfo = info;
+        }
+        
         public void onServiceConnected(ComponentName name, IBinder service) {
             synchronized (mLock) {
                 if (mWallpaperConnection == this) {
                     mService = IWallpaperService.Stub.asInterface(service);
                     attachServiceLocked(this);
+                    // XXX should probably do saveSettingsLocked() later
+                    // when we have an engine, but I'm not sure about
+                    // locking there and anyway we always need to be able to
+                    // recover if there is something wrong.
+                    saveSettingsLocked();
                 }
             }
         }
@@ -165,11 +177,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         public ParcelFileDescriptor setWallpaper(String name) {
             synchronized (mLock) {
                 if (mWallpaperConnection == this) {
-                    ParcelFileDescriptor pfd = updateWallpaperBitmapLocked(name);
-                    if (pfd != null) {
-                        saveSettingsLocked();
-                    }
-                    return pfd;
+                    return updateWallpaperBitmapLocked(name);
                 }
                 return null;
             }
@@ -283,6 +291,15 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    public WallpaperInfo getWallpaperInfo() {
+        synchronized (mLock) {
+            if (mWallpaperConnection != null) {
+                return mWallpaperConnection.mInfo;
+            }
+            return null;
+        }
+    }
+    
     public ParcelFileDescriptor setWallpaper(String name) {
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
         synchronized (mLock) {
@@ -356,32 +373,43 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                         + ": " + realName);
             }
             
+            WallpaperInfo wi = null;
+            
             Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
             if (name != null) {
                 // Make sure the selected service is actually a wallpaper service.
                 List<ResolveInfo> ris = mContext.getPackageManager()
-                        .queryIntentServices(intent, 0);
+                        .queryIntentServices(intent, PackageManager.GET_META_DATA);
                 for (int i=0; i<ris.size(); i++) {
                     ServiceInfo rsi = ris.get(i).serviceInfo;
                     if (rsi.name.equals(si.name) &&
                             rsi.packageName.equals(si.packageName)) {
-                        ris = null;
+                        try {
+                            wi = new WallpaperInfo(mContext, ris.get(i));
+                        } catch (XmlPullParserException e) {
+                            throw new IllegalArgumentException(e);
+                        } catch (IOException e) {
+                            throw new IllegalArgumentException(e);
+                        }
                         break;
                     }
                 }
-                if (ris != null) {
+                if (wi == null) {
                     throw new SecurityException("Selected service is not a wallpaper: "
                             + realName);
                 }
             }
             
             // Bind the service!
-            WallpaperConnection newConn = new WallpaperConnection();
+            WallpaperConnection newConn = new WallpaperConnection(wi);
             intent.setComponent(realName);
             intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                     com.android.internal.R.string.wallpaper_binding_label);
             intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
-                    mContext, 0, new Intent(Intent.ACTION_SET_WALLPAPER), 0));
+                    mContext, 0,
+                    Intent.createChooser(new Intent(Intent.ACTION_SET_WALLPAPER),
+                            mContext.getText(com.android.internal.R.string.chooser_wallpaper)),
+                            0));
             if (!mContext.bindService(intent, newConn,
                     Context.BIND_AUTO_CREATE)) {
                 throw new IllegalArgumentException("Unable to bind service: "
@@ -639,5 +667,36 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             }
         }
         return false;
+    }
+    
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            
+            pw.println("Permission Denial: can't dump wallpaper service from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+
+        synchronized (mLock) {
+            pw.println("Current Wallpaper Service state:");
+            pw.print("  mWidth="); pw.print(mWidth);
+                    pw.print(" mHeight="); pw.println(mHeight);
+            pw.print("  mName="); pw.println(mName);
+            pw.print("  mWallpaperComponent="); pw.println(mWallpaperComponent);
+            if (mWallpaperConnection != null) {
+                WallpaperConnection conn = mWallpaperConnection;
+                pw.print("  Wallpaper connection ");
+                        pw.print(conn); pw.println(":");
+                pw.print("    mInfo.component="); pw.println(conn.mInfo.getComponent());
+                pw.print("    mToken="); pw.println(conn.mToken);
+                pw.print("    mService="); pw.println(conn.mService);
+                pw.print("    mEngine="); pw.println(conn.mEngine);
+                pw.print("    mLastDiedTime=");
+                        pw.println(mLastDiedTime - SystemClock.uptimeMillis());
+            }
+        }
     }
 }

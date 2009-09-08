@@ -53,9 +53,9 @@ import java.util.List;
  *
  */
 public abstract class LauncherActivity extends ListActivity {
-
     Intent mIntent;
     PackageManager mPackageManager;
+    IconResizer mIconResizer;
     
     /**
      * An item in the list
@@ -77,7 +77,9 @@ public abstract class LauncherActivity extends ListActivity {
                 label = resolveInfo.activityInfo.name;
             }
             
-            icon = resizer.createIconThumbnail(resolveInfo.loadIcon(pm));
+            if (resizer != null) {
+                icon = resizer.createIconThumbnail(resolveInfo.loadIcon(pm));
+            }
             packageName = ci.applicationInfo.packageName;
             className = ci.name;
         }
@@ -93,13 +95,15 @@ public abstract class LauncherActivity extends ListActivity {
         private final Object lock = new Object();
         private ArrayList<ListItem> mOriginalValues;
 
+        protected final IconResizer mIconResizer;
         protected final LayoutInflater mInflater;
 
         protected List<ListItem> mActivitiesList;
 
         private Filter mFilter;
         
-        public ActivityAdapter() {
+        public ActivityAdapter(IconResizer resizer) {
+            mIconResizer = resizer;
             mInflater = (LayoutInflater) LauncherActivity.this.getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
             mActivitiesList = makeListItems();
@@ -154,6 +158,10 @@ public abstract class LauncherActivity extends ListActivity {
         private void bindView(View view, ListItem item) {
             TextView text = (TextView) view;
             text.setText(item.label);
+            if (item.icon == null) {
+                item.icon = mIconResizer.createIconThumbnail(
+                        item.resolveInfo.loadIcon(getPackageManager()));
+            }
             text.setCompoundDrawablesWithIntrinsicBounds(item.icon, null, null, null);
         }
         
@@ -330,9 +338,11 @@ public abstract class LauncherActivity extends ListActivity {
         setProgressBarIndeterminateVisibility(true);
         onSetContentView();
             
+        mIconResizer = new IconResizer();
+        
         mIntent = new Intent(getTargetIntent());
         mIntent.setComponent(null);
-        mAdapter = new ActivityAdapter();
+        mAdapter = new ActivityAdapter(mIconResizer);
         
         setListAdapter(mAdapter);
         getListView().setTextFilterEnabled(true);
@@ -398,13 +408,11 @@ public abstract class LauncherActivity extends ListActivity {
         List<ResolveInfo> list = onQueryPackageManager(mIntent);
         Collections.sort(list, new ResolveInfo.DisplayNameComparator(mPackageManager));
         
-        IconResizer resizer = new IconResizer();
-        
         ArrayList<ListItem> result = new ArrayList<ListItem>(list.size());
         int listSize = list.size();
         for (int i = 0; i < listSize; i++) {
             ResolveInfo resolveInfo = list.get(i);
-            result.add(new ListItem(mPackageManager, resolveInfo, resizer));
+            result.add(new ListItem(mPackageManager, resolveInfo, null));
         }
 
         return result;

@@ -1929,6 +1929,15 @@ public class Intent implements Parcelable {
     public static final String EXTRA_TITLE = "android.intent.extra.TITLE";
 
     /**
+     * A Parcelable[] of {@link Intent} or
+     * {@link android.content.pm.LabeledIntent} objects as set with
+     * {@link #putExtra(String, Parcelable[])} of additional activities to place
+     * a the front of the list of choices, when shown to the user with a
+     * {@link #ACTION_CHOOSER}.
+     */
+    public static final String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
+
+    /**
      * A {@link android.view.KeyEvent} object containing the event that
      * triggered the creation of the Intent it is in.
      */
@@ -5067,7 +5076,8 @@ public class Intent implements Parcelable {
         }
     };
 
-    private Intent(Parcel in) {
+    /** @hide */
+    protected Intent(Parcel in) {
         readFromParcel(in);
     }
 

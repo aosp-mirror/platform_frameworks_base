@@ -19,6 +19,7 @@ package android.app;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.app.IWallpaperManagerCallback;
+import android.app.WallpaperInfo;
 import android.content.ComponentName;
 
 /** @hide */
@@ -39,6 +40,11 @@ interface IWallpaperManager {
      */
     ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb,
             out Bundle outParams);
+    
+    /**
+     * Get information about a live wallpaper.
+     */
+    WallpaperInfo getWallpaperInfo();
     
     /**
      * Clear the wallpaper.
