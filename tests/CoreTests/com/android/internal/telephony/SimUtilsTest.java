@@ -59,7 +59,7 @@ public class SimUtilsTest extends TestCase {
         assertEquals(89, IccUtils.cdmaBcdByteToInt((byte) 0x89));
 
         // Out of range is treated as 0
-        assertEquals(80, IccUtils.gsmBcdByteToInt((byte) 0x8c));
+        assertEquals(80, IccUtils.cdmaBcdByteToInt((byte) 0x8c));
 
         /*
          * adnStringFieldToString()
