@@ -21,6 +21,7 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 
+#include "Buffer.h"
 #include "BufferAllocator.h"
 #include "LayerDim.h"
 #include "SurfaceFlinger.h"

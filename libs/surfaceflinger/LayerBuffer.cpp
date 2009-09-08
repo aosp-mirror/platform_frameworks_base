@@ -28,6 +28,7 @@
 
 #include <hardware/copybit.h>
 
+#include "Buffer.h"
 #include "BufferAllocator.h"
 #include "LayerBuffer.h"
 #include "SurfaceFlinger.h"
@@ -58,7 +59,7 @@ LayerBuffer::~LayerBuffer()
 void LayerBuffer::onFirstRef()
 {
     LayerBaseClient::onFirstRef();
-    mSurface = new SurfaceBuffer(mFlinger, clientIndex(),
+    mSurface = new SurfaceLayerBuffer(mFlinger, clientIndex(),
             const_cast<LayerBuffer *>(this));
 }
 
@@ -181,21 +182,21 @@ sp<LayerBuffer::Source> LayerBuffer::clearSource() {
 }
 
 // ============================================================================
-// LayerBuffer::SurfaceBuffer
+// LayerBuffer::SurfaceLayerBuffer
 // ============================================================================
 
-LayerBuffer::SurfaceBuffer::SurfaceBuffer(const sp<SurfaceFlinger>& flinger,
+LayerBuffer::SurfaceLayerBuffer::SurfaceLayerBuffer(const sp<SurfaceFlinger>& flinger,
         SurfaceID id, const sp<LayerBuffer>& owner)
     : LayerBaseClient::Surface(flinger, id, owner->getIdentity(), owner)
 {
 }
 
-LayerBuffer::SurfaceBuffer::~SurfaceBuffer()
+LayerBuffer::SurfaceLayerBuffer::~SurfaceLayerBuffer()
 {
     unregisterBuffers();
 }
 
-status_t LayerBuffer::SurfaceBuffer::registerBuffers(
+status_t LayerBuffer::SurfaceLayerBuffer::registerBuffers(
         const ISurface::BufferHeap& buffers)
 {
     sp<LayerBuffer> owner(getOwner());
@@ -204,21 +205,21 @@ status_t LayerBuffer::SurfaceBuffer::registerBuffers(
     return NO_INIT;
 }
 
-void LayerBuffer::SurfaceBuffer::postBuffer(ssize_t offset)
+void LayerBuffer::SurfaceLayerBuffer::postBuffer(ssize_t offset)
 {
     sp<LayerBuffer> owner(getOwner());
     if (owner != 0)
         owner->postBuffer(offset);
 }
 
-void LayerBuffer::SurfaceBuffer::unregisterBuffers()
+void LayerBuffer::SurfaceLayerBuffer::unregisterBuffers()
 {
     sp<LayerBuffer> owner(getOwner());
     if (owner != 0)
         owner->unregisterBuffers();
 }
 
-sp<OverlayRef> LayerBuffer::SurfaceBuffer::createOverlay(
+sp<OverlayRef> LayerBuffer::SurfaceLayerBuffer::createOverlay(
         uint32_t w, uint32_t h, int32_t format) {
     sp<OverlayRef> result;
     sp<LayerBuffer> owner(getOwner());
@@ -462,8 +463,8 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
                 const int tmp_h = floorf(src_height * yscale);
                 
                 if (mTempBitmap==0 || 
-                        mTempBitmap->getWidth() < tmp_w || 
-                        mTempBitmap->getHeight() < tmp_h) {
+                        mTempBitmap->getWidth() < size_t(tmp_w) || 
+                        mTempBitmap->getHeight() < size_t(tmp_h)) {
                     mTempBitmap.clear();
                     mTempBitmap = new android::Buffer(
                             tmp_w, tmp_h, src.img.format,

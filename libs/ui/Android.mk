@@ -23,7 +23,9 @@ LOCAL_SRC_FILES:= \
 	PixelFormat.cpp \
 	Rect.cpp \
 	Region.cpp \
+	SharedBufferStack.cpp \
 	Surface.cpp \
+	SurfaceBuffer.cpp \
 	SurfaceComposerClient.cpp \
 	SurfaceFlingerSynchro.cpp 
 

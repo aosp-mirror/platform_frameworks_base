@@ -47,6 +47,9 @@ public:
     status_t lock(uint32_t usage, const Rect& rect, void** vaddr);
     status_t unlock();
 
+    void setIndex(int index);
+    int getIndex() const;
+    
 protected:
             SurfaceBuffer();
             SurfaceBuffer(const Parcel& reply);
@@ -69,6 +72,7 @@ private:
             android_native_buffer_t const* buffer);
     
     BufferMapper& mBufferMapper;
+    int mIndex;
 };
 
 }; // namespace android

@@ -44,13 +44,13 @@ protected:
         UNREGISTER_BUFFERS,
         POST_BUFFER, // one-way transaction
         CREATE_OVERLAY,
-        GET_BUFFER,
+        REQUEST_BUFFER,
     };
 
 public: 
     DECLARE_META_INTERFACE(Surface);
 
-    virtual sp<SurfaceBuffer> getBuffer(int usage) = 0; 
+    virtual sp<SurfaceBuffer> requestBuffer(int bufferIdx, int usage) = 0; 
     
     class BufferHeap {
     public:

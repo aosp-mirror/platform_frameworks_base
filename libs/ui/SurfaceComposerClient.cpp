@@ -40,8 +40,8 @@
 #include <ui/SurfaceComposerClient.h>
 #include <ui/Rect.h>
 
-#include <private/ui/SharedState.h>
 #include <private/ui/LayerState.h>
+#include <private/ui/SharedBufferStack.h>
 #include <private/ui/SurfaceFlingerSynchro.h>
 
 #define VERBOSE(...)	((void)0)
@@ -103,169 +103,6 @@ static volatile surface_flinger_cblk_t const * get_cblk()
 
 // ---------------------------------------------------------------------------
 
-// these functions are used by the clients
-status_t per_client_cblk_t::validate(size_t i) const {
-    if (uint32_t(i) >= NUM_LAYERS_MAX)
-        return BAD_INDEX;
-    if (layers[i].swapState & eInvalidSurface)
-        return NO_MEMORY;
-    return NO_ERROR;
-}
-
-int32_t per_client_cblk_t::lock_layer(size_t i, uint32_t flags)
-{
-    int32_t index;
-    uint32_t state;
-    int timeout = 0;
-    status_t result;
-    layer_cblk_t * const layer = layers + i;
-    const bool blocking = flags & BLOCKING;
-    const bool inspect  = flags & INSPECT;
-
-    do {
-        state = layer->swapState;
-
-        if (UNLIKELY((state&(eFlipRequested|eNextFlipPending)) == eNextFlipPending)) {
-            LOGE("eNextFlipPending set but eFlipRequested not set, "
-                 "layer=%d (lcblk=%p), state=%08x",
-                 int(i), layer, int(state));
-            return INVALID_OPERATION;
-        }
-
-        if (UNLIKELY(state&eLocked)) {
-            LOGE("eLocked set when entering lock_layer(), "
-                 "layer=%d (lcblk=%p), state=%08x",
-                 int(i), layer, int(state));
-            return WOULD_BLOCK;
-        }
-
-
-	    if (state & (eFlipRequested | eNextFlipPending | eResizeRequested
-                        | eInvalidSurface))
-        {
-	        int32_t resizeIndex;
-	        Mutex::Autolock _l(lock);
-	            // might block for a very short amount of time
-	            // will never cause the server to block (trylock())
-
-	        goto start_loop_here;
-
-	        // We block the client if:
-	        // eNextFlipPending:  we've used both buffers already, so we need to
-	        //                    wait for one to become availlable.
-	        // eResizeRequested:  the buffer we're going to acquire is being
-	        //                    resized. Block until it is done.
-	        // eFlipRequested && eBusy: the buffer we're going to acquire is
-	        //                    currently in use by the server.
-	        // eInvalidSurface:   this is a special case, we don't block in this
-	        //                    case, we just return an error.
-
-	        while((state & (eNextFlipPending|eInvalidSurface)) ||
-	              (state & ((resizeIndex) ? eResizeBuffer1 : eResizeBuffer0)) ||
-	              ((state & (eFlipRequested|eBusy)) == (eFlipRequested|eBusy)) )
-	        {
-	            if (state & eInvalidSurface)
-	                return NO_MEMORY;
-
-	            if (!blocking)
-	                return WOULD_BLOCK;
-
-                timeout = 0;
-                result = cv.waitRelative(lock, seconds(1));
-	            if (__builtin_expect(result!=NO_ERROR, false)) {
-                    const int newState = layer->swapState;
-                    LOGW(   "lock_layer timed out (is the CPU pegged?) "
-                            "layer=%d, lcblk=%p, state=%08x (was %08x)",
-                            int(i), layer, newState, int(state));
-                    timeout = newState != int(state);
-                }
-
-	        start_loop_here:
-	            state = layer->swapState;
-	            resizeIndex = (state&eIndex) ^ ((state&eFlipRequested)>>1);
-	        }
-
-            LOGW_IF(timeout,
-                    "lock_layer() timed out but didn't appear to need "
-                    "to be locked and we recovered "
-                    "(layer=%d, lcblk=%p, state=%08x)",
-                    int(i), layer, int(state));
-	    }
-
-	    // eFlipRequested is not set and cannot be set by another thread: it's
-	    // safe to use the first buffer without synchronization.
-
-        // Choose the index depending on eFlipRequested.
-        // When it's set, choose the 'other' buffer.
-        index = (state&eIndex) ^ ((state&eFlipRequested)>>1);
-
-	    // make sure this buffer is valid
-        status_t err = layer->surface[index].status;
-	    if (err < 0) {
-	        return err;
-	    }
-
-        if (inspect) {
-            // we just want to inspect this layer. don't lock it.
-            goto done;
-        }
-
-	    // last thing before we're done, we need to atomically lock the state
-    } while (android_atomic_cmpxchg(state, state|eLocked, &(layer->swapState)));
-
-    VERBOSE("locked layer=%d (lcblk=%p), buffer=%d, state=0x%08x",
-         int(i), layer, int(index), int(state));
-
-    // store the index of the locked buffer (for client use only)
-    layer->flags &= ~eBufferIndex;
-    layer->flags |= ((index << eBufferIndexShift) & eBufferIndex);
-
-done:
-    return index;
-}
-
-uint32_t per_client_cblk_t::unlock_layer_and_post(size_t i)
-{
-    // atomically set eFlipRequested and clear eLocked and optionally
-    // set eNextFlipPending if eFlipRequested was already set
-
-    layer_cblk_t * const layer = layers + i;
-    int32_t oldvalue, newvalue;
-    do {
-        oldvalue = layer->swapState;
-            // get current value
-
-        newvalue = oldvalue & ~eLocked;
-            // clear eLocked
-
-        newvalue |= eFlipRequested;
-            // set eFlipRequested
-
-        if (oldvalue & eFlipRequested)
-            newvalue |= eNextFlipPending;
-            // if eFlipRequested was already set, set eNextFlipPending
-
-    } while (android_atomic_cmpxchg(oldvalue, newvalue, &(layer->swapState)));
-
-    VERBOSE("request pageflip for layer=%d, buffer=%d, state=0x%08x",
-            int(i), int((layer->flags & eBufferIndex) >> eBufferIndexShift),
-            int(newvalue));
-
-    // from this point, the server can kick in at any time and use the first
-    // buffer, so we cannot use it anymore, and we must use the 'other'
-    // buffer instead (or wait if it is not available yet, see lock_layer).
-
-    return newvalue;
-}
-
-void per_client_cblk_t::unlock_layer(size_t i)
-{
-    layer_cblk_t * const layer = layers + i;
-    android_atomic_and(~eLocked, &layer->swapState);
-}
-
-// ---------------------------------------------------------------------------
-
 static inline int compare_type( const layer_state_t& lhs,
                                 const layer_state_t& rhs) {
     if (lhs.surface < rhs.surface)  return -1;
@@ -315,7 +152,7 @@ void SurfaceComposerClient::_init(
 
     mControlMemory = mClient->getControlBlock();
     mSignalServer = new SurfaceFlingerSynchro(sm);
-    mControl = static_cast<per_client_cblk_t *>(mControlMemory->getBase());
+    mControl = static_cast<SharedClient *>(mControlMemory->getBase());
 }
 
 SurfaceComposerClient::~SurfaceComposerClient()
@@ -539,17 +376,16 @@ void SurfaceComposerClient::closeGlobalTransaction()
 
     const size_t N = clients.size();
     VERBOSE("closeGlobalTransaction (%ld clients)", N);
-    if (N == 1) {
-        clients[0]->closeTransaction();
-    } else {
-        const sp<ISurfaceComposer>& sm(_get_surface_manager());
-        sm->openGlobalTransaction();
-        for (size_t i=0; i<N; i++) {
-            clients[i]->closeTransaction();
-        }
-        sm->closeGlobalTransaction();
+
+    const sp<ISurfaceComposer>& sm(_get_surface_manager());
+    sm->openGlobalTransaction();
+    for (size_t i=0; i<N; i++) {
+        clients[i]->closeTransaction();
     }
+    sm->closeGlobalTransaction();
+
 }
+
 
 status_t SurfaceComposerClient::freezeDisplay(DisplayID dpy, uint32_t flags)
 {
