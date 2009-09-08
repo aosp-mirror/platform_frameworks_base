@@ -193,9 +193,9 @@ public final class BluetoothDevice implements Parcelable {
      * <p>The local adapter will automatically retrieve remote names when
      * performing a device scan, and will cache them. This method just returns
      * the name for this device from the cache.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @return the Bluetooth name, or null if there was a problem.
-     * @hide
      */
     public String getName() {
         try {
@@ -358,6 +358,7 @@ public final class BluetoothDevice implements Parcelable {
      * connection.
      * <p>Valid RFCOMM channels are in range 1 to 30.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
      * @param channel RFCOMM channel to connect to
      * @return a RFCOMM BluetoothServerSocket ready for an outgoing connection
      * @throws IOException on error, for example Bluetooth not available, or
