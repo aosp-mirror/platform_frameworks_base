@@ -15,11 +15,12 @@
 -->
 
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:clickable="false"
+    android:clickable="true"
     android:focusable="false"
-    android:textAppearance="?android:attr/textAppearanceLargeInverse"
-    android:textColor="#FF000000"
+    android:textAppearance="?android:attr/textAppearanceLarge"
+    android:background="@drawable/btn_keyboard_key_trans"
+    android:textColor="#FFFFFFFF"
 />
 
