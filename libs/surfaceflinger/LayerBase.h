@@ -23,6 +23,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include <private/ui/SharedBufferStack.h>
 #include <private/ui/LayerState.h>
 
 #include <utils/RefBase.h>
@@ -137,11 +138,6 @@ public:
     virtual void initStates(uint32_t w, uint32_t h, uint32_t flags);
     
     /**
-     * setSizeChanged - called when the *current* state's size is changed.
-     */
-    virtual void setSizeChanged(uint32_t w, uint32_t h);
-    
-    /**
      * doTransaction - process the transaction. This is a good place to figure
      * out which attributes of the surface have changed.
      */
@@ -160,13 +156,6 @@ public:
      */
     virtual void setCoveredRegion(const Region& coveredRegion);
     
-    /**
-     * getPhysicalSize - returns the physical size of the drawing state of
-     * the surface. If the surface is backed by a bitmap, this is the size of
-     * the bitmap (as opposed to the size of the drawing state).
-     */
-    virtual Point getPhysicalSize() const;
-
     /**
      * validateVisibility - cache a bunch of things
      */
@@ -308,8 +297,8 @@ public:
     virtual ~LayerBaseClient();
     virtual void onFirstRef();
 
-    wp<Client>          client;
-    layer_cblk_t*       const lcblk;
+    wp<Client>              client;
+//    SharedBufferServer*     lcblk;
 
     inline  uint32_t    getIdentity() const { return mIdentity; }
     inline  int32_t     clientIndex() const { return mIndex; }
@@ -336,7 +325,7 @@ public:
         sp<LayerBaseClient> getOwner() const;
 
     private:
-        virtual sp<SurfaceBuffer> getBuffer(int usage);
+        virtual sp<SurfaceBuffer> requestBuffer(int index, int usage);
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers); 
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();

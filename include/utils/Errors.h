@@ -63,7 +63,7 @@ enum {
     BAD_INDEX           = -EOVERFLOW,
     NOT_ENOUGH_DATA     = -ENODATA,
     WOULD_BLOCK         = -EWOULDBLOCK, 
-    TIMED_OUT           = -ETIME,
+    TIMED_OUT           = -ETIMEDOUT,
     UNKNOWN_TRANSACTION = -EBADMSG,
 #else    
     BAD_INDEX           = -E2BIG,

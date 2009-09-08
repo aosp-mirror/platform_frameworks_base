@@ -71,14 +71,23 @@ void BufferAllocator::dump(String8& result) const
     result.append(buffer);
 }
 
+static inline uint32_t clamp(uint32_t c) {
+    return c>0 ? c : 1;
+}
+
 status_t BufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat format,
         int usage, buffer_handle_t* handle, int32_t* stride)
 {
     Mutex::Autolock _l(mLock);
-    
+
+    // make sure to not allocate a 0 x 0 buffer
+    w = clamp(w);
+    h = clamp(h);
+
     // we have a h/w allocator and h/w buffer is requested
     status_t err = mAllocDev->alloc(mAllocDev,
             w, h, format, usage, handle, stride);
+
     LOGW_IF(err, "alloc(%u, %u, %d, %08x, ...) failed %d (%s)",
             w, h, format, usage, err, strerror(-err));
     

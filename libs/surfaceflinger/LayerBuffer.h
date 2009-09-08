@@ -24,7 +24,6 @@
 #include <private/ui/LayerState.h>
 
 #include "LayerBase.h"
-#include "LayerBitmap.h"
 
 struct copybit_device_t;
 
@@ -32,8 +31,11 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
+class Buffer;
 class Region;
 class OverlayRef;
+
+// ---------------------------------------------------------------------------
 
 class LayerBuffer : public LayerBaseClient
 {
@@ -179,12 +181,12 @@ private:
     };
 
 
-    class SurfaceBuffer : public LayerBaseClient::Surface
+    class SurfaceLayerBuffer : public LayerBaseClient::Surface
     {
     public:
-                SurfaceBuffer(const sp<SurfaceFlinger>& flinger,
+        SurfaceLayerBuffer(const sp<SurfaceFlinger>& flinger,
                         SurfaceID id, const sp<LayerBuffer>& owner);
-        virtual ~SurfaceBuffer();
+        virtual ~SurfaceLayerBuffer();
 
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers);
         virtual void postBuffer(ssize_t offset);
