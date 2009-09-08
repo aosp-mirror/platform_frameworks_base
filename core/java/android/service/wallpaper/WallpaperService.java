@@ -377,6 +377,7 @@ public abstract class WallpaperService extends Service {
                     if (!mCreated) {
                         mLayout.type = mIWallpaperEngine.mWindowType;
                         mLayout.gravity = Gravity.LEFT|Gravity.TOP;
+                        mLayout.setTitle(WallpaperService.this.getClass().getName());
                         mLayout.windowAnimations =
                                 com.android.internal.R.style.Animation_Wallpaper;
                         mSession.add(mWindow, mLayout, View.VISIBLE, mContentInsets);
@@ -558,7 +559,7 @@ public abstract class WallpaperService extends Service {
                     mSession.remove(mWindow);
                 } catch (RemoteException e) {
                 }
-                mSurfaceHolder.mSurface.clear();
+                mSurfaceHolder.mSurface.release();
                 mCreated = false;
             }
         }
