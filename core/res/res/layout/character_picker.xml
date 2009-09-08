@@ -15,35 +15,35 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="304dp"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:background="@drawable/keyboard_popup_panel_trans_background">
 
     <GridView
         android:id="@+id/characterPicker"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:padding="4dp"
-        android:verticalSpacing="4dp"
+        android:verticalSpacing="8dp"
         android:horizontalSpacing="8dp"
-        android:stretchMode="spacingWidth"
         android:gravity="left"
         android:drawSelectorOnTop="false"
-        android:listSelector="@drawable/grid_selector_background"
         android:numColumns="4"
-        android:columnWidth="64dp"
+        android:columnWidth="48dp"
         android:fadingEdge="none"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="center_vertical"
+        android:listSelector="#0000"
     />
 
     <Button
         android:id="@+id/cancel"
-        android:text="@string/cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="50dp"
-        android:paddingRight="50dp"
-        android:gravity="center"
-        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:background="@drawable/btn_close"
+        android:layout_gravity="center_vertical"
     />
 </LinearLayout>
