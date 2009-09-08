@@ -25,7 +25,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import java.util.Iterator;
 
-public class SMSTest extends AndroidTestCase {
+public class GsmSmsTest extends AndroidTestCase {
 
     @SmallTest
     public void testOne() throws Exception {
