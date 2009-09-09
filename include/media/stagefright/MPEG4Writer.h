@@ -34,9 +34,9 @@ class MPEG4Writer : public RefBase {
 public:
     MPEG4Writer(const char *filename);
 
-    // Caller retains ownership of both meta and source.
-    void addSource(const sp<MetaData> &meta, const sp<MediaSource> &source);
-    void start();
+    void addSource(const sp<MediaSource> &source);
+    status_t start();
+    bool reachedEOS();
     void stop();
 
     void beginBox(const char *fourcc);

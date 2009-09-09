@@ -30,12 +30,12 @@ namespace android {
 
 class MPEG4Writer::Track {
 public:
-    Track(MPEG4Writer *owner,
-          const sp<MetaData> &meta, const sp<MediaSource> &source);
+    Track(MPEG4Writer *owner, const sp<MediaSource> &source);
     ~Track();
 
-    void start();
+    status_t start();
     void stop();
+    bool reachedEOS();
 
     int64_t getDuration() const;
     void writeTrackHeader(int32_t trackID);
@@ -57,6 +57,8 @@ private:
 
     void *mCodecSpecificData;
     size_t mCodecSpecificDataSize;
+
+    bool mReachedEOS;
 
     static void *ThreadWrapper(void *me);
     void threadEntry();
@@ -82,15 +84,14 @@ MPEG4Writer::~MPEG4Writer() {
     mTracks.clear();
 }
 
-void MPEG4Writer::addSource(
-        const sp<MetaData> &meta, const sp<MediaSource> &source) {
-    Track *track = new Track(this, meta, source);
+void MPEG4Writer::addSource(const sp<MediaSource> &source) {
+    Track *track = new Track(this, source);
     mTracks.push_back(track);
 }
 
-void MPEG4Writer::start() {
+status_t MPEG4Writer::start() {
     if (mFile == NULL) {
-        return;
+        return UNKNOWN_ERROR;
     }
 
     beginBox("ftyp");
@@ -104,8 +105,19 @@ void MPEG4Writer::start() {
 
     for (List<Track *>::iterator it = mTracks.begin();
          it != mTracks.end(); ++it) {
-        (*it)->start();
+        status_t err = (*it)->start();
+
+        if (err != OK) {
+            for (List<Track *>::iterator it2 = mTracks.begin();
+                 it2 != it; ++it2) {
+                (*it2)->stop();
+            }
+
+            return err;
+        }
     }
+
+    return OK;
 }
 
 void MPEG4Writer::stop() {
@@ -252,17 +264,30 @@ void MPEG4Writer::write(const void *data, size_t size) {
     mOffset += size;
 }
 
+bool MPEG4Writer::reachedEOS() {
+    bool allDone = true;
+    for (List<Track *>::iterator it = mTracks.begin();
+         it != mTracks.end(); ++it) {
+        if (!(*it)->reachedEOS()) {
+            allDone = false;
+            break;
+        }
+    }
+
+    return allDone;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 MPEG4Writer::Track::Track(
-        MPEG4Writer *owner,
-        const sp<MetaData> &meta, const sp<MediaSource> &source)
+        MPEG4Writer *owner, const sp<MediaSource> &source)
     : mOwner(owner),
-      mMeta(meta),
+      mMeta(source->getFormat()),
       mSource(source),
       mDone(false),
       mCodecSpecificData(NULL),
-      mCodecSpecificDataSize(0) {
+      mCodecSpecificDataSize(0),
+      mReachedEOS(false) {
 }
 
 MPEG4Writer::Track::~Track() {
@@ -274,19 +299,25 @@ MPEG4Writer::Track::~Track() {
     }
 }
 
-void MPEG4Writer::Track::start() {
-    mSource->start();
+status_t MPEG4Writer::Track::start() {
+    status_t err = mSource->start();
+
+    if (err != OK) {
+        mDone = mReachedEOS = true;
+        return err;
+    }
 
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     mDone = false;
+    mReachedEOS = false;
 
-    int err = pthread_create(&mThread, &attr, ThreadWrapper, this);
-    CHECK_EQ(err, 0);
-
+    pthread_create(&mThread, &attr, ThreadWrapper, this);
     pthread_attr_destroy(&attr);
+
+    return OK;
 }
 
 void MPEG4Writer::Track::stop() {
@@ -300,6 +331,10 @@ void MPEG4Writer::Track::stop() {
     pthread_join(mThread, &dummy);
 
     mSource->stop();
+}
+
+bool MPEG4Writer::Track::reachedEOS() {
+    return mReachedEOS;
 }
 
 // static
@@ -378,6 +413,8 @@ void MPEG4Writer::Track::threadEntry() {
         buffer->release();
         buffer = NULL;
     }
+
+    mReachedEOS = true;
 }
 
 int64_t MPEG4Writer::Track::getDuration() const {
@@ -490,7 +527,17 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
             mOwner->writeInt32(0);               // version=0, flags=0
             mOwner->writeInt32(1);               // entry count
             if (is_audio) {
-                mOwner->beginBox("xxxx");          // audio format XXX
+                const char *fourcc = NULL;
+                if (!strcasecmp("audio/3gpp", mime)) {
+                    fourcc = "samr";
+                } else if (!strcasecmp("audio/amr-wb", mime)) {
+                    fourcc = "sawb";
+                } else {
+                    LOGE("Unknown mime type '%s'.", mime);
+                    CHECK(!"should not be here, unknown mime type.");
+                }
+
+                mOwner->beginBox(fourcc);          // audio format
                   mOwner->writeInt32(0);           // reserved
                   mOwner->writeInt16(0);           // reserved
                   mOwner->writeInt16(0);           // data ref index
@@ -513,6 +560,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                 } else if (!strcasecmp("video/3gpp", mime)) {
                     mOwner->beginBox("s263");
                 } else {
+                    LOGE("Unknown mime type '%s'.", mime);
                     CHECK(!"should not be here, unknown mime type.");
                 }
 
