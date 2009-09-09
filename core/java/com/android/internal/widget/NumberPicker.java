@@ -36,7 +36,7 @@ import com.android.internal.R;
 
 public class NumberPicker extends LinearLayout implements OnClickListener,
         OnFocusChangeListener, OnLongClickListener {
-        
+
     public interface OnChangedListener {
         void onChanged(NumberPicker picker, int oldVal, int newVal);
     }
@@ -51,7 +51,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
      * most efficient way to do this; it avoids creating temporary objects
      * on every call to format().
      */
-    public static final NumberPicker.Formatter TWO_DIGIT_FORMATTER = 
+    public static final NumberPicker.Formatter TWO_DIGIT_FORMATTER =
             new NumberPicker.Formatter() {
                 final StringBuilder mBuilder = new StringBuilder();
                 final java.util.Formatter mFmt = new java.util.Formatter(mBuilder);
@@ -63,7 +63,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
                     return mFmt.toString();
                 }
         };
-    
+
     private final Handler mHandler;
     private final Runnable mRunnable = new Runnable() {
         public void run() {
@@ -81,21 +81,21 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
     private final InputFilter mNumberInputFilter;
 
     private String[] mDisplayedValues;
-    private int mStart;
-    private int mEnd;
-    private int mCurrent;
-    private int mPrevious;
+    protected int mStart;
+    protected int mEnd;
+    protected int mCurrent;
+    protected int mPrevious;
     private OnChangedListener mListener;
     private Formatter mFormatter;
     private long mSpeed = 300;
-    
+
     private boolean mIncrement;
     private boolean mDecrement;
-    
+
     public NumberPicker(Context context) {
         this(context, null);
     }
-    
+
     public NumberPicker(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -117,7 +117,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         mDecrementButton.setOnClickListener(this);
         mDecrementButton.setOnLongClickListener(this);
         mDecrementButton.setNumberPicker(this);
-        
+
         mText = (EditText) findViewById(R.id.timepicker_input);
         mText.setOnFocusChangeListener(this);
         mText.setFilters(new InputFilter[] {inputFilter});
@@ -127,7 +127,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
             setEnabled(false);
         }
     }
-    
+
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
@@ -135,19 +135,19 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         mDecrementButton.setEnabled(enabled);
         mText.setEnabled(enabled);
     }
-    
+
     public void setOnChangeListener(OnChangedListener listener) {
         mListener = listener;
     }
-    
+
     public void setFormatter(Formatter formatter) {
         mFormatter = formatter;
     }
-    
+
     /**
      * Set the range of numbers allowed for the number picker. The current
      * value will be automatically set to the start.
-     * 
+     *
      * @param start the start of the range (inclusive)
      * @param end the end of the range (inclusive)
      */
@@ -157,12 +157,12 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         mCurrent = start;
         updateView();
     }
-    
+
     /**
      * Set the range of numbers allowed for the number picker. The current
      * value will be automatically set to the start. Also provide a mapping
      * for values used to display to the user.
-     * 
+     *
      * @param start the start of the range (inclusive)
      * @param end the end of the range (inclusive)
      * @param displayedValues the values displayed to the user.
@@ -174,7 +174,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         mCurrent = start;
         updateView();
     }
-    
+
     public void setCurrent(int current) {
         mCurrent = current;
         updateView();
@@ -187,7 +187,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
     public void setSpeed(long speed) {
         mSpeed = speed;
     }
-    
+
     public void onClick(View v) {
         validateInput(mText);
         if (!mText.hasFocus()) mText.requestFocus();
@@ -199,15 +199,15 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
             changeCurrent(mCurrent - 1);
         }
     }
-    
+
     private String formatNumber(int value) {
         return (mFormatter != null)
                 ? mFormatter.toString(value)
                 : String.valueOf(value);
     }
- 
-    private void changeCurrent(int current) {
-        
+
+    protected void changeCurrent(int current) {
+
         // Wrap around the values if we go past the start or end
         if (current > mEnd) {
             current = mStart;
@@ -219,15 +219,15 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         notifyChange();
         updateView();
     }
-    
-    private void notifyChange() {
+
+    protected void notifyChange() {
         if (mListener != null) {
             mListener.onChanged(this, mPrevious, mCurrent);
         }
     }
 
-    private void updateView() {
-        
+    protected void updateView() {
+
         /* If we don't have displayed values then use the
          * current number else find the correct value in the
          * displayed values for the current number.
@@ -239,7 +239,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         }
         mText.setSelection(mText.getText().length());
     }
-    
+
     private void validateCurrentView(CharSequence str) {
         int val = getSelectedPos(str.toString());
         if ((val >= mStart) && (val <= mEnd)) {
@@ -253,7 +253,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
     }
 
     public void onFocusChange(View v, boolean hasFocus) {
-        
+
         /* When focus is lost check that the text field
          * has valid values.
          */
@@ -280,12 +280,12 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
      * to inform us when the long click has ended.
      */
     public boolean onLongClick(View v) {
-        
+
         /* The text view may still have focus so clear it's focus which will
          * trigger the on focus changed and any typed values to be pulled.
          */
         mText.clearFocus();
-        
+
         if (R.id.increment == v.getId()) {
             mIncrement = true;
             mHandler.post(mRunnable);
@@ -295,22 +295,22 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         }
         return true;
     }
-    
+
     public void cancelIncrement() {
         mIncrement = false;
     }
-    
+
     public void cancelDecrement() {
         mDecrement = false;
     }
-    
+
     private static final char[] DIGIT_CHARACTERS = new char[] {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
     };
-    
+
     private NumberPickerButton mIncrementButton;
     private NumberPickerButton mDecrementButton;
-    
+
     private class NumberPickerInputFilter implements InputFilter {
         public CharSequence filter(CharSequence source, int start, int end,
                 Spanned dest, int dstart, int dend) {
@@ -331,7 +331,7 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
             return "";
         }
     }
-    
+
     private class NumberRangeKeyListener extends NumberKeyListener {
 
         // XXX This doesn't allow for range limits when controlled by a
@@ -339,12 +339,12 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         public int getInputType() {
             return InputType.TYPE_CLASS_NUMBER;
         }
-        
+
         @Override
         protected char[] getAcceptedChars() {
             return DIGIT_CHARACTERS;
         }
-        
+
         @Override
         public CharSequence filter(CharSequence source, int start, int end,
                 Spanned dest, int dstart, int dend) {
@@ -381,21 +381,21 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
             return Integer.parseInt(str);
         } else {
             for (int i = 0; i < mDisplayedValues.length; i++) {
-                
+
                 /* Don't force the user to type in jan when ja will do */
                 str = str.toLowerCase();
                 if (mDisplayedValues[i].toLowerCase().startsWith(str)) {
                     return mStart + i;
                 }
             }
-            
+
             /* The user might have typed in a number into the month field i.e.
              * 10 instead of OCT so support that too.
              */
             try {
                 return Integer.parseInt(str);
             } catch (NumberFormatException e) {
-                
+
                 /* Ignore as if it's not a number we don't care */
             }
         }
