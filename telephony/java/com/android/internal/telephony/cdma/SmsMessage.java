@@ -598,21 +598,20 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
-     * Calculate the next message id, starting at 0 and iteratively
-     * incrementing within the range 0..65535 remembering the state
+     * Calculate the next message id, starting at 1 and iteratively
+     * incrementing within the range 1..65535 remembering the state
      * via a persistent system property.  (See C.S0015-B, v2.0,
-     * 4.3.1.5)
+     * 4.3.1.5) Since this routine is expected to be accessed via via
+     * binder-call, and hence should be threadsafe, it has been
+     * synchronized.
      */
     private synchronized static int getNextMessageId() {
-        // The only (meaningful) way this code can be called is via
-        // binder-call into the Phone process.  All other calls will
-        // assumedly not be as with UID radio, and hence will be
-        // unable to modify the system property.  Synchronization has
-        // thus been added to this function conservatively -- if it
-        // can be conclusively reasoned to be unnecessary, it should
-        // be removed.
-        int msgId = SystemProperties.getInt(TelephonyProperties.PROPERTY_CDMA_MSG_ID, 0);
-        String nextMsgId = Integer.toString((msgId + 1) & 0xFFFF);
+        // Testing and dialog with partners has indicated that
+        // msgId==0 is (sometimes?) treated specially by lower levels.
+        // Specifically, the ID is not preserved for delivery ACKs.
+        // Hence, avoid 0 -- constraining the range to 1..65535.
+        int msgId = SystemProperties.getInt(TelephonyProperties.PROPERTY_CDMA_MSG_ID, 1);
+        String nextMsgId = Integer.toString((msgId % 0xFFFF) + 1);
         SystemProperties.set(TelephonyProperties.PROPERTY_CDMA_MSG_ID, nextMsgId);
         if (DBG_SMS) {
             Log.d(LOG_TAG, "next " + TelephonyProperties.PROPERTY_CDMA_MSG_ID + " = " + nextMsgId);
