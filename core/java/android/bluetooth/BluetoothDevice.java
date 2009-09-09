@@ -44,6 +44,15 @@ import java.io.UnsupportedEncodingException;
 public final class BluetoothDevice implements Parcelable {
     private static final String TAG = "BluetoothDevice";
 
+    /**
+     * Sentinel error value for this class. Guaranteed to not equal any other
+     * integer constant in this class. Provided as a convenience for functions
+     * that require a sentinel error value, for example:
+     * <p><code>Intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+     * BluetoothAdapter.ERROR)</code>
+     */
+    public static final int ERROR = -1;
+
     /** We do not have a link key for the remote device, and are therefore not
      * bonded
      * @hide*/
@@ -65,7 +74,9 @@ public final class BluetoothDevice implements Parcelable {
      *  @hide */
     public static final int DEVICE_PICKER_FILTER_TYPE_TRANSFER = 2;
 
-    //TODO: Unify these result codes in BluetoothResult or BluetoothError
+    /** A bond attempt succeeded
+     * @hide */
+    public static final int BOND_SUCCESS = 0;
     /** A bond attempt failed because pins did not match, or remote device did
      * not respond to pin request in time 
      * @hide */
@@ -252,8 +263,8 @@ public final class BluetoothDevice implements Parcelable {
      * Get the bonding state of a remote device.
      *
      * Result is one of:
-     * BluetoothError.*
      * BOND_*
+     * ERROR
      *
      * @param address Bluetooth hardware address of the remote device to check.
      * @return Result code
@@ -263,7 +274,7 @@ public final class BluetoothDevice implements Parcelable {
         try {
             return sService.getBondState(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothError.ERROR_IPC;
+        return BluetoothDevice.ERROR;
     }
 
     /**
@@ -298,7 +309,7 @@ public final class BluetoothDevice implements Parcelable {
         try {
             return sService.getRemoteClass(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothError.ERROR_IPC;
+        return BluetoothDevice.ERROR;
     }
 
     /** @hide */
@@ -314,7 +325,7 @@ public final class BluetoothDevice implements Parcelable {
          try {
              return sService.getRemoteServiceChannel(mAddress, uuid);
          } catch (RemoteException e) {Log.e(TAG, "", e);}
-         return BluetoothError.ERROR_IPC;
+         return BluetoothDevice.ERROR;
     }
 
     /** @hide */

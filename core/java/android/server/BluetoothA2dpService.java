@@ -25,7 +25,6 @@ package android.server;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothIntent;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothA2dp;
@@ -83,7 +82,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                     intent.getParcelableExtra(BluetoothIntent.DEVICE);
             if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
-                                               BluetoothError.ERROR);
+                                               BluetoothAdapter.ERROR);
                 switch (state) {
                 case BluetoothAdapter.STATE_ON:
                     onBluetoothEnable();
@@ -94,7 +93,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 }
             } else if (action.equals(BluetoothIntent.BOND_STATE_CHANGED_ACTION)) {
                 int bondState = intent.getIntExtra(BluetoothIntent.BOND_STATE,
-                                                   BluetoothError.ERROR);
+                                                   BluetoothDevice.ERROR);
                 switch(bondState) {
                 case BluetoothDevice.BOND_BONDED:
                     setSinkPriority(device, BluetoothA2dp.PRIORITY_AUTO);
@@ -273,7 +272,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         mAudioManager.setParameters(BLUETOOTH_ENABLED + "=false");
     }
 
-    public synchronized int connectSink(BluetoothDevice device) {
+    public synchronized boolean connectSink(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         if (DBG) log("connectSink(" + device + ")");
@@ -284,11 +283,11 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 BluetoothA2dp.STATE_CONNECTED,
                 BluetoothA2dp.STATE_PLAYING,
                 BluetoothA2dp.STATE_DISCONNECTING}).size() != 0) {
-            return BluetoothError.ERROR;
+            return false;
         }
 
         if (mAudioDevices.get(device) == null && !addAudioSink(device))
-            return BluetoothError.ERROR;
+            return false;
 
         int state = mAudioDevices.get(device);
 
@@ -296,44 +295,44 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         case BluetoothA2dp.STATE_CONNECTED:
         case BluetoothA2dp.STATE_PLAYING:
         case BluetoothA2dp.STATE_DISCONNECTING:
-            return BluetoothError.ERROR;
+            return false;
         case BluetoothA2dp.STATE_CONNECTING:
-            return BluetoothError.SUCCESS;
+            return true;
         }
 
         String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
         if (path == null)
-            return BluetoothError.ERROR;
+            return false;
 
         // State is DISCONNECTED
         if (!connectSinkNative(path)) {
-            return BluetoothError.ERROR;
+            return false;
         }
-        return BluetoothError.SUCCESS;
+        return true;
     }
 
-    public synchronized int disconnectSink(BluetoothDevice device) {
+    public synchronized boolean disconnectSink(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         if (DBG) log("disconnectSink(" + device + ")");
 
         String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
         if (path == null) {
-            return BluetoothError.ERROR;
+            return false;
         }
 
         switch (getSinkState(device)) {
         case BluetoothA2dp.STATE_DISCONNECTED:
-            return BluetoothError.ERROR;
+            return false;
         case BluetoothA2dp.STATE_DISCONNECTING:
-            return BluetoothError.SUCCESS;
+            return true;
         }
 
         // State is CONNECTING or CONNECTED or PLAYING
         if (!disconnectSinkNative(path)) {
-            return BluetoothError.ERROR;
+            return false;
         } else {
-            return BluetoothError.SUCCESS;
+            return true;
         }
     }
 
@@ -359,15 +358,14 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 BluetoothA2dp.PRIORITY_OFF);
     }
 
-    public synchronized int setSinkPriority(BluetoothDevice device, int priority) {
+    public synchronized boolean setSinkPriority(BluetoothDevice device, int priority) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         if (!BluetoothDevice.checkBluetoothAddress(device.getAddress())) {
-            return BluetoothError.ERROR;
+            return false;
         }
         return Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.getBluetoothA2dpSinkPriorityKey(device.getAddress()), priority) ?
-                BluetoothError.SUCCESS : BluetoothError.ERROR;
+                Settings.Secure.getBluetoothA2dpSinkPriorityKey(device.getAddress()), priority);
     }
 
     private synchronized void onSinkPropertyChanged(String path, String []propValues) {
