@@ -102,7 +102,7 @@ public class BluetoothService extends IBluetooth.Stub {
             disableNative();
         }
 
-        mBluetoothState = BluetoothAdapter.BLUETOOTH_STATE_OFF;
+        mBluetoothState = BluetoothAdapter.STATE_OFF;
         mIsDiscovering = false;
         mAdapterProperties = new HashMap<String, String>();
         mDeviceProperties = new HashMap<String, Map<String,String>>();
@@ -128,7 +128,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     public boolean isEnabled() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothState == BluetoothAdapter.BLUETOOTH_STATE_ON;
+        return mBluetoothState == BluetoothAdapter.STATE_ON;
     }
 
     public int getBluetoothState() {
@@ -153,9 +153,9 @@ public class BluetoothService extends IBluetooth.Stub {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
 
         switch (mBluetoothState) {
-        case BluetoothAdapter.BLUETOOTH_STATE_OFF:
+        case BluetoothAdapter.STATE_OFF:
             return true;
-        case BluetoothAdapter.BLUETOOTH_STATE_ON:
+        case BluetoothAdapter.STATE_ON:
             break;
         default:
             return false;
@@ -163,7 +163,7 @@ public class BluetoothService extends IBluetooth.Stub {
         if (mEnableThread != null && mEnableThread.isAlive()) {
             return false;
         }
-        setBluetoothState(BluetoothAdapter.BLUETOOTH_STATE_TURNING_OFF);
+        setBluetoothState(BluetoothAdapter.STATE_TURNING_OFF);
 
         // Allow 3 seconds for profiles to gracefully disconnect
         // TODO: Introduce a callback mechanism so that each profile can notify
@@ -175,7 +175,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
 
     private synchronized void finishDisable(boolean saveSetting) {
-        if (mBluetoothState != BluetoothAdapter.BLUETOOTH_STATE_TURNING_OFF) {
+        if (mBluetoothState != BluetoothAdapter.STATE_TURNING_OFF) {
             return;
         }
         mEventLoop.stop();
@@ -189,8 +189,8 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         // update mode
-        Intent intent = new Intent(BluetoothIntent.SCAN_MODE_CHANGED_ACTION);
-        intent.putExtra(BluetoothIntent.SCAN_MODE, BluetoothAdapter.SCAN_MODE_NONE);
+        Intent intent = new Intent(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+        intent.putExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.SCAN_MODE_NONE);
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
         mIsDiscovering = false;
@@ -200,7 +200,7 @@ public class BluetoothService extends IBluetooth.Stub {
             persistBluetoothOnSetting(false);
         }
 
-        setBluetoothState(BluetoothAdapter.BLUETOOTH_STATE_OFF);
+        setBluetoothState(BluetoothAdapter.STATE_OFF);
 
         // Log bluetooth off to battery stats.
         long ident = Binder.clearCallingIdentity();
@@ -237,13 +237,13 @@ public class BluetoothService extends IBluetooth.Stub {
         if (mIsAirplaneSensitive && isAirplaneModeOn()) {
             return false;
         }
-        if (mBluetoothState != BluetoothAdapter.BLUETOOTH_STATE_OFF) {
+        if (mBluetoothState != BluetoothAdapter.STATE_OFF) {
             return false;
         }
         if (mEnableThread != null && mEnableThread.isAlive()) {
             return false;
         }
-        setBluetoothState(BluetoothAdapter.BLUETOOTH_STATE_TURNING_ON);
+        setBluetoothState(BluetoothAdapter.STATE_TURNING_ON);
         mEnableThread = new EnableThread(saveSetting);
         mEnableThread.start();
         return true;
@@ -251,7 +251,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     /** Forcibly restart Bluetooth if it is on */
     /* package */ synchronized void restart() {
-        if (mBluetoothState != BluetoothAdapter.BLUETOOTH_STATE_ON) {
+        if (mBluetoothState != BluetoothAdapter.STATE_ON) {
             return;
         }
         mRestart = true;
@@ -267,9 +267,9 @@ public class BluetoothService extends IBluetooth.Stub {
 
         if (DBG) log("Bluetooth state " + mBluetoothState + " -> " + state);
 
-        Intent intent = new Intent(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION);
-        intent.putExtra(BluetoothIntent.BLUETOOTH_PREVIOUS_STATE, mBluetoothState);
-        intent.putExtra(BluetoothIntent.BLUETOOTH_STATE, state);
+        Intent intent = new Intent(BluetoothAdapter.ACTION_STATE_CHANGED);
+        intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, mBluetoothState);
+        intent.putExtra(BluetoothAdapter.EXTRA_STATE, state);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
 
         mBluetoothState = state;
@@ -357,8 +357,8 @@ public class BluetoothService extends IBluetooth.Stub {
             mEnableThread = null;
 
             setBluetoothState(res ?
-                              BluetoothAdapter.BLUETOOTH_STATE_ON :
-                              BluetoothAdapter.BLUETOOTH_STATE_OFF);
+                              BluetoothAdapter.STATE_ON :
+                              BluetoothAdapter.STATE_OFF);
 
             if (res) {
                 // Update mode
@@ -411,7 +411,7 @@ public class BluetoothService extends IBluetooth.Stub {
                         ));
 
         public synchronized void loadBondState() {
-            if (mBluetoothState != BluetoothAdapter.BLUETOOTH_STATE_TURNING_ON) {
+            if (mBluetoothState != BluetoothAdapter.STATE_TURNING_ON) {
                 return;
             }
             String []bonds = null;
@@ -633,17 +633,22 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean setScanMode(int mode) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        boolean pairable = false, discoverable = false;
-        String modeString = scanModeToBluezString(mode);
-        if (modeString.equals("off")) {
+        boolean pairable = false;
+        boolean discoverable = false;
+        switch (mode) {
+        case BluetoothAdapter.SCAN_MODE_NONE:
             pairable = false;
             discoverable = false;
-        } else if (modeString.equals("pariable")) {
+            break;
+        case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
             pairable = true;
             discoverable = false;
-        } else if (modeString.equals("discoverable")) {
+        case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
             pairable = true;
             discoverable = true;
+        default:
+            Log.w(TAG, "Requested invalid scan mode " + mode);
+            return false;
         }
         setPropertyBoolean("Pairable", pairable);
         setPropertyBoolean("Discoverable", discoverable);
@@ -709,7 +714,7 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized int getScanMode() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!isEnabled())
-            return BluetoothError.ERROR;
+            return BluetoothAdapter.SCAN_MODE_NONE;
 
         boolean pairable = getProperty("Pairable").equals("true");
         boolean discoverable = getProperty("Discoverable").equals("true");
@@ -1103,16 +1108,16 @@ public class BluetoothService extends IBluetooth.Stub {
         pw.println("\nmIsAirplaneSensitive = " + mIsAirplaneSensitive + "\n");
 
         switch(mBluetoothState) {
-        case BluetoothAdapter.BLUETOOTH_STATE_OFF:
+        case BluetoothAdapter.STATE_OFF:
             pw.println("\nBluetooth OFF\n");
             return;
-        case BluetoothAdapter.BLUETOOTH_STATE_TURNING_ON:
+        case BluetoothAdapter.STATE_TURNING_ON:
             pw.println("\nBluetooth TURNING ON\n");
             return;
-        case BluetoothAdapter.BLUETOOTH_STATE_TURNING_OFF:
+        case BluetoothAdapter.STATE_TURNING_OFF:
             pw.println("\nBluetooth TURNING OFF\n");
             return;
-        case BluetoothAdapter.BLUETOOTH_STATE_ON:
+        case BluetoothAdapter.STATE_ON:
             pw.println("\nBluetooth ON\n");
         }
 
