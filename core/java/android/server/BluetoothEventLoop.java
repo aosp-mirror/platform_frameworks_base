@@ -240,6 +240,11 @@ class BluetoothEventLoop {
     }
 
     /*package*/ void onPropertyChanged(String[] propValues) {
+        if (mBluetoothService.isAdapterPropertiesEmpty()) {
+            // We have got a property change before
+            // we filled up our cache.
+            mBluetoothService.getAllProperties();
+        }
         String name = propValues[0];
         if (name.equals("Name")) {
             Intent intent = new Intent(BluetoothIntent.NAME_CHANGED_ACTION);

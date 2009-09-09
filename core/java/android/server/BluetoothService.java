@@ -538,6 +538,10 @@ public class BluetoothService extends IBluetooth.Stub {
         }
     }
 
+    /*package*/ synchronized boolean isAdapterPropertiesEmpty() {
+        return mAdapterProperties.isEmpty();
+    }
+
     /*package*/synchronized void getAllProperties() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         mAdapterProperties.clear();
