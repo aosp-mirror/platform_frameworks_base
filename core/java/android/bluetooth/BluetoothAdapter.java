@@ -43,6 +43,15 @@ public final class BluetoothAdapter {
     private static final String TAG = "BluetoothAdapter";
 
     /**
+     * Sentinel error value for this class. Guaranteed to not equal any other
+     * integer constant in this class. Provided as a convenience for functions
+     * that require a sentinel error value, for example:
+     * <p><code>Intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+     * BluetoothAdapter.ERROR)</code>
+     */
+    public static final int ERROR = -1;
+
+    /**
      * Broadcast Action: The state of the local Bluetooth adapter has been
      * changed.
      * <p>For example, Bluetooth has been turned on or off.

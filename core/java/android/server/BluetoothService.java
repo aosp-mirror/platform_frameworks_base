@@ -27,7 +27,6 @@ package android.server;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothIntent;
 import android.bluetooth.IBluetooth;
@@ -810,7 +809,7 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized int getBondState(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return BluetoothError.ERROR;
+            return BluetoothDevice.ERROR;
         }
         return mBondState.getBondState(address.toUpperCase());
     }
@@ -984,7 +983,7 @@ public class BluetoothService extends IBluetooth.Stub {
     public int getRemoteServiceChannel(String address, String uuid) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothDevice.checkBluetoothAddress(address)) {
-            return BluetoothError.ERROR_IPC;
+            return BluetoothDevice.ERROR;
         }
         return getDeviceServiceChannelNative(getObjectPathFromAddress(address), uuid, 0x0004);
     }
