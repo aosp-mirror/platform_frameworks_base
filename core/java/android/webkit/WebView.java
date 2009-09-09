@@ -2049,6 +2049,10 @@ public class WebView extends AbsoluteLayout
     protected int computeHorizontalScrollRange() {
         if (mDrawHistory) {
             return mHistoryWidth;
+        } else if (mLastWidthSent == mContentWidth) {
+            // special case to avoid rounding error. Otherwise we may get a
+            // faked scrollbar sometimes.
+            return getViewWidth();
         } else {
             return contentToViewDimension(mContentWidth);
         }
@@ -2062,7 +2066,14 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             return mHistoryHeight;
         } else {
-            int height = contentToViewDimension(mContentHeight);
+            int height;
+            // special case to avoid rounding error. Otherwise we may get a
+            // faked scrollbar sometimes.
+            if (mLastHeightSent == mContentHeight) {
+                height = getViewHeight();
+            } else {
+                height = contentToViewDimension(mContentHeight);
+            }
             if (mFindIsUp) {
                 height += FIND_HEIGHT;
             }
