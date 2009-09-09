@@ -455,8 +455,6 @@ class BrowserFrame extends Handler {
             mJSInterfaceMap.remove(interfaceName);
         }
         mJSInterfaceMap.put(interfaceName, obj);
-        nativeAddJavascriptInterface(0, mJSInterfaceMap.get(interfaceName),
-                interfaceName);
     }
 
     /**
