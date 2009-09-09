@@ -408,6 +408,9 @@ private:
     volatile bool           mExitPending;
     volatile bool           mRunning;
             sp<Thread>      mHoldSelf;
+#if HAVE_ANDROID_OS
+            int             mTid;
+#endif
 };
 
 
