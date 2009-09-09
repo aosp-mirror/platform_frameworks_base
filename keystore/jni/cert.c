@@ -18,7 +18,6 @@
 #define LOG_TAG "CertTool"
 
 #include <stdio.h>
-#include <openssl/engine.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>
 #include <openssl/rsa.h>
