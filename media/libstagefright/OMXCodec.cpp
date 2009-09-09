@@ -50,6 +50,7 @@ static const CodecInfo kDecoderInfo[] = {
     { "audio/3gpp", "OMX.TI.AMR.decode" },
     { "audio/3gpp", "OMX.PV.amrdec" },
     { "audio/amr-wb", "OMX.TI.WBAMR.decode" },
+    { "audio/amr-wb", "OMX.PV.amrdec" },
     { "audio/mp4a-latm", "OMX.TI.AAC.decode" },
     { "audio/mp4a-latm", "OMX.PV.aacdec" },
     { "video/mp4v-es", "OMX.qcom.video.decoder.mpeg4" },
