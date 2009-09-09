@@ -133,6 +133,14 @@ bool LayerBuffer::transformed() const
     return false;
 }
 
+void LayerBuffer::serverDestroy()
+{
+    sp<Source> source(clearSource());
+    if (source != 0) {
+        source->destroy();
+    }
+}
+
 /**
  * This creates a "buffer" source for this surface
  */
@@ -413,7 +421,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
 
     status_t err = NO_ERROR;
     NativeBuffer src(ourBuffer->getBuffer());
-    const Rect& transformedBounds = mLayer.getTransformedBounds();
+    const Rect transformedBounds(mLayer.getTransformedBounds());
     copybit_device_t* copybit = mBlitEngine;
 
     if (copybit)  {
@@ -493,7 +501,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
                 }
             }
 
-            const Rect& transformedBounds = mLayer.getTransformedBounds();
+            const Rect transformedBounds(mLayer.getTransformedBounds());
             const copybit_rect_t& drect =
                 reinterpret_cast<const copybit_rect_t&>(transformedBounds);
             const State& s(mLayer.drawingState());
@@ -583,9 +591,7 @@ LayerBuffer::OverlaySource::OverlaySource(LayerBuffer& layer,
 
     mOverlayHandle = overlay->getHandleRef(overlay);
     
-    // NOTE: here it's okay to acquire a reference to "this" as long as
-    // the reference is not released before we leave the ctor.
-    sp<OverlayChannel> channel = new OverlayChannel(this);
+    sp<OverlayChannel> channel = new OverlayChannel( &layer );
 
     *overlayRef = new OverlayRef(mOverlayHandle, channel,
             mWidth, mHeight, mFormat, mWidthStride, mHeightStride);
@@ -625,7 +631,7 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
         if (mVisibilityChanged || !mInitialized) {
             mVisibilityChanged = false;
             mInitialized = true;
-            const Rect& bounds = mLayer.getTransformedBounds();
+            const Rect bounds(mLayer.getTransformedBounds());
             int x = bounds.left;
             int y = bounds.top;
             int w = bounds.width();
@@ -644,17 +650,11 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
     }
 }
 
-void LayerBuffer::OverlaySource::serverDestroy() 
-{
-    mLayer.clearSource();
-    destroyOverlay();
-}
-
-void LayerBuffer::OverlaySource::destroyOverlay() 
+void LayerBuffer::OverlaySource::destroy()
 {
     // we need a lock here to protect "onVisibilityResolved"
     Mutex::Autolock _l(mOverlaySourceLock);
-    if (mOverlay) {
+    if (mOverlay && mOverlayDevice) {
         overlay_control_device_t* overlay_dev = mOverlayDevice;
         overlay_dev->destroyOverlay(overlay_dev, mOverlay);
         mOverlay = 0;
