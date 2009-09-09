@@ -20,7 +20,6 @@ import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothIntent;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
@@ -169,7 +168,7 @@ class BluetoothEventLoop {
 
     private void onCreatePairedDeviceResult(String address, int result) {
         address = address.toUpperCase();
-        if (result == BluetoothError.SUCCESS) {
+        if (result == BluetoothDevice.BOND_SUCCESS) {
             mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDED);
             if (mBluetoothService.getBondState().isAutoPairingAttemptsInProgress(address)) {
                 mBluetoothService.getBondState().clearPinAttempts(address);

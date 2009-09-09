@@ -42,9 +42,6 @@ import java.util.HashSet;
  *
  * Currently the BluetoothA2dp service runs in the system server and this
  * proxy object will be immediately bound to the service on construction.
- * However this may change in future releases, and error codes such as
- * BluetoothError.ERROR_IPC_NOT_READY will be returned from this API when the
- * proxy object is not yet attached.
  * 
  * Currently this class provides methods to connect to A2DP audio sinks.
  *
@@ -105,16 +102,16 @@ public final class BluetoothA2dp {
      *  Listen for SINK_STATE_CHANGED_ACTION to find out when the
      *  connection is completed.
      *  @param device Remote BT device.
-     *  @return Result code, negative indicates an immediate error.
+     *  @return false on immediate error, true otherwise
      *  @hide
      */
-    public int connectSink(BluetoothDevice device) {
+    public boolean connectSink(BluetoothDevice device) {
         if (DBG) log("connectSink(" + device + ")");
         try {
             return mService.connectSink(device);
         } catch (RemoteException e) {
-            Log.w(TAG, "", e);
-            return BluetoothError.ERROR_IPC;
+            Log.e(TAG, "", e);
+            return false;
         }
     }
 
@@ -122,16 +119,16 @@ public final class BluetoothA2dp {
      *  Listen for SINK_STATE_CHANGED_ACTION to find out when
      *  disconnect is completed.
      *  @param device Remote BT device.
-     *  @return Result code, negative indicates an immediate error.
+     *  @return false on immediate error, true otherwise
      *  @hide
      */
-    public int disconnectSink(BluetoothDevice device) {
+    public boolean disconnectSink(BluetoothDevice device) {
         if (DBG) log("disconnectSink(" + device + ")");
         try {
             return mService.disconnectSink(device);
         } catch (RemoteException e) {
-            Log.w(TAG, "", e);
-            return BluetoothError.ERROR_IPC;
+            Log.e(TAG, "", e);
+            return false;
         }
     }
 
@@ -156,14 +153,14 @@ public final class BluetoothA2dp {
             return Collections.unmodifiableSet(
                     new HashSet<BluetoothDevice>(Arrays.asList(mService.getConnectedSinks())));
         } catch (RemoteException e) {
-            Log.w(TAG, "", e);
+            Log.e(TAG, "", e);
             return null;
         }
     }
 
     /** Get the state of an A2DP sink
      *  @param device Remote BT device.
-     *  @return State code, or negative on error
+     *  @return State code, one of STATE_
      *  @hide
      */
     public int getSinkState(BluetoothDevice device) {
@@ -171,8 +168,8 @@ public final class BluetoothA2dp {
         try {
             return mService.getSinkState(device);
         } catch (RemoteException e) {
-            Log.w(TAG, "", e);
-            return BluetoothError.ERROR_IPC;
+            Log.e(TAG, "", e);
+            return BluetoothA2dp.STATE_DISCONNECTED;
         }
     }
 
@@ -186,15 +183,15 @@ public final class BluetoothA2dp {
      * @param device Paired sink
      * @param priority Integer priority, for example PRIORITY_AUTO or
      *                 PRIORITY_NONE
-     * @return Result code, negative indicates an error
+     * @return true if priority is set, false on error
      */
-    public int setSinkPriority(BluetoothDevice device, int priority) {
+    public boolean setSinkPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setSinkPriority(" + device + ", " + priority + ")");
         try {
             return mService.setSinkPriority(device, priority);
         } catch (RemoteException e) {
-            Log.w(TAG, "", e);
-            return BluetoothError.ERROR_IPC;
+            Log.e(TAG, "", e);
+            return false;
         }
     }
 
@@ -208,8 +205,8 @@ public final class BluetoothA2dp {
         try {
             return mService.getSinkPriority(device);
         } catch (RemoteException e) {
-            Log.w(TAG, "", e);
-            return BluetoothError.ERROR_IPC;
+            Log.e(TAG, "", e);
+            return PRIORITY_OFF;
         }
     }
 
