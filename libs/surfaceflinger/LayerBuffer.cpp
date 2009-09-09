@@ -354,7 +354,7 @@ void LayerBuffer::BufferSource::postBuffer(ssize_t offset)
 {    
     ISurface::BufferHeap buffers;
     { // scope for the lock
-        Mutex::Autolock _l(mLock);
+        Mutex::Autolock _l(mBufferSourceLock);
         buffers = mBufferHeap;
         if (buffers.heap != 0) {
             const size_t memorySize = buffers.heap->getSize();
@@ -379,7 +379,7 @@ void LayerBuffer::BufferSource::postBuffer(ssize_t offset)
 
 void LayerBuffer::BufferSource::unregisterBuffers()
 {
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mBufferSourceLock);
     mBufferHeap.heap.clear();
     mBuffer.clear();
     mLayer.invalidate();
@@ -387,13 +387,13 @@ void LayerBuffer::BufferSource::unregisterBuffers()
 
 sp<LayerBuffer::Buffer> LayerBuffer::BufferSource::getBuffer() const
 {
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mBufferSourceLock);
     return mBuffer;
 }
 
 void LayerBuffer::BufferSource::setBuffer(const sp<LayerBuffer::Buffer>& buffer)
 {
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mBufferSourceLock);
     mBuffer = buffer;
 }
 
@@ -583,7 +583,7 @@ LayerBuffer::OverlaySource::OverlaySource(LayerBuffer& layer,
 
     mOverlayHandle = overlay->getHandleRef(overlay);
     
-    // NOTE: here it's okay to acquire a reference to "this"m as long as
+    // NOTE: here it's okay to acquire a reference to "this" as long as
     // the reference is not released before we leave the ctor.
     sp<OverlayChannel> channel = new OverlayChannel(this);
 
@@ -601,7 +601,6 @@ LayerBuffer::OverlaySource::~OverlaySource()
 
 void LayerBuffer::OverlaySource::onDraw(const Region& clip) const
 {
-    GLclampx color = 0x000018; //dark blue
     GLclampx red = 0;
     GLclampx green = 0;
     GLclampx blue = 0x1818;
@@ -633,7 +632,7 @@ void LayerBuffer::OverlaySource::onVisibilityResolved(
             int h = bounds.height();
             
             // we need a lock here to protect "destroy"
-            Mutex::Autolock _l(mLock);
+            Mutex::Autolock _l(mOverlaySourceLock);
             if (mOverlay) {
                 overlay_control_device_t* overlay_dev = mOverlayDevice;
                 overlay_dev->setPosition(overlay_dev, mOverlay, x,y,w,h);
@@ -654,7 +653,7 @@ void LayerBuffer::OverlaySource::serverDestroy()
 void LayerBuffer::OverlaySource::destroyOverlay() 
 {
     // we need a lock here to protect "onVisibilityResolved"
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mOverlaySourceLock);
     if (mOverlay) {
         overlay_control_device_t* overlay_dev = mOverlayDevice;
         overlay_dev->destroyOverlay(overlay_dev, mOverlay);

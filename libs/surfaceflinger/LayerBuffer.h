@@ -124,7 +124,7 @@ private:
         virtual void unregisterBuffers();
         virtual bool transformed() const;
     private:
-        mutable Mutex                   mLock;
+        mutable Mutex                   mBufferSourceLock;
         sp<Buffer>                      mBuffer;
         status_t                        mStatus;
         ISurface::BufferHeap            mBufferHeap;
@@ -145,14 +145,18 @@ private:
         virtual void onVisibilityResolved(const Transform& planeTransform);
     private:
         void serverDestroy(); 
-        void destroyOverlay(); 
+        void destroyOverlay();
+        
         class OverlayChannel : public BnOverlay {
-            mutable Mutex mLock;
-            sp<OverlaySource> mSource;
+        public:
+            OverlayChannel(const sp<OverlaySource>& source)
+                : mSource(source) {
+            }
+        private:
             virtual void destroy() {
                 sp<OverlaySource> source;
                 { // scope for the lock;
-                    Mutex::Autolock _l(mLock);
+                    Mutex::Autolock _l(mDestroyLock);
                     source = mSource;
                     mSource.clear();
                 }
@@ -160,11 +164,10 @@ private:
                     source->serverDestroy();
                 }
             }
-        public:
-            OverlayChannel(const sp<OverlaySource>& source)
-                : mSource(source) {
-            }
+            mutable Mutex mDestroyLock;
+            sp<OverlaySource> mSource;
         };
+        
         friend class OverlayChannel;
         bool mVisibilityChanged;
 
@@ -176,7 +179,7 @@ private:
         int32_t mFormat;
         int32_t mWidthStride;
         int32_t mHeightStride;
-        mutable Mutex mLock;
+        mutable Mutex mOverlaySourceLock;
         bool mInitialized;
     };
 
@@ -199,7 +202,7 @@ private:
             return static_cast<LayerBuffer*>(Surface::getOwner().get());
         }
     };
-    
+
     mutable Mutex   mLock;
     sp<Source>      mSource;
     sp<Surface>     mSurface;
