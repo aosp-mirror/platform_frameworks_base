@@ -17,6 +17,7 @@
 package android.database.sqlite;
 
 import android.util.Config;
+import android.util.Log;
 
 /**
  * Provides debugging info about all SQLite databases running in the current process.
@@ -27,23 +28,27 @@ public final class SQLiteDebug {
     /**
      * Controls the printing of SQL statements as they are executed.
      */
-    public static final boolean DEBUG_SQL_STATEMENTS = Config.LOGV;
+    public static final boolean DEBUG_SQL_STATEMENTS =
+            Log.isLoggable("SQLiteStatements", Log.VERBOSE);
 
     /**
      * Controls the stack trace reporting of active cursors being
      * finalized.
      */
-    public static final boolean DEBUG_ACTIVE_CURSOR_FINALIZATION = Config.LOGV;
+    public static final boolean DEBUG_ACTIVE_CURSOR_FINALIZATION =
+            Log.isLoggable("SQLiteCursorClosing", Log.VERBOSE);
 
     /**
      * Controls the tracking of time spent holding the database lock. 
      */
-    public static final boolean DEBUG_LOCK_TIME_TRACKING = false;
+    public static final boolean DEBUG_LOCK_TIME_TRACKING =
+            Log.isLoggable("SQLiteLockTime", Log.VERBOSE);
 
     /**
      * Controls the printing of stack traces when tracking the time spent holding the database lock. 
      */
-    public static final boolean DEBUG_LOCK_TIME_TRACKING_STACK_TRACE = false;
+    public static final boolean DEBUG_LOCK_TIME_TRACKING_STACK_TRACE =
+            Log.isLoggable("SQLiteLockStackTrace", Log.VERBOSE);
 
     /**
      * Contains statistics about the active pagers in the current process.
