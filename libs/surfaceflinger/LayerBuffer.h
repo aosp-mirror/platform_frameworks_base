@@ -49,6 +49,7 @@ class LayerBuffer : public LayerBaseClient
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
         virtual bool transformed() const;
+        virtual void destroy() { }
     protected:
         LayerBuffer& mLayer;
     };
@@ -81,9 +82,11 @@ public:
     sp<Source> getSource() const;
     sp<Source> clearSource();
     void setNeedsBlending(bool blending);
-    const Rect& getTransformedBounds() const {
+    Rect getTransformedBounds() const {
         return mTransformedBounds;
     }
+
+    void serverDestroy();
 
 private:
     struct NativeBuffer {
@@ -123,6 +126,7 @@ private:
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
         virtual bool transformed() const;
+        virtual void destroy() { }
     private:
         mutable Mutex                   mBufferSourceLock;
         sp<Buffer>                      mBuffer;
@@ -143,29 +147,21 @@ private:
         virtual void onDraw(const Region& clip) const;
         virtual void onTransaction(uint32_t flags);
         virtual void onVisibilityResolved(const Transform& planeTransform);
+        virtual void destroy();
     private:
-        void serverDestroy(); 
-        void destroyOverlay();
-        
+
         class OverlayChannel : public BnOverlay {
-        public:
-            OverlayChannel(const sp<OverlaySource>& source)
-                : mSource(source) {
-            }
-        private:
+            wp<LayerBuffer> mLayer;
             virtual void destroy() {
-                sp<OverlaySource> source;
-                { // scope for the lock;
-                    Mutex::Autolock _l(mDestroyLock);
-                    source = mSource;
-                    mSource.clear();
-                }
-                if (source != 0) {
-                    source->serverDestroy();
+                sp<LayerBuffer> layer(mLayer.promote());
+                if (layer != 0) {
+                    layer->serverDestroy();
                 }
             }
-            mutable Mutex mDestroyLock;
-            sp<OverlaySource> mSource;
+        public:
+            OverlayChannel(const sp<LayerBuffer>& layer)
+                : mLayer(layer) {
+            }
         };
         
         friend class OverlayChannel;
