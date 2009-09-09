@@ -46,6 +46,7 @@ import android.text.Spannable;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -2768,7 +2769,8 @@ public class WebView extends AbsoluteLayout
                 mZoomScale = 0;
                 if (mNeedToAdjustWebTextView) {
                     mNeedToAdjustWebTextView = false;
-                    mWebTextView.setTextSize(contentToViewDimension(
+                    mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                            contentToViewDimension(
                             nativeFocusCandidateTextSize()));
                     Rect bounds = nativeFocusCandidateNodeBounds();
                     Rect vBox = contentToView(bounds);
@@ -3333,7 +3335,8 @@ public class WebView extends AbsoluteLayout
             // Initialize our generation number.
             mTextGeneration = 0;
         }
-        mWebTextView.setTextSize(contentToViewDimension(nativeFocusCandidateTextSize()));
+        mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                contentToViewDimension(nativeFocusCandidateTextSize()));
         Rect visibleRect = new Rect();
         calcOurContentVisibleRect(visibleRect);
         // Note that sendOurVisibleRect calls viewToContent, so the coordinates
