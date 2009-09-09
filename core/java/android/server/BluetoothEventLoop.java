@@ -265,8 +265,8 @@ class BluetoothEventLoop {
                     pairable.equals("true"),
                     discoverable.equals("true"));
             if (mode >= 0) {
-                Intent intent = new Intent(BluetoothIntent.SCAN_MODE_CHANGED_ACTION);
-                intent.putExtra(BluetoothIntent.SCAN_MODE, mode);
+                Intent intent = new Intent(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+                intent.putExtra(BluetoothAdapter.EXTRA_SCAN_MODE, mode);
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                 mContext.sendBroadcast(intent, BLUETOOTH_PERM);
             }
@@ -371,7 +371,7 @@ class BluetoothEventLoop {
         address = address.toUpperCase();
         mPasskeyAgentRequestData.put(address, new Integer(nativeData));
 
-        if (mBluetoothService.getBluetoothState() == BluetoothAdapter.BLUETOOTH_STATE_TURNING_OFF) {
+        if (mBluetoothService.getBluetoothState() == BluetoothAdapter.STATE_TURNING_OFF) {
             // shutdown path
             mBluetoothService.cancelPairingUserInput(address);
             return null;

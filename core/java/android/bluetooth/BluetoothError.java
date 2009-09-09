@@ -21,6 +21,8 @@ package android.bluetooth;
  *
  * Errors are always negative.
  *
+ * TODO: Deprecate this class.
+ *
  * @hide
  */
 public class BluetoothError {

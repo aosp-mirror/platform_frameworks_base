@@ -81,14 +81,14 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             String action = intent.getAction();
             BluetoothDevice device =
                     intent.getParcelableExtra(BluetoothIntent.DEVICE);
-            if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION)) {
-                int state = intent.getIntExtra(BluetoothIntent.BLUETOOTH_STATE,
+            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
                                                BluetoothError.ERROR);
                 switch (state) {
-                case BluetoothAdapter.BLUETOOTH_STATE_ON:
+                case BluetoothAdapter.STATE_ON:
                     onBluetoothEnable();
                     break;
-                case BluetoothAdapter.BLUETOOTH_STATE_TURNING_OFF:
+                case BluetoothAdapter.STATE_TURNING_OFF:
                     onBluetoothDisable();
                     break;
                 }
@@ -134,7 +134,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
         mAdapter = (BluetoothAdapter) context.getSystemService(Context.BLUETOOTH_SERVICE);
 
-        mIntentFilter = new IntentFilter(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION);
+        mIntentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         mIntentFilter.addAction(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
         mIntentFilter.addAction(BluetoothIntent.REMOTE_DEVICE_CONNECTED_ACTION);
         mContext.registerReceiver(mReceiver, mIntentFilter);
