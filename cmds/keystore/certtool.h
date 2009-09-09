@@ -38,9 +38,9 @@ static inline int get_cert(const char *certname, unsigned char *value, int *size
     int count, fd, ret = -1;
     LPC_MARSHAL cmd;
     char delimiter[] = "_";
-    char *namespace, *keyname;
+    char *p = NULL;
     char *context = NULL;
-    char cname[CERT_NAME_LEN];
+    char *cname = (char*)cmd.data;
 
     if ((certname == NULL) || (value == NULL)) {
         LOGE("get_cert: certname or value is null\n");
@@ -61,12 +61,10 @@ static inline int get_cert(const char *certname, unsigned char *value, int *size
     }
 
     cmd.opcode = GET;
-    if (((namespace = strtok_r(cname, delimiter, &context)) == NULL) ||
-        ((keyname = strtok_r(NULL, delimiter, &context)) == NULL)) {
-        goto err;
-    }
-    if ((cmd.len = snprintf((char*)cmd.data, BUFFER_MAX, "%s %s", namespace, keyname))
-        > (2 * MAX_KEY_NAME_LENGTH + 1)) goto err;
+    p = strstr(cname, delimiter);
+    cmd.len = strlen(certname) + 1;
+    if (p == NULL) goto err;
+    *p = 0; // replace the delimiter with \0 .
 
     if (write_marshal(fd, &cmd)) {
         LOGE("Incorrect command or command line is too long.\n");
