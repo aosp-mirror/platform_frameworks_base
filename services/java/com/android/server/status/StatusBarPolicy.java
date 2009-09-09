@@ -362,7 +362,7 @@ public class StatusBarPolicy {
                     || action.equals(Intent.ACTION_POWER_CONNECTED)) {
                 onBatteryOkay(intent);
             }
-            else if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION) ||
+            else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED) ||
                     action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION) ||
                     action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION) ||
                     action.equals(BluetoothPbap.PBAP_STATE_CHANGED_ACTION)) {
@@ -507,7 +507,7 @@ public class StatusBarPolicy {
         filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
-        filter.addAction(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION);
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION);
         filter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
         filter.addAction(BluetoothPbap.PBAP_STATE_CHANGED_ACTION);
@@ -1072,10 +1072,10 @@ public class StatusBarPolicy {
         int iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth;
 
         String action = intent.getAction();
-        if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION)) {
-            int state = intent.getIntExtra(BluetoothIntent.BLUETOOTH_STATE,
+        if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
                                            BluetoothError.ERROR);
-            mBluetoothEnabled = state == BluetoothAdapter.BLUETOOTH_STATE_ON;
+            mBluetoothEnabled = state == BluetoothAdapter.STATE_ON;
         } else if (action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION)) {
             mBluetoothHeadsetState = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
                     BluetoothHeadset.STATE_ERROR);

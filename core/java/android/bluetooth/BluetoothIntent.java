@@ -20,17 +20,12 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 
 /**
- * The Android Bluetooth API is not finalized, and *will* change. Use at your
- * own risk.
+ * Bluetooth API constants.
  *
- * Manages the local Bluetooth device. Scan for devices, create bondings,
- * power up and down the adapter.
- *
+ * TODO: Deprecate this class
  * @hide
  */
 public interface BluetoothIntent {
-    public static final String SCAN_MODE =
-        "android.bluetooth.intent.SCAN_MODE";
     public static final String DEVICE =
         "android.bluetooth.intent.DEVICE";
     public static final String NAME =
@@ -41,10 +36,6 @@ public interface BluetoothIntent {
         "android.bluetooth.intent.RSSI";
     public static final String CLASS =
         "android.bluetooth.intent.CLASS";
-    public static final String BLUETOOTH_STATE =
-        "android.bluetooth.intent.BLUETOOTH_STATE";
-    public static final String BLUETOOTH_PREVIOUS_STATE =
-        "android.bluetooth.intent.BLUETOOTH_PREVIOUS_STATE";
     public static final String HEADSET_STATE =
         "android.bluetooth.intent.HEADSET_STATE";
     public static final String HEADSET_PREVIOUS_STATE =
@@ -91,24 +82,9 @@ public interface BluetoothIntent {
     public static final String DEVICE_PICKER_DEVICE_PICKER =
         "android.bluetooth.intent.action.DEVICE_PICKER";
 
-    /** Broadcast when the local Bluetooth device state changes, for example
-     *  when Bluetooth is enabled. Will contain int extra's BLUETOOTH_STATE and
-     *  BLUETOOTH_PREVIOUS_STATE. */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String BLUETOOTH_STATE_CHANGED_ACTION =
-        "android.bluetooth.intent.action.BLUETOOTH_STATE_CHANGED";
-
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String NAME_CHANGED_ACTION  =
         "android.bluetooth.intent.action.NAME_CHANGED";
-
-    /**
-     * Broadcast when the scan mode changes. Always contains an int extra
-     * named SCAN_MODE that contains the new scan mode.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String SCAN_MODE_CHANGED_ACTION         =
-        "android.bluetooth.intent.action.SCAN_MODE_CHANGED";
 
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String DISCOVERY_STARTED_ACTION          =

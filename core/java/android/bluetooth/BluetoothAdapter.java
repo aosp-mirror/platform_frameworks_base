@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -40,32 +42,109 @@ import java.util.HashSet;
 public final class BluetoothAdapter {
     private static final String TAG = "BluetoothAdapter";
 
-    /** @hide */
-    public static final int BLUETOOTH_STATE_OFF = 0;
-    /** @hide */
-    public static final int BLUETOOTH_STATE_TURNING_ON = 1;
-    /** @hide */
-    public static final int BLUETOOTH_STATE_ON = 2;
-    /** @hide */
-    public static final int BLUETOOTH_STATE_TURNING_OFF = 3;
+    /**
+     * Broadcast Action: The state of the local Bluetooth adapter has been
+     * changed.
+     * <p>For example, Bluetooth has been turned on or off.
+     * <p>Contains the extra fields {@link #EXTRA_STATE} and {@link
+     * #EXTRA_PREVIOUS_STATE} containing the new and old states
+     * respectively.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_STATE_CHANGED =
+            "android.bluetooth.intent.action.STATE_CHANGED";
 
-    /** Inquiry scan and page scan are both off.
-     *  Device is neither discoverable nor connectable
-     *  @hide */
-    public static final int SCAN_MODE_NONE = 0;
-    /** Page scan is on, inquiry scan is off.
-     *  Device is connectable, but not discoverable
-     *  @hide*/
-    public static final int SCAN_MODE_CONNECTABLE = 1;
-    /** Page scan and inquiry scan are on.
-     *  Device is connectable and discoverable
-     *  @hide*/
-    public static final int SCAN_MODE_CONNECTABLE_DISCOVERABLE = 3;
+    /**
+     * Used as an int extra field in {@link #ACTION_STATE_CHANGED}
+     * intents to request the current power state. Possible values are:
+     * {@link #STATE_OFF},
+     * {@link #STATE_TURNING_ON},
+     * {@link #STATE_ON},
+     * {@link #STATE_TURNING_OFF},
+     */
+    public static final String EXTRA_STATE =
+            "android.bluetooth.intent.extra.STATE";
+    /**
+     * Used as an int extra field in {@link #ACTION_STATE_CHANGED}
+     * intents to request the previous power state. Possible values are:
+     * {@link #STATE_OFF},
+     * {@link #STATE_TURNING_ON},
+     * {@link #STATE_ON},
+     * {@link #STATE_TURNING_OFF},
+     */
+    public static final String EXTRA_PREVIOUS_STATE =
+            "android.bluetooth.intent.extra.PREVIOUS_STATE";
 
-    /** @hide */
-    public static final int RESULT_FAILURE = -1;
-    /** @hide */
-    public static final int RESULT_SUCCESS = 0;
+    /**
+     * Indicates the local Bluetooth adapter is off.
+     */
+    public static final int STATE_OFF = 40;
+    /**
+     * Indicates the local Bluetooth adapter is turning on. However local
+     * clients should wait for {@link #STATE_ON} before attempting to
+     * use the adapter.
+     */
+    public static final int STATE_TURNING_ON = 41;
+    /**
+     * Indicates the local Bluetooth adapter is on, and ready for use.
+     */
+    public static final int STATE_ON = 42;
+    /**
+     * Indicates the local Bluetooth adapter is turning off. Local clients
+     * should immediately attempt graceful disconnection of any remote links.
+     */
+    public static final int STATE_TURNING_OFF = 43;
+
+    /**
+     * Broadcast Action: Indicates the Bluetooth scan mode of the local Adapter
+     * has changed.
+     * <p>Contains the extra fields {@link #EXTRA_SCAN_MODE} and {@link
+     * #EXTRA_PREVIOUS_SCAN_MODE} containing the new and old scan modes
+     * respectively.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SCAN_MODE_CHANGED =
+            "android.bluetooth.intent.action.SCAN_MODE_CHANGED";
+
+    /**
+     * Used as an int extra field in {@link #ACTION_SCAN_MODE_CHANGED}
+     * intents to request the current scan mode. Possible values are:
+     * {@link #SCAN_MODE_NONE},
+     * {@link #SCAN_MODE_CONNECTABLE},
+     * {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE},
+     */
+    public static final String EXTRA_SCAN_MODE = "android.bluetooth.intent.extra.SCAN_MODE";
+    /**
+     * Used as an int extra field in {@link #ACTION_SCAN_MODE_CHANGED}
+     * intents to request the previous scan mode. Possible values are:
+     * {@link #SCAN_MODE_NONE},
+     * {@link #SCAN_MODE_CONNECTABLE},
+     * {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE},
+     */
+    public static final String EXTRA_PREVIOUS_SCAN_MODE =
+            "android.bluetooth.intent.extra.PREVIOUS_SCAN_MODE";
+
+    /**
+     * Indicates that both inquiry scan and page scan are disabled on the local
+     * Bluetooth adapter. Therefore this device is neither discoverable
+     * nor connectable from remote Bluetooth devices.
+     */
+    public static final int SCAN_MODE_NONE = 50;
+    /**
+     * Indicates that inquiry scan is disabled, but page scan is enabled on the
+     * local Bluetooth adapter. Therefore this device is not discoverable from
+     * remote Bluetooth devices, but is connectable from remote devices that
+     * have previously discovered this device.
+     */
+    public static final int SCAN_MODE_CONNECTABLE = 51;
+    /**
+     * Indicates that both inquiry scan and page scan are enabled on the local
+     * Bluetooth adapter. Therefore this device is both discoverable and
+     * connectable from remote Bluetooth devices.
+     */
+    public static final int SCAN_MODE_CONNECTABLE_DISCOVERABLE = 53;
 
     /** The user will be prompted to enter a pin
      * @hide */
@@ -97,6 +176,7 @@ public final class BluetoothAdapter {
      * such as "00:11:22:33:AA:BB".
      * <p>A {@link BluetoothDevice} will always be returned for a valid
      * hardware address, even if this adapter has never seen that device.
+     *
      * @param address valid Bluetooth MAC address
      * @throws IllegalArgumentException if address is invalid
      */
@@ -105,10 +185,12 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Is Bluetooth currently turned on.
+     * Return true if Bluetooth is currently enabled and ready for use.
+     * <p>Equivalent to:
+     * <code>getBluetoothState() == STATE_ON</code>
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
-     * @return true if Bluetooth enabled, false otherwise.
-     * @hide
+     * @return true if the local adapter is turned on
      */
     public boolean isEnabled() {
         try {
@@ -118,28 +200,40 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Get the current state of Bluetooth.
+     * Get the current state of the local Bluetooth adapter.
+     * <p>Possible return values are
+     * {@link #STATE_OFF},
+     * {@link #STATE_TURNING_ON},
+     * {@link #STATE_ON},
+     * {@link #STATE_TURNING_OFF}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
-     * @return One of BLUETOOTH_STATE_ or BluetoothError.ERROR.
-     * @hide
+     * @return current state of Bluetooth adapter
      */
-    public int getBluetoothState() {
+    public int getState() {
         try {
             return mService.getBluetoothState();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothError.ERROR;
+        return STATE_OFF;
     }
 
     /**
-     * Enable the Bluetooth device.
-     * Turn on the underlying hardware.
-     * This is an asynchronous call,
-     * BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION can be used to check if
-     * and when the device is sucessfully enabled.
-     * @return false if we cannot enable the Bluetooth device. True does not
-     * imply the device was enabled, it only implies that so far there were no
-     * problems.
-     * @hide
+     * Turn on the local Bluetooth adapter.
+     * <p>This powers on the underlying Bluetooth hardware, and starts all
+     * Bluetooth system services.
+     * <p>This is an asynchronous call: it will return immediatley, and
+     * clients should listen for {@link #ACTION_STATE_CHANGED}
+     * to be notified of subsequent adapter state changes. If this call returns
+     * true, then the adapter state will immediately transition from {@link
+     * #STATE_OFF} to {@link #STATE_TURNING_ON}, and some time
+     * later transition to either {@link #STATE_OFF} or {@link
+     * #STATE_ON}. If this call returns false then there was an
+     * immediate problem that will prevent the adapter from being turned on -
+     * such as Airplane mode, or the adapter is already turned on.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     *
+     * @return true to indicate adapter startup has begun, or false on
+     *         immediate error
      */
     public boolean enable() {
         try {
@@ -149,11 +243,22 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Disable the Bluetooth device.
-     * This turns off the underlying hardware.
+     * Turn off the local Bluetooth adapter.
+     * <p>This gracefully shuts down all Bluetooth connections, stops Bluetooth
+     * system services, and powers down the underlying Bluetooth hardware.
+     * <p>This is an asynchronous call: it will return immediatley, and
+     * clients should listen for {@link #ACTION_STATE_CHANGED}
+     * to be notified of subsequent adapter state changes. If this call returns
+     * true, then the adapter state will immediately transition from {@link
+     * #STATE_ON} to {@link #STATE_TURNING_OFF}, and some time
+     * later transition to either {@link #STATE_OFF} or {@link
+     * #STATE_ON}. If this call returns false then there was an
+     * immediate problem that will prevent the adapter from being turned off -
+     * such as the adapter already being turned off.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      *
-     * @return true if successful, false otherwise.
-     * @hide
+     * @return true to indicate adapter shutdown has begun, or false on
+     *         immediate error
      */
     public boolean disable() {
         try {
@@ -162,7 +267,13 @@ public final class BluetoothAdapter {
         return false;
     }
 
-    /** @hide */
+    /**
+     * Returns the hardware address of the local Bluetooth adapter.
+     * <p>For example, "00:11:22:AA:BB:CC".
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @return Bluetooth hardware address as string
+     */
     public String getAddress() {
         try {
             return mService.getAddress();
@@ -171,13 +282,11 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Get the friendly Bluetooth name of this device.
+     * Get the friendly Bluetooth name of the local Bluetooth adapter.
+     * <p>This name is visible to remote Bluetooth devices.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
-     * This name is visible to remote Bluetooth devices. Currently it is only
-     * possible to retrieve the Bluetooth name when Bluetooth is enabled.
-     *
-     * @return the Bluetooth name, or null if there was a problem.
-     * @hide
+     * @return the Bluetooth name, or null on error
      */
     public String getName() {
         try {
@@ -187,14 +296,15 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Set the friendly Bluetooth name of this device.
+     * Set the friendly Bluetooth name of the local Bluetoth adapter.
+     * <p>This name is visible to remote Bluetooth devices.
+     * <p>Valid Bluetooth names are a maximum of 248 UTF-8 characters, however
+     * many remote devices can only display the first 40 characters, and some
+     * may be limited to just 20.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      *
-     * This name is visible to remote Bluetooth devices. The Bluetooth Service
-     * is responsible for persisting this name.
-     *
-     * @param name the name to set
-     * @return     true, if the name was successfully set. False otherwise.
-     * @hide
+     * @param name a valid Bluetooth name
+     * @return     true if the name was set, false otherwise
      */
     public boolean setName(String name) {
         try {
@@ -204,28 +314,46 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Get the current scan mode.
-     * Used to determine if the local device is connectable and/or discoverable
-     * @return Scan mode, one of SCAN_MODE_* or an error code
-     * @hide
+     * Get the current Bluetooth scan mode of the local Bluetooth adaper.
+     * <p>The Bluetooth scan mode determines if the local adapter is
+     * connectable and/or discoverable from remote Bluetooth devices.
+     * <p>Possible values are:
+     * {@link #SCAN_MODE_NONE},
+     * {@link #SCAN_MODE_CONNECTABLE},
+     * {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @return scan mode
      */
     public int getScanMode() {
         try {
             return mService.getScanMode();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothError.ERROR_IPC;
+        return SCAN_MODE_NONE;
     }
 
     /**
-     * Set the current scan mode.
-     * Used to make the local device connectable and/or discoverable
-     * @param scanMode One of SCAN_MODE_*
-     * @hide
+     * Set the Bluetooth scan mode of the local Bluetooth adapter.
+     * <p>The Bluetooth scan mode determines if the local adapter is
+     * connectable and/or discoverable from remote Bluetooth devices.
+     * <p>For privacy reasons, it is recommended to limit the duration of time
+     * that the local adapter remains in a discoverable scan mode. For example,
+     * 2 minutes is a generous time to allow a remote Bluetooth device to
+     * initiate and complete its discovery process.
+     * <p>Valid scan mode values are:
+     * {@link #SCAN_MODE_NONE},
+     * {@link #SCAN_MODE_CONNECTABLE},
+     * {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     *
+     * @param mode valid scan mode
+     * @return     true if the scan mode was set, false otherwise
      */
-    public void setScanMode(int scanMode) {
+    public boolean setScanMode(int mode) {
         try {
-            mService.setScanMode(scanMode);
+            return mService.setScanMode(mode);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
     }
 
     /** @hide */
