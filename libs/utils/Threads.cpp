@@ -655,6 +655,11 @@ int Thread::_threadLoop(void* user)
     wp<Thread> weak(strong);
     self->mHoldSelf.clear();
 
+#if HAVE_ANDROID_OS
+    // this is very useful for debugging with gdb
+    self->mTid = gettid();
+#endif
+
     bool first = true;
 
     do {
@@ -685,7 +690,7 @@ int Thread::_threadLoop(void* user)
             self->mExitPending = true;
             self->mLock.lock();
             self->mRunning = false;
-            self->mThreadExitedCondition.signal();
+            self->mThreadExitedCondition.broadcast();
             self->mLock.unlock();
             break;
         }
@@ -693,7 +698,7 @@ int Thread::_threadLoop(void* user)
         // Release our strong reference, to let a chance to the thread
         // to die a peaceful death.
         strong.clear();
-        // And immediately, reacquire a strong reference for the next loop
+        // And immediately, re-acquire a strong reference for the next loop
         strong = weak.promote();
     } while(strong != 0);
     
