@@ -138,6 +138,7 @@ private:
     void setComponentRole();
 
     void setAMRFormat();
+    void setAMRWBFormat();
     void setAACFormat(int32_t numChannels, int32_t sampleRate);
 
     status_t setVideoPortFormatType(
