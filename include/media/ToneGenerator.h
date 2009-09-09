@@ -154,7 +154,7 @@ public:
     ToneGenerator(int streamType, float volume);
     ~ToneGenerator();
 
-    bool startTone(int toneType);
+    bool startTone(int toneType, int durationMs = -1);
     void stopTone();
 
     bool isInited() { return (mState == TONE_IDLE)?false:true;}
@@ -246,6 +246,7 @@ private:
     // NOTE: because mTotalSmp, mNextSegSmp are stored on 32 bit, current design will operate properly
     // only if tone duration is less than about 27 Hours(@44100Hz sampling rate). If this time is exceeded,
     // no crash will occur but tone sequence will show a glitch.
+    unsigned int mMaxSmp;  // Maximum number of audio samples played (maximun tone duration)
 
     unsigned short mCurSegment;  // Current segment index in ToneDescriptor segments[]
     unsigned short mCurCount;  // Current sequence repeat count

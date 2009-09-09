@@ -744,7 +744,7 @@ public class ToneGenerator
      * This method starts the playback of a tone of the specified type.
      * only one tone can play at a time: if a tone is playing while this method is called,
      * this tone is stopped and replaced by the one requested.
-     * @param toneType   The type of tone generate chosen from the following list:
+     * @param toneType   The type of tone generated chosen from the following list:
      * <ul>
      * <li>{@link #TONE_DTMF_0}
      * <li>{@link #TONE_DTMF_1}
@@ -846,7 +846,18 @@ public class ToneGenerator
      * </ul>
      * @see #ToneGenerator(int, int)
     */
-    public native boolean startTone(int toneType);
+    public boolean startTone(int toneType) {
+        return startTone(toneType, -1);
+    }
+
+    /**
+     * This method starts the playback of a tone of the specified type for the specified duration.
+     * @param toneType   The type of tone generated @see #startTone(int).
+     * @param durationMs  The tone duration in milliseconds. If the tone is limited in time by definition,
+     * the actual duration will be the minimum of durationMs and the defined tone duration. Setting durationMs to -1,
+     * is equivalent to calling #startTone(int).
+    */
+    public native boolean startTone(int toneType, int durationMs);
 
     /**
      * This method stops the tone currently playing playback.

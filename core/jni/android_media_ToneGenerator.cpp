@@ -38,7 +38,7 @@ struct fields_t {
 };
 static fields_t fields;
 
-static jboolean android_media_ToneGenerator_startTone(JNIEnv *env, jobject thiz, jint toneType) {
+static jboolean android_media_ToneGenerator_startTone(JNIEnv *env, jobject thiz, jint toneType, jint durationMs) {
     LOGV("android_media_ToneGenerator_startTone: %x\n", (int)thiz);
 
     ToneGenerator *lpToneGen = (ToneGenerator *)env->GetIntField(thiz,
@@ -48,7 +48,7 @@ static jboolean android_media_ToneGenerator_startTone(JNIEnv *env, jobject thiz,
         return false;
     }
 
-    return lpToneGen->startTone(toneType);
+    return lpToneGen->startTone(toneType, durationMs);
 }
 
 static void android_media_ToneGenerator_stopTone(JNIEnv *env, jobject thiz) {
@@ -120,7 +120,7 @@ static void android_media_ToneGenerator_native_finalize(JNIEnv *env,
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    { "startTone", "(I)Z", (void *)android_media_ToneGenerator_startTone },
+    { "startTone", "(II)Z", (void *)android_media_ToneGenerator_startTone },
     { "stopTone", "()V", (void *)android_media_ToneGenerator_stopTone },
     { "release", "()V", (void *)android_media_ToneGenerator_release },
     { "native_setup", "(II)V", (void *)android_media_ToneGenerator_native_setup },
