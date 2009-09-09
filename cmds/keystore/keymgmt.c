@@ -192,21 +192,15 @@ static int create_master_key(char *upasswd)
     return ret;
 }
 
-static int change_passwd(char *data)
+int change_passwd(char *old_pass, char *new_pass)
 {
     unsigned char master_key[USER_KEY_LEN];
-    char *old_pass, *new_pass = NULL, *p, *delimiter=" ";
-    int ret, count = 0;
-    char *context = NULL;
+    int ret;
 
-    old_pass = p = strtok_r(data, delimiter, &context);
-    while (p != NULL) {
-        count++;
-        new_pass = p;
-        p = strtok_r(NULL, delimiter, &context);
-    }
-    if (count != 2) return -1;
-    if (strlen(new_pass) < MIN_PASSWD_LENGTH) return -1;
+    if (state == UNINITIALIZED) return -1;
+    if ((strlen(old_pass) < MIN_PASSWD_LENGTH) ||
+        (strlen(new_pass) < MIN_PASSWD_LENGTH)) return -1;
+
     if ((ret = get_master_key(old_pass, master_key)) == 0) {
         ret = store_master_key(new_pass, master_key);
         retry_count = 0;
@@ -336,14 +330,12 @@ int list_keys(const char *namespace, char reply[BUFFER_MAX])
     return 0;
 }
 
-int passwd(char *data)
+int new_passwd(char *password)
 {
-    if (state == UNINITIALIZED) {
-        if (strchr(data, ' ')) return -1;
-        if (strlen(data) < MIN_PASSWD_LENGTH) return -1;
-        return create_master_key(data);
-    }
-    return change_passwd(data);
+    int passwdlen = strlen(password);
+
+    if ((state != UNINITIALIZED) || (passwdlen < MIN_PASSWD_LENGTH)) return -1;
+    return create_master_key(password);
 }
 
 int lock()
