@@ -283,10 +283,10 @@ public final class ServerSession extends ObexSession implements Runnable {
 
                 ObexHelper.updateHeaderSet(request, headers);
 
-                if (request.mConnectionID != null) {
+                if (mListener.getConnectionId() != -1 && request.mConnectionID != null) {
                     mListener.setConnectionId(ObexHelper.convertToLong(request.mConnectionID));
                 } else {
-                    mListener.setConnectionId(-1);
+                    mListener.setConnectionId(1);
                 }
                 // the Auth chan is initiated by the server, client sent back the authResp .
                 if (request.mAuthResp != null) {
@@ -405,7 +405,7 @@ public final class ServerSession extends ObexSession implements Runnable {
                 ObexHelper.updateHeaderSet(request, headers);
             }
 
-            if (request.mConnectionID != null) {
+            if (mListener.getConnectionId() != -1 && request.mConnectionID != null) {
                 mListener.setConnectionId(ObexHelper.convertToLong(request.mConnectionID));
             } else {
                 mListener.setConnectionId(1);
@@ -527,7 +527,7 @@ public final class ServerSession extends ObexSession implements Runnable {
                 ObexHelper.updateHeaderSet(request, headers);
             }
 
-            if (request.mConnectionID != null) {
+            if (mListener.getConnectionId() != -1 && request.mConnectionID != null) {
                 mListener.setConnectionId(ObexHelper.convertToLong(request.mConnectionID));
             } else {
                 mListener.setConnectionId(1);
