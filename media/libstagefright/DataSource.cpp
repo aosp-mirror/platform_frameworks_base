@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <media/stagefright/AMRExtractor.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MP3Extractor.h>
@@ -84,6 +85,7 @@ void DataSource::RegisterSniffer(SnifferFunc func) {
 void DataSource::RegisterDefaultSniffers() {
     RegisterSniffer(SniffMP3);
     RegisterSniffer(SniffMPEG4);
+    RegisterSniffer(SniffAMR);
 }
 
 }  // namespace android
