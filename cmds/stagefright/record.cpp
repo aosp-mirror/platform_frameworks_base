@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
 #endif
 
     sp<MetaData> encMeta = new MetaData;
-    encMeta->setCString(kKeyMIMEType, 1 ? "audio/3gpp" : "audio/mp4a-latm");
+    encMeta->setCString(kKeyMIMEType, 1 ? "audio/amr-wb" : "audio/mp4a-latm");
     encMeta->setInt32(kKeySampleRate, kSampleRate);
     encMeta->setInt32(kKeyChannelCount, kNumChannels);
     encMeta->setInt32(kKeyMaxInputSize, 8192);
@@ -248,7 +248,7 @@ int main(int argc, char **argv) {
         buffer->release();
         buffer = NULL;
 
-        if (++n == 10000) {
+        if (++n == 100) {
             break;
         }
     }
