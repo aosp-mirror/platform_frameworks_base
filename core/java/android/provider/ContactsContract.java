@@ -523,7 +523,7 @@ public final class ContactsContract {
         /**
          * Aggregation mode: aggregate at the time the raw contact is inserted/updated.
          */
-        public static final int AGGREGATION_MODE_IMMEDITATE = 1;
+        public static final int AGGREGATION_MODE_IMMEDIATE = 1;
 
         /**
          * If {@link #AGGREGATION_MODE} is {@link #AGGREGATION_MODE_SUSPENDED}, changes
