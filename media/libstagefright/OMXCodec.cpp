@@ -49,6 +49,7 @@ static const CodecInfo kDecoderInfo[] = {
     { "audio/mpeg", "OMX.PV.mp3dec" },
     { "audio/3gpp", "OMX.TI.AMR.decode" },
     { "audio/3gpp", "OMX.PV.amrdec" },
+    { "audio/amr-wb", "OMX.TI.WBAMR.decode" },
     { "audio/mp4a-latm", "OMX.TI.AAC.decode" },
     { "audio/mp4a-latm", "OMX.PV.aacdec" },
     { "video/mp4v-es", "OMX.qcom.video.decoder.mpeg4" },
@@ -65,6 +66,7 @@ static const CodecInfo kDecoderInfo[] = {
 static const CodecInfo kEncoderInfo[] = {
     { "audio/3gpp", "OMX.TI.AMR.encode" },
     { "audio/3gpp", "OMX.PV.amrencnb" },
+    { "audio/amr-wb", "OMX.TI.WBAMR.encode" },
     { "audio/mp4a-latm", "OMX.TI.AAC.encode" },
     { "audio/mp4a-latm", "OMX.PV.aacenc" },
     { "video/mp4v-es", "OMX.qcom.video.encoder.mpeg4" },
@@ -316,6 +318,9 @@ sp<OMXCodec> OMXCodec::Create(
 
     if (!strcasecmp("audio/3gpp", mime)) {
         codec->setAMRFormat();
+    }
+    if (!strcasecmp("audio/amr-wb", mime)) {
+        codec->setAMRWBFormat();
     }
     if (!strcasecmp("audio/mp4a-latm", mime)) {
         int32_t numChannels, sampleRate;
@@ -673,6 +678,7 @@ void OMXCodec::setComponentRole() {
     static const MimeToRole kMimeToRole[] = {
         { "audio/mpeg", "audio_decoder.mp3", "audio_encoder.mp3" },
         { "audio/3gpp", "audio_decoder.amrnb", "audio_encoder.amrnb" },
+        { "audio/amr-wb", "audio_decoder.amrwb", "audio_encoder.amrwb" },
         { "audio/mp4a-latm", "audio_decoder.aac", "audio_encoder.aac" },
         { "video/avc",  "video_decoder.avc", "video_encoder.avc" },
         { "video/mp4v-es", "video_decoder.mpeg4", "video_encoder.mpeg4" },
@@ -1530,6 +1536,37 @@ void OMXCodec::setAMRFormat() {
 
         def.eAMRFrameFormat = OMX_AUDIO_AMRFrameFormatFSF;
         def.eAMRBandMode = OMX_AUDIO_AMRBandModeNB0;
+
+        err = mOMX->set_parameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
+        CHECK_EQ(err, OK);
+    }
+
+    ////////////////////////
+
+    if (mIsEncoder) {
+        sp<MetaData> format = mSource->getFormat();
+        int32_t sampleRate;
+        int32_t numChannels;
+        CHECK(format->findInt32(kKeySampleRate, &sampleRate));
+        CHECK(format->findInt32(kKeyChannelCount, &numChannels));
+
+        setRawAudioFormat(kPortIndexInput, sampleRate, numChannels);
+    }
+}
+
+void OMXCodec::setAMRWBFormat() {
+    if (!mIsEncoder) {
+        OMX_AUDIO_PARAM_AMRTYPE def;
+        InitOMXParams(&def);
+        def.nPortIndex = kPortIndexInput;
+
+        status_t err =
+            mOMX->get_parameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
+
+        CHECK_EQ(err, OK);
+
+        def.eAMRFrameFormat = OMX_AUDIO_AMRFrameFormatFSF;
+        def.eAMRBandMode = OMX_AUDIO_AMRBandModeWB0;
 
         err = mOMX->set_parameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
         CHECK_EQ(err, OK);
