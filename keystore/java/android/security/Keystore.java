@@ -53,7 +53,6 @@ public abstract class Keystore {
         private static final String CA_CERTIFICATE = "CaCertificate";
         private static final String USER_CERTIFICATE = "UserCertificate";
         private static final String USER_KEY = "UserPrivateKey";
-        private static final String COMMAND_DELIMITER = " ";
         private static final ServiceCommand mServiceCommand =
                 new ServiceCommand(SERVICE_NAME);
 
@@ -80,7 +79,7 @@ public abstract class Keystore {
         @Override
         public int changePassword(String oldPassword, String newPassword) {
             Reply result = mServiceCommand.execute(ServiceCommand.PASSWD,
-                    oldPassword + " " + newPassword);
+                    oldPassword + "\0" + newPassword + "\0");
             return (result != null) ? result.returnCode : -1;
         }
 
@@ -105,14 +104,14 @@ public abstract class Keystore {
         @Override
         public int put(String namespace, String keyname, String value) {
             Reply result = mServiceCommand.execute(ServiceCommand.PUT_KEY,
-                    namespace + " " + keyname + " " + value);
+                    namespace + "\0" + keyname + "\0" + value);
             return (result != null) ? result.returnCode : -1;
         }
 
         @Override
         public String get(String namespace, String keyname) {
             Reply result = mServiceCommand.execute(ServiceCommand.GET_KEY,
-                    namespace + " " + keyname);
+                    namespace + "\0" + keyname + "\0");
             return (result != null) ? ((result.returnCode != 0) ? null :
                     new String(result.data, 0, result.len)) : null;
         }
@@ -120,7 +119,7 @@ public abstract class Keystore {
         @Override
         public int remove(String namespace, String keyname) {
             Reply result = mServiceCommand.execute(ServiceCommand.REMOVE_KEY,
-                    namespace + " " + keyname);
+                    namespace + "\0" + keyname + "\0");
             return (result != null) ? result.returnCode : -1;
         }
 
