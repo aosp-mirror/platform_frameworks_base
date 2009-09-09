@@ -22,7 +22,9 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.net.Uri;
+import android.provider.CallLog;
 import android.provider.Contacts;
+import android.provider.CallLog.Calls;
 import android.provider.Contacts.ContactMethods;
 import android.provider.Contacts.Extensions;
 import android.provider.Contacts.GroupMembership;
@@ -88,6 +90,8 @@ public class ContactStruct {
     /** Only for GET. Use addExtension() to PUT */
     public Map<String, List<String>> extensionMap;
 
+    public String timeStamp;
+
     // Use organizationList instead when handling ORG.
     @Deprecated
     public String company;
@@ -145,6 +149,32 @@ public class ContactStruct {
         phoneData.label = label;
         phoneData.isPrimary = isPrimary;
         phoneList.add(phoneData);
+    }
+
+    /**
+     * Add call history time stamp and call type.
+     * @param type call type
+     * @param timeStamp timeStamp
+     */
+    public void addCallHistoryTimeStamp(int type, String date) {
+        // Extension for call history as defined in
+        // in the Specification for Ic Mobile Communcation - ver 1.1,
+        // Oct 2000. This is used to send the details of the call
+        // history - missed, incoming, outgoing along with date and time
+        // to the requesting device (For example, transferring phone book
+        // when connected over bluetooth)
+        // X-IRMC-CALL-DATETIME;MISSED:20050320T100000
+        String strCallType;
+        if (type == Calls.INCOMING_TYPE) {
+            strCallType = "INCOMING";
+        } else if (type == Calls.OUTGOING_TYPE) {
+            strCallType = "OUTGOING";
+        } else if (type == Calls.MISSED_TYPE) {
+            strCallType = "MISSED";
+        } else {
+            strCallType = "";
+        }
+        timeStamp = "X-IRMC-CALL-DATETIME;" + strCallType + ":" + date;
     }
 
     /**
