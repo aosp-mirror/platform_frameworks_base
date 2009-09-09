@@ -19,7 +19,6 @@ package com.android.server.status;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothError;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothIntent;
 import android.bluetooth.BluetoothPbap;
@@ -1073,8 +1072,7 @@ public class StatusBarPolicy {
 
         String action = intent.getAction();
         if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
-                                           BluetoothError.ERROR);
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
             mBluetoothEnabled = state == BluetoothAdapter.STATE_ON;
         } else if (action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION)) {
             mBluetoothHeadsetState = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
