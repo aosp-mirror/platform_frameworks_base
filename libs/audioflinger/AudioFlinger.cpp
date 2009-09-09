@@ -2014,6 +2014,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
     :   RefBase(),
         mThread(thread),
         mClient(client),
+        mCblk(0),
         mFrameCount(0),
         mState(IDLE),
         mClientTid(-1),
@@ -2162,21 +2163,23 @@ AudioFlinger::PlaybackThread::Track::Track(
     :   TrackBase(thread, client, sampleRate, format, channelCount, frameCount, 0, sharedBuffer),
     mMute(false), mSharedBuffer(sharedBuffer), mName(-1)
 {
-    sp<ThreadBase> baseThread = thread.promote();
-    if (baseThread != 0) {
-        PlaybackThread *playbackThread = (PlaybackThread *)baseThread.get();
-        mName = playbackThread->getTrackName_l();
+    if (mCblk != NULL) {
+        sp<ThreadBase> baseThread = thread.promote();
+        if (baseThread != 0) {
+            PlaybackThread *playbackThread = (PlaybackThread *)baseThread.get();
+            mName = playbackThread->getTrackName_l();
+        }
+        LOGV("Track constructor name %d, calling thread %d", mName, IPCThreadState::self()->getCallingPid());
+        if (mName < 0) {
+            LOGE("no more track names available");
+        }
+        mVolume[0] = 1.0f;
+        mVolume[1] = 1.0f;
+        mStreamType = streamType;
+        // NOTE: audio_track_cblk_t::frameSize for 8 bit PCM data is based on a sample size of
+        // 16 bit because data is converted to 16 bit before being stored in buffer by AudioTrack
+        mCblk->frameSize = AudioSystem::isLinearPCM(format) ? channelCount * sizeof(int16_t) : sizeof(int8_t);
     }
-    LOGV("Track constructor name %d, calling thread %d", mName, IPCThreadState::self()->getCallingPid());
-    if (mName < 0) {
-        LOGE("no more track names available");
-    }
-    mVolume[0] = 1.0f;
-    mVolume[1] = 1.0f;
-    mStreamType = streamType;
-    // NOTE: audio_track_cblk_t::frameSize for 8 bit PCM data is based on a sample size of
-    // 16 bit because data is converted to 16 bit before being stored in buffer by AudioTrack
-    mCblk->frameSize = AudioSystem::isLinearPCM(format) ? channelCount * sizeof(int16_t) : sizeof(int8_t);
 }
 
 AudioFlinger::PlaybackThread::Track::~Track()
@@ -2390,14 +2393,16 @@ AudioFlinger::RecordThread::RecordTrack::RecordTrack(
                   channelCount, frameCount, flags, 0),
         mOverflow(false)
 {
-   LOGV("RecordTrack constructor, size %d", (int)mBufferEnd - (int)mBuffer);
-   if (format == AudioSystem::PCM_16_BIT) {
-       mCblk->frameSize = channelCount * sizeof(int16_t);
-   } else if (format == AudioSystem::PCM_8_BIT) {
-       mCblk->frameSize = channelCount * sizeof(int8_t);
-   } else {
-       mCblk->frameSize = sizeof(int8_t);
-   }
+    if (mCblk != NULL) {
+       LOGV("RecordTrack constructor, size %d", (int)mBufferEnd - (int)mBuffer);
+       if (format == AudioSystem::PCM_16_BIT) {
+           mCblk->frameSize = channelCount * sizeof(int16_t);
+       } else if (format == AudioSystem::PCM_8_BIT) {
+           mCblk->frameSize = channelCount * sizeof(int8_t);
+       } else {
+           mCblk->frameSize = sizeof(int8_t);
+       }
+    }
 }
 
 AudioFlinger::RecordThread::RecordTrack::~RecordTrack()
