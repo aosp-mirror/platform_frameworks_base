@@ -758,6 +758,9 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#setSpeakerphoneOn() */
     public void setSpeakerphoneOn(boolean on){
+        if (!checkAudioSettingsPermission("setSpeakerphoneOn()")) {
+            return;
+        }
         if (on) {
             AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_SPEAKER);
             mForcedUseForComm = AudioSystem.FORCE_SPEAKER;
@@ -778,6 +781,9 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#setBluetoothScoOn() */
     public void setBluetoothScoOn(boolean on){
+        if (!checkAudioSettingsPermission("setBluetoothScoOn()")) {
+            return;
+        }
         if (on) {
             AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_BT_SCO);
             AudioSystem.setForceUse(AudioSystem.FOR_RECORD, AudioSystem.FORCE_BT_SCO);
