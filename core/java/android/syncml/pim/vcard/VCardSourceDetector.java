@@ -26,8 +26,10 @@ import java.util.Set;
 /**
  * Class which tries to detects the source of the vCard from its properties.
  * Currently this implementation is very premature.
- * @hide
+ * 
+ * @deprecated Please use the code in android.pim.vcard
  */
+@Deprecated
 public class VCardSourceDetector implements VBuilder {
     // Should only be used in package. 
     static final int TYPE_UNKNOWN = 0;

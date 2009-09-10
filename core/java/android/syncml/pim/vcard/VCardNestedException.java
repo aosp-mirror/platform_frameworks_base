@@ -18,7 +18,10 @@ package android.syncml.pim.vcard;
 
 /**
  * VCardException thrown when VCard is nested without VCardParser's being notified.
+ *
+ * @depricated Please use the code in android.pim.vcard
  */
+@Deprecated
 public class VCardNestedException extends VCardException {
     public VCardNestedException() {}
     public VCardNestedException(String message) {

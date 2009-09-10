@@ -47,7 +47,10 @@ import java.util.List;
  * If we store all VNode entries in memory like VDataBuilder.java,
  * OutOfMemoryError may be thrown. Thus, this class push each VCard entry into
  * ContentResolver immediately.
+ * 
+ * @depricated Please use the code in android.pim.vcard
  */
+@Deprecated
 public class VCardDataBuilder implements VBuilder {
     static private String LOG_TAG = "VCardDataBuilder"; 
     
