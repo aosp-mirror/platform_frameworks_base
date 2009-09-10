@@ -103,10 +103,22 @@ void DisplayHardware::init(uint32_t dpy)
     }
 
     // initialize EGL
-    const EGLint attribs[] = {
+    EGLint attribs[] = {
             EGL_SURFACE_TYPE,   EGL_WINDOW_BIT,
+            EGL_NONE,           0,
             EGL_NONE
     };
+
+    // debug: disable h/w rendering
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get("debug.sf.hw", property, NULL) > 0) {
+        if (atoi(property) == 0) {
+            LOGW("H/W composition disabled");
+            attribs[2] = EGL_CONFIG_CAVEAT;
+            attribs[3] = EGL_SLOW_CONFIG;
+        }
+    }
+
     EGLint w, h, dummy;
     EGLint numConfigs=0;
     EGLSurface surface;
@@ -193,7 +205,6 @@ void DisplayHardware::init(uint32_t dpy)
     mDpiY = mNativeWindow->ydpi;
     mRefreshRate = fbDev->fps; 
     
-    char property[PROPERTY_VALUE_MAX];
     /* Read density from build-specific ro.sf.lcd_density property
      * except if it is overridden by qemu.sf.lcd_density.
      */
