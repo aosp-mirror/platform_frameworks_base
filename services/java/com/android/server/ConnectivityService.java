@@ -640,20 +640,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return false;
         }
         NetworkStateTracker tracker = mNetTrackers[networkType];
-        /*
-         * If there's only one connected network, and it's the one requested,
-         * then we don't have to do anything - the requested route already
-         * exists. If it's not the requested network, then it's not possible
-         * to establish the requested route. Finally, if there is more than
-         * one connected network, then we must insert an entry in the routing
-         * table.
-         */
-        if (getNumConnectedNetworks() > 1) {
-            return tracker.requestRouteToHost(hostAddress);
-        } else {
-            return (mNetAttributes[networkType].isDefault() &&
-                    tracker.getNetworkInfo().isConnected());
+
+        if (!tracker.getNetworkInfo().isConnected() || tracker.isTeardownRequested()) {
+            if (DBG) {
+                Log.d(TAG, "requestRouteToHost on down network (" + networkType + " - dropped");
+            }
+            return false;
         }
+        return tracker.requestRouteToHost(hostAddress);
     }
 
     /**
