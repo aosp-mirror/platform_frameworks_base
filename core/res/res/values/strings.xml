@@ -1848,7 +1848,7 @@
     <!-- Title of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_title">USB debugging connected</string>
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
-    <string name="adb_active_notification_message">A computer is connected to your phone.</string>
+    <string name="adb_active_notification_message">Select to disable USB debugging.</string>
 
     <!-- Used to replace %s in urls retreived from the signin server with locales.  For Some        -->
     <!-- devices we don't support all the locales we ship to and need to replace the '%s' with a    -->
@@ -1858,7 +1858,7 @@
     <string name="locale_replacement">""</string>
 
     <!-- Title of the pop-up dialog in which the user switches input method components. -->
-    <string name="select_input_method">Select Input Method</string>
+    <string name="select_input_method">Select input method</string>
 
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="fast_scroll_numeric_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
