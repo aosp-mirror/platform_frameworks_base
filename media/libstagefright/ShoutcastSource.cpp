@@ -20,6 +20,7 @@
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/ShoutcastSource.h>
 #include <media/stagefright/string.h>
@@ -77,7 +78,7 @@ status_t ShoutcastSource::stop() {
 
 sp<MetaData> ShoutcastSource::getFormat() {
     sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, "audio/mpeg");
+    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
     meta->setInt32(kKeySampleRate, 44100);
     meta->setInt32(kKeyChannelCount, 2);  // XXX
 

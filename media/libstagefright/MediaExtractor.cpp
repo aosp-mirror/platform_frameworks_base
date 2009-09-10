@@ -20,6 +20,7 @@
 
 #include <media/stagefright/AMRExtractor.h>
 #include <media/stagefright/DataSource.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MP3Extractor.h>
 #include <media/stagefright/MPEG4Extractor.h>
 #include <media/stagefright/MediaExtractor.h>
@@ -44,12 +45,13 @@ sp<MediaExtractor> MediaExtractor::Create(
              mime, confidence);
     }
 
-    if (!strcasecmp(mime, "video/mp4") || !strcasecmp(mime, "audio/mp4")) {
+    if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)
+            || !strcasecmp(mime, "audio/mp4")) {
         return new MPEG4Extractor(source);
-    } else if (!strcasecmp(mime, "audio/mpeg")) {
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
         return new MP3Extractor(source);
-    } else if (!strcasecmp(mime, "audio/3gpp")
-            || !strcasecmp(mime, "audio/amr-wb")) {
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)
+            || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_WB)) {
         return new AMRExtractor(source);
     }
 

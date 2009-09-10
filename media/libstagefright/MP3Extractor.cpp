@@ -23,6 +23,7 @@
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
@@ -330,7 +331,7 @@ MP3Extractor::MP3Extractor(const sp<DataSource> &source)
 
         mMeta = new MetaData;
 
-        mMeta->setCString(kKeyMIMEType, "audio/mpeg");
+        mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
         mMeta->setInt32(kKeySampleRate, sample_rate);
         mMeta->setInt32(kKeyBitRate, bitrate);
         mMeta->setInt32(kKeyChannelCount, num_channels);
@@ -510,7 +511,7 @@ bool SniffMP3(
         return false;
     }
 
-    *mimeType = "audio/mpeg";
+    *mimeType = MEDIA_MIMETYPE_AUDIO_MPEG;
     *confidence = 0.3f;
 
     return true;

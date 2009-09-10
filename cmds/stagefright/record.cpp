@@ -21,6 +21,7 @@
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MPEG4Extractor.h>
 #include <media/stagefright/MPEG4Writer.h>
@@ -45,7 +46,7 @@ public:
         sp<MetaData> meta = new MetaData;
         meta->setInt32(kKeyWidth, mWidth);
         meta->setInt32(kKeyHeight, mHeight);
-        meta->setCString(kKeyMIMEType, "video/raw");
+        meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_RAW);
 
         return meta;
     }
@@ -149,8 +150,8 @@ int main(int argc, char **argv) {
 #endif
 
     sp<MetaData> enc_meta = new MetaData;
-    // enc_meta->setCString(kKeyMIMEType, "video/3gpp");
-    enc_meta->setCString(kKeyMIMEType, "video/mp4v-es");
+    // enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_H263);
+    enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG4);
     enc_meta->setInt32(kKeyWidth, width);
     enc_meta->setInt32(kKeyHeight, height);
 
@@ -228,7 +229,8 @@ int main(int argc, char **argv) {
 #endif
 
     sp<MetaData> encMeta = new MetaData;
-    encMeta->setCString(kKeyMIMEType, 1 ? "audio/amr-wb" : "audio/mp4a-latm");
+    encMeta->setCString(kKeyMIMEType,
+            1 ? MEDIA_MIMETYPE_AUDIO_AMR_WB : MEDIA_MIMETYPE_AUDIO_AAC);
     encMeta->setInt32(kKeySampleRate, kSampleRate);
     encMeta->setInt32(kKeyChannelCount, kNumChannels);
     encMeta->setInt32(kKeyMaxInputSize, 8192);

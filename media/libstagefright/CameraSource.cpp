@@ -155,7 +155,7 @@ status_t CameraSource::stop() {
 
 sp<MetaData> CameraSource::getFormat() {
     sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, "video/raw");
+    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_RAW);
     meta->setInt32(kKeyColorFormat, OMX_COLOR_FormatYUV420SemiPlanar);
     meta->setInt32(kKeyWidth, 480);
     meta->setInt32(kKeyHeight, 320);
