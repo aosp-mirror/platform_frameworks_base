@@ -194,7 +194,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     private static final int LOCK_ACQUIRED_WARNING_THREAD_TIME_IN_MS = 100;
     private static final int LOCK_ACQUIRED_WARNING_TIME_IN_MS_ALWAYS_PRINT = 2000;
 
-    private static final int SLEEP_AFTER_YIELD_QUANTUM = 500;
+    private static final int SLEEP_AFTER_YIELD_QUANTUM = 1000;
 
     private long mLastLockMessageTime = 0L;
 
