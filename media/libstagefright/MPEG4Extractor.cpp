@@ -124,6 +124,9 @@ static const char *const FourCC2MIME(uint32_t fourcc) {
         case FOURCC('s', 'a', 'm', 'r'):
             return "audio/3gpp";
 
+        case FOURCC('s', 'a', 'w', 'b'):
+            return "audio/amr-wb";
+
         case FOURCC('m', 'p', '4', 'v'):
             return "video/mp4v-es";
 
@@ -187,6 +190,10 @@ sp<MetaData> MPEG4Extractor::getTrackMetaData(size_t index) {
 
         track = track->next;
         --index;
+    }
+
+    if (track == NULL) {
+        return NULL;
     }
 
     return track->meta;
@@ -472,6 +479,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
         case FOURCC('m', 'p', '4', 'a'):
         case FOURCC('s', 'a', 'm', 'r'):
+        case FOURCC('s', 'a', 'w', 'b'):
         {
             if (mHandlerType != FOURCC('s', 'o', 'u', 'n')) {
                 return ERROR_MALFORMED;
@@ -491,7 +499,8 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             uint16_t data_ref_index = U16_AT(&buffer[6]);
             uint16_t num_channels = U16_AT(&buffer[16]);
 
-            if (!strcasecmp("audio/3gpp", FourCC2MIME(chunk_type))) {
+            if (!strcasecmp("audio/3gpp", FourCC2MIME(chunk_type))
+                || !strcasecmp("audio/amr-wb", FourCC2MIME(chunk_type))) {
                 // AMR audio is always mono.
                 num_channels = 1;
             }
@@ -703,6 +712,10 @@ sp<MediaSource> MPEG4Extractor::getTrack(size_t index) {
 
         track = track->next;
         --index;
+    }
+
+    if (track == NULL) {
+        return NULL;
     }
 
     return new MPEG4Source(
