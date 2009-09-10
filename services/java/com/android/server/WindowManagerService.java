@@ -8022,6 +8022,19 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        WindowState findMainWindow() {
+            int j = windows.size();
+            while (j > 0) {
+                j--;
+                WindowState win = windows.get(j);
+                if (win.mAttrs.type == WindowManager.LayoutParams.TYPE_BASE_APPLICATION
+                        || win.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
+                    return win;
+                }
+            }
+            return null;
+        }
+        
         void dump(PrintWriter pw, String prefix) {
             super.dump(pw, prefix);
             if (appToken != null) {
@@ -8086,71 +8099,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             return stringName;
         }
-    }
-
-    public static WindowManager.LayoutParams findAnimations(
-            ArrayList<AppWindowToken> order,
-            ArrayList<AppWindowToken> openingTokenList1,
-            ArrayList<AppWindowToken> closingTokenList2) {
-        // We need to figure out which animation to use...
-
-        // First, check if there is a compatible window in opening/closing
-        // apps, and use it if exists.
-        WindowManager.LayoutParams animParams = null;
-        int animSrc = 0;
-        animParams = findCompatibleWindowParams(openingTokenList1);
-        if (animParams == null) {
-            animParams = findCompatibleWindowParams(closingTokenList2);
-        }
-        if (animParams != null) {
-            return animParams;
-        }
-        
-        //Log.i(TAG, "Looking for animations...");
-        for (int i=order.size()-1; i>=0; i--) {
-            AppWindowToken wtoken = order.get(i);
-            //Log.i(TAG, "Token " + wtoken + " with " + wtoken.windows.size() + " windows");
-            if (openingTokenList1.contains(wtoken) || closingTokenList2.contains(wtoken)) {
-                int j = wtoken.windows.size();
-                while (j > 0) {
-                    j--;
-                    WindowState win = wtoken.windows.get(j);
-                    //Log.i(TAG, "Window " + win + ": type=" + win.mAttrs.type);
-                    if (win.mAttrs.type == WindowManager.LayoutParams.TYPE_BASE_APPLICATION
-                            || win.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
-                        //Log.i(TAG, "Found base or application window, done!");
-                        if (wtoken.appFullscreen) {
-                            return win.mAttrs;
-                        }
-                        if (animSrc < 2) {
-                            animParams = win.mAttrs;
-                            animSrc = 2;
-                        }
-                    } else if (animSrc < 1 && win.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION) {
-                        //Log.i(TAG, "Found normal window, we may use this...");
-                        animParams = win.mAttrs;
-                        animSrc = 1;
-                    }
-                }
-            }
-        }
-
-        return animParams;
-    }
-
-    private static LayoutParams findCompatibleWindowParams(ArrayList<AppWindowToken> tokenList) {
-        for (int appCount = tokenList.size() - 1; appCount >= 0; appCount--) {
-            AppWindowToken wtoken = tokenList.get(appCount);
-            // Just checking one window is sufficient as all windows have the compatible flag 
-            // if the application is in compatibility mode.
-            if (wtoken.windows.size() > 0) {
-                WindowManager.LayoutParams params = wtoken.windows.get(0).mAttrs;
-                if ((params.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
-                    return params;
-                }
-            }
-        }
-        return null;
     }
 
     // -------------------------------------------------------------
@@ -9043,35 +8991,56 @@ public class WindowManagerService extends IWindowManager.Stub
                         adjustWallpaperWindowsLocked();
                         wallpaperMayChange = false;
                         
+                        // The top-most window will supply the layout params,
+                        // and we will determine it below.
+                        LayoutParams animLp = null;
+                        int bestAnimLayer = -1;
+                        
                         if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
                                 "New wallpaper target=" + mWallpaperTarget
                                 + ", lower target=" + mLowerWallpaperTarget
                                 + ", upper target=" + mUpperWallpaperTarget);
                         int foundWallpapers = 0;
-                        if (mLowerWallpaperTarget != null) {
-                            // Need to determine if both the closing and
-                            // opening app token sets are wallpaper targets,
-                            // in which case special animations are needed
-                            // (since the wallpaper needs to stay static
-                            // behind them).
-                            NN = mClosingApps.size();
-                            for (i=0; i<NN; i++) {
-                                AppWindowToken wtoken = mClosingApps.get(i);
-                                if (mLowerWallpaperTarget.mAppToken == wtoken) {
-                                    foundWallpapers |= 1;
-                                }
-                                if (mUpperWallpaperTarget.mAppToken == wtoken) {
-                                    foundWallpapers |= 1;
+                        // Do a first pass through the tokens for two
+                        // things:
+                        // (1) Determine if both the closing and opening
+                        // app token sets are wallpaper targets, in which
+                        // case special animations are needed
+                        // (since the wallpaper needs to stay static
+                        // behind them).
+                        // (2) Find the layout params of the top-most
+                        // application window in the tokens, which is
+                        // what will control the animation theme.
+                        final int NC = mClosingApps.size();
+                        NN = NC + mOpeningApps.size();
+                        for (i=0; i<NN; i++) {
+                            AppWindowToken wtoken;
+                            int mode;
+                            if (i < NC) {
+                                wtoken = mClosingApps.get(i);
+                                mode = 1;
+                            } else {
+                                wtoken = mOpeningApps.get(i-NC);
+                                mode = 2;
+                            }
+                            if (mLowerWallpaperTarget != null) {
+                                if (mLowerWallpaperTarget.mAppToken == wtoken
+                                        || mUpperWallpaperTarget.mAppToken == wtoken) {
+                                    foundWallpapers |= mode;
                                 }
                             }
-                            NN = mOpeningApps.size();
-                            for (i=0; i<NN; i++) {
-                                AppWindowToken wtoken = mOpeningApps.get(i);
-                                if (mLowerWallpaperTarget.mAppToken == wtoken) {
-                                    foundWallpapers |= 2;
-                                }
-                                if (mUpperWallpaperTarget.mAppToken == wtoken) {
-                                    foundWallpapers |= 2;
+                            if (wtoken.appFullscreen) {
+                                WindowState ws = wtoken.findMainWindow();
+                                if (ws != null) {
+                                    // If this is a compatibility mode
+                                    // window, we will always use its anim.
+                                    if ((ws.mAttrs.flags&FLAG_COMPATIBLE_WINDOW) != 0) {
+                                        animLp = ws.mAttrs;
+                                        bestAnimLayer = Integer.MAX_VALUE;
+                                    } else if (ws.mLayer > bestAnimLayer) {
+                                        animLp = ws.mAttrs;
+                                        bestAnimLayer = ws.mLayer;
+                                    }
                                 }
                             }
                         }
@@ -9107,10 +9076,6 @@ public class WindowManagerService extends IWindowManager.Stub
                                     "New transit into wallpaper: " + transit);
                         }
                         
-                        // We need to figure out which animation to use...
-                        WindowManager.LayoutParams lp = findAnimations(mAppTokens,
-                                mOpeningApps, mClosingApps);
-
                         NN = mOpeningApps.size();
                         for (i=0; i<NN; i++) {
                             AppWindowToken wtoken = mOpeningApps.get(i);
@@ -9119,7 +9084,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             wtoken.reportedVisible = false;
                             wtoken.inPendingTransaction = false;
                             wtoken.animation = null;
-                            setTokenVisibilityLocked(wtoken, lp, true, transit, false);
+                            setTokenVisibilityLocked(wtoken, animLp, true, transit, false);
                             wtoken.updateReportedVisibilityLocked();
                             wtoken.waitingToShow = false;
                             wtoken.showAllWindowsLocked();
@@ -9131,7 +9096,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     "Now closing app" + wtoken);
                             wtoken.inPendingTransaction = false;
                             wtoken.animation = null;
-                            setTokenVisibilityLocked(wtoken, lp, false, transit, false);
+                            setTokenVisibilityLocked(wtoken, animLp, false, transit, false);
                             wtoken.updateReportedVisibilityLocked();
                             wtoken.waitingToHide = false;
                             // Force the allDrawn flag, because we want to start

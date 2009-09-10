@@ -2649,10 +2649,8 @@ public class Activity extends ContextThemeWrapper
     }
 
     @Override
-    protected void onApplyThemeResource(Resources.Theme theme,
-                                      int resid,
-                                      boolean first)
-    {
+    protected void onApplyThemeResource(Resources.Theme theme, int resid,
+            boolean first) {
         if (mParent == null) {
             super.onApplyThemeResource(theme, resid, first);
         } else {
@@ -2723,6 +2721,66 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Like {@link #startActivityForResult(Intent, int)}, but allowing you
+     * to use a PendingIntent to describe the activity to be started.  Note
+     * that the given PendingIntent <em>must</em> have been created with
+     * {@link PendingIntent#getActivity PendingIntent.getActivity}; all other
+     * types will result in an IllegalArgumentException being thrown.
+     * 
+     * @param intent The PendingIntent to launch.
+     * @param requestCode If >= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param fillInIntent If non-null, this will be provided as the
+     * intent parameter to {@link PendingIntent#send(Context, int, Intent)
+     * PendingIntent.send(Context, int, Intent)}.
+     * @param flagsMask Intent flags in the original PendingIntent that you
+     * would like to change.
+     * @param flagsValues Desired values for any bits set in
+     * <var>flagsMask</var>
+     */
+    public void startActivityForResult(PendingIntent intent, int requestCode,
+            Intent fillInIntent, int flagsMask, int flagsValues)
+            throws PendingIntent.CanceledException {
+        if (mParent == null) {
+            startActivityForResultInner(intent, requestCode, fillInIntent,
+                    flagsMask, flagsValues, this);
+        } else {
+            mParent.startActivityFromChild(this, intent, requestCode,
+                    fillInIntent, flagsMask, flagsValues);
+        }
+    }
+
+    private void startActivityForResultInner(PendingIntent intent, int requestCode,
+            Intent fillInIntent, int flagsMask, int flagsValues, Activity activity)
+            throws PendingIntent.CanceledException {
+        try {
+            String resolvedType = null;
+            if (fillInIntent != null) {
+                resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
+            }
+            int result = ActivityManagerNative.getDefault()
+                .startActivityPendingIntent(mMainThread.getApplicationThread(), intent,
+                        fillInIntent, resolvedType, mToken, activity.mEmbeddedID,
+                        requestCode, flagsMask, flagsValues);
+            if (result == IActivityManager.START_CANCELED) {
+                throw new PendingIntent.CanceledException();
+            }
+            Instrumentation.checkStartActivityResult(result, null);
+        } catch (RemoteException e) {
+        }
+        if (requestCode >= 0) {
+            // If this start is requesting a result, we can avoid making
+            // the activity visible until the result is received.  Setting
+            // this code during onCreate(Bundle savedInstanceState) or onResume() will keep the
+            // activity hidden during this time, to avoid flickering.
+            // This can only be done when a result is requested because
+            // that guarantees we will get information back when the
+            // activity is finished, no matter what happens to it.
+            mStartedActivity = true;
+        }
+    }
+
+    /**
      * Launch a new activity.  You will not receive any information about when
      * the activity exits.  This implementation overrides the base version,
      * providing information about
@@ -2743,6 +2801,27 @@ public class Activity extends ContextThemeWrapper
     @Override
     public void startActivity(Intent intent) {
         startActivityForResult(intent, -1);
+    }
+
+    /**
+     * Like {@link #startActivity(Intent)}, but taking a PendingIntent
+     * to start; see
+     * {@link #startActivityForResult(PendingIntent, int, Intent, int, int)}
+     * for more information.
+     * 
+     * @param intent The PendingIntent to launch.
+     * @param fillInIntent If non-null, this will be provided as the
+     * intent parameter to {@link PendingIntent#send(Context, int, Intent)
+     * PendingIntent.send(Context, int, Intent)}.
+     * @param flagsMask Intent flags in the original PendingIntent that you
+     * would like to change.
+     * @param flagsValues Desired values for any bits set in
+     * <var>flagsMask</var>
+     */
+    public void startActivity(PendingIntent intent,
+            Intent fillInIntent, int flagsMask, int flagsValues)
+            throws PendingIntent.CanceledException {
+        startActivityForResult(intent, -1, fillInIntent, flagsMask, flagsValues);
     }
 
     /**
@@ -2863,6 +2942,19 @@ public class Activity extends ContextThemeWrapper
                 mToken, child.mEmbeddedID, requestCode,
                 ar.getResultCode(), ar.getResultData());
         }
+    }
+
+    /**
+     * Like {@link #startActivityFromChild(Activity, Intent, int)}, but
+     * taking a PendingIntent; see
+     * {@link #startActivityForResult(PendingIntent, int, Intent, int, int)}
+     * for more information.
+     */
+    public void startActivityFromChild(Activity child, PendingIntent intent,
+            int requestCode, Intent fillInIntent, int flagsMask, int flagsValues)
+            throws PendingIntent.CanceledException {
+        startActivityForResultInner(intent, requestCode, fillInIntent,
+                flagsMask, flagsValues, child);
     }
 
     /**

@@ -77,10 +77,16 @@ public interface IActivityManager extends IInterface {
     public static final int START_CLASS_NOT_FOUND = -2;
     public static final int START_FORWARD_AND_REQUEST_CONFLICT = -3;
     public static final int START_PERMISSION_DENIED = -4;
+    public static final int START_NOT_ACTIVITY = -5;
+    public static final int START_CANCELED = -6;
     public int startActivity(IApplicationThread caller,
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo, String resultWho, int requestCode,
             boolean onlyIfNeeded, boolean debug) throws RemoteException;
+    public int startActivityPendingIntent(IApplicationThread caller,
+            PendingIntent intent, Intent fillInIntent, String resolvedType,
+            IBinder resultTo, String resultWho, int requestCode,
+            int flagsMask, int flagsValues) throws RemoteException;
     public boolean startNextMatchingActivity(IBinder callingActivity,
             Intent intent) throws RemoteException;
     public boolean finishActivity(IBinder token, int code, Intent data)
@@ -436,4 +442,5 @@ public interface IActivityManager extends IInterface {
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
     int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;
     int KILL_APPLICATION_PROCESS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+98;
+    int START_ACTIVITY_PENDING_INTENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+99;
 }
