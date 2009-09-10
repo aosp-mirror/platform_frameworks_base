@@ -24,6 +24,7 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+#include "clz.h"
 #include "BlurFilter.h"
 #include "LayerBlur.h"
 #include "SurfaceFlinger.h"
@@ -40,7 +41,8 @@ const char* const LayerBlur::typeID = "LayerBlur";
 LayerBlur::LayerBlur(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
      : LayerBaseClient(flinger, display, client, i), mCacheDirty(true),
-     mRefreshCache(true), mCacheAge(0), mTextureName(-1U)
+     mRefreshCache(true), mCacheAge(0), mTextureName(-1U), 
+     mWidthScale(1.0f), mHeightScale(1.0f)
 {
 }
 
@@ -164,11 +166,26 @@ void LayerBlur::onDraw(const Region& clip) const
             bl.format = GGL_PIXEL_FORMAT_RGB_565;
             bl.data = (GGLubyte*)pixels;            
             blurFilter(&bl, 8, 2);
-            
-            // NOTE: this works only because we have POT. we'd have to round the
-            // texture size up, otherwise.
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0,
-                    GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels);
+
+            if (mFlags & (DisplayHardware::NPOT_EXTENSION)) {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0,
+                        GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels);
+                mWidthScale  = 1.0f / w;
+                mHeightScale =-1.0f / h;
+                mYOffset = 0;
+            } else {
+                GLuint tw = 1 << (31 - clz(w));
+                GLuint th = 1 << (31 - clz(h));
+                if (tw < w) tw <<= 1;
+                if (th < h) th <<= 1;
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0,
+                        GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, 
+                        GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels);
+                mWidthScale  = 1.0f / tw;
+                mHeightScale =-1.0f / th;
+                mYOffset = th-h;
+            }
 
             free((void*)pixels);
         }
@@ -184,7 +201,12 @@ void LayerBlur::onDraw(const Region& clip) const
             glDisable(GL_BLEND);
         }
 
-        glDisable(GL_DITHER);
+        if (mFlags & DisplayHardware::SLOW_CONFIG) {
+            glDisable(GL_DITHER);
+        } else {
+            glEnable(GL_DITHER);
+        }
+
         glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
         glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -194,8 +216,8 @@ void LayerBlur::onDraw(const Region& clip) const
             // This is a very rare scenario.
             glMatrixMode(GL_TEXTURE);
             glLoadIdentity();
-            glScalef(1.0f/w, -1.0f/h, 1);
-            glTranslatef(-x, -y, 0);
+            glScalef(mWidthScale, mHeightScale, 1);
+            glTranslatef(-x, mYOffset - y, 0);
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             glVertexPointer(2, GL_FIXED, 0, mVertices);
             glTexCoordPointer(2, GL_FIXED, 0, mVertices);
@@ -205,6 +227,7 @@ void LayerBlur::onDraw(const Region& clip) const
                 glScissor(r.left, sy, r.width(), r.height());
                 glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
             }       
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         } else {
             // NOTE: this is marginally faster with the software gl, because
             // glReadPixels() reads the fb bottom-to-top, however we'll
@@ -221,8 +244,6 @@ void LayerBlur::onDraw(const Region& clip) const
             }
         }
     }
-
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 // ---------------------------------------------------------------------------
