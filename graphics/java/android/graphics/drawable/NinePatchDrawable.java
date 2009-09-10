@@ -194,6 +194,14 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
+    public void setFilterBitmap(boolean filter) {
+        // at the moment, we see no quality improvement, but a big slowdown
+        // with filtering, so ignore this call for now
+        //
+        //getPaint().setFilterBitmap(filter);
+    }
+
+    @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
             throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs);
@@ -247,6 +255,8 @@ public class NinePatchDrawable extends Drawable {
     public Paint getPaint() {
         if (mPaint == null) {
             mPaint = new Paint();
+            // dithering helps a lot, and is pretty cheap, so default on
+            mPaint.setDither(true);
         }
         return mPaint;
     }
