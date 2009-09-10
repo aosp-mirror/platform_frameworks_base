@@ -149,6 +149,10 @@ public class VCardComposer {
             appendContactMethodStr(struct.contactmethodList, vcardversion);
         }
 
+        if (!isNull(struct.timeStamp)) {
+            mResult.append(struct.timeStamp).append(mNewline);
+        }
+
         mResult.append("END:VCARD").append(mNewline);
         return mResult.toString();
     }
