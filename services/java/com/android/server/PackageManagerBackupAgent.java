@@ -327,6 +327,13 @@ public class PackageManagerBackupAgent extends BackupAgent {
         try {
             int num = in.readInt();
             Log.v(TAG, " ... unflatten read " + num);
+
+            // Sensical?
+            if (num > 20) {
+                Log.e(TAG, "Suspiciously large sig count in restore data; aborting");
+                throw new IllegalStateException("Bad restore state");
+            }
+
             sigs = new Signature[num];
             for (int i = 0; i < num; i++) {
                 int len = in.readInt();
