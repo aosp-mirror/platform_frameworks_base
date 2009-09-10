@@ -552,17 +552,6 @@ status_t CameraService::Client::setOverlay()
     CameraParameters params(mHardware->getParameters());
     params.getPreviewSize(&w, &h);
 
-    const char *format = params.getPreviewFormat();
-    int fmt;
-    if (!strcmp(format, "yuv422i-yuyv"))
-        fmt = OVERLAY_FORMAT_YCbYCr_422_I;
-    else if (!strcmp(format, "rgb565"))
-        fmt = OVERLAY_FORMAT_RGB_565;
-    else {
-        LOGE("Invalid preview format for overlays");
-        return -EINVAL;
-    }
-
     if ( w != mOverlayW || h != mOverlayH )
     {
         // Force the destruction of any previous overlay
@@ -574,7 +563,7 @@ status_t CameraService::Client::setOverlay()
     status_t ret = NO_ERROR;
     if (mSurface != 0) {
         if (mOverlayRef.get() == NULL) {
-            mOverlayRef = mSurface->createOverlay(w, h, fmt);
+            mOverlayRef = mSurface->createOverlay(w, h, OVERLAY_FORMAT_DEFAULT);
             if ( mOverlayRef.get() == NULL )
             {
                 LOGE("Overlay Creation Failed!");
