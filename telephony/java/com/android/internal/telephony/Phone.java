@@ -1189,17 +1189,9 @@ public interface Phone {
     List<DataConnection> getCurrentDataConnectionList ();
 
     /**
-     * Udpate LAC and CID in service state for currnet GSM netowrk registration
-     *
-     * If get different LAC and/or CID, notifyServiceState will be sent
-     *
-     * @param
-     * <strong>On failure</strong>,
-     * (((AsyncResult)response.obj).result) == null and
-     * (((AsyncResult)response.obj).exception) being an instance of
-     * com.android.internal.telephony.gsm.CommandException
+     * Update the ServiceState CellLocation for current network registration.
      */
-    void updateServiceLocation(Message response);
+    void updateServiceLocation();
 
     /**
      * Enable location update notifications.
