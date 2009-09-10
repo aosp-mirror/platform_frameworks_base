@@ -29,6 +29,7 @@
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/SampleTable.h>
@@ -116,25 +117,25 @@ static void hexdump(const void *_data, size_t size) {
     }
 }
 
-static const char *const FourCC2MIME(uint32_t fourcc) {
+static const char *FourCC2MIME(uint32_t fourcc) {
     switch (fourcc) {
         case FOURCC('m', 'p', '4', 'a'):
-            return "audio/mp4a-latm";
+            return MEDIA_MIMETYPE_AUDIO_AAC;
 
         case FOURCC('s', 'a', 'm', 'r'):
-            return "audio/3gpp";
+            return MEDIA_MIMETYPE_AUDIO_AMR_NB;
 
         case FOURCC('s', 'a', 'w', 'b'):
-            return "audio/amr-wb";
+            return MEDIA_MIMETYPE_AUDIO_AMR_WB;
 
         case FOURCC('m', 'p', '4', 'v'):
-            return "video/mp4v-es";
+            return MEDIA_MIMETYPE_VIDEO_MPEG4;
 
         case FOURCC('s', '2', '6', '3'):
-            return "video/3gpp";
+            return MEDIA_MIMETYPE_VIDEO_H263;
 
         case FOURCC('a', 'v', 'c', '1'):
-            return "video/avc";
+            return MEDIA_MIMETYPE_VIDEO_AVC;
 
         default:
             CHECK(!"should not be here.");
@@ -499,8 +500,10 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             uint16_t data_ref_index = U16_AT(&buffer[6]);
             uint16_t num_channels = U16_AT(&buffer[16]);
 
-            if (!strcasecmp("audio/3gpp", FourCC2MIME(chunk_type))
-                || !strcasecmp("audio/amr-wb", FourCC2MIME(chunk_type))) {
+            if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB,
+                            FourCC2MIME(chunk_type))
+                || !strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB,
+                               FourCC2MIME(chunk_type))) {
                 // AMR audio is always mono.
                 num_channels = 1;
             }
@@ -746,7 +749,7 @@ MPEG4Source::MPEG4Source(
     success = mFormat->findInt32(kKeyTimeScale, &mTimescale);
     CHECK(success);
 
-    mIsAVC = !strcasecmp(mime, "video/avc");
+    mIsAVC = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC);
 }
 
 MPEG4Source::~MPEG4Source() {
@@ -978,7 +981,7 @@ bool SniffMPEG4(
 
     if (!memcmp(header, "ftyp3gp", 7) || !memcmp(header, "ftypmp42", 8)
         || !memcmp(header, "ftypisom", 8) || !memcmp(header, "ftypM4V ", 8)) {
-        *mimeType = "video/mp4";
+        *mimeType = MEDIA_MIMETYPE_CONTAINER_MPEG4;
         *confidence = 0.1;
 
         return true;

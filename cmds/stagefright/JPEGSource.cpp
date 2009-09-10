@@ -23,6 +23,7 @@
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 
@@ -99,7 +100,7 @@ status_t JPEGSource::stop() {
 
 sp<MetaData> JPEGSource::getFormat() {
     sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, "image/jpeg");
+    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_IMAGE_JPEG);
     meta->setInt32(kKeyWidth, mWidth);
     meta->setInt32(kKeyHeight, mHeight);
     meta->setInt32(kKeyMaxInputSize, mSize);

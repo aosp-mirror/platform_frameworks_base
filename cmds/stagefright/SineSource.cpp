@@ -4,6 +4,7 @@
 
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 
 namespace android {
@@ -48,7 +49,7 @@ status_t SineSource::stop() {
 
 sp<MetaData> SineSource::getFormat() {
     sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, "audio/raw");
+    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
     meta->setInt32(kKeyChannelCount, mNumChannels);
     meta->setInt32(kKeySampleRate, mSampleRate);
 

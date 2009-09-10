@@ -20,6 +20,7 @@
 #include <media/AudioTrack.h>
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 
@@ -61,7 +62,7 @@ void AudioPlayer::start() {
     const char *mime;
     bool success = format->findCString(kKeyMIMEType, &mime);
     CHECK(success);
-    CHECK(!strcasecmp(mime, "audio/raw"));
+    CHECK(!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_RAW));
 
     success = format->findInt32(kKeySampleRate, &mSampleRate);
     CHECK(success);

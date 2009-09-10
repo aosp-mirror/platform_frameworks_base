@@ -22,6 +22,7 @@
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
@@ -66,7 +67,7 @@ AMRExtractor::AMRExtractor(const sp<DataSource> &source)
     float confidence;
     if (SniffAMR(mDataSource, &mimeType, &confidence)) {
         mInitCheck = OK;
-        mIsWide = (mimeType == "audio/amr-wb");
+        mIsWide = (mimeType == MEDIA_MIMETYPE_AUDIO_AMR_WB);
     }
 }
 
@@ -96,7 +97,10 @@ sp<MetaData> AMRExtractor::getTrackMetaData(size_t index) {
 // static
 sp<MetaData> AMRExtractor::makeAMRFormat(bool isWide) {
     sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, isWide ? "audio/amr-wb" : "audio/3gpp");
+    meta->setCString(
+            kKeyMIMEType, isWide ? MEDIA_MIMETYPE_AUDIO_AMR_WB
+                                 : MEDIA_MIMETYPE_AUDIO_AMR_NB);
+
     meta->setInt32(kKeyChannelCount, 1);
     meta->setInt32(kKeySampleRate, isWide ? 16000 : 8000);
 
@@ -221,12 +225,12 @@ bool SniffAMR(
     }
 
     if (!memcmp(header, "#!AMR\n", 6)) {
-        *mimeType = "audio/3gpp";
+        *mimeType = MEDIA_MIMETYPE_AUDIO_AMR_NB;
         *confidence = 0.5;
 
         return true;
     } else if (!memcmp(header, "#!AMR-WB\n", 9)) {
-        *mimeType = "audio/amr-wb";
+        *mimeType = MEDIA_MIMETYPE_AUDIO_AMR_WB;
         *confidence = 0.5;
 
         return true;
