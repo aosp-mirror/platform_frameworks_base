@@ -26,6 +26,7 @@
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MmapSource.h>
@@ -44,40 +45,40 @@ struct CodecInfo {
 };
 
 static const CodecInfo kDecoderInfo[] = {
-    { "image/jpeg", "OMX.TI.JPEG.decode" },
-    { "audio/mpeg", "OMX.TI.MP3.decode" },
-    { "audio/mpeg", "OMX.PV.mp3dec" },
-    { "audio/3gpp", "OMX.TI.AMR.decode" },
-    { "audio/3gpp", "OMX.PV.amrdec" },
-    { "audio/amr-wb", "OMX.TI.WBAMR.decode" },
-    { "audio/amr-wb", "OMX.PV.amrdec" },
-    { "audio/mp4a-latm", "OMX.TI.AAC.decode" },
-    { "audio/mp4a-latm", "OMX.PV.aacdec" },
-    { "video/mp4v-es", "OMX.qcom.video.decoder.mpeg4" },
-    { "video/mp4v-es", "OMX.TI.Video.Decoder" },
-    { "video/mp4v-es", "OMX.PV.mpeg4dec" },
-    { "video/3gpp", "OMX.qcom.video.decoder.h263" },
-    { "video/3gpp", "OMX.TI.Video.Decoder" },
-    { "video/3gpp", "OMX.PV.h263dec" },
-    { "video/avc", "OMX.qcom.video.decoder.avc" },
-    { "video/avc", "OMX.TI.Video.Decoder" },
-    { "video/avc", "OMX.PV.avcdec" },
+    { MEDIA_MIMETYPE_IMAGE_JPEG, "OMX.TI.JPEG.decode" },
+    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.TI.MP3.decode" },
+    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.PV.mp3dec" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.decode" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.PV.amrdec" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.decode" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.PV.amrdec" },
+    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.decode" },
+    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.PV.aacdec" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.decoder.mpeg4" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.Decoder" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.PV.mpeg4dec" },
+    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.decoder.h263" },
+    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.Video.Decoder" },
+    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.PV.h263dec" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.decoder.avc" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.Decoder" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.PV.avcdec" },
 };
 
 static const CodecInfo kEncoderInfo[] = {
-    { "audio/3gpp", "OMX.TI.AMR.encode" },
-    { "audio/3gpp", "OMX.PV.amrencnb" },
-    { "audio/amr-wb", "OMX.TI.WBAMR.encode" },
-    { "audio/mp4a-latm", "OMX.TI.AAC.encode" },
-    { "audio/mp4a-latm", "OMX.PV.aacenc" },
-    { "video/mp4v-es", "OMX.qcom.video.encoder.mpeg4" },
-    { "video/mp4v-es", "OMX.TI.Video.encoder" },
-    { "video/mp4v-es", "OMX.PV.mpeg4enc" },
-    { "video/3gpp", "OMX.qcom.video.encoder.h263" },
-    { "video/3gpp", "OMX.TI.Video.encoder" },
-    { "video/3gpp", "OMX.PV.h263enc" },
-    { "video/avc", "OMX.TI.Video.encoder" },
-    { "video/avc", "OMX.PV.avcenc" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.encode" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.PV.amrencnb" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.encode" },
+    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.encode" },
+    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.PV.aacenc" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.encoder.mpeg4" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.encoder" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.PV.mpeg4enc" },
+    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.encoder.h263" },
+    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.Video.encoder" },
+    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.PV.h263enc" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.encoder" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.PV.avcenc" },
 };
 
 #define CODEC_LOGI(x, ...) LOGI("[%s] "x, mComponentName, ##__VA_ARGS__)
@@ -169,7 +170,8 @@ static void InitOMXParams(T *params) {
 sp<OMXCodec> OMXCodec::Create(
         const sp<IOMX> &omx,
         const sp<MetaData> &meta, bool createEncoder,
-        const sp<MediaSource> &source) {
+        const sp<MediaSource> &source,
+        const char *matchComponentName) {
     const char *mime;
     bool success = meta->findCString(kKeyMIMEType, &mime);
     CHECK(success);
@@ -189,6 +191,11 @@ sp<OMXCodec> OMXCodec::Create(
 
         if (!componentName) {
             return NULL;
+        }
+
+        // If a specific codec is requested, skip the non-matching ones.
+        if (matchComponentName && strcmp(componentName, matchComponentName)) {
+            continue;
         }
 
         LOGV("Attempting to allocate OMX node '%s'", componentName);
@@ -318,13 +325,13 @@ sp<OMXCodec> OMXCodec::Create(
         }
     }
 
-    if (!strcasecmp("audio/3gpp", mime)) {
+    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mime)) {
         codec->setAMRFormat();
     }
-    if (!strcasecmp("audio/amr-wb", mime)) {
+    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mime)) {
         codec->setAMRWBFormat();
     }
-    if (!strcasecmp("audio/mp4a-latm", mime)) {
+    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
         int32_t numChannels, sampleRate;
         CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
@@ -343,7 +350,7 @@ sp<OMXCodec> OMXCodec::Create(
             codec->setVideoOutputFormat(mime, width, height);
         }
     }
-    if (!strcasecmp(mime, "image/jpeg")
+    if (!strcasecmp(mime, MEDIA_MIMETYPE_IMAGE_JPEG)
         && !strcmp(componentName, "OMX.TI.JPEG.decode")) {
         OMX_COLOR_FORMATTYPE format =
             OMX_COLOR_Format32bitARGB8888;
@@ -471,11 +478,11 @@ void OMXCodec::setVideoInputFormat(
     CODEC_LOGI("setVideoInputFormat width=%ld, height=%ld", width, height);
 
     OMX_VIDEO_CODINGTYPE compressionFormat = OMX_VIDEO_CodingUnused;
-    if (!strcasecmp("video/avc", mime)) {
+    if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
         compressionFormat = OMX_VIDEO_CodingAVC;
-    } else if (!strcasecmp("video/mp4v-es", mime)) {
+    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
         compressionFormat = OMX_VIDEO_CodingMPEG4;
-    } else if (!strcasecmp("video/3gpp", mime)) {
+    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
         compressionFormat = OMX_VIDEO_CodingH263;
     } else {
         LOGE("Not a supported video mime type: %s", mime);
@@ -547,11 +554,11 @@ void OMXCodec::setVideoOutputFormat(
     CODEC_LOGI("setVideoOutputFormat width=%ld, height=%ld", width, height);
 
     OMX_VIDEO_CODINGTYPE compressionFormat = OMX_VIDEO_CodingUnused;
-    if (!strcasecmp("video/avc", mime)) {
+    if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
         compressionFormat = OMX_VIDEO_CodingAVC;
-    } else if (!strcasecmp("video/mp4v-es", mime)) {
+    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
         compressionFormat = OMX_VIDEO_CodingMPEG4;
-    } else if (!strcasecmp("video/3gpp", mime)) {
+    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
         compressionFormat = OMX_VIDEO_CodingH263;
     } else {
         LOGE("Not a supported video mime type: %s", mime);
@@ -670,7 +677,10 @@ OMXCodec::OMXCodec(
     setComponentRole();
 }
 
-void OMXCodec::setComponentRole() {
+// static
+void OMXCodec::setComponentRole(
+        const sp<IOMX> &omx, IOMX::node_id node, bool isEncoder,
+        const char *mime) {
     struct MimeToRole {
         const char *mime;
         const char *decoderRole;
@@ -678,13 +688,20 @@ void OMXCodec::setComponentRole() {
     };
 
     static const MimeToRole kMimeToRole[] = {
-        { "audio/mpeg", "audio_decoder.mp3", "audio_encoder.mp3" },
-        { "audio/3gpp", "audio_decoder.amrnb", "audio_encoder.amrnb" },
-        { "audio/amr-wb", "audio_decoder.amrwb", "audio_encoder.amrwb" },
-        { "audio/mp4a-latm", "audio_decoder.aac", "audio_encoder.aac" },
-        { "video/avc",  "video_decoder.avc", "video_encoder.avc" },
-        { "video/mp4v-es", "video_decoder.mpeg4", "video_encoder.mpeg4" },
-        { "video/3gpp", "video_decoder.h263", "video_encoder.h263" },
+        { MEDIA_MIMETYPE_AUDIO_MPEG,
+            "audio_decoder.mp3", "audio_encoder.mp3" },
+        { MEDIA_MIMETYPE_AUDIO_AMR_NB,
+            "audio_decoder.amrnb", "audio_encoder.amrnb" },
+        { MEDIA_MIMETYPE_AUDIO_AMR_WB,
+            "audio_decoder.amrwb", "audio_encoder.amrwb" },
+        { MEDIA_MIMETYPE_AUDIO_AAC,
+            "audio_decoder.aac", "audio_encoder.aac" },
+        { MEDIA_MIMETYPE_VIDEO_AVC,
+            "video_decoder.avc", "video_encoder.avc" },
+        { MEDIA_MIMETYPE_VIDEO_MPEG4,
+            "video_decoder.mpeg4", "video_encoder.mpeg4" },
+        { MEDIA_MIMETYPE_VIDEO_H263,
+            "video_decoder.h263", "video_encoder.h263" },
     };
 
     static const size_t kNumMimeToRole =
@@ -692,7 +709,7 @@ void OMXCodec::setComponentRole() {
 
     size_t i;
     for (i = 0; i < kNumMimeToRole; ++i) {
-        if (!strcasecmp(mMIME, kMimeToRole[i].mime)) {
+        if (!strcasecmp(mime, kMimeToRole[i].mime)) {
             break;
         }
     }
@@ -702,12 +719,10 @@ void OMXCodec::setComponentRole() {
     }
 
     const char *role =
-        mIsEncoder ? kMimeToRole[i].encoderRole
-                   : kMimeToRole[i].decoderRole;
+        isEncoder ? kMimeToRole[i].encoderRole
+                  : kMimeToRole[i].decoderRole;
 
     if (role != NULL) {
-        CODEC_LOGV("Setting component role '%s'.", role);
-
         OMX_PARAM_COMPONENTROLETYPE roleParams;
         InitOMXParams(&roleParams);
 
@@ -716,14 +731,18 @@ void OMXCodec::setComponentRole() {
 
         roleParams.cRole[OMX_MAX_STRINGNAME_SIZE - 1] = '\0';
 
-        status_t err = mOMX->set_parameter(
-                mNode, OMX_IndexParamStandardComponentRole,
+        status_t err = omx->set_parameter(
+                node, OMX_IndexParamStandardComponentRole,
                 &roleParams, sizeof(roleParams));
 
         if (err != OK) {
             LOGW("Failed to set standard component role '%s'.", role);
         }
     }
+}
+
+void OMXCodec::setComponentRole() {
+    setComponentRole(mOMX, mNode, mIsEncoder, mMIME);
 }
 
 OMXCodec::~OMXCodec() {
@@ -1359,7 +1378,7 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
         size_t size = specific->mSize;
 
-        if (!strcasecmp("video/avc", mMIME)
+        if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mMIME)
                 && !(mQuirks & kWantsNALFragments)) {
             static const uint8_t kNALStartCode[4] =
                     { 0x00, 0x00, 0x00, 0x01 };
@@ -2250,7 +2269,7 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
             OMX_IMAGE_PORTDEFINITIONTYPE *imageDef = &def.format.image;
             CHECK_EQ(imageDef->eCompressionFormat, OMX_IMAGE_CodingUnused);
 
-            mOutputFormat->setCString(kKeyMIMEType, "image/raw");
+            mOutputFormat->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_RAW);
             mOutputFormat->setInt32(kKeyColorFormat, imageDef->eColorFormat);
             mOutputFormat->setInt32(kKeyWidth, imageDef->nFrameWidth);
             mOutputFormat->setInt32(kKeyHeight, imageDef->nFrameHeight);
@@ -2283,7 +2302,8 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                          "the input stream contains.");
                 }
 
-                mOutputFormat->setCString(kKeyMIMEType, "audio/raw");
+                mOutputFormat->setCString(
+                        kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
 
                 // Use the codec-advertised number of channels, as some
                 // codecs appear to output stereo even if the input data is
@@ -2306,17 +2326,20 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
 
                 if (amr.eAMRBandMode >= OMX_AUDIO_AMRBandModeNB0
                     && amr.eAMRBandMode <= OMX_AUDIO_AMRBandModeNB7) {
-                    mOutputFormat->setCString(kKeyMIMEType, "audio/3gpp");
+                    mOutputFormat->setCString(
+                            kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AMR_NB);
                     mOutputFormat->setInt32(kKeySampleRate, 8000);
                 } else if (amr.eAMRBandMode >= OMX_AUDIO_AMRBandModeWB0
                             && amr.eAMRBandMode <= OMX_AUDIO_AMRBandModeWB8) {
-                    mOutputFormat->setCString(kKeyMIMEType, "audio/amr-wb");
+                    mOutputFormat->setCString(
+                            kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AMR_WB);
                     mOutputFormat->setInt32(kKeySampleRate, 16000);
                 } else {
                     CHECK(!"Unknown AMR band mode.");
                 }
             } else if (audio_def->eEncoding == OMX_AUDIO_CodingAAC) {
-                mOutputFormat->setCString(kKeyMIMEType, "audio/mp4a-latm");
+                mOutputFormat->setCString(
+                        kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
             } else {
                 CHECK(!"Should not be here. Unknown audio encoding.");
             }
@@ -2328,13 +2351,17 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
             OMX_VIDEO_PORTDEFINITIONTYPE *video_def = &def.format.video;
 
             if (video_def->eCompressionFormat == OMX_VIDEO_CodingUnused) {
-                mOutputFormat->setCString(kKeyMIMEType, "video/raw");
+                mOutputFormat->setCString(
+                        kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_RAW);
             } else if (video_def->eCompressionFormat == OMX_VIDEO_CodingMPEG4) {
-                mOutputFormat->setCString(kKeyMIMEType, "video/mp4v-es");
+                mOutputFormat->setCString(
+                        kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG4);
             } else if (video_def->eCompressionFormat == OMX_VIDEO_CodingH263) {
-                mOutputFormat->setCString(kKeyMIMEType, "video/3gpp");
+                mOutputFormat->setCString(
+                        kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_H263);
             } else if (video_def->eCompressionFormat == OMX_VIDEO_CodingAVC) {
-                mOutputFormat->setCString(kKeyMIMEType, "video/avc");
+                mOutputFormat->setCString(
+                        kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_AVC);
             } else {
                 CHECK(!"Unknown compression format.");
             }
@@ -2359,6 +2386,69 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
             CHECK(!"should not be here, neither audio nor video.");
             break;
         }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+status_t QueryCodecs(
+        const sp<IOMX> &omx,
+        const char *mime, bool queryDecoders,
+        Vector<CodecCapabilities> *results) {
+    results->clear();
+
+    for (int index = 0;; ++index) {
+        const char *componentName;
+
+        if (!queryDecoders) {
+            componentName = GetCodec(
+                    kEncoderInfo, sizeof(kEncoderInfo) / sizeof(kEncoderInfo[0]),
+                    mime, index);
+        } else {
+            componentName = GetCodec(
+                    kDecoderInfo, sizeof(kDecoderInfo) / sizeof(kDecoderInfo[0]),
+                    mime, index);
+        }
+
+        if (!componentName) {
+            return OK;
+        }
+
+        IOMX::node_id node;
+        status_t err = omx->allocate_node(componentName, &node);
+
+        if (err != OK) {
+            continue;
+        }
+
+        OMXCodec::setComponentRole(omx, node, queryDecoders, mime);
+
+        results->push();
+        CodecCapabilities *caps = &results->editItemAt(results->size() - 1);
+        caps->mComponentName = componentName;
+
+        OMX_VIDEO_PARAM_PROFILELEVELTYPE param;
+        InitOMXParams(&param);
+
+        param.nPortIndex = queryDecoders ? 0 : 1;
+
+        for (param.nProfileIndex = 0;; ++param.nProfileIndex) {
+            err = omx->get_parameter(
+                    node, OMX_IndexParamVideoProfileLevelQuerySupported,
+                    &param, sizeof(param));
+
+            if (err != OK) {
+                break;
+            }
+
+            CodecProfileLevel profileLevel;
+            profileLevel.mProfile = param.eProfile;
+            profileLevel.mLevel = param.eLevel;
+
+            caps->mProfileLevels.push(profileLevel);
+        }
+
+        CHECK_EQ(omx->free_node(node), OK);
     }
 }
 

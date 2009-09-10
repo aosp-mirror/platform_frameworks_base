@@ -26,6 +26,7 @@
 #include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaPlayerImpl.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MediaSource.h>
@@ -126,6 +127,7 @@ static void usage(const char *me) {
     fprintf(stderr, "       -l(ist) components\n");
     fprintf(stderr, "       -m max-number-of-frames-to-decode in each pass\n");
     fprintf(stderr, "       -b bug to reproduce\n");
+    fprintf(stderr, "       -p(rofiles) dump decoder profiles supported\n");
 }
 
 int main(int argc, char **argv) {
@@ -133,12 +135,13 @@ int main(int argc, char **argv) {
 
     bool audioOnly = false;
     bool listComponents = false;
+    bool dumpProfiles = false;
     gNumRepetitions = 1;
     gMaxNumFrames = 0;
     gReproduceBug = -1;
 
     int res;
-    while ((res = getopt(argc, argv, "han:lm:b:")) >= 0) {
+    while ((res = getopt(argc, argv, "han:lm:b:p")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -174,6 +177,12 @@ int main(int argc, char **argv) {
                 break;
             }
 
+            case 'p':
+            {
+                dumpProfiles = true;
+                break;
+            }
+
             case '?':
             case 'h':
             default:
@@ -187,6 +196,53 @@ int main(int argc, char **argv) {
 
     argc -= optind;
     argv += optind;
+
+    if (dumpProfiles) {
+        sp<IServiceManager> sm = defaultServiceManager();
+        sp<IBinder> binder = sm->getService(String16("media.player"));
+        sp<IMediaPlayerService> service =
+            interface_cast<IMediaPlayerService>(binder);
+
+        CHECK(service.get() != NULL);
+
+        sp<IOMX> omx = service->createOMX();
+        CHECK(omx.get() != NULL);
+
+        const char *kMimeTypes[] = {
+            MEDIA_MIMETYPE_VIDEO_AVC, MEDIA_MIMETYPE_VIDEO_MPEG4,
+            MEDIA_MIMETYPE_VIDEO_H263
+        };
+
+        for (size_t k = 0; k < sizeof(kMimeTypes) / sizeof(kMimeTypes[0]);
+             ++k) {
+            printf("type '%s':\n", kMimeTypes[k]);
+
+            Vector<CodecCapabilities> results;
+            CHECK_EQ(QueryCodecs(omx, kMimeTypes[k],
+                                 true, // queryDecoders
+                                 &results), OK);
+
+            for (size_t i = 0; i < results.size(); ++i) {
+                printf("  decoder '%s' supports ",
+                       results[i].mComponentName.string());
+
+                if (results[i].mProfileLevels.size() == 0) {
+                    printf("NOTHING.\n");
+                    continue;
+                }
+
+                for (size_t j = 0; j < results[i].mProfileLevels.size(); ++j) {
+                    const CodecProfileLevel &profileLevel =
+                        results[i].mProfileLevels[j];
+
+                    printf("%s%ld/%ld", j > 0 ? ", " : "",
+                           profileLevel.mProfile, profileLevel.mLevel);
+                }
+
+                printf("\n");
+            }
+        }
+    }
 
     if (listComponents) {
         sp<IServiceManager> sm = defaultServiceManager();

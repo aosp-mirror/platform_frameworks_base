@@ -13,6 +13,7 @@ LOCAL_SRC_FILES:=                 \
         MPEG4Writer.cpp           \
         MediaBuffer.cpp           \
         MediaBufferGroup.cpp      \
+        MediaDefs.cpp             \
         MediaExtractor.cpp        \
         MediaPlayerImpl.cpp       \
         MediaSource.cpp           \
