@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -38,8 +40,6 @@ import java.io.UnsupportedEncodingException;
  * are performed on the remote Bluetooth hardware address, using the
  * {@link BluetoothAdapter} that was used to create this {@link
  * BluetoothDevice}.
- *
- * TODO: unhide more of this class
  */
 public final class BluetoothDevice implements Parcelable {
     private static final String TAG = "BluetoothDevice";
@@ -48,31 +48,203 @@ public final class BluetoothDevice implements Parcelable {
      * Sentinel error value for this class. Guaranteed to not equal any other
      * integer constant in this class. Provided as a convenience for functions
      * that require a sentinel error value, for example:
-     * <p><code>Intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
-     * BluetoothAdapter.ERROR)</code>
+     * <p><code>Intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,
+     * BluetoothDevice.ERROR)</code>
      */
-    public static final int ERROR = -1;
+    public static final int ERROR = Integer.MIN_VALUE;
 
-    /** We do not have a link key for the remote device, and are therefore not
-     * bonded
-     * @hide*/
-    public static final int BOND_NOT_BONDED = 0;
-    /** We have a link key for the remote device, and are probably bonded.
-     *  @hide */
-    public static final int BOND_BONDED = 1;
-    /** We are currently attempting bonding
-     *  @hide */
-    public static final int BOND_BONDING = 2;
+    /**
+     * Broadcast Action: Remote device discovered.
+     * <p>Sent when a remote device is found during discovery.
+     * <p>Always contains the extra fields {@link #EXTRA_DEVICE} and {@link
+     * #EXTRA_CLASS}. Can contain the extra fields {@link #EXTRA_NAME} and/or
+     * {@link #EXTRA_RSSI} if they are available.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+     // TODO: Change API to not broadcast RSSI if not available (incoming connection)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_FOUND =
+            "android.bluetooth.device.action.FOUND";
 
-    /** Ask device picker to show all kinds of BT devices.
-     *  @hide */
-    public static final int DEVICE_PICKER_FILTER_TYPE_ALL = 0;
-    /** Ask device picker to show BT devices that support AUDIO profiles.
-     *  @hide */
-    public static final int DEVICE_PICKER_FILTER_TYPE_AUDIO = 1;
-    /** Ask device picker to show BT devices that support Object Transfer.
-     *  @hide */
-    public static final int DEVICE_PICKER_FILTER_TYPE_TRANSFER = 2;
+    /**
+     * Broadcast Action: Remote device disappeared.
+     * <p>Sent when a remote device that was found in the last discovery is not
+     * found in the current discovery.
+     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DISAPPEARED =
+            "android.bluetooth.device.action.DISAPPEARED";
+
+    /**
+     * Broadcast Action: Bluetooth class of a remote device has changed.
+     * <p>Always contains the extra fields {@link #EXTRA_DEVICE} and {@link
+     * #EXTRA_CLASS}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * @see {@link BluetoothClass}
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CLASS_CHANGED =
+            "android.bluetooth.device.action.CLASS_CHANGED";
+
+    /**
+     * Broadcast Action: Indicates a low level (ACL) connection has been
+     * established with a remote device.
+     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
+     * <p>ACL connections are managed automatically by the Android Bluetooth
+     * stack.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ACL_CONNECTED =
+            "android.bluetooth.device.action.ACL_CONNECTED";
+
+    /**
+     * Broadcast Action: Indicates that a low level (ACL) disconnection has
+     * been requested for a remote device, and it will soon be disconnected.
+     * <p>This is useful for graceful disconnection. Applications should use
+     * this intent as a hint to immediately terminate higher level connections
+     * (RFCOMM, L2CAP, or profile connections) to the remote device.
+     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ACL_DISCONNECT_REQUESTED =
+            "android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED";
+
+    /**
+     * Broadcast Action: Indicates a low level (ACL) disconnection from a
+     * remote device.
+     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
+     * <p>ACL connections are managed automatically by the Android Bluetooth
+     * stack.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ACL_DISCONNECTED =
+            "android.bluetooth.device.action.ACL_DISCONNECTED";
+
+    /**
+     * Broadcast Action: Indicates the friendly name of a remote device has
+     * been retrieved for the first time, or changed since the last retrieval.
+     * <p>Always contains the extra fields {@link #EXTRA_DEVICE} and {@link
+     * #EXTRA_NAME}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NAME_CHANGED =
+            "android.bluetooth.device.action.NAME_CHANGED";
+
+    /**
+     * Broadcast Action: Indicates a change in the bond state of a remote
+     * device. For example, if a device is bonded (paired).
+     * <p>Always contains the extra fields {@link #EXTRA_DEVICE}, {@link
+     * #EXTRA_BOND_STATE} and {@link #EXTRA_PREVIOUS_BOND_STATE}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    // Note: When EXTRA_BOND_STATE is BOND_NONE then this will also
+    // contain a hidden extra field EXTRA_REASON with the result code.
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_BOND_STATE_CHANGED =
+            "android.bluetooth.device.action.BOND_STATE_CHANGED";
+
+    /**
+     * Used as a Parcelable {@link BluetoothDevice} extra field in every intent
+     * broadcast by this class. It contains the {@link BluetoothDevice} that
+     * the intent applies to.
+     */
+    public static final String EXTRA_DEVICE = "android.bluetooth.device.extra.DEVICE";
+
+    /**
+     * Used as a String extra field in {@link #ACTION_NAME_CHANGED} and {@link
+     * #ACTION_FOUND} intents. It contains the friendly Bluetooth name.
+     */
+    public static final String EXTRA_NAME = "android.bluetooth.device.extra.NAME";
+
+    /**
+     * Used as an optional short extra field in {@link #ACTION_FOUND} intents.
+     * Contains the RSSI value of the remote device as reported by the
+     * Bluetooth hardware.
+     */
+    public static final String EXTRA_RSSI = "android.bluetooth.device.extra.RSSI";
+
+    /**
+     * Used as an Parcelable {@link BluetoothClass} extra field in {@link
+     * #ACTION_FOUND} and {@link #ACTION_CLASS_CHANGED} intents.
+     */
+    public static final String EXTRA_CLASS = "android.bluetooth.device.extra.CLASS";
+
+    /**
+     * Used as an int extra field in {@link #ACTION_BOND_STATE_CHANGED} intents.
+     * Contains the bond state of the remote device.
+     * <p>Possible values are:
+     * {@link #BOND_NONE},
+     * {@link #BOND_BONDING},
+     * {@link #BOND_BONDED}.
+      */
+    public static final String EXTRA_BOND_STATE = "android.bluetooth.device.extra.BOND_STATE";
+    /**
+     * Used as an int extra field in {@link #ACTION_BOND_STATE_CHANGED} intents.
+     * Contains the previous bond state of the remote device.
+     * <p>Possible values are:
+     * {@link #BOND_NONE},
+     * {@link #BOND_BONDING},
+     * {@link #BOND_BONDED}.
+      */
+    public static final String EXTRA_PREVIOUS_BOND_STATE =
+            "android.bluetooth.device.extra.PREVIOUS_BOND_STATE";
+    /**
+     * Indicates the remote device is not bonded (paired).
+     * <p>There is no shared link key with the remote device, so communication
+     * (if it is allowed at all) will be unauthenticated and unencrypted.
+     */
+    public static final int BOND_NONE = 10;
+    /**
+     * Indicates bonding (pairing) is in progress with the remote device.
+     */
+    public static final int BOND_BONDING = 11;
+    /**
+     * Indicates the remote device is bonded (paired).
+     * <p>A shared link keys exists locally for the remote device, so
+     * communication can be authenticated and encrypted.
+     * <p><i>Being bonded (paired) with a remote device does not necessarily
+     * mean the device is currently connected. It just means that the ponding
+     * procedure was compeleted at some earlier time, and the link key is still
+     * stored locally, ready to use on the next connection.
+     * </i>
+     */
+    public static final int BOND_BONDED = 12;
+
+    /** @hide */
+    public static final String EXTRA_REASON = "android.bluetooth.device.extra.REASON";
+    /** @hide */
+    public static final String EXTRA_PAIRING_VARIANT =
+            "android.bluetooth.device.extra.PAIRING_VARIANT";
+    /** @hide */
+    public static final String EXTRA_PASSKEY = "android.bluetooth.device.extra.PASSKEY";
+
+    /**
+     * Broadcast Action: Indicates a failure to retrieve the name of a remote
+     * device.
+     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * @hide
+     */
+    //TODO: is this actually useful?
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NAME_FAILED =
+            "android.bluetooth.device.action.NAME_FAILED";
+
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PAIRING_REQUEST =
+            "android.bluetooth.device.action.PAIRING_REQUEST";
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PAIRING_CANCEL =
+            "android.bluetooth.device.action.PAIRING_CANCEL";
 
     /** A bond attempt succeeded
      * @hide */
@@ -98,7 +270,6 @@ public final class BluetoothDevice implements Parcelable {
      * @hide */
     public static final int UNBOND_REASON_REMOVED = 6;
 
-    //TODO: Remove duplicates between here and BluetoothAdapter
     /** The user will be prompted to enter a pin
      * @hide */
     public static final int PAIRING_VARIANT_PIN = 0;
@@ -108,8 +279,6 @@ public final class BluetoothDevice implements Parcelable {
     /** The user will be prompted to confirm the passkey displayed on the screen
      * @hide */
     public static final int PAIRING_VARIANT_CONFIRMATION = 2;
-
-    private static final int ADDRESS_LENGTH = 17;
 
     private static IBluetooth sService;  /* Guarenteed constant after first object constructed */
 
@@ -135,7 +304,7 @@ public final class BluetoothDevice implements Parcelable {
             }
         }
 
-        if (!checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             throw new IllegalArgumentException(address + " is not a valid Bluetooth address");
         }
 
@@ -216,15 +385,15 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * Create a bonding with a remote bluetooth device.
+     * Start the bonding (pairing) process with the remote device.
+     * <p>This is an asynchronous call, it will return immediately. Register
+     * for {@link #ACTION_BOND_STATE_CHANGED} intents to be notified when
+     * the bonding process completes, and its result.
+     * <p>Android system services will handle the necessary user interactions
+     * to confirm and complete the bonding process.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
-     * This is an asynchronous call. The result of this bonding attempt can be
-     * observed through BluetoothIntent.BOND_STATE_CHANGED_ACTION intents.
-     *
-     * @param address the remote device Bluetooth address.
-     * @return false If there was an immediate problem creating the bonding,
-     *         true otherwise.
-     * @hide
+     * @return false on immediate error, true if bonding will begin
      */
     public boolean createBond() {
         try {
@@ -234,8 +403,10 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * Cancel an in-progress bonding request started with createBond.
-     * @hide
+     * Cancel an in-progress bonding request started with {@link #createBond}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     *
+     * @return true on sucess, false on error
      */
     public boolean cancelBondProcess() {
         try {
@@ -245,12 +416,13 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * Removes the remote device and the pairing information associated
-     * with it.
+     * Remove bond (pairing) with the remote device.
+     * <p>Delete the link key associated with the remote device, and
+     * immediately terminate connections to that device that require
+     * authentication and encryption.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
-     * @return true if the device was disconnected, false otherwise and on
-     *         error.
-     * @hide
+     * @return true on sucess, false on error
      */
     public boolean removeBond() {
         try {
@@ -260,21 +432,35 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * Get the bonding state of a remote device.
+     * Get the bond state of the remote device.
+     * <p>Possible values for the bond state are:
+     * {@link #BOND_NONE},
+     * {@link #BOND_BONDING},
+     * {@link #BOND_BONDED}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
-     * Result is one of:
-     * BOND_*
-     * ERROR
-     *
-     * @param address Bluetooth hardware address of the remote device to check.
-     * @return Result code
-     * @hide
+     * @return the bond state
      */
     public int getBondState() {
         try {
             return sService.getBondState(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothDevice.ERROR;
+        return BOND_NONE;
+    }
+
+    /**
+     * Get the Bluetooth class of the remote device.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
+     *
+     * @return Bluetooth class object, or null on error
+     */
+    public BluetoothClass getBluetoothClass() {
+        try {
+            int classInt = sService.getRemoteClass(mAddress);
+            if (classInt == BluetoothClass.ERROR) return null;
+            return new BluetoothClass(classInt);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return null;
     }
 
     /**
@@ -302,14 +488,6 @@ public final class BluetoothDevice implements Parcelable {
             Log.e(TAG, "", e);
         }
         return false;
-    }
-
-    /** @hide */
-    public int getBluetoothClass() {
-        try {
-            return sService.getRemoteClass(mAddress);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothDevice.ERROR;
     }
 
     /** @hide */
@@ -433,28 +611,4 @@ public final class BluetoothDevice implements Parcelable {
         return pinBytes;
     }
 
-    /** Sanity check a bluetooth address, such as "00:43:A8:23:10:F0"
-     * @hide */
-    public static boolean checkBluetoothAddress(String address) {
-        if (address == null || address.length() != ADDRESS_LENGTH) {
-            return false;
-        }
-        for (int i = 0; i < ADDRESS_LENGTH; i++) {
-            char c = address.charAt(i);
-            switch (i % 3) {
-            case 0:
-            case 1:
-                if (Character.digit(c, 16) != -1) {
-                    break;  // hex character, OK
-                }
-                return false;
-            case 2:
-                if (c == ':') {
-                    break;  // OK
-                }
-                return false;
-            }
-        }
-        return true;
-    }
 }
