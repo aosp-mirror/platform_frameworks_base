@@ -80,6 +80,7 @@ static const CodecInfo kEncoderInfo[] = {
     { "video/avc", "OMX.PV.avcenc" },
 };
 
+#define CODEC_LOGI(x, ...) LOGI("[%s] "x, mComponentName, ##__VA_ARGS__)
 #define CODEC_LOGV(x, ...) LOGV("[%s] "x, mComponentName, ##__VA_ARGS__)
 
 struct OMXCodecObserver : public BnOMXObserver {
@@ -424,7 +425,7 @@ status_t OMXCodec::setVideoPortFormatType(
         // CHECK_EQ(format.nIndex, index);
 
 #if 1
-        LOGI("portIndex: %ld, index: %ld, eCompressionFormat=%d eColorFormat=%d",
+        CODEC_LOGI("portIndex: %ld, index: %ld, eCompressionFormat=%d eColorFormat=%d",
              portIndex,
              index, format.eCompressionFormat, format.eColorFormat);
 #endif
@@ -457,7 +458,7 @@ status_t OMXCodec::setVideoPortFormatType(
         return UNKNOWN_ERROR;
     }
 
-    LOGI("found a match.");
+    CODEC_LOGI("found a match.");
     status_t err = mOMX->set_parameter(
             mNode, OMX_IndexParamVideoPortFormat,
             &format, sizeof(format));
@@ -467,7 +468,7 @@ status_t OMXCodec::setVideoPortFormatType(
 
 void OMXCodec::setVideoInputFormat(
         const char *mime, OMX_U32 width, OMX_U32 height) {
-    LOGI("setVideoInputFormat width=%ld, height=%ld", width, height);
+    CODEC_LOGI("setVideoInputFormat width=%ld, height=%ld", width, height);
 
     OMX_VIDEO_CODINGTYPE compressionFormat = OMX_VIDEO_CodingUnused;
     if (!strcasecmp("video/avc", mime)) {
@@ -527,7 +528,7 @@ void OMXCodec::setVideoInputFormat(
     CHECK_EQ(err, OK);
 
     def.nBufferSize = (width * height * 2); // (width * height * 3) / 2;
-    LOGI("Setting nBufferSize = %ld", def.nBufferSize);
+    CODEC_LOGI("Setting nBufferSize = %ld", def.nBufferSize);
 
     CHECK_EQ(def.eDomain, OMX_PortDomainVideo);
 
@@ -543,7 +544,7 @@ void OMXCodec::setVideoInputFormat(
 
 void OMXCodec::setVideoOutputFormat(
         const char *mime, OMX_U32 width, OMX_U32 height) {
-    LOGI("setVideoOutputFormat width=%ld, height=%ld", width, height);
+    CODEC_LOGI("setVideoOutputFormat width=%ld, height=%ld", width, height);
 
     OMX_VIDEO_CODINGTYPE compressionFormat = OMX_VIDEO_CodingUnused;
     if (!strcasecmp("video/avc", mime)) {
