@@ -24,7 +24,6 @@ import android.util.TypedValue;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Locale;
 
 /**
  * Provides access to an application's raw asset files; see {@link Resources}
