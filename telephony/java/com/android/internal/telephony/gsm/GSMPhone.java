@@ -1099,8 +1099,8 @@ public class GSMPhone extends PhoneBase {
         return mDataConnection.getAllDataConnections();
     }
 
-    public void updateServiceLocation(Message response) {
-        mSST.getLacAndCid(response);
+    public void updateServiceLocation() {
+        mSST.enableSingleLocationUpdate();
     }
 
     public void enableLocationUpdates() {
