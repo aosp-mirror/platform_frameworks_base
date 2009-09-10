@@ -17,8 +17,11 @@
 package android.syncml.pim.vcard;
 
 /**
- * VCardException used only when the version of the vCard is different. 
+ * VCardException used only when the version of the vCard is different.
+ * 
+ * @deprecated Please use the code in android.pim.vcard
  */
+@Deprecated
 public class VCardVersionException extends VCardException {
     public VCardVersionException() {
     }

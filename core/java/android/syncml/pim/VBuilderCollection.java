@@ -19,6 +19,7 @@ package android.syncml.pim;
 import java.util.Collection;
 import java.util.List;
 
+@Deprecated
 public class VBuilderCollection implements VBuilder {
 
     private final Collection<VBuilder> mVBuilderCollection;

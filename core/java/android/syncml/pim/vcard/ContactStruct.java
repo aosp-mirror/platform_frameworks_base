@@ -49,8 +49,11 @@ import java.util.Map.Entry;
  * This class standy by the person-contact in
  * Android system, we must use this class instance as parameter to transmit to
  * VCardComposer so that create vCard string.
+ * 
+ * @deprecated Please use the new code in android.pim.vcard
  */
 // TODO: rename the class name, next step
+@Deprecated
 public class ContactStruct {
     private static final String LOG_TAG = "ContactStruct";
     
