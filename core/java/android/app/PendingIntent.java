@@ -519,7 +519,8 @@ public final class PendingIntent implements Parcelable {
         mTarget = IIntentSender.Stub.asInterface(target);
     }
 
-    /*package*/ IIntentSender getTarget() {
+    /** @hide */
+    public IIntentSender getTarget() {
         return mTarget;
     }
 }

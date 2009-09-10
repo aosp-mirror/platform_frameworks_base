@@ -49,15 +49,15 @@
         <item name="centerMedium">@android:drawable/popup_center_medium</item>
     </style>
     
-    <!-- Animations -->
+    <!-- Base style for animations.  This style specifies no animations. -->
     <style name="Animation" />
     
     <!-- Standard animations for a full-screen window or activity. -->
     <style name="Animation.Activity">
-        <item name="activityOpenEnterAnimation">@anim/task_open_enter</item>
-        <item name="activityOpenExitAnimation">@anim/task_open_exit</item>
-        <item name="activityCloseEnterAnimation">@anim/task_close_enter</item>
-        <item name="activityCloseExitAnimation">@anim/task_close_exit</item>
+        <item name="activityOpenEnterAnimation">@anim/activity_open_enter</item>
+        <item name="activityOpenExitAnimation">@anim/activity_open_exit</item>
+        <item name="activityCloseEnterAnimation">@anim/activity_close_enter</item>
+        <item name="activityCloseExitAnimation">@anim/activity_close_exit</item>
         <item name="taskOpenEnterAnimation">@anim/task_open_enter</item>
         <item name="taskOpenExitAnimation">@anim/task_open_exit</item>
         <item name="taskCloseEnterAnimation">@anim/task_close_enter</item>
@@ -88,8 +88,15 @@
         <item name="windowExitAnimation">@anim/status_bar_exit</item>
     </style>
 
-    <!-- Standard animations for a translucent window or activity. -->
+    <!-- Standard animations for a translucent window or activity.  This
+         style is <em>not<em> used by default for the translucent theme
+         (since translucent activities are a special case that have no
+         clear UI paradigm), but you can make your own specialized theme
+         with this animation style if you would like to have the standard
+         platform transition animation. -->
     <style name="Animation.Translucent">
+        <item name="windowEnterAnimation">@anim/translucent_enter</item>
+        <item name="windowExitAnimation">@anim/translucent_exit</item>
     </style>
 
     <!-- Standard animations for a non-full-screen window or activity. -->

@@ -33,6 +33,7 @@ import android.app.AlertDialog;
 import android.app.ApplicationErrorReport;
 import android.app.Dialog;
 import android.app.IActivityController;
+import android.app.IActivityManager;
 import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
@@ -3612,6 +3613,29 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public int startActivityPendingIntent(IApplicationThread caller,
+            PendingIntent intent, Intent fillInIntent, String resolvedType,
+            IBinder resultTo, String resultWho, int requestCode,
+            int flagsMask, int flagsValues) {
+        // Refuse possible leaked file descriptors
+        if (fillInIntent != null && fillInIntent.hasFileDescriptors()) {
+            throw new IllegalArgumentException("File descriptors passed in Intent");
+        }
+        
+        IIntentSender sender = intent.getTarget();
+        if (!(sender instanceof PendingIntentRecord)) {
+            throw new IllegalArgumentException("Bad PendingIntent object");
+        }
+        
+        PendingIntentRecord pir = (PendingIntentRecord)sender;
+        if (pir.key.type != IActivityManager.INTENT_SENDER_ACTIVITY) {
+            return START_NOT_ACTIVITY;
+        }
+        
+        return pir.sendInner(0, fillInIntent, resolvedType,
+                null, resultTo, resultWho, requestCode, flagsMask, flagsValues);
+    }
+    
     public boolean startNextMatchingActivity(IBinder callingActivity,
             Intent intent) {
         // Refuse possible leaked file descriptors
@@ -12919,15 +12943,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         if (app.services.size() != 0 && adj > FOREGROUND_APP_ADJ) {
-            // If this process has active services running in it, we would
-            // like to avoid killing it unless it would prevent the current
-            // application from running.  By default we put the process in
-            // with the rest of the background processes; as we scan through
-            // its services we may bump it up from there.
-            if (adj > hiddenAdj) {
-                adj = hiddenAdj;
-                app.adjType = "bg-services";
-            }
             final long now = SystemClock.uptimeMillis();
             // This process is more important if the top activity is
             // bound to the service.
@@ -12995,17 +13010,19 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     }
                 }
             }
+            
+            // Finally, f this process has active services running in it, we
+            // would like to avoid killing it unless it would prevent the current
+            // application from running.  By default we put the process in
+            // with the rest of the background processes; as we scan through
+            // its services we may bump it up from there.
+            if (adj > hiddenAdj) {
+                adj = hiddenAdj;
+                app.adjType = "bg-services";
+            }
         }
 
         if (app.pubProviders.size() != 0 && adj > FOREGROUND_APP_ADJ) {
-            // If this process has published any content providers, then
-            // its adjustment makes it at least as important as any of the
-            // processes using those providers, and no less important than
-            // CONTENT_PROVIDER_ADJ, which is just shy of EMPTY.
-            if (adj > CONTENT_PROVIDER_ADJ) {
-                adj = CONTENT_PROVIDER_ADJ;
-                app.adjType = "pub-providers";
-            }
             Iterator jt = app.pubProviders.values().iterator();
             while (jt.hasNext() && adj > FOREGROUND_APP_ADJ) {
                 ContentProviderRecord cpr = (ContentProviderRecord)jt.next();
@@ -13048,6 +13065,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         app.adjTarget = cpr.info.name;
                     }
                 }
+            }
+            
+            // Finally, if this process has published any content providers,
+            // then its adjustment makes it at least as important as any of the
+            // processes using those providers, and no less important than
+            // CONTENT_PROVIDER_ADJ, which is just shy of EMPTY.
+            if (adj > CONTENT_PROVIDER_ADJ) {
+                adj = CONTENT_PROVIDER_ADJ;
+                app.adjType = "pub-providers";
             }
         }
 
