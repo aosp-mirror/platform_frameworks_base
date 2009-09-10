@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 
 import android.util.Log;
 import android.os.*;
-import android.net.Uri;
 
 /**
  * Integrates the framework with Dalvik's sampling profiler.
@@ -60,14 +59,25 @@ public class SamplingProfilerIntegration {
     public static void writeSnapshot(final String name) {
         if (!enabled) return;
 
+        /*
+         * If we're already writing a snapshot, don't bother enqueing another
+         * request right now. This will reduce the number of individual
+         * snapshots and in turn the total amount of memory consumed (one big
+         * snapshot is smaller than N subset snapshots).
+         */
         if (!pending) {
             pending = true;
             snapshotWriter.execute(new Runnable() {
                 public void run() {
                     String dir = "/sdcard/snapshots";
                     if (!dirMade) {
-                        makeDirectory(dir);
-                        dirMade = true;
+                        new File(dir).mkdirs();
+                        if (new File(dir).isDirectory()) {
+                            dirMade = true;
+                        } else {
+                            Log.w(TAG, "Creation of " + dir + " failed.");
+                            return;
+                        }
                     }
                     try {
                         writeSnapshot(dir, name);
@@ -86,7 +96,7 @@ public class SamplingProfilerIntegration {
         if (!enabled) return;
 
         String dir = "/data/zygote/snapshots";
-        makeDirectory(dir);
+        new File(dir).mkdirs();
         writeSnapshot(dir, "zygote");
     }
 
@@ -102,7 +112,7 @@ public class SamplingProfilerIntegration {
          * we capture two snapshots in rapid succession.
          */
         long start = System.currentTimeMillis();
-        String path = dir + "/" + name.replace(':', '.') + "-"
+        String path = dir + "/" + name.replace(':', '.') + "-" +
                 + System.currentTimeMillis() + ".snapshot";
         try {
             // Try to open the file a few times. The SD card may not be mounted.
@@ -117,7 +127,7 @@ public class SamplingProfilerIntegration {
                         Log.e(TAG, "Could not open " + path + ".");
                         return;
                     }
-                    
+
                     // Sleep for a bit and then try again.
                     try {
                         Thread.sleep(2500);
@@ -136,9 +146,5 @@ public class SamplingProfilerIntegration {
         } catch (IOException e) {
             Log.e(TAG, "Error writing snapshot.", e);
         }
-    }
-
-    private static void makeDirectory(String dir) {
-        new File(dir).mkdirs();
     }
 }
