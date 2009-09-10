@@ -25,6 +25,8 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDoneException;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.media.AudioManager;
@@ -64,6 +66,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
+
+    // Please, please please. If you update the database version, check to make sure the
+    // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
+    // is properly propagated through your change.  Not doing so will result in a loss of user
+    // settings.
     private static final int DATABASE_VERSION = 39;
 
     private Context mContext;
@@ -397,6 +404,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } finally {
                 db.endTransaction();
             }
+            upgradeVersion = 35;
         }
             // due to a botched merge from donut to eclair, the initialization of ASSISTED_GPS_ENABLED
             // was accidentally done out of order here.
