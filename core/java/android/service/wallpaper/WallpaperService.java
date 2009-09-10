@@ -22,7 +22,10 @@ import com.android.internal.view.BaseSurfaceHolder;
 
 import android.app.Service;
 import android.app.WallpaperManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Message;
@@ -88,6 +91,8 @@ public abstract class WallpaperService extends Service {
         
         boolean mInitializing = true;
         boolean mVisible;
+        boolean mScreenOn = true;
+        boolean mReportedVisible;
         boolean mDestroyed;
         
         // Current window state.
@@ -116,6 +121,19 @@ public abstract class WallpaperService extends Service {
         float mPendingXOffset;
         float mPendingYOffset;
         MotionEvent mPendingMove;
+        
+        final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
+                    mScreenOn = true;
+                    reportVisibility();
+                } else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                    mScreenOn = false;
+                    reportVisibility();
+                }
+            }
+        };
         
         final BaseSurfaceHolder mSurfaceHolder = new BaseSurfaceHolder() {
 
@@ -239,7 +257,7 @@ public abstract class WallpaperService extends Service {
          * {@link #onVisibilityChanged(boolean)}.
          */
         public boolean isVisible() {
-            return mVisible;
+            return mReportedVisible;
         }
         
         /**
@@ -489,6 +507,11 @@ public abstract class WallpaperService extends Service {
             mSession = ViewRoot.getWindowSession(getMainLooper());
             mWindow.setSession(mSession);
             
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_SCREEN_ON);
+            filter.addAction(Intent.ACTION_SCREEN_OFF);
+            registerReceiver(mReceiver, filter);
+            
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
             onCreate(mSurfaceHolder);
             
@@ -505,11 +528,19 @@ public abstract class WallpaperService extends Service {
         }
         
         void doVisibilityChanged(boolean visible) {
+            mVisible = visible;
+            reportVisibility();
+        }
+        
+        void reportVisibility() {
             if (!mDestroyed) {
-                mVisible = visible;
-                if (DEBUG) Log.v(TAG, "onVisibilityChanged(" + visible
-                        + "): " + this);
-                onVisibilityChanged(visible);
+                boolean visible = mVisible && mScreenOn;
+                if (mReportedVisible != visible) {
+                    mReportedVisible = visible;
+                    if (DEBUG) Log.v(TAG, "onVisibilityChanged(" + visible
+                            + "): " + this);
+                    onVisibilityChanged(visible);
+                }
             }
         }
         
@@ -561,6 +592,8 @@ public abstract class WallpaperService extends Service {
             
             if (DEBUG) Log.v(TAG, "onDestroy(): " + this);
             onDestroy();
+            
+            unregisterReceiver(mReceiver);
             
             if (mCreated) {
                 try {

@@ -144,6 +144,30 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(result);
             return true;
         }
+
+        case START_ACTIVITY_PENDING_INTENT_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder b = data.readStrongBinder();
+            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            PendingIntent intent = PendingIntent.CREATOR.createFromParcel(data);
+            Intent fillInIntent = null;
+            if (data.readInt() != 0) {
+                fillInIntent = Intent.CREATOR.createFromParcel(data);
+            }
+            String resolvedType = data.readString();
+            IBinder resultTo = data.readStrongBinder();
+            String resultWho = data.readString();    
+            int requestCode = data.readInt();
+            int flagsMask = data.readInt();
+            int flagsValues = data.readInt();
+            int result = startActivityPendingIntent(app, intent,
+                    fillInIntent, resolvedType, resultTo, resultWho,
+                    requestCode, flagsMask, flagsValues);
+            reply.writeNoException();
+            reply.writeInt(result);
+            return true;
+        }
         
         case START_NEXT_MATCHING_ACTIVITY_TRANSACTION:
         {
@@ -1173,6 +1197,34 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(onlyIfNeeded ? 1 : 0);
         data.writeInt(debug ? 1 : 0);
         mRemote.transact(START_ACTIVITY_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int result = reply.readInt();
+        reply.recycle();
+        data.recycle();
+        return result;
+    }
+    public int startActivityPendingIntent(IApplicationThread caller,
+            PendingIntent intent, Intent fillInIntent, String resolvedType,
+            IBinder resultTo, String resultWho, int requestCode,
+            int flagsMask, int flagsValues) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(caller != null ? caller.asBinder() : null);
+        intent.writeToParcel(data, 0);
+        if (fillInIntent != null) {
+            data.writeInt(1);
+            fillInIntent.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        data.writeString(resolvedType);
+        data.writeStrongBinder(resultTo);
+        data.writeString(resultWho);
+        data.writeInt(requestCode);
+        data.writeInt(flagsMask);
+        data.writeInt(flagsValues);
+        mRemote.transact(START_ACTIVITY_PENDING_INTENT_TRANSACTION, data, reply, 0);
         reply.readException();
         int result = reply.readInt();
         reply.recycle();

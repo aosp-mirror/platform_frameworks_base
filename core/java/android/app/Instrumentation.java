@@ -1468,7 +1468,7 @@ public class Instrumentation {
         mWatcher = watcher;
     }
 
-    /*package*/ static void checkStartActivityResult(int res, Intent intent) {
+    /*package*/ static void checkStartActivityResult(int res, Object intent) {
         if (res >= IActivityManager.START_SUCCESS) {
             return;
         }
@@ -1476,10 +1476,10 @@ public class Instrumentation {
         switch (res) {
             case IActivityManager.START_INTENT_NOT_RESOLVED:
             case IActivityManager.START_CLASS_NOT_FOUND:
-                if (intent.getComponent() != null)
+                if (intent instanceof Intent && ((Intent)intent).getComponent() != null)
                     throw new ActivityNotFoundException(
                             "Unable to find explicit activity class "
-                            + intent.getComponent().toShortString()
+                            + ((Intent)intent).getComponent().toShortString()
                             + "; have you declared this activity in your AndroidManifest.xml?");
                 throw new ActivityNotFoundException(
                         "No Activity found to handle " + intent);
@@ -1489,6 +1489,9 @@ public class Instrumentation {
             case IActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
                 throw new AndroidRuntimeException(
                         "FORWARD_RESULT_FLAG used while also requesting a result");
+            case IActivityManager.START_NOT_ACTIVITY:
+                throw new IllegalArgumentException(
+                        "PendingIntent is not an activity");
             default:
                 throw new AndroidRuntimeException("Unknown error code "
                         + res + " when starting " + intent);

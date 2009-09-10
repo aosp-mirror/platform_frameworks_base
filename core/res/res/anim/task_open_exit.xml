@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/res/anim/options_panel_exit.xml
-**
-** Copyright 2007, The Android Open Source Project
+/*
+** Copyright 2009, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License"); 
 ** you may not use this file except in compliance with the License. 
@@ -21,6 +20,8 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:interpolator="@anim/decelerate_interpolator"
         android:zAdjustment="top">
-	<translate android:fromXDelta="0%" android:toXDelta="-100%"
-        android:duration="@android:integer/config_mediumAnimTime"/>
+    <scale android:fromXScale="1.0" android:toXScale="2.0"
+           android:fromYScale="1.0" android:toYScale="2.0"
+           android:pivotX="50%p" android:pivotY="50%p"
+           android:duration="@android:integer/config_mediumAnimTime" />
 </set>
