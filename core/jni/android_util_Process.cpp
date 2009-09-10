@@ -50,14 +50,6 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
-/*
- * List of cgroup names which map to ANDROID_TGROUP_ values in Thread.h
- * and Process.java
- * These names are used to construct the path to the cgroup control dir
- */
-
-static const char *cgroup_names[] = { NULL, "bg_non_interactive", "fg_boost" };
-
 using namespace android;
 
 static void signalExceptionForPriorityError(JNIEnv* env, jobject obj, int err)
@@ -194,14 +186,13 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
     return -1;
 }
 
-static int add_pid_to_cgroup(int pid, int grp)
+static int add_pid_to_cgroup(int pid, const char *grp_name)
 {
     int fd;
     char path[255];
     char text[64];
 
-    sprintf(path, "/dev/cpuctl/%s/tasks",
-           (cgroup_names[grp] ? cgroup_names[grp] : ""));
+    sprintf(path, "/dev/cpuctl/%s/tasks", grp_name);
 
     if ((fd = open(path, O_WRONLY)) < 0)
         return -1;
@@ -216,6 +207,37 @@ static int add_pid_to_cgroup(int pid, int grp)
     return 0;
 }
 
+void setSchedPolicy(JNIEnv* env, jobject clazz, int pid, SchedPolicy policy)
+{
+    static int __sys_supports_schedgroups = -1;
+
+    if (__sys_supports_schedgroups < 0) {
+        if (!access("/dev/cpuctl/tasks", F_OK)) {
+            __sys_supports_schedgroups = 1;
+        } else {
+            __sys_supports_schedgroups = 0;
+        }
+    }
+
+    if (__sys_supports_schedgroups) {
+        const char *grp = NULL;
+
+        if (policy == SP_BACKGROUND) {
+            grp = "bg_non_interactive";
+        }
+
+        if (add_pid_to_cgroup(pid, grp)) {
+            if (errno != ESRCH && errno != ENOENT)
+                signalExceptionForGroupError(env, clazz, errno);
+        }
+    } else {
+        struct sched_param param;
+
+        param.sched_priority = 0;
+        sched_setscheduler(pid, (policy == SP_BACKGROUND) ? 5 : 0, &param);
+    }
+}
+
 void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
     if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
@@ -223,11 +245,9 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint
         return;
     }
 
-    if (add_pid_to_cgroup(pid, grp)) {
-        // If the thread exited on us, don't generate an exception
-        if (errno != ESRCH && errno != ENOENT)
-            signalExceptionForGroupError(env, clazz, errno);
-    }
+    setSchedPolicy(env, clazz, pid,
+                   (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
+                           SP_BACKGROUND : SP_FOREGROUND);
 }
 
 void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp) 
@@ -271,14 +291,9 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             continue;
         }
      
-        if (add_pid_to_cgroup(t_pid, grp)) {
-            // If the thread exited on us, ignore it and keep going
-            if (errno != ESRCH && errno != ENOENT) {
-                signalExceptionForGroupError(env, clazz, errno);
-                closedir(d);
-                return;
-            }
-        }
+        setSchedPolicy(env, clazz, t_pid,
+                       (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
+                               SP_BACKGROUND : SP_FOREGROUND);
     }
     closedir(d);
 }
@@ -287,9 +302,9 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
                                               jint pid, jint pri)
 {
     if (pri >= ANDROID_PRIORITY_BACKGROUND) {
-        add_pid_to_cgroup(pid, ANDROID_TGROUP_BG_NONINTERACT);
+        setSchedPolicy(env, clazz, pid, SP_BACKGROUND);
     } else if (getpriority(PRIO_PROCESS, pid) >= ANDROID_PRIORITY_BACKGROUND) {
-        add_pid_to_cgroup(pid, ANDROID_TGROUP_DEFAULT);
+        setSchedPolicy(env, clazz, pid, SP_FOREGROUND);
     }
 
     if (setpriority(PRIO_PROCESS, pid, pri) < 0) {
