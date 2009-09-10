@@ -124,6 +124,8 @@ public class SurfaceView extends View {
     };
     
     boolean mRequestedVisible = false;
+    boolean mWindowVisibility = false;
+    boolean mViewVisibility = false;
     int mRequestedWidth = -1;
     int mRequestedHeight = -1;
     int mRequestedFormat = PixelFormat.OPAQUE;
@@ -176,12 +178,22 @@ public class SurfaceView extends View {
         mSession = getWindowSession();
         mLayout.token = getWindowToken();
         mLayout.setTitle("SurfaceView");
+        mViewVisibility = getVisibility() == VISIBLE;
     }
 
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
-        mRequestedVisible = visibility == VISIBLE;
+        mWindowVisibility = visibility == VISIBLE;
+        mRequestedVisible = mWindowVisibility && mViewVisibility;
+        updateWindow(false);
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        mViewVisibility = visibility == VISIBLE;
+        mRequestedVisible = mWindowVisibility && mViewVisibility;
         updateWindow(false);
     }
     
