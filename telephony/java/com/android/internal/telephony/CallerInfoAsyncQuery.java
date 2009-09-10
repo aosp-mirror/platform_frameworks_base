@@ -303,7 +303,7 @@ public class CallerInfoAsyncQuery {
     public static CallerInfoAsyncQuery startQuery(int token, Context context, String number,
             OnQueryCompleteListener listener, Object cookie) {
         //contruct the URI object and start Query.
-        Uri contactRef = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, number);
+        Uri contactRef = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
 
         CallerInfoAsyncQuery c = new CallerInfoAsyncQuery();
         c.allocate(context, contactRef);
