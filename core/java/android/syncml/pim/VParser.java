@@ -25,6 +25,7 @@ import java.io.UnsupportedEncodingException;
  * This interface is used to parse the V format files, such as VCard & VCal
  *
  */
+@Deprecated
 abstract public class VParser {
     // Assume that "iso-8859-1" is able to map "all" 8bit characters to some unicode and
     // decode the unicode to the original charset. If not, this setting will cause some bug. 

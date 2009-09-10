@@ -31,7 +31,10 @@ import java.util.HashSet;
 
 /**
  * This class is used to parse vcard. Please refer to vCard Specification 2.1.
+ *
+ * @deprecated Please use the code in android.pim.vcard
  */
+@Deprecated
 public class VCardParser_V21 {
     private static final String LOG_TAG = "VCardParser_V21";
     

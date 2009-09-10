@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+@Deprecated
 public class PropertyNode {
 
     public String propName;

@@ -18,6 +18,7 @@ package android.syncml.pim;
 
 import java.util.List;
 
+@Deprecated
 public interface VBuilder {
     void start();
 
