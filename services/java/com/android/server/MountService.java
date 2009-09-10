@@ -296,7 +296,7 @@ class MountService extends IMountService.Stub {
         setMediaStorageNotification(
                 com.android.internal.R.string.ext_media_nomedia_notification_title,
                 com.android.internal.R.string.ext_media_nomedia_notification_message,
-                com.android.internal.R.drawable.stat_sys_no_sim,
+                com.android.internal.R.drawable.stat_notify_sdcard_usb,
                 true, false, null);
         handlePossibleExplicitUnmountBroadcast(path);
 
@@ -353,7 +353,7 @@ class MountService extends IMountService.Stub {
 
         setMediaStorageNotification(com.android.internal.R.string.ext_media_nofs_notification_title,
                                     com.android.internal.R.string.ext_media_nofs_notification_message,
-                                    com.android.internal.R.drawable.stat_sys_no_sim,
+                                    com.android.internal.R.drawable.stat_notify_sdcard_usb,
                                     true, false, pi);
         updateUsbMassStorageNotification(false, false);
         intent = new Intent(Intent.ACTION_MEDIA_NOFS, 
@@ -421,7 +421,7 @@ class MountService extends IMountService.Stub {
 
         setMediaStorageNotification(com.android.internal.R.string.ext_media_unmountable_notification_title,
                                     com.android.internal.R.string.ext_media_unmountable_notification_message,
-                                    com.android.internal.R.drawable.stat_sys_no_sim,
+                                    com.android.internal.R.drawable.stat_notify_sdcard_usb,
                                     true, false, pi); 
         updateUsbMassStorageNotification(false, false);
 
