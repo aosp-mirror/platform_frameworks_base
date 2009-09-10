@@ -90,6 +90,11 @@ enum {
     ANDROID_TGROUP_MAX              = ANDROID_TGROUP_FG_BOOST,
 };
 
+typedef enum {
+    SP_BACKGROUND = 0,
+    SP_FOREGROUND = 1,
+} SchedPolicy;
+
 // Create and run a new thread.
 extern int androidCreateThread(android_thread_func_t, void *);
 
