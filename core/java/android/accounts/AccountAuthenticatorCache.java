@@ -49,10 +49,15 @@ import android.text.TextUtils;
                     com.android.internal.R.styleable.AccountAuthenticator_label, 0);
             final int iconId = sa.getResourceId(
                     com.android.internal.R.styleable.AccountAuthenticator_icon, 0);
+            final int smallIconId = sa.getResourceId(
+                    com.android.internal.R.styleable.AccountAuthenticator_smallIcon, 0);
+            final int prefId = sa.getResourceId(
+                    com.android.internal.R.styleable.AccountAuthenticator_accountPreferences, 0);
             if (TextUtils.isEmpty(accountType)) {
                 return null;
             }
-            return new AuthenticatorDescription(accountType, packageName, labelId, iconId);
+            return new AuthenticatorDescription(accountType, packageName, labelId, iconId, 
+                    smallIconId, prefId);
         } finally {
             sa.recycle();
         }
