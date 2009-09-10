@@ -500,8 +500,8 @@ public class CDMAPhone extends PhoneBase {
         Log.e(LOG_TAG, "method setCallWaiting is NOT supported in CDMA!");
     }
 
-    public void updateServiceLocation(Message response) {
-        mSST.getLacAndCid(response);
+    public void updateServiceLocation() {
+        mSST.enableSingleLocationUpdate();
     }
 
     public void setDataRoamingEnabled(boolean enable) {
@@ -661,6 +661,10 @@ public class CDMAPhone extends PhoneBase {
         mSST.enableLocationUpdates();
     }
 
+    public void disableLocationUpdates() {
+        mSST.disableLocationUpdates();
+    }
+
     /**
      * @deprecated
      */
@@ -739,10 +743,6 @@ public class CDMAPhone extends PhoneBase {
         } else {
             return mDataConnection.setDataEnabled(true);
         }
-    }
-
-    public void disableLocationUpdates() {
-        mSST.disableLocationUpdates();
     }
 
     public boolean getIccRecordsLoaded() {

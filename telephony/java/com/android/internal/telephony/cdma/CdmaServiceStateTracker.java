@@ -279,12 +279,6 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         cdmaForSubscriptionInfoReadyRegistrants.remove(h);
     }
 
-    public void
-    getLacAndCid(Message onComplete) {
-        cm.getRegistrationState(obtainMessage(
-                EVENT_GET_LOC_DONE_CDMA, onComplete));
-    }
-
     @Override
     public void handleMessage (Message msg) {
         AsyncResult ar;
@@ -377,22 +371,14 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                     }
                 }
 
-                // Only update if cell location really changed.
-                if (cellLoc.getBaseStationId() != baseStationData[0]
-                        || cellLoc.getBaseStationLatitude() != baseStationData[1]
-                        || cellLoc.getBaseStationLongitude() != baseStationData[2]) {
-                    cellLoc.setCellLocationData(baseStationData[0],
-                                                baseStationData[1],
-                                                baseStationData[2]);
-                   phone.notifyLocationChanged();
-                }
+                cellLoc.setCellLocationData(baseStationData[0],
+                        baseStationData[1], baseStationData[2]);
+                phone.notifyLocationChanged();
             }
 
-            if (ar.userObj != null) {
-                AsyncResult.forMessage(((Message) ar.userObj)).exception
-                = ar.exception;
-                ((Message) ar.userObj).sendToTarget();
-            }
+            // Release any temporary cell lock, which could have been
+            // aquired to allow a single-shot location update.
+            disableSingleLocationUpdate();
             break;
 
         case EVENT_POLL_STATE_REGISTRATION_CDMA:
@@ -487,7 +473,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             ar = (AsyncResult) msg.obj;
 
             if (ar.exception == null) {
-                getLacAndCid(null);
+                cm.getRegistrationState(obtainMessage(EVENT_GET_LOC_DONE_CDMA, null));
             }
             break;
 
