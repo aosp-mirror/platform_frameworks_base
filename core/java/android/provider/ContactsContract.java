@@ -298,6 +298,15 @@ public final class ContactsContract {
         }
 
         /**
+         * Build a {@link #CONTENT_LOOKUP_URI} lookup {@link Uri} using the
+         * given {@link Contacts#_ID} and {@link Contacts#LOOKUP_KEY}.
+         */
+        public static Uri getLookupUri(long contactId, String lookupKey) {
+            return ContentUris.withAppendedId(Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI,
+                    lookupKey), contactId);
+        }
+
+        /**
          * Computes a content URI (see {@link #CONTENT_URI}) given a lookup URI.
          * <p>
          * Returns null if the contact cannot be found.
