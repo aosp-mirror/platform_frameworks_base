@@ -2067,6 +2067,55 @@ static const char *audioPCMModeString(OMX_AUDIO_PCMMODETYPE type) {
     }
 }
 
+static const char *amrBandModeString(OMX_AUDIO_AMRBANDMODETYPE type) {
+    static const char *kNames[] = {
+        "OMX_AUDIO_AMRBandModeUnused",
+        "OMX_AUDIO_AMRBandModeNB0",
+        "OMX_AUDIO_AMRBandModeNB1",
+        "OMX_AUDIO_AMRBandModeNB2",
+        "OMX_AUDIO_AMRBandModeNB3",
+        "OMX_AUDIO_AMRBandModeNB4",
+        "OMX_AUDIO_AMRBandModeNB5",
+        "OMX_AUDIO_AMRBandModeNB6",
+        "OMX_AUDIO_AMRBandModeNB7",
+        "OMX_AUDIO_AMRBandModeWB0",
+        "OMX_AUDIO_AMRBandModeWB1",
+        "OMX_AUDIO_AMRBandModeWB2",
+        "OMX_AUDIO_AMRBandModeWB3",
+        "OMX_AUDIO_AMRBandModeWB4",
+        "OMX_AUDIO_AMRBandModeWB5",
+        "OMX_AUDIO_AMRBandModeWB6",
+        "OMX_AUDIO_AMRBandModeWB7",
+        "OMX_AUDIO_AMRBandModeWB8",
+    };
+
+    size_t numNames = sizeof(kNames) / sizeof(kNames[0]);
+
+    if (type < 0 || (size_t)type >= numNames) {
+        return "UNKNOWN";
+    } else {
+        return kNames[type];
+    }
+}
+
+static const char *amrFrameFormatString(OMX_AUDIO_AMRFRAMEFORMATTYPE type) {
+    static const char *kNames[] = {
+        "OMX_AUDIO_AMRFrameFormatConformance",
+        "OMX_AUDIO_AMRFrameFormatIF1",
+        "OMX_AUDIO_AMRFrameFormatIF2",
+        "OMX_AUDIO_AMRFrameFormatFSF",
+        "OMX_AUDIO_AMRFrameFormatRTPPayload",
+        "OMX_AUDIO_AMRFrameFormatITU",
+    };
+
+    size_t numNames = sizeof(kNames) / sizeof(kNames[0]);
+
+    if (type < 0 || (size_t)type >= numNames) {
+        return "UNKNOWN";
+    } else {
+        return kNames[type];
+    }
+}
 
 void OMXCodec::dumpPortStatus(OMX_U32 portIndex) {
     OMX_PARAM_PORTDEFINITIONTYPE def;
@@ -2153,6 +2202,20 @@ void OMXCodec::dumpPortStatus(OMX_U32 portIndex) {
                         ? "signed" : "unsigned");
 
                 printf("  ePCMMode = %s\n", audioPCMModeString(params.ePCMMode));
+            } else if (audioDef->eEncoding == OMX_AUDIO_CodingAMR) {
+                OMX_AUDIO_PARAM_AMRTYPE amr;
+                InitOMXParams(&amr);
+                amr.nPortIndex = portIndex;
+
+                err = mOMX->get_parameter(
+                        mNode, OMX_IndexParamAudioAmr, &amr, sizeof(amr));
+                CHECK_EQ(err, OK);
+
+                printf("  nChannels = %ld\n", amr.nChannels);
+                printf("  eAMRBandMode = %s\n",
+                        amrBandModeString(amr.eAMRBandMode));
+                printf("  eAMRFrameFormat = %s\n",
+                        amrFrameFormatString(amr.eAMRFrameFormat));
             }
 
             break;
@@ -2229,7 +2292,28 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                 // The codec-reported sampleRate is not reliable...
                 mOutputFormat->setInt32(kKeySampleRate, sampleRate);
             } else if (audio_def->eEncoding == OMX_AUDIO_CodingAMR) {
-                mOutputFormat->setCString(kKeyMIMEType, "audio/3gpp");
+                OMX_AUDIO_PARAM_AMRTYPE amr;
+                InitOMXParams(&amr);
+                amr.nPortIndex = kPortIndexOutput;
+
+                err = mOMX->get_parameter(
+                        mNode, OMX_IndexParamAudioAmr, &amr, sizeof(amr));
+                CHECK_EQ(err, OK);
+
+                CHECK_EQ(amr.nChannels, 1);
+                mOutputFormat->setInt32(kKeyChannelCount, 1);
+
+                if (amr.eAMRBandMode >= OMX_AUDIO_AMRBandModeNB0
+                    && amr.eAMRBandMode <= OMX_AUDIO_AMRBandModeNB7) {
+                    mOutputFormat->setCString(kKeyMIMEType, "audio/3gpp");
+                    mOutputFormat->setInt32(kKeySampleRate, 8000);
+                } else if (amr.eAMRBandMode >= OMX_AUDIO_AMRBandModeWB0
+                            && amr.eAMRBandMode <= OMX_AUDIO_AMRBandModeWB8) {
+                    mOutputFormat->setCString(kKeyMIMEType, "audio/amr-wb");
+                    mOutputFormat->setInt32(kKeySampleRate, 16000);
+                } else {
+                    CHECK(!"Unknown AMR band mode.");
+                }
             } else if (audio_def->eEncoding == OMX_AUDIO_CodingAAC) {
                 mOutputFormat->setCString(kKeyMIMEType, "audio/mp4a-latm");
             } else {
