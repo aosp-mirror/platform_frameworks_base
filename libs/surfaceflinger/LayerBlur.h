@@ -56,6 +56,9 @@ private:
     mutable bool    mAutoRefreshPending;
             nsecs_t mCacheAge;
     mutable GLuint  mTextureName;
+    mutable GLfloat mWidthScale;
+    mutable GLfloat mHeightScale;
+    mutable GLfloat mYOffset;
 };
 
 // ---------------------------------------------------------------------------
