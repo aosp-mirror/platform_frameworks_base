@@ -1974,5 +1974,8 @@
     <string name="wallpaper_binding_label">Wallpaper</string>
     <!-- Dialog title for user to select a different wallpaper from service list -->
     <string name="chooser_wallpaper">Change wallpaper</string>
-    
+
+    <!-- Do Not Translate: Alternate eri.xml -->
+    <string name="alternate_eri_file">/data/eri.xml</string>
+
 </resources>
