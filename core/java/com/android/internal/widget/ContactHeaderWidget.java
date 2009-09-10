@@ -366,7 +366,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     public void bindFromPhoneNumber(String number) {
         Cursor c = null;
         try {
-            c = mContentResolver.query(Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, number),
+            c = mContentResolver.query(
+                    Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number)),
                     PHONE_LOOKUP_PROJECTION, null, null, null);
             if (c != null && c.moveToFirst()) {
                 long contactId = c.getLong(PHONE_LOOKUP_CONTACT_ID_COLUMN_INDEX);

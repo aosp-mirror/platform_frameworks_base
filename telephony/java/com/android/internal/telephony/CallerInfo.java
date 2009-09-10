@@ -250,7 +250,7 @@ public class CallerInfo {
             }
         }
 
-        Uri contactUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, number);
+        Uri contactUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
 
         CallerInfo info = getCallerInfo(context, contactUri);
 
