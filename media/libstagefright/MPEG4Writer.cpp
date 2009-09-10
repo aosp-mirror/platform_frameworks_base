@@ -23,6 +23,7 @@
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/Utils.h>
 
@@ -351,7 +352,7 @@ void MPEG4Writer::Track::threadEntry() {
     sp<MetaData> meta = mSource->getFormat();
     const char *mime;
     meta->findCString(kKeyMIMEType, &mime);
-    is_mpeg4 = !strcasecmp(mime, "video/mp4v-es");
+    is_mpeg4 = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_MPEG4);
 
     MediaBuffer *buffer;
     while (!mDone && mSource->read(&buffer) == OK) {
@@ -528,9 +529,9 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
             mOwner->writeInt32(1);               // entry count
             if (is_audio) {
                 const char *fourcc = NULL;
-                if (!strcasecmp("audio/3gpp", mime)) {
+                if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mime)) {
                     fourcc = "samr";
-                } else if (!strcasecmp("audio/amr-wb", mime)) {
+                } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mime)) {
                     fourcc = "sawb";
                 } else {
                     LOGE("Unknown mime type '%s'.", mime);
@@ -555,9 +556,9 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                   mOwner->writeInt32(samplerate << 16);
                 mOwner->endBox();
             } else {
-                if (!strcasecmp("video/mp4v-es", mime)) {
+                if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
                     mOwner->beginBox("mp4v");
-                } else if (!strcasecmp("video/3gpp", mime)) {
+                } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
                     mOwner->beginBox("s263");
                 } else {
                     LOGE("Unknown mime type '%s'.", mime);
@@ -590,7 +591,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
 
                   CHECK(23 + mCodecSpecificDataSize < 128);
 
-                  if (!strcasecmp("video/mp4v-es", mime)) {
+                  if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
                       mOwner->beginBox("esds");
 
                         mOwner->writeInt32(0);           // version=0, flags=0
@@ -625,7 +626,7 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                         mOwner->write(kData2, sizeof(kData2));
 
                       mOwner->endBox();  // esds
-                  } else if (!strcasecmp("video/3gpp", mime)) {
+                  } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
                       mOwner->beginBox("d263");
 
                           mOwner->writeInt32(0);  // vendor

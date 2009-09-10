@@ -33,7 +33,12 @@ struct OMXCodec : public MediaSource,
     static sp<OMXCodec> Create(
             const sp<IOMX> &omx,
             const sp<MetaData> &meta, bool createEncoder,
-            const sp<MediaSource> &source);
+            const sp<MediaSource> &source,
+            const char *matchComponentName = NULL);
+
+    static void setComponentRole(
+            const sp<IOMX> &omx, IOMX::node_id node, bool isEncoder,
+            const char *mime);
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -205,6 +210,32 @@ private:
     OMXCodec(const OMXCodec &);
     OMXCodec &operator=(const OMXCodec &);
 };
+
+struct CodecProfileLevel {
+    OMX_U32 mProfile;
+    OMX_U32 mLevel;
+};
+
+struct CodecCapabilities {
+    String8 mComponentName;
+    Vector<CodecProfileLevel> mProfileLevels;
+};
+
+// Return a vector of componentNames with supported profile/level pairs
+// supporting the given mime type, if queryDecoders==true, returns components
+// that decode content of the given type, otherwise returns components
+// that encode content of the given type.
+// profile and level indications only make sense for h.263, mpeg4 and avc
+// video.
+// The profile/level values correspond to
+// OMX_VIDEO_H263PROFILETYPE, OMX_VIDEO_MPEG4PROFILETYPE,
+// OMX_VIDEO_AVCPROFILETYPE, OMX_VIDEO_H263LEVELTYPE, OMX_VIDEO_MPEG4LEVELTYPE
+// and OMX_VIDEO_AVCLEVELTYPE respectively.
+
+status_t QueryCodecs(
+        const sp<IOMX> &omx,
+        const char *mimeType, bool queryDecoders,
+        Vector<CodecCapabilities> *results);
 
 }  // namespace android
 
