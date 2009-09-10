@@ -36,6 +36,7 @@ import java.util.List;
  * VNode: standy by a vcard instance.
  * PropertyNode: standy by a property line of a card.
  */
+@Deprecated
 public class VDataBuilder implements VBuilder {
     static private String LOG_TAG = "VDATABuilder"; 
     

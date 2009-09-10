@@ -18,6 +18,7 @@ package android.syncml.pim;
 
 import java.util.ArrayList;
 
+@Deprecated
 public class VNode {
 
     public String VName;
