@@ -871,11 +871,10 @@ public class VCardComposer {
     }
 
     private boolean appendPostalsForDoCoMoInternal(final StringBuilder builder,
-            final List<ContentValues> contentValuesList, int preferedType) {
+            final List<ContentValues> contentValuesList, Integer preferedType) {
         for (ContentValues contentValues : contentValuesList) {
-            final int type = contentValues.getAsInteger(StructuredPostal.TYPE);
-            final String label = contentValues
-                    .getAsString(StructuredPostal.LABEL);
+            final Integer type = contentValues.getAsInteger(StructuredPostal.TYPE);
+            final String label = contentValues.getAsString(StructuredPostal.LABEL);
             if (type == preferedType) {
                 appendVCardPostalLine(builder, type, label, contentValues);
                 return true;
@@ -887,9 +886,8 @@ public class VCardComposer {
     private void appendPostalsForGeneric(final StringBuilder builder,
             final List<ContentValues> contentValuesList) {
         for (ContentValues contentValues : contentValuesList) {
-            final int type = contentValues.getAsInteger(StructuredPostal.TYPE);
-            final String label = contentValues
-                    .getAsString(StructuredPostal.LABEL);
+            final Integer type = contentValues.getAsInteger(StructuredPostal.TYPE);
+            final String label = contentValues.getAsString(StructuredPostal.LABEL);
             appendVCardPostalLine(builder, type, label, contentValues);
         }
     }
@@ -900,15 +898,10 @@ public class VCardComposer {
                 .get(Im.CONTENT_ITEM_TYPE);
         if (contentValuesList != null) {
             for (ContentValues contentValues : contentValuesList) {
-                int type = contentValues.getAsInteger(Im.PROTOCOL);
+                Integer protocol = contentValues.getAsInteger(Im.PROTOCOL);
                 String data = contentValues.getAsString(Im.DATA);
-                
-                Log.d("@@@", "Im information. protocol=\"" + type +
-                        "\", data=\"" + data + "\", protocol=\"" +
-                        contentValues.getAsString(Im.PROTOCOL) + "\", custom_protocol=\"" +
-                        contentValues.getAsString(Im.CUSTOM_PROTOCOL) + "\"");
 
-                if (type == Im.PROTOCOL_GOOGLE_TALK) {
+                if (protocol != null && protocol == Im.PROTOCOL_GOOGLE_TALK) {
                     if (VCardConfig.usesAndroidSpecificProperty(mVCardType)) {
                         appendVCardLine(builder, Constants.PROPERTY_X_GOOGLE_TALK, data);
                     }
@@ -1129,8 +1122,8 @@ public class VCardComposer {
         builder.append(VCARD_COL_SEPARATOR);
     }
 
-    private void appendVCardPostalLine(StringBuilder builder, int type,
-            String label, final ContentValues contentValues) {
+    private void appendVCardPostalLine(StringBuilder builder, Integer type, String label,
+            final ContentValues contentValues) {
         builder.append(VCARD_PROPERTY_ADR);
         builder.append(VCARD_ATTR_SEPARATOR);
 
@@ -1150,6 +1143,10 @@ public class VCardComposer {
             }
         }
 
+        if (type == null) {
+            type = StructuredPostal.TYPE_OTHER;
+        }
+
         boolean typeIsAppended = false;
         switch (type) {
         case StructuredPostal.TYPE_HOME:
@@ -1161,7 +1158,8 @@ public class VCardComposer {
             typeIsAppended = true;
             break;
         case StructuredPostal.TYPE_CUSTOM:
-            if (mUsesAndroidProperty && VCardUtils.containsOnlyAlphaDigitHyphen(label)){
+            if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
+                        && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
                 // We're not sure whether the label is valid in the spec ("IANA-token" in the vCard 3.1
                 // is unclear...)
                 // Just for safety, we add "X-" at the beggining of each label.
@@ -1216,17 +1214,21 @@ public class VCardComposer {
         builder.append(VCARD_COL_SEPARATOR);
     }
 
-    private void appendVCardEmailLine(StringBuilder builder, int type,
-            String label, String data) {
+    private void appendVCardEmailLine(StringBuilder builder, Integer type, String label, String data) {
         builder.append(VCARD_PROPERTY_EMAIL);
         builder.append(VCARD_ATTR_SEPARATOR);
 
+        if (type == null) {
+            type = Email.TYPE_OTHER;
+        }
+
         switch (type) {
         case Email.TYPE_CUSTOM:
-            if (label.equals(
-                    android.provider.Contacts.ContactMethodsColumns.MOBILE_EMAIL_TYPE_NAME)) {
+            if (android.provider.Contacts.ContactMethodsColumns.MOBILE_EMAIL_TYPE_NAME
+                        .equals(label)) {
                 builder.append(Constants.ATTR_TYPE_CELL);
-            } else if (mUsesAndroidProperty && VCardUtils.containsOnlyAlphaDigitHyphen(label)){
+            } else if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
+                        && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
                 builder.append("X-");
                 builder.append(label);
             } else {
@@ -1257,10 +1259,14 @@ public class VCardComposer {
         builder.append(VCARD_COL_SEPARATOR);
     }
 
-    private void appendVCardTelephoneLine(StringBuilder builder, int type,
-            String label, String encodedData) {
+    private void appendVCardTelephoneLine(StringBuilder builder, Integer type, String label,
+            String encodedData) {
         builder.append(VCARD_PROPERTY_TEL);
         builder.append(VCARD_ATTR_SEPARATOR);
+
+        if (type == null) {
+            type = Phone.TYPE_OTHER;
+        }
 
         switch (type) {
         case Phone.TYPE_HOME:
@@ -1295,8 +1301,8 @@ public class VCardComposer {
             builder.append(Constants.ATTR_TYPE_VOICE);
             break;
         case Phone.TYPE_CUSTOM:
-            if (mUsesAndroidProperty) {
-                VCardUtils.containsOnlyAlphaDigitHyphen(label);
+            if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
+                        && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
                 builder.append("X-" + label);
             } else {
                 // Just ignore the custom type.
@@ -1316,11 +1322,10 @@ public class VCardComposer {
     /**
      * Appends phone type string which may not be available in some devices.
      */
-    private void appendUncommonPhoneType(StringBuilder builder, int type) {
+    private void appendUncommonPhoneType(StringBuilder builder, Integer type) {
         if (mIsDoCoMo) {
             // The previous implementation for DoCoMo had been conservative
-            // about
-            // miscellaneous types.
+            // about miscellaneous types.
             builder.append(Constants.ATTR_TYPE_VOICE);
         } else {
             String phoneAttribute = VCardUtils.getPhoneAttributeString(type);

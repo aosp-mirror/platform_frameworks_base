@@ -75,7 +75,7 @@ public class VCardUtils {
         sPhoneTypesSetUnknownToContacts.add(Constants.ATTR_TYPE_VIDEO);
     }
     
-    public static String getPhoneAttributeString(int type) {
+    public static String getPhoneAttributeString(Integer type) {
         return sKnownPhoneTypesMap_ItoS.get(type);
     }
     
