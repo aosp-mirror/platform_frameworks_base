@@ -1456,8 +1456,10 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
         if (!TextUtils.isEmpty(summary)) {
             sb.append(summary).append(' ');
         }
-        // Drop the last space
-        sb.setLength(sb.length() - 1);
+        if (sb.length() > 0) {
+            // Drop the last space
+            sb.setLength(sb.length() - 1);
+        }
         return sb;
     }
 
