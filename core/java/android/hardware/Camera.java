@@ -37,6 +37,23 @@ import android.os.Message;
  * frames for encoding for video.
  * <p>There is no default constructor for this class. Use {@link #open()} to
  * get a Camera object.</p>
+ *
+ * <p>In order to use the device camera, you must declare the 
+ * {@link android.Manifest.permission#CAMERA} permission in your Android 
+ * Manifest. Also be sure to include the
+ * <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature></a>
+ * manifest element in order to declare camera features used by your application. 
+ * For example, if you use the camera and auto-focus feature, your Manifest 
+ * should include the following:</p>
+ * <pre> &lt;uses-permission android:name="android.permission.CAMERA" />
+ * &lt;uses-feature android:name="android.hardware.camera" />
+ * &lt;uses-feature android:name="android.hardware.camera.autofocus" /></pre>
+ *
+ * <p class="caution"><strong>Caution:</strong> Different Android-powered devices
+ * may have different hardware specifications, such as megapixel ratings and
+ * auto-focus capabilities. In order for your application to be compatible with
+ * more devices, you should not make assumptions about the device camera 
+ * specifications.</p>
  */
 public class Camera {
     private static final String TAG = "Camera";
@@ -179,10 +196,10 @@ public class Camera {
         /**
          * The callback that delivers the preview frames.
          *
-         * @param data The contents of the preview frame in {@link
-         *             android.hardware.Camera.Parameters#getPreviewFormat()}
-         *             format. If {@link
-         *             android.hardware.Camera.Parameters#setPreviewFormat(int)}
+         * @param data The contents of the preview frame in the format defined
+         *  by {@link android.graphics.PixelFormat}, which can be queried 
+         *  with {@link android.hardware.Camera.Parameters#getPreviewFormat()}.
+         *  If {@link android.hardware.Camera.Parameters#setPreviewFormat(int)}
          *             is never called, the default will be the YCbCr_420_SP
          *             (NV21) format.
          * @param camera The Camera service object.
@@ -323,6 +340,13 @@ public class Camera {
 
     /**
      * Handles the callback for the camera auto focus.
+     * <p>Devices that do not support auto-focus will receive a "fake" 
+     * callback to this interface. If your application needs auto-focus and 
+     * should not be installed on devices <em>without</em> auto-focus, you must
+     * declare that your app uses the
+     * {@code android.hardware.camera.autofocus} feature, in the 
+     * <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature></a>
+     * manifest element.</p>
      */
     public interface AutoFocusCallback
     {
@@ -343,7 +367,12 @@ public class Camera {
      * the camera does not support auto-focus, it is a no-op and {@link
      * AutoFocusCallback#onAutoFocus(boolean, Camera)} callback will be called
      * immediately.
-     *
+     * <p>If your application should not be installed
+     * on devices without auto-focus, you must declare that your application 
+     * uses auto-focus with the 
+     * <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature></a>
+     * manifest element.</p>
+     * 
      * @param cb the callback to run
      */
     public final void autoFocus(AutoFocusCallback cb)
@@ -874,11 +903,14 @@ public class Camera {
         }
 
         /**
-         * Sets the image format for preview pictures. If this is never called,
-         * the default will be the YCbCr_420_SP (NV21) format.
-         *
-         * @param pixel_format the desired preview picture format
-         *                     (<var>PixelFormat.YCbCr_420_SP (NV21)</var>,
+         * Sets the image format for preview pictures. 
+         * <p>If this is never called, the default format will be
+         * {@link android.graphics.PixelFormat#YCbCr_420_SP}, which
+         * uses the NV21 encoding format.</p>
+         * 
+         * @param pixel_format the desired preview picture format, defined
+         *   by one of the {@link android.graphics.PixelFormat} constants.
+         *   (E.g., <var>PixelFormat.YCbCr_420_SP</var> (default),
          *                      <var>PixelFormat.RGB_565</var>, or
          *                      <var>PixelFormat.JPEG</var>)
          * @see android.graphics.PixelFormat
@@ -896,9 +928,9 @@ public class Camera {
         /**
          * Returns the image format for preview pictures got from
          * {@link PreviewCallback}.
-         *
-         * @return the PixelFormat int representing the preview picture format
-         * @see android.graphics.PixelFormat
+         * 
+         * @return the {@link android.graphics.PixelFormat} int representing 
+         *         the preview picture format.
          */
         public int getPreviewFormat() {
             return pixelFormatForCameraFormat(get(KEY_PREVIEW_FORMAT));
