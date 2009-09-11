@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +56,27 @@ public final class BluetoothHeadset {
     private static final String TAG = "BluetoothHeadset";
     private static final boolean DBG = false;
 
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_STATE_CHANGED =
+            "android.bluetooth.headset.action.STATE_CHANGED";
+    /**
+     * TODO(API release): Consider incorporating as new state in
+     * HEADSET_STATE_CHANGED
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_AUDIO_STATE_CHANGED =
+            "android.bluetooth.headset.action.AUDIO_STATE_CHANGED";
+    public static final String EXTRA_STATE =
+            "android.bluetooth.headset.extra.STATE";
+    public static final String EXTRA_PREVIOUS_STATE =
+            "android.bluetooth.headset.extra.PREVIOUS_STATE";
+    public static final String EXTRA_AUDIO_STATE =
+            "android.bluetooth.headset.extra.AUDIO_STATE";
+
+    /**
+     * TODO(API release): Consider incorporating as new state in
+     * HEADSET_STATE_CHANGED
+     */
     private IBluetoothHeadset mService;
     private final Context mContext;
     private final ServiceListener mServiceListener;

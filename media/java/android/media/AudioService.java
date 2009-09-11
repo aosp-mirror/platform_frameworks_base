@@ -25,7 +25,6 @@ import android.content.IntentFilter;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothIntent;
 import android.bluetooth.BluetoothHeadset;
 
 import android.content.pm.PackageManager;
@@ -265,8 +264,8 @@ public class AudioService extends IAudioService.Stub {
         // Register for device connection intent broadcasts.
         IntentFilter intentFilter =
                 new IntentFilter(Intent.ACTION_HEADSET_PLUG);
-        intentFilter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
-        intentFilter.addAction(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION);
+        intentFilter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
+        intentFilter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
         context.registerReceiver(mReceiver, intentFilter);
 
     }
@@ -1372,10 +1371,10 @@ public class AudioService extends IAudioService.Stub {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
-                int state = intent.getIntExtra(BluetoothA2dp.SINK_STATE,
+            if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothA2dp.EXTRA_SINK_STATE,
                                                BluetoothA2dp.STATE_DISCONNECTED);
-                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothIntent.DEVICE);
+                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 String address = btDevice.getAddress();
                 boolean isConnected = (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) &&
                                        ((String)mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)).equals(address));
@@ -1395,27 +1394,23 @@ public class AudioService extends IAudioService.Stub {
                     mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP),
                             address);
                 }
-            } else if (action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION)) {
-                int state = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
+            } else if (action.equals(BluetoothHeadset.ACTION_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE,
                                                BluetoothHeadset.STATE_ERROR);
                 int device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO;
-                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothIntent.DEVICE);
+                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 String address = null;
-                int btClass = BluetoothClass.ERROR;
                 if (btDevice != null) {
                     address = btDevice.getAddress();
-                    btClass = btDevice.getBluetoothClass();
-                    if (BluetoothClass.Device.Major.getDeviceMajor(btClass) ==
-                                BluetoothClass.Device.Major.AUDIO_VIDEO) {
-                        switch (BluetoothClass.Device.getDevice(btClass)) {
+                    BluetoothClass btClass = btDevice.getBluetoothClass();
+                    if (btClass != null) {
+                        switch (btClass.getDeviceClass()) {
                         case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
                         case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
                             device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET;
                             break;
                         case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
                             device = AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT;
-                            break;
-                        default:
                             break;
                         }
                     }

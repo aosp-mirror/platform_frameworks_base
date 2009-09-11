@@ -221,9 +221,9 @@ public class BluetoothPbap {
      * devices. It tries to err on the side of false positives.
      * @return True if this device might support PBAP.
      */
-    public static boolean doesClassMatchSink(int btClass) {
+    public static boolean doesClassMatchSink(BluetoothClass btClass) {
         // TODO optimize the rule
-        switch (BluetoothClass.Device.getDevice(btClass)) {
+        switch (btClass.getDeviceClass()) {
         case BluetoothClass.Device.COMPUTER_DESKTOP:
         case BluetoothClass.Device.COMPUTER_LAPTOP:
         case BluetoothClass.Device.COMPUTER_SERVER:

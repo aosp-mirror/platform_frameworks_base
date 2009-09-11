@@ -25,7 +25,6 @@ package android.server;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothIntent;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothA2dp;
 import android.content.BroadcastReceiver;
@@ -79,7 +78,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             BluetoothDevice device =
-                    intent.getParcelableExtra(BluetoothIntent.DEVICE);
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
                                                BluetoothAdapter.ERROR);
@@ -91,19 +90,19 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                     onBluetoothDisable();
                     break;
                 }
-            } else if (action.equals(BluetoothIntent.BOND_STATE_CHANGED_ACTION)) {
-                int bondState = intent.getIntExtra(BluetoothIntent.BOND_STATE,
+            } else if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
+                int bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,
                                                    BluetoothDevice.ERROR);
                 switch(bondState) {
                 case BluetoothDevice.BOND_BONDED:
                     setSinkPriority(device, BluetoothA2dp.PRIORITY_AUTO);
                     break;
                 case BluetoothDevice.BOND_BONDING:
-                case BluetoothDevice.BOND_NOT_BONDED:
+                case BluetoothDevice.BOND_NONE:
                     setSinkPriority(device, BluetoothA2dp.PRIORITY_OFF);
                     break;
                 }
-            } else if (action.equals(BluetoothIntent.REMOTE_DEVICE_CONNECTED_ACTION)) {
+            } else if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
                 if (getSinkPriority(device) > BluetoothA2dp.PRIORITY_OFF &&
                         isSinkDevice(device)) {
                     // This device is a preferred sink. Make an A2DP connection
@@ -134,8 +133,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         mAdapter = (BluetoothAdapter) context.getSystemService(Context.BLUETOOTH_SERVICE);
 
         mIntentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        mIntentFilter.addAction(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
-        mIntentFilter.addAction(BluetoothIntent.REMOTE_DEVICE_CONNECTED_ACTION);
+        mIntentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         mContext.registerReceiver(mReceiver, mIntentFilter);
 
         mAudioDevices = new HashMap<BluetoothDevice, Integer>();
@@ -361,7 +360,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     public synchronized boolean setSinkPriority(BluetoothDevice device, int priority) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        if (!BluetoothDevice.checkBluetoothAddress(device.getAddress())) {
+        if (!BluetoothAdapter.checkBluetoothAddress(device.getAddress())) {
             return false;
         }
         return Settings.Secure.putInt(mContext.getContentResolver(),
@@ -411,10 +410,10 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             }
             mAudioDevices.put(device, state);
 
-            Intent intent = new Intent(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
-            intent.putExtra(BluetoothIntent.DEVICE, device);
-            intent.putExtra(BluetoothA2dp.SINK_PREVIOUS_STATE, prevState);
-            intent.putExtra(BluetoothA2dp.SINK_STATE, state);
+            Intent intent = new Intent(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
+            intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
+            intent.putExtra(BluetoothA2dp.EXTRA_PREVIOUS_SINK_STATE, prevState);
+            intent.putExtra(BluetoothA2dp.EXTRA_SINK_STATE, state);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
             if (DBG) log("A2DP state : device: " + device + " State:" + prevState + "->" + state);

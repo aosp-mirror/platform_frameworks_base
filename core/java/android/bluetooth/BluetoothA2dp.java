@@ -51,20 +51,21 @@ public final class BluetoothA2dp {
     private static final String TAG = "BluetoothA2dp";
     private static final boolean DBG = false;
 
-    /** int extra for SINK_STATE_CHANGED_ACTION */
-    public static final String SINK_STATE =
-        "android.bluetooth.a2dp.intent.SINK_STATE";
-    /** int extra for SINK_STATE_CHANGED_ACTION */
-    public static final String SINK_PREVIOUS_STATE =
-        "android.bluetooth.a2dp.intent.SINK_PREVIOUS_STATE";
+    /** int extra for ACTION_SINK_STATE_CHANGED */
+    public static final String EXTRA_SINK_STATE =
+        "android.bluetooth.a2dp.extra.SINK_STATE";
+    /** int extra for ACTION_SINK_STATE_CHANGED */
+    public static final String EXTRA_PREVIOUS_SINK_STATE =
+        "android.bluetooth.a2dp.extra.PREVIOUS_SINK_STATE";
 
     /** Indicates the state of an A2DP audio sink has changed.
-     *  This intent will always contain SINK_STATE, SINK_PREVIOUS_STATE and
-     *  BluetoothIntent.ADDRESS extras.
+     * This intent will always contain EXTRA_SINK_STATE,
+     * EXTRA_PREVIOUS_SINK_STATE and BluetoothDevice.EXTRA_DEVICE
+     * extras.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String SINK_STATE_CHANGED_ACTION =
-        "android.bluetooth.a2dp.intent.action.SINK_STATE_CHANGED";
+    public static final String ACTION_SINK_STATE_CHANGED =
+        "android.bluetooth.a2dp.action.SINK_STATE_CHANGED";
 
     public static final int STATE_DISCONNECTED = 0;
     public static final int STATE_CONNECTING   = 1;
