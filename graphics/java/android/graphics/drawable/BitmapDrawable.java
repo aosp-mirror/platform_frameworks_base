@@ -56,7 +56,8 @@ import java.io.IOException;
  */
 public class BitmapDrawable extends Drawable {
 
-    private static final int DEFAULT_PAINT_FLAGS = Paint.FILTER_BITMAP_FLAG;
+    private static final int DEFAULT_PAINT_FLAGS =
+            Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG;
     private BitmapState mBitmapState;
     private Bitmap mBitmap;
     private final Rect mDstRect = new Rect();   // Gravity.apply() sets this
