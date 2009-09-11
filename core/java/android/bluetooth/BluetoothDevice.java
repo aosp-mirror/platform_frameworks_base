@@ -250,7 +250,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide */
     public static final int BOND_SUCCESS = 0;
     /** A bond attempt failed because pins did not match, or remote device did
-     * not respond to pin request in time 
+     * not respond to pin request in time
      * @hide */
     public static final int UNBOND_REASON_AUTH_FAILED = 1;
     /** A bond attempt failed because the other side explicilty rejected
@@ -266,9 +266,15 @@ public final class BluetoothDevice implements Parcelable {
     /** A bond attempt failed because a discovery is in progress
      * @hide */
     public static final int UNBOND_REASON_DISCOVERY_IN_PROGRESS = 5;
+    /** A bond attempt failed because of authentication timeout
+     * @hide */
+    public static final int UNBOND_REASON_AUTH_TIMEOUT = 6;
+    /** A bond attempt failed because of repeated attempts
+     * @hide */
+    public static final int UNBOND_REASON_REPEATED_ATTEMPTS = 7;
     /** An existing bond was explicitly revoked
      * @hide */
-    public static final int UNBOND_REASON_REMOVED = 6;
+    public static final int UNBOND_REASON_REMOVED = 8;
 
     /** The user will be prompted to enter a pin
      * @hide */
@@ -278,7 +284,13 @@ public final class BluetoothDevice implements Parcelable {
     public static final int PAIRING_VARIANT_PASSKEY = 1;
     /** The user will be prompted to confirm the passkey displayed on the screen
      * @hide */
-    public static final int PAIRING_VARIANT_CONFIRMATION = 2;
+    public static final int PAIRING_VARIANT_PASSKEY_CONFIRMATION = 2;
+    /** The user will be prompted to accept or deny the incoming pairing request
+     * @hide */
+    public static final int PAIRING_VARIANT_CONSENT = 3;
+    /** The user will be prompted to enter the passkey displayed on remote device
+     * @hide */
+    public static final int PAIRING_VARIANT_DISPLAY_PASSKEY = 4;
 
     private static IBluetooth sService;  /* Guarenteed constant after first object constructed */
 

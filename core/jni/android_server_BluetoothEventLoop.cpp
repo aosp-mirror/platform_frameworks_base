@@ -52,7 +52,9 @@ static jmethodID method_onGetDeviceServiceChannelResult;
 
 static jmethodID method_onRequestPinCode;
 static jmethodID method_onRequestPasskey;
-static jmethodID method_onRequestConfirmation;
+static jmethodID method_onRequestPasskeyConfirmation;
+static jmethodID method_onRequestPairingConsent;
+static jmethodID method_onDisplayPasskey;
 static jmethodID method_onAgentAuthorize;
 static jmethodID method_onAgentCancel;
 
@@ -98,7 +100,11 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
                                                "(Ljava/lang/String;I)V");
     method_onRequestPasskey = env->GetMethodID(clazz, "onRequestPasskey",
                                                "(Ljava/lang/String;I)V");
-    method_onRequestConfirmation = env->GetMethodID(clazz, "onRequestConfirmation",
+    method_onRequestPasskeyConfirmation = env->GetMethodID(clazz, "onRequestPasskeyConfirmation",
+                                               "(Ljava/lang/String;II)V");
+    method_onRequestPairingConsent = env->GetMethodID(clazz, "onRequestPairingConsent",
+                                               "(Ljava/lang/String;I)V");
+    method_onDisplayPasskey = env->GetMethodID(clazz, "onDisplayPasskey",
                                                "(Ljava/lang/String;II)V");
 
     field_mNativeData = env->GetFieldID(clazz, "mNativeData", "I");
@@ -230,7 +236,7 @@ static jboolean setUpEventLoop(native_data_t *nat) {
 
 
 const char * get_adapter_path(DBusConnection *conn) {
-    DBusMessage *msg, *reply = NULL;
+    DBusMessage *msg = NULL, *reply = NULL;
     DBusError err;
     const char *device_path = NULL;
     int attempt = 0;
@@ -856,9 +862,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
 
     if (dbus_message_is_method_call(msg,
             "org.bluez.Agent", "Cancel")) {
-
         env->CallVoidMethod(nat->me, method_onAgentCancel);
-
         // reply
         DBusMessage *reply = dbus_message_new_method_return(msg);
         if (!reply) {
@@ -939,6 +943,24 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
                                        int(msg));
         goto success;
     } else if (dbus_message_is_method_call(msg,
+            "org.bluez.Agent", "DisplayPasskey")) {
+        char *object_path;
+        uint32_t passkey;
+        if (!dbus_message_get_args(msg, NULL,
+                                   DBUS_TYPE_OBJECT_PATH, &object_path,
+                                   DBUS_TYPE_UINT32, &passkey,
+                                   DBUS_TYPE_INVALID)) {
+            LOGE("%s: Invalid arguments for RequestPasskey() method", __FUNCTION__);
+            goto failure;
+        }
+
+        dbus_message_ref(msg);  // increment refcount because we pass to java
+        env->CallVoidMethod(nat->me, method_onDisplayPasskey,
+                                       env->NewStringUTF(object_path),
+                                       passkey,
+                                       int(msg));
+        goto success;
+    } else if (dbus_message_is_method_call(msg,
             "org.bluez.Agent", "RequestConfirmation")) {
         char *object_path;
         uint32_t passkey;
@@ -951,9 +973,24 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         }
 
         dbus_message_ref(msg);  // increment refcount because we pass to java
-        env->CallVoidMethod(nat->me, method_onRequestConfirmation,
+        env->CallVoidMethod(nat->me, method_onRequestPasskeyConfirmation,
                                        env->NewStringUTF(object_path),
                                        passkey,
+                                       int(msg));
+        goto success;
+    } else if (dbus_message_is_method_call(msg,
+            "org.bluez.Agent", "RequestPairingConsent")) {
+        char *object_path;
+        if (!dbus_message_get_args(msg, NULL,
+                                   DBUS_TYPE_OBJECT_PATH, &object_path,
+                                   DBUS_TYPE_INVALID)) {
+            LOGE("%s: Invalid arguments for RequestPairingConsent() method", __FUNCTION__);
+            goto failure;
+        }
+
+        dbus_message_ref(msg);  // increment refcount because we pass to java
+        env->CallVoidMethod(nat->me, method_onRequestPairingConsent,
+                                       env->NewStringUTF(object_path),
                                        int(msg));
         goto success;
     } else if (dbus_message_is_method_call(msg,
@@ -992,6 +1029,8 @@ success:
 #define BOND_RESULT_AUTH_CANCELED 3
 #define BOND_RESULT_REMOTE_DEVICE_DOWN 4
 #define BOND_RESULT_DISCOVERY_IN_PROGRESS 5
+#define BOND_RESULT_AUTH_TIMEOUT 6
+#define BOND_RESULT_REPEATED_ATTEMPTS 7
 
 void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *n) {
     LOGV(__FUNCTION__);
@@ -1037,6 +1076,12 @@ void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *n) {
                    !strcmp(err.message, "Discover in progress")) {
             LOGV("... error = %s (%s)\n", err.name, err.message);
             result = BOND_RESULT_DISCOVERY_IN_PROGRESS;
+        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.RepeatedAttempts")) {
+            LOGV("... error = %s (%s)\n", err.name, err.message);
+            result = BOND_RESULT_REPEATED_ATTEMPTS;
+        } else if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationTimeout")) {
+            LOGV("... error = %s (%s)\n", err.name, err.message);
+            result = BOND_RESULT_AUTH_TIMEOUT;
         } else {
             LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
             result = BOND_RESULT_ERROR;

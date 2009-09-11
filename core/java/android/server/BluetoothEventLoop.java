@@ -17,8 +17,8 @@
 package android.server;
 
 import android.bluetooth.BluetoothA2dp;
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
@@ -53,6 +53,7 @@ class BluetoothEventLoop {
 
     private static final int EVENT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 1;
     private static final int EVENT_RESTART_BLUETOOTH = 2;
+    private static final int EVENT_PAIRING_CONSENT_DELAYED_ACCEPT = 3;
 
     // The time (in millisecs) to delay the pairing attempt after the first
     // auto pairing attempt fails. We use an exponential delay with
@@ -67,9 +68,10 @@ class BluetoothEventLoop {
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            String address = null;
             switch (msg.what) {
             case EVENT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY:
-                String address = (String)msg.obj;
+                address = (String)msg.obj;
                 if (address != null) {
                     mBluetoothService.createBond(address);
                     return;
@@ -77,6 +79,12 @@ class BluetoothEventLoop {
                 break;
             case EVENT_RESTART_BLUETOOTH:
                 mBluetoothService.restart();
+                break;
+            case EVENT_PAIRING_CONSENT_DELAYED_ACCEPT:
+                address = (String)msg.obj;
+                if (address != null) {
+                    mBluetoothService.setPairingConfirmation(address, true);
+                }
                 break;
             }
         }
@@ -239,6 +247,7 @@ class BluetoothEventLoop {
                 addDevice(address, properties);
             }
         }
+        mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDING);
         return;
     }
 
@@ -390,7 +399,32 @@ class BluetoothEventLoop {
         return address;
     }
 
-    private void onRequestConfirmation(String objectPath, int passkey, int nativeData) {
+    private void onRequestPairingConsent(String objectPath, int nativeData) {
+        String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
+        if (address == null) return;
+
+        /* The link key will not be stored if the incoming request has MITM
+         * protection switched on. Unfortunately, some devices have MITM
+         * switched on even though their capabilities are NoInputNoOutput,
+         * so we may get this request many times. Also if we respond immediately,
+         * the other end is unable to handle it. Delay sending the message.
+         */
+        if (mBluetoothService.getBondState().getBondState(address) == BluetoothDevice.BOND_BONDED) {
+            Message message = mHandler.obtainMessage(EVENT_PAIRING_CONSENT_DELAYED_ACCEPT);
+            message.obj = address;
+            mHandler.sendMessageDelayed(message, 1500);
+            return;
+        }
+
+        Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
+        intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
+                        BluetoothDevice.PAIRING_VARIANT_CONSENT);
+        mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        return;
+    }
+
+    private void onRequestPasskeyConfirmation(String objectPath, int passkey, int nativeData) {
         String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
         if (address == null) return;
 
@@ -398,7 +432,7 @@ class BluetoothEventLoop {
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothDevice.EXTRA_PASSKEY, passkey);
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
-                BluetoothDevice.PAIRING_VARIANT_CONFIRMATION);
+                BluetoothDevice.PAIRING_VARIANT_PASSKEY_CONFIRMATION);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
         return;
     }
@@ -445,6 +479,18 @@ class BluetoothEventLoop {
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT, BluetoothDevice.PAIRING_VARIANT_PIN);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
         return;
+    }
+
+    private void onDisplayPasskey(String objectPath, int passkey, int nativeData) {
+        String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
+        if (address == null) return;
+
+        Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_REQUEST);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
+        intent.putExtra(BluetoothDevice.EXTRA_PASSKEY, passkey);
+        intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
+                        BluetoothDevice.PAIRING_VARIANT_DISPLAY_PASSKEY);
+        mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
     }
 
     private boolean onAgentAuthorize(String objectPath, String deviceUuid) {
