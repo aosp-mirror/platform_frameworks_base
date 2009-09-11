@@ -1162,6 +1162,8 @@
   <public type="attr" name="supportsUploading" />
   <public type="attr" name="killAfterRestore" />
   <public type="attr" name="restoreNeedsApplication" />
+  <public type="attr" name="smallIcon" />
+  <public type="attr" name="accountPreferences" />
 
   <public type="style" name="Theme.Wallpaper" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar" />
