@@ -45,6 +45,7 @@ static jmethodID method_onDeviceFound;
 static jmethodID method_onDeviceDisappeared;
 static jmethodID method_onDeviceCreated;
 static jmethodID method_onDeviceRemoved;
+static jmethodID method_onDeviceDisconnectRequested;
 
 static jmethodID method_onCreatePairedDeviceResult;
 static jmethodID method_onGetDeviceServiceChannelResult;
@@ -84,6 +85,8 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
                                                   "(Ljava/lang/String;)V");
     method_onDeviceCreated = env->GetMethodID(clazz, "onDeviceCreated", "(Ljava/lang/String;)V");
     method_onDeviceRemoved = env->GetMethodID(clazz, "onDeviceRemoved", "(Ljava/lang/String;)V");
+    method_onDeviceDisconnectRequested = env->GetMethodID(clazz, "onDeviceDisconnectRequested",
+                                                        "(Ljava/lang/String;)V");
 
     method_onCreatePairedDeviceResult = env->GetMethodID(clazz, "onCreatePairedDeviceResult",
                                                          "(Ljava/lang/String;I)V");
@@ -814,6 +817,14 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                             env->NewStringUTF(remote_device_path),
                             str_array);
         } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+        goto success;
+    } else if (dbus_message_is_signal(msg,
+                                      "org.bluez.Device",
+                                      "DisconnectRequested")) {
+        const char *remote_device_path = dbus_message_get_path(msg);
+        env->CallVoidMethod(nat->me,
+                            method_onDeviceDisconnectRequested,
+                            env->NewStringUTF(remote_device_path));
         goto success;
     }
 
