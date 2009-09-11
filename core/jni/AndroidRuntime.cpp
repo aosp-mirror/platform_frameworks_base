@@ -750,6 +750,18 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         opt.optionString = "-Xjitprofile";
         mOptions.add(opt);
     }
+
+    /*
+     * Disable optimizations by setting the corresponding bit to 1.
+     */
+    char jitOptBuf[sizeof("-Xjitdisableopt:") + PROPERTY_VALUE_MAX];
+    property_get("dalvik.vm.jit.disableopt", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        strcpy(jitOptBuf, "-Xjitdisableopt:");
+        strcat(jitOptBuf, propBuf);
+        opt.optionString = jitOptBuf;
+        mOptions.add(opt);
+    }
 #endif
 
     if (executionMode == kEMIntPortable) {
