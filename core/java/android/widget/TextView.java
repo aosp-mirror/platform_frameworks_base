@@ -732,7 +732,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         } else if (digits != null) {
             mInput = DigitsKeyListener.getInstance(digits.toString());
-            mInputType = inputType;
+            // If no input type was specified, we will default to generic
+            // text, since we can't tell the IME about the set of digits
+            // that was selected.
+            mInputType = inputType != EditorInfo.TYPE_NULL
+                    ? inputType : EditorInfo.TYPE_CLASS_TEXT;
         } else if (inputType != EditorInfo.TYPE_NULL) {
             setInputType(inputType, true);
             singleLine = (inputType&(EditorInfo.TYPE_MASK_CLASS
