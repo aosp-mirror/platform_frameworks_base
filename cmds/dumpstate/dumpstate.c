@@ -216,11 +216,9 @@ int main(int argc, char *argv[]) {
     } else
         vibrate_fd = -1;
 
-#if 0
     /* switch to non-root user and group */
     setgroups(sizeof(groups)/sizeof(groups[0]), groups);
     setuid(AID_SHELL);
-#endif
 
     /* make it safe to use both printf and STDOUT_FILENO */ 
     setvbuf(stdout, 0, _IONBF, 0);
