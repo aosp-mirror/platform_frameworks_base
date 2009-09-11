@@ -51,10 +51,6 @@ public:
     static const char* const typeID;
     virtual char const* getTypeID() const { return typeID; }
     virtual uint32_t getTypeInfo() const { return typeInfo; }
-
-    
-    SharedBufferServer*     lcblk;
-
     
                  Layer(SurfaceFlinger* flinger, DisplayID display,
                          const sp<Client>& client, int32_t i);
@@ -88,6 +84,8 @@ private:
         return mBuffers[mFrontBufferIndex];
     }
  
+    virtual void onRemoved();
+
     void reloadTexture(const Region& dirty);
 
     sp<SurfaceBuffer> requestBuffer(int index, int usage);
