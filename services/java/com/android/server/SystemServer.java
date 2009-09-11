@@ -43,6 +43,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.accounts.AccountManagerService;
 
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -291,6 +292,14 @@ class ServerThread extends Thread {
             if (INCLUDE_DEMO) {
                 Log.i(TAG, "Installing demo data...");
                 (new DemoThread(context)).start();
+            }
+
+            try {
+                Log.i(TAG, "DropBox Service");
+                ServiceManager.addService("dropbox",
+                        new DropBoxService(context, new File("/data/system/dropbox")));
+            } catch (Throwable e) {
+                Log.e(TAG, "Failure starting DropBox Service", e);
             }
 
             try {
