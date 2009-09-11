@@ -100,8 +100,7 @@ that it supports</li>
 <li>It lets applications describe the framework API revision that they
 require</li>
 <li>It lets the system negotiate the installation of applications on the user's
-device, such that version-incompatible applications are not installed on a
-user's device</li>
+device, such that version-incompatible applications are not installed.</li>
 </ul>
 
 <p>Each Android platform version stores its API Level identifier internally, in
@@ -137,7 +136,7 @@ must be less than or equal to the system's API Level integer. If not declared,
 the system assumes that the application requires API Level 1. </li>
 <li>If a <code>android:maxSdkVersion</code> attribute is declared, its value
 must be equal to or greater than the system's API Level integer. 
-in the system itself. If not declared, the system assumes that the application
+If not declared, the system assumes that the application
 has no maximum API Level. </li>
 </ul>
 
@@ -154,7 +153,7 @@ element might look like this: </p>
 <code>android:minSdkVersion</code> is to tell the Android system that it is
 using APIs that were <em>introduced</em> in the API Level specified. If the
 application were to be somehow installed on a platform with a lower API Level,
-then it would crash at run-time when it tries to access APIs that don't exist.
+then it would crash at run-time when it tried to access APIs that don't exist.
 The system prevents such an outcome by not allowing the application to be
 installed if the lowest API Level it requires is higher than that of the
 platform version on the target device.</p>
@@ -194,7 +193,7 @@ receive over-the-air (OTA) system updates. The user may install your
 application and use it successfully, then later receive an OTA update to a new
 version of the Android platform. Once the update is installed, your application
 will run in a new run-time version of the environment, but one that has the API
-and system capabilities that it depends on. </p>
+and system capabilities that your application depends on. </p>
 
 <p>In some cases, changes <em>below</em> the API, such those in the underlying
 system itself, may affect your application when it is run in the new
@@ -222,8 +221,8 @@ unable to run on those platforms.</p>
 <p>Although it's unlikely that an Android-powered device would be downgraded to
 a previous version of the platform, it's important to realize that there are
 likely to be many devices in the field that run earlier versions of the
-platform. Even among devices that receive OTA updates, some might lag and not
-receive an update for a significant amount of time. </p>
+platform. Even among devices that receive OTA updates, some might lag and
+might not receive an update for a significant amount of time. </p>
 
 <h3 id="platform">Selecting a platform version and API Level</h3>
 
@@ -285,39 +284,32 @@ you are using a physical device for testing, ensure that you know the API Level
 of the Android platform it runs. See the table at the top of this document for
 a list of platform versions and their API Levels. </p>
 
-<!--
-The Framework API makeup: the API available in a specific platform version is
-made up of API parts introduced in previous versions, plus some parts that are
-new.
--->
 
 <h2 id="filtering">Filtering the Reference Documentation by API Level</h2>
 
 <p>Reference documentation pages on the Android Developers site offer a "Filter
-by API Level" control in the top-right area of each page. </p>
+by API Level" control in the top-right area of each page. You can use the 
+control to show documentation only for parts of the API that are actually 
+accessible to your application, based on the API Level that it specifies in 
+the <code>android:minSdkVersion</code> attribute of its manifest file. </p>
 
-<p>The "Filter by API Level" lets you show documentation only for parts of the
-API that are actually accessible to your application, based on the API Level
-that it specifies in the <code>minSdkVersion</code> attribute in its manifest 
-file </p>
+<p>To use filtering, set the control to the same API Level as that specified
+by your application. Notice that APIs introduced in a later API Level are 
+then grayed out and their content is masked, since they would not be
+accessible to your application. </p>
 
-<p>When you filter the reference documentation by an API level, only the APIs
-available at that API level are shown. APIs introduced in a later API level are
-grayed out and their content is masked, since they would not be accessible to
-your application. </p>
-
-<p>Note that filtering by API Level in the documentation does not provide a view
-of what is new or introduced in each API Level. Filtering simply provides a way
+<p>Filtering by API Level in the documentation does not provide a view
+of what is new or introduced in each API Level &mdash; it simply provides a way
 to view the entire API associated with a given API Level, while excluding API
 elements introduced in later API Levels.</p>
 
 <p>By default, API Level filtering is enabled and set to show the latest API
-Level. If you do not want to use filtering reference documentation, select the
-highest available API Level.</p>
+Level. If you do not want to use filtering reference documentation, 
+simply select the highest available API Level. </p>
 
-<p>Note that the reference documentation for API elements also specifies the API
-Level at which the element was introduced. The API Level for packages and
-classes is specified as "Since &lt;api level&gt;" at the top-right corner of the
-content area on each documentation page. The API Level for each class member is
-specified in the member's detailed description section header, at the right
-margin. </p>
+<p>Also note that the reference documentation for individual API elements
+specifies the API Level at which the elements were introduced. The API Level 
+for packages and classes is specified as "Since &lt;api level&gt;" at the 
+top-right corner of the content area on each documentation page. The API Level 
+for class members is specified in their detailed description headers, 
+at the right margin. </p>

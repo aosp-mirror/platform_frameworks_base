@@ -219,7 +219,7 @@ hardware capabilities. If you find dependencies, you can design around them by
 building in alternate support or graceful degradation, or you can specify them 
 as hardware requirements in a 
 <a href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code>.</a>
-element in the application's manifest file. Also see the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code>
+element in the application's manifest file. Also see the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a>
 manifest element, which lets your application declare a requirement for 
 specific features, such as an OpenGL ES version or a camera that has 
 autofocus capability.
@@ -258,7 +258,7 @@ AVDs that emulate different screen resolutions and densities. Also note that,
 starting with Android 1.6, the platform provides a Compatibility Mode that
 automatically scales the UI of applications if they do not explicitly indicate
 support for the current screen in the 
-<a href="{@docRoot}guide/topics/manifest/supports-screen-element.html"><code>&lt;supports-screen&gt;</code>
+<a href="{@docRoot}guide/topics/manifest/supports-screen-element.html"><code>&lt;supports-screen&gt;</code></a>
 element in their manifest files. As part of testing, you should evaluate how
 your application is displayed in Compatibility Mode on different screens. </p>
   </li>
