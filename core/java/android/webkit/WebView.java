@@ -2049,12 +2049,9 @@ public class WebView extends AbsoluteLayout
     protected int computeHorizontalScrollRange() {
         if (mDrawHistory) {
             return mHistoryWidth;
-        } else if (mLastWidthSent == mContentWidth) {
-            // special case to avoid rounding error. Otherwise we may get a
-            // faked scrollbar sometimes.
-            return getViewWidth();
         } else {
-            return contentToViewDimension(mContentWidth);
+            // to avoid rounding error caused unnecessary scrollbar, use floor
+            return (int) Math.floor(mContentWidth * mActualScale);
         }
     }
 
@@ -2066,18 +2063,8 @@ public class WebView extends AbsoluteLayout
         if (mDrawHistory) {
             return mHistoryHeight;
         } else {
-            int height;
-            // special case to avoid rounding error. Otherwise we may get a
-            // faked scrollbar sometimes.
-            if (mLastHeightSent == mContentHeight) {
-                height = getViewHeight();
-            } else {
-                height = contentToViewDimension(mContentHeight);
-            }
-            if (mFindIsUp) {
-                height += FIND_HEIGHT;
-            }
-            return height;
+            // to avoid rounding error caused unnecessary scrollbar, use floor
+            return (int) Math.floor(mContentHeight * mActualScale);
         }
     }
 
@@ -4582,8 +4569,7 @@ public class WebView extends AbsoluteLayout
     }
 
     private int computeMaxScrollY() {
-        int maxContentH = contentToViewDimension(mContentHeight)
-                          + getTitleHeight();
+        int maxContentH = computeVerticalScrollRange() + getTitleHeight();
         return Math.max(maxContentH - getHeight(), 0);
     }
 
@@ -5023,8 +5009,8 @@ public class WebView extends AbsoluteLayout
         int measuredWidth = widthSize;
 
         // Grab the content size from WebViewCore.
-        int contentHeight = Math.round(mContentHeight * mActualScale);
-        int contentWidth = Math.round(mContentWidth * mActualScale);
+        int contentHeight = contentToViewDimension(mContentHeight);
+        int contentWidth = contentToViewDimension(mContentWidth);
 
 //        Log.d(LOGTAG, "------- measure " + heightMode);
 
