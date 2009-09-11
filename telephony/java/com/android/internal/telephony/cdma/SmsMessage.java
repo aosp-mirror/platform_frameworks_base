@@ -424,12 +424,9 @@ public class SmsMessage extends SmsMessageBase {
         return (status << 16);
     }
 
-    /**
-     *  Note: This function is a GSM specific functionality which is not supported in CDMA mode.
-     */
+    /** Return true iff the bearer data message type is DELIVERY_ACK. */
     public boolean isStatusReportMessage() {
-        Log.w(LOG_TAG, "isStatusReportMessage: is not supported in CDMA mode.");
-        return false;
+        return (mBearerData.messageType == BearerData.MESSAGE_TYPE_DELIVERY_ACK);
     }
 
     /**
@@ -548,17 +545,6 @@ public class SmsMessage extends SmsMessageBase {
             messageBody = mBearerData.userData.payloadStr;
         }
 
-        // TP-Message-Type-Indicator (See 3GPP2 C.S0015-B, v2, 4.5.1)
-        switch (mBearerData.messageType) {
-        case BearerData.MESSAGE_TYPE_USER_ACK:
-        case BearerData.MESSAGE_TYPE_READ_ACK:
-        case BearerData.MESSAGE_TYPE_DELIVER:
-        case BearerData.MESSAGE_TYPE_DELIVERY_ACK:
-            break;
-        default:
-            throw new RuntimeException("Unsupported message type: " + mBearerData.messageType);
-        }
-
         if (originatingAddress != null) {
             originatingAddress.address = new String(originatingAddress.origBytes);
             if (Config.LOGV) Log.v(LOG_TAG, "SMS originating address: "
@@ -571,11 +557,26 @@ public class SmsMessage extends SmsMessageBase {
 
         if (Config.LOGD) Log.d(LOG_TAG, "SMS SC timestamp: " + scTimeMillis);
 
-        // TODO(Teleca): do we really want this test to occur only for DELIVERY_ACKs?
-        if ((mBearerData.messageType == BearerData.MESSAGE_TYPE_DELIVERY_ACK) &&
-                (mBearerData.errorClass != BearerData.ERROR_UNDEFINED)) {
-            status = mBearerData.errorClass << 8;
-            status |= mBearerData.messageStatus;
+        // Message Type (See 3GPP2 C.S0015-B, v2, 4.5.1)
+        if (mBearerData.messageType == BearerData.MESSAGE_TYPE_DELIVERY_ACK) {
+            // The BearerData MsgStatus subparameter should only be
+            // included for DELIVERY_ACK messages.  If it occurred for
+            // other messages, it would be unclear what the status
+            // being reported refers to.  The MsgStatus subparameter
+            // is primarily useful to indicate error conditions -- a
+            // message without this subparameter is assumed to
+            // indicate successful delivery (status == 0).
+            if (! mBearerData.messageStatusSet) {
+                Log.d(LOG_TAG, "DELIVERY_ACK message without msgStatus (" +
+                        (userData == null ? "also missing" : "does have") +
+                        " userData).");
+                status = 0;
+            } else {
+                status = mBearerData.errorClass << 8;
+                status |= mBearerData.messageStatus;
+            }
+        } else if (mBearerData.messageType != BearerData.MESSAGE_TYPE_DELIVER) {
+            throw new RuntimeException("Unsupported message type: " + mBearerData.messageType);
         }
 
         if (messageBody != null) {

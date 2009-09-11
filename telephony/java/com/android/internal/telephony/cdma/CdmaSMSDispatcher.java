@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -73,6 +74,23 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         Log.d(TAG, "handleStatusReport is a special GSM function, should never be called in CDMA!");
     }
 
+    private void handleCdmaStatusReport(SmsMessage sms) {
+        for (int i = 0, count = deliveryPendingList.size(); i < count; i++) {
+            SmsTracker tracker = deliveryPendingList.get(i);
+            if (tracker.mMessageRef == sms.messageRef) {
+                // Found it.  Remove from list and broadcast.
+                deliveryPendingList.remove(i);
+                PendingIntent intent = tracker.mDeliveryIntent;
+                Intent fillIn = new Intent();
+                fillIn.putExtra("pdu", sms.getPdu());
+                try {
+                    intent.send(mContext, Activity.RESULT_OK, fillIn);
+                } catch (CanceledException ex) {}
+                break;  // Only expect to see one tracker matching this message.
+            }
+        }
+    }
+
     /** {@inheritDoc} */
     protected int dispatchMessage(SmsMessageBase smsb) {
 
@@ -104,6 +122,11 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             editor.putInt(CDMAPhone.VM_COUNT_CDMA, voicemailCount);
             editor.commit();
             ((CDMAPhone) mPhone).updateMessageWaitingIndicator(voicemailCount);
+            handled = true;
+        } else if (((SmsEnvelope.TELESERVICE_WMT == teleService) ||
+                (SmsEnvelope.TELESERVICE_WEMT == teleService)) &&
+                sms.isStatusReportMessage()) {
+            handleCdmaStatusReport(sms);
             handled = true;
         } else if ((sms.getUserData() == null)) {
             if (Config.LOGD) {
@@ -354,8 +377,12 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             uData.payloadStr = parts.get(i);
             uData.userDataHeader = smsHeader;
 
+            /* By setting the statusReportRequested bit only for the
+             * last message fragment, this will result in only one
+             * callback to the sender when that last fragment delivery
+             * has been acknowledged. */
             SmsMessage.SubmitPdu submitPdu = SmsMessage.getSubmitPdu(destAddr,
-                    uData, deliveryIntent != null);
+                    uData, (deliveryIntent != null) && (i == (msgCount - 1)));
 
             sendSubmitPdu(submitPdu, sentIntent, deliveryIntent);
         }
