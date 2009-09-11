@@ -5,7 +5,8 @@ sdk.date=September 2009
 
 
 <style type="text/css">
-#jd-content div.screenshot {
+#jd-content div.screenshot,
+#jd-content div.video {
   float:right;
   clear:right;
   padding:15px 70px;
@@ -13,10 +14,24 @@ sdk.date=September 2009
   font-weight:bold;
   line-height:1.7em;
 }
+#jd-content div.video {
+  padding-top:0;
+  margin-top:-15px;
+}
 #jd-content div.screenshot img {
   margin:0;
 }
 </style>
+
+<div class="video">
+<object width="293" height="180">
+<param name="movie" value="http://www.youtube.com/v/MBRFkLKRwFw&hl=en&fs=1&"></param>
+<param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param>
+<embed src="http://www.youtube.com/v/MBRFkLKRwFw&hl=en&fs=1&" type="application/x-shockwave-flash" 
+allowscriptaccess="always" allowfullscreen="true" width="293" height="180"></embed>
+</object>
+</div>
+
 
 <p>The Android 1.6 platform introduces new features for users and developers. 
 This page provides an overview of some new features and technologies.</p>
@@ -29,7 +44,7 @@ This page provides an overview of some new features and technologies.</p>
 
 
     
-<h2 id="UserFeatures">New User Features</h2>
+<h2 id="UserFeatures" style="clear:right">New User Features</h2>
 
 <!-- screenshots float right -->
 

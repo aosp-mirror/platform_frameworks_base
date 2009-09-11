@@ -37,10 +37,12 @@ var playlistsWithTitleInDescription = "734A052F802C96B9";
  * Each playlist ID is paired with a custom video description.
  */
 var featured = {
+// Android 1.6 Release
+  'MBRFkLKRwFw' : "The Android 1.6 release includes new features and improvements to the Android platform. Here's an introduction to what's new in Android 1.6.",
 // How to Make your Android UI Fast..
   'N6YdwzAvwOA' : "Make your user interface fast, with more efficient AdapterViews, better bitmap scaling, faster redrawing, ViewStub layouts, fewer Views, and more.", 
 // Coding for Life: Battery Life
-  'OUemfrKe65c' : "Learn what kinds of operations consume the most battery and how you can reduce your usage, with tips for parsing and zipping data, using wakelocks, and running a Service.",
+//  'OUemfrKe65c' : "Learn what kinds of operations consume the most battery and how you can reduce your usage, with tips for parsing and zipping data, using wakelocks, and running a Service.",
 // How Do I Code Thee?
   'GARMe7Km_gk' : "If you'd like to augment your Android applications with pieces written in JavaScript or native code, watch this video."
 };
