@@ -185,7 +185,7 @@ public abstract class AccessibilityService extends Service {
 
         private final HandlerCaller mCaller;
 
-        private AccessibilityService mTarget;
+        private final AccessibilityService mTarget;
 
         public IEventListenerWrapper(AccessibilityService context) {
             mTarget = context;
@@ -211,9 +211,9 @@ public abstract class AccessibilityService extends Service {
             switch (message.what) {
                 case DO_ON_ACCESSIBILITY_EVENT :
                     AccessibilityEvent event = (AccessibilityEvent) message.obj;
-                    if (event != null){
-                      mTarget.onAccessibilityEvent(event);
-                      event.recycle();
+                    if (event != null) {
+                        mTarget.onAccessibilityEvent(event);
+                        event.recycle();
                     }
                     return;
                 case DO_ON_INTERRUPT :
