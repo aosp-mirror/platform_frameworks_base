@@ -166,6 +166,17 @@ class BluetoothEventLoop {
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
     }
 
+    private void onDeviceDisconnectRequested(String deviceObjectPath) {
+        String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
+        if (address == null) {
+            Log.e(TAG, "onDeviceDisconnectRequested: Address of the remote device in null");
+            return;
+        }
+        Intent intent = new Intent(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
+        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
+    }
+
     private void onCreatePairedDeviceResult(String address, int result) {
         address = address.toUpperCase();
         if (result == BluetoothDevice.BOND_SUCCESS) {
