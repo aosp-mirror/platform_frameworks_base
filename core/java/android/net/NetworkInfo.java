@@ -131,7 +131,7 @@ public class NetworkInfo implements Parcelable {
         mSubtypeName = subtypeName;
         setDetailedState(DetailedState.IDLE, null, null);
         mState = State.UNKNOWN;
-        mIsAvailable = true;
+        mIsAvailable = false; // until we're told otherwise, assume unavailable
         mIsRoaming = false;
     }
 
