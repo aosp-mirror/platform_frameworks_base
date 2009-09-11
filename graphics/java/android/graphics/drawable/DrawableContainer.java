@@ -19,12 +19,23 @@ package android.graphics.drawable;
 import android.graphics.*;
 
 public class DrawableContainer extends Drawable implements Drawable.Callback {
-    
+
+    /**
+     * To be proper, we should have a getter for dither (and alpha, etc.)
+     * so that proxy classes like this can save/restore their delegates'
+     * values, but we don't have getters. Since we do have setters
+     * (e.g. setDither), which this proxy forwards on, we have to have some
+     * default/initial setting.
+     *
+     * The initial setting for dither is now true, since it almost always seems
+     * to improve the quality at negligible cost.
+     */
+    private static final boolean DEFAULT_DITHER = true;
     private DrawableContainerState mDrawableContainerState;
     private Drawable mCurrDrawable;
     private int mAlpha = 0xFF;
     private ColorFilter mColorFilter;
-    private boolean mDither;
+    private boolean mDither = DEFAULT_DITHER;
 
     private int mCurIndex = -1;
     private boolean mMutated;

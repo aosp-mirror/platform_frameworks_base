@@ -50,6 +50,17 @@ import android.util.StateSet;
  * @attr ref android.R.styleable#DrawableStates_state_pressed
  */
 public class StateListDrawable extends DrawableContainer {
+    /**
+     * To be proper, we should have a getter for dither (and alpha, etc.)
+     * so that proxy classes like this can save/restore their delegates'
+     * values, but we don't have getters. Since we do have setters
+     * (e.g. setDither), which this proxy forwards on, we have to have some
+     * default/initial setting.
+     *
+     * The initial setting for dither is now true, since it almost always seems
+     * to improve the quality at negligible cost.
+     */
+    private static final boolean DEFAULT_DITHER = true;
     private final StateListState mStateListState;
     private boolean mMutated;
 
@@ -105,7 +116,8 @@ public class StateListDrawable extends DrawableContainer {
         mStateListState.setConstantSize(a.getBoolean(
                 com.android.internal.R.styleable.StateListDrawable_constantSize, false));
 
-        setDither(a.getBoolean(com.android.internal.R.styleable.StateListDrawable_dither, false));
+        setDither(a.getBoolean(com.android.internal.R.styleable.StateListDrawable_dither,
+                               DEFAULT_DITHER));
 
         a.recycle();
 
