@@ -3611,7 +3611,6 @@ public final class Settings {
          */
         public static final String SEARCH_PER_SOURCE_CONCURRENT_QUERY_LIMIT =
                 "search_per_source_concurrent_query_limit";
-
         /**
          * Flag for allowing ActivityManagerService to send ACTION_APP_ERROR intents
          * on application crashes and ANRs. If this is disabled, the crash/ANR dialog
@@ -3624,6 +3623,32 @@ public final class Settings {
          * Maximum size of /proc/last_kmsg content to upload after reboot.
          */
         public static final String LAST_KMSG_KB = "last_kmsg_kb";
+
+        /**
+         * Maximum age of entries kept by {@link android.os.IDropBox}.
+         */
+        public static final String DROPBOX_AGE_SECONDS =
+                "dropbox_age_seconds";
+        /**
+         * Maximum amount of disk space used by {@link android.os.IDropBox} no matter what.
+         */
+        public static final String DROPBOX_QUOTA_KB =
+                "dropbox_quota_kb";
+        /**
+         * Percent of free disk (excluding reserve) which {@link android.os.IDropBox} will use.
+         */
+        public static final String DROPBOX_QUOTA_PERCENT =
+                "dropbox_quota_percent";
+        /**
+         * Percent of total disk which {@link android.os.IDropBox} will never dip into.
+         */
+        public static final String DROPBOX_RESERVE_PERCENT =
+                "dropbox_reserve_percent";
+        /**
+         * Prefix for per-tag dropbox disable/enable settings.
+         */
+        public static final String DROPBOX_TAG_PREFIX =
+                "dropbox:";
 
         /**
          * @deprecated

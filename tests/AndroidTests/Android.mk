@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
 
-LOCAL_JAVA_LIBRARIES := framework-tests android.test.runner
+LOCAL_JAVA_LIBRARIES := framework-tests android.test.runner services
 
 LOCAL_STATIC_JAVA_LIBRARIES := googlelogin-client
 
